@@ -1,6 +1,6 @@
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
-export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconColor, loading = false, onClick }) {
+export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconColor, loading = false, onClick, note }) {
   const isPositive = delta > 0
   const isNeutral  = delta === 0 || delta === undefined
 
@@ -47,6 +47,11 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
           {value ?? '—'}
         </div>
         <div style={{ fontSize: 13, color: '#9CA3AF' }}>{label}</div>
+        {note && (
+          <div style={{ fontSize: 11, color: '#A78BFA', marginTop: 3, fontWeight: 500 }}>
+            {note}
+          </div>
+        )}
       </div>
     </div>
   )

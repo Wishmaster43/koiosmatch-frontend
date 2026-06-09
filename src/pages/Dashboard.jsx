@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react'
-import { CheckCircle, AlertCircle } from 'lucide-react'
+import { CheckCircle, AlertCircle, CalendarDays, TrendingUp, MessageCircle, Percent } from 'lucide-react'
 import api from '../lib/api'
-import CandidatesKpiRow from '../components/reports/CandidatesKpiRow'
-import TripleKpiCard    from '../components/ui/TripleKpiCard'
+import MonthlyKpiCard from '../components/ui/MonthlyKpiCard'
+import StatCard       from '../components/ui/StatCard'
 
 const RUNS = [
   { name: 'Diensten Aanbod — Yesway', time: '08:00', ok: true,  n: 87 },
   { name: 'No Response Checker',      time: '09:00', ok: true,  n: 12 },
   { name: 'Shift Reminder',           time: '10:00', ok: false, err: 'API timeout' },
   { name: 'Wekelijkse Rapportage',    time: '07:00', ok: true,  n: 441 },
+]
+
+const DUMMY_STATS = [
+  { label: 'Openstaande diensten', value: '23',    sub: '5 urgent',               color: '#E11D48', bg: '#FFF1F2', icon: CalendarDays },
+  { label: 'Bezettingsgraad',      value: '87%',   sub: '+4% vorige maand',        color: '#059669', bg: '#ECFDF5', icon: Percent     },
+  { label: 'Berichten verstuurd',  value: '1.847', sub: 'Deze maand',              color: '#2563EB', bg: '#EFF6FF', icon: MessageCircle},
+  { label: 'Response rate',        value: '76%',   sub: 'gem. 72% historisch',     color: '#D97706', bg: '#FFFBEB', icon: TrendingUp   },
 ]
 
 export default function Dashboard() {
@@ -32,14 +39,14 @@ export default function Dashboard() {
         <p className="text-sm text-gray-400 mt-0.5">Overzicht van vandaag</p>
       </div>
 
-      {/* Kandidaten KPI rij */}
-      {/* <CandidatesKpiRow candidates={candidates} loading={loading} /> */}
-
-      {/* Nieuwe kandidaten vs KPI vs gemiddelde */}
-      <div className="mb-4">
-        <TripleKpiCard candidates={candidates} loading={loading} />
+      {/* KPI rij — 5 bokjes naast elkaar */}
+      <div className="grid gap-4 mb-4"
+        style={{ gridTemplateColumns: 'repeat(5, 1fr)' }}>
+        <MonthlyKpiCard candidates={candidates} loading={loading} />
+        {DUMMY_STATS.map(s => (
+          <StatCard key={s.label} {...s} />
+        ))}
       </div>
-      
 
       {/* Recente uitvoeringen */}
       <div className="overflow-hidden bg-white rounded-xl"

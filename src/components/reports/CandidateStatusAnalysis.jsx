@@ -19,12 +19,8 @@ const CITY_COLOR   = '#86EFAC'
 const END_COLOR    = '#EF4444'
 
 const STATUS_META = {
-  actief: 'Actief', 
-  nietactief: 'Niet actief', 
-  extern: 'Extern',
-  intake: 'Intake', 
-  verwijderd: 'Verwijderd',  
-  onbekend: 'Onbekend',
+  actief:'Actief', nietactief:'Niet actief', extern:'Extern',
+  intake:'Intake', verwijderd:'Verwijderd', onbekend:'Onbekend',
 }
 
 const MONTHS_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
@@ -40,7 +36,7 @@ function getWeekNumber(date) {
 export default function CandidateStatusAnalysis() {
   const [candidates,          setCandidates]          = useState([])
   const [selectedStatuses,    setSelectedStatuses]    = useState(['actief'])
-  const [selectedStatusesDEL, setSelectedStatusesDEL] = useState(['verwijderd'])
+  const [selectedStatusesDEL, setSelectedStatusesDEL] = useState(['verwijderd'])  // verborgen, later via instellingen
   const [selectedPositions,   setSelectedPositions]   = useState([])
   const [selectedYear,        setSelectedYear]        = useState(2026)
   const [showPercent,         setShowPercent]         = useState(false)
@@ -65,41 +61,35 @@ export default function CandidateStatusAnalysis() {
 
   useEffect(() => { fetchCandidates() }, [])
 
-  // ── Filters Opsplitsen ────────────────────────────────────────────────────────
+  // ── Filters ───────────────────────────────────────────────────────────────────
 
-  // Basis filter die voor beide groepen geldt (Functie)
   const baseFiltered = candidates.filter(c => {
     const p = c.position || 'Onbekend'
     return selectedPositions.length === 0 || selectedPositions.includes(p)
   })
 
-  // FIX 2: Dataset voor de algemene grafieken (reageert op de normale Status filter)
   const filteredGeneral = baseFiltered.filter(c => {
     const s = (c.status || 'onbekend').toLowerCase()
     return selectedStatuses.length === 0 || selectedStatuses.includes(s)
   })
 
-  // FIX 3: Dataset voor de Uitgeschreven grafieken (reageert op Uitgeschreven Status filter)
   const filteredDeleted = baseFiltered.filter(c => {
     const s = (c.status || 'onbekend').toLowerCase()
     return selectedStatusesDEL.length === 0 || selectedStatusesDEL.includes(s)
   })
 
-  // ── Chart datakoppelingen ─────────────────────────────────────────────────────
+  // ── Chart data ────────────────────────────────────────────────────────────────
 
   const positionData   = toChartData(groupAndCount(filteredGeneral, c => c.position))
   const loginData      = toChartData(groupAndCount(filteredGeneral, c => getLoginGroup(c.last_login_at)), LOGIN_GROUP_ORDER)
   const monthData      = groupByMonth(filteredGeneral, selectedYear)
   const weekData       = groupByWeek(filteredGeneral, selectedYear)
-  
-  // Deze twee gebruiken nu de gefilterde uitgeschreven dataset:
   const endMonthData   = groupByMonth(filteredDeleted, selectedYear, 'end_date_employment')
   const endWeekData    = groupByWeek(filteredDeleted, selectedYear, 'end_date_employment')
-  
   const cityData       = topN(filteredGeneral, c => c.city || 'Onbekend', 10)
   const availableYears = getAvailableYears(candidates)
 
-  // ── Drill-down Handlers ───────────────────────────────────────────────────────
+  // ── Drill-down handlers ───────────────────────────────────────────────────────
 
   const openDrillDown = (title, subtitle, items) =>
     setDrillDown({ title, subtitle, candidates: items })
@@ -141,7 +131,6 @@ export default function CandidateStatusAnalysis() {
     openDrillDown(data.name, 'Woonplaats', items)
   }
 
-  // FIX 4: Drilldowns voor uitgeschreven personen maken nu gebruik van filteredDeleted
   const handleEndMonthDrillDown = (data) => {
     const monthName = data.name || data.payload?.name
     const items = filteredDeleted.filter(c => {
@@ -164,7 +153,7 @@ export default function CandidateStatusAnalysis() {
     openDrillDown(label, 'Uitgeschreven week', items)
   }
 
-  // ── Filter groepen ────────────────────────────────────────────────────────────
+  // ── Filter groepen (status_del verborgen) ─────────────────────────────────────
 
   const allStatuses  = [...new Set(candidates.map(c => (c.status||'onbekend').toLowerCase()))].sort()
   const allPositions = [...new Set(candidates.map(c => c.position||'Onbekend'))].sort()
@@ -197,19 +186,9 @@ export default function CandidateStatusAnalysis() {
         count: candidates.filter(c => (c.position||'Onbekend') === p).length,
       })),
     },
-    {
-      key: 'status_del', // FIX 5: Unieke key gegeven om key-clashes te voorkomen
-      label: 'Uitgeschreven status',
-      selected: selectedStatusesDEL,
-      onToggle: v => setSelectedStatusesDEL(p => p.includes(v) ? p.filter(s => s !== v) : [...p, v]),
-      options: allStatuses.map(s => ({
-        value: s, label: STATUS_META[s] ?? s,
-        count: candidates.filter(c => (c.status||'onbekend').toLowerCase() === s).length,
-      })),
-    },
   ]
 
-  const activeFilterCount = selectedStatuses.length + selectedPositions.length + selectedStatusesDEL.length + (selectedYear ? 1 : 0)
+  const activeFilterCount = selectedStatuses.length + selectedPositions.length + (selectedYear ? 1 : 0)
 
   return (
     <div>
@@ -224,7 +203,7 @@ export default function CandidateStatusAnalysis() {
         <div>
           <h3 className="font-semibold text-gray-900" style={{ fontSize: 15 }}>Kandidaten analyse</h3>
           <p className="text-sm text-gray-400 mt-0.5">
-            {loading ? 'Laden...' : `${filteredGeneral.length} actieve / ${filteredDeleted.length} uitgeschreven kandidaten`}
+            {loading ? 'Laden...' : `${filteredGeneral.length} actieve · ${filteredDeleted.length} uitgeschreven`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -317,7 +296,7 @@ export default function CandidateStatusAnalysis() {
                   />
                 </div>
               </div>
-        
+
               {/* Rij 3: Uitgeschreven per maand + week */}
               <div className="flex overflow-hidden bg-white rounded-xl"
                 style={{ border:'1px solid #F3F4F6' }}>

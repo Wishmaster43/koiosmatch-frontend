@@ -1,31 +1,129 @@
-import { Users, UserCheck, UserX, UserPlus } from 'lucide-react'
+import { AlertTriangle, UserCheck, UserX, UserPlus, TrendingUp } from 'lucide-react'
 import KpiCard from '../ui/KpiCard'
 
 const count = (candidates, status) =>
   candidates.filter(c => (c.status || 'onbekend').toLowerCase() === status).length
 
+function calcAandacht(candidates) {
+  const now = Date.now()
+  return candidates.filter(c => {
+    if ((c.status || '').toLowerCase() !== 'actief') return false
+    const reg = c.registration_date ? new Date(c.registration_date) : null
+    const isNew = reg && (now - reg) < 30 * 86400000
+    const hasNoPlanned = !c.last_planned_shift || new Date(c.last_planned_shift) < new Date()
+    return isNew && hasNoPlanned
+  })
+}
+
+function calcGepland(candidates) {
+  return candidates.filter(c => {
+    if ((c.status || '').toLowerCase() !== 'actief') return false
+    return c.last_planned_shift && new Date(c.last_planned_shift) > new Date()
+  })
+}
+
+function calcMonthStats(candidates) {
+  const now          = new Date()
+  const currentMonth = now.getMonth()
+  const currentYear  = now.getFullYear()
+
+  const currentMonthCount = candidates.filter(c => {
+    if (!c.registration_date) return false
+    const d = new Date(c.registration_date)
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear
+  }).length
+
+  const grouped = {}
+  candidates.forEach(c => {
+    if (!c.registration_date) return
+    const d   = new Date(c.registration_date)
+    if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) return
+    const key = `${d.getFullYear()}-${d.getMonth()}`
+    grouped[key] = (grouped[key] || 0) + 1
+  })
+  const values = Object.values(grouped)
+  const avg    = values.length ? Math.round(values.reduce((s, v) => s + v, 0) / values.length) : 0
+  const delta  = avg > 0 ? Math.round(((currentMonthCount - avg) / avg) * 100) : 0
+  return { currentMonthCount, avg, delta }
+}
+
 export default function CandidatesKpiRow({ candidates = [], loading = false, onDrillDown }) {
-  const drill = (label, statusFilter) => {
+  const drill = (label, filterFn) => {
     if (!onDrillDown) return undefined
-    return () => {
-      const items = statusFilter
-        ? candidates.filter(c => (c.status || 'onbekend').toLowerCase() === statusFilter)
-        : candidates
-      onDrillDown(label, items)
-    }
+    return () => onDrillDown(label, filterFn(candidates))
   }
+
+  const aandachtItems  = calcAandacht(candidates)
+  const actiefTotal    = count(candidates, 'actief')
+  const geplandItems   = calcGepland(candidates)
+  const { currentMonthCount, avg, delta } = calcMonthStats(candidates)
+  const currentMonthLabel = new Date().toLocaleString('nl-NL', { month: 'long' })
 
   return (
     <div className="grid gap-4 mb-6"
-      style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-      <KpiCard label="Passive kandidaten"      value={candidates.length}               icon={Users}     iconBg="#EEF2FF" iconColor="#534AB7" loading={loading} onClick={drill('Alle kandidaten', null)} /> 
-      {/* // Status actief en nieuw Nieuw kleiner dan 30 dagen en geen planned shifts */}
-      <KpiCard label="Actieve kandidaten"      value={count(candidates, 'actief')}     icon={UserCheck} iconBg="#F0FDF4" iconColor="#16A34A" loading={loading} onClick={drill('Actief', 'actief')} />
+      style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
 
-{/* - Gepland vs actief (plast planned shift in toekomst) */}
+      {/* Aandachtskandidaten: actief + nieuw (<30d) + niet gepland */}
+      <KpiCard
+        label="Aandachtskandidaten"
+        note="Actief · nieuw · niet gepland"
+        value={aandachtItems.length}
+        icon={AlertTriangle}
+        iconBg="#FFF7ED"
+        iconColor="#D97706"
+        loading={loading}
+        onClick={drill('Aandachtskandidaten', calcAandacht)}
+      />
 
-      <KpiCard label="Niet actieve kandidaten" value={count(candidates, 'nietactief')} icon={UserX}     iconBg="#FFF7ED" iconColor="#C2410C" loading={loading} onClick={drill('Niet actief', 'nietactief')} />
-      <KpiCard label="Intake kandidaten"      value={count(candidates, 'intake')}     icon={UserPlus}  iconBg="#FAF5FF" iconColor="#7C3AED" loading={loading} onClick={drill('Intake', 'intake')} />
+      {/* Actieve kandidaten + hoeveel gepland */}
+      <KpiCard
+        label="Actieve kandidaten"
+        note={`${geplandItems.length} / ${actiefTotal} gepland`}
+        value={actiefTotal}
+        icon={UserCheck}
+        iconBg="#F0FDF4"
+        iconColor="#16A34A"
+        loading={loading}
+        onClick={drill('Actief', c => c.filter(x => (x.status || '').toLowerCase() === 'actief'))}
+      />
+
+      {/* Niet actief */}
+      <KpiCard
+        label="Niet actieve kandidaten"
+        value={count(candidates, 'nietactief')}
+        icon={UserX}
+        iconBg="#FFF7ED"
+        iconColor="#C2410C"
+        loading={loading}
+        onClick={drill('Niet actief', c => c.filter(x => (x.status || '').toLowerCase() === 'nietactief'))}
+      />
+
+      {/* Intake */}
+      <KpiCard
+        label="Intake kandidaten"
+        value={count(candidates, 'intake')}
+        icon={UserPlus}
+        iconBg="#FAF5FF"
+        iconColor="#7C3AED"
+        loading={loading}
+        onClick={drill('Intake', c => c.filter(x => (x.status || '').toLowerCase() === 'intake'))}
+      />
+
+      {/* Nieuw deze maand vs gemiddelde */}
+      <KpiCard
+        label={`Nieuw ${currentMonthLabel} (gem. ${avg}/mnd)`}
+        value={currentMonthCount}
+        delta={delta}
+        icon={TrendingUp}
+        iconBg="#F0F7FF"
+        iconColor="#3B8FD4"
+        loading={loading}
+        onClick={drill(`Nieuw in ${currentMonthLabel}`, c => c.filter(x => {
+          if (!x.registration_date) return false
+          const d = new Date(x.registration_date)
+          return d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear()
+        }))}
+      />
     </div>
   )
 }

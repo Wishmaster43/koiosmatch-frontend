@@ -109,11 +109,12 @@ const NAV_ITEMS = [
     label: 'Rapportages',
     Icon: BarChart2,
     children: [
-      { id: 'reports.candidates', label: 'Kandidaten',    Icon: UserSquare }, 
-      { id: 'reports.messages',   label: 'Klanten',     Icon: MessageSquare },
-      { id: 'reports.shifts',     label: 'Diensten',      Icon: CalendarRange },
-      { id: 'reports.runs',       label: 'Uitvoeringen',  Icon: Activity },
-     { id: 'reports.runs',        label: 'Berichten',  Icon: MessageSquare },
+      { id: 'reports.candidates', label: 'Kandidaten',           Icon: UserSquare   },
+      { id: 'reports.services',   label: 'Kandidaten diensten',  Icon: CalendarRange},
+      { id: 'reports.clients',    label: 'Klanten',              Icon: MessageSquare},
+      { id: 'reports.shifts',     label: 'Diensten',             Icon: CalendarRange},
+      { id: 'reports.runs',       label: 'Uitvoeringen',         Icon: Activity     },
+      { id: 'reports.messages',   label: 'Berichten',            Icon: MessageSquare},
     ],
   },
 ]
