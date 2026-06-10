@@ -1,0 +1,1 @@
+export default function DepartmentsDetailPage() { return <div className="flex items-center justify-center h-full"><p className="font-mono text-sm text-gray-400">Details — Afdelingen · komt eraan</p></div> }

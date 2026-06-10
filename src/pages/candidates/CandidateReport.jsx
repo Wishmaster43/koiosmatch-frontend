@@ -1,4 +1,4 @@
-import CandidateStatusAnalysis from '../components/reports/CandidateStatusAnalysis'
+import CandidateStatusAnalysis from "../../components/reports/CandidateReport";
 
 function ComingSoon({ label }) {
   return (

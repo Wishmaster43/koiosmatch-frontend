@@ -1,0 +1,1 @@
+export default function LocationsDetailPage() { return <div className="flex items-center justify-center h-full"><p className="font-mono text-sm text-gray-400">Details — Locaties · komt eraan</p></div> }

@@ -1,12 +1,10 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import {
-  LayoutDashboard, Users, Calendar, MessageCircle,
-  BarChart2, Settings, Zap, Palette, ChevronLeft,
-  ChevronRight, ChevronDown, UserSquare, MessageSquare,
-  CalendarRange, Activity
+  LayoutDashboard, Zap, Users, Building2, MapPin, Layers,
+  MessageCircle, Table2, Settings, Palette,
+  ChevronLeft, ChevronRight, ChevronDown,
 } from 'lucide-react'
-
 
 function TenantSwitcher({ expanded }) {
   const { activeTenant, tenants, setActiveTenant, isSuperAdmin } = useAuth()
@@ -58,7 +56,6 @@ function TenantSwitcher({ expanded }) {
         )}
       </button>
 
-      {/* Dropdown */}
       {open && isSuperAdmin() && (
         <div className="absolute left-0 right-0 z-50 mt-1 overflow-hidden bg-white top-full rounded-xl"
           style={{ border: '1px solid #E5E7EB', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
@@ -97,28 +94,27 @@ function TenantSwitcher({ expanded }) {
   )
 }
 
-
 const NAV_ITEMS = [
-  { id: 'dashboard',  label: 'Dashboard',   Icon: LayoutDashboard },
-  { id: 'workflows',  label: 'Werkstromen',  Icon: Zap },
-  { id: 'candidates', label: 'Kandidaten',   Icon: Users },
-  { id: 'shifts',     label: 'Diensten',     Icon: Calendar },
-  { id: 'whatsapp',   label: 'WhatsApp',     Icon: MessageCircle },
+  { id: 'dashboard',   label: 'Dashboard',  icon: LayoutDashboard },
+  { id: 'workflows',   label: 'Workflows',  icon: Zap },
+  { id: 'candidates',  label: 'Kandidaten', icon: Users },
+  { id: 'customers',   label: 'Klanten',    icon: Building2 },
+  { id: 'locations',   label: 'Locaties',   icon: MapPin },
+  { id: 'departments', label: 'Afdelingen', icon: Layers },
+  { id: 'whatsapp',    label: 'WhatsApp',   icon: MessageCircle },
   {
-    id: 'reports',
-    label: 'Rapportages',
-    Icon: BarChart2,
+    id: 'details', label: 'Details', icon: Table2,
     children: [
-      { id: 'reports.candidates', label: 'Kandidaten',           Icon: UserSquare   },
-      { id: 'reports.services',   label: 'Kandidaten diensten',  Icon: CalendarRange},
-      { id: 'reports.clients',    label: 'Klanten',              Icon: MessageSquare},
-      { id: 'reports.shifts',     label: 'Diensten',             Icon: CalendarRange},
-      { id: 'reports.runs',       label: 'Uitvoeringen',         Icon: Activity     },
-      { id: 'reports.messages',   label: 'Berichten',            Icon: MessageSquare},
+      { id: 'details.candidates',  label: 'Kandidaten' },
+      { id: 'details.customers',   label: 'Klanten' },
+      { id: 'details.locations',   label: 'Locaties' },
+      { id: 'details.departments', label: 'Afdelingen' },
+      { id: 'details.orders',      label: 'Diensten' },
+      { id: 'details.runs',        label: 'Uitvoeringen' },
+      { id: 'details.messages',    label: 'Berichten' },
     ],
   },
 ]
-
 
 function SubNavItem({ item, active, onNavigate }) {
   const [hovered, setHovered] = useState(false)
@@ -129,17 +125,14 @@ function SubNavItem({ item, active, onNavigate }) {
       onMouseLeave={() => setHovered(false)}
       className="flex items-center w-full rounded-lg mb-0.5 border-none cursor-pointer font-sans transition-all duration-150"
       style={{
-        gap: 8,
-        padding: '6px 10px',
+        gap: 8, padding: '6px 10px',
         background: active ? 'var(--color-primary-bg)' : hovered ? 'var(--sidebar-hover)' : 'transparent',
         color:      active ? 'var(--color-primary)'    : hovered ? 'var(--sidebar-text)'   : 'var(--sidebar-muted)',
       }}
     >
-      <div
-        className="flex-shrink-0 rounded-full"
+      <div className="flex-shrink-0 rounded-full"
         style={{ width: 4, height: 4, marginLeft: 2,
-          background: active ? 'var(--color-primary)' : 'currentColor' }}
-      />
+          background: active ? 'var(--color-primary)' : 'currentColor' }} />
       <span style={{ fontSize: 12, fontWeight: active ? 500 : 400 }}>{item.label}</span>
     </button>
   )
@@ -150,16 +143,13 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
 
   const hasChildren = !!item.children?.length
   const mainPage    = activePage?.split('.')[0]
-  const isActive    = mainPage === item.id
+  const isActive    = !hasChildren && mainPage === item.id
   const isOpen      = openItems.includes(item.id)
+  const Icon        = item.icon
 
   const handleClick = () => {
-    if (hasChildren) {
-      // Alleen toggling — niet navigeren
-      toggleOpen(item.id)
-    } else {
-      onNavigate(item.id)
-    }
+    if (hasChildren) toggleOpen(item.id)
+    else onNavigate(item.id)
   }
 
   return (
@@ -178,46 +168,34 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
           color:      isActive ? 'var(--color-primary)'    : hovered ? 'var(--sidebar-text)'   : 'var(--sidebar-muted)',
         }}
       >
-        <item.Icon size={15} style={{ flexShrink: 0 }} />
+        {Icon && <Icon size={15} style={{ flexShrink: 0 }} />}
 
         {expanded && (
           <>
             <span style={{ fontSize: 13, fontWeight: isActive ? 500 : 400, flex: 1, textAlign: 'left' }}>
               {item.label}
             </span>
-
             {hasChildren ? (
-              <ChevronDown
-                size={13}
-                style={{
-                  flexShrink: 0,
-                  transform:  isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                  transition: 'transform 0.2s ease',
-                  opacity: 0.5,
-                }}
-              />
+              <ChevronDown size={13} style={{
+                flexShrink: 0, opacity: 0.5,
+                transform:  isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s ease',
+              }} />
             ) : (
               isActive && (
-                <span
-                  className="rounded-full"
-                  style={{ width: 5, height: 5, background: 'var(--color-primary)', flexShrink: 0 }}
-                />
+                <span className="rounded-full"
+                  style={{ width: 5, height: 5, background: 'var(--color-primary)', flexShrink: 0 }} />
               )
             )}
           </>
         )}
       </button>
 
-      {/* Sub-items — alleen tonen als expanded én isOpen */}
       {hasChildren && isOpen && expanded && (
         <div className="mb-1" style={{ paddingLeft: 10 }}>
           {item.children.map(child => (
-            <SubNavItem
-              key={child.id}
-              item={child}
-              active={activePage === child.id}
-              onNavigate={onNavigate}
-            />
+            <SubNavItem key={child.id} item={child}
+              active={activePage === child.id} onNavigate={onNavigate} />
           ))}
         </div>
       )}
@@ -226,39 +204,27 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
 }
 
 export default function Sidebar({ expanded, setExpanded, activePage, setActivePage, onTheme }) {
-  // Bijhouden welke parent-items open zijn (los van actieve pagina)
   const [openItems, setOpenItems] = useState([])
 
-  const toggleOpen = (id) => {
-    setOpenItems(prev =>
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    )
-  }
+  const toggleOpen = (id) =>
+    setOpenItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])
 
   return (
-    <div
-      className="flex flex-col flex-shrink-0 overflow-hidden transition-all duration-200"
-      style={{
-        width: expanded ? 220 : 56,
-        background: 'var(--sidebar-bg)',
-        borderRight: '1px solid var(--sidebar-border)',
-      }}
-    >
-      {/* Brand + collapse */}
-      <div
-        className="flex items-center flex-shrink-0"
+    <div className="flex flex-col flex-shrink-0 overflow-hidden transition-all duration-200"
+      style={{ width: expanded ? 220 : 56, background: 'var(--sidebar-bg)',
+               borderRight: '1px solid var(--sidebar-border)' }}>
+
+      {/* Brand */}
+      <div className="flex items-center flex-shrink-0"
         style={{
           padding:        expanded ? '14px 10px 13px 14px' : '14px 0 13px',
           justifyContent: expanded ? 'space-between' : 'center',
           borderBottom:   '1px solid var(--sidebar-border)',
           minHeight: 56,
-        }}
-      >
+        }}>
         <div className="flex items-center" style={{ gap: 9 }}>
-          <div
-            className="flex items-center justify-center flex-shrink-0 rounded-lg"
-            style={{ width: 28, height: 28, background: 'var(--color-primary)' }}
-          >
+          <div className="flex items-center justify-center flex-shrink-0 rounded-lg"
+            style={{ width: 28, height: 28, background: 'var(--color-primary)' }}>
             <Zap size={14} color="white" />
           </div>
           {expanded && (
@@ -268,56 +234,35 @@ export default function Sidebar({ expanded, setExpanded, activePage, setActivePa
             </span>
           )}
         </div>
-
-        <button
-          onClick={() => setExpanded(e => !e)}
+        <button onClick={() => setExpanded(e => !e)}
           title={expanded ? 'Inklappen' : 'Uitklappen'}
           className="flex items-center justify-center flex-shrink-0 transition-all duration-150 border-none rounded-md cursor-pointer"
           style={{ width: 24, height: 24, background: 'transparent', color: 'var(--sidebar-muted)' }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-hover)'; e.currentTarget.style.color = 'var(--sidebar-text)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--sidebar-muted)' }}
-        >
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--sidebar-muted)' }}>
           {expanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
         </button>
       </div>
 
-{/* Tenant switcher */}
-<TenantSwitcher expanded={expanded} />
-
+      <TenantSwitcher expanded={expanded} />
 
       {/* Nav */}
       <div className="flex-1 overflow-auto" style={{ padding: '10px 6px' }}>
         {NAV_ITEMS.map(item => (
-          <NavItem
-            key={item.id}
-            item={item}
-            activePage={activePage}
-            expanded={expanded}
-            openItems={openItems}
-            toggleOpen={toggleOpen}
-            onNavigate={setActivePage}
-          />
+          <NavItem key={item.id} item={item} activePage={activePage}
+            expanded={expanded} openItems={openItems}
+            toggleOpen={toggleOpen} onNavigate={setActivePage} />
         ))}
       </div>
 
       {/* Bottom */}
       <div style={{ padding: '6px 6px 10px', borderTop: '1px solid var(--sidebar-border)' }}>
-        <NavItem
-          item={{ id: 'settings', label: 'Instellingen', Icon: Settings }}
-          activePage={activePage}
-          expanded={expanded}
-          openItems={openItems}
-          toggleOpen={toggleOpen}
-          onNavigate={setActivePage}
-        />
-        <NavItem
-          item={{ id: 'theme', label: 'Huisstijl', Icon: Palette }}
-          activePage={activePage}
-          expanded={expanded}
-          openItems={openItems}
-          toggleOpen={toggleOpen}
-          onNavigate={onTheme}
-        />
+        <NavItem item={{ id: 'settings', label: 'Instellingen', icon: Settings }}
+          activePage={activePage} expanded={expanded}
+          openItems={openItems} toggleOpen={toggleOpen} onNavigate={setActivePage} />
+        <NavItem item={{ id: 'theme', label: 'Huisstijl', icon: Palette }}
+          activePage={activePage} expanded={expanded}
+          openItems={openItems} toggleOpen={toggleOpen} onNavigate={onTheme} />
       </div>
     </div>
   )

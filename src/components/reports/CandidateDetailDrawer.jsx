@@ -1,0 +1,292 @@
+import { useState } from 'react'
+import { X, Phone, Mail, MapPin, Calendar, Clock, Briefcase, MessageSquare, History } from 'lucide-react'
+
+function StatusBadge({ status }) {
+  const styles = {
+    actief:     { bg: '#F0FDF4', color: '#16A34A' },
+    nietactief: { bg: '#FFF7ED', color: '#C2410C' },
+    extern:     { bg: '#EFF6FF', color: '#1D4ED8' },
+    intake:     { bg: '#FAF5FF', color: '#7C3AED' },
+    verwijderd: { bg: '#FEF2F2', color: '#DC2626' },
+  }
+  const key = (status || '').toLowerCase().replace(/\s+/g, '')
+  const s = styles[key] || { bg: '#F9FAFB', color: '#6B7280' }
+  return (
+    <span style={{ background: s.bg, color: s.color, fontSize: 11, fontWeight: 600,
+                   padding: '3px 10px', borderRadius: 999 }}>
+      {status || 'onbekend'}
+    </span>
+  )
+}
+
+function InfoRow({ icon: Icon, label, value }) {
+  if (!value) return null
+  return (
+    <div className="flex items-start gap-3"
+      style={{ padding: '8px 0', borderBottom: '1px solid #F9FAFB' }}>
+      <div className="flex items-center justify-center flex-shrink-0 rounded-lg"
+        style={{ width: 28, height: 28, background: '#F9FAFB' }}>
+        <Icon size={13} style={{ color: '#9CA3AF' }} />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 2 }}>{label}</div>
+        <div style={{ fontSize: 13, color: '#374151', fontWeight: 500, wordBreak: 'break-word' }}>{value}</div>
+      </div>
+    </div>
+  )
+}
+
+function Section({ title, children }) {
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                    letterSpacing: '0.06em', color: '#9CA3AF', marginBottom: 8 }}>
+        {title}
+      </div>
+      {children}
+    </div>
+  )
+}
+
+function TagList({ items, color = '#534AB7', bg = '#EEF2FF' }) {
+  if (!items?.length) return <span style={{ fontSize: 12, color: '#D1D5DB' }}>—</span>
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {items.map((item, i) => (
+        <span key={i} style={{ fontSize: 11, fontWeight: 500, padding: '3px 8px',
+                                borderRadius: 6, background: bg, color }}>
+          {item}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function fmtDate(v) {
+  if (!v) return null
+  const d = new Date(v)
+  if (isNaN(d.getTime())) return null
+  return d.toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric' })
+}
+
+function fmtDateTime(v) {
+  if (!v) return null
+  const d = new Date(v)
+  if (isNaN(d.getTime())) return null
+  return d.toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric',
+                                          hour: '2-digit', minute: '2-digit' })
+}
+
+/* ── Tabs ── */
+const TABS = [
+  { id: 'algemeen',    label: 'Algemeen' },
+  { id: 'conversatie', label: 'Conversatie', icon: MessageSquare },
+  { id: 'history',     label: 'History',     icon: History },
+]
+
+function TabBar({ active, onChange }) {
+  return (
+    <div className="flex flex-shrink-0" style={{ borderBottom: '1px solid #F3F4F6' }}>
+      {TABS.map(tab => {
+        const isActive = active === tab.id
+        return (
+          <button key={tab.id} onClick={() => onChange(tab.id)}
+            className="inline-flex items-center gap-1.5"
+            style={{
+              padding: '10px 16px', fontSize: 13,
+              fontWeight: isActive ? 600 : 400,
+              color: isActive ? 'var(--color-primary)' : '#6B7280',
+              borderTop: 'none', borderLeft: 'none', borderRight: 'none',
+              borderBottom: isActive ? '2px solid var(--color-primary)' : '2px solid transparent',
+              marginBottom: -1, background: 'none',
+              cursor: 'pointer', whiteSpace: 'nowrap',
+            }}>
+            {tab.icon && <tab.icon size={13} />}
+            {tab.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+function TabAlgemeen({ c, kenmerken, rates }) {
+  return (
+    <div className="flex-1 overflow-auto" style={{ padding: '20px 24px' }}>
+
+      <Section title="Contact">
+        <InfoRow icon={Phone}  label="Mobiel"     value={c.mobile ?? c.phone} />
+        <InfoRow icon={Mail}   label="E-mail"     value={c.email} />
+        <InfoRow icon={MapPin} label="Woonplaats" value={c.city} />
+      </Section>
+
+      <Section title="Tijdlijn">
+        <InfoRow icon={Calendar}  label="Registratiedatum"    value={fmtDate(c.registration_date)} />
+        <InfoRow icon={Clock}     label="Laatste inlog"       value={fmtDateTime(c.last_login_at)} />
+        <InfoRow icon={Calendar}  label="Geplande dienst"     value={fmtDateTime(c.last_planned_shift)} />
+        <InfoRow icon={Briefcase} label="Laatste dienst"      value={fmtDateTime(c.last_worked_shift)} />
+        {c.end_date_employment && (
+          <InfoRow icon={Calendar} label="Einde dienstverband" value={fmtDate(c.end_date_employment)} />
+        )}
+      </Section>
+
+      <Section title="Statistieken">
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Diensten gewerkt', value: c.number_of_times_worked ?? '—' },
+            { label: 'No-shows',         value: c.no_shows ?? '—' },
+            { label: 'Annuleringen',     value: c.cancellations ?? '—' },
+          ].map(stat => (
+            <div key={stat.label} className="text-center rounded-xl"
+              style={{ padding: '12px 8px', background: '#F9FAFB', border: '1px solid #F3F4F6' }}>
+              <div style={{ fontSize: 20, fontWeight: 700, color: '#111827' }}>{stat.value}</div>
+              <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Kenmerken">
+        <TagList items={kenmerken} color="#534AB7" bg="#EEF2FF" />
+      </Section>
+
+      {rates.length > 0 && (
+        <Section title="Globale functie">
+          <div className="overflow-hidden rounded-xl" style={{ border: '1px solid #F3F4F6' }}>
+            <div style={{ padding: '10px 14px' }}>
+              {rates.map((r, i) => (
+                <div key={i} style={{ padding: '8px 0', borderBottom: '1px solid #F9FAFB' }}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>
+                        {r.global_rate?.internal_description ?? '—'}
+                      </div>
+                      <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1 }}>
+                        {r.step_name ?? '—'}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>
+                        {r.hour_rate != null ? `€ ${Number(r.hour_rate).toFixed(2)}` : '—'}
+                      </div>
+                      {r.is_default_step === 1 && (
+                        <span style={{ fontSize: 10, fontWeight: 500, padding: '1px 6px',
+                                       borderRadius: 4, background: '#F0FDF4', color: '#16A34A',
+                                       display: 'inline-block', marginTop: 2 }}>
+                          Standaard
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Section>
+      )}
+
+    </div>
+  )
+}
+
+function TabConversatie({ c }) {
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center"
+      style={{ padding: 32 }}>
+      <div className="flex items-center justify-center rounded-xl"
+        style={{ width: 44, height: 44, background: '#F3F4F6' }}>
+        <MessageSquare size={20} style={{ color: '#D1D5DB' }} />
+      </div>
+      <div>
+        <p className="font-medium text-gray-400" style={{ fontSize: 14 }}>Conversatie komt eraan</p>
+        <p className="mt-1 text-gray-300" style={{ fontSize: 12 }}>
+          WhatsApp gesprekken tussen Yessy AI en {c.firstname ?? 'kandidaat'}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+function TabHistory({ c }) {
+  return (
+    <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center"
+      style={{ padding: 32 }}>
+      <div className="flex items-center justify-center rounded-xl"
+        style={{ width: 44, height: 44, background: '#F3F4F6' }}>
+        <History size={20} style={{ color: '#D1D5DB' }} />
+      </div>
+      <div>
+        <p className="font-medium text-gray-400" style={{ fontSize: 14 }}>Diensthistory komt eraan</p>
+        <p className="mt-1 text-gray-300" style={{ fontSize: 12 }}>
+          Alle gewerkte diensten van {c.firstname ?? 'kandidaat'}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/* ── Main component ── */
+export default function CandidateDetailDrawer({ candidate: c, onClose }) {
+  const [activeTab, setActiveTab] = useState('algemeen')
+  if (!c) return null
+
+  const fullName = `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim() || 'Onbekend'
+
+  const kenmerken = Array.isArray(c.features)
+    ? c.features.map(f => f.name).filter(Boolean)
+    : []
+
+  const rates = Array.isArray(c.global_rate_summary) ? c.global_rate_summary : []
+
+  return (
+    <>
+      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }}
+        onClick={onClose} />
+
+      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-white"
+        style={{ width: 520, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
+
+        {/* Header */}
+        <div className="flex-shrink-0"
+          style={{ padding: '20px 24px 16px', borderBottom: '1px solid #F3F4F6' }}>
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center min-w-0 gap-3">
+              <div className="flex items-center justify-center flex-shrink-0 font-bold rounded-xl"
+                style={{ width: 44, height: 44, background: 'var(--color-primary-bg)',
+                          color: 'var(--color-primary)', fontSize: 16 }}>
+                {(c.firstname?.[0] ?? '?').toUpperCase()}
+              </div>
+              <div className="min-w-0">
+                <div className="font-semibold truncate"
+                  style={{ fontSize: 16, color: '#111827' }}>{fullName}</div>
+                <div className="flex flex-wrap items-center gap-2 mt-1">
+                  <StatusBadge status={c.status} />
+                  {c.position && (
+                    <span style={{ fontSize: 12, color: '#6B7280' }}>{c.position}</span>
+                  )}
+                </div>
+              </div>
+            </div>
+            <button onClick={onClose}
+              className="flex items-center justify-center flex-shrink-0 rounded-lg"
+              style={{ width: 30, height: 30, border: '1px solid #E5E7EB',
+                       background: 'none', cursor: 'pointer', color: '#9CA3AF' }}
+              onMouseEnter={e => e.currentTarget.style.background = '#F9FAFB'}
+              onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+              <X size={14} />
+            </button>
+          </div>
+        </div>
+
+        {/* Tabs */}
+        <TabBar active={activeTab} onChange={setActiveTab} />
+
+        {/* Tab inhoud */}
+        {activeTab === 'algemeen'    && <TabAlgemeen    c={c} kenmerken={kenmerken} rates={rates} />}
+        {activeTab === 'conversatie' && <TabConversatie c={c} />}
+        {activeTab === 'history'     && <TabHistory     c={c} />}
+
+      </div>
+    </>
+  )
+}

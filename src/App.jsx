@@ -1,29 +1,49 @@
+/**
+ * App.jsx — root van de applicatie
+ * Bevat routing, auth guard, en de DashboardLayout.
+ * DashboardLayout beheert: linker nav, topbar, rechter filterpanel.
+ */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { AuthProvider, useAuth } from './context/AuthContext'
-import LoginPage from './pages/LoginPage'
-import Dashboard from './pages/Dashboard'
-import WorkflowsPage from './pages/Workflows'
-import Reports from './pages/Reports'
-import Sidebar from './components/layout/Sidebar'
-import { useState } from 'react'
+import { AuthProvider, useAuth }                   from './context/AuthContext'
+import { RightPanelProvider, useRightPanel }       from './context/RightPanelContext'
+import { useState, useEffect }                     from 'react'
+import { SlidersHorizontal }                       from 'lucide-react'
 import './index.css'
 
+// Pagina-imports
+import LoginPage              from './pages/LoginPage'
+import Dashboard              from './pages/Dashboard'
+import WorkflowsPage          from './pages/Workflows'
+import Sidebar                from './components/layout/Sidebar'
+import ReportFilterSidebar    from './components/reports/ReportFilterSidebar'
+import CandidateReport        from './pages/candidates/CandidateReport'
+import CandidatesDetailPage   from './pages/candidates/CandidatesDetailPage'
+import CustomersDetailPage    from './pages/customers/CustomersDetailPage'
+import LocationsDetailPage    from './pages/locations/LocationsDetailPage'
+import DepartmentsDetailPage  from './pages/departments/DepartmentsDetailPage'
+
+// Mapping van route-sleutel naar leesbare paginatitel
 const PAGE_TITLES = {
-  dashboard:            'Dashboard',
-  workflows:            'Werkstromen',
-  candidates:           'Kandidaten',
-  shifts:               'Diensten',
-  whatsapp:             'WhatsApp',
-  reports:              'Rapportages',
-  'reports.candidates': 'Rapportages — Kandidaten',
-  'reports.messages':   'Rapportages — Berichten',
-  'reports.shifts':     'Rapportages — Diensten',
-  'reports.runs':       'Rapportages — Uitvoeringen',
-  settings:             'Instellingen',
-  users:                'Gebruikers',
-  profile:              'Profiel',
+  dashboard:              'Dashboard',
+  workflows:              'Workflows',
+  candidates:             'Kandidaten',
+  customers:              'Klanten',
+  locations:              'Locaties',
+  departments:            'Afdelingen',
+  whatsapp:               'WhatsApp',
+  'details.candidates':   'Details — Kandidaten',
+  'details.customers':    'Details — Klanten',
+  'details.locations':    'Details — Locaties',
+  'details.departments':  'Details — Afdelingen',
+  'details.orders':       'Details — Diensten',
+  'details.runs':         'Details — Uitvoeringen',
+  'details.messages':     'Details — Berichten',
+  settings:               'Instellingen',
+  users:                  'Gebruikers',
+  profile:                'Profiel',
 }
 
+// Tijdelijke placeholder voor pagina's die nog gebouwd worden
 function PlaceholderPage({ title }) {
   return (
     <div className="flex items-center justify-center h-full">
@@ -32,26 +52,66 @@ function PlaceholderPage({ title }) {
   )
 }
 
-function DashboardLayout() {
-  const [expanded,   setExpanded]   = useState(true)
-  const [activePage, setActivePage] = useState('dashboard')
-  const { logout, user }            = useAuth()
+/**
+ * useTenantTheme
+ * Past CSS-variabelen toe op basis van tenant-branding.
+ * Backend moet { primary_color, logo_url } teruggeven via /api/auth/me.
+ */
+function useTenantTheme(tenant) {
+  useEffect(() => {
+    if (!tenant) return
+    const root = document.documentElement
+    if (tenant.primary_color) {
+      root.style.setProperty('--color-primary',    tenant.primary_color)
+      root.style.setProperty('--color-primary-bg', tenant.primary_color + '18')
+    }
+  }, [tenant])
+}
 
+/**
+ * DashboardLayout
+ * Hoofdlayout na inloggen:
+ * [Linker nav] [Topbar + Content] [Rechter filterpanel (optioneel)]
+ */
+function DashboardLayout() {
+  const [expanded,       setExpanded]       = useState(true)
+  const [activePage,     setActivePage]     = useState('dashboard')
+  const [rightPanelOpen, setRightPanelOpen] = useState(false)
+  const { logout, user }                    = useAuth()
+  const { filterGroups }                    = useRightPanel()
+
+  // Tenant-info uit user object (backend vult dit via /api/auth/me)
+  const tenant = user?.tenant ?? { name: user?.tenant_id ?? 'Koios', logo_url: null }
+  useTenantTheme(tenant)
+
+  // Filterpanel-knop alleen tonen als huidige pagina filters heeft geregistreerd
+  const hasFilters = filterGroups.length > 0
+
+  // Rendert de juiste pagina-component op basis van activePage-sleutel
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard':           return <Dashboard />
+      case 'candidates':          return <CandidateReport initialTab="candidates" />
+      case 'customers':           return <PlaceholderPage title="Klanten" />
+      case 'locations':           return <PlaceholderPage title="Locaties" />
+      case 'departments':         return <PlaceholderPage title="Afdelingen" />
       case 'workflows':           return <WorkflowsPage />
-      case 'reports':
-      case 'reports.candidates':  return <Reports initialTab="candidates" />
-      case 'reports.messages':    return <Reports initialTab="messages" />
-      case 'reports.shifts':      return <Reports initialTab="shifts" />
-      case 'reports.runs':        return <Reports initialTab="runs" />
+      case 'whatsapp':            return <PlaceholderPage title="WhatsApp" />
+      case 'details.candidates':  return <CandidatesDetailPage />
+      case 'details.customers':   return <CustomersDetailPage />
+      case 'details.locations':   return <LocationsDetailPage />
+      case 'details.departments': return <DepartmentsDetailPage />
+      case 'details.orders':      return <PlaceholderPage title="Details — Diensten" />
+      case 'details.runs':        return <PlaceholderPage title="Details — Uitvoeringen" />
+      case 'details.messages':    return <PlaceholderPage title="Details — Berichten" />
       default:                    return <PlaceholderPage title={PAGE_TITLES[activePage] || activePage} />
     }
   }
 
   return (
     <div className="flex h-screen overflow-hidden">
+
+      {/* ── Linker navigatie ── */}
       <Sidebar
         expanded={expanded}
         setExpanded={setExpanded}
@@ -59,16 +119,65 @@ function DashboardLayout() {
         setActivePage={setActivePage}
         onTheme={() => {}}
       />
+
+      {/* ── Rechter kolom: topbar + content + filterpanel ── */}
       <div className="flex flex-col flex-1 overflow-hidden" style={{ background: '#F5F5F7' }}>
+
+        {/* Topbar */}
         <div
-          className="flex items-center flex-shrink-0 px-5"
+          className="flex items-center flex-shrink-0 gap-3 px-5"
           style={{ height: 52, background: 'white', borderBottom: '1px solid #F3F4F6' }}
         >
-          <span className="font-medium text-gray-800" style={{ fontSize: 14 }}>
+          {/* Tenant logo of initiaal-avatar + naam */}
+          <div className="flex items-center flex-shrink-0 gap-2">
+            {tenant?.logo_url
+              ? <img src={tenant.logo_url} alt="" style={{ height: 22, borderRadius: 4 }} />
+              : (
+                <div
+                  className="flex items-center justify-center flex-shrink-0 rounded-md"
+                  style={{
+                    width: 22, height: 22,
+                    background: 'var(--color-primary)',
+                    fontSize: 11, color: 'white', fontWeight: 700,
+                  }}
+                >
+                  {(tenant?.name ?? 'K').charAt(0).toUpperCase()}
+                </div>
+              )
+            }
+            <span className="font-semibold text-gray-900" style={{ fontSize: 13 }}>
+              {tenant?.name ?? 'Koios'}
+            </span>
+          </div>
+
+          {/* Broodkruimel-separator + paginatitel */}
+          <span style={{ color: '#D1D5DB', fontSize: 16 }}>›</span>
+          <span className="font-medium text-gray-600 truncate" style={{ fontSize: 13 }}>
             {PAGE_TITLES[activePage] || activePage}
           </span>
-          <div className="flex items-center gap-3 ml-auto">
-            <span className="text-xs text-gray-400">{user?.name}</span>
+
+          {/* Rechter acties */}
+          <div className="flex items-center flex-shrink-0 gap-2 ml-auto">
+            <span className="hidden text-xs text-gray-400 sm:block">{user?.name}</span>
+
+            {/* Filterknop — alleen zichtbaar als pagina filters heeft geregistreerd */}
+            {hasFilters && (
+              <button
+                onClick={() => setRightPanelOpen(o => !o)}
+                title="Filters tonen/verbergen"
+                className="flex items-center justify-center transition-colors rounded-lg"
+                style={{
+                  width: 30, height: 30,
+                  background: rightPanelOpen ? 'var(--color-primary-bg)' : '#F9FAFB',
+                  border:     `1px solid ${rightPanelOpen ? 'var(--color-primary)' : '#E5E7EB'}`,
+                  color:      rightPanelOpen ? 'var(--color-primary)' : '#6B7280',
+                  cursor: 'pointer',
+                }}
+              >
+                <SlidersHorizontal size={14} />
+              </button>
+            )}
+
             <button
               onClick={logout}
               className="text-xs rounded-md px-3 py-1.5"
@@ -78,14 +187,33 @@ function DashboardLayout() {
             </button>
           </div>
         </div>
-        <div className="flex-1 overflow-auto">
-          {renderPage()}
+
+        {/* Content-rij: pagina + optioneel rechter filterpanel naast elkaar */}
+        <div className="flex flex-1 overflow-hidden">
+          <div className="flex-1 overflow-auto">
+            {renderPage()}
+          </div>
+
+          {/* Rechter filterpanel — zelfde hoogte als content, schuift naast de pagina */}
+          {rightPanelOpen && hasFilters && (
+            <div
+              className="flex-shrink-0 overflow-y-auto bg-white"
+              style={{ width: 240, borderLeft: '1px solid #F3F4F6' }}
+            >
+              <ReportFilterSidebar
+                title="Filters"
+                groups={filterGroups}
+                onClose={() => setRightPanelOpen(false)}
+              />
+            </div>
+          )}
         </div>
       </div>
     </div>
   )
 }
 
+// Beschermt routes — redirect naar /login als niet ingelogd
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) {
@@ -104,6 +232,7 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />
 }
 
+// Blokkeert ingelogde users van de loginpagina
 function PublicRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return null
@@ -114,10 +243,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-          <Route path="/*" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} />
-        </Routes>
+        {/* RightPanelProvider binnen AuthProvider zodat componenten
+            zowel auth als filterpanel context kunnen gebruiken */}
+        <RightPanelProvider>
+          <Routes>
+            <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+            <Route path="/*"     element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} />
+          </Routes>
+        </RightPanelProvider>
       </AuthProvider>
     </BrowserRouter>
   )

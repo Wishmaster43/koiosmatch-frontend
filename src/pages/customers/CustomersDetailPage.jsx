@@ -1,0 +1,1 @@
+export default function CustomersDetailPage() { return <div className="flex items-center justify-center h-full"><p className="font-mono text-sm text-gray-400">Details — Klanten · komt eraan</p></div> }
