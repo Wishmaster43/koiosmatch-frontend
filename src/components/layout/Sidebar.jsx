@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import {
   LayoutDashboard, Zap, Users, Building2, MapPin, Layers,
-  MessageCircle, Table2, Settings,
-  ChevronLeft, ChevronRight, ChevronDown,
+  MessageCircle, Table2, Settings, ChevronDown,
 } from 'lucide-react'
 
 function TenantSwitcher({ expanded }) {
@@ -96,7 +95,9 @@ function TenantSwitcher({ expanded }) {
 
 const NAV_ITEMS = [
   { id: 'dashboard',   label: 'Dashboard',  icon: LayoutDashboard },
+  { id: 'aiagents',   label: 'AI Agents',  icon: Zap },
   { id: 'workflows',   label: 'Workflows',  icon: Zap },
+//  { id: 'apiconnections',   label: 'API Connections',  icon: Zap },
   { id: 'candidates',  label: 'Kandidaten', icon: Users },
   { id: 'customers',   label: 'Klanten',    icon: Building2 },
   { id: 'locations',   label: 'Locaties',   icon: MapPin },
@@ -204,7 +205,7 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
   )
 }
 
-export default function Sidebar({ expanded, setExpanded, activePage, setActivePage, onTheme }) {
+export default function Sidebar({ expanded, activePage, setActivePage, onTheme }) {
   const [openItems, setOpenItems] = useState([])
 
   const toggleOpen = (id) =>
@@ -216,14 +217,13 @@ export default function Sidebar({ expanded, setExpanded, activePage, setActivePa
                borderRight: '1px solid var(--sidebar-border)' }}>
 
       {/* Brand */}
-      <div className="flex items-center flex-shrink-0"
+      <div className="flex items-center justify-center flex-shrink-0"
         style={{
-          padding:        expanded ? '14px 10px 13px 14px' : '14px 0 13px',
-          justifyContent: expanded ? 'space-between' : 'center',
-          borderBottom:   '1px solid var(--sidebar-border)',
+          padding:      '14px 0 13px',
+          borderBottom: '1px solid var(--sidebar-border)',
           minHeight: 56,
         }}>
-        <div className="flex items-center" style={{ gap: 9 }}>
+        <div className="flex items-center" style={{ gap: 9, paddingLeft: expanded ? 14 : 0, paddingRight: expanded ? 10 : 0, width: '100%', justifyContent: expanded ? 'flex-start' : 'center' }}>
           <div className="flex items-center justify-center flex-shrink-0 rounded-lg"
             style={{ width: 28, height: 28, background: 'var(--color-primary)' }}>
             <Zap size={14} color="white" />
@@ -235,14 +235,6 @@ export default function Sidebar({ expanded, setExpanded, activePage, setActivePa
             </span>
           )}
         </div>
-        <button onClick={() => setExpanded(e => !e)}
-          title={expanded ? 'Inklappen' : 'Uitklappen'}
-          className="flex items-center justify-center flex-shrink-0 transition-all duration-150 border-none rounded-md cursor-pointer"
-          style={{ width: 24, height: 24, background: 'transparent', color: 'var(--sidebar-muted)' }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-hover)'; e.currentTarget.style.color = 'var(--sidebar-text)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--sidebar-muted)' }}>
-          {expanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-        </button>
       </div>
 
       <TenantSwitcher expanded={expanded} />

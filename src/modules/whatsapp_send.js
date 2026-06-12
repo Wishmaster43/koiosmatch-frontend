@@ -2,6 +2,7 @@ import { MessageCircle } from 'lucide-react'
 
 export default {
   type:  'whatsapp_send',
+  category: 'Berichten',
   label: 'WhatsApp Sturen',
   Icon:  MessageCircle,
   color: '#3B6D11',

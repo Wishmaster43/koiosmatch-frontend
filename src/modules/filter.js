@@ -2,6 +2,7 @@ import { Filter } from 'lucide-react'
 
 export default {
   type:  'filter',
+  category: 'Flow beheer',
   label: 'Filter',
   Icon:  Filter,
   color: '#7C3AED',

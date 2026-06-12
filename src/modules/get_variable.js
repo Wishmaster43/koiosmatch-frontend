@@ -1,0 +1,13 @@
+import { BookMarked } from 'lucide-react'
+
+export default {
+  type:     'get_variable',
+  category: 'Flow beheer',
+  label:    'Variabele ophalen',
+  Icon:     BookMarked,
+  color:    '#0369A1',
+  bg:       '#E0F2FE',
+  schema: [
+    { key: 'variable_name', label: 'Variabelenaam', type: 'text', placeholder: 'mijn_variabele' },
+  ],
+}

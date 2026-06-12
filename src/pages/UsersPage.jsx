@@ -104,6 +104,9 @@ const ROLE_META = {
   default:       { label: 'Gebruiker',   color: '#6B7280', bg: '#F9FAFB', icon: User },
 }
 
+const hasRole = (u, role) => (u?.roles ?? []).some(r => (typeof r === 'string' ? r : r?.name) === role)
+const isSuperAdminUser = u => hasRole(u, 'super_admin')
+
 function RoleBadge({ role }) {
   const name = typeof role === 'string' ? role : role?.name ?? 'default'
   const meta = ROLE_META[name] ?? ROLE_META.default
@@ -240,42 +243,52 @@ export default function UsersPage() {
               </td></tr>
             )}
             {!loading && filtered.map((u, i) => {
-              const fullName = [u.firstname, u.lastname].filter(Boolean).join(' ') || u.name || '—'
+              const name = [u.firstname, u.lastname].filter(Boolean).join(' ') || u.name || '—'
               const isMe = u.id === me?.id
+              const isSA = isSuperAdminUser(u)
               return (
                 <tr key={u.id ?? i}
-                  style={{ transition: 'background 0.1s', background: isMe ? 'var(--color-primary-bg)' : undefined }}
-                  onMouseEnter={e => { if (!isMe) e.currentTarget.style.background = '#FAFAFA' }}
-                  onMouseLeave={e => { if (!isMe) e.currentTarget.style.background = 'transparent' }}
+                  style={{ transition: 'background 0.1s', background: isMe ? 'var(--color-primary-bg)' : isSA ? '#FAFBFF' : undefined }}
+                  onMouseEnter={e => { if (!isMe && !isSA) e.currentTarget.style.background = '#FAFAFA' }}
+                  onMouseLeave={e => { if (!isMe && !isSA) e.currentTarget.style.background = 'transparent' }}
                 >
                   <td style={{ ...TD, minWidth: 200 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                       <Avatar user={u} />
                       <div>
                         <div style={{ fontWeight: 500, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          {fullName}
+                          {name}
                           {isMe && (
                             <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
-                                           background: 'var(--color-primary-bg)', borderRadius: 999,
-                                           padding: '1px 7px' }}>
+                                           background: 'var(--color-primary-bg)', borderRadius: 999, padding: '1px 7px' }}>
                               jij
+                            </span>
+                          )}
+                          {isSA && (
+                            <span style={{ fontSize: 10, fontWeight: 600, color: '#7C3AED',
+                                           background: '#F5F3FF', borderRadius: 999, padding: '1px 7px' }}>
+                              systeem
                             </span>
                           )}
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td style={{ ...TD, minWidth: 200, color: 'var(--text-muted)', fontSize: 12 }}>
-                    {u.email ?? '—'}
-                  </td>
-                  <td style={{ ...TD, minWidth: 140, color: 'var(--text-muted)', fontSize: 12 }}>
-                    {u.phone ?? '—'}
-                  </td>
+                  <td style={{ ...TD, minWidth: 200, color: 'var(--text-muted)', fontSize: 12 }}>{u.email ?? '—'}</td>
+                  <td style={{ ...TD, minWidth: 140, color: 'var(--text-muted)', fontSize: 12 }}>{u.phone ?? '—'}</td>
                   <td style={TD}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-                      {(u.roles ?? []).map((r, ri) => <RoleBadge key={ri} role={r} />)}
-                      {(!u.roles || u.roles.length === 0) && <RoleBadge role="default" />}
-                    </div>
+                    {isSA ? (
+                      <RoleBadge role="super_admin" />
+                    ) : (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+                        {(u.roles ?? [])
+                          .filter(r => (typeof r === 'string' ? r : r?.name) !== 'super_admin')
+                          .map((r, ri) => <RoleBadge key={ri} role={r} />)}
+                        {(u.roles ?? []).filter(r => (typeof r === 'string' ? r : r?.name) !== 'super_admin').length === 0 && (
+                          <RoleBadge role="default" />
+                        )}
+                      </div>
+                    )}
                   </td>
                 </tr>
               )

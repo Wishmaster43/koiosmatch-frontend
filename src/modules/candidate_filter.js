@@ -2,6 +2,7 @@ import { Users } from 'lucide-react'
 
 export default {
   type:  'candidate_filter',
+  category: 'Kandidaten',
   label: 'Kandidaten Filter',
   Icon:  Users,
   color: '#534AB7',

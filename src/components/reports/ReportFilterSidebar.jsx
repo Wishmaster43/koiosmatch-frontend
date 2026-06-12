@@ -1,5 +1,5 @@
-import { X, Search, ChevronDown } from 'lucide-react'
-import { useState } from 'react'
+import { X, Search, ChevronDown, RotateCcw } from 'lucide-react'
+import { useState, useMemo } from 'react'
 
 function SearchSelectGroup({ group }) {
   const [open,  setOpen]  = useState(false)
@@ -117,39 +117,234 @@ function SearchSelectGroup({ group }) {
   )
 }
 
+// ─── Period picker ────────────────────────────────────────────────────────────
+// group.value   : string — '' | '2024' | '2024-Q2' | '2024-05'
+// group.years   : number[] — available years, newest first
+// group.onChange: (value: string) => void
+
+const NL_MONTHS = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
+const QUARTERS  = ['K1','K2','K3','K4']
+
+function PeriodGroup({ group }) {
+  const val = group.value ?? ''
+
+  // Derive current granularity + year from value
+  const granularity = useMemo(() => {
+    if (!val) return 'month'
+    if (val.includes('-Q')) return 'quarter'
+    if (val.includes('-'))  return 'month'
+    return 'year'
+  }, [val])
+
+  const selectedYear = useMemo(() => {
+    if (!val) return null
+    return Number(val.split('-')[0])
+  }, [val])
+
+  const selectedSub = useMemo(() => {
+    if (!val || !val.includes('-')) return null
+    return val.split('-')[1] // 'Q2' or '05'
+  }, [val])
+
+  const years = group.years ?? []
+
+  const setGranularity = (g) => {
+    if (!selectedYear) return group.onChange('')
+    if (g === 'year')    return group.onChange(String(selectedYear))
+    group.onChange('')
+  }
+
+  const setYear = (y) => {
+    if (granularity === 'year') return group.onChange(String(y))
+    group.onChange('')
+  }
+
+  const setSub = (sub) => {
+    if (!selectedYear) return
+    group.onChange(`${selectedYear}-${sub}`)
+  }
+
+  const btnBase = {
+    border: 'none', cursor: 'pointer', borderRadius: 5,
+    fontSize: 11, fontWeight: 500, transition: 'all 0.1s',
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+
+      {/* Granulariteit toggle */}
+      <div style={{ display: 'flex', background: '#F3F4F6', borderRadius: 7, padding: 2, gap: 2 }}>
+        {[
+          { id: 'month',   label: 'Maand'    },
+          { id: 'quarter', label: 'Kwartaal' },
+          { id: 'year',    label: 'Jaar'     },
+        ].map(g => {
+          const active = granularity === g.id
+          return (
+            <button key={g.id}
+              onClick={() => setGranularity(g.id)}
+              style={{ ...btnBase, flex: 1, padding: '4px 0',
+                       border: active ? '1px solid #E5E7EB' : '1px solid transparent',
+                       background: active ? 'white' : 'transparent',
+                       color: active ? '#111827' : '#6B7280',
+                       boxShadow: active ? '0 1px 2px rgba(0,0,0,0.06)' : 'none' }}>
+              {g.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Jaar selector */}
+      {years.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+          {years.map(y => {
+            const active = selectedYear === y
+            return (
+              <button key={y} onClick={() => setYear(y)}
+                style={{ ...btnBase, padding: '3px 9px',
+                         background: active ? 'var(--color-primary)' : '#F3F4F6',
+                         color:      active ? 'white'                : '#374151',
+                         fontWeight: active ? 600 : 400 }}>
+                {y}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Maand grid */}
+      {granularity === 'month' && selectedYear && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3 }}>
+          {NL_MONTHS.map((m, i) => {
+            const sub   = String(i + 1).padStart(2, '0')
+            const active = selectedSub === sub
+            return (
+              <button key={sub} onClick={() => setSub(sub)}
+                style={{ ...btnBase, padding: '4px 0', textAlign: 'center',
+                         background: active ? 'var(--color-primary-bg)' : '#F9FAFB',
+                         color:      active ? 'var(--color-primary)'    : '#374151',
+                         border: `1px solid ${active ? 'var(--color-primary)' : '#E5E7EB'}`,
+                         fontWeight: active ? 600 : 400 }}>
+                {m}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Kwartaal grid */}
+      {granularity === 'quarter' && selectedYear && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 4 }}>
+          {QUARTERS.map((q, i) => {
+            const sub   = `Q${i + 1}`
+            const active = selectedSub === sub
+            return (
+              <button key={sub} onClick={() => setSub(sub)}
+                style={{ ...btnBase, padding: '6px 0', textAlign: 'center',
+                         background: active ? 'var(--color-primary-bg)' : '#F9FAFB',
+                         color:      active ? 'var(--color-primary)'    : '#374151',
+                         border: `1px solid ${active ? 'var(--color-primary)' : '#E5E7EB'}`,
+                         fontWeight: active ? 600 : 400, fontSize: 12 }}>
+                {q}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Reset periode */}
+      {val && (
+        <button onClick={() => group.onChange('')}
+          style={{ ...btnBase, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                   gap: 4, padding: '4px 0', background: 'none',
+                   color: '#9CA3AF', fontSize: 11, fontWeight: 400 }}>
+          <RotateCcw size={10} /> Periode wissen
+        </button>
+      )}
+    </div>
+  )
+}
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+
 export default function ReportFilterSidebar({ title = 'Filters', groups = [], onClose }) {
+  const activeCount = groups.reduce((sum, g) => {
+    if (g.type === 'period') return sum + (g.value ? 1 : 0)
+    return sum + (g.selected?.length ?? 0)
+  }, 0)
+
+  const clearAll = () => {
+    groups.forEach(g => {
+      if (g.type === 'period') { g.onChange?.('') }
+      else { g.selected?.forEach(v => g.onToggle?.(v)) }
+    })
+  }
+
   return (
     <div className="flex flex-col flex-shrink-0 bg-white"
-      style={{ width: 210, borderLeft: '1px solid #F3F4F6' }}>
+      style={{ width: 220, borderLeft: '1px solid #F3F4F6' }}>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '10px 12px', borderBottom: '1px solid #F3F4F6' }}>
-        <span style={{ fontWeight: 600, fontSize: 12, color: '#111827' }}>{title}</span>
-        <button onClick={onClose}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                   width: 22, height: 22, background: 'none', border: 'none',
-                   cursor: 'pointer', color: '#9CA3AF', borderRadius: 4 }}
-          onMouseEnter={e => (e.currentTarget.style.background = '#F3F4F6')}
-          onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-          <X size={13} />
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontWeight: 600, fontSize: 12, color: '#111827' }}>{title}</span>
+          {activeCount > 0 && (
+            <span style={{ background: 'var(--color-primary)', color: 'white',
+                           borderRadius: 999, padding: '1px 6px', fontSize: 10, fontWeight: 600 }}>
+              {activeCount}
+            </span>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {activeCount > 0 && (
+            <button onClick={clearAll} title="Alle filters wissen"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+                       width: 22, height: 22, background: 'none', border: 'none',
+                       cursor: 'pointer', color: '#9CA3AF', borderRadius: 4 }}
+              onMouseEnter={e => (e.currentTarget.style.background = '#F3F4F6')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+              <RotateCcw size={12} />
+            </button>
+          )}
+          <button onClick={onClose}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+                     width: 22, height: 22, background: 'none', border: 'none',
+                     cursor: 'pointer', color: '#9CA3AF', borderRadius: 4 }}
+            onMouseEnter={e => (e.currentTarget.style.background = '#F3F4F6')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+            <X size={13} />
+          </button>
+        </div>
       </div>
 
       {/* Groepen */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px',
+                    display: 'flex', flexDirection: 'column', gap: 14 }}>
         {groups.map(group => (
           <div key={group.key}>
-            {/* Label */}
-            <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF',
-                          textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 5 }}>
-              {group.label}
+            {/* Label + wis-knop */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                          marginBottom: 5 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF',
+                            textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                {group.label}
+              </div>
+              {group.type !== 'period' && group.selected?.length > 0 && (
+                <button
+                  onClick={() => group.selected.forEach(v => group.onToggle(v))}
+                  style={{ fontSize: 9, color: '#9CA3AF', background: 'none', border: 'none',
+                           cursor: 'pointer', padding: 0 }}>
+                  wis
+                </button>
+              )}
             </div>
 
-            {group.type === 'search-select' ? (
+            {group.type === 'period' ? (
+              <PeriodGroup group={group} />
+            ) : group.type === 'search-select' ? (
               <SearchSelectGroup group={group} />
             ) : group.type === 'radio' ? (
-              // Gesegmenteerde toggle — single select
               <div style={{ display: 'flex', background: '#F3F4F6', borderRadius: 7,
                             padding: 2, gap: 2 }}>
                 {group.options.map(opt => {

@@ -2,6 +2,7 @@ import { Webhook } from 'lucide-react'
 
 export default {
   type:  'webhook',
+  category: 'Triggers',
   label: 'Webhook Trigger',
   Icon:  Webhook,
   color: '#0369A1',

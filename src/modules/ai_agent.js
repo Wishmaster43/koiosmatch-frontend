@@ -2,6 +2,7 @@ import { Bot } from 'lucide-react'
 
 export default {
   type:  'ai_agent',
+  category: 'AI',
   label: 'AI Agent',
   Icon:  Bot,
   color: '#7C3AED',

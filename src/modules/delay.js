@@ -2,6 +2,7 @@ import { Clock } from 'lucide-react'
 
 export default {
   type:  'delay',
+  category: 'Flow beheer',
   label: 'Wachttijd',
   Icon:  Clock,
   color: '#5F5E5A',

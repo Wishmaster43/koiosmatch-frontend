@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth }                   from './context/AuthContext'
 import { RightPanelProvider, useRightPanel }       from './context/RightPanelContext'
 import { useState, useEffect }                     from 'react'
-import { SlidersHorizontal }                       from 'lucide-react'
+import { SlidersHorizontal, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import './index.css'
 
 // Pagina-imports
@@ -30,6 +30,7 @@ import DepartmentsReport      from './pages/departments/DepartmentsReport'
 import ContactsDetailPage     from './pages/contacts/ContactsDetailPage'
 import ProfilePage            from './pages/ProfilePage'
 import UsersPage              from './pages/UsersPage'
+import WhatsAppPage           from './pages/WhatsAppPage'
 import RunsDetailPage         from './pages/details/RunsDetailPage'
 import MessagesDetailPage     from './pages/details/MessagesDetailPage'
 import { ThemeProvider }      from './context/ThemeContext'
@@ -110,7 +111,7 @@ function DashboardLayout() {
       case 'locations':           return <LocationsReport />
       case 'departments':         return <DepartmentsReport />
       case 'workflows':           return <WorkflowsPage />
-      case 'whatsapp':            return <PlaceholderPage title="WhatsApp" />
+      case 'whatsapp':            return <WhatsAppPage />
       case 'details.candidates':  return <CandidatesDetailPage />
       case 'details.customers':   return <CustomersDetailPage />
       case 'details.locations':   return <LocationsDetailPage />
@@ -146,6 +147,21 @@ function DashboardLayout() {
           className="kc-topbar flex items-center flex-shrink-0 gap-3 px-5"
           style={{ height: 52, background: 'var(--topbar-bg)', borderBottom: '1px solid var(--border)' }}
         >
+          {/* Sidebar toggle */}
+          <button
+            onClick={() => setExpanded(e => !e)}
+            title={expanded ? 'Sidebar inklappen' : 'Sidebar uitklappen'}
+            className="flex items-center justify-center flex-shrink-0 rounded-lg transition-colors"
+            style={{
+              width: 30, height: 30, border: 'none', cursor: 'pointer',
+              background: 'transparent', color: 'var(--text-muted)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = 'var(--text)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)' }}
+          >
+            {expanded ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
+          </button>
+
           {/* Tenant logo of initiaal-avatar + naam */}
           <div className="flex items-center flex-shrink-0 gap-2">
             {tenant?.logo_url

@@ -9,9 +9,16 @@ export function AuthProvider({ children }) {
   const [tenants,       setTenants]       = useState([])
   const [activeTenant,  setActiveTenantState] = useState(null)
 
-  const setActiveTenant = (tenant) => {
+  const setActiveTenant = async (tenant) => {
     localStorage.setItem('active_tenant', tenant.id)
     setActiveTenantState(tenant)
+    // Herlaad /auth/me zodat permissies/context voor deze tenant kloppen
+    try {
+      const res = await api.get('/auth/me')
+      const u   = res.data?.user ?? res.data?.data ?? res.data
+      setUser(u)
+      localStorage.setItem('auth_user', JSON.stringify(u))
+    } catch {}
   }
 
   // ── Startup: herstel sessie ──────────────────────────────────────────────────

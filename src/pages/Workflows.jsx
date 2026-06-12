@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import api from '../lib/api'
 import {
   Zap, Users, Calendar, MessageCircle, Database,
   Mail, Clock, Play, Plus, MoreHorizontal,
-  CheckCircle, AlertCircle, Loader2
+  CheckCircle, AlertCircle, Loader2,
+  Folder, FolderOpen, FolderPlus, Trash2, ChevronDown, ChevronRight,
 } from 'lucide-react'
 import WorkflowCanvasEditor from '../components/layout/WorkflowCanvasEditor'
 
@@ -240,26 +241,31 @@ function denormalizeWorkflow(wf) {
   }
 }
 
+// ── Folder sidebar ────────────────────────────────────────────────────────────
+
+// ── Main page ─────────────────────────────────────────────────────────────────
+
 export default function WorkflowsPage() {
-  const [workflows, setWorkflows]       = useState([])
-  const [loading,   setLoading]         = useState(true)
+  const [workflows,       setWorkflows]       = useState([])
+  const [folders,         setFolders]         = useState([])
+  const [loading,         setLoading]         = useState(true)
+  const [selectedFolder,  setSelectedFolder]  = useState(null)   // null = alle, 'unassigned' = geen folder, uuid = folder
   const [editingWorkflow, setEditingWorkflow] = useState(null)
+  const [dragOverFolder,  setDragOverFolder]  = useState(null)
+  const dragWf = useRef(null)
 
   useEffect(() => {
-    api.get('/workflows')
-      .then(res => {
-        const raw = res.data?.data ?? res.data ?? []
-        setWorkflows(raw.map(normalizeWorkflow))
-      })
-      .catch(() => setWorkflows(MOCK_WORKFLOWS))
-      .finally(() => setLoading(false))
+    Promise.all([
+      api.get('/workflows').then(r => (r.data?.data ?? r.data ?? []).map(normalizeWorkflow)).catch(() => MOCK_WORKFLOWS),
+      api.get('/workflow-folders').then(r => r.data?.data ?? r.data ?? []).catch(() => []),
+    ]).then(([wfs, flds]) => {
+      setWorkflows(wfs)
+      setFolders(flds)
+    }).finally(() => setLoading(false))
   }, [])
 
   const handleRun = async (id) => {
-    // probeer /run, fallback naar /execute
-    await api.post(`/workflows/${id}/run`)
-      .catch(() => api.post(`/workflows/${id}/execute`))
-      .catch(() => {})
+    await api.post(`/workflows/${id}/run`).catch(() => api.post(`/workflows/${id}/execute`)).catch(() => {})
   }
 
   const handleSave = async (updated) => {
@@ -268,49 +274,136 @@ export default function WorkflowsPage() {
       return
     }
     const isNew = !updated.id || !workflows.some(w => w.id === updated.id)
-    const payload = denormalizeWorkflow(updated)
+    const payload = { ...denormalizeWorkflow(updated), folder_id: updated.folder_id ?? null }
     try {
       const res = isNew
         ? await api.post('/workflows', payload)
         : await api.put(`/workflows/${updated.id}`, payload)
       const saved = normalizeWorkflow(res.data?.data ?? res.data)
-      setWorkflows(prev => isNew
-        ? [...prev, saved]
-        : prev.map(w => w.id === saved.id ? saved : w)
-      )
+      setWorkflows(prev => isNew ? [...prev, saved] : prev.map(w => w.id === saved.id ? saved : w))
       setEditingWorkflow(null)
     } catch (err) {
-      const detail = err.response?.data
-      alert(`Opslaan mislukt: ${detail?.message ?? err.message}`)
+      alert(`Opslaan mislukt: ${err.response?.data?.message ?? err.message}`)
     }
   }
 
+  const createFolder = async (name) => {
+    try {
+      const res = await api.post('/workflow-folders', { name })
+      setFolders(prev => [...prev, res.data?.data ?? res.data])
+    } catch {}
+  }
+
+  const deleteFolder = async (folder) => {
+    if (!confirm(`Map "${folder.name}" verwijderen? De workflows blijven bestaan onder "Niet toegewezen".`)) return
+    try {
+      await api.delete(`/workflow-folders/${folder.id}`)
+      setFolders(prev => prev.filter(f => f.id !== folder.id))
+      setWorkflows(prev => prev.map(w => w.folder_id === folder.id ? { ...w, folder_id: null } : w))
+      if (selectedFolder === folder.id) setSelectedFolder(null)
+    } catch {}
+  }
+
+  const moveToFolder = async (workflowId, folderId) => {
+    setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, folder_id: folderId } : w))
+    const wf = workflows.find(w => w.id === workflowId)
+    if (!wf) return
+    const payload = { ...denormalizeWorkflow(wf), folder_id: folderId }
+    api.put(`/workflows/${workflowId}`, payload).catch(() => {
+      setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, folder_id: wf.folder_id } : w))
+    })
+  }
+
+  const visibleWorkflows = workflows.filter(wf => {
+    if (selectedFolder === null) return true
+    if (selectedFolder === 'unassigned') return !wf.folder_id
+    return wf.folder_id === selectedFolder
+  })
+
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="font-semibold text-gray-900" style={{ fontSize: 18 }}>Werkstromen</h2>
-          <p className="text-sm text-gray-400 mt-0.5">{workflows.length} werkstromen actief</p>
+    <div style={{ display: 'flex', height: '100%' }}>
+      {/* Folder sidebar — drag targets */}
+      <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid #F3F4F6', display: 'flex', flexDirection: 'column', background: 'white' }}>
+        <div style={{ padding: '16px 16px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Folders</span>
+          <button onClick={() => {
+            const name = prompt('Mapnaam:')
+            if (name?.trim()) createFolder(name.trim())
+          }} title="Nieuwe folder"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: 2, display: 'flex' }}>
+            <FolderPlus size={15} />
+          </button>
         </div>
-        <button
-          onClick={() => setEditingWorkflow({ name: 'Nieuwe Workflow', trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [] })}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg"
-          style={{ background: 'var(--color-primary)', border: 'none', cursor: 'pointer' }}
-        >
-          <Plus size={15} />
-          Nieuwe Workflow
-        </button>
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          {[
+            { id: null,          label: 'Alle workflows',  icon: <Zap size={13} /> },
+            { id: 'unassigned',  label: 'Niet toegewezen', icon: <Folder size={13} /> },
+          ].map(item => (
+            <SidebarRow key={String(item.id)} label={item.label} icon={item.icon}
+              active={selectedFolder === item.id}
+              isDragOver={dragOverFolder === item.id}
+              onClick={() => setSelectedFolder(item.id)}
+              onDragOver={e => { e.preventDefault(); setDragOverFolder(item.id) }}
+              onDragLeave={() => setDragOverFolder(null)}
+              onDrop={() => { moveToFolder(dragWf.current, item.id === 'unassigned' ? null : item.id); setDragOverFolder(null) }}
+            />
+          ))}
+          <div style={{ height: 1, background: '#F3F4F6', margin: '4px 12px' }} />
+          {folders.map(f => (
+            <SidebarRow key={f.id} label={f.name} icon={<Folder size={13} />}
+              active={selectedFolder === f.id}
+              isDragOver={dragOverFolder === f.id}
+              onClick={() => setSelectedFolder(f.id)}
+              onDragOver={e => { e.preventDefault(); setDragOverFolder(f.id) }}
+              onDragLeave={() => setDragOverFolder(null)}
+              onDrop={() => { moveToFolder(dragWf.current, f.id); setDragOverFolder(null) }}
+              onDelete={() => deleteFolder(f)}
+            />
+          ))}
+        </div>
       </div>
 
-      <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
-        {workflows.map(wf => (
-          <WorkflowCard
-            key={wf.id}
-            workflow={wf}
-            onRun={handleRun}
-            onEdit={() => setEditingWorkflow(wf)}
-          />
-        ))}
+      {/* Content */}
+      <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          <div>
+            <h2 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>
+              {selectedFolder === null ? 'Alle workflows'
+               : selectedFolder === 'unassigned' ? 'Niet toegewezen'
+               : (folders.find(f => f.id === selectedFolder)?.name ?? 'Workflows')}
+            </h2>
+            <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>{visibleWorkflows.length} workflows</p>
+          </div>
+          <button
+            onClick={() => setEditingWorkflow({ name: 'Nieuwe Workflow', trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13, fontWeight: 500, color: 'white', background: 'var(--color-primary)', border: 'none', borderRadius: 8, cursor: 'pointer' }}
+          >
+            <Plus size={14} /> Nieuwe Workflow
+          </button>
+        </div>
+
+        {loading ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#9CA3AF', fontSize: 13 }}>
+            <Loader2 size={14} className="animate-spin" /> Laden...
+          </div>
+        ) : (
+          <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
+            {visibleWorkflows.map(wf => (
+              <div key={wf.id} draggable
+                onDragStart={() => { dragWf.current = wf.id }}
+                onDragEnd={() => { dragWf.current = null }}
+                style={{ cursor: 'grab' }}
+              >
+                <WorkflowCard workflow={wf} onRun={handleRun} onEdit={() => setEditingWorkflow(wf)} />
+              </div>
+            ))}
+            {visibleWorkflows.length === 0 && (
+              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: '#9CA3AF', fontSize: 14 }}>
+                Geen workflows in deze map. Sleep er een naartoe of maak een nieuwe aan.
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {editingWorkflow && (
@@ -319,6 +412,32 @@ export default function WorkflowsPage() {
           onClose={() => setEditingWorkflow(null)}
           onSave={handleSave}
         />
+      )}
+    </div>
+  )
+}
+
+function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDragLeave, onDrop, onDelete }) {
+  const [hover, setHover] = useState(false)
+  return (
+    <div onClick={onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+      onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px',
+        cursor: 'pointer', borderRadius: 6, margin: '1px 6px',
+        background: isDragOver ? '#EFF6FF' : active ? 'var(--color-primary-bg)' : hover ? '#F9FAFB' : 'transparent',
+        border: isDragOver ? '1.5px dashed #3B82F6' : '1.5px solid transparent',
+        color: active ? 'var(--color-primary)' : '#374151',
+        transition: 'background 0.1s',
+      }}
+    >
+      <span style={{ color: isDragOver ? '#3B82F6' : active ? 'var(--color-primary)' : '#9CA3AF', flexShrink: 0 }}>{icon}</span>
+      <span style={{ fontSize: 13, flex: 1, fontWeight: active ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
+      {onDelete && hover && (
+        <button onClick={e => { e.stopPropagation(); onDelete() }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: 2, display: 'flex', flexShrink: 0 }}>
+          <Trash2 size={11} />
+        </button>
       )}
     </div>
   )

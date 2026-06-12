@@ -2,6 +2,7 @@ import { Calendar } from 'lucide-react'
 
 export default {
   type:  'shift_fetcher',
+  category: 'Diensten',
   label: 'Diensten Ophalen',
   Icon:  Calendar,
   color: '#0F6E56',

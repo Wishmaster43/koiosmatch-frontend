@@ -9,6 +9,7 @@ import '@xyflow/react/dist/style.css'
 import {
   X, Save, Play, Loader2, Plus, Trash2,
   Zap, CheckCircle, AlertCircle, List, Clock, Filter,
+  ChevronDown, ChevronRight,
 } from 'lucide-react'
 import { MODULE_META, MODULE_SCHEMAS } from '../../modules/index'
 
@@ -103,6 +104,42 @@ function FieldInput({ field, value, onChange }) {
         <option value="">Selecteer...</option>
         {field.options.map(o => <option key={o} value={o}>{o}</option>)}
       </select>
+    )
+  }
+  if (field.type === 'textarea') {
+    return (
+      <textarea value={value || ''} placeholder={field.placeholder || ''}
+        onChange={e => onChange(field.key, e.target.value)}
+        rows={4}
+        style={{ width: '100%', padding: '7px 9px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 12, color: '#111', background: 'white', outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace', resize: 'vertical' }}
+        onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
+        onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+    )
+  }
+  if (field.type === 'keyvalue') {
+    const pairs = Array.isArray(value) ? value : []
+    const update = (i, k, v) => onChange(field.key, pairs.map((p, j) => j === i ? { ...p, [k]: v } : p))
+    const add    = () => onChange(field.key, [...pairs, { name: '', value: '' }])
+    const remove = (i) => onChange(field.key, pairs.filter((_, j) => j !== i))
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+        {pairs.map((p, i) => (
+          <div key={i} style={{ display: 'flex', gap: 4 }}>
+            <input value={p.name} onChange={e => update(i, 'name', e.target.value)} placeholder="Naam"
+              style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none' }} />
+            <input value={p.value} onChange={e => update(i, 'value', e.target.value)} placeholder="Waarde"
+              style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none' }} />
+            <button type="button" onClick={() => remove(i)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: '0 4px' }}>
+              <X size={12} />
+            </button>
+          </div>
+        ))}
+        <button type="button" onClick={add}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '4px 8px', cursor: 'pointer' }}>
+          <Plus size={10} /> Toevoegen
+        </button>
+      </div>
     )
   }
   return (
@@ -385,46 +422,107 @@ const EDGE_TYPES = { addable: AddableEdge }
 
 // ── Module picker ─────────────────────────────────────────────────────────────
 
+const CATEGORY_ORDER = ['Alle', 'Triggers', 'Kandidaten', 'Diensten', 'Berichten', 'AI', 'Integraties', 'Flow beheer', 'Tekst & Parsing', 'Foutafhandeling']
+
 function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
   const [search, setSearch] = useState('')
-  const filtered = Object.entries(MODULE_META).filter(([, m]) =>
-    m.label.toLowerCase().includes(search.toLowerCase())
-  )
+  const [tab,    setTab]    = useState('Alle')
+
+  const allEntries = Object.entries(MODULE_META)
+
+  const visible = allEntries.filter(([, m]) => {
+    const matchSearch = !search || m.label.toLowerCase().includes(search.toLowerCase())
+    const matchTab    = tab === 'Alle' || m.category === tab
+    return matchSearch && matchTab
+  })
+
+  // Count per category
+  const counts = {}
+  allEntries.forEach(([, m]) => {
+    const c = m.category ?? 'Overig'
+    counts[c] = (counts[c] ?? 0) + 1
+  })
+
+  const renderRow = ([type, meta]) => {
+    const Icon = meta.Icon
+    return (
+      <button key={type} type="button"
+        onClick={() => { onSelect(type, insertAfterEdgeId); onClose() }}
+        style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 16px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
+        onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+        <div style={{ width: 34, height: 34, borderRadius: '50%', background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Icon size={15} color={meta.color} />
+        </div>
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{meta.label}</div>
+        </div>
+      </button>
+    )
+  }
+
+  // In "Alle" tab (or search), render with category dividers
+  const renderGrouped = () => {
+    const groups = {}
+    visible.forEach(entry => {
+      const cat = entry[1].category ?? 'Overig'
+      if (!groups[cat]) groups[cat] = []
+      groups[cat].push(entry)
+    })
+    const orderedCats = CATEGORY_ORDER.filter(c => c !== 'Alle' && groups[c])
+    const remaining = Object.keys(groups).filter(c => !CATEGORY_ORDER.includes(c))
+    return [...orderedCats, ...remaining].map((cat, i) => (
+      <div key={cat}>
+        {i > 0 && <div style={{ height: 1, background: '#F3F4F6', margin: '4px 0' }} />}
+        <div style={{ padding: '6px 16px 2px', fontSize: 10, fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{cat}</div>
+        {groups[cat].map(renderRow)}
+      </div>
+    ))
+  }
+
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.35)' }}
       onClick={onClose}>
-      <div style={{ width: 320, background: 'white', borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 40px rgba(0,0,0,0.18)' }}
+      <div style={{ width: 400, maxHeight: '82vh', background: 'white', borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 40px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column' }}
         onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #F3F4F6' }}>
-          <span style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>Module kiezen</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
-            <X size={16} />
-          </button>
-        </div>
-        <div style={{ padding: '10px 16px', borderBottom: '1px solid #F3F4F6' }}>
+
+        {/* Header + zoeken */}
+        <div style={{ padding: '14px 16px 0', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Module kiezen</span>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
+              <X size={16} />
+            </button>
+          </div>
           <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Zoeken..."
-            style={{ width: '100%', padding: '7px 10px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13, outline: 'none', background: '#FAFAFA', boxSizing: 'border-box' }} />
+            style={{ width: '100%', padding: '7px 10px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13, outline: 'none', background: '#F9FAFB', boxSizing: 'border-box', marginBottom: 12 }} />
         </div>
-        <div style={{ maxHeight: 340, overflowY: 'auto' }}>
-          {filtered.map(([type, meta]) => {
-            const Icon = meta.Icon
-            return (
-              <button key={type} type="button"
-                onClick={() => { onSelect(type, insertAfterEdgeId); onClose() }}
-                style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '11px 16px', background: 'none', border: 'none', borderBottom: '1px solid #F9FAFB', cursor: 'pointer', textAlign: 'left' }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#FAFAFA')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Icon size={16} color={meta.color} />
-                </div>
-                <span style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{meta.label}</span>
-              </button>
-            )
-          })}
-          {filtered.length === 0 && (
-            <p style={{ padding: '24px 16px', textAlign: 'center', fontSize: 13, color: '#9CA3AF' }}>Geen modules gevonden</p>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', overflowX: 'auto', borderBottom: '1px solid #F3F4F6', flexShrink: 0, padding: '0 8px' }}>
+          {CATEGORY_ORDER.filter(c => c === 'Alle' || counts[c]).map(cat => (
+            <button key={cat} type="button" onClick={() => { setTab(cat); }}
+              style={{
+                padding: '7px 12px', fontSize: 12, fontWeight: tab === cat ? 700 : 400,
+                color: tab === cat ? 'var(--color-primary)' : '#6B7280',
+                background: 'none', border: 'none', borderBottom: tab === cat ? '2px solid var(--color-primary)' : '2px solid transparent',
+                cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: -1,
+              }}>
+              {cat}
+            </button>
+          ))}
+        </div>
+
+        {/* Lijst */}
+        <div style={{ overflowY: 'auto', flex: 1, paddingBottom: 8 }}>
+          {visible.length === 0 && (
+            <p style={{ padding: '32px 16px', textAlign: 'center', fontSize: 13, color: '#9CA3AF' }}>Geen modules gevonden</p>
           )}
+          {visible.length > 0 && (tab === 'Alle' || search)
+            ? renderGrouped()
+            : visible.map(renderRow)
+          }
         </div>
       </div>
     </div>
@@ -434,6 +532,11 @@ function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
 // ── Config panel ──────────────────────────────────────────────────────────────
 
 function ConfigPanel({ node, onUpdate, onDelete }) {
+  const [activeTab, setActiveTab] = useState('instellingen')
+
+  // Reset tab when selected node changes
+  useEffect(() => { setActiveTab('instellingen') }, [node?.id])
+
   if (!node) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, padding: 24 }}>
@@ -447,15 +550,18 @@ function ConfigPanel({ node, onUpdate, onDelete }) {
   const meta   = MODULE_META[node.data.type]
   const schema = MODULE_SCHEMAS[node.data.type] || []
   const Icon   = meta?.Icon
+  const output = node.data.output
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
+      {/* Module header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px 0', flexShrink: 0 }}>
         <div style={{ width: 36, height: 36, borderRadius: '50%', background: meta?.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           {Icon && <Icon size={16} color={meta?.color} />}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>{meta?.label}</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF' }}>Configuratie</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{meta?.label}</div>
+          <div style={{ fontSize: 11, color: '#9CA3AF' }}>{meta?.category}</div>
         </div>
         <button onClick={() => onDelete(node.id)}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 4, display: 'flex' }}
@@ -465,20 +571,69 @@ function ConfigPanel({ node, onUpdate, onDelete }) {
           <Trash2 size={14} />
         </button>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {schema.map(field => (
-          <div key={field.key}>
-            <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-              {field.label}
-            </label>
-            <FieldInput field={field} value={node.data.config[field.key]}
-              onChange={(key, val) => onUpdate(node.id, key, val)} />
-          </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', borderBottom: '1px solid #F3F4F6', flexShrink: 0, padding: '8px 16px 0' }}>
+        {[
+          { id: 'instellingen', label: 'Instellingen' },
+          { id: 'uitvoering',   label: output ? `Uitvoering (${Array.isArray(output) ? output.length : 1})` : 'Uitvoering' },
+        ].map(t => (
+          <button key={t.id} type="button" onClick={() => setActiveTab(t.id)}
+            style={{
+              padding: '5px 10px', fontSize: 12, fontWeight: activeTab === t.id ? 600 : 400,
+              color: activeTab === t.id ? 'var(--color-primary)' : '#6B7280',
+              background: 'none', border: 'none',
+              borderBottom: activeTab === t.id ? '2px solid var(--color-primary)' : '2px solid transparent',
+              cursor: 'pointer', marginBottom: -1, whiteSpace: 'nowrap',
+            }}>
+            {t.label}
+          </button>
         ))}
-        {schema.length === 0 && (
-          <p style={{ fontSize: 12, color: '#9CA3AF' }}>Geen configuratie vereist.</p>
-        )}
       </div>
+
+      {/* Tab content */}
+      {activeTab === 'instellingen' ? (
+        <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {schema.map(field => (
+            <div key={field.key}>
+              <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+                {field.label}
+              </label>
+              <FieldInput field={field} value={node.data.config[field.key]}
+                onChange={(key, val) => onUpdate(node.id, key, val)} />
+              {field.help && <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{field.help}</div>}
+            </div>
+          ))}
+          {schema.length === 0 && (
+            <p style={{ fontSize: 12, color: '#9CA3AF' }}>Geen configuratie vereist.</p>
+          )}
+        </div>
+      ) : (
+        <div style={{ flex: 1, overflowY: 'auto' }}>
+          {!output ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 10, padding: 24 }}>
+              <Play size={24} color="#D1D5DB" />
+              <p style={{ fontSize: 12, color: '#9CA3AF', textAlign: 'center', lineHeight: 1.5 }}>
+                Nog geen uitvoerdata.<br />Druk op ▶ bij de module om te testen.
+              </p>
+            </div>
+          ) : (
+            <div style={{ padding: 12 }}>
+              {Array.isArray(output) && (
+                <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 8, fontWeight: 500 }}>
+                  {output.length} {output.length === 1 ? 'item' : 'items'}
+                </div>
+              )}
+              <pre style={{
+                fontSize: 11, lineHeight: 1.6, color: '#E2E8F0', background: '#1E293B',
+                borderRadius: 8, padding: 12, overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0,
+              }}>
+                {JSON.stringify(output, null, 2)}
+              </pre>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -486,50 +641,119 @@ function ConfigPanel({ node, onUpdate, onDelete }) {
 // ── Logs panel ────────────────────────────────────────────────────────────────
 
 const MOCK_LOGS = [
-  { id: 1, ts: 'Vandaag 08:00',    ok: true,  candidates: 87, duration: '3.2s', steps_ok: 4 },
-  { id: 2, ts: 'Gisteren 08:00',   ok: true,  candidates: 92, duration: '2.8s', steps_ok: 4 },
-  { id: 3, ts: '10 jun 08:00',     ok: false, candidates: 0,  duration: '0.9s', error: 'API timeout bij Diensten Ophalen' },
-  { id: 4, ts: '9 jun 08:00',      ok: true,  candidates: 78, duration: '3.5s', steps_ok: 4 },
-  { id: 5, ts: '8 jun 08:00',      ok: true,  candidates: 64, duration: '2.1s', steps_ok: 4 },
+  {
+    id: 1, ts: 'Vandaag 08:00', ok: true, duration: '3.2s',
+    operations: 12, bundles: 87,
+    steps: [
+      { label: 'Webhook ontvangen',    ok: true,  duration: '0.1s', bundles: 1 },
+      { label: 'Kandidaten Ophalen',   ok: true,  duration: '1.4s', bundles: 87 },
+      { label: 'Filter',               ok: true,  duration: '0.2s', bundles: 64 },
+      { label: 'WhatsApp versturen',   ok: true,  duration: '1.5s', bundles: 64 },
+    ],
+  },
+  {
+    id: 2, ts: 'Gisteren 08:00', ok: true, duration: '2.8s',
+    operations: 9, bundles: 92,
+    steps: [
+      { label: 'Webhook ontvangen',    ok: true,  duration: '0.1s', bundles: 1 },
+      { label: 'Kandidaten Ophalen',   ok: true,  duration: '1.2s', bundles: 92 },
+      { label: 'Filter',               ok: true,  duration: '0.2s', bundles: 71 },
+      { label: 'WhatsApp versturen',   ok: true,  duration: '1.3s', bundles: 71 },
+    ],
+  },
+  {
+    id: 3, ts: '10 jun 08:00', ok: false, duration: '0.9s',
+    operations: 2, bundles: 0,
+    error: 'API timeout bij Diensten Ophalen',
+    steps: [
+      { label: 'Webhook ontvangen',    ok: true,  duration: '0.1s', bundles: 1 },
+      { label: 'Diensten Ophalen',     ok: false, duration: '0.8s', bundles: 0, error: 'Request timeout na 800ms' },
+    ],
+  },
+  {
+    id: 4, ts: '9 jun 08:00', ok: true, duration: '3.5s',
+    operations: 11, bundles: 78,
+    steps: [
+      { label: 'Webhook ontvangen',    ok: true,  duration: '0.1s', bundles: 1 },
+      { label: 'Kandidaten Ophalen',   ok: true,  duration: '1.6s', bundles: 78 },
+      { label: 'Filter',               ok: true,  duration: '0.3s', bundles: 55 },
+      { label: 'WhatsApp versturen',   ok: true,  duration: '1.5s', bundles: 55 },
+    ],
+  },
 ]
 
 function LogsPanel({ onClose }) {
+  const [expanded, setExpanded] = useState(null)
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <List size={14} color="var(--color-primary)" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>Uitvoeringslog</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>Uitvoeringen</span>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
           <X size={15} />
         </button>
       </div>
+
+      {/* Log list */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
-        {MOCK_LOGS.map(log => (
-          <div key={log.id} style={{ padding: '12px 16px', borderBottom: '1px solid #F9FAFB' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        {MOCK_LOGS.map(log => {
+          const isOpen = expanded === log.id
+          return (
+            <div key={log.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+              {/* Row */}
+              <button type="button"
+                onClick={() => setExpanded(isOpen ? null : log.id)}
+                style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', gap: 8, textAlign: 'left' }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
                 {log.ok
-                  ? <CheckCircle size={13} color="#16A34A" />
-                  : <AlertCircle size={13} color="#DC2626" />
+                  ? <CheckCircle size={13} color="#16A34A" style={{ flexShrink: 0 }} />
+                  : <AlertCircle size={13} color="#DC2626" style={{ flexShrink: 0 }} />
                 }
-                <span style={{ fontSize: 12, fontWeight: 500, color: log.ok ? '#16A34A' : '#DC2626' }}>
-                  {log.ok ? 'Geslaagd' : 'Mislukt'}
-                </span>
-              </div>
-              <span style={{ fontSize: 11, color: '#9CA3AF' }}>{log.ts}</span>
-            </div>
-            {log.ok
-              ? <div style={{ display: 'flex', gap: 8, fontSize: 11, color: '#6B7280' }}>
-                  <span>{log.candidates} kandidaten</span>
-                  <span>·</span>
-                  <span>{log.duration}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ fontSize: 12, fontWeight: 500, color: log.ok ? '#111827' : '#DC2626' }}>
+                      {log.ok ? 'Geslaagd' : 'Mislukt'}
+                    </span>
+                    <span style={{ fontSize: 11, color: '#9CA3AF' }}>{log.duration}</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>
+                    {log.ts} · {log.operations} operaties · {log.bundles} bundles
+                  </div>
+                  {!log.ok && log.error && (
+                    <div style={{ fontSize: 11, color: '#DC2626', marginTop: 2 }}>{log.error}</div>
+                  )}
                 </div>
-              : <div style={{ fontSize: 11, color: '#DC2626' }}>{log.error}</div>
-            }
-          </div>
-        ))}
+                <ChevronDown size={12} color="#D1D5DB"
+                  style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+              </button>
+
+              {/* Expanded steps */}
+              {isOpen && (
+                <div style={{ padding: '0 16px 12px 36px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {log.steps.map((step, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: step.ok ? '#16A34A' : '#DC2626', marginTop: 5, flexShrink: 0 }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: 11, fontWeight: 500, color: '#374151' }}>{step.label}</span>
+                          <span style={{ fontSize: 11, color: '#9CA3AF' }}>{step.duration}</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: '#6B7280' }}>
+                          {step.ok ? `${step.bundles} bundles` : step.error}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )
@@ -596,7 +820,11 @@ function EditorInner({ workflow, onClose, onSave }) {
       if (data.type === 'candidates_fetch' || data.type === 'candidate_filter') {
         const cfg = data.config ?? {}
         const params = { per_page: cfg.limit ?? 100 }
-        if (cfg.status && cfg.status !== 'alle') params.status = cfg.status
+        if (cfg.status && cfg.status !== 'alle') {
+          // Map legacy Dutch values to API values
+          const statusMap = { actief: 'active', inactief: 'inactive' }
+          params.status = statusMap[cfg.status] ?? cfg.status
+        }
         const res = await api.get('/candidates', { params })
         let rows = res.data?.data ?? res.data ?? []
 

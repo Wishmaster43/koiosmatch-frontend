@@ -2,6 +2,7 @@ import { BookOpen } from 'lucide-react'
 
 export default {
   type:  'knowledge_search',
+  category: 'AI',
   label: 'Kennisbank Zoeken',
   Icon:  BookOpen,
   color: '#0F6E56',

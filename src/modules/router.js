@@ -2,6 +2,7 @@ import { GitBranch } from 'lucide-react'
 
 export default {
   type:  'router',
+  category: 'Flow beheer',
   label: 'Router',
   Icon:  GitBranch,
   color: '#B45309',
