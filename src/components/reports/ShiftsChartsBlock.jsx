@@ -1,28 +1,26 @@
 /**
  * ShiftsChartsBlock.jsx
- * Toont twee staafgrafieken naast elkaar: uren (links) en diensten (rechts).
- * Filters worden via RightPanelContext naar de layout gestuurd — geen eigen
- * filter-knop of inline sidebar. De layout-topbar beheert het openen/sluiten.
+ * Twee losse kaarten: Aantal uren (links) en Aantal diensten (rechts).
+ * Filters via RightPanelContext — geen eigen filterknop.
  *
- * Ondersteunt:
- * - Multi-jaar vergelijking (bars worden transparanter per ouder jaar)
- * - Maand- en kwartaalweergave
- * - Individuele maanden aan/uitzetten
- * - Filter op functie, klant en locatie (geladen uit /reports/shifts-filter-options)
- * - Drill-down drawer bij klik op een bar
+ * Props:
+ *   filterKey          — unieke sleutel voor RightPanelContext (default 'shifts-charts')
+ *   fixedCustomers     — array van klantnamen die altijd meegestuurd worden (niet toonbaar in filter)
+ *   fixedLocationIds   — array van location-id strings die altijd meegestuurd worden
+ *   fixedDepartmentId  — department_id string die altijd meegestuurd wordt
+ *   fixedCandidateId   — candidate_id string die altijd meegestuurd wordt
  */
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useReducer, useState } from "react"
 import {
   ResponsiveContainer, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts"
-import api               from "../../lib/api"
-import DrillDownDrawer   from "./DrillDownDrawer"
-import { useRightPanel } from "../../context/RightPanelContext"
+import api                    from "../../lib/api"
+import ShiftsDrillDownDrawer  from "./ShiftsDrillDownDrawer"
+import { useRightPanel }      from "../../context/RightPanelContext"
 
 // ── Constanten ────────────────────────────────────────────────────────────────
 
-// Alle mogelijke reeksen met hun label en kleur
 const SERIES = [
   { key: "totaal",         label: "Totaal",         color: "#1e293b" },
   { key: "niet_ingevuld",  label: "Niet ingevuld",  color: "#f59e0b" },
@@ -34,8 +32,6 @@ const SERIES = [
 const MONTH_LABELS = ["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"]
 const CURRENT_YEAR = new Date().getFullYear()
 const YEAR_OPTIONS = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR]
-
-// Oudere jaren krijgen lagere opacity zodat vergelijking visueel duidelijk is
 const YEAR_OPACITY = [1, 0.55, 0.3]
 
 const QUARTERS = [
@@ -45,14 +41,22 @@ const QUARTERS = [
   { label: "Q4", key: "Q4", months: ["10","11","12"] },
 ]
 
-// ── Herbruikbaar chart-component ──────────────────────────────────────────────
-/**
- * BarChartWidget
- * Generieke recharts staafgrafiek. Ontvangt data-array en bar-descriptors.
- * Bar-descriptors bevatten: { dataKey, name, color, opacity }
- * onBarClick(datum, barMeta) wordt aangeroepen bij klik op een bar.
- */
+// ── Chart-widget ──────────────────────────────────────────────────────────────
+
 function BarChartWidget({ data, bars, onBarClick }) {
+  // Deduplicate legend: toon alleen de eerste bar per series-naam (voorkomt dubbele legenda bij meerdere jaren)
+  const legendPayload = useMemo(() => {
+    const seen = new Set()
+    return bars
+      .filter(b => b.legendType !== "none")
+      .filter(b => {
+        if (seen.has(b.name)) return false
+        seen.add(b.name)
+        return true
+      })
+      .map(b => ({ value: b.name, type: "square", color: b.color }))
+  }, [bars])
+
   return (
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
@@ -60,7 +64,7 @@ function BarChartWidget({ data, bars, onBarClick }) {
         <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#64748b" }} />
         <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#64748b" }} />
         <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 13 }} />
-        <Legend wrapperStyle={{ fontSize: 13 }} />
+        <Legend payload={legendPayload} wrapperStyle={{ fontSize: 12 }} />
         {bars.map((b) => (
           <Bar
             key={b.dataKey}
@@ -68,6 +72,7 @@ function BarChartWidget({ data, bars, onBarClick }) {
             name={b.name}
             fill={b.color}
             fillOpacity={b.opacity}
+            legendType="none"
             radius={[4, 4, 0, 0]}
             cursor="pointer"
             onClick={(datum) => onBarClick(datum, b)}
@@ -78,76 +83,143 @@ function BarChartWidget({ data, bars, onBarClick }) {
   )
 }
 
+// Kleine jaar-indicator als er meerdere jaren geselecteerd zijn
+function YearIndicator({ years }) {
+  if (years.length < 2) return null
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      {years.map((y, i) => (
+        <span key={y} className="flex items-center gap-1.5 text-xs"
+          style={{ color: '#64748b', opacity: YEAR_OPACITY[i] }}>
+          <span style={{ display: 'inline-block', width: 10, height: 10,
+                         borderRadius: 2, background: '#64748b', opacity: YEAR_OPACITY[i] }} />
+          {y}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+// ── Kaart-wrapper ─────────────────────────────────────────────────────────────
+
+function ChartCard({ title, subtitle, loading, error, children }) {
+  return (
+    <div className="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
+      <div className="p-5">
+        <div className="mb-4">
+          <h3 className="text-base font-semibold text-slate-900">{title}</h3>
+          {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
+        </div>
+        {loading && (
+          <div className="flex items-center justify-center h-64 text-slate-400">Laden…</div>
+        )}
+        {error && !loading && (
+          <div className="flex items-center justify-center h-64 text-red-500">{error}</div>
+        )}
+        {!loading && !error && children}
+      </div>
+    </div>
+  )
+}
+
 // ── Hoofdcomponent ────────────────────────────────────────────────────────────
-export default function ShiftsChartsBlock() {
+
+export default function ShiftsChartsBlock({
+  filterKey         = 'shifts-charts',
+  fixedCustomers:    fixedCustomersProp   = [],
+  fixedLocationIds:  fixedLocationIdsProp = [],
+  fixedDepartmentId = null,
+  fixedCandidateId  = null,
+}) {
+  // Stabiliseer array-props zodat ze geen nieuwe referentie geven bij elke render
+  // (default [] in props zorgt anders voor een infinite re-render loop)
+  const fixedCustomers   = useMemo(() => fixedCustomersProp,   // eslint-disable-line
+    [fixedCustomersProp.join(',')])                            // eslint-disable-line
+  const fixedLocationIds = useMemo(() => fixedLocationIdsProp, // eslint-disable-line
+    [fixedLocationIdsProp.join(',')])                          // eslint-disable-line
 
   // ── Filter state ──────────────────────────────────────────────────────────
-  const [selectedYears,     setSelectedYears]     = useState([CURRENT_YEAR])
-  const [selectedMonths,    setSelectedMonths]     = useState([])   // leeg = alle maanden
-  const [period,            setPeriod]            = useState("month")
-  const [visible,           setVisible]           = useState(SERIES.map((s) => s.key))
-  const [selectedJobTypes,  setSelectedJobTypes]  = useState([])
-  const [selectedLocations, setSelectedLocations] = useState([])
+  const [selectedYears,      setSelectedYears]      = useState([CURRENT_YEAR])
+  const [selectedMonths,     setSelectedMonths]     = useState([])
+  const [period,             setPeriod]             = useState("month")
+  const [visible,            setVisible]            = useState(SERIES.map((s) => s.key))
+  const [selectedJobTypes,   setSelectedJobTypes]   = useState([])
+  const [selectedCustomers,  setSelectedCustomers]  = useState([])
+  const [selectedLocations,  setSelectedLocations]  = useState([])
 
   // ── Data state ────────────────────────────────────────────────────────────
-  const [rows,          setRows]          = useState([])
+  const [{ rows, loading, error }, dispatch] = useReducer(
+    (_, action) => action,
+    { rows: [], loading: true, error: null }
+  )
   const [filterOptions, setFilterOptions] = useState({ job_types: [], locations: [] })
-  const [loading,       setLoading]       = useState(true)
-  const [error,         setError]         = useState(null)
-  const [drill,         setDrill]         = useState(null) // drill-down drawer state
+  const [drill,         setDrill]         = useState(null)
 
-  // Nieuwe context API: registerFilters/unregisterFilters ipv setFilterGroups
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  // ── Eenmalig filter-opties laden (functies, klanten, locaties) ────────────
+  // ── Filter-opties laden ───────────────────────────────────────────────────
   useEffect(() => {
     api.get("reports/shifts-filter-options")
       .then((res) => setFilterOptions(res.data ?? { job_types: [], locations: [] }))
-      .catch(() => {}) // stil falen — filters zijn optioneel
+      .catch(() => {})
   }, [])
 
-  // ── Chart data laden wanneer filters wijzigen ─────────────────────────────
+  // ── Chart data laden ──────────────────────────────────────────────────────
   useEffect(() => {
     let active = true
-    setLoading(true)
-    setError(null)
+    dispatch({ rows: [], loading: true, error: null })
 
-    // URLSearchParams ondersteunt arrays via herhaald append
     const params = new URLSearchParams()
     selectedYears.forEach((y) => params.append("years[]", y))
     selectedMonths.forEach((m) => params.append("months[]", m))
     selectedJobTypes.forEach((j) => params.append("job_type[]", j))
-    selectedLocations.forEach((l) => params.append("location_id[]", l))
+
+    // Fixed department / candidate (pre-scoped context)
+    if (fixedDepartmentId) params.append("department_id[]", fixedDepartmentId)
+    if (fixedCandidateId)  params.append("candidate_id[]",  fixedCandidateId)
+
+    // Effectieve locaties: vaste locaties hebben de hoogste prioriteit,
+    // dan user-geselecteerde locaties, dan klant-gebaseerde filtering.
+    const allFixed = [...fixedLocationIds]
+    if (allFixed.length > 0) {
+      allFixed.forEach((l) => params.append("location_id[]", l))
+    } else {
+      const effectiveLocations = selectedLocations.length > 0
+        ? selectedLocations
+        : [...selectedCustomers, ...fixedCustomers].length > 0
+          ? filterOptions.locations
+              .filter(l => [...selectedCustomers, ...fixedCustomers].includes(l.customer ?? l.name))
+              .map(l => String(l.id))
+          : []
+      effectiveLocations.forEach((l) => params.append("location_id[]", l))
+    }
 
     api.get(`reports/shifts-per-month?${params}`)
       .then((res) => {
         if (!active) return
         const data = res.data?.data ?? res.data ?? []
-        setRows(Array.isArray(data) ? data : [])
+        dispatch({ rows: Array.isArray(data) ? data : [], loading: false, error: null })
       })
-      .catch((err) => active && setError(err.message ?? "Laden mislukt"))
-      .finally(() => active && setLoading(false))
+      .catch((err) => active && dispatch({ rows: [], loading: false, error: err.message ?? "Laden mislukt" }))
 
-    return () => { active = false } // cleanup: voorkomt state-updates na unmount
-  }, [selectedYears, selectedMonths, selectedJobTypes, selectedLocations])
+    return () => { active = false }
+  }, [selectedYears, selectedMonths, selectedJobTypes, selectedLocations, selectedCustomers,
+      filterOptions.locations, fixedLocationIds, fixedCustomers, fixedDepartmentId, fixedCandidateId])
 
-  // ── Rows indexeren op YYYY-MM voor snelle lookup ──────────────────────────
+  // ── Rows indexeren ────────────────────────────────────────────────────────
   const byYearMonth = useMemo(
     () => new Map(rows.map((r) => [r.maand, r])),
     [rows]
   )
 
-  // ── Chart data transformeren naar recharts-formaat ────────────────────────
-  // Sleutels zijn "{jaar}_{reeks}" zodat meerdere jaren naast elkaar staan.
+  // ── Chart data transformeren ──────────────────────────────────────────────
   const chartData = useMemo(() => {
-    // Bepaal welke maand-indices zichtbaar zijn (leeg = alle 12)
     const monthIndices =
       selectedMonths.length > 0
         ? selectedMonths.map((m) => parseInt(m, 10) - 1).filter((i) => i >= 0 && i < 12)
         : Array.from({ length: 12 }, (_, i) => i)
 
     if (period === "quarter") {
-      // Aggregeer maanddata per kwartaal per geselecteerd jaar
       return QUARTERS.map((q) => {
         const entry = { label: q.label, _quarter: q.key }
         selectedYears.forEach((year) => {
@@ -162,7 +234,6 @@ export default function ShiftsChartsBlock() {
       })
     }
 
-    // Per maand — één entry per zichtbare maand per geselecteerd jaar
     return monthIndices.map((i) => {
       const entry = { label: MONTH_LABELS[i], _monthIndex: i + 1 }
       selectedYears.forEach((year) => {
@@ -180,36 +251,37 @@ export default function ShiftsChartsBlock() {
   const activeSeries = SERIES.filter((s) => visible.includes(s.key))
   const multiYear    = selectedYears.length > 1
 
-  // ── Bar-descriptors genereren voor beide charts ───────────────────────────
-  // Bij meerdere jaren: jaar-suffix in naam + lagere opacity per ouder jaar
+  // ── Bar-descriptors ───────────────────────────────────────────────────────
   const shiftBars = useMemo(() =>
     selectedYears.flatMap((year, yi) =>
       activeSeries.map((s) => ({
-        dataKey:   `${year}_${s.key}`,
-        name:      multiYear ? `${s.label} '${String(year).slice(2)}` : s.label,
-        color:     s.color,
-        opacity:   YEAR_OPACITY[yi] ?? 0.25,
+        dataKey:    `${year}_${s.key}`,
+        name:       s.label,
+        color:      s.color,
+        opacity:    YEAR_OPACITY[yi] ?? 0.25,
+        legendType: yi === 0 ? "square" : "none",
         year,
-        seriesKey: s.key,
+        seriesKey:  s.key,
       }))
-    ), [selectedYears, activeSeries, multiYear])
+    ), [selectedYears, activeSeries])
 
   const hoursBars = useMemo(() =>
     selectedYears.flatMap((year, yi) =>
       activeSeries.map((s) => ({
-        dataKey:   `${year}_${s.key}_uren`,
-        name:      multiYear ? `${s.label} '${String(year).slice(2)}` : s.label,
-        color:     s.color,
-        opacity:   YEAR_OPACITY[yi] ?? 0.25,
+        dataKey:    `${year}_${s.key}_uren`,
+        name:       s.label,
+        color:      s.color,
+        opacity:    YEAR_OPACITY[yi] ?? 0.25,
+        legendType: yi === 0 ? "square" : "none",
         year,
-        seriesKey: `${s.key}_uren`,
+        seriesKey:  `${s.key}_uren`,
       }))
-    ), [selectedYears, activeSeries, multiYear])
+    ), [selectedYears, activeSeries])
 
-  // ── Drill-down: bouw URL-params en open drawer ────────────────────────────
+  // ── Drill-down ────────────────────────────────────────────────────────────
   const handleBarClick = (datum, barMeta) => {
     const { year, seriesKey } = barMeta
-    const baseMetric = seriesKey.replace("_uren", "") // strip _uren suffix
+    const baseMetric = seriesKey.replace("_uren", "")
     const params     = new URLSearchParams()
 
     if (period === "quarter") {
@@ -223,6 +295,9 @@ export default function ShiftsChartsBlock() {
     params.set("metric", baseMetric)
     selectedJobTypes.forEach((j) => params.append("job_type[]", j))
     selectedLocations.forEach((l) => params.append("location_id[]", l))
+    fixedLocationIds.forEach((l)  => params.append("location_id[]", l))
+    if (fixedDepartmentId) params.append("department_id[]", fixedDepartmentId)
+    if (fixedCandidateId)  params.append("candidate_id[]",  fixedCandidateId)
 
     const seriesLabel = SERIES.find((s) => s.key === baseMetric)?.label ?? baseMetric
     const yearSuffix  = multiYear ? ` '${String(year).slice(2)}` : ""
@@ -232,9 +307,7 @@ export default function ShiftsChartsBlock() {
     })
   }
 
-  const periodLabel = `${selectedYears.join(", ")} — per ${period === "quarter" ? "kwartaal" : "maand"}`
-
-  // Jaar toggle: minimaal 1 jaar altijd geselecteerd
+  // ── Jaar-toggle ───────────────────────────────────────────────────────────
   const toggleYear = (v) =>
     setSelectedYears((prev) => {
       const n = Number(v)
@@ -242,7 +315,9 @@ export default function ShiftsChartsBlock() {
       return [...prev, n].sort()
     })
 
-  // ── Filter groups samenstellen voor rechter sidebar ───────────────────────
+  const periodLabel = `${selectedYears.join(", ")} — per ${period === "quarter" ? "kwartaal" : "maand"}`
+
+  // ── Filter groups voor rechter sidebar ────────────────────────────────────
   const filterGroups = useMemo(() => {
     const groups = [
       {
@@ -264,12 +339,10 @@ export default function ShiftsChartsBlock() {
       },
     ]
 
-    // Maanden-filter alleen relevant bij maandweergave
     if (period === "month") {
       groups.push({
         key:      "maanden",
         label:    "Maanden",
-        // Leeg = alle maanden actief → toon ze allemaal als checked
         selected: selectedMonths.length > 0
           ? selectedMonths.map(String)
           : MONTH_LABELS.map((_, i) => String(i + 1)),
@@ -281,7 +354,6 @@ export default function ShiftsChartsBlock() {
       })
     }
 
-    // Reeksen — welke statuslijnen zichtbaar zijn in beide charts
     groups.push({
       key:      "reeksen",
       label:    "Reeksen",
@@ -293,7 +365,6 @@ export default function ShiftsChartsBlock() {
         ),
     })
 
-    // Functie-filter — alleen tonen als backend functies terugstuurt
     if (filterOptions.job_types.length > 0) {
       groups.push({
         key:      "functie",
@@ -307,76 +378,83 @@ export default function ShiftsChartsBlock() {
       })
     }
 
-    // Locatie/klant-filter — klant naam als context in het label
-    if (filterOptions.locations.length > 0) {
-      groups.push({
-        key:      "locatie",
-        label:    "Klant / locatie",
-        selected: selectedLocations,
-        options:  filterOptions.locations.map((l) => ({
-          value: l.id,
-          label: l.customer ? `${l.name} (${l.customer})` : l.name,
-        })),
-        onToggle: (v) =>
-          setSelectedLocations((prev) =>
-            prev.includes(v) ? prev.filter((l) => l !== v) : [...prev, v]
-          ),
-      })
+    // Klant-filter alleen tonen als er geen vaste klant/locatie is ingesteld
+    if (fixedCustomers.length === 0 && fixedLocationIds.length === 0) {
+      const customerOptions = [...new Set(
+        filterOptions.locations.map(l => l.customer).filter(Boolean)
+      )].sort().map(c => ({ value: c, label: c }))
+
+      if (customerOptions.length > 0) {
+        groups.push({
+          key:      "klant",
+          label:    "Klant",
+          type:     "search-select",
+          selected: selectedCustomers,
+          options:  customerOptions,
+          onToggle: (v) =>
+            setSelectedCustomers((prev) =>
+              prev.includes(v) ? prev.filter((c) => c !== v) : [...prev, v]
+            ),
+        })
+      }
+    }
+
+    // Locatie-filter alleen tonen als er geen vaste locaties zijn
+    if (fixedLocationIds.length === 0) {
+      const locationOptions = filterOptions.locations
+        .filter(l => {
+          if (fixedCustomers.length > 0) return fixedCustomers.includes(l.customer)
+          return selectedCustomers.length === 0 || selectedCustomers.includes(l.customer)
+        })
+        .map(l => ({ value: String(l.id), label: l.name }))
+
+      if (locationOptions.length > 0) {
+        groups.push({
+          key:      "locatie",
+          label:    "Locatie",
+          type:     "search-select",
+          selected: selectedLocations,
+          options:  locationOptions,
+          onToggle: (v) =>
+            setSelectedLocations((prev) =>
+              prev.includes(v) ? prev.filter((l) => l !== v) : [...prev, v]
+            ),
+        })
+      }
     }
 
     return groups
-  }, [period, selectedYears, selectedMonths, visible, selectedJobTypes, selectedLocations, filterOptions])
+  }, [period, selectedYears, selectedMonths, visible, selectedJobTypes, selectedCustomers,
+      selectedLocations, filterOptions, fixedCustomers, fixedLocationIds])
 
-  // ── Sync filterGroups naar rechter panel via context ──────────────────────
-  // Unieke key 'shifts-charts' zodat andere pagina-componenten niet worden overschreven.
-  // Ruimt zichzelf op bij unmount zodat de filterknop verdwijnt bij navigatie.
+  // ── Sync naar rechter panel ───────────────────────────────────────────────
   useEffect(() => {
-    registerFilters('shifts-charts', filterGroups)
-    return () => unregisterFilters('shifts-charts')
-  }, [filterGroups])
+    registerFilters(filterKey, filterGroups)
+    return () => unregisterFilters(filterKey)
+  }, [filterKey, filterGroups, registerFilters, unregisterFilters])
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
-      <div className="p-5">
+    <>
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ChartCard title="Aantal uren" subtitle={periodLabel} loading={loading} error={error}>
+          <YearIndicator years={selectedYears} />
+          <BarChartWidget data={chartData} bars={hoursBars} onBarClick={handleBarClick} />
+        </ChartCard>
 
-        {/* Header — geen filterknop meer, die zit in de topbar */}
-        <div className="mb-5">
-          <h3 className="text-base font-semibold text-slate-900">Diensten &amp; uren</h3>
-          <p className="text-sm text-slate-500">{periodLabel}</p>
-        </div>
-
-        {/* Laadstatus */}
-        {loading && (
-          <div className="flex items-center justify-center h-64 text-slate-400">Laden…</div>
-        )}
-        {error && !loading && (
-          <div className="flex items-center justify-center h-64 text-red-500">{error}</div>
-        )}
-
-        {/* Twee charts naast elkaar */}
-        {!loading && !error && (
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div>
-              <p className="mb-2 text-sm font-medium text-slate-600">Aantal uren</p>
-              <BarChartWidget data={chartData} bars={hoursBars} onBarClick={handleBarClick} />
-            </div>
-            <div>
-              <p className="mb-2 text-sm font-medium text-slate-600">Aantal diensten</p>
-              <BarChartWidget data={chartData} bars={shiftBars} onBarClick={handleBarClick} />
-            </div>
-          </div>
-        )}
+        <ChartCard title="Aantal diensten" subtitle={periodLabel} loading={loading} error={error}>
+          <YearIndicator years={selectedYears} />
+          <BarChartWidget data={chartData} bars={shiftBars} onBarClick={handleBarClick} />
+        </ChartCard>
       </div>
 
-      {/* Drill-down drawer — toont onderliggende diensten bij klik op bar */}
       {drill && (
-        <DrillDownDrawer
+        <ShiftsDrillDownDrawer
           title={drill.title}
           fetchUrl={drill.fetchUrl}
           onClose={() => setDrill(null)}
         />
       )}
-    </div>
+    </>
   )
 }

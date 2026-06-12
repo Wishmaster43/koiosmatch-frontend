@@ -23,7 +23,11 @@ export function AuthProvider({ children }) {
     if (token && saved) {
       setUser(JSON.parse(saved))
       api.get('/auth/me')
-        .then(res => setUser(res.data))
+        .then(res => {
+          const u = res.data?.user ?? res.data?.data ?? res.data
+          setUser(u)
+          localStorage.setItem('auth_user', JSON.stringify(u))
+        })
         .catch(() => {
           localStorage.removeItem('auth_token')
           localStorage.removeItem('auth_user')
@@ -82,6 +86,15 @@ export function AuthProvider({ children }) {
     return user
   }
 
+  // ── Profiel verversen ────────────────────────────────────────────────────────
+  const refreshUser = async () => {
+    const res = await api.get('/auth/me')
+    const u   = res.data?.user ?? res.data?.data ?? res.data
+    setUser(u)
+    localStorage.setItem('auth_user', JSON.stringify(u))
+    return u
+  }
+
   // ── Logout ───────────────────────────────────────────────────────────────────
   const logout = async () => {
     try { await api.post('/auth/logout') } catch {}
@@ -93,15 +106,35 @@ export function AuthProvider({ children }) {
     setTenants([])
   }
 
-  const hasRole  = (role) => user?.roles?.some(r => r.name === role) ?? false
+  const hasRole  = (role) => user?.roles?.some(r => (typeof r === 'string' ? r : r.name) === role) ?? false
   const isAdmin  = ()     => hasRole('admin') || hasRole('super_admin')
   const isSuperAdmin = () => hasRole('super_admin')
+
+  // Checkt of de ingelogde gebruiker een specifieke permission heeft.
+  // Probeert eerst de permissions-array op de rol-objecten (als backend die meegeeft),
+  // valt terug op rol-naam: super_admin en tenant_admin hebben altijd alle rechten.
+  const hasPermission = (permName) => {
+    if (!user) return false
+    if (isSuperAdmin()) return true
+    const roles = user.roles ?? []
+    // Als rollen als objecten komen met permissions-array
+    for (const r of roles) {
+      if (typeof r === 'object' && Array.isArray(r.permissions)) {
+        if (r.permissions.some(p => (typeof p === 'string' ? p : p.name) === permName)) return true
+      }
+    }
+    // Fallback: tenant_admin krijgt sync-rechten standaard (zoals backend seeder doet)
+    if (permName.endsWith('.sync') || permName.endsWith('.refresh')) {
+      return hasRole('tenant_admin') || hasRole('planner')
+    }
+    return false
+  }
 
   return (
     <AuthContext.Provider value={{
       user, loading,
       tenants, activeTenant, setActiveTenant,
-      login, logout, hasRole, isAdmin, isSuperAdmin,
+      login, logout, refreshUser, hasRole, hasPermission, isAdmin, isSuperAdmin,
     }}>
       {children}
     </AuthContext.Provider>

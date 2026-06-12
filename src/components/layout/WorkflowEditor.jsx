@@ -1,62 +1,48 @@
 import { useState } from 'react'
-import {
-  X, Plus, Trash2, ChevronDown, ChevronUp,
-  Users, Calendar, MessageCircle, Database,
-  Mail, Clock, Save, Zap, GripVertical
-} from 'lucide-react'
-
-const MODULE_META = {
-  candidate_filter: { label: 'Kandidaten Filter', Icon: Users,         color: '#534AB7', bg: '#EEEDFE' },
-  shift_fetcher:    { label: 'Diensten Ophalen',  Icon: Calendar,      color: '#0F6E56', bg: '#E1F5EE' },
-  whatsapp_send:    { label: 'WhatsApp Sturen',   Icon: MessageCircle, color: '#3B6D11', bg: '#EAF3DE' },
-  database_update:  { label: 'Database Updaten',  Icon: Database,      color: '#185FA5', bg: '#E6F1FB' },
-  email_send:       { label: 'E-mail Sturen',     Icon: Mail,          color: '#854F0B', bg: '#FAEEDA' },
-  delay:            { label: 'Wachttijd',          Icon: Clock,         color: '#5F5E5A', bg: '#F1EFE8' },
-}
-
-const MODULE_SCHEMAS = {
-  candidate_filter: [
-    { key: 'status',                label: 'Status',                 type: 'select',      options: ['actief','inactief','alle'] },
-    { key: 'pools',                 label: 'Pools',                  type: 'multiselect', options: ['Pool 7','Pool 8','Pool 9','Pool 10','Pool ZZP'] },
-    { key: 'days_since_last_shift', label: 'Dagen zonder dienst',    type: 'number',      placeholder: '30' },
-    { key: 'features',              label: 'Vaardigheden',           type: 'multiselect', options: ['BHV','Nachtdienst','Gastouder','Verzorging IG'] },
-    { key: 'limit',                 label: 'Max. kandidaten',        type: 'number',      placeholder: '100' },
-  ],
-  shift_fetcher: [
-    { key: 'connection_id',       label: 'Planning systeem',        type: 'select',  options: ['ShiftManager (Yesway)','Intus','SDB'] },
-    { key: 'hours_ahead',         label: 'Uren vooruit',            type: 'number',  placeholder: '72' },
-    { key: 'min_hours_available', label: 'Min. uur beschikbaar',    type: 'number',  placeholder: '36' },
-  ],
-  whatsapp_send: [
-    { key: 'message_type',        label: 'Berichttype',             type: 'select',  options: ['template','flow'] },
-    { key: 'phone_number_id',     label: 'Afzender',                type: 'select',  options: ['085 020 5160 (Yesway)','085 020 5161 (Yesway 2)'] },
-    { key: 'template_name',       label: 'Template naam',           type: 'text',    placeholder: 'geen_reactie_shiftmanager' },
-    { key: 'update_conversation', label: 'Gespreksstatus updaten',  type: 'boolean' },
-    { key: 'throttle_per_minute', label: 'Max. per minuut',         type: 'number',  placeholder: '30' },
-  ],
-  database_update: [
-    { key: 'model',               label: 'Model',                   type: 'select',  options: ['Candidate','Conversation','Message'] },
-    { key: 'set_status',          label: 'Zet status naar',         type: 'text',    placeholder: 'AWAITING_SHIFTS_OFFERED' },
-    { key: 'set_last_contacted',  label: 'Zet last_contacted = nu', type: 'boolean' },
-  ],
-  email_send: [
-    { key: 'to',       label: 'Aan',        type: 'text',   placeholder: 'flex@yesway.nu' },
-    { key: 'subject',  label: 'Onderwerp',  type: 'text',   placeholder: 'Dienst overzicht' },
-    { key: 'template', label: 'Template',   type: 'select', options: ['shift_summary','no_response_report','daily_overview'] },
-  ],
-  delay: [
-    { key: 'hours',         label: 'Wachten (uren)',    type: 'number',  placeholder: '24' },
-    { key: 'skip_weekends', label: 'Weekend overslaan', type: 'boolean' },
-  ],
-}
-
-const TRIGGER_OPTIONS = [
-  'Dagelijks 07:00','Dagelijks 08:00','Dagelijks 09:00',
-  'Dagelijks 10:00','Dagelijks 12:00','Elk uur',
-  'Maandag 07:00','Handmatig',
-]
+import { X, Plus, Trash2, ChevronDown, ChevronUp, Save, Zap, GripVertical } from 'lucide-react'
+import ScheduleSettings, { scheduleLabel } from '../workflows/ScheduleSettings'
+import { MODULE_META, MODULE_SCHEMAS } from '../../modules/index'
 
 const uid = () => 'step_' + Math.random().toString(36).slice(2, 8)
+
+// ── Route module picker ───────────────────────────────────────────────────────
+
+function RouteModulePicker({ onAdd }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setOpen(o => !o)}
+        className="flex items-center gap-1.5 text-xs rounded-lg w-full py-1.5 px-2"
+        style={{ border: '1px dashed #E5E7EB', background: 'none', cursor: 'pointer', color: '#9CA3AF' }}
+        onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)' }}
+        onMouseLeave={e => { e.currentTarget.style.borderColor = '#E5E7EB'; e.currentTarget.style.color = '#9CA3AF' }}>
+        <Plus size={11} /> Actie toevoegen
+      </button>
+      {open && (
+        <div className="absolute left-0 z-50 overflow-hidden bg-white rounded-xl"
+          style={{ top: '100%', marginTop: 4, width: 220, boxShadow: '0 4px 20px rgba(0,0,0,0.12)', border: '1px solid #E5E7EB' }}>
+          {Object.entries(MODULE_META).map(([type, meta]) => {
+            const Icon = meta.Icon
+            return (
+              <button key={type} type="button"
+                onClick={() => { onAdd(type); setOpen(false) }}
+                className="flex items-center gap-2.5 w-full px-3 py-2 text-left"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', borderBottom: '1px solid #F9FAFB' }}
+                onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+                <div className="flex items-center justify-center flex-shrink-0 rounded-md"
+                  style={{ width: 24, height: 24, background: meta.bg }}>
+                  <Icon size={12} color={meta.color} />
+                </div>
+                <span className="text-xs font-medium text-gray-700">{meta.label}</span>
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
 
 // ── Veld renderers ─────────────────────────────────────────────────────────────
 
@@ -108,6 +94,105 @@ function FieldInput({ field, value, onChange }) {
         <option value="">Selecteer...</option>
         {field.options.map(o => <option key={o} value={o}>{o}</option>)}
       </select>
+    )
+  }
+
+  if (field.type === 'routes') {
+    const routes    = Array.isArray(value) ? value : []
+    const OPERATORS = ['gelijk aan', 'niet gelijk aan', 'bevat', 'groter dan', 'kleiner dan', 'bestaat']
+    const ALL_MODULES = Object.entries(MODULE_META)
+    const setRoutes  = (next) => onChange(field.key, next)
+    const addRoute   = () => setRoutes([...routes, { name: `Route ${routes.length + 1}`, field: '', operator: 'gelijk aan', value: '', steps: [] }])
+    const delRoute   = (i) => setRoutes(routes.filter((_, j) => j !== i))
+    const updRoute   = (i, key, val) => setRoutes(routes.map((r, j) => j === i ? { ...r, [key]: val } : r))
+    const addStep    = (i, type) => updRoute(i, 'steps', [...(routes[i].steps || []), { id: uid(), type, config: {} }])
+    const delStep    = (i, si)   => updRoute(i, 'steps', (routes[i].steps || []).filter((_, j) => j !== si))
+
+    return (
+      <div className="flex flex-col gap-3">
+        {routes.map((route, i) => (
+          <div key={i} className="rounded-xl overflow-hidden" style={{ border: '1px solid #E5E7EB' }}>
+
+            {/* Route header */}
+            <div className="flex items-center justify-between px-3 py-2" style={{ background: '#F9FAFB', borderBottom: '1px solid #E5E7EB' }}>
+              <input
+                value={route.name}
+                onChange={e => updRoute(i, 'name', e.target.value)}
+                className="text-xs font-semibold text-gray-700 bg-transparent outline-none border-none flex-1"
+                placeholder={`Route ${i + 1}`}
+              />
+              <button type="button" onClick={() => delRoute(i)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB' }}
+                onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+                onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}>
+                <Trash2 size={12} />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-3 p-3">
+              {/* Conditie */}
+              <div>
+                <div className="text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide">Conditie</div>
+                <div className="flex gap-2 flex-wrap">
+                  <input value={route.field} onChange={e => updRoute(i, 'field', e.target.value)}
+                    placeholder="Veld (bijv. action)"
+                    className="text-xs rounded-md"
+                    style={{ padding: '5px 8px', border: '1px solid #E5E7EB', outline: 'none', flex: 1, minWidth: 80 }}
+                    onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
+                    onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+                  <select value={route.operator} onChange={e => updRoute(i, 'operator', e.target.value)}
+                    className="text-xs rounded-md"
+                    style={{ padding: '5px 8px', border: '1px solid #E5E7EB', background: 'white', outline: 'none' }}>
+                    {OPERATORS.map(o => <option key={o}>{o}</option>)}
+                  </select>
+                  {route.operator !== 'bestaat' && (
+                    <input value={route.value} onChange={e => updRoute(i, 'value', e.target.value)}
+                      placeholder="Waarde (bijv. RESPOND)"
+                      className="text-xs rounded-md"
+                      style={{ padding: '5px 8px', border: '1px solid #E5E7EB', outline: 'none', flex: 1, minWidth: 80 }}
+                      onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
+                      onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+                  )}
+                </div>
+              </div>
+
+              {/* Stappen van deze route */}
+              <div>
+                <div className="text-xs font-medium text-gray-400 mb-1.5 uppercase tracking-wide">Acties</div>
+                <div className="flex flex-col gap-1.5">
+                  {(route.steps || []).map((step, si) => {
+                    const meta = MODULE_META[step.type]
+                    if (!meta) return null
+                    const Icon = meta.Icon
+                    return (
+                      <div key={step.id} className="flex items-center gap-2 rounded-lg px-2.5 py-2"
+                        style={{ background: meta.bg, border: `1px solid ${meta.color}20` }}>
+                        <Icon size={12} color={meta.color} />
+                        <span className="text-xs font-medium flex-1" style={{ color: meta.color }}>{meta.label}</span>
+                        <button type="button" onClick={() => delStep(i, si)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: `${meta.color}60` }}
+                          onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+                          onMouseLeave={e => (e.currentTarget.style.color = `${meta.color}60`)}>
+                          <Trash2 size={11} />
+                        </button>
+                      </div>
+                    )
+                  })}
+
+                  {/* Module picker inline */}
+                  <RouteModulePicker onAdd={(type) => addStep(i, type)} />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <button type="button" onClick={addRoute}
+          className="flex items-center gap-2 text-xs font-medium py-2"
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)' }}>
+          <Plus size={12} /> Route toevoegen
+        </button>
+      </div>
     )
   }
 
@@ -252,9 +337,11 @@ export default function WorkflowEditor({ workflow, onClose, onSave }) {
   const [steps,       setSteps]       = useState(
     workflow.steps.map(s => ({ ...s, id: uid(), config: { ...s.config } }))
   )
-  const [expandedId,  setExpandedId]  = useState(steps[0]?.id || null)
-  const [showPicker,  setShowPicker]  = useState(false)
-  const [saved,       setSaved]       = useState(false)
+  const [expandedId,    setExpandedId]    = useState(steps[0]?.id || null)
+  const [showPicker,    setShowPicker]    = useState(false)
+  const [saved,         setSaved]         = useState(false)
+  const [showSchedule,  setShowSchedule]  = useState(false)
+  const [schedule,      setSchedule]      = useState(workflow.schedule || null)
 
   // Drag state
   const [draggedId,   setDraggedId]   = useState(null)
@@ -311,7 +398,7 @@ export default function WorkflowEditor({ workflow, onClose, onSave }) {
   // ── Save ──────────────────────────────────────────────────────────────────────
 
   const handleSave = () => {
-    onSave({ ...workflow, name, trigger, steps })
+    onSave({ ...workflow, name, trigger, schedule, steps })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
   }
@@ -357,14 +444,20 @@ export default function WorkflowEditor({ workflow, onClose, onSave }) {
               onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
           </div>
 
-          {/* Trigger */}
+          {/* Schedule */}
           <div>
-            <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Trigger</label>
-            <select value={trigger} onChange={e => setTrigger(e.target.value)}
-              className="w-full text-sm text-gray-800 rounded-lg"
-              style={{ padding: '9px 11px', border: '1px solid #E5E7EB', background: 'white', outline: 'none' }}>
-              {TRIGGER_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
+            <label className="block text-xs font-medium text-gray-500 mb-1.5 uppercase tracking-wide">Inplannen</label>
+            <button type="button" onClick={() => setShowSchedule(true)}
+              className="flex items-center justify-between w-full text-sm text-gray-800 rounded-lg"
+              style={{ padding: '9px 11px', border: '1px solid #E5E7EB', background: 'white', cursor: 'pointer', textAlign: 'left' }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--color-primary)')}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = '#E5E7EB')}>
+              <div className="flex items-center gap-2">
+                <Clock size={13} color="#9CA3AF" />
+                <span>{scheduleLabel(schedule)}</span>
+              </div>
+              <ChevronDown size={14} color="#9CA3AF" />
+            </button>
           </div>
 
           {/* Stappen */}
@@ -423,6 +516,14 @@ export default function WorkflowEditor({ workflow, onClose, onSave }) {
           </button>
         </div>
       </div>
+
+      {showSchedule && (
+        <ScheduleSettings
+          value={schedule}
+          onChange={setSchedule}
+          onClose={() => setShowSchedule(false)}
+        />
+      )}
     </>
   )
 }

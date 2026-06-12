@@ -16,8 +16,16 @@ function BarTooltip({ active, payload, label, total, showPercent }) {
 }
 
 export default function BarChartCard({ title, data = [], colors = [], showPercent = false, height = 220, onBarClick, showAverage = false }) {
-  const total   = data.reduce((s, d) => s + d.value, 0)
-  const average = data.length ? Math.round(total / data.length) : 0
+  const rawTotal   = data.reduce((s, d) => s + d.value, 0)
+  const rawAverage = data.length ? Math.round(rawTotal / data.length) : 0
+
+  // Bij percentages: balken tonen als % van totaal; gemiddelde ook omrekenen
+  const displayData = showPercent && rawTotal > 0
+    ? data.map(d => ({ ...d, value: +((d.value / rawTotal) * 100).toFixed(1) }))
+    : data
+  const displayAverage = showPercent && rawTotal > 0
+    ? +((rawAverage / rawTotal) * 100).toFixed(1)
+    : rawAverage
 
   if (!data.length) {
     return (
@@ -33,10 +41,10 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="text-sm font-medium text-gray-600">{title}</div>
-          {showAverage && average > 0 && (
+          {showAverage && displayAverage > 0 && (
             <div className="flex items-center gap-1.5 text-xs" style={{ color: '#534AB7' }}>
               <div style={{ width: 16, borderTop: '2px dashed #534AB7' }} />
-              gem. {average}
+              gem. {displayAverage}{showPercent ? '%' : ''}
             </div>
           )}
         </div>
@@ -44,19 +52,24 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
       </div>
 
       <ResponsiveContainer width="100%" height={height}>
-        <BarChart data={data} margin={{ top: 4, right: showAverage ? 50 : 8, left: -20, bottom: 60 }}>
+        <BarChart data={displayData} margin={{ top: 4, right: showAverage ? 50 : 8, left: -20, bottom: 60 }}>
           <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#9CA3AF' }}
             angle={-35} textAnchor="end" interval={0} />
-          <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} allowDecimals={false} />
-          <Tooltip content={<BarTooltip total={total} showPercent={showPercent} />} />
+          <YAxis
+            tick={{ fontSize: 10, fill: '#9CA3AF' }}
+            allowDecimals={showPercent}
+            tickFormatter={v => showPercent ? `${v}%` : v}
+            domain={showPercent ? [0, 100] : undefined}
+          />
+          <Tooltip content={<BarTooltip total={rawTotal} showPercent={showPercent} />} />
 
-          {showAverage && average > 0 && (
+          {showAverage && displayAverage > 0 && (
             <ReferenceLine
-              y={average}
+              y={displayAverage}
               stroke="#534AB7"
               strokeDasharray="4 4"
               strokeWidth={1.5}
-              label={{ value: `${average}`, position: 'right', fontSize: 10, fill: '#534AB7' }}
+              label={{ value: `${displayAverage}${showPercent ? '%' : ''}`, position: 'right', fontSize: 10, fill: '#534AB7' }}
             />
           )}
 
@@ -64,7 +77,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
             dataKey="value"
             radius={[4, 4, 0, 0]}
             cursor={onBarClick ? 'pointer' : 'default'}
-            onClick={(data) => onBarClick && onBarClick(data)}
+            onClick={(_, idx) => onBarClick && onBarClick(data[idx])}
           >
             {data.map((_, i) => (
               <Cell key={i} fill={colors[i % colors.length] || '#534AB7'} />
@@ -75,7 +88,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
 
       <div className="flex justify-center mt-2">
         <span style={{ fontSize: 11, color: '#9CA3AF' }}>
-          Totaal: <strong style={{ color: '#374151' }}>{total}</strong>
+          Totaal: <strong style={{ color: '#374151' }}>{rawTotal}</strong>
         </span>
       </div>
     </div>

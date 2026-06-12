@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import api from '../lib/api'
 import {
   Zap, Users, Calendar, MessageCircle, Database,
   Mail, Clock, Play, Plus, MoreHorizontal,
   CheckCircle, AlertCircle, Loader2
 } from 'lucide-react'
-import WorkflowEditor from '../components/layout/WorkflowEditor'
+import WorkflowCanvasEditor from '../components/layout/WorkflowCanvasEditor'
 
 const MODULE_META = {
   candidate_filter: { label: 'Kandidaten Filter', Icon: Users,         color: '#534AB7', bg: '#EEEDFE' },
@@ -180,18 +181,108 @@ function WorkflowCard({ workflow, onRun, onEdit }) {
   )
 }
 
+// Vertaal backend formaat → frontend formaat
+function normalizeWorkflow(wf) {
+  // trigger: string samengesteld uit trigger_type + trigger_config, of al een string
+  const trigger = typeof wf.trigger === 'string'
+    ? wf.trigger
+    : wf.trigger_type ?? 'Handmatig'
+
+  // status: active boolean → string
+  const status = typeof wf.status === 'string'
+    ? wf.status
+    : (wf.active ? 'active' : 'inactive')
+
+  // steps: altijd normaliseren naar { id, type, config, position }
+  const rawSteps = Array.isArray(wf.steps) ? wf.steps : (wf.workflow_steps ?? [])
+  const steps = rawSteps.map(s => ({
+    id:       s.id ? String(s.id) : undefined,
+    type:     s.module_type ?? s.type,
+    config:   s.config ?? s.parameters ?? {},
+    position: s.position ?? undefined,
+  }))
+
+  // last_run: uit laatste WorkflowRun of direct
+  const lastRun = wf.last_run ?? (wf.latest_run
+    ? { time: wf.latest_run.created_at, ok: wf.latest_run.status === 'success' }
+    : null)
+
+  return { ...wf, trigger, status, steps, last_run: lastRun }
+}
+
+// Vertaal frontend trigger string → trigger_type + trigger_config
+function parseTrigger(trigger) {
+  if (!trigger || trigger === 'Handmatig') return { trigger_type: 'manual', trigger_config: {} }
+  if (trigger.toLowerCase().includes('webhook')) return { trigger_type: 'webhook', trigger_config: {} }
+  // "Dagelijks 08:00", "Elk uur", "Maandag 07:00" → scheduled
+  const timeMatch = trigger.match(/(\d{2}:\d{2})/)
+  return {
+    trigger_type: 'scheduled',
+    trigger_config: { schedule_label: trigger, schedule_time: timeMatch?.[1] ?? '09:00' },
+  }
+}
+
+// Vertaal frontend formaat → backend formaat voor opslaan
+function denormalizeWorkflow(wf) {
+  const { trigger_type, trigger_config } = parseTrigger(wf.trigger)
+  return {
+    name:           wf.name,
+    trigger_type,
+    trigger_config: wf.schedule ? { ...trigger_config, schedule: wf.schedule } : trigger_config,
+    active:         wf.status === 'active',
+    status:         wf.status ?? 'draft',
+    steps:          (wf.steps ?? []).map((s, i) => ({
+      module_type: s.type,
+      config:      s.config ?? {},
+      label:       s.label ?? null,
+      order:       i,
+    })),
+  }
+}
+
 export default function WorkflowsPage() {
-  const [workflows, setWorkflows]       = useState(MOCK_WORKFLOWS)
+  const [workflows, setWorkflows]       = useState([])
+  const [loading,   setLoading]         = useState(true)
   const [editingWorkflow, setEditingWorkflow] = useState(null)
 
+  useEffect(() => {
+    api.get('/workflows')
+      .then(res => {
+        const raw = res.data?.data ?? res.data ?? []
+        setWorkflows(raw.map(normalizeWorkflow))
+      })
+      .catch(() => setWorkflows(MOCK_WORKFLOWS))
+      .finally(() => setLoading(false))
+  }, [])
+
   const handleRun = async (id) => {
-    console.log('Workflow uitvoeren:', id)
-    return new Promise(r => setTimeout(r, 1500))
+    // probeer /run, fallback naar /execute
+    await api.post(`/workflows/${id}/run`)
+      .catch(() => api.post(`/workflows/${id}/execute`))
+      .catch(() => {})
   }
 
-  const handleSave = (updated) => {
-    setWorkflows(prev => prev.map(w => w.id === updated.id ? updated : w))
-    setEditingWorkflow(null)
+  const handleSave = async (updated) => {
+    if (!updated.steps || updated.steps.length === 0) {
+      alert('Voeg minimaal één module toe aan de workflow voordat je opslaat.')
+      return
+    }
+    const isNew = !updated.id || !workflows.some(w => w.id === updated.id)
+    const payload = denormalizeWorkflow(updated)
+    try {
+      const res = isNew
+        ? await api.post('/workflows', payload)
+        : await api.put(`/workflows/${updated.id}`, payload)
+      const saved = normalizeWorkflow(res.data?.data ?? res.data)
+      setWorkflows(prev => isNew
+        ? [...prev, saved]
+        : prev.map(w => w.id === saved.id ? saved : w)
+      )
+      setEditingWorkflow(null)
+    } catch (err) {
+      const detail = err.response?.data
+      alert(`Opslaan mislukt: ${detail?.message ?? err.message}`)
+    }
   }
 
   return (
@@ -202,12 +293,12 @@ export default function WorkflowsPage() {
           <p className="text-sm text-gray-400 mt-0.5">{workflows.length} werkstromen actief</p>
         </div>
         <button
-          onClick={() => setEditingWorkflow({ id: Date.now(), name: 'Nieuwe werkstroom', trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [] })}
+          onClick={() => setEditingWorkflow({ name: 'Nieuwe Workflow', trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [] })}
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white rounded-lg"
           style={{ background: 'var(--color-primary)', border: 'none', cursor: 'pointer' }}
         >
           <Plus size={15} />
-          Nieuwe werkstroom
+          Nieuwe Workflow
         </button>
       </div>
 
@@ -223,7 +314,7 @@ export default function WorkflowsPage() {
       </div>
 
       {editingWorkflow && (
-        <WorkflowEditor
+        <WorkflowCanvasEditor
           workflow={editingWorkflow}
           onClose={() => setEditingWorkflow(null)}
           onSave={handleSave}

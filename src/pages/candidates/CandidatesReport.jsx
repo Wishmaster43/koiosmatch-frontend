@@ -1,4 +1,4 @@
-import CandidateStatusAnalysis from "../../components/reports/CandidateReport";
+import CandidatesReport from "../../components/reports/CandidatesReport";
 
 function ComingSoon({ label }) {
   return (
@@ -12,7 +12,7 @@ function ComingSoon({ label }) {
 export default function Reports({ initialTab = 'candidates' }) {
   const renderTab = () => {
     switch (initialTab) {
-      case 'candidates': return <CandidateStatusAnalysis />
+      case 'candidates': return <CandidatesReport />
       default:           return <ComingSoon label={initialTab} />
     }
   }

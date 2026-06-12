@@ -1,0 +1,56 @@
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+
+export const PAGE_SIZE_OPTIONS = [50, 100, 200, 300, 400, 500]
+
+export default function PaginationBar({ page, totalPages, totalRows, pageSize, onPageChange, onPageSizeChange }) {
+  const from = totalRows === 0 ? 0 : (page - 1) * pageSize + 1
+  const to   = Math.min(page * pageSize, totalRows)
+
+  const btn = (onClick, disabled, children, title) => (
+    <button onClick={onClick} disabled={disabled} title={title} style={{
+      width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
+      color: disabled ? 'var(--border)' : 'var(--text-muted)', cursor: disabled ? 'default' : 'pointer',
+      transition: 'all 0.1s',
+    }}>
+      {children}
+    </button>
+  )
+
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '10px 14px', borderTop: '1px solid var(--border)',
+      background: 'var(--surface)', flexShrink: 0,
+    }}>
+      {/* Rijen-info */}
+      <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+        {totalRows === 0 ? 'Geen resultaten' : `${from}–${to} van ${totalRows}`}
+      </span>
+
+      {/* Navigatie */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        {btn(() => onPageChange(1),         page <= 1,          <ChevronsLeft  size={13} />, 'Eerste pagina')}
+        {btn(() => onPageChange(page - 1),  page <= 1,          <ChevronLeft   size={13} />, 'Vorige pagina')}
+        <span style={{ fontSize: 12, color: 'var(--text)', padding: '0 8px', whiteSpace: 'nowrap' }}>
+          {page} / {totalPages || 1}
+        </span>
+        {btn(() => onPageChange(page + 1),  page >= totalPages, <ChevronRight  size={13} />, 'Volgende pagina')}
+        {btn(() => onPageChange(totalPages), page >= totalPages, <ChevronsRight size={13} />, 'Laatste pagina')}
+      </div>
+
+      {/* Rijen per pagina */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Rijen per pagina</span>
+        <select value={pageSize} onChange={e => onPageSizeChange(Number(e.target.value))}
+          style={{
+            fontSize: 12, padding: '3px 6px', borderRadius: 6,
+            border: '1px solid var(--border)', background: 'var(--surface)',
+            color: 'var(--text)', cursor: 'pointer', outline: 'none',
+          }}>
+          {PAGE_SIZE_OPTIONS.map(n => <option key={n} value={n}>{n}</option>)}
+        </select>
+      </div>
+    </div>
+  )
+}

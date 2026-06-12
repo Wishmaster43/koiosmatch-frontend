@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import {
   LayoutDashboard, Zap, Users, Building2, MapPin, Layers,
-  MessageCircle, Table2, Settings, Palette,
+  MessageCircle, Table2, Settings,
   ChevronLeft, ChevronRight, ChevronDown,
 } from 'lucide-react'
 
@@ -109,6 +109,7 @@ const NAV_ITEMS = [
       { id: 'details.customers',   label: 'Klanten' },
       { id: 'details.locations',   label: 'Locaties' },
       { id: 'details.departments', label: 'Afdelingen' },
+      { id: 'details.contacts',    label: 'Contactpersonen' },
       { id: 'details.orders',      label: 'Diensten' },
       { id: 'details.runs',        label: 'Uitvoeringen' },
       { id: 'details.messages',    label: 'Berichten' },
@@ -230,7 +231,7 @@ export default function Sidebar({ expanded, setExpanded, activePage, setActivePa
           {expanded && (
             <span className="font-mono font-semibold tracking-wide"
               style={{ fontSize: 13, color: 'var(--sidebar-text)' }}>
-              koios
+              koios Connect
             </span>
           )}
         </div>
@@ -260,9 +261,6 @@ export default function Sidebar({ expanded, setExpanded, activePage, setActivePa
         <NavItem item={{ id: 'settings', label: 'Instellingen', icon: Settings }}
           activePage={activePage} expanded={expanded}
           openItems={openItems} toggleOpen={toggleOpen} onNavigate={setActivePage} />
-        <NavItem item={{ id: 'theme', label: 'Huisstijl', icon: Palette }}
-          activePage={activePage} expanded={expanded}
-          openItems={openItems} toggleOpen={toggleOpen} onNavigate={onTheme} />
       </div>
     </div>
   )

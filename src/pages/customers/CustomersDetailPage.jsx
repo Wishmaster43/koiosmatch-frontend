@@ -1,1 +1,9 @@
-export default function CustomersDetailPage() { return <div className="flex items-center justify-center h-full"><p className="font-mono text-sm text-gray-400">Details — Klanten · komt eraan</p></div> }
+import CustomersTable from '../../components/reports/CustomersTable'
+
+export default function CustomersDetailPage() {
+  return (
+    <div className="flex flex-col h-full p-6">
+      <CustomersTable />
+    </div>
+  )
+}

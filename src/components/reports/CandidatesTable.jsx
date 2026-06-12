@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
-import { Search, SlidersHorizontal, ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
-import ReportFilterSidebar from './ReportFilterSidebar'
+import { useState, useEffect, useMemo } from 'react'
+import { Search, ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
 import CandidateDetailDrawer from './CandidateDetailDrawer'
+import { useRightPanel }     from '../../context/RightPanelContext'
 
 function StatusBadge({ status }) {
   const styles = {
@@ -142,7 +142,7 @@ function SortIcon({ active, dir }) {
 
 export default function CandidatesTable({ candidates = [], loading = false }) {
   const [search, setSearch]                       = useState('')
-  const [filterOpen, setFilterOpen]               = useState(false)
+  const { registerFilters, unregisterFilters }    = useRightPanel()
   const [selectedYears, setSelectedYears]         = useState([])
   const [selectedStatuses, setSelectedStatuses]   = useState(['actief'])
   const [selectedPositions, setSelectedPositions] = useState([])
@@ -166,12 +166,12 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
     return [...new Set(ys)].sort((a, b) => b - a)
   }, [candidates])
 
-const kenmerkOptions = useMemo(() => {
-  const all = candidates.flatMap(c =>
-    Array.isArray(c.features) ? c.features.map(f => f.name).filter(Boolean) : []
-  )
-  return [...new Set(all)].sort()
-}, [candidates])
+  const kenmerkOptions = useMemo(() => {
+    const all = candidates.flatMap(c =>
+      Array.isArray(c.features) ? c.features.map(f => f.name).filter(Boolean) : []
+    )
+    return [...new Set(all)].sort()
+  }, [candidates])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
@@ -206,7 +206,7 @@ const kenmerkOptions = useMemo(() => {
       ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
       : { key, dir: 'asc' })
 
-  const filterGroups = [
+  const filterGroups = useMemo(() => [
     { key: 'jaar', label: 'Registratiejaar',
       options: yearOptions.map(y => ({ value: y, label: String(y) })),
       selected: selectedYears, onToggle: toggle(setSelectedYears) },
@@ -219,11 +219,14 @@ const kenmerkOptions = useMemo(() => {
     { key: 'kenmerken', label: 'Kenmerken',
       options: kenmerkOptions.map(k => ({ value: k, label: k })),
       selected: selectedKenmerken, onToggle: toggle(setSelectedKenmerken) },
-  ]
+  ], [yearOptions, statusOptions, positionOptions, kenmerkOptions,
+      selectedYears, selectedStatuses, selectedPositions, selectedKenmerken])
 
-  const activeCount =
-    selectedYears.length + selectedStatuses.length +
-    selectedPositions.length + selectedKenmerken.length
+  useEffect(() => {
+    registerFilters('candidates-table', filterGroups)
+    return () => unregisterFilters('candidates-table')
+  }, [filterGroups, registerFilters, unregisterFilters])
+
 
   return (
     <div className="flex flex-col h-full">
@@ -244,21 +247,6 @@ const kenmerkOptions = useMemo(() => {
               style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
                        border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
           </div>
-          <button onClick={() => setFilterOpen(o => !o)}
-            className="inline-flex items-center gap-2 rounded-lg"
-            style={{ height: 34, padding: '0 12px', fontSize: 13, fontWeight: 500,
-                     border: `1px solid ${filterOpen ? 'var(--color-primary)' : '#E5E7EB'}`,
-                     background: filterOpen ? 'var(--color-primary-bg)' : '#fff',
-                     color: filterOpen ? 'var(--color-primary)' : '#374151', cursor: 'pointer' }}>
-            <SlidersHorizontal size={14} />
-            Filters
-            {activeCount > 0 && (
-              <span style={{ background: 'var(--color-primary)', color: '#fff', borderRadius: 999,
-                             fontSize: 11, fontWeight: 600, padding: '1px 6px' }}>
-                {activeCount}
-              </span>
-            )}
-          </button>
         </div>
       </div>
 
@@ -321,10 +309,6 @@ const kenmerkOptions = useMemo(() => {
           )}
         </div>
 
-        {filterOpen && (
-          <ReportFilterSidebar title="Filters" groups={filterGroups}
-            onClose={() => setFilterOpen(false)} />
-        )}
       </div>
 
       {detail && (

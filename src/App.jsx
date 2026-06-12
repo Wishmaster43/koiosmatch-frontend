@@ -16,11 +16,23 @@ import Dashboard              from './pages/Dashboard'
 import WorkflowsPage          from './pages/Workflows'
 import Sidebar                from './components/layout/Sidebar'
 import ReportFilterSidebar    from './components/reports/ReportFilterSidebar'
-import CandidateReport        from './pages/candidates/CandidateReport'
+import CandidatesReport        from './pages/candidates/CandidatesReport'
 import CandidatesDetailPage   from './pages/candidates/CandidatesDetailPage'
+import CustomerReport        from './pages/customers/CustomersReport'
+
 import CustomersDetailPage    from './pages/customers/CustomersDetailPage'
+import OrdersReport           from './pages/OrdersReport'
+import SettingsPage           from './pages/SettingsPage'
 import LocationsDetailPage    from './pages/locations/LocationsDetailPage'
+import LocationsReport        from './pages/locations/LocationsReport'
 import DepartmentsDetailPage  from './pages/departments/DepartmentsDetailPage'
+import DepartmentsReport      from './pages/departments/DepartmentsReport'
+import ContactsDetailPage     from './pages/contacts/ContactsDetailPage'
+import ProfilePage            from './pages/ProfilePage'
+import UsersPage              from './pages/UsersPage'
+import RunsDetailPage         from './pages/details/RunsDetailPage'
+import MessagesDetailPage     from './pages/details/MessagesDetailPage'
+import { ThemeProvider }      from './context/ThemeContext'
 
 // Mapping van route-sleutel naar leesbare paginatitel
 const PAGE_TITLES = {
@@ -36,6 +48,7 @@ const PAGE_TITLES = {
   'details.locations':    'Details — Locaties',
   'details.departments':  'Details — Afdelingen',
   'details.orders':       'Details — Diensten',
+  'details.contacts':     'Details — Contactpersonen',
   'details.runs':         'Details — Uitvoeringen',
   'details.messages':     'Details — Berichten',
   settings:               'Instellingen',
@@ -81,29 +94,34 @@ function DashboardLayout() {
   const { filterGroups }                    = useRightPanel()
 
   // Tenant-info uit user object (backend vult dit via /api/auth/me)
-  const tenant = user?.tenant ?? { name: user?.tenant_id ?? 'Koios', logo_url: null }
+  const tenant = user?.tenant ?? { name: user?.tenant_id ?? 'Koios Connect', logo_url: null }
   useTenantTheme(tenant)
 
   // Filterpanel-knop alleen tonen als huidige pagina filters heeft geregistreerd
-  const hasFilters = filterGroups.length > 0
+  const hasFilters    = filterGroups.length > 0
+  const activeFilters = filterGroups.reduce((sum, g) => sum + (g.selected?.length ?? 0), 0)
 
   // Rendert de juiste pagina-component op basis van activePage-sleutel
   const renderPage = () => {
     switch (activePage) {
       case 'dashboard':           return <Dashboard />
-      case 'candidates':          return <CandidateReport initialTab="candidates" />
-      case 'customers':           return <PlaceholderPage title="Klanten" />
-      case 'locations':           return <PlaceholderPage title="Locaties" />
-      case 'departments':         return <PlaceholderPage title="Afdelingen" />
+      case 'candidates':          return <CandidatesReport initialTab="candidates" />
+      case 'customers':           return <CustomerReport />
+      case 'locations':           return <LocationsReport />
+      case 'departments':         return <DepartmentsReport />
       case 'workflows':           return <WorkflowsPage />
       case 'whatsapp':            return <PlaceholderPage title="WhatsApp" />
       case 'details.candidates':  return <CandidatesDetailPage />
       case 'details.customers':   return <CustomersDetailPage />
       case 'details.locations':   return <LocationsDetailPage />
       case 'details.departments': return <DepartmentsDetailPage />
-      case 'details.orders':      return <PlaceholderPage title="Details — Diensten" />
-      case 'details.runs':        return <PlaceholderPage title="Details — Uitvoeringen" />
-      case 'details.messages':    return <PlaceholderPage title="Details — Berichten" />
+      case 'details.contacts':    return <ContactsDetailPage />
+      case 'details.orders':      return <OrdersReport />
+      case 'profile':             return <ProfilePage />
+      case 'users':               return <UsersPage />
+      case 'details.runs':        return <RunsDetailPage />
+      case 'details.messages':    return <MessagesDetailPage />
+      case 'settings':            return <SettingsPage />
       default:                    return <PlaceholderPage title={PAGE_TITLES[activePage] || activePage} />
     }
   }
@@ -121,12 +139,12 @@ function DashboardLayout() {
       />
 
       {/* ── Rechter kolom: topbar + content + filterpanel ── */}
-      <div className="flex flex-col flex-1 overflow-hidden" style={{ background: '#F5F5F7' }}>
+      <div className="kc-main-bg flex flex-col flex-1 overflow-hidden" style={{ background: 'var(--bg)' }}>
 
         {/* Topbar */}
         <div
-          className="flex items-center flex-shrink-0 gap-3 px-5"
-          style={{ height: 52, background: 'white', borderBottom: '1px solid #F3F4F6' }}
+          className="kc-topbar flex items-center flex-shrink-0 gap-3 px-5"
+          style={{ height: 52, background: 'var(--topbar-bg)', borderBottom: '1px solid var(--border)' }}
         >
           {/* Tenant logo of initiaal-avatar + naam */}
           <div className="flex items-center flex-shrink-0 gap-2">
@@ -146,19 +164,44 @@ function DashboardLayout() {
               )
             }
             <span className="font-semibold text-gray-900" style={{ fontSize: 13 }}>
-              {tenant?.name ?? 'Koios'}
+              {tenant?.name ?? 'Koios Connect'}
             </span>
           </div>
 
           {/* Broodkruimel-separator + paginatitel */}
-          <span style={{ color: '#D1D5DB', fontSize: 16 }}>›</span>
-          <span className="font-medium text-gray-600 truncate" style={{ fontSize: 13 }}>
+          <span style={{ color: 'var(--border)', fontSize: 16 }}>›</span>
+          <span className="font-medium truncate" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
             {PAGE_TITLES[activePage] || activePage}
           </span>
 
           {/* Rechter acties */}
           <div className="flex items-center flex-shrink-0 gap-2 ml-auto">
-            <span className="hidden text-xs text-gray-400 sm:block">{user?.name}</span>
+            {/* Avatar knop — navigeert naar profielpagina */}
+            {(() => {
+              const initials = (
+                [user?.firstname, user?.lastname].filter(Boolean).map(n => n[0]).join('').toUpperCase()
+                || (user?.name ?? '').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                || (user?.email ?? '').slice(0, 2).toUpperCase()
+                || '?'
+              )
+              return (
+                <button
+                  onClick={() => setActivePage('profile')}
+                  title={[user?.firstname, user?.lastname].filter(Boolean).join(' ') || user?.name || 'Profiel'}
+                  style={{
+                    width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
+                    background: activePage === 'profile' ? 'var(--color-primary)' : 'var(--color-primary-bg)',
+                    color: activePage === 'profile' ? 'white' : 'var(--color-primary)',
+                    border: `1.5px solid ${activePage === 'profile' ? 'var(--color-primary)' : 'transparent'}`,
+                    fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {initials}
+                </button>
+              )
+            })()}
 
             {/* Filterknop — alleen zichtbaar als pagina filters heeft geregistreerd */}
             {hasFilters && (
@@ -167,6 +210,7 @@ function DashboardLayout() {
                 title="Filters tonen/verbergen"
                 className="flex items-center justify-center transition-colors rounded-lg"
                 style={{
+                  position: 'relative',
                   width: 30, height: 30,
                   background: rightPanelOpen ? 'var(--color-primary-bg)' : '#F9FAFB',
                   border:     `1px solid ${rightPanelOpen ? 'var(--color-primary)' : '#E5E7EB'}`,
@@ -175,6 +219,18 @@ function DashboardLayout() {
                 }}
               >
                 <SlidersHorizontal size={14} />
+                {activeFilters > 0 && (
+                  <span style={{
+                    position: 'absolute', top: -5, right: -5,
+                    background: 'var(--color-primary)', color: '#fff',
+                    borderRadius: 999, fontSize: 10, fontWeight: 700,
+                    minWidth: 16, height: 16, display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                    padding: '0 4px', lineHeight: 1,
+                  }}>
+                    {activeFilters}
+                  </span>
+                )}
               </button>
             )}
 
@@ -197,8 +253,8 @@ function DashboardLayout() {
           {/* Rechter filterpanel — zelfde hoogte als content, schuift naast de pagina */}
           {rightPanelOpen && hasFilters && (
             <div
-              className="flex-shrink-0 overflow-y-auto bg-white"
-              style={{ width: 240, borderLeft: '1px solid #F3F4F6' }}
+              className="kc-right-panel flex-shrink-0 overflow-y-auto"
+              style={{ width: 240, borderLeft: '1px solid var(--border)', background: 'var(--surface)' }}
             >
               <ReportFilterSidebar
                 title="Filters"
@@ -242,6 +298,7 @@ function PublicRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <ThemeProvider>
       <AuthProvider>
         {/* RightPanelProvider binnen AuthProvider zodat componenten
             zowel auth als filterpanel context kunnen gebruiken */}
@@ -252,6 +309,7 @@ export default function App() {
           </Routes>
         </RightPanelProvider>
       </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }
