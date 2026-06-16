@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { X, Maximize2, Minimize2, Edit2, Plus, FileText, ChevronDown, ChevronUp, MoreHorizontal, GripVertical, Search, Check, Calendar, Eye, Pencil, Camera, Bold, Italic, List, ListOrdered, Heading2, Undo2, Redo2, AlignLeft, AlignCenter, AlignRight } from 'lucide-react'
+import { X, Maximize2, Minimize2, Edit2, Plus, FileText, ChevronDown, ChevronUp, MoreHorizontal, GripVertical, Search, Check, Calendar, Eye, Pencil, Camera, Bold, Italic, List, ListOrdered, Heading2, Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Download, MapPin, Clock } from 'lucide-react'
 import api from '../../lib/api'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -494,44 +494,291 @@ const TABS = [
   { id: 'achtergrond',   label: 'Achtergrond'  },
   { id: 'werk',          label: 'Werk'         },
   { id: 'planning',      label: 'Planning'     },
+  { id: 'voorkeuren',    label: 'Voorkeuren'   },
   { id: 'administratie', label: 'ZZP'          },
   { id: 'communicatie',  label: 'Communicatie' },
+  { id: 'statistieken',  label: 'Statistieken' },
 ]
 
 function PlaatsingenTab({ c }) {
-  const plaatsingen = c.plaatsingen ?? []
+  const [plaatsingen, setPlaatsingen] = useState(c.plaatsingen ?? [])
+  const [adding, setAdding] = useState(false)
+  const EMPTY = { klant: '', functie: '', schaal: '', trede: '', uurloon: '', uren_per_week: '', periode_van: '', periode_tot: '', contractsoort: '', contractduur: '' }
+
   return (
     <div style={sectionBlock}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <span style={sectionTitle}>Plaatsingen</span>
-        <button style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
-          <Plus size={11} /> Toevoegen
-        </button>
+        {!adding && (
+          <button onClick={() => setAdding(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+            <Plus size={11} /> Toevoegen
+          </button>
+        )}
       </div>
-      {plaatsingen.length === 0
-        ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Nog geen plaatsingen.</div>
-        : plaatsingen.map((p, i) => (
-          <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
-            <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{p.klant ?? '-'}</span>
-              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.periode ?? ''}</span>
-            </div>
-            {[
-              ['Functie', p.functie],
-              ['Schaal / Trede', p.schaal && p.trede ? `${p.schaal} / ${p.trede}` : (p.schaal ?? p.trede ?? '-')],
-              ['Uurloon', p.uurloon ? `€ ${p.uurloon}` : '-'],
-              ['Uren per week', p.uren_per_week ?? '-'],
-              ['Contractsoort', p.contractsoort ?? '-'],
-              ['Contractduur', p.contractduur ?? '-'],
-            ].map(([label, value]) => (
-              <div key={label} style={{ display: 'flex', padding: '7px 12px', borderBottom: '1px solid var(--border)', gap: 16, background: 'var(--surface)' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
-                <span style={{ fontSize: 12, color: 'var(--text)' }}>{value}</span>
-              </div>
-            ))}
+      {adding && (
+        <AddForm
+          fields={[
+            { key: 'klant',         label: 'Klant' },
+            { key: 'functie',       label: 'Functie' },
+            { key: 'schaal',        label: 'Schaal',        half: true },
+            { key: 'trede',         label: 'Trede',         half: true },
+            { key: 'uurloon',       label: 'Uurloon (€)',   half: true },
+            { key: 'uren_per_week', label: 'Uren p/w',      half: true },
+            { key: 'periode_van',   label: 'Startdatum',    separator: true, date: true },
+            { key: 'periode_tot',   label: 'Einddatum',     date: true },
+            { key: 'contractsoort', label: 'Contractsoort', half: true },
+            { key: 'contractduur',  label: 'Contractduur',  half: true },
+          ]}
+          onSave={v => { setPlaatsingen(p => [...p, v]); setAdding(false) }}
+          onCancel={() => setAdding(false)}
+        />
+      )}
+      {plaatsingen.length === 0 && !adding && (
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Nog geen plaatsingen.</div>
+      )}
+      {plaatsingen.map((p, i) => (
+        <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
+          <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{p.klant || '-'}</span>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              {p.periode_van && p.periode_tot ? `${p.periode_van} t/m ${p.periode_tot}` : (p.periode_van ?? '')}
+            </span>
           </div>
-        ))
-      }
+          {[
+            ['Functie',       p.functie       || '-'],
+            ['Schaal / Trede', p.schaal && p.trede ? `${p.schaal} / ${p.trede}` : (p.schaal || p.trede || '-')],
+            ['Uurloon',       p.uurloon       ? `€ ${p.uurloon}` : '-'],
+            ['Uren per week', p.uren_per_week || '-'],
+            ['Contractsoort', p.contractsoort || '-'],
+            ['Contractduur',  p.contractduur  || '-'],
+          ].map(([label, value]) => (
+            <div key={label} style={{ display: 'flex', padding: '7px 12px', borderBottom: '1px solid var(--border)', gap: 16, background: 'var(--surface)' }}>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
+              <span style={{ fontSize: 12, color: 'var(--text)' }}>{value}</span>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+const AGENDA_DIENSTEN = [
+  { date: '2026-06-16', start: 7,  end: 15, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6' },
+  { date: '2026-06-18', start: 13, end: 17, klant: 'Zorggroep West',   functie: 'Helpende Plus',  color: '#8B5CF6' },
+  { date: '2026-06-19', start: 8,  end: 12, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6' },
+  { date: '2026-06-20', start: 10, end: 13, klant: 'Zorggroep Oost',   functie: 'Helpende',       color: '#22C55E' },
+  { date: '2026-06-23', start: 7,  end: 15, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6' },
+  { date: '2026-06-25', start: 14, end: 18, klant: 'Zorggroep West',   functie: 'Helpende Plus',  color: '#8B5CF6' },
+  { date: '2026-06-26', start: 7,  end: 11, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6' },
+]
+
+const DUMMY_DIENSTEN_LIST = [
+  { datum: 'ma 16 jun', tijd: '07:00–15:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6' },
+  { datum: 'wo 18 jun', tijd: '13:00–17:00', klant: 'Zorggroep West',   functie: 'Helpende Plus',  locatie: 'Haarlem',   color: '#8B5CF6' },
+  { datum: 'do 19 jun', tijd: '08:00–12:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6' },
+  { datum: 'vr 20 jun', tijd: '10:00–13:00', klant: 'Zorggroep Oost',   functie: 'Helpende',       locatie: 'Utrecht',   color: '#22C55E' },
+  { datum: 'ma 23 jun', tijd: '07:00–15:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6' },
+  { datum: 'do 25 jun', tijd: '14:00–18:00', klant: 'Zorggroep West',   functie: 'Helpende Plus',  locatie: 'Haarlem',   color: '#8B5CF6' },
+  { datum: 'vr 26 jun', tijd: '07:00–11:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6' },
+]
+
+function BeschikbaarheidAgenda() {
+  const [view, setView] = useState('maand')
+  const [base, setBase] = useState(new Date(2026, 5, 16))
+
+  const DAYS_NL   = ['ma','di','wo','do','vr','za','zo']
+  const MONTHS_NL = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december']
+  const HOURS     = [7,8,9,10,11,12,13,14,15,16,17,18]
+
+  const addDays    = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r }
+  const addMonths_ = (d, n) => { const r = new Date(d); r.setMonth(r.getMonth() + n); return r }
+  const fmtD       = (d)    => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  const getMon     = (d)    => { const r = new Date(d); const dw = r.getDay(); r.setDate(r.getDate() - (dw === 0 ? 6 : dw - 1)); r.setHours(0,0,0,0); return r }
+  const getDOW     = (d)    => { const d0 = d.getDay(); return d0 === 0 ? 6 : d0 - 1 }
+
+  const dienstenForDate = (d) => AGENDA_DIENSTEN.filter(s => s.date === fmtD(d))
+  const hasDienst       = (d) => dienstenForDate(d).length > 0
+
+  const nav = (n) => {
+    if (view === 'dag')   setBase(b => addDays(b, n))
+    if (view === 'week')  setBase(b => addDays(b, n * 7))
+    if (view === 'maand') setBase(b => addMonths_(b, n))
+  }
+
+  const navLabel = () => {
+    if (view === 'maand') return `${MONTHS_NL[base.getMonth()].charAt(0).toUpperCase() + MONTHS_NL[base.getMonth()].slice(1)} ${base.getFullYear()}`
+    if (view === 'week')  {
+      const mon = getMon(base); const sun = addDays(mon, 6)
+      if (mon.getMonth() === sun.getMonth())
+        return `${mon.getDate()} – ${sun.getDate()} ${MONTHS_NL[mon.getMonth()]} ${mon.getFullYear()}`
+      return `${mon.getDate()} ${MONTHS_NL[mon.getMonth()].slice(0,3)} – ${sun.getDate()} ${MONTHS_NL[sun.getMonth()].slice(0,3)} ${sun.getFullYear()}`
+    }
+    return `${base.getDate()} ${MONTHS_NL[base.getMonth()]} ${base.getFullYear()}`
+  }
+
+  const renderWeek = () => {
+    const mon  = getMon(base)
+    const days = Array.from({ length: 7 }, (_, i) => addDays(mon, i))
+    const today = new Date()
+    const isToday = (d) => d.toDateString() === today.toDateString()
+    return (
+      <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+        {/* Day headers */}
+        <div style={{ display: 'grid', gridTemplateColumns: '44px repeat(7, 1fr)', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
+          <div />
+          {days.map((d, i) => (
+            <div key={i} style={{ textAlign: 'center', padding: '6px 2px', borderLeft: '1px solid var(--border)' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>{DAYS_NL[i]}</div>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', margin: '2px auto 0', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: isToday(d) ? 'var(--color-primary)' : 'transparent',
+                fontSize: 13, fontWeight: 700, color: isToday(d) ? 'white' : i >= 5 ? 'var(--text-muted)' : 'var(--text)' }}>
+                {d.getDate()}
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Hour rows */}
+        {HOURS.map(h => (
+          <div key={h} style={{ display: 'grid', gridTemplateColumns: '44px repeat(7, 1fr)', borderBottom: '1px solid var(--border)', minHeight: 32 }}>
+            <div style={{ fontSize: 10, color: 'var(--text-muted)', padding: '6px 6px 0', textAlign: 'right', background: 'var(--bg)', borderRight: '1px solid var(--border)' }}>{h}:00</div>
+            {days.map((d, i) => {
+              const ds = dienstenForDate(d).filter(s => h >= s.start && h < s.end)
+              return (
+                <div key={i} style={{ borderLeft: i > 0 ? '1px solid var(--border)' : 'none', position: 'relative',
+                  background: i >= 5 ? '#FAFAFA' : 'transparent' }}>
+                  {ds.map((s, j) => (
+                    <div key={j} style={{ background: s.color + '22', borderLeft: `3px solid ${s.color}`,
+                      padding: '2px 4px', fontSize: 9, color: s.color, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', lineHeight: 1.4 }}>
+                      {h === s.start ? s.klant : ''}
+                    </div>
+                  ))}
+                </div>
+              )
+            })}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  const renderMonth = () => {
+    const year = base.getFullYear(), month = base.getMonth()
+    const firstDay = new Date(year, month, 1), lastDay = new Date(year, month + 1, 0)
+    const startDow = getDOW(firstDay)
+    const cells = []
+    for (let i = 0; i < startDow; i++) cells.push(null)
+    for (let d = 1; d <= lastDay.getDate(); d++) cells.push(d)
+    while (cells.length % 7 !== 0) cells.push(null)
+    const rows = []; for (let r = 0; r < cells.length / 7; r++) rows.push(cells.slice(r*7, r*7+7))
+    const today = new Date()
+    const isToday = (d) => d && year === today.getFullYear() && month === today.getMonth() && d === today.getDate()
+
+    return (
+      <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+        {/* Day headers */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
+          {DAYS_NL.map((d, i) => (
+            <div key={d} style={{ textAlign: 'center', padding: '7px 4px', fontSize: 10, fontWeight: 700,
+              color: i >= 5 ? '#9CA3AF' : 'var(--text-muted)', textTransform: 'uppercase',
+              borderLeft: i > 0 ? '1px solid var(--border)' : 'none' }}>{d}</div>
+          ))}
+        </div>
+        {rows.map((row, ri) => (
+          <div key={ri} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: ri < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            {row.map((day, ci) => {
+              const d   = day ? new Date(year, month, day) : null
+              const ds  = d ? dienstenForDate(d) : []
+              const tod = isToday(day)
+              return (
+                <div key={ci} style={{ minHeight: 72, padding: '4px 4px 4px', borderLeft: ci > 0 ? '1px solid var(--border)' : 'none',
+                  background: ci >= 5 ? '#FAFAFA' : 'white' }}>
+                  {day && (
+                    <>
+                      <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: tod ? 'var(--color-primary)' : 'transparent', marginBottom: 2,
+                        fontSize: 11, fontWeight: tod ? 700 : 400,
+                        color: tod ? 'white' : ci >= 5 ? '#9CA3AF' : 'var(--text)' }}>
+                        {day}
+                      </div>
+                      {ds.map((s, j) => (
+                        <div key={j} title={`${s.klant} · ${s.start}:00–${s.end}:00`}
+                          style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, marginBottom: 2, cursor: 'pointer',
+                            background: s.color + '20', color: s.color, fontWeight: 500,
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                            borderLeft: `3px solid ${s.color}` }}>
+                          {s.start}:00–{s.end}:00 {s.klant}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  const renderDay = () => {
+    const ds = dienstenForDate(base)
+    const today = new Date(); const isToday = base.toDateString() === today.toDateString()
+    const dow = getDOW(base)
+    return (
+      <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+        <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
+            {['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'][dow]} {base.getDate()} {MONTHS_NL[base.getMonth()]}
+          </span>
+          {isToday && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 99, background: 'var(--color-primary)', color: 'white', fontWeight: 600 }}>Vandaag</span>}
+        </div>
+        {HOURS.map((h, hi) => {
+          const slot = ds.filter(s => h >= s.start && h < s.end)
+          return (
+            <div key={h} style={{ display: 'grid', gridTemplateColumns: '50px 1fr', borderBottom: hi < HOURS.length - 1 ? '1px solid var(--border)' : 'none', minHeight: 44 }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '10px 8px', textAlign: 'right', borderRight: '1px solid var(--border)', background: 'var(--bg)' }}>{h}:00</div>
+              <div style={{ padding: slot.length ? '4px 10px' : 0 }}>
+                {slot.map((s, j) => (
+                  <div key={j} style={{ padding: '6px 10px', borderRadius: 6, background: s.color + '18', borderLeft: `3px solid ${s.color}`, marginBottom: 3 }}>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: s.color }}>{s.klant}</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{s.functie} · {s.start}:00–{s.end}:00</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  const vBtn = (id, lbl) => ({
+    padding: '4px 10px', fontSize: 11, fontWeight: view === id ? 600 : 400, borderRadius: 6, cursor: 'pointer',
+    border: '1px solid ' + (view === id ? 'var(--color-primary)' : 'var(--border)'),
+    background: view === id ? 'var(--color-primary)' : 'none',
+    color: view === id ? 'white' : 'var(--text-muted)',
+  })
+
+  return (
+    <div style={sectionBlock}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', flex: 1 }}>Beschikbaarheidsagenda</span>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {[['dag','Dag'],['week','Week'],['maand','Maand']].map(([id, lbl]) => (
+            <button key={id} style={vBtn(id, lbl)} onClick={() => setView(id)}>{lbl}</button>
+          ))}
+        </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <button onClick={() => nav(-1)} style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 16, lineHeight: 1 }}>‹</button>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', flex: 1, textAlign: 'center' }}>{navLabel()}</span>
+        <button onClick={() => nav(1)}  style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', cursor: 'pointer', color: 'var(--text-muted)', fontSize: 16, lineHeight: 1 }}>›</button>
+      </div>
+      {view === 'week'  && renderWeek()}
+      {view === 'maand' && renderMonth()}
+      {view === 'dag'   && renderDay()}
     </div>
   )
 }
@@ -1209,24 +1456,96 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                 </button>
               ))}
             </div>
-            {planningSubTab === 'beschikbaarheid' && (
-              <div style={sectionBlock}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>Beschikbaarheidsagenda</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Nog geen beschikbaarheid ingesteld.</div>
-              </div>
-            )}
+            {planningSubTab === 'beschikbaarheid' && <BeschikbaarheidAgenda />}
             {planningSubTab === 'inplanning' && (
               <div style={sectionBlock}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>Komende diensten</div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Nog geen diensten ingepland.</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <span style={sectionTitle}>Komende diensten</span>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{DUMMY_DIENSTEN_LIST.length} diensten</span>
+                </div>
+                {DUMMY_DIENSTEN_LIST.map((d, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: i < DUMMY_DIENSTEN_LIST.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                    <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 3, background: d.color, flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', width: 80, flexShrink: 0 }}>{d.datum}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
+                          <Clock size={10} />{d.tijd}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>{d.klant}</div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{d.functie}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
+                          <MapPin size={10} />{d.locatie}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
             {planningSubTab === 'functies' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <VoorkeurenTab c={c} />
                 <PlanningTab c={c} />
               </div>
             )}
+          </div>
+        )
+      case 'voorkeuren':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <VoorkeurenTab c={c} />
+            <PlanningTab c={c} />
+          </div>
+        )
+      case 'statistieken':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {[
+                { label: 'Plaatsingen',   value: c.plaatsingen?.length ?? 0,    sub: 'totaal',   color: '#6366F1' },
+                { label: 'Sollicitaties', value: currentSoll.length,             sub: 'totaal',   color: '#3B82F6' },
+                { label: 'Diensten',      value: c.diensten_count ?? 24,         sub: 'dit jaar', color: '#22C55E' },
+                { label: 'Uren gewerkt',  value: c.uren_gewerkt ?? 186,          sub: 'dit jaar', color: '#F59E0B' },
+              ].map(k => (
+                <div key={k.label} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', background: 'var(--surface)' }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{k.label}</div>
+                  <div style={{ fontSize: 26, fontWeight: 700, color: k.color, lineHeight: 1 }}>{k.value}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>{k.sub}</div>
+                </div>
+              ))}
+            </div>
+            <div style={sectionBlock}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>Statusoverzicht</div>
+              {[
+                ['Status',          currentStatus ?? c.status ?? '-'],
+                ['Laatste contact',  c.laatste_contact_datum ?? '-'],
+                ['Soort contact',    c.laatste_contact_soort ?? '-'],
+                ['Lid sinds',        c.created ?? '-'],
+                ['Vestiging',        (vestigingen ?? c.vestiging ?? []).join(', ') || '-'],
+              ].map(([lbl, val]) => (
+                <div key={lbl} style={{ display: 'flex', padding: '8px 0', borderBottom: '1px solid var(--border)', gap: 16 }}>
+                  <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{lbl}</span>
+                  <span style={{ fontSize: 12, color: 'var(--text)' }}>{val}</span>
+                </div>
+              ))}
+            </div>
+            <div style={sectionBlock}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>Recente activiteit</div>
+              {(c.tijdlijn ?? []).length === 0
+                ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Nog geen activiteiten.</div>
+                : (c.tijdlijn ?? []).slice(0, 5).map((ev, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'flex-start' }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0, marginTop: 5 }} />
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 12, color: 'var(--text)' }}>{ev.text ?? ev.description}</div>
+                      <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{ev.time ?? ev.created_at}</div>
+                    </div>
+                  </div>
+                ))
+              }
+            </div>
           </div>
         )
       case 'administratie':
@@ -1405,20 +1724,46 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
               </>
             )}
           </div>
-          <button onClick={() => { setEditing(e => !e); setActiveTab('profiel') }}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px',
-              fontSize: 12, fontWeight: 500, borderRadius: 7, cursor: 'pointer',
-              background: editing ? 'var(--color-primary)' : 'var(--bg)',
-              color: editing ? '#fff' : 'var(--text)',
-              border: editing ? 'none' : '1px solid var(--border)' }}>
-            <Edit2 size={11} /> {editing ? 'Bewerken…' : 'Bewerken'}
-          </button>
+          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+            {/* CV actions */}
+            {(() => {
+              const cvDoc = currentDocs.find(d => d.type === 'CV')
+              const cvUrl = cvDoc?.objectUrl ?? cvDoc?.url ?? null
+              return cvDoc ? (
+                <>
+                  <button onClick={() => setPreviewDoc(cvDoc)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 8px', fontSize: 11, fontWeight: 500, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
+                    <Eye size={11} /> CV
+                  </button>
+                  {cvUrl && (
+                    <a href={cvUrl} download={cvDoc.name ?? 'CV'}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 8px', fontSize: 11, fontWeight: 500, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', textDecoration: 'none' }}>
+                      <Download size={11} />
+                    </a>
+                  )}
+                </>
+              ) : (
+                <button onClick={() => { setPendingType('CV'); fileRef.current?.click() }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 8px', fontSize: 11, fontWeight: 500, borderRadius: 7, cursor: 'pointer', border: '1px dashed var(--border)', background: 'none', color: 'var(--text-muted)' }}>
+                  <FileText size={11} /> CV uploaden
+                </button>
+              )
+            })()}
+            <button onClick={() => { setEditing(e => !e); setActiveTab('profiel') }}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px',
+                fontSize: 12, fontWeight: 500, borderRadius: 7, cursor: 'pointer',
+                background: editing ? 'var(--color-primary)' : 'var(--bg)',
+                color: editing ? '#fff' : 'var(--text)',
+                border: editing ? 'none' : '1px solid var(--border)' }}>
+              <Edit2 size={11} /> {editing ? 'Bewerken…' : 'Bewerken'}
+            </button>
+          </div>
         </div>
 
         {/* Status + Eigenaar row */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24, marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'stretch', gap: 0, marginBottom: 6 }}>
           {/* Status */}
-          <div>
+          <div style={{ paddingRight: 20 }}>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Status</div>
             <div ref={statusRef} style={{ position: 'relative', display: 'inline-block' }}>
               <button onClick={() => setStatusOpen(o => !o)}
@@ -1445,8 +1790,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
               )}
             </div>
           </div>
+          {/* Divider */}
+          <div style={{ width: 1, background: 'var(--border)', flexShrink: 0, margin: '2px 0' }} />
           {/* Eigenaar */}
-          <div style={{ flex: 1 }}>
+          <div style={{ flex: 1, paddingLeft: 20 }}>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Eigenaar</div>
             <div ref={recruiterRef} style={{ position: 'relative' }}>
               <button onClick={() => setRecruiterOpen(o => !o)}
@@ -1577,13 +1924,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       </div>
 
       {/* Footer */}
-      <div style={{ padding: '10px 16px', borderTop: '1px solid var(--border)', flexShrink: 0,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Gemaakt op {c.created}</span>
-        <button style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
-          color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
-          <FileText size={13} /> CV
-        </button>
+      <div style={{ padding: '8px 16px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Aangemaakt op {c.created ?? '—'}</span>
       </div>
     </div>
   )
