@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { X, Maximize2, Minimize2, Edit2, Plus, FileText, ChevronDown, ChevronUp, MoreHorizontal, GripVertical, Search, Check, Calendar, Eye, Pencil, Camera, Bold, Italic, List, ListOrdered, Heading2, Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Download, MapPin, Clock, Sparkles, RefreshCw } from 'lucide-react'
+import { X, Maximize2, Minimize2, Edit2, Plus, FileText, ChevronDown, ChevronUp, MoreHorizontal, GripVertical, Search, Check, Calendar, Eye, Pencil, Camera, Bold, Italic, List, ListOrdered, Heading2, Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Download, MapPin, Clock, Sparkles, RefreshCw, Heart } from 'lucide-react'
 import api from '../../lib/api'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -627,28 +627,68 @@ function KoiosAiBlock({ c }) {
 }
 
 const AGENDA_DIENSTEN = [
-  { date: '2026-06-16', start: 7,  end: 15, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6' },
-  { date: '2026-06-18', start: 13, end: 17, klant: 'Zorggroep West',   functie: 'Helpende Plus',  color: '#8B5CF6' },
-  { date: '2026-06-19', start: 8,  end: 12, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6' },
-  { date: '2026-06-20', start: 10, end: 13, klant: 'Zorggroep Oost',   functie: 'Helpende',       color: '#22C55E' },
-  { date: '2026-06-23', start: 7,  end: 15, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6' },
-  { date: '2026-06-25', start: 14, end: 18, klant: 'Zorggroep West',   functie: 'Helpende Plus',  color: '#8B5CF6' },
-  { date: '2026-06-26', start: 7,  end: 11, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6' },
+  { date: '2026-06-16', start: 7,  end: 15, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
+  { date: '2026-06-18', start: 13, end: 17, klant: 'Zorggroep West',   functie: 'Helpende Plus',  color: '#8B5CF6', locatie: 'Haarlem',   eerder_gewerkt: 0, adres: 'Kennemerplein 10'    },
+  { date: '2026-06-19', start: 8,  end: 12, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
+  { date: '2026-06-20', start: 10, end: 13, klant: 'Zorggroep Oost',   functie: 'Helpende',       color: '#22C55E', locatie: 'Utrecht',   eerder_gewerkt: 1, adres: 'Maliebaan 50'        },
+  { date: '2026-06-23', start: 7,  end: 15, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
+  { date: '2026-06-25', start: 14, end: 18, klant: 'Zorggroep West',   functie: 'Helpende Plus',  color: '#8B5CF6', locatie: 'Haarlem',   eerder_gewerkt: 0, adres: 'Kennemerplein 10'    },
+  { date: '2026-06-26', start: 7,  end: 11, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
 ]
 
 const DUMMY_DIENSTEN_LIST = [
-  { datum: 'ma 16 jun', tijd: '07:00–15:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6' },
-  { datum: 'wo 18 jun', tijd: '13:00–17:00', klant: 'Zorggroep West',   functie: 'Helpende Plus',  locatie: 'Haarlem',   color: '#8B5CF6' },
-  { datum: 'do 19 jun', tijd: '08:00–12:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6' },
-  { datum: 'vr 20 jun', tijd: '10:00–13:00', klant: 'Zorggroep Oost',   functie: 'Helpende',       locatie: 'Utrecht',   color: '#22C55E' },
-  { datum: 'ma 23 jun', tijd: '07:00–15:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6' },
-  { datum: 'do 25 jun', tijd: '14:00–18:00', klant: 'Zorggroep West',   functie: 'Helpende Plus',  locatie: 'Haarlem',   color: '#8B5CF6' },
-  { datum: 'vr 26 jun', tijd: '07:00–11:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6' },
+  { datum: 'ma 16 jun', tijd: '07:00–15:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Vaste begeleider voor mevrouw De Vries.' },
+  { datum: 'wo 18 jun', tijd: '13:00–17:00', klant: 'Zorggroep West',   functie: 'Helpende Plus',  locatie: 'Haarlem',   color: '#8B5CF6', eerder_gewerkt: 0, favoriet: false, adres: 'Kennemerplein 10',    opmerkingen: 'Eerste dienst bij deze klant.'          },
+  { datum: 'do 19 jun', tijd: '08:00–12:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Ochtendrondes afdeling 3.'               },
+  { datum: 'vr 20 jun', tijd: '10:00–13:00', klant: 'Zorggroep Oost',   functie: 'Helpende',       locatie: 'Utrecht',   color: '#22C55E', eerder_gewerkt: 1, favoriet: false, adres: 'Maliebaan 50',        opmerkingen: ''                                        },
+  { datum: 'ma 23 jun', tijd: '07:00–15:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Vaste begeleider voor mevrouw De Vries.' },
+  { datum: 'do 25 jun', tijd: '14:00–18:00', klant: 'Zorggroep West',   functie: 'Helpende Plus',  locatie: 'Haarlem',   color: '#8B5CF6', eerder_gewerkt: 0, favoriet: false, adres: 'Kennemerplein 10',    opmerkingen: ''                                        },
+  { datum: 'vr 26 jun', tijd: '07:00–11:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Ochtendrondes afdeling 3.'               },
 ]
 
+function DienstDetail({ s, onClose }) {
+  const [fav, setFav] = useState(s.favoriet ?? false)
+  return (
+    <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginTop: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg)' }}>
+        <div style={{ width: 3, height: 20, borderRadius: 2, background: s.color, flexShrink: 0 }} />
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{s.klant}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.functie}</div>
+        </div>
+        <button onClick={() => setFav(f => !f)} title={fav ? 'Verwijder favoriet' : 'Markeer als favoriet'}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? '#EF4444' : 'var(--text-muted)', display: 'flex' }}>
+          <Heart size={15} fill={fav ? '#EF4444' : 'none'} />
+        </button>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex' }}>
+          <X size={14} />
+        </button>
+      </div>
+      {[
+        ['Tijdstip',       `${s.start ?? '?'}:00 – ${s.end ?? '?'}:00`],
+        ['Locatie',        s.locatie ?? '-'],
+        ['Adres',          s.adres   ?? '-'],
+        ['Eerder gewerkt', s.eerder_gewerkt > 0 ? `Ja, ${s.eerder_gewerkt}× bij ${s.klant}` : `Nee, eerste keer bij ${s.klant}`],
+      ].map(([l, v]) => (
+        <div key={l} style={{ display: 'flex', padding: '8px 14px', borderBottom: '1px solid var(--border)', gap: 12, background: 'var(--surface)' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 110, flexShrink: 0 }}>{l}</span>
+          <span style={{ fontSize: 12, color: 'var(--text)' }}>{v}</span>
+        </div>
+      ))}
+      {s.eerder_gewerkt > 0 && (
+        <div style={{ padding: '8px 14px', background: '#F0FDF4', borderTop: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Check size={12} color="#16A34A" />
+          <span style={{ fontSize: 11, color: '#15803D', fontWeight: 500 }}>Kandidaat is bekend bij deze klant</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function BeschikbaarheidAgenda() {
-  const [view, setView] = useState('maand')
-  const [base, setBase] = useState(new Date(2026, 5, 16))
+  const [view,     setView]     = useState('maand')
+  const [base,     setBase]     = useState(new Date(2026, 5, 16))
+  const [selected, setSelected] = useState(null)
 
   const DAYS_NL   = ['ma','di','wo','do','vr','za','zo']
   const MONTHS_NL = ['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december']
@@ -661,9 +701,9 @@ function BeschikbaarheidAgenda() {
   const getDOW     = (d)    => { const d0 = d.getDay(); return d0 === 0 ? 6 : d0 - 1 }
 
   const dienstenForDate = (d) => AGENDA_DIENSTEN.filter(s => s.date === fmtD(d))
-  const hasDienst       = (d) => dienstenForDate(d).length > 0
 
   const nav = (n) => {
+    setSelected(null)
     if (view === 'dag')   setBase(b => addDays(b, n))
     if (view === 'week')  setBase(b => addDays(b, n * 7))
     if (view === 'maand') setBase(b => addMonths_(b, n))
@@ -687,7 +727,6 @@ function BeschikbaarheidAgenda() {
     const isToday = (d) => d.toDateString() === today.toDateString()
     return (
       <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-        {/* Day headers */}
         <div style={{ display: 'grid', gridTemplateColumns: '44px repeat(7, 1fr)', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
           <div />
           {days.map((d, i) => (
@@ -701,18 +740,17 @@ function BeschikbaarheidAgenda() {
             </div>
           ))}
         </div>
-        {/* Hour rows */}
         {HOURS.map(h => (
           <div key={h} style={{ display: 'grid', gridTemplateColumns: '44px repeat(7, 1fr)', borderBottom: '1px solid var(--border)', minHeight: 32 }}>
             <div style={{ fontSize: 10, color: 'var(--text-muted)', padding: '6px 6px 0', textAlign: 'right', background: 'var(--bg)', borderRight: '1px solid var(--border)' }}>{h}:00</div>
             {days.map((d, i) => {
               const ds = dienstenForDate(d).filter(s => h >= s.start && h < s.end)
               return (
-                <div key={i} style={{ borderLeft: i > 0 ? '1px solid var(--border)' : 'none', position: 'relative',
-                  background: i >= 5 ? '#FAFAFA' : 'transparent' }}>
+                <div key={i} style={{ borderLeft: i > 0 ? '1px solid var(--border)' : 'none', background: i >= 5 ? '#FAFAFA' : 'transparent' }}>
                   {ds.map((s, j) => (
-                    <div key={j} style={{ background: s.color + '22', borderLeft: `3px solid ${s.color}`,
-                      padding: '2px 4px', fontSize: 9, color: s.color, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', lineHeight: 1.4 }}>
+                    <div key={j} onClick={() => setSelected(s)}
+                      style={{ background: selected === s ? s.color + '40' : s.color + '22', borderLeft: `3px solid ${s.color}`,
+                        padding: '2px 4px', fontSize: 9, color: s.color, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', lineHeight: 1.4, cursor: 'pointer' }}>
                       {h === s.start ? s.klant : ''}
                     </div>
                   ))}
@@ -739,7 +777,6 @@ function BeschikbaarheidAgenda() {
 
     return (
       <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-        {/* Day headers */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
           {DAYS_NL.map((d, i) => (
             <div key={d} style={{ textAlign: 'center', padding: '7px 4px', fontSize: 10, fontWeight: 700,
@@ -750,26 +787,25 @@ function BeschikbaarheidAgenda() {
         {rows.map((row, ri) => (
           <div key={ri} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: ri < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
             {row.map((day, ci) => {
-              const d   = day ? new Date(year, month, day) : null
-              const ds  = d ? dienstenForDate(d) : []
+              const d = day ? new Date(year, month, day) : null
+              const ds = d ? dienstenForDate(d) : []
               const tod = isToday(day)
               return (
-                <div key={ci} style={{ minHeight: 72, padding: '4px 4px 4px', borderLeft: ci > 0 ? '1px solid var(--border)' : 'none',
+                <div key={ci} style={{ minHeight: 68, padding: '4px', borderLeft: ci > 0 ? '1px solid var(--border)' : 'none',
                   background: ci >= 5 ? '#FAFAFA' : 'white' }}>
                   {day && (
                     <>
                       <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         background: tod ? 'var(--color-primary)' : 'transparent', marginBottom: 2,
-                        fontSize: 11, fontWeight: tod ? 700 : 400,
-                        color: tod ? 'white' : ci >= 5 ? '#9CA3AF' : 'var(--text)' }}>
+                        fontSize: 11, fontWeight: tod ? 700 : 400, color: tod ? 'white' : ci >= 5 ? '#9CA3AF' : 'var(--text)' }}>
                         {day}
                       </div>
                       {ds.map((s, j) => (
-                        <div key={j} title={`${s.klant} · ${s.start}:00–${s.end}:00`}
+                        <div key={j} onClick={() => setSelected(selected === s ? null : s)}
                           style={{ fontSize: 9, padding: '2px 5px', borderRadius: 3, marginBottom: 2, cursor: 'pointer',
-                            background: s.color + '20', color: s.color, fontWeight: 500,
-                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                            borderLeft: `3px solid ${s.color}` }}>
+                            background: selected === s ? s.color + '40' : s.color + '18',
+                            color: s.color, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                            borderLeft: `3px solid ${s.color}`, outline: selected === s ? `2px solid ${s.color}` : 'none' }}>
                           {s.start}:00–{s.end}:00 {s.klant}
                         </div>
                       ))}
@@ -795,15 +831,19 @@ function BeschikbaarheidAgenda() {
             {['Maandag','Dinsdag','Woensdag','Donderdag','Vrijdag','Zaterdag','Zondag'][dow]} {base.getDate()} {MONTHS_NL[base.getMonth()]}
           </span>
           {isToday && <span style={{ fontSize: 10, padding: '1px 7px', borderRadius: 99, background: 'var(--color-primary)', color: 'white', fontWeight: 600 }}>Vandaag</span>}
+          {ds.length === 0 && <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>Geen diensten</span>}
         </div>
         {HOURS.map((h, hi) => {
           const slot = ds.filter(s => h >= s.start && h < s.end)
           return (
-            <div key={h} style={{ display: 'grid', gridTemplateColumns: '50px 1fr', borderBottom: hi < HOURS.length - 1 ? '1px solid var(--border)' : 'none', minHeight: 44 }}>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '10px 8px', textAlign: 'right', borderRight: '1px solid var(--border)', background: 'var(--bg)' }}>{h}:00</div>
+            <div key={h} style={{ display: 'grid', gridTemplateColumns: '50px 1fr', borderBottom: hi < HOURS.length - 1 ? '1px solid var(--border)' : 'none', minHeight: 40 }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '8px 8px 0', textAlign: 'right', borderRight: '1px solid var(--border)', background: 'var(--bg)' }}>{h}:00</div>
               <div style={{ padding: slot.length ? '4px 10px' : 0 }}>
                 {slot.map((s, j) => (
-                  <div key={j} style={{ padding: '6px 10px', borderRadius: 6, background: s.color + '18', borderLeft: `3px solid ${s.color}`, marginBottom: 3 }}>
+                  <div key={j} onClick={() => setSelected(selected === s ? null : s)}
+                    style={{ padding: '6px 10px', borderRadius: 6, marginBottom: 3, cursor: 'pointer',
+                      background: selected === s ? s.color + '30' : s.color + '18',
+                      borderLeft: `3px solid ${s.color}`, outline: selected === s ? `2px solid ${s.color}` : 'none' }}>
                     <div style={{ fontSize: 11, fontWeight: 600, color: s.color }}>{s.klant}</div>
                     <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{s.functie} · {s.start}:00–{s.end}:00</div>
                   </div>
@@ -816,7 +856,7 @@ function BeschikbaarheidAgenda() {
     )
   }
 
-  const vBtn = (id, lbl) => ({
+  const vBtn = (id) => ({
     padding: '4px 10px', fontSize: 11, fontWeight: view === id ? 600 : 400, borderRadius: 6, cursor: 'pointer',
     border: '1px solid ' + (view === id ? 'var(--color-primary)' : 'var(--border)'),
     background: view === id ? 'var(--color-primary)' : 'none',
@@ -829,7 +869,7 @@ function BeschikbaarheidAgenda() {
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', flex: 1 }}>Beschikbaarheidsagenda</span>
         <div style={{ display: 'flex', gap: 4 }}>
           {[['dag','Dag'],['week','Week'],['maand','Maand']].map(([id, lbl]) => (
-            <button key={id} style={vBtn(id, lbl)} onClick={() => setView(id)}>{lbl}</button>
+            <button key={id} style={vBtn(id)} onClick={() => { setView(id); setSelected(null) }}>{lbl}</button>
           ))}
         </div>
       </div>
@@ -841,6 +881,7 @@ function BeschikbaarheidAgenda() {
       {view === 'week'  && renderWeek()}
       {view === 'maand' && renderMonth()}
       {view === 'dag'   && renderDay()}
+      {selected && <DienstDetail key={selected.date + selected.klant} s={selected} onClose={() => setSelected(null)} />}
     </div>
   )
 }
@@ -1245,16 +1286,19 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
 
   const [vestigingOpen,   setVestigingOpen]   = useState(false)
   const [vestigingSearch, setVestigingSearch] = useState('')
-  const [planningSubTab,  setPlanningSubTab]  = useState('beschikbaarheid')
+  const [planningSubTab,       setPlanningSubTab]       = useState('beschikbaarheid')
+  const [inplanningSelected,   setInplanningSelected]   = useState(null)
+  const [inplanningFavorieten, setInplanningFavorieten] = useState({})
   const [allLocations,    setAllLocations]    = useState([])
 
-  const recruiterRef  = useRef(null)
-  const statusRef     = useRef(null)
-  const fileRef       = useRef(null)
-  const tagInputRef   = useRef(null)
-  const photoRef      = useRef(null)
-  const photoFileRef  = useRef(null)
-  const vestigingRef  = useRef(null)
+  const recruiterRef   = useRef(null)
+  const statusRef      = useRef(null)
+  const fileRef        = useRef(null)
+  const tagInputRef    = useRef(null)
+  const photoRef       = useRef(null)
+  const photoFileRef   = useRef(null)
+  const vestigingRef   = useRef(null)
+  const autoExpandedRef = useRef(false)
 
   useEffect(() => {
     setRecruiter(null); setActiveTab('profiel'); setStatus(null)
@@ -1264,10 +1308,18 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     setAddingNote(false); setNewNote(''); setNewNoteTitle(''); setNewNoteType('Algemeen'); setEditing(false); setProfileEdits(null)
     setPreviewDoc(null); setPendingFile(null); setPendingType('CV'); setPhotoUrl(null); setPhotoMenuOpen(false); setNoteExpanded(false)
     setPlanningSubTab('beschikbaarheid')
+    setInplanningSelected(null)
+    setInplanningFavorieten({})
   }, [c?.id])
 
   useEffect(() => {
-    if (activeTab === 'planning' && !expanded) {
+    if (activeTab === 'planning') {
+      if (!expanded) {
+        autoExpandedRef.current = true
+        onToggleExpand?.()
+      }
+    } else if (autoExpandedRef.current && expanded) {
+      autoExpandedRef.current = false
       onToggleExpand?.()
     }
   }, [activeTab])
@@ -1522,31 +1574,93 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             </div>
             {planningSubTab === 'beschikbaarheid' && <BeschikbaarheidAgenda />}
             {planningSubTab === 'inplanning' && (
-              <div style={sectionBlock}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                  <span style={sectionTitle}>Komende diensten</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{DUMMY_DIENSTEN_LIST.length} diensten</span>
-                </div>
-                {DUMMY_DIENSTEN_LIST.map((d, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 0', borderBottom: i < DUMMY_DIENSTEN_LIST.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                    <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 3, background: d.color, flexShrink: 0 }} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', width: 80, flexShrink: 0 }}>{d.datum}</span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
-                          <Clock size={10} />{d.tijd}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 2 }}>{d.klant}</div>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{d.functie}</span>
-                        <span style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
-                          <MapPin size={10} />{d.locatie}
-                        </span>
-                      </div>
-                    </div>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                {/* List */}
+                <div style={{ ...sectionBlock, flex: inplanningSelected ? '0 0 270px' : '1', minWidth: 0, padding: '12px 14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <span style={sectionTitle}>Komende diensten</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{DUMMY_DIENSTEN_LIST.length}</span>
                   </div>
-                ))}
+                  {DUMMY_DIENSTEN_LIST.map((d, i) => {
+                    const isSel = inplanningSelected === d
+                    return (
+                      <div key={i} onClick={() => setInplanningSelected(isSel ? null : d)}
+                        style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 8px', borderRadius: 7, marginBottom: 2, cursor: 'pointer',
+                          background: isSel ? 'var(--bg)' : 'transparent',
+                          border: isSel ? `1px solid ${d.color}` : '1px solid transparent' }}>
+                        <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 3, background: d.color, flexShrink: 0 }} />
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                            <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)' }}>{d.datum}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 10, color: 'var(--text-muted)' }}>
+                              <Clock size={9} />{d.tijd}
+                            </span>
+                          </div>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.klant}</div>
+                          {!inplanningSelected && (
+                            <div style={{ display: 'flex', gap: 6 }}>
+                              <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{d.functie}</span>
+                              <span style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 10, color: 'var(--text-muted)' }}>
+                                <MapPin size={9} />{d.locatie}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+                {/* Detail panel */}
+                {inplanningSelected && (() => {
+                  const d = inplanningSelected
+                  const fav = inplanningFavorieten[d.datum + d.klant] ?? d.favoriet
+                  const toggleFav = () => setInplanningFavorieten(p => ({ ...p, [d.datum + d.klant]: !fav }))
+                  return (
+                    <div style={{ flex: 1, minWidth: 0, border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', background: 'var(--surface)' }}>
+                      {/* Detail header */}
+                      <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg)', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                        <div style={{ width: 3, height: 38, borderRadius: 2, background: d.color, flexShrink: 0 }} />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{d.klant}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{d.functie}</div>
+                        </div>
+                        <button onClick={toggleFav} title={fav ? 'Verwijder favoriet' : 'Favoriet'}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? '#EF4444' : 'var(--text-muted)', display: 'flex' }}>
+                          <Heart size={15} fill={fav ? '#EF4444' : 'none'} />
+                        </button>
+                        <button onClick={() => setInplanningSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex' }}>
+                          <X size={14} />
+                        </button>
+                      </div>
+                      {[
+                        ['Datum',          d.datum],
+                        ['Tijdstip',       d.tijd],
+                        ['Locatie',        d.locatie],
+                        ['Adres',          d.adres ?? '-'],
+                        ['Eerder gewerkt', d.eerder_gewerkt > 0
+                          ? `Ja, ${d.eerder_gewerkt}× bij ${d.klant}`
+                          : `Nee, eerste keer bij ${d.klant}`],
+                      ].map(([l, v]) => (
+                        <div key={l} style={{ display: 'flex', padding: '8px 14px', borderBottom: '1px solid var(--border)', gap: 10 }}>
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 100, flexShrink: 0 }}>{l}</span>
+                          <span style={{ fontSize: 11, color: 'var(--text)', fontWeight: 500 }}>{v}</span>
+                        </div>
+                      ))}
+                      {d.eerder_gewerkt > 0 && (
+                        <div style={{ padding: '7px 14px', background: '#F0FDF4', borderBottom: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <Check size={11} color="#16A34A" />
+                          <span style={{ fontSize: 11, color: '#15803D', fontWeight: 500 }}>Bekend bij deze klant</span>
+                        </div>
+                      )}
+                      {d.opmerkingen ? (
+                        <div style={{ padding: '8px 14px' }}>
+                          <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Opmerkingen</div>
+                          <div style={{ fontSize: 11, color: 'var(--text)', lineHeight: 1.5 }}>{d.opmerkingen}</div>
+                        </div>
+                      ) : null}
+                    </div>
+                  )
+                })()}
               </div>
             )}
             {planningSubTab === 'functies' && (
