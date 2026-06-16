@@ -1,3 +1,4 @@
+// aggregator module — merge the bundles produced by a previous step into a single array.
 import { Combine } from 'lucide-react'
 
 export default {

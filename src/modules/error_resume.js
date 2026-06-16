@@ -1,3 +1,4 @@
+// error_resume module — error handler: substitute a fallback value and continue on error.
 import { PlayCircle } from 'lucide-react'
 
 export default {

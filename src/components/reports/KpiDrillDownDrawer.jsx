@@ -1,3 +1,8 @@
+/**
+ * KpiDrillDownDrawer — slide-in panel that explains a KPI: its target (from
+ * useKpiSettings), the actual value, and the records behind it. Opened by
+ * clicking a KPI card. MONTHS_NL = Dutch month names for labels.
+ */
 import { X, Search, TrendingUp, Target, Info } from 'lucide-react'
 import { useState } from 'react'
 import { useKpiSettings } from '../../lib/useKpiSettings'

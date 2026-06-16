@@ -1,3 +1,8 @@
+/**
+ * RunsTable — searchable, sortable table of workflow runs (executions).
+ * Shows each run's workflow, status, start time, duration and processed count;
+ * filters come from RightPanelContext. formatDT below formats run timestamps.
+ */
 import { useState, useEffect, useMemo } from 'react'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X,
          Zap, CheckCircle, XCircle, Clock, Users, AlertTriangle, RotateCcw } from 'lucide-react'
@@ -6,6 +11,7 @@ import api from '../../lib/api'
 
 const PAD = n => String(n).padStart(2, '0')
 
+// Format an ISO datetime into a short readable date + time (or em-dash if empty).
 function formatDT(dt) {
   if (!dt) return '—'
   const d = new Date(dt)

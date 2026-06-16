@@ -1,3 +1,4 @@
+// html_to_text module — strip HTML markup down to plain text.
 import { FileText } from 'lucide-react'
 
 export default {

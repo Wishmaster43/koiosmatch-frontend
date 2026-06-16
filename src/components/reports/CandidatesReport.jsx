@@ -1,8 +1,7 @@
 /**
- * CandidatesReport.jsx
- * Kandidaten-rapportage met meerdere charts.
- * Filters worden via RightPanelContext naar de layout gestuurd —
- * geen eigen filter-knop of inline sidebar meer.
+ * CandidatesReport — candidates analytics report with several charts.
+ * Filters are pushed to the layout via RightPanelContext (no own filter button
+ * or inline sidebar). KPI targets come from useKpiSettings.
  */
 import { useState, useEffect, useMemo } from 'react'
 import { RefreshCw } from 'lucide-react'
@@ -315,7 +314,7 @@ export default function CandidatesReport() {
           {/* Kaart 7: Top 10 woonplaatsen (Volledige breedte) */}
           <div className="min-w-0 p-6 bg-white border border-gray-100 shadow-sm rounded-xl lg:col-span-2">
             <BarChartCard
-              title="Top 10 woonplaatsen"
+              title={`Top ${top_cities_n} woonplaatsen`}
               data={cityData} colors={[SAP_BLUE]} height={260}
               onBarClick={handleCityDrillDown}
             />

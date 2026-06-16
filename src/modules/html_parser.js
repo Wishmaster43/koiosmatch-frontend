@@ -1,3 +1,4 @@
+// html_parser module — extract elements/values from an HTML document.
 import { FileCode2 } from 'lucide-react'
 
 export default {

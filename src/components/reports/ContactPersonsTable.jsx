@@ -1,3 +1,8 @@
+/**
+ * ContactPersonsTable — searchable, paginated table of customer contact persons.
+ * Each row shows contact details; clicking opens ContactPersonDrawer. Filters
+ * come from RightPanelContext, page size from the user's preference.
+ */
 import { useState, useEffect, useMemo } from 'react'
 import { Search, Mail, Phone, MessageCircle, Building2 } from 'lucide-react'
 import api                    from '../../lib/api'

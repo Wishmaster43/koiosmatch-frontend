@@ -1,7 +1,9 @@
+// candidate_filter module — keep only the candidates that match the given criteria.
 import { Users } from 'lucide-react'
 
 export default {
   type:  'candidate_filter',
+  app:   ['shiftmanager','intus','aelio','elanza'],
   category: 'Kandidaten',
   label: 'Kandidaten Filter',
   Icon:  Users,

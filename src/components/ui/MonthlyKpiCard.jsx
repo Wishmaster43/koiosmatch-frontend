@@ -1,3 +1,8 @@
+/**
+ * MonthlyKpiCard — KPI card for "new candidates this month" vs the configured
+ * target (from useKpiSettings). Clicking it opens KpiDrillDownDrawer with the
+ * underlying candidates. statusFilter limits which candidates count.
+ */
 import { useState } from 'react'
 import KpiDrillDownDrawer from '../reports/KpiDrillDownDrawer'
 import { useKpiSettings } from '../../lib/useKpiSettings'

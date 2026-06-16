@@ -1,3 +1,4 @@
+// numeric_aggregator module — aggregate numbers (sum/avg/min/max/count) across bundles.
 import { Calculator } from 'lucide-react'
 
 export default {

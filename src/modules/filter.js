@@ -1,3 +1,4 @@
+// filter module — only let bundles pass that satisfy a condition.
 import { Filter } from 'lucide-react'
 
 export default {

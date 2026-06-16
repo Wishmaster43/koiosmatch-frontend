@@ -34,7 +34,19 @@ import html_to_text      from './html_to_text'
 import html_table_parser from './html_table_parser'
 import text_parser       from './text_parser'
 import advanced_parser   from './advanced_parser'
+import gateway_mail_hook from './gateway_mail_hook'
 
+/**
+ * Module registry — the single source of truth for every workflow building block.
+ *
+ * Each imported module is a definition object ({ type, label, Icon, schema, app,
+ * makeType, ... }). The derived maps below are what the rest of the app consumes:
+ *   MODULE_META    — display info (label/icon/colors) keyed by type
+ *   MODULE_SCHEMAS — the form fields for each module's config panel
+ *   MODULE_APP_MAP — type → required add-on app(s) for visibility gating
+ *   MAKE_MODULE_MAP — Make.com identifier → internal type (for import/mapping)
+ * To add a module: import it and append it here; the maps update automatically.
+ */
 const MODULES = [
   webhook,
   http_request,
@@ -72,6 +84,7 @@ const MODULES = [
   html_table_parser,
   text_parser,
   advanced_parser,
+  gateway_mail_hook,
 ]
 
 export const MODULE_META = Object.fromEntries(
@@ -80,6 +93,16 @@ export const MODULE_META = Object.fromEntries(
 
 export const MODULE_SCHEMAS = Object.fromEntries(
   MODULES.map(m => [m.type, m.schema])
+)
+
+// Maps module type → required app id(s) (string or array). No entry = always visible.
+export const MODULE_APP_MAP = Object.fromEntries(
+  MODULES.filter(m => m.app).map(m => [m.type, m.app])
+)
+
+// Maps Make.com module identifiers → internal type
+export const MAKE_MODULE_MAP = Object.fromEntries(
+  MODULES.filter(m => m.makeType).map(m => [m.makeType, m.type])
 )
 
 export default MODULES

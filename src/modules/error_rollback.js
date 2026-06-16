@@ -1,3 +1,4 @@
+// error_rollback module — error handler: roll back the current transaction on error.
 import { RotateCcw } from 'lucide-react'
 
 export default {

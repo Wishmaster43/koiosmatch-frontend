@@ -1,3 +1,4 @@
+// email_send module — send an email message.
 import { Mail } from 'lucide-react'
 
 export default {

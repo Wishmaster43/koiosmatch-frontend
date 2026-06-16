@@ -1,3 +1,4 @@
+// webhook module — trigger: start the workflow when its webhook URL is called.
 import { Webhook } from 'lucide-react'
 
 export default {

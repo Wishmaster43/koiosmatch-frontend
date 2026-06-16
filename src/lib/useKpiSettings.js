@@ -1,3 +1,8 @@
+/**
+ * useKpiSettings — loads tenant KPI/target settings from /settings (cached) and
+ * exposes them to components, falling back to SETTING_DEFAULTS. Also provides
+ * invalidateKpiCache() so SettingsPage can force a reload after saving.
+ */
 import { useState, useEffect } from 'react'
 import api from './api'
 

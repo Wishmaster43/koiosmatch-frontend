@@ -1,3 +1,8 @@
+/**
+ * LocationsTable — searchable, sortable, paginated table of locations.
+ * Clicking a row opens LocationDrawer. Filters come from RightPanelContext,
+ * page size from the user's preference; data is fetched per page from the API.
+ */
 import { useState, useEffect, useMemo } from 'react'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useRightPanel }      from '../../context/RightPanelContext'
@@ -6,20 +11,8 @@ import api                    from '../../lib/api'
 import LocationDrawer         from './LocationDrawer'
 import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '../../lib/usePageSize'
+import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 
-function StatusBadge({ status }) {
-  const map = {
-    active:   { bg: '#F0FDF4', color: '#16A34A', label: 'Actief' },
-    inactive: { bg: '#FFF7ED', color: '#C2410C', label: 'Inactief' },
-  }
-  const s = map[status?.toLowerCase()] ?? { bg: '#F9FAFB', color: '#6B7280', label: status ?? '—' }
-  return (
-    <span style={{ background: s.bg, color: s.color, fontSize: 11, fontWeight: 500,
-                   padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-      {s.label}
-    </span>
-  )
-}
 
 function SortIcon({ active, dir }) {
   if (!active) return <ChevronsUpDown size={12} style={{ color: '#D1D5DB' }} />

@@ -1,5 +1,11 @@
+/**
+ * ContactPersonDrawer — slide-in panel with one contact person's details and
+ * quick mail/call links. Opened from ContactPersonsTable.
+ * InfoRow below = one labeled detail row (optionally a clickable mailto/tel link).
+ */
 import { X, Mail, Phone, Building2, MessageCircle, Briefcase, User } from 'lucide-react'
 
+// One labeled row of contact info; renders a mailto/tel link when href is given.
 function InfoRow({ icon: Icon, label, value, href }) {
   if (!value) return null
   return (

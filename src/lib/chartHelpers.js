@@ -1,3 +1,5 @@
+// chartHelpers — shared chart constants/utilities (e.g. the fixed display order
+// of "last login" buckets used to sort chart categories consistently).
 export const LOGIN_GROUP_ORDER = [
   'Minder dan 7 dagen','8 t/m 14 dagen','15 t/m 21 dagen',
   '22 t/m 30 dagen','31 t/m 60 dagen','61 t/m 90 dagen',

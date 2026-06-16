@@ -1,3 +1,4 @@
+// table_aggregator module — aggregate bundles into a table structure.
 import { Table2 } from 'lucide-react'
 
 export default {

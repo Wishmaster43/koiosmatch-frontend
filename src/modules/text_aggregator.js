@@ -1,3 +1,4 @@
+// text_aggregator module — concatenate text from multiple bundles into one string.
 import { AlignLeft } from 'lucide-react'
 
 export default {

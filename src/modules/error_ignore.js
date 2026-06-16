@@ -1,3 +1,4 @@
+// error_ignore module — error handler: swallow the error and continue the flow.
 import { EyeOff } from 'lucide-react'
 
 export default {

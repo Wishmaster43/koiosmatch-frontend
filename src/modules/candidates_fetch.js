@@ -1,7 +1,9 @@
+// candidates_fetch module — fetch candidates from the connected planning system.
 import { UserSearch } from 'lucide-react'
 
 export default {
   type:  'candidates_fetch',
+  app:   ['shiftmanager','intus','aelio','elanza'],
   category: 'Kandidaten',
   label: 'Kandidaten Ophalen',
   Icon:  UserSearch,

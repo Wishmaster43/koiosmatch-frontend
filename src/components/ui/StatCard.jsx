@@ -1,7 +1,14 @@
-export default function StatCard({ label, value, sub, color = '#534AB7', bg = '#EEF2FF', icon: Icon }) {
+// StatCard — a simple stat tile (icon + label + value + optional sub-text).
+// When onClick is provided the card becomes clickable (hover highlight + pointer cursor).
+export default function StatCard({ label, value, sub, color = '#534AB7', bg = '#EEF2FF', icon: Icon, onClick }) {
   return (
-    <div className="flex flex-col gap-3 p-5 bg-white rounded-xl"
-      style={{ border: '1px solid #F3F4F6' }}>
+    <div
+      className="flex flex-col gap-3 p-5 bg-white rounded-xl"
+      style={{ border: '1px solid #F3F4F6', cursor: onClick ? 'pointer' : undefined, transition: 'background 0.1s' }}
+      onClick={onClick}
+      onMouseEnter={onClick ? e => (e.currentTarget.style.background = '#F9FAFB') : undefined}
+      onMouseLeave={onClick ? e => (e.currentTarget.style.background = 'white') : undefined}
+    >
       <div className="flex items-center justify-between">
         {Icon && (
           <div className="flex items-center justify-center flex-shrink-0 rounded-lg"

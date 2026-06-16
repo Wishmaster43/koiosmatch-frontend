@@ -1,3 +1,4 @@
+// delay module — pause the workflow for a configured duration before continuing.
 import { Clock } from 'lucide-react'
 
 export default {

@@ -1,9 +1,16 @@
+/**
+ * CandidatesKpiRow — the row of KPI cards above the candidates report
+ * (active / inactive / new / needs-attention counts + a trend).
+ * count() tallies candidates by status; calcAandacht() flags ones needing attention.
+ */
 import { AlertTriangle, UserCheck, UserX, UserPlus, TrendingUp } from 'lucide-react'
 import KpiCard from '../ui/KpiCard'
 
+// Count candidates whose status matches the given value (defaults missing to 'onbekend').
 const count = (candidates, status) =>
   candidates.filter(c => (c.status || 'onbekend').toLowerCase() === status).length
 
+// Compute how many candidates need attention (e.g. stale/expiring), used for the KPI.
 function calcAandacht(candidates) {
   const now = Date.now()
   return candidates.filter(c => {

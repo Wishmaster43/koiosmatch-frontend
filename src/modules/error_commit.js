@@ -1,3 +1,4 @@
+// error_commit module — error handler: commit the current transaction and stop on error.
 import { CheckCircle2 } from 'lucide-react'
 
 export default {

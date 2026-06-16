@@ -1,10 +1,20 @@
+/**
+ * Sidebar — the left navigation rail.
+ * Renders the brand, a TenantSwitcher (super admins can change tenant), and the
+ * nav items that set the active page. Collapses to icons when `expanded` is false.
+ *
+ * TenantSwitcher below = the tenant dropdown shown at the top of the sidebar.
+ */
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { canAccessPage } from '../../lib/access'
 import {
-  LayoutDashboard, Zap, Users, Building2, MapPin, Layers,
-  MessageCircle, Table2, Settings, ChevronDown,
+  LayoutDashboard, Zap, Users, Building2,
+  MessageCircle, Settings, ChevronDown, Brain, BarChart3, TrendingUp, Bot,
+  FileText, Briefcase, CalendarDays,
 } from 'lucide-react'
 
+// Tenant dropdown: shows the active tenant; super admins can switch tenants here.
 function TenantSwitcher({ expanded }) {
   const { activeTenant, tenants, setActiveTenant, isSuperAdmin } = useAuth()
   const [open, setOpen] = useState(false)
@@ -12,6 +22,11 @@ function TenantSwitcher({ expanded }) {
   const initials = activeTenant?.name
     ? activeTenant.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
     : '??'
+
+  // The switcher is only interactive when there is actually more than one tenant
+  // to switch between (true cross-tenant super admins). Single-tenant users get a
+  // plain, non-clickable display regardless of their role.
+  const canSwitch = isSuperAdmin() && tenants.length > 1
 
   if (!expanded) {
     return (
@@ -27,14 +42,14 @@ function TenantSwitcher({ expanded }) {
   return (
     <div className="relative flex-shrink-0 mx-3 mt-3">
       <button
-        onClick={() => isSuperAdmin() && setOpen(o => !o)}
+        onClick={() => canSwitch && setOpen(o => !o)}
         className="flex items-center w-full transition-colors rounded-lg"
         style={{
           gap: 8, padding: '7px 9px',
           background: '#F8F9FF', border: '1px solid #EBEBF5',
-          cursor: isSuperAdmin() ? 'pointer' : 'default',
+          cursor: canSwitch ? 'pointer' : 'default',
         }}
-        onMouseEnter={e => isSuperAdmin() && (e.currentTarget.style.background = '#F0F0FF')}
+        onMouseEnter={e => canSwitch && (e.currentTarget.style.background = '#F0F0FF')}
         onMouseLeave={e => (e.currentTarget.style.background = '#F8F9FF')}
       >
         <div className="flex items-center justify-center flex-shrink-0 rounded"
@@ -49,13 +64,13 @@ function TenantSwitcher({ expanded }) {
             {isSuperAdmin() ? 'Super admin' : 'Flex staffing'}
           </div>
         </div>
-        {isSuperAdmin() && tenants.length > 1 && (
+        {canSwitch && (
           <ChevronDown size={12} style={{ color: '#9CA3AF', flexShrink: 0,
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
         )}
       </button>
 
-      {open && isSuperAdmin() && (
+      {open && canSwitch && (
         <div className="absolute left-0 right-0 z-50 mt-1 overflow-hidden bg-white top-full rounded-xl"
           style={{ border: '1px solid #E5E7EB', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
           <div className="px-3 py-2 border-b border-gray-100">
@@ -93,29 +108,47 @@ function TenantSwitcher({ expanded }) {
   )
 }
 
+// Regular top-level pages. Gated entries (see lib/access.js) are filtered by
+// accessible_pages below. AI Agents + Workflows are NOT here — they are modules
+// shown in their own group (MODULE_NAV_ITEMS) and only for users who may access them.
 const NAV_ITEMS = [
-  { id: 'dashboard',   label: 'Dashboard',  icon: LayoutDashboard },
-  { id: 'aiagents',   label: 'AI Agents',  icon: Zap },
-  { id: 'workflows',   label: 'Workflows',  icon: Zap },
-//  { id: 'apiconnections',   label: 'API Connections',  icon: Zap },
-  { id: 'candidates',  label: 'Kandidaten', icon: Users },
-  { id: 'customers',   label: 'Klanten',    icon: Building2 },
-  { id: 'locations',   label: 'Locaties',   icon: MapPin },
-  { id: 'departments', label: 'Afdelingen', icon: Layers },
-  { id: 'whatsapp',    label: 'WhatsApp',   icon: MessageCircle },
+  { id: 'dashboard',      label: 'Dashboard',     icon: LayoutDashboard },
+  { id: 'candidates',     label: 'Kandidaten',    icon: Users },
+  { id: 'applications',   label: 'Sollicitaties', icon: FileText },
+  { id: 'vacancies',      label: 'Vacatures',     icon: Briefcase },
   {
-    id: 'details', label: 'Details', icon: Table2,
+    id: 'customers', label: 'Klanten',  icon: Building2,
     children: [
-      { id: 'details.candidates',  label: 'Kandidaten' },
-      { id: 'details.customers',   label: 'Klanten' },
-      { id: 'details.locations',   label: 'Locaties' },
-      { id: 'details.departments', label: 'Afdelingen' },
-      { id: 'details.contacts',    label: 'Contactpersonen' },
-      { id: 'details.orders',      label: 'Diensten' },
-      { id: 'details.runs',        label: 'Uitvoeringen' },
-      { id: 'details.messages',    label: 'Berichten' },
+      { id: 'customers.locations',   label: 'Locaties' },
+      { id: 'customers.departments', label: 'Afdelingen' },
+      { id: 'customers.contacts',    label: 'Contactpersonen' },
     ],
   },
+]
+
+// Module pages — shown in a separate "Modules" nav group. All are gated by
+// accessible_pages (super admin enables them per tenant via the Modules settings tab).
+const MODULE_NAV_ITEMS = [
+  {
+    id: 'shiftmanager', label: 'Shiftmanager', icon: BarChart3,
+    children: [
+      { id: 'shiftmanager.candidates',  label: 'Kandidaten-SM' },
+      { id: 'shiftmanager.customers',   label: 'Klanten-SM' },
+      { id: 'shiftmanager.locations',   label: 'Locaties-SM' },
+      { id: 'shiftmanager.departments', label: 'Afdelingen-SM' },
+      { id: 'shiftmanager.contacts',    label: 'Contactpersonen-SM' },
+      { id: 'shiftmanager.details',     label: 'Details-SM' },
+    ],
+  },
+  {
+    id: 'helloflex', label: 'HelloFlex', icon: TrendingUp,
+    children: [
+      { id: 'helloflex.dashboard', label: 'Dashboard-HF' },
+    ],
+  },
+  { id: 'planning',  label: 'Planning',       icon: CalendarDays },
+  { id: 'aiagents',  label: 'AI & Workflows', icon: Brain },
+  { id: 'whatsapp',  label: 'WhatsApp',       icon: MessageCircle },
 ]
 
 function SubNavItem({ item, active, onNavigate }) {
@@ -150,7 +183,7 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
   const Icon        = item.icon
 
   const handleClick = () => {
-    if (hasChildren) toggleOpen(item.id)
+    if (hasChildren) { toggleOpen(item.id); onNavigate(item.id) }
     else onNavigate(item.id)
   }
 
@@ -177,6 +210,14 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
             <span style={{ fontSize: 13, fontWeight: isActive ? 500 : 400, flex: 1, textAlign: 'left' }}>
               {item.label}
             </span>
+            {item.soon && (
+              <span style={{
+                fontSize: 9, fontWeight: 600, letterSpacing: '0.04em', padding: '2px 5px',
+                background: '#F3F4F6', color: '#9CA3AF', borderRadius: 4, flexShrink: 0,
+              }}>
+                binnenkort
+              </span>
+            )}
             {hasChildren ? (
               <ChevronDown size={13} style={{
                 flexShrink: 0, opacity: 0.5,
@@ -184,7 +225,7 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
                 transition: 'transform 0.2s ease',
               }} />
             ) : (
-              isActive && (
+              !item.soon && isActive && (
                 <span className="rounded-full"
                   style={{ width: 5, height: 5, background: 'var(--color-primary)', flexShrink: 0 }} />
               )
@@ -205,11 +246,28 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
   )
 }
 
-export default function Sidebar({ expanded, activePage, setActivePage, onTheme }) {
+export default function Sidebar({ expanded, activePage, setActivePage, onTheme, koiosOpen, onToggleKoios }) {
   const [openItems, setOpenItems] = useState([])
+  const auth = useAuth()
 
   const toggleOpen = (id) =>
     setOpenItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])
+
+  // Show only the pages/modules this user may access, driven by accessible_pages.
+  // For items with children (e.g. Details), also filter each child by canAccessPage.
+  const visibleNavItems = NAV_ITEMS
+    .filter(item => canAccessPage(item.id, auth))
+    .map(item => {
+      if (!item.children) return item
+      return { ...item, children: item.children.filter(child => canAccessPage(child.id, auth)) }
+    })
+  const visibleModuleItems = MODULE_NAV_ITEMS
+    .filter(item => canAccessPage(item.id, auth))
+    .map(item => {
+      if (!item.children) return item
+      return { ...item, children: item.children.filter(child => canAccessPage(child.id, auth)) }
+    })
+  const showSettings       = canAccessPage('settings', auth)
 
   return (
     <div className="flex flex-col flex-shrink-0 overflow-hidden transition-all duration-200"
@@ -224,35 +282,81 @@ export default function Sidebar({ expanded, activePage, setActivePage, onTheme }
           minHeight: 56,
         }}>
         <div className="flex items-center" style={{ gap: 9, paddingLeft: expanded ? 14 : 0, paddingRight: expanded ? 10 : 0, width: '100%', justifyContent: expanded ? 'flex-start' : 'center' }}>
-          <div className="flex items-center justify-center flex-shrink-0 rounded-lg"
-            style={{ width: 28, height: 28, background: 'var(--color-primary)' }}>
-            <Zap size={14} color="white" />
-          </div>
-          {expanded && (
-            <span className="font-mono font-semibold tracking-wide"
-              style={{ fontSize: 13, color: 'var(--sidebar-text)' }}>
-              koios Connect
-            </span>
-          )}
+          {expanded
+            ? <img src="/KoiosMatch.png" alt="KoiosMatch" style={{ height: 28, width: 'auto' }} />
+            : <img src="/favicon.png" alt="KoiosMatch" style={{ width: 28, height: 28, objectFit: 'contain' }} />
+          }
         </div>
       </div>
 
       <TenantSwitcher expanded={expanded} />
 
-      {/* Nav */}
+      {/* Nav — only the items this user may access */}
       <div className="flex-1 overflow-auto" style={{ padding: '10px 6px' }}>
-        {NAV_ITEMS.map(item => (
+        {visibleNavItems.map(item => (
           <NavItem key={item.id} item={item} activePage={activePage}
             expanded={expanded} openItems={openItems}
             toggleOpen={toggleOpen} onNavigate={setActivePage} />
         ))}
+
+        {/* Modules — separate group, only for users who may access them (super admins) */}
+        {visibleModuleItems.length > 0 && (
+          <div style={{ marginTop: 12 }}>
+            {expanded && (
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--sidebar-muted)', letterSpacing: '0.08em',
+                            textTransform: 'uppercase', padding: '0 10px 4px' }}>
+                Modules
+              </div>
+            )}
+            {visibleModuleItems.map(item => (
+              <NavItem key={item.id} item={item} activePage={activePage}
+                expanded={expanded} openItems={openItems}
+                toggleOpen={toggleOpen} onNavigate={setActivePage} />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Bottom */}
+      {/* Bottom — Koios toggle + Settings */}
       <div style={{ padding: '6px 6px 10px', borderTop: '1px solid var(--sidebar-border)' }}>
-        <NavItem item={{ id: 'settings', label: 'Instellingen', icon: Settings }}
-          activePage={activePage} expanded={expanded}
-          openItems={openItems} toggleOpen={toggleOpen} onNavigate={setActivePage} />
+        {/* Koios AI knop */}
+        <button
+          onClick={onToggleKoios}
+          title="Koios AI"
+          className="flex items-center w-full rounded-lg mb-1 border-none cursor-pointer font-sans transition-all duration-150"
+          style={{
+            gap:            expanded ? 9 : 0,
+            padding:        expanded ? '7px 10px' : '7px',
+            justifyContent: expanded ? 'flex-start' : 'center',
+            background: koiosOpen
+              ? 'linear-gradient(135deg, #6366F1, #8B5CF6)'
+              : 'linear-gradient(135deg, #6366F120, #8B5CF620)',
+            color: '#fff',
+          }}
+        >
+          <div className="flex items-center justify-center rounded-full flex-shrink-0"
+            style={{ width: 18, height: 18, background: koiosOpen ? 'rgba(255,255,255,0.25)' : '#6366F1' }}>
+            <Bot size={11} color="white" />
+          </div>
+          {expanded && (
+            <span style={{ fontSize: 13, fontWeight: 600, flex: 1, textAlign: 'left',
+              color: koiosOpen ? '#fff' : '#6366F1' }}>
+              Koios
+            </span>
+          )}
+          {expanded && !koiosOpen && (
+            <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px',
+              background: '#6366F1', color: '#fff', borderRadius: 99, letterSpacing: '0.04em' }}>
+              AI
+            </span>
+          )}
+        </button>
+
+        {showSettings && (
+          <NavItem item={{ id: 'settings', label: 'Instellingen', icon: Settings }}
+            activePage={activePage} expanded={expanded}
+            openItems={openItems} toggleOpen={toggleOpen} onNavigate={setActivePage} />
+        )}
       </div>
     </div>
   )

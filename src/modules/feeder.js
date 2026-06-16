@@ -1,3 +1,4 @@
+// feeder module — feed an array into the flow one item at a time.
 import { Database } from 'lucide-react'
 
 export default {

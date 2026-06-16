@@ -1,5 +1,10 @@
+/**
+ * DepartmentDrawer — slide-in panel with one department's details (customer,
+ * location, codes). Opened from DepartmentsTable. InfoRow = one labeled detail row.
+ */
 import { X, Building2, MapPin, Hash, Layers } from 'lucide-react'
 
+// One labeled row of department info (hidden when value is empty).
 function InfoRow({ icon: Icon, label, value }) {
   if (!value) return null
   return (

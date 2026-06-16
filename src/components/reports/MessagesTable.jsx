@@ -1,3 +1,8 @@
+/**
+ * MessagesTable — searchable, sortable, paginated table of sent/received messages
+ * (WhatsApp + email). Shows direction, status, channel and contact; filters come
+ * from RightPanelContext. Data is fetched per page from the API.
+ */
 import { useState, useEffect, useMemo } from 'react'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X,
          MessageCircle, Mail, CheckCheck, Clock, XCircle,

@@ -1,3 +1,4 @@
+// advanced_parser module — parse text into structured fields using advanced/custom rules.
 import { Regex } from 'lucide-react'
 
 export default {

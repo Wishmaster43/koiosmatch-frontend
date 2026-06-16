@@ -1,3 +1,7 @@
+/**
+ * KpiCard — a single KPI tile: label, big value, optional delta arrow (up/down),
+ * icon, and an optional click handler (e.g. to drill down). Shows a skeleton when loading.
+ */
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
 export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconColor, loading = false, onClick, note }) {

@@ -68,6 +68,11 @@
   to   { transform: rotate(360deg); }
 }
 
+@keyframes nodePulse {
+  0%, 100% { box-shadow: 0 0 0 4px var(--pulse-color, rgba(99,102,241,0.25)), 0 0 16px var(--pulse-color, rgba(99,102,241,0.3)); }
+  50%       { box-shadow: 0 0 0 10px var(--pulse-color, rgba(99,102,241,0.1)), 0 0 28px var(--pulse-color, rgba(99,102,241,0.4)); }
+}
+
 * { box-sizing: border-box; }
 
 body {
@@ -80,3 +85,9 @@ body {
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
+/* Tiptap editor */
+.ProseMirror { outline: none; min-height: inherit; }
+.ProseMirror p { margin: 0 0 6px; }
+.ProseMirror ul, .ProseMirror ol { padding-left: 20px; margin: 0 0 6px; }
+.ProseMirror h2 { font-size: 14px; font-weight: 700; margin: 0 0 6px; }
+.ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: #9CA3AF; pointer-events: none; float: left; height: 0; }

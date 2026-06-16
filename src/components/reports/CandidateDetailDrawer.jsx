@@ -1,6 +1,12 @@
+/**
+ * CandidateDetailDrawer — slide-in panel showing one candidate's full detail:
+ * contact info, status, work history, and messages. Opened from CandidatesTable.
+ * StatusBadge below = the colored status pill.
+ */
 import { useState } from 'react'
 import { X, Phone, Mail, MapPin, Calendar, Clock, Briefcase, MessageSquare, History } from 'lucide-react'
 
+// Colored status pill (actief / nietactief / extern / ...) for the candidate.
 function StatusBadge({ status }) {
   const styles = {
     actief:     { bg: '#F0FDF4', color: '#16A34A' },

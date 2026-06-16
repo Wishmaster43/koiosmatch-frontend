@@ -1,7 +1,9 @@
+// knowledge_search module — search the knowledge base (requires the AI Agent app).
 import { BookOpen } from 'lucide-react'
 
 export default {
   type:  'knowledge_search',
+  app:   'ai_agent',
   category: 'AI',
   label: 'Kennisbank Zoeken',
   Icon:  BookOpen,

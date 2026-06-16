@@ -1,3 +1,4 @@
+// set_variable module — store a single variable for use in later steps.
 import { StickyNote } from 'lucide-react'
 
 export default {

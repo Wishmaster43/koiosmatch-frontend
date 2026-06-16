@@ -1,3 +1,4 @@
+// repeater module — repeat the following steps a configured number of times.
 import { RefreshCw } from 'lucide-react'
 
 export default {

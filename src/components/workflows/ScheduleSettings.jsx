@@ -1,3 +1,16 @@
+/**
+ * ScheduleSettings — UI for configuring WHEN a workflow runs.
+ *
+ * Lets the user pick a trigger type (manual / interval / daily / weekly /
+ * monthly / cron-like) and the matching options (times, weekdays, days of
+ * month). Produces the schedule config object consumed by the editor.
+ * Also exports scheduleLabel() to render that config as a short readable string.
+ *
+ * Main blocks below:
+ *   - WEEKDAYS / MONTHS / pad → small date constants + helpers
+ *   - TimeInput               → hour:minute picker built from two selects
+ *   - (further down)          → the trigger-type sections + the exported panel
+ */
 import { useState } from 'react'
 import { X, Clock, Calendar, RotateCcw, Zap, ChevronDown, Plus, Trash2 } from 'lucide-react'
 

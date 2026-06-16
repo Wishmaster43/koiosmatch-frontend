@@ -1,7 +1,9 @@
+// whatsapp_send module — send a WhatsApp message to a candidate (requires the WhatsApp app).
 import { MessageCircle } from 'lucide-react'
 
 export default {
   type:  'whatsapp_send',
+  app:   'whatsapp',
   category: 'Berichten',
   label: 'WhatsApp Sturen',
   Icon:  MessageCircle,

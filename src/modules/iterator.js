@@ -1,3 +1,4 @@
+// iterator module — split an array so the following steps run once per item.
 import { Repeat } from 'lucide-react'
 
 export default {

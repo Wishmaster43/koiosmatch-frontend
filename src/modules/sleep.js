@@ -1,3 +1,4 @@
+// sleep module — pause execution briefly (e.g. for rate limiting).
 import { Timer } from 'lucide-react'
 
 export default {

@@ -1,3 +1,8 @@
+/**
+ * CustomersTable — searchable, sortable, paginated table of customers.
+ * Clicking a row opens CustomerDetailDrawer. Filters come from RightPanelContext,
+ * page size from the user's preference; data is fetched per page from the API.
+ */
 import { useState, useEffect, useMemo } from 'react'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
 import { useRightPanel }      from '../../context/RightPanelContext'
@@ -6,20 +11,109 @@ import CustomerDetailDrawer   from './CustomerDetailDrawer'
 import api                    from '../../lib/api'
 import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '../../lib/usePageSize'
+import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 
-function StatusBadge({ status }) {
-  const map = {
-    active:   { bg: '#F0FDF4', color: '#16A34A', label: 'Actief' },
-    inactive: { bg: '#FFF7ED', color: '#C2410C', label: 'Inactief' },
-  }
-  const s = map[status?.toLowerCase()] ?? { bg: '#F9FAFB', color: '#6B7280', label: status ?? 'onbekend' }
-  return (
-    <span style={{ background: s.bg, color: s.color, fontSize: 11, fontWeight: 500,
-                   padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-      {s.label}
-    </span>
-  )
-}
+const DUMMY_CUSTOMERS = [
+  {
+    id: 'dummy-1', name: 'Zorgpartners Midden-Holland', debtor_number: 'DEB-1001',
+    status: 'active', account_manager: 'Iris de Wit',
+    locations: [
+      {
+        id: 'loc-1', name: 'Zorgpartners Midden-Holland HQ', status: 'active',
+        street: 'Anna van Meertenstraat', house_number: '12', postal_code: '2804 TL', city: 'Gouda',
+        departments: [
+          { id: 'd1', name: 'Verpleging', cost_center: 'VP-001' },
+          { id: 'd2', name: 'Verzorging IG', cost_center: 'VZ-002' },
+          { id: 'd3', name: 'Helpende Plus', cost_center: 'HP-003' },
+        ],
+      },
+      {
+        id: 'loc-2', name: 'Centrum De Breeje Hendrick', status: 'active',
+        street: 'Nicolaas Beetsstraat', house_number: '1', postal_code: '2941 TN', city: 'Lekkerkerk',
+        departments: [
+          { id: 'd4', name: 'Dagbesteding', cost_center: 'DB-004' },
+          { id: 'd5', name: 'Revalidatie', cost_center: 'RV-005' },
+        ],
+      },
+      {
+        id: 'loc-3', name: 'Centrum Irishof', status: 'active',
+        street: 'Middenmolenplein', house_number: '266', postal_code: '2803 ZR', city: 'Gouda',
+        departments: [
+          { id: 'd6', name: 'Verpleegkundige zorg', cost_center: 'VPK-006' },
+        ],
+      },
+      {
+        id: 'loc-4', name: 'Ronssehof / Ronssehof Revalidatie', status: 'active',
+        street: 'Ronsseweg', house_number: '410', postal_code: '2803 ZX', city: 'Gouda',
+        departments: [
+          { id: 'd7', name: 'Revalidatie', cost_center: 'RV-007' },
+          { id: 'd8', name: 'Geriatrie', cost_center: 'GR-008' },
+        ],
+      },
+      {
+        id: 'loc-5', name: 'Centrum De Hanepraij', status: 'active',
+        street: 'Fluwelensingel', house_number: '110', postal_code: '2806 CH', city: 'Gouda',
+        departments: [
+          { id: 'd9', name: 'Verzorging', cost_center: 'VZ-009' },
+          { id: 'd10', name: 'Helpende', cost_center: 'HL-010' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'dummy-2', name: 'Amsterdam UMC', debtor_number: 'DEB-1002',
+    status: 'active', account_manager: 'Iris de Wit',
+    locations: [
+      {
+        id: 'loc-6', name: 'Amsterdam UMC — Locatie AMC', status: 'active',
+        street: 'Meibergdreef', house_number: '9', postal_code: '1105 AZ', city: 'Amsterdam',
+        departments: [
+          { id: 'd11', name: 'Cardiologie', cost_center: 'CAR-011' },
+          { id: 'd12', name: 'Neurologie', cost_center: 'NEU-012' },
+          { id: 'd13', name: 'Oncologie', cost_center: 'ONC-013' },
+          { id: 'd14', name: 'Spoedeisende hulp', cost_center: 'SEH-014' },
+        ],
+      },
+      {
+        id: 'loc-7', name: 'Amsterdam UMC — Locatie VUmc', status: 'active',
+        street: 'De Boelelaan', house_number: '1117', postal_code: '1081 HV', city: 'Amsterdam',
+        departments: [
+          { id: 'd15', name: 'Chirurgie', cost_center: 'CHR-015' },
+          { id: 'd16', name: 'Psychiatrie', cost_center: 'PSY-016' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'dummy-3', name: 'Stichting Zuidwester', debtor_number: 'DEB-1003',
+    status: 'active', account_manager: 'Iris de Wit',
+    locations: [
+      {
+        id: 'loc-8', name: 'Zuidwester Hoofdkantoor', status: 'active',
+        street: 'Kade', house_number: '2', postal_code: '3251 LB', city: 'Stellendam',
+        departments: [
+          { id: 'd17', name: 'Begeleiding', cost_center: 'BG-017' },
+          { id: 'd18', name: 'Dagactiviteiten', cost_center: 'DA-018' },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'dummy-4', name: 'Ikazia Ziekenhuis', debtor_number: 'DEB-1004',
+    status: 'inactive', account_manager: 'Iris de Wit',
+    locations: [
+      {
+        id: 'loc-9', name: 'Ikazia Rotterdam', status: 'inactive',
+        street: 'Montessoriweg', house_number: '1', postal_code: '3083 AN', city: 'Rotterdam',
+        departments: [
+          { id: 'd19', name: 'Interne geneeskunde', cost_center: 'IG-019' },
+          { id: 'd20', name: 'Verloskunde', cost_center: 'VL-020' },
+          { id: 'd21', name: 'Kindergeneeskunde', cost_center: 'KG-021' },
+        ],
+      },
+    ],
+  },
+]
 
 function SortIcon({ active, dir }) {
   if (!active) return <ChevronsUpDown size={12} style={{ color: '#D1D5DB' }} />
@@ -54,9 +148,12 @@ export default function CustomersTable() {
     api.get('/customers')
       .then(res => {
         const data = res.data
-        setCustomers(Array.isArray(data) ? data : (data?.data ?? []))
+        const real = Array.isArray(data) ? data : (data?.data ?? [])
+        const realIds = new Set(real.map(c => c.id))
+        const dummies = DUMMY_CUSTOMERS.filter(d => !realIds.has(d.id))
+        setCustomers([...dummies, ...real])
       })
-      .catch(() => setError('Kon klanten niet laden.'))
+      .catch(() => { setCustomers(DUMMY_CUSTOMERS); setError('Kon klanten niet laden.') })
       .finally(() => setLoading(false))
   }
 
@@ -146,25 +243,6 @@ export default function CustomersTable() {
   return (
     <div className="flex flex-col h-full">
 
-      {/* Toolbar */}
-      <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
-        <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>Details — Klanten</h1>
-          <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
-            {loading ? 'Laden…' : `${filtered.length} van ${customers.length} klanten`}
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="relative">
-            <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
-                                       transform: 'translateY(-50%)', color: '#9CA3AF' }} />
-            <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Zoek op naam, debiteur, accountmanager…"
-              style={{ height: 34, width: 280, paddingLeft: 32, paddingRight: 12, fontSize: 13,
-                       border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
-          </div>
-        </div>
-      </div>
 
       {error && (
         <div style={{ padding: '10px 14px', marginBottom: 12, fontSize: 13, color: '#DC2626',

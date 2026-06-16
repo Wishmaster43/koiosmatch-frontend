@@ -1,3 +1,8 @@
+/**
+ * ThemeContext — light/dark theme state.
+ * Persists the choice in localStorage and applies it on mount; exposes the
+ * current theme plus a setter/toggle to the app via useTheme().
+ */
 import { createContext, useContext, useState, useEffect } from 'react'
 
 const ThemeContext = createContext()

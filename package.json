@@ -1,5 +1,5 @@
 {
-  "name": "koiosconnect-frontend",
+  "name": "koiosmatch-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -10,11 +10,20 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tiptap/extension-color": "^3.26.1",
+    "@tiptap/extension-text-align": "^3.26.1",
+    "@tiptap/extension-text-style": "^3.26.1",
+    "@tiptap/extension-underline": "^3.26.1",
+    "@tiptap/pm": "^3.26.1",
+    "@tiptap/react": "^3.26.1",
+    "@tiptap/starter-kit": "^3.26.1",
     "@xyflow/react": "^12.11.0",
     "axios": "^1.17.0",
     "clsx": "^2.1.1",
     "lucide-react": "^1.17.0",
+    "qrcode.react": "^4.2.0",
     "react": "^19.2.6",
+    "react-datepicker": "^9.1.0",
     "react-dom": "^19.2.6",
     "react-router-dom": "^7.16.0",
     "recharts": "^3.8.1"

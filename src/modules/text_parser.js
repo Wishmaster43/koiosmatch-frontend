@@ -1,3 +1,4 @@
+// text_parser module — extract data from text using a pattern/expression.
 import { ScanText } from 'lucide-react'
 
 export default {

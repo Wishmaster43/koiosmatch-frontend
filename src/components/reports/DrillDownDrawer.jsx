@@ -1,6 +1,12 @@
+/**
+ * DrillDownDrawer — generic slide-in panel that lists the records behind a
+ * chart/KPI data point (searchable). Reused by several reports.
+ * StatusBadge below = the colored status pill.
+ */
 import { X, Search, Phone, Mail, Calendar, Briefcase, Clock, CalendarCheck } from 'lucide-react'
 import { useState } from 'react'
 
+// Colored status pill (actief / nietactief / extern / ...) for a record.
 function StatusBadge({ status }) {
   const styles = {
     actief:     { bg: '#F0FDF4', color: '#16A34A' },

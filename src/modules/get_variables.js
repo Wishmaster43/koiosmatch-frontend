@@ -1,3 +1,4 @@
+// get_variables module — read multiple stored workflow variables at once.
 import { BookMarked } from 'lucide-react'
 
 export default {

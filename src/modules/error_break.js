@@ -1,3 +1,4 @@
+// error_break module — error handler: stop the route and let the run fail when an error occurs.
 import { OctagonX } from 'lucide-react'
 
 export default {

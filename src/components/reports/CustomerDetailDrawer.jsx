@@ -1,18 +1,9 @@
+/**
+ * CustomerDetailDrawer — slide-in panel with one customer's details (locations,
+ * departments, contacts). Opened from CustomersTable. StatusBadge = active/inactive pill.
+ */
 import { X, MapPin, Building2, Hash, User, Layers } from 'lucide-react'
-
-function StatusBadge({ status }) {
-  const map = {
-    active:   { bg: '#F0FDF4', color: '#16A34A', label: 'Actief' },
-    inactive: { bg: '#FFF7ED', color: '#C2410C', label: 'Inactief' },
-  }
-  const s = map[status?.toLowerCase()] ?? { bg: '#F9FAFB', color: '#6B7280', label: status ?? 'onbekend' }
-  return (
-    <span style={{ background: s.bg, color: s.color, borderRadius: 999,
-                   padding: '2px 8px', fontSize: 11, fontWeight: 500 }}>
-      {s.label}
-    </span>
-  )
-}
+import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 
 function InfoRow({ icon: Icon, label, value }) {
   if (!value) return null

@@ -1,7 +1,9 @@
+// shifts_input module — provide shifts as manual input (requires a planning app).
 import { ClipboardList } from 'lucide-react'
 
 export default {
   type:  'shifts_input',
+  app:   ['shiftmanager','intus','aelio','elanza'],
   category: 'Diensten',
   label: 'Diensten Plakken',
   Icon:  ClipboardList,
@@ -19,6 +21,7 @@ export default {
       key:   'id_field',
       label: 'ID veld naam',
       type:  'select',
+  app:   ['shiftmanager','intus','aelio','elanza'],
       options: ['id', 'external_id', 'shift_number'],
       help:  'Welk veld wordt gebruikt als identifier in de volgende module.',
     },

@@ -1,3 +1,8 @@
+/**
+ * PaginationBar — shared pagination footer for tables: "x–y of N", page size
+ * selector, and first/prev/next/last controls. Calls back onPageChange /
+ * onPageSizeChange so the parent can refetch. PAGE_SIZE_OPTIONS = selectable sizes.
+ */
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 
 export const PAGE_SIZE_OPTIONS = [50, 100, 200, 300, 400, 500]

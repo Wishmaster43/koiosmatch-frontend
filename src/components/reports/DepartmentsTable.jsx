@@ -1,3 +1,8 @@
+/**
+ * DepartmentsTable — searchable, sortable, paginated table of departments.
+ * Clicking a row opens DepartmentDrawer. Filters come from RightPanelContext,
+ * page size from the user's preference; data is fetched per page from the API.
+ */
 import { useState, useEffect, useMemo } from 'react'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useRightPanel }      from '../../context/RightPanelContext'

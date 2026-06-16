@@ -1,3 +1,4 @@
+// html_table_parser module — parse an HTML table into structured rows and columns.
 import { TableProperties } from 'lucide-react'
 
 export default {

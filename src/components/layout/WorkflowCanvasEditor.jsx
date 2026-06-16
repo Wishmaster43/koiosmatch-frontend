@@ -1,3 +1,19 @@
+/**
+ * WorkflowCanvasEditor — the visual drag-and-drop workflow builder.
+ *
+ * Renders the node graph (via @xyflow/react / ReactFlow): the canvas, nodes,
+ * connecting edges, minimap and controls. Lets the user add modules from a
+ * picker, wire them together, configure each module in a side panel, and
+ * save/run the workflow.
+ *
+ * Main blocks below:
+ *   - Schedule helpers      → turn a trigger config into a human-readable label
+ *   - Field inputs          → render the right form control per schema field type
+ *                             (incl. AgentSelectField which fetches /ai/agents)
+ *   - ModulePicker          → lists modules, filtered by which apps are enabled
+ *   - Node / edge components → how each block and connection looks on the canvas
+ *   - Editor component       → owns state, save/run, and the config side panel
+ */
 import { useState, useCallback, useRef, useEffect, createContext, useContext } from 'react'
 import {
   ReactFlow, Background, Controls, MiniMap,
@@ -9,15 +25,281 @@ import '@xyflow/react/dist/style.css'
 import {
   X, Save, Play, Loader2, Plus, Trash2,
   Zap, CheckCircle, AlertCircle, List, Clock, Filter,
-  ChevronDown, ChevronRight,
+  ChevronDown, ChevronRight, CalendarDays, Repeat, Webhook,
 } from 'lucide-react'
-import { MODULE_META, MODULE_SCHEMAS } from '../../modules/index'
+import { MODULE_META, MODULE_SCHEMAS, MODULE_APP_MAP } from '../../modules/index'
+import { useApps } from '../../context/AppsContext'
 
-const TRIGGER_OPTIONS = [
-  'Dagelijks 07:00','Dagelijks 08:00','Dagelijks 09:00',
-  'Dagelijks 10:00','Dagelijks 12:00','Elk uur',
-  'Maandag 07:00','Handmatig','Webhook',
-]
+// ── Schedule helpers ──────────────────────────────────────────────────────────
+
+const DAYS_NL  = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za']
+const DAYS_FULL = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag']
+const MONTHS_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
+
+function scheduleLabel(trigger, cfg) {
+  if (!trigger || trigger === 'Handmatig') return 'Handmatig'
+  if (trigger === 'Direct') return 'Direct'
+  if (!cfg) return 'Gepland'
+  const t = cfg.schedule_type
+  if (t === 'interval') {
+    const u = cfg.interval_unit === 'hours' ? 'uur' : 'min'
+    return `Elke ${cfg.interval_value ?? 1} ${u}`
+  }
+  const time = cfg.time ?? '08:00'
+  if (t === 'daily')   return `Dagelijks ${time}`
+  if (t === 'weekly') {
+    const d = (cfg.days_of_week ?? [1]).map(i => DAYS_NL[i]).join(', ')
+    return `${d} ${time}`
+  }
+  if (t === 'monthly') return `Dag ${cfg.day_of_month ?? 1} v/d maand ${time}`
+  if (t === 'quarterly') return `Elk kwartaal ${time}`
+  if (t === 'yearly')  return `Jaarlijks ${MONTHS_NL[(cfg.month ?? 1) - 1]} ${cfg.day_of_month ?? 1} ${time}`
+  return 'Gepland'
+}
+
+// ── Schedule Modal ────────────────────────────────────────────────────────────
+
+function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
+  const [type,     setType]     = useState(trigger === 'Handmatig' ? 'manual' : trigger === 'Direct' ? 'instant' : 'scheduled')
+  const [sType,    setSType]    = useState(scheduleConfig?.schedule_type ?? 'daily')
+  const [intVal,   setIntVal]   = useState(scheduleConfig?.interval_value ?? 15)
+  const [intUnit,  setIntUnit]  = useState(scheduleConfig?.interval_unit  ?? 'minutes')
+  const [time,     setTime]     = useState(scheduleConfig?.time ?? '08:00')
+  const [times,    setTimes]    = useState(scheduleConfig?.times ?? ['08:00'])
+  const [dow,      setDow]      = useState(scheduleConfig?.days_of_week ?? [1, 2, 3, 4, 5])
+  const [dom,      setDom]      = useState(scheduleConfig?.day_of_month ?? 1)
+  const [month,    setMonth]    = useState(scheduleConfig?.month ?? 1)
+  const toggleDay = d => setDow(ds => ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d].sort((a,b)=>a-b))
+
+  const addTime    = () => setTimes(ts => [...ts, '08:00'])
+  const removeTime = i  => setTimes(ts => ts.filter((_, j) => j !== i))
+  const updateTime = (i, v) => setTimes(ts => ts.map((t, j) => j === i ? v : t))
+
+  const handleSave = () => {
+    if (type === 'manual')  { onSave('Handmatig', null); return }
+    if (type === 'instant') { onSave('Direct', null); return }
+    const cfg = { schedule_type: sType }
+    if (sType === 'interval') { cfg.interval_value = +intVal; cfg.interval_unit = intUnit }
+    else if (sType === 'daily')     { cfg.times = times }
+    else if (sType === 'weekly')    { cfg.days_of_week = dow; cfg.time = time }
+    else if (sType === 'monthly')   { cfg.day_of_month = +dom; cfg.time = time }
+    else if (sType === 'quarterly') { cfg.time = time }
+    else if (sType === 'yearly')    { cfg.day_of_month = +dom; cfg.month = +month; cfg.time = time }
+    onSave('Scheduled', cfg)
+  }
+
+  const inputStyle = { padding: '6px 10px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13, outline: 'none', background: 'white', color: '#374151' }
+  const selectStyle = { ...inputStyle, cursor: 'pointer' }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}
+      onClick={onClose}>
+      <div style={{ width: 480, background: 'white', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
+        onClick={e => e.stopPropagation()}>
+
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #F3F4F6' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <CalendarDays size={16} color="var(--color-primary)" />
+            <span style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Planning instellen</span>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}><X size={16} /></button>
+        </div>
+
+        <div style={{ overflowY: 'auto', flex: 1, padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+          {/* Trigger type selector */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+            {[
+              { id: 'manual',    label: 'Handmatig', desc: 'Starten via de knop',          Icon: Play },
+              { id: 'instant',   label: 'Direct',    desc: 'Zodra data binnenkomt',         Icon: Zap },
+              { id: 'scheduled', label: 'Gepland',   desc: 'Automatisch op een schema',     Icon: CalendarDays },
+            ].map(({ id, label, desc, Icon: Ic }) => (
+              <button key={id} type="button" onClick={() => setType(id)}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  padding: '14px 12px', borderRadius: 10, cursor: 'pointer',
+                  border: `2px solid ${type === id ? 'var(--color-primary)' : '#E5E7EB'}`,
+                  background: type === id ? 'var(--color-primary-bg)' : 'white',
+                }}>
+                <Ic size={20} color={type === id ? 'var(--color-primary)' : '#9CA3AF'} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: type === id ? 'var(--color-primary)' : '#374151' }}>{label}</span>
+                <span style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'center' }}>{desc}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Schedule type */}
+          {type === 'scheduled' && (
+            <>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Frequentie</label>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+                  {[
+                    { id: 'interval',  label: 'Interval' },
+                    { id: 'daily',     label: 'Dagelijks' },
+                    { id: 'weekly',    label: 'Wekelijks' },
+                    { id: 'monthly',   label: 'Maandelijks' },
+                    { id: 'quarterly', label: 'Kwartaal' },
+                    { id: 'yearly',    label: 'Jaarlijks' },
+                  ].map(o => (
+                    <button key={o.id} type="button" onClick={() => setSType(o.id)}
+                      style={{
+                        padding: '7px 4px', borderRadius: 8, fontSize: 12, fontWeight: sType === o.id ? 600 : 400,
+                        border: `1.5px solid ${sType === o.id ? 'var(--color-primary)' : '#E5E7EB'}`,
+                        background: sType === o.id ? 'var(--color-primary-bg)' : 'white',
+                        color: sType === o.id ? 'var(--color-primary)' : '#374151',
+                        cursor: 'pointer',
+                      }}>{o.label}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Interval */}
+              {sType === 'interval' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Elke</label>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <input type="number" min={1} max={999} value={intVal} onChange={e => setIntVal(e.target.value)}
+                      style={{ ...inputStyle, width: 80 }} />
+                    <select value={intUnit} onChange={e => setIntUnit(e.target.value)} style={selectStyle}>
+                      <option value="minutes">Minuten</option>
+                      <option value="hours">Uren</option>
+                    </select>
+                  </div>
+                  <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6 }}>Min. interval: 1 minuut</p>
+                </div>
+              )}
+
+              {/* Daily — multiple times */}
+              {sType === 'daily' && (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tijdstippen</label>
+                    <button type="button" onClick={addTime}
+                      style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>+ Tijdstip toevoegen</button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {times.map((t, i) => (
+                      <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <input type="time" value={t} onChange={e => updateTime(i, e.target.value)} style={{ ...inputStyle, flex: 1 }} />
+                        {times.length > 1 && (
+                          <button type="button" onClick={() => removeTime(i)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', display: 'flex', padding: 4 }}
+                            onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+                            onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}>
+                            <X size={14} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Weekly */}
+              {sType === 'weekly' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Dagen</label>
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      {DAYS_NL.map((d, i) => (
+                        <button key={i} type="button" onClick={() => toggleDay(i)}
+                          style={{
+                            width: 38, height: 38, borderRadius: '50%', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+                            border: `1.5px solid ${dow.includes(i) ? 'var(--color-primary)' : '#E5E7EB'}`,
+                            background: dow.includes(i) ? 'var(--color-primary)' : 'white',
+                            color: dow.includes(i) ? 'white' : '#374151',
+                          }}>{d}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
+                    <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
+                  </div>
+                </div>
+              )}
+
+              {/* Monthly */}
+              {sType === 'monthly' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Dag van de maand</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                        <button key={d} type="button" onClick={() => setDom(d)}
+                          style={{
+                            width: 34, height: 34, borderRadius: 8, fontSize: 12, fontWeight: dom === d ? 700 : 400, cursor: 'pointer',
+                            border: `1.5px solid ${dom === d ? 'var(--color-primary)' : '#E5E7EB'}`,
+                            background: dom === d ? 'var(--color-primary)' : 'white',
+                            color: dom === d ? 'white' : '#374151',
+                          }}>{d}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
+                    <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
+                  </div>
+                </div>
+              )}
+
+              {/* Quarterly */}
+              {sType === 'quarterly' && (
+                <div>
+                  <p style={{ fontSize: 12, color: '#6B7280', marginBottom: 10 }}>Wordt uitgevoerd op de eerste dag van elk kwartaal (jan, apr, jul, okt).</p>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
+                  <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
+                </div>
+              )}
+
+              {/* Yearly */}
+              {sType === 'yearly' && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    <div style={{ flex: 1 }}>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Maand</label>
+                      <select value={month} onChange={e => setMonth(+e.target.value)} style={{ ...selectStyle, width: '100%' }}>
+                        {MONTHS_NL.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Dag</label>
+                      <input type="number" min={1} max={31} value={dom} onChange={e => setDom(+e.target.value)} style={{ ...inputStyle, width: 70 }} />
+                    </div>
+                    <div>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
+                      <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Preview */}
+              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 14px' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Voorbeeld</div>
+                <div style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>
+                  {scheduleLabel('Scheduled', {
+                    schedule_type: sType,
+                    interval_value: intVal, interval_unit: intUnit,
+                    time, times, days_of_week: dow, day_of_month: dom, month,
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 20px', borderTop: '1px solid #F3F4F6' }}>
+          <button onClick={onClose} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: '1px solid #E5E7EB', background: 'white', cursor: 'pointer', color: '#374151' }}>Annuleren</button>
+          <button onClick={handleSave} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>Opslaan</button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const uid  = () => 'n_' + Math.random().toString(36).slice(2, 8)
 const mkEdge = (src, tgt) => ({ id: `e_${src}_${tgt}`, source: src, target: tgt, type: 'addable' })
@@ -60,9 +342,33 @@ function flowToSteps(nodes, edges) {
   return ordered.map(n => ({ id: n.id, type: n.data.type, config: n.data.config, position: n.position }))
 }
 
+// ── Agent select field ────────────────────────────────────────────────────────
+
+function AgentSelectField({ value, onChange, fieldKey }) {
+  const [agents,  setAgents]  = useState([])
+  const [loading, setLoading] = useState(true)
+  useEffect(() => {
+    import('../../lib/api').then(m => m.default.get('/ai/agents'))
+      .then(r => setAgents(r.data?.data ?? r.data ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+  return (
+    <select value={value || ''} onChange={e => onChange(fieldKey, e.target.value)}
+      style={{ width: '100%', padding: '7px 9px', border: '1px solid #E5E7EB', borderRadius: 8,
+               background: 'white', fontSize: 13, color: '#111', outline: 'none', cursor: 'pointer' }}>
+      <option value="">{loading ? 'Agents ophalen…' : 'Selecteer een agent…'}</option>
+      {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+    </select>
+  )
+}
+
 // ── Field renderer ────────────────────────────────────────────────────────────
 
 function FieldInput({ field, value, onChange }) {
+  if (field.type === 'agent_select') {
+    return <AgentSelectField value={value} onChange={onChange} fieldKey={field.key} />
+  }
   if (field.type === 'boolean') {
     return (
       <button type="button" onClick={() => onChange(field.key, !value)}
@@ -194,11 +500,14 @@ function ModuleNode({ id, data, selected }) {
         <div style={{
           width: 72, height: 72, borderRadius: '50%',
           background: meta.bg,
-          border: selected ? `3px solid ${meta.color}` : `2px solid ${meta.color}40`,
+          border: data.isRunning ? `3px solid ${meta.color}` : selected ? `3px solid ${meta.color}` : `2px solid ${meta.color}40`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: selected ? `0 0 0 4px ${meta.color}20` : '0 2px 8px rgba(0,0,0,0.08)',
-          transition: 'border 0.15s, box-shadow 0.15s',
+          boxShadow: data.isRunning
+            ? `0 0 0 6px ${meta.color}30, 0 0 20px ${meta.color}50`
+            : selected ? `0 0 0 4px ${meta.color}20` : '0 2px 8px rgba(0,0,0,0.08)',
+          transition: 'border 0.2s, box-shadow 0.2s',
           cursor: 'pointer', flexShrink: 0,
+          animation: data.isRunning ? 'nodePulse 1s ease-in-out infinite' : 'none',
         }}>
           <Icon size={26} color={meta.color} />
         </div>
@@ -427,8 +736,17 @@ const CATEGORY_ORDER = ['Alle', 'Triggers', 'Kandidaten', 'Diensten', 'Berichten
 function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
   const [search, setSearch] = useState('')
   const [tab,    setTab]    = useState('Alle')
+  const { isAppEnabled } = useApps()
 
-  const allEntries = Object.entries(MODULE_META)
+  // Filter out modules whose app is not enabled
+  const isModuleEnabled = (type) => {
+    const req = MODULE_APP_MAP[type]
+    if (!req) return true
+    const apps = Array.isArray(req) ? req : [req]
+    return apps.some(a => isAppEnabled(a))
+  }
+
+  const allEntries = Object.entries(MODULE_META).filter(([type]) => isModuleEnabled(type))
 
   const visible = allEntries.filter(([, m]) => {
     const matchSearch = !search || m.label.toLowerCase().includes(search.toLowerCase())
@@ -774,15 +1092,18 @@ function EditorInner({ workflow, onClose, onSave }) {
     setEdges(initFlow.edges)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-  const [name,       setName]      = useState(workflow.name)
-  const [trigger,    setTrigger]   = useState(workflow.trigger)
-  const [webhookId,  setWebhookId] = useState(workflow.trigger_config?.webhook_id ?? null)
-  const [webhooks,   setWebhooks]  = useState([])
-  const [status,     setStatus]    = useState(workflow.status || 'draft')
-  const [saved,      setSaved]     = useState(false)
-  const [running,    setRunning]   = useState(false)
+  const [name,           setName]           = useState(workflow.name)
+  const [trigger,        setTrigger]        = useState(workflow.trigger)
+  const [scheduleConfig, setScheduleConfig] = useState(workflow.trigger_config?.schedule ?? null)
+  const [webhookId,      setWebhookId]      = useState(workflow.trigger_config?.webhook_id ?? null)
+  const [webhooks,       setWebhooks]       = useState([])
+  const [status,         setStatus]         = useState(workflow.status || 'draft')
+  const [saved,          setSaved]          = useState(false)
+  const [running,        setRunning]        = useState(false)
+  const [runningNodeId,  setRunningNodeId]  = useState(null)
   const [selectedNodeId, setSelectedNodeId] = useState(null)
   const [pickerState,    setPickerState]    = useState(null)
+  const [showSchedule,   setShowSchedule]   = useState(false)
 
   useEffect(() => {
     import('../../lib/api').then(m => {
@@ -792,8 +1113,8 @@ function EditorInner({ workflow, onClose, onSave }) {
     })
   }, [])
   const [showLogs,       setShowLogs]       = useState(false)
-  const [filterState,    setFilterState]    = useState(null)  // { edgeId }
-  const [outputState,    setOutputState]    = useState(null)  // { nodeId, output }
+  const [filterState,    setFilterState]    = useState(null)
+  const [outputState,    setOutputState]    = useState(null)
 
   // Stable callback passed via context — never touches edge objects
   const handleEdgeAdd = useCallback((edgeId) => {
@@ -969,17 +1290,34 @@ function EditorInner({ workflow, onClose, onSave }) {
 
   const handleSave = useCallback(() => {
     const steps = flowToSteps(nodes, edges)
-    const triggerConfig = trigger === 'Webhook' && webhookId ? { webhook_id: webhookId } : undefined
+    let triggerConfig = undefined
+    if (trigger === 'Webhook' && webhookId) triggerConfig = { webhook_id: webhookId }
+    else if (trigger === 'Scheduled' && scheduleConfig) triggerConfig = { schedule: scheduleConfig }
     onSave({ ...workflow, name, trigger, trigger_config: triggerConfig, status, steps })
     setSaved(true)
     setTimeout(() => setSaved(false), 2000)
-  }, [nodes, edges, workflow, name, trigger, webhookId, status, onSave])
+  }, [nodes, edges, workflow, name, trigger, scheduleConfig, webhookId, status, onSave])
 
   const handleRun = useCallback(async () => {
     setRunning(true)
-    await new Promise(r => setTimeout(r, 2000))
+    // Walk nodes in flow order, animate each
+    const orderedNodes = []
+    const visited = new Set()
+    const startId = nodes.filter(n => !edges.some(e => e.target === n.id))
+                         .sort((a, b) => a.position.x - b.position.x)[0]?.id
+    let current = startId
+    while (current && !visited.has(current)) {
+      orderedNodes.push(current)
+      visited.add(current)
+      current = edges.find(e => e.source === current)?.target
+    }
+    for (const nid of orderedNodes) {
+      setRunningNodeId(nid)
+      await new Promise(r => setTimeout(r, 800))
+    }
+    setRunningNodeId(null)
     setRunning(false)
-  }, [])
+  }, [nodes, edges])
 
   const selectedNode = nodes.find(n => n.id === selectedNodeId) ?? null
 
@@ -989,7 +1327,7 @@ function EditorInner({ workflow, onClose, onSave }) {
 
   const nodesWithFirst = nodes.map(n => ({
     ...n,
-    data: { ...n.data, isFirst: n.id === firstNodeId },
+    data: { ...n.data, isFirst: n.id === firstNodeId, isRunning: n.id === runningNodeId },
   }))
 
   return (
@@ -1017,20 +1355,17 @@ function EditorInner({ workflow, onClose, onSave }) {
 
           <div style={{ width: 1, height: 20, background: '#E5E7EB', flexShrink: 0 }} />
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button onClick={() => setShowSchedule(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8,
+              border: '1px solid #E5E7EB', background: '#F9FAFB', cursor: 'pointer',
+              fontSize: 12, color: '#374151', fontWeight: 500,
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = '#F3F4F6')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#F9FAFB')}>
             <Clock size={13} color="#9CA3AF" />
-            <select value={trigger} onChange={e => { setTrigger(e.target.value); setWebhookId(null) }}
-              style={{ fontSize: 12, color: '#374151', border: 'none', background: 'transparent', outline: 'none', cursor: 'pointer' }}>
-              {TRIGGER_OPTIONS.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
-            {trigger === 'Webhook' && (
-              <select value={webhookId ?? ''} onChange={e => setWebhookId(e.target.value || null)}
-                style={{ fontSize: 12, color: '#374151', border: '1px solid #E5E7EB', borderRadius: 6, padding: '2px 6px', background: 'white', outline: 'none', cursor: 'pointer' }}>
-                <option value=''>— kies webhook —</option>
-                {webhooks.map(wh => <option key={wh.id} value={wh.id}>{wh.name}</option>)}
-              </select>
-            )}
-          </div>
+            {scheduleLabel(trigger, scheduleConfig)}
+          </button>
 
           <div style={{ width: 1, height: 20, background: '#E5E7EB', flexShrink: 0 }} />
 
@@ -1145,6 +1480,20 @@ function EditorInner({ workflow, onClose, onSave }) {
             }
           </div>
         </div>
+
+        {/* Schedule modal */}
+        {showSchedule && (
+          <ScheduleModal
+            trigger={trigger}
+            scheduleConfig={scheduleConfig}
+            onSave={(newTrigger, newCfg) => {
+              setTrigger(newTrigger)
+              setScheduleConfig(newCfg)
+              setShowSchedule(false)
+            }}
+            onClose={() => setShowSchedule(false)}
+          />
+        )}
 
         {/* Module picker */}
         {pickerState && (

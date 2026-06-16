@@ -1,6 +1,12 @@
+/**
+ * ReportFilterSidebar — the right-hand filter panel shared by all reports.
+ * Renders each filter group (registered via RightPanelContext) as a searchable
+ * multi-select, plus a reset action. SearchSelectGroup below = one such group.
+ */
 import { X, Search, ChevronDown, RotateCcw } from 'lucide-react'
 import { useState, useMemo } from 'react'
 
+// One collapsible, searchable multi-select group of filter options.
 function SearchSelectGroup({ group }) {
   const [open,  setOpen]  = useState(false)
   const [query, setQuery] = useState('')
@@ -270,12 +276,16 @@ function PeriodGroup({ group }) {
 export default function ReportFilterSidebar({ title = 'Filters', groups = [], onClose }) {
   const activeCount = groups.reduce((sum, g) => {
     if (g.type === 'period') return sum + (g.value ? 1 : 0)
+    if (g.type === 'global-search') return sum + (g.value ? 1 : 0)
+    if (g.type === 'location') return sum + (g.city ? 1 : 0)
     return sum + (g.selected?.length ?? 0)
   }, 0)
 
   const clearAll = () => {
     groups.forEach(g => {
       if (g.type === 'period') { g.onChange?.('') }
+      else if (g.type === 'global-search') { g.onChange?.('') }
+      else if (g.type === 'location') { g.onCityChange?.(''); g.onRadiusChange?.('') }
       else { g.selected?.forEach(v => g.onToggle?.(v)) }
     })
   }
@@ -318,10 +328,51 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
         </div>
       </div>
 
+      {/* Global search (type: 'global-search') — rendered at top before filter groups */}
+      {groups.filter(g => g.type === 'global-search').map(g => (
+        <div key={g.key} style={{ padding: '8px 12px', borderBottom: '1px solid #F3F4F6' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px',
+            borderRadius: 7, border: '1px solid #E5E7EB', background: '#F9FAFB' }}>
+            <Search size={12} color="#9CA3AF" style={{ flexShrink: 0 }} />
+            <input autoFocus={false} value={g.value ?? ''} onChange={e => g.onChange(e.target.value)}
+              placeholder={g.placeholder ?? 'Zoek alles…'}
+              style={{ flex: 1, border: 'none', outline: 'none', fontSize: 12, color: '#374151', background: 'transparent', padding: 0 }} />
+            {g.value && (
+              <button onClick={() => g.onChange('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: 0, display: 'flex' }}>
+                <X size={10} />
+              </button>
+            )}
+          </div>
+        </div>
+      ))}
+
+      {/* Location radius (type: 'location') */}
+      {groups.filter(g => g.type === 'location').map(g => (
+        <div key={g.key} style={{ padding: '8px 12px', borderBottom: '1px solid #F3F4F6' }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+            Straal
+          </div>
+          <input value={g.city ?? ''} onChange={e => g.onCityChange(e.target.value)}
+            placeholder="Plaatsnaam (bijv. Den Haag)"
+            style={{ width: '100%', padding: '6px 8px', fontSize: 12, borderRadius: 6,
+              border: '1px solid #E5E7EB', background: '#F9FAFB', color: '#374151',
+              outline: 'none', boxSizing: 'border-box', marginBottom: 6 }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <input value={g.radius ?? ''} onChange={e => g.onRadiusChange(e.target.value)}
+              placeholder="35"
+              type="number" min="1"
+              style={{ width: 70, padding: '6px 8px', fontSize: 12, borderRadius: 6,
+                border: '1px solid #E5E7EB', background: '#F9FAFB', color: '#374151',
+                outline: 'none', boxSizing: 'border-box' }} />
+            <span style={{ fontSize: 12, color: '#6B7280' }}>km</span>
+          </div>
+        </div>
+      ))}
+
       {/* Groepen */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px',
                     display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {groups.map(group => (
+        {groups.filter(g => g.type !== 'global-search' && g.type !== 'location').map(group => (
           <div key={group.key}>
             {/* Label + wis-knop */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',

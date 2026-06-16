@@ -1,8 +1,14 @@
+/**
+ * CandidatesTable — searchable, sortable table of candidates.
+ * Shows a status badge per candidate; clicking a row opens CandidateDetailDrawer.
+ * Filters come from RightPanelContext. StatusBadge below = the colored status pill.
+ */
 import { useState, useEffect, useMemo } from 'react'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
 import CandidateDetailDrawer from './CandidateDetailDrawer'
 import { useRightPanel }     from '../../context/RightPanelContext'
 
+// Colored status pill (actief / nietactief / extern / ...) for a candidate row.
 function StatusBadge({ status }) {
   const styles = {
     actief:     { bg: '#F0FDF4', color: '#16A34A' },

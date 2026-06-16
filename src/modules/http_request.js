@@ -1,3 +1,4 @@
+// http_request module — make a custom HTTP request to an external API.
 import { Globe } from 'lucide-react'
 
 export default {

@@ -1,7 +1,9 @@
+// shift_fetcher module — fetch shifts to offer from the planning system (requires a planning app).
 import { Calendar } from 'lucide-react'
 
 export default {
   type:  'shift_fetcher',
+  app:   ['shiftmanager','intus','aelio','elanza'],
   category: 'Diensten',
   label: 'Diensten Ophalen',
   Icon:  Calendar,

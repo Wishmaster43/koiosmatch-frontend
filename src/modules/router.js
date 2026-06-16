@@ -1,3 +1,4 @@
+// router module — branch the flow into multiple parallel routes.
 import { GitBranch } from 'lucide-react'
 
 export default {

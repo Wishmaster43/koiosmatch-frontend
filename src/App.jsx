@@ -1,7 +1,7 @@
 /**
- * App.jsx — root van de applicatie
- * Bevat routing, auth guard, en de DashboardLayout.
- * DashboardLayout beheert: linker nav, topbar, rechter filterpanel.
+ * App.jsx — application root
+ * Contains client-side routing, auth guard, and DashboardLayout.
+ * DashboardLayout manages: left nav, topbar, right filter panel.
  */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth }                   from './context/AuthContext'
@@ -10,54 +10,93 @@ import { useState, useEffect }                     from 'react'
 import { SlidersHorizontal, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import './index.css'
 
-// Pagina-imports
-import LoginPage              from './pages/LoginPage'
-import Dashboard              from './pages/Dashboard'
-import WorkflowsPage          from './pages/Workflows'
+// ── Page imports ─────────────────────────────────────────────────────────────
+import LoginPage              from './pages/auth/LoginPage'
+import Dashboard              from './pages/dashboard/Dashboard'
+import WorkflowsPage          from './pages/ai/WorkflowsPage'
 import Sidebar                from './components/layout/Sidebar'
+import KoiosPanel             from './components/layout/KoiosPanel'
 import ReportFilterSidebar    from './components/reports/ReportFilterSidebar'
-import CandidatesReport        from './pages/candidates/CandidatesReport'
-import CandidatesDetailPage   from './pages/candidates/CandidatesDetailPage'
-import CustomerReport        from './pages/customers/CustomersReport'
-
-import CustomersDetailPage    from './pages/customers/CustomersDetailPage'
-import OrdersReport           from './pages/OrdersReport'
-import SettingsPage           from './pages/SettingsPage'
-import LocationsDetailPage    from './pages/locations/LocationsDetailPage'
-import LocationsReport        from './pages/locations/LocationsReport'
-import DepartmentsDetailPage  from './pages/departments/DepartmentsDetailPage'
-import DepartmentsReport      from './pages/departments/DepartmentsReport'
-import ContactsDetailPage     from './pages/contacts/ContactsDetailPage'
-import ProfilePage            from './pages/ProfilePage'
-import UsersPage              from './pages/UsersPage'
-import WhatsAppPage           from './pages/WhatsAppPage'
-import RunsDetailPage         from './pages/details/RunsDetailPage'
-import MessagesDetailPage     from './pages/details/MessagesDetailPage'
+import CandidatesReport        from './pages/shiftmanager/CandidatesReport'
+import CandidatesPage          from './pages/candidates/CandidatesPage'
+import CandidatesDetailPage   from './pages/shiftmanager/CandidatesDetailPage'
+import CustomerReport          from './pages/shiftmanager/CustomersReport'
+import CustomersDetailPage     from './pages/shiftmanager/CustomersDetailPage'
+import OrdersReport            from './pages/shiftmanager/OrdersReport'
+import SettingsPage            from './pages/settings/SettingsPage'
+import LocationsDetailPage     from './pages/shiftmanager/LocationsDetailPage'
+import LocationsReport         from './pages/shiftmanager/LocationsReport'
+import DepartmentsDetailPage   from './pages/shiftmanager/DepartmentsDetailPage'
+import DepartmentsReport       from './pages/shiftmanager/DepartmentsReport'
+import ContactsDetailPage      from './pages/shiftmanager/ContactsDetailPage'
+import ContactPersonsPage      from './pages/shiftmanager/ContactPersonsPage'
+import ContactsPage            from './pages/contacts/ContactsPage'
+import LocationsPage          from './pages/locations/LocationsPage'
+import DepartmentsPage        from './pages/departments/DepartmentsPage'
+import ProfilePage            from './pages/auth/ProfilePage'
+import UsersPage              from './pages/users/UsersPage'
+import WhatsAppPage           from './pages/whatsapp/WhatsAppPage'
+import AIAgentsPage           from './pages/ai/AIAgentsPage'
+import RunsDetailPage              from './pages/ai/RunsDetailPage'
+import MessagesDetailPage          from './pages/ai/MessagesDetailPage'
+import ShiftmanagerDetailsPage     from './pages/shiftmanager/ShiftmanagerDetailsPage'
+import ShiftmanagerDashboard       from './pages/shiftmanager/ShiftmanagerDashboard'
+import PlanningPage               from './pages/planning/PlanningPage'
+import ApplicationsPage          from './pages/applications/ApplicationsPage'
+import VacanciesPage             from './pages/vacancies/VacanciesPage'
 import { ThemeProvider }      from './context/ThemeContext'
+import { AppsProvider, useApps } from './context/AppsContext'
+import { canAccessPage, PACKAGE_DEFAULT_PAGE } from './lib/access'
 
-// Mapping van route-sleutel naar leesbare paginatitel
+// ── Page title map (route key → breadcrumb label) ────────────────────────────
 const PAGE_TITLES = {
-  dashboard:              'Dashboard',
-  workflows:              'Workflows',
-  candidates:             'Kandidaten',
-  customers:              'Klanten',
-  locations:              'Locaties',
-  departments:            'Afdelingen',
-  whatsapp:               'WhatsApp',
-  'details.candidates':   'Details — Kandidaten',
-  'details.customers':    'Details — Klanten',
-  'details.locations':    'Details — Locaties',
-  'details.departments':  'Details — Afdelingen',
-  'details.orders':       'Details — Diensten',
-  'details.contacts':     'Details — Contactpersonen',
-  'details.runs':         'Details — Uitvoeringen',
-  'details.messages':     'Details — Berichten',
-  settings:               'Instellingen',
-  users:                  'Gebruikers',
-  profile:                'Profiel',
+  // Core
+  dashboard:                    'Dashboard',
+  settings:                     'Settings',
+  users:                        'Users',
+  profile:                      'Profile',
+
+  // ATS & CRM
+  candidates:                   'Candidates',
+  applications:                 'Applications',
+  vacancies:                    'Vacancies',
+  customers:                    'Customers',
+  'customers.locations':        'Customers — Locations',
+  'customers.departments':      'Customers — Departments',
+  'customers.contacts':         'Customers — Contacts',
+  planning:                     'Planning',
+
+  // Shiftmanager module
+  shiftmanager:                 'Shiftmanager',
+  'shiftmanager.dashboard':     'Shiftmanager — Dashboard',
+  'shiftmanager.candidates':    'Shiftmanager — Candidates',
+  'shiftmanager.customers':     'Shiftmanager — Customers',
+  'shiftmanager.locations':     'Shiftmanager — Locations',
+  'shiftmanager.departments':   'Shiftmanager — Departments',
+  'shiftmanager.contacts':      'Shiftmanager — Contacts',
+  'shiftmanager.details':       'Shiftmanager — Details',
+
+  // Shiftmanager detail drill-downs (navigated to from SM reports)
+  'details.candidates':         'SM Details — Candidates',
+  'details.customers':          'SM Details — Customers',
+  'details.locations':          'SM Details — Locations',
+  'details.departments':        'SM Details — Departments',
+  'details.contacts':           'SM Details — Contacts',
+  'details.orders':             'SM Details — Shifts',
+
+  // HelloFlex module
+  helloflex:                    'HelloFlex',
+  'helloflex.dashboard':        'HelloFlex — Dashboard',
+
+  // AI & Workflow module
+  aiagents:                     'AI Agents',
+  workflows:                    'Workflows',
+  whatsapp:                     'WhatsApp',
+  'details.runs':               'AI Details — Runs',
+  'details.messages':           'AI Details — Messages',
 }
 
-// Tijdelijke placeholder voor pagina's die nog gebouwd worden
+// Temporary placeholder for pages that are not built yet.
 function PlaceholderPage({ title }) {
   return (
     <div className="flex items-center justify-center h-full">
@@ -66,10 +105,21 @@ function PlaceholderPage({ title }) {
   )
 }
 
+// Shown when a user opens a page they are not allowed to access.
+function NoAccessPage() {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <div className="text-center">
+        <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>Geen toegang</p>
+        <p className="mt-1 text-xs text-gray-400">Je hebt geen rechten voor deze pagina.</p>
+      </div>
+    </div>
+  )
+}
+
 /**
- * useTenantTheme
- * Past CSS-variabelen toe op basis van tenant-branding.
- * Backend moet { primary_color, logo_url } teruggeven via /api/auth/me.
+ * useTenantTheme — applies CSS variables based on tenant branding.
+ * Backend returns { primary_color, logo_url } via /api/auth/me.
  */
 function useTenantTheme(tenant) {
   useEffect(() => {
@@ -83,63 +133,105 @@ function useTenantTheme(tenant) {
 }
 
 /**
- * DashboardLayout
- * Hoofdlayout na inloggen:
- * [Linker nav] [Topbar + Content] [Rechter filterpanel (optioneel)]
+ * DashboardLayout — main shell after login.
+ * [Left nav] [Topbar + Content] [Right filter panel (optional)]
  */
 function DashboardLayout() {
   const [expanded,       setExpanded]       = useState(true)
-  const [activePage,     setActivePage]     = useState('dashboard')
+  const auth0                               = useAuth()
+  const pkg0                                = auth0?.activeTenant?.package ?? auth0?.user?.tenant?.package
+  const [activePage,     setActivePage]     = useState(PACKAGE_DEFAULT_PAGE[pkg0] ?? 'dashboard')
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
-  const { logout, user }                    = useAuth()
+  const [koiosOpen,      setKoiosOpen]      = useState(false)
+  const auth                                = auth0
+  const { logout, user, activeTenant }      = auth
   const { filterGroups }                    = useRightPanel()
 
-  // Tenant-info uit user object (backend vult dit via /api/auth/me)
-  const tenant = user?.tenant ?? { name: user?.tenant_id ?? 'Koios Connect', logo_url: null }
+  // Active tenant drives topbar branding. Super admins see the tenant they switched to;
+  // regular users fall back to their own tenant from /auth/me.
+  const tenant = activeTenant ?? user?.tenant ?? { name: 'KoiosMatch', logo_url: null }
   useTenantTheme(tenant)
 
-  // Filterpanel-knop alleen tonen als huidige pagina filters heeft geregistreerd
+  // Only show the filter button when the current page has registered filter groups.
   const hasFilters    = filterGroups.length > 0
   const activeFilters = filterGroups.reduce((sum, g) => sum + (g.selected?.length ?? 0), 0)
 
-  // Rendert de juiste pagina-component op basis van activePage-sleutel
+  // Renders the page component for the active key.
+  // Defense-in-depth: block admin-only pages for users who lack access, even if
+  // they reach it via a direct/stale key (the nav already hides these items).
   const renderPage = () => {
+    if (!canAccessPage(activePage, auth)) return <NoAccessPage />
     switch (activePage) {
-      case 'dashboard':           return <Dashboard />
-      case 'candidates':          return <CandidatesReport initialTab="candidates" />
-      case 'customers':           return <CustomerReport />
-      case 'locations':           return <LocationsReport />
-      case 'departments':         return <DepartmentsReport />
-      case 'workflows':           return <WorkflowsPage />
-      case 'whatsapp':            return <WhatsAppPage />
+
+      // ── Core ──────────────────────────────────────────────────────────────
+      case 'dashboard':   return <Dashboard onNavigate={setActivePage} />
+      case 'profile':     return <ProfilePage />
+      case 'users':       return <UsersPage />
+      case 'settings':    return <SettingsPage />
+
+      // ── ATS & CRM ─────────────────────────────────────────────────────────
+      case 'candidates':             return <CandidatesPage />
+      case 'applications':           return <ApplicationsPage />
+      case 'vacancies':              return <VacanciesPage />
+      case 'customers':              return <CustomersDetailPage />
+      case 'customers.locations':    return <LocationsPage />
+      case 'customers.departments':  return <DepartmentsPage />
+      case 'customers.contacts':     return <ContactsPage />
+      case 'planning':               return <PlanningPage />
+
+      // ── Shiftmanager module ───────────────────────────────────────────────
+      case 'shiftmanager':
+      case 'shiftmanager.dashboard':   return <ShiftmanagerDashboard onNavigate={setActivePage} />
+      case 'shiftmanager.candidates':  return <CandidatesReport initialTab="candidates" />
+      case 'shiftmanager.customers':   return <CustomerReport />
+      case 'shiftmanager.locations':   return <LocationsReport />
+      case 'shiftmanager.departments': return <DepartmentsReport />
+      case 'shiftmanager.contacts':    return <ContactPersonsPage />
+      case 'shiftmanager.details':     return <ShiftmanagerDetailsPage />
+
+      // Shiftmanager drill-down detail routes (navigated to from SM reports)
       case 'details.candidates':  return <CandidatesDetailPage />
       case 'details.customers':   return <CustomersDetailPage />
       case 'details.locations':   return <LocationsDetailPage />
       case 'details.departments': return <DepartmentsDetailPage />
       case 'details.contacts':    return <ContactsDetailPage />
       case 'details.orders':      return <OrdersReport />
-      case 'profile':             return <ProfilePage />
-      case 'users':               return <UsersPage />
+
+      // ── HelloFlex module ──────────────────────────────────────────────────
+      case 'helloflex':
+      case 'helloflex.dashboard': return <PlaceholderPage title="HelloFlex Dashboard" />
+
+      // ── AI & Workflow module ──────────────────────────────────────────────
+      case 'aiagents':            return <AIAgentsPage />
+      case 'workflows':           return <AIAgentsPage />
+      case 'whatsapp':            return <WhatsAppPage />
+
+      // AI & Workflow drill-down detail routes
       case 'details.runs':        return <RunsDetailPage />
       case 'details.messages':    return <MessagesDetailPage />
-      case 'settings':            return <SettingsPage />
-      default:                    return <PlaceholderPage title={PAGE_TITLES[activePage] || activePage} />
+
+      default: return <PlaceholderPage title={PAGE_TITLES[activePage] || activePage} />
     }
   }
 
   return (
     <div className="flex h-screen overflow-hidden">
 
-      {/* ── Linker navigatie ── */}
+      {/* ── Left navigation ── */}
       <Sidebar
         expanded={expanded}
         setExpanded={setExpanded}
         activePage={activePage}
         setActivePage={setActivePage}
         onTheme={() => {}}
+        koiosOpen={koiosOpen}
+        onToggleKoios={() => setKoiosOpen(o => !o)}
       />
 
-      {/* ── Rechter kolom: topbar + content + filterpanel ── */}
+      {/* ── Koios AI panel ── */}
+      <KoiosPanel open={koiosOpen} onClose={() => setKoiosOpen(false)} />
+
+      {/* ── Right column: topbar + content + filter panel ── */}
       <div className="kc-main-bg flex flex-col flex-1 overflow-hidden" style={{ background: 'var(--bg)' }}>
 
         {/* Topbar */}
@@ -180,19 +272,19 @@ function DashboardLayout() {
               )
             }
             <span className="font-semibold text-gray-900" style={{ fontSize: 13 }}>
-              {tenant?.name ?? 'Koios Connect'}
+              {tenant?.name ?? 'KoiosMatch'}
             </span>
           </div>
 
-          {/* Broodkruimel-separator + paginatitel */}
+          {/* Breadcrumb separator + page title */}
           <span style={{ color: 'var(--border)', fontSize: 16 }}>›</span>
           <span className="font-medium truncate" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
             {PAGE_TITLES[activePage] || activePage}
           </span>
 
-          {/* Rechter acties */}
+          {/* Right actions */}
           <div className="flex items-center flex-shrink-0 gap-2 ml-auto">
-            {/* Avatar knop — navigeert naar profielpagina */}
+            {/* Avatar button — navigates to profile page */}
             {(() => {
               const initials = (
                 [user?.firstname, user?.lastname].filter(Boolean).map(n => n[0]).join('').toUpperCase()
@@ -219,7 +311,7 @@ function DashboardLayout() {
               )
             })()}
 
-            {/* Filterknop — alleen zichtbaar als pagina filters heeft geregistreerd */}
+            {/* Filter button — only visible when the current page has registered filters */}
             {hasFilters && (
               <button
                 onClick={() => setRightPanelOpen(o => !o)}
@@ -260,13 +352,13 @@ function DashboardLayout() {
           </div>
         </div>
 
-        {/* Content-rij: pagina + optioneel rechter filterpanel naast elkaar */}
+        {/* Content row: page + optional right filter panel side by side */}
         <div className="flex flex-1 overflow-hidden">
           <div className="flex-1 overflow-auto">
             {renderPage()}
           </div>
 
-          {/* Rechter filterpanel — zelfde hoogte als content, schuift naast de pagina */}
+          {/* Right filter panel — same height as content, slides next to page */}
           {rightPanelOpen && hasFilters && (
             <div
               className="kc-right-panel flex-shrink-0 overflow-y-auto"
@@ -285,7 +377,7 @@ function DashboardLayout() {
   )
 }
 
-// Beschermt routes — redirect naar /login als niet ingelogd
+// Guards authenticated routes — redirects to /login when not logged in.
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) {
@@ -304,7 +396,7 @@ function ProtectedRoute({ children }) {
   return user ? children : <Navigate to="/login" replace />
 }
 
-// Blokkeert ingelogde users van de loginpagina
+// Blocks authenticated users from the login page.
 function PublicRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return null
@@ -316,14 +408,15 @@ export default function App() {
     <BrowserRouter>
       <ThemeProvider>
       <AuthProvider>
-        {/* RightPanelProvider binnen AuthProvider zodat componenten
-            zowel auth als filterpanel context kunnen gebruiken */}
+        <AppsProvider>
+        {/* RightPanelProvider inside AuthProvider so components can use both auth and filter panel context */}
         <RightPanelProvider>
           <Routes>
             <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
             <Route path="/*"     element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} />
           </Routes>
         </RightPanelProvider>
+        </AppsProvider>
       </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>
