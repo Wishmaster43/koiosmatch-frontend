@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { X, Maximize2, Minimize2, Edit2, Plus, FileText, ChevronDown, ChevronUp, MoreHorizontal, GripVertical, Search, Check, Calendar, Eye, Pencil, Camera, Bold, Italic, List, ListOrdered, Heading2, Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Download, MapPin, Clock } from 'lucide-react'
+import { X, Maximize2, Minimize2, Edit2, Plus, FileText, ChevronDown, ChevronUp, MoreHorizontal, GripVertical, Search, Check, Calendar, Eye, Pencil, Camera, Bold, Italic, List, ListOrdered, Heading2, Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Download, MapPin, Clock, Sparkles, RefreshCw } from 'lucide-react'
 import api from '../../lib/api'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -564,6 +564,68 @@ function PlaatsingenTab({ c }) {
   )
 }
 
+function KoiosAiBlock({ c }) {
+  const [loading, setLoading] = useState(false)
+
+  const coreFields = [c.email, c.phone, c.dob, c.address, c.gender, c.nationality, c.summary]
+  const filledPct  = Math.round((coreFields.filter(Boolean).length / coreFields.length) * 100)
+
+  const insights = [
+    {
+      type: 'Volledigheid',
+      color: filledPct >= 80 ? '#16A34A' : '#D97706',
+      text: filledPct >= 80
+        ? 'Profiel is goed gevuld — geen ontbrekende kernvelden gedetecteerd.'
+        : `Profiel is ${filledPct}% compleet. Voeg samenvatting, adres en geboortedatum toe voor betere matchresultaten.`,
+    },
+    {
+      type: 'Functiematch',
+      color: '#6366F1',
+      text: 'Op basis van het profiel is de verwachte beste match: Verzorgende IG en Helpende Plus bij zorginstellingen in de regio.',
+    },
+    {
+      type: 'Betrokkenheid',
+      color: '#3B82F6',
+      text: c.laatste_contact_datum
+        ? `Laatste contactmoment geregistreerd op ${c.laatste_contact_datum}. Profiel is actief bewaakt.`
+        : 'Geen recent contactmoment geregistreerd. Een follow-up verhoogt de kans op succesvolle plaatsing.',
+    },
+  ]
+
+  return (
+    <div style={{ border: '1px solid #C4B5FD', borderRadius: 10, padding: '14px 16px', background: 'linear-gradient(135deg, #F5F3FF 0%, #EEF2FF 100%)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+        <div style={{ width: 26, height: 26, borderRadius: 7, background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Sparkles size={13} color="white" />
+        </div>
+        <span style={{ fontSize: 13, fontWeight: 700, color: '#4F46E5', flex: 1 }}>Koios AI adviseert</span>
+        <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, background: '#DDD6FE', color: '#6D28D9', fontWeight: 600 }}>Beta</span>
+        <button onClick={() => { setLoading(true); setTimeout(() => setLoading(false), 1400) }}
+          title="Vernieuwen" disabled={loading}
+          style={{ background: 'none', border: 'none', cursor: loading ? 'default' : 'pointer', color: '#6366F1', padding: 3, display: 'flex', opacity: loading ? 0.4 : 1, borderRadius: 5 }}>
+          <RefreshCw size={12} />
+        </button>
+      </div>
+      {loading
+        ? <div style={{ fontSize: 12, color: '#6366F1', fontStyle: 'italic' }}>Koios AI analyseert profiel…</div>
+        : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {insights.map((ins, i) => (
+              <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: 'rgba(255,255,255,0.55)', borderRadius: 8, padding: '8px 10px' }}>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: ins.color, flexShrink: 0, marginTop: 5 }} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: ins.color, marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{ins.type}</div>
+                  <div style={{ fontSize: 12, color: '#374151', lineHeight: 1.5 }}>{ins.text}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  )
+}
+
 const AGENDA_DIENSTEN = [
   { date: '2026-06-16', start: 7,  end: 15, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6' },
   { date: '2026-06-18', start: 13, end: 17, klant: 'Zorggroep West',   functie: 'Helpende Plus',  color: '#8B5CF6' },
@@ -868,130 +930,131 @@ const ALL_POOLS = [
 
 function PlanningTab({ c }) {
   const plan = c.planning_settings ?? {}
-  const [editing, setEditing]           = useState(false)
-  const [infoBijPlanning, setInfo]      = useState(plan.info ?? '')
-  const [functies, setFuncties]         = useState(plan.functies ?? [])
-  const [pools, setPools]               = useState(plan.pools ?? [])
-  const [diensttype, setDiensttype]     = useState(plan.diensttype ?? [])
-  const [rijbewijzen, setRijbewijzen]   = useState(plan.rijbewijzen ?? [])
-  const [rijOpen, setRijOpen]           = useState(false)
+  const [info,         setInfo]        = useState(plan.info ?? '')
+  const [functies,     setFuncties]    = useState(plan.functies ?? [])
+  const [pools,        setPools]       = useState(plan.pools ?? [])
+  const [diensttype,   setDiensttype]  = useState(plan.diensttype ?? [])
+  const [rijbewijzen,  setRijbewijzen] = useState(plan.rijbewijzen ?? [])
+  const [rijOpen,      setRijOpen]     = useState(false)
   const rijRef = useRef(null)
 
   useEffect(() => {
-    const handler = e => { if (rijRef.current && !rijRef.current.contains(e.target)) setRijOpen(false) }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
+    const h = e => { if (rijRef.current && !rijRef.current.contains(e.target)) setRijOpen(false) }
+    document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h)
   }, [])
 
-  const togFunc = (v, set) => val => set(prev => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val])
+  const tog = (val, set) => set(prev => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val])
 
-  const iStyle = { padding: '7px 10px', fontSize: 12, borderRadius: 6,
-    border: '1px solid var(--border)', background: editing ? 'white' : 'var(--bg)',
-    color: 'var(--text)', outline: 'none', width: '100%', boxSizing: 'border-box' }
-
-  const Cb = ({ label, checked, onChange }) => (
-    <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text)', cursor: editing ? 'pointer' : 'default' }}>
-      <input type="checkbox" checked={checked} onChange={onChange} disabled={!editing}
-        style={{ width: 13, height: 13, accentColor: 'var(--color-primary)', cursor: editing ? 'pointer' : 'default' }} />
+  const Chip = ({ label, selected, onToggle }) => (
+    <button onClick={onToggle} style={{
+      padding: '4px 11px', fontSize: 11, borderRadius: 99, cursor: 'pointer', transition: 'all 0.1s',
+      border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--border)'}`,
+      background: selected ? 'var(--color-primary)' : 'var(--bg)',
+      color: selected ? '#fff' : 'var(--text-muted)', fontWeight: selected ? 600 : 400,
+    }}>
       {label}
-    </label>
+    </button>
+  )
+
+  const SecLabel = ({ children, action }) => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+      <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{children}</span>
+      {action}
+    </div>
   )
 
   return (
     <div style={sectionBlock}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Functies, pools en skills</span>
-        {!editing && <button onClick={() => setEditing(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}><Edit2 size={13} /></button>}
+      <span style={sectionTitle}>Functies, pools en skills</span>
+
+      {/* Info */}
+      <div style={{ marginBottom: 16 }}>
+        <SecLabel>Informatie bij planning</SecLabel>
+        <input value={info} onChange={e => setInfo(e.target.value)} placeholder="Notitie voor planners…"
+          style={{ width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 7, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' }} />
       </div>
 
-      {/* Info bij planning */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 140, flexShrink: 0 }}>Informatie bij planning</span>
-        {editing
-          ? <input value={infoBijPlanning} onChange={e => setInfo(e.target.value)} style={iStyle} />
-          : <span style={{ fontSize: 12, color: 'var(--text)' }}>{infoBijPlanning || '-'}</span>
-        }
-      </div>
-
-      {/* Globale functie */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Globale functie</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <Cb label="Alles selecteren/deselecteren"
-            checked={functies.length === ALL_FUNCTIES.length}
-            onChange={e => setFuncties(e.target.checked ? [...ALL_FUNCTIES] : [])} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px', marginLeft: 4 }}>
-            {ALL_FUNCTIES.map(f => (
-              <Cb key={f} label={f} checked={functies.includes(f)} onChange={() => setFuncties(prev => prev.includes(f) ? prev.filter(x => x !== f) : [...prev, f])} />
-            ))}
-          </div>
+      {/* Functies */}
+      <div style={{ marginBottom: 16 }}>
+        <SecLabel action={
+          <button onClick={() => setFuncties(f => f.length === ALL_FUNCTIES.length ? [] : [...ALL_FUNCTIES])}
+            style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            {functies.length === ALL_FUNCTIES.length ? 'Alles deselecteren' : 'Alles selecteren'}
+          </button>
+        }>Globale functie</SecLabel>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {ALL_FUNCTIES.map(f => <Chip key={f} label={f} selected={functies.includes(f)} onToggle={() => tog(f, setFuncties)} />)}
         </div>
       </div>
 
       {/* Pools */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Pools</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          <Cb label="Alles selecteren/deselecteren"
-            checked={pools.length === ALL_POOLS.length}
-            onChange={e => setPools(e.target.checked ? [...ALL_POOLS] : [])} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 12px', marginLeft: 4 }}>
-            {ALL_POOLS.map(p => (
-              <Cb key={p} label={p} checked={pools.includes(p)} onChange={() => setPools(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p])} />
-            ))}
-          </div>
+      <div style={{ marginBottom: 16 }}>
+        <SecLabel action={
+          <button onClick={() => setPools(p => p.length === ALL_POOLS.length ? [] : [...ALL_POOLS])}
+            style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+            {pools.length === ALL_POOLS.length ? 'Alles deselecteren' : 'Alles selecteren'}
+          </button>
+        }>Pools</SecLabel>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {ALL_POOLS.map(p => <Chip key={p} label={p} selected={pools.includes(p)} onToggle={() => tog(p, setPools)} />)}
         </div>
       </div>
 
-      {/* Voorkeur dienstype */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>Voorkeur dienstype</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {/* Diensttype */}
+      <div style={{ marginBottom: 16 }}>
+        <SecLabel>Voorkeur dienstype</SecLabel>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {['Avonddienst', 'Dagdienst', 'Nachtdienst'].map(d => (
-            <Cb key={d} label={d} checked={diensttype.includes(d)} onChange={() => setDiensttype(prev => prev.includes(d) ? prev.filter(x => x !== d) : [...prev, d])} />
+            <Chip key={d} label={d} selected={diensttype.includes(d)} onToggle={() => tog(d, setDiensttype)} />
           ))}
         </div>
       </div>
 
       {/* Rijbewijzen */}
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>Rijbewijzen</div>
+      <div>
+        <SecLabel>Rijbewijzen</SecLabel>
+        {rijbewijzen.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+            {rijbewijzen.map(r => (
+              <span key={r} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 10px', fontSize: 11,
+                borderRadius: 99, border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: '#fff', fontWeight: 600 }}>
+                {r}
+                <button onClick={() => setRijbewijzen(p => p.filter(x => x !== r))}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', padding: 0, lineHeight: 1, fontSize: 14, opacity: 0.7 }}>×</button>
+              </span>
+            ))}
+          </div>
+        )}
         <div ref={rijRef} style={{ position: 'relative' }}>
-          <button onClick={() => editing && setRijOpen(o => !o)}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%',
-              padding: '8px 10px', fontSize: 12, borderRadius: 8,
-              border: '1px solid var(--border)', background: editing ? 'white' : 'var(--bg)',
-              color: 'var(--text)', cursor: editing ? 'pointer' : 'default', textAlign: 'left' }}>
-            <span>{rijbewijzen.length === 0 ? 'Geen geselecteerd' : rijbewijzen.join(', ')}</span>
-            {editing && <ChevronDown size={13} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
+          <button onClick={() => setRijOpen(o => !o)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', fontSize: 11, fontWeight: 500,
+              border: '1px dashed var(--border)', borderRadius: 7, background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+            <Plus size={11} /> Rijbewijs toevoegen
           </button>
           {rijOpen && (
-            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 200, marginTop: 4,
+            <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 200, marginTop: 4,
               background: 'white', border: '1px solid var(--border)', borderRadius: 8,
-              boxShadow: '0 4px 16px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
-              {RIJBEWIJZEN.map(r => (
-                <button key={r} onClick={() => setRijbewijzen(prev => prev.includes(r) ? prev.filter(x => x !== r) : [...prev, r])}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '9px 12px',
-                    background: rijbewijzen.includes(r) ? '#EEF2FF' : 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                  <div style={{ width: 14, height: 14, borderRadius: 3, border: `2px solid ${rijbewijzen.includes(r) ? 'var(--color-primary)' : 'var(--border)'}`,
-                    background: rijbewijzen.includes(r) ? 'var(--color-primary)' : 'white',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    {rijbewijzen.includes(r) && <Check size={9} color="white" />}
-                  </div>
-                  <span style={{ fontSize: 12, color: 'var(--text)' }}>{r}</span>
-                </button>
-              ))}
+              boxShadow: '0 4px 16px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 180 }}>
+              {RIJBEWIJZEN.map(r => {
+                const sel = rijbewijzen.includes(r)
+                return (
+                  <button key={r} onClick={() => tog(r, setRijbewijzen)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '9px 12px',
+                      background: sel ? 'var(--color-primary-bg, #EEF2FF)' : 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+                    <div style={{ width: 14, height: 14, borderRadius: 3, flexShrink: 0,
+                      border: `2px solid ${sel ? 'var(--color-primary)' : 'var(--border)'}`,
+                      background: sel ? 'var(--color-primary)' : 'white',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {sel && <Check size={9} color="white" />}
+                    </div>
+                    <span style={{ fontSize: 12, color: 'var(--text)' }}>{r}</span>
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
       </div>
-
-      {editing && (
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button onClick={() => setEditing(false)} style={{ padding: '8px 16px', fontSize: 12, fontWeight: 600, borderRadius: 8, background: 'var(--text)', color: '#fff', border: 'none', cursor: 'pointer' }}>Opslaan</button>
-          <button onClick={() => setEditing(false)} style={{ padding: '8px 16px', fontSize: 12, borderRadius: 8, background: 'none', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>Annuleren</button>
-        </div>
-      )}
     </div>
   )
 }
@@ -1204,7 +1267,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   }, [c?.id])
 
   useEffect(() => {
-    if ((activeTab === 'werk' || activeTab === 'planning') && !expanded) {
+    if (activeTab === 'planning' && !expanded) {
       onToggleExpand?.()
     }
   }, [activeTab])
@@ -1266,6 +1329,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             <ProfielTab c={{ ...c, ...(profileEdits ?? {}) }}
               editing={editing} onEditSave={v => { setProfileEdits(v); setEditing(false) }} onEditCancel={() => setEditing(false)}
               onStartEdit={() => setEditing(true)} />
+            <KoiosAiBlock c={{ ...c, ...(profileEdits ?? {}) }} />
             <TaalTab items={currentTalen} onAdd={v => setTalen(p => [...(p ?? c.talen ?? []), v])} />
             {/* Documenten */}
             <div style={sectionBlock}>
@@ -1496,7 +1560,6 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <VoorkeurenTab c={c} />
-            <PlanningTab c={c} />
           </div>
         )
       case 'statistieken':
