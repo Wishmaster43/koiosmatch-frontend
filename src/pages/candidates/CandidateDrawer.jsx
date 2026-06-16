@@ -140,9 +140,11 @@ function InlineInput({ placeholder, value, onChange, type = 'text' }) {
   )
 }
 
+const NL_PROVINCES = ['Drenthe','Flevoland','Friesland','Gelderland','Groningen','Limburg','Noord-Brabant','Noord-Holland','Overijssel','Utrecht','Zeeland','Zuid-Holland']
+
 // ── Tab contents ──────────────────────────────────────────────────────────────
 function ProfielTab({ c, editing, onEditSave, onEditCancel, onStartEdit }) {
-  const [form, setForm] = useState({ gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '', email: c.email ?? '', phone: c.phone ?? '', address: c.address ?? '', summary: c.summary ?? '' })
+  const [form, setForm] = useState({ gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '', email: c.email ?? '', phone: c.phone ?? '', address: c.address ?? '', provincie: c.provincie ?? '', summary: c.summary ?? '' })
   const setF = (k, v) => setForm(p => ({ ...p, [k]: v }))
 
   const inputStyle = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
@@ -166,6 +168,7 @@ function ProfielTab({ c, editing, onEditSave, onEditCancel, onStartEdit }) {
           ['E-mailadres',   'email'],
           ['Telefoon',      'phone'],
           ['Adres',         'address'],
+          ['Provincie',     'provincie'],
         ].map(([label, key]) => (
           <div key={key} style={{ display: 'flex', alignItems: 'center', padding: '9px 12px', borderBottom: '1px solid var(--border)', gap: 16, background: 'var(--surface)' }}>
             <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
@@ -181,6 +184,11 @@ function ProfielTab({ c, editing, onEditSave, onEditCancel, onStartEdit }) {
                 <select value={form.nationality} onChange={e => setF('nationality', e.target.value)} style={inputStyle}>
                   <option value="">Selecteer</option>
                   {['Nederlands','Belgisch','Duits','Frans','Brits','Pools','Turks','Marokkaans','Surinaams','Antilliaans','Overig'].map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+              ) : key === 'provincie' ? (
+                <select value={form.provincie} onChange={e => setF('provincie', e.target.value)} style={inputStyle}>
+                  <option value="">Selecteer</option>
+                  {NL_PROVINCES.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
               ) : key === 'dob' ? (
                 <DatePicker
@@ -1323,7 +1331,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [uitgeplandIdx,  setUitgeplandIdx]  = useState(() => new Set())
   const [favorieten,     setFavorieten]     = useState({ klanten: ['Thuiszorg Noord'], locaties: ['Amsterdam'], afdelingen: [] })
   const [blacklist,      setBlacklist]      = useState({ klanten: [], locaties: [], afdelingen: [] })
-  const [favAddMode,     setFavAddMode]     = useState(null)
+  const [favAddMode,     setFavAddMode]     = useState(null)   // null | 'fav' | 'bl'
+  const [favAddType,     setFavAddType]     = useState(null)   // null | 'klanten' | 'locaties' | 'afdelingen'
   const [favAddInput,    setFavAddInput]    = useState('')
   const [allLocations,   setAllLocations]   = useState([])
 
@@ -1349,6 +1358,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     setIngeplandIds(new Set())
     setUitgeplandIdx(new Set())
     setFavAddMode(null)
+    setFavAddType(null)
     setFavAddInput('')
   }, [c?.id])
 
@@ -1868,80 +1878,105 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
               </div>
             )}
 
-            {/* ── Favorieten & Blacklist ── */}
+            {/* ── Voorkeur & Niet inplannen ── */}
             {planningSubTab === 'favorieten' && (() => {
-              const FavSection = ({ title, items, onRemove, onAdd, modeKey }) => {
-                const isAdding = favAddMode === modeKey
+              const TYPE_LABELS = { klanten: 'Klant', locaties: 'Locatie', afdelingen: 'Afdeling' }
+              const TYPES = Object.keys(TYPE_LABELS)
+
+              const confirm = (data, setData) => {
+                if (!favAddInput.trim() || !favAddType) return
+                setData(f => ({ ...f, [favAddType]: [...f[favAddType], favAddInput.trim()] }))
+                setFavAddInput(''); setFavAddMode(null); setFavAddType(null)
+              }
+              const cancel = () => { setFavAddMode(null); setFavAddType(null); setFavAddInput('') }
+
+              const FavCard = ({ icon, iconColor, title, emptyText, data, setData, mode }) => {
+                const isAdding = favAddMode === mode
+                const allItems = TYPES.flatMap(key => data[key].map((item, j) => ({ key, item, j })))
                 return (
-                  <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{title}</div>
-                    {items.length === 0 && !isAdding && (
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 4 }}>Geen</div>
+                  <div style={sectionBlock}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
+                      {icon}
+                      <span style={{ ...sectionTitle, marginBottom: 0, flex: 1 }}>{title}</span>
+                      {!isAdding && (
+                        <button onClick={() => { setFavAddMode(mode); setFavAddType(null); setFavAddInput('') }}
+                          style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', cursor: 'pointer', color: 'var(--text-muted)', flexShrink: 0 }}>
+                          <Plus size={13} />
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Flat list */}
+                    {allItems.length === 0 && !isAdding && (
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>{emptyText}</div>
                     )}
-                    {items.map((item, j) => (
-                      <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0' }}>
+                    {allItems.map(({ key, item, j }) => (
+                      <div key={`${key}-${j}`} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0',
+                        borderBottom: '1px solid var(--border)' }}>
+                        <span style={{ fontSize: 9, padding: '1px 6px', borderRadius: 3, background: 'var(--bg)',
+                          color: 'var(--text-muted)', border: '1px solid var(--border)', fontWeight: 600, flexShrink: 0 }}>
+                          {TYPE_LABELS[key]}
+                        </span>
                         <span style={{ fontSize: 12, color: 'var(--text)', flex: 1 }}>{item}</span>
-                        <button onClick={() => onRemove(j)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+                        <button onClick={() => setData(f => ({ ...f, [key]: f[key].filter((_, i) => i !== j) }))}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
                           <X size={12} />
                         </button>
                       </div>
                     ))}
-                    {isAdding ? (
-                      <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
-                        <input autoFocus value={favAddInput} onChange={e => setFavAddInput(e.target.value)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && favAddInput.trim()) { onAdd(favAddInput.trim()); setFavAddInput(''); setFavAddMode(null) }
-                            if (e.key === 'Escape') { setFavAddMode(null); setFavAddInput('') }
-                          }}
-                          placeholder="Naam..." style={{ flex: 1, padding: '4px 8px', fontSize: 12, border: '1px solid var(--color-primary)', borderRadius: 6, outline: 'none', background: 'var(--bg)', color: 'var(--text)' }} />
-                        <button onClick={() => { if (favAddInput.trim()) { onAdd(favAddInput.trim()); setFavAddInput(''); setFavAddMode(null) } }}
-                          style={{ padding: '4px 8px', fontSize: 11, border: '1px solid var(--color-primary)', borderRadius: 6, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>OK</button>
-                        <button onClick={() => { setFavAddMode(null); setFavAddInput('') }}
-                          style={{ padding: '4px 6px', border: '1px solid var(--border)', borderRadius: 6, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                          <X size={11} />
-                        </button>
+
+                    {/* Add form */}
+                    {isAdding && (
+                      <div style={{ marginTop: allItems.length ? 10 : 0 }}>
+                        <div style={{ display: 'flex', gap: 4, marginBottom: 8 }}>
+                          {TYPES.map(key => (
+                            <button key={key} onClick={() => setFavAddType(key)}
+                              style={{ padding: '3px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: favAddType === key ? 600 : 400,
+                                border: `1px solid ${favAddType === key ? 'var(--color-primary)' : 'var(--border)'}`,
+                                background: favAddType === key ? 'var(--color-primary)' : 'var(--bg)',
+                                color: favAddType === key ? '#fff' : 'var(--text-muted)' }}>
+                              {TYPE_LABELS[key]}
+                            </button>
+                          ))}
+                        </div>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          <input autoFocus value={favAddInput} onChange={e => setFavAddInput(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter') confirm(data, setData); if (e.key === 'Escape') cancel() }}
+                            disabled={!favAddType}
+                            placeholder={favAddType ? `Naam ${TYPE_LABELS[favAddType].toLowerCase()}...` : 'Kies type hierboven...'}
+                            style={{ flex: 1, padding: '5px 8px', fontSize: 12, border: '1px solid var(--color-primary)', borderRadius: 6,
+                              outline: 'none', background: 'var(--bg)', color: 'var(--text)', opacity: favAddType ? 1 : 0.5 }} />
+                          <button onClick={() => confirm(data, setData)} disabled={!favAddType || !favAddInput.trim()}
+                            style={{ padding: '4px 10px', fontSize: 11, border: '1px solid var(--color-primary)', borderRadius: 6,
+                              background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600,
+                              opacity: !favAddType || !favAddInput.trim() ? 0.5 : 1 }}>
+                            OK
+                          </button>
+                          <button onClick={cancel}
+                            style={{ padding: '4px 6px', border: '1px solid var(--border)', borderRadius: 6, background: 'none',
+                              color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                            <X size={11} />
+                          </button>
+                        </div>
                       </div>
-                    ) : (
-                      <button onClick={() => { setFavAddMode(modeKey); setFavAddInput('') }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 0', fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, marginTop: 2 }}>
-                        <Plus size={11} /> Toevoegen
-                      </button>
                     )}
                   </div>
                 )
               }
-              const rmFav = (key, j) => setFavorieten(f => ({ ...f, [key]: f[key].filter((_, i) => i !== j) }))
-              const addFav = (key, v) => setFavorieten(f => ({ ...f, [key]: [...f[key], v] }))
-              const rmBl  = (key, j) => setBlacklist(f => ({ ...f, [key]: f[key].filter((_, i) => i !== j) }))
-              const addBl  = (key, v) => setBlacklist(f => ({ ...f, [key]: [...f[key], v] }))
+
               return (
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-                  {/* Favorieten */}
-                  <div style={sectionBlock}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
-                      <Heart size={14} color="var(--color-danger)" fill="var(--color-danger)" />
-                      <span style={{ ...sectionTitle, marginBottom: 0 }}>Favorieten</span>
-                    </div>
-                    <FavSection title="Klanten" items={favorieten.klanten}
-                      onRemove={j => rmFav('klanten',j)} onAdd={v => addFav('klanten',v)} modeKey="fav_klant" />
-                    <FavSection title="Locaties" items={favorieten.locaties}
-                      onRemove={j => rmFav('locaties',j)} onAdd={v => addFav('locaties',v)} modeKey="fav_locatie" />
-                    <FavSection title="Afdelingen" items={favorieten.afdelingen}
-                      onRemove={j => rmFav('afdelingen',j)} onAdd={v => addFav('afdelingen',v)} modeKey="fav_afdeling" />
-                  </div>
-                  {/* Blacklist */}
-                  <div style={sectionBlock}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
-                      <Ban size={14} color="#EF4444" />
-                      <span style={{ ...sectionTitle, marginBottom: 0 }}>Blacklist</span>
-                    </div>
-                    <FavSection title="Klanten" items={blacklist.klanten}
-                      onRemove={j => rmBl('klanten',j)} onAdd={v => addBl('klanten',v)} modeKey="bl_klant" />
-                    <FavSection title="Locaties" items={blacklist.locaties}
-                      onRemove={j => rmBl('locaties',j)} onAdd={v => addBl('locaties',v)} modeKey="bl_locatie" />
-                    <FavSection title="Afdelingen" items={blacklist.afdelingen}
-                      onRemove={j => rmBl('afdelingen',j)} onAdd={v => addBl('afdelingen',v)} modeKey="bl_afdeling" />
-                  </div>
+                  <FavCard
+                    icon={<Heart size={14} color="var(--color-danger)" fill="var(--color-danger)" />}
+                    title="Voorkeur" emptyText="Geen voorkeuren ingesteld"
+                    data={favorieten} setData={setFavorieten} mode="fav"
+                  />
+                  <FavCard
+                    icon={<Ban size={14} color="#EF4444" />}
+                    title="Niet inplannen" emptyText="Geen beperkingen ingesteld"
+                    data={blacklist} setData={setBlacklist} mode="bl"
+                  />
                 </div>
               )
             })()}
