@@ -490,13 +490,51 @@ function VaardighedenTab({ items = [], onAdd }) {
 
 // ── Candidate Drawer ──────────────────────────────────────────────────────────
 const TABS = [
-  { id: 'profiel',       label: 'Profiel'         },
-  { id: 'achtergrond',   label: 'Achtergrond'     },
-  { id: 'voorkeuren',    label: 'Voorkeuren & Planning' },
-  { id: 'administratie', label: 'ZZP'              },
-  { id: 'communicatie',  label: 'Communicatie'    },
-  { id: 'sollicitaties', label: 'Sollicitaties'   },
+  { id: 'profiel',       label: 'Profiel'      },
+  { id: 'achtergrond',   label: 'Achtergrond'  },
+  { id: 'werk',          label: 'Werk'         },
+  { id: 'planning',      label: 'Planning'     },
+  { id: 'administratie', label: 'ZZP'          },
+  { id: 'communicatie',  label: 'Communicatie' },
 ]
+
+function PlaatsingenTab({ c }) {
+  const plaatsingen = c.plaatsingen ?? []
+  return (
+    <div style={sectionBlock}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <span style={sectionTitle}>Plaatsingen</span>
+        <button style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+          <Plus size={11} /> Toevoegen
+        </button>
+      </div>
+      {plaatsingen.length === 0
+        ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Nog geen plaatsingen.</div>
+        : plaatsingen.map((p, i) => (
+          <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
+            <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{p.klant ?? '-'}</span>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.periode ?? ''}</span>
+            </div>
+            {[
+              ['Functie', p.functie],
+              ['Schaal / Trede', p.schaal && p.trede ? `${p.schaal} / ${p.trede}` : (p.schaal ?? p.trede ?? '-')],
+              ['Uurloon', p.uurloon ? `€ ${p.uurloon}` : '-'],
+              ['Uren per week', p.uren_per_week ?? '-'],
+              ['Contractsoort', p.contractsoort ?? '-'],
+              ['Contractduur', p.contractduur ?? '-'],
+            ].map(([label, value]) => (
+              <div key={label} style={{ display: 'flex', padding: '7px 12px', borderBottom: '1px solid var(--border)', gap: 16, background: 'var(--surface)' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
+                <span style={{ fontSize: 12, color: 'var(--text)' }}>{value}</span>
+              </div>
+            ))}
+          </div>
+        ))
+      }
+    </div>
+  )
+}
 
 function VoorkeurenTab({ c }) {
   const pref = c.voorkeuren ?? c.preferences ?? {}
@@ -897,6 +935,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
 
   const [vestigingOpen,   setVestigingOpen]   = useState(false)
   const [vestigingSearch, setVestigingSearch] = useState('')
+  const [planningSubTab,  setPlanningSubTab]  = useState('beschikbaarheid')
   const [allLocations,    setAllLocations]    = useState([])
 
   const recruiterRef  = useRef(null)
@@ -914,7 +953,14 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     setCerts(null); setVaardigheden(null); setSollPage(1)
     setAddingNote(false); setNewNote(''); setNewNoteTitle(''); setNewNoteType('Algemeen'); setEditing(false); setProfileEdits(null)
     setPreviewDoc(null); setPendingFile(null); setPendingType('CV'); setPhotoUrl(null); setPhotoMenuOpen(false); setNoteExpanded(false)
+    setPlanningSubTab('beschikbaarheid')
   }, [c?.id])
+
+  useEffect(() => {
+    if ((activeTab === 'werk' || activeTab === 'planning') && !expanded) {
+      onToggleExpand?.()
+    }
+  }, [activeTab])
 
   useEffect(() => {
     if (!recruiterOpen) return
@@ -1114,11 +1160,73 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             <VaardighedenTab items={currentVaardigheden} onAdd={v => setVaardigheden(p => [...(p ?? c.vaardigheden ?? []), v])} />
           </div>
         )
-      case 'voorkeuren':
+      case 'werk':
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <VoorkeurenTab c={c} />
-            <PlanningTab c={c} />
+            <PlaatsingenTab c={c} />
+            <div style={sectionBlock}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>
+                Sollicitaties <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>{currentSoll.length}</span>
+              </div>
+              <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+                <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>Vacature</div>
+                {sollSlice.length === 0
+                  ? <div style={{ padding: '20px', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>Nog geen sollicitaties.</div>
+                  : sollSlice.map((s, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: i < sollSlice.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 12, color: 'var(--text)' }}>
+                      {(s.logo_url ?? s.vacancy?.logo_url) && <img src={s.logo_url ?? s.vacancy?.logo_url} alt="" style={{ width: 24, height: 24, borderRadius: 4, objectFit: 'contain', flexShrink: 0 }} />}
+                      <span style={{ fontWeight: 500 }}>{s.vacature ?? s.vacancy?.title ?? s.title ?? '-'}</span>
+                    </div>
+                  ))
+                }
+              </div>
+              {currentSoll.length > 0 && (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
+                  <span>{(sollPage - 1) * SOLL_PER_PAGE + 1}–{Math.min(sollPage * SOLL_PER_PAGE, currentSoll.length)} van {currentSoll.length}</span>
+                  <button onClick={() => setSollPage(p => Math.max(1, p - 1))} disabled={sollPage <= 1} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: sollPage <= 1 ? 'default' : 'pointer', color: sollPage <= 1 ? 'var(--border)' : 'var(--text-muted)' }}>‹</button>
+                  <button onClick={() => setSollPage(p => Math.min(sollPages, p + 1))} disabled={sollPage >= sollPages} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: sollPage >= sollPages ? 'default' : 'pointer', color: sollPage >= sollPages ? 'var(--border)' : 'var(--text-muted)' }}>›</button>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      case 'planning':
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Planning sub-tabs */}
+            <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+              {[
+                { id: 'beschikbaarheid', label: 'Beschikbaarheid' },
+                { id: 'inplanning',      label: 'Inplanning'      },
+                { id: 'functies',        label: 'Functies & Pools' },
+              ].map(sub => (
+                <button key={sub.id} onClick={() => setPlanningSubTab(sub.id)}
+                  style={{ padding: '6px 12px', fontSize: 12, whiteSpace: 'nowrap', background: 'none', border: 'none',
+                    borderBottom: planningSubTab === sub.id ? '2px solid var(--color-primary)' : '2px solid transparent',
+                    color: planningSubTab === sub.id ? 'var(--color-primary)' : 'var(--text-muted)',
+                    fontWeight: planningSubTab === sub.id ? 600 : 400, cursor: 'pointer', marginBottom: -1 }}>
+                  {sub.label}
+                </button>
+              ))}
+            </div>
+            {planningSubTab === 'beschikbaarheid' && (
+              <div style={sectionBlock}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>Beschikbaarheidsagenda</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Nog geen beschikbaarheid ingesteld.</div>
+              </div>
+            )}
+            {planningSubTab === 'inplanning' && (
+              <div style={sectionBlock}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>Komende diensten</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Nog geen diensten ingepland.</div>
+              </div>
+            )}
+            {planningSubTab === 'functies' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <VoorkeurenTab c={c} />
+                <PlanningTab c={c} />
+              </div>
+            )}
           </div>
         )
       case 'administratie':
@@ -1215,33 +1323,6 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             </div>
           </div>
         )
-      case 'sollicitaties':
-        return (
-          <div style={sectionBlock}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>
-              Sollicitaties <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>{currentSoll.length}</span>
-            </div>
-            <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-              <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>Vacature</div>
-              {sollSlice.length === 0
-                ? <div style={{ padding: '20px', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>Nog geen sollicitaties.</div>
-                : sollSlice.map((s, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: i < sollSlice.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 12, color: 'var(--text)' }}>
-                    {(s.logo_url ?? s.vacancy?.logo_url) && <img src={s.logo_url ?? s.vacancy?.logo_url} alt="" style={{ width: 24, height: 24, borderRadius: 4, objectFit: 'contain', flexShrink: 0 }} />}
-                    <span style={{ fontWeight: 500 }}>{s.vacature ?? s.vacancy?.title ?? s.title ?? '-'}</span>
-                  </div>
-                ))
-              }
-            </div>
-            {currentSoll.length > 0 && (
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginTop: 8, fontSize: 12, color: 'var(--text-muted)' }}>
-                <span>{(sollPage - 1) * SOLL_PER_PAGE + 1}–{Math.min(sollPage * SOLL_PER_PAGE, currentSoll.length)} van {currentSoll.length}</span>
-                <button onClick={() => setSollPage(p => Math.max(1, p - 1))} disabled={sollPage <= 1} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: sollPage <= 1 ? 'default' : 'pointer', color: sollPage <= 1 ? 'var(--border)' : 'var(--text-muted)' }}>‹</button>
-                <button onClick={() => setSollPage(p => Math.min(sollPages, p + 1))} disabled={sollPage >= sollPages} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: sollPage >= sollPages ? 'default' : 'pointer', color: sollPage >= sollPages ? 'var(--border)' : 'var(--text-muted)' }}>›</button>
-              </div>
-            )}
-          </div>
-        )
       default: return null
     }
   }
@@ -1335,7 +1416,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         </div>
 
         {/* Status + Eigenaar row */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 24, marginBottom: 6 }}>
           {/* Status */}
           <div>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>Status</div>
@@ -1405,6 +1486,21 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             </div>
           </div>
         </div>
+
+        {/* Laatste contact row */}
+        {(c.laatste_contact_datum || c.laatste_contact_soort) && (
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
+            Laatste contact:&nbsp;
+            {c.laatste_contact_datum && <span style={{ color: 'var(--text)' }}>{c.laatste_contact_datum}</span>}
+            {c.laatste_contact_datum && c.laatste_contact_soort && <span> · </span>}
+            {c.laatste_contact_soort && <span style={{ color: 'var(--text)' }}>{c.laatste_contact_soort}</span>}
+          </div>
+        )}
+        {!c.laatste_contact_datum && !c.laatste_contact_soort && (
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
+            Laatste contact: <span style={{ fontStyle: 'italic' }}>nog niet geregistreerd</span>
+          </div>
+        )}
 
         {/* Tags */}
         <div style={{ marginBottom: 12 }}>
