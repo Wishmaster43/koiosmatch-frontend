@@ -13,7 +13,10 @@
  *   - SettingsPage                → the nav + renders the active tab
  */
 import { useState, useEffect, useRef, useMemo, Fragment } from 'react'
-import { Save, RefreshCw, Plus, Trash2, Shield, Target, RotateCcw, Check, Clock, AlertTriangle, ClipboardList, Search, X, LayoutDashboard, Palette, Mail, Upload, Eye, EyeOff, Webhook, Copy, Users, AppWindow, ChevronDown, ChevronRight, Package, ArrowLeft, Brain, Zap, MessageCircle, Lock, ShieldCheck, Building2, MapPin, BookOpen, Layers, UserCheck, Briefcase, XCircle, Bell, Store, Key, Download, CreditCard, BarChart2, FileText, User, Settings2, GripVertical, CloudUpload, ChevronLeft } from 'lucide-react'
+import { Save, RefreshCw, Plus, Trash2, Shield, Target, RotateCcw, Check, Clock, AlertTriangle, ClipboardList, Search, X, LayoutDashboard, Palette, Mail, Upload, Eye, EyeOff, Webhook, Copy, Users, AppWindow, ChevronDown, ChevronRight, Package, ArrowLeft, Brain, Zap, MessageCircle, Lock, ShieldCheck, Building2, MapPin, BookOpen, Layers, UserCheck, Briefcase, XCircle, Bell, Store, Key, Download, CreditCard, BarChart2, FileText, User, Settings2, GripVertical, CloudUpload, ChevronLeft, ChevronUp, ToggleLeft, ToggleRight } from 'lucide-react'
+import { pdf } from '@react-pdf/renderer'
+import { CvDocument } from '../candidates/CvTemplate'
+import { useCvSettings, CV_DEFAULT_SECTIONS } from '../../lib/useCvSettings'
 import { QRCodeSVG } from 'qrcode.react'
 import UsersPage from '../users/UsersPage'
 import { useAuth } from '../../context/AuthContext'
@@ -95,7 +98,7 @@ function KpiSettings() {
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: saving ? 'wait' : 'pointer',
                    border: 'none', opacity: saving ? 0.7 : 1,
-                   background: saved ? '#16A34A' : 'var(--color-primary)', color: 'white', transition: 'background 0.2s' }}>
+                   background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white', transition: 'background 0.2s' }}>
           {saved   ? <><Check size={13} /> Opgeslagen</>                         :
            saving  ? <><RefreshCw size={13} className="animate-spin" /> Opslaan…</> :
                      <><Save size={13} /> Opslaan</>}
@@ -208,7 +211,7 @@ function DisplaySettings() {
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: saving ? 'wait' : 'pointer',
                    border: 'none', opacity: saving ? 0.7 : 1,
-                   background: saved ? '#16A34A' : 'var(--color-primary)', color: 'white' }}>
+                   background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
           {saved  ? <><Check size={13} /> Opgeslagen</>                           :
            saving ? <><RefreshCw size={13} className="animate-spin" /> Opslaan…</> :
                     <><Save size={13} /> Opslaan</>}
@@ -489,9 +492,9 @@ function RolesSettings() {
                     border: 'none', borderRadius: 8,
                     cursor: canDelete ? 'pointer' : 'not-allowed',
                     background: canDelete ? '#FEF2F2' : '#F9FAFB',
-                    color: canDelete ? '#DC2626' : '#D1D5DB',
+                    color: canDelete ? 'var(--color-danger)' : '#D1D5DB',
                   }}
-                  onMouseEnter={e => { if (canDelete) e.currentTarget.style.background = '#FEE2E2' }}
+                  onMouseEnter={e => { if (canDelete) e.currentTarget.style.background = 'var(--color-danger-bg)' }}
                   onMouseLeave={e => { if (canDelete) e.currentTarget.style.background = '#FEF2F2' }}>
                   {deleting === role.id ? <RefreshCw size={12} className="animate-spin" /> : <Trash2 size={12} />}
                 </button>
@@ -595,7 +598,7 @@ function SyncRow({ item, user, canSync, onLog }) {
                            borderRadius: 4, padding: '1px 6px' }}>{item.note}</span>
           )}
           {item.disabled && (
-            <span style={{ fontSize: 10, color: '#F59E0B', background: '#FFFBEB',
+            <span style={{ fontSize: 10, color: 'var(--color-warning)', background: 'var(--color-warning-bg)',
                            border: '1px solid #FDE68A', borderRadius: 4, padding: '1px 6px' }}>
               Binnenkort
             </span>
@@ -609,7 +612,7 @@ function SyncRow({ item, user, canSync, onLog }) {
           </div>
         )}
         {result && !running && (
-          <div style={{ marginTop: 6, fontSize: 12, color: result.ok ? '#16A34A' : '#DC2626',
+          <div style={{ marginTop: 6, fontSize: 12, color: result.ok ? 'var(--color-success)' : 'var(--color-danger)',
                         display: 'flex', alignItems: 'center', gap: 4 }}>
             {result.ok ? <Check size={11} /> : <AlertTriangle size={11} />}
             {result.msg}
@@ -625,7 +628,7 @@ function SyncRow({ item, user, canSync, onLog }) {
                    cursor: blocked ? 'not-allowed' : 'pointer',
                    border: `1px solid ${!canSync ? '#FCA5A5' : '#E5E7EB'}`,
                    background: !canSync ? '#FFF5F5' : '#F9FAFB',
-                   color: !canSync ? '#EF4444' : '#374151',
+                   color: !canSync ? 'var(--color-danger)' : '#374151',
                    opacity: (running || cooldown > 0 || item.disabled) ? 0.5 : 1 }}>
           <RotateCcw size={13} className={running ? 'animate-spin' : ''} />
           {running ? `${elapsed}s…` : !canSync ? 'Geen toegang' : 'Sync'}
@@ -682,9 +685,9 @@ function SyncSettings() {
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
                                     borderBottom: i < log.length - 1 ? '1px solid #F9FAFB' : 'none' }}>
                 <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-                              background: entry.ok ? '#16A34A' : '#EF4444' }} />
+                              background: entry.ok ? 'var(--color-success)' : 'var(--color-danger)' }} />
                 <span style={{ fontSize: 12, fontWeight: 500, color: '#111827', width: 120, flexShrink: 0 }}>{entry.label}</span>
-                <span style={{ fontSize: 12, color: entry.ok ? '#16A34A' : '#DC2626', flex: 1 }}>{entry.msg}</span>
+                <span style={{ fontSize: 12, color: entry.ok ? 'var(--color-success)' : 'var(--color-danger)', flex: 1 }}>{entry.msg}</span>
                 {entry.elapsed && <span style={{ fontSize: 11, color: '#9CA3AF' }}>{entry.elapsed}s</span>}
                 <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>{entry.user}</span>
                 <span style={{ fontSize: 11, color: '#D1D5DB', flexShrink: 0 }}>{entry.at}</span>
@@ -708,11 +711,11 @@ function DiffRow({ label, before, after }) {
                   padding: '7px 0', borderBottom: '1px solid #F9FAFB', alignItems: 'start' }}>
       <span style={{ fontSize: 12, color: '#9CA3AF' }}>{label}</span>
       <div style={{ fontSize: 12, background: changed ? '#FEF2F2' : '#F9FAFB',
-                    borderRadius: 6, padding: '3px 8px', color: changed ? '#DC2626' : '#6B7280' }}>
+                    borderRadius: 6, padding: '3px 8px', color: changed ? 'var(--color-danger)' : '#6B7280' }}>
         {Array.isArray(before) ? (before.length ? before.join(', ') : 'geen') : String(before ?? '—')}
       </div>
       <div style={{ fontSize: 12, background: changed ? '#F0FDF4' : '#F9FAFB',
-                    borderRadius: 6, padding: '3px 8px', color: changed ? '#16A34A' : '#6B7280' }}>
+                    borderRadius: 6, padding: '3px 8px', color: changed ? 'var(--color-success)' : '#6B7280' }}>
         {Array.isArray(after)  ? (after.length  ? after.join(', ')  : 'geen') : String(after  ?? '—')}
       </div>
     </div>
@@ -729,8 +732,8 @@ function AuditDrawer({ entry, onClose }) {
       const status  = p.status
       const isOk    = status >= 200 && status < 300
       const isErr   = status >= 400
-      const statusColor = isOk ? '#16A34A' : isErr ? '#DC2626' : '#D97706'
-      const statusBg    = isOk ? '#F0FDF4' : isErr ? '#FEF2F2' : '#FFFBEB'
+      const statusColor = isOk ? 'var(--color-success)' : isErr ? 'var(--color-danger)' : 'var(--color-warning)'
+      const statusBg    = isOk ? '#F0FDF4' : isErr ? '#FEF2F2' : 'var(--color-warning-bg)'
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: '8px 16px', alignItems: 'start' }}>
@@ -788,9 +791,9 @@ function AuditDrawer({ entry, onClose }) {
       return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {[
-            { label: 'Gesynchroniseerd', value: p.synced ?? p.customers ?? p.candidates ?? '—', color: '#16A34A' },
+            { label: 'Gesynchroniseerd', value: p.synced ?? p.customers ?? p.candidates ?? '—', color: 'var(--color-success)' },
             { label: 'Totaal',           value: p.total ?? '—' },
-            { label: 'Fouten',           value: p.errors ?? '0', color: p.errors > 0 ? '#DC2626' : undefined },
+            { label: 'Fouten',           value: p.errors ?? '0', color: p.errors > 0 ? 'var(--color-danger)' : undefined },
             { label: 'Duur',             value: p.duration ?? '—' },
             { label: 'Locaties',         value: p.locations },
             { label: 'Afdelingen',       value: p.departments },
@@ -826,7 +829,7 @@ function AuditDrawer({ entry, onClose }) {
             <div style={{ marginTop: 14, display: 'flex', gap: 12 }}>
               {added.length > 0 && (
                 <div style={{ flex: 1, background: '#F0FDF4', borderRadius: 8, padding: '10px 12px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#16A34A', marginBottom: 6 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)', marginBottom: 6 }}>
                     Toegevoegd ({added.length})
                   </div>
                   {added.map(p => <div key={p} style={{ fontSize: 12, color: '#374151' }}>{p}</div>)}
@@ -834,7 +837,7 @@ function AuditDrawer({ entry, onClose }) {
               )}
               {removed.length > 0 && (
                 <div style={{ flex: 1, background: '#FEF2F2', borderRadius: 8, padding: '10px 12px' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: '#DC2626', marginBottom: 6 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-danger)', marginBottom: 6 }}>
                     Verwijderd ({removed.length})
                   </div>
                   {removed.map(p => <div key={p} style={{ fontSize: 12, color: '#374151' }}>{p}</div>)}
@@ -860,8 +863,8 @@ function AuditDrawer({ entry, onClose }) {
                 <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr 1fr', gap: 8,
                               padding: '6px 0', marginBottom: 4 }}>
                   <span />
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#DC2626' }}>Oude waarde</span>
-                  <span style={{ fontSize: 11, fontWeight: 600, color: '#16A34A' }}>Nieuwe waarde</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-danger)' }}>Oude waarde</span>
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)' }}>Nieuwe waarde</span>
                 </div>
                 {changed.map(k => (
                   <DiffRow key={k} label={KPI_LABELS[k] ?? k} before={p.before[k] ?? '—'} after={p.after[k]} />
@@ -957,9 +960,9 @@ function AuditDrawer({ entry, onClose }) {
 }
 
 const LOG_NAME_META = {
-  auth:      { label: 'Auth',            bg: '#EFF6FF', color: '#1D4ED8' },
+  auth:      { label: 'Auth',            bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
   http:      { label: 'HTTP',            bg: '#F1F5F9', color: '#475569' },
-  sync:      { label: 'Synchronisatie',  bg: '#EFF6FF', color: '#2563EB' },
+  sync:      { label: 'Synchronisatie',  bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
   roles:     { label: 'Rollen',          bg: '#F5F3FF', color: '#6D28D9' },
   settings:  { label: 'Instellingen',   bg: '#ECFDF5', color: '#059669' },
   users:     { label: 'Gebruikers',      bg: '#FFF7ED', color: '#C2410C' },
@@ -1186,7 +1189,7 @@ function AuditLog() {
       </div>
 
       {error && (
-        <div style={{ padding: '12px 14px', borderRadius: 10, background: '#FFFBEB',
+        <div style={{ padding: '12px 14px', borderRadius: 10, background: 'var(--color-warning-bg)',
                       border: '1px solid #FDE68A', fontSize: 13, color: '#92400E', marginBottom: 12 }}>
           {error}
         </div>
@@ -1237,8 +1240,8 @@ function AuditLog() {
                     </td>
                     <td style={TD}><LogBadge logName={entry.log_name} /></td>
                     <td style={{ ...TD, fontWeight: 500, color: '#111827' }}>{entry.description}</td>
-                    <td style={{ ...TD, fontSize: 11, color: '#DC2626' }}>{beforeCell}</td>
-                    <td style={{ ...TD, fontSize: 11, color: '#16A34A' }}>{afterCell}</td>
+                    <td style={{ ...TD, fontSize: 11, color: 'var(--color-danger)' }}>{beforeCell}</td>
+                    <td style={{ ...TD, fontSize: 11, color: 'var(--color-success)' }}>{afterCell}</td>
                   </tr>
                 )
               })}
@@ -1255,8 +1258,8 @@ function AuditLog() {
 // ─── Huisstijl ───────────────────────────────────────────────────────────────
 
 const BRAND_COLOR_PRESETS = [
-  '#3B8FD4', '#6366F1', '#0EA5E9', '#10B981', '#F59E0B',
-  '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316',
+  '#3B8FD4', 'var(--color-primary)', 'var(--color-info)', '#10B981', 'var(--color-warning)',
+  'var(--color-danger)', '#8B5CF6', '#EC4899', '#14B8A6', '#F97316',
 ]
 
 function BrandingSettings() {
@@ -1323,7 +1326,7 @@ function BrandingSettings() {
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: saving ? 'wait' : 'pointer',
                    border: 'none', opacity: saving ? 0.7 : 1,
-                   background: saved ? '#16A34A' : 'var(--color-primary)', color: 'white', transition: 'background 0.2s' }}>
+                   background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white', transition: 'background 0.2s' }}>
           {saved   ? <><Check size={13} /> Opgeslagen</>                         :
            saving  ? <><RefreshCw size={13} className="animate-spin" /> Opslaan…</> :
                      <><Save size={13} /> Opslaan</>}
@@ -1401,7 +1404,7 @@ function BrandingSettings() {
               {logoPreview && (
                 <button onClick={() => { setLogoPreview(null); setLogoFile(null) }}
                   style={{ height: 34, padding: '0 12px', fontSize: 13, borderRadius: 8, cursor: 'pointer',
-                           border: '1px solid #FCA5A5', background: '#FFF5F5', color: '#EF4444' }}>
+                           border: '1px solid #FCA5A5', background: '#FFF5F5', color: 'var(--color-danger)' }}>
                   Verwijderen
                 </button>
               )}
@@ -1510,7 +1513,7 @@ function EmailSettings() {
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: saving ? 'wait' : 'pointer',
                      border: 'none', opacity: saving ? 0.7 : 1,
-                     background: saved ? '#16A34A' : 'var(--color-primary)', color: 'white', transition: 'background 0.2s' }}>
+                     background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white', transition: 'background 0.2s' }}>
             {saved   ? <><Check size={13} /> Opgeslagen</>                         :
              saving  ? <><RefreshCw size={13} className="animate-spin" /> Opslaan…</> :
                        <><Save size={13} /> Opslaan</>}
@@ -1523,7 +1526,7 @@ function EmailSettings() {
                       display: 'flex', alignItems: 'center', gap: 8,
                       background: testResult.ok ? '#F0FDF4' : '#FEF2F2',
                       border: `1px solid ${testResult.ok ? '#86EFAC' : '#FCA5A5'}`,
-                      color: testResult.ok ? '#16A34A' : '#DC2626' }}>
+                      color: testResult.ok ? 'var(--color-success)' : 'var(--color-danger)' }}>
           {testResult.ok ? <Check size={14} /> : <AlertTriangle size={14} />}
           {testResult.msg}
         </div>
@@ -1541,7 +1544,7 @@ function EmailSettings() {
               <button key={p.id} onClick={() => setProvider(p.id)}
                 style={{ flex: 1, padding: '12px 14px', borderRadius: 10, cursor: 'pointer', textAlign: 'left',
                          border: `1px solid ${provider === p.id ? 'var(--color-primary)' : '#E5E7EB'}`,
-                         background: provider === p.id ? 'var(--color-primary-bg, #EFF6FF)' : '#F9FAFB',
+                         background: provider === p.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : '#F9FAFB',
                          transition: 'all 0.15s' }}>
                 <div style={{ fontSize: 13, fontWeight: 600,
                               color: provider === p.id ? 'var(--color-primary)' : '#111827', marginBottom: 2 }}>
@@ -1553,7 +1556,7 @@ function EmailSettings() {
           </div>
 
           {(provider === 'gmail' || provider === 'office') && (
-            <div style={{ marginTop: 14, padding: '12px 14px', background: '#FFFBEB',
+            <div style={{ marginTop: 14, padding: '12px 14px', background: 'var(--color-warning-bg)',
                           border: '1px solid #FDE68A', borderRadius: 8, fontSize: 12, color: '#92400E' }}>
               <strong>Backend vereist:</strong> OAuth2-koppeling voor {provider === 'gmail' ? 'Google' : 'Microsoft'} moet worden geconfigureerd via de backend.
               Sla het verzendadres hieronder op; de daadwerkelijke OAuth-verbinding wordt ingesteld door de beheerder.
@@ -1608,7 +1611,7 @@ function EmailSettings() {
                 <label style={labelStyle}>
                   Wachtwoord
                   {smtpPassSet && !smtpPass && (
-                    <span style={{ marginLeft: 6, fontSize: 11, color: '#16A34A', fontWeight: 400 }}>
+                    <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--color-success)', fontWeight: 400 }}>
                       ✓ ingesteld
                     </span>
                   )}
@@ -1637,7 +1640,7 @@ function EmailSettings() {
                   <button key={s.id} onClick={() => setSmtpSecure(s.id)}
                     style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
                              border: `1px solid ${smtpSecure === s.id ? 'var(--color-primary)' : '#E5E7EB'}`,
-                             background: smtpSecure === s.id ? 'var(--color-primary-bg, #EFF6FF)' : '#F9FAFB',
+                             background: smtpSecure === s.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : '#F9FAFB',
                              color: smtpSecure === s.id ? 'var(--color-primary)' : '#374151',
                              fontWeight: smtpSecure === s.id ? 500 : 400 }}>
                     {s.label}
@@ -1751,7 +1754,7 @@ function WebhooksSettings() {
                   )}
                   <button onClick={() => remove(wh.id)}
                     style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                             background: '#FEF2F2', border: 'none', borderRadius: 6, cursor: 'pointer', color: '#DC2626' }}>
+                             background: '#FEF2F2', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--color-danger)' }}>
                     <Trash2 size={12} />
                   </button>
                 </div>
@@ -1763,7 +1766,7 @@ function WebhooksSettings() {
                 </code>
                 <button onClick={() => copyUrl(wh.token)}
                   style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '6px 10px', fontSize: 11, fontWeight: 500,
-                           background: copied === wh.token ? '#DCFCE7' : '#F3F4F6', color: copied === wh.token ? '#16A34A' : '#374151',
+                           background: copied === wh.token ? 'var(--color-success-bg)' : '#F3F4F6', color: copied === wh.token ? 'var(--color-success)' : '#374151',
                            border: 'none', borderRadius: 6, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                   {copied === wh.token ? <Check size={11} /> : <Copy size={11} />}
                   {copied === wh.token ? 'Gekopieerd!' : 'Kopieer URL'}
@@ -1827,8 +1830,8 @@ function AppsSettings() {
 
       {/* Cost warning */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px',
-                    background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: 10, marginBottom: 24 }}>
-        <AlertTriangle size={16} color="#D97706" style={{ flexShrink: 0, marginTop: 1 }} />
+                    background: 'var(--color-warning-bg)', border: '1px solid #FDE68A', borderRadius: 10, marginBottom: 24 }}>
+        <AlertTriangle size={16} color="var(--color-warning)" style={{ flexShrink: 0, marginTop: 1 }} />
         <div>
           <div style={{ fontSize: 13, fontWeight: 600, color: '#92400E' }}>
             Let op: hier zitten maandelijkse kosten aan verbonden
@@ -1875,7 +1878,7 @@ function AppsSettings() {
                     </span>
                   )}
                   {app.monthly && (
-                    <span style={{ fontSize: 10, color: '#D97706', background: '#FEF3C7',
+                    <span style={{ fontSize: 10, color: 'var(--color-warning)', background: 'var(--color-warning-bg)',
                                    borderRadius: 999, padding: '1px 7px', fontWeight: 500 }}>
                       Maandelijks
                     </span>
@@ -1900,7 +1903,7 @@ function AppsSettings() {
                   left: on ? 22 : 3, boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
                 }} />
               </button>
-              {isSaved && <Check size={14} color="#16A34A" style={{ flexShrink: 0 }} />}
+              {isSaved && <Check size={14} color="var(--color-success)" style={{ flexShrink: 0 }} />}
             </div>
           )
         })}
@@ -1935,7 +1938,7 @@ const MATRIX_COLS = [
   { key: 'hf',   label: 'HelloFlex',      icon: '🟡', color: '#0891B2' },
   { key: 'ai',   label: 'AI & Workflow',  icon: '🤖', color: '#7C3AED' },
   { key: 'ats',  label: 'ATS & CRM',      icon: '📋', color: '#059669' },
-  { key: 'plan', label: 'Planning',        icon: '📅', color: '#0EA5E9' },
+  { key: 'plan', label: 'Planning',        icon: '📅', color: 'var(--color-info)' },
 ]
 
 const WORKFLOW_APPS = [
@@ -1952,7 +1955,7 @@ function MatrixCell({ active }) {
     <td style={{ textAlign: 'center', padding: '0 4px' }}>
       {active
         ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          width: 20, height: 20, borderRadius: '50%', background: '#D1FAE5' }}>
+                          width: 20, height: 20, borderRadius: '50%', background: 'var(--color-success-bg)' }}>
             <Check size={11} color="#059669" />
           </span>
         : <span style={{ display: 'inline-block', width: 14, height: 2, borderRadius: 1, background: '#E5E7EB' }} />
@@ -2050,11 +2053,11 @@ function ModulesSettings() {
                   style={{
                     cursor: 'pointer',
                     borderBottom: i < PACKAGES.length - 1 ? '1px solid var(--border)' : 'none',
-                    background: isSelected ? '#EFF6FF' : isActive ? '#F0FDF4' : 'white',
+                    background: isSelected ? 'var(--color-secondary-bg)' : isActive ? '#F0FDF4' : 'white',
                     transition: 'background 0.1s',
                   }}
                   onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#F9FAFB' }}
-                  onMouseLeave={e => { e.currentTarget.style.background = isSelected ? '#EFF6FF' : isActive ? '#F0FDF4' : 'white' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = isSelected ? 'var(--color-secondary-bg)' : isActive ? '#F0FDF4' : 'white' }}
                 >
                   <td style={{ padding: '11px 16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -2067,7 +2070,7 @@ function ModulesSettings() {
                       </span>
                       {isActive && (
                         <span style={{ fontSize: 10, fontWeight: 600, color: '#059669',
-                                        background: '#D1FAE5', borderRadius: 999, padding: '1px 7px' }}>
+                                        background: 'var(--color-success-bg)', borderRadius: 999, padding: '1px 7px' }}>
                           Huidig
                         </span>
                       )}
@@ -2094,7 +2097,7 @@ function ModulesSettings() {
         <button onClick={save} disabled={saving || !hasChange}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 20px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none',
-                   background: saved ? '#16A34A' : hasChange ? 'var(--color-primary)' : '#D1D5DB',
+                   background: saved ? 'var(--color-success)' : hasChange ? 'var(--color-primary)' : '#D1D5DB',
                    color: 'white', cursor: (saving || !hasChange) ? 'not-allowed' : 'pointer',
                    transition: 'background 0.2s', opacity: saving ? 0.7 : 1 }}>
           {saved  ? <><Check size={13} /> Opgeslagen &amp; actief</>
@@ -2118,15 +2121,15 @@ function ModulesSettings() {
 // API: GET /whatsapp/connection, /whatsapp/phone-numbers, /whatsapp/templates
 
 const QUALITY_META = {
-  GREEN:  { label: 'Goed',      color: '#16A34A', bg: '#F0FDF4' },
-  YELLOW: { label: 'Matig',     color: '#D97706', bg: '#FFFBEB' },
-  RED:    { label: 'Slecht',    color: '#DC2626', bg: '#FEF2F2' },
+  GREEN:  { label: 'Goed',      color: 'var(--color-success)', bg: '#F0FDF4' },
+  YELLOW: { label: 'Matig',     color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
+  RED:    { label: 'Slecht',    color: 'var(--color-danger)', bg: '#FEF2F2' },
 }
 
 const TEMPLATE_STATUS_META = {
-  APPROVED: { label: 'Goedgekeurd', color: '#16A34A', bg: '#F0FDF4' },
-  PENDING:  { label: 'In review',   color: '#D97706', bg: '#FFFBEB' },
-  REJECTED: { label: 'Afgewezen',   color: '#DC2626', bg: '#FEF2F2' },
+  APPROVED: { label: 'Goedgekeurd', color: 'var(--color-success)', bg: '#F0FDF4' },
+  PENDING:  { label: 'In review',   color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
+  REJECTED: { label: 'Afgewezen',   color: 'var(--color-danger)', bg: '#FEF2F2' },
   PAUSED:   { label: 'Gepauzeerd',  color: '#6B7280', bg: '#F9FAFB' },
 }
 
@@ -2194,9 +2197,9 @@ function WhatsAppSettings() {
   })
 
   const STATUS_CONN = {
-    active:   { label: 'Verbonden',      dotColor: '#16A34A', border: '#86EFAC', bg: '#F0FDF4', labelColor: '#16A34A' },
+    active:   { label: 'Verbonden',      dotColor: 'var(--color-success)', border: '#86EFAC', bg: '#F0FDF4', labelColor: 'var(--color-success)' },
     inactive: { label: 'Inactief',       dotColor: '#9CA3AF', border: '#E5E7EB', bg: '#F9FAFB', labelColor: '#6B7280' },
-    expired:  { label: 'Token verlopen', dotColor: '#DC2626', border: '#FCA5A5', bg: '#FEF2F2', labelColor: '#DC2626' },
+    expired:  { label: 'Token verlopen', dotColor: 'var(--color-danger)', border: '#FCA5A5', bg: '#FEF2F2', labelColor: 'var(--color-danger)' },
   }
   const cs = connection ? (STATUS_CONN[connection.status] ?? STATUS_CONN.inactive) : null
 
@@ -2215,9 +2218,9 @@ function WhatsAppSettings() {
         {noConn ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 18px',
                         background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 12 }}>
-            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#DC2626', flexShrink: 0 }} />
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-danger)', flexShrink: 0 }} />
             <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: '#DC2626' }}>Niet verbonden</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>Niet verbonden</div>
               <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
                 Er is nog geen WhatsApp Business-koppeling geconfigureerd voor deze tenant.
               </div>
@@ -2257,7 +2260,7 @@ function WhatsAppSettings() {
       {syncMsg && (
         <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, fontSize: 12,
                       background: syncMsg.ok ? '#F0FDF4' : '#FEF2F2',
-                      color: syncMsg.ok ? '#16A34A' : '#DC2626',
+                      color: syncMsg.ok ? 'var(--color-success)' : 'var(--color-danger)',
                       border: `1px solid ${syncMsg.ok ? '#86EFAC' : '#FCA5A5'}` }}>
           {syncMsg.text}
         </div>
@@ -2299,7 +2302,7 @@ function WhatsAppSettings() {
                                                border: '1px solid #F3F4F6', borderRadius: 12 }}>
                   <div style={{ width: 36, height: 36, borderRadius: 10, background: '#F0FDF4',
                                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <MessageCircle size={16} color="#16A34A" />
+                    <MessageCircle size={16} color="var(--color-success)" />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>
@@ -2511,10 +2514,10 @@ function SecuritySettings() {
     <div style={{ maxWidth: 480 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px',
                     background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: 12, marginBottom: 24 }}>
-        <ShieldCheck size={18} color="#16A34A" style={{ flexShrink: 0, marginTop: 1 }} />
+        <ShieldCheck size={18} color="var(--color-success)" style={{ flexShrink: 0, marginTop: 1 }} />
         <div>
           <div style={{ fontSize: 13, fontWeight: 600, color: '#15803D' }}>Twee-factor verificatie geactiveerd</div>
-          <div style={{ fontSize: 12, color: '#16A34A', marginTop: 2 }}>
+          <div style={{ fontSize: 12, color: 'var(--color-success)', marginTop: 2 }}>
             Sla je herstelcodes op. Ze zijn slechts één keer bruikbaar en worden niet opnieuw getoond.
           </div>
         </div>
@@ -2586,7 +2589,7 @@ function SecuritySettings() {
             onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
         </div>
         {error && (
-          <div style={{ fontSize: 13, color: '#DC2626', background: '#FEF2F2',
+          <div style={{ fontSize: 13, color: 'var(--color-danger)', background: '#FEF2F2',
                          border: '1px solid #FCA5A5', borderRadius: 8, padding: '8px 12px' }}>
             {error}
           </div>
@@ -2621,10 +2624,10 @@ function SecuritySettings() {
           placeholder="123456" maxLength={6} required autoFocus
           style={{ padding: '10px 14px', border: '1px solid #E5E7EB', borderRadius: 8,
                    fontSize: 18, letterSpacing: '0.2em', textAlign: 'center', outline: 'none', color: '#111827' }}
-          onFocus={e => (e.target.style.borderColor = '#DC2626')}
+          onFocus={e => (e.target.style.borderColor = 'var(--color-danger)')}
           onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
         {error && (
-          <div style={{ fontSize: 13, color: '#DC2626', background: '#FEF2F2',
+          <div style={{ fontSize: 13, color: 'var(--color-danger)', background: '#FEF2F2',
                          border: '1px solid #FCA5A5', borderRadius: 8, padding: '8px 12px' }}>
             {error}
           </div>
@@ -2632,7 +2635,7 @@ function SecuritySettings() {
         <button type="submit" disabled={loading || disableCode.length < 6}
           style={{ height: 36, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
                    border: 'none', cursor: (loading || disableCode.length < 6) ? 'not-allowed' : 'pointer',
-                   background: (loading || disableCode.length < 6) ? '#D1D5DB' : '#DC2626', color: 'white' }}>
+                   background: (loading || disableCode.length < 6) ? '#D1D5DB' : 'var(--color-danger)', color: 'white' }}>
           {loading ? 'Bezig…' : '2FA uitschakelen'}
         </button>
       </form>
@@ -2648,14 +2651,14 @@ function SecuritySettings() {
                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                        background: mfaEnabled ? '#F0FDF4' : '#F9FAFB' }}>
           {mfaEnabled
-            ? <ShieldCheck size={22} color="#16A34A" />
+            ? <ShieldCheck size={22} color="var(--color-success)" />
             : <Lock size={22} color="#9CA3AF" />}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>
             Twee-factor verificatie (2FA)
           </div>
-          <div style={{ fontSize: 12, color: mfaEnabled ? '#16A34A' : '#9CA3AF', marginTop: 2 }}>
+          <div style={{ fontSize: 12, color: mfaEnabled ? 'var(--color-success)' : '#9CA3AF', marginTop: 2 }}>
             {mfaEnabled ? 'Ingeschakeld — je account is extra beveiligd' : 'Uitgeschakeld — voeg een extra beveiligingslaag toe'}
           </div>
         </div>
@@ -2663,7 +2666,7 @@ function SecuritySettings() {
           ? (
             <button onClick={() => { setStep('disabling'); setError('') }}
               style={{ height: 32, padding: '0 14px', fontSize: 12, fontWeight: 500, borderRadius: 8,
-                       cursor: 'pointer', border: '1px solid #FCA5A5', background: '#FEF2F2', color: '#DC2626', flexShrink: 0 }}>
+                       cursor: 'pointer', border: '1px solid #FCA5A5', background: '#FEF2F2', color: 'var(--color-danger)', flexShrink: 0 }}>
               Uitschakelen
             </button>
           ) : (
@@ -2677,7 +2680,7 @@ function SecuritySettings() {
         }
       </div>
       {error && (
-        <div style={{ fontSize: 13, color: '#DC2626', background: '#FEF2F2', border: '1px solid #FCA5A5',
+        <div style={{ fontSize: 13, color: 'var(--color-danger)', background: '#FEF2F2', border: '1px solid #FCA5A5',
                        borderRadius: 8, padding: '8px 12px', marginTop: 12 }}>
           {error}
         </div>
@@ -2698,8 +2701,8 @@ function SecuritySettings() {
 // ─── Kleurenpalet voor status/fase pickers ───────────────────────────────────
 
 const COLOR_PRESETS = [
-  '#EF4444','#F97316','#F59E0B','#84CC16','#22C55E','#14B8A6',
-  '#3B8FD4','#6366F1','#8B5CF6','#EC4899','#6B7280','#111827',
+  'var(--color-danger)','#F97316','var(--color-warning)','#84CC16','var(--color-success)','#14B8A6',
+  '#3B8FD4','var(--color-primary)','#8B5CF6','#EC4899','#6B7280','#111827',
 ]
 
 function ColorPickerPopup({ color, onChange, onClose }) {
@@ -2814,7 +2817,7 @@ function ProfielSettings() {
         <button onClick={save} disabled={saving}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
-                   background: saved ? '#16A34A' : 'var(--color-primary)', color: 'white' }}>
+                   background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
           {saved ? <><Check size={13}/> Opgeslagen</> : saving ? <><RefreshCw size={13} className="animate-spin"/> Opslaan…</> : <><Save size={13}/> Opslaan</>}
         </button>
       </div>
@@ -2949,7 +2952,7 @@ function BedrijfAlgemeenSettings() {
         <button onClick={save} disabled={saving}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
-                   background: saved ? '#16A34A' : 'var(--color-primary)', color: 'white' }}>
+                   background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
           {saved ? <><Check size={13}/> Opgeslagen</> : saving ? <><RefreshCw size={13} className="animate-spin"/> Opslaan…</> : <><Save size={13}/> Opslaan</>}
         </button>
       </div>
@@ -3138,7 +3141,7 @@ function GeheugenSettings() {
         <button onClick={save} disabled={saving}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
-                   background: saved ? '#16A34A' : 'var(--color-primary)', color: 'white' }}>
+                   background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
           {saved ? <><Check size={13}/> Opgeslagen</> : saving ? <><RefreshCw size={13} className="animate-spin"/> Opslaan…</> : <><Save size={13}/> Opslaan</>}
         </button>
       </div>
@@ -3209,7 +3212,7 @@ function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = tru
             <button onClick={saveOrder} disabled={saving}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                        fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
-                       background: saved ? '#16A34A' : 'var(--color-primary)', color: 'white' }}>
+                       background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
               {saved ? <><Check size={13}/> Opgeslagen</> : <><Save size={13}/> Opslaan</>}
             </button>
           )}
@@ -3235,7 +3238,7 @@ function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = tru
               <div style={{ flex: 1 }} />
               <button onClick={() => remove(item)} disabled={deleting === item.id}
                 style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         background: '#FEF2F2', border: 'none', borderRadius: 6, cursor: 'pointer', color: '#DC2626' }}>
+                         background: '#FEF2F2', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--color-danger)' }}>
                 {deleting === item.id ? <RefreshCw size={11} className="animate-spin" /> : <Trash2 size={11} />}
               </button>
             </>
@@ -3323,7 +3326,7 @@ function VacatureSettings() {
             <div key={f.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'white', border: '1px solid #F3F4F6', borderRadius: 8 }}>
               <span style={{ flex: 1, fontSize: 13, color: '#111827' }}>{f.name}</span>
               <button onClick={async () => { await api.delete(`/vacancy-custom-fields/${f.id}`); setCustomFields(p => p.filter(x => x.id !== f.id)) }}
-                style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FEF2F2', border: 'none', borderRadius: 6, cursor: 'pointer', color: '#DC2626' }}>
+                style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FEF2F2', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--color-danger)' }}>
                 <Trash2 size={11} />
               </button>
             </div>
@@ -3456,7 +3459,7 @@ function ImporterenSettings() {
           {step === 2 && (
             <div style={{ padding: '20px 0' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 8, marginBottom: 16 }}>
-                <Check size={14} style={{ color: '#16A34A' }} />
+                <Check size={14} style={{ color: 'var(--color-success)' }} />
                 <span style={{ fontSize: 13, color: '#166534', fontWeight: 500 }}>{file?.name}</span>
                 <button onClick={reset} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}><X size={13} /></button>
               </div>
@@ -3473,7 +3476,7 @@ function ImporterenSettings() {
 
           {step === 4 && (
             <div style={{ padding: '20px 0', textAlign: 'center' }}>
-              <Check size={40} style={{ color: '#16A34A', margin: '0 auto 12px' }} />
+              <Check size={40} style={{ color: 'var(--color-success)', margin: '0 auto 12px' }} />
               <p style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 6 }}>Import klaar!</p>
               <p style={{ fontSize: 13, color: '#9CA3AF' }}>Je gegevens zijn succesvol geïmporteerd.</p>
               <button onClick={reset} style={{ marginTop: 16, height: 34, padding: '0 16px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', cursor: 'pointer' }}>Nieuw importeren</button>
@@ -3527,8 +3530,8 @@ function ApiKeysSettings() {
         <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: '14px 16px', marginBottom: 16 }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: '#166534', marginBottom: 6 }}>Nieuwe API-key — kopieer deze nu, hij wordt niet meer getoond.</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <code style={{ flex: 1, fontSize: 12, fontFamily: 'monospace', background: 'white', border: '1px solid #D1FAE5', borderRadius: 6, padding: '6px 10px', color: '#111827', overflow: 'auto' }}>{newKey}</code>
-            <button onClick={() => navigator.clipboard.writeText(newKey)} style={{ height: 30, padding: '0 10px', fontSize: 12, border: '1px solid #D1FAE5', borderRadius: 6, background: 'white', cursor: 'pointer' }}><Copy size={12} /></button>
+            <code style={{ flex: 1, fontSize: 12, fontFamily: 'monospace', background: 'white', border: '1px solid var(--color-success-bg)', borderRadius: 6, padding: '6px 10px', color: '#111827', overflow: 'auto' }}>{newKey}</code>
+            <button onClick={() => navigator.clipboard.writeText(newKey)} style={{ height: 30, padding: '0 10px', fontSize: 12, border: '1px solid var(--color-success-bg)', borderRadius: 6, background: 'white', cursor: 'pointer' }}><Copy size={12} /></button>
           </div>
           <button onClick={() => setNewKey(null)} style={{ marginTop: 8, fontSize: 12, color: '#9CA3AF', background: 'none', border: 'none', cursor: 'pointer' }}>Sluiten</button>
         </div>
@@ -3558,7 +3561,7 @@ function ApiKeysSettings() {
                 </div>
               </div>
               <button onClick={() => revoke(k)}
-                style={{ display: 'flex', alignItems: 'center', gap: 5, height: 30, padding: '0 12px', fontSize: 12, border: '1px solid #FCA5A5', borderRadius: 7, background: '#FEF2F2', cursor: 'pointer', color: '#DC2626' }}>
+                style={{ display: 'flex', alignItems: 'center', gap: 5, height: 30, padding: '0 12px', fontSize: 12, border: '1px solid #FCA5A5', borderRadius: 7, background: '#FEF2F2', cursor: 'pointer', color: 'var(--color-danger)' }}>
                 <Trash2 size={11} /> Intrekken
               </button>
             </div>
@@ -3614,7 +3617,7 @@ function NotificatiesSettings({ context }) {
         <button onClick={save} disabled={saving}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
-                   background: saved ? '#16A34A' : 'var(--color-primary)', color: 'white' }}>
+                   background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
           {saved ? <><Check size={13}/> Opgeslagen</> : <><Save size={13}/> Opslaan</>}
         </button>
       </div>
@@ -3645,6 +3648,318 @@ function GebruikSettings()             { return <PlaceholderSettings title="Gebr
 function FacturenSettings()            { return <PlaceholderSettings title="Facturen"                description="Bekijk en download je facturen." /> }
 function GebruikersbeheerSettings()    { return <UsersPage /> }
 
+// ─── CV Template Settings ─────────────────────────────────────────────────────
+
+const PREVIEW_CANDIDATE = {
+  name: 'Anouk de Vries',
+  title: 'Verzorgende IG',
+  email: 'anouk.devries@email.nl',
+  phone: '06 12 34 56 78',
+  address: 'Amsterdam',
+  dob: '1990-03-15',
+  nationality: 'Nederlands',
+  summary: 'Enthousiaste zorgprofessional met 8 jaar ervaring in de ouderenzorg en thuiszorg. Betrouwbaar, klantgericht en flexibel inzetbaar.',
+  ervaring: [
+    { functie: 'Verzorgende IG', werkgever: 'Thuiszorg Noord', start_datum: '2020-01-01', beschrijving: 'Zelfstandige thuiszorgverlening, medicijnbeheer en rapportage.' },
+    { functie: 'Helpende Plus',  werkgever: 'Zorggroep West',  start_datum: '2017-03-01', eind_datum: '2019-12-31' },
+  ],
+  opleiding: [
+    { opleiding: 'MBO Verpleging & Verzorging niveau 3', instelling: 'ROC Amsterdam', start_jaar: 2015, eind_jaar: 2017 },
+    { opleiding: 'VMBO Zorg & Welzijn',                  instelling: 'Pieter Nieuwland College', start_jaar: 2011, eind_jaar: 2015 },
+  ],
+  talen:        [{ taal: 'Nederlands', niveau: 'Moedertaal' }, { taal: 'Engels', niveau: 'B2' }],
+  vaardigheden: [{ naam: 'Medicijnbeheer' }, { naam: 'Rapportage' }, { naam: 'Tilhulpmiddelen' }, { naam: 'BHV' }],
+  certs:        [{ naam: 'BIG-registratie' }, { naam: 'VCA Basis' }],
+}
+
+function CvHtmlPreview({ settings }) {
+  const color = settings.primaryColor ?? '#6366F1'
+  const c = PREVIEW_CANDIDATE
+  const secs = settings.sections ?? []
+  const enabled = (id) => secs.length === 0 || (secs.find(s => s.id === id)?.enabled !== false)
+  const scale = 0.62
+
+  return (
+    <div style={{ overflow: 'hidden', borderRadius: 6, boxShadow: '0 2px 16px rgba(0,0,0,0.12)', background: 'white' }}>
+      <div style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: `${100/scale}%`, fontFamily: 'sans-serif', color: '#1F2937' }}>
+        {/* Accent bar */}
+        <div style={{ height: 7, background: color }} />
+        {/* Header */}
+        <div style={{ padding: '22px 38px 18px', borderBottom: `1px solid ${color}28`, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: 28, fontWeight: 800, color: '#111827', marginBottom: 4 }}>{c.name}</div>
+            <div style={{ fontSize: 13, color, fontWeight: 700 }}>{c.title}</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {settings.logoUrl ? (
+              <img src={settings.logoUrl} style={{ height: 40, objectFit: 'contain' }} alt="logo" />
+            ) : settings.companyName ? (
+              <div style={{ fontSize: 17, fontWeight: 800, color }}>{settings.companyName}</div>
+            ) : null}
+          </div>
+        </div>
+        {/* Body */}
+        <div style={{ display: 'flex', minHeight: 700 }}>
+          {/* Sidebar */}
+          <div style={{ width: 200, background: color + '10', padding: '20px 14px 20px 22px', flexShrink: 0 }}>
+            <div style={{ width: 80, height: 80, borderRadius: '50%', background: color + '28', marginBottom: 16 }} />
+            {enabled('contact') && (
+              <>
+                <div style={{ fontSize: 8, fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: 6 }}>Contact</div>
+                {[['E-mail', c.email], ['Tel.', c.phone], ['Woonplaats', c.address], ['Geb.', '15 mrt 1990']].map(([k, v]) => (
+                  <div key={k} style={{ display: 'flex', fontSize: 9, marginBottom: 4, gap: 6 }}>
+                    <span style={{ color: '#6B7280', width: 55, flexShrink: 0 }}>{k}</span>
+                    <span style={{ color: '#1F2937' }}>{v}</span>
+                  </div>
+                ))}
+              </>
+            )}
+            {enabled('talen') && (
+              <>
+                <div style={{ fontSize: 8, fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: 6, marginTop: 14 }}>Talen</div>
+                {c.talen.map((t, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, marginBottom: 3 }}>
+                    <span>{t.taal}</span><span style={{ color: '#9CA3AF' }}>{t.niveau}</span>
+                  </div>
+                ))}
+              </>
+            )}
+            {enabled('vaardigheden') && (
+              <>
+                <div style={{ fontSize: 8, fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: 6, marginTop: 14 }}>Vaardigheden</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
+                  {c.vaardigheden.map((v, i) => (
+                    <span key={i} style={{ fontSize: 8, background: color + '18', color, padding: '2px 6px', borderRadius: 3 }}>{v.naam}</span>
+                  ))}
+                </div>
+              </>
+            )}
+            {enabled('certificaten') && (
+              <>
+                <div style={{ fontSize: 8, fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '1.2px', marginBottom: 6, marginTop: 14 }}>Certificaten</div>
+                {c.certs.map((cert, i) => (
+                  <div key={i} style={{ fontSize: 9, marginBottom: 3, color: '#374151' }}>• {cert.naam}</div>
+                ))}
+              </>
+            )}
+          </div>
+          {/* Main */}
+          <div style={{ flex: 1, padding: '20px 34px 20px 22px' }}>
+            {enabled('samenvatting') && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color, borderBottom: `1px solid ${color}28`, paddingBottom: 5, marginBottom: 8 }}>Over mij</div>
+                <div style={{ fontSize: 10, color: '#374151', lineHeight: 1.6 }}>{c.summary}</div>
+              </div>
+            )}
+            {enabled('ervaring') && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color, borderBottom: `1px solid ${color}28`, paddingBottom: 5, marginBottom: 8 }}>Werkervaring</div>
+                {c.ervaring.map((e, i) => (
+                  <div key={i} style={{ marginBottom: 10 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#111827' }}>{e.functie}</div>
+                    <div style={{ fontSize: 10, color }}>{e.werkgever}</div>
+                    <div style={{ fontSize: 9, color: '#9CA3AF', marginBottom: 3 }}>jan 2020 – heden</div>
+                    {e.beschrijving && <div style={{ fontSize: 9.5, color: '#4B5563', lineHeight: 1.5 }}>{e.beschrijving}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+            {enabled('opleiding') && (
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color, borderBottom: `1px solid ${color}28`, paddingBottom: 5, marginBottom: 8 }}>Opleiding</div>
+                {c.opleiding.map((o, i) => (
+                  <div key={i} style={{ marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#111827' }}>{o.opleiding}</div>
+                    <div style={{ fontSize: 10, color }}>{o.instelling}</div>
+                    <div style={{ fontSize: 9, color: '#9CA3AF' }}>{o.start_jaar} – {o.eind_jaar}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        {/* Footer */}
+        <div style={{ padding: '8px 38px', borderTop: `1px solid #E5E7EB`, display: 'flex', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 8, color: '#9CA3AF' }}>
+            {settings.companyName ? `Opgemaakt door ${settings.companyName}` : 'Opgemaakt via KoiosMatch'}
+          </span>
+          <span style={{ fontSize: 8, color: '#9CA3AF' }}>1 / 1</span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CvTemplateSettings() {
+  const { settings, save, reset } = useCvSettings()
+  const [generating, setGenerating] = useState(false)
+  const logoRef = useRef(null)
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => save({ logoUrl: ev.target.result })
+    reader.readAsDataURL(file)
+  }
+
+  const handleSectionToggle = (id) => {
+    save({
+      sections: settings.sections.map(s => s.id === id ? { ...s, enabled: !s.enabled } : s),
+    })
+  }
+
+  const handleSectionMove = (id, dir) => {
+    const arr = [...settings.sections]
+    const idx = arr.findIndex(s => s.id === id)
+    const swapIdx = idx + dir
+    if (swapIdx < 0 || swapIdx >= arr.length) return;
+    [arr[idx], arr[swapIdx]] = [arr[swapIdx], arr[idx]]
+    save({ sections: arr })
+  }
+
+  const handleDownloadPreview = async () => {
+    setGenerating(true)
+    try {
+      const blob = await pdf(<CvDocument c={PREVIEW_CANDIDATE} settings={settings} />).toBlob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url; a.download = 'CV-voorbeeld.pdf'
+      document.body.appendChild(a); a.click()
+      document.body.removeChild(a); URL.revokeObjectURL(url)
+    } finally {
+      setGenerating(false)
+    }
+  }
+
+  const fieldStyle = {
+    width: '100%', padding: '8px 10px', fontSize: 13, border: '1px solid var(--border)',
+    borderRadius: 6, background: 'var(--bg)', color: 'var(--text)', boxSizing: 'border-box',
+  }
+  const labelStyle = { fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 5, display: 'block' }
+
+  return (
+    <div style={{ padding: '28px 32px', maxWidth: 1100 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+        <div>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', margin: 0 }}>CV Template</h2>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4, marginBottom: 0 }}>
+            Stel het CV-ontwerp in dat gegenereerd wordt vanuit kandidaatprofielen.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button onClick={handleDownloadPreview} disabled={generating}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 12, fontWeight: 500,
+              border: '1px solid var(--border)', borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', cursor: 'pointer' }}>
+            <Download size={13} />{generating ? 'Genereren...' : 'PDF voorbeeld'}
+          </button>
+          <button onClick={reset}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 12, fontWeight: 500,
+              border: '1px solid var(--border)', borderRadius: 7, background: 'var(--bg)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+            <RotateCcw size={12} /> Reset
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '320px 1fr', gap: 24, alignItems: 'start' }}>
+
+        {/* ── Form panel ── */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* Logo */}
+          <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px', background: 'var(--surface)' }}>
+            <span style={labelStyle}>Logo</span>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>Wordt rechtsbovenin het CV geplaatst. PNG of SVG aanbevolen.</p>
+            {settings.logoUrl && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                <img src={settings.logoUrl} style={{ height: 36, objectFit: 'contain', border: '1px solid var(--border)', borderRadius: 6, padding: 4, background: 'white' }} alt="logo" />
+                <button onClick={() => save({ logoUrl: null })}
+                  style={{ fontSize: 11, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
+                  Verwijderen
+                </button>
+              </div>
+            )}
+            <input ref={logoRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogoUpload} />
+            <button onClick={() => logoRef.current?.click()}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 12px', fontSize: 12,
+                border: '1px dashed var(--border)', borderRadius: 7, background: 'var(--bg)', color: 'var(--text-muted)', cursor: 'pointer', width: '100%', justifyContent: 'center' }}>
+              <Upload size={12} /> {settings.logoUrl ? 'Ander logo kiezen' : 'Logo uploaden'}
+            </button>
+          </div>
+
+          {/* Bedrijfsnaam */}
+          <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px', background: 'var(--surface)' }}>
+            <label style={labelStyle}>Bedrijfsnaam</label>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>Fallback als er geen logo is. Wordt ook in de voettekst vermeld.</p>
+            <input type="text" value={settings.companyName} onChange={e => save({ companyName: e.target.value })}
+              placeholder="Jouw bedrijfsnaam" style={fieldStyle} />
+          </div>
+
+          {/* Kleur */}
+          <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px', background: 'var(--surface)' }}>
+            <label style={labelStyle}>Accentkleur</label>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>Gebruikt voor kopteksten, sectietitels en tags.</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <input type="color" value={settings.primaryColor} onChange={e => save({ primaryColor: e.target.value })}
+                style={{ width: 40, height: 40, border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', padding: 2 }} />
+              <input type="text" value={settings.primaryColor} onChange={e => /^#[0-9A-Fa-f]{0,6}$/.test(e.target.value) && save({ primaryColor: e.target.value })}
+                style={{ ...fieldStyle, width: 110, fontFamily: 'monospace', fontSize: 12 }} />
+              <div style={{ display: 'flex', gap: 6 }}>
+                {['#6366F1','#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#0EA5E9','#14B8A6'].map(c => (
+                  <button key={c} onClick={() => save({ primaryColor: c })}
+                    style={{ width: 20, height: 20, borderRadius: '50%', background: c, border: settings.primaryColor === c ? '2px solid var(--text)' : '2px solid transparent', cursor: 'pointer' }} />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Secties */}
+          <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px', background: 'var(--surface)' }}>
+            <label style={labelStyle}>Secties</label>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 12 }}>Stel in welke secties zichtbaar zijn en in welke volgorde.</p>
+            {settings.sections.map((sec, idx) => (
+              <div key={sec.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0',
+                borderBottom: idx < settings.sections.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                <button onClick={() => handleSectionToggle(sec.id)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', color: sec.enabled ? 'var(--color-primary)' : '#D1D5DB', flexShrink: 0 }}>
+                  {sec.enabled
+                    ? <ToggleRight size={22} />
+                    : <ToggleLeft size={22} />}
+                </button>
+                <span style={{ flex: 1, fontSize: 12, color: sec.enabled ? 'var(--text)' : 'var(--text-muted)', fontWeight: sec.enabled ? 500 : 400 }}>
+                  {sec.label}
+                </span>
+                <div style={{ display: 'flex', gap: 2 }}>
+                  <button onClick={() => handleSectionMove(sec.id, -1)} disabled={idx === 0}
+                    style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, cursor: idx === 0 ? 'not-allowed' : 'pointer',
+                      padding: '2px 5px', color: idx === 0 ? '#D1D5DB' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                    <ChevronUp size={11} />
+                  </button>
+                  <button onClick={() => handleSectionMove(sec.id, 1)} disabled={idx === settings.sections.length - 1}
+                    style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, cursor: idx === settings.sections.length - 1 ? 'not-allowed' : 'pointer',
+                      padding: '2px 5px', color: idx === settings.sections.length - 1 ? '#D1D5DB' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                    <ChevronDown size={11} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Preview panel ── */}
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>Voorvertoning</span>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>A4 — met voorbeeldkandidaat</span>
+          </div>
+          <CvHtmlPreview settings={settings} />
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
 const NAV_GROUPS = [
   {
     label: 'Algemeen',
@@ -3670,6 +3985,7 @@ const NAV_GROUPS = [
       { id: 'candidate_status',label: 'Kandidaatstatus', icon: UserCheck   },
       { id: 'vacancy',         label: 'Vacature',        icon: Briefcase   },
       { id: 'rejection',       label: 'Afwijsredenen',   icon: XCircle     },
+      { id: 'cv_template',     label: 'CV Template',     icon: FileText    },
     ],
   },
   {
@@ -3804,6 +4120,7 @@ export default function SettingsPage() {
         {tab === 'candidate_status' && <KandidaatstatusSettings />}
         {tab === 'vacancy'    && <VacatureSettings />}
         {tab === 'rejection'  && <AfwijsredenenSettings />}
+        {tab === 'cv_template' && <CvTemplateSettings />}
         {tab === 'notif_sollicitaties' && <NotificatiesSettings context="sollicitaties" />}
         {tab === 'notif_vacatures'     && <NotificatiesSettings context="vacatures" />}
         {tab === 'notif_facturering'   && <NotificatiesSettings context="facturering" />}

@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, Maximize2, Minimize2, Edit2, Plus, FileText, ChevronDown, ChevronUp, MoreHorizontal, GripVertical, Search, Check, Calendar, Eye, Pencil, Camera, Bold, Italic, List, ListOrdered, Heading2, Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Download, MapPin, Clock, Sparkles, RefreshCw, Heart } from 'lucide-react'
+import { pdf } from '@react-pdf/renderer'
+import { CvDocument } from './CvTemplate'
+import { useCvSettings } from '../../lib/useCvSettings'
 import api from '../../lib/api'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -11,11 +14,11 @@ import DatePicker from 'react-datepicker'
 const DOC_TYPES = ['CV', 'ID-bewijs', 'Diploma', 'Contract', 'VOG', 'Certificaat', 'Overig']
 
 const DOC_COLORS = {
-  'CV':        '#3B82F6',
+  'CV':        'var(--color-secondary)',
   'ID-bewijs': '#8B5CF6',
-  'Diploma':   '#F59E0B',
+  'Diploma':   'var(--color-warning)',
   'Contract':  '#059669',
-  'VOG':       '#EF4444',
+  'VOG':       'var(--color-danger)',
   'Certificaat':'#EC4899',
   'Overig':    '#6B7280',
 }
@@ -71,7 +74,7 @@ const CANDIDATE_STATUSES = ['actief', 'nietactief', 'intake', 'verwijderd', 'ext
 
 // ── UI helpers ────────────────────────────────────────────────────────────────
 export function Avatar({ initials, size = 28, photo }) {
-  const colors = ['#6366F1','#3B82F6','#22C55E','#F59E0B','#EF4444','#8B5CF6','#EC4899']
+  const colors = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6','#EC4899']
   const color  = colors[(initials ?? '?').charCodeAt(0) % colors.length]
   return photo
     ? <img src={photo} alt={initials} style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, objectFit: 'cover', display: 'block' }} />
@@ -314,7 +317,7 @@ function ErvaringTab({ items = [], onAdd }) {
       {items.map((e, i) => (
         <div key={e.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < items.length - 1 ? '1px solid var(--border)' : 'none' }}>
           <GripVertical size={14} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 2 }} />
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#F59E0B', flexShrink: 0, marginTop: 5 }} />
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{e.title ?? e.function_title}</div>
             {(e.company ?? e.employer) && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{e.company ?? e.employer}</div>}
@@ -360,7 +363,7 @@ function OpleidingTab({ items = [], onAdd }) {
       {items.map((o, i) => (
         <div key={o.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < items.length - 1 ? '1px solid var(--border)' : 'none' }}>
           <GripVertical size={14} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 2 }} />
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#F59E0B', flexShrink: 0, marginTop: 5 }} />
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{o.title ?? o.education}</div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{o.school ?? o.institution}</div>
@@ -573,19 +576,19 @@ function KoiosAiBlock({ c }) {
   const insights = [
     {
       type: 'Volledigheid',
-      color: filledPct >= 80 ? '#16A34A' : '#D97706',
+      color: filledPct >= 80 ? 'var(--color-success)' : 'var(--color-warning)',
       text: filledPct >= 80
         ? 'Profiel is goed gevuld — geen ontbrekende kernvelden gedetecteerd.'
         : `Profiel is ${filledPct}% compleet. Voeg samenvatting, adres en geboortedatum toe voor betere matchresultaten.`,
     },
     {
       type: 'Functiematch',
-      color: '#6366F1',
+      color: 'var(--color-primary)',
       text: 'Op basis van het profiel is de verwachte beste match: Verzorgende IG en Helpende Plus bij zorginstellingen in de regio.',
     },
     {
       type: 'Betrokkenheid',
-      color: '#3B82F6',
+      color: 'var(--color-secondary)',
       text: c.laatste_contact_datum
         ? `Laatste contactmoment geregistreerd op ${c.laatste_contact_datum}. Profiel is actief bewaakt.`
         : 'Geen recent contactmoment geregistreerd. Een follow-up verhoogt de kans op succesvolle plaatsing.',
@@ -593,21 +596,21 @@ function KoiosAiBlock({ c }) {
   ]
 
   return (
-    <div style={{ border: '1px solid #C4B5FD', borderRadius: 10, padding: '14px 16px', background: 'linear-gradient(135deg, #F5F3FF 0%, #EEF2FF 100%)' }}>
+    <div style={{ border: '1px solid #C4B5FD', borderRadius: 10, padding: '14px 16px', background: 'linear-gradient(135deg, #F5F3FF 0%, var(--color-primary-bg) 100%)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <div style={{ width: 26, height: 26, borderRadius: 7, background: 'linear-gradient(135deg, #6366F1, #8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <div style={{ width: 26, height: 26, borderRadius: 7, background: 'linear-gradient(135deg, var(--color-primary), #8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <Sparkles size={13} color="white" />
         </div>
-        <span style={{ fontSize: 13, fontWeight: 700, color: '#4F46E5', flex: 1 }}>Koios AI adviseert</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-primary)', flex: 1 }}>Koios AI adviseert</span>
         <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 99, background: '#DDD6FE', color: '#6D28D9', fontWeight: 600 }}>Beta</span>
         <button onClick={() => { setLoading(true); setTimeout(() => setLoading(false), 1400) }}
           title="Vernieuwen" disabled={loading}
-          style={{ background: 'none', border: 'none', cursor: loading ? 'default' : 'pointer', color: '#6366F1', padding: 3, display: 'flex', opacity: loading ? 0.4 : 1, borderRadius: 5 }}>
+          style={{ background: 'none', border: 'none', cursor: loading ? 'default' : 'pointer', color: 'var(--color-primary)', padding: 3, display: 'flex', opacity: loading ? 0.4 : 1, borderRadius: 5 }}>
           <RefreshCw size={12} />
         </button>
       </div>
       {loading
-        ? <div style={{ fontSize: 12, color: '#6366F1', fontStyle: 'italic' }}>Koios AI analyseert profiel…</div>
+        ? <div style={{ fontSize: 12, color: 'var(--color-primary)', fontStyle: 'italic' }}>Koios AI analyseert profiel…</div>
         : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {insights.map((ins, i) => (
@@ -627,23 +630,23 @@ function KoiosAiBlock({ c }) {
 }
 
 const AGENDA_DIENSTEN = [
-  { date: '2026-06-16', start: 7,  end: 15, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
+  { date: '2026-06-16', start: 7,  end: 15, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: 'var(--color-secondary)', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
   { date: '2026-06-18', start: 13, end: 17, klant: 'Zorggroep West',   functie: 'Helpende Plus',  color: '#8B5CF6', locatie: 'Haarlem',   eerder_gewerkt: 0, adres: 'Kennemerplein 10'    },
-  { date: '2026-06-19', start: 8,  end: 12, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
-  { date: '2026-06-20', start: 10, end: 13, klant: 'Zorggroep Oost',   functie: 'Helpende',       color: '#22C55E', locatie: 'Utrecht',   eerder_gewerkt: 1, adres: 'Maliebaan 50'        },
-  { date: '2026-06-23', start: 7,  end: 15, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
+  { date: '2026-06-19', start: 8,  end: 12, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: 'var(--color-secondary)', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
+  { date: '2026-06-20', start: 10, end: 13, klant: 'Zorggroep Oost',   functie: 'Helpende',       color: 'var(--color-success)', locatie: 'Utrecht',   eerder_gewerkt: 1, adres: 'Maliebaan 50'        },
+  { date: '2026-06-23', start: 7,  end: 15, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: 'var(--color-secondary)', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
   { date: '2026-06-25', start: 14, end: 18, klant: 'Zorggroep West',   functie: 'Helpende Plus',  color: '#8B5CF6', locatie: 'Haarlem',   eerder_gewerkt: 0, adres: 'Kennemerplein 10'    },
-  { date: '2026-06-26', start: 7,  end: 11, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: '#3B82F6', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
+  { date: '2026-06-26', start: 7,  end: 11, klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', color: 'var(--color-secondary)', locatie: 'Amsterdam', eerder_gewerkt: 4, adres: 'Amstelveenseweg 220' },
 ]
 
 const DUMMY_DIENSTEN_LIST = [
-  { datum: 'ma 16 jun', tijd: '07:00–15:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Vaste begeleider voor mevrouw De Vries.' },
+  { datum: 'ma 16 jun', tijd: '07:00–15:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: 'var(--color-secondary)', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Vaste begeleider voor mevrouw De Vries.' },
   { datum: 'wo 18 jun', tijd: '13:00–17:00', klant: 'Zorggroep West',   functie: 'Helpende Plus',  locatie: 'Haarlem',   color: '#8B5CF6', eerder_gewerkt: 0, favoriet: false, adres: 'Kennemerplein 10',    opmerkingen: 'Eerste dienst bij deze klant.'          },
-  { datum: 'do 19 jun', tijd: '08:00–12:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Ochtendrondes afdeling 3.'               },
-  { datum: 'vr 20 jun', tijd: '10:00–13:00', klant: 'Zorggroep Oost',   functie: 'Helpende',       locatie: 'Utrecht',   color: '#22C55E', eerder_gewerkt: 1, favoriet: false, adres: 'Maliebaan 50',        opmerkingen: ''                                        },
-  { datum: 'ma 23 jun', tijd: '07:00–15:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Vaste begeleider voor mevrouw De Vries.' },
+  { datum: 'do 19 jun', tijd: '08:00–12:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: 'var(--color-secondary)', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Ochtendrondes afdeling 3.'               },
+  { datum: 'vr 20 jun', tijd: '10:00–13:00', klant: 'Zorggroep Oost',   functie: 'Helpende',       locatie: 'Utrecht',   color: 'var(--color-success)', eerder_gewerkt: 1, favoriet: false, adres: 'Maliebaan 50',        opmerkingen: ''                                        },
+  { datum: 'ma 23 jun', tijd: '07:00–15:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: 'var(--color-secondary)', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Vaste begeleider voor mevrouw De Vries.' },
   { datum: 'do 25 jun', tijd: '14:00–18:00', klant: 'Zorggroep West',   functie: 'Helpende Plus',  locatie: 'Haarlem',   color: '#8B5CF6', eerder_gewerkt: 0, favoriet: false, adres: 'Kennemerplein 10',    opmerkingen: ''                                        },
-  { datum: 'vr 26 jun', tijd: '07:00–11:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: '#3B82F6', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Ochtendrondes afdeling 3.'               },
+  { datum: 'vr 26 jun', tijd: '07:00–11:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: 'var(--color-secondary)', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Ochtendrondes afdeling 3.'               },
 ]
 
 function DienstDetail({ s, onClose }) {
@@ -657,8 +660,8 @@ function DienstDetail({ s, onClose }) {
           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.functie}</div>
         </div>
         <button onClick={() => setFav(f => !f)} title={fav ? 'Verwijder favoriet' : 'Markeer als favoriet'}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? '#EF4444' : 'var(--text-muted)', display: 'flex' }}>
-          <Heart size={15} fill={fav ? '#EF4444' : 'none'} />
+          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? 'var(--color-danger)' : 'var(--text-muted)', display: 'flex' }}>
+          <Heart size={15} fill={fav ? 'var(--color-danger)' : 'none'} />
         </button>
         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex' }}>
           <X size={14} />
@@ -677,7 +680,7 @@ function DienstDetail({ s, onClose }) {
       ))}
       {s.eerder_gewerkt > 0 && (
         <div style={{ padding: '8px 14px', background: '#F0FDF4', borderTop: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Check size={12} color="#16A34A" />
+          <Check size={12} color="var(--color-success)" />
           <span style={{ fontSize: 11, color: '#15803D', fontWeight: 500 }}>Kandidaat is bekend bij deze klant</span>
         </div>
       )}
@@ -834,12 +837,13 @@ function BeschikbaarheidAgenda() {
           {ds.length === 0 && <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>Geen diensten</span>}
         </div>
         {HOURS.map((h, hi) => {
-          const slot = ds.filter(s => h >= s.start && h < s.end)
+          const starters   = ds.filter(s => s.start === h)
+          const continuers = ds.filter(s => h > s.start && h < s.end)
           return (
             <div key={h} style={{ display: 'grid', gridTemplateColumns: '50px 1fr', borderBottom: hi < HOURS.length - 1 ? '1px solid var(--border)' : 'none', minHeight: 40 }}>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '8px 8px 0', textAlign: 'right', borderRight: '1px solid var(--border)', background: 'var(--bg)' }}>{h}:00</div>
-              <div style={{ padding: slot.length ? '4px 10px' : 0 }}>
-                {slot.map((s, j) => (
+              <div style={{ position: 'relative', padding: starters.length ? '4px 10px' : 0 }}>
+                {starters.map((s, j) => (
                   <div key={j} onClick={() => setSelected(selected === s ? null : s)}
                     style={{ padding: '6px 10px', borderRadius: 6, marginBottom: 3, cursor: 'pointer',
                       background: selected === s ? s.color + '30' : s.color + '18',
@@ -847,6 +851,11 @@ function BeschikbaarheidAgenda() {
                     <div style={{ fontSize: 11, fontWeight: 600, color: s.color }}>{s.klant}</div>
                     <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{s.functie} · {s.start}:00–{s.end}:00</div>
                   </div>
+                ))}
+                {continuers.map((s, j) => (
+                  <div key={j} onClick={() => setSelected(selected === s ? null : s)}
+                    style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 4,
+                      background: selected === s ? s.color : s.color + '80', cursor: 'pointer', borderRadius: 0 }} />
                 ))}
               </div>
             </div>
@@ -1081,7 +1090,7 @@ function PlanningTab({ c }) {
                 return (
                   <button key={r} onClick={() => tog(r, setRijbewijzen)}
                     style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '9px 12px',
-                      background: sel ? 'var(--color-primary-bg, #EEF2FF)' : 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+                      background: sel ? 'var(--color-primary-bg, var(--color-primary-bg))' : 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
                     <div style={{ width: 14, height: 14, borderRadius: 3, flexShrink: 0,
                       border: `2px solid ${sel ? 'var(--color-primary)' : 'var(--border)'}`,
                       background: sel ? 'var(--color-primary)' : 'white',
@@ -1252,6 +1261,8 @@ function NoteEditor({ value, onChange, expanded, onToggleExpand }) {
 }
 
 export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, users = [] }) {
+  const { settings: cvSettings } = useCvSettings()
+  const [cvGenerating,   setCvGenerating]   = useState(false)
   const [activeTab,      setActiveTab]      = useState('profiel')
   const [recruiterOpen,  setRecruiterOpen]  = useState(false)
   const [recruiter,      setRecruiter]      = useState(null)
@@ -1401,7 +1412,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                 </div>
               </div>
               {pendingFile && (
-                <div style={{ border: '1px solid var(--color-primary)', borderRadius: 10, padding: 12, marginBottom: 10, background: '#EEF2FF' }}>
+                <div style={{ border: '1px solid var(--color-primary)', borderRadius: 10, padding: 12, marginBottom: 10, background: 'var(--color-primary-bg)' }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
                     {pendingFile.name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pendingFile.size})</span>
                   </div>
@@ -1499,7 +1510,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                             <button key={l.id ?? name}
                               onClick={() => setVestigingen(prev => { const cur = prev ?? c.vestiging ?? []; return selected ? cur.filter(x => x !== name) : [...cur, name] })}
                               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                width: '100%', padding: '9px 12px', fontSize: 12, background: selected ? '#EEF2FF' : 'none',
+                                width: '100%', padding: '9px 12px', fontSize: 12, background: selected ? 'var(--color-primary-bg)' : 'none',
                                 border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--text)' }}>
                               {name}
                               {selected && <Check size={13} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />}
@@ -1625,8 +1636,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                           <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{d.functie}</div>
                         </div>
                         <button onClick={toggleFav} title={fav ? 'Verwijder favoriet' : 'Favoriet'}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? '#EF4444' : 'var(--text-muted)', display: 'flex' }}>
-                          <Heart size={15} fill={fav ? '#EF4444' : 'none'} />
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? 'var(--color-danger)' : 'var(--text-muted)', display: 'flex' }}>
+                          <Heart size={15} fill={fav ? 'var(--color-danger)' : 'none'} />
                         </button>
                         <button onClick={() => setInplanningSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex' }}>
                           <X size={14} />
@@ -1648,7 +1659,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                       ))}
                       {d.eerder_gewerkt > 0 && (
                         <div style={{ padding: '7px 14px', background: '#F0FDF4', borderBottom: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <Check size={11} color="#16A34A" />
+                          <Check size={11} color="var(--color-success)" />
                           <span style={{ fontSize: 11, color: '#15803D', fontWeight: 500 }}>Bekend bij deze klant</span>
                         </div>
                       )}
@@ -1681,10 +1692,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {[
-                { label: 'Plaatsingen',   value: c.plaatsingen?.length ?? 0,    sub: 'totaal',   color: '#6366F1' },
-                { label: 'Sollicitaties', value: currentSoll.length,             sub: 'totaal',   color: '#3B82F6' },
-                { label: 'Diensten',      value: c.diensten_count ?? 24,         sub: 'dit jaar', color: '#22C55E' },
-                { label: 'Uren gewerkt',  value: c.uren_gewerkt ?? 186,          sub: 'dit jaar', color: '#F59E0B' },
+                { label: 'Plaatsingen',   value: c.plaatsingen?.length ?? 0,    sub: 'totaal',   color: 'var(--color-primary)' },
+                { label: 'Sollicitaties', value: currentSoll.length,             sub: 'totaal',   color: 'var(--color-secondary)' },
+                { label: 'Diensten',      value: c.diensten_count ?? 24,         sub: 'dit jaar', color: 'var(--color-success)' },
+                { label: 'Uren gewerkt',  value: c.uren_gewerkt ?? 186,          sub: 'dit jaar', color: 'var(--color-warning)' },
               ].map(k => (
                 <div key={k.label} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', background: 'var(--surface)' }}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{k.label}</div>
@@ -1780,7 +1791,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                       <div style={{ flex: 1, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
                           <div style={{ flex: 1 }}>
-                            {n.type && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99, background: '#EEF2FF', color: '#4F46E5', marginRight: 6 }}>{n.type}</span>}
+                            {n.type && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', marginRight: 6 }}>{n.type}</span>}
                             <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{n.title ?? n.author}</span>
                           </div>
                           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{n.ago}</span>
@@ -1874,7 +1885,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                 </button>
                 <button onClick={() => { setPhotoUrl(''); setPhotoMenuOpen(false) }}
                   style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left',
-                    background: 'none', border: 'none', cursor: 'pointer', color: '#EF4444' }}
+                    background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#FEF2F2'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                   Verwijderen
@@ -1902,23 +1913,14 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             )}
           </div>
           <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-            {/* CV actions */}
+            {/* Uploaded CV preview */}
             {(() => {
               const cvDoc = currentDocs.find(d => d.type === 'CV')
-              const cvUrl = cvDoc?.objectUrl ?? cvDoc?.url ?? null
               return cvDoc ? (
-                <>
-                  <button onClick={() => setPreviewDoc(cvDoc)}
-                    style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 8px', fontSize: 11, fontWeight: 500, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
-                    <Eye size={11} /> CV
-                  </button>
-                  {cvUrl && (
-                    <a href={cvUrl} download={cvDoc.name ?? 'CV'}
-                      style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 8px', fontSize: 11, fontWeight: 500, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', textDecoration: 'none' }}>
-                      <Download size={11} />
-                    </a>
-                  )}
-                </>
+                <button onClick={() => setPreviewDoc(cvDoc)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 8px', fontSize: 11, fontWeight: 500, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
+                  <Eye size={11} /> Huidig CV
+                </button>
               ) : (
                 <button onClick={() => { setPendingType('CV'); fileRef.current?.click() }}
                   style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 8px', fontSize: 11, fontWeight: 500, borderRadius: 7, cursor: 'pointer', border: '1px dashed var(--border)', background: 'none', color: 'var(--text-muted)' }}>
@@ -1926,6 +1928,27 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                 </button>
               )
             })()}
+            {/* Generate CV from profile */}
+            <button
+              disabled={cvGenerating}
+              onClick={async () => {
+                setCvGenerating(true)
+                try {
+                  const blob = await pdf(<CvDocument c={c} settings={cvSettings} />).toBlob()
+                  const url = URL.createObjectURL(blob)
+                  const a = document.createElement('a')
+                  a.href = url
+                  a.download = `CV - ${c?.name ?? 'kandidaat'}.pdf`
+                  document.body.appendChild(a); a.click()
+                  document.body.removeChild(a); URL.revokeObjectURL(url)
+                } finally {
+                  setCvGenerating(false)
+                }
+              }}
+              style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: cvGenerating ? 'not-allowed' : 'pointer',
+                border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white', opacity: cvGenerating ? 0.7 : 1 }}>
+              <Download size={11} />{cvGenerating ? 'Genereren...' : 'CV downloaden'}
+            </button>
             <button onClick={() => { setEditing(e => !e); setActiveTab('profiel') }}
               style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px',
                 fontSize: 12, fontWeight: 500, borderRadius: 7, cursor: 'pointer',

@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@react-pdf/renderer": "^4.5.1",
     "@tiptap/extension-color": "^3.26.1",
     "@tiptap/extension-text-align": "^3.26.1",
     "@tiptap/extension-text-style": "^3.26.1",
