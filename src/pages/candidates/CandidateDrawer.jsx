@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { X, Maximize2, Minimize2, Edit2, Plus, FileText, ChevronDown, ChevronUp, MoreHorizontal, GripVertical, Search, Check, Calendar, Eye, Pencil, Camera, Bold, Italic, List, ListOrdered, Heading2, Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Download, MapPin, Clock, Sparkles, RefreshCw, Heart } from 'lucide-react'
+import { X, Maximize2, Minimize2, Edit2, Plus, FileText, ChevronDown, ChevronUp, MoreHorizontal, GripVertical, Search, Check, Calendar, Eye, Pencil, Camera, Bold, Italic, List, ListOrdered, Heading2, Undo2, Redo2, AlignLeft, AlignCenter, AlignRight, Download, MapPin, Clock, Sparkles, RefreshCw, Heart, Mail, Ban } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { CvDocument } from './CvTemplate'
 import { useCvSettings } from '../../lib/useCvSettings'
@@ -647,6 +647,24 @@ const DUMMY_DIENSTEN_LIST = [
   { datum: 'ma 23 jun', tijd: '07:00–15:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: 'var(--color-secondary)', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Vaste begeleider voor mevrouw De Vries.' },
   { datum: 'do 25 jun', tijd: '14:00–18:00', klant: 'Zorggroep West',   functie: 'Helpende Plus',  locatie: 'Haarlem',   color: '#8B5CF6', eerder_gewerkt: 0, favoriet: false, adres: 'Kennemerplein 10',    opmerkingen: ''                                        },
   { datum: 'vr 26 jun', tijd: '07:00–11:00', klant: 'Thuiszorg Noord',  functie: 'Verzorgende IG', locatie: 'Amsterdam', color: 'var(--color-secondary)', eerder_gewerkt: 4, favoriet: true,  adres: 'Amstelveenseweg 220', opmerkingen: 'Ochtendrondes afdeling 3.'               },
+]
+
+const FUNCTIE_NIVEAU_MAP = {
+  'Huishoudelijke hulp': 1, 'Helpende': 2, 'Helpende Plus': 3,
+  'Verzorgende': 4, 'Verzorgende IG': 5, 'Verpleegkundige': 6, 'Wijkverpleegkundige': 7,
+}
+const FUNCTIE_NIVEAUS_LIST = ['Huishoudelijke hulp','Helpende','Helpende Plus','Verzorgende','Verzorgende IG','Verpleegkundige','Wijkverpleegkundige']
+
+const DUMMY_OPEN_DIENSTEN = [
+  { id:1, datum:'di 17 jun', tijd:'13:00–21:00', klant:'Thuiszorg Noord',         functie:'Verzorgende IG',  niveau:5, locatie:'Amsterdam',        afstand:8,  pool:'Zorg',        diensttype:'Avond', color:'#3B82F6', afdeling:'Afdeling 3',   openplaatsen:1 },
+  { id:2, datum:'wo 18 jun', tijd:'21:00–07:00', klant:'Zorggroep West',          functie:'Helpende Plus',   niveau:3, locatie:'Haarlem',           afstand:22, pool:'Zorg',        diensttype:'Nacht', color:'#8B5CF6', afdeling:'Nachtdienst',  openplaatsen:2 },
+  { id:3, datum:'do 19 jun', tijd:'07:00–15:00', klant:'Zorggroep Oost',          functie:'Helpende',        niveau:2, locatie:'Utrecht',           afstand:42, pool:'Zorg',        diensttype:'Dag',   color:'#22C55E', afdeling:'Dagzorg',      openplaatsen:3 },
+  { id:4, datum:'vr 20 jun', tijd:'07:00–15:00', klant:'Thuiszorg Noord',         functie:'Verzorgende IG',  niveau:5, locatie:'Amsterdam',        afstand:8,  pool:'Zorg',        diensttype:'Dag',   color:'#3B82F6', afdeling:'Afdeling 1',   openplaatsen:1 },
+  { id:5, datum:'ma 23 jun', tijd:'13:00–21:00', klant:'Woonzorg Centrum',        functie:'Verzorgende',     niveau:4, locatie:'Amsterdam',        afstand:12, pool:'Zorg',        diensttype:'Avond', color:'#F59E0B', afdeling:'Dementiezorg', openplaatsen:2 },
+  { id:6, datum:'di 24 jun', tijd:'21:00–07:00', klant:'Thuiszorg Noord',         functie:'Verzorgende IG',  niveau:5, locatie:'Amsterdam',        afstand:8,  pool:'Zorg',        diensttype:'Nacht', color:'#3B82F6', afdeling:'Nachtdienst',  openplaatsen:1 },
+  { id:7, datum:'wo 25 jun', tijd:'07:00–15:00', klant:'Revalidatiekliniek Zuid', functie:'Helpende Plus',   niveau:3, locatie:'Amsterdam ZO',     afstand:18, pool:'Revalidatie', diensttype:'Dag',   color:'#0EA5E9', afdeling:'Revalidatie',  openplaatsen:4 },
+  { id:8, datum:'do 26 jun', tijd:'07:00–15:00', klant:'Zorggroep West',          functie:'Verzorgende IG',  niveau:5, locatie:'Haarlem',           afstand:22, pool:'Zorg',        diensttype:'Dag',   color:'#8B5CF6', afdeling:'Afdeling 2',   openplaatsen:2 },
+  { id:9, datum:'vr 27 jun', tijd:'13:00–21:00', klant:'Woonzorg Centrum',        functie:'Verzorgende IG',  niveau:5, locatie:'Amsterdam',        afstand:12, pool:'Zorg',        diensttype:'Avond', color:'#F59E0B', afdeling:'Afdeling 4',   openplaatsen:1 },
 ]
 
 function DienstDetail({ s, onClose }) {
@@ -1300,7 +1318,14 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [planningSubTab,       setPlanningSubTab]       = useState('beschikbaarheid')
   const [inplanningSelected,   setInplanningSelected]   = useState(null)
   const [inplanningFavorieten, setInplanningFavorieten] = useState({})
-  const [allLocations,    setAllLocations]    = useState([])
+  const [openFilters,    setOpenFilters]    = useState({ diensttypen: ['Dag', 'Avond'], afstand: 35, max_niveau: 5 })
+  const [ingeplandIds,   setIngeplandIds]   = useState(() => new Set())
+  const [uitgeplandIdx,  setUitgeplandIdx]  = useState(() => new Set())
+  const [favorieten,     setFavorieten]     = useState({ klanten: ['Thuiszorg Noord'], locaties: ['Amsterdam'], afdelingen: [] })
+  const [blacklist,      setBlacklist]      = useState({ klanten: [], locaties: [], afdelingen: [] })
+  const [favAddMode,     setFavAddMode]     = useState(null)
+  const [favAddInput,    setFavAddInput]    = useState('')
+  const [allLocations,   setAllLocations]   = useState([])
 
   const recruiterRef   = useRef(null)
   const statusRef      = useRef(null)
@@ -1321,6 +1346,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     setPlanningSubTab('beschikbaarheid')
     setInplanningSelected(null)
     setInplanningFavorieten({})
+    setIngeplandIds(new Set())
+    setUitgeplandIdx(new Set())
+    setFavAddMode(null)
+    setFavAddInput('')
   }, [c?.id])
 
   useEffect(() => {
@@ -1568,13 +1597,15 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
             {/* Planning sub-tabs */}
-            <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 4 }}>
+            <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid var(--border)', marginBottom: 4, overflowX: 'auto' }}>
               {[
                 { id: 'beschikbaarheid', label: 'Beschikbaarheid' },
                 { id: 'inplanning',      label: 'Inplanning'      },
+                { id: 'open_diensten',   label: 'Open diensten'   },
                 { id: 'functies',        label: 'Functies & Pools' },
+                { id: 'favorieten',      label: 'Favorieten'      },
               ].map(sub => (
-                <button key={sub.id} onClick={() => setPlanningSubTab(sub.id)}
+                <button key={sub.id} onClick={() => { setPlanningSubTab(sub.id); setInplanningSelected(null) }}
                   style={{ padding: '6px 12px', fontSize: 12, whiteSpace: 'nowrap', background: 'none', border: 'none',
                     borderBottom: planningSubTab === sub.id ? '2px solid var(--color-primary)' : '2px solid transparent',
                     color: planningSubTab === sub.id ? 'var(--color-primary)' : 'var(--text-muted)',
@@ -1583,102 +1614,337 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                 </button>
               ))}
             </div>
+
+            {/* ── Beschikbaarheid ── */}
             {planningSubTab === 'beschikbaarheid' && <BeschikbaarheidAgenda />}
-            {planningSubTab === 'inplanning' && (
-              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                {/* List */}
-                <div style={{ ...sectionBlock, flex: inplanningSelected ? '0 0 270px' : '1', minWidth: 0, padding: '12px 14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <span style={sectionTitle}>Komende diensten</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{DUMMY_DIENSTEN_LIST.length}</span>
-                  </div>
-                  {DUMMY_DIENSTEN_LIST.map((d, i) => {
-                    const isSel = inplanningSelected === d
-                    return (
-                      <div key={i} onClick={() => setInplanningSelected(isSel ? null : d)}
-                        style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 8px', borderRadius: 7, marginBottom: 2, cursor: 'pointer',
-                          background: isSel ? 'var(--bg)' : 'transparent',
-                          border: isSel ? `1px solid ${d.color}` : '1px solid transparent' }}>
-                        <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 3, background: d.color, flexShrink: 0 }} />
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
-                            <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)' }}>{d.datum}</span>
-                            <span style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 10, color: 'var(--text-muted)' }}>
-                              <Clock size={9} />{d.tijd}
-                            </span>
-                          </div>
-                          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.klant}</div>
-                          {!inplanningSelected && (
-                            <div style={{ display: 'flex', gap: 6 }}>
-                              <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{d.functie}</span>
+
+            {/* ── Inplanning ── */}
+            {planningSubTab === 'inplanning' && (() => {
+              const visibleBase  = DUMMY_DIENSTEN_LIST.filter((_, i) => !uitgeplandIdx.has(i))
+              const extraGepland = DUMMY_OPEN_DIENSTEN.filter(d => ingeplandIds.has(d.id)).map(d => ({
+                datum: d.datum, tijd: d.tijd, klant: d.klant, functie: d.functie,
+                locatie: d.locatie, color: d.color, eerder_gewerkt: 0, favoriet: false,
+                adres: '-', opmerkingen: 'Ingepland via open diensten.', _openId: d.id,
+              }))
+              const allDiensten = [...visibleBase, ...extraGepland]
+              const rosterBody  = allDiensten.map(d => `${d.datum}\t${d.tijd}\t${d.klant}\t${d.locatie}`).join('%0A')
+              const voornaam    = c?.name?.split(' ')[0] ?? ''
+              const mailHref    = `mailto:${c?.email ?? ''}?subject=Jouw%20rooster&body=Hallo%20${encodeURIComponent(voornaam)}%2C%0A%0AHierbij%20je%20rooster%3A%0A%0A${rosterBody}%0A%0AMet%20vriendelijke%20groet`
+              return (
+                <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                  {/* List */}
+                  <div style={{ ...sectionBlock, flex: inplanningSelected ? '0 0 265px' : '1', minWidth: 0, padding: '12px 14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                      <span style={sectionTitle}>Rooster ({allDiensten.length})</span>
+                      <a href={mailHref} title="Rooster mailen naar kandidaat"
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', fontSize: 11, fontWeight: 500,
+                          border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)',
+                          textDecoration: 'none', cursor: 'pointer' }}>
+                        <Mail size={11} /> Mailen
+                      </a>
+                    </div>
+                    {allDiensten.length === 0 && (
+                      <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: 12 }}>Geen ingeplande diensten</div>
+                    )}
+                    {allDiensten.map((d, i) => {
+                      const isSel = inplanningSelected === d
+                      return (
+                        <div key={i} onClick={() => setInplanningSelected(isSel ? null : d)}
+                          style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 8px', borderRadius: 7, marginBottom: 2, cursor: 'pointer',
+                            background: isSel ? 'var(--bg)' : 'transparent',
+                            border: isSel ? `1px solid ${d.color}` : '1px solid transparent' }}>
+                          <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 3, background: d.color, flexShrink: 0 }} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
+                              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)' }}>{d.datum}</span>
                               <span style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 10, color: 'var(--text-muted)' }}>
-                                <MapPin size={9} />{d.locatie}
+                                <Clock size={9} />{d.tijd}
                               </span>
+                              {d._openId && <span style={{ fontSize: 9, padding: '0 4px', borderRadius: 3, background: '#DCFCE7', color: '#16A34A', fontWeight: 600 }}>Nieuw</span>}
                             </div>
-                          )}
+                            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.klant}</div>
+                            {!inplanningSelected && (
+                              <div style={{ display: 'flex', gap: 6 }}>
+                                <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{d.functie}</span>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: 2, fontSize: 10, color: 'var(--text-muted)' }}>
+                                  <MapPin size={9} />{d.locatie}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                  {/* Detail panel */}
+                  {inplanningSelected && (() => {
+                    const d = inplanningSelected
+                    const fav = inplanningFavorieten[d.datum + d.klant] ?? d.favoriet
+                    const toggleFav = () => setInplanningFavorieten(p => ({ ...p, [d.datum + d.klant]: !fav }))
+                    const baseIdx = DUMMY_DIENSTEN_LIST.indexOf(d)
+                    const handleUitplannen = () => {
+                      if (d._openId) {
+                        setIngeplandIds(prev => { const n = new Set(prev); n.delete(d._openId); return n })
+                      } else if (baseIdx !== -1) {
+                        setUitgeplandIdx(prev => { const n = new Set(prev); n.add(baseIdx); return n })
+                      }
+                      setInplanningSelected(null)
+                    }
+                    return (
+                      <div style={{ flex: 1, minWidth: 0, border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', background: 'var(--surface)' }}>
+                        <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg)', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                          <div style={{ width: 3, height: 38, borderRadius: 2, background: d.color, flexShrink: 0 }} />
+                          <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{d.klant}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{d.functie}</div>
+                          </div>
+                          <button onClick={toggleFav} title={fav ? 'Verwijder favoriet' : 'Favoriet'}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? 'var(--color-danger)' : 'var(--text-muted)', display: 'flex' }}>
+                            <Heart size={15} fill={fav ? 'var(--color-danger)' : 'none'} />
+                          </button>
+                          <button onClick={() => setInplanningSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex' }}>
+                            <X size={14} />
+                          </button>
+                        </div>
+                        {[
+                          ['Datum',          d.datum],
+                          ['Tijdstip',       d.tijd],
+                          ['Locatie',        d.locatie],
+                          ['Adres',          d.adres ?? '-'],
+                          ['Eerder gewerkt', d.eerder_gewerkt > 0 ? `Ja, ${d.eerder_gewerkt}× bij ${d.klant}` : `Nee, eerste keer bij ${d.klant}`],
+                        ].map(([l, v]) => (
+                          <div key={l} style={{ display: 'flex', padding: '8px 14px', borderBottom: '1px solid var(--border)', gap: 10 }}>
+                            <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 100, flexShrink: 0 }}>{l}</span>
+                            <span style={{ fontSize: 11, color: 'var(--text)', fontWeight: 500 }}>{v}</span>
+                          </div>
+                        ))}
+                        {d.eerder_gewerkt > 0 && (
+                          <div style={{ padding: '7px 14px', background: '#F0FDF4', borderBottom: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <Check size={11} color="var(--color-success)" />
+                            <span style={{ fontSize: 11, color: '#15803D', fontWeight: 500 }}>Bekend bij deze klant</span>
+                          </div>
+                        )}
+                        {d.opmerkingen ? (
+                          <div style={{ padding: '8px 14px', borderBottom: '1px solid var(--border)' }}>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Opmerkingen</div>
+                            <div style={{ fontSize: 11, color: 'var(--text)', lineHeight: 1.5 }}>{d.opmerkingen}</div>
+                          </div>
+                        ) : null}
+                        <div style={{ padding: '10px 14px' }}>
+                          <button onClick={handleUitplannen}
+                            style={{ width: '100%', padding: '7px 0', fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: 'pointer',
+                              border: '1px solid #FCA5A5', background: '#FEF2F2', color: '#EF4444' }}>
+                            Uitplannen
+                          </button>
                         </div>
                       </div>
                     )
-                  })}
+                  })()}
                 </div>
-                {/* Detail panel */}
-                {inplanningSelected && (() => {
-                  const d = inplanningSelected
-                  const fav = inplanningFavorieten[d.datum + d.klant] ?? d.favoriet
-                  const toggleFav = () => setInplanningFavorieten(p => ({ ...p, [d.datum + d.klant]: !fav }))
-                  return (
-                    <div style={{ flex: 1, minWidth: 0, border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', background: 'var(--surface)' }}>
-                      {/* Detail header */}
-                      <div style={{ padding: '12px 14px', borderBottom: '1px solid var(--border)', background: 'var(--bg)', display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                        <div style={{ width: 3, height: 38, borderRadius: 2, background: d.color, flexShrink: 0 }} />
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{d.klant}</div>
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{d.functie}</div>
+              )
+            })()}
+
+            {/* ── Open diensten ── */}
+            {planningSubTab === 'open_diensten' && (() => {
+              const candNiveau = openFilters.max_niveau
+              const filtered = DUMMY_OPEN_DIENSTEN.filter(d =>
+                d.afstand <= openFilters.afstand &&
+                d.niveau <= candNiveau &&
+                (openFilters.diensttypen.length === 0 || openFilters.diensttypen.includes(d.diensttype))
+              )
+              const toggleDiensttype = (dt) => setOpenFilters(f => {
+                const has = f.diensttypen.includes(dt)
+                return { ...f, diensttypen: has ? f.diensttypen.filter(x => x !== dt) : [...f.diensttypen, dt] }
+              })
+              const toggleIngepland = (id) => setIngeplandIds(prev => {
+                const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n
+              })
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {/* Filter bar */}
+                  <div style={{ ...sectionBlock, padding: '12px 16px' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, alignItems: 'flex-end' }}>
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5 }}>Diensttype</div>
+                        <div style={{ display: 'flex', gap: 4 }}>
+                          {['Dag','Avond','Nacht'].map(dt => {
+                            const active = openFilters.diensttypen.includes(dt)
+                            return (
+                              <button key={dt} onClick={() => toggleDiensttype(dt)}
+                                style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: active ? 600 : 400,
+                                  border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
+                                  background: active ? 'var(--color-primary)' : 'var(--bg)',
+                                  color: active ? '#fff' : 'var(--text-muted)' }}>
+                                {dt}
+                              </button>
+                            )
+                          })}
                         </div>
-                        <button onClick={toggleFav} title={fav ? 'Verwijder favoriet' : 'Favoriet'}
-                          style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? 'var(--color-danger)' : 'var(--text-muted)', display: 'flex' }}>
-                          <Heart size={15} fill={fav ? 'var(--color-danger)' : 'none'} />
-                        </button>
-                        <button onClick={() => setInplanningSelected(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex' }}>
-                          <X size={14} />
-                        </button>
                       </div>
-                      {[
-                        ['Datum',          d.datum],
-                        ['Tijdstip',       d.tijd],
-                        ['Locatie',        d.locatie],
-                        ['Adres',          d.adres ?? '-'],
-                        ['Eerder gewerkt', d.eerder_gewerkt > 0
-                          ? `Ja, ${d.eerder_gewerkt}× bij ${d.klant}`
-                          : `Nee, eerste keer bij ${d.klant}`],
-                      ].map(([l, v]) => (
-                        <div key={l} style={{ display: 'flex', padding: '8px 14px', borderBottom: '1px solid var(--border)', gap: 10 }}>
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 100, flexShrink: 0 }}>{l}</span>
-                          <span style={{ fontSize: 11, color: 'var(--text)', fontWeight: 500 }}>{v}</span>
-                        </div>
-                      ))}
-                      {d.eerder_gewerkt > 0 && (
-                        <div style={{ padding: '7px 14px', background: '#F0FDF4', borderBottom: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <Check size={11} color="var(--color-success)" />
-                          <span style={{ fontSize: 11, color: '#15803D', fontWeight: 500 }}>Bekend bij deze klant</span>
-                        </div>
-                      )}
-                      {d.opmerkingen ? (
-                        <div style={{ padding: '8px 14px' }}>
-                          <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 4, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Opmerkingen</div>
-                          <div style={{ fontSize: 11, color: 'var(--text)', lineHeight: 1.5 }}>{d.opmerkingen}</div>
-                        </div>
-                      ) : null}
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5 }}>Max. afstand</div>
+                        <select value={openFilters.afstand} onChange={e => setOpenFilters(f => ({ ...f, afstand: Number(e.target.value) }))}
+                          style={{ padding: '5px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)', cursor: 'pointer' }}>
+                          {[10,25,35,50,999].map(v => <option key={v} value={v}>{v === 999 ? 'Geen limiet' : `${v} km`}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5 }}>Max. functieniveau</div>
+                        <select value={openFilters.max_niveau} onChange={e => setOpenFilters(f => ({ ...f, max_niveau: Number(e.target.value) }))}
+                          style={{ padding: '5px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)', cursor: 'pointer' }}>
+                          {FUNCTIE_NIVEAUS_LIST.map((fn, i) => <option key={fn} value={i+1}>{fn}</option>)}
+                        </select>
+                      </div>
+                      <div style={{ marginLeft: 'auto' }}>
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                          {filtered.length}/{DUMMY_OPEN_DIENSTEN.length} diensten
+                        </span>
+                      </div>
                     </div>
-                  )
-                })()}
-              </div>
-            )}
+                  </div>
+                  {/* Results */}
+                  <div style={sectionBlock}>
+                    {filtered.length === 0 ? (
+                      <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)', fontSize: 12 }}>
+                        Geen open diensten met deze filters
+                      </div>
+                    ) : filtered.map((d, i) => {
+                      const isGepland   = ingeplandIds.has(d.id)
+                      const isFavKlant  = favorieten.klanten.includes(d.klant)
+                      const isBlKlant   = blacklist.klanten.includes(d.klant)
+                      const isBlLocatie = blacklist.locaties.includes(d.locatie)
+                      const tags = [
+                        { label: `${d.afstand} km`, ok: d.afstand <= 35 },
+                        { label: d.diensttype, ok: openFilters.diensttypen.includes(d.diensttype) },
+                        d.niveau < 5 && { label: d.functie, ok: true },
+                      ].filter(Boolean)
+                      return (
+                        <div key={d.id} style={{ padding: '10px 0', borderBottom: i < filtered.length-1 ? '1px solid var(--border)' : 'none',
+                          display: 'flex', gap: 10, alignItems: 'flex-start',
+                          opacity: isBlKlant || isBlLocatie ? 0.4 : 1 }}>
+                          <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 3, background: d.color, flexShrink: 0 }} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2, flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>{d.klant}</span>
+                              {isFavKlant && <Heart size={11} color="var(--color-danger)" fill="var(--color-danger)" />}
+                              {isBlKlant  && <Ban size={11} color="#EF4444" />}
+                              {d.openplaatsen === 1 && (
+                                <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: '#FEF3C7', color: '#D97706', fontWeight: 600 }}>Laatste plek</span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 3 }}>
+                              {d.datum} · {d.tijd} · {d.locatie} · {d.pool}
+                            </div>
+                            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                              {tags.map((t, j) => (
+                                <span key={j} style={{ fontSize: 9, padding: '1px 6px', borderRadius: 99,
+                                  background: t.ok ? '#F0FDF4' : '#FEF2F2',
+                                  color: t.ok ? '#16A34A' : '#EF4444', fontWeight: 500 }}>
+                                  {t.ok ? '✓' : '✗'} {t.label}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <button onClick={() => toggleIngepland(d.id)} disabled={isBlKlant || isBlLocatie}
+                            style={{ flexShrink: 0, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7,
+                              cursor: isBlKlant || isBlLocatie ? 'not-allowed' : 'pointer', minWidth: 90,
+                              border: isGepland ? '1px solid #BBF7D0' : '1px solid var(--color-primary)',
+                              background: isGepland ? '#F0FDF4' : 'var(--color-primary)',
+                              color: isGepland ? '#16A34A' : 'white' }}>
+                            {isGepland ? '✓ Ingepland' : 'Inplannen'}
+                          </button>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })()}
+
+            {/* ── Functies & Pools ── */}
             {planningSubTab === 'functies' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <PlanningTab c={c} />
               </div>
             )}
+
+            {/* ── Favorieten & Blacklist ── */}
+            {planningSubTab === 'favorieten' && (() => {
+              const FavSection = ({ title, items, onRemove, onAdd, modeKey }) => {
+                const isAdding = favAddMode === modeKey
+                return (
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{title}</div>
+                    {items.length === 0 && !isAdding && (
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', marginBottom: 4 }}>Geen</div>
+                    )}
+                    {items.map((item, j) => (
+                      <div key={j} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '3px 0' }}>
+                        <span style={{ fontSize: 12, color: 'var(--text)', flex: 1 }}>{item}</span>
+                        <button onClick={() => onRemove(j)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                    {isAdding ? (
+                      <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
+                        <input autoFocus value={favAddInput} onChange={e => setFavAddInput(e.target.value)}
+                          onKeyDown={e => {
+                            if (e.key === 'Enter' && favAddInput.trim()) { onAdd(favAddInput.trim()); setFavAddInput(''); setFavAddMode(null) }
+                            if (e.key === 'Escape') { setFavAddMode(null); setFavAddInput('') }
+                          }}
+                          placeholder="Naam..." style={{ flex: 1, padding: '4px 8px', fontSize: 12, border: '1px solid var(--color-primary)', borderRadius: 6, outline: 'none', background: 'var(--bg)', color: 'var(--text)' }} />
+                        <button onClick={() => { if (favAddInput.trim()) { onAdd(favAddInput.trim()); setFavAddInput(''); setFavAddMode(null) } }}
+                          style={{ padding: '4px 8px', fontSize: 11, border: '1px solid var(--color-primary)', borderRadius: 6, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>OK</button>
+                        <button onClick={() => { setFavAddMode(null); setFavAddInput('') }}
+                          style={{ padding: '4px 6px', border: '1px solid var(--border)', borderRadius: 6, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                          <X size={11} />
+                        </button>
+                      </div>
+                    ) : (
+                      <button onClick={() => { setFavAddMode(modeKey); setFavAddInput('') }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 0', fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500, marginTop: 2 }}>
+                        <Plus size={11} /> Toevoegen
+                      </button>
+                    )}
+                  </div>
+                )
+              }
+              const rmFav = (key, j) => setFavorieten(f => ({ ...f, [key]: f[key].filter((_, i) => i !== j) }))
+              const addFav = (key, v) => setFavorieten(f => ({ ...f, [key]: [...f[key], v] }))
+              const rmBl  = (key, j) => setBlacklist(f => ({ ...f, [key]: f[key].filter((_, i) => i !== j) }))
+              const addBl  = (key, v) => setBlacklist(f => ({ ...f, [key]: [...f[key], v] }))
+              return (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                  {/* Favorieten */}
+                  <div style={sectionBlock}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
+                      <Heart size={14} color="var(--color-danger)" fill="var(--color-danger)" />
+                      <span style={{ ...sectionTitle, marginBottom: 0 }}>Favorieten</span>
+                    </div>
+                    <FavSection title="Klanten" items={favorieten.klanten}
+                      onRemove={j => rmFav('klanten',j)} onAdd={v => addFav('klanten',v)} modeKey="fav_klant" />
+                    <FavSection title="Locaties" items={favorieten.locaties}
+                      onRemove={j => rmFav('locaties',j)} onAdd={v => addFav('locaties',v)} modeKey="fav_locatie" />
+                    <FavSection title="Afdelingen" items={favorieten.afdelingen}
+                      onRemove={j => rmFav('afdelingen',j)} onAdd={v => addFav('afdelingen',v)} modeKey="fav_afdeling" />
+                  </div>
+                  {/* Blacklist */}
+                  <div style={sectionBlock}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 14 }}>
+                      <Ban size={14} color="#EF4444" />
+                      <span style={{ ...sectionTitle, marginBottom: 0 }}>Blacklist</span>
+                    </div>
+                    <FavSection title="Klanten" items={blacklist.klanten}
+                      onRemove={j => rmBl('klanten',j)} onAdd={v => addBl('klanten',v)} modeKey="bl_klant" />
+                    <FavSection title="Locaties" items={blacklist.locaties}
+                      onRemove={j => rmBl('locaties',j)} onAdd={v => addBl('locaties',v)} modeKey="bl_locatie" />
+                    <FavSection title="Afdelingen" items={blacklist.afdelingen}
+                      onRemove={j => rmBl('afdelingen',j)} onAdd={v => addBl('afdelingen',v)} modeKey="bl_afdeling" />
+                  </div>
+                </div>
+              )
+            })()}
           </div>
         )
       case 'voorkeuren':
