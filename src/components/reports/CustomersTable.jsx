@@ -147,7 +147,7 @@ export default function CustomersTable() {
   const load = () => {
     setLoading(true)
     setError(null)
-    api.get('/customers')
+    api.get('/sm/customers')
       .then(res => {
         const data = res.data
         const real = Array.isArray(data) ? data : (data?.data ?? [])

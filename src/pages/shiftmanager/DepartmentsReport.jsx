@@ -20,7 +20,7 @@ export default function DepartmentsReport() {
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   useEffect(() => {
-    api.get('/customers')
+    api.get('/sm/customers')
       .then(res => {
         const customers = res.data?.data ?? res.data ?? []
         setDepartments(customers.flatMap(c =>

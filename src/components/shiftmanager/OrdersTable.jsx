@@ -215,7 +215,7 @@ export default function OrdersTable() {
 
   useEffect(() => {
     dispatch({ rows: [], loading: true, total: 0, lastPage: 1 })
-    api.get('/reports/shifts-per-month/detail', {
+    api.get('/sm/reports/shifts-per-month/detail', {
       params: {
         ...(selectedMonth ? { month: selectedMonth } : {}),
         metric: 'totaal', per_page: pageSize, page,

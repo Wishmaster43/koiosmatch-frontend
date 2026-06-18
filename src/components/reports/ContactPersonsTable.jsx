@@ -30,7 +30,7 @@ export default function ContactPersonsTable() {
   const [pageSize, setPageSize] = useState(defaultPageSize)
 
   useEffect(() => {
-    api.get('/customers')
+    api.get('/sm/customers')
       .then(res => {
         const customers = res.data?.data ?? res.data ?? []
         const flat = customers.flatMap(customer =>

@@ -164,7 +164,7 @@ export default function ShiftsChartsBlock({
 
   // ── Filter-opties laden ───────────────────────────────────────────────────
   useEffect(() => {
-    api.get("reports/shifts-filter-options")
+    api.get("/sm/reports/shifts-filter-options")
       .then((res) => setFilterOptions(res.data ?? { job_types: [], locations: [] }))
       .catch(() => {})
   }, [])
@@ -199,7 +199,7 @@ export default function ShiftsChartsBlock({
       effectiveLocations.forEach((l) => params.append("location_id[]", l))
     }
 
-    api.get(`reports/shifts-per-month?${params}`)
+    api.get(`/sm/reports/shifts-per-month?${params}`)
       .then((res) => {
         if (!active) return
         const data = res.data?.data ?? res.data ?? []
@@ -308,7 +308,7 @@ export default function ShiftsChartsBlock({
     const yearSuffix  = multiYear ? ` '${String(year).slice(2)}` : ""
     setDrill({
       title:    `${metricLabel}${yearSuffix} — ${datum.label}`,
-      fetchUrl: `reports/shifts-per-month/detail?${params}`,
+      fetchUrl: `/sm/reports/shifts-per-month/detail?${params}`,
     })
   }
 

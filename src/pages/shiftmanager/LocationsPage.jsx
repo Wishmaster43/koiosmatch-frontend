@@ -218,7 +218,7 @@ export default function LocationsPage() {
 
   // Try to load from API, fall back to dummy
   useEffect(() => {
-    api.get('/customers')
+    api.get('/sm/customers')
       .then(res => {
         const customers = res.data?.data ?? res.data ?? []
         const flat = customers.flatMap(c =>

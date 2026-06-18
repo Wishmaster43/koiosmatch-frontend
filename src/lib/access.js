@@ -12,6 +12,15 @@
  * Everything here is cosmetic. The backend enforces real authorization on every endpoint.
  */
 
+import { hasModule } from './modules'
+
+// Pages that require a paid add-on module. These are ALSO hard-gated server-side
+// (e.g. /sm/* → 403 without the 'sm' module), so this is just UI mirroring.
+const PAGE_REQUIRED_MODULE = {
+  shiftmanager: 'sm',
+  helloflex:    'hf',
+}
+
 // Canonical page sets per package ID.
 // These IDs must match exactly what the backend stores in tenant.package.
 //
@@ -127,6 +136,10 @@ export function canAccessPage(pageId, auth) {
 
   // Super admins always see everything
   if (auth?.user?.is_super_admin === true) return true
+
+  // Module gate: SM/HF pages require the matching paid add-on module.
+  const reqModule = PAGE_REQUIRED_MODULE[base]
+  if (reqModule && !hasModule(reqModule, auth?.activeTenant ?? auth?.user?.tenant)) return false
 
   // Sub-page gates (e.g. details.runs needs aiagents, details.messages needs whatsapp)
   if (SUB_PAGE_GATES[pageId] && !hasAccess(SUB_PAGE_GATES[pageId], auth)) return false

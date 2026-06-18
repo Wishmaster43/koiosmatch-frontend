@@ -169,7 +169,7 @@ export default function DepartmentsPage() {
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   useEffect(() => {
-    api.get('/customers')
+    api.get('/sm/customers')
       .then(res => {
         const customers = res.data?.data ?? res.data ?? []
         const flat = customers.flatMap(c =>

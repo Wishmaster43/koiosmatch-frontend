@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import api from '../lib/api'
+import { hasModule as tenantHasModule } from '../lib/modules'
 
 /**
  * AuthContext — global authentication + tenant state.
@@ -257,6 +258,11 @@ export function AuthProvider({ children }) {
   const isAdmin  = ()     => hasRole('admin') || hasRole('tenant_admin') || hasRole('super_admin')
   const isSuperAdmin = () => user?.is_super_admin === true
 
+  // Capability check for paid add-on modules ('sm', 'hf', 'ai', 'ats', 'plan').
+  // Used to gate SM nav/pages now that /sm/* is hard-gated server-side (403).
+  const hasModule = (key) =>
+    tenantHasModule(key, activeTenant ?? user?.tenant, { isSuperAdmin: isSuperAdmin() })
+
   const hasPermission = (permName) => {
     if (!user) return false
     if (isSuperAdmin()) return true
@@ -284,7 +290,7 @@ export function AuthProvider({ children }) {
       tenants, activeTenant, setActiveTenant,
       login, logout, refreshUser,
       verifyMfa, setupMfa, confirmMfa, disableMfa,
-      hasRole, hasPermission, isAdmin, isSuperAdmin,
+      hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule,
     }}>
       {children}
     </AuthContext.Provider>

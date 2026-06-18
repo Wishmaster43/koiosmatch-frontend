@@ -1266,10 +1266,10 @@ function EditorInner({ workflow, onClose, onSave }) {
       if (data.type === 'candidates_fetch' || data.type === 'candidate_filter') {
         const cfg = data.config ?? {}
         const params = { per_page: cfg.limit ?? 100 }
-        // ShiftManager-sync (oude shape: firstname/pools/features) → /sm-candidates,
+        // ShiftManager-sync (oude shape: firstname/pools/features) → /sm/candidates,
         // dat de oorspronkelijke Nederlandse status-waarden gebruikt (geen remap).
         if (cfg.status && cfg.status !== 'alle') params.status = cfg.status
-        const res = await api.get('/sm-candidates', { params })
+        const res = await api.get('/sm/candidates', { params })
         let rows = res.data?.data ?? res.data ?? []
 
         // Client-side filter op pools en features (backend filtert hier nog niet op)

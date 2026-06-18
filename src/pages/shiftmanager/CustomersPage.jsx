@@ -53,7 +53,7 @@ export default function CustomersPage() {
   const [selectedCity,   setSelectedCity]   = useState([])
 
   useEffect(() => {
-    api.get('/customers', { params: { page, per_page: pageSize } })
+    api.get('/sm/customers', { params: { page, per_page: pageSize } })
       .then(res => {
         const body = res.data
         const rows = Array.isArray(body) ? body : (body?.data ?? [])
