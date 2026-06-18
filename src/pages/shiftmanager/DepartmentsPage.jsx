@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Search, Layers, MapPin, Building2, Users, X, Plus, ChevronRight } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
-import api from '../../lib/api'
+import api, { unwrapList } from '../../lib/api'
+import { USE_MOCKS, isAbortError } from '../../lib/mocks'
 
 const DUMMY = [
   { id: 1,  name: 'Verpleging',           customer: 'Stichting Rivas Zorggroep', location: 'Rivas Zorggroep — Papendrecht', city: 'Papendrecht', status: 'Actief',   employees: 24, shifts: 18 },
@@ -157,7 +158,7 @@ function DepartmentDrawer({ dep, onClose }) {
 }
 
 export default function DepartmentsPage() {
-  const [departments, setDepartments] = useState(DUMMY)
+  const [departments, setDepartments] = useState(USE_MOCKS ? DUMMY : [])
   const [search,      setSearch]      = useState('')
   const [selected,    setSelected]    = useState(null)
   const [page,        setPage]        = useState(1)
@@ -168,10 +169,12 @@ export default function DepartmentsPage() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
+  // Dummy only in mock mode — a failed/empty call shows an empty list in prod.
   useEffect(() => {
-    api.get('/sm/customers')
+    const ctrl = new AbortController()
+    api.get('/sm/customers', { signal: ctrl.signal })
       .then(res => {
-        const customers = res.data?.data ?? res.data ?? []
+        const { rows: customers } = unwrapList(res)
         const flat = customers.flatMap(c =>
           (c.locations ?? []).flatMap(loc =>
             (loc.departments ?? []).map(d => ({
@@ -187,8 +190,10 @@ export default function DepartmentsPage() {
           )
         )
         if (flat.length > 0) setDepartments(flat)
+        else if (!USE_MOCKS) setDepartments([])
       })
-      .catch(() => {})
+      .catch(err => { if (!isAbortError(err) && !USE_MOCKS) setDepartments([]) })
+    return () => ctrl.abort()
   }, [])
 
   const toggle = setter => val =>

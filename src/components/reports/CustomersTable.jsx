@@ -9,7 +9,8 @@ import { Search, ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucid
 import { useRightPanel }      from '../../context/RightPanelContext'
 import { useAuth }            from '../../context/AuthContext'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
-import api                    from '../../lib/api'
+import api, { unwrapList }    from '../../lib/api'
+import { USE_MOCKS }          from '../../lib/mocks'
 import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '../../lib/usePageSize'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
@@ -149,13 +150,16 @@ export default function CustomersTable() {
     setError(null)
     api.get('/sm/customers')
       .then(res => {
-        const data = res.data
-        const real = Array.isArray(data) ? data : (data?.data ?? [])
-        const realIds = new Set(real.map(c => c.id))
-        const dummies = DUMMY_CUSTOMERS.filter(d => !realIds.has(d.id))
-        setCustomers([...dummies, ...real])
+        const { rows: real } = unwrapList(res)
+        if (USE_MOCKS) {
+          const realIds = new Set(real.map(c => c.id))
+          const dummies = DUMMY_CUSTOMERS.filter(d => !realIds.has(d.id))
+          setCustomers([...dummies, ...real])
+        } else {
+          setCustomers(real)
+        }
       })
-      .catch(() => { setCustomers(DUMMY_CUSTOMERS); setError(t('customers.loadError')) })
+      .catch(() => { setError(t('customers.loadError')); setCustomers(USE_MOCKS ? DUMMY_CUSTOMERS : []) })
       .finally(() => setLoading(false))
   }
 

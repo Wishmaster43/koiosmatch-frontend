@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect } from 'react'
 import { Search, MapPin, Building2, Layers, X, Phone, Mail, ChevronRight, Plus } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
-import api from '../../lib/api'
+import api, { unwrapList } from '../../lib/api'
+import { USE_MOCKS, isAbortError } from '../../lib/mocks'
 
 // ── Dummy fallback data ───────────────────────────────────────────────────────
 const DUMMY = [
@@ -205,7 +206,7 @@ function LocationDrawer({ loc, onClose }) {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LocationsPage() {
-  const [locations, setLocations] = useState(DUMMY)
+  const [locations, setLocations] = useState(USE_MOCKS ? DUMMY : [])
   const [search,    setSearch]    = useState('')
   const [selected,  setSelected]  = useState(null)
   const [page,      setPage]      = useState(1)
@@ -216,11 +217,13 @@ export default function LocationsPage() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  // Try to load from API, fall back to dummy
+  // Load locations (derived from /sm/customers). Dummy only in mock mode — a
+  // failed/empty call shows an empty list in prod, never fabricated rows.
   useEffect(() => {
-    api.get('/sm/customers')
+    const ctrl = new AbortController()
+    api.get('/sm/customers', { signal: ctrl.signal })
       .then(res => {
-        const customers = res.data?.data ?? res.data ?? []
+        const { rows: customers } = unwrapList(res)
         const flat = customers.flatMap(c =>
           (c.locations ?? []).map(l => ({
             id:          l.id,
@@ -236,8 +239,10 @@ export default function LocationsPage() {
           }))
         )
         if (flat.length > 0) setLocations(flat)
+        else if (!USE_MOCKS) setLocations([])
       })
-      .catch(() => {})
+      .catch(err => { if (!isAbortError(err) && !USE_MOCKS) setLocations([]) })
+    return () => ctrl.abort()
   }, [])
 
   const toggle = setter => val =>
