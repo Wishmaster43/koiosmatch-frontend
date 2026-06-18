@@ -4,6 +4,8 @@
  * DashboardLayout manages: left nav, topbar, right filter panel.
  */
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { QueryClientProvider }                     from '@tanstack/react-query'
+import { queryClient }                             from './lib/queryClient'
 import { AuthProvider, useAuth }                   from './context/AuthContext'
 import { RightPanelProvider, useRightPanel }       from './context/RightPanelContext'
 import { useState, useEffect, lazy, Suspense }     from 'react'
@@ -430,6 +432,7 @@ function PublicRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
       <ThemeProvider>
       <AuthProvider>
         <AppsProvider>
@@ -445,6 +448,7 @@ export default function App() {
         </AppsProvider>
       </AuthProvider>
       </ThemeProvider>
+      </QueryClientProvider>
     </BrowserRouter>
   )
 }

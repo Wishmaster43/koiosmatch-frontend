@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api, { unwrapList } from '../../lib/api'
+import { useUsers } from '../../lib/queries'
 import { USE_MOCKS, isAbortError } from '../../lib/mocks'
 import CandidateDrawer from './CandidateDrawer'
 import AddCandidateModal from './AddCandidateModal'
@@ -51,7 +52,7 @@ export default function CandidatesPage() {
   const [selected,        setSelected]        = useState(null)
   const [drawerExpanded,  setDrawerExpanded]  = useState(false)
   const [addOpen,         setAddOpen]         = useState(false)
-  const [users,           setUsers]           = useState([])
+  const { data: users = [] } = useUsers()
 
   const [selectedStatus,      setSelectedStatus]      = useState([])
   const [selectedFunnel,      setSelectedFunnel]      = useState([])
@@ -103,12 +104,6 @@ export default function CandidatesPage() {
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
   }, [page, pageSize, t])
-
-  useEffect(() => {
-    api.get('/users')
-      .then(res => { const d = res.data; setUsers(Array.isArray(d) ? d : (d?.data ?? [])) })
-      .catch(() => {})
-  }, [])
 
   // Build {value,label,count} option lists from the loaded candidates.
   const optsFrom = (values, mapLabel = v => v) => {
