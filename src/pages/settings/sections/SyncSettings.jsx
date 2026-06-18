@@ -62,21 +62,33 @@ function SyncRow({ item, user, canSync, onLog }) {
     if (!item.endpoint || running || cooldown > 0) return
     setRunning(true)
     setResult(null)
-    const start = Date.now()
     try {
-      const res     = await api.post(item.endpoint)
-      const elapsed = ((Date.now() - start) / 1000).toFixed(1)
-      const entry   = { ok: true, msg: res.data?.message ?? t('sync.succeeded'), elapsed,
-                        at: new Date().toLocaleTimeString('nl-NL'), user: user?.name ?? '—', label }
+      const res = await api.post(item.endpoint)
+      // Full SM syncs are async now: 202 = job queued, NO result counts in the
+      // response. Show "started", not "X synced". The lists update once the job
+      // finishes (no status endpoint yet — the user refreshes later).
+      const started = res.status === 202 || res.data?.status === 'queued'
+      const entry = {
+        ok: true,
+        started,
+        msg: res.data?.message ?? (started
+          ? t('sync.started', { defaultValue: 'Synchronisatie gestart — dit kan enkele minuten duren. Ververs de lijsten later voor de bijgewerkte data.' })
+          : t('sync.succeeded')),
+        at: new Date().toLocaleTimeString('nl-NL'), user: user?.name ?? '—', label,
+      }
       setResult(entry)
       onLog(entry)
       startCooldown(COOLDOWN_SECS)
     } catch (err) {
+      const status     = err.response?.status
       const retryAfter = err.response?.data?.retry_after
-      const msg = err.response?.status === 429
+      // 403 (geen sm-module), 404/422 (geen actieve SM-connectie) en overige
+      // fouten tonen de server-message; 429 toont de rate-limit-melding.
+      const msg = status === 429
         ? t('sync.tooManyRequests', { secs: retryAfter ?? 60 })
         : (err.response?.data?.message ?? t('sync.failed'))
-      const entry = { ok: false, msg, at: new Date().toLocaleTimeString('nl-NL'), user: user?.name ?? '—', label }
+      const entry = { ok: false, started: false, msg,
+                      at: new Date().toLocaleTimeString('nl-NL'), user: user?.name ?? '—', label }
       setResult(entry)
       onLog(entry)
       if (retryAfter) startCooldown(retryAfter)
@@ -113,11 +125,11 @@ function SyncRow({ item, user, canSync, onLog }) {
           </div>
         )}
         {result && !running && (
-          <div style={{ marginTop: 6, fontSize: 12, color: result.ok ? 'var(--color-success)' : 'var(--color-danger)',
+          <div style={{ marginTop: 6, fontSize: 12,
+                        color: result.started ? 'var(--color-info)' : result.ok ? 'var(--color-success)' : 'var(--color-danger)',
                         display: 'flex', alignItems: 'center', gap: 4 }}>
-            {result.ok ? <Check size={11} /> : <AlertTriangle size={11} />}
+            {result.started ? <Clock size={11} /> : result.ok ? <Check size={11} /> : <AlertTriangle size={11} />}
             {result.msg}
-            {result.elapsed && <span style={{ color: '#9CA3AF' }}>· {result.elapsed}s</span>}
           </div>
         )}
       </div>
