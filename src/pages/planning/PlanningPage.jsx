@@ -1,16 +1,19 @@
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ChevronLeft, ChevronRight, Plus, X, Clock, MapPin, User, Save, Star, Search } from 'lucide-react'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const DAYS_NL   = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za']
-const MONTHS_NL = ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December']
+// Locale-aware month name + Monday-first weekday abbreviations (2024-01-01 = Monday).
+const monthName    = (i) => new Date(2000, i, 1).toLocaleString(undefined, { month: 'long' })
+const WEEKDAYS_MON = Array.from({ length: 7 }, (_, i) =>
+  new Date(2024, 0, 1 + i).toLocaleString(undefined, { weekday: 'short' }))
 
 function isSameDay(a, b) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
 }
 
 function formatDate(d) {
-  return `${d.getDate()} ${MONTHS_NL[d.getMonth()]} ${d.getFullYear()}`
+  return `${d.getDate()} ${monthName(d.getMonth())} ${d.getFullYear()}`
 }
 
 // ── Dummy shifts ──────────────────────────────────────────────────────────────
@@ -18,20 +21,20 @@ const today = new Date()
 const y = today.getFullYear(), m = today.getMonth()
 
 const INITIAL_SHIFTS = [
-  { id: 1, date: new Date(y, m, today.getDate()),     title: 'Nachtdienst', location: 'Rivas Zorggroep',   candidate: 'Ismail Eddahchouri', start: '22:00', end: '06:00', color: '#6366F1' },
-  { id: 2, date: new Date(y, m, today.getDate()),     title: 'Dagdienst',   location: 'Yesway Zorg',       candidate: 'Elif Akagündüz',     start: '07:00', end: '15:00', color: '#22C55E' },
-  { id: 3, date: new Date(y, m, today.getDate() + 1), title: 'Avonddienst', location: 'WoonzorgGroep',     candidate: 'Rubina Milan',        start: '15:00', end: '23:00', color: '#F59E0B' },
-  { id: 4, date: new Date(y, m, today.getDate() + 2), title: 'Dagdienst',   location: 'Rivas Zorggroep',   candidate: 'Merel Van Muijlwijk', start: '07:00', end: '15:00', color: '#22C55E' },
-  { id: 5, date: new Date(y, m, today.getDate() + 4), title: 'Nachtdienst', location: 'Yesway Zorg',       candidate: 'Figen Ooijevaar',     start: '22:00', end: '06:00', color: '#6366F1' },
-  { id: 6, date: new Date(y, m, today.getDate() - 1), title: 'Dagdienst',   location: 'WoonzorgGroep',     candidate: 'Petra Kuiters',       start: '07:00', end: '15:00', color: '#22C55E' },
+  { id: 1, date: new Date(y, m, today.getDate()),     title: 'Nachtdienst', location: 'Rivas Zorggroep',   candidate: 'Ismail Eddahchouri', start: '22:00', end: '06:00', color: 'var(--color-primary)' },
+  { id: 2, date: new Date(y, m, today.getDate()),     title: 'Dagdienst',   location: 'Yesway Zorg',       candidate: 'Elif Akagündüz',     start: '07:00', end: '15:00', color: 'var(--color-success)' },
+  { id: 3, date: new Date(y, m, today.getDate() + 1), title: 'Avonddienst', location: 'WoonzorgGroep',     candidate: 'Rubina Milan',        start: '15:00', end: '23:00', color: 'var(--color-warning)' },
+  { id: 4, date: new Date(y, m, today.getDate() + 2), title: 'Dagdienst',   location: 'Rivas Zorggroep',   candidate: 'Merel Van Muijlwijk', start: '07:00', end: '15:00', color: 'var(--color-success)' },
+  { id: 5, date: new Date(y, m, today.getDate() + 4), title: 'Nachtdienst', location: 'Yesway Zorg',       candidate: 'Figen Ooijevaar',     start: '22:00', end: '06:00', color: 'var(--color-primary)' },
+  { id: 6, date: new Date(y, m, today.getDate() - 1), title: 'Dagdienst',   location: 'WoonzorgGroep',     candidate: 'Petra Kuiters',       start: '07:00', end: '15:00', color: 'var(--color-success)' },
 ]
 
 // ── Dummy kandidaten voor suggesties ─────────────────────────────────────────
 const SUGGESTIES = [
-  { name: 'Ismail Eddahchouri',   initials: 'IE', functie: 'Verzorgende IG',   uren: 8,   km: '3.2km',  color: '#6366F1', favoriet: true  },
-  { name: 'Merel Van Muijlwijk',  initials: 'MV', functie: 'Helpende',         uren: 24,  km: '7.1km',  color: '#22C55E', favoriet: true  },
-  { name: 'Elif Akagündüz',       initials: 'EA', functie: 'Gastvrouw',         uren: 16,  km: '5.4km',  color: '#F59E0B', favoriet: false },
-  { name: 'Rubina Rosella Milan', initials: 'RM', functie: 'Verzorgende',       uren: 32,  km: '9.8km',  color: '#3B82F6', favoriet: false },
+  { name: 'Ismail Eddahchouri',   initials: 'IE', functie: 'Verzorgende IG',   uren: 8,   km: '3.2km',  color: 'var(--color-primary)', favoriet: true  },
+  { name: 'Merel Van Muijlwijk',  initials: 'MV', functie: 'Helpende',         uren: 24,  km: '7.1km',  color: 'var(--color-success)', favoriet: true  },
+  { name: 'Elif Akagündüz',       initials: 'EA', functie: 'Gastvrouw',         uren: 16,  km: '5.4km',  color: 'var(--color-warning)', favoriet: false },
+  { name: 'Rubina Rosella Milan', initials: 'RM', functie: 'Verzorgende',       uren: 32,  km: '9.8km',  color: 'var(--color-secondary)', favoriet: false },
   { name: 'Figen Ooijevaar',      initials: 'FO', functie: 'Zorgmedewerker',   uren: 12,  km: '11.2km', color: '#8B5CF6', favoriet: false },
   { name: 'Petra Kuiters',        initials: 'PK', functie: 'Helpende',         uren: 40,  km: '18.5km', color: '#EC4899', favoriet: false },
 ]
@@ -56,7 +59,7 @@ function SectionHead({ children }) {
 }
 
 function Avatar({ initials, size = 26 }) {
-  const colors = ['#6366F1','#3B82F6','#22C55E','#F59E0B','#EF4444','#8B5CF6','#EC4899']
+  const colors = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6','#EC4899']
   const color  = colors[initials.charCodeAt(0) % colors.length]
   return (
     <div style={{ width: size, height: size, borderRadius: '50%', background: color, flexShrink: 0,
@@ -69,6 +72,7 @@ function Avatar({ initials, size = 26 }) {
 
 // ── Add Shift Modal ───────────────────────────────────────────────────────────
 function AddShiftModal({ date, onClose, onAdd }) {
+  const { t } = useTranslation('planning')
   const [title,      setTitle]      = useState('Dagdienst')
   const [start,      setStart]      = useState('07:00')
   const [end,        setEnd]        = useState('15:00')
@@ -79,8 +83,8 @@ function AddShiftModal({ date, onClose, onAdd }) {
   const [personen,   setPersonen]   = useState(1)
   const [kandidaat,  setKandidaat]  = useState(null)
   const [zoek,       setZoek]       = useState('')
-  const [color,      setColor]      = useState('#22C55E')
-  const COLORS = ['#22C55E','#6366F1','#F59E0B','#EF4444','#3B82F6','#8B5CF6']
+  const [color,      setColor]      = useState('var(--color-success)')
+  const COLORS = ['var(--color-success)','var(--color-primary)','var(--color-warning)','var(--color-danger)','var(--color-secondary)','#8B5CF6']
 
   const gefilterd = SUGGESTIES.filter(s =>
     s.name.toLowerCase().includes(zoek.toLowerCase()) ||
@@ -110,7 +114,7 @@ function AddShiftModal({ date, onClose, onAdd }) {
           <div style={{ display: 'flex', alignItems: 'center', padding: '12px 20px',
             background: 'var(--sidebar-bg)', borderBottom: '1px solid var(--sidebar-border)', flexShrink: 0 }}>
             <div>
-              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--sidebar-text)' }}>Dienst toevoegen</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--sidebar-text)' }}>{t('addShift')}</span>
               <span style={{ fontSize: 12, color: 'var(--sidebar-muted)', marginLeft: 10 }}>{formatDate(date)}</span>
             </div>
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
@@ -118,7 +122,7 @@ function AddShiftModal({ date, onClose, onAdd }) {
                 style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 16px', fontSize: 12,
                   fontWeight: 600, background: 'var(--color-primary)', color: '#fff',
                   border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-                <Save size={13} /> Opslaan
+                <Save size={13} /> {t('common:save')}
               </button>
               <button onClick={onClose}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -135,8 +139,8 @@ function AddShiftModal({ date, onClose, onAdd }) {
             {/* ── Links: order info ── */}
             <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid var(--border)',
               background: 'var(--surface)', overflowY: 'auto', padding: '14px 14px' }}>
-              <SectionHead>Order</SectionHead>
-              <Field label="Klant">
+              <SectionHead>{t('sectionOrder')}</SectionHead>
+              <Field label={t('fCustomer')}>
                 <select style={SELECT} value={klant} onChange={e => setKlant(e.target.value)}>
                   <option>Stichting Rivas Zorggroep</option>
                   <option>Yesway Zorg</option>
@@ -144,23 +148,23 @@ function AddShiftModal({ date, onClose, onAdd }) {
                   <option>Stichting Floravita</option>
                 </select>
               </Field>
-              <Field label="Afdeling">
+              <Field label={t('fDepartment')}>
                 <select style={SELECT} value={afdeling} onChange={e => setAfdeling(e.target.value)}>
                   <option>Watertorenlocatie</option>
                   <option>Hoofdkantoor</option>
                   <option>Thuiszorg</option>
                 </select>
               </Field>
-              <Field label="Opdracht"><input style={INPUT} defaultValue="Watertorenlocatie" /></Field>
-              <Field label="Contactpersoon"><input style={INPUT} placeholder="Naam contactpersoon" /></Field>
+              <Field label={t('fAssignment')}><input style={INPUT} defaultValue="Watertorenlocatie" /></Field>
+              <Field label={t('fContact')}><input style={INPUT} placeholder={t('contactPlaceholder')} /></Field>
 
-              <SectionHead>Locatie</SectionHead>
-              <Field label="Adres">
+              <SectionHead>{t('sectionLocation')}</SectionHead>
+              <Field label={t('fAddress')}>
                 <textarea style={{ ...INPUT, resize: 'none', height: 56 }}
                   value={locatie} onChange={e => setLocatie(e.target.value)} />
               </Field>
 
-              <SectionHead>Kleur</SectionHead>
+              <SectionHead>{t('sectionColor')}</SectionHead>
               <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
                 {COLORS.map(c => (
                   <button key={c} type="button" onClick={() => setColor(c)}
@@ -172,26 +176,26 @@ function AddShiftModal({ date, onClose, onAdd }) {
 
             {/* ── Midden: dienst details ── */}
             <div style={{ flex: 1, overflowY: 'auto', padding: '14px 20px' }}>
-              <SectionHead>Dienst 1</SectionHead>
+              <SectionHead>{t('shift1')}</SectionHead>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 10, marginBottom: 10 }}>
-                <Field label="Naam dienst">
+                <Field label={t('fShiftName')}>
                   <input style={INPUT} value={title} onChange={e => setTitle(e.target.value)} />
                 </Field>
-                <Field label="Begintijd">
+                <Field label={t('fStart')}>
                   <input type="time" style={INPUT} value={start} onChange={e => setStart(e.target.value)} />
                 </Field>
-                <Field label="Eindtijd">
+                <Field label={t('fEnd')}>
                   <input type="time" style={INPUT} value={end} onChange={e => setEnd(e.target.value)} />
                 </Field>
-                <Field label="Aantal personen">
+                <Field label={t('fPersons')}>
                   <input type="number" style={INPUT} value={personen} min={1} max={20}
                     onChange={e => setPersonen(Number(e.target.value))} />
                 </Field>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
-                <Field label="Jobtype">
+                <Field label={t('fJobtype')}>
                   <select style={SELECT} value={jobtype} onChange={e => setJobtype(e.target.value)}>
                     <option>Verzorgende IG</option>
                     <option>Helpende</option>
@@ -200,17 +204,17 @@ function AddShiftModal({ date, onClose, onAdd }) {
                     <option>Zorgmedewerker</option>
                   </select>
                 </Field>
-                <Field label="Open dienst">
+                <Field label={t('fOpenShift')}>
                   <select style={SELECT}>
-                    <option>Alle medewerkers</option>
-                    <option>Favorieten</option>
-                    <option>Vaste medewerkers</option>
+                    <option>{t('openAll')}</option>
+                    <option>{t('openFavorites')}</option>
+                    <option>{t('openFixed')}</option>
                   </select>
                 </Field>
               </div>
 
-              {/* Ingeplande kandidaat */}
-              <SectionHead>Ingeplande medewerker</SectionHead>
+              {/* Scheduled candidate */}
+              <SectionHead>{t('scheduledWorker')}</SectionHead>
               {kandidaat ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
                   border: `1px solid ${kandidaat.color}40`, borderLeft: `4px solid ${kandidaat.color}`,
@@ -218,7 +222,7 @@ function AddShiftModal({ date, onClose, onAdd }) {
                   <Avatar initials={kandidaat.initials} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{kandidaat.name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{kandidaat.functie} · {kandidaat.uren} uur · {kandidaat.km}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{kandidaat.functie} · {t('hours', { n: kandidaat.uren })} · {kandidaat.km}</div>
                   </div>
                   <button onClick={() => setKandidaat(null)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
@@ -228,20 +232,20 @@ function AddShiftModal({ date, onClose, onAdd }) {
               ) : (
                 <div style={{ padding: '20px', textAlign: 'center', border: '1px dashed var(--border)',
                   borderRadius: 8, fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>
-                  Klik op een kandidaat uit de lijst →
+                  {t('clickCandidate')}
                 </div>
               )}
 
-              {/* Notities */}
-              <SectionHead>Notities</SectionHead>
-              <textarea style={{ ...INPUT, height: 70, resize: 'none' }} placeholder="Interne notitie bij deze dienst…" />
+              {/* Notes */}
+              <SectionHead>{t('notes')}</SectionHead>
+              <textarea style={{ ...INPUT, height: 70, resize: 'none' }} placeholder={t('notePlaceholder')} />
 
-              {/* Opdracht prestaties */}
-              <SectionHead style={{ marginTop: 16 }}>Opdracht prestaties</SectionHead>
+              {/* Assignment performance */}
+              <SectionHead style={{ marginTop: 16 }}>{t('performance')}</SectionHead>
               <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
-                    {['Naam','Opdrachtgever','Functie','Collega\'s'].map(h => (
+                    {[t('colName'), t('colClient'), t('colFunction'), t('colColleagues')].map(h => (
                       <th key={h} style={{ padding: '6px 10px', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)' }}>{h}</th>
                     ))}
                   </tr>
@@ -257,7 +261,7 @@ function AddShiftModal({ date, onClose, onAdd }) {
                   ) : (
                     <tr>
                       <td colSpan={4} style={{ padding: '16px 10px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 12 }}>
-                        Nog geen medewerker ingepland
+                        {t('noWorkerPlanned')}
                       </td>
                     </tr>
                   )}
@@ -274,7 +278,7 @@ function AddShiftModal({ date, onClose, onAdd }) {
                 <div style={{ position: 'relative' }}>
                   <Search size={13} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                   <input value={zoek} onChange={e => setZoek(e.target.value)}
-                    placeholder="Zoek kandidaat…"
+                    placeholder={t('searchCandidate')}
                     style={{ ...INPUT, paddingLeft: 28, fontSize: 12 }} />
                 </div>
               </div>
@@ -286,7 +290,7 @@ function AddShiftModal({ date, onClose, onAdd }) {
                   <>
                     <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.07em',
                       textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <Star size={10} /> Favorieten
+                      <Star size={10} /> {t('favorites')}
                     </div>
                     {favorieten.map(s => (
                       <KandidaatRij key={s.name} s={s} selected={kandidaat?.name === s.name} onClick={() => setKandidaat(s)} />
@@ -298,7 +302,7 @@ function AddShiftModal({ date, onClose, onAdd }) {
                 {/* Suggesties */}
                 <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.07em',
                   textTransform: 'uppercase', marginBottom: 6 }}>
-                  Suggesties — {jobtype}
+                  {t('suggestions')} — {jobtype}
                 </div>
                 {overige.map(s => (
                   <KandidaatRij key={s.name} s={s} selected={kandidaat?.name === s.name} onClick={() => setKandidaat(s)} />
@@ -313,6 +317,7 @@ function AddShiftModal({ date, onClose, onAdd }) {
 }
 
 function KandidaatRij({ s, selected, onClick }) {
+  const { t } = useTranslation('planning')
   return (
     <div onClick={onClick}
       style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px', borderRadius: 8,
@@ -326,7 +331,7 @@ function KandidaatRij({ s, selected, onClick }) {
         <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {s.name}
         </div>
-        <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{s.uren} uur · {s.km}</div>
+        <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t('hours', { n: s.uren })} · {s.km}</div>
       </div>
       {selected && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0 }} />}
     </div>
@@ -353,6 +358,7 @@ function ShiftPill({ shift, small }) {
 
 // ── Month view ────────────────────────────────────────────────────────────────
 function MonthView({ current, shifts, today, onDayClick }) {
+  const { t } = useTranslation('planning')
   const year  = current.getFullYear()
   const month = current.getMonth()
   const first = new Date(year, month, 1)
@@ -375,7 +381,7 @@ function MonthView({ current, shifts, today, onDayClick }) {
 
   const weeks = []
   for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
-  const WEEK_DAYS = ['Ma','Di','Wo','Do','Vr','Za','Zo']
+  const WEEK_DAYS = WEEKDAYS_MON
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -413,7 +419,7 @@ function MonthView({ current, shifts, today, onDayClick }) {
                   </div>
                   {dayShifts.slice(0, 3).map(s => <ShiftPill key={s.id} shift={s} small />)}
                   {dayShifts.length > 3 && (
-                    <div style={{ fontSize: 10, color: 'var(--text-muted)', paddingLeft: 2 }}>+{dayShifts.length - 3} meer</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-muted)', paddingLeft: 2 }}>{t('more', { count: dayShifts.length - 3 })}</div>
                   )}
                 </div>
               )
@@ -435,7 +441,7 @@ function WeekView({ current, shifts, today, onDayClick }) {
     d.setDate(startOfWeek.getDate() + i)
     return d
   })
-  const WEEK_LABELS = ['Ma','Di','Wo','Do','Vr','Za','Zo']
+  const WEEK_LABELS = WEEKDAYS_MON
 
   return (
     <div style={{ flex: 1, overflow: 'auto' }}>
@@ -470,6 +476,7 @@ function WeekView({ current, shifts, today, onDayClick }) {
 
 // ── Day view ──────────────────────────────────────────────────────────────────
 function DayView({ current, shifts, today, onDayClick }) {
+  const { t } = useTranslation('planning')
   const dayShifts = shifts.filter(s => isSameDay(s.date, current))
   const isToday = isSameDay(current, today)
 
@@ -477,7 +484,7 @@ function DayView({ current, shifts, today, onDayClick }) {
     <div style={{ flex: 1, overflow: 'auto', padding: '0 24px' }}>
       <div style={{ padding: '16px 0', borderBottom: '1px solid var(--border)', marginBottom: 16 }}>
         <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>
-          {isToday && <span style={{ color: 'var(--color-primary)', marginRight: 8 }}>Vandaag —</span>}
+          {isToday && <span style={{ color: 'var(--color-primary)', marginRight: 8 }}>{t('today')} —</span>}
           {formatDate(current)}
         </div>
       </div>
@@ -486,12 +493,12 @@ function DayView({ current, shifts, today, onDayClick }) {
         ? (
           <div style={{ textAlign: 'center', padding: '60px 0' }}>
             <div style={{ fontSize: 32, marginBottom: 12 }}>📅</div>
-            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>Geen diensten gepland</div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>Klik hieronder om een dienst toe te voegen.</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{t('noShiftsPlanned')}</div>
+            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>{t('addHint')}</div>
             <button onClick={() => onDayClick(current)}
               style={{ padding: '9px 18px', fontSize: 13, fontWeight: 600, background: 'var(--color-primary)',
                 color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-              + Dienst toevoegen
+              + {t('addShift')}
             </button>
           </div>
         )
@@ -524,7 +531,7 @@ function DayView({ current, shifts, today, onDayClick }) {
             <button onClick={() => onDayClick(current)}
               style={{ width: '100%', padding: '9px', fontSize: 13, border: '1px dashed var(--border)',
                 borderRadius: 8, background: 'none', color: 'var(--text-muted)', cursor: 'pointer', marginTop: 4 }}>
-              + Dienst toevoegen
+              + {t('addShift')}
             </button>
           </>
         )
@@ -535,6 +542,7 @@ function DayView({ current, shifts, today, onDayClick }) {
 
 // ── List view ─────────────────────────────────────────────────────────────────
 function ListView({ shifts, today, onDayClick }) {
+  const { t } = useTranslation('planning')
   const sorted = [...shifts].sort((a, b) => a.date - b.date)
   const grouped = {}
   sorted.forEach(s => {
@@ -547,7 +555,7 @@ function ListView({ shifts, today, onDayClick }) {
     <div style={{ flex: 1, overflow: 'auto', padding: '0 24px' }}>
       {Object.values(grouped).length === 0 && (
         <div style={{ textAlign: 'center', padding: '60px 0', fontSize: 13, color: 'var(--text-muted)' }}>
-          Geen diensten gepland.
+          {t('noShiftsPlannedDot')}
         </div>
       )}
       {Object.values(grouped).map(({ date, shifts: ds }) => {
@@ -558,13 +566,13 @@ function ListView({ shifts, today, onDayClick }) {
               borderBottom: '2px solid var(--border)', marginBottom: 10 }}>
               <span style={{ fontSize: 13, fontWeight: 700,
                 color: isToday ? 'var(--color-primary)' : 'var(--text)' }}>
-                {isToday ? 'Vandaag — ' : ''}{formatDate(date)}
+                {isToday ? `${t('today')} — ` : ''}{formatDate(date)}
               </span>
               <button onClick={() => onDayClick(date)}
                 style={{ marginLeft: 'auto', fontSize: 11, padding: '3px 10px',
                   border: '1px solid var(--border)', borderRadius: 6, background: 'none',
                   color: 'var(--text-muted)', cursor: 'pointer' }}>
-                + Toevoegen
+                + {t('add')}
               </button>
             </div>
             {ds.map(s => (
@@ -591,10 +599,11 @@ function ListView({ shifts, today, onDayClick }) {
 }
 
 // ── Main planning page ────────────────────────────────────────────────────────
-const VIEWS = ['Maand', 'Week', 'Dag', 'Lijst']
+const VIEW_IDS = ['month', 'week', 'day', 'list']
 
 export default function PlanningPage() {
-  const [view,       setView]       = useState('Maand')
+  const { t } = useTranslation('planning')
+  const [view,       setView]       = useState('month')
   const [current,    setCurrent]    = useState(new Date())
   const [shifts,     setShifts]     = useState(INITIAL_SHIFTS)
   const [modal,      setModal]      = useState(null) // date to add shift for
@@ -602,8 +611,8 @@ export default function PlanningPage() {
 
   const navigate = (dir) => {
     const d = new Date(current)
-    if (view === 'Maand') d.setMonth(d.getMonth() + dir)
-    else if (view === 'Week') d.setDate(d.getDate() + dir * 7)
+    if (view === 'month') d.setMonth(d.getMonth() + dir)
+    else if (view === 'week') d.setDate(d.getDate() + dir * 7)
     else d.setDate(d.getDate() + dir)
     setCurrent(d)
   }
@@ -611,12 +620,12 @@ export default function PlanningPage() {
   const goToday = () => setCurrent(new Date())
 
   const headerLabel = () => {
-    if (view === 'Maand') return `${MONTHS_NL[current.getMonth()]} ${current.getFullYear()}`
-    if (view === 'Week') {
+    if (view === 'month') return `${monthName(current.getMonth())} ${current.getFullYear()}`
+    if (view === 'week') {
       const dow = (current.getDay() + 6) % 7
       const start = new Date(current); start.setDate(current.getDate() - dow)
       const end   = new Date(start);   end.setDate(start.getDate() + 6)
-      return `${start.getDate()} ${MONTHS_NL[start.getMonth()]} – ${end.getDate()} ${MONTHS_NL[end.getMonth()]} ${end.getFullYear()}`
+      return `${start.getDate()} ${monthName(start.getMonth())} – ${end.getDate()} ${monthName(end.getMonth())} ${end.getFullYear()}`
     }
     return formatDate(current)
   }
@@ -638,7 +647,7 @@ export default function PlanningPage() {
         <button onClick={goToday}
           style={{ padding: '6px 14px', fontSize: 12, fontWeight: 500, border: '1px solid var(--border)',
             borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
-          Vandaag
+          {t('today')}
         </button>
 
         {/* Prev / Next */}
@@ -660,13 +669,13 @@ export default function PlanningPage() {
 
         {/* View switcher */}
         <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-          {VIEWS.map(v => (
+          {VIEW_IDS.map((v, i) => (
             <button key={v} onClick={() => setView(v)}
               style={{ padding: '6px 14px', fontSize: 12, fontWeight: view === v ? 600 : 400,
-                border: 'none', borderRight: v !== 'Lijst' ? '1px solid var(--border)' : 'none',
+                border: 'none', borderRight: i < VIEW_IDS.length - 1 ? '1px solid var(--border)' : 'none',
                 background: view === v ? 'var(--color-primary)' : 'var(--surface)',
                 color:      view === v ? '#fff' : 'var(--text)', cursor: 'pointer' }}>
-              {v}
+              {t(`views.${v}`)}
             </button>
           ))}
         </div>
@@ -676,16 +685,16 @@ export default function PlanningPage() {
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: 12,
             fontWeight: 600, background: 'var(--color-primary)', color: '#fff',
             border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-          <Plus size={14} /> Dienst toevoegen
+          <Plus size={14} /> {t('addShift')}
         </button>
       </div>
 
       {/* ── Calendar body ── */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {view === 'Maand' && <MonthView current={current} shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
-        {view === 'Week'  && <WeekView  current={current} shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
-        {view === 'Dag'   && <DayView   current={current} shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
-        {view === 'Lijst' && <ListView  shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
+        {view === 'month' && <MonthView current={current} shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
+        {view === 'week'  && <WeekView  current={current} shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
+        {view === 'day'   && <DayView   current={current} shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
+        {view === 'list'  && <ListView  shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
       </div>
 
       {/* ── Modal ── */}

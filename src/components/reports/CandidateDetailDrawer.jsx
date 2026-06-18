@@ -4,23 +4,26 @@
  * StatusBadge below = the colored status pill.
  */
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Phone, Mail, MapPin, Calendar, Clock, Briefcase, MessageSquare, History } from 'lucide-react'
 
 // Colored status pill (actief / nietactief / extern / ...) for the candidate.
 function StatusBadge({ status }) {
+  const { t } = useTranslation('reports')
   const styles = {
-    actief:     { bg: '#F0FDF4', color: '#16A34A' },
+    actief:     { bg: '#F0FDF4', color: 'var(--color-success)' },
     nietactief: { bg: '#FFF7ED', color: '#C2410C' },
-    extern:     { bg: '#EFF6FF', color: '#1D4ED8' },
+    extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
     intake:     { bg: '#FAF5FF', color: '#7C3AED' },
-    verwijderd: { bg: '#FEF2F2', color: '#DC2626' },
+    verwijderd: { bg: '#FEF2F2', color: 'var(--color-danger)' },
   }
   const key = (status || '').toLowerCase().replace(/\s+/g, '')
   const s = styles[key] || { bg: '#F9FAFB', color: '#6B7280' }
+  const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')
   return (
     <span style={{ background: s.bg, color: s.color, fontSize: 11, fontWeight: 600,
                    padding: '3px 10px', borderRadius: 999 }}>
-      {status || 'onbekend'}
+      {label}
     </span>
   )
 }
@@ -54,7 +57,7 @@ function Section({ title, children }) {
   )
 }
 
-function TagList({ items, color = '#534AB7', bg = '#EEF2FF' }) {
+function TagList({ items, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)' }) {
   if (!items?.length) return <span style={{ fontSize: 12, color: '#D1D5DB' }}>—</span>
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -72,25 +75,26 @@ function fmtDate(v) {
   if (!v) return null
   const d = new Date(v)
   if (isNaN(d.getTime())) return null
-  return d.toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 function fmtDateTime(v) {
   if (!v) return null
   const d = new Date(v)
   if (isNaN(d.getTime())) return null
-  return d.toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric',
+  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric',
                                           hour: '2-digit', minute: '2-digit' })
 }
 
 /* ── Tabs ── */
 const TABS = [
-  { id: 'algemeen',    label: 'Algemeen' },
-  { id: 'conversatie', label: 'Conversatie', icon: MessageSquare },
-  { id: 'history',     label: 'History',     icon: History },
+  { id: 'algemeen',    tKey: 'general' },
+  { id: 'conversatie', tKey: 'conversation', icon: MessageSquare },
+  { id: 'history',     tKey: 'history',      icon: History },
 ]
 
 function TabBar({ active, onChange }) {
+  const { t } = useTranslation('reports')
   return (
     <div className="flex flex-shrink-0" style={{ borderBottom: '1px solid #F3F4F6' }}>
       {TABS.map(tab => {
@@ -108,7 +112,7 @@ function TabBar({ active, onChange }) {
               cursor: 'pointer', whiteSpace: 'nowrap',
             }}>
             {tab.icon && <tab.icon size={13} />}
-            {tab.label}
+            {t(`candidateDrawer.tabs.${tab.tKey}`)}
           </button>
         )
       })}
@@ -117,31 +121,32 @@ function TabBar({ active, onChange }) {
 }
 
 function TabAlgemeen({ c, kenmerken, rates }) {
+  const { t } = useTranslation('reports')
   return (
     <div className="flex-1 overflow-auto" style={{ padding: '20px 24px' }}>
 
-      <Section title="Contact">
-        <InfoRow icon={Phone}  label="Mobiel"     value={c.mobile ?? c.phone} />
-        <InfoRow icon={Mail}   label="E-mail"     value={c.email} />
-        <InfoRow icon={MapPin} label="Woonplaats" value={c.city} />
+      <Section title={t('candidateDrawer.sections.contact')}>
+        <InfoRow icon={Phone}  label={t('candidateDrawer.fields.mobile')} value={c.mobile ?? c.phone} />
+        <InfoRow icon={Mail}   label={t('candidateDrawer.fields.email')}  value={c.email} />
+        <InfoRow icon={MapPin} label={t('candidateDrawer.fields.city')}   value={c.city} />
       </Section>
 
-      <Section title="Tijdlijn">
-        <InfoRow icon={Calendar}  label="Registratiedatum"    value={fmtDate(c.registration_date)} />
-        <InfoRow icon={Clock}     label="Laatste inlog"       value={fmtDateTime(c.last_login_at)} />
-        <InfoRow icon={Calendar}  label="Geplande dienst"     value={fmtDateTime(c.last_planned_shift)} />
-        <InfoRow icon={Briefcase} label="Laatste dienst"      value={fmtDateTime(c.last_worked_shift)} />
+      <Section title={t('candidateDrawer.sections.timeline')}>
+        <InfoRow icon={Calendar}  label={t('candidateDrawer.fields.registrationDate')} value={fmtDate(c.registration_date)} />
+        <InfoRow icon={Clock}     label={t('candidateDrawer.fields.lastLogin')}        value={fmtDateTime(c.last_login_at)} />
+        <InfoRow icon={Calendar}  label={t('candidateDrawer.fields.plannedShift')}     value={fmtDateTime(c.last_planned_shift)} />
+        <InfoRow icon={Briefcase} label={t('candidateDrawer.fields.lastShift')}        value={fmtDateTime(c.last_worked_shift)} />
         {c.end_date_employment && (
-          <InfoRow icon={Calendar} label="Einde dienstverband" value={fmtDate(c.end_date_employment)} />
+          <InfoRow icon={Calendar} label={t('candidateDrawer.fields.endEmployment')} value={fmtDate(c.end_date_employment)} />
         )}
       </Section>
 
-      <Section title="Statistieken">
+      <Section title={t('candidateDrawer.sections.stats')}>
         <div className="grid grid-cols-3 gap-3">
           {[
-            { label: 'Diensten gewerkt', value: c.number_of_times_worked ?? '—' },
-            { label: 'No-shows',         value: c.no_shows ?? '—' },
-            { label: 'Annuleringen',     value: c.cancellations ?? '—' },
+            { label: t('candidateDrawer.stats.worked'),        value: c.number_of_times_worked ?? '—' },
+            { label: t('candidateDrawer.stats.noShows'),       value: c.no_shows ?? '—' },
+            { label: t('candidateDrawer.stats.cancellations'), value: c.cancellations ?? '—' },
           ].map(stat => (
             <div key={stat.label} className="text-center rounded-xl"
               style={{ padding: '12px 8px', background: '#F9FAFB', border: '1px solid #F3F4F6' }}>
@@ -152,12 +157,12 @@ function TabAlgemeen({ c, kenmerken, rates }) {
         </div>
       </Section>
 
-      <Section title="Kenmerken">
-        <TagList items={kenmerken} color="#534AB7" bg="#EEF2FF" />
+      <Section title={t('candidateDrawer.sections.features')}>
+        <TagList items={kenmerken} color="var(--color-primary)" bg="var(--color-primary-bg)" />
       </Section>
 
       {rates.length > 0 && (
-        <Section title="Globale functie">
+        <Section title={t('candidateDrawer.sections.globalRole')}>
           <div className="overflow-hidden rounded-xl" style={{ border: '1px solid #F3F4F6' }}>
             <div style={{ padding: '10px 14px' }}>
               {rates.map((r, i) => (
@@ -177,9 +182,9 @@ function TabAlgemeen({ c, kenmerken, rates }) {
                       </div>
                       {r.is_default_step === 1 && (
                         <span style={{ fontSize: 10, fontWeight: 500, padding: '1px 6px',
-                                       borderRadius: 4, background: '#F0FDF4', color: '#16A34A',
+                                       borderRadius: 4, background: '#F0FDF4', color: 'var(--color-success)',
                                        display: 'inline-block', marginTop: 2 }}>
-                          Standaard
+                          {t('candidateDrawer.default')}
                         </span>
                       )}
                     </div>
@@ -196,6 +201,7 @@ function TabAlgemeen({ c, kenmerken, rates }) {
 }
 
 function TabConversatie({ c }) {
+  const { t } = useTranslation('reports')
   return (
     <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center"
       style={{ padding: 32 }}>
@@ -204,9 +210,9 @@ function TabConversatie({ c }) {
         <MessageSquare size={20} style={{ color: '#D1D5DB' }} />
       </div>
       <div>
-        <p className="font-medium text-gray-400" style={{ fontSize: 14 }}>Conversatie komt eraan</p>
+        <p className="font-medium text-gray-400" style={{ fontSize: 14 }}>{t('candidateDrawer.conversationComing')}</p>
         <p className="mt-1 text-gray-300" style={{ fontSize: 12 }}>
-          WhatsApp gesprekken tussen Yessy AI en {c.firstname ?? 'kandidaat'}
+          {t('candidateDrawer.conversationDesc', { name: c.firstname ?? t('candidateDrawer.candidateFallback') })}
         </p>
       </div>
     </div>
@@ -214,6 +220,7 @@ function TabConversatie({ c }) {
 }
 
 function TabHistory({ c }) {
+  const { t } = useTranslation('reports')
   return (
     <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center"
       style={{ padding: 32 }}>
@@ -222,9 +229,9 @@ function TabHistory({ c }) {
         <History size={20} style={{ color: '#D1D5DB' }} />
       </div>
       <div>
-        <p className="font-medium text-gray-400" style={{ fontSize: 14 }}>Diensthistory komt eraan</p>
+        <p className="font-medium text-gray-400" style={{ fontSize: 14 }}>{t('candidateDrawer.historyComing')}</p>
         <p className="mt-1 text-gray-300" style={{ fontSize: 12 }}>
-          Alle gewerkte diensten van {c.firstname ?? 'kandidaat'}
+          {t('candidateDrawer.historyDesc', { name: c.firstname ?? t('candidateDrawer.candidateFallback') })}
         </p>
       </div>
     </div>
@@ -233,10 +240,11 @@ function TabHistory({ c }) {
 
 /* ── Main component ── */
 export default function CandidateDetailDrawer({ candidate: c, onClose }) {
+  const { t } = useTranslation('reports')
   const [activeTab, setActiveTab] = useState('algemeen')
   if (!c) return null
 
-  const fullName = `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim() || 'Onbekend'
+  const fullName = `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim() || t('candidateDrawer.unknownName')
 
   const kenmerken = Array.isArray(c.features)
     ? c.features.map(f => f.name).filter(Boolean)
@@ -287,7 +295,7 @@ export default function CandidateDetailDrawer({ candidate: c, onClose }) {
         {/* Tabs */}
         <TabBar active={activeTab} onChange={setActiveTab} />
 
-        {/* Tab inhoud */}
+        {/* Tab content */}
         {activeTab === 'algemeen'    && <TabAlgemeen    c={c} kenmerken={kenmerken} rates={rates} />}
         {activeTab === 'conversatie' && <TabConversatie c={c} />}
         {activeTab === 'history'     && <TabHistory     c={c} />}

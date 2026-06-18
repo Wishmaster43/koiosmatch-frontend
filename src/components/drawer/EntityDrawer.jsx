@@ -1,0 +1,61 @@
+/**
+ * EntityDrawer — the generic right-hand detail panel used by every entity
+ * (candidates, customers, vacancies, tasks…). It owns only the shell: panel
+ * sizing, the header region, the tab bar and the scroll/footer areas.
+ *
+ * Everything else is config:
+ *   header: ReactNode | ({ activeTab, setActiveTab }) => ReactNode
+ *   tabs:   Array<{ id, label, badge?, autoExpand?, render: () => ReactNode }>
+ *   footer: ReactNode
+ *
+ * `autoExpand` on a tab widens the drawer while that tab is active (e.g. planning)
+ * and restores the previous width when you leave it.
+ */
+import { useState, useRef, useEffect } from 'react'
+import DrawerTabs from './DrawerTabs'
+
+export default function EntityDrawer({
+  entity, header, tabs = [], footer,
+  expanded, onToggleExpand,
+  widthCollapsed = 580, widthExpanded = 880,
+}) {
+  const [activeTab, setActiveTab] = useState(tabs[0]?.id)
+
+  // Reset to the first tab whenever a different entity is shown (adjust during render).
+  const [prevId, setPrevId] = useState(entity?.id)
+  if (entity?.id !== prevId) { setPrevId(entity?.id); setActiveTab(tabs[0]?.id) }
+
+  const active = tabs.find(t => t.id === activeTab) ?? tabs[0]
+
+  // Auto-expand for flagged tabs; restore when leaving.
+  const autoExpandedRef = useRef(false)
+  useEffect(() => {
+    if (active?.autoExpand && !expanded) { autoExpandedRef.current = true; onToggleExpand?.() }
+    else if (autoExpandedRef.current && expanded && !active?.autoExpand) { autoExpandedRef.current = false; onToggleExpand?.() }
+  }, [activeTab]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!entity) return null
+
+  return (
+    <div style={{ width: expanded ? widthExpanded : widthCollapsed, flexShrink: 0, height: '100%',
+      borderLeft: '1px solid var(--border)', background: 'var(--surface)',
+      display: 'flex', flexDirection: 'column', transition: 'width 0.2s ease', overflow: 'hidden' }}>
+
+      {/* Header region: composed header + tab bar */}
+      <div style={{ padding: '14px 16px 0', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+        {typeof header === 'function' ? header({ activeTab, setActiveTab }) : header}
+        <DrawerTabs tabs={tabs} active={activeTab} onChange={setActiveTab} />
+      </div>
+
+      {/* Scrollable tab content */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
+        <div style={{ marginBottom: 20 }}>{active?.render()}</div>
+      </div>
+
+      {/* Footer */}
+      {footer && (
+        <div style={{ padding: '8px 16px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>{footer}</div>
+      )}
+    </div>
+  )
+}

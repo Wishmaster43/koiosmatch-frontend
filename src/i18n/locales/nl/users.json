@@ -1,0 +1,34 @@
+{
+  "newUser": "Nieuwe gebruiker",
+  "firstName": "Voornaam",
+  "lastName": "Achternaam",
+  "email": "E-mailadres",
+  "password": "Wachtwoord",
+  "role": "Rol",
+  "create": "Aanmaken",
+  "creating": "Aanmaken…",
+  "createFailed": "Aanmaken mislukt.",
+  "pwPlaceholder": "Minimaal 8 tekens",
+  "changeRole": "Rol wijzigen",
+  "title": "Gebruikers",
+  "summary": "{{shown}} van {{total}} gebruikers",
+  "loading": "Gebruikers ophalen…",
+  "empty": "Geen gebruikers gevonden",
+  "noAccess": "Geen toegang tot gebruikerslijst.",
+  "loadError": "Kon gebruikers niet laden.",
+  "you": "jij",
+  "system": "systeem",
+  "filterRole": "Rol",
+  "cols": {
+    "name": "Naam",
+    "email": "E-mail",
+    "phone": "Telefoon",
+    "role": "Rol"
+  },
+  "roles": {
+    "super_admin": "Super admin",
+    "tenant_admin": "Admin",
+    "planner": "Planner",
+    "user": "Gebruiker"
+  }
+}

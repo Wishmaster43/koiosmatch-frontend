@@ -1,0 +1,203 @@
+{
+  "orders": {
+    "title": "Détails — Missions",
+    "count": "{{count}} missions",
+    "loading": "Chargement des missions…",
+    "empty": "Aucune mission trouvée",
+    "allMonths": "Tous les mois",
+    "search": "Rechercher par ID ext., réf. commande, client…",
+    "status": {
+      "open": "Ouvert",
+      "prognosis": "Prévision",
+      "completed": "Réel",
+      "in_process": "En cours",
+      "cancelled": "Annulé"
+    },
+    "cols": {
+      "extId": "ID ext.",
+      "orderRef": "Réf. commande",
+      "status": "Statut",
+      "customer": "Client",
+      "location": "Site",
+      "date": "Date",
+      "start": "Début",
+      "end": "Fin",
+      "hoursCand": "H. cand.",
+      "hoursCust": "H. client",
+      "ccCand": "CC cand.",
+      "ccCust": "CC client"
+    },
+    "filterStatus": "Statut",
+    "drawer": {
+      "title": "Détails de la mission",
+      "identification": "Identification",
+      "shiftId": "ID mission",
+      "externalId": "ID externe",
+      "scheduledId": "Scheduled ID",
+      "orderRef": "Réf. commande",
+      "planning": "Planning",
+      "date": "Date",
+      "startTime": "Heure de début",
+      "endTime": "Heure de fin",
+      "jobType": "Poste",
+      "persons": "Nombre de personnes",
+      "status": "Statut",
+      "customerLocation": "Client et site",
+      "customer": "Client",
+      "location": "Site",
+      "address": "Adresse",
+      "hours": "Heures",
+      "hoursCand": "Heures candidat",
+      "hoursCust": "Heures client",
+      "ccCand": "Centre de coûts cand.",
+      "ccCust": "Centre de coûts client",
+      "candidates": "Candidats",
+      "notes": "Notes"
+    }
+  },
+  "shiftsDrawer": {
+    "count": "{{count}} missions",
+    "loadError": "Impossible de charger les missions.",
+    "loading": "Chargement…",
+    "empty": "Aucune mission trouvée",
+    "search": "Rechercher par poste, site, réf. commande, candidat…",
+    "shownOf": "{{shown}} sur {{total}} affichés",
+    "close": "Fermer",
+    "unknown": "Inconnu",
+    "noCandidate": "Aucun candidat encore associé",
+    "hoursUnit": "{{n}} h",
+    "status": {
+      "in_process": "Prévision",
+      "completed": "Réel",
+      "open": "Aucun candidat",
+      "verwijderd": "Non pourvu",
+      "niet_factureerbaar": "Non facturable"
+    },
+    "fields": {
+      "email": "E-mail",
+      "mobile": "Mobile",
+      "scheduled": "Planifié",
+      "workedHours": "Heures travaillées",
+      "contract": "Contrat",
+      "date": "Date",
+      "persons": "Personnes",
+      "customerId": "ID client",
+      "location": "Site",
+      "place": "Lieu",
+      "orderRef": "Réf. commande",
+      "subject": "Objet",
+      "shiftIdExt": "ID mission (externe)",
+      "orderIdExt": "ID commande (externe)",
+      "rate": "Tarif",
+      "pickup": "Ramassage"
+    }
+  },
+  "charts": {
+    "hours": "Nombre d'heures",
+    "shifts": "Nombre de missions",
+    "loading": "Chargement…",
+    "perMonthUnit": "mois",
+    "perQuarterUnit": "trimestre",
+    "periodLabel": "{{years}} — par {{unit}}",
+    "filters": {
+      "period": "Période",
+      "month": "Par mois",
+      "quarter": "Par trimestre",
+      "years": "Années",
+      "months": "Mois",
+      "series": "Séries",
+      "jobType": "Poste",
+      "customer": "Client",
+      "location": "Site"
+    },
+    "series": {
+      "totaal": "Total",
+      "niet_ingevuld": "Non pourvu",
+      "geen_kandidaat": "Aucun candidat",
+      "prognose": "Prévision",
+      "werkelijk": "Réel"
+    }
+  },
+  "customersReport": {
+    "title": "Rapport clients",
+    "activeWord": "actifs",
+    "inactiveWord": "inactifs",
+    "totalWord": "au total",
+    "filterStatus": "Statut client",
+    "drill": {
+      "activeCustomers": "Clients actifs",
+      "allLocations": "Tous les sites",
+      "allDepartments": "Tous les départements",
+      "customersWithoutLocation": "Clients sans site"
+    },
+    "sub": {
+      "locations": "{{count}} sites",
+      "avgPerCustomer": "moy. {{n}} par client",
+      "avgPerLocation": "moy. {{n}} par site",
+      "notLinked": "Pas encore associé",
+      "noLocationsLinked": "Aucun site associé"
+    }
+  },
+  "locationsReport": {
+    "title": "Rapport sites",
+    "activeWord": "actifs",
+    "inactiveWord": "inactifs",
+    "totalWord": "au total",
+    "filterStatus": "Statut du site",
+    "kpi": {
+      "activeLocations": "Sites actifs",
+      "totalDepartments": "Total départements",
+      "uniqueCustomers": "Clients uniques",
+      "withoutDepartment": "Sans département"
+    },
+    "drill": {
+      "activeLocations": "Sites actifs",
+      "allDepartments": "Tous les départements",
+      "customers": "Clients",
+      "locationsWithoutDepartment": "Sites sans département"
+    },
+    "sub": {
+      "avgPerLocation": "moy. {{n}} par site",
+      "notConfigured": "Pas encore configuré",
+      "allConfigured": "Tout configuré"
+    },
+    "badge": {
+      "active": "actif",
+      "noDepartments": "Aucun département"
+    }
+  },
+  "departmentsReport": {
+    "title": "Rapport départements",
+    "count": "{{count}} départements",
+    "filterCustomer": "Client",
+    "kpi": {
+      "totalDepartments": "Total départements",
+      "uniqueLocations": "Sites uniques",
+      "uniqueCustomers": "Clients uniques",
+      "withCostCenter": "Avec centre de coûts"
+    },
+    "sub": {
+      "avgPerLocation": "moy. {{n}} par site",
+      "linkedPct": "{{pct}}% associé"
+    }
+  },
+  "dashboard": {
+    "recentRuns": "Exécutions récentes",
+    "recentConversations": "Conversations récentes",
+    "viewAll": "Tout voir →",
+    "candidates": "{{n}} candidats",
+    "stats": {
+      "openHours": "Nombre d'heures ouvertes",
+      "hoursThisMonth": "Heures ce mois-ci",
+      "occupancy": "Taux d'occupation",
+      "messagesSent": "Messages envoyés",
+      "responseRate": "Taux de réponse"
+    },
+    "statSub": {
+      "urgent": "{{n}} urgent",
+      "prevMonth": "{{pct}} mois précédent",
+      "thisMonth": "Ce mois-ci",
+      "historicAvg": "moy. {{pct}} historique"
+    }
+  }
+}

@@ -3,6 +3,7 @@
  * (active / inactive / new / needs-attention counts + a trend).
  * count() tallies candidates by status; calcAandacht() flags ones needing attention.
  */
+import { useTranslation } from 'react-i18next'
 import { AlertTriangle, UserCheck, UserX, UserPlus, TrendingUp } from 'lucide-react'
 import KpiCard from '../ui/KpiCard'
 
@@ -55,6 +56,7 @@ function calcMonthStats(candidates) {
 }
 
 export default function CandidatesKpiRow({ candidates = [], loading = false, onDrillDown }) {
+  const { t } = useTranslation('reports')
   const drill = (label, filterFn) => {
     if (!onDrillDown) return undefined
     return () => onDrillDown(label, filterFn(candidates))
@@ -64,68 +66,68 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
   const actiefTotal    = count(candidates, 'actief')
   const geplandItems   = calcGepland(candidates)
   const { currentMonthCount, avg, delta } = calcMonthStats(candidates)
-  const currentMonthLabel = new Date().toLocaleString('nl-NL', { month: 'long' })
+  const currentMonthLabel = new Date().toLocaleString(undefined, { month: 'long' })
 
   return (
     <div className="grid gap-4 mb-6"
       style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))' }}>
 
-      {/* Aandachtskandidaten: actief + nieuw (<30d) + niet gepland */}
+      {/* Candidates needing attention: active + new (<30d) + not planned */}
       <KpiCard
-        label="Aandachtskandidaten"
-        note="Actief · nieuw · niet gepland"
+        label={t('kpiRow.attention')}
+        note={t('kpiRow.attentionNote')}
         value={aandachtItems.length}
         icon={AlertTriangle}
         iconBg="#FFF7ED"
-        iconColor="#D97706"
+        iconColor="var(--color-warning)"
         loading={loading}
-        onClick={drill('Aandachtskandidaten', calcAandacht)}
+        onClick={drill(t('kpiRow.attention'), calcAandacht)}
       />
 
-      {/* Actieve kandidaten + hoeveel gepland */}
+      {/* Active candidates + how many planned */}
       <KpiCard
-        label="Actieve kandidaten"
-        note={`${geplandItems.length} / ${actiefTotal} gepland`}
+        label={t('kpiRow.active')}
+        note={t('kpiRow.activeNote', { planned: geplandItems.length, total: actiefTotal })}
         value={actiefTotal}
         icon={UserCheck}
         iconBg="#F0FDF4"
-        iconColor="#16A34A"
+        iconColor="var(--color-success)"
         loading={loading}
-        onClick={drill('Actief', c => c.filter(x => (x.status || '').toLowerCase() === 'actief'))}
+        onClick={drill(t('kpiRow.drillActive'), c => c.filter(x => (x.status || '').toLowerCase() === 'actief'))}
       />
 
-      {/* Niet actief */}
+      {/* Inactive */}
       <KpiCard
-        label="Niet actieve kandidaten"
+        label={t('kpiRow.inactive')}
         value={count(candidates, 'nietactief')}
         icon={UserX}
         iconBg="#FFF7ED"
         iconColor="#C2410C"
         loading={loading}
-        onClick={drill('Niet actief', c => c.filter(x => (x.status || '').toLowerCase() === 'nietactief'))}
+        onClick={drill(t('kpiRow.drillInactive'), c => c.filter(x => (x.status || '').toLowerCase() === 'nietactief'))}
       />
 
       {/* Intake */}
       <KpiCard
-        label="Intake kandidaten"
+        label={t('kpiRow.intake')}
         value={count(candidates, 'intake')}
         icon={UserPlus}
         iconBg="#FAF5FF"
         iconColor="#7C3AED"
         loading={loading}
-        onClick={drill('Intake', c => c.filter(x => (x.status || '').toLowerCase() === 'intake'))}
+        onClick={drill(t('kpiRow.drillIntake'), c => c.filter(x => (x.status || '').toLowerCase() === 'intake'))}
       />
 
-      {/* Nieuw deze maand vs gemiddelde */}
+      {/* New this month vs average */}
       <KpiCard
-        label={`Nieuw ${currentMonthLabel} (gem. ${avg}/mnd)`}
+        label={t('kpiRow.newThisMonth', { month: currentMonthLabel, avg })}
         value={currentMonthCount}
         delta={delta}
         icon={TrendingUp}
         iconBg="#F0F7FF"
         iconColor="#3B8FD4"
         loading={loading}
-        onClick={drill(`Nieuw in ${currentMonthLabel}`, c => c.filter(x => {
+        onClick={drill(t('kpiRow.drillNewIn', { month: currentMonthLabel }), c => c.filter(x => {
           if (!x.registration_date) return false
           const d = new Date(x.registration_date)
           return d.getMonth() === new Date().getMonth() && d.getFullYear() === new Date().getFullYear()

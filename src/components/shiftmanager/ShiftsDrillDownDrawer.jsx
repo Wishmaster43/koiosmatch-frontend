@@ -5,23 +5,25 @@
  */
 import { X, Search, Clock, MapPin, Briefcase, User, Hash, Building2, CalendarCheck, Timer } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
 
-// Maps a shift status code → display label + badge colors.
+// Shift status → badge colours. Label = t('shiftsDrawer.status.<key>').
 const STATUS_META = {
-  in_process:         { label: 'Prognose',          bg: '#EFF6FF', color: '#2563EB' },
-  completed:          { label: 'Werkelijk',          bg: '#F0FDF4', color: '#16A34A' },
-  open:               { label: 'Geen kandidaat',     bg: '#FFF7ED', color: '#C2410C' },
-  verwijderd:         { label: 'Niet ingevuld',      bg: '#FEF2F2', color: '#DC2626' },
-  niet_factureerbaar: { label: 'Niet factureerbaar', bg: '#F9FAFB', color: '#6B7280' },
+  in_process:         { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
+  completed:          { bg: '#F0FDF4', color: 'var(--color-success)' },
+  open:               { bg: '#FFF7ED', color: '#C2410C' },
+  verwijderd:         { bg: '#FEF2F2', color: 'var(--color-danger)' },
+  niet_factureerbaar: { bg: '#F9FAFB', color: '#6B7280' },
 }
 
 function Badge({ status }) {
-  const s = STATUS_META[status] ?? { label: status ?? 'onbekend', bg: '#F9FAFB', color: '#6B7280' }
+  const { t } = useTranslation('shiftmanager')
+  const s = STATUS_META[status] ?? { bg: '#F9FAFB', color: '#6B7280' }
   return (
     <span style={{ background: s.bg, color: s.color, borderRadius: 999,
                    padding: '2px 8px', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>
-      {s.label}
+      {status ? t(`shiftsDrawer.status.${status}`, { defaultValue: status }) : t('shiftsDrawer.unknown')}
     </span>
   )
 }
@@ -42,22 +44,23 @@ function Row({ icon: Icon, label, value, mono }) {
 
 function formatDateTime(iso) {
   if (!iso) return null
-  return new Date(iso).toLocaleString('nl-NL', {
+  return new Date(iso).toLocaleString(undefined, {
     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
   })
 }
 
 function formatTime(iso) {
   if (!iso) return null
-  return new Date(iso).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
 }
 
 function formatDate(iso) {
   if (!iso) return null
-  return new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function CandidateBlock({ invite }) {
+  const { t } = useTranslation('shiftmanager')
   const c    = invite.candidate
   const name = c ? `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() : null
   const ini  = c ? `${c.first_name?.[0] ?? ''}${c.last_name?.[0] ?? ''}`.toUpperCase() : '?'
@@ -73,21 +76,22 @@ function CandidateBlock({ invite }) {
           {ini}
         </div>
         <span style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>
-          {name || 'Onbekend'}
+          {name || t('shiftsDrawer.unknown')}
         </span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 31 }}>
-        {c?.email    && <Row icon={User}         label="E-mail"        value={c.email} />}
-        {c?.mobile   && <Row icon={User}         label="Mobiel"        value={c.mobile} />}
-        {invite.scheduled_at     && <Row icon={CalendarCheck} label="Ingepland"     value={formatDateTime(invite.scheduled_at)} />}
-        {invite.total_time_worked && <Row icon={Timer}        label="Gewerkte uren" value={`${invite.total_time_worked} uur`} />}
-        {invite.contract_type    && <Row icon={Hash}          label="Contract"      value={invite.contract_type} />}
+        {c?.email    && <Row icon={User}         label={t('shiftsDrawer.fields.email')}       value={c.email} />}
+        {c?.mobile   && <Row icon={User}         label={t('shiftsDrawer.fields.mobile')}      value={c.mobile} />}
+        {invite.scheduled_at     && <Row icon={CalendarCheck} label={t('shiftsDrawer.fields.scheduled')}   value={formatDateTime(invite.scheduled_at)} />}
+        {invite.total_time_worked && <Row icon={Timer}        label={t('shiftsDrawer.fields.workedHours')} value={t('shiftsDrawer.hoursUnit', { n: invite.total_time_worked })} />}
+        {invite.contract_type    && <Row icon={Hash}          label={t('shiftsDrawer.fields.contract')}    value={invite.contract_type} />}
       </div>
     </div>
   )
 }
 
 export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
+  const { t } = useTranslation('shiftmanager')
   const [search,  setSearch]  = useState('')
   const [shifts,  setShifts]  = useState([])
   const [loading, setLoading] = useState(false)
@@ -104,7 +108,7 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
         const data = res.data?.data ?? res.data ?? []
         setShifts(Array.isArray(data) ? data : [])
       })
-      .catch(() => active && setError('Kon diensten niet laden.'))
+      .catch(() => active && setError(t('shiftsDrawer.loadError')))
       .finally(() => active && setLoading(false))
     return () => { active = false }
   }, [fetchUrl])
@@ -136,7 +140,7 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
           <div>
             <div style={{ fontWeight: 600, fontSize: 15, color: '#111827' }}>{title}</div>
             <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>
-              {loading ? 'Laden…' : `${shifts.length} diensten`}
+              {loading ? t('shiftsDrawer.loading') : t('shiftsDrawer.count', { count: shifts.length })}
             </div>
           </div>
           <button onClick={onClose}
@@ -149,31 +153,31 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
           </button>
         </div>
 
-        {/* Zoekbalk */}
+        {/* Search bar */}
         <div style={{ flexShrink: 0, padding: '8px 14px', borderBottom: '1px solid #F9FAFB' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px',
                         background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 7 }}>
             <Search size={13} color="#9CA3AF" />
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Zoek op functie, locatie, order-ref, kandidaat…"
+              placeholder={t('shiftsDrawer.search')}
               style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none',
                        fontSize: 12, color: '#374151' }} />
           </div>
         </div>
 
-        {/* Lijst */}
+        {/* List */}
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {loading && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          height: 120, fontSize: 13, color: '#9CA3AF' }}>Laden…</div>
+                          height: 120, fontSize: 13, color: '#9CA3AF' }}>{t('shiftsDrawer.loading')}</div>
           )}
           {error && !loading && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          height: 120, fontSize: 13, color: '#EF4444' }}>{error}</div>
+                          height: 120, fontSize: 13, color: 'var(--color-danger)' }}>{error}</div>
           )}
           {!loading && !error && filtered.length === 0 && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          height: 120, fontSize: 13, color: '#9CA3AF' }}>Geen diensten gevonden</div>
+                          height: 120, fontSize: 13, color: '#9CA3AF' }}>{t('shiftsDrawer.empty')}</div>
           )}
 
           {!loading && !error && filtered.map((shift, i) => {
@@ -190,11 +194,11 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
                 onMouseEnter={e => (e.currentTarget.style.background = '#FAFAFA')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'none')}
               >
-                {/* Regel 1: functie + status */}
+                {/* Row 1: position + status */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                   <Briefcase size={13} color="#9CA3AF" style={{ flexShrink: 0 }} />
                   <span style={{ fontWeight: 600, fontSize: 13, color: '#111827', flex: 1 }}>
-                    {shift.job_type ?? 'Onbekend'}
+                    {shift.job_type ?? t('shiftsDrawer.unknown')}
                   </span>
                   <Badge status={shift.own_status} />
                 </div>
@@ -202,51 +206,51 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
                 {/* Details grid */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 21 }}>
 
-                  {/* Datum & tijd */}
-                  <Row icon={Clock} label="Datum"
+                  {/* Date & time */}
+                  <Row icon={Clock} label={t('shiftsDrawer.fields.date')}
                     value={date ? `${date}  ${start ?? ''}${end ? ` – ${end}` : ''}` : null} />
 
-                  {/* Personen */}
+                  {/* People */}
                   {shift.number_persons > 1 &&
-                    <Row icon={User} label="Personen" value={`${shift.number_persons}×`} />}
+                    <Row icon={User} label={t('shiftsDrawer.fields.persons')} value={`${shift.number_persons}×`} />}
 
-                  {/* Klant */}
+                  {/* Customer */}
                   {loc?.customer_external_id &&
-                    <Row icon={Building2} label="Klant-ID" value={loc.customer_external_id} mono />}
+                    <Row icon={Building2} label={t('shiftsDrawer.fields.customerId')} value={loc.customer_external_id} mono />}
 
-                  {/* Locatie */}
+                  {/* Location */}
                   {loc?.name &&
-                    <Row icon={MapPin} label="Locatie" value={loc.name} />}
+                    <Row icon={MapPin} label={t('shiftsDrawer.fields.location')} value={loc.name} />}
 
-                  {/* Adres */}
+                  {/* Address */}
                   {shift.order?.location_place &&
-                    <Row icon={MapPin} label="Plaats"
+                    <Row icon={MapPin} label={t('shiftsDrawer.fields.place')}
                       value={[shift.order.location_street, shift.order.location_postal_code,
                               shift.order.location_place].filter(Boolean).join(', ')} />}
 
-                  {/* Order-info */}
-                  {shift.order?.order_ref  && <Row icon={Hash} label="Order-ref"  value={shift.order.order_ref} />}
-                  {shift.order?.subject    && <Row icon={Hash} label="Onderwerp"  value={shift.order.subject} />}
+                  {/* Order info */}
+                  {shift.order?.order_ref  && <Row icon={Hash} label={t('shiftsDrawer.fields.orderRef')}  value={shift.order.order_ref} />}
+                  {shift.order?.subject    && <Row icon={Hash} label={t('shiftsDrawer.fields.subject')}   value={shift.order.subject} />}
 
                   {/* IDs */}
-                  {shift.external_id       && <Row icon={Hash} label="Shift-ID (extern)"  value={shift.external_id} mono />}
-                  {shift.order_external_id && <Row icon={Hash} label="Order-ID (extern)"  value={shift.order_external_id} mono />}
+                  {shift.external_id       && <Row icon={Hash} label={t('shiftsDrawer.fields.shiftIdExt')}  value={shift.external_id} mono />}
+                  {shift.order_external_id && <Row icon={Hash} label={t('shiftsDrawer.fields.orderIdExt')}  value={shift.order_external_id} mono />}
 
-                  {/* Tarief */}
+                  {/* Rate */}
                   {shift.customer_rate &&
-                    <Row icon={Timer} label="Tarief" value={`€ ${shift.customer_rate}`} />}
+                    <Row icon={Timer} label={t('shiftsDrawer.fields.rate')} value={`€ ${shift.customer_rate}`} />}
 
-                  {/* Ophaallocatie */}
+                  {/* Pickup location */}
                   {shift.pickup_place &&
-                    <Row icon={MapPin} label="Ophaal" value={shift.pickup_place} />}
+                    <Row icon={MapPin} label={t('shiftsDrawer.fields.pickup')} value={shift.pickup_place} />}
                 </div>
 
-                {/* Kandidaten — alleen bij prognose / werkelijk */}
+                {/* Candidates — only for forecast / actual */}
                 {planned && (
                   <div style={{ marginTop: 8, paddingLeft: 21 }}>
                     {invites.length === 0 ? (
                       <div style={{ fontSize: 11, color: '#9CA3AF', fontStyle: 'italic' }}>
-                        Nog geen kandidaat gekoppeld
+                        {t('shiftsDrawer.noCandidate')}
                       </div>
                     ) : (
                       invites.map((inv, j) => <CandidateBlock key={inv.id ?? j} invite={inv} />)
@@ -263,12 +267,12 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
                       padding: '8px 16px', borderTop: '1px solid #F3F4F6', background: '#FAFAFA',
                       flexShrink: 0 }}>
           <span style={{ fontSize: 11, color: '#9CA3AF' }}>
-            {loading ? '…' : `${filtered.length} van ${shifts.length} getoond`}
+            {loading ? '…' : t('shiftsDrawer.shownOf', { shown: filtered.length, total: shifts.length })}
           </span>
           <button onClick={onClose}
             style={{ fontSize: 12, borderRadius: 6, padding: '4px 12px',
                      background: 'none', border: '1px solid #E5E7EB', cursor: 'pointer', color: '#6B7280' }}>
-            Sluiten
+            {t('shiftsDrawer.close')}
           </button>
         </div>
       </div>

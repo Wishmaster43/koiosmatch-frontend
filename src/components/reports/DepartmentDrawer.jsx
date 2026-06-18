@@ -2,6 +2,7 @@
  * DepartmentDrawer — slide-in panel with one department's details (customer,
  * location, codes). Opened from DepartmentsTable. InfoRow = one labeled detail row.
  */
+import { useTranslation } from 'react-i18next'
 import { X, Building2, MapPin, Hash, Layers } from 'lucide-react'
 
 // One labeled row of department info (hidden when value is empty).
@@ -18,6 +19,7 @@ function InfoRow({ icon: Icon, label, value }) {
 }
 
 export default function DepartmentDrawer({ department, onClose }) {
+  const { t } = useTranslation('reports')
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
@@ -59,20 +61,20 @@ export default function DepartmentDrawer({ department, onClose }) {
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                         letterSpacing: '0.05em', marginBottom: 8 }}>
-            Afdelingsgegevens
+            {t('departmentDrawer.info')}
           </div>
 
-          <InfoRow icon={Layers}    label="Afdelingsnaam"   value={department.name} />
-          <InfoRow icon={Hash}      label="Kostenplaats"    value={department.cost_center} />
-          <InfoRow icon={Hash}      label="Extern ID"       value={department.external_id} />
-          <InfoRow icon={MapPin}    label="Locatie"         value={department.location_name} />
-          <InfoRow icon={Building2} label="Klant"           value={department.customer_name} />
+          <InfoRow icon={Layers}    label={t('departmentDrawer.name')} value={department.name} />
+          <InfoRow icon={Hash}      label={t('dr.costCenter')}         value={department.cost_center} />
+          <InfoRow icon={Hash}      label={t('dr.externalId')}         value={department.external_id} />
+          <InfoRow icon={MapPin}    label={t('dr.location')}           value={department.location_name} />
+          <InfoRow icon={Building2} label={t('dr.customer')}           value={department.customer_name} />
 
           {department.remarks && (
             <div style={{ marginTop: 16 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                             letterSpacing: '0.05em', marginBottom: 8 }}>
-                Opmerkingen
+                {t('dr.remarks')}
               </div>
               <div style={{ fontSize: 12, color: '#374151', background: '#F9FAFB', borderRadius: 8,
                             padding: '10px 12px', lineHeight: 1.6 }}>

@@ -1,0 +1,653 @@
+{
+  "shell": {
+    "title": "Instellingen",
+    "empty": "Geen instellingen beschikbaar voor jouw rol."
+  },
+  "common": {
+    "save": "Opslaan",
+    "saving": "Opslaan…",
+    "saved": "Opgeslagen",
+    "loading": "Instellingen ophalen…",
+    "upload": "Uploaden",
+    "remove": "Verwijderen",
+    "cancel": "Annuleren",
+    "loadingShort": "Laden…",
+    "copied": "Gekopieerd!",
+    "back": "Terug",
+    "next": "Volgende"
+  },
+  "groups": {
+    "general": "Algemeen",
+    "company": "Bedrijf",
+    "personalisation": "Personalisatie",
+    "views": "Weergave",
+    "notifications": "Notificaties",
+    "communication": "Communicatie",
+    "integrations": "Integraties en API",
+    "billing": "Facturering",
+    "administration": "Beheer"
+  },
+  "nav": {
+    "kpis": "KPI's",
+    "display": "Weergave",
+    "branding": "Huisstijl",
+    "security": "Beveiliging",
+    "company": "Algemeen",
+    "locations": "Locaties",
+    "memory": "Geheugen",
+    "phases": "Fasen",
+    "candidate_status": "Kandidaatstatus",
+    "vacancy": "Vacature",
+    "rejection": "Afwijsredenen",
+    "cv_template": "CV-sjabloon",
+    "view_customers": "Klanten",
+    "view_planning": "Planning",
+    "view_sales": "Sales",
+    "view_candidates": "Kandidaten",
+    "notif_sollicitaties": "Sollicitaties",
+    "notif_vacatures": "Vacatures",
+    "notif_facturering": "Facturering",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp",
+    "appstore": "App store",
+    "apikeys": "API-keys",
+    "webhooks": "Webhooks",
+    "importeren": "Importeren",
+    "billing_plans": "Planbeheer",
+    "billing_pay": "Betaalmethoden",
+    "billing_auto": "Automatisch opwaarderen",
+    "billing_usage": "Gebruik",
+    "billing_invoices": "Facturen",
+    "modules": "Modules",
+    "apps": "Apps (connectors)",
+    "roles": "Rollen & Rechten",
+    "users": "Gebruikersbeheer",
+    "sync": "Synchronisatie",
+    "audit": "Audit log"
+  },
+  "kpis": {
+    "title": "KPI-instellingen",
+    "subtitle": "Streefwaarden voor dashboards en rapportages",
+    "fields": {
+      "new_candidates_target": {
+        "label": "Doel nieuwe kandidaten / maand",
+        "description": "Maandelijks streefgetal voor nieuwe inschrijvingen",
+        "unit": "kandidaten"
+      },
+      "churn_warning_threshold": {
+        "label": "Uitstroom waarschuwingsgrens",
+        "description": "Percentage uitstroom waarbij een waarschuwing getoond wordt",
+        "unit": "%"
+      },
+      "avg_candidates_window": {
+        "label": "Gemiddelde berekeningsperiode",
+        "description": "Aantal maanden voor berekening van het voortschrijdend gemiddelde",
+        "unit": "maanden"
+      },
+      "occupancy_target": {
+        "label": "Bezettingsgraad doel",
+        "description": "Streefwaarde voor bezettingsgraad",
+        "unit": "%"
+      },
+      "response_rate_target": {
+        "label": "Response rate doel",
+        "description": "Streefwaarde voor kandidaat response op berichten",
+        "unit": "%"
+      }
+    }
+  },
+  "display": {
+    "title": "Weergave-instellingen",
+    "subtitle": "Limieten en standaardwaarden voor tabellen en grafieken",
+    "fields": {
+      "candidates_per_page": {
+        "label": "Kandidaten per API-aanroep",
+        "description": "Maximaal aantal kandidaten dat in één keer wordt opgehaald",
+        "unit": "records"
+      },
+      "top_cities_n": {
+        "label": "Top N woonplaatsen",
+        "description": "Aantal woonplaatsen getoond in de woonplaatsen-grafiek",
+        "unit": "steden"
+      },
+      "shifts_detail_limit": {
+        "label": "Diensten detail limiet",
+        "description": "Maximaal aantal diensten in het detailoverzicht",
+        "unit": "records"
+      },
+      "activity_log_limit": {
+        "label": "Audit log entries",
+        "description": "Maximaal aantal audit log entries dat wordt opgehaald",
+        "unit": "entries"
+      }
+    }
+  },
+  "brand": {
+    "title": "Huisstijl",
+    "subtitle": "Logo, naam en primaire kleur voor dit platform",
+    "companyName": "Bedrijfsnaam",
+    "companyNameHint": "Wordt getoond in de navigatiebalk en e-mails",
+    "companyNamePlaceholder": "Bijv. MijnBedrijf B.V.",
+    "primaryColor": "Primaire kleur",
+    "primaryColorHint": "Wordt gebruikt voor knoppen, links en actieve menu-items",
+    "preview": "Voorbeeld:",
+    "buttonPreview": "Knop voorbeeld",
+    "linkPreview": "Link voorbeeld",
+    "logo": "Logo",
+    "logoHint": "PNG of SVG, max 2 MB — wordt getoond in de navigatiebalk",
+    "noLogo": "Geen logo"
+  },
+  "company": {
+    "title": "Bedrijf",
+    "subtitle": "Beheer je bedrijfsgegevens en voorkeuren.",
+    "managedUnder": "Bedrijfsnaam en logo beheer je onder Algemeen → Huisstijl.",
+    "banner": "Bedrijfsbanner",
+    "industry": "Industrie",
+    "country": "Land",
+    "address1": "Adresregel 1",
+    "address1Placeholder": "Straat en huisnummer",
+    "address2": "Adresregel 2 (optioneel)",
+    "postcode": "Postcode",
+    "city": "Plaats",
+    "cityPlaceholder": "Stad",
+    "province": "Provincie",
+    "language": "Taal",
+    "currency": "Valuta",
+    "timezone": "Tijdzone"
+  },
+  "locations": {
+    "title": "Locaties",
+    "subtitle": "Beheer al je kantoren en locaties op één plek.",
+    "create": "Locatie aanmaken",
+    "colName": "Naam",
+    "colAddress": "Adres",
+    "colCreated": "Gemaakt op",
+    "empty": "Nog geen locaties.",
+    "prev": "Vorige",
+    "next": "Volgende",
+    "nameLabel": "Naam",
+    "namePlaceholder": "Locatienaam",
+    "addressLabel": "Adres",
+    "addressPlaceholder": "Volledig adres",
+    "createBtn": "Aanmaken"
+  },
+  "memory": {
+    "title": "Geheugen",
+    "subtitle": "Sla notities en context op die door het hele systeem beschikbaar zijn.",
+    "placeholder": "Voeg hier notities, context of instructies toe…"
+  },
+  "statusList": {
+    "nameLabel": "Naam",
+    "namePlaceholder": "Naam",
+    "colorLabel": "Kleur",
+    "addBtn": "Toevoegen",
+    "confirmDelete": "Weet je zeker dat je \"{{name}}\" wilt verwijderen?"
+  },
+  "phases": {
+    "title": "Fasen",
+    "subtitle": "Beheer de fasen van je workflow en welke acties er in elke fase beschikbaar zijn.",
+    "add": "Fase toevoegen"
+  },
+  "candidateStatus": {
+    "title": "Kandidaatstatus",
+    "subtitle": "Beheer de status van je kandidaten en beheer hun beschikbaarheid.",
+    "add": "Status toevoegen"
+  },
+  "lookups": {
+    "title": "Kandidaat-lookups",
+    "subtitle": "Beheer de contractvormen, funnelfasen en statussen (labels, kleuren en volgorde).",
+    "add": "Toevoegen",
+    "edit": "Bewerken",
+    "empty": "Nog niets ingesteld.",
+    "labelField": "Label",
+    "labelPlaceholder": "Weergavenaam",
+    "valueField": "Slug (waarde)",
+    "valueHint": "Stabiele sleutel; leeg laten genereert er een uit het label.",
+    "valueImmutable": "De slug kan na aanmaken niet meer gewijzigd worden.",
+    "colorField": "Kleur",
+    "confirmDelete": "\"{{name}}\" verwijderen? Als deze in gebruik is, wordt hij gearchiveerd.",
+    "candidate_types": {
+      "title": "Contractvormen",
+      "subtitle": "Meerdere per kandidaat (bijv. Oproepkracht, ZZP, Payroll)."
+    },
+    "funnel_types": {
+      "title": "Funnelfasen",
+      "subtitle": "Eén per kandidaat (Prospect → Intake → Pool → Alumni)."
+    },
+    "statuses": {
+      "title": "Statussen",
+      "subtitle": "Operationele status met kleur (Actief, Niet actief, Ziek …)."
+    }
+  },
+  "vacancy": {
+    "title": "Vacature",
+    "subtitle": "Beheer vacaturestatussen en vooraf ingestelde aangepaste veldnamen.",
+    "add": "Status toevoegen",
+    "customFields": "Aangepaste velden",
+    "customFieldsHint": "Stel veldnamen in die op elke vacature verschijnen om aangepaste velden makkelijker in te vullen.",
+    "fieldPlaceholder": "Veldnaam…"
+  },
+  "rejection": {
+    "title": "Afwijsredenen",
+    "subtitle": "Beheer de redenen voor de afwijzing van je sollicitaties.",
+    "add": "Reden toevoegen"
+  },
+  "cvTemplate": {
+    "title": "CV-sjabloon",
+    "subtitle": "Stel het CV-ontwerp in dat gegenereerd wordt vanuit kandidaatprofielen.",
+    "pdfPreview": "PDF voorbeeld",
+    "generating": "Genereren…",
+    "reset": "Reset",
+    "accentColors": "Accentkleuren",
+    "accentColorsHint": "Kleur 1 = sidebar & balk. Kleur 2 = sectietitels & links.",
+    "color1": "Kleur 1",
+    "color2": "Kleur 2",
+    "sections": "Secties",
+    "sectionsHint": "Stel in welke secties zichtbaar zijn en in welke volgorde.",
+    "preview": "Voorvertoning",
+    "previewHint": "A4 — met voorbeeldkandidaat"
+  },
+  "security": {
+    "twoFactor": "Twee-factor verificatie (2FA)",
+    "statusOn": "Ingeschakeld — je account is extra beveiligd",
+    "statusOff": "Uitgeschakeld — voeg een extra beveiligingslaag toe",
+    "enable": "Inschakelen",
+    "disable": "Uitschakelen",
+    "enabledTitle": "Twee-factor verificatie geactiveerd",
+    "enabledDesc": "Sla je herstelcodes op. Ze zijn slechts één keer bruikbaar en worden niet opnieuw getoond.",
+    "recoveryCodes": "Herstelcodes",
+    "copy": "Kopiëren",
+    "copied": "Gekopieerd!",
+    "done": "Klaar",
+    "back": "Terug",
+    "scanTitle": "Scan de QR-code",
+    "scanDesc": "Open je authenticator app (Google Authenticator, Microsoft Authenticator, Bitwarden, etc.) en scan de onderstaande QR-code.",
+    "manualEntry": "Handmatige invoer",
+    "codeLabel": "Verificatiecode uit de app",
+    "working": "Bezig…",
+    "confirmEnable": "Bevestigen en activeren",
+    "disableTitle": "Twee-factor verificatie uitschakelen",
+    "disableDesc": "Voer je huidige verificatiecode in om 2FA uit te schakelen.",
+    "disableBtn": "2FA uitschakelen",
+    "supportedApps": "Ondersteunde apps",
+    "errSetup": "Kon MFA setup niet starten.",
+    "errInvalidRetry": "Ongeldige code. Probeer opnieuw.",
+    "errInvalid": "Ongeldige code."
+  },
+  "email": {
+    "title": "E-mail instellingen",
+    "subtitle": "Verzendadres en verbinding voor de e-mailmodule",
+    "testConnection": "Test verbinding",
+    "testSent": "Testmail verstuurd",
+    "testFailed": "Verbinding mislukt",
+    "provider": "E-mail provider",
+    "gmailDesc": "Verbind via OAuth2 of App-wachtwoord",
+    "officeDesc": "Verbind via Microsoft OAuth2 of SMTP",
+    "manualLabel": "Handmatig SMTP",
+    "manualDesc": "Eigen mailserver of provider",
+    "oauthWarningTitle": "Backend vereist:",
+    "oauthWarning": "OAuth2-koppeling voor {{provider}} moet worden geconfigureerd via de backend. Sla het verzendadres hieronder op; de daadwerkelijke OAuth-verbinding wordt ingesteld door de beheerder.",
+    "senderDetails": "Afzendergegevens",
+    "senderName": "Afzendernaam",
+    "senderNamePlaceholder": "Bijv. KoiosMatch",
+    "fromAddress": "Verzendadres (from)",
+    "fromPlaceholder": "noreply@jouwbedrijf.nl",
+    "smtpConfig": "SMTP configuratie",
+    "smtpServer": "SMTP server",
+    "smtpServerPlaceholder": "smtp.jouwbedrijf.nl",
+    "port": "Poort",
+    "username": "Gebruikersnaam",
+    "usernamePlaceholder": "gebruiker@jouwbedrijf.nl",
+    "password": "Wachtwoord",
+    "passwordSet": "✓ ingesteld",
+    "passwordKeepPlaceholder": "Laat leeg om huidig wachtwoord te behouden",
+    "passwordPlaceholder": "SMTP wachtwoord",
+    "security": "Beveiliging",
+    "secTls": "STARTTLS (poort 587)",
+    "secSsl": "SSL/TLS (poort 465)",
+    "secNone": "Geen (niet aanbevolen)"
+  },
+  "appStore": {
+    "title": "App store",
+    "desc": "Beheer en installeer apps en integraties."
+  },
+  "notifications": {
+    "email": {
+      "label": "E-mail notificaties",
+      "desc": "Ontvang meldingen via e-mail"
+    },
+    "inApp": {
+      "label": "In-app notificaties",
+      "desc": "Ontvang meldingen binnen het platform"
+    },
+    "context": {
+      "sollicitaties": {
+        "title": "Sollicitaties",
+        "desc": "Meldingen over nieuwe en bijgewerkte sollicitaties."
+      },
+      "vacatures": {
+        "title": "Vacatures",
+        "desc": "Meldingen over vacature-updates en statuswijzigingen."
+      },
+      "facturering": {
+        "title": "Facturering",
+        "desc": "Meldingen over facturen, betalingen en abonnementen."
+      }
+    }
+  },
+  "billing": {
+    "plans": {
+      "title": "Planbeheer",
+      "desc": "Beheer je abonnement en plan."
+    },
+    "pay": {
+      "title": "Betaalmethoden",
+      "desc": "Voeg betaalmethoden toe en beheer ze."
+    },
+    "auto": {
+      "title": "Automatisch opwaarderen",
+      "desc": "Stel automatisch opwaarderen in."
+    },
+    "usage": {
+      "title": "Gebruik",
+      "desc": "Bekijk je verbruiksoverzicht."
+    },
+    "invoices": {
+      "title": "Facturen",
+      "desc": "Bekijk en download je facturen."
+    }
+  },
+  "apiKeys": {
+    "title": "API-keys",
+    "subtitle": "Beheer API-sleutels voor externe koppelingen.",
+    "newKeyBanner": "Nieuwe API-key — kopieer deze nu, hij wordt niet meer getoond.",
+    "close": "Sluiten",
+    "namePlaceholder": "Naam voor de API-key…",
+    "create": "Aanmaken",
+    "empty": "Nog geen API-keys aangemaakt.",
+    "created": "Aangemaakt",
+    "used": "Gebruikt",
+    "revokeConfirm": "API-key \"{{name}}\" intrekken?",
+    "revoke": "Intrekken"
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "subtitle": "Maak inkomende webhook-URLs aan om workflows te triggeren vanuit externe systemen.",
+    "newWebhook": "Nieuwe webhook",
+    "namePlaceholder": "Naam (bijv. Inkomende WhatsApp)",
+    "descPlaceholder": "Omschrijving (optioneel)",
+    "create": "Aanmaken",
+    "creating": "Aanmaken...",
+    "empty": "Nog geen webhooks aangemaakt.",
+    "lastTriggered": "Laatst",
+    "removeConfirm": "Webhook verwijderen?",
+    "copyUrl": "Kopieer URL"
+  },
+  "sync": {
+    "title": "Synchronisatie",
+    "subtitle": "Handmatig data ophalen · max 1x per {{secs}}s per item",
+    "sessionLog": "Sessie log",
+    "busy": "Bezig…",
+    "comingSoon": "Binnenkort",
+    "viaCustomers": "Via klanten sync",
+    "noAccess": "Geen toegang",
+    "syncBtn": "Sync",
+    "cooldown": "Cooldown",
+    "noPermission": "Je hebt geen toestemming om te synchroniseren",
+    "succeeded": "Geslaagd",
+    "failed": "Mislukt",
+    "tooManyRequests": "Te veel verzoeken — wacht {{secs}}s",
+    "items": {
+      "candidates": {
+        "label": "Kandidaten",
+        "desc": "Kandidatendata vanuit het planningssysteem"
+      },
+      "customers": {
+        "label": "Klanten",
+        "desc": "Klanten vanuit het planningssysteem"
+      },
+      "locations": {
+        "label": "Locaties",
+        "desc": "Locaties worden meegesynchroniseerd via klanten"
+      },
+      "departments": {
+        "label": "Afdelingen",
+        "desc": "Afdelingen worden meegesynchroniseerd via klanten"
+      },
+      "contacts": {
+        "label": "Contactpersonen",
+        "desc": "Contactpersonen per klant synchroniseren"
+      },
+      "orders": {
+        "label": "Diensten",
+        "desc": "Dienstenoverzicht vanuit het planningssysteem"
+      },
+      "shifts": {
+        "label": "Shifts",
+        "desc": "Shift details vanuit het planningssysteem"
+      },
+      "invites": {
+        "label": "Inplanningen",
+        "desc": "Kandidaatinplanningen per shift"
+      }
+    }
+  },
+  "import": {
+    "types": {
+      "candidates": "Kandidaten",
+      "cvs": "CV's",
+      "vacancies": "Vacatures"
+    },
+    "title": "{{type}} importeren",
+    "subtitle": "Importeer je bestaande {{type}}-gegevens met een CSV-bestand.",
+    "fileTitle": "Importeer je bestand",
+    "step": "Huidige stap: {{step}} / {{total}}",
+    "dropHere": "Sleep je bestanden hierheen",
+    "selectCsv": "Selecteer CSV",
+    "fileSelected": "Bestand geselecteerd. Klik op Volgende om de kolommen te koppelen.",
+    "mapColumns": "Koppel de kolommen uit je CSV aan de systeemvelden.",
+    "mapColumnsHint": "Kolomkoppeling wordt na upload geconfigureerd.",
+    "doneTitle": "Import klaar!",
+    "doneDesc": "Je gegevens zijn succesvol geïmporteerd.",
+    "newImport": "Nieuw importeren"
+  },
+  "apps": {
+    "notOnPkg3Title": "Tenant zit nog niet op Pakket 3",
+    "notOnPkg3Desc": "Je kunt connectors alvast instellen, maar ze worden pas zichtbaar voor gebruikers nadat je dit tenant-pakket via het tabblad Modules naar Pakket 3 upgradet.",
+    "costTitle": "Let op: hier zitten maandelijkse kosten aan verbonden",
+    "costDesc": "Het in- of uitschakelen van apps heeft direct invloed op je factuur. Neem contact op met je accountmanager voor de tarieven.",
+    "adminOnly": "Alleen admins kunnen apps in- of uitschakelen.",
+    "active": "Actief",
+    "monthly": "Maandelijks",
+    "noRights": "Geen rechten",
+    "disable": "Uitschakelen",
+    "enable": "Inschakelen"
+  },
+  "modules": {
+    "loading": "Pakket ophalen…",
+    "superAdminTitle": "Alleen zichtbaar voor super admins",
+    "superAdminDesc": "Pakket wijzigen heeft direct invloed op de klantfactuur. Elke wijziging wordt gelogd.",
+    "pkgCol": "Pakket",
+    "current": "Huidig",
+    "savedActive": "Opgeslagen & actief",
+    "activate": "Pakket activeren",
+    "changeFromTo": "Wijziging van {{from}} naar {{to}}",
+    "packages": {
+      "reporting_sm": "Rapportage Shiftmanager",
+      "reporting_hf": "Rapportage HelloFlex",
+      "reporting_sm_hf": "Rapportage SM + HF",
+      "reporting_sm_ai": "Rapportage SM + AI & Workflow",
+      "reporting_hf_ai": "Rapportage HF + AI & Workflow",
+      "reporting_sm_hf_ai": "Rapportage SM + HF + AI & Workflow",
+      "ats_crm": "ATS & CRM",
+      "ats_crm_ai": "ATS & CRM + AI & Workflow",
+      "ats_crm_planning": "ATS & CRM + Planning",
+      "ats_crm_ai_planning": "ATS & CRM + AI & Workflow + Planning"
+    }
+  },
+  "whatsapp": {
+    "loading": "WhatsApp gegevens ophalen…",
+    "connection": "Verbinding",
+    "notConnected": "Niet verbonden",
+    "notConnectedDesc": "Er is nog geen WhatsApp Business-koppeling geconfigureerd voor deze tenant.",
+    "statusUnavailable": "Verbindingsstatus niet beschikbaar",
+    "checked": "Gecontroleerd",
+    "statusActive": "Verbonden",
+    "statusInactive": "Inactief",
+    "statusExpired": "Token verlopen",
+    "phoneNumbers": "Telefoonnummers",
+    "linked": "{{count}} gekoppeld",
+    "sync": "Synchroniseren",
+    "noNumbers": "Geen telefoonnummers gevonden",
+    "quality": "Kwaliteit",
+    "qualityGREEN": "Goed",
+    "qualityYELLOW": "Matig",
+    "qualityRED": "Slecht",
+    "templates": "Templates",
+    "total": "{{count}} totaal",
+    "noTemplates": "Geen templates gevonden",
+    "searchPlaceholder": "Zoek template…",
+    "noResults": "Geen resultaten",
+    "colName": "Naam",
+    "colCategory": "Categorie",
+    "colLang": "Taal",
+    "colStatus": "Status",
+    "statusAPPROVED": "Goedgekeurd",
+    "statusPENDING": "In review",
+    "statusREJECTED": "Afgewezen",
+    "statusPAUSED": "Gepauzeerd",
+    "catMARKETING": "Marketing",
+    "catUTILITY": "Transactioneel",
+    "catAUTHENTICATION": "Authenticatie",
+    "numbersSynced": "Nummers gesynchroniseerd",
+    "templatesSynced": "Templates gesynchroniseerd",
+    "syncFailed": "Synchronisatie mislukt"
+  },
+  "roles": {
+    "loading": "Rollen ophalen…",
+    "title": "Rollen & Rechten",
+    "subtitle": "Klik op een rol om de rechten te bewerken",
+    "newPlaceholder": "Nieuwe rol…",
+    "create": "Aanmaken",
+    "editNameTitle": "Klik om naam te bewerken",
+    "rightsCount_one": "{{count}} recht",
+    "rightsCount_other": "{{count}} rechten",
+    "usersCount_one": "{{count}} gebruiker",
+    "usersCount_other": "{{count}} gebruikers",
+    "edit": "Bewerken",
+    "deleteTitle": "Rol verwijderen",
+    "deleteBlocked_one": "Niet verwijderbaar — {{count}} gebruiker heeft deze rol. Wijs hen eerst een andere rol toe.",
+    "deleteBlocked_other": "Niet verwijderbaar — {{count}} gebruikers hebben deze rol. Wijs hen eerst een andere rol toe.",
+    "confirmDelete": "Rol \"{{name}}\" verwijderen?",
+    "empty": "Nog geen rollen aangemaakt.",
+    "groups": {
+      "candidates": "Kandidaten",
+      "customers": "Klanten",
+      "reports": "Rapportages",
+      "workflows": "Workflows",
+      "whatsapp": "WhatsApp",
+      "users": "Gebruikers",
+      "settings": "Instellingen",
+      "sync": "Synchronisatie"
+    },
+    "actions": {
+      "view": "Bekijken",
+      "create": "Aanmaken",
+      "edit": "Bewerken",
+      "delete": "Verwijderen",
+      "sync": "Synchroniseren",
+      "refresh": "Vernieuwen",
+      "export": "Exporteren"
+    }
+  },
+  "audit": {
+    "title": "Audit log",
+    "loading": "Laden…",
+    "countSummary": "{{shown}} van {{total}} entries",
+    "unavailable": "Audit log niet beschikbaar.",
+    "searchPlaceholder": "Zoek op actie of gebruiker…",
+    "dateTo": "t/m",
+    "noEntries": "Geen entries gevonden",
+    "colDateTime": "Datum & tijd",
+    "colWho": "Door wie",
+    "colType": "Type",
+    "colAction": "Actie",
+    "colOldValue": "Oude waarde",
+    "colNewValue": "Nieuwe waarde",
+    "system": "Systeem",
+    "none": "geen",
+    "active": "✓ actief",
+    "inactive": "— inactief",
+    "before": "Voor",
+    "after": "Na",
+    "addedCount": "Toegevoegd ({{count}})",
+    "removedCount": "Verwijderd ({{count}})",
+    "changedCount": "Gewijzigd ({{count}})",
+    "unchangedCount": "Ongewijzigd ({{count}})",
+    "oldValue": "Oude waarde",
+    "newValue": "Nieuwe waarde",
+    "settingsUpdated_one": "{{count}} instelling bijgewerkt",
+    "settingsUpdated_other": "{{count}} instellingen bijgewerkt",
+    "noChanges": "Geen wijzigingen",
+    "keysUpdated": "{{count}} sleutel(s) bijgewerkt",
+    "filterType": "Type",
+    "filterWho": "Door wie",
+    "filterRole": "Rol",
+    "http": {
+      "method": "Methode",
+      "path": "Pad",
+      "status": "Status",
+      "duration": "Duur",
+      "payload": "Payload"
+    },
+    "auth": {
+      "action": "Actie",
+      "ip": "IP",
+      "browser": "Browser"
+    },
+    "sync": {
+      "synced": "Gesynchroniseerd",
+      "total": "Totaal",
+      "errors": "Fouten",
+      "duration": "Duur",
+      "locations": "Locaties",
+      "departments": "Afdelingen"
+    },
+    "cell": {
+      "synced": "{{count}} gesync",
+      "errors": "{{count}} fouten"
+    },
+    "logName": {
+      "auth": "Auth",
+      "http": "HTTP",
+      "sync": "Synchronisatie",
+      "roles": "Rollen",
+      "settings": "Instellingen",
+      "users": "Gebruikers",
+      "apps": "Apps",
+      "modules": "Modules",
+      "workflows": "Workflows",
+      "webhooks": "Webhooks",
+      "ai": "AI"
+    },
+    "kpi": {
+      "new_candidates_target": "Doel nieuwe kandidaten",
+      "churn_warning_threshold": "Uitstroom grens",
+      "avg_candidates_window": "Gem. periode",
+      "occupancy_target": "Bezettingsgraad doel",
+      "response_rate_target": "Response rate doel"
+    },
+    "props": {
+      "synced": "Gesynchroniseerd",
+      "total": "Totaal",
+      "errors": "Fouten",
+      "duration": "Duur",
+      "keys": "Sleutels",
+      "name": "Naam",
+      "permissions": "Rechten",
+      "before": "Voor",
+      "after": "Na",
+      "role": "Rol"
+    }
+  }
+}

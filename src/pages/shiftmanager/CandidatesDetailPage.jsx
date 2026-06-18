@@ -24,7 +24,7 @@ export default function CandidatesDetailPage() {
 
   useEffect(() => {
     setLoading(true)
-    api.get('/candidates', { params: { page, per_page: pageSize } })
+    api.get('/sm-candidates', { params: { page, per_page: pageSize } })
       .then(res => {
         const body = res.data
         setCandidates(Array.isArray(body) ? body : (body?.data ?? []))

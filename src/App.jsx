@@ -30,13 +30,14 @@ import DepartmentsDetailPage   from './pages/shiftmanager/DepartmentsDetailPage'
 import DepartmentsReport       from './pages/shiftmanager/DepartmentsReport'
 import ContactsDetailPage      from './pages/shiftmanager/ContactsDetailPage'
 import ContactPersonsPage      from './pages/shiftmanager/ContactPersonsPage'
-import ContactsPage            from './pages/contacts/ContactsPage'
-import LocationsPage          from './pages/locations/LocationsPage'
-import DepartmentsPage        from './pages/departments/DepartmentsPage'
+import CustomersPage          from './pages/customers/CustomersPage'
+import SmCustomersPage        from './pages/shiftmanager/CustomersPage'
+import ContactsPage            from './pages/shiftmanager/ContactsPage'
+import LocationsPage          from './pages/shiftmanager/LocationsPage'
+import DepartmentsPage        from './pages/shiftmanager/DepartmentsPage'
 import ProfilePage            from './pages/auth/ProfilePage'
 import UsersPage              from './pages/users/UsersPage'
 import WhatsAppPage           from './pages/whatsapp/WhatsAppPage'
-import AIAgentsPage           from './pages/ai/AIAgentsPage'
 import RunsDetailPage              from './pages/ai/RunsDetailPage'
 import MessagesDetailPage          from './pages/ai/MessagesDetailPage'
 import ShiftmanagerDetailsPage     from './pages/shiftmanager/ShiftmanagerDetailsPage'
@@ -46,6 +47,7 @@ import ApplicationsPage          from './pages/applications/ApplicationsPage'
 import VacanciesPage             from './pages/vacancies/VacanciesPage'
 import { ThemeProvider }      from './context/ThemeContext'
 import { AppsProvider, useApps } from './context/AppsContext'
+import { LookupsProvider } from './context/LookupsContext'
 import { canAccessPage, PACKAGE_DEFAULT_PAGE } from './lib/access'
 
 // ── Page title map (route key → breadcrumb label) ────────────────────────────
@@ -75,6 +77,10 @@ const PAGE_TITLES = {
   'shiftmanager.departments':   'Shiftmanager — Departments',
   'shiftmanager.contacts':      'Shiftmanager — Contacts',
   'shiftmanager.details':       'Shiftmanager — Details',
+  'shiftmanager.customers-table':   'Shiftmanager — Klanten',
+  'shiftmanager.locations-table':   'Shiftmanager — Locaties',
+  'shiftmanager.departments-table': 'Shiftmanager — Afdelingen',
+  'shiftmanager.contacts-table':    'Shiftmanager — Contactpersonen',
 
   // Shiftmanager detail drill-downs (navigated to from SM reports)
   'details.candidates':         'SM Details — Candidates',
@@ -173,21 +179,24 @@ function DashboardLayout() {
       case 'candidates':             return <CandidatesPage />
       case 'applications':           return <ApplicationsPage />
       case 'vacancies':              return <VacanciesPage />
-      case 'customers':              return <CustomersDetailPage />
-      case 'customers.locations':    return <LocationsPage />
-      case 'customers.departments':  return <DepartmentsPage />
-      case 'customers.contacts':     return <ContactsPage />
+      case 'customers':              return <CustomersPage />
       case 'planning':               return <PlanningPage />
 
       // ── Shiftmanager module ───────────────────────────────────────────────
       case 'shiftmanager':
       case 'shiftmanager.dashboard':   return <ShiftmanagerDashboard onNavigate={setActivePage} />
+      // Reports
       case 'shiftmanager.candidates':  return <CandidatesReport initialTab="candidates" />
       case 'shiftmanager.customers':   return <CustomerReport />
       case 'shiftmanager.locations':   return <LocationsReport />
       case 'shiftmanager.departments': return <DepartmentsReport />
       case 'shiftmanager.contacts':    return <ContactPersonsPage />
       case 'shiftmanager.details':     return <ShiftmanagerDetailsPage />
+      // Table pages (operational data tables)
+      case 'shiftmanager.customers-table':   return <SmCustomersPage />
+      case 'shiftmanager.locations-table':   return <LocationsPage />
+      case 'shiftmanager.departments-table': return <DepartmentsPage />
+      case 'shiftmanager.contacts-table':    return <ContactsPage />
 
       // Shiftmanager drill-down detail routes (navigated to from SM reports)
       case 'details.candidates':  return <CandidatesDetailPage />
@@ -202,8 +211,8 @@ function DashboardLayout() {
       case 'helloflex.dashboard': return <PlaceholderPage title="HelloFlex Dashboard" />
 
       // ── AI & Workflow module ──────────────────────────────────────────────
-      case 'aiagents':            return <AIAgentsPage />
-      case 'workflows':           return <AIAgentsPage />
+      case 'aiagents':
+      case 'workflows':           return <WorkflowsPage />
       case 'whatsapp':            return <WhatsAppPage />
 
       // AI & Workflow drill-down detail routes
@@ -409,6 +418,7 @@ export default function App() {
       <ThemeProvider>
       <AuthProvider>
         <AppsProvider>
+        <LookupsProvider>
         {/* RightPanelProvider inside AuthProvider so components can use both auth and filter panel context */}
         <RightPanelProvider>
           <Routes>
@@ -416,6 +426,7 @@ export default function App() {
             <Route path="/*"     element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} />
           </Routes>
         </RightPanelProvider>
+        </LookupsProvider>
         </AppsProvider>
       </AuthProvider>
       </ThemeProvider>

@@ -1,0 +1,36 @@
+{
+  "title": "WhatsApp",
+  "updatedAt": "Bijgewerkt om {{time}}",
+  "refresh": "Verversen",
+  "loading": "Laden…",
+  "outbound": "Uitgaand",
+  "inbound": "Inkomend",
+  "chartTitle": "Berichtenactiviteit — afgelopen 14 dagen",
+  "kpi": {
+    "messagesToday": "Berichten vandaag",
+    "candidatesContacted": "Kandidaten benaderd",
+    "shiftsFilled": "Diensten gevuld via WA",
+    "openEscalations": "Open escalaties"
+  },
+  "feed": {
+    "title": "Laatste berichten",
+    "live": "live",
+    "loading": "Berichten ophalen…",
+    "empty": "Geen berichten"
+  },
+  "escalations": {
+    "title": "Escalaties",
+    "loading": "Ophalen…",
+    "empty": "Geen openstaande escalaties"
+  },
+  "reasons": {
+    "failed_delivery": "Niet bezorgd",
+    "no_reply": "Geen reactie",
+    "negative_response": "Negatief antwoord"
+  },
+  "noConn": {
+    "title": "Geen WhatsApp-verbinding",
+    "desc": "Er is nog geen WhatsApp Business-koppeling ingesteld voor deze tenant. Configureer een verbinding via de backend om berichten en statistieken hier te zien.",
+    "errorLabel": "Foutmelding backend"
+  }
+}

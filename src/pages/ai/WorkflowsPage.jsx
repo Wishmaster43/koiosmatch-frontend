@@ -10,6 +10,7 @@
  *   - (further down)→ folder tree, workflow rows, run/create handlers, editor mount
  */
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
 import {
   Zap, Users, Calendar, MessageCircle, Database,
@@ -19,13 +20,14 @@ import {
 } from 'lucide-react'
 import WorkflowCanvasEditor from '../../components/layout/WorkflowCanvasEditor'
 
+// Module chip icon + colours; label = t('modules.<type>').
 const MODULE_META = {
-  candidate_filter: { label: 'Kandidaten Filter', Icon: Users,         color: '#534AB7', bg: '#EEEDFE' },
-  shift_fetcher:    { label: 'Diensten Ophalen',  Icon: Calendar,      color: '#0F6E56', bg: '#E1F5EE' },
-  whatsapp_send:    { label: 'WhatsApp Sturen',   Icon: MessageCircle, color: '#3B6D11', bg: '#EAF3DE' },
-  database_update:  { label: 'Database Updaten',  Icon: Database,      color: '#185FA5', bg: '#E6F1FB' },
-  email_send:       { label: 'E-mail Sturen',     Icon: Mail,          color: '#854F0B', bg: '#FAEEDA' },
-  delay:            { label: 'Wachttijd',          Icon: Clock,         color: '#5F5E5A', bg: '#F1EFE8' },
+  candidate_filter: { Icon: Users,         color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
+  shift_fetcher:    { Icon: Calendar,      color: '#0F6E56', bg: '#E1F5EE' },
+  whatsapp_send:    { Icon: MessageCircle, color: '#3B6D11', bg: '#EAF3DE' },
+  database_update:  { Icon: Database,      color: '#185FA5', bg: '#E6F1FB' },
+  email_send:       { Icon: Mail,          color: '#854F0B', bg: '#FAEEDA' },
+  delay:            { Icon: Clock,         color: '#5F5E5A', bg: '#F1EFE8' },
 }
 
 const MOCK_WORKFLOWS = [
@@ -79,29 +81,33 @@ const MOCK_WORKFLOWS = [
   },
 ]
 
+// Status badge colours; label = t('status.<key>').
 const STATUS_STYLES = {
-  active:   { label: 'Actief',   bg: '#F0FDF4', color: '#16A34A', dot: '#16A34A' },
-  draft:    { label: 'Concept',  bg: '#F9FAFB', color: '#6B7280', dot: '#9CA3AF' },
-  inactive: { label: 'Inactief', bg: '#FFF7ED', color: '#C2410C', dot: '#F97316' },
+  active:   { bg: '#F0FDF4', color: 'var(--color-success)', dot: 'var(--color-success)' },
+  draft:    { bg: '#F9FAFB', color: '#6B7280', dot: '#9CA3AF' },
+  inactive: { bg: '#FFF7ED', color: '#C2410C', dot: '#F97316' },
 }
 
 function StepPill({ type }) {
+  const { t } = useTranslation('workflows')
   const meta = MODULE_META[type]
   if (!meta) return null
   const Icon = meta.Icon
+  const label = t(`modules.${type}`, { defaultValue: type })
   return (
     <div
       className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
       style={{ background: meta.bg, color: meta.color }}
-      title={meta.label}
+      title={label}
     >
       <Icon size={11} />
-      <span>{meta.label}</span>
+      <span>{label}</span>
     </div>
   )
 }
 
 function WorkflowCard({ workflow, onRun, onEdit }) {
+  const { t } = useTranslation('workflows')
   const [running, setRunning] = useState(false)
   const status = STATUS_STYLES[workflow.status] || STATUS_STYLES.draft
 
@@ -134,7 +140,7 @@ function WorkflowCard({ workflow, onRun, onEdit }) {
           style={{ background: status.bg, color: status.color }}
         >
           <span className="flex-shrink-0 rounded-full" style={{ width: 5, height: 5, background: status.dot }} />
-          <span style={{ fontSize: 11, fontWeight: 500 }}>{status.label}</span>
+          <span style={{ fontSize: 11, fontWeight: 500 }}>{t(`status.${workflow.status}`, { defaultValue: workflow.status })}</span>
         </div>
       </div>
 
@@ -147,18 +153,18 @@ function WorkflowCard({ workflow, onRun, onEdit }) {
           {workflow.last_run ? (
             <>
               {workflow.last_run.ok
-                ? <CheckCircle size={13} color="#16A34A" />
-                : <AlertCircle size={13} color="#DC2626" />
+                ? <CheckCircle size={13} color="var(--color-success)" />
+                : <AlertCircle size={13} color="var(--color-danger)" />
               }
               <span className="text-xs text-gray-400">
                 {workflow.last_run.ok
-                  ? `${workflow.last_run.time} · ${workflow.last_run.candidates} kandidaten`
+                  ? `${workflow.last_run.time} · ${t('page.candidates', { n: workflow.last_run.candidates })}`
                   : `${workflow.last_run.time} · ${workflow.last_run.error}`
                 }
               </span>
             </>
           ) : (
-            <span className="text-xs text-gray-300">Nog niet uitgevoerd</span>
+            <span className="text-xs text-gray-300">{t('page.notRun')}</span>
           )}
         </div>
 
@@ -175,7 +181,7 @@ function WorkflowCard({ workflow, onRun, onEdit }) {
             }}
           >
             {running ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />}
-            {running ? 'Bezig...' : 'Uitvoeren'}
+            {running ? t('page.running') : t('page.run')}
           </button>
 
           <button
@@ -257,6 +263,7 @@ function denormalizeWorkflow(wf) {
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function WorkflowsPage() {
+  const { t } = useTranslation('workflows')
   const [workflows,       setWorkflows]       = useState([])
   const [folders,         setFolders]         = useState([])
   const [loading,         setLoading]         = useState(true)
@@ -281,7 +288,7 @@ export default function WorkflowsPage() {
 
   const handleSave = async (updated) => {
     if (!updated.steps || updated.steps.length === 0) {
-      alert('Voeg minimaal één module toe aan de workflow voordat je opslaat.')
+      alert(t('page.addModuleAlert'))
       return
     }
     const isNew = !updated.id || !workflows.some(w => w.id === updated.id)
@@ -294,7 +301,7 @@ export default function WorkflowsPage() {
       setWorkflows(prev => isNew ? [...prev, saved] : prev.map(w => w.id === saved.id ? saved : w))
       setEditingWorkflow(null)
     } catch (err) {
-      alert(`Opslaan mislukt: ${err.response?.data?.message ?? err.message}`)
+      alert(t('page.saveFailed', { msg: err.response?.data?.message ?? err.message }))
     }
   }
 
@@ -302,17 +309,17 @@ export default function WorkflowsPage() {
     try {
       const res = await api.post('/workflow-folders', { name })
       setFolders(prev => [...prev, res.data?.data ?? res.data])
-    } catch {}
+    } catch { /* noop */ }
   }
 
   const deleteFolder = async (folder) => {
-    if (!confirm(`Map "${folder.name}" verwijderen? De workflows blijven bestaan onder "Niet toegewezen".`)) return
+    if (!confirm(t('page.deleteFolderConfirm', { name: folder.name }))) return
     try {
       await api.delete(`/workflow-folders/${folder.id}`)
       setFolders(prev => prev.filter(f => f.id !== folder.id))
       setWorkflows(prev => prev.map(w => w.folder_id === folder.id ? { ...w, folder_id: null } : w))
       if (selectedFolder === folder.id) setSelectedFolder(null)
-    } catch {}
+    } catch { /* noop */ }
   }
 
   const moveToFolder = async (workflowId, folderId) => {
@@ -336,19 +343,19 @@ export default function WorkflowsPage() {
       {/* Folder sidebar — drag targets */}
       <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid #F3F4F6', display: 'flex', flexDirection: 'column', background: 'white' }}>
         <div style={{ padding: '16px 16px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Folders</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{t('page.folders')}</span>
           <button onClick={() => {
-            const name = prompt('Mapnaam:')
+            const name = prompt(t('page.folderNamePrompt'))
             if (name?.trim()) createFolder(name.trim())
-          }} title="Nieuwe folder"
+          }} title={t('page.newFolder')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: 2, display: 'flex' }}>
             <FolderPlus size={15} />
           </button>
         </div>
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {[
-            { id: null,          label: 'Alle workflows',  icon: <Zap size={13} /> },
-            { id: 'unassigned',  label: 'Niet toegewezen', icon: <Folder size={13} /> },
+            { id: null,          label: t('page.allWorkflows'),  icon: <Zap size={13} /> },
+            { id: 'unassigned',  label: t('page.unassigned'), icon: <Folder size={13} /> },
           ].map(item => (
             <SidebarRow key={String(item.id)} label={item.label} icon={item.icon}
               active={selectedFolder === item.id}
@@ -379,23 +386,23 @@ export default function WorkflowsPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
             <h2 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>
-              {selectedFolder === null ? 'Alle workflows'
-               : selectedFolder === 'unassigned' ? 'Niet toegewezen'
-               : (folders.find(f => f.id === selectedFolder)?.name ?? 'Workflows')}
+              {selectedFolder === null ? t('page.allWorkflows')
+               : selectedFolder === 'unassigned' ? t('page.unassigned')
+               : (folders.find(f => f.id === selectedFolder)?.name ?? t('page.workflowsTitle'))}
             </h2>
-            <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>{visibleWorkflows.length} workflows</p>
+            <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>{t('page.countWorkflows', { n: visibleWorkflows.length })}</p>
           </div>
           <button
-            onClick={() => setEditingWorkflow({ name: 'Nieuwe Workflow', trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
+            onClick={() => setEditingWorkflow({ name: t('page.newWorkflow'), trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13, fontWeight: 500, color: 'white', background: 'var(--color-primary)', border: 'none', borderRadius: 8, cursor: 'pointer' }}
           >
-            <Plus size={14} /> Nieuwe Workflow
+            <Plus size={14} /> {t('page.newWorkflow')}
           </button>
         </div>
 
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#9CA3AF', fontSize: 13 }}>
-            <Loader2 size={14} className="animate-spin" /> Laden...
+            <Loader2 size={14} className="animate-spin" /> {t('page.loading')}
           </div>
         ) : (
           <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
@@ -410,7 +417,7 @@ export default function WorkflowsPage() {
             ))}
             {visibleWorkflows.length === 0 && (
               <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: '#9CA3AF', fontSize: 14 }}>
-                Geen workflows in deze map. Sleep er een naartoe of maak een nieuwe aan.
+                {t('page.empty')}
               </div>
             )}
           </div>
@@ -436,17 +443,17 @@ function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDr
       style={{
         display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px',
         cursor: 'pointer', borderRadius: 6, margin: '1px 6px',
-        background: isDragOver ? '#EFF6FF' : active ? 'var(--color-primary-bg)' : hover ? '#F9FAFB' : 'transparent',
-        border: isDragOver ? '1.5px dashed #3B82F6' : '1.5px solid transparent',
+        background: isDragOver ? 'var(--color-secondary-bg)' : active ? 'var(--color-primary-bg)' : hover ? '#F9FAFB' : 'transparent',
+        border: isDragOver ? '1.5px dashed var(--color-secondary)' : '1.5px solid transparent',
         color: active ? 'var(--color-primary)' : '#374151',
         transition: 'background 0.1s',
       }}
     >
-      <span style={{ color: isDragOver ? '#3B82F6' : active ? 'var(--color-primary)' : '#9CA3AF', flexShrink: 0 }}>{icon}</span>
+      <span style={{ color: isDragOver ? 'var(--color-secondary)' : active ? 'var(--color-primary)' : '#9CA3AF', flexShrink: 0 }}>{icon}</span>
       <span style={{ fontSize: 13, flex: 1, fontWeight: active ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
       {onDelete && hover && (
         <button onClick={e => { e.stopPropagation(); onDelete() }}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: 2, display: 'flex', flexShrink: 0 }}>
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: 2, display: 'flex', flexShrink: 0 }}>
           <Trash2 size={11} />
         </button>
       )}

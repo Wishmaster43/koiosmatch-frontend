@@ -1,0 +1,34 @@
+{
+  "newUser": "Nouvel utilisateur",
+  "firstName": "Prénom",
+  "lastName": "Nom",
+  "email": "Adresse e-mail",
+  "password": "Mot de passe",
+  "role": "Rôle",
+  "create": "Créer",
+  "creating": "Création…",
+  "createFailed": "Échec de la création.",
+  "pwPlaceholder": "Au moins 8 caractères",
+  "changeRole": "Changer de rôle",
+  "title": "Utilisateurs",
+  "summary": "{{shown}} sur {{total}} utilisateurs",
+  "loading": "Chargement des utilisateurs…",
+  "empty": "Aucun utilisateur trouvé",
+  "noAccess": "Pas d'accès à la liste des utilisateurs.",
+  "loadError": "Impossible de charger les utilisateurs.",
+  "you": "vous",
+  "system": "système",
+  "filterRole": "Rôle",
+  "cols": {
+    "name": "Nom",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "role": "Rôle"
+  },
+  "roles": {
+    "super_admin": "Super admin",
+    "tenant_admin": "Admin",
+    "planner": "Planificateur",
+    "user": "Utilisateur"
+  }
+}

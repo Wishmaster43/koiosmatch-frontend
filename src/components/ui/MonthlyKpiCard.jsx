@@ -66,9 +66,9 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
   })
   const uitgeschreven = uitgeschrevenKandidaten.length
 
-  const color = werkelijk >= KPI_TARGET ? '#16A34A'
-              : werkelijk >= gemiddeld   ? '#D97706'
-              : '#DC2626'
+  const color = werkelijk >= KPI_TARGET ? 'var(--color-success)'
+              : werkelijk >= gemiddeld   ? 'var(--color-warning)'
+              : 'var(--color-danger)'
 
   const pctVsKpi = KPI_TARGET > 0 ? Math.round((werkelijk / KPI_TARGET) * 100) : 0
 
@@ -163,7 +163,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
             title={uitgeschreven > 0 ? 'Klik voor details' : undefined}
           >
             <div className="mb-1 font-semibold leading-none"
-              style={{ fontSize: 26, color: uitgeschreven > 0 ? '#EF4444' : '#9CA3AF', letterSpacing: '-0.5px' }}>
+              style={{ fontSize: 26, color: uitgeschreven > 0 ? 'var(--color-danger)' : '#9CA3AF', letterSpacing: '-0.5px' }}>
               {uitgeschreven}
             </div>
             <div className="text-xs text-gray-400">Uitgeschreven</div>

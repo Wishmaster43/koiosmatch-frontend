@@ -4,6 +4,7 @@
  * page size from the user's preference; data is fetched per page from the API.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useRightPanel }      from '../../context/RightPanelContext'
 import { useAuth }            from '../../context/AuthContext'
@@ -25,6 +26,7 @@ const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 6
 const TD = { padding: '10px 12px', fontSize: 13, color: '#374151', borderBottom: '1px solid #F9FAFB' }
 
 export default function DepartmentsTable() {
+  const { t } = useTranslation('reports')
   const [rows,    setRows]    = useState([])
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
@@ -99,7 +101,7 @@ export default function DepartmentsTable() {
 
   const handlePageSizeChange = async (n) => {
     setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch {}
+    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch { /* noop */ }
   }
 
   const setSort_ = key => setSort(prev =>
@@ -110,7 +112,7 @@ export default function DepartmentsTable() {
 
   const filterGroups = useMemo(() => [
     {
-      key: 'customer', label: 'Klant',
+      key: 'customer', label: t('departments.filters.customer'),
       type: 'search-select',
       selected: selectedCustomers,
       options: customerOptions.map(c => ({
@@ -121,16 +123,16 @@ export default function DepartmentsTable() {
       onToggle: v => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     },
     {
-      key: 'status', label: 'Status locatie',
+      key: 'status', label: t('departments.filters.locationStatus'),
       selected: selectedStatuses,
       options: statusOptions.map(s => ({
         value: s,
-        label: s === 'active' ? 'Actief' : s === 'inactive' ? 'Inactief' : s,
+        label: s === 'active' ? t('common.statusActive') : s === 'inactive' ? t('common.statusInactive') : s,
         count: rows.filter(r => r.location_status === s).length,
       })),
       onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     },
-  ], [selectedCustomers, selectedStatuses, customerOptions, statusOptions, rows])
+  ], [t, selectedCustomers, selectedStatuses, customerOptions, statusOptions, rows])
 
   useEffect(() => {
     registerFilters('departments-table', filterGroups)
@@ -138,26 +140,26 @@ export default function DepartmentsTable() {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   const COLS = [
-    { key: 'customer_name', label: 'Klant',        sortable: true },
-    { key: 'location_name', label: 'Locatie',      sortable: true },
-    { key: 'name',          label: 'Afdeling',     sortable: true },
-    { key: 'cost_center',   label: 'Kostenplaats', sortable: true },
+    { key: 'customer_name', label: t('departments.cols.customer'),   sortable: true },
+    { key: 'location_name', label: t('departments.cols.location'),   sortable: true },
+    { key: 'name',          label: t('departments.cols.department'), sortable: true },
+    { key: 'cost_center',   label: t('departments.cols.costCenter'), sortable: true },
   ]
 
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>Details — Afdelingen</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>{t('departments.title')}</h1>
           <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
-            {loading ? 'Laden…' : `${filtered.length} van ${rows.length} afdelingen`}
+            {loading ? t('common.loadingShort') : t('departments.summary', { shown: filtered.length, total: rows.length })}
           </p>
         </div>
         <div className="relative">
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
                                      transform: 'translateY(-50%)', color: '#9CA3AF' }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Zoek op naam, locatie, kostenplaats…"
+            placeholder={t('departments.search')}
             style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
                      border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
         </div>
@@ -168,11 +170,11 @@ export default function DepartmentsTable() {
         <div className="flex-1 min-w-0 overflow-auto">
           {loading ? (
             <div className="flex items-center justify-center" style={{ height: 200 }}>
-              <p style={{ fontSize: 13, color: '#9CA3AF' }}>Afdelingen ophalen…</p>
+              <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('departments.loading')}</p>
             </div>
           ) : sorted.length === 0 ? (
             <div className="flex items-center justify-center" style={{ height: 160 }}>
-              <p style={{ fontSize: 13, color: '#9CA3AF' }}>Geen afdelingen gevonden</p>
+              <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('departments.empty')}</p>
             </div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>

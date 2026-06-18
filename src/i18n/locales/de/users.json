@@ -1,0 +1,34 @@
+{
+  "newUser": "Neuer Benutzer",
+  "firstName": "Vorname",
+  "lastName": "Nachname",
+  "email": "E-Mail-Adresse",
+  "password": "Passwort",
+  "role": "Rolle",
+  "create": "Erstellen",
+  "creating": "Wird erstellt…",
+  "createFailed": "Erstellen fehlgeschlagen.",
+  "pwPlaceholder": "Mindestens 8 Zeichen",
+  "changeRole": "Rolle ändern",
+  "title": "Benutzer",
+  "summary": "{{shown}} von {{total}} Benutzern",
+  "loading": "Benutzer werden geladen…",
+  "empty": "Keine Benutzer gefunden",
+  "noAccess": "Kein Zugriff auf die Benutzerliste.",
+  "loadError": "Benutzer konnten nicht geladen werden.",
+  "you": "Sie",
+  "system": "System",
+  "filterRole": "Rolle",
+  "cols": {
+    "name": "Name",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "role": "Rolle"
+  },
+  "roles": {
+    "super_admin": "Super-Admin",
+    "tenant_admin": "Admin",
+    "planner": "Planer",
+    "user": "Benutzer"
+  }
+}

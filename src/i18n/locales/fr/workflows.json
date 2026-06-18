@@ -1,0 +1,175 @@
+{
+  "schedule": {
+    "header": "Planifier",
+    "run": "Exécuter",
+    "advanced": "Paramètres avancés",
+    "types": {
+      "interval": "À intervalles réguliers",
+      "once": "Une fois",
+      "daily": "Quotidien",
+      "weekdays": "Jours ouvrés (Lun–Ven)",
+      "weekly": "Hebdomadaire",
+      "monthly": "Mensuel",
+      "specified": "Dates spécifiques",
+      "ondemand": "À la demande"
+    },
+    "intervalLabel": "Intervalle (minutes)",
+    "minShort": "{{n}} min",
+    "hourShort": "{{n}} h",
+    "custom": "Ou personnalisé :",
+    "minutes": "minutes",
+    "dateTime": "Date et heure",
+    "times": "Heures",
+    "timesWeekdays": "Heures (jours ouvrés)",
+    "addTime": "Ajouter une heure",
+    "days": "Jour(s)",
+    "time": "Heure",
+    "dayOfMonth": "Jour du mois",
+    "ofEveryMonth": "de chaque mois",
+    "dates": "Dates",
+    "addDate": "Ajouter une date",
+    "onDemandText": "Le scénario n'est pas exécuté automatiquement. Vous pouvez le lancer manuellement via le bouton « Exécuter » ou via un appel API.",
+    "startDate": "Date de début (facultatif)",
+    "endDate": "Date de fin (facultatif)",
+    "maxRuns": "Max. exécutions par minute",
+    "default100": "Par défaut : 100",
+    "rateLimitHint": "L'excédent est mis en file d'attente jusqu'à libération de capacité.",
+    "label": {
+      "notSet": "Non défini",
+      "every": "Toutes les {{interval}}",
+      "onceOn": "Une fois le {{date}} à {{time}}",
+      "dailyAt": "Tous les jours à {{times}}",
+      "weekdaysAt": "Jours ouvrés à {{times}}",
+      "weeklyOn": "Chaque semaine le {{days}} à {{time}}",
+      "monthlyOn": "Chaque mois le jour {{day}} à {{time}}",
+      "specifiedCount": "{{count}} date(s) spécifique(s)",
+      "onDemand": "À la demande",
+      "unknown": "Inconnu"
+    }
+  },
+  "modules": {
+    "candidate_filter": "Filtre de candidats",
+    "shift_fetcher": "Récupérer les missions",
+    "whatsapp_send": "Envoyer WhatsApp",
+    "database_update": "Mettre à jour la base",
+    "email_send": "Envoyer un e-mail",
+    "delay": "Délai"
+  },
+  "status": {
+    "active": "Actif",
+    "draft": "Brouillon",
+    "inactive": "Inactif"
+  },
+  "page": {
+    "notRun": "Pas encore exécuté",
+    "running": "En cours...",
+    "run": "Exécuter",
+    "candidates": "{{n}} candidats",
+    "folders": "Dossiers",
+    "newFolder": "Nouveau dossier",
+    "folderNamePrompt": "Nom du dossier :",
+    "allWorkflows": "Tous les workflows",
+    "unassigned": "Non attribué",
+    "workflowsTitle": "Workflows",
+    "countWorkflows": "{{n}} workflows",
+    "newWorkflow": "Nouveau workflow",
+    "loading": "Chargement...",
+    "empty": "Aucun workflow dans ce dossier. Glissez-en un ici ou créez-en un nouveau.",
+    "addModuleAlert": "Ajoutez au moins un module au workflow avant d'enregistrer.",
+    "saveFailed": "Échec de l'enregistrement : {{msg}}",
+    "deleteFolderConfirm": "Supprimer le dossier « {{name}} » ? Les workflows resteront sous « Non attribué »."
+  },
+  "ai": {
+    "saved": "Enregistré",
+    "restore": "Restaurer",
+    "versions": "{{count}} version(s)",
+    "loading": "Chargement…",
+    "emptyStart": "Rien pour le moment. Cliquez sur + pour commencer.",
+    "strength": {
+      "high": "Élevé",
+      "medium": "Moyen",
+      "fast": "Rapide",
+      "reasoning": "Raisonnement"
+    },
+    "customApi": "Custom (API perso)",
+    "field": {
+      "name": "Nom",
+      "content": "Contenu"
+    },
+    "chat": {
+      "test": "Test",
+      "clear": "Effacer",
+      "placeholder": "Tapez un message…",
+      "empty": "Envoyez un message pour tester l'agent",
+      "noReply": "(pas de réponse)",
+      "error": "⚠ Erreur lors de la récupération de la réponse."
+    },
+    "agent": {
+      "newAgent": "Nouvel agent",
+      "fallback": "Agent",
+      "namePlaceholder": "Ex. Yessy AI",
+      "model": "Modèle",
+      "apiEndpoint": "Point de terminaison API",
+      "apiKey": "Clé API",
+      "prompt": "Instruction (Prompt)",
+      "noPrompt": "— Aucun prompt —",
+      "selectFaqs": "Sélectionner des FAQ",
+      "noFaqs": "Aucune FAQ créée",
+      "knowledge": "Base de connaissances",
+      "useKnowledge": "Utiliser la base de connaissances générale",
+      "maxHistory": "Max. historique de conversation",
+      "confirmDelete": "Supprimer l'agent « {{name}} » ?",
+      "selectOrNew": "Sélectionnez un agent ou cliquez sur +"
+    },
+    "tabs": {
+      "agents": "Agents",
+      "prompts": "Prompts",
+      "faqs": "FAQ",
+      "knowledge": "Base de connaissances"
+    },
+    "prompts": {
+      "namePlaceholder": "Ex. Prompt système Yessy",
+      "bodyPlaceholder": "Vous êtes un assistant IA amical…",
+      "confirmDelete": "Supprimer le prompt « {{name}} » ?"
+    },
+    "faqs": {
+      "namePlaceholder": "Ex. FAQ missions",
+      "contentLabel": "Contenu (format question + réponse)",
+      "bodyPlaceholder": "Q : Comment me désinscrire ?\nR : Envoyez un message via WhatsApp...",
+      "confirmDelete": "Supprimer la FAQ « {{name}} » ?"
+    },
+    "knowledge": {
+      "namePlaceholder": "Ex. Conditions de travail",
+      "bodyPlaceholder": "Saisissez le contenu de la base de connaissances…"
+    },
+    "tools": {
+      "hint": "Activez les outils qu'un agent peut utiliser",
+      "items": {
+        "shift_lookup": {
+          "label": "Rechercher une mission",
+          "description": "Trouve les missions disponibles pour un candidat"
+        },
+        "candidate_status": {
+          "label": "Statut du candidat",
+          "description": "Récupère le statut et le pool d'un candidat"
+        },
+        "send_whatsapp": {
+          "label": "Envoyer WhatsApp",
+          "description": "Envoie un message via WhatsApp"
+        },
+        "update_candidate": {
+          "label": "Mettre à jour le candidat",
+          "description": "Modifie le statut ou les notes"
+        },
+        "knowledge_search": {
+          "label": "Rechercher dans la base",
+          "description": "Recherche des informations dans la base de connaissances"
+        },
+        "calendar_check": {
+          "label": "Consulter l'agenda",
+          "description": "Vérifie le planning et les missions"
+        }
+      }
+    }
+  }
+}

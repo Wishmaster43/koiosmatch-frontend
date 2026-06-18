@@ -1,0 +1,175 @@
+{
+  "schedule": {
+    "header": "Programar",
+    "run": "Ejecutar",
+    "advanced": "Ajustes avanzados",
+    "types": {
+      "interval": "A intervalos regulares",
+      "once": "Una vez",
+      "daily": "Diario",
+      "weekdays": "Días laborables (Lun–Vie)",
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "specified": "Fechas específicas",
+      "ondemand": "Bajo demanda"
+    },
+    "intervalLabel": "Intervalo (minutos)",
+    "minShort": "{{n}} min",
+    "hourShort": "{{n}} h",
+    "custom": "O personalizado:",
+    "minutes": "minutos",
+    "dateTime": "Fecha y hora",
+    "times": "Horas",
+    "timesWeekdays": "Horas (días laborables)",
+    "addTime": "Añadir hora",
+    "days": "Día(s)",
+    "time": "Hora",
+    "dayOfMonth": "Día del mes",
+    "ofEveryMonth": "de cada mes",
+    "dates": "Fechas",
+    "addDate": "Añadir fecha",
+    "onDemandText": "El escenario no se ejecuta automáticamente. Puedes iniciarlo manualmente con el botón «Ejecutar» o mediante una llamada a la API.",
+    "startDate": "Fecha de inicio (opcional)",
+    "endDate": "Fecha de fin (opcional)",
+    "maxRuns": "Máx. ejecuciones por minuto",
+    "default100": "Predeterminado: 100",
+    "rateLimitHint": "El exceso se pone en cola hasta que se libere capacidad.",
+    "label": {
+      "notSet": "No configurado",
+      "every": "Cada {{interval}}",
+      "onceOn": "Una vez el {{date}} a las {{time}}",
+      "dailyAt": "Diariamente a las {{times}}",
+      "weekdaysAt": "Días laborables a las {{times}}",
+      "weeklyOn": "Semanalmente el {{days}} a las {{time}}",
+      "monthlyOn": "Mensualmente el día {{day}} a las {{time}}",
+      "specifiedCount": "{{count}} fecha(s) específica(s)",
+      "onDemand": "Bajo demanda",
+      "unknown": "Desconocido"
+    }
+  },
+  "modules": {
+    "candidate_filter": "Filtro de candidatos",
+    "shift_fetcher": "Obtener turnos",
+    "whatsapp_send": "Enviar WhatsApp",
+    "database_update": "Actualizar base de datos",
+    "email_send": "Enviar correo",
+    "delay": "Espera"
+  },
+  "status": {
+    "active": "Activo",
+    "draft": "Borrador",
+    "inactive": "Inactivo"
+  },
+  "page": {
+    "notRun": "Aún no ejecutado",
+    "running": "Procesando...",
+    "run": "Ejecutar",
+    "candidates": "{{n}} candidatos",
+    "folders": "Carpetas",
+    "newFolder": "Nueva carpeta",
+    "folderNamePrompt": "Nombre de la carpeta:",
+    "allWorkflows": "Todos los workflows",
+    "unassigned": "Sin asignar",
+    "workflowsTitle": "Workflows",
+    "countWorkflows": "{{n}} workflows",
+    "newWorkflow": "Nuevo workflow",
+    "loading": "Cargando...",
+    "empty": "No hay workflows en esta carpeta. Arrastra uno aquí o crea uno nuevo.",
+    "addModuleAlert": "Añade al menos un módulo al workflow antes de guardar.",
+    "saveFailed": "Error al guardar: {{msg}}",
+    "deleteFolderConfirm": "¿Eliminar la carpeta «{{name}}»? Los workflows permanecerán en «Sin asignar»."
+  },
+  "ai": {
+    "saved": "Guardado",
+    "restore": "Restaurar",
+    "versions": "{{count}} versión(es)",
+    "loading": "Cargando…",
+    "emptyStart": "Nada todavía. Haz clic en + para empezar.",
+    "strength": {
+      "high": "Alto",
+      "medium": "Medio",
+      "fast": "Rápido",
+      "reasoning": "Razonamiento"
+    },
+    "customApi": "Custom (API propia)",
+    "field": {
+      "name": "Nombre",
+      "content": "Contenido"
+    },
+    "chat": {
+      "test": "Probar",
+      "clear": "Borrar",
+      "placeholder": "Escribe un mensaje…",
+      "empty": "Envía un mensaje para probar el agente",
+      "noReply": "(sin respuesta)",
+      "error": "⚠ Error al obtener la respuesta."
+    },
+    "agent": {
+      "newAgent": "Nuevo agente",
+      "fallback": "Agente",
+      "namePlaceholder": "Ej. Yessy AI",
+      "model": "Modelo",
+      "apiEndpoint": "Endpoint de API",
+      "apiKey": "Clave API",
+      "prompt": "Instrucción (Prompt)",
+      "noPrompt": "— Sin prompt —",
+      "selectFaqs": "Seleccionar FAQ",
+      "noFaqs": "No se han creado FAQ",
+      "knowledge": "Base de conocimiento",
+      "useKnowledge": "Usar base de conocimiento general",
+      "maxHistory": "Máx. historial de conversación",
+      "confirmDelete": "¿Eliminar el agente \"{{name}}\"?",
+      "selectOrNew": "Selecciona un agente o haz clic en +"
+    },
+    "tabs": {
+      "agents": "Agentes",
+      "prompts": "Prompts",
+      "faqs": "FAQ",
+      "knowledge": "Base de conocimiento"
+    },
+    "prompts": {
+      "namePlaceholder": "Ej. Prompt de sistema Yessy",
+      "bodyPlaceholder": "Eres un asistente de IA amable…",
+      "confirmDelete": "¿Eliminar el prompt \"{{name}}\"?"
+    },
+    "faqs": {
+      "namePlaceholder": "Ej. FAQ de turnos",
+      "contentLabel": "Contenido (formato pregunta + respuesta)",
+      "bodyPlaceholder": "P: ¿Cómo me doy de baja?\nR: Envía un mensaje por WhatsApp...",
+      "confirmDelete": "¿Eliminar la FAQ \"{{name}}\"?"
+    },
+    "knowledge": {
+      "namePlaceholder": "Ej. Condiciones laborales",
+      "bodyPlaceholder": "Introduce el contenido de la base de conocimiento…"
+    },
+    "tools": {
+      "hint": "Activa qué herramientas puede usar un agente",
+      "items": {
+        "shift_lookup": {
+          "label": "Buscar turno",
+          "description": "Encuentra turnos disponibles para un candidato"
+        },
+        "candidate_status": {
+          "label": "Estado del candidato",
+          "description": "Obtiene el estado y el pool de un candidato"
+        },
+        "send_whatsapp": {
+          "label": "Enviar WhatsApp",
+          "description": "Envía un mensaje por WhatsApp"
+        },
+        "update_candidate": {
+          "label": "Actualizar candidato",
+          "description": "Cambia el estado o las notas"
+        },
+        "knowledge_search": {
+          "label": "Buscar en la base",
+          "description": "Busca información en la base de conocimiento"
+        },
+        "calendar_check": {
+          "label": "Consultar agenda",
+          "description": "Comprueba el horario y los turnos"
+        }
+      }
+    }
+  }
+}

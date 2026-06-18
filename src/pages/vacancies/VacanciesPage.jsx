@@ -6,7 +6,7 @@ import { useRightPanel } from '../../context/RightPanelContext'
 const VACATURES = [
   { id: '00101', titel: 'Verzorgende IG – Avond- en Nachtdiensten | PG-zorg Rotterdam Zuid | 24 uur per week',
     status: 'Open', leads: 0, sollicitaties: 0, gepubliceerd: ['career'], eigenaar: { naam: 'Wiktoria Opalenyk', initials: 'WO' },
-    klant: { naam: 'Yesway zorg', color: '#F59E0B' }, datum: '2 jun 2026, 16:37',
+    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '2 jun 2026, 16:37',
     locatie: 'Rotterdam Zuid Rotterdam', dienstverband: 'Vaste termijn', salaris: '€ 2.643,00 – € 3.471,00 maandelijks',
     uren: 'Van 24 tot 24 uur', ervaring: '1 jaar', senioriteit: 'Professional',
     opleiding: 'MBO / Beroepssecundair onderwijs', branche: 'Gezondheidszorg', categorie: 'Zorg',
@@ -21,7 +21,7 @@ const VACATURES = [
   },
   { id: '00100', titel: 'Verzorgende IG – Revalidatiezorg | Rotterdam Zuid | Dag- en avonddiensten | 20–32 uur',
     status: 'Open', leads: 0, sollicitaties: 1, gepubliceerd: ['career','werkzoeken'], eigenaar: { naam: 'Wiktoria Opalenyk', initials: 'WO' },
-    klant: { naam: 'Yesway zorg', color: '#F59E0B' }, datum: '2 jun 2026, 16:13',
+    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '2 jun 2026, 16:13',
     locatie: 'Rotterdam Zuid', dienstverband: 'Vaste termijn', salaris: '€ 2.400,00 – € 3.100,00 maandelijks',
     uren: 'Van 20 tot 32 uur', ervaring: '1 jaar', senioriteit: 'Medior',
     opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Verpleging',
@@ -32,7 +32,7 @@ const VACATURES = [
   },
   { id: '00099', titel: 'Teamleider (Zorg met bedrijfskundige power)',
     status: 'Open', leads: 63, sollicitaties: 0, gepubliceerd: ['career'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: '#F59E0B' }, datum: '21 mei 2026, 15:43',
+    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '21 mei 2026, 15:43',
     locatie: 'Den Haag', dienstverband: 'Vaste termijn', salaris: '€ 3.500,00 – € 4.200,00 maandelijks',
     uren: 'Van 32 tot 40 uur', ervaring: '3 jaar', senioriteit: 'Senior',
     opleiding: 'HBO', branche: 'Gezondheidszorg', categorie: 'Management',
@@ -43,7 +43,7 @@ const VACATURES = [
   },
   { id: '00098', titel: 'Verzorgende IG PG – Den Haag & omgeving | Flexibele diensten + bonus',
     status: 'Open', leads: 0, sollicitaties: 0, gepubliceerd: ['career','werkzoeken'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: '#F59E0B' }, datum: '19 mei 2026, 13:55',
+    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '19 mei 2026, 13:55',
     locatie: 'Den Haag', dienstverband: 'Flexibel', salaris: '€ 2.643,00 – € 3.200,00 maandelijks',
     uren: 'Van 16 tot 32 uur', ervaring: '1 jaar', senioriteit: 'Professional',
     opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Zorg',
@@ -54,7 +54,7 @@ const VACATURES = [
   },
   { id: '00097', titel: 'Startende Verzorgende IG – Groei, begeleiding & zekerheid | Regio Den Haag',
     status: 'Open', leads: 0, sollicitaties: 0, gepubliceerd: ['career','werkzoeken'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: '#F59E0B' }, datum: '19 mei 2026, 13:53',
+    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '19 mei 2026, 13:53',
     locatie: 'Den Haag', dienstverband: 'Vaste termijn', salaris: '€ 2.200,00 – € 2.800,00 maandelijks',
     uren: 'Van 20 tot 32 uur', ervaring: '0 jaar', senioriteit: 'Junior',
     opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Zorg',
@@ -65,7 +65,7 @@ const VACATURES = [
   },
   { id: '00096', titel: 'Verzorgende IG – Den Haag - Somatische zorg - Goed salaris + bonus',
     status: 'Open', leads: 37, sollicitaties: 0, gepubliceerd: ['career','werkzoeken'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: '#F59E0B' }, datum: '19 mei 2026, 13:50',
+    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '19 mei 2026, 13:50',
     locatie: 'Den Haag', dienstverband: 'Flexibel', salaris: '€ 2.643,00 – € 3.471,00 maandelijks',
     uren: 'Van 16 tot 32 uur', ervaring: '1 jaar', senioriteit: 'Professional',
     opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Somatiek',
@@ -76,7 +76,7 @@ const VACATURES = [
   },
   { id: '00095', titel: 'Persoonlijk begeleider | LVB+ | Den Haag',
     status: 'Open', leads: 155, sollicitaties: 1, gepubliceerd: ['career','werkzoeken'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: '#F59E0B' }, datum: '11 mei 2026, 10:31',
+    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '11 mei 2026, 10:31',
     locatie: 'Den Haag', dienstverband: 'Vaste termijn', salaris: '€ 2.400,00 – € 3.100,00 maandelijks',
     uren: 'Van 24 tot 32 uur', ervaring: '2 jaar', senioriteit: 'Medior',
     opleiding: 'HBO / MBO', branche: 'Gezondheidszorg', categorie: 'Begeleiding',
@@ -87,7 +87,7 @@ const VACATURES = [
   },
   { id: '00094', titel: 'Verzorgende IG – Kleinschalig wonen | PG & Somatiek | Dag en avond',
     status: 'Open', leads: 0, sollicitaties: 0, gepubliceerd: ['career'], eigenaar: { naam: 'Wiktoria Opalenyk', initials: 'WO' },
-    klant: { naam: 'Yesway zorg', color: '#F59E0B' }, datum: '8 mei 2026, 14:12',
+    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '8 mei 2026, 14:12',
     locatie: 'Utrecht', dienstverband: 'Vaste termijn', salaris: '€ 2.643,00 – € 3.200,00 maandelijks',
     uren: 'Van 20 tot 32 uur', ervaring: '1 jaar', senioriteit: 'Professional',
     opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Zorg',
@@ -98,7 +98,7 @@ const VACATURES = [
   },
   { id: '00093', titel: 'Begeleider | Zuid-Holland | DUMMY',
     status: 'Open', leads: 0, sollicitaties: 197, gepubliceerd: ['career'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway works', color: '#6366F1' }, datum: '7 mei 2026, 14:48',
+    klant: { naam: 'Yesway works', color: 'var(--color-primary)' }, datum: '7 mei 2026, 14:48',
     locatie: 'Zuid-Holland', dienstverband: 'Flexibel', salaris: '€ 2.000,00 – € 2.800,00 maandelijks',
     uren: 'Van 16 tot 32 uur', ervaring: '0 jaar', senioriteit: 'Junior',
     opleiding: 'MBO', branche: 'Zorg & Welzijn', categorie: 'Begeleiding',
@@ -109,7 +109,7 @@ const VACATURES = [
   },
   { id: '00092', titel: 'Verzorgende IG – Den Haag - Avond en Nachtdiensten',
     status: 'Open', leads: 37, sollicitaties: 0, gepubliceerd: ['career'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: '#F59E0B' }, datum: '1 mei 2026, 15:54',
+    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '1 mei 2026, 15:54',
     locatie: 'Den Haag', dienstverband: 'Flexibel', salaris: '€ 2.643,00 – € 3.471,00 maandelijks',
     uren: 'Van 16 tot 24 uur', ervaring: '1 jaar', senioriteit: 'Professional',
     opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Zorg',
@@ -121,15 +121,15 @@ const VACATURES = [
 ]
 
 const FASE_STATS = [
-  { label: 'Gesolliciteerd', color: '#F59E0B', count: 428 },
+  { label: 'Gesolliciteerd', color: 'var(--color-warning)', count: 428 },
   { label: 'Geaccepteerd',   color: '#8B5CF6', count: 18 },
-  { label: 'Uitgenodigd',    color: '#3B82F6', count: 12 },
+  { label: 'Uitgenodigd',    color: 'var(--color-secondary)', count: 12 },
   { label: 'Voorstel gedaan',color: '#9CA3AF', count: 7 },
-  { label: 'Aangenomen',     color: '#22C55E', count: 0 },
-  { label: 'Afgewezen',      color: '#EF4444', count: 183 },
+  { label: 'Aangenomen',     color: 'var(--color-success)', count: 0 },
+  { label: 'Afgewezen',      color: 'var(--color-danger)', count: 183 },
 ]
 
-const AVATAR_COLORS = ['#6366F1','#3B82F6','#22C55E','#F59E0B','#EF4444','#8B5CF6','#EC4899']
+const AVATAR_COLORS = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6','#EC4899']
 function ac(s) { return AVATAR_COLORS[s.charCodeAt(0) % AVATAR_COLORS.length] }
 
 function Avatar({ initials, size = 26 }) {
@@ -155,7 +155,7 @@ function KlantLogo({ klant }) {
 function PlatformIcon({ type }) {
   const icons = {
     career:    { label: '🌐', bg: '#1F2937' },
-    werkzoeken:{ label: 'W',  bg: '#DC2626' },
+    werkzoeken:{ label: 'W',  bg: 'var(--color-danger)' },
     google:    { label: 'G',  bg: '#4285F4' },
     indeed:    { label: 'i',  bg: '#003A9B' },
   }
@@ -169,7 +169,7 @@ function PlatformIcon({ type }) {
   )
 }
 
-function BarCell({ value, max = 200, color = '#6366F1', warning = false }) {
+function BarCell({ value, max = 200, color = 'var(--color-primary)', warning = false }) {
   const pct = Math.min((value / max) * 100, 100)
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -180,7 +180,7 @@ function BarCell({ value, max = 200, color = '#6366F1', warning = false }) {
         )}
       </div>
       {value > 0 && (
-        <span style={{ fontSize: 12, color: warning ? '#EF4444' : 'var(--text-muted)', fontWeight: warning ? 600 : 400 }}>
+        <span style={{ fontSize: 12, color: warning ? 'var(--color-danger)' : 'var(--text-muted)', fontWeight: warning ? 600 : 400 }}>
           {value}
         </span>
       )}
@@ -194,7 +194,7 @@ function Toggle({ on, onChange }) {
   return (
     <button onClick={() => onChange(!on)}
       style={{ width: 40, height: 22, borderRadius: 999, border: 'none', cursor: 'pointer',
-        background: on ? '#F59E0B' : '#D1D5DB', position: 'relative', flexShrink: 0,
+        background: on ? 'var(--color-warning)' : '#D1D5DB', position: 'relative', flexShrink: 0,
         transition: 'background 0.2s' }}>
       <div style={{ position: 'absolute', top: 2, left: on ? 20 : 2, width: 18, height: 18,
         borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
@@ -276,7 +276,7 @@ function VacatureDrawer({ vac, onClose }) {
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{l}</div>
                 {isStatus
                   ? <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 10px', borderRadius: 999,
-                      background: '#DCFCE7', color: '#16A34A', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      background: 'var(--color-success-bg)', color: 'var(--color-success)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                       {v} <X size={9} />
                     </span>
                   : <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.4 }}>{v}</div>
@@ -295,7 +295,7 @@ function VacatureDrawer({ vac, onClose }) {
 
           {/* Vaardigheden */}
           <Section title="Vereiste vaardigheden">
-            <button style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: '#6366F1',
+            <button style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: 'var(--color-primary)',
               background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
               <Plus size={13} /> Vaardigheid toevoegen
             </button>
@@ -358,10 +358,10 @@ function VacatureDrawer({ vac, onClose }) {
                 <div key={p.key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <PlatformIcon type={p.key} />
                   <span style={{ flex: 1, fontSize: 13, color: 'var(--text)' }}>
-                    {p.label} {p.ext && <span style={{ fontSize: 11, color: '#6366F1' }}>↗</span>}
+                    {p.label} {p.ext && <span style={{ fontSize: 11, color: 'var(--color-primary)' }}>↗</span>}
                   </span>
                   {p.integreer
-                    ? <span style={{ fontSize: 12, color: '#6366F1', fontWeight: 500 }}>Integreer</span>
+                    ? <span style={{ fontSize: 12, color: 'var(--color-primary)', fontWeight: 500 }}>Integreer</span>
                     : <>
                         <Toggle on={platforms[p.key]} onChange={() => togglePlatform(p.key)} />
                         <span style={{ fontSize: 12, color: 'var(--text-muted)', minWidth: 90 }}>
@@ -396,7 +396,7 @@ function VacatureDrawer({ vac, onClose }) {
           <Section title="Leads">
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               background: 'var(--hover-bg)', borderRadius: 6, padding: '8px 12px' }}>
-              <span style={{ fontSize: 13, color: '#F59E0B' }}>Totale leads</span>
+              <span style={{ fontSize: 13, color: 'var(--color-warning)' }}>Totale leads</span>
               <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>{vac.leads}</span>
             </div>
           </Section>
@@ -435,7 +435,7 @@ function VacatureDrawer({ vac, onClose }) {
               {vac.tijdlijn.map((t, i) => (
                 <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#F59E0B', flexShrink: 0 }} />
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0 }} />
                     <Avatar initials={t.initials} size={24} />
                     <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{t.naam}</span>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{t.datum}</span>
@@ -605,7 +605,7 @@ export default function VacanciesPage() {
           display: 'flex', gap: 10, padding: '20px 24px 16px', flexShrink: 0,
         }}>
           {[
-            { label: 'Totaal open',     value: VACATURES.length,  color: '#6366F1', bg: '#EEF2FF' },
+            { label: 'Totaal open',     value: VACATURES.length,  color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
             ...FASE_STATS.map(f => ({ label: f.label, value: f.count, color: f.color, bg: f.color + '22' })),
           ].map(k => (
             <div key={k.label} style={{
@@ -667,7 +667,7 @@ export default function VacanciesPage() {
                       </td>
                       <td style={{ padding: '11px 12px' }}>
                         <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 999,
-                          background: '#DCFCE7', color: '#16A34A' }}>{vac.status}</span>
+                          background: 'var(--color-success-bg)', color: 'var(--color-success)' }}>{vac.status}</span>
                       </td>
                       <td style={{ padding: '11px 12px' }}>
                         <BarCell value={vac.leads} max={200} />

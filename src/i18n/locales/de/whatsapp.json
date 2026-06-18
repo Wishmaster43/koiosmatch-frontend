@@ -1,0 +1,36 @@
+{
+  "title": "WhatsApp",
+  "updatedAt": "Aktualisiert um {{time}}",
+  "refresh": "Aktualisieren",
+  "loading": "Wird geladen…",
+  "outbound": "Ausgehend",
+  "inbound": "Eingehend",
+  "chartTitle": "Nachrichtenaktivität — letzte 14 Tage",
+  "kpi": {
+    "messagesToday": "Nachrichten heute",
+    "candidatesContacted": "Kontaktierte Kandidaten",
+    "shiftsFilled": "Über WA besetzte Einsätze",
+    "openEscalations": "Offene Eskalationen"
+  },
+  "feed": {
+    "title": "Neueste Nachrichten",
+    "live": "live",
+    "loading": "Nachrichten werden geladen…",
+    "empty": "Keine Nachrichten"
+  },
+  "escalations": {
+    "title": "Eskalationen",
+    "loading": "Wird geladen…",
+    "empty": "Keine offenen Eskalationen"
+  },
+  "reasons": {
+    "failed_delivery": "Nicht zugestellt",
+    "no_reply": "Keine Antwort",
+    "negative_response": "Negative Antwort"
+  },
+  "noConn": {
+    "title": "Keine WhatsApp-Verbindung",
+    "desc": "Für diesen Mandanten wurde noch keine WhatsApp-Business-Verbindung eingerichtet. Konfigurieren Sie eine Verbindung über das Backend, um hier Nachrichten und Statistiken zu sehen.",
+    "errorLabel": "Backend-Fehler"
+  }
+}

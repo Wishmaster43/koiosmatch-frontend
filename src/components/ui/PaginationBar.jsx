@@ -4,10 +4,12 @@
  * onPageSizeChange so the parent can refetch. PAGE_SIZE_OPTIONS = selectable sizes.
  */
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export const PAGE_SIZE_OPTIONS = [50, 100, 200, 300, 400, 500]
 
 export default function PaginationBar({ page, totalPages, totalRows, pageSize, onPageChange, onPageSizeChange }) {
+  const { t } = useTranslation('common')
   const from = totalRows === 0 ? 0 : (page - 1) * pageSize + 1
   const to   = Math.min(page * pageSize, totalRows)
 
@@ -28,25 +30,25 @@ export default function PaginationBar({ page, totalPages, totalRows, pageSize, o
       padding: '10px 14px', borderTop: '1px solid var(--border)',
       background: 'var(--surface)', flexShrink: 0,
     }}>
-      {/* Rijen-info */}
+      {/* Row range info */}
       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-        {totalRows === 0 ? 'Geen resultaten' : `${from}–${to} van ${totalRows}`}
+        {totalRows === 0 ? t('noResults') : t('rangeOf', { from, to, total: totalRows })}
       </span>
 
-      {/* Navigatie */}
+      {/* Page navigation */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-        {btn(() => onPageChange(1),         page <= 1,          <ChevronsLeft  size={13} />, 'Eerste pagina')}
-        {btn(() => onPageChange(page - 1),  page <= 1,          <ChevronLeft   size={13} />, 'Vorige pagina')}
+        {btn(() => onPageChange(1),         page <= 1,          <ChevronsLeft  size={13} />, t('firstPage'))}
+        {btn(() => onPageChange(page - 1),  page <= 1,          <ChevronLeft   size={13} />, t('prevPage'))}
         <span style={{ fontSize: 12, color: 'var(--text)', padding: '0 8px', whiteSpace: 'nowrap' }}>
           {page} / {totalPages || 1}
         </span>
-        {btn(() => onPageChange(page + 1),  page >= totalPages, <ChevronRight  size={13} />, 'Volgende pagina')}
-        {btn(() => onPageChange(totalPages), page >= totalPages, <ChevronsRight size={13} />, 'Laatste pagina')}
+        {btn(() => onPageChange(page + 1),  page >= totalPages, <ChevronRight  size={13} />, t('nextPage'))}
+        {btn(() => onPageChange(totalPages), page >= totalPages, <ChevronsRight size={13} />, t('lastPage'))}
       </div>
 
-      {/* Rijen per pagina */}
+      {/* Rows per page */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Rijen per pagina</span>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('rowsPerPage')}</span>
         <select value={pageSize} onChange={e => onPageSizeChange(Number(e.target.value))}
           style={{
             fontSize: 12, padding: '3px 6px', borderRadius: 6,

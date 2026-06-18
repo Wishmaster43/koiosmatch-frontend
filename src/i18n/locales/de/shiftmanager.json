@@ -1,0 +1,203 @@
+{
+  "orders": {
+    "title": "Details — Einsätze",
+    "count": "{{count}} Einsätze",
+    "loading": "Einsätze werden geladen…",
+    "empty": "Keine Einsätze gefunden",
+    "allMonths": "Alle Monate",
+    "search": "Nach ext. ID, Auftragsref., Kunde suchen…",
+    "status": {
+      "open": "Offen",
+      "prognosis": "Prognose",
+      "completed": "Tatsächlich",
+      "in_process": "In Bearbeitung",
+      "cancelled": "Storniert"
+    },
+    "cols": {
+      "extId": "Ext. ID",
+      "orderRef": "Auftragsref.",
+      "status": "Status",
+      "customer": "Kunde",
+      "location": "Standort",
+      "date": "Datum",
+      "start": "Start",
+      "end": "Ende",
+      "hoursCand": "Std. Kand.",
+      "hoursCust": "Std. Kunde",
+      "ccCand": "KSt. Kand.",
+      "ccCust": "KSt. Kunde"
+    },
+    "filterStatus": "Status",
+    "drawer": {
+      "title": "Einsatzdetails",
+      "identification": "Identifikation",
+      "shiftId": "Einsatz-ID",
+      "externalId": "Externe ID",
+      "scheduledId": "Scheduled ID",
+      "orderRef": "Auftragsref.",
+      "planning": "Planung",
+      "date": "Datum",
+      "startTime": "Startzeit",
+      "endTime": "Endzeit",
+      "jobType": "Funktion",
+      "persons": "Anzahl Personen",
+      "status": "Status",
+      "customerLocation": "Kunde & Standort",
+      "customer": "Kunde",
+      "location": "Standort",
+      "address": "Adresse",
+      "hours": "Stunden",
+      "hoursCand": "Stunden Kandidat",
+      "hoursCust": "Stunden Kunde",
+      "ccCand": "Kostenstelle Kand.",
+      "ccCust": "Kostenstelle Kunde",
+      "candidates": "Kandidaten",
+      "notes": "Notizen"
+    }
+  },
+  "shiftsDrawer": {
+    "count": "{{count}} Einsätze",
+    "loadError": "Einsätze konnten nicht geladen werden.",
+    "loading": "Wird geladen…",
+    "empty": "Keine Einsätze gefunden",
+    "search": "Nach Funktion, Standort, Auftragsref., Kandidat suchen…",
+    "shownOf": "{{shown}} von {{total}} angezeigt",
+    "close": "Schließen",
+    "unknown": "Unbekannt",
+    "noCandidate": "Noch kein Kandidat zugeordnet",
+    "hoursUnit": "{{n}} Std.",
+    "status": {
+      "in_process": "Prognose",
+      "completed": "Tatsächlich",
+      "open": "Kein Kandidat",
+      "verwijderd": "Nicht besetzt",
+      "niet_factureerbaar": "Nicht abrechenbar"
+    },
+    "fields": {
+      "email": "E-Mail",
+      "mobile": "Mobil",
+      "scheduled": "Eingeplant",
+      "workedHours": "Geleistete Stunden",
+      "contract": "Vertrag",
+      "date": "Datum",
+      "persons": "Personen",
+      "customerId": "Kunden-ID",
+      "location": "Standort",
+      "place": "Ort",
+      "orderRef": "Auftragsref.",
+      "subject": "Betreff",
+      "shiftIdExt": "Einsatz-ID (extern)",
+      "orderIdExt": "Auftrags-ID (extern)",
+      "rate": "Tarif",
+      "pickup": "Abholung"
+    }
+  },
+  "charts": {
+    "hours": "Anzahl Stunden",
+    "shifts": "Anzahl Einsätze",
+    "loading": "Wird geladen…",
+    "perMonthUnit": "Monat",
+    "perQuarterUnit": "Quartal",
+    "periodLabel": "{{years}} — pro {{unit}}",
+    "filters": {
+      "period": "Zeitraum",
+      "month": "Pro Monat",
+      "quarter": "Pro Quartal",
+      "years": "Jahre",
+      "months": "Monate",
+      "series": "Reihen",
+      "jobType": "Funktion",
+      "customer": "Kunde",
+      "location": "Standort"
+    },
+    "series": {
+      "totaal": "Gesamt",
+      "niet_ingevuld": "Nicht besetzt",
+      "geen_kandidaat": "Kein Kandidat",
+      "prognose": "Prognose",
+      "werkelijk": "Tatsächlich"
+    }
+  },
+  "customersReport": {
+    "title": "Kundenbericht",
+    "activeWord": "aktiv",
+    "inactiveWord": "inaktiv",
+    "totalWord": "gesamt",
+    "filterStatus": "Kundenstatus",
+    "drill": {
+      "activeCustomers": "Aktive Kunden",
+      "allLocations": "Alle Standorte",
+      "allDepartments": "Alle Abteilungen",
+      "customersWithoutLocation": "Kunden ohne Standort"
+    },
+    "sub": {
+      "locations": "{{count}} Standorte",
+      "avgPerCustomer": "Ø {{n}} pro Kunde",
+      "avgPerLocation": "Ø {{n}} pro Standort",
+      "notLinked": "Noch nicht verknüpft",
+      "noLocationsLinked": "Keine Standorte verknüpft"
+    }
+  },
+  "locationsReport": {
+    "title": "Standortbericht",
+    "activeWord": "aktiv",
+    "inactiveWord": "inaktiv",
+    "totalWord": "gesamt",
+    "filterStatus": "Standortstatus",
+    "kpi": {
+      "activeLocations": "Aktive Standorte",
+      "totalDepartments": "Abteilungen gesamt",
+      "uniqueCustomers": "Eindeutige Kunden",
+      "withoutDepartment": "Ohne Abteilung"
+    },
+    "drill": {
+      "activeLocations": "Aktive Standorte",
+      "allDepartments": "Alle Abteilungen",
+      "customers": "Kunden",
+      "locationsWithoutDepartment": "Standorte ohne Abteilung"
+    },
+    "sub": {
+      "avgPerLocation": "Ø {{n}} pro Standort",
+      "notConfigured": "Noch nicht eingerichtet",
+      "allConfigured": "Alles eingerichtet"
+    },
+    "badge": {
+      "active": "aktiv",
+      "noDepartments": "Keine Abteilungen"
+    }
+  },
+  "departmentsReport": {
+    "title": "Abteilungsbericht",
+    "count": "{{count}} Abteilungen",
+    "filterCustomer": "Kunde",
+    "kpi": {
+      "totalDepartments": "Abteilungen gesamt",
+      "uniqueLocations": "Eindeutige Standorte",
+      "uniqueCustomers": "Eindeutige Kunden",
+      "withCostCenter": "Mit Kostenstelle"
+    },
+    "sub": {
+      "avgPerLocation": "Ø {{n}} pro Standort",
+      "linkedPct": "{{pct}}% verknüpft"
+    }
+  },
+  "dashboard": {
+    "recentRuns": "Letzte Ausführungen",
+    "recentConversations": "Letzte Konversationen",
+    "viewAll": "Alle →",
+    "candidates": "{{n}} Kandidaten",
+    "stats": {
+      "openHours": "Offene Stundenzahl",
+      "hoursThisMonth": "Stunden aktueller Monat",
+      "occupancy": "Auslastung",
+      "messagesSent": "Gesendete Nachrichten",
+      "responseRate": "Antwortrate"
+    },
+    "statSub": {
+      "urgent": "{{n}} dringend",
+      "prevMonth": "{{pct}} Vormonat",
+      "thisMonth": "Diesen Monat",
+      "historicAvg": "Ø {{pct}} historisch"
+    }
+  }
+}

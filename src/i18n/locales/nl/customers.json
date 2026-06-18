@@ -1,0 +1,88 @@
+{
+  "title": "Klanten",
+  "page": {
+    "add": "Klant toevoegen",
+    "searchPlaceholder": "Zoek klant, debiteurnr, accountmanager…",
+    "empty": "Geen klanten gevonden.",
+    "loading": "Laden…"
+  },
+  "cols": {
+    "name": "Naam",
+    "debtorNumber": "Debiteurnr.",
+    "status": "Status",
+    "accountManager": "Accountmanager",
+    "locations": "Locaties",
+    "departments": "Afdelingen",
+    "contacts": "Contactpersonen",
+    "city": "Plaats"
+  },
+  "status": {
+    "actief": "Actief",
+    "prospect": "Prospect",
+    "inactief": "Inactief",
+    "geblokkeerd": "Geblokkeerd"
+  },
+  "filters": {
+    "search": "Zoeken",
+    "status": "Status",
+    "accountManager": "Accountmanager",
+    "city": "Plaats",
+    "categories": {
+      "general": "Algemeen",
+      "organisation": "Organisatie"
+    }
+  },
+  "analytics": {
+    "statusTitle": "Status",
+    "amTitle": "Per accountmanager",
+    "locations": "Locaties",
+    "locationsSub": "totaal vestigingen",
+    "departments": "Afdelingen",
+    "departmentsSub": "totaal afdelingen",
+    "contacts": "Contactpersonen",
+    "contactsSub": "totaal contacten",
+    "noContact": "Zonder contactpersoon",
+    "noContactSub": "geen contact gekoppeld"
+  },
+  "drawer": {
+    "noLocations": "Nog geen locaties",
+    "noDepartments": "Nog geen afdelingen",
+    "noContacts": "Nog geen contactpersonen"
+  },
+  "subModal": {
+    "addLocation": "Locatie toevoegen",
+    "addDepartment": "Afdeling toevoegen",
+    "addContact": "Contactpersoon toevoegen",
+    "locationName": "Naam locatie",
+    "locationPlaceholder": "Bijv. Hoofdlocatie",
+    "departmentName": "Naam afdeling",
+    "departmentPlaceholder": "Bijv. Thuiszorg",
+    "selectLocation": "Locatie",
+    "noLocationsFirst": "Maak eerst een locatie aan",
+    "contactName": "Naam",
+    "contactPlaceholder": "Bijv. Jan de Vries",
+    "role": "Functie",
+    "email": "E-mailadres",
+    "city": "Plaats",
+    "create": "Toevoegen",
+    "cancel": "Annuleren",
+    "required": "Verplicht veld"
+  },
+  "modal": {
+    "title": "Klant toevoegen",
+    "subtitle": "Vul de gegevens van de nieuwe klant in",
+    "fillRequired": "Vul de verplichte velden in",
+    "required": "Verplicht veld",
+    "create": "Klant aanmaken",
+    "cancel": "Annuleren",
+    "fields": {
+      "name": "Naam",
+      "namePlaceholder": "Bijv. Stichting Rivas Zorggroep",
+      "debtorNumber": "Debiteurnummer",
+      "status": "Status",
+      "accountManager": "Accountmanager",
+      "city": "Plaats",
+      "cityPlaceholder": "Bijv. Gorinchem"
+    }
+  }
+}

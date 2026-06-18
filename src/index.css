@@ -5,9 +5,24 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #534AB7;
-  --color-primary-light: #7F77DD;
-  --color-primary-bg: #EEEDFE;
+  /* ── Koiosmatch huisstijl ── */
+  --color-primary:       #19A5CA;
+  --color-primary-light: #4DBEDD;
+  --color-primary-bg:    #E8F7FB;
+  --color-secondary:     #1B60A9;
+  --color-secondary-bg:  #E8F0F9;
+  --color-accent:        #F0AB00;
+  --color-accent-bg:     #FEF6E0;
+
+  /* ── Semantische statuskleuren ── */
+  --color-success:       #16A34A;
+  --color-success-bg:    #DCFCE7;
+  --color-warning:       #D97706;
+  --color-warning-bg:    #FEF3C7;
+  --color-danger:        #DC2626;
+  --color-danger-bg:     #FEE2E2;
+  --color-info:          #0EA5E9;
+  --color-info-bg:       #E0F2FE;
   --sidebar-bg: #FFFFFF;
   --sidebar-text: #111827;
   --sidebar-muted: #9CA3AF;

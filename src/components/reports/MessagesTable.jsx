@@ -4,6 +4,7 @@
  * from RightPanelContext. Data is fetched per page from the API.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X,
          MessageCircle, Mail, CheckCheck, Clock, XCircle,
          AlertTriangle, User, Phone } from 'lucide-react'
@@ -21,41 +22,47 @@ function formatDT(dt) {
   return `${PAD(d.getDate())}-${PAD(d.getMonth()+1)}-${d.getFullYear()} ${PAD(d.getHours())}:${PAD(d.getMinutes())}`
 }
 
+// Channel → colour + icon. Label = t('messages.channel.<key>').
 const CHANNEL_META = {
-  whatsapp: { label: 'WhatsApp', bg: '#ECFDF5', color: '#059669', Icon: MessageCircle },
-  email:    { label: 'E-mail',   bg: '#EFF6FF', color: '#2563EB', Icon: Mail          },
-  sms:      { label: 'SMS',      bg: '#F5F3FF', color: '#6D28D9', Icon: Phone         },
+  whatsapp: { bg: '#ECFDF5', color: '#059669', Icon: MessageCircle },
+  email:    { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)', Icon: Mail },
+  sms:      { bg: '#F5F3FF', color: '#6D28D9', Icon: Phone },
 }
 
+// Status → colour + icon. Label = t('messages.status.<key>').
 const STATUS_META = {
-  sent:       { label: 'Verstuurd',  bg: '#F0FDF4', color: '#16A34A', Icon: CheckCheck  },
-  delivered:  { label: 'Bezorgd',   bg: '#ECFDF5', color: '#059669', Icon: CheckCheck  },
-  read:       { label: 'Gelezen',   bg: '#EFF6FF', color: '#2563EB', Icon: CheckCheck  },
-  failed:     { label: 'Mislukt',   bg: '#FEF2F2', color: '#DC2626', Icon: XCircle     },
-  pending:    { label: 'In wachtrij', bg: '#F9FAFB', color: '#6B7280', Icon: Clock     },
-  bounced:    { label: 'Bounced',   bg: '#FFF7ED', color: '#C2410C', Icon: AlertTriangle },
+  sent:       { bg: '#F0FDF4', color: 'var(--color-success)', Icon: CheckCheck  },
+  delivered:  { bg: '#ECFDF5', color: '#059669', Icon: CheckCheck  },
+  read:       { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)', Icon: CheckCheck  },
+  failed:     { bg: '#FEF2F2', color: 'var(--color-danger)', Icon: XCircle     },
+  pending:    { bg: '#F9FAFB', color: '#6B7280', Icon: Clock     },
+  bounced:    { bg: '#FFF7ED', color: '#C2410C', Icon: AlertTriangle },
 }
 
 function ChannelBadge({ channel }) {
-  const m = CHANNEL_META[channel?.toLowerCase()] ?? { label: channel ?? '—', bg: '#F9FAFB', color: '#6B7280', Icon: MessageCircle }
+  const { t } = useTranslation('reports')
+  const key = channel?.toLowerCase()
+  const m = CHANNEL_META[key] ?? { bg: '#F9FAFB', color: '#6B7280', Icon: MessageCircle }
   const Icon = m.Icon
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
                    fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
       <Icon size={10} />
-      {m.label}
+      {channel ? t(`messages.channel.${key}`, { defaultValue: channel }) : '—'}
     </span>
   )
 }
 
 function StatusBadge({ status }) {
-  const m = STATUS_META[status?.toLowerCase()] ?? { label: status ?? '—', bg: '#F9FAFB', color: '#6B7280', Icon: Clock }
+  const { t } = useTranslation('reports')
+  const key = status?.toLowerCase()
+  const m = STATUS_META[key] ?? { bg: '#F9FAFB', color: '#6B7280', Icon: Clock }
   const Icon = m.Icon
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
                    fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
       <Icon size={10} />
-      {m.label}
+      {status ? t(`messages.status.${key}`, { defaultValue: status }) : '—'}
     </span>
   )
 }
@@ -70,6 +77,7 @@ function SortIcon({ active, dir }) {
 // ─── Drill-down drawer ────────────────────────────────────────────────────────
 
 function MessageDrawer({ message, onClose }) {
+  const { t } = useTranslation('reports')
   const channelMeta = CHANNEL_META[message.channel?.toLowerCase()] ?? { Icon: MessageCircle, color: 'var(--color-primary)' }
   const ChannelIcon = channelMeta.Icon
 
@@ -87,7 +95,7 @@ function MessageDrawer({ message, onClose }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                 <ChannelIcon size={15} color={channelMeta.color} />
                 <span style={{ fontWeight: 700, fontSize: 15, color: '#111827' }}>
-                  {message.subject ?? message.template_name ?? `Bericht #${message.id}`}
+                  {message.subject ?? message.template_name ?? t('messages.drawer.messageFallback', { id: message.id })}
                 </span>
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
@@ -109,15 +117,15 @@ function MessageDrawer({ message, onClose }) {
         {/* Body */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
 
-          {/* Ontvanger */}
+          {/* Recipient */}
           <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                         letterSpacing: '0.05em', marginBottom: 8 }}>
-            Ontvanger
+            {t('messages.drawer.recipient')}
           </div>
           {[
-            { icon: User,  label: 'Naam',     value: message.recipient_name },
-            { icon: Phone, label: 'Mobiel',   value: message.recipient_phone ?? message.to_phone },
-            { icon: Mail,  label: 'E-mail',   value: message.recipient_email ?? message.to_email },
+            { icon: User,  label: t('messages.drawer.name'),   value: message.recipient_name },
+            { icon: Phone, label: t('messages.drawer.mobile'), value: message.recipient_phone ?? message.to_phone },
+            { icon: Mail,  label: t('messages.drawer.email'),  value: message.recipient_email ?? message.to_email },
           ].filter(r => r.value).map(r => (
             <div key={r.label} style={{ display: 'flex', gap: 8, padding: '7px 0',
                                         borderBottom: '1px solid #F9FAFB' }}>
@@ -127,17 +135,17 @@ function MessageDrawer({ message, onClose }) {
             </div>
           ))}
 
-          {/* Tijdlijn */}
+          {/* Timeline */}
           <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                         letterSpacing: '0.05em', marginTop: 20, marginBottom: 8 }}>
-            Tijdlijn
+            {t('messages.drawer.timeline')}
           </div>
           {[
-            { label: 'Verstuurd op',  value: formatDT(message.sent_at     ?? message.created_at) },
-            { label: 'Bezorgd op',    value: formatDT(message.delivered_at) },
-            { label: 'Gelezen op',    value: formatDT(message.read_at) },
-            { label: 'Workflow',      value: message.workflow_name },
-            { label: 'Template',      value: message.template_name },
+            { label: t('messages.drawer.sentAt'),      value: formatDT(message.sent_at     ?? message.created_at) },
+            { label: t('messages.drawer.deliveredAt'), value: formatDT(message.delivered_at) },
+            { label: t('messages.drawer.readAt'),      value: formatDT(message.read_at) },
+            { label: t('messages.drawer.workflow'),    value: message.workflow_name },
+            { label: t('messages.drawer.template'),    value: message.template_name },
           ].filter(r => r.value && r.value !== '—').map(r => (
             <div key={r.label} style={{ display: 'flex', gap: 8, padding: '7px 0',
                                         borderBottom: '1px solid #F9FAFB' }}>
@@ -146,12 +154,12 @@ function MessageDrawer({ message, onClose }) {
             </div>
           ))}
 
-          {/* Berichtinhoud */}
+          {/* Message content */}
           {message.body && (
             <div style={{ marginTop: 20 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                             letterSpacing: '0.05em', marginBottom: 8 }}>
-                Berichtinhoud
+                {t('messages.drawer.body')}
               </div>
               <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '12px 14px',
                             fontSize: 13, color: '#374151', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
@@ -160,13 +168,13 @@ function MessageDrawer({ message, onClose }) {
             </div>
           )}
 
-          {/* Foutmelding */}
+          {/* Error message */}
           {message.error_message && (
             <div style={{ marginTop: 16, background: '#FEF2F2', border: '1px solid #FCA5A5',
                           borderRadius: 8, padding: '12px 14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <AlertTriangle size={13} color="#DC2626" />
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#DC2626' }}>Foutmelding</span>
+                <AlertTriangle size={13} color="var(--color-danger)" />
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-danger)' }}>{t('messages.drawer.error')}</span>
               </div>
               <pre style={{ fontSize: 11, color: '#374151', whiteSpace: 'pre-wrap',
                             wordBreak: 'break-all', margin: 0, fontFamily: 'monospace' }}>
@@ -187,16 +195,18 @@ const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 6
              whiteSpace: 'nowrap', userSelect: 'none' }
 const TD = { padding: '10px 12px', fontSize: 13, color: '#374151', borderBottom: '1px solid #F9FAFB' }
 
-const COLS = [
-  { key: 'sent_at',        label: 'Verstuurd',   sortable: true  },
-  { key: 'recipient_name', label: 'Ontvanger',   sortable: true  },
-  { key: 'channel',        label: 'Kanaal',      sortable: true  },
-  { key: 'subject',        label: 'Onderwerp',   sortable: true  },
-  { key: 'status',         label: 'Status',      sortable: true  },
-  { key: 'workflow_name',  label: 'Workflow',    sortable: true  },
+const COL_KEYS = [
+  { key: 'sent_at',         tKey: 'sent',      sortable: true },
+  { key: 'recipient_name',  tKey: 'recipient', sortable: true },
+  { key: 'channel',         tKey: 'channel',   sortable: true },
+  { key: 'subject',         tKey: 'subject',   sortable: true },
+  { key: 'status',          tKey: 'status',    sortable: true },
+  { key: 'workflow_name',   tKey: 'workflow',  sortable: true },
 ]
 
 export default function MessagesTable() {
+  const { t } = useTranslation('reports')
+  const COLS = COL_KEYS.map(c => ({ ...c, label: t(`messages.cols.${c.tKey}`) }))
   const [rows,    setRows]    = useState([])
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
@@ -261,18 +271,18 @@ export default function MessagesTable() {
 
   const handlePageSizeChange = async (n) => {
     setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch {}
+    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch { /* noop */ }
   }
 
   const filterGroups = useMemo(() => {
     const groups = []
     if (channelOptions.length) {
       groups.push({
-        key: 'channel', label: 'Kanaal',
+        key: 'channel', label: t('messages.filters.channel'),
         selected: selectedChannels,
         options: channelOptions.map(c => ({
           value: c,
-          label: CHANNEL_META[c?.toLowerCase()]?.label ?? c,
+          label: t(`messages.channel.${c?.toLowerCase()}`, { defaultValue: c }),
           count: rows.filter(r => r.channel === c).length,
         })),
         onToggle: v => setSelectedChannels(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
@@ -280,11 +290,11 @@ export default function MessagesTable() {
     }
     if (statusOptions.length) {
       groups.push({
-        key: 'status', label: 'Status',
+        key: 'status', label: t('messages.filters.status'),
         selected: selectedStatuses,
         options: statusOptions.map(s => ({
           value: s,
-          label: STATUS_META[s?.toLowerCase()]?.label ?? s,
+          label: t(`messages.status.${s?.toLowerCase()}`, { defaultValue: s }),
           count: rows.filter(r => r.status === s).length,
         })),
         onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
@@ -292,7 +302,7 @@ export default function MessagesTable() {
     }
     if (workflowOptions.length) {
       groups.push({
-        key: 'workflow', label: 'Workflow', type: 'search-select',
+        key: 'workflow', label: t('messages.filters.workflow'), type: 'search-select',
         selected: selectedWorkflows,
         options: workflowOptions.map(w => ({
           value: w, label: w,
@@ -302,7 +312,7 @@ export default function MessagesTable() {
       })
     }
     return groups
-  }, [channelOptions, statusOptions, workflowOptions, selectedChannels, selectedStatuses, selectedWorkflows, rows])
+  }, [t, channelOptions, statusOptions, workflowOptions, selectedChannels, selectedStatuses, selectedWorkflows, rows])
 
   useEffect(() => {
     registerFilters('messages-table', filterGroups)
@@ -315,16 +325,16 @@ export default function MessagesTable() {
       {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>Details — Berichten</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>{t('messages.title')}</h1>
           <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
-            {loading ? 'Laden…' : `${filtered.length} van ${rows.length} berichten`}
+            {loading ? t('common.loadingShort') : t('messages.summary', { shown: filtered.length, total: rows.length })}
           </p>
         </div>
         <div className="relative">
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
                                      transform: 'translateY(-50%)', color: '#9CA3AF' }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Zoek op naam, onderwerp, workflow…"
+            placeholder={t('messages.search')}
             style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
                      border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
         </div>
@@ -350,12 +360,12 @@ export default function MessagesTable() {
             <tbody>
               {loading && (
                 <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
-                  Berichten ophalen…
+                  {t('messages.loading')}
                 </td></tr>
               )}
               {!loading && sorted.length === 0 && (
                 <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
-                  Geen berichten gevonden
+                  {t('messages.empty')}
                 </td></tr>
               )}
               {!loading && paged.map((r, i) => (
@@ -367,12 +377,12 @@ export default function MessagesTable() {
                     <td style={{ ...TD, fontSize: 12, whiteSpace: 'nowrap' }}>
                       <div style={{ fontWeight: 500, color: '#111827' }}>
                         {(r.sent_at ?? r.created_at)
-                          ? new Date(r.sent_at ?? r.created_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })
+                          ? new Date(r.sent_at ?? r.created_at).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' })
                           : '—'}
                       </div>
                       <div style={{ fontSize: 11, color: '#9CA3AF' }}>
                         {(r.sent_at ?? r.created_at)
-                          ? new Date(r.sent_at ?? r.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+                          ? new Date(r.sent_at ?? r.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
                           : ''}
                       </div>
                     </td>

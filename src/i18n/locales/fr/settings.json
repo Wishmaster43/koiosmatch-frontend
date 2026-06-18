@@ -1,0 +1,653 @@
+{
+  "shell": {
+    "title": "Paramètres",
+    "empty": "Aucun paramètre disponible pour votre rôle."
+  },
+  "common": {
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Enregistré",
+    "loading": "Chargement des paramètres…",
+    "upload": "Téléverser",
+    "remove": "Supprimer",
+    "cancel": "Annuler",
+    "loadingShort": "Chargement…",
+    "copied": "Copié !",
+    "back": "Retour",
+    "next": "Suivant"
+  },
+  "groups": {
+    "general": "Général",
+    "company": "Entreprise",
+    "personalisation": "Personnalisation",
+    "views": "Vues",
+    "notifications": "Notifications",
+    "communication": "Communication",
+    "integrations": "Intégrations et API",
+    "billing": "Facturation",
+    "administration": "Administration"
+  },
+  "nav": {
+    "kpis": "KPI",
+    "display": "Affichage",
+    "branding": "Marque",
+    "security": "Sécurité",
+    "company": "Général",
+    "locations": "Emplacements",
+    "memory": "Mémoire",
+    "phases": "Phases",
+    "candidate_status": "Statut candidat",
+    "vacancy": "Offre",
+    "rejection": "Motifs de refus",
+    "cv_template": "Modèle de CV",
+    "view_customers": "Clients",
+    "view_planning": "Planning",
+    "view_sales": "Ventes",
+    "view_candidates": "Candidats",
+    "notif_sollicitaties": "Candidatures",
+    "notif_vacatures": "Offres",
+    "notif_facturering": "Facturation",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp",
+    "appstore": "App store",
+    "apikeys": "Clés API",
+    "webhooks": "Webhooks",
+    "importeren": "Importer",
+    "billing_plans": "Forfait",
+    "billing_pay": "Moyens de paiement",
+    "billing_auto": "Recharge automatique",
+    "billing_usage": "Utilisation",
+    "billing_invoices": "Factures",
+    "modules": "Modules",
+    "apps": "Apps (connecteurs)",
+    "roles": "Rôles et droits",
+    "users": "Utilisateurs",
+    "sync": "Synchronisation",
+    "audit": "Journal d'audit"
+  },
+  "kpis": {
+    "title": "Paramètres KPI",
+    "subtitle": "Objectifs pour les tableaux de bord et les rapports",
+    "fields": {
+      "new_candidates_target": {
+        "label": "Objectif nouveaux candidats / mois",
+        "description": "Objectif mensuel de nouvelles inscriptions",
+        "unit": "candidats"
+      },
+      "churn_warning_threshold": {
+        "label": "Seuil d'alerte d'attrition",
+        "description": "Pourcentage d'attrition déclenchant une alerte",
+        "unit": "%"
+      },
+      "avg_candidates_window": {
+        "label": "Période de calcul de la moyenne",
+        "description": "Nombre de mois pour la moyenne mobile",
+        "unit": "mois"
+      },
+      "occupancy_target": {
+        "label": "Objectif de taux d'occupation",
+        "description": "Valeur cible du taux d'occupation",
+        "unit": "%"
+      },
+      "response_rate_target": {
+        "label": "Objectif de taux de réponse",
+        "description": "Valeur cible de réponse des candidats aux messages",
+        "unit": "%"
+      }
+    }
+  },
+  "display": {
+    "title": "Paramètres d'affichage",
+    "subtitle": "Limites et valeurs par défaut des tableaux et graphiques",
+    "fields": {
+      "candidates_per_page": {
+        "label": "Candidats par appel API",
+        "description": "Nombre maximal de candidats récupérés en une fois",
+        "unit": "enreg."
+      },
+      "top_cities_n": {
+        "label": "Top N villes",
+        "description": "Nombre de villes affichées dans le graphique des villes",
+        "unit": "villes"
+      },
+      "shifts_detail_limit": {
+        "label": "Limite de détail des shifts",
+        "description": "Nombre maximal de shifts dans le détail",
+        "unit": "enreg."
+      },
+      "activity_log_limit": {
+        "label": "Entrées du journal d'audit",
+        "description": "Nombre maximal d'entrées du journal récupérées",
+        "unit": "entrées"
+      }
+    }
+  },
+  "brand": {
+    "title": "Marque",
+    "subtitle": "Logo, nom et couleur principale pour cette plateforme",
+    "companyName": "Nom de l'entreprise",
+    "companyNameHint": "Affiché dans la barre de navigation et les e-mails",
+    "companyNamePlaceholder": "p.ex. MonEntreprise SARL",
+    "primaryColor": "Couleur principale",
+    "primaryColorHint": "Utilisée pour les boutons, liens et éléments de menu actifs",
+    "preview": "Aperçu :",
+    "buttonPreview": "Aperçu du bouton",
+    "linkPreview": "Aperçu du lien",
+    "logo": "Logo",
+    "logoHint": "PNG ou SVG, max 2 Mo — affiché dans la barre de navigation",
+    "noLogo": "Aucun logo"
+  },
+  "company": {
+    "title": "Entreprise",
+    "subtitle": "Gérez les informations et préférences de votre entreprise.",
+    "managedUnder": "Le nom et le logo de l'entreprise sont gérés sous Général → Marque.",
+    "banner": "Bannière d'entreprise",
+    "industry": "Secteur",
+    "country": "Pays",
+    "address1": "Adresse ligne 1",
+    "address1Placeholder": "Rue et numéro",
+    "address2": "Adresse ligne 2 (facultatif)",
+    "postcode": "Code postal",
+    "city": "Ville",
+    "cityPlaceholder": "Ville",
+    "province": "Province",
+    "language": "Langue",
+    "currency": "Devise",
+    "timezone": "Fuseau horaire"
+  },
+  "locations": {
+    "title": "Emplacements",
+    "subtitle": "Gérez tous vos bureaux et emplacements au même endroit.",
+    "create": "Créer un emplacement",
+    "colName": "Nom",
+    "colAddress": "Adresse",
+    "colCreated": "Créé le",
+    "empty": "Aucun emplacement.",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "nameLabel": "Nom",
+    "namePlaceholder": "Nom de l'emplacement",
+    "addressLabel": "Adresse",
+    "addressPlaceholder": "Adresse complète",
+    "createBtn": "Créer"
+  },
+  "memory": {
+    "title": "Mémoire",
+    "subtitle": "Enregistrez des notes et du contexte disponibles dans tout le système.",
+    "placeholder": "Ajoutez ici des notes, du contexte ou des instructions…"
+  },
+  "statusList": {
+    "nameLabel": "Nom",
+    "namePlaceholder": "Nom",
+    "colorLabel": "Couleur",
+    "addBtn": "Ajouter",
+    "confirmDelete": "Supprimer « {{name}} » ?"
+  },
+  "phases": {
+    "title": "Phases",
+    "subtitle": "Gérez les phases de votre flux et les actions disponibles à chaque étape.",
+    "add": "Ajouter une phase"
+  },
+  "candidateStatus": {
+    "title": "Statut candidat",
+    "subtitle": "Gérez les statuts de vos candidats et leur disponibilité.",
+    "add": "Ajouter un statut"
+  },
+  "vacancy": {
+    "title": "Offre",
+    "subtitle": "Gérez les statuts d'offre et les noms de champs personnalisés prédéfinis.",
+    "add": "Ajouter un statut",
+    "customFields": "Champs personnalisés",
+    "customFieldsHint": "Définissez des noms de champs qui apparaissent sur chaque offre pour faciliter la saisie.",
+    "fieldPlaceholder": "Nom du champ…"
+  },
+  "rejection": {
+    "title": "Motifs de refus",
+    "subtitle": "Gérez les motifs de refus des candidatures.",
+    "add": "Ajouter un motif"
+  },
+  "cvTemplate": {
+    "title": "Modèle de CV",
+    "subtitle": "Configurez le design du CV généré à partir des profils candidats.",
+    "pdfPreview": "Aperçu PDF",
+    "generating": "Génération…",
+    "reset": "Réinitialiser",
+    "accentColors": "Couleurs d'accent",
+    "accentColorsHint": "Couleur 1 = barre latérale et bande. Couleur 2 = titres de section et liens.",
+    "color1": "Couleur 1",
+    "color2": "Couleur 2",
+    "sections": "Sections",
+    "sectionsHint": "Définissez quelles sections sont visibles et dans quel ordre.",
+    "preview": "Aperçu",
+    "previewHint": "A4 — avec candidat exemple"
+  },
+  "security": {
+    "twoFactor": "Authentification à deux facteurs (2FA)",
+    "statusOn": "Activée — votre compte est mieux protégé",
+    "statusOff": "Désactivée — ajoutez une couche de sécurité supplémentaire",
+    "enable": "Activer",
+    "disable": "Désactiver",
+    "enabledTitle": "Authentification à deux facteurs activée",
+    "enabledDesc": "Enregistrez vos codes de récupération. Ils ne sont utilisables qu'une fois et ne seront plus affichés.",
+    "recoveryCodes": "Codes de récupération",
+    "copy": "Copier",
+    "copied": "Copié !",
+    "done": "Terminé",
+    "back": "Retour",
+    "scanTitle": "Scannez le QR code",
+    "scanDesc": "Ouvrez votre application d'authentification (Google Authenticator, Microsoft Authenticator, Bitwarden, etc.) et scannez le QR code ci-dessous.",
+    "manualEntry": "Saisie manuelle",
+    "codeLabel": "Code de vérification de l'application",
+    "working": "En cours…",
+    "confirmEnable": "Confirmer et activer",
+    "disableTitle": "Désactiver l'authentification à deux facteurs",
+    "disableDesc": "Saisissez votre code de vérification actuel pour désactiver la 2FA.",
+    "disableBtn": "Désactiver la 2FA",
+    "supportedApps": "Applications prises en charge",
+    "errSetup": "Impossible de démarrer la configuration MFA.",
+    "errInvalidRetry": "Code invalide. Veuillez réessayer.",
+    "errInvalid": "Code invalide."
+  },
+  "email": {
+    "title": "Paramètres e-mail",
+    "subtitle": "Adresse d'expéditeur et connexion pour le module e-mail",
+    "testConnection": "Tester la connexion",
+    "testSent": "E-mail de test envoyé",
+    "testFailed": "Échec de la connexion",
+    "provider": "Fournisseur e-mail",
+    "gmailDesc": "Connexion via OAuth2 ou mot de passe d'application",
+    "officeDesc": "Connexion via Microsoft OAuth2 ou SMTP",
+    "manualLabel": "SMTP manuel",
+    "manualDesc": "Votre propre serveur de messagerie ou fournisseur",
+    "oauthWarningTitle": "Backend requis :",
+    "oauthWarning": "La connexion OAuth2 pour {{provider}} doit être configurée via le backend. Enregistrez l'adresse d'expéditeur ci-dessous ; la connexion OAuth réelle est configurée par l'administrateur.",
+    "senderDetails": "Coordonnées de l'expéditeur",
+    "senderName": "Nom de l'expéditeur",
+    "senderNamePlaceholder": "p.ex. KoiosMatch",
+    "fromAddress": "Adresse d'expéditeur (from)",
+    "fromPlaceholder": "noreply@votreentreprise.fr",
+    "smtpConfig": "Configuration SMTP",
+    "smtpServer": "Serveur SMTP",
+    "smtpServerPlaceholder": "smtp.votreentreprise.fr",
+    "port": "Port",
+    "username": "Nom d'utilisateur",
+    "usernamePlaceholder": "utilisateur@votreentreprise.fr",
+    "password": "Mot de passe",
+    "passwordSet": "✓ défini",
+    "passwordKeepPlaceholder": "Laisser vide pour conserver le mot de passe actuel",
+    "passwordPlaceholder": "Mot de passe SMTP",
+    "security": "Sécurité",
+    "secTls": "STARTTLS (port 587)",
+    "secSsl": "SSL/TLS (port 465)",
+    "secNone": "Aucune (non recommandé)"
+  },
+  "appStore": {
+    "title": "App store",
+    "desc": "Gérer et installer des apps et intégrations."
+  },
+  "notifications": {
+    "email": {
+      "label": "Notifications e-mail",
+      "desc": "Recevoir des notifications par e-mail"
+    },
+    "inApp": {
+      "label": "Notifications in-app",
+      "desc": "Recevoir des notifications dans la plateforme"
+    },
+    "context": {
+      "sollicitaties": {
+        "title": "Candidatures",
+        "desc": "Notifications sur les candidatures nouvelles et mises à jour."
+      },
+      "vacatures": {
+        "title": "Offres",
+        "desc": "Notifications sur les mises à jour et changements de statut des offres."
+      },
+      "facturering": {
+        "title": "Facturation",
+        "desc": "Notifications sur les factures, paiements et abonnements."
+      }
+    }
+  },
+  "billing": {
+    "plans": {
+      "title": "Forfait",
+      "desc": "Gérez votre abonnement et votre forfait."
+    },
+    "pay": {
+      "title": "Moyens de paiement",
+      "desc": "Ajoutez et gérez les moyens de paiement."
+    },
+    "auto": {
+      "title": "Recharge automatique",
+      "desc": "Configurez la recharge automatique."
+    },
+    "usage": {
+      "title": "Utilisation",
+      "desc": "Consultez votre aperçu d'utilisation."
+    },
+    "invoices": {
+      "title": "Factures",
+      "desc": "Consultez et téléchargez vos factures."
+    }
+  },
+  "apiKeys": {
+    "title": "Clés API",
+    "subtitle": "Gérez les clés API pour les intégrations externes.",
+    "newKeyBanner": "Nouvelle clé API — copiez-la maintenant, elle ne sera plus affichée.",
+    "close": "Fermer",
+    "namePlaceholder": "Nom de la clé API…",
+    "create": "Créer",
+    "empty": "Aucune clé API créée.",
+    "created": "Créée",
+    "used": "Utilisée",
+    "revokeConfirm": "Révoquer la clé API « {{name}} » ?",
+    "revoke": "Révoquer"
+  },
+  "webhooks": {
+    "title": "Webhooks",
+    "subtitle": "Créez des URL de webhook entrantes pour déclencher des workflows depuis des systèmes externes.",
+    "newWebhook": "Nouveau webhook",
+    "namePlaceholder": "Nom (p.ex. WhatsApp entrant)",
+    "descPlaceholder": "Description (facultatif)",
+    "create": "Créer",
+    "creating": "Création…",
+    "empty": "Aucun webhook créé.",
+    "lastTriggered": "Dernier",
+    "removeConfirm": "Supprimer le webhook ?",
+    "copyUrl": "Copier l'URL"
+  },
+  "sync": {
+    "title": "Synchronisation",
+    "subtitle": "Récupérer les données manuellement · max 1x toutes les {{secs}}s par élément",
+    "sessionLog": "Journal de session",
+    "busy": "En cours…",
+    "comingSoon": "Bientôt",
+    "viaCustomers": "Via sync clients",
+    "noAccess": "Aucun accès",
+    "syncBtn": "Sync",
+    "cooldown": "Cooldown",
+    "noPermission": "Vous n'avez pas l'autorisation de synchroniser",
+    "succeeded": "Réussi",
+    "failed": "Échec",
+    "tooManyRequests": "Trop de requêtes — attendez {{secs}}s",
+    "items": {
+      "candidates": {
+        "label": "Candidats",
+        "desc": "Données candidats du système de planning"
+      },
+      "customers": {
+        "label": "Clients",
+        "desc": "Clients du système de planning"
+      },
+      "locations": {
+        "label": "Emplacements",
+        "desc": "Les emplacements sont synchronisés avec les clients"
+      },
+      "departments": {
+        "label": "Départements",
+        "desc": "Les départements sont synchronisés avec les clients"
+      },
+      "contacts": {
+        "label": "Contacts",
+        "desc": "Synchroniser les contacts par client"
+      },
+      "orders": {
+        "label": "Services",
+        "desc": "Aperçu des services du système de planning"
+      },
+      "shifts": {
+        "label": "Shifts",
+        "desc": "Détails des shifts du système de planning"
+      },
+      "invites": {
+        "label": "Plannings",
+        "desc": "Plannings des candidats par shift"
+      }
+    }
+  },
+  "import": {
+    "types": {
+      "candidates": "Candidats",
+      "cvs": "CV",
+      "vacancies": "Offres"
+    },
+    "title": "Importer {{type}}",
+    "subtitle": "Importez vos données {{type}} existantes avec un fichier CSV.",
+    "fileTitle": "Importer votre fichier",
+    "step": "Étape actuelle : {{step}} / {{total}}",
+    "dropHere": "Glissez vos fichiers ici",
+    "selectCsv": "Sélectionner CSV",
+    "fileSelected": "Fichier sélectionné. Cliquez sur Suivant pour mapper les colonnes.",
+    "mapColumns": "Associez les colonnes de votre CSV aux champs du système.",
+    "mapColumnsHint": "Le mappage des colonnes est configuré après le téléversement.",
+    "doneTitle": "Import terminé !",
+    "doneDesc": "Vos données ont été importées avec succès.",
+    "newImport": "Nouvel import"
+  },
+  "apps": {
+    "notOnPkg3Title": "Le tenant n'est pas encore sur le Forfait 3",
+    "notOnPkg3Desc": "Vous pouvez préconfigurer les connecteurs, mais ils ne deviennent visibles pour les utilisateurs qu'après avoir fait passer ce forfait tenant au Forfait 3 via l'onglet Modules.",
+    "costTitle": "Attention : des frais mensuels sont associés",
+    "costDesc": "Activer ou désactiver des apps affecte directement votre facture. Contactez votre gestionnaire de compte pour les tarifs.",
+    "adminOnly": "Seuls les admins peuvent activer ou désactiver des apps.",
+    "active": "Actif",
+    "monthly": "Mensuel",
+    "noRights": "Aucune autorisation",
+    "disable": "Désactiver",
+    "enable": "Activer"
+  },
+  "modules": {
+    "loading": "Chargement du forfait…",
+    "superAdminTitle": "Visible uniquement par les super admins",
+    "superAdminDesc": "Changer le forfait affecte directement la facture client. Chaque changement est enregistré.",
+    "pkgCol": "Forfait",
+    "current": "Actuel",
+    "savedActive": "Enregistré & actif",
+    "activate": "Activer le forfait",
+    "changeFromTo": "Changement de {{from}} à {{to}}",
+    "packages": {
+      "reporting_sm": "Rapports Shiftmanager",
+      "reporting_hf": "Rapports HelloFlex",
+      "reporting_sm_hf": "Rapports SM + HF",
+      "reporting_sm_ai": "Rapports SM + AI & Workflow",
+      "reporting_hf_ai": "Rapports HF + AI & Workflow",
+      "reporting_sm_hf_ai": "Rapports SM + HF + AI & Workflow",
+      "ats_crm": "ATS & CRM",
+      "ats_crm_ai": "ATS & CRM + AI & Workflow",
+      "ats_crm_planning": "ATS & CRM + Planning",
+      "ats_crm_ai_planning": "ATS & CRM + AI & Workflow + Planning"
+    }
+  },
+  "whatsapp": {
+    "loading": "Chargement des données WhatsApp…",
+    "connection": "Connexion",
+    "notConnected": "Non connecté",
+    "notConnectedDesc": "Aucune connexion WhatsApp Business n'est encore configurée pour ce tenant.",
+    "statusUnavailable": "Statut de connexion indisponible",
+    "checked": "Vérifié",
+    "statusActive": "Connecté",
+    "statusInactive": "Inactif",
+    "statusExpired": "Jeton expiré",
+    "phoneNumbers": "Numéros de téléphone",
+    "linked": "{{count}} liés",
+    "sync": "Synchroniser",
+    "noNumbers": "Aucun numéro de téléphone trouvé",
+    "quality": "Qualité",
+    "qualityGREEN": "Bonne",
+    "qualityYELLOW": "Moyenne",
+    "qualityRED": "Mauvaise",
+    "templates": "Modèles",
+    "total": "{{count}} au total",
+    "noTemplates": "Aucun modèle trouvé",
+    "searchPlaceholder": "Rechercher un modèle…",
+    "noResults": "Aucun résultat",
+    "colName": "Nom",
+    "colCategory": "Catégorie",
+    "colLang": "Langue",
+    "colStatus": "Statut",
+    "statusAPPROVED": "Approuvé",
+    "statusPENDING": "En révision",
+    "statusREJECTED": "Rejeté",
+    "statusPAUSED": "En pause",
+    "catMARKETING": "Marketing",
+    "catUTILITY": "Transactionnel",
+    "catAUTHENTICATION": "Authentification",
+    "numbersSynced": "Numéros synchronisés",
+    "templatesSynced": "Modèles synchronisés",
+    "syncFailed": "Échec de la synchronisation"
+  },
+  "roles": {
+    "loading": "Chargement des rôles…",
+    "title": "Rôles et permissions",
+    "subtitle": "Cliquez sur un rôle pour modifier ses permissions",
+    "newPlaceholder": "Nouveau rôle…",
+    "create": "Créer",
+    "editNameTitle": "Cliquez pour modifier le nom",
+    "rightsCount_one": "{{count}} permission",
+    "rightsCount_other": "{{count}} permissions",
+    "usersCount_one": "{{count}} utilisateur",
+    "usersCount_other": "{{count}} utilisateurs",
+    "edit": "Modifier",
+    "deleteTitle": "Supprimer le rôle",
+    "deleteBlocked_one": "Suppression impossible — {{count}} utilisateur possède ce rôle. Attribuez-lui d'abord un autre rôle.",
+    "deleteBlocked_other": "Suppression impossible — {{count}} utilisateurs possèdent ce rôle. Attribuez-leur d'abord un autre rôle.",
+    "confirmDelete": "Supprimer le rôle « {{name}} » ?",
+    "empty": "Aucun rôle créé pour le moment.",
+    "groups": {
+      "candidates": "Candidats",
+      "customers": "Clients",
+      "reports": "Rapports",
+      "workflows": "Workflows",
+      "whatsapp": "WhatsApp",
+      "users": "Utilisateurs",
+      "settings": "Paramètres",
+      "sync": "Synchronisation"
+    },
+    "actions": {
+      "view": "Consulter",
+      "create": "Créer",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "sync": "Synchroniser",
+      "refresh": "Actualiser",
+      "export": "Exporter"
+    }
+  },
+  "audit": {
+    "title": "Journal d'audit",
+    "loading": "Chargement…",
+    "countSummary": "{{shown}} sur {{total}} entrées",
+    "unavailable": "Journal d'audit indisponible.",
+    "searchPlaceholder": "Rechercher par action ou utilisateur…",
+    "dateTo": "au",
+    "noEntries": "Aucune entrée trouvée",
+    "colDateTime": "Date et heure",
+    "colWho": "Par qui",
+    "colType": "Type",
+    "colAction": "Action",
+    "colOldValue": "Ancienne valeur",
+    "colNewValue": "Nouvelle valeur",
+    "system": "Système",
+    "none": "aucun",
+    "active": "✓ actif",
+    "inactive": "— inactif",
+    "before": "Avant",
+    "after": "Après",
+    "addedCount": "Ajouté ({{count}})",
+    "removedCount": "Supprimé ({{count}})",
+    "changedCount": "Modifié ({{count}})",
+    "unchangedCount": "Inchangé ({{count}})",
+    "oldValue": "Ancienne valeur",
+    "newValue": "Nouvelle valeur",
+    "settingsUpdated_one": "{{count}} paramètre mis à jour",
+    "settingsUpdated_other": "{{count}} paramètres mis à jour",
+    "noChanges": "Aucune modification",
+    "keysUpdated": "{{count}} clé(s) mise(s) à jour",
+    "filterType": "Type",
+    "filterWho": "Par qui",
+    "filterRole": "Rôle",
+    "http": {
+      "method": "Méthode",
+      "path": "Chemin",
+      "status": "Statut",
+      "duration": "Durée",
+      "payload": "Payload"
+    },
+    "auth": {
+      "action": "Action",
+      "ip": "IP",
+      "browser": "Navigateur"
+    },
+    "sync": {
+      "synced": "Synchronisé",
+      "total": "Total",
+      "errors": "Erreurs",
+      "duration": "Durée",
+      "locations": "Sites",
+      "departments": "Départements"
+    },
+    "cell": {
+      "synced": "{{count}} synchro.",
+      "errors": "{{count}} erreurs"
+    },
+    "logName": {
+      "auth": "Auth",
+      "http": "HTTP",
+      "sync": "Synchronisation",
+      "roles": "Rôles",
+      "settings": "Paramètres",
+      "users": "Utilisateurs",
+      "apps": "Apps",
+      "modules": "Modules",
+      "workflows": "Workflows",
+      "webhooks": "Webhooks",
+      "ai": "IA"
+    },
+    "kpi": {
+      "new_candidates_target": "Objectif nouveaux candidats",
+      "churn_warning_threshold": "Seuil d'attrition",
+      "avg_candidates_window": "Période moy.",
+      "occupancy_target": "Objectif d'occupation",
+      "response_rate_target": "Objectif taux de réponse"
+    },
+    "props": {
+      "synced": "Synchronisé",
+      "total": "Total",
+      "errors": "Erreurs",
+      "duration": "Durée",
+      "keys": "Clés",
+      "name": "Nom",
+      "permissions": "Permissions",
+      "before": "Avant",
+      "after": "Après",
+      "role": "Rôle"
+    }
+  },
+  "lookups": {
+    "add": "Ajouter",
+    "colorField": "Couleur",
+    "edit": "Modifier",
+    "empty": "Rien de configuré pour le moment.",
+    "labelField": "Libellé",
+    "labelPlaceholder": "Nom affiché",
+    "title": "Lookups candidats",
+    "subtitle": "Gérez les types de contrat, les étapes du funnel et les statuts (libellés, couleurs et ordre).",
+    "confirmDelete": "Supprimer « {{name}} » ? S'il est utilisé, il sera archivé.",
+    "valueField": "Slug (valeur)",
+    "valueHint": "Clé stable ; laissez vide pour en générer une à partir du libellé.",
+    "valueImmutable": "Le slug ne peut plus être modifié après la création.",
+    "candidate_types": {
+      "title": "Types de contrat",
+      "subtitle": "Plusieurs par candidat (ex. Extra, Indépendant, Payroll)."
+    },
+    "funnel_types": {
+      "title": "Étapes du funnel",
+      "subtitle": "Un par candidat (Prospect → Admission → Vivier → Alumni)."
+    },
+    "statuses": {
+      "title": "Statuts",
+      "subtitle": "Statut opérationnel avec une couleur (Actif, Inactif, Malade …)."
+    }
+  }
+}

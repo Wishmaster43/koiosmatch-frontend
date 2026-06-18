@@ -1,6 +1,6 @@
 // StatCard — a simple stat tile (icon + label + value + optional sub-text).
 // When onClick is provided the card becomes clickable (hover highlight + pointer cursor).
-export default function StatCard({ label, value, sub, color = '#534AB7', bg = '#EEF2FF', icon: Icon, onClick }) {
+export default function StatCard({ label, value, sub, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)', icon: Icon, onClick }) {
   return (
     <div
       className="flex flex-col gap-3 p-5 bg-white rounded-xl"

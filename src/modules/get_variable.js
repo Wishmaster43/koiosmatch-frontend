@@ -7,7 +7,7 @@ export default {
   label:    'Variabele ophalen',
   Icon:     BookMarked,
   color:    '#0369A1',
-  bg:       '#E0F2FE',
+  bg:       'var(--color-info-bg)',
   schema: [
     { key: 'variable_name', label: 'Variabelenaam', type: 'text', placeholder: 'mijn_variabele' },
   ],

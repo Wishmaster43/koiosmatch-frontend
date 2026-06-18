@@ -14,21 +14,24 @@ import {
   ResponsiveContainer, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts"
+import { useTranslation }     from "react-i18next"
 import api                    from "../../lib/api"
 import ShiftsDrillDownDrawer  from "./ShiftsDrillDownDrawer"
 import { useRightPanel }      from "../../context/RightPanelContext"
 
-// ── Constanten ────────────────────────────────────────────────────────────────
+// ── Constants ───────────────────────────────────────────────────────────────
 
+// Series key + colour; labels come from i18n via t('charts.series.<key>').
 const SERIES = [
-  { key: "totaal",         label: "Totaal",         color: "#1e293b" },
-  { key: "niet_ingevuld",  label: "Niet ingevuld",  color: "#f59e0b" },
-  { key: "geen_kandidaat", label: "Geen kandidaat", color: "#ef4444" },
-  { key: "prognose",       label: "Prognose",       color: "#6366f1" },
-  { key: "werkelijk",      label: "Werkelijk",      color: "#10b981" },
+  { key: "totaal",         color: "#1e293b" },
+  { key: "niet_ingevuld",  color: "#f59e0b" },
+  { key: "geen_kandidaat", color: "#ef4444" },
+  { key: "prognose",       color: "#6366f1" },
+  { key: "werkelijk",      color: "#10b981" },
 ]
 
-const MONTH_LABELS = ["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"]
+// Locale-aware short month name for index 0–11 (used for chart axis labels).
+const monthAbbr = (i) => new Date(2000, i, 1).toLocaleString(undefined, { month: "short" })
 const CURRENT_YEAR = new Date().getFullYear()
 const YEAR_OPTIONS = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR]
 const YEAR_OPACITY = [1, 0.55, 0.3]
@@ -99,9 +102,10 @@ function YearIndicator({ years }) {
   )
 }
 
-// ── Kaart-wrapper ─────────────────────────────────────────────────────────────
+// ── Card wrapper ──────────────────────────────────────────────────────────────
 
 function ChartCard({ title, subtitle, loading, error, children }) {
+  const { t } = useTranslation('shiftmanager')
   return (
     <div className="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
       <div className="p-5">
@@ -110,7 +114,7 @@ function ChartCard({ title, subtitle, loading, error, children }) {
           {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
         </div>
         {loading && (
-          <div className="flex items-center justify-center h-64 text-slate-400">Laden…</div>
+          <div className="flex items-center justify-center h-64 text-slate-400">{t('charts.loading')}</div>
         )}
         {error && !loading && (
           <div className="flex items-center justify-center h-64 text-red-500">{error}</div>
@@ -130,8 +134,10 @@ export default function ShiftsChartsBlock({
   fixedDepartmentId = null,
   fixedCandidateId  = null,
 }) {
-  // Stabiliseer array-props zodat ze geen nieuwe referentie geven bij elke render
-  // (default [] in props zorgt anders voor een infinite re-render loop)
+  const { t } = useTranslation('shiftmanager')
+  const seriesLabel = (key) => t(`charts.series.${key}`, { defaultValue: key })
+  // Stabilise array props so they keep the same reference across renders
+  // (a default [] in props would otherwise cause an infinite re-render loop)
   const fixedCustomers   = useMemo(() => fixedCustomersProp,   // eslint-disable-line
     [fixedCustomersProp.join(',')])                            // eslint-disable-line
   const fixedLocationIds = useMemo(() => fixedLocationIdsProp, // eslint-disable-line
@@ -234,7 +240,7 @@ export default function ShiftsChartsBlock({
     }
 
     return monthIndices.map((i) => {
-      const entry = { label: MONTH_LABELS[i], _monthIndex: i + 1 }
+      const entry = { label: monthAbbr(i), _monthIndex: i + 1 }
       selectedYears.forEach((year) => {
         const key = `${year}-${String(i + 1).padStart(2, "0")}`
         const row = byYearMonth.get(key) ?? {}
@@ -255,7 +261,7 @@ export default function ShiftsChartsBlock({
     selectedYears.flatMap((year, yi) =>
       activeSeries.map((s) => ({
         dataKey:    `${year}_${s.key}`,
-        name:       s.label,
+        name:       seriesLabel(s.key),
         color:      s.color,
         opacity:    YEAR_OPACITY[yi] ?? 0.25,
         legendType: yi === 0 ? "square" : "none",
@@ -268,7 +274,7 @@ export default function ShiftsChartsBlock({
     selectedYears.flatMap((year, yi) =>
       activeSeries.map((s) => ({
         dataKey:    `${year}_${s.key}_uren`,
-        name:       s.label,
+        name:       seriesLabel(s.key),
         color:      s.color,
         opacity:    YEAR_OPACITY[yi] ?? 0.25,
         legendType: yi === 0 ? "square" : "none",
@@ -298,10 +304,10 @@ export default function ShiftsChartsBlock({
     if (fixedDepartmentId) params.append("department_id[]", fixedDepartmentId)
     if (fixedCandidateId)  params.append("candidate_id[]",  fixedCandidateId)
 
-    const seriesLabel = SERIES.find((s) => s.key === baseMetric)?.label ?? baseMetric
+    const metricLabel = seriesLabel(baseMetric)
     const yearSuffix  = multiYear ? ` '${String(year).slice(2)}` : ""
     setDrill({
-      title:    `${seriesLabel}${yearSuffix} — ${datum.label}`,
+      title:    `${metricLabel}${yearSuffix} — ${datum.label}`,
       fetchUrl: `reports/shifts-per-month/detail?${params}`,
     })
   }
@@ -314,24 +320,27 @@ export default function ShiftsChartsBlock({
       return [...prev, n].sort()
     })
 
-  const periodLabel = `${selectedYears.join(", ")} — per ${period === "quarter" ? "kwartaal" : "maand"}`
+  const periodLabel = t('charts.periodLabel', {
+    years: selectedYears.join(", "),
+    unit:  period === "quarter" ? t('charts.perQuarterUnit') : t('charts.perMonthUnit'),
+  })
 
-  // ── Filter groups voor rechter sidebar ────────────────────────────────────
+  // ── Filter groups for the right sidebar ───────────────────────────────────
   const filterGroups = useMemo(() => {
     const groups = [
       {
         key:      "periode",
-        label:    "Periode",
+        label:    t('charts.filters.period'),
         selected: [period],
         options:  [
-          { value: "month",   label: "Per maand" },
-          { value: "quarter", label: "Per kwartaal" },
+          { value: "month",   label: t('charts.filters.month') },
+          { value: "quarter", label: t('charts.filters.quarter') },
         ],
         onToggle: (v) => setPeriod(v),
       },
       {
         key:      "jaren",
-        label:    "Jaren",
+        label:    t('charts.filters.years'),
         selected: selectedYears.map(String),
         options:  YEAR_OPTIONS.map((y) => ({ value: String(y), label: String(y) })),
         onToggle: toggleYear,
@@ -341,11 +350,11 @@ export default function ShiftsChartsBlock({
     if (period === "month") {
       groups.push({
         key:      "maanden",
-        label:    "Maanden",
+        label:    t('charts.filters.months'),
         selected: selectedMonths.length > 0
           ? selectedMonths.map(String)
-          : MONTH_LABELS.map((_, i) => String(i + 1)),
-        options:  MONTH_LABELS.map((label, i) => ({ value: String(i + 1), label })),
+          : Array.from({ length: 12 }, (_, i) => String(i + 1)),
+        options:  Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: monthAbbr(i) })),
         onToggle: (v) =>
           setSelectedMonths((prev) =>
             prev.includes(v) ? prev.filter((m) => m !== v) : [...prev, v]
@@ -355,9 +364,9 @@ export default function ShiftsChartsBlock({
 
     groups.push({
       key:      "reeksen",
-      label:    "Reeksen",
+      label:    t('charts.filters.series'),
       selected: visible,
-      options:  SERIES.map((s) => ({ value: s.key, label: s.label })),
+      options:  SERIES.map((s) => ({ value: s.key, label: seriesLabel(s.key) })),
       onToggle: (v) =>
         setVisible((prev) =>
           prev.includes(v) ? prev.filter((k) => k !== v) : [...prev, v]
@@ -367,7 +376,7 @@ export default function ShiftsChartsBlock({
     if (filterOptions.job_types.length > 0) {
       groups.push({
         key:      "functie",
-        label:    "Functie",
+        label:    t('charts.filters.jobType'),
         selected: selectedJobTypes,
         options:  filterOptions.job_types.map((j) => ({ value: j, label: j })),
         onToggle: (v) =>
@@ -386,7 +395,7 @@ export default function ShiftsChartsBlock({
       if (customerOptions.length > 0) {
         groups.push({
           key:      "klant",
-          label:    "Klant",
+          label:    t('charts.filters.customer'),
           type:     "search-select",
           selected: selectedCustomers,
           options:  customerOptions,
@@ -410,7 +419,7 @@ export default function ShiftsChartsBlock({
       if (locationOptions.length > 0) {
         groups.push({
           key:      "locatie",
-          label:    "Locatie",
+          label:    t('charts.filters.location'),
           type:     "search-select",
           selected: selectedLocations,
           options:  locationOptions,
@@ -423,7 +432,7 @@ export default function ShiftsChartsBlock({
     }
 
     return groups
-  }, [period, selectedYears, selectedMonths, visible, selectedJobTypes, selectedCustomers,
+  }, [t, period, selectedYears, selectedMonths, visible, selectedJobTypes, selectedCustomers,
       selectedLocations, filterOptions, fixedCustomers, fixedLocationIds])
 
   // ── Sync naar rechter panel ───────────────────────────────────────────────
@@ -436,12 +445,12 @@ export default function ShiftsChartsBlock({
   return (
     <>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <ChartCard title="Aantal uren" subtitle={periodLabel} loading={loading} error={error}>
+        <ChartCard title={t('charts.hours')} subtitle={periodLabel} loading={loading} error={error}>
           <YearIndicator years={selectedYears} />
           <BarChartWidget data={chartData} bars={hoursBars} onBarClick={handleBarClick} />
         </ChartCard>
 
-        <ChartCard title="Aantal diensten" subtitle={periodLabel} loading={loading} error={error}>
+        <ChartCard title={t('charts.shifts')} subtitle={periodLabel} loading={loading} error={error}>
           <YearIndicator years={selectedYears} />
           <BarChartWidget data={chartData} bars={shiftBars} onBarClick={handleBarClick} />
         </ChartCard>

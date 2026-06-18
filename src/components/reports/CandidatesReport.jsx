@@ -4,6 +4,7 @@
  * or inline sidebar). KPI targets come from useKpiSettings.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
 import api from '../../lib/api'
 import { useKpiSettings } from '../../lib/useKpiSettings'
@@ -19,17 +20,14 @@ import CandidatesKpiRow    from './CandidatesKpiRow'
 import DrillDownDrawer     from './DrillDownDrawer'
 import { useRightPanel }   from '../../context/RightPanelContext'
 
-// Kleurenconfiguratie
-const LOGIN_COLORS = ['#0064d2','#3b82f6','#93c5fd','#FDE68A','#FCA5A5','#EF4444','#F97316','#D1D5DB']
-const MONTH_COLOR  = '#534AB7'
-const SAP_BLUE     = '#0064d2' // Toegepast als primaire huiskleur
-const END_COLOR    = '#EF4444'
+// Chart color configuration
+const LOGIN_COLORS = ['#0064d2','#3b82f6','#93c5fd','#FDE68A','#FCA5A5','var(--color-danger)','#F97316','#D1D5DB']
+const MONTH_COLOR  = 'var(--color-primary)'
+const SAP_BLUE     = '#0064d2' // Used as the primary house color
+const END_COLOR    = 'var(--color-danger)'
 
-const STATUS_META = {
-  actief:'Actief', nietactief:'Niet actief', extern:'Extern',
-  intake:'Intake', verwijderd:'Verwijderd', onbekend:'Onbekend',
-}
-
+// Month labels used to match chart bars back to candidates in drill-downs
+// (must mirror the labels chartHelpers.groupByMonth produces).
 const MONTHS_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
 
 function getWeekNumber(date) {
@@ -41,6 +39,7 @@ function getWeekNumber(date) {
 }
 
 export default function CandidatesReport() {
+  const { t } = useTranslation('reports')
   const { candidates_per_page, top_cities_n } = useKpiSettings()
   // ── Data & filter state ───────────────────────────────────────────────────
   const [candidates,          setCandidates]          = useState([])
@@ -53,19 +52,19 @@ export default function CandidatesReport() {
   const [error,               setError]               = useState(null)
   const [drillDown,           setDrillDown]           = useState(null)
 
-  // Registreert filterGroups in de rechter sidebar via context
+  // Registers filterGroups in the right sidebar via context
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  // ── Data ophalen ──────────────────────────────────────────────────────────
+  // ── Fetch data ────────────────────────────────────────────────────────────
   const fetchCandidates = async () => {
     setLoading(true)
     setError(null)
     try {
-      const res  = await api.get(`/candidates?per_page=${candidates_per_page}`)
+      const res  = await api.get(`/sm-candidates?per_page=${candidates_per_page}`)
       const body = res.data
       setCandidates(Array.isArray(body) ? body : (body?.data ?? []))
     } catch {
-      setError('Kon kandidaten niet laden.')
+      setError(t('report.loadError'))
     } finally {
       setLoading(false)
     }
@@ -73,7 +72,7 @@ export default function CandidatesReport() {
 
   useEffect(() => { fetchCandidates() }, [])
 
-  // ── Gefilterde datasets ───────────────────────────────────────────────────
+  // ── Filtered datasets ─────────────────────────────────────────────────────
   const baseFiltered = candidates.filter(c => {
     const p = c.position || 'Onbekend'
     return selectedPositions.length === 0 || selectedPositions.includes(p)
@@ -98,22 +97,22 @@ export default function CandidatesReport() {
   const endWeekData    = groupByWeek(filteredDeleted, selectedYear, 'end_date_employment')
   const cityData       = topN(filteredGeneral, c => c.city || 'Onbekend', top_cities_n)
   
-  // FIX: useMemo voorkomt dat er bij elke render een nieuwe array-referentie ontstaat
+  // useMemo prevents a new array reference on every render
   const availableYears = useMemo(() => getAvailableYears(candidates), [candidates])
 
   // ── Drill-down helpers ────────────────────────────────────────────────────
   const openDrillDown = (title, subtitle, items) =>
     setDrillDown({ title, subtitle, candidates: items })
 
-  const handlePositionDrillDown  = (data) => openDrillDown(data.name, 'Functie',
+  const handlePositionDrillDown  = (data) => openDrillDown(data.name, t('report.sub.position'),
     filteredGeneral.filter(c => (c.position || 'Onbekend') === data.name))
 
-  const handleLoginDrillDown = (data) => openDrillDown(data.name, 'Laatste inlog',
+  const handleLoginDrillDown = (data) => openDrillDown(data.name, t('report.sub.lastLogin'),
     filteredGeneral.filter(c => getLoginGroup(c.last_login_at) === data.name))
 
   const handleMonthDrillDown = (data) => {
     const monthName = data.name || data.payload?.name
-    openDrillDown(monthName, 'Registratie maand', filteredGeneral.filter(c => {
+    openDrillDown(monthName, t('report.sub.regMonth'), filteredGeneral.filter(c => {
       if (!c.registration_date) return false
       const date = new Date(c.registration_date)
       if (selectedYear && date.getFullYear() !== selectedYear) return false
@@ -123,7 +122,7 @@ export default function CandidatesReport() {
 
   const handleWeekDrillDown = (data) => {
     const label = data.name || data.payload?.name
-    openDrillDown(label, 'Registratie week', filteredGeneral.filter(c => {
+    openDrillDown(label, t('report.sub.regWeek'), filteredGeneral.filter(c => {
       if (!c.registration_date) return false
       const date = new Date(c.registration_date)
       if (selectedYear && date.getFullYear() !== selectedYear) return false
@@ -131,12 +130,12 @@ export default function CandidatesReport() {
     }))
   }
 
-  const handleCityDrillDown = (data) => openDrillDown(data.name, 'Woonplaats',
+  const handleCityDrillDown = (data) => openDrillDown(data.name, t('report.sub.city'),
     filteredGeneral.filter(c => (c.city || 'Onbekend') === data.name))
 
   const handleEndMonthDrillDown = (data) => {
     const monthName = data.name || data.payload?.name
-    openDrillDown(monthName, 'Uitgeschreven maand', filteredDeleted.filter(c => {
+    openDrillDown(monthName, t('report.sub.endMonth'), filteredDeleted.filter(c => {
       if (!c.end_date_employment) return false
       const date = new Date(c.end_date_employment)
       if (selectedYear && date.getFullYear() !== selectedYear) return false
@@ -146,7 +145,7 @@ export default function CandidatesReport() {
 
   const handleEndWeekDrillDown = (data) => {
     const label = data.name || data.payload?.name
-    openDrillDown(label, 'Uitgeschreven week', filteredDeleted.filter(c => {
+    openDrillDown(label, t('report.sub.endWeek'), filteredDeleted.filter(c => {
       if (!c.end_date_employment) return false
       const date = new Date(c.end_date_employment)
       if (selectedYear && date.getFullYear() !== selectedYear) return false
@@ -165,17 +164,17 @@ export default function CandidatesReport() {
 
   const filterGroups = useMemo(() => [
     {
-      key: 'weergave', label: 'Weergave',
+      key: 'weergave', label: t('report.filters.view'),
       type: 'radio',
       selected: [showPercent ? 'percent' : 'number'],
       options: [
-        { value: 'number',  label: 'Getallen' },
-        { value: 'percent', label: 'Percentages' },
+        { value: 'number',  label: t('report.filters.numbers') },
+        { value: 'percent', label: t('report.filters.percentages') },
       ],
       onToggle: v => setShowPercent(v === 'percent'),
     },
     {
-      key: 'year', label: 'Jaar',
+      key: 'year', label: t('report.filters.year'),
       selected: selectedYear ? [String(selectedYear)] : [],
       onToggle: v => setSelectedYear(prev => String(prev) === v ? null : parseInt(v)),
       options: availableYears.map(y => ({
@@ -186,16 +185,16 @@ export default function CandidatesReport() {
       })),
     },
     {
-      key: 'status', label: 'Status',
+      key: 'status', label: t('report.filters.status'),
       selected: selectedStatuses,
       onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(s => s !== v) : [...p, v]),
       options: allStatuses.map(s => ({
-        value: s, label: STATUS_META[s] ?? s,
+        value: s, label: t(`candidates.status.${s}`, { defaultValue: s }),
         count: candidates.filter(c => (c.status||'onbekend').toLowerCase() === s).length,
       })),
     },
     {
-      key: 'position', label: 'Functie',
+      key: 'position', label: t('report.filters.position'),
       selected: selectedPositions,
       onToggle: v => setSelectedPositions(p => p.includes(v) ? p.filter(s => s !== v) : [...p, v]),
       options: allPositions.map(p => ({
@@ -203,7 +202,7 @@ export default function CandidatesReport() {
         count: candidates.filter(c => (c.position||'Onbekend') === p).length,
       })),
     },
-  ], [showPercent, selectedYear, selectedStatuses, selectedPositions, allStatuses, allPositions, availableYears, candidates])
+  ], [t, showPercent, selectedYear, selectedStatuses, selectedPositions, allStatuses, allPositions, availableYears, candidates])
 
   useEffect(() => {
     registerFilters('candidates-analysis', filterGroups)
@@ -212,42 +211,42 @@ export default function CandidatesReport() {
 
   return (
     <div>
-      {/* ── Pagina-header ──────────────────────────────────────────────────────── */}
+      {/* ── Page header ──────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-4 mb-6">
         <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', letterSpacing: '-0.3px', flexShrink: 0 }}>
-          Kandidaten rapport
+          {t('report.title')}
         </h2>
         {!loading && (
           <>
             <div style={{ width: 1, height: 18, background: '#E5E7EB', flexShrink: 0 }} />
             <div className="flex items-center gap-2">
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: '#F0FDF4', color: '#16A34A', borderRadius: 999,
+                             background: '#F0FDF4', color: 'var(--color-success)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16A34A', flexShrink: 0 }} />
-                {filteredGeneral.length} actief
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', flexShrink: 0 }} />
+                {filteredGeneral.length} {t('report.activeWord')}
               </span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: '#FEF2F2', color: '#DC2626', borderRadius: 999,
+                             background: '#FEF2F2', color: 'var(--color-danger)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#DC2626', flexShrink: 0 }} />
-                {filteredDeleted.length} uitgeschreven
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-danger)', flexShrink: 0 }} />
+                {filteredDeleted.length} {t('report.deregisteredWord')}
               </span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
                              background: '#F9FAFB', color: '#6B7280', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                {candidates.length} totaal
+                {candidates.length} {t('report.totalWord')}
               </span>
             </div>
           </>
         )}
       </div>
 
-      {/* ── KPI rij ────────────────────────────────────────────────────────────── */}
+      {/* ── KPI row ────────────────────────────────────────────────────────────── */}
       <CandidatesKpiRow
         candidates={candidates}
         loading={loading}
-        onDrillDown={(title, items) => openDrillDown(title, 'KPI', items)}
+        onDrillDown={(title, items) => openDrillDown(title, t('report.sub.kpi'), items)}
       />
 
       {error && (
@@ -256,65 +255,65 @@ export default function CandidatesReport() {
         </div>
       )}
 
-      {/* Grid Layout voor de Kaarten */}
+      {/* Grid layout for the cards */}
       {loading ? (
         <div className="flex flex-col items-center justify-center h-64 gap-3 bg-white border border-gray-100 shadow-sm rounded-xl">
           <RefreshCw size={20} className="text-gray-300 animate-spin" />
-          <p className="text-sm text-gray-400">Kandidaten ophalen...</p>
+          <p className="text-sm text-gray-400">{t('candidates.loading')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          
-          {/* Kaart 1: Per Functie */}
+
+          {/* Card 1: By position */}
           <div className="min-w-0 p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
-            <PieChartCard title="Per functie" data={positionData} showPercent={showPercent} size={260} onItemClick={handlePositionDrillDown} />
+            <PieChartCard title={t('report.charts.perPosition')} data={positionData} showPercent={showPercent} size={260} unit={t('report.unitCandidates')} onItemClick={handlePositionDrillDown} />
           </div>
 
-          {/* Kaart 2: Laatste Inlog */}
+          {/* Card 2: Last login */}
           <div className="min-w-0 p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
-            <BarChartCard title="Laatste inlog" data={loginData} showPercent={showPercent} colors={LOGIN_COLORS} height={260} onBarClick={handleLoginDrillDown} />
+            <BarChartCard title={t('report.charts.lastLogin')} data={loginData} showPercent={showPercent} colors={LOGIN_COLORS} height={260} onBarClick={handleLoginDrillDown} />
           </div>
 
-          {/* Kaart 3: Nieuwe kandidaten per maand — tijdreeks, geen % */}
+          {/* Card 3: New candidates per month — time series, no % */}
           <div className="min-w-0 p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
             <BarChartCard
-              title={`Nieuwe kandidaten per maand${selectedYear ? ` (${selectedYear})` : ''}`}
+              title={`${t('report.charts.newPerMonth')}${selectedYear ? ` (${selectedYear})` : ''}`}
               data={monthData} colors={[MONTH_COLOR]} height={260}
               onBarClick={handleMonthDrillDown} showAverage
             />
           </div>
 
-          {/* Kaart 4: Nieuwe kandidaten per week — tijdreeks, geen % */}
+          {/* Card 4: New candidates per week — time series, no % */}
           <div className="min-w-0 p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
             <LineChartCard
-              title={`Nieuwe kandidaten per week${selectedYear ? ` (${selectedYear})` : ''}`}
+              title={`${t('report.charts.newPerWeek')}${selectedYear ? ` (${selectedYear})` : ''}`}
               data={weekData} color={MONTH_COLOR} height={260}
               onItemClick={handleWeekDrillDown}
             />
           </div>
 
-          {/* Kaart 5: Uitgeschreven per maand — tijdreeks, geen % */}
+          {/* Card 5: Deregistered per month — time series, no % */}
           <div className="min-w-0 p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
             <BarChartCard
-              title={`Uitgeschreven per maand${selectedYear ? ` (${selectedYear})` : ''}`}
+              title={`${t('report.charts.endPerMonth')}${selectedYear ? ` (${selectedYear})` : ''}`}
               data={endMonthData} colors={['#FCA5A5']} height={260}
               onBarClick={handleEndMonthDrillDown} showAverage
             />
           </div>
 
-          {/* Kaart 6: Uitgeschreven per week — tijdreeks, geen % */}
+          {/* Card 6: Deregistered per week — time series, no % */}
           <div className="min-w-0 p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
             <LineChartCard
-              title={`Uitgeschreven per week${selectedYear ? ` (${selectedYear})` : ''}`}
+              title={`${t('report.charts.endPerWeek')}${selectedYear ? ` (${selectedYear})` : ''}`}
               data={endWeekData} color={END_COLOR} height={260}
               onItemClick={handleEndWeekDrillDown}
             />
           </div>
 
-          {/* Kaart 7: Top 10 woonplaatsen (Volledige breedte) */}
+          {/* Card 7: Top cities (full width) */}
           <div className="min-w-0 p-6 bg-white border border-gray-100 shadow-sm rounded-xl lg:col-span-2">
             <BarChartCard
-              title={`Top ${top_cities_n} woonplaatsen`}
+              title={t('report.charts.topCities', { n: top_cities_n })}
               data={cityData} colors={[SAP_BLUE]} height={260}
               onBarClick={handleCityDrillDown}
             />

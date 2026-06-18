@@ -5,14 +5,16 @@
  * drawer listing the underlying records.
  */
 import { useState, useEffect, useMemo } from 'react'
-import { Building2, MapPin, Layers, TrendingUp, RefreshCw } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { RefreshCw } from 'lucide-react'
 import api from '../../lib/api'
 import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '../../context/RightPanelContext'
-import KpiBlock          from '../../components/ui/KpiBlock'
+import ModuleView       from '../../components/settings/ModuleView'
 import EntityListDrawer  from '../../components/ui/EntityListDrawer'
 
 export default function CustomersReport() {
+  const { t } = useTranslation('shiftmanager')
   const [customers, setCustomers] = useState([])
   const [loading,   setLoading]   = useState(true)
   const [drawer,    setDrawer]    = useState(null) // { title, items }
@@ -40,9 +42,9 @@ export default function CustomersReport() {
   // Drill-down datasets
   const drillActive = active.map(c => ({
     primary:     c.name,
-    secondary:   `${c.locations?.length ?? 0} locaties`,
-    badge:       'actief',
-    badgeColor:  '#16A34A',
+    secondary:   t('customersReport.sub.locations', { count: c.locations?.length ?? 0 }),
+    badge:       t('customersReport.activeWord'),
+    badgeColor:  'var(--color-success)',
     badgeBg:     '#F0FDF4',
   }))
   const drillLocations = customers.flatMap(c =>
@@ -58,11 +60,35 @@ export default function CustomersReport() {
   )
   const drillNoLocation = noLocation.map(c => ({
     primary:   c.name,
-    secondary: 'Geen locaties gekoppeld',
-    badge:     `${inactive.includes(c) ? 'inactief' : 'actief'}`,
-    badgeColor: inactive.includes(c) ? '#C2410C' : '#16A34A',
+    secondary: t('customersReport.sub.noLocationsLinked'),
+    badge:     inactive.includes(c) ? t('customersReport.inactiveWord') : t('customersReport.activeWord'),
+    badgeColor: inactive.includes(c) ? '#C2410C' : 'var(--color-success)',
     badgeBg:   inactive.includes(c) ? '#FFF7ED' : '#F0FDF4',
   }))
+
+  // Values for the configurable "customers" module view (keyed by block id).
+  const moduleData = {
+    active_customers: {
+      value: active.length,
+      sub: inactive.length > 0 ? `${inactive.length} ${t('customersReport.inactiveWord')}` : undefined,
+      onClick: !loading ? () => setDrawer({ title: t('customersReport.drill.activeCustomers'), items: drillActive }) : undefined,
+    },
+    total_locations: {
+      value: totalLoc,
+      sub: active.length > 0 ? t('customersReport.sub.avgPerCustomer', { n: (totalLoc / Math.max(active.length, 1)).toFixed(1) }) : undefined,
+      onClick: !loading ? () => setDrawer({ title: t('customersReport.drill.allLocations'), items: drillLocations }) : undefined,
+    },
+    total_departments: {
+      value: totalDep,
+      sub: totalLoc > 0 ? t('customersReport.sub.avgPerLocation', { n: (totalDep / Math.max(totalLoc, 1)).toFixed(1) }) : undefined,
+      onClick: !loading ? () => setDrawer({ title: t('customersReport.drill.allDepartments'), items: drillDepartments }) : undefined,
+    },
+    customers_without_location: {
+      value: noLocation.length,
+      sub: t('customersReport.sub.notLinked'),
+      onClick: !loading && noLocation.length > 0 ? () => setDrawer({ title: t('customersReport.drill.customersWithoutLocation'), items: drillNoLocation }) : undefined,
+    },
+  }
 
   // Right-panel filter
   const [selectedStatuses, setSelectedStatuses] = useState([])
@@ -70,15 +96,15 @@ export default function CustomersReport() {
     [...new Set(customers.map(c => c.status).filter(Boolean))].sort(), [customers])
 
   const filterGroups = useMemo(() => statusOptions.length === 0 ? [] : [{
-    key: 'status', label: 'Status klant',
+    key: 'status', label: t('customersReport.filterStatus'),
     selected: selectedStatuses,
     options: statusOptions.map(s => ({
       value: s,
-      label: s === 'active' ? 'Actief' : s === 'inactive' ? 'Inactief' : s,
+      label: s === 'active' ? t('common:status.active') : s === 'inactive' ? t('common:status.inactive') : s,
       count: customers.filter(c => c.status === s).length,
     })),
     onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-  }], [statusOptions, selectedStatuses, customers])
+  }], [t, statusOptions, selectedStatuses, customers])
 
   useEffect(() => {
     registerFilters('customers-report', filterGroups)
@@ -91,30 +117,30 @@ export default function CustomersReport() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', letterSpacing: '-0.3px', flexShrink: 0 }}>
-          Klanten rapport
+          {t('customersReport.title')}
         </h2>
         {!loading && (
           <>
             <div style={{ width: 1, height: 18, background: '#E5E7EB', flexShrink: 0 }} />
             <div className="flex items-center gap-2">
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: '#F0FDF4', color: '#16A34A', borderRadius: 999,
+                             background: '#F0FDF4', color: 'var(--color-success)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16A34A', flexShrink: 0 }} />
-                {active.length} actief
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', flexShrink: 0 }} />
+                {active.length} {t('customersReport.activeWord')}
               </span>
               {inactive.length > 0 && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
                                background: '#FFF7ED', color: '#C2410C', borderRadius: 999,
                                padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C2410C', flexShrink: 0 }} />
-                  {inactive.length} inactief
+                  {inactive.length} {t('customersReport.inactiveWord')}
                 </span>
               )}
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
                              background: '#F9FAFB', color: '#6B7280', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                {customers.length} totaal
+                {customers.length} {t('customersReport.totalWord')}
               </span>
             </div>
           </>
@@ -122,46 +148,9 @@ export default function CustomersReport() {
         {loading && <RefreshCw size={14} className="animate-spin" style={{ color: '#D1D5DB' }} />}
       </div>
 
-      {/* KPI blokken */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
-        <KpiBlock
-          label="Actieve klanten"
-          value={active.length}
-          sub={inactive.length > 0 ? `${inactive.length} inactief` : undefined}
-          icon={Building2}
-          color="#2563EB" bg="#EFF6FF"
-          loading={loading}
-          onClick={!loading ? () => setDrawer({ title: 'Actieve klanten', items: drillActive }) : undefined}
-        />
-        <KpiBlock
-          label="Totaal locaties"
-          value={totalLoc}
-          sub={active.length > 0 ? `gem. ${(totalLoc / Math.max(active.length, 1)).toFixed(1)} per klant` : undefined}
-          icon={MapPin}
-          color="#7C3AED" bg="#F5F3FF"
-          loading={loading}
-          onClick={!loading ? () => setDrawer({ title: 'Alle locaties', items: drillLocations }) : undefined}
-        />
-        <KpiBlock
-          label="Totaal afdelingen"
-          value={totalDep}
-          sub={totalLoc > 0 ? `gem. ${(totalDep / Math.max(totalLoc, 1)).toFixed(1)} per locatie` : undefined}
-          icon={Layers}
-          color="#059669" bg="#ECFDF5"
-          loading={loading}
-          onClick={!loading ? () => setDrawer({ title: 'Alle afdelingen', items: drillDepartments }) : undefined}
-        />
-        <KpiBlock
-          label="Klanten zonder locatie"
-          value={noLocation.length}
-          sub="Nog niet gekoppeld"
-          icon={TrendingUp}
-          color="#D97706" bg="#FFFBEB"
-          loading={loading}
-          onClick={!loading && noLocation.length > 0
-            ? () => setDrawer({ title: 'Klanten zonder locatie', items: drillNoLocation })
-            : undefined}
-        />
+      {/* KPI blocks — layout configurable in Settings → Views → Klanten */}
+      <div style={{ marginBottom: 28 }}>
+        <ModuleView module="customers" data={moduleData} loading={loading} />
       </div>
 
       {/* Shift charts */}

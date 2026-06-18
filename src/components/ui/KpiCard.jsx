@@ -37,7 +37,7 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
         </div>
         {!isNeutral && (
           <div className="flex items-center gap-1 px-2 py-1 rounded-full"
-            style={{ background: isPositive ? '#F0FDF4' : '#FEF2F2', color: isPositive ? '#16A34A' : '#DC2626' }}>
+            style={{ background: isPositive ? '#F0FDF4' : '#FEF2F2', color: isPositive ? 'var(--color-success)' : 'var(--color-danger)' }}>
             {isPositive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
             <span style={{ fontSize: 11, fontWeight: 600 }}>
               {isPositive ? `+${delta}` : delta}%

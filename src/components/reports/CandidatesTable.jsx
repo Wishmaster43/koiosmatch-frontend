@@ -4,25 +4,28 @@
  * Filters come from RightPanelContext. StatusBadge below = the colored status pill.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
 import CandidateDetailDrawer from './CandidateDetailDrawer'
 import { useRightPanel }     from '../../context/RightPanelContext'
 
 // Colored status pill (actief / nietactief / extern / ...) for a candidate row.
 function StatusBadge({ status }) {
+  const { t } = useTranslation('reports')
   const styles = {
-    actief:     { bg: '#F0FDF4', color: '#16A34A' },
+    actief:     { bg: '#F0FDF4', color: 'var(--color-success)' },
     nietactief: { bg: '#FFF7ED', color: '#C2410C' },
-    extern:     { bg: '#EFF6FF', color: '#1D4ED8' },
+    extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
     intake:     { bg: '#FAF5FF', color: '#7C3AED' },
-    verwijderd: { bg: '#FEF2F2', color: '#DC2626' },
+    verwijderd: { bg: '#FEF2F2', color: 'var(--color-danger)' },
   }
   const key = (status || '').toLowerCase().replace(/\s+/g, '')
   const s = styles[key] || { bg: '#F9FAFB', color: '#6B7280' }
+  const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')
   return (
     <span style={{ background: s.bg, color: s.color, fontSize: 11, fontWeight: 500,
                    padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-      {status || 'onbekend'}
+      {label}
     </span>
   )
 }
@@ -31,10 +34,10 @@ function fmtDate(v) {
   if (!v) return '—'
   const d = new Date(v)
   if (isNaN(d.getTime())) return '—'
-  return d.toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-function TagPill({ value, color = '#534AB7', bg = '#EEF2FF' }) {
+function TagPill({ value, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)' }) {
   return (
     <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 6px', borderRadius: 5,
                    background: bg, color, whiteSpace: 'nowrap' }}>
@@ -56,6 +59,7 @@ function TagCell({ items, color, bg }) {
 }
 
 function RateCell({ candidate }) {
+  const { t } = useTranslation('reports')
   const rates = candidate.global_rate_summary
   if (!Array.isArray(rates) || !rates.length) return <span style={{ color: '#D1D5DB' }}>—</span>
   const visible = rates.slice(0, 2)
@@ -70,7 +74,7 @@ function RateCell({ candidate }) {
         </span>
       ))}
       {rates.length > 2 && (
-        <span style={{ fontSize: 10, color: '#9CA3AF' }}>+{rates.length - 2} meer</span>
+        <span style={{ fontSize: 10, color: '#9CA3AF' }}>{t('candidates.more', { count: rates.length - 2 })}</span>
       )}
     </div>
   )
@@ -81,8 +85,10 @@ function parseKenmerken(v) {
   return v.map(item => item.name ?? String(item)).filter(Boolean)
 }
 
-const COLUMNS = [
-  { key: 'name', label: 'Naam', type: 'string',
+// Column definitions; labels are resolved from i18n via the `t` passed in.
+function buildColumns(t) {
+  return [
+  { key: 'name', label: t('candidates.cols.name'), type: 'string',
     value: c => `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim(),
     render: c => (
       <div>
@@ -92,37 +98,38 @@ const COLUMNS = [
         {c.email && <div style={{ fontSize: 11, color: '#9CA3AF' }}>{c.email}</div>}
       </div>
     )},
-  { key: 'status', label: 'Status', type: 'string',
+  { key: 'status', label: t('candidates.cols.status'), type: 'string',
     value: c => c.status || '',
     render: c => <StatusBadge status={c.status} /> },
-  { key: 'position', label: 'Functie', type: 'string',
+  { key: 'position', label: t('candidates.cols.position'), type: 'string',
     value: c => c.position || '',
     render: c => <span style={{ fontSize: 13 }}>{c.position || '—'}</span> },
-  { key: 'mobile', label: 'Mobiel', type: 'string',
+  { key: 'mobile', label: t('candidates.cols.mobile'), type: 'string',
     value: c => c.mobile ?? c.phone ?? '',
     render: c => <span style={{ fontSize: 13, whiteSpace: 'nowrap' }}>{c.mobile ?? c.phone ?? '—'}</span> },
-  { key: 'registration_date', label: 'Registratie', type: 'date',
+  { key: 'registration_date', label: t('candidates.cols.registration'), type: 'date',
     value: c => c.registration_date || null,
     render: c => <span style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{fmtDate(c.registration_date)}</span> },
-  { key: 'last_login_at', label: 'Laatste inlog', type: 'date',
+  { key: 'last_login_at', label: t('candidates.cols.lastLogin'), type: 'date',
     value: c => c.last_login_at || null,
     render: c => <span style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{fmtDate(c.last_login_at)}</span> },
-  { key: 'last_planned_shift', label: 'Geplande dienst', type: 'date',
+  { key: 'last_planned_shift', label: t('candidates.cols.plannedShift'), type: 'date',
     value: c => c.last_planned_shift || null,
     render: c => <span style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{fmtDate(c.last_planned_shift)}</span> },
-  { key: 'last_worked_shift', label: 'Laatste dienst', type: 'date',
+  { key: 'last_worked_shift', label: t('candidates.cols.lastShift'), type: 'date',
     value: c => c.last_worked_shift || null,
     render: c => <span style={{ fontSize: 12, whiteSpace: 'nowrap' }}>{fmtDate(c.last_worked_shift)}</span> },
-  { key: 'number_of_times_worked', label: 'Diensten', type: 'number', align: 'right',
+  { key: 'number_of_times_worked', label: t('candidates.cols.shifts'), type: 'number', align: 'right',
     value: c => Number(c.number_of_times_worked) || 0,
     render: c => <span style={{ fontSize: 13 }}>{c.number_of_times_worked ?? 0}</span> },
-  { key: 'features', label: 'Kenmerken', type: 'string',
+  { key: 'features', label: t('candidates.cols.features'), type: 'string',
     value: c => parseKenmerken(c.features).join(', '),
-    render: c => <TagCell items={parseKenmerken(c.features)} color="#534AB7" bg="#EEF2FF" /> },
-  { key: 'global_rate', label: 'Globale rates', type: 'string',
+    render: c => <TagCell items={parseKenmerken(c.features)} color="var(--color-primary)" bg="var(--color-primary-bg)" /> },
+  { key: 'global_rate', label: t('candidates.cols.globalRates'), type: 'string',
     value: c => '',
     render: c => <RateCell candidate={c} /> },
-]
+  ]
+}
 
 function compareValues(a, b, col, dir) {
   const av = col.value(a)
@@ -135,7 +142,7 @@ function compareValues(a, b, col, dir) {
   let cmp
   if (col.type === 'number')    cmp = av - bv
   else if (col.type === 'date') cmp = new Date(av).getTime() - new Date(bv).getTime()
-  else                          cmp = String(av).localeCompare(String(bv), 'nl', { sensitivity: 'base' })
+  else                          cmp = String(av).localeCompare(String(bv), undefined, { sensitivity: 'base' })
   return dir === 'asc' ? cmp : -cmp
 }
 
@@ -147,6 +154,8 @@ function SortIcon({ active, dir }) {
 }
 
 export default function CandidatesTable({ candidates = [], loading = false }) {
+  const { t } = useTranslation('reports')
+  const columns = useMemo(() => buildColumns(t), [t])
   const [search, setSearch]                       = useState('')
   const { registerFilters, unregisterFilters }    = useRightPanel()
   const [selectedYears, setSelectedYears]         = useState([])
@@ -202,10 +211,10 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
   }, [candidates, selectedStatuses, selectedPositions, selectedYears, selectedKenmerken, search])
 
   const sorted = useMemo(() => {
-    const col = COLUMNS.find(c => c.key === sort.key)
+    const col = columns.find(c => c.key === sort.key)
     if (!col) return filtered
     return [...filtered].sort((a, b) => compareValues(a, b, col, sort.dir))
-  }, [filtered, sort])
+  }, [filtered, sort, columns])
 
   const onSort = key =>
     setSort(prev => prev.key === key
@@ -213,19 +222,19 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
       : { key, dir: 'asc' })
 
   const filterGroups = useMemo(() => [
-    { key: 'jaar', label: 'Registratiejaar',
+    { key: 'jaar', label: t('candidates.filters.year'),
       options: yearOptions.map(y => ({ value: y, label: String(y) })),
       selected: selectedYears, onToggle: toggle(setSelectedYears) },
-    { key: 'status', label: 'Status',
-      options: statusOptions.map(s => ({ value: s, label: s })),
+    { key: 'status', label: t('candidates.filters.status'),
+      options: statusOptions.map(s => ({ value: s, label: t(`candidates.status.${(s||'').toLowerCase().replace(/\s+/g,'')}`, { defaultValue: s }) })),
       selected: selectedStatuses, onToggle: toggle(setSelectedStatuses) },
-    { key: 'functie', label: 'Functie',
+    { key: 'functie', label: t('candidates.filters.position'),
       options: positionOptions.map(p => ({ value: p, label: p })),
       selected: selectedPositions, onToggle: toggle(setSelectedPositions) },
-    { key: 'kenmerken', label: 'Kenmerken',
+    { key: 'kenmerken', label: t('candidates.filters.features'),
       options: kenmerkOptions.map(k => ({ value: k, label: k })),
       selected: selectedKenmerken, onToggle: toggle(setSelectedKenmerken) },
-  ], [yearOptions, statusOptions, positionOptions, kenmerkOptions,
+  ], [t, yearOptions, statusOptions, positionOptions, kenmerkOptions,
       selectedYears, selectedStatuses, selectedPositions, selectedKenmerken])
 
   useEffect(() => {
@@ -239,9 +248,9 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
 
       <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>Details — Kandidaten</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>{t('candidates.title')}</h1>
           <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
-            {filtered.length} van {candidates.length} kandidaten
+            {t('candidates.summary', { shown: filtered.length, total: candidates.length })}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -249,7 +258,7 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
             <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
                                        transform: 'translateY(-50%)', color: '#9CA3AF' }} />
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Zoeken op naam, e-mail, functie..."
+              placeholder={t('candidates.search')}
               style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
                        border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
           </div>
@@ -263,19 +272,19 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
             <div className="flex flex-col items-center justify-center gap-3"
               style={{ height: '100%', minHeight: 300 }}>
               <RefreshCw size={20} className="animate-spin" style={{ color: '#D1D5DB' }} />
-              <p className="text-sm text-gray-400">Kandidaten ophalen...</p>
+              <p className="text-sm text-gray-400">{t('candidates.loading')}</p>
             </div>
           ) : sorted.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 text-center"
               style={{ height: '100%', minHeight: 300 }}>
-              <p className="text-sm font-medium text-gray-400">Geen kandidaten gevonden</p>
-              <p className="text-xs text-gray-300">Pas de filters of zoekopdracht aan</p>
+              <p className="text-sm font-medium text-gray-400">{t('candidates.empty')}</p>
+              <p className="text-xs text-gray-300">{t('candidates.emptyHint')}</p>
             </div>
           ) : (
             <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 1100 }}>
               <thead>
                 <tr style={{ position: 'sticky', top: 0, zIndex: 1, background: '#fff' }}>
-                  {COLUMNS.map(col => {
+                  {columns.map(col => {
                     const active = sort.key === col.key
                     return (
                       <th key={col.key} onClick={() => onSort(col.key)}
@@ -301,7 +310,7 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
                     onClick={() => setDetail(c)}
                     className="transition-colors hover:bg-gray-50"
                     style={{ borderBottom: '1px solid #F9FAFB', cursor: 'pointer' }}>
-                    {COLUMNS.map(col => (
+                    {columns.map(col => (
                       <td key={col.key}
                         style={{ padding: '10px 14px', textAlign: col.align || 'left',
                                  color: '#374151', fontSize: 13 }}>

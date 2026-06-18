@@ -7,7 +7,7 @@ export default {
   label: 'HTTP Request',
   Icon:  Globe,
   color: '#0369A1',
-  bg:    '#E0F2FE',
+  bg:    'var(--color-info-bg)',
   schema: [
     { key: 'url',    label: 'URL',    type: 'text',   placeholder: 'https://api.example.com/endpoint', required: true },
     { key: 'method', label: 'Method', type: 'select', options: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'], required: true },

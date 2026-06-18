@@ -9,11 +9,13 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
 // ── Shared layout wrapper ─────────────────────────────────────────────────────
 function LoginShell({ children }) {
+  const { t } = useTranslation('auth')
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Left — branding panel */}
@@ -25,10 +27,10 @@ function LoginShell({ children }) {
         <div>
           <p className="mb-2 text-2xl font-semibold leading-snug"
              style={{ color: 'var(--sidebar-text)' }}>
-            ATS, CRM, Planning<br />en rapportage.
+            {t('brand.line1')}<br />{t('brand.line2')}
           </p>
           <p className="text-sm leading-relaxed" style={{ color: 'var(--sidebar-muted)' }}>
-            Workflow AI agents, koppelingen en automatisering — alles in één platform.
+            {t('brand.sub')}
           </p>
         </div>
 
@@ -47,7 +49,7 @@ function LoginShell({ children }) {
             Koios
           </p>
           <p className="text-xs" style={{ color: 'var(--sidebar-muted)' }}>
-            Jouw intelligente AI agent
+            {t('brand.agentTagline')}
           </p>
         </div>
 
@@ -69,6 +71,7 @@ function LoginShell({ children }) {
 
 // ── Step 1: email + password ──────────────────────────────────────────────────
 function CredentialForm({ onMfaRequired }) {
+  const { t } = useTranslation('auth')
   const { login }  = useAuth()
   const navigate   = useNavigate()
   const [email,    setEmail]   = useState('')
@@ -89,7 +92,7 @@ function CredentialForm({ onMfaRequired }) {
         navigate('/')
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Inloggen mislukt. Controleer je gegevens.')
+      setError(err.response?.data?.message || t('login.failed'))
     } finally {
       setLoading(false)
     }
@@ -97,14 +100,14 @@ function CredentialForm({ onMfaRequired }) {
 
   return (
     <>
-      <h1 className="mb-1 text-2xl font-semibold text-gray-900">Inloggen</h1>
-      <p className="mb-8 text-sm text-gray-500">Log in op je KoiosMatch account</p>
+      <h1 className="mb-1 text-2xl font-semibold text-gray-900">{t('login.title')}</h1>
+      <p className="mb-8 text-sm text-gray-500">{t('login.subtitle')}</p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">E-mailadres</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('login.email')}</label>
           <input type="email" value={email} onChange={e => setEmail(e.target.value)}
-            placeholder="jij@bedrijf.nl" required autoFocus
+            placeholder={t('login.emailPlaceholder')} required autoFocus
             className="w-full text-sm text-gray-900 bg-white rounded-lg"
             style={{ padding: '10px 12px', border: '1px solid #E5E7EB', outline: 'none' }}
             onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
@@ -112,11 +115,11 @@ function CredentialForm({ onMfaRequired }) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">Wachtwoord</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('login.password')}</label>
           <div className="relative">
             <input type={showPw ? 'text' : 'password'} value={password}
               onChange={e => setPassword(e.target.value)}
-              placeholder="Wachtwoord" required
+              placeholder={t('login.password')} required
               className="w-full text-sm text-gray-900 bg-white rounded-lg"
               style={{ padding: '10px 40px 10px 12px', border: '1px solid #E5E7EB', outline: 'none' }}
               onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
@@ -140,7 +143,7 @@ function CredentialForm({ onMfaRequired }) {
           style={{ padding: '11px', background: loading ? '#9CA3AF' : 'var(--color-primary)',
                    border: 'none', cursor: loading ? 'not-allowed' : 'pointer' }}>
           {loading && <Loader2 size={15} className="animate-spin" />}
-          {loading ? 'Bezig…' : 'Inloggen'}
+          {loading ? t('login.busy') : t('login.signIn')}
         </button>
       </form>
     </>
@@ -149,6 +152,7 @@ function CredentialForm({ onMfaRequired }) {
 
 // ── Step 2: TOTP verification ─────────────────────────────────────────────────
 function MfaForm({ mfaToken, onBack }) {
+  const { t } = useTranslation('auth')
   const { verifyMfa } = useAuth()
   const navigate = useNavigate()
   const inputRef = useRef(null)
@@ -168,7 +172,7 @@ function MfaForm({ mfaToken, onBack }) {
       await verifyMfa(mfaToken, code.replace(/\s/g, ''))
       navigate('/')
     } catch (err) {
-      setError(err.response?.data?.message || 'Ongeldige code. Probeer opnieuw.')
+      setError(err.response?.data?.message || t('mfa.invalid'))
       setCode('')
       inputRef.current?.focus()
     } finally {
@@ -193,18 +197,18 @@ function MfaForm({ mfaToken, onBack }) {
           <ShieldCheck size={22} style={{ color: 'var(--color-primary)' }} />
         </div>
         <div>
-          <h1 className="text-xl font-semibold text-gray-900">Twee-factor verificatie</h1>
-          <p className="text-sm text-gray-500">Open je authenticator app</p>
+          <h1 className="text-xl font-semibold text-gray-900">{t('mfa.title')}</h1>
+          <p className="text-sm text-gray-500">{t('mfa.openApp')}</p>
         </div>
       </div>
 
       <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 24, lineHeight: 1.6 }}>
-        Voer de 6-cijferige code in die je authenticator app toont. De code is 30 seconden geldig.
+        {t('mfa.instructions')}
       </p>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">Verificatiecode</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('mfa.codeLabel')}</label>
           <input ref={inputRef} type="text" inputMode="numeric" pattern="\d{6}"
             value={code} onChange={handleChange}
             placeholder="123456" maxLength={6} required
@@ -227,14 +231,14 @@ function MfaForm({ mfaToken, onBack }) {
                    background: (loading || code.length < 6) ? '#9CA3AF' : 'var(--color-primary)',
                    border: 'none', cursor: (loading || code.length < 6) ? 'not-allowed' : 'pointer' }}>
           {loading && <Loader2 size={15} className="animate-spin" />}
-          {loading ? 'Verifiëren…' : 'Verifiëren'}
+          {loading ? t('mfa.verifying') : t('mfa.verify')}
         </button>
 
         <button type="button" onClick={onBack}
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                    fontSize: 13, color: '#6B7280', background: 'none', border: 'none',
                    cursor: 'pointer', padding: '4px 0' }}>
-          <ArrowLeft size={13} /> Terug naar inloggen
+          <ArrowLeft size={13} /> {t('mfa.back')}
         </button>
       </form>
     </>

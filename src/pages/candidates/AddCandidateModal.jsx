@@ -1,107 +1,240 @@
 import { useState, useEffect } from 'react'
-import { X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { X, UserPlus } from 'lucide-react'
 import api from '../../lib/api'
+import { Field, TextField, SelectField } from '../../components/forms/fields'
+import { NL_PROVINCES } from './drawer/constants'
+import { useLookups } from '../../context/LookupsContext'
+import { mapCandidate } from './data/mapCandidate'
 
-export default function AddCandidaatModal({ onClose }) {
-  const [type,       setType]       = useState('')
-  const [vacatures,  setVacatures]  = useState([])
-  const [kandidaten, setKandidaten] = useState([])
-  const [vakRef,     setVakRef]     = useState('')
-  const [form,       setForm]       = useState({ voornaam: '', achternaam: '', email: '', telefoon: '' })
+// 422 field-error keys are snake_case; map them back to this form's field names.
+const API_TO_FORM = {
+  first_name: 'firstName', last_name: 'lastName', email: 'email', phone: 'phone',
+  date_of_birth: 'dateOfBirth', gender: 'gender', city: 'city', province: 'province',
+}
+
+export default function AddCandidateModal({ onClose, onCreated }) {
+  const { t } = useTranslation(['candidates', 'common'])
+  const { funnelTypes } = useLookups()
+  const [stage,     setStage]     = useState('')
+  const [vacatures, setVacatures] = useState([])
+  const [vacRef,    setVacRef]    = useState('')
+  const [errors,    setErrors]    = useState({})
+  const [saving,    setSaving]    = useState(false)
+  const [form, setForm] = useState({
+    firstName: '', lastName: '', email: '', phone: '',
+    dateOfBirth: '', gender: '', city: '', province: '',
+  })
 
   useEffect(() => {
-    if (type !== 'sollicitant') return
-    api.get('/vacancies').then(r => { const d = r.data; setVacatures(Array.isArray(d) ? d : (d?.data ?? [])) }).catch(() => {})
-    api.get('/candidates').then(r => { const d = r.data; setKandidaten(Array.isArray(d) ? d : (d?.data ?? [])) }).catch(() => {})
-  }, [type])
+    if (stage !== 'intake') return
+    api.get('/vacancies')
+      .then(r => { const d = r.data; setVacatures(Array.isArray(d) ? d : (d?.data ?? [])) })
+      .catch(() => {})
+  }, [stage])
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const set = (k, v) => {
+    setForm(f => ({ ...f, [k]: v }))
+    if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
+  }
+
+  const selectStage = (id) => { setStage(id); setVacRef(''); setErrors({}) }
+
+  const handleSubmit = async () => {
+    const e = {}
+    if (!form.firstName.trim()) e.firstName = true
+    if (!form.lastName.trim())  e.lastName  = true
+    if (Object.keys(e).length) { setErrors(e); return }
+
+    setSaving(true)
+    try {
+      const body = {
+        first_name:   form.firstName.trim(),
+        last_name:    form.lastName.trim(),
+        email:        form.email || null,
+        phone:        form.phone || null,
+        date_of_birth: form.dateOfBirth || null,
+        gender:       form.gender || null,
+        city:         form.city || null,
+        province:     form.province || null,
+        funnel_type:  stage,
+        status:       'prospect',
+        funnel_vacancy_id: stage === 'intake' ? (vacRef || null) : null,
+        candidate_types: [],
+      }
+      const r = await api.post('/candidates', body)
+      onCreated?.(mapCandidate(r.data?.data ?? r.data))
+      onClose()
+    } catch (err) {
+      const apiErrors = err?.response?.data?.errors
+      if (apiErrors) {
+        const e2 = {}
+        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
+        setErrors(e2)
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const selectedStage = funnelTypes.find(t0 => t0.value === stage)
+  const canSubmit     = !!stage && form.firstName.trim() && form.lastName.trim()
+  const stageLabel    = selectedStage ? selectedStage.label : ''
+
+  const genderOptions = [
+    { value: 'male',   label: t('modal.gender.male') },
+    { value: 'female', label: t('modal.gender.female') },
+    { value: 'other',  label: t('modal.gender.other') },
+  ]
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-      onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: 'white', borderRadius: 14, width: 480, boxShadow: '0 8px 40px rgba(0,0,0,0.18)', overflow: 'hidden' }}>
+    <div
+      onClick={e => e.target === e.currentTarget && onClose()}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <div style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 860,
+        boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', maxHeight: '90vh' }}>
 
-        {/* Header */}
-        <div style={{ padding: '18px 22px 14px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Kandidaat toevoegen</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
-            <X size={18} />
-          </button>
-        </div>
+        {/* ── Left panel: stage selection ── */}
+        <div style={{ width: 280, flexShrink: 0, borderRight: '1px solid var(--border)',
+          background: '#FAFAFA', display: 'flex', flexDirection: 'column' }}>
 
-        {/* Body */}
-        <div style={{ padding: '20px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-
-          {/* Type */}
-          <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Type</label>
-            <select value={type} onChange={e => { setType(e.target.value); setVakRef('') }}
-              style={{ width: '100%', padding: '8px 12px', fontSize: 13, borderRadius: 8,
-                border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
-              <option value="">— Selecteer type —</option>
-              <option value="lead">Lead</option>
-              <option value="sollicitant">Sollicitant</option>
-            </select>
+          <div style={{ padding: '20px 20px 14px' }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('modal.title')}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{t('modal.selectTypeFirst')}</div>
           </div>
 
-          {/* Sollicitant: link to vacancy or candidate */}
-          {type === 'sollicitant' && (
-            <div>
-              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>Koppelen aan</label>
-              <select value={vakRef} onChange={e => setVakRef(e.target.value)}
-                style={{ width: '100%', padding: '8px 12px', fontSize: 13, borderRadius: 8,
-                  border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
-                <option value="">— Vacature of kandidaat —</option>
-                {vacatures.length > 0 && (
-                  <optgroup label="Vacatures">
-                    {vacatures.map(v => <option key={`v-${v.id}`} value={`vacature-${v.id}`}>{v.title ?? v.name ?? `Vacature ${v.id}`}</option>)}
-                  </optgroup>
-                )}
-                {kandidaten.length > 0 && (
-                  <optgroup label="Kandidaten">
-                    {kandidaten.map(k => <option key={`k-${k.id}`} value={`kandidaat-${k.id}`}>{k.name ?? k.full_name ?? `Kandidaat ${k.id}`}</option>)}
-                  </optgroup>
-                )}
-              </select>
+          <div style={{ padding: '4px 12px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {funnelTypes.map(t0 => {
+              const active = stage === t0.value
+              return (
+                <button key={t0.value} onClick={() => selectStage(t0.value)}
+                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
+                    borderRadius: 10, cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s',
+                    border: `1.5px solid ${active ? t0.color : 'var(--border)'}`,
+                    background: active ? t0.color + '14' : 'white',
+                    boxShadow: active ? `0 0 0 2px ${t0.color}22` : 'none' }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: t0.color, flexShrink: 0 }} />
+                  <div style={{ fontSize: 13, fontWeight: 600, color: active ? t0.color : 'var(--text)' }}>{t0.label}</div>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* Intake: link a vacancy */}
+          {stage === 'intake' && (
+            <div style={{ padding: '0 12px 20px', marginTop: -4 }}>
+              <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px' }}>
+                <Field label={t('modal.linkVacancy')}>
+                  <SelectField value={vacRef} onChange={setVacRef} placeholder={t('common:optional')}
+                    options={vacatures.length === 0
+                      ? [{ value: '', label: t('modal.noVacancies') }]
+                      : vacatures.map(v => ({ value: v.id, label: v.title ?? v.name ?? t('modal.vacancyFallback', { id: v.id }) }))} />
+                </Field>
+              </div>
             </div>
           )}
 
-          {/* Name fields */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {[['voornaam','Voornaam'],['achternaam','Achternaam']].map(([k, l]) => (
-              <div key={k}>
-                <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>{l}</label>
-                <input value={form[k]} onChange={e => set(k, e.target.value)} placeholder={l}
-                  style={{ width: '100%', padding: '8px 12px', fontSize: 13, borderRadius: 8,
-                    border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box' }} />
-              </div>
-            ))}
+          <div style={{ flex: 1 }} />
+          <div style={{ padding: '0 12px 16px' }}>
+            <button onClick={onClose}
+              style={{ width: '100%', padding: '8px 0', fontSize: 13, borderRadius: 8,
+                border: '1px solid var(--border)', background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+              {t('common:cancel')}
+            </button>
           </div>
-
-          {/* Email + Phone */}
-          {[['email','E-mailadres','email'],['telefoon','Telefoon','tel']].map(([k, l, t]) => (
-            <div key={k}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 6 }}>{l}</label>
-              <input type={t} value={form[k]} onChange={e => set(k, e.target.value)} placeholder={l}
-                style={{ width: '100%', padding: '8px 12px', fontSize: 13, borderRadius: 8,
-                  border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box' }} />
-            </div>
-          ))}
         </div>
 
-        {/* Footer */}
-        <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button onClick={onClose}
-            style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-              background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
-            Annuleren
-          </button>
-          <button disabled={!type}
-            style={{ padding: '8px 18px', fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none',
-              background: type ? 'var(--color-primary)' : '#D1D5DB', color: 'white', cursor: type ? 'pointer' : 'not-allowed' }}>
-            Toevoegen
-          </button>
+        {/* ── Right panel: candidate form ── */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+
+          <div style={{ padding: '20px 24px 14px', borderBottom: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
+                {selectedStage ? `${t('modal.newPrefix')} — ${stageLabel}` : t('modal.candidateData')}
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                {stage ? t('modal.fillRequired') : t('modal.selectTypeLeft')}
+              </div>
+            </div>
+            <button onClick={onClose}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
+              <X size={18} />
+            </button>
+          </div>
+
+          <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+            {!stage ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                height: '100%', gap: 12, color: 'var(--text-muted)', textAlign: 'center', padding: '60px 0' }}>
+                <div style={{ width: 48, height: 48, borderRadius: 12, background: '#F3F4F6',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <UserPlus size={22} color="#D1D5DB" />
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: '#9CA3AF' }}>{t('modal.noTypeSelected')}</div>
+                  <div style={{ fontSize: 12, color: '#D1D5DB', marginTop: 4 }}>{t('modal.chooseType')}</div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Field label={t('modal.fields.firstName')} required>
+                    <TextField value={form.firstName} onChange={v => set('firstName', v)} placeholder={t('modal.fields.firstName')} error={errors.firstName} />
+                    {errors.firstName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
+                  </Field>
+                  <Field label={t('modal.fields.lastName')} required>
+                    <TextField value={form.lastName} onChange={v => set('lastName', v)} placeholder={t('modal.fields.lastName')} error={errors.lastName} />
+                    {errors.lastName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
+                  </Field>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Field label={t('modal.fields.email')}>
+                    <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('modal.fields.emailPlaceholder')} />
+                  </Field>
+                  <Field label={t('modal.fields.phone')}>
+                    <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} />
+                  </Field>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Field label={t('modal.fields.dob')}>
+                    <TextField type="date" value={form.dateOfBirth} onChange={v => set('dateOfBirth', v)} />
+                  </Field>
+                  <Field label={t('modal.fields.gender')}>
+                    <SelectField value={form.gender} onChange={v => set('gender', v)} placeholder={t('common:select')} options={genderOptions} />
+                  </Field>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Field label={t('modal.fields.city')}>
+                    <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} />
+                  </Field>
+                  <Field label={t('modal.fields.province')}>
+                    <SelectField value={form.province} onChange={v => set('province', v)} placeholder={t('common:select')} options={NL_PROVINCES} />
+                  </Field>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
+            display: 'flex', justifyContent: 'flex-end', gap: 8, background: '#FAFAFA' }}>
+            <button onClick={onClose}
+              style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8,
+                border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+              {t('common:cancel')}
+            </button>
+            <button onClick={handleSubmit} disabled={!canSubmit || saving}
+              style={{ padding: '8px 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
+                background: (canSubmit && !saving) ? 'var(--color-primary)' : '#E5E7EB',
+                color: (canSubmit && !saving) ? 'white' : '#9CA3AF',
+                cursor: (canSubmit && !saving) ? 'pointer' : 'not-allowed', transition: 'all 0.15s' }}>
+              {saving ? t('common:saving', 'Opslaan…') : selectedStage ? t('modal.create', { type: stageLabel }) : t('modal.createGeneric')}
+            </button>
+          </div>
         </div>
       </div>
     </div>

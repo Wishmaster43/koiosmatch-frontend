@@ -17,7 +17,7 @@ function AppDrawer({ item, onClose }) {
         <div style={{ padding: '16px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 20 }}>
             <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-              background: ['#6366F1','#3B82F6','#22C55E','#F59E0B','#EF4444'][item.initials.charCodeAt(0) % 5],
+              background: ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)'][item.initials.charCodeAt(0) % 5],
               display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 15, fontWeight: 700 }}>
               {item.initials}
             </div>
@@ -37,10 +37,10 @@ function AppDrawer({ item, onClose }) {
           <div style={{ marginBottom: 20 }}>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>Taak</div>
             <div style={{ display: 'flex', gap: 8, padding: '10px 12px',
-              background: '#EEF2FF', borderRadius: 8, border: '1px solid #C7D2FE' }}>
+              background: 'var(--color-primary-bg)', borderRadius: 8, border: '1px solid #C7D2FE' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-                <Zap size={11} color="#6366F1" />
-                <span style={{ fontSize: 10, fontWeight: 700, color: '#6366F1' }}>AI</span>
+                <Zap size={11} color="var(--color-primary)" />
+                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--color-primary)' }}>AI</span>
               </div>
               <span style={{ fontSize: 13, color: '#3730A3', lineHeight: 1.5 }}>{item.taak}</span>
             </div>
@@ -92,7 +92,7 @@ function AppDrawer({ item, onClose }) {
             <div style={{ position: 'absolute', bottom: -16, left: 16, width: 44, height: 44, borderRadius: 10,
               background: '#fff', border: '3px solid #fff', display: 'flex', alignItems: 'center',
               justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}>
-              <span style={{ fontSize: 7, fontWeight: 800, color: '#16A34A' }}>RIVAS</span>
+              <span style={{ fontSize: 7, fontWeight: 800, color: 'var(--color-success)' }}>RIVAS</span>
             </div>
           </div>
           <div style={{ marginTop: 20, marginBottom: 16 }}>
@@ -113,7 +113,7 @@ function AppDrawer({ item, onClose }) {
               <div key={l}>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{l}</div>
                 {l==='Status'
-                  ? <span style={{ fontSize:11,fontWeight:500,padding:'2px 10px',borderRadius:99,background:'#DCFCE7',color:'#16A34A' }}>{v}</span>
+                  ? <span style={{ fontSize:11,fontWeight:500,padding:'2px 10px',borderRadius:99,background:'var(--color-success-bg)',color:'var(--color-success)' }}>{v}</span>
                   : <div style={{ fontSize:13,color:'var(--text)' }}>{v}</div>}
               </div>
             ))}
@@ -211,47 +211,47 @@ const VACATURES = [
 
 // ── Dummy sollicitaties ───────────────────────────────────────────────────────
 const INIT_SOLLICITATIES = [
-  { id: 1,  naam: 'Ismail Eddahchouri',    initials: 'I',  vacatureId: 'v1',  match: null, taak: 'Beoordeel de sollicitatie en plan een kennismakingsgesprek', fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Stichting Rivas Zorggroep (Hoofd)', kandidaatStatus: 'Available',       statusColor: '#22C55E', datum: '12 jun 2026', isNew: true  },
-  { id: 2,  naam: 'Merel Van Muijlwijk',   initials: 'M',  vacatureId: 'v2',  match: null, taak: 'Nodig de kandidaat uit voor een kennismakingsgesprek',       fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Stichting Rivas Zorggroep (Hoofd)', kandidaatStatus: 'Available',       statusColor: '#22C55E', datum: '12 jun 2026', isNew: true  },
-  { id: 3,  naam: 'Elif Akagündüz',        initials: 'E',  vacatureId: 'v3',  match: null, taak: 'Beoordeel of Elif uitgenodigd kan worden voor gesprek',       fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Kelly van Vliet',   eigenaarInitials: 'K', klant: 'Yesway zorg',                      kandidaatStatus: 'Available',       statusColor: '#22C55E', datum: '12 jun 2026', isNew: false },
-  { id: 4,  naam: 'Figen Ooijevaar',       initials: 'F',  vacatureId: 'v4',  match: 78,   taak: 'Plan een kennismakingsgesprek met Figen',                    fase: 'Gesolliciteerd', bron: 'Yesway Import', eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: '#6366F1', datum: '11 jun 2026', isNew: false },
-  { id: 5,  naam: 'Fernanda Vogel-Andrade',initials: 'F',  vacatureId: 'v4',  match: 78,   taak: 'Bel Fernanda volgende week voor h...',                       fase: 'Uitgenodigd',    bron: 'Yesway Import', eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: '#22C55E', datum: '11 jun 2026', isNew: false },
-  { id: 6,  naam: 'Rubina Rosella Milan',  initials: 'R',  vacatureId: 'v6',  match: 65,   taak: 'Kandidaat is uitgenodigd beoordeel de match voor vervolgstap', fase: 'Uitgenodigd',    bron: 'Werkzoeken',    eigenaar: 'Kelly van Vliet',   eigenaarInitials: 'K', klant: 'Stichting WoonzorgGroep Samen',    kandidaatStatus: 'Intake gepland',  statusColor: '#3B82F6', datum: '11 jun 2026', isNew: true  },
-  { id: 7,  naam: 'Priscilla Benjamin',    initials: 'P',  vacatureId: 'v5',  match: 68,   taak: 'Plan intakegesprek voor Priscilla Be...',                    fase: 'Gesolliciteerd', bron: 'Yesway Import', eigenaar: 'Bente de Jong',     eigenaarInitials: 'B', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: '#6366F1', datum: '11 jun 2026', isNew: false },
-  { id: 8,  naam: 'Petra Kuiters',         initials: 'P',  vacatureId: 'v5',  match: 67,   taak: 'Beoordeel kandidaat voor de volgende stap',                  fase: 'Gesolliciteerd', bron: 'Yesway Import', eigenaar: 'Bente de Jong',     eigenaarInitials: 'B', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: '#6366F1', datum: '11 jun 2026', isNew: false },
-  { id: 9,  naam: 'Fenicia Uiterloo',      initials: 'F',  vacatureId: 'v4',  match: 78,   taak: 'Beoordeel de match en nodig kandidaat uit',                  fase: 'Gesolliciteerd', bron: 'Yesway Import', eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: '#6366F1', datum: '11 jun 2026', isNew: false },
-  { id: 10, naam: 'Felicia Meijer',        initials: 'F',  vacatureId: 'v4',  match: 78,   taak: 'Beoordeel kandidaat voor uitnodiging',                       fase: 'Gesolliciteerd', bron: 'Yesway Import', eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: '#6366F1', datum: '11 jun 2026', isNew: false },
-  { id: 11, naam: 'Shemion Kuwas',         initials: 'S',  vacatureId: 'v9',  match: 35,   taak: 'Beoordeel kandidaat voor de volgende stap',                  fase: 'Geaccepteerd',   bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway zorg',                      kandidaatStatus: 'Nieuwe kandidaat', statusColor: '#6366F1', datum: '8 jun 2026',  isNew: true  },
-  { id: 12, naam: 'Monica Vogel',          initials: 'M',  vacatureId: 'v5',  match: 70,   taak: 'Nodig kandidaat uit voor gesprek',                           fase: 'Geaccepteerd',   bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: '#22C55E', datum: '8 jun 2026',  isNew: false },
-  { id: 13, naam: 'Esther Boer',           initials: 'E',  vacatureId: 'v4',  match: 78,   taak: 'Nodig de kandidaat uit voor een kennismakingsgesprek',       fase: 'Geaccepteerd',   bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: '#22C55E', datum: '8 jun 2026',  isNew: false },
-  { id: 14, naam: 'Emi Soliano',           initials: 'E',  vacatureId: 'v7',  match: 100,  taak: 'Evalueer sollicitatie voor vervolgstap',                     fase: 'Geaccepteerd',   bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: '#22C55E', datum: '8 jun 2026',  isNew: false },
-  { id: 15, naam: 'Marish Tewari',         initials: 'M',  vacatureId: 'v5',  match: 55,   taak: 'Suur kandidaat uitnodiging voor ko...',                      fase: 'Uitgenodigd',    bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: '#22C55E', datum: '11 jun 2026', isNew: false },
-  { id: 16, naam: 'Nema Kamwanda',         initials: 'N',  vacatureId: 'v4',  match: 81,   taak: 'Plan gesprek met Nema',                                      fase: 'Uitgenodigd',    bron: 'Werkzoeken',    eigenaar: 'Bente de Jong',     eigenaarInitials: 'B', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: '#22C55E', datum: '11 jun 2026', isNew: true  },
-  { id: 17, naam: 'Nadia Tahtah',          initials: 'N',  vacatureId: 'v11', match: 82,   taak: 'Nodig Nadia uit voor een kennismakingsgesprek',              fase: 'Voorstel gedaan',bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway zorg',                      kandidaatStatus: 'Nieuwe kandidaat', statusColor: '#6366F1', datum: '7 jun 2026',  isNew: true  },
-  { id: 18, naam: 'Manike Basnayaka',      initials: 'M',  vacatureId: 'v5',  match: 72,   taak: 'Stuur kandidaat een uitnodiging vo...',                      fase: 'Voorstel gedaan',bron: 'Werkzoeken',    eigenaar: 'Bente de Jong',     eigenaarInitials: 'B', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: '#22C55E', datum: '5 jun 2026',  isNew: false },
-  { id: 19, naam: 'Chantal Wagemakers',    initials: 'C',  vacatureId: 'v10', match: 72,   taak: 'Plan een kennismakingsgesprek me...',                        fase: 'Voorstel gedaan',bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway',                           kandidaatStatus: 'Nieuwe kandidaat', statusColor: '#6366F1', datum: '2 jun 2026',  isNew: true  },
-  { id: 20, naam: 'Genevieve Nyanda',      initials: 'G',  vacatureId: 'v5',  match: 50,   taak: 'Bevestig afwijzing wegens geen interesse',                   fase: 'Afgewezen',      bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: '#22C55E', datum: '26 mei 2026', isNew: false },
-  { id: 21, naam: 'Joehna Hous',           initials: 'J',  vacatureId: 'v4',  match: 73,   taak: 'Plan gesprek met Joehna',                                    fase: 'Voorstel gedaan',bron: 'Werkzoeken',    eigenaar: 'Kelly van Vliet',   eigenaarInitials: 'K', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: '#22C55E', datum: '4 jun 2026',  isNew: false },
-  { id: 22, naam: 'Amara Diallo',          initials: 'A',  vacatureId: 'v8',  match: 61,   taak: 'Beoordeel de sollicitatie',                                  fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Kelly van Vliet',   eigenaarInitials: 'K', klant: 'Yesway zorg',                      kandidaatStatus: 'Beschikbaar',     statusColor: '#22C55E', datum: '10 jun 2026', isNew: false },
-  { id: 23, naam: 'Rosa Tijssen',          initials: 'R',  vacatureId: 'v5',  match: 84,   taak: 'Nodig Rosa uit voor gesprek',                                fase: 'Geaccepteerd',   bron: 'Yesway Import', eigenaar: 'Bente de Jong',     eigenaarInitials: 'B', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: '#6366F1', datum: '7 jun 2026',  isNew: false },
-  { id: 24, naam: 'Layla Mansour',         initials: 'L',  vacatureId: 'v3',  match: 77,   taak: 'Beoordeel sollicitatie Layla',                               fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Kelly van Vliet',   eigenaarInitials: 'K', klant: 'Yesway zorg',                      kandidaatStatus: 'Beschikbaar',     statusColor: '#22C55E', datum: '11 jun 2026', isNew: false },
-  { id: 25, naam: 'Yara Fontein',          initials: 'Y',  vacatureId: 'v1',  match: 69,   taak: 'Plan kennismakingsgesprek Yara',                             fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Stichting Rivas Zorggroep (Hoofd)', kandidaatStatus: 'Available',       statusColor: '#22C55E', datum: '10 jun 2026', isNew: false },
+  { id: 1,  naam: 'Ismail Eddahchouri',    initials: 'I',  vacatureId: 'v1',  match: null, taak: 'Beoordeel de sollicitatie en plan een kennismakingsgesprek', fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Stichting Rivas Zorggroep (Hoofd)', kandidaatStatus: 'Available',       statusColor: 'var(--color-success)', datum: '12 jun 2026', isNew: true  },
+  { id: 2,  naam: 'Merel Van Muijlwijk',   initials: 'M',  vacatureId: 'v2',  match: null, taak: 'Nodig de kandidaat uit voor een kennismakingsgesprek',       fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Stichting Rivas Zorggroep (Hoofd)', kandidaatStatus: 'Available',       statusColor: 'var(--color-success)', datum: '12 jun 2026', isNew: true  },
+  { id: 3,  naam: 'Elif Akagündüz',        initials: 'E',  vacatureId: 'v3',  match: null, taak: 'Beoordeel of Elif uitgenodigd kan worden voor gesprek',       fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Kelly van Vliet',   eigenaarInitials: 'K', klant: 'Yesway zorg',                      kandidaatStatus: 'Available',       statusColor: 'var(--color-success)', datum: '12 jun 2026', isNew: false },
+  { id: 4,  naam: 'Figen Ooijevaar',       initials: 'F',  vacatureId: 'v4',  match: 78,   taak: 'Plan een kennismakingsgesprek met Figen',                    fase: 'Gesolliciteerd', bron: 'Yesway Import', eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: 'var(--color-primary)', datum: '11 jun 2026', isNew: false },
+  { id: 5,  naam: 'Fernanda Vogel-Andrade',initials: 'F',  vacatureId: 'v4',  match: 78,   taak: 'Bel Fernanda volgende week voor h...',                       fase: 'Uitgenodigd',    bron: 'Yesway Import', eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: 'var(--color-success)', datum: '11 jun 2026', isNew: false },
+  { id: 6,  naam: 'Rubina Rosella Milan',  initials: 'R',  vacatureId: 'v6',  match: 65,   taak: 'Kandidaat is uitgenodigd beoordeel de match voor vervolgstap', fase: 'Uitgenodigd',    bron: 'Werkzoeken',    eigenaar: 'Kelly van Vliet',   eigenaarInitials: 'K', klant: 'Stichting WoonzorgGroep Samen',    kandidaatStatus: 'Intake gepland',  statusColor: 'var(--color-secondary)', datum: '11 jun 2026', isNew: true  },
+  { id: 7,  naam: 'Priscilla Benjamin',    initials: 'P',  vacatureId: 'v5',  match: 68,   taak: 'Plan intakegesprek voor Priscilla Be...',                    fase: 'Gesolliciteerd', bron: 'Yesway Import', eigenaar: 'Bente de Jong',     eigenaarInitials: 'B', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: 'var(--color-primary)', datum: '11 jun 2026', isNew: false },
+  { id: 8,  naam: 'Petra Kuiters',         initials: 'P',  vacatureId: 'v5',  match: 67,   taak: 'Beoordeel kandidaat voor de volgende stap',                  fase: 'Gesolliciteerd', bron: 'Yesway Import', eigenaar: 'Bente de Jong',     eigenaarInitials: 'B', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: 'var(--color-primary)', datum: '11 jun 2026', isNew: false },
+  { id: 9,  naam: 'Fenicia Uiterloo',      initials: 'F',  vacatureId: 'v4',  match: 78,   taak: 'Beoordeel de match en nodig kandidaat uit',                  fase: 'Gesolliciteerd', bron: 'Yesway Import', eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: 'var(--color-primary)', datum: '11 jun 2026', isNew: false },
+  { id: 10, naam: 'Felicia Meijer',        initials: 'F',  vacatureId: 'v4',  match: 78,   taak: 'Beoordeel kandidaat voor uitnodiging',                       fase: 'Gesolliciteerd', bron: 'Yesway Import', eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: 'var(--color-primary)', datum: '11 jun 2026', isNew: false },
+  { id: 11, naam: 'Shemion Kuwas',         initials: 'S',  vacatureId: 'v9',  match: 35,   taak: 'Beoordeel kandidaat voor de volgende stap',                  fase: 'Geaccepteerd',   bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway zorg',                      kandidaatStatus: 'Nieuwe kandidaat', statusColor: 'var(--color-primary)', datum: '8 jun 2026',  isNew: true  },
+  { id: 12, naam: 'Monica Vogel',          initials: 'M',  vacatureId: 'v5',  match: 70,   taak: 'Nodig kandidaat uit voor gesprek',                           fase: 'Geaccepteerd',   bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: 'var(--color-success)', datum: '8 jun 2026',  isNew: false },
+  { id: 13, naam: 'Esther Boer',           initials: 'E',  vacatureId: 'v4',  match: 78,   taak: 'Nodig de kandidaat uit voor een kennismakingsgesprek',       fase: 'Geaccepteerd',   bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: 'var(--color-success)', datum: '8 jun 2026',  isNew: false },
+  { id: 14, naam: 'Emi Soliano',           initials: 'E',  vacatureId: 'v7',  match: 100,  taak: 'Evalueer sollicitatie voor vervolgstap',                     fase: 'Geaccepteerd',   bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: 'var(--color-success)', datum: '8 jun 2026',  isNew: false },
+  { id: 15, naam: 'Marish Tewari',         initials: 'M',  vacatureId: 'v5',  match: 55,   taak: 'Suur kandidaat uitnodiging voor ko...',                      fase: 'Uitgenodigd',    bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: 'var(--color-success)', datum: '11 jun 2026', isNew: false },
+  { id: 16, naam: 'Nema Kamwanda',         initials: 'N',  vacatureId: 'v4',  match: 81,   taak: 'Plan gesprek met Nema',                                      fase: 'Uitgenodigd',    bron: 'Werkzoeken',    eigenaar: 'Bente de Jong',     eigenaarInitials: 'B', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: 'var(--color-success)', datum: '11 jun 2026', isNew: true  },
+  { id: 17, naam: 'Nadia Tahtah',          initials: 'N',  vacatureId: 'v11', match: 82,   taak: 'Nodig Nadia uit voor een kennismakingsgesprek',              fase: 'Voorstel gedaan',bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway zorg',                      kandidaatStatus: 'Nieuwe kandidaat', statusColor: 'var(--color-primary)', datum: '7 jun 2026',  isNew: true  },
+  { id: 18, naam: 'Manike Basnayaka',      initials: 'M',  vacatureId: 'v5',  match: 72,   taak: 'Stuur kandidaat een uitnodiging vo...',                      fase: 'Voorstel gedaan',bron: 'Werkzoeken',    eigenaar: 'Bente de Jong',     eigenaarInitials: 'B', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: 'var(--color-success)', datum: '5 jun 2026',  isNew: false },
+  { id: 19, naam: 'Chantal Wagemakers',    initials: 'C',  vacatureId: 'v10', match: 72,   taak: 'Plan een kennismakingsgesprek me...',                        fase: 'Voorstel gedaan',bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway',                           kandidaatStatus: 'Nieuwe kandidaat', statusColor: 'var(--color-primary)', datum: '2 jun 2026',  isNew: true  },
+  { id: 20, naam: 'Genevieve Nyanda',      initials: 'G',  vacatureId: 'v5',  match: 50,   taak: 'Bevestig afwijzing wegens geen interesse',                   fase: 'Afgewezen',      bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: 'var(--color-success)', datum: '26 mei 2026', isNew: false },
+  { id: 21, naam: 'Joehna Hous',           initials: 'J',  vacatureId: 'v4',  match: 73,   taak: 'Plan gesprek met Joehna',                                    fase: 'Voorstel gedaan',bron: 'Werkzoeken',    eigenaar: 'Kelly van Vliet',   eigenaarInitials: 'K', klant: 'Yesway works',                     kandidaatStatus: 'Beschikbaar',     statusColor: 'var(--color-success)', datum: '4 jun 2026',  isNew: false },
+  { id: 22, naam: 'Amara Diallo',          initials: 'A',  vacatureId: 'v8',  match: 61,   taak: 'Beoordeel de sollicitatie',                                  fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Kelly van Vliet',   eigenaarInitials: 'K', klant: 'Yesway zorg',                      kandidaatStatus: 'Beschikbaar',     statusColor: 'var(--color-success)', datum: '10 jun 2026', isNew: false },
+  { id: 23, naam: 'Rosa Tijssen',          initials: 'R',  vacatureId: 'v5',  match: 84,   taak: 'Nodig Rosa uit voor gesprek',                                fase: 'Geaccepteerd',   bron: 'Yesway Import', eigenaar: 'Bente de Jong',     eigenaarInitials: 'B', klant: 'Yesway works',                     kandidaatStatus: 'Nieuwe kandidaat', statusColor: 'var(--color-primary)', datum: '7 jun 2026',  isNew: false },
+  { id: 24, naam: 'Layla Mansour',         initials: 'L',  vacatureId: 'v3',  match: 77,   taak: 'Beoordeel sollicitatie Layla',                               fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Kelly van Vliet',   eigenaarInitials: 'K', klant: 'Yesway zorg',                      kandidaatStatus: 'Beschikbaar',     statusColor: 'var(--color-success)', datum: '11 jun 2026', isNew: false },
+  { id: 25, naam: 'Yara Fontein',          initials: 'Y',  vacatureId: 'v1',  match: 69,   taak: 'Plan kennismakingsgesprek Yara',                             fase: 'Gesolliciteerd', bron: 'Werkzoeken',    eigenaar: 'Wiktoria Opalenyk', eigenaarInitials: 'W', klant: 'Stichting Rivas Zorggroep (Hoofd)', kandidaatStatus: 'Available',       statusColor: 'var(--color-success)', datum: '10 jun 2026', isNew: false },
 ]
 
 const FASES = ['Gesolliciteerd', 'Geaccepteerd', 'Uitgenodigd', 'Voorstel gedaan', 'Aangenomen', 'Afgewezen']
 
 const FASE_COLORS = {
-  'Gesolliciteerd':  '#6366F1',
+  'Gesolliciteerd':  'var(--color-primary)',
   'Geaccepteerd':    '#8B5CF6',
-  'Uitgenodigd':     '#3B82F6',
-  'Voorstel gedaan': '#F59E0B',
-  'Aangenomen':      '#22C55E',
-  'Afgewezen':       '#EF4444',
+  'Uitgenodigd':     'var(--color-secondary)',
+  'Voorstel gedaan': 'var(--color-warning)',
+  'Aangenomen':      'var(--color-success)',
+  'Afgewezen':       'var(--color-danger)',
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function Avatar({ initials, size = 26 }) {
-  const colors = ['#6366F1', '#3B82F6', '#22C55E', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
+  const colors = ['var(--color-primary)', 'var(--color-secondary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899']
   const color  = colors[initials.charCodeAt(0) % colors.length]
   return (
     <div style={{
@@ -263,7 +263,7 @@ function Avatar({ initials, size = 26 }) {
 }
 
 function MatchCircle({ pct }) {
-  const color = pct >= 75 ? '#22C55E' : pct >= 50 ? '#F59E0B' : '#EF4444'
+  const color = pct >= 75 ? 'var(--color-success)' : pct >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 12, color }}>
       <svg width="14" height="14" viewBox="0 0 14 14">
@@ -352,7 +352,7 @@ function TableView({ items, selected, onSelect }) {
                 </td>
                 <td style={{ padding: '10px 12px' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12,
-                    background: '#EEF2FF', color: '#4F46E5', padding: '3px 8px', borderRadius: 6,
+                    background: 'var(--color-primary-bg)', color: 'var(--color-primary)', padding: '3px 8px', borderRadius: 6,
                     fontWeight: 500, whiteSpace: 'nowrap' }}>
                     <Bot size={12} />
                     <span style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', maxWidth: 180 }}>
@@ -405,7 +405,7 @@ function KanbanCard({ item, onDragStart }) {
         <Avatar initials={item.initials} size={28} />
         <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', flex: 1 }}>{item.naam}</span>
         {item.isNew
-          ? <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#EF4444', flexShrink: 0 }} />
+          ? <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-danger)', flexShrink: 0 }} />
           : <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--border)', flexShrink: 0 }} />
         }
       </div>
@@ -440,10 +440,10 @@ function KanbanCard({ item, onDragStart }) {
       )}
 
       {/* AI Taak */}
-      <div style={{ background: '#EEF2FF', borderRadius: 6, padding: '5px 8px', marginBottom: 8 }}>
+      <div style={{ background: 'var(--color-primary-bg)', borderRadius: 6, padding: '5px 8px', marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 5 }}>
-          <Bot size={11} style={{ color: '#4F46E5', marginTop: 1, flexShrink: 0 }} />
-          <span style={{ fontSize: 11, color: '#4F46E5', fontWeight: 500,
+          <Bot size={11} style={{ color: 'var(--color-primary)', marginTop: 1, flexShrink: 0 }} />
+          <span style={{ fontSize: 11, color: 'var(--color-primary)', fontWeight: 500,
             display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
             {item.taak}
           </span>
@@ -570,12 +570,12 @@ export default function ApplicationsPage() {
     const actief = all.filter(s => s.fase !== 'Afgewezen')
     const count  = (fase) => all.filter(s => s.fase === fase).length
     return [
-      { label: 'Totaal actief',    value: actief.length,                    color: '#6366F1', bg: '#EEF2FF' },
-      { label: 'Gesolliciteerd',   value: count('Gesolliciteerd'),           color: '#F59E0B', bg: '#FEF3C7' },
+      { label: 'Totaal actief',    value: actief.length,                    color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
+      { label: 'Gesolliciteerd',   value: count('Gesolliciteerd'),           color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
       { label: 'Geaccepteerd',     value: count('Geaccepteerd'),            color: '#8B5CF6', bg: '#F3E8FF' },
-      { label: 'Uitgenodigd',      value: count('Uitgenodigd'),             color: '#3B82F6', bg: '#EFF6FF' },
+      { label: 'Uitgenodigd',      value: count('Uitgenodigd'),             color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)' },
       { label: 'Voorstel gedaan',  value: count('Voorstel gedaan'),         color: '#9CA3AF', bg: '#F3F4F6' },
-      { label: 'Afgewezen',        value: count('Afgewezen'),               color: '#EF4444', bg: '#FEE2E2' },
+      { label: 'Afgewezen',        value: count('Afgewezen'),               color: 'var(--color-danger)', bg: 'var(--color-danger-bg)' },
     ]
   }, [sollicitaties])
 

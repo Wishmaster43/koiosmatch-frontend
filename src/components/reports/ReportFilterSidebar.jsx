@@ -5,9 +5,11 @@
  */
 import { X, Search, ChevronDown, RotateCcw } from 'lucide-react'
 import { useState, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 
 // One collapsible, searchable multi-select group of filter options.
 function SearchSelectGroup({ group }) {
+  const { t } = useTranslation('common')
   const [open,  setOpen]  = useState(false)
   const [query, setQuery] = useState('')
 
@@ -33,8 +35,8 @@ function SearchSelectGroup({ group }) {
           {hasSelected
             ? group.selected.length === 1
               ? (group.options.find(o => o.value === group.selected[0])?.label ?? group.selected[0])
-              : `${group.selected.length} geselecteerd`
-            : `Kies ${group.label.toLowerCase()}…`}
+              : t('filters.selectedCount', { count: group.selected.length })
+            : t('filters.choose', { label: group.label.toLowerCase() })}
         </span>
         <ChevronDown size={12} style={{ flexShrink: 0, marginLeft: 4,
           transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
@@ -44,7 +46,7 @@ function SearchSelectGroup({ group }) {
       {open && (
         <div style={{ marginTop: 4, border: '1px solid #E5E7EB', borderRadius: 6,
                       background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-          {/* Zoekbalk */}
+          {/* Search bar */}
           <div style={{ padding: '6px 8px', borderBottom: '1px solid #F3F4F6',
                         display: 'flex', alignItems: 'center', gap: 6 }}>
             <Search size={11} color="#9CA3AF" style={{ flexShrink: 0 }} />
@@ -52,7 +54,7 @@ function SearchSelectGroup({ group }) {
               autoFocus
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder={`Zoek…`}
+              placeholder={t('search')}
               style={{ flex: 1, border: 'none', outline: 'none', fontSize: 11,
                        color: '#374151', background: 'transparent', padding: 0 }}
             />
@@ -64,13 +66,13 @@ function SearchSelectGroup({ group }) {
             )}
           </div>
 
-          {/* Opties */}
+          {/* Options */}
           <div style={{ maxHeight: 160, overflowY: 'auto', padding: '4px 0' }}>
             {group.options.length === 0 && (
-              <div style={{ padding: '6px 10px', fontSize: 11, color: '#9CA3AF' }}>Geen data beschikbaar</div>
+              <div style={{ padding: '6px 10px', fontSize: 11, color: '#9CA3AF' }}>{t('filters.noData')}</div>
             )}
             {group.options.length > 0 && visible.length === 0 && (
-              <div style={{ padding: '6px 10px', fontSize: 11, color: '#9CA3AF' }}>Geen resultaten</div>
+              <div style={{ padding: '6px 10px', fontSize: 11, color: '#9CA3AF' }}>{t('noResults')}</div>
             )}
             {visible.map(opt => {
               const checked = group.selected.includes(opt.value)
@@ -94,7 +96,7 @@ function SearchSelectGroup({ group }) {
             })}
           </div>
 
-          {/* Geselecteerde tags + sluiten */}
+          {/* Selected tags */}
           {hasSelected && (
             <div style={{ padding: '5px 8px', borderTop: '1px solid #F3F4F6',
                           display: 'flex', flexWrap: 'wrap', gap: 4 }}>
@@ -128,10 +130,12 @@ function SearchSelectGroup({ group }) {
 // group.years   : number[] — available years, newest first
 // group.onChange: (value: string) => void
 
-const NL_MONTHS = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
-const QUARTERS  = ['K1','K2','K3','K4']
+// Locale-aware short month name for index 0–11.
+const monthAbbr = (i) => new Date(2000, i, 1).toLocaleString(undefined, { month: 'short' })
+const QUARTERS  = ['Q1','Q2','Q3','Q4']
 
 function PeriodGroup({ group }) {
+  const { t } = useTranslation('common')
   const val = group.value ?? ''
 
   // Derive current granularity + year from value
@@ -178,12 +182,12 @@ function PeriodGroup({ group }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
-      {/* Granulariteit toggle */}
+      {/* Granularity toggle */}
       <div style={{ display: 'flex', background: '#F3F4F6', borderRadius: 7, padding: 2, gap: 2 }}>
         {[
-          { id: 'month',   label: 'Maand'    },
-          { id: 'quarter', label: 'Kwartaal' },
-          { id: 'year',    label: 'Jaar'     },
+          { id: 'month',   label: t('filters.granMonth')   },
+          { id: 'quarter', label: t('filters.granQuarter') },
+          { id: 'year',    label: t('filters.granYear')    },
         ].map(g => {
           const active = granularity === g.id
           return (
@@ -200,7 +204,7 @@ function PeriodGroup({ group }) {
         })}
       </div>
 
-      {/* Jaar selector */}
+      {/* Year selector */}
       {years.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
           {years.map(y => {
@@ -218,10 +222,10 @@ function PeriodGroup({ group }) {
         </div>
       )}
 
-      {/* Maand grid */}
+      {/* Month grid */}
       {granularity === 'month' && selectedYear && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3 }}>
-          {NL_MONTHS.map((m, i) => {
+          {Array.from({ length: 12 }, (_, i) => {
             const sub   = String(i + 1).padStart(2, '0')
             const active = selectedSub === sub
             return (
@@ -231,14 +235,14 @@ function PeriodGroup({ group }) {
                          color:      active ? 'var(--color-primary)'    : '#374151',
                          border: `1px solid ${active ? 'var(--color-primary)' : '#E5E7EB'}`,
                          fontWeight: active ? 600 : 400 }}>
-                {m}
+                {monthAbbr(i)}
               </button>
             )
           })}
         </div>
       )}
 
-      {/* Kwartaal grid */}
+      {/* Quarter grid */}
       {granularity === 'quarter' && selectedYear && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 4 }}>
           {QUARTERS.map((q, i) => {
@@ -258,13 +262,13 @@ function PeriodGroup({ group }) {
         </div>
       )}
 
-      {/* Reset periode */}
+      {/* Reset period */}
       {val && (
         <button onClick={() => group.onChange('')}
           style={{ ...btnBase, display: 'flex', alignItems: 'center', justifyContent: 'center',
                    gap: 4, padding: '4px 0', background: 'none',
                    color: '#9CA3AF', fontSize: 11, fontWeight: 400 }}>
-          <RotateCcw size={10} /> Periode wissen
+          <RotateCcw size={10} /> {t('filters.clearPeriod')}
         </button>
       )}
     </div>
@@ -274,6 +278,7 @@ function PeriodGroup({ group }) {
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 export default function ReportFilterSidebar({ title = 'Filters', groups = [], onClose }) {
+  const { t } = useTranslation('common')
   const activeCount = groups.reduce((sum, g) => {
     if (g.type === 'period') return sum + (g.value ? 1 : 0)
     if (g.type === 'global-search') return sum + (g.value ? 1 : 0)
@@ -308,7 +313,7 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
           {activeCount > 0 && (
-            <button onClick={clearAll} title="Alle filters wissen"
+            <button onClick={clearAll} title={t('filters.clearAll')}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                        width: 22, height: 22, background: 'none', border: 'none',
                        cursor: 'pointer', color: '#9CA3AF', borderRadius: 4 }}
@@ -335,7 +340,7 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
             borderRadius: 7, border: '1px solid #E5E7EB', background: '#F9FAFB' }}>
             <Search size={12} color="#9CA3AF" style={{ flexShrink: 0 }} />
             <input autoFocus={false} value={g.value ?? ''} onChange={e => g.onChange(e.target.value)}
-              placeholder={g.placeholder ?? 'Zoek alles…'}
+              placeholder={g.placeholder ?? t('filters.searchAll')}
               style={{ flex: 1, border: 'none', outline: 'none', fontSize: 12, color: '#374151', background: 'transparent', padding: 0 }} />
             {g.value && (
               <button onClick={() => g.onChange('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: 0, display: 'flex' }}>
@@ -350,10 +355,10 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
       {groups.filter(g => g.type === 'location').map(g => (
         <div key={g.key} style={{ padding: '8px 12px', borderBottom: '1px solid #F3F4F6' }}>
           <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-            Straal
+            {t('filters.radius')}
           </div>
           <input value={g.city ?? ''} onChange={e => g.onCityChange(e.target.value)}
-            placeholder="Plaatsnaam (bijv. Den Haag)"
+            placeholder={t('filters.cityPlaceholder')}
             style={{ width: '100%', padding: '6px 8px', fontSize: 12, borderRadius: 6,
               border: '1px solid #E5E7EB', background: '#F9FAFB', color: '#374151',
               outline: 'none', boxSizing: 'border-box', marginBottom: 6 }} />
@@ -369,12 +374,20 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
         </div>
       ))}
 
-      {/* Groepen */}
+      {/* Groups */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px',
                     display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {groups.filter(g => g.type !== 'global-search' && g.type !== 'location').map(group => (
+        {groups.filter(g => g.type !== 'global-search' && g.type !== 'location').map((group, i, arr) => (
           <div key={group.key}>
-            {/* Label + wis-knop */}
+            {/* Category heading — only shown when the category changes */}
+            {group.category && group.category !== arr[i - 1]?.category && (
+              <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text)', textTransform: 'uppercase',
+                            letterSpacing: '0.06em', marginBottom: 8,
+                            paddingBottom: 4, borderBottom: '1px solid #F3F4F6' }}>
+                {group.category}
+              </div>
+            )}
+            {/* Label + clear button */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                           marginBottom: 5 }}>
               <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF',
@@ -386,7 +399,7 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
                   onClick={() => group.selected.forEach(v => group.onToggle(v))}
                   style={{ fontSize: 9, color: '#9CA3AF', background: 'none', border: 'none',
                            cursor: 'pointer', padding: 0 }}>
-                  wis
+                  {t('filters.clear')}
                 </button>
               )}
             </div>

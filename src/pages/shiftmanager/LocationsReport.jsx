@@ -4,6 +4,7 @@
  * in the right panel. Clicking a KPI block opens a drill-down drawer.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { MapPin, Layers, Building2, AlertCircle, RefreshCw } from 'lucide-react'
 import api from '../../lib/api'
 import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
@@ -12,6 +13,7 @@ import KpiBlock         from '../../components/ui/KpiBlock'
 import EntityListDrawer from '../../components/ui/EntityListDrawer'
 
 export default function LocationsReport() {
+  const { t } = useTranslation('shiftmanager')
   const [locations, setLocations] = useState([])
   const [loading,   setLoading]   = useState(true)
   const [drawer,    setDrawer]    = useState(null) // { title, items }
@@ -45,8 +47,8 @@ export default function LocationsReport() {
   const drillActive = active.map(l => ({
     primary:    l.name,
     secondary:  l.customer_name,
-    badge:      'actief',
-    badgeColor: '#16A34A',
+    badge:      t('locationsReport.badge.active'),
+    badgeColor: 'var(--color-success)',
     badgeBg:    '#F0FDF4',
   }))
   const drillDepartments = locations.flatMap(l =>
@@ -56,24 +58,24 @@ export default function LocationsReport() {
   const drillNoDept = noDept.map(l => ({
     primary:    l.name,
     secondary:  l.customer_name,
-    badge:      'Geen afdelingen',
-    badgeColor: '#D97706',
-    badgeBg:    '#FFFBEB',
+    badge:      t('locationsReport.badge.noDepartments'),
+    badgeColor: 'var(--color-warning)',
+    badgeBg:    'var(--color-warning-bg)',
   }))
 
   const statusOptions = useMemo(() =>
     [...new Set(locations.map(l => l.status).filter(Boolean))].sort(), [locations])
 
   const filterGroups = useMemo(() => statusOptions.length === 0 ? [] : [{
-    key: 'status', label: 'Status locatie',
+    key: 'status', label: t('locationsReport.filterStatus'),
     selected: selectedStatuses,
     options: statusOptions.map(s => ({
       value: s,
-      label: s === 'active' ? 'Actief' : s === 'inactive' ? 'Inactief' : s,
+      label: s === 'active' ? t('common:status.active') : s === 'inactive' ? t('common:status.inactive') : s,
       count: locations.filter(l => l.status === s).length,
     })),
     onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-  }], [statusOptions, selectedStatuses, locations])
+  }], [t, statusOptions, selectedStatuses, locations])
 
   useEffect(() => {
     registerFilters('locations-report', filterGroups)
@@ -86,30 +88,30 @@ export default function LocationsReport() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', letterSpacing: '-0.3px', flexShrink: 0 }}>
-          Locaties rapport
+          {t('locationsReport.title')}
         </h2>
         {!loading && (
           <>
             <div style={{ width: 1, height: 18, background: '#E5E7EB', flexShrink: 0 }} />
             <div className="flex items-center gap-2">
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: '#F0FDF4', color: '#16A34A', borderRadius: 999,
+                             background: '#F0FDF4', color: 'var(--color-success)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#16A34A' }} />
-                {active.length} actief
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)' }} />
+                {active.length} {t('locationsReport.activeWord')}
               </span>
               {inactive.length > 0 && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
                                background: '#FFF7ED', color: '#C2410C', borderRadius: 999,
                                padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C2410C' }} />
-                  {inactive.length} inactief
+                  {inactive.length} {t('locationsReport.inactiveWord')}
                 </span>
               )}
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
                              background: '#F9FAFB', color: '#6B7280', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                {locations.length} totaal
+                {locations.length} {t('locationsReport.totalWord')}
               </span>
             </div>
           </>
@@ -117,38 +119,38 @@ export default function LocationsReport() {
         {loading && <RefreshCw size={14} className="animate-spin" style={{ color: '#D1D5DB' }} />}
       </div>
 
-      {/* KPI blokken */}
+      {/* KPI blocks */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
         <KpiBlock
-          label="Actieve locaties"
+          label={t('locationsReport.kpi.activeLocations')}
           value={active.length}
-          icon={MapPin} color="#2563EB" bg="#EFF6FF"
+          icon={MapPin} color="var(--color-secondary)" bg="var(--color-secondary-bg)"
           loading={loading}
-          onClick={!loading ? () => setDrawer({ title: 'Actieve locaties', items: drillActive }) : undefined}
+          onClick={!loading ? () => setDrawer({ title: t('locationsReport.drill.activeLocations'), items: drillActive }) : undefined}
         />
         <KpiBlock
-          label="Totaal afdelingen"
+          label={t('locationsReport.kpi.totalDepartments')}
           value={totalDep}
           icon={Layers} color="#7C3AED" bg="#F5F3FF"
           loading={loading}
-          sub={active.length > 0 ? `gem. ${(totalDep / Math.max(active.length, 1)).toFixed(1)} per locatie` : undefined}
-          onClick={!loading ? () => setDrawer({ title: 'Alle afdelingen', items: drillDepartments }) : undefined}
+          sub={active.length > 0 ? t('locationsReport.sub.avgPerLocation', { n: (totalDep / Math.max(active.length, 1)).toFixed(1) }) : undefined}
+          onClick={!loading ? () => setDrawer({ title: t('locationsReport.drill.allDepartments'), items: drillDepartments }) : undefined}
         />
         <KpiBlock
-          label="Unieke klanten"
+          label={t('locationsReport.kpi.uniqueCustomers')}
           value={uniqueCustomers.length}
           icon={Building2} color="#059669" bg="#ECFDF5"
           loading={loading}
-          onClick={!loading ? () => setDrawer({ title: 'Klanten', items: drillCustomers }) : undefined}
+          onClick={!loading ? () => setDrawer({ title: t('locationsReport.drill.customers'), items: drillCustomers }) : undefined}
         />
         <KpiBlock
-          label="Zonder afdeling"
+          label={t('locationsReport.kpi.withoutDepartment')}
           value={noDept.length}
-          icon={AlertCircle} color="#D97706" bg="#FFFBEB"
+          icon={AlertCircle} color="var(--color-warning)" bg="var(--color-warning-bg)"
           loading={loading}
-          sub={noDept.length > 0 ? 'Nog niet ingericht' : 'Alles ingericht'}
+          sub={noDept.length > 0 ? t('locationsReport.sub.notConfigured') : t('locationsReport.sub.allConfigured')}
           onClick={!loading && noDept.length > 0
-            ? () => setDrawer({ title: 'Locaties zonder afdeling', items: drillNoDept })
+            ? () => setDrawer({ title: t('locationsReport.drill.locationsWithoutDepartment'), items: drillNoDept })
             : undefined}
         />
       </div>

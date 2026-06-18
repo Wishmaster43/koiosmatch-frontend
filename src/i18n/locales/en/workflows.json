@@ -1,0 +1,175 @@
+{
+  "schedule": {
+    "header": "Schedule",
+    "run": "Run",
+    "advanced": "Advanced settings",
+    "types": {
+      "interval": "At regular intervals",
+      "once": "Once",
+      "daily": "Daily",
+      "weekdays": "Weekdays (Mon–Fri)",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "specified": "Specific dates",
+      "ondemand": "On demand"
+    },
+    "intervalLabel": "Interval (minutes)",
+    "minShort": "{{n}} min",
+    "hourShort": "{{n}} h",
+    "custom": "Or custom:",
+    "minutes": "minutes",
+    "dateTime": "Date and time",
+    "times": "Times",
+    "timesWeekdays": "Times (weekdays)",
+    "addTime": "Add time",
+    "days": "Day(s)",
+    "time": "Time",
+    "dayOfMonth": "Day of the month",
+    "ofEveryMonth": "of every month",
+    "dates": "Dates",
+    "addDate": "Add date",
+    "onDemandText": "The scenario is not run automatically. You can start it manually via the \"Run\" button or via an API call.",
+    "startDate": "Start date (optional)",
+    "endDate": "End date (optional)",
+    "maxRuns": "Max. runs per minute",
+    "default100": "Default: 100",
+    "rateLimitHint": "Excess is queued until capacity frees up.",
+    "label": {
+      "notSet": "Not set",
+      "every": "Every {{interval}}",
+      "onceOn": "Once on {{date}} at {{time}}",
+      "dailyAt": "Daily at {{times}}",
+      "weekdaysAt": "Weekdays at {{times}}",
+      "weeklyOn": "Weekly on {{days}} at {{time}}",
+      "monthlyOn": "Monthly on day {{day}} at {{time}}",
+      "specifiedCount": "{{count}} specific date(s)",
+      "onDemand": "On demand",
+      "unknown": "Unknown"
+    }
+  },
+  "modules": {
+    "candidate_filter": "Candidate filter",
+    "shift_fetcher": "Fetch shifts",
+    "whatsapp_send": "Send WhatsApp",
+    "database_update": "Update database",
+    "email_send": "Send email",
+    "delay": "Delay"
+  },
+  "status": {
+    "active": "Active",
+    "draft": "Draft",
+    "inactive": "Inactive"
+  },
+  "page": {
+    "notRun": "Not run yet",
+    "running": "Working...",
+    "run": "Run",
+    "candidates": "{{n}} candidates",
+    "folders": "Folders",
+    "newFolder": "New folder",
+    "folderNamePrompt": "Folder name:",
+    "allWorkflows": "All workflows",
+    "unassigned": "Unassigned",
+    "workflowsTitle": "Workflows",
+    "countWorkflows": "{{n}} workflows",
+    "newWorkflow": "New workflow",
+    "loading": "Loading...",
+    "empty": "No workflows in this folder. Drag one here or create a new one.",
+    "addModuleAlert": "Add at least one module to the workflow before saving.",
+    "saveFailed": "Saving failed: {{msg}}",
+    "deleteFolderConfirm": "Delete folder \"{{name}}\"? The workflows will remain under \"Unassigned\"."
+  },
+  "ai": {
+    "saved": "Saved",
+    "restore": "Restore",
+    "versions": "{{count}} version(s)",
+    "loading": "Loading…",
+    "emptyStart": "Nothing yet. Click + to start.",
+    "strength": {
+      "high": "High",
+      "medium": "Medium",
+      "fast": "Fast",
+      "reasoning": "Reasoning"
+    },
+    "customApi": "Custom (own API)",
+    "field": {
+      "name": "Name",
+      "content": "Content"
+    },
+    "chat": {
+      "test": "Test",
+      "clear": "Clear",
+      "placeholder": "Type a message…",
+      "empty": "Send a message to test the agent",
+      "noReply": "(no answer)",
+      "error": "⚠ Error fetching answer."
+    },
+    "agent": {
+      "newAgent": "New agent",
+      "fallback": "Agent",
+      "namePlaceholder": "E.g. Yessy AI",
+      "model": "Model",
+      "apiEndpoint": "API Endpoint",
+      "apiKey": "API Key",
+      "prompt": "Instruction (Prompt)",
+      "noPrompt": "— No prompt —",
+      "selectFaqs": "Select FAQs",
+      "noFaqs": "No FAQs created",
+      "knowledge": "Knowledge base",
+      "useKnowledge": "Use general knowledge base",
+      "maxHistory": "Max. conversation history",
+      "confirmDelete": "Delete agent \"{{name}}\"?",
+      "selectOrNew": "Select an agent or click +"
+    },
+    "tabs": {
+      "agents": "Agents",
+      "prompts": "Prompts",
+      "faqs": "FAQs",
+      "knowledge": "Knowledge base"
+    },
+    "prompts": {
+      "namePlaceholder": "E.g. Yessy system prompt",
+      "bodyPlaceholder": "You are a friendly AI assistant…",
+      "confirmDelete": "Delete prompt \"{{name}}\"?"
+    },
+    "faqs": {
+      "namePlaceholder": "E.g. Shift FAQs",
+      "contentLabel": "Content (question + answer format)",
+      "bodyPlaceholder": "Q: How do I cancel?\nA: Send a message via WhatsApp...",
+      "confirmDelete": "Delete FAQ \"{{name}}\"?"
+    },
+    "knowledge": {
+      "namePlaceholder": "E.g. Terms of employment",
+      "bodyPlaceholder": "Enter knowledge base content…"
+    },
+    "tools": {
+      "hint": "Activate which tools an agent may use",
+      "items": {
+        "shift_lookup": {
+          "label": "Look up shift",
+          "description": "Finds available shifts for a candidate"
+        },
+        "candidate_status": {
+          "label": "Candidate status",
+          "description": "Fetches a candidate’s status and pool"
+        },
+        "send_whatsapp": {
+          "label": "Send WhatsApp",
+          "description": "Sends a message via WhatsApp"
+        },
+        "update_candidate": {
+          "label": "Update candidate",
+          "description": "Updates status or notes"
+        },
+        "knowledge_search": {
+          "label": "Search knowledge base",
+          "description": "Looks up information in the knowledge base"
+        },
+        "calendar_check": {
+          "label": "Check calendar",
+          "description": "Checks schedule and shifts"
+        }
+      }
+    }
+  }
+}

@@ -7,7 +7,7 @@ export default {
   label: 'Router',
   Icon:  GitBranch,
   color: '#B45309',
-  bg:    '#FEF3C7',
+  bg:    'var(--color-warning-bg)',
   schema: [
     {
       key:   'routes',

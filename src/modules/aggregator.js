@@ -7,7 +7,7 @@ export default {
   label: 'Aggregator',
   Icon:  Combine,
   color: '#0369A1',
-  bg:    '#E0F2FE',
+  bg:    'var(--color-info-bg)',
   schema: [
     {
       key:   'source_module',

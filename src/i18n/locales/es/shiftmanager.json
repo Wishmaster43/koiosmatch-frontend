@@ -1,0 +1,203 @@
+{
+  "orders": {
+    "title": "Detalles — Turnos",
+    "count": "{{count}} turnos",
+    "loading": "Cargando turnos…",
+    "empty": "No se encontraron turnos",
+    "allMonths": "Todos los meses",
+    "search": "Buscar por ID ext., ref. pedido, cliente…",
+    "status": {
+      "open": "Abierto",
+      "prognosis": "Previsión",
+      "completed": "Real",
+      "in_process": "En curso",
+      "cancelled": "Cancelado"
+    },
+    "cols": {
+      "extId": "ID ext.",
+      "orderRef": "Ref. pedido",
+      "status": "Estado",
+      "customer": "Cliente",
+      "location": "Ubicación",
+      "date": "Fecha",
+      "start": "Inicio",
+      "end": "Fin",
+      "hoursCand": "H. cand.",
+      "hoursCust": "H. cliente",
+      "ccCand": "CC cand.",
+      "ccCust": "CC cliente"
+    },
+    "filterStatus": "Estado",
+    "drawer": {
+      "title": "Detalles del turno",
+      "identification": "Identificación",
+      "shiftId": "ID de turno",
+      "externalId": "ID externo",
+      "scheduledId": "Scheduled ID",
+      "orderRef": "Ref. pedido",
+      "planning": "Planificación",
+      "date": "Fecha",
+      "startTime": "Hora de inicio",
+      "endTime": "Hora de fin",
+      "jobType": "Puesto",
+      "persons": "Número de personas",
+      "status": "Estado",
+      "customerLocation": "Cliente y ubicación",
+      "customer": "Cliente",
+      "location": "Ubicación",
+      "address": "Dirección",
+      "hours": "Horas",
+      "hoursCand": "Horas candidato",
+      "hoursCust": "Horas cliente",
+      "ccCand": "Centro de costes cand.",
+      "ccCust": "Centro de costes cliente",
+      "candidates": "Candidatos",
+      "notes": "Notas"
+    }
+  },
+  "shiftsDrawer": {
+    "count": "{{count}} turnos",
+    "loadError": "No se pudieron cargar los turnos.",
+    "loading": "Cargando…",
+    "empty": "No se encontraron turnos",
+    "search": "Buscar por puesto, ubicación, ref. pedido, candidato…",
+    "shownOf": "{{shown}} de {{total}} mostrados",
+    "close": "Cerrar",
+    "unknown": "Desconocido",
+    "noCandidate": "Aún no hay candidato asignado",
+    "hoursUnit": "{{n}} h",
+    "status": {
+      "in_process": "Previsión",
+      "completed": "Real",
+      "open": "Sin candidato",
+      "verwijderd": "Sin cubrir",
+      "niet_factureerbaar": "No facturable"
+    },
+    "fields": {
+      "email": "Correo",
+      "mobile": "Móvil",
+      "scheduled": "Planificado",
+      "workedHours": "Horas trabajadas",
+      "contract": "Contrato",
+      "date": "Fecha",
+      "persons": "Personas",
+      "customerId": "ID de cliente",
+      "location": "Ubicación",
+      "place": "Lugar",
+      "orderRef": "Ref. pedido",
+      "subject": "Asunto",
+      "shiftIdExt": "ID de turno (externo)",
+      "orderIdExt": "ID de pedido (externo)",
+      "rate": "Tarifa",
+      "pickup": "Recogida"
+    }
+  },
+  "charts": {
+    "hours": "Número de horas",
+    "shifts": "Número de turnos",
+    "loading": "Cargando…",
+    "perMonthUnit": "mes",
+    "perQuarterUnit": "trimestre",
+    "periodLabel": "{{years}} — por {{unit}}",
+    "filters": {
+      "period": "Período",
+      "month": "Por mes",
+      "quarter": "Por trimestre",
+      "years": "Años",
+      "months": "Meses",
+      "series": "Series",
+      "jobType": "Puesto",
+      "customer": "Cliente",
+      "location": "Ubicación"
+    },
+    "series": {
+      "totaal": "Total",
+      "niet_ingevuld": "Sin cubrir",
+      "geen_kandidaat": "Sin candidato",
+      "prognose": "Previsión",
+      "werkelijk": "Real"
+    }
+  },
+  "customersReport": {
+    "title": "Informe de clientes",
+    "activeWord": "activos",
+    "inactiveWord": "inactivos",
+    "totalWord": "en total",
+    "filterStatus": "Estado del cliente",
+    "drill": {
+      "activeCustomers": "Clientes activos",
+      "allLocations": "Todas las ubicaciones",
+      "allDepartments": "Todos los departamentos",
+      "customersWithoutLocation": "Clientes sin ubicación"
+    },
+    "sub": {
+      "locations": "{{count}} ubicaciones",
+      "avgPerCustomer": "prom. {{n}} por cliente",
+      "avgPerLocation": "prom. {{n}} por ubicación",
+      "notLinked": "Aún no vinculado",
+      "noLocationsLinked": "Sin ubicaciones vinculadas"
+    }
+  },
+  "locationsReport": {
+    "title": "Informe de ubicaciones",
+    "activeWord": "activas",
+    "inactiveWord": "inactivas",
+    "totalWord": "en total",
+    "filterStatus": "Estado de la ubicación",
+    "kpi": {
+      "activeLocations": "Ubicaciones activas",
+      "totalDepartments": "Total departamentos",
+      "uniqueCustomers": "Clientes únicos",
+      "withoutDepartment": "Sin departamento"
+    },
+    "drill": {
+      "activeLocations": "Ubicaciones activas",
+      "allDepartments": "Todos los departamentos",
+      "customers": "Clientes",
+      "locationsWithoutDepartment": "Ubicaciones sin departamento"
+    },
+    "sub": {
+      "avgPerLocation": "prom. {{n}} por ubicación",
+      "notConfigured": "Aún no configurado",
+      "allConfigured": "Todo configurado"
+    },
+    "badge": {
+      "active": "activa",
+      "noDepartments": "Sin departamentos"
+    }
+  },
+  "departmentsReport": {
+    "title": "Informe de departamentos",
+    "count": "{{count}} departamentos",
+    "filterCustomer": "Cliente",
+    "kpi": {
+      "totalDepartments": "Total departamentos",
+      "uniqueLocations": "Ubicaciones únicas",
+      "uniqueCustomers": "Clientes únicos",
+      "withCostCenter": "Con centro de costes"
+    },
+    "sub": {
+      "avgPerLocation": "prom. {{n}} por ubicación",
+      "linkedPct": "{{pct}}% vinculado"
+    }
+  },
+  "dashboard": {
+    "recentRuns": "Ejecuciones recientes",
+    "recentConversations": "Conversaciones recientes",
+    "viewAll": "Ver todo →",
+    "candidates": "{{n}} candidatos",
+    "stats": {
+      "openHours": "Horas abiertas",
+      "hoursThisMonth": "Horas mes actual",
+      "occupancy": "Tasa de ocupación",
+      "messagesSent": "Mensajes enviados",
+      "responseRate": "Tasa de respuesta"
+    },
+    "statSub": {
+      "urgent": "{{n}} urgente",
+      "prevMonth": "{{pct}} mes anterior",
+      "thisMonth": "Este mes",
+      "historicAvg": "prom. {{pct}} histórico"
+    }
+  }
+}

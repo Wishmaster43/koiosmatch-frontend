@@ -7,7 +7,7 @@ export default {
   label:    'Tekst samenvoegen',
   Icon:     AlignLeft,
   color:    '#0369A1',
-  bg:       '#E0F2FE',
+  bg:       'var(--color-info-bg)',
   schema: [
     { key: 'source_module', label: 'Bronmodule', type: 'text', placeholder: 'automatisch ingevuld' },
     { key: 'row_separator', label: 'Scheidingsteken', type: 'select', options: ['Nieuwe regel', 'Komma', 'Puntkomma', 'Spatie', 'Geen'] },

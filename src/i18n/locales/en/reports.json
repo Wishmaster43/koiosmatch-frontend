@@ -1,0 +1,357 @@
+{
+  "candidates": {
+    "title": "Details — Candidates",
+    "summary": "{{shown}} of {{total}} candidates",
+    "search": "Search by name, email, position…",
+    "loading": "Loading candidates…",
+    "empty": "No candidates found",
+    "emptyHint": "Adjust the filters or search",
+    "unknown": "unknown",
+    "more": "+{{count}} more",
+    "cols": {
+      "name": "Name",
+      "status": "Status",
+      "position": "Position",
+      "mobile": "Mobile",
+      "registration": "Registration",
+      "lastLogin": "Last login",
+      "plannedShift": "Planned shift",
+      "lastShift": "Last shift",
+      "shifts": "Shifts",
+      "features": "Features",
+      "globalRates": "Global rates"
+    },
+    "filters": {
+      "year": "Registration year",
+      "status": "Status",
+      "position": "Position",
+      "features": "Features"
+    },
+    "status": {
+      "actief": "Active",
+      "nietactief": "Inactive",
+      "extern": "External",
+      "intake": "Intake",
+      "verwijderd": "Deleted",
+      "onbekend": "Unknown"
+    }
+  },
+  "customers": {
+    "loading": "Loading customers…",
+    "empty": "No customers found",
+    "loadError": "Could not load customers.",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "cols": {
+      "name": "Name",
+      "debtorNumber": "Debtor no.",
+      "status": "Status",
+      "accountManager": "Account manager",
+      "locations": "Locations",
+      "departments": "Departments"
+    },
+    "filters": {
+      "status": "Status"
+    }
+  },
+  "common": {
+    "loadingShort": "Loading…",
+    "statusActive": "Active",
+    "statusInactive": "Inactive"
+  },
+  "contacts": {
+    "title": "Contact persons",
+    "summary": "{{shown}} of {{total}} contact persons",
+    "search": "Search by name, email, location…",
+    "loading": "Loading contact persons…",
+    "empty": "No contact persons found",
+    "cols": {
+      "customer": "Customer",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "planningContact": "Planning contact"
+    },
+    "filters": {
+      "customer": "Customer",
+      "planningContact": "Planning contact"
+    },
+    "planningYes": "Planning contact",
+    "planningNo": "No planning contact",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "departments": {
+    "title": "Details — Departments",
+    "summary": "{{shown}} of {{total}} departments",
+    "search": "Search by name, location, cost center…",
+    "loading": "Loading departments…",
+    "empty": "No departments found",
+    "cols": {
+      "customer": "Customer",
+      "location": "Location",
+      "department": "Department",
+      "costCenter": "Cost center"
+    },
+    "filters": {
+      "customer": "Customer",
+      "locationStatus": "Location status"
+    }
+  },
+  "locations": {
+    "title": "Details — Locations",
+    "summary": "{{shown}} of {{total}} locations",
+    "search": "Search by name, customer, address…",
+    "loading": "Loading locations…",
+    "empty": "No locations found",
+    "cols": {
+      "customer": "Customer",
+      "location": "Location",
+      "address": "Address",
+      "status": "Status",
+      "departments": "Departments"
+    },
+    "filters": {
+      "customer": "Customer",
+      "status": "Status"
+    }
+  },
+  "dr": {
+    "close": "Close",
+    "remarks": "Remarks",
+    "externalId": "External ID",
+    "customer": "Customer",
+    "location": "Location",
+    "costCenter": "Cost center",
+    "address": "Address",
+    "departments": "Departments",
+    "email": "Email",
+    "mobile": "Mobile",
+    "phone": "Phone"
+  },
+  "candidateDrawer": {
+    "unknownName": "Unknown",
+    "candidateFallback": "candidate",
+    "default": "Default",
+    "tabs": {
+      "general": "General",
+      "conversation": "Conversation",
+      "history": "History"
+    },
+    "sections": {
+      "contact": "Contact",
+      "timeline": "Timeline",
+      "stats": "Statistics",
+      "features": "Features",
+      "globalRole": "Global role"
+    },
+    "fields": {
+      "mobile": "Mobile",
+      "email": "Email",
+      "city": "City",
+      "registrationDate": "Registration date",
+      "lastLogin": "Last login",
+      "plannedShift": "Planned shift",
+      "lastShift": "Last shift",
+      "endEmployment": "End of employment"
+    },
+    "stats": {
+      "worked": "Shifts worked",
+      "noShows": "No-shows",
+      "cancellations": "Cancellations"
+    },
+    "conversationComing": "Conversation coming soon",
+    "conversationDesc": "WhatsApp conversations between Yessy AI and {{name}}",
+    "historyComing": "Shift history coming soon",
+    "historyDesc": "All shifts worked by {{name}}"
+  },
+  "customerDrawer": {
+    "debtorNumber": "Debtor no.",
+    "accountManager": "Account manager",
+    "locations": "Locations",
+    "departments": "Departments",
+    "noLocations": "No locations known"
+  },
+  "contactDrawer": {
+    "contactInfo": "Contact details",
+    "function": "Position",
+    "salutation": "Salutation",
+    "planningContact": "Planning contact",
+    "noPlanningContact": "No planning contact",
+    "sendEmail": "Send email",
+    "call": "Call"
+  },
+  "departmentDrawer": {
+    "info": "Department details",
+    "name": "Department name"
+  },
+  "locationDrawer": {
+    "info": "Location details",
+    "departmentsCount": "Departments ({{count}})"
+  },
+  "report": {
+    "title": "Candidates report",
+    "activeWord": "active",
+    "deregisteredWord": "deregistered",
+    "totalWord": "total",
+    "loadError": "Could not load candidates.",
+    "unitCandidates": "candidates",
+    "charts": {
+      "perPosition": "By position",
+      "lastLogin": "Last login",
+      "newPerMonth": "New candidates per month",
+      "newPerWeek": "New candidates per week",
+      "endPerMonth": "Deregistered per month",
+      "endPerWeek": "Deregistered per week",
+      "topCities": "Top {{n}} cities"
+    },
+    "sub": {
+      "position": "Position",
+      "lastLogin": "Last login",
+      "regMonth": "Registration month",
+      "regWeek": "Registration week",
+      "city": "City",
+      "endMonth": "Deregistration month",
+      "endWeek": "Deregistration week",
+      "kpi": "KPI"
+    },
+    "filters": {
+      "view": "Display",
+      "numbers": "Numbers",
+      "percentages": "Percentages",
+      "year": "Year",
+      "status": "Status",
+      "position": "Position"
+    }
+  },
+  "kpiRow": {
+    "attention": "Candidates needing attention",
+    "attentionNote": "Active · new · not planned",
+    "active": "Active candidates",
+    "activeNote": "{{planned}} / {{total}} planned",
+    "inactive": "Inactive candidates",
+    "intake": "Intake candidates",
+    "newThisMonth": "New {{month}} (avg. {{avg}}/mo)",
+    "drillActive": "Active",
+    "drillInactive": "Inactive",
+    "drillIntake": "Intake",
+    "drillNewIn": "New in {{month}}"
+  },
+  "drilldown": {
+    "searchFull": "Search by name, position, mobile or email…",
+    "searchShort": "Search by name, position or email…",
+    "candidatesCount": "{{count}} candidates",
+    "shownOf": "{{shown}} of {{total}} shown",
+    "notPlanned": "Not planned",
+    "registered": "Registered",
+    "deregistered": "Deregistered",
+    "kpiPerMonth": "KPI: {{target}}/mo",
+    "atKpi": "✓ KPI",
+    "calcLabel": "Calculation:",
+    "calcBody": "total new candidates in {{year}} up to {{month}} ({{total}}) divided by the number of months ({{months}}) = {{avg}}/month.",
+    "kpiGoal": "KPI target is {{target}} per month.",
+    "newThisMonth": "New this month",
+    "avgPerMonthLabel": "Average /mo",
+    "kpiTargetLabel": "KPI target /mo",
+    "perMonthYear": "Per month — {{year}}",
+    "kpiGoalFoot": "KPI target: {{target}} new candidates per month",
+    "fields": {
+      "position": "Position",
+      "mobile": "Mobile",
+      "email": "Email",
+      "registered": "Registered",
+      "lastLogin": "Last login",
+      "plannedOn": "Planned on",
+      "lastShift": "Last shift",
+      "shiftsWorked": "Shifts worked",
+      "noShows": "No-shows"
+    }
+  },
+  "messages": {
+    "title": "Details — Messages",
+    "summary": "{{shown}} of {{total}} messages",
+    "search": "Search by name, subject, workflow…",
+    "loading": "Loading messages…",
+    "empty": "No messages found",
+    "cols": {
+      "sent": "Sent",
+      "recipient": "Recipient",
+      "channel": "Channel",
+      "subject": "Subject",
+      "status": "Status",
+      "workflow": "Workflow"
+    },
+    "channel": {
+      "whatsapp": "WhatsApp",
+      "email": "Email",
+      "sms": "SMS"
+    },
+    "status": {
+      "sent": "Sent",
+      "delivered": "Delivered",
+      "read": "Read",
+      "failed": "Failed",
+      "pending": "Queued",
+      "bounced": "Bounced"
+    },
+    "filters": {
+      "channel": "Channel",
+      "status": "Status",
+      "workflow": "Workflow"
+    },
+    "drawer": {
+      "recipient": "Recipient",
+      "name": "Name",
+      "mobile": "Mobile",
+      "email": "Email",
+      "timeline": "Timeline",
+      "sentAt": "Sent at",
+      "deliveredAt": "Delivered at",
+      "readAt": "Read at",
+      "workflow": "Workflow",
+      "template": "Template",
+      "body": "Message content",
+      "error": "Error message",
+      "messageFallback": "Message #{{id}}"
+    }
+  },
+  "runs": {
+    "title": "Details — Runs",
+    "summary": "{{shown}} of {{total}} runs",
+    "search": "Search by workflow, trigger, error…",
+    "loading": "Loading runs…",
+    "empty": "No runs found",
+    "cols": {
+      "started": "Started",
+      "workflow": "Workflow",
+      "status": "Status",
+      "candidates": "Candidates",
+      "duration": "Duration",
+      "trigger": "Trigger"
+    },
+    "status": {
+      "success": "Succeeded",
+      "failed": "Failed",
+      "running": "Running",
+      "pending": "Queued"
+    },
+    "filters": {
+      "status": "Status",
+      "workflow": "Workflow"
+    },
+    "drawer": {
+      "startedColon": "Started:",
+      "candidates": "Candidates",
+      "duration": "Duration",
+      "timeline": "Timeline",
+      "started": "Started",
+      "finished": "Finished",
+      "trigger": "Trigger",
+      "createdBy": "Created by",
+      "stepResults": "Step results",
+      "step": "Step {{n}}",
+      "error": "Error message",
+      "workflowFallback": "Workflow #{{id}}"
+    }
+  }
+}

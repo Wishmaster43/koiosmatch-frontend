@@ -1,0 +1,357 @@
+{
+  "candidates": {
+    "title": "Details — Kandidaten",
+    "summary": "{{shown}} von {{total}} Kandidaten",
+    "search": "Nach Name, E-Mail, Funktion suchen…",
+    "loading": "Kandidaten werden geladen…",
+    "empty": "Keine Kandidaten gefunden",
+    "emptyHint": "Passen Sie die Filter oder die Suche an",
+    "unknown": "unbekannt",
+    "more": "+{{count}} mehr",
+    "cols": {
+      "name": "Name",
+      "status": "Status",
+      "position": "Funktion",
+      "mobile": "Mobil",
+      "registration": "Registrierung",
+      "lastLogin": "Letzter Login",
+      "plannedShift": "Geplanter Einsatz",
+      "lastShift": "Letzter Einsatz",
+      "shifts": "Einsätze",
+      "features": "Merkmale",
+      "globalRates": "Globale Sätze"
+    },
+    "filters": {
+      "year": "Registrierungsjahr",
+      "status": "Status",
+      "position": "Funktion",
+      "features": "Merkmale"
+    },
+    "status": {
+      "actief": "Aktiv",
+      "nietactief": "Inaktiv",
+      "extern": "Extern",
+      "intake": "Intake",
+      "verwijderd": "Gelöscht",
+      "onbekend": "Unbekannt"
+    }
+  },
+  "customers": {
+    "loading": "Kunden werden geladen…",
+    "empty": "Keine Kunden gefunden",
+    "loadError": "Kunden konnten nicht geladen werden.",
+    "statusActive": "Aktiv",
+    "statusInactive": "Inaktiv",
+    "cols": {
+      "name": "Name",
+      "debtorNumber": "Debitor-Nr.",
+      "status": "Status",
+      "accountManager": "Kundenbetreuer",
+      "locations": "Standorte",
+      "departments": "Abteilungen"
+    },
+    "filters": {
+      "status": "Status"
+    }
+  },
+  "common": {
+    "loadingShort": "Wird geladen…",
+    "statusActive": "Aktiv",
+    "statusInactive": "Inaktiv"
+  },
+  "contacts": {
+    "title": "Ansprechpartner",
+    "summary": "{{shown}} von {{total}} Ansprechpartnern",
+    "search": "Nach Name, E-Mail, Standort suchen…",
+    "loading": "Ansprechpartner werden geladen…",
+    "empty": "Keine Ansprechpartner gefunden",
+    "cols": {
+      "customer": "Kunde",
+      "name": "Name",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "planningContact": "Planungskontakt"
+    },
+    "filters": {
+      "customer": "Kunde",
+      "planningContact": "Planungskontakt"
+    },
+    "planningYes": "Planungskontakt",
+    "planningNo": "Kein Planungskontakt",
+    "yes": "Ja",
+    "no": "Nein"
+  },
+  "departments": {
+    "title": "Details — Abteilungen",
+    "summary": "{{shown}} von {{total}} Abteilungen",
+    "search": "Nach Name, Standort, Kostenstelle suchen…",
+    "loading": "Abteilungen werden geladen…",
+    "empty": "Keine Abteilungen gefunden",
+    "cols": {
+      "customer": "Kunde",
+      "location": "Standort",
+      "department": "Abteilung",
+      "costCenter": "Kostenstelle"
+    },
+    "filters": {
+      "customer": "Kunde",
+      "locationStatus": "Standortstatus"
+    }
+  },
+  "locations": {
+    "title": "Details — Standorte",
+    "summary": "{{shown}} von {{total}} Standorten",
+    "search": "Nach Name, Kunde, Adresse suchen…",
+    "loading": "Standorte werden geladen…",
+    "empty": "Keine Standorte gefunden",
+    "cols": {
+      "customer": "Kunde",
+      "location": "Standort",
+      "address": "Adresse",
+      "status": "Status",
+      "departments": "Abteilungen"
+    },
+    "filters": {
+      "customer": "Kunde",
+      "status": "Status"
+    }
+  },
+  "dr": {
+    "close": "Schließen",
+    "remarks": "Anmerkungen",
+    "externalId": "Externe ID",
+    "customer": "Kunde",
+    "location": "Standort",
+    "costCenter": "Kostenstelle",
+    "address": "Adresse",
+    "departments": "Abteilungen",
+    "email": "E-Mail",
+    "mobile": "Mobil",
+    "phone": "Telefon"
+  },
+  "candidateDrawer": {
+    "unknownName": "Unbekannt",
+    "candidateFallback": "Kandidat",
+    "default": "Standard",
+    "tabs": {
+      "general": "Allgemein",
+      "conversation": "Konversation",
+      "history": "Verlauf"
+    },
+    "sections": {
+      "contact": "Kontakt",
+      "timeline": "Zeitachse",
+      "stats": "Statistiken",
+      "features": "Merkmale",
+      "globalRole": "Globale Funktion"
+    },
+    "fields": {
+      "mobile": "Mobil",
+      "email": "E-Mail",
+      "city": "Wohnort",
+      "registrationDate": "Registrierungsdatum",
+      "lastLogin": "Letzter Login",
+      "plannedShift": "Geplanter Einsatz",
+      "lastShift": "Letzter Einsatz",
+      "endEmployment": "Ende des Arbeitsverhältnisses"
+    },
+    "stats": {
+      "worked": "Geleistete Einsätze",
+      "noShows": "No-Shows",
+      "cancellations": "Stornierungen"
+    },
+    "conversationComing": "Konversation folgt bald",
+    "conversationDesc": "WhatsApp-Gespräche zwischen Yessy AI und {{name}}",
+    "historyComing": "Einsatzverlauf folgt bald",
+    "historyDesc": "Alle geleisteten Einsätze von {{name}}"
+  },
+  "customerDrawer": {
+    "debtorNumber": "Debitor-Nr.",
+    "accountManager": "Kundenbetreuer",
+    "locations": "Standorte",
+    "departments": "Abteilungen",
+    "noLocations": "Keine Standorte bekannt"
+  },
+  "contactDrawer": {
+    "contactInfo": "Kontaktdaten",
+    "function": "Funktion",
+    "salutation": "Anrede",
+    "planningContact": "Planungskontakt",
+    "noPlanningContact": "Kein Planungskontakt",
+    "sendEmail": "E-Mail senden",
+    "call": "Anrufen"
+  },
+  "departmentDrawer": {
+    "info": "Abteilungsdaten",
+    "name": "Abteilungsname"
+  },
+  "locationDrawer": {
+    "info": "Standortdaten",
+    "departmentsCount": "Abteilungen ({{count}})"
+  },
+  "report": {
+    "title": "Kandidatenbericht",
+    "activeWord": "aktiv",
+    "deregisteredWord": "abgemeldet",
+    "totalWord": "gesamt",
+    "loadError": "Kandidaten konnten nicht geladen werden.",
+    "unitCandidates": "Kandidaten",
+    "charts": {
+      "perPosition": "Nach Funktion",
+      "lastLogin": "Letzter Login",
+      "newPerMonth": "Neue Kandidaten pro Monat",
+      "newPerWeek": "Neue Kandidaten pro Woche",
+      "endPerMonth": "Abmeldungen pro Monat",
+      "endPerWeek": "Abmeldungen pro Woche",
+      "topCities": "Top {{n}} Wohnorte"
+    },
+    "sub": {
+      "position": "Funktion",
+      "lastLogin": "Letzter Login",
+      "regMonth": "Registrierungsmonat",
+      "regWeek": "Registrierungswoche",
+      "city": "Wohnort",
+      "endMonth": "Abmeldemonat",
+      "endWeek": "Abmeldewoche",
+      "kpi": "KPI"
+    },
+    "filters": {
+      "view": "Anzeige",
+      "numbers": "Zahlen",
+      "percentages": "Prozente",
+      "year": "Jahr",
+      "status": "Status",
+      "position": "Funktion"
+    }
+  },
+  "kpiRow": {
+    "attention": "Kandidaten mit Aufmerksamkeitsbedarf",
+    "attentionNote": "Aktiv · neu · nicht geplant",
+    "active": "Aktive Kandidaten",
+    "activeNote": "{{planned}} / {{total}} geplant",
+    "inactive": "Inaktive Kandidaten",
+    "intake": "Intake-Kandidaten",
+    "newThisMonth": "Neu {{month}} (Ø {{avg}}/Mon.)",
+    "drillActive": "Aktiv",
+    "drillInactive": "Inaktiv",
+    "drillIntake": "Intake",
+    "drillNewIn": "Neu in {{month}}"
+  },
+  "drilldown": {
+    "searchFull": "Nach Name, Funktion, Mobil oder E-Mail suchen…",
+    "searchShort": "Nach Name, Funktion oder E-Mail suchen…",
+    "candidatesCount": "{{count}} Kandidaten",
+    "shownOf": "{{shown}} von {{total}} angezeigt",
+    "notPlanned": "Nicht geplant",
+    "registered": "Registriert",
+    "deregistered": "Abgemeldet",
+    "kpiPerMonth": "KPI: {{target}}/Mon.",
+    "atKpi": "✓ KPI",
+    "calcLabel": "Berechnung:",
+    "calcBody": "Gesamtzahl neuer Kandidaten in {{year}} bis {{month}} ({{total}}) geteilt durch die Anzahl der Monate ({{months}}) = {{avg}}/Monat.",
+    "kpiGoal": "KPI-Ziel ist {{target}} pro Monat.",
+    "newThisMonth": "Neu diesen Monat",
+    "avgPerMonthLabel": "Durchschnitt /Mon.",
+    "kpiTargetLabel": "KPI-Ziel /Mon.",
+    "perMonthYear": "Pro Monat — {{year}}",
+    "kpiGoalFoot": "KPI-Ziel: {{target}} neue Kandidaten pro Monat",
+    "fields": {
+      "position": "Funktion",
+      "mobile": "Mobil",
+      "email": "E-Mail",
+      "registered": "Registriert",
+      "lastLogin": "Letzter Login",
+      "plannedOn": "Geplant am",
+      "lastShift": "Letzter Einsatz",
+      "shiftsWorked": "Geleistete Einsätze",
+      "noShows": "No-Shows"
+    }
+  },
+  "messages": {
+    "title": "Details — Nachrichten",
+    "summary": "{{shown}} von {{total}} Nachrichten",
+    "search": "Nach Name, Betreff, Workflow suchen…",
+    "loading": "Nachrichten werden geladen…",
+    "empty": "Keine Nachrichten gefunden",
+    "cols": {
+      "sent": "Gesendet",
+      "recipient": "Empfänger",
+      "channel": "Kanal",
+      "subject": "Betreff",
+      "status": "Status",
+      "workflow": "Workflow"
+    },
+    "channel": {
+      "whatsapp": "WhatsApp",
+      "email": "E-Mail",
+      "sms": "SMS"
+    },
+    "status": {
+      "sent": "Gesendet",
+      "delivered": "Zugestellt",
+      "read": "Gelesen",
+      "failed": "Fehlgeschlagen",
+      "pending": "In Warteschlange",
+      "bounced": "Unzustellbar"
+    },
+    "filters": {
+      "channel": "Kanal",
+      "status": "Status",
+      "workflow": "Workflow"
+    },
+    "drawer": {
+      "recipient": "Empfänger",
+      "name": "Name",
+      "mobile": "Mobil",
+      "email": "E-Mail",
+      "timeline": "Zeitachse",
+      "sentAt": "Gesendet am",
+      "deliveredAt": "Zugestellt am",
+      "readAt": "Gelesen am",
+      "workflow": "Workflow",
+      "template": "Vorlage",
+      "body": "Nachrichteninhalt",
+      "error": "Fehlermeldung",
+      "messageFallback": "Nachricht #{{id}}"
+    }
+  },
+  "runs": {
+    "title": "Details — Ausführungen",
+    "summary": "{{shown}} von {{total}} Ausführungen",
+    "search": "Nach Workflow, Trigger, Fehler suchen…",
+    "loading": "Ausführungen werden geladen…",
+    "empty": "Keine Ausführungen gefunden",
+    "cols": {
+      "started": "Gestartet",
+      "workflow": "Workflow",
+      "status": "Status",
+      "candidates": "Kandidaten",
+      "duration": "Dauer",
+      "trigger": "Trigger"
+    },
+    "status": {
+      "success": "Erfolgreich",
+      "failed": "Fehlgeschlagen",
+      "running": "Läuft",
+      "pending": "In Warteschlange"
+    },
+    "filters": {
+      "status": "Status",
+      "workflow": "Workflow"
+    },
+    "drawer": {
+      "startedColon": "Gestartet:",
+      "candidates": "Kandidaten",
+      "duration": "Dauer",
+      "timeline": "Zeitachse",
+      "started": "Gestartet",
+      "finished": "Abgeschlossen",
+      "trigger": "Trigger",
+      "createdBy": "Erstellt von",
+      "stepResults": "Schritt-Ergebnisse",
+      "step": "Schritt {{n}}",
+      "error": "Fehlermeldung",
+      "workflowFallback": "Workflow #{{id}}"
+    }
+  }
+}

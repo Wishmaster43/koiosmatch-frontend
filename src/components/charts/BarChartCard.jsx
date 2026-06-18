@@ -1,4 +1,6 @@
+/** BarChartCard — themed bar chart with optional average line + click-through. */
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer, ReferenceLine } from 'recharts'
+import { useTranslation } from 'react-i18next'
 
 function BarTooltip({ active, payload, label, total, showPercent }) {
   if (!active || !payload?.length) return null
@@ -16,10 +18,11 @@ function BarTooltip({ active, payload, label, total, showPercent }) {
 }
 
 export default function BarChartCard({ title, data = [], colors = [], showPercent = false, height = 220, onBarClick, showAverage = false }) {
+  const { t } = useTranslation('common')
   const rawTotal   = data.reduce((s, d) => s + d.value, 0)
   const rawAverage = data.length ? Math.round(rawTotal / data.length) : 0
 
-  // Bij percentages: balken tonen als % van totaal; gemiddelde ook omrekenen
+  // With percentages: bars show as % of total; recompute the average too.
   const displayData = showPercent && rawTotal > 0
     ? data.map(d => ({ ...d, value: +((d.value / rawTotal) * 100).toFixed(1) }))
     : data
@@ -31,7 +34,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
     return (
       <div className="flex flex-col flex-1 min-w-0">
         <div className="mb-4 text-sm font-medium text-gray-600">{title}</div>
-        <div className="flex items-center justify-center h-40 text-xs text-gray-300">Geen data</div>
+        <div className="flex items-center justify-center h-40 text-xs text-gray-300">{t('noData')}</div>
       </div>
     )
   }
@@ -42,13 +45,13 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
         <div className="flex items-center gap-3">
           <div className="text-sm font-medium text-gray-600">{title}</div>
           {showAverage && displayAverage > 0 && (
-            <div className="flex items-center gap-1.5 text-xs" style={{ color: '#534AB7' }}>
-              <div style={{ width: 16, borderTop: '2px dashed #534AB7' }} />
-              gem. {displayAverage}{showPercent ? '%' : ''}
+            <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--color-primary)' }}>
+              <div style={{ width: 16, borderTop: '2px dashed var(--color-primary)' }} />
+              {t('avg')} {displayAverage}{showPercent ? '%' : ''}
             </div>
           )}
         </div>
-        {onBarClick && <span className="text-xs text-gray-300">klik op balk voor details</span>}
+        {onBarClick && <span className="text-xs text-gray-300">{t('clickBar')}</span>}
       </div>
 
       <ResponsiveContainer width="100%" height={height}>
@@ -66,10 +69,10 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
           {showAverage && displayAverage > 0 && (
             <ReferenceLine
               y={displayAverage}
-              stroke="#534AB7"
+              stroke="var(--color-primary)"
               strokeDasharray="4 4"
               strokeWidth={1.5}
-              label={{ value: `${displayAverage}${showPercent ? '%' : ''}`, position: 'right', fontSize: 10, fill: '#534AB7' }}
+              label={{ value: `${displayAverage}${showPercent ? '%' : ''}`, position: 'right', fontSize: 10, fill: 'var(--color-primary)' }}
             />
           )}
 
@@ -80,7 +83,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
             onClick={(_, idx) => onBarClick && onBarClick(data[idx])}
           >
             {data.map((_, i) => (
-              <Cell key={i} fill={colors[i % colors.length] || '#534AB7'} />
+              <Cell key={i} fill={colors[i % colors.length] || 'var(--color-primary)'} />
             ))}
           </Bar>
         </BarChart>
@@ -88,7 +91,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
 
       <div className="flex justify-center mt-2">
         <span style={{ fontSize: 11, color: '#9CA3AF' }}>
-          Totaal: <strong style={{ color: '#374151' }}>{rawTotal}</strong>
+          {t('total')}: <strong style={{ color: '#374151' }}>{rawTotal}</strong>
         </span>
       </div>
     </div>

@@ -9,18 +9,17 @@
  *   - (further down)→ the searchable user table + role rendering
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ShieldCheck, Shield, User, Plus, X, Loader2, ChevronDown } from 'lucide-react'
 import api from '../../lib/api'
 import { useAuth } from '../../context/AuthContext'
 import { useRightPanel } from '../../context/RightPanelContext'
 
-const ROLES = [
-  { value: 'tenant_admin', label: 'Admin' },
-  { value: 'planner',      label: 'Planner' },
-  { value: 'user',         label: 'Gebruiker' },
-]
+// Selectable roles in the new-user form; labels = t('users.roles.<value>').
+const ROLES = ['tenant_admin', 'planner', 'user']
 
 function NewUserModal({ onClose, onCreated }) {
+  const { t } = useTranslation('users')
   const [form, setForm]     = useState({ firstname: '', lastname: '', email: '', password: '', role: 'planner' })
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState(null)
@@ -35,7 +34,7 @@ function NewUserModal({ onClose, onCreated }) {
       onCreated(res.data?.data ?? res.data)
       onClose()
     } catch (err) {
-      setError(err?.response?.data?.message ?? 'Aanmaken mislukt.')
+      setError(err?.response?.data?.message ?? t('createFailed'))
     } finally {
       setSaving(false)
     }
@@ -55,7 +54,7 @@ function NewUserModal({ onClose, onCreated }) {
         width: 420, padding: 24,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Nieuwe gebruiker</h3>
+          <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('newUser')}</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
             <X size={16} />
           </button>
@@ -64,42 +63,42 @@ function NewUserModal({ onClose, onCreated }) {
         <form onSubmit={handleSubmit}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div>
-              <label style={label}>Voornaam</label>
+              <label style={label}>{t('firstName')}</label>
               <input required value={form.firstname} onChange={set('firstname')} style={input} placeholder="Jan" />
             </div>
             <div>
-              <label style={label}>Achternaam</label>
+              <label style={label}>{t('lastName')}</label>
               <input value={form.lastname} onChange={set('lastname')} style={input} placeholder="Jansen" />
             </div>
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={label}>E-mailadres</label>
+            <label style={label}>{t('email')}</label>
             <input required type="email" value={form.email} onChange={set('email')} style={input} placeholder="jan@bedrijf.nl" />
           </div>
           <div style={{ marginBottom: 12 }}>
-            <label style={label}>Wachtwoord</label>
-            <input required type="password" value={form.password} onChange={set('password')} style={input} placeholder="Minimaal 8 tekens" />
+            <label style={label}>{t('password')}</label>
+            <input required type="password" value={form.password} onChange={set('password')} style={input} placeholder={t('pwPlaceholder')} />
           </div>
           <div style={{ marginBottom: 20 }}>
-            <label style={label}>Rol</label>
+            <label style={label}>{t('role')}</label>
             <select value={form.role} onChange={set('role')} style={{ ...input, cursor: 'pointer' }}>
-              {ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
+              {ROLES.map(r => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
             </select>
           </div>
 
-          {error && <p style={{ fontSize: 12, color: '#EF4444', marginBottom: 12 }}>{error}</p>}
+          {error && <p style={{ fontSize: 12, color: 'var(--color-danger)', marginBottom: 12 }}>{error}</p>}
 
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <button type="button" onClick={onClose}
               style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
                        background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
-              Annuleren
+              {t('common:cancel')}
             </button>
             <button type="submit" disabled={saving}
               style={{ padding: '8px 18px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
                        background: 'var(--color-primary)', color: 'white', cursor: saving ? 'default' : 'pointer',
                        display: 'flex', alignItems: 'center', gap: 6 }}>
-              {saving ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> Aanmaken…</> : 'Aanmaken'}
+              {saving ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t('creating')}</> : t('create')}
             </button>
           </div>
         </form>
@@ -108,17 +107,20 @@ function NewUserModal({ onClose, onCreated }) {
   )
 }
 
+// Role → colour + icon. Label = t('users.roles.<name>') (default → user).
 const ROLE_META = {
-  super_admin:   { label: 'Super admin', color: '#7C3AED', bg: '#F5F3FF', icon: ShieldCheck },
-  tenant_admin:  { label: 'Admin',       color: '#1D4ED8', bg: '#EFF6FF', icon: Shield },
-  planner:       { label: 'Planner',     color: '#065F46', bg: '#ECFDF5', icon: User },
-  default:       { label: 'Gebruiker',   color: '#6B7280', bg: '#F9FAFB', icon: User },
+  super_admin:   { color: '#7C3AED', bg: '#F5F3FF', icon: ShieldCheck },
+  tenant_admin:  { color: '#1D4ED8', bg: 'var(--color-secondary-bg)', icon: Shield },
+  planner:       { color: '#065F46', bg: '#ECFDF5', icon: User },
+  default:       { color: '#6B7280', bg: '#F9FAFB', icon: User },
 }
+const roleLabel = (t, name) => t(`users.roles.${name === 'default' ? 'user' : name}`, { defaultValue: name })
 
 const hasRole = (u, role) => (u?.roles ?? []).some(r => (typeof r === 'string' ? r : r?.name) === role)
 const isSuperAdminUser = u => hasRole(u, 'super_admin')
 
 function RoleBadge({ role }) {
+  const { t } = useTranslation('users')
   const name = typeof role === 'string' ? role : role?.name ?? 'default'
   const meta = ROLE_META[name] ?? ROLE_META.default
   const Icon = meta.icon
@@ -130,7 +132,7 @@ function RoleBadge({ role }) {
       borderRadius: 999, padding: '2px 9px', fontSize: 11, fontWeight: 500,
     }}>
       <Icon size={10} />
-      {meta.label}
+      {roleLabel(t, name)}
     </span>
   )
 }
@@ -138,6 +140,7 @@ function RoleBadge({ role }) {
 // Inline role-changer shown when clicking the role cell of a non-super-admin user.
 // Loads available roles from /roles and sends PUT /users/{id}/roles.
 function RoleSelector({ user: u, availableRoles, onChanged }) {
+  const { t } = useTranslation('users')
   const [open,    setOpen]    = useState(false)
   const [saving,  setSaving]  = useState(false)
 
@@ -151,7 +154,7 @@ function RoleSelector({ user: u, availableRoles, onChanged }) {
     try {
       const res = await api.put(`/users/${u.id}/roles`, { roles: [roleId] })
       onChanged(res.data?.data ?? res.data)
-    } catch {}
+    } catch { /* noop */ }
     setSaving(false)
   }
 
@@ -166,7 +169,7 @@ function RoleSelector({ user: u, availableRoles, onChanged }) {
 
       {/* Change role button */}
       <button onClick={() => setOpen(o => !o)} disabled={saving}
-        title="Rol wijzigen"
+        title={t('changeRole')}
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                  width: 22, height: 22, borderRadius: 6, border: '1px solid #E5E7EB',
                  background: open ? '#F3F4F6' : 'white', cursor: 'pointer',
@@ -186,7 +189,7 @@ function RoleSelector({ user: u, availableRoles, onChanged }) {
                          boxShadow: '0 4px 20px rgba(0,0,0,0.1)', minWidth: 160, overflow: 'hidden' }}>
             <div style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, color: '#9CA3AF',
                            textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid #F3F4F6' }}>
-              Rol wijzigen
+              {t('changeRole')}
             </div>
             {availableRoles.map(role => {
               const meta    = ROLE_META[role.name] ?? ROLE_META.default
@@ -202,7 +205,7 @@ function RoleSelector({ user: u, availableRoles, onChanged }) {
                   onMouseLeave={e => { if (!isCurrent) e.currentTarget.style.background = 'white' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%',
                                  background: meta.color, flexShrink: 0 }} />
-                  {meta.label ?? role.name}
+                  {roleLabel(t, role.name)}
                   {isCurrent && (
                     <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--color-primary)' }}>✓</span>
                   )}
@@ -243,6 +246,7 @@ const TH = {
 const TD = { padding: '10px 14px', borderBottom: '1px solid #F9FAFB', verticalAlign: 'middle' }
 
 export default function UsersPage() {
+  const { t } = useTranslation('users')
   const { user: me } = useAuth()
   const [users,        setUsers]        = useState([])
   const [roles,        setRoles]        = useState([])
@@ -260,15 +264,15 @@ export default function UsersPage() {
         const roleList = rolesRes.data ?? []
         setRoles(roleList.filter(r => r.name !== 'super_admin' && r.name !== 'tenant_admin'))
       })
-      .catch(err => setError(err?.response?.status === 403 ? 'Geen toegang tot gebruikerslijst.' : 'Kon gebruikers niet laden.'))
+      .catch(err => setError(err?.response?.status === 403 ? t('noAccess') : t('loadError')))
       .finally(() => setLoading(false))
   }, [])
 
   const roleOptions = useMemo(() => [...new Set(users.flatMap(u => (u.roles ?? []).map(r => r.name)))].map(r => ({ value: r, label: r, count: users.filter(u => (u.roles ?? []).some(x => x.name === r)).length })), [users])
 
   const filterGroups = useMemo(() => [
-    { key: 'role', label: 'Rol', selected: selectedRole, options: roleOptions, onToggle: v => setSelectedRole(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
-  ], [selectedRole, roleOptions])
+    { key: 'role', label: t('filterRole'), selected: selectedRole, options: roleOptions, onToggle: v => setSelectedRole(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+  ], [t, selectedRole, roleOptions])
 
   useEffect(() => {
     registerFilters('users-page', filterGroups)
@@ -287,11 +291,11 @@ export default function UsersPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.2px' }}>
-            Gebruikers
+            {t('title')}
           </h2>
           {!loading && (
             <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-              {filtered.length} van {users.length} gebruikers
+              {t('summary', { shown: filtered.length, total: users.length })}
             </p>
           )}
         </div>
@@ -300,37 +304,37 @@ export default function UsersPage() {
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px',
                      fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
                      background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
-            <Plus size={14} /> Nieuwe gebruiker
+            <Plus size={14} /> {t('newUser')}
           </button>
         </div>
       </div>
 
-      {/* Tabel */}
+      {/* Table */}
       <div style={{ background: 'var(--surface)', borderRadius: 12,
                     border: '1px solid var(--border)', overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr>
-              <th style={TH}>Naam</th>
-              <th style={TH}>E-mail</th>
-              <th style={TH}>Telefoon</th>
-              <th style={TH}>Rol</th>
+              <th style={TH}>{t('cols.name')}</th>
+              <th style={TH}>{t('cols.email')}</th>
+              <th style={TH}>{t('cols.phone')}</th>
+              <th style={TH}>{t('cols.role')}</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr><td colSpan={4} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
-                Gebruikers ophalen…
+                {t('loading')}
               </td></tr>
             )}
             {!loading && error && (
-              <tr><td colSpan={4} style={{ textAlign: 'center', padding: 40, color: '#EF4444', fontSize: 13 }}>
+              <tr><td colSpan={4} style={{ textAlign: 'center', padding: 40, color: 'var(--color-danger)', fontSize: 13 }}>
                 {error}
               </td></tr>
             )}
             {!loading && !error && filtered.length === 0 && (
               <tr><td colSpan={4} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
-                Geen gebruikers gevonden
+                {t('empty')}
               </td></tr>
             )}
             {!loading && filtered.map((u, i) => {
@@ -352,13 +356,13 @@ export default function UsersPage() {
                           {isMe && (
                             <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
                                            background: 'var(--color-primary-bg)', borderRadius: 999, padding: '1px 7px' }}>
-                              jij
+                              {t('you')}
                             </span>
                           )}
                           {isSA && (
                             <span style={{ fontSize: 10, fontWeight: 600, color: '#7C3AED',
                                            background: '#F5F3FF', borderRadius: 999, padding: '1px 7px' }}>
-                              systeem
+                              {t('system')}
                             </span>
                           )}
                         </div>

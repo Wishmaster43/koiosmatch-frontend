@@ -4,24 +4,24 @@ import { useRightPanel } from '../../context/RightPanelContext'
 import { Users, Building2, FileText, Briefcase, TrendingUp, CheckCircle, AlertCircle, MessageCircle, CalendarDays } from 'lucide-react'
 
 const RECENT_CANDIDATES = [
-  { name: 'Ismail Eddahchouri',    initials: 'IE', status: 'Beschikbaar',     statusColor: '#22C55E', role: 'Verzorgende IG',   time: '22:00' },
-  { name: 'Merel Van Muijlwijk',   initials: 'MV', status: 'Beschikbaar',     statusColor: '#22C55E', role: 'Helpende',         time: '16:36' },
-  { name: 'Raginie Rasoelbaks',    initials: 'RR', status: 'In procedure',    statusColor: '#F59E0B', role: 'Verpleegkundige',  time: '16:02' },
-  { name: 'Elif Akagündüz',        initials: 'EA', status: 'Beschikbaar',     statusColor: '#22C55E', role: 'Gastvrouw',        time: '14:00' },
-  { name: 'Rubina Rosella Milan',  initials: 'RM', status: 'Intake gepland',  statusColor: '#3B82F6', role: 'Verzorgende',      time: '11:18' },
+  { name: 'Ismail Eddahchouri',    initials: 'IE', status: 'Beschikbaar',     statusColor: 'var(--color-success)', role: 'Verzorgende IG',   time: '22:00' },
+  { name: 'Merel Van Muijlwijk',   initials: 'MV', status: 'Beschikbaar',     statusColor: 'var(--color-success)', role: 'Helpende',         time: '16:36' },
+  { name: 'Raginie Rasoelbaks',    initials: 'RR', status: 'In procedure',    statusColor: 'var(--color-warning)', role: 'Verpleegkundige',  time: '16:02' },
+  { name: 'Elif Akagündüz',        initials: 'EA', status: 'Beschikbaar',     statusColor: 'var(--color-success)', role: 'Gastvrouw',        time: '14:00' },
+  { name: 'Rubina Rosella Milan',  initials: 'RM', status: 'Intake gepland',  statusColor: 'var(--color-secondary)', role: 'Verzorgende',      time: '11:18' },
 ]
 
 const RECENT_APPLICATIONS = [
-  { candidate: 'Ismail Eddahchouri',   vacancy: 'Verzorgende IG — Papendrecht',  status: 'In behandeling', statusColor: '#F59E0B', time: '12 jun' },
-  { candidate: 'Merel Van Muijlwijk',  vacancy: 'Helpende — Utrecht',            status: 'Afgewezen',      statusColor: '#EF4444', time: '11 jun' },
-  { candidate: 'Figen Ooijevaar',      vacancy: 'Zorgmedewerker — Den Haag',     status: 'Nieuw',          statusColor: '#6366F1', time: '11 jun' },
-  { candidate: 'Priscilla Benjamin',   vacancy: 'Verpleegkundige — Tilburg',      status: 'Aangenomen',     statusColor: '#22C55E', time: '10 jun' },
+  { candidate: 'Ismail Eddahchouri',   vacancy: 'Verzorgende IG — Papendrecht',  status: 'In behandeling', statusColor: 'var(--color-warning)', time: '12 jun' },
+  { candidate: 'Merel Van Muijlwijk',  vacancy: 'Helpende — Utrecht',            status: 'Afgewezen',      statusColor: 'var(--color-danger)', time: '11 jun' },
+  { candidate: 'Figen Ooijevaar',      vacancy: 'Zorgmedewerker — Den Haag',     status: 'Nieuw',          statusColor: 'var(--color-primary)', time: '11 jun' },
+  { candidate: 'Priscilla Benjamin',   vacancy: 'Verpleegkundige — Tilburg',      status: 'Aangenomen',     statusColor: 'var(--color-success)', time: '10 jun' },
 ]
 
 const RECENT_LEADS = [
-  { name: 'Zorgcentrum De Eik',      contact: 'Linda Brouwer',  status: 'Warm',    statusColor: '#F59E0B', time: '12 jun' },
-  { name: 'Thuiszorg Noord-Holland', contact: 'Peter van Dam',  status: 'Nieuw',   statusColor: '#6366F1', time: '11 jun' },
-  { name: 'Verpleeghuis Zonnehoek',  contact: 'Anke Smits',     status: 'Contact', statusColor: '#3B82F6', time: '10 jun' },
+  { name: 'Zorgcentrum De Eik',      contact: 'Linda Brouwer',  status: 'Warm',    statusColor: 'var(--color-warning)', time: '12 jun' },
+  { name: 'Thuiszorg Noord-Holland', contact: 'Peter van Dam',  status: 'Nieuw',   statusColor: 'var(--color-primary)', time: '11 jun' },
+  { name: 'Verpleeghuis Zonnehoek',  contact: 'Anke Smits',     status: 'Contact', statusColor: 'var(--color-secondary)', time: '10 jun' },
 ]
 
 const RUNS = [
@@ -51,7 +51,7 @@ function KpiCard({ label, value, sub, color, bg, Icon, onClick }) {
         </div>
       </div>
       <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{value}</div>
-      <div style={{ fontSize: 11, color: sub?.startsWith('+') ? '#22C55E' : sub?.startsWith('-') ? '#EF4444' : 'var(--text-muted)' }}>{sub}</div>
+      <div style={{ fontSize: 11, color: sub?.startsWith('+') ? 'var(--color-success)' : sub?.startsWith('-') ? 'var(--color-danger)' : 'var(--text-muted)' }}>{sub}</div>
     </div>
   )
 }
@@ -70,7 +70,7 @@ function Block({ title, action, onAction, children }) {
 }
 
 function Avatar({ initials, size = 28 }) {
-  const colors = ['#6366F1','#3B82F6','#22C55E','#F59E0B','#EF4444','#8B5CF6','#EC4899']
+  const colors = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6','#EC4899']
   const color  = colors[initials.charCodeAt(0) % colors.length]
   return (
     <div style={{ width: size, height: size, borderRadius: '50%', background: color, flexShrink: 0,
@@ -132,20 +132,20 @@ export default function Dashboard({ onNavigate }) {
       {/* KPI rij — ATS */}
       <div style={{ marginBottom: 6 }}>
         <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-          <KpiCard label="Totaal kandidaten"         value="2.845" sub="+34 deze maand"    color="#6366F1" bg="#EEF2FF" Icon={Users}      onClick={() => onNavigate?.('candidates')} />
-          <KpiCard label="Nieuwe kandidaten"         value="34"    sub="+12% vorige maand" color="#22C55E" bg="#DCFCE7" Icon={TrendingUp}  onClick={() => onNavigate?.('candidates')} />
-          <KpiCard label="Openstaande sollicitaties" value="18"    sub="5 nieuw vandaag"   color="#F59E0B" bg="#FEF3C7" Icon={FileText}    onClick={() => onNavigate?.('applications')} />
-          <KpiCard label="Actieve vacatures"         value="9"     sub="3 urgent"          color="#EF4444" bg="#FEE2E2" Icon={Briefcase}   onClick={() => onNavigate?.('vacancies')} />
+          <KpiCard label="Totaal kandidaten"         value="2.845" sub="+34 deze maand"    color="var(--color-primary)" bg="var(--color-primary-bg)" Icon={Users}      onClick={() => onNavigate?.('candidates')} />
+          <KpiCard label="Nieuwe kandidaten"         value="34"    sub="+12% vorige maand" color="var(--color-success)" bg="var(--color-success-bg)" Icon={TrendingUp}  onClick={() => onNavigate?.('candidates')} />
+          <KpiCard label="Openstaande sollicitaties" value="18"    sub="5 nieuw vandaag"   color="var(--color-warning)" bg="var(--color-warning-bg)" Icon={FileText}    onClick={() => onNavigate?.('applications')} />
+          <KpiCard label="Actieve vacatures"         value="9"     sub="3 urgent"          color="var(--color-danger)" bg="var(--color-danger-bg)" Icon={Briefcase}   onClick={() => onNavigate?.('vacancies')} />
         </div>
       </div>
 
       {/* KPI rij — CRM */}
       <div style={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', gap: 12 }}>
-          <KpiCard label="Actieve klanten"     value="47"    sub="+3 deze maand"  color="#3B82F6" bg="#EFF6FF" Icon={Building2}    onClick={() => onNavigate?.('customers')} />
+          <KpiCard label="Actieve klanten"     value="47"    sub="+3 deze maand"  color="var(--color-secondary)" bg="var(--color-secondary-bg)" Icon={Building2}    onClick={() => onNavigate?.('customers')} />
           <KpiCard label="Leads in pipeline"   value="12"    sub="4 warm"         color="#8B5CF6" bg="#F3E8FF" Icon={TrendingUp}   />
-          <KpiCard label="Geplande diensten"   value="138"   sub="Deze week"      color="#22C55E" bg="#DCFCE7" Icon={CalendarDays} onClick={() => onNavigate?.('planning')} />
-          {hasWhatsApp && <KpiCard label="Berichten verstuurd" value="1.847" sub="Deze maand" color="#0EA5E9" bg="#E0F2FE" Icon={MessageCircle} onClick={() => onNavigate?.('whatsapp')} />}
+          <KpiCard label="Geplande diensten"   value="138"   sub="Deze week"      color="var(--color-success)" bg="var(--color-success-bg)" Icon={CalendarDays} onClick={() => onNavigate?.('planning')} />
+          {hasWhatsApp && <KpiCard label="Berichten verstuurd" value="1.847" sub="Deze maand" color="var(--color-info)" bg="var(--color-info-bg)" Icon={MessageCircle} onClick={() => onNavigate?.('whatsapp')} />}
         </div>
       </div>
 
@@ -203,9 +203,9 @@ export default function Dashboard({ onNavigate }) {
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
                 borderBottom: i < RUNS.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-                  background: r.ok ? '#DCFCE7' : '#FEE2E2',
+                  background: r.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {r.ok ? <CheckCircle size={13} color="#16A34A" /> : <AlertCircle size={13} color="#DC2626" />}
+                  {r.ok ? <CheckCircle size={13} color="var(--color-success)" /> : <AlertCircle size={13} color="var(--color-danger)" />}
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>

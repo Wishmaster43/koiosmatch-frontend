@@ -1,21 +1,22 @@
 import { useState } from 'react'
 
 export const CV_DEFAULT_SECTIONS = [
-  { id: 'contact',      label: 'Contactgegevens', enabled: true  },
-  { id: 'samenvatting', label: 'Over mij',        enabled: true  },
-  { id: 'ervaring',     label: 'Werkervaring',    enabled: true  },
-  { id: 'opleiding',    label: 'Opleiding',       enabled: true  },
-  { id: 'talen',        label: 'Talen',           enabled: true  },
-  { id: 'vaardigheden', label: 'Vaardigheden',    enabled: true  },
-  { id: 'certificaten', label: 'Certificaten',    enabled: true  },
-  { id: 'voorkeuren',   label: 'Voorkeuren',      enabled: false },
+  { id: 'contact',      label: 'Contact details', enabled: true  },
+  { id: 'summary',      label: 'About me',        enabled: true  },
+  { id: 'experience',   label: 'Work experience', enabled: true  },
+  { id: 'education',    label: 'Education',        enabled: true  },
+  { id: 'languages',    label: 'Languages',       enabled: true  },
+  { id: 'skills',       label: 'Skills',          enabled: true  },
+  { id: 'certificates', label: 'Certificates',    enabled: true  },
+  { id: 'preferences',  label: 'Preferences',     enabled: false },
 ]
 
 const DEFAULTS = {
-  primaryColor: '#6366F1',
-  logoUrl:      null,
-  companyName:  '',
-  sections:     CV_DEFAULT_SECTIONS,
+  primaryColor:   '#19A5CA',
+  secondaryColor: '#1B60A9',
+  logoUrl:        null,
+  companyName:    '',
+  sections:       CV_DEFAULT_SECTIONS,
 }
 
 const STORAGE_KEY = 'koios_cv_settings'

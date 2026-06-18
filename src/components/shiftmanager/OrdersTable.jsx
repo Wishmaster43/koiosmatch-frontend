@@ -11,6 +11,7 @@
  *   - DetailDrawer           → slide-in panel with the full record
  */
 import { useState, useEffect, useMemo, useReducer } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X } from 'lucide-react'
 import { useRightPanel }      from '../../context/RightPanelContext'
 import { useAuth }            from '../../context/AuthContext'
@@ -21,20 +22,22 @@ import { useDefaultPageSize } from '../../lib/usePageSize'
 const NOW = new Date()
 const PAD = n => String(n).padStart(2, '0')
 
+// Shift status → badge colours. Label = t('orders.status.<key>').
 const STATUS_LABELS = {
-  open:       { label: 'Open',            bg: '#F0F9FF', color: '#0369A1' },
-  prognosis:  { label: 'Prognose',        bg: '#F5F3FF', color: '#6D28D9' },
-  completed:  { label: 'Werkelijk',       bg: '#F0FDF4', color: '#16A34A' },
-  in_process: { label: 'In uitvoering',   bg: '#FFFBEB', color: '#D97706' },
-  cancelled:  { label: 'Geannuleerd',     bg: '#FFF1F2', color: '#E11D48' },
+  open:       { bg: '#F0F9FF', color: '#0369A1' },
+  prognosis:  { bg: '#F5F3FF', color: '#6D28D9' },
+  completed:  { bg: '#F0FDF4', color: 'var(--color-success)' },
+  in_process: { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
+  cancelled:  { bg: 'var(--color-danger-bg)', color: '#E11D48' },
 }
 
 function StatusBadge({ status }) {
-  const s = STATUS_LABELS[status] ?? { label: status ?? '—', bg: '#F9FAFB', color: '#6B7280' }
+  const { t } = useTranslation('shiftmanager')
+  const s = STATUS_LABELS[status] ?? { bg: '#F9FAFB', color: '#6B7280' }
   return (
     <span style={{ background: s.bg, color: s.color, fontSize: 11, fontWeight: 500,
                    padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-      {s.label}
+      {status ? t(`orders.status.${status}`, { defaultValue: status }) : '—'}
     </span>
   )
 }
@@ -58,6 +61,7 @@ const formatHours  = h  => h != null ? Number(h).toFixed(2) : '—'
 const dash         = v  => v || <span style={{ color: '#D1D5DB' }}>—</span>
 
 function DetailDrawer({ row, onClose }) {
+  const { t } = useTranslation('shiftmanager')
   if (!row) return null
 
   const loc      = row.order?.customerLocation
@@ -80,7 +84,7 @@ function DetailDrawer({ row, onClose }) {
         <div style={{ padding: '20px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       borderBottom: '1px solid var(--border)', paddingBottom: 16, marginBottom: 20 }}>
           <div>
-            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>Shift details</h3>
+            <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('orders.drawer.title')}</h3>
             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{row.external_id ?? row.id}</p>
           </div>
           <button onClick={onClose}
@@ -91,37 +95,37 @@ function DetailDrawer({ row, onClose }) {
 
         <div style={{ padding: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-          <Section title="Identificatie">
-            <Field label="Shift ID"      value={row.id} />
-            <Field label="External ID"   value={row.external_id} />
-            <Field label="Scheduled ID"  value={row.scheduled_id ?? row.schedule_id} />
-            <Field label="Order ref"     value={row.order?.order_ref} />
+          <Section title={t('orders.drawer.identification')}>
+            <Field label={t('orders.drawer.shiftId')}      value={row.id} />
+            <Field label={t('orders.drawer.externalId')}   value={row.external_id} />
+            <Field label={t('orders.drawer.scheduledId')}  value={row.scheduled_id ?? row.schedule_id} />
+            <Field label={t('orders.drawer.orderRef')}     value={row.order?.order_ref} />
           </Section>
 
-          <Section title="Planning">
-            <Field label="Datum"         value={formatDate(row.start_time)} />
-            <Field label="Starttijd"     value={formatTime(row.start_time)} />
-            <Field label="Eindtijd"      value={formatTime(row.end_time)} />
-            <Field label="Functie"       value={row.job_type} />
-            <Field label="Aantal personen" value={row.number_persons} />
-            <Field label="Status"        value={STATUS_LABELS[row.own_status]?.label ?? row.own_status} />
+          <Section title={t('orders.drawer.planning')}>
+            <Field label={t('orders.drawer.date')}         value={formatDate(row.start_time)} />
+            <Field label={t('orders.drawer.startTime')}    value={formatTime(row.start_time)} />
+            <Field label={t('orders.drawer.endTime')}      value={formatTime(row.end_time)} />
+            <Field label={t('orders.drawer.jobType')}      value={row.job_type} />
+            <Field label={t('orders.drawer.persons')}      value={row.number_persons} />
+            <Field label={t('orders.drawer.status')}       value={row.own_status ? t(`orders.status.${row.own_status}`, { defaultValue: row.own_status }) : null} />
           </Section>
 
-          <Section title="Klant & locatie">
-            <Field label="Klant"         value={customer?.name} />
-            <Field label="Locatie"       value={loc?.name} />
-            <Field label="Adres"         value={loc?.address} />
+          <Section title={t('orders.drawer.customerLocation')}>
+            <Field label={t('orders.drawer.customer')}     value={customer?.name} />
+            <Field label={t('orders.drawer.location')}     value={loc?.name} />
+            <Field label={t('orders.drawer.address')}      value={loc?.address} />
           </Section>
 
-          <Section title="Uren">
-            <Field label="Uren kandidaat"   value={formatHours(row.worked_hours_candidate ?? row.hours_worked)} />
-            <Field label="Uren klant"       value={formatHours(row.worked_hours_customer  ?? row.billed_hours)} />
-            <Field label="Kostenplaats kand." value={row.cost_center_candidate ?? row.cost_center} />
-            <Field label="Kostenplaats klant" value={row.cost_center_customer  ?? row.order?.cost_center} />
+          <Section title={t('orders.drawer.hours')}>
+            <Field label={t('orders.drawer.hoursCand')}    value={formatHours(row.worked_hours_candidate ?? row.hours_worked)} />
+            <Field label={t('orders.drawer.hoursCust')}    value={formatHours(row.worked_hours_customer  ?? row.billed_hours)} />
+            <Field label={t('orders.drawer.ccCand')}       value={row.cost_center_candidate ?? row.cost_center} />
+            <Field label={t('orders.drawer.ccCust')}       value={row.cost_center_customer  ?? row.order?.cost_center} />
           </Section>
 
           {invites.length > 0 && (
-            <Section title="Kandidaten">
+            <Section title={t('orders.drawer.candidates')}>
               {invites.map((inv, i) => {
                 const c = inv.candidate
                 return (
@@ -149,7 +153,7 @@ function DetailDrawer({ row, onClose }) {
           )}
 
           {row.notes && (
-            <Section title="Notities">
+            <Section title={t('orders.drawer.notes')}>
               <p style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.5 }}>{row.notes}</p>
             </Section>
           )}
@@ -173,22 +177,24 @@ function Section({ title, children }) {
   )
 }
 
-const COLS = [
-  { key: 'external_id',               label: 'Ext. ID',          sortable: true  },
-  { key: 'order_ref',                  label: 'Order ref',         sortable: false },
-  { key: 'own_status',                 label: 'Status',            sortable: true  },
-  { key: 'customer_name',              label: 'Klant',             sortable: true  },
-  { key: 'location_name',              label: 'Locatie',           sortable: true  },
-  { key: 'start_date',                 label: 'Datum',             sortable: true  },
-  { key: 'start_time',                 label: 'Start',             sortable: true  },
-  { key: 'end_time',                   label: 'Eind',              sortable: false },
-  { key: 'worked_hours_candidate',     label: 'Uren kand.',        sortable: false },
-  { key: 'worked_hours_customer',      label: 'Uren klant',        sortable: false },
-  { key: 'cost_center_candidate',      label: 'KP kand.',          sortable: false },
-  { key: 'cost_center_customer',       label: 'KP klant',          sortable: false },
+const COL_KEYS = [
+  { key: 'external_id',            tKey: 'extId',     sortable: true  },
+  { key: 'order_ref',              tKey: 'orderRef',  sortable: false },
+  { key: 'own_status',             tKey: 'status',    sortable: true  },
+  { key: 'customer_name',          tKey: 'customer',  sortable: true  },
+  { key: 'location_name',          tKey: 'location',  sortable: true  },
+  { key: 'start_date',             tKey: 'date',      sortable: true  },
+  { key: 'start_time',             tKey: 'start',     sortable: true  },
+  { key: 'end_time',               tKey: 'end',       sortable: false },
+  { key: 'worked_hours_candidate', tKey: 'hoursCand', sortable: false },
+  { key: 'worked_hours_customer',  tKey: 'hoursCust', sortable: false },
+  { key: 'cost_center_candidate',  tKey: 'ccCand',    sortable: false },
+  { key: 'cost_center_customer',   tKey: 'ccCust',    sortable: false },
 ]
 
 export default function OrdersTable() {
+  const { t } = useTranslation('shiftmanager')
+  const COLS = COL_KEYS.map(c => ({ ...c, label: t(`orders.cols.${c.tKey}`) }))
   const defaultPageSize                        = useDefaultPageSize()
   const { refreshUser }                        = useAuth()
   const [{ rows, loading, total, lastPage: lp }, dispatch] = useReducer(
@@ -232,7 +238,7 @@ export default function OrdersTable() {
     try {
       await api.put('/auth/me', { default_per_page: newSize })
       await refreshUser()
-    } catch {}
+    } catch { /* noop */ }
   }
 
   const statusOptions = useMemo(() =>
@@ -281,15 +287,15 @@ export default function OrdersTable() {
     prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' })
 
   const filterGroups = useMemo(() => [{
-    key: 'status', label: 'Status',
+    key: 'status', label: t('orders.filterStatus'),
     selected: selectedStatuses,
     options: statusOptions.map(s => ({
       value: s,
-      label: STATUS_LABELS[s]?.label ?? s,
+      label: t(`orders.status.${s}`, { defaultValue: s }),
       count: rows.filter(r => r.own_status === s).length,
     })),
     onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-  }], [selectedStatuses, statusOptions, rows])
+  }], [t, selectedStatuses, statusOptions, rows])
 
   useEffect(() => {
     registerFilters('orders-table', filterGroups)
@@ -305,24 +311,27 @@ export default function OrdersTable() {
     return opts
   }, [])
 
-  const MONTHS_NL = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec']
-  const formatMonth = m => { const [y, mo] = m.split('-'); return `${MONTHS_NL[parseInt(mo)-1]} ${y}` }
+  // Locale-aware "mon yyyy" label for the month dropdown.
+  const formatMonth = m => {
+    const [y, mo] = m.split('-')
+    return `${new Date(Number(y), Number(mo) - 1, 1).toLocaleString(undefined, { month: 'short' })} ${y}`
+  }
 
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>Details — Diensten</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>{t('orders.title')}</h1>
           <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
-            {loading ? 'Laden…' : `${total.toLocaleString('nl')} diensten`}
+            {loading ? t('charts.loading') : t('orders.count', { count: total })}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}
             style={{ height: 34, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB',
                      borderRadius: 8, color: '#374151', background: 'white', cursor: 'pointer' }}>
-            <option value="">Alle maanden</option>
+            <option value="">{t('orders.allMonths')}</option>
             {monthOptions.map(m => (
               <option key={m} value={m}>{formatMonth(m)}</option>
             ))}
@@ -331,7 +340,7 @@ export default function OrdersTable() {
             <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
                                        transform: 'translateY(-50%)', color: '#9CA3AF' }} />
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Zoek op ext. ID, order ref, klant…"
+              placeholder={t('orders.search')}
               style={{ height: 34, width: 240, paddingLeft: 32, paddingRight: 12, fontSize: 13,
                        border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
           </div>
@@ -359,18 +368,18 @@ export default function OrdersTable() {
             <tbody>
               {loading && (
                 <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 48, color: '#9CA3AF', fontSize: 13 }}>
-                  Diensten ophalen…
+                  {t('orders.loading')}
                 </td></tr>
               )}
               {!loading && sorted.length === 0 && (
                 <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 48, color: '#9CA3AF', fontSize: 13 }}>
-                  Geen diensten gevonden
+                  {t('orders.empty')}
                 </td></tr>
               )}
               {!loading && sorted.map((r, i) => (
                 <tr key={r.id ?? i}
                   onClick={() => setSelected(r)}
-                  style={{ cursor: 'pointer', background: selected?.id === r.id ? '#EFF6FF' : undefined }}
+                  style={{ cursor: 'pointer', background: selected?.id === r.id ? 'var(--color-secondary-bg)' : undefined }}
                   onMouseEnter={e => { if (selected?.id !== r.id) e.currentTarget.style.background = '#F9FAFB' }}
                   onMouseLeave={e => { if (selected?.id !== r.id) e.currentTarget.style.background = 'transparent' }}>
                   <td style={{ ...TD, fontFamily: 'monospace', fontSize: 11, color: '#6B7280' }}>

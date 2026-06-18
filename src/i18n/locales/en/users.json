@@ -1,0 +1,34 @@
+{
+  "newUser": "New user",
+  "firstName": "First name",
+  "lastName": "Last name",
+  "email": "Email address",
+  "password": "Password",
+  "role": "Role",
+  "create": "Create",
+  "creating": "Creating…",
+  "createFailed": "Could not create.",
+  "pwPlaceholder": "At least 8 characters",
+  "changeRole": "Change role",
+  "title": "Users",
+  "summary": "{{shown}} of {{total}} users",
+  "loading": "Loading users…",
+  "empty": "No users found",
+  "noAccess": "No access to the user list.",
+  "loadError": "Could not load users.",
+  "you": "you",
+  "system": "system",
+  "filterRole": "Role",
+  "cols": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "role": "Role"
+  },
+  "roles": {
+    "super_admin": "Super admin",
+    "tenant_admin": "Admin",
+    "planner": "Planner",
+    "user": "User"
+  }
+}

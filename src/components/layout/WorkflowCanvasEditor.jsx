@@ -29,6 +29,7 @@ import {
 } from 'lucide-react'
 import { MODULE_META, MODULE_SCHEMAS, MODULE_APP_MAP } from '../../modules/index'
 import { useApps } from '../../context/AppsContext'
+import { AgentsTab, PromptsTab, FAQTab, KnowledgeTab, ToolsTab } from '../ai/AIManagementTabs'
 
 // ── Schedule helpers ──────────────────────────────────────────────────────────
 
@@ -186,7 +187,7 @@ function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
                         {times.length > 1 && (
                           <button type="button" onClick={() => removeTime(i)}
                             style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', display: 'flex', padding: 4 }}
-                            onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+                            onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
                             onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}>
                             <X size={14} />
                           </button>
@@ -363,11 +364,107 @@ function AgentSelectField({ value, onChange, fieldKey }) {
   )
 }
 
+// ── FAQ multi-select field ─────────────────────────────────────────────────────
+
+function FaqSelectField({ value, onChange, fieldKey }) {
+  const [faqs,    setFaqs]    = useState([])
+  const [loading, setLoading] = useState(true)
+  const selected = Array.isArray(value) ? value : []
+
+  useEffect(() => {
+    import('../../lib/api').then(m => m.default.get('/ai/faqs'))
+      .then(r => setFaqs(r.data?.data ?? r.data ?? []))
+      .catch(() => {})
+      .finally(() => setLoading(false))
+  }, [])
+
+  const toggle = (id) => {
+    const next = selected.includes(id) ? selected.filter(v => v !== id) : [...selected, id]
+    onChange(fieldKey, next)
+  }
+
+  if (loading) return <div style={{ fontSize: 12, color: '#9CA3AF', padding: '4px 0' }}>FAQ's ophalen…</div>
+  if (faqs.length === 0) return (
+    <div style={{ fontSize: 12, color: '#9CA3AF', padding: '6px 10px', border: '1px solid #E5E7EB', borderRadius: 8 }}>
+      Geen FAQ's gevonden
+    </div>
+  )
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5, border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px' }}>
+      {faqs.map(faq => {
+        const active = selected.includes(faq.id)
+        return (
+          <label key={faq.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <input type="checkbox" checked={active} onChange={() => toggle(faq.id)}
+              style={{ accentColor: 'var(--color-primary)', width: 14, height: 14, cursor: 'pointer' }} />
+            <span style={{ fontSize: 12, color: '#374151' }}>{faq.name ?? faq.title ?? `FAQ ${faq.id}`}</span>
+          </label>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── Response structure builder ─────────────────────────────────────────────────
+
+const RS_TYPES = ['Text', 'Number', 'Boolean', 'Date', 'Array', 'Collection', 'Any']
+
+function ResponseStructureField({ value, onChange, fieldKey }) {
+  const items = Array.isArray(value) ? value : []
+
+  const add    = ()        => onChange(fieldKey, [...items, { name: '', type: 'Text' }])
+  const remove = (i)       => onChange(fieldKey, items.filter((_, j) => j !== i))
+  const update = (i, k, v) => onChange(fieldKey, items.map((item, j) => j === i ? { ...item, [k]: v } : item))
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+      {items.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px 22px', gap: 4, padding: '0 2px', marginBottom: 2 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Item naam</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Type</div>
+          <div />
+        </div>
+      )}
+      {items.map((item, i) => (
+        <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 90px 22px', gap: 4, alignItems: 'center' }}>
+          <input value={item.name} onChange={e => update(i, 'name', e.target.value)}
+            placeholder="item_naam"
+            style={{ padding: '5px 7px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none', minWidth: 0 }}
+            onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
+            onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+          <select value={item.type} onChange={e => update(i, 'type', e.target.value)}
+            style={{ padding: '5px 5px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none', background: 'white', cursor: 'pointer' }}>
+            {RS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+          <button type="button" onClick={() => remove(i)}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}>
+            <X size={13} />
+          </button>
+        </div>
+      ))}
+      <button type="button" onClick={add}
+        style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)',
+          background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6,
+          padding: '5px 9px', cursor: 'pointer', marginTop: 2 }}>
+        <Plus size={10} /> Item toevoegen
+      </button>
+    </div>
+  )
+}
+
 // ── Field renderer ────────────────────────────────────────────────────────────
 
 function FieldInput({ field, value, onChange }) {
   if (field.type === 'agent_select') {
     return <AgentSelectField value={value} onChange={onChange} fieldKey={field.key} />
+  }
+  if (field.type === 'faq_select') {
+    return <FaqSelectField value={value} onChange={onChange} fieldKey={field.key} />
+  }
+  if (field.type === 'response_structure') {
+    return <ResponseStructureField value={value} onChange={onChange} fieldKey={field.key} />
   }
   if (field.type === 'boolean') {
     return (
@@ -408,7 +505,11 @@ function FieldInput({ field, value, onChange }) {
       <select value={value || ''} onChange={e => onChange(field.key, e.target.value)}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', fontSize: 13, color: '#111', outline: 'none' }}>
         <option value="">Selecteer...</option>
-        {field.options.map(o => <option key={o} value={o}>{o}</option>)}
+        {(field.options ?? []).map(o => {
+          const val = typeof o === 'object' ? o.value : o
+          const lbl = typeof o === 'object' ? o.label : o
+          return <option key={val} value={val}>{lbl}</option>
+        })}
       </select>
     )
   }
@@ -436,7 +537,7 @@ function FieldInput({ field, value, onChange }) {
             <input value={p.value} onChange={e => update(i, 'value', e.target.value)} placeholder="Waarde"
               style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none' }} />
             <button type="button" onClick={() => remove(i)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: '0 4px' }}>
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: '0 4px' }}>
               <X size={12} />
             </button>
           </div>
@@ -532,7 +633,7 @@ function ModuleNode({ id, data, selected }) {
           <div style={{
             position: 'absolute', top: -4, right: -4,
             width: 16, height: 16, borderRadius: '50%',
-            background: '#16A34A', border: '2px solid white',
+            background: 'var(--color-success)', border: '2px solid white',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <CheckCircle size={9} color="white" />
@@ -542,7 +643,7 @@ function ModuleNode({ id, data, selected }) {
       <div style={{ textAlign: 'center', width: NODE_W }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: '#374151', lineHeight: 1.3 }}>{meta.label}</div>
         {data.output && (
-          <div style={{ fontSize: 9, color: '#16A34A', marginTop: 1 }}>
+          <div style={{ fontSize: 9, color: 'var(--color-success)', marginTop: 1 }}>
             {Array.isArray(data.output) ? `${data.output.length} records` : 'Klaar'}
           </div>
         )}
@@ -613,7 +714,7 @@ function EdgeFilterPanel({ edgeId, filters, onClose, onSave }) {
                   placeholder="waarde"
                   style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none' }} />
               )}
-              <button onClick={() => delCond(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#DC2626', padding: 4 }}><Trash2 size={12} /></button>
+              <button onClick={() => delCond(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: 4 }}><Trash2 size={12} /></button>
             </div>
           ))}
         </div>
@@ -715,7 +816,7 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data })
           </button>
           <button onClick={() => onDelete && onDelete(id)} title="Verbinding verbreken"
             style={{ width: 22, height: 22, borderRadius: '50%', background: 'white', border: '1.5px solid #D1D5DB', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#9CA3AF', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = '#DC2626'; e.currentTarget.style.color = '#DC2626' }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-danger)'; e.currentTarget.style.color = 'var(--color-danger)' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = '#D1D5DB'; e.currentTarget.style.color = '#9CA3AF' }}>
             <X size={11} />
           </button>
@@ -849,11 +950,15 @@ function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
 
 // ── Config panel ──────────────────────────────────────────────────────────────
 
-function ConfigPanel({ node, onUpdate, onDelete }) {
+const MANAGE_TABS = ['agents', 'prompts', 'faq', 'knowledge', 'tools']
+
+function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
   const [activeTab, setActiveTab] = useState('instellingen')
 
+  const switchTab = (id) => { setActiveTab(id); onTabChange?.(id) }
+
   // Reset tab when selected node changes
-  useEffect(() => { setActiveTab('instellingen') }, [node?.id])
+  useEffect(() => { setActiveTab('instellingen'); onTabChange?.('instellingen') }, [node?.id])
 
   if (!node) {
     return (
@@ -883,7 +988,7 @@ function ConfigPanel({ node, onUpdate, onDelete }) {
         </div>
         <button onClick={() => onDelete(node.id)}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 4, display: 'flex' }}
-          onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+          onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
           onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}
           title="Module verwijderen">
           <Trash2 size={14} />
@@ -891,12 +996,19 @@ function ConfigPanel({ node, onUpdate, onDelete }) {
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #F3F4F6', flexShrink: 0, padding: '8px 16px 0' }}>
+      <div style={{ display: 'flex', borderBottom: '1px solid #F3F4F6', flexShrink: 0, padding: '8px 16px 0', overflowX: 'auto' }}>
         {[
           { id: 'instellingen', label: 'Instellingen' },
           { id: 'uitvoering',   label: output ? `Uitvoering (${Array.isArray(output) ? output.length : 1})` : 'Uitvoering' },
+          ...(node.data.type === 'ai_agent' ? [
+            { id: 'agents',    label: 'Agents' },
+            { id: 'prompts',   label: 'Prompts' },
+            { id: 'faq',       label: "FAQ's" },
+            { id: 'knowledge', label: 'Kennisbank' },
+            { id: 'tools',     label: 'Tools' },
+          ] : []),
         ].map(t => (
-          <button key={t.id} type="button" onClick={() => setActiveTab(t.id)}
+          <button key={t.id} type="button" onClick={() => switchTab(t.id)}
             style={{
               padding: '5px 10px', fontSize: 12, fontWeight: activeTab === t.id ? 600 : 400,
               color: activeTab === t.id ? 'var(--color-primary)' : '#6B7280',
@@ -909,24 +1021,36 @@ function ConfigPanel({ node, onUpdate, onDelete }) {
         ))}
       </div>
 
+      {/* Tab content — management tabs */}
+      {activeTab === 'agents'    && <div style={{ flex: 1, overflow: 'hidden', padding: 12 }}><AgentsTab /></div>}
+      {activeTab === 'prompts'   && <div style={{ flex: 1, overflow: 'hidden', padding: 12 }}><PromptsTab /></div>}
+      {activeTab === 'faq'       && <div style={{ flex: 1, overflow: 'hidden', padding: 12 }}><FAQTab /></div>}
+      {activeTab === 'knowledge' && <div style={{ flex: 1, overflow: 'hidden', padding: 12 }}><KnowledgeTab /></div>}
+      {activeTab === 'tools'     && <div style={{ flex: 1, overflowY: 'auto', padding: 12 }}><ToolsTab /></div>}
+
       {/* Tab content */}
       {activeTab === 'instellingen' ? (
         <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {schema.map(field => (
+          {schema
+            .filter(field => {
+              if (!field.showIf) return true
+              return node.data.config[field.showIf.key] === field.showIf.value
+            })
+            .map(field => (
             <div key={field.key}>
               <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
                 {field.label}
               </label>
               <FieldInput field={field} value={node.data.config[field.key]}
                 onChange={(key, val) => onUpdate(node.id, key, val)} />
-              {field.help && <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{field.help}</div>}
+              {field.hint && <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{field.hint}</div>}
             </div>
           ))}
           {schema.length === 0 && (
             <p style={{ fontSize: 12, color: '#9CA3AF' }}>Geen configuratie vereist.</p>
           )}
         </div>
-      ) : (
+      ) : !MANAGE_TABS.includes(activeTab) ? (
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {!output ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 10, padding: 24 }}>
@@ -951,7 +1075,7 @@ function ConfigPanel({ node, onUpdate, onDelete }) {
             </div>
           )}
         </div>
-      )}
+      ) : null}
     </div>
   )
 }
@@ -1029,12 +1153,12 @@ function LogsPanel({ onClose }) {
                 onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
                 {log.ok
-                  ? <CheckCircle size={13} color="#16A34A" style={{ flexShrink: 0 }} />
-                  : <AlertCircle size={13} color="#DC2626" style={{ flexShrink: 0 }} />
+                  ? <CheckCircle size={13} color="var(--color-success)" style={{ flexShrink: 0 }} />
+                  : <AlertCircle size={13} color="var(--color-danger)" style={{ flexShrink: 0 }} />
                 }
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: 12, fontWeight: 500, color: log.ok ? '#111827' : '#DC2626' }}>
+                    <span style={{ fontSize: 12, fontWeight: 500, color: log.ok ? '#111827' : 'var(--color-danger)' }}>
                       {log.ok ? 'Geslaagd' : 'Mislukt'}
                     </span>
                     <span style={{ fontSize: 11, color: '#9CA3AF' }}>{log.duration}</span>
@@ -1043,7 +1167,7 @@ function LogsPanel({ onClose }) {
                     {log.ts} · {log.operations} operaties · {log.bundles} bundles
                   </div>
                   {!log.ok && log.error && (
-                    <div style={{ fontSize: 11, color: '#DC2626', marginTop: 2 }}>{log.error}</div>
+                    <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 2 }}>{log.error}</div>
                   )}
                 </div>
                 <ChevronDown size={12} color="#D1D5DB"
@@ -1055,7 +1179,7 @@ function LogsPanel({ onClose }) {
                 <div style={{ padding: '0 16px 12px 36px', display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {log.steps.map((step, i) => (
                     <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: step.ok ? '#16A34A' : '#DC2626', marginTop: 5, flexShrink: 0 }} />
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: step.ok ? 'var(--color-success)' : 'var(--color-danger)', marginTop: 5, flexShrink: 0 }} />
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                           <span style={{ fontSize: 11, fontWeight: 500, color: '#374151' }}>{step.label}</span>
@@ -1104,6 +1228,7 @@ function EditorInner({ workflow, onClose, onSave }) {
   const [selectedNodeId, setSelectedNodeId] = useState(null)
   const [pickerState,    setPickerState]    = useState(null)
   const [showSchedule,   setShowSchedule]   = useState(false)
+  const [widePanelActive, setWidePanelActive] = useState(false)
 
   useEffect(() => {
     import('../../lib/api').then(m => {
@@ -1141,12 +1266,10 @@ function EditorInner({ workflow, onClose, onSave }) {
       if (data.type === 'candidates_fetch' || data.type === 'candidate_filter') {
         const cfg = data.config ?? {}
         const params = { per_page: cfg.limit ?? 100 }
-        if (cfg.status && cfg.status !== 'alle') {
-          // Map legacy Dutch values to API values
-          const statusMap = { actief: 'active', inactief: 'inactive' }
-          params.status = statusMap[cfg.status] ?? cfg.status
-        }
-        const res = await api.get('/candidates', { params })
+        // ShiftManager-sync (oude shape: firstname/pools/features) → /sm-candidates,
+        // dat de oorspronkelijke Nederlandse status-waarden gebruikt (geen remap).
+        if (cfg.status && cfg.status !== 'alle') params.status = cfg.status
+        const res = await api.get('/sm-candidates', { params })
         let rows = res.data?.data ?? res.data ?? []
 
         // Client-side filter op pools en features (backend filtert hier nog niet op)
@@ -1373,11 +1496,11 @@ function EditorInner({ workflow, onClose, onSave }) {
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999,
               background: status === 'active' ? '#F0FDF4' : '#F9FAFB',
-              color:      status === 'active' ? '#16A34A' : '#9CA3AF',
+              color:      status === 'active' ? 'var(--color-success)' : '#9CA3AF',
               border:     `1px solid ${status === 'active' ? '#BBF7D0' : '#E5E7EB'}`,
               cursor: 'pointer', fontSize: 11, fontWeight: 500,
             }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? '#16A34A' : '#D1D5DB' }} />
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? 'var(--color-success)' : '#D1D5DB' }} />
             {status === 'active' ? 'Actief' : 'Inactief'}
           </button>
 
@@ -1409,7 +1532,7 @@ function EditorInner({ workflow, onClose, onSave }) {
           <button onClick={handleSave}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-              background: saved ? '#16A34A' : 'var(--color-primary)',
+              background: saved ? 'var(--color-success)' : 'var(--color-primary)',
               color: 'white', border: 'none', cursor: 'pointer', transition: 'background 0.2s',
             }}>
             <Save size={13} />
@@ -1472,11 +1595,12 @@ function EditorInner({ workflow, onClose, onSave }) {
             </button>
           </div>
 
-          {/* Right panel */}
-          <div style={{ width: 280, flexShrink: 0, background: 'white', borderLeft: '1px solid #F3F4F6', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {/* Right panel — widens when management tabs (Agents/Prompts/FAQ/etc.) are active */}
+          <div style={{ width: widePanelActive ? 560 : 280, flexShrink: 0, background: 'white', borderLeft: '1px solid #F3F4F6', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'width 0.2s ease' }}>
             {showLogs
               ? <LogsPanel onClose={() => setShowLogs(false)} />
-              : <ConfigPanel node={selectedNode} onUpdate={updateNodeConfig} onDelete={deleteNode} />
+              : <ConfigPanel node={selectedNode} onUpdate={updateNodeConfig} onDelete={deleteNode}
+                  onTabChange={tab => setWidePanelActive(MANAGE_TABS.includes(tab))} />
             }
           </div>
         </div>

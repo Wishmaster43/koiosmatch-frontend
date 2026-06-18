@@ -7,7 +7,7 @@ export default {
   label:    'Tabel samenvoegen',
   Icon:     Table2,
   color:    '#0369A1',
-  bg:       '#E0F2FE',
+  bg:       'var(--color-info-bg)',
   schema: [
     { key: 'source_module', label: 'Bronmodule', type: 'text', placeholder: 'automatisch ingevuld' },
     { key: 'columns', label: 'Kolommen (kommagescheiden)', type: 'text', placeholder: 'naam, email, telefoon' },

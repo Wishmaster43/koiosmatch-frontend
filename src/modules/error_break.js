@@ -6,7 +6,7 @@ export default {
   category: 'Foutafhandeling',
   label:    'Stoppen (Break)',
   Icon:     OctagonX,
-  color:    '#DC2626',
+  color:    'var(--color-danger)',
   bg:       '#FEF2F2',
   schema: [
     { key: 'store_incomplete', label: 'Sla incomplete uitvoering op', type: 'boolean', help: 'Vereist dat "onvolledige uitvoeringen opslaan" is ingeschakeld in de workflow instellingen.' },

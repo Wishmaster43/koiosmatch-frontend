@@ -2,6 +2,7 @@
  * LocationDrawer — slide-in panel with one location's details (address,
  * department, customer). Opened from LocationsTable. StatusBadge = active/inactive pill.
  */
+import { useTranslation } from 'react-i18next'
 import { X, Building2, MapPin, Layers, Hash } from 'lucide-react'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 
@@ -18,6 +19,7 @@ function InfoRow({ icon: Icon, label, value }) {
 }
 
 export default function LocationDrawer({ location, onClose }) {
+  const { t } = useTranslation('reports')
   const departments = location.departments ?? []
 
   const addressParts = [
@@ -62,7 +64,7 @@ export default function LocationDrawer({ location, onClose }) {
           </div>
         </div>
 
-        {/* Samenvatting */}
+        {/* Summary */}
         <div style={{ display: 'flex', gap: 1, background: '#F9FAFB',
                       borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
           <div style={{ flex: 1, padding: '10px 16px', textAlign: 'center' }}>
@@ -70,7 +72,7 @@ export default function LocationDrawer({ location, onClose }) {
               <Layers size={12} color="#9CA3AF" />
               <span style={{ fontSize: 18, fontWeight: 700, color: '#111827' }}>{departments.length}</span>
             </div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1 }}>Afdelingen</div>
+            <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1 }}>{t('dr.departments')}</div>
           </div>
         </div>
 
@@ -79,18 +81,18 @@ export default function LocationDrawer({ location, onClose }) {
 
           <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                         letterSpacing: '0.05em', marginBottom: 8 }}>
-            Locatiegegevens
+            {t('locationDrawer.info')}
           </div>
 
-          <InfoRow icon={MapPin}    label="Adres"           value={fullAddress} />
-          <InfoRow icon={Hash}      label="Extern ID"       value={location.external_id} />
-          <InfoRow icon={Building2} label="Klant"           value={location.customer_name} />
+          <InfoRow icon={MapPin}    label={t('dr.address')}    value={fullAddress} />
+          <InfoRow icon={Hash}      label={t('dr.externalId')} value={location.external_id} />
+          <InfoRow icon={Building2} label={t('dr.customer')}   value={location.customer_name} />
 
           {departments.length > 0 && (
             <div style={{ marginTop: 20 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                             letterSpacing: '0.05em', marginBottom: 10 }}>
-                Afdelingen ({departments.length})
+                {t('locationDrawer.departmentsCount', { count: departments.length })}
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {departments.map((d, i) => (

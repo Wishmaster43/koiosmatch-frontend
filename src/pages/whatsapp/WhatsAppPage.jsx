@@ -13,6 +13,7 @@
  *   - EscalationList    → conversations flagged for human follow-up
  */
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   MessageCircle, Users, CheckSquare, AlertTriangle,
   Clock, ArrowDownLeft, ArrowUpRight, RefreshCw,
@@ -44,11 +45,12 @@ const formatDate = iso => {
   return `${PAD(d.getDate())}-${PAD(d.getMonth()+1)} ${PAD(d.getHours())}:${PAD(d.getMinutes())}`
 }
 
-const DIRECTION_COLOR = { inbound: '#16A34A', outbound: '#3B8FD4' }
-const REASON_LABEL = {
-  failed_delivery:   { label: 'Niet bezorgd',     color: '#DC2626', bg: '#FEF2F2' },
-  no_reply:          { label: 'Geen reactie',      color: '#D97706', bg: '#FFFBEB' },
-  negative_response: { label: 'Negatief antwoord', color: '#7C3AED', bg: '#F5F3FF' },
+const DIRECTION_COLOR = { inbound: 'var(--color-success)', outbound: '#3B8FD4' }
+// Escalation reason → colour. Label = t('reasons.<key>').
+const REASON_COLOR = {
+  failed_delivery:   { color: 'var(--color-danger)', bg: '#FEF2F2' },
+  no_reply:          { color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
+  negative_response: { color: '#7C3AED', bg: '#F5F3FF' },
 }
 
 // ─── sub-components ─────────────────────────────────────────────────────────
@@ -92,14 +94,15 @@ function Avatar({ candidate, size = 32 }) {
 
 function StatusDot({ status, direction }) {
   const color =
-    status === 'read'      ? '#16A34A' :
+    status === 'read'      ? 'var(--color-success)' :
     status === 'delivered' ? '#3B8FD4' :
-    status === 'failed'    ? '#DC2626' :
-    direction === 'inbound' ? '#16A34A' : '#9CA3AF'
+    status === 'failed'    ? 'var(--color-danger)' :
+    direction === 'inbound' ? 'var(--color-success)' : '#9CA3AF'
   return <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0, display: 'inline-block' }} />
 }
 
 function MessageFeed({ messages, loading }) {
+  const { t } = useTranslation('whatsapp')
   return (
     <div style={{
       background: 'var(--surface)', borderRadius: 14,
@@ -107,18 +110,18 @@ function MessageFeed({ messages, loading }) {
     }}>
       <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)',
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Laatste berichten</span>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>live</span>
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('feed.title')}</span>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('feed.live')}</span>
       </div>
       <div style={{ overflowY: 'auto', maxHeight: 420 }}>
         {loading && (
           <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-            Berichten ophalen…
+            {t('feed.loading')}
           </div>
         )}
         {!loading && messages.length === 0 && (
           <div style={{ padding: 32, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-            Geen berichten
+            {t('feed.empty')}
           </div>
         )}
         {!loading && messages.map((msg, i) => (
@@ -159,6 +162,7 @@ function MessageFeed({ messages, loading }) {
 }
 
 function EscalationList({ escalations, loading }) {
+  const { t } = useTranslation('whatsapp')
   return (
     <div style={{
       background: 'var(--surface)', borderRadius: 14,
@@ -166,10 +170,10 @@ function EscalationList({ escalations, loading }) {
     }}>
       <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--border)',
                     display: 'flex', alignItems: 'center', gap: 8 }}>
-        <AlertTriangle size={14} color="#DC2626" />
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Escalaties</span>
+        <AlertTriangle size={14} color="var(--color-danger)" />
+        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('escalations.title')}</span>
         {!loading && escalations.length > 0 && (
-          <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: '#DC2626',
+          <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: 'var(--color-danger)',
                          background: '#FEF2F2', borderRadius: 999, padding: '1px 7px' }}>
             {escalations.length}
           </span>
@@ -178,16 +182,17 @@ function EscalationList({ escalations, loading }) {
       <div style={{ overflowY: 'auto', maxHeight: 320 }}>
         {loading && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-            Ophalen…
+            {t('escalations.loading')}
           </div>
         )}
         {!loading && escalations.length === 0 && (
           <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
-            Geen openstaande escalaties
+            {t('escalations.empty')}
           </div>
         )}
         {!loading && escalations.map((esc, i) => {
-          const meta = REASON_LABEL[esc.reason] ?? { label: esc.reason, color: '#6B7280', bg: '#F9FAFB' }
+          const meta = REASON_COLOR[esc.reason] ?? { color: '#6B7280', bg: '#F9FAFB' }
+          const reasonLabel = t(`reasons.${esc.reason}`, { defaultValue: esc.reason })
           return (
             <div key={esc.candidate_id ?? i} style={{
               display: 'flex', alignItems: 'center', gap: 10,
@@ -203,7 +208,7 @@ function EscalationList({ escalations, loading }) {
                 </div>
                 <span style={{ fontSize: 10, fontWeight: 500, color: meta.color,
                                background: meta.bg, borderRadius: 999, padding: '1px 6px' }}>
-                  {meta.label}
+                  {reasonLabel}
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 3,
@@ -219,24 +224,25 @@ function EscalationList({ escalations, loading }) {
   )
 }
 
-const MONTHS_NL = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec']
 function fmtAxisDate(dateStr) {
   const [, m, d] = dateStr.split('-')
-  return `${parseInt(d)} ${MONTHS_NL[parseInt(m)-1]}`
+  const monthAbbr = new Date(2000, parseInt(m) - 1, 1).toLocaleString(undefined, { month: 'short' })
+  return `${parseInt(d)} ${monthAbbr}`
 }
 
 function ActivityChart({ data, loading }) {
+  const { t } = useTranslation('whatsapp')
   return (
     <div style={{
       background: 'var(--surface)', borderRadius: 14,
       border: '1px solid var(--border)', padding: '16px 20px 12px',
     }}>
       <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>
-        Berichtenactiviteit — afgelopen 14 dagen
+        {t('chartTitle')}
       </div>
       {loading ? (
         <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: 'var(--text-muted)', fontSize: 13 }}>Laden…</div>
+                      color: 'var(--text-muted)', fontSize: 13 }}>{t('loading')}</div>
       ) : (
         <ResponsiveContainer width="100%" height={180}>
           <AreaChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
@@ -246,8 +252,8 @@ function ActivityChart({ data, loading }) {
                 <stop offset="95%" stopColor="#3B8FD4" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="gradIn" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#16A34A" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#16A34A" stopOpacity={0} />
+                <stop offset="5%"  stopColor="var(--color-success)" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="var(--color-success)" stopOpacity={0} />
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -261,12 +267,12 @@ function ActivityChart({ data, loading }) {
             />
             <Legend iconType="circle" iconSize={7}
               formatter={v => <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                {v === 'outbound' ? 'Uitgaand' : 'Inkomend'}
+                {v === 'outbound' ? t('outbound') : t('inbound')}
               </span>} />
             <Area type="monotone" dataKey="outbound" name="outbound"
               stroke="#3B8FD4" fill="url(#gradOut)" strokeWidth={2} dot={false} />
             <Area type="monotone" dataKey="inbound" name="inbound"
-              stroke="#16A34A" fill="url(#gradIn)" strokeWidth={2} dot={false} />
+              stroke="var(--color-success)" fill="url(#gradIn)" strokeWidth={2} dot={false} />
           </AreaChart>
         </ResponsiveContainer>
       )}
@@ -277,6 +283,7 @@ function ActivityChart({ data, loading }) {
 // ─── main page ───────────────────────────────────────────────────────────────
 
 export default function WhatsAppPage() {
+  const { t } = useTranslation('whatsapp')
   const [stats,       setStats]       = useState(null)
   const [messages,    setMessages]    = useState([])
   const [escalations, setEscalations] = useState([])
@@ -321,20 +328,19 @@ export default function WhatsAppPage() {
           <div style={{ width: 56, height: 56, borderRadius: 16, background: '#F0FDF4',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         margin: '0 auto 16px' }}>
-            <MessageCircle size={26} color="#16A34A" />
+            <MessageCircle size={26} color="var(--color-success)" />
           </div>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 8 }}>
-            Geen WhatsApp-verbinding
+            {t('noConn.title')}
           </h2>
           <p style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.6, marginBottom: 20 }}>
-            Er is nog geen WhatsApp Business-koppeling ingesteld voor deze tenant.
-            Configureer een verbinding via de backend om berichten en statistieken hier te zien.
+            {t('noConn.desc')}
           </p>
           <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '12px 16px',
                         border: '1px solid #F3F4F6', textAlign: 'left' }}>
             <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                           letterSpacing: '0.05em', marginBottom: 8 }}>
-              Foutmelding backend
+              {t('noConn.errorLabel')}
             </div>
             <code style={{ fontSize: 11, color: '#374151', fontFamily: 'monospace' }}>
               No query results for model WhatsappConnection
@@ -352,10 +358,10 @@ export default function WhatsAppPage() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px' }}>
-            WhatsApp
+            {t('title')}
           </h1>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-            Bijgewerkt om {PAD(lastRefresh.getHours())}:{PAD(lastRefresh.getMinutes())}
+            {t('updatedAt', { time: `${PAD(lastRefresh.getHours())}:${PAD(lastRefresh.getMinutes())}` })}
           </p>
         </div>
         <button onClick={load}
@@ -363,16 +369,16 @@ export default function WhatsAppPage() {
                    fontSize: 12, fontWeight: 500, borderRadius: 8,
                    border: '1px solid var(--border)', background: 'var(--surface)',
                    color: 'var(--text-muted)', cursor: 'pointer' }}>
-          <RefreshCw size={12} /> Verversen
+          <RefreshCw size={12} /> {t('refresh')}
         </button>
       </div>
 
       {/* KPI row */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 20 }}>
-        <KpiCard icon={MessageCircle} label="Berichten vandaag"       value={stats?.messages_today}            color="#3B8FD4" loading={loading.stats} />
-        <KpiCard icon={Users}         label="Kandidaten benaderd"     value={stats?.candidates_contacted}      color="#7C3AED" loading={loading.stats} />
-        <KpiCard icon={CheckSquare}   label="Diensten gevuld via WA"  value={stats?.shifts_filled_via_whatsapp} color="#16A34A" loading={loading.stats} />
-        <KpiCard icon={AlertTriangle} label="Open escalaties"         value={stats?.open_escalations}          color="#DC2626" loading={loading.stats} />
+        <KpiCard icon={MessageCircle} label={t('kpi.messagesToday')}        value={stats?.messages_today}            color="#3B8FD4" loading={loading.stats} />
+        <KpiCard icon={Users}         label={t('kpi.candidatesContacted')} value={stats?.candidates_contacted}      color="#7C3AED" loading={loading.stats} />
+        <KpiCard icon={CheckSquare}   label={t('kpi.shiftsFilled')}        value={stats?.shifts_filled_via_whatsapp} color="var(--color-success)" loading={loading.stats} />
+        <KpiCard icon={AlertTriangle} label={t('kpi.openEscalations')}     value={stats?.open_escalations}          color="var(--color-danger)" loading={loading.stats} />
       </div>
 
       {/* Chart */}

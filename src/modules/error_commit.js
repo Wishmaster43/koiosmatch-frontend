@@ -6,8 +6,8 @@ export default {
   category: 'Foutafhandeling',
   label:    'Vastleggen (Commit)',
   Icon:     CheckCircle2,
-  color:    '#2563EB',
-  bg:       '#EFF6FF',
+  color:    'var(--color-secondary)',
+  bg:       'var(--color-secondary-bg)',
   schema: [
     { key: 'info', label: 'Werking', type: 'textarea', placeholder: 'Alle tot nu toe verwerkte bundles worden als succesvol gemarkeerd. De foutieve bundle en alles daarna wordt overgeslagen.' },
   ],

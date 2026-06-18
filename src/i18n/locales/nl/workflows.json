@@ -1,0 +1,175 @@
+{
+  "schedule": {
+    "header": "Inplannen",
+    "run": "Uitvoeren",
+    "advanced": "Geavanceerde instellingen",
+    "types": {
+      "interval": "Op regelmatige intervallen",
+      "once": "Eenmalig",
+      "daily": "Dagelijks",
+      "weekdays": "Werkdagen (Ma–Vr)",
+      "weekly": "Wekelijks",
+      "monthly": "Maandelijks",
+      "specified": "Specifieke datums",
+      "ondemand": "Op aanvraag"
+    },
+    "intervalLabel": "Interval (minuten)",
+    "minShort": "{{n}} min",
+    "hourShort": "{{n}} uur",
+    "custom": "Of aangepast:",
+    "minutes": "minuten",
+    "dateTime": "Datum en tijd",
+    "times": "Tijden",
+    "timesWeekdays": "Tijden (werkdagen)",
+    "addTime": "Tijdstip toevoegen",
+    "days": "Dag(en)",
+    "time": "Tijd",
+    "dayOfMonth": "Dag van de maand",
+    "ofEveryMonth": "van elke maand",
+    "dates": "Datums",
+    "addDate": "Datum toevoegen",
+    "onDemandText": "Het scenario wordt niet automatisch uitgevoerd. Je kunt het handmatig starten via de knop \"Uitvoeren\" of via een API-aanroep.",
+    "startDate": "Startdatum (optioneel)",
+    "endDate": "Einddatum (optioneel)",
+    "maxRuns": "Max. uitvoeringen per minuut",
+    "default100": "Standaard: 100",
+    "rateLimitHint": "Overschot wordt in een wachtrij geplaatst tot er capaciteit vrijkomt.",
+    "label": {
+      "notSet": "Niet ingesteld",
+      "every": "Elke {{interval}}",
+      "onceOn": "Eenmalig op {{date}} om {{time}}",
+      "dailyAt": "Dagelijks om {{times}}",
+      "weekdaysAt": "Werkdagen om {{times}}",
+      "weeklyOn": "Wekelijks op {{days}} om {{time}}",
+      "monthlyOn": "Maandelijks op dag {{day}} om {{time}}",
+      "specifiedCount": "{{count}} specifieke datum(s)",
+      "onDemand": "Op aanvraag",
+      "unknown": "Onbekend"
+    }
+  },
+  "modules": {
+    "candidate_filter": "Kandidaten Filter",
+    "shift_fetcher": "Diensten Ophalen",
+    "whatsapp_send": "WhatsApp Sturen",
+    "database_update": "Database Updaten",
+    "email_send": "E-mail Sturen",
+    "delay": "Wachttijd"
+  },
+  "status": {
+    "active": "Actief",
+    "draft": "Concept",
+    "inactive": "Inactief"
+  },
+  "page": {
+    "notRun": "Nog niet uitgevoerd",
+    "running": "Bezig...",
+    "run": "Uitvoeren",
+    "candidates": "{{n}} kandidaten",
+    "folders": "Folders",
+    "newFolder": "Nieuwe folder",
+    "folderNamePrompt": "Mapnaam:",
+    "allWorkflows": "Alle workflows",
+    "unassigned": "Niet toegewezen",
+    "workflowsTitle": "Workflows",
+    "countWorkflows": "{{n}} workflows",
+    "newWorkflow": "Nieuwe Workflow",
+    "loading": "Laden...",
+    "empty": "Geen workflows in deze map. Sleep er een naartoe of maak een nieuwe aan.",
+    "addModuleAlert": "Voeg minimaal één module toe aan de workflow voordat je opslaat.",
+    "saveFailed": "Opslaan mislukt: {{msg}}",
+    "deleteFolderConfirm": "Map \"{{name}}\" verwijderen? De workflows blijven bestaan onder \"Niet toegewezen\"."
+  },
+  "ai": {
+    "saved": "Opgeslagen",
+    "restore": "Herstel",
+    "versions": "{{count}} versie(s)",
+    "loading": "Laden…",
+    "emptyStart": "Nog niets. Klik + om te starten.",
+    "strength": {
+      "high": "Hoog",
+      "medium": "Gemiddeld",
+      "fast": "Snel",
+      "reasoning": "Redeneren"
+    },
+    "customApi": "Custom (eigen API)",
+    "field": {
+      "name": "Naam",
+      "content": "Inhoud"
+    },
+    "chat": {
+      "test": "Test",
+      "clear": "Wissen",
+      "placeholder": "Typ een bericht…",
+      "empty": "Stuur een bericht om de agent te testen",
+      "noReply": "(geen antwoord)",
+      "error": "⚠ Fout bij ophalen antwoord."
+    },
+    "agent": {
+      "newAgent": "Nieuwe agent",
+      "fallback": "Agent",
+      "namePlaceholder": "Bijv. Yessy AI",
+      "model": "Model",
+      "apiEndpoint": "API Endpoint",
+      "apiKey": "API Key",
+      "prompt": "Instructie (Prompt)",
+      "noPrompt": "— Geen prompt —",
+      "selectFaqs": "FAQ's selecteren",
+      "noFaqs": "Geen FAQ's aangemaakt",
+      "knowledge": "Kennisbank",
+      "useKnowledge": "Algemene kennisbank gebruiken",
+      "maxHistory": "Max. conversatiehistorie",
+      "confirmDelete": "Agent \"{{name}}\" verwijderen?",
+      "selectOrNew": "Selecteer een agent of klik +"
+    },
+    "tabs": {
+      "agents": "Agents",
+      "prompts": "Prompts",
+      "faqs": "FAQ's",
+      "knowledge": "Kennisbank"
+    },
+    "prompts": {
+      "namePlaceholder": "Bijv. Yessy systeem prompt",
+      "bodyPlaceholder": "Je bent een vriendelijke AI assistent…",
+      "confirmDelete": "Prompt \"{{name}}\" verwijderen?"
+    },
+    "faqs": {
+      "namePlaceholder": "Bijv. Veelgestelde vragen diensten",
+      "contentLabel": "Inhoud (vraag + antwoord formaat)",
+      "bodyPlaceholder": "V: Hoe meld ik me af?\nA: Stuur een bericht via WhatsApp...",
+      "confirmDelete": "FAQ \"{{name}}\" verwijderen?"
+    },
+    "knowledge": {
+      "namePlaceholder": "Bijv. Arbeidsvoorwaarden",
+      "bodyPlaceholder": "Voer kennisbank-inhoud in…"
+    },
+    "tools": {
+      "hint": "Activeer welke tools een agent mag gebruiken",
+      "items": {
+        "shift_lookup": {
+          "label": "Dienst opzoeken",
+          "description": "Zoekt beschikbare diensten voor een kandidaat"
+        },
+        "candidate_status": {
+          "label": "Kandidaatstatus",
+          "description": "Haalt status en pool op van een kandidaat"
+        },
+        "send_whatsapp": {
+          "label": "WhatsApp sturen",
+          "description": "Stuurt een bericht via WhatsApp"
+        },
+        "update_candidate": {
+          "label": "Kandidaat updaten",
+          "description": "Past status of notities aan"
+        },
+        "knowledge_search": {
+          "label": "Kennisbank doorzoeken",
+          "description": "Zoekt informatie op in de kennisbank"
+        },
+        "calendar_check": {
+          "label": "Agenda raadplegen",
+          "description": "Controleert rooster en diensten"
+        }
+      }
+    }
+  }
+}

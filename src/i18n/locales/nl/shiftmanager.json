@@ -1,0 +1,203 @@
+{
+  "orders": {
+    "title": "Details — Diensten",
+    "count": "{{count}} diensten",
+    "loading": "Diensten ophalen…",
+    "empty": "Geen diensten gevonden",
+    "allMonths": "Alle maanden",
+    "search": "Zoek op ext. ID, order ref, klant…",
+    "status": {
+      "open": "Open",
+      "prognosis": "Prognose",
+      "completed": "Werkelijk",
+      "in_process": "In uitvoering",
+      "cancelled": "Geannuleerd"
+    },
+    "cols": {
+      "extId": "Ext. ID",
+      "orderRef": "Order ref",
+      "status": "Status",
+      "customer": "Klant",
+      "location": "Locatie",
+      "date": "Datum",
+      "start": "Start",
+      "end": "Eind",
+      "hoursCand": "Uren kand.",
+      "hoursCust": "Uren klant",
+      "ccCand": "KP kand.",
+      "ccCust": "KP klant"
+    },
+    "filterStatus": "Status",
+    "drawer": {
+      "title": "Shift details",
+      "identification": "Identificatie",
+      "shiftId": "Shift ID",
+      "externalId": "External ID",
+      "scheduledId": "Scheduled ID",
+      "orderRef": "Order ref",
+      "planning": "Planning",
+      "date": "Datum",
+      "startTime": "Starttijd",
+      "endTime": "Eindtijd",
+      "jobType": "Functie",
+      "persons": "Aantal personen",
+      "status": "Status",
+      "customerLocation": "Klant & locatie",
+      "customer": "Klant",
+      "location": "Locatie",
+      "address": "Adres",
+      "hours": "Uren",
+      "hoursCand": "Uren kandidaat",
+      "hoursCust": "Uren klant",
+      "ccCand": "Kostenplaats kand.",
+      "ccCust": "Kostenplaats klant",
+      "candidates": "Kandidaten",
+      "notes": "Notities"
+    }
+  },
+  "shiftsDrawer": {
+    "count": "{{count}} diensten",
+    "loadError": "Kon diensten niet laden.",
+    "loading": "Laden…",
+    "empty": "Geen diensten gevonden",
+    "search": "Zoek op functie, locatie, order-ref, kandidaat…",
+    "shownOf": "{{shown}} van {{total}} getoond",
+    "close": "Sluiten",
+    "unknown": "Onbekend",
+    "noCandidate": "Nog geen kandidaat gekoppeld",
+    "hoursUnit": "{{n}} uur",
+    "status": {
+      "in_process": "Prognose",
+      "completed": "Werkelijk",
+      "open": "Geen kandidaat",
+      "verwijderd": "Niet ingevuld",
+      "niet_factureerbaar": "Niet factureerbaar"
+    },
+    "fields": {
+      "email": "E-mail",
+      "mobile": "Mobiel",
+      "scheduled": "Ingepland",
+      "workedHours": "Gewerkte uren",
+      "contract": "Contract",
+      "date": "Datum",
+      "persons": "Personen",
+      "customerId": "Klant-ID",
+      "location": "Locatie",
+      "place": "Plaats",
+      "orderRef": "Order-ref",
+      "subject": "Onderwerp",
+      "shiftIdExt": "Shift-ID (extern)",
+      "orderIdExt": "Order-ID (extern)",
+      "rate": "Tarief",
+      "pickup": "Ophaal"
+    }
+  },
+  "charts": {
+    "hours": "Aantal uren",
+    "shifts": "Aantal diensten",
+    "loading": "Laden…",
+    "perMonthUnit": "maand",
+    "perQuarterUnit": "kwartaal",
+    "periodLabel": "{{years}} — per {{unit}}",
+    "filters": {
+      "period": "Periode",
+      "month": "Per maand",
+      "quarter": "Per kwartaal",
+      "years": "Jaren",
+      "months": "Maanden",
+      "series": "Reeksen",
+      "jobType": "Functie",
+      "customer": "Klant",
+      "location": "Locatie"
+    },
+    "series": {
+      "totaal": "Totaal",
+      "niet_ingevuld": "Niet ingevuld",
+      "geen_kandidaat": "Geen kandidaat",
+      "prognose": "Prognose",
+      "werkelijk": "Werkelijk"
+    }
+  },
+  "customersReport": {
+    "title": "Klanten rapport",
+    "activeWord": "actief",
+    "inactiveWord": "inactief",
+    "totalWord": "totaal",
+    "filterStatus": "Status klant",
+    "drill": {
+      "activeCustomers": "Actieve klanten",
+      "allLocations": "Alle locaties",
+      "allDepartments": "Alle afdelingen",
+      "customersWithoutLocation": "Klanten zonder locatie"
+    },
+    "sub": {
+      "locations": "{{count}} locaties",
+      "avgPerCustomer": "gem. {{n}} per klant",
+      "avgPerLocation": "gem. {{n}} per locatie",
+      "notLinked": "Nog niet gekoppeld",
+      "noLocationsLinked": "Geen locaties gekoppeld"
+    }
+  },
+  "locationsReport": {
+    "title": "Locaties rapport",
+    "activeWord": "actief",
+    "inactiveWord": "inactief",
+    "totalWord": "totaal",
+    "filterStatus": "Status locatie",
+    "kpi": {
+      "activeLocations": "Actieve locaties",
+      "totalDepartments": "Totaal afdelingen",
+      "uniqueCustomers": "Unieke klanten",
+      "withoutDepartment": "Zonder afdeling"
+    },
+    "drill": {
+      "activeLocations": "Actieve locaties",
+      "allDepartments": "Alle afdelingen",
+      "customers": "Klanten",
+      "locationsWithoutDepartment": "Locaties zonder afdeling"
+    },
+    "sub": {
+      "avgPerLocation": "gem. {{n}} per locatie",
+      "notConfigured": "Nog niet ingericht",
+      "allConfigured": "Alles ingericht"
+    },
+    "badge": {
+      "active": "actief",
+      "noDepartments": "Geen afdelingen"
+    }
+  },
+  "departmentsReport": {
+    "title": "Afdelingen rapport",
+    "count": "{{count}} afdelingen",
+    "filterCustomer": "Klant",
+    "kpi": {
+      "totalDepartments": "Totaal afdelingen",
+      "uniqueLocations": "Unieke locaties",
+      "uniqueCustomers": "Unieke klanten",
+      "withCostCenter": "Met kostenplaats"
+    },
+    "sub": {
+      "avgPerLocation": "gem. {{n}} per locatie",
+      "linkedPct": "{{pct}}% gekoppeld"
+    }
+  },
+  "dashboard": {
+    "recentRuns": "Recente uitvoeringen",
+    "recentConversations": "Recente conversaties",
+    "viewAll": "Alles →",
+    "candidates": "{{n}} kandidaten",
+    "stats": {
+      "openHours": "Openstaande aantal uur",
+      "hoursThisMonth": "Uren huidige maand",
+      "occupancy": "Bezettingsgraad",
+      "messagesSent": "Berichten verstuurd",
+      "responseRate": "Response rate"
+    },
+    "statSub": {
+      "urgent": "{{n}} urgent",
+      "prevMonth": "{{pct}} vorige maand",
+      "thisMonth": "Deze maand",
+      "historicAvg": "gem. {{pct}} historisch"
+    }
+  }
+}

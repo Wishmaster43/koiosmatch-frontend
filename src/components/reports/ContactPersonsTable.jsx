@@ -4,6 +4,7 @@
  * come from RightPanelContext, page size from the user's preference.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, Mail, Phone, MessageCircle, Building2 } from 'lucide-react'
 import api                    from '../../lib/api'
 import { useRightPanel }      from '../../context/RightPanelContext'
@@ -14,6 +15,7 @@ import { useDefaultPageSize } from '../../lib/usePageSize'
 
 
 export default function ContactPersonsTable() {
+  const { t } = useTranslation('reports')
   const [contacts, setContacts]   = useState([])
   const [loading,  setLoading]    = useState(true)
   const [search,   setSearch]     = useState('')
@@ -78,14 +80,14 @@ export default function ContactPersonsTable() {
 
   const handlePageSizeChange = async (n) => {
     setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch {}
+    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch { /* noop */ }
   }
 
   const filterGroups = useMemo(() => {
     const groups = []
     if (customerOptions.length > 0) {
       groups.push({
-        key: 'klant', label: 'Klant', type: 'search-select',
+        key: 'klant', label: t('contacts.filters.customer'), type: 'search-select',
         selected: selectedCustomers,
         options: customerOptions.map(c => ({
           value: c, label: c,
@@ -95,16 +97,16 @@ export default function ContactPersonsTable() {
       })
     }
     groups.push({
-      key: 'berichten', label: 'Planningscontact',
+      key: 'berichten', label: t('contacts.filters.planningContact'),
       selected: selectedReceives,
       options: [
-        { value: 'ja',  label: 'Planningscontact',     count: contacts.filter(c => Boolean(c.scheduled_order_contact)).length },
-        { value: 'nee', label: 'Geen planningscontact', count: contacts.filter(c => !Boolean(c.scheduled_order_contact)).length },
+        { value: 'ja',  label: t('contacts.planningYes'), count: contacts.filter(c => Boolean(c.scheduled_order_contact)).length },
+        { value: 'nee', label: t('contacts.planningNo'),  count: contacts.filter(c => !Boolean(c.scheduled_order_contact)).length },
       ],
       onToggle: v => setSelectedReceives(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     })
     return groups
-  }, [customerOptions, selectedCustomers, selectedReceives, contacts])
+  }, [t, customerOptions, selectedCustomers, selectedReceives, contacts])
 
   useEffect(() => {
     registerFilters('contact-persons', filterGroups)
@@ -123,11 +125,11 @@ export default function ContactPersonsTable() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <div>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', letterSpacing: '-0.2px' }}>
-            Contactpersonen
+            {t('contacts.title')}
           </h2>
           {!loading && (
             <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>
-              {filtered.length} van {contacts.length} contactpersonen
+              {t('contacts.summary', { shown: filtered.length, total: contacts.length })}
             </p>
           )}
         </div>
@@ -135,34 +137,34 @@ export default function ContactPersonsTable() {
                       background: 'white', border: '1px solid #E5E7EB', borderRadius: 8, width: 260 }}>
           <Search size={13} color="#9CA3AF" />
           <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Zoek op naam, e-mail, locatie…"
+            placeholder={t('contacts.search')}
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none',
                      fontSize: 12, color: '#374151' }} />
         </div>
       </div>
 
-      {/* Tabel */}
+      {/* Table */}
       <div style={{ background: 'white', borderRadius: 12, border: '1px solid #F3F4F6', overflow: 'hidden', flex: 1 }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr>
-                <th style={TH}>Klant</th>
-                <th style={TH}>Naam</th>
-                <th style={TH}>E-mail</th>
-                <th style={TH}>Telefoon</th>
-                <th style={TH}>Planningscontact</th>
+                <th style={TH}>{t('contacts.cols.customer')}</th>
+                <th style={TH}>{t('contacts.cols.name')}</th>
+                <th style={TH}>{t('contacts.cols.email')}</th>
+                <th style={TH}>{t('contacts.cols.phone')}</th>
+                <th style={TH}>{t('contacts.cols.planningContact')}</th>
               </tr>
             </thead>
             <tbody>
               {loading && (
                 <tr><td colSpan={5} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
-                  Contactpersonen ophalen…
+                  {t('contacts.loading')}
                 </td></tr>
               )}
               {!loading && filtered.length === 0 && (
                 <tr><td colSpan={5} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
-                  Geen contactpersonen gevonden
+                  {t('contacts.empty')}
                 </td></tr>
               )}
               {!loading && paged.map((c, i) => {
@@ -178,7 +180,7 @@ export default function ContactPersonsTable() {
                     onMouseEnter={e => (e.currentTarget.style.background = '#FAFAFA')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                   >
-                    {/* Klant — eerste kolom */}
+                    {/* Customer — first column */}
                     <td style={{ ...TD, minWidth: 140 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <Building2 size={12} color="#9CA3AF" style={{ flexShrink: 0 }} />
@@ -188,7 +190,7 @@ export default function ContactPersonsTable() {
                       </div>
                     </td>
 
-                    {/* Naam */}
+                    {/* Name */}
                     <td style={{ ...TD, minWidth: 160 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
@@ -206,18 +208,18 @@ export default function ContactPersonsTable() {
                       </div>
                     </td>
 
-                    {/* E-mail */}
+                    {/* Email */}
                     <td style={{ ...TD, minWidth: 180 }}>
                       {c.email
                         ? <a href={`mailto:${c.email}`}
                             style={{ display: 'flex', alignItems: 'center', gap: 5,
-                                     color: '#2563EB', textDecoration: 'none', fontSize: 12 }}>
+                                     color: 'var(--color-secondary)', textDecoration: 'none', fontSize: 12 }}>
                             <Mail size={11} />{c.email}
                           </a>
                         : <span style={{ color: '#D1D5DB' }}>—</span>}
                     </td>
 
-                    {/* Telefoon */}
+                    {/* Phone */}
                     <td style={{ ...TD, minWidth: 130 }}>
                       {c.mobile
                         ? <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#374151' }}>
@@ -226,18 +228,18 @@ export default function ContactPersonsTable() {
                         : <span style={{ color: '#D1D5DB' }}>—</span>}
                     </td>
 
-                    {/* Planningscontact */}
+                    {/* Planning contact */}
                     <td style={TD}>
                       <span style={{
                         display: 'inline-flex', alignItems: 'center', gap: 5,
                         borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 500,
                         background: isPlanning ? '#F0FDF4' : '#F9FAFB',
-                        color:      isPlanning ? '#16A34A'  : '#9CA3AF',
+                        color:      isPlanning ? 'var(--color-success)'  : '#9CA3AF',
                         border:     `1px solid ${isPlanning ? '#BBF7D0' : '#E5E7EB'}`,
                       }}>
                         {isPlanning
-                          ? <><MessageCircle size={10} /> Ja</>
-                          : <><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#D1D5DB' }} /> Nee</>}
+                          ? <><MessageCircle size={10} /> {t('contacts.yes')}</>
+                          : <><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#D1D5DB' }} /> {t('contacts.no')}</>}
                       </span>
                     </td>
                   </tr>

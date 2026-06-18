@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Plus, Bot, Sparkles, AtSign, Paperclip, ArrowUp, ChevronDown } from 'lucide-react'
 import api from '../../lib/api'
 
@@ -23,12 +24,13 @@ function getFallbackReply(text) {
 }
 
 // ── Mention picker items ──────────────────────────────────────────────────────
+// Mention items; label = t('nav.<navKey>'). desc is illustrative demo data.
 const MENTIONS = [
-  { id: 'kandidaten', label: 'Kandidaten', desc: '2.845 actief' },
-  { id: 'planning',   label: 'Planning',   desc: 'Diensten deze week' },
-  { id: 'klanten',    label: 'Klanten',    desc: '47 actief' },
-  { id: 'vacatures',  label: 'Vacatures',  desc: '9 open' },
-  { id: 'workflows',  label: 'Workflows',  desc: 'Automatisering' },
+  { id: 'kandidaten', navKey: 'candidates', desc: '2.845 actief' },
+  { id: 'planning',   navKey: 'planning',   desc: 'Diensten deze week' },
+  { id: 'klanten',    navKey: 'customers',  desc: '47 actief' },
+  { id: 'vacatures',  navKey: 'vacancies',  desc: '9 open' },
+  { id: 'workflows',  navKey: 'workflows',  desc: 'Automatisering' },
 ]
 
 // ── Chat bubble ───────────────────────────────────────────────────────────────
@@ -40,7 +42,7 @@ function KoiosMessage({ msg, isNew }) {
       animation: isNew ? 'fadeSlideIn 0.2s ease' : 'none' }}>
       {isKoios && (
         <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, marginBottom: 2,
-          background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
+          background: 'linear-gradient(135deg,var(--color-primary),#8B5CF6)',
           display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Bot size={13} color="white" />
         </div>
@@ -49,7 +51,7 @@ function KoiosMessage({ msg, isNew }) {
         maxWidth: '84%', padding: '9px 13px',
         borderRadius: isKoios ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
         fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap',
-        background: isKoios ? 'var(--surface)' : 'linear-gradient(135deg,#6366F1,#8B5CF6)',
+        background: isKoios ? 'var(--surface)' : 'linear-gradient(135deg,var(--color-primary),#8B5CF6)',
         color:      isKoios ? 'var(--text)'    : '#fff',
         border:     isKoios ? '1px solid var(--border)' : 'none',
         boxShadow:  isKoios ? 'none' : '0 2px 10px rgba(99,102,241,0.35)',
@@ -65,7 +67,7 @@ function TypingIndicator() {
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
       <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
-        background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
+        background: 'linear-gradient(135deg,var(--color-primary),#8B5CF6)',
         display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Bot size={13} color="white" />
       </div>
@@ -82,15 +84,19 @@ function TypingIndicator() {
 }
 
 // ── Quick suggestions ─────────────────────────────────────────────────────────
+// Quick suggestions; label = t('koios.<key>').
 const QUICK = [
-  { label: 'Kandidaten overzicht',   icon: '👥' },
-  { label: 'Openstaande diensten',   icon: '📅' },
-  { label: 'Nieuwe workflow starten', icon: '⚡' },
-  { label: 'Rapportage deze maand',  icon: '📊' },
+  { key: 'quickCandidates',  icon: '👥' },
+  { key: 'quickOpenShifts',  icon: '📅' },
+  { key: 'quickNewWorkflow', icon: '⚡' },
+  { key: 'quickReport',      icon: '📊' },
 ]
 
 // ── Main panel ────────────────────────────────────────────────────────────────
 export default function KoiosPanel({ open, onClose }) {
+  const { t } = useTranslation('common')
+  const mentions = MENTIONS.map(m => ({ ...m, label: t(`nav.${m.navKey}`) }))
+  const quick    = QUICK.map(q => ({ ...q, label: t(`koios.${q.key}`) }))
   const [messages,    setMessages]    = useState([
     { role: 'assistant', content: 'Hallo! Ik ben Koios, jouw intelligente AI agent.\n\nIk kan je helpen met kandidaten, planning, klanten en rapportages. Wat kan ik voor je doen?' }
   ])
@@ -189,7 +195,7 @@ export default function KoiosPanel({ open, onClose }) {
     setShowMention(false)
   }
 
-  const filteredMentions = MENTIONS.filter(m =>
+  const filteredMentions = mentions.filter(m =>
     !mentionQ || m.label.toLowerCase().includes(mentionQ) || m.id.includes(mentionQ)
   )
 
@@ -203,24 +209,24 @@ export default function KoiosPanel({ open, onClose }) {
       <div style={{ height: 56, borderBottom: '1px solid var(--sidebar-border)', flexShrink: 0,
         display: 'flex', alignItems: 'center', padding: '0 14px', gap: 8 }}>
         <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-          background: 'linear-gradient(135deg,#6366F1,#8B5CF6)',
+          background: 'linear-gradient(135deg,var(--color-primary),#8B5CF6)',
           display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Sparkles size={13} color="white" />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--sidebar-text)', lineHeight: 1.2 }}>Koios</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E', display: 'block' }} />
-            <span style={{ fontSize: 10, color: '#22C55E', fontWeight: 500 }}>Online</span>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', display: 'block' }} />
+            <span style={{ fontSize: 10, color: 'var(--color-success)', fontWeight: 500 }}>{t('koios.online')}</span>
           </div>
         </div>
-        <button onClick={newChat} title="Nieuwe chat"
+        <button onClick={newChat} title={t('koios.newChat')}
           style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', fontSize: 10,
-            fontWeight: 600, background: 'rgba(99,102,241,0.12)', color: '#6366F1',
+            fontWeight: 600, background: 'rgba(99,102,241,0.12)', color: 'var(--color-primary)',
             border: 'none', borderRadius: 6, cursor: 'pointer', transition: 'background 0.15s' }}
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.22)'}
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}>
-          <Plus size={10} /> Nieuw
+          <Plus size={10} /> {t('koios.newChatShort')}
         </button>
         <button onClick={onClose}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sidebar-muted)',
@@ -244,13 +250,13 @@ export default function KoiosPanel({ open, onClose }) {
       {/* ── Quick suggestions (only on welcome screen) ── */}
       {messages.length === 1 && !loading && (
         <div style={{ padding: '0 12px 10px', display: 'flex', flexDirection: 'column', gap: 5 }}>
-          {QUICK.map(q => (
-            <button key={q.label} onClick={() => sendMessage(q.label)}
+          {quick.map(q => (
+            <button key={q.key} onClick={() => sendMessage(q.label)}
               style={{ textAlign: 'left', padding: '8px 11px', fontSize: 12,
                 border: '1px solid var(--sidebar-border)', borderRadius: 10, background: 'none',
                 color: 'var(--sidebar-text)', cursor: 'pointer', transition: 'all 0.15s',
                 display: 'flex', alignItems: 'center', gap: 8 }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-hover)'; e.currentTarget.style.borderColor = '#6366F1' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-hover)'; e.currentTarget.style.borderColor = 'var(--color-primary)' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'var(--sidebar-border)' }}>
               <span>{q.icon}</span>
               <span>{q.label}</span>
@@ -270,7 +276,7 @@ export default function KoiosPanel({ open, onClose }) {
               boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden', zIndex: 50 }}>
             <div style={{ padding: '8px 12px 4px', fontSize: 10, fontWeight: 700,
               color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-              Context toevoegen
+              {t('koios.addContext')}
             </div>
             {filteredMentions.map(m => (
               <button key={m.id} onClick={() => insertMention(m)}
@@ -280,9 +286,9 @@ export default function KoiosPanel({ open, onClose }) {
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--hover-bg)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                 <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-                  background: 'linear-gradient(135deg,#EEF2FF,#F3E8FF)',
+                  background: 'linear-gradient(135deg,var(--color-primary-bg),#F3E8FF)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: '#6366F1' }}>@</span>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-primary)' }}>@</span>
                 </div>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{m.label}</div>
@@ -296,7 +302,7 @@ export default function KoiosPanel({ open, onClose }) {
         {/* Input box */}
         <div style={{
           background: 'var(--surface)',
-          border: `1.5px solid ${focused ? '#6366F1' : 'var(--border)'}`,
+          border: `1.5px solid ${focused ? 'var(--color-primary)' : 'var(--border)'}`,
           borderRadius: 20,
           padding: '10px 10px 8px 14px',
           boxShadow: focused ? '0 0 0 3px rgba(99,102,241,0.1)' : '0 1px 3px rgba(0,0,0,0.05)',
@@ -309,7 +315,7 @@ export default function KoiosPanel({ open, onClose }) {
             onKeyDown={handleKeyDown}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
-            placeholder="Geef een taak op"
+            placeholder={t('koios.taskPlaceholder')}
             rows={1}
             style={{
               width: '100%', background: 'none', border: 'none', outline: 'none',
@@ -324,21 +330,21 @@ export default function KoiosPanel({ open, onClose }) {
             {/* @ mention */}
             <button
               onClick={() => { setInput(v => v + '@'); setShowMention(true); setMentionQ(''); textareaRef.current?.focus() }}
-              title="Context toevoegen"
+              title={t('koios.addContext')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 5px',
                 borderRadius: 7, color: 'var(--sidebar-muted)', display: 'flex',
                 transition: 'background 0.1s, color 0.1s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = '#6366F1' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = 'var(--color-primary)' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--sidebar-muted)' }}>
               <AtSign size={14} />
             </button>
 
             {/* Paperclip */}
-            <button title="Bijlage toevoegen"
+            <button title={t('koios.attachFile')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 5px',
                 borderRadius: 7, color: 'var(--sidebar-muted)', display: 'flex',
                 transition: 'background 0.1s, color 0.1s' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = '#6366F1' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = 'var(--color-primary)' }}
               onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--sidebar-muted)' }}>
               <Paperclip size={14} />
             </button>

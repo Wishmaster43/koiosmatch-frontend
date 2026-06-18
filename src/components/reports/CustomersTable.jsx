@@ -4,6 +4,7 @@
  * page size from the user's preference; data is fetched per page from the API.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
 import { useRightPanel }      from '../../context/RightPanelContext'
 import { useAuth }            from '../../context/AuthContext'
@@ -128,6 +129,7 @@ const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 6
 const TD = { padding: '10px 12px', fontSize: 13, color: '#374151', borderBottom: '1px solid #F9FAFB' }
 
 export default function CustomersTable() {
+  const { t } = useTranslation('reports')
   const [customers,         setCustomers]         = useState([])
   const [loading,           setLoading]           = useState(true)
   const [error,             setError]             = useState(null)
@@ -153,7 +155,7 @@ export default function CustomersTable() {
         const dummies = DUMMY_CUSTOMERS.filter(d => !realIds.has(d.id))
         setCustomers([...dummies, ...real])
       })
-      .catch(() => { setCustomers(DUMMY_CUSTOMERS); setError('Kon klanten niet laden.') })
+      .catch(() => { setCustomers(DUMMY_CUSTOMERS); setError(t('customers.loadError')) })
       .finally(() => setLoading(false))
   }
 
@@ -204,7 +206,7 @@ export default function CustomersTable() {
 
   const handlePageSizeChange = async (n) => {
     setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch {}
+    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch { /* noop */ }
   }
 
   const setSort_ = (key) => setSort(prev =>
@@ -215,16 +217,16 @@ export default function CustomersTable() {
 
   const filterGroups = useMemo(() => [
     {
-      key: 'status', label: 'Status',
+      key: 'status', label: t('customers.filters.status'),
       selected: selectedStatuses,
       options: statusOptions.map(s => ({
         value: s,
-        label: s === 'active' ? 'Actief' : s === 'inactive' ? 'Inactief' : s,
+        label: s === 'active' ? t('customers.statusActive') : s === 'inactive' ? t('customers.statusInactive') : s,
         count: customers.filter(c => c.status === s).length,
       })),
       onToggle: toggle(setSelectedStatuses),
     },
-  ], [selectedStatuses, statusOptions, customers])
+  ], [t, selectedStatuses, statusOptions, customers])
 
   useEffect(() => {
     registerFilters('customers-table', filterGroups)
@@ -232,12 +234,12 @@ export default function CustomersTable() {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   const COLS = [
-    { key: 'name',          label: 'Naam',           sortable: true },
-    { key: 'debtor_number', label: 'Debiteur-nr',    sortable: true },
-    { key: 'status',        label: 'Status',         sortable: true },
-    { key: 'account_manager', label: 'Accountmanager', sortable: true },
-    { key: 'locations',     label: 'Locaties',       sortable: true },
-    { key: 'departments',   label: 'Afdelingen',     sortable: true },
+    { key: 'name',          label: t('customers.cols.name'),          sortable: true },
+    { key: 'debtor_number', label: t('customers.cols.debtorNumber'),  sortable: true },
+    { key: 'status',        label: t('customers.cols.status'),        sortable: true },
+    { key: 'account_manager', label: t('customers.cols.accountManager'), sortable: true },
+    { key: 'locations',     label: t('customers.cols.locations'),     sortable: true },
+    { key: 'departments',   label: t('customers.cols.departments'),   sortable: true },
   ]
 
   return (
@@ -245,24 +247,24 @@ export default function CustomersTable() {
 
 
       {error && (
-        <div style={{ padding: '10px 14px', marginBottom: 12, fontSize: 13, color: '#DC2626',
+        <div style={{ padding: '10px 14px', marginBottom: 12, fontSize: 13, color: 'var(--color-danger)',
                       background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8 }}>
           {error}
         </div>
       )}
 
-      {/* Tabel */}
+      {/* Table */}
       <div className="flex flex-1 min-h-0 overflow-hidden bg-white rounded-xl"
         style={{ border: '1px solid #F3F4F6' }}>
         <div className="flex-1 min-w-0 overflow-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center gap-3" style={{ height: 240 }}>
               <RefreshCw size={18} className="animate-spin" style={{ color: '#D1D5DB' }} />
-              <p style={{ fontSize: 13, color: '#9CA3AF' }}>Klanten ophalen…</p>
+              <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('customers.loading')}</p>
             </div>
           ) : sorted.length === 0 ? (
             <div className="flex items-center justify-center" style={{ height: 180 }}>
-              <p style={{ fontSize: 13, color: '#9CA3AF' }}>Geen klanten gevonden</p>
+              <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('customers.empty')}</p>
             </div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>

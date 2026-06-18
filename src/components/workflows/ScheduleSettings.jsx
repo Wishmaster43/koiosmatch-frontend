@@ -12,13 +12,14 @@
  *   - (further down)          → the trigger-type sections + the exported panel
  */
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Clock, Calendar, RotateCcw, Zap, ChevronDown, Plus, Trash2 } from 'lucide-react'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const WEEKDAYS = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo']
-const WEEKDAY_FULL = ['Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag', 'Zondag']
-const MONTHS = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
+// Locale-aware Monday-first short weekday names (2024-01-01 = Monday).
+const WEEKDAYS = Array.from({ length: 7 }, (_, i) =>
+  new Date(2024, 0, 1 + i).toLocaleString(undefined, { weekday: 'short' }))
 
 function pad(n) { return String(n).padStart(2, '0') }
 
@@ -61,15 +62,16 @@ function Section({ children, style }) {
 
 // ── Schedule types ─────────────────────────────────────────────────────────────
 
+// Schedule types — Icon per type; labels resolved via t('schedule.types.<id>').
 const SCHEDULE_TYPES = [
-  { id: 'interval',  label: 'Op regelmatige intervallen', Icon: RotateCcw },
-  { id: 'once',      label: 'Eenmalig',                   Icon: Zap       },
-  { id: 'daily',     label: 'Dagelijks',                   Icon: Clock     },
-  { id: 'weekdays',  label: 'Werkdagen (Ma–Vr)',           Icon: Calendar  },
-  { id: 'weekly',    label: 'Wekelijks',                   Icon: Calendar  },
-  { id: 'monthly',   label: 'Maandelijks',                 Icon: Calendar  },
-  { id: 'specified', label: 'Specifieke datums',           Icon: Calendar  },
-  { id: 'ondemand',  label: 'Op aanvraag',                 Icon: Zap       },
+  { id: 'interval',  Icon: RotateCcw },
+  { id: 'once',      Icon: Zap       },
+  { id: 'daily',     Icon: Clock     },
+  { id: 'weekdays',  Icon: Calendar  },
+  { id: 'weekly',    Icon: Calendar  },
+  { id: 'monthly',   Icon: Calendar  },
+  { id: 'specified', Icon: Calendar  },
+  { id: 'ondemand',  Icon: Zap       },
 ]
 
 // Default state per type
@@ -90,14 +92,15 @@ function defaultSchedule(type) {
 // ── Renderers per type ────────────────────────────────────────────────────────
 
 function IntervalEditor({ schedule, onChange }) {
+  const { t } = useTranslation('workflows')
   const PRESETS = [5,10,15,30,60,120,240,480]
   return (
     <Section>
-      <Label>Interval (minuten)</Label>
+      <Label>{t('schedule.intervalLabel')}</Label>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {PRESETS.map(m => {
           const active = schedule.minutes === m
-          const label  = m < 60 ? `${m} min` : `${m/60} uur`
+          const label  = m < 60 ? t('schedule.minShort', { n: m }) : t('schedule.hourShort', { n: m/60 })
           return (
             <button key={m} type="button" onClick={() => onChange({ ...schedule, minutes: m })}
               style={{
@@ -112,19 +115,20 @@ function IntervalEditor({ schedule, onChange }) {
         })}
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-        <span style={{ fontSize: 13, color: '#6B7280' }}>Of aangepast:</span>
+        <span style={{ fontSize: 13, color: '#6B7280' }}>{t('schedule.custom')}</span>
         <input type="number" min={1} value={schedule.minutes} onChange={e => onChange({ ...schedule, minutes: Number(e.target.value) })}
           style={{ ...inputStyle, width: 80 }} />
-        <span style={{ fontSize: 13, color: '#6B7280' }}>minuten</span>
+        <span style={{ fontSize: 13, color: '#6B7280' }}>{t('schedule.minutes')}</span>
       </div>
     </Section>
   )
 }
 
 function OnceEditor({ schedule, onChange }) {
+  const { t } = useTranslation('workflows')
   return (
     <Section>
-      <Label>Datum en tijd</Label>
+      <Label>{t('schedule.dateTime')}</Label>
       <div style={{ display: 'flex', gap: 10 }}>
         <input type="date" value={schedule.date} onChange={e => onChange({ ...schedule, date: e.target.value })}
           style={{ ...inputStyle, flex: 1 }} />
@@ -134,20 +138,21 @@ function OnceEditor({ schedule, onChange }) {
   )
 }
 
-function TimesListEditor({ schedule, onChange, label = 'Tijden' }) {
+function TimesListEditor({ schedule, onChange, label }) {
+  const { t } = useTranslation('workflows')
   const times = schedule.times || ['08:00']
   const setTimes = (newTimes) => onChange({ ...schedule, times: newTimes })
   return (
     <Section>
-      <Label>{label}</Label>
+      <Label>{label ?? t('schedule.times')}</Label>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {times.map((t, i) => (
+        {times.map((tm, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <TimeInput value={t} onChange={v => setTimes(times.map((x, j) => j === i ? v : x))} />
+            <TimeInput value={tm} onChange={v => setTimes(times.map((x, j) => j === i ? v : x))} />
             {times.length > 1 && (
               <button type="button" onClick={() => setTimes(times.filter((_, j) => j !== i))}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', display: 'flex', padding: 4 }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
                 onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}>
                 <Trash2 size={14} />
               </button>
@@ -156,7 +161,7 @@ function TimesListEditor({ schedule, onChange, label = 'Tijden' }) {
         ))}
         <button type="button" onClick={() => setTimes([...times, '09:00'])}
           style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontWeight: 500 }}>
-          <Plus size={13} /> Tijdstip toevoegen
+          <Plus size={13} /> {t('schedule.addTime')}
         </button>
       </div>
     </Section>
@@ -164,6 +169,7 @@ function TimesListEditor({ schedule, onChange, label = 'Tijden' }) {
 }
 
 function WeeklyEditor({ schedule, onChange }) {
+  const { t } = useTranslation('workflows')
   const days    = schedule.days || [0]
   const toggleDay = (d) => {
     const next = days.includes(d) ? days.filter(x => x !== d) : [...days, d].sort()
@@ -171,7 +177,7 @@ function WeeklyEditor({ schedule, onChange }) {
   }
   return (
     <Section>
-      <Label>Dag(en)</Label>
+      <Label>{t('schedule.days')}</Label>
       <div style={{ display: 'flex', gap: 6 }}>
         {WEEKDAYS.map((wd, i) => {
           const active = days.includes(i)
@@ -189,38 +195,40 @@ function WeeklyEditor({ schedule, onChange }) {
         })}
       </div>
       <div style={{ marginTop: 8 }}>
-        <Label>Tijd</Label>
-        <TimeInput value={schedule.time} onChange={t => onChange({ ...schedule, time: t })} />
+        <Label>{t('schedule.time')}</Label>
+        <TimeInput value={schedule.time} onChange={v => onChange({ ...schedule, time: v })} />
       </div>
     </Section>
   )
 }
 
 function MonthlyEditor({ schedule, onChange }) {
+  const { t } = useTranslation('workflows')
   return (
     <Section>
-      <Label>Dag van de maand</Label>
+      <Label>{t('schedule.dayOfMonth')}</Label>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <select value={schedule.day} onChange={e => onChange({ ...schedule, day: Number(e.target.value) })}
           style={{ ...selectStyle, width: 80 }}>
           {Array.from({ length: 31 }, (_, i) => <option key={i+1} value={i+1}>{i+1}</option>)}
         </select>
-        <span style={{ fontSize: 13, color: '#6B7280' }}>van elke maand</span>
+        <span style={{ fontSize: 13, color: '#6B7280' }}>{t('schedule.ofEveryMonth')}</span>
       </div>
       <div style={{ marginTop: 8 }}>
-        <Label>Tijd</Label>
-        <TimeInput value={schedule.time} onChange={t => onChange({ ...schedule, time: t })} />
+        <Label>{t('schedule.time')}</Label>
+        <TimeInput value={schedule.time} onChange={v => onChange({ ...schedule, time: v })} />
       </div>
     </Section>
   )
 }
 
 function SpecifiedEditor({ schedule, onChange }) {
+  const { t } = useTranslation('workflows')
   const dates  = schedule.dates || [{ date: '', time: '08:00' }]
   const setDates = (d) => onChange({ ...schedule, dates: d })
   return (
     <Section>
-      <Label>Datums</Label>
+      <Label>{t('schedule.dates')}</Label>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {dates.map((entry, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -230,7 +238,7 @@ function SpecifiedEditor({ schedule, onChange }) {
             {dates.length > 1 && (
               <button type="button" onClick={() => setDates(dates.filter((_, j) => j !== i))}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', display: 'flex', padding: 4 }}
-                onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
                 onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}>
                 <Trash2 size={14} />
               </button>
@@ -239,7 +247,7 @@ function SpecifiedEditor({ schedule, onChange }) {
         ))}
         <button type="button" onClick={() => setDates([...dates, { date: '', time: '08:00' }])}
           style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px 0', fontWeight: 500 }}>
-          <Plus size={13} /> Datum toevoegen
+          <Plus size={13} /> {t('schedule.addDate')}
         </button>
       </div>
     </Section>
@@ -247,10 +255,11 @@ function SpecifiedEditor({ schedule, onChange }) {
 }
 
 function OnDemandEditor() {
+  const { t } = useTranslation('workflows')
   return (
     <div style={{ padding: '12px 14px', background: '#F9FAFB', borderRadius: 10, border: '1px solid #E5E7EB' }}>
       <p style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.6, margin: 0 }}>
-        Het scenario wordt <strong>niet automatisch</strong> uitgevoerd. Je kunt het handmatig starten via de knop "Uitvoeren" of via een API-aanroep.
+        {t('schedule.onDemandText')}
       </p>
     </div>
   )
@@ -259,28 +268,29 @@ function OnDemandEditor() {
 // ── Advanced settings ─────────────────────────────────────────────────────────
 
 function AdvancedSettings({ advanced, onChange }) {
+  const { t } = useTranslation('workflows')
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <div>
-        <Label>Startdatum (optioneel)</Label>
+        <Label>{t('schedule.startDate')}</Label>
         <input type="date" value={advanced.startDate || ''} onChange={e => onChange({ ...advanced, startDate: e.target.value })}
           style={inputStyle} />
       </div>
       <div>
-        <Label>Einddatum (optioneel)</Label>
+        <Label>{t('schedule.endDate')}</Label>
         <input type="date" value={advanced.endDate || ''} onChange={e => onChange({ ...advanced, endDate: e.target.value })}
           style={inputStyle} />
       </div>
       <div>
-        <Label>Max. uitvoeringen per minuut</Label>
+        <Label>{t('schedule.maxRuns')}</Label>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <input type="number" min={1} max={1000} value={advanced.rateLimit ?? 100}
             onChange={e => onChange({ ...advanced, rateLimit: Number(e.target.value) })}
             style={{ ...inputStyle, width: 100 }} />
-          <span style={{ fontSize: 12, color: '#9CA3AF' }}>Standaard: 100</span>
+          <span style={{ fontSize: 12, color: '#9CA3AF' }}>{t('schedule.default100')}</span>
         </div>
         <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6, lineHeight: 1.5 }}>
-          Overschot wordt in een wachtrij geplaatst tot er capaciteit vrijkomt.
+          {t('schedule.rateLimitHint')}
         </p>
       </div>
     </div>
@@ -289,27 +299,34 @@ function AdvancedSettings({ advanced, onChange }) {
 
 // ── Summary label ─────────────────────────────────────────────────────────────
 
-export function scheduleLabel(schedule) {
-  if (!schedule) return 'Niet ingesteld'
+// Render a schedule config as a short readable string. Pass the i18n `t`
+// (workflows namespace); falls back gracefully when omitted.
+export function scheduleLabel(schedule, t) {
+  if (!t) t = (k) => k
+  if (!schedule) return t('schedule.label.notSet')
+  const interval = schedule.minutes < 60
+    ? t('schedule.minShort', { n: schedule.minutes })
+    : t('schedule.hourShort', { n: schedule.minutes / 60 })
   switch (schedule.type) {
-    case 'interval':  return `Elke ${schedule.minutes < 60 ? schedule.minutes + ' min' : schedule.minutes / 60 + ' uur'}`
-    case 'once':      return `Eenmalig op ${schedule.date || '—'} om ${schedule.time}`
-    case 'daily':     return `Dagelijks om ${(schedule.times || []).join(', ')}`
-    case 'weekdays':  return `Werkdagen om ${(schedule.times || []).join(', ')}`
+    case 'interval':  return t('schedule.label.every', { interval })
+    case 'once':      return t('schedule.label.onceOn', { date: schedule.date || '—', time: schedule.time })
+    case 'daily':     return t('schedule.label.dailyAt', { times: (schedule.times || []).join(', ') })
+    case 'weekdays':  return t('schedule.label.weekdaysAt', { times: (schedule.times || []).join(', ') })
     case 'weekly': {
       const days = (schedule.days || []).map(d => WEEKDAYS[d]).join(', ')
-      return `Wekelijks op ${days} om ${schedule.time}`
+      return t('schedule.label.weeklyOn', { days, time: schedule.time })
     }
-    case 'monthly':   return `Maandelijks op dag ${schedule.day} om ${schedule.time}`
-    case 'specified': return `${schedule.dates?.length ?? 0} specifieke datum(s)`
-    case 'ondemand':  return 'Op aanvraag'
-    default:          return 'Onbekend'
+    case 'monthly':   return t('schedule.label.monthlyOn', { day: schedule.day, time: schedule.time })
+    case 'specified': return t('schedule.label.specifiedCount', { count: schedule.dates?.length ?? 0 })
+    case 'ondemand':  return t('schedule.label.onDemand')
+    default:          return t('schedule.label.unknown')
   }
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function ScheduleSettings({ value, onChange, onClose }) {
+  const { t } = useTranslation('workflows')
   const initial = value || defaultSchedule('interval')
   const [schedule,  setSchedule]  = useState(initial)
   const [advanced,  setAdvanced]  = useState(value?.advanced || {})
@@ -323,8 +340,6 @@ export default function ScheduleSettings({ value, onChange, onClose }) {
     onChange({ ...schedule, advanced })
     onClose()
   }
-
-  const activeType = SCHEDULE_TYPES.find(t => t.id === schedule.type)
 
   return (
     <>
@@ -348,8 +363,8 @@ export default function ScheduleSettings({ value, onChange, onClose }) {
               <Clock size={16} color="var(--color-primary)" />
             </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>Inplannen</div>
-              <div style={{ fontSize: 11, color: '#9CA3AF' }}>{scheduleLabel(schedule)}</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{t('schedule.header')}</div>
+              <div style={{ fontSize: 11, color: '#9CA3AF' }}>{scheduleLabel(schedule, t)}</div>
             </div>
           </div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
@@ -362,9 +377,9 @@ export default function ScheduleSettings({ value, onChange, onClose }) {
 
           {/* Type picker */}
           <Section>
-            <Label>Uitvoeren</Label>
+            <Label>{t('schedule.run')}</Label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {SCHEDULE_TYPES.map(({ id, label, Icon }) => {
+              {SCHEDULE_TYPES.map(({ id, Icon }) => {
                 const active = schedule.type === id
                 return (
                   <button key={id} type="button" onClick={() => handleTypeChange(id)}
@@ -379,7 +394,7 @@ export default function ScheduleSettings({ value, onChange, onClose }) {
                     onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'none' }}>
                     <Icon size={15} color={active ? 'var(--color-primary)' : '#9CA3AF'} />
                     <span style={{ fontSize: 13, fontWeight: 500, color: active ? 'var(--color-primary)' : '#374151' }}>
-                      {label}
+                      {t(`schedule.types.${id}`)}
                     </span>
                     {active && <span style={{ marginLeft: 'auto', width: 8, height: 8, borderRadius: '50%', background: 'var(--color-primary)' }} />}
                   </button>
@@ -393,8 +408,8 @@ export default function ScheduleSettings({ value, onChange, onClose }) {
             <div style={{ padding: 16, background: '#FAFAFA', borderRadius: 12, border: '1px solid #F3F4F6' }}>
               {schedule.type === 'interval'  && <IntervalEditor  schedule={schedule} onChange={setSchedule} />}
               {schedule.type === 'once'      && <OnceEditor      schedule={schedule} onChange={setSchedule} />}
-              {schedule.type === 'daily'     && <TimesListEditor schedule={schedule} onChange={setSchedule} label="Tijden" />}
-              {schedule.type === 'weekdays'  && <TimesListEditor schedule={schedule} onChange={setSchedule} label="Tijden (werkdagen)" />}
+              {schedule.type === 'daily'     && <TimesListEditor schedule={schedule} onChange={setSchedule} label={t('schedule.times')} />}
+              {schedule.type === 'weekdays'  && <TimesListEditor schedule={schedule} onChange={setSchedule} label={t('schedule.timesWeekdays')} />}
               {schedule.type === 'weekly'    && <WeeklyEditor    schedule={schedule} onChange={setSchedule} />}
               {schedule.type === 'monthly'   && <MonthlyEditor   schedule={schedule} onChange={setSchedule} />}
               {schedule.type === 'specified' && <SpecifiedEditor schedule={schedule} onChange={setSchedule} />}
@@ -408,7 +423,7 @@ export default function ScheduleSettings({ value, onChange, onClose }) {
               <button type="button" onClick={() => setShowAdv(s => !s)}
                 style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 500, color: '#6B7280', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
                 <ChevronDown size={14} style={{ transform: showAdv ? 'rotate(180deg)' : 'none', transition: 'transform .2s' }} />
-                Geavanceerde instellingen
+                {t('schedule.advanced')}
               </button>
               {showAdv && (
                 <div style={{ marginTop: 14, padding: 16, background: '#FAFAFA', borderRadius: 12, border: '1px solid #F3F4F6' }}>
@@ -423,11 +438,11 @@ export default function ScheduleSettings({ value, onChange, onClose }) {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 10, padding: '14px 20px', borderTop: '1px solid #F3F4F6', flexShrink: 0, background: '#FAFAFA' }}>
           <button onClick={onClose}
             style={{ padding: '8px 16px', borderRadius: 8, fontSize: 13, color: '#6B7280', background: 'white', border: '1px solid #E5E7EB', cursor: 'pointer' }}>
-            Annuleren
+            {t('common:cancel')}
           </button>
           <button onClick={handleSave}
             style={{ padding: '8px 20px', borderRadius: 8, fontSize: 13, fontWeight: 500, color: 'white', background: 'var(--color-primary)', border: 'none', cursor: 'pointer' }}>
-            Opslaan
+            {t('common:save')}
           </button>
         </div>
       </div>

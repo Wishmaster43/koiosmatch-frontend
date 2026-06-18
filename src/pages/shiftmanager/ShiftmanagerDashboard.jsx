@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle, CalendarDays, TrendingUp, MessageCircle, Percent } from 'lucide-react'
 import api from '../../lib/api'
 import { useKpiSettings } from '../../lib/useKpiSettings'
@@ -9,6 +10,7 @@ import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
 
 const AI_PACKAGES = ['reporting_sm_ai', 'reporting_hf_ai', 'reporting_sm_hf_ai', 'ats_crm_ai', 'ats_crm_ai_planning', 'ats_crm_aiagents', 'ats_crm_workflows', 'connect']
 
+// Demo data for the runs panel (placeholder until wired to the API).
 const RUNS = [
   { name: 'Diensten Aanbod — Yesway', time: '08:00', ok: true,  n: 87  },
   { name: 'No Response Checker',      time: '09:00', ok: true,  n: 12  },
@@ -16,16 +18,18 @@ const RUNS = [
   { name: 'Wekelijkse Rapportage',    time: '07:00', ok: true,  n: 441 },
 ]
 
-const DUMMY_STATS = [
-  { label: 'Openstaande aantal uur', value: '1.123', sub: '5 urgent',             color: '#E11D48', bg: '#FFF1F2', icon: CalendarDays  },
-  { label: 'Uren huidige maand',     value: '1.374', sub: '-12% vorige maand',    color: '#D97706', bg: '#FFFBEB', icon: TrendingUp     },
-  { label: 'Bezettingsgraad',        value: '87%',   sub: '+4% vorige maand',     color: '#059669', bg: '#ECFDF5', icon: Percent        },
-  { label: 'Berichten verstuurd',    value: '1.847', sub: 'Deze maand',           color: '#2563EB', bg: '#EFF6FF', icon: MessageCircle  },
-  { label: 'Response rate',          value: '76%',   sub: 'gem. 72% historisch',  color: '#D97706', bg: '#FFFBEB', icon: TrendingUp     },
-]
-
 export default function ShiftmanagerDashboard() {
+  const { t } = useTranslation('shiftmanager')
   const { candidates_per_page } = useKpiSettings()
+
+  // KPI cards — demo values until wired to the API; labels/subs from i18n.
+  const DUMMY_STATS = [
+    { label: t('dashboard.stats.openHours'),     value: '1.123', sub: t('dashboard.statSub.urgent', { n: 5 }),       color: '#E11D48', bg: 'var(--color-danger-bg)', icon: CalendarDays  },
+    { label: t('dashboard.stats.hoursThisMonth'), value: '1.374', sub: t('dashboard.statSub.prevMonth', { pct: '-12%' }), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', icon: TrendingUp },
+    { label: t('dashboard.stats.occupancy'),     value: '87%',   sub: t('dashboard.statSub.prevMonth', { pct: '+4%' }),  color: '#059669', bg: '#ECFDF5', icon: Percent        },
+    { label: t('dashboard.stats.messagesSent'),  value: '1.847', sub: t('dashboard.statSub.thisMonth'),                color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', icon: MessageCircle },
+    { label: t('dashboard.stats.responseRate'),  value: '76%',   sub: t('dashboard.statSub.historicAvg', { pct: '72%' }), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', icon: TrendingUp },
+  ]
   const auth = useAuth()
   const pkg  = auth?.activeTenant?.package ?? auth?.user?.tenant?.package ?? ''
   const hasAI = AI_PACKAGES.includes(pkg)
@@ -33,7 +37,7 @@ export default function ShiftmanagerDashboard() {
   const [loading,    setLoading]    = useState(true)
 
   useEffect(() => {
-    api.get(`/candidates?per_page=${candidates_per_page}`)
+    api.get(`/sm-candidates?per_page=${candidates_per_page}`)
       .then(res => {
         const body = res.data
         setCandidates(Array.isArray(body) ? body : (body?.data ?? []))
@@ -44,23 +48,23 @@ export default function ShiftmanagerDashboard() {
 
   return (
     <div className="p-6">
-      {/* KPI rij */}
+      {/* KPI row */}
       <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}>
         <MonthlyKpiCard candidates={candidates} loading={loading} />
         {DUMMY_STATS.map(s => <StatCard key={s.label} {...s} />)}
       </div>
 
-      {/* Twee charts met gedeelde filters */}
+      {/* Two charts with shared filters */}
       <ShiftsChartsBlock filterKey="shiftmanager-dashboard" />
 
-      {/* Recente uitvoeringen + Conversaties — alleen bij pakketten met AI & Workflow */}
+      {/* Recent runs + conversations — only for packages with AI & Workflow */}
       {hasAI && <div className="grid grid-cols-2 gap-4 mt-6 mb-6">
 
-        {/* Recente uitvoeringen */}
+        {/* Recent runs */}
         <div className="overflow-hidden bg-white rounded-xl" style={{ border: '1px solid #F3F4F6' }}>
           <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid #F3F4F6' }}>
-            <span className="font-medium text-gray-900" style={{ fontSize: 13 }}>Recente uitvoeringen</span>
-            <span className="text-xs text-gray-400 cursor-pointer">Alles →</span>
+            <span className="font-medium text-gray-900" style={{ fontSize: 13 }}>{t('dashboard.recentRuns')}</span>
+            <span className="text-xs text-gray-400 cursor-pointer">{t('dashboard.viewAll')}</span>
           </div>
           {RUNS.map((r, i) => (
             <div key={i} className="flex items-center gap-3 px-4 py-3"
@@ -73,18 +77,18 @@ export default function ShiftmanagerDashboard() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="font-medium text-gray-800 truncate" style={{ fontSize: 13 }}>{r.name}</div>
-                <div className="text-xs text-gray-400">{r.ok ? `${r.n} kandidaten` : r.err}</div>
+                <div className="text-xs text-gray-400">{r.ok ? t('dashboard.candidates', { n: r.n }) : r.err}</div>
               </div>
               <span className="flex-shrink-0 text-xs text-gray-400">{r.time}</span>
             </div>
           ))}
         </div>
 
-        {/* Recente conversaties */}
+        {/* Recent conversations */}
         <div className="overflow-hidden bg-white rounded-xl" style={{ border: '1px solid #F3F4F6' }}>
           <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid #F3F4F6' }}>
-            <span className="font-medium text-gray-900" style={{ fontSize: 13 }}>Recente conversaties</span>
-            <span className="text-xs text-gray-400 cursor-pointer">Alles →</span>
+            <span className="font-medium text-gray-900" style={{ fontSize: 13 }}>{t('dashboard.recentConversations')}</span>
+            <span className="text-xs text-gray-400 cursor-pointer">{t('dashboard.viewAll')}</span>
           </div>
           {[
             { name: 'Jan de Vries', msg: 'Ik kan morgen om 09:00 starten',  time: '08:45' },
@@ -95,7 +99,7 @@ export default function ShiftmanagerDashboard() {
             <div key={i} className="flex items-start gap-3 px-4 py-3"
               style={{ borderBottom: i < 3 ? '1px solid #F9FAFB' : 'none' }}>
               <div className="flex items-center justify-center flex-shrink-0 rounded-full"
-                style={{ width: 28, height: 28, background: '#EEF2FF', color: '#4F46E5', fontSize: 11 }}>
+                style={{ width: 28, height: 28, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: 11 }}>
                 {c.name.split(' ').map(n => n[0]).join('')}
               </div>
               <div className="flex-1 min-w-0">

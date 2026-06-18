@@ -4,6 +4,7 @@
  * filters come from RightPanelContext. formatDT below formats run timestamps.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X,
          Zap, CheckCircle, XCircle, Clock, Users, AlertTriangle, RotateCcw } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
@@ -25,21 +26,23 @@ function formatDuration(ms) {
   return `${Math.floor(ms/60000)}m ${Math.floor((ms%60000)/1000)}s`
 }
 
+// Run status → colour + icon. Label = t('runs.status.<key>').
 const STATUS_META = {
-  success:  { label: 'Geslaagd',    bg: '#F0FDF4', color: '#16A34A', Icon: CheckCircle },
-  failed:   { label: 'Mislukt',     bg: '#FEF2F2', color: '#DC2626', Icon: XCircle     },
-  running:  { label: 'Bezig',       bg: '#FFFBEB', color: '#D97706', Icon: RotateCcw   },
-  pending:  { label: 'In wachtrij', bg: '#F9FAFB', color: '#6B7280', Icon: Clock       },
+  success:  { bg: '#F0FDF4', color: 'var(--color-success)', Icon: CheckCircle },
+  failed:   { bg: '#FEF2F2', color: 'var(--color-danger)', Icon: XCircle     },
+  running:  { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)', Icon: RotateCcw   },
+  pending:  { bg: '#F9FAFB', color: '#6B7280', Icon: Clock       },
 }
 
 function StatusBadge({ status }) {
-  const m = STATUS_META[status] ?? { label: status ?? '—', bg: '#F9FAFB', color: '#6B7280', Icon: Clock }
+  const { t } = useTranslation('reports')
+  const m = STATUS_META[status] ?? { bg: '#F9FAFB', color: '#6B7280', Icon: Clock }
   const Icon = m.Icon
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
                    fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
       <Icon size={10} />
-      {m.label}
+      {status ? t(`runs.status.${status}`, { defaultValue: status }) : '—'}
     </span>
   )
 }
@@ -54,8 +57,7 @@ function SortIcon({ active, dir }) {
 // ─── Drill-down drawer ────────────────────────────────────────────────────────
 
 function RunDrawer({ run, onClose }) {
-  const m = STATUS_META[run.status] ?? { label: run.status ?? '—', bg: '#F9FAFB', color: '#6B7280', Icon: Clock }
-  const Icon = m.Icon
+  const { t } = useTranslation('reports')
 
   return (
     <>
@@ -71,12 +73,12 @@ function RunDrawer({ run, onClose }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <Zap size={15} color="var(--color-primary)" />
                 <span style={{ fontWeight: 700, fontSize: 15, color: '#111827' }}>
-                  {run.workflow_name ?? `Workflow #${run.workflow_id ?? run.id}`}
+                  {run.workflow_name ?? t('runs.drawer.workflowFallback', { id: run.workflow_id ?? run.id })}
                 </span>
                 <StatusBadge status={run.status} />
               </div>
               <div style={{ fontSize: 12, color: '#9CA3AF' }}>
-                Gestart: {formatDT(run.started_at ?? run.created_at)}
+                {t('runs.drawer.startedColon')} {formatDT(run.started_at ?? run.created_at)}
               </div>
             </div>
             <button onClick={onClose}
@@ -94,8 +96,8 @@ function RunDrawer({ run, onClose }) {
         <div style={{ display: 'flex', gap: 1, background: '#F9FAFB',
                       borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
           {[
-            { label: 'Kandidaten',   value: run.candidates_count ?? run.candidates ?? '—', Icon: Users },
-            { label: 'Duur',         value: formatDuration(run.duration_ms ?? run.duration), Icon: Clock },
+            { label: t('runs.drawer.candidates'), value: run.candidates_count ?? run.candidates ?? '—', Icon: Users },
+            { label: t('runs.drawer.duration'),   value: formatDuration(run.duration_ms ?? run.duration), Icon: Clock },
           ].map(b => (
             <div key={b.label} style={{ flex: 1, padding: '10px 16px', textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
@@ -110,17 +112,17 @@ function RunDrawer({ run, onClose }) {
         {/* Body */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
 
-          {/* Tijdlijn */}
+          {/* Timeline */}
           <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                         letterSpacing: '0.05em', marginBottom: 10 }}>
-            Tijdlijn
+            {t('runs.drawer.timeline')}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 20 }}>
             {[
-              { label: 'Gestart',   value: formatDT(run.started_at  ?? run.created_at) },
-              { label: 'Afgerond',  value: formatDT(run.finished_at ?? run.completed_at) },
-              { label: 'Trigger',   value: run.trigger ?? run.trigger_type },
-              { label: 'Aangemaakt door', value: run.triggered_by ?? run.user_name },
+              { label: t('runs.drawer.started'),   value: formatDT(run.started_at  ?? run.created_at) },
+              { label: t('runs.drawer.finished'),  value: formatDT(run.finished_at ?? run.completed_at) },
+              { label: t('runs.drawer.trigger'),   value: run.trigger ?? run.trigger_type },
+              { label: t('runs.drawer.createdBy'), value: run.triggered_by ?? run.user_name },
             ].filter(r => r.value && r.value !== '—').map(r => (
               <div key={r.label} style={{ display: 'flex', gap: 8, padding: '7px 0',
                                           borderBottom: '1px solid #F9FAFB' }}>
@@ -130,12 +132,12 @@ function RunDrawer({ run, onClose }) {
             ))}
           </div>
 
-          {/* Stap-resultaten */}
+          {/* Step results */}
           {(run.step_results ?? run.steps ?? []).length > 0 && (
             <>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                             letterSpacing: '0.05em', marginBottom: 10 }}>
-                Stap-resultaten ({(run.step_results ?? run.steps).length})
+                {t('runs.drawer.stepResults')} ({(run.step_results ?? run.steps).length})
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
                 {(run.step_results ?? run.steps).map((step, i) => (
@@ -143,7 +145,7 @@ function RunDrawer({ run, onClose }) {
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                   marginBottom: step.message ? 4 : 0 }}>
                       <span style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>
-                        {step.label ?? step.type ?? `Stap ${i + 1}`}
+                        {step.label ?? step.type ?? t('runs.drawer.step', { n: i + 1 })}
                       </span>
                       <StatusBadge status={step.status ?? (step.ok ? 'success' : 'failed')} />
                     </div>
@@ -156,13 +158,13 @@ function RunDrawer({ run, onClose }) {
             </>
           )}
 
-          {/* Foutmelding */}
+          {/* Error message */}
           {run.error_message && (
             <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 8,
                           padding: '12px 14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <AlertTriangle size={13} color="#DC2626" />
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#DC2626' }}>Foutmelding</span>
+                <AlertTriangle size={13} color="var(--color-danger)" />
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-danger)' }}>{t('runs.drawer.error')}</span>
               </div>
               <pre style={{ fontSize: 11, color: '#374151', whiteSpace: 'pre-wrap',
                             wordBreak: 'break-all', margin: 0, fontFamily: 'monospace' }}>
@@ -183,16 +185,18 @@ const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 6
              whiteSpace: 'nowrap', userSelect: 'none' }
 const TD = { padding: '10px 12px', fontSize: 13, color: '#374151', borderBottom: '1px solid #F9FAFB' }
 
-const COLS = [
-  { key: 'started_at',      label: 'Gestart',     sortable: true  },
-  { key: 'workflow_name',   label: 'Workflow',     sortable: true  },
-  { key: 'status',          label: 'Status',       sortable: true  },
-  { key: 'candidates_count', label: 'Kandidaten',  sortable: true  },
-  { key: 'duration_ms',     label: 'Duur',         sortable: true  },
-  { key: 'trigger',         label: 'Trigger',      sortable: false },
+const COL_KEYS = [
+  { key: 'started_at',       tKey: 'started',    sortable: true  },
+  { key: 'workflow_name',    tKey: 'workflow',   sortable: true  },
+  { key: 'status',           tKey: 'status',     sortable: true  },
+  { key: 'candidates_count', tKey: 'candidates', sortable: true  },
+  { key: 'duration_ms',      tKey: 'duration',   sortable: true  },
+  { key: 'trigger',          tKey: 'trigger',    sortable: false },
 ]
 
 export default function RunsTable() {
+  const { t } = useTranslation('reports')
+  const COLS = COL_KEYS.map(c => ({ ...c, label: t(`runs.cols.${c.tKey}`) }))
   const [rows,    setRows]    = useState([])
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
@@ -253,11 +257,11 @@ export default function RunsTable() {
     const groups = []
     if (statusOptions.length) {
       groups.push({
-        key: 'status', label: 'Status',
+        key: 'status', label: t('runs.filters.status'),
         selected: selectedStatuses,
         options: statusOptions.map(s => ({
           value: s,
-          label: STATUS_META[s]?.label ?? s,
+          label: t(`runs.status.${s}`, { defaultValue: s }),
           count: rows.filter(r => r.status === s).length,
         })),
         onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
@@ -265,7 +269,7 @@ export default function RunsTable() {
     }
     if (workflowOptions.length) {
       groups.push({
-        key: 'workflow', label: 'Workflow', type: 'search-select',
+        key: 'workflow', label: t('runs.filters.workflow'), type: 'search-select',
         selected: selectedWorkflows,
         options: workflowOptions.map(w => ({
           value: w, label: w,
@@ -275,7 +279,7 @@ export default function RunsTable() {
       })
     }
     return groups
-  }, [statusOptions, workflowOptions, selectedStatuses, selectedWorkflows, rows])
+  }, [t, statusOptions, workflowOptions, selectedStatuses, selectedWorkflows, rows])
 
   useEffect(() => {
     registerFilters('runs-table', filterGroups)
@@ -288,16 +292,16 @@ export default function RunsTable() {
       {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>Details — Uitvoeringen</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>{t('runs.title')}</h1>
           <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
-            {loading ? 'Laden…' : `${filtered.length} van ${rows.length} uitvoeringen`}
+            {loading ? t('common.loadingShort') : t('runs.summary', { shown: filtered.length, total: rows.length })}
           </p>
         </div>
         <div className="relative">
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
                                      transform: 'translateY(-50%)', color: '#9CA3AF' }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Zoek op workflow, trigger, fout…"
+            placeholder={t('runs.search')}
             style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
                      border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
         </div>
@@ -323,12 +327,12 @@ export default function RunsTable() {
             <tbody>
               {loading && (
                 <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
-                  Uitvoeringen ophalen…
+                  {t('runs.loading')}
                 </td></tr>
               )}
               {!loading && sorted.length === 0 && (
                 <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
-                  Geen uitvoeringen gevonden
+                  {t('runs.empty')}
                 </td></tr>
               )}
               {!loading && sorted.map((r, i) => (
@@ -339,16 +343,16 @@ export default function RunsTable() {
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ ...TD, fontSize: 12, whiteSpace: 'nowrap' }}>
                       <div style={{ fontWeight: 500, color: '#111827' }}>
-                        {r.started_at ? new Date(r.started_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
+                        {r.started_at ? new Date(r.started_at).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
                       </div>
                       <div style={{ fontSize: 11, color: '#9CA3AF' }}>
-                        {r.started_at ? new Date(r.started_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''}
+                        {r.started_at ? new Date(r.started_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : ''}
                       </div>
                     </td>
                     <td style={{ ...TD, fontWeight: 500, color: '#111827' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <Zap size={13} color="var(--color-primary)" />
-                        {r.workflow_name ?? `Workflow #${r.workflow_id ?? r.id}`}
+                        {r.workflow_name ?? t('runs.drawer.workflowFallback', { id: r.workflow_id ?? r.id })}
                       </div>
                     </td>
                     <td style={TD}><StatusBadge status={r.status} /></td>

@@ -1,0 +1,36 @@
+{
+  "title": "WhatsApp",
+  "updatedAt": "Updated at {{time}}",
+  "refresh": "Refresh",
+  "loading": "Loading…",
+  "outbound": "Outbound",
+  "inbound": "Inbound",
+  "chartTitle": "Message activity — last 14 days",
+  "kpi": {
+    "messagesToday": "Messages today",
+    "candidatesContacted": "Candidates contacted",
+    "shiftsFilled": "Shifts filled via WA",
+    "openEscalations": "Open escalations"
+  },
+  "feed": {
+    "title": "Latest messages",
+    "live": "live",
+    "loading": "Loading messages…",
+    "empty": "No messages"
+  },
+  "escalations": {
+    "title": "Escalations",
+    "loading": "Loading…",
+    "empty": "No open escalations"
+  },
+  "reasons": {
+    "failed_delivery": "Not delivered",
+    "no_reply": "No reply",
+    "negative_response": "Negative response"
+  },
+  "noConn": {
+    "title": "No WhatsApp connection",
+    "desc": "No WhatsApp Business connection has been set up for this tenant yet. Configure a connection via the backend to see messages and statistics here.",
+    "errorLabel": "Backend error"
+  }
+}

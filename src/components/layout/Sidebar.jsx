@@ -6,6 +6,7 @@
  * TenantSwitcher below = the tenant dropdown shown at the top of the sidebar.
  */
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { canAccessPage } from '../../lib/access'
 import {
@@ -14,8 +15,12 @@ import {
   FileText, Briefcase, CalendarDays,
 } from 'lucide-react'
 
+// Resolve a nav item's label from i18n by id (dots → underscores to stay flat).
+const navLabel = (t, id) => t(`nav.${id.replace(/\./g, '_')}`)
+
 // Tenant dropdown: shows the active tenant; super admins can switch tenants here.
 function TenantSwitcher({ expanded }) {
+  const { t } = useTranslation('common')
   const { activeTenant, tenants, setActiveTenant, isSuperAdmin } = useAuth()
   const [open, setOpen] = useState(false)
 
@@ -74,7 +79,7 @@ function TenantSwitcher({ expanded }) {
         <div className="absolute left-0 right-0 z-50 mt-1 overflow-hidden bg-white top-full rounded-xl"
           style={{ border: '1px solid #E5E7EB', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
           <div className="px-3 py-2 border-b border-gray-100">
-            <p className="text-xs font-medium text-gray-400">Wissel van tenant</p>
+            <p className="text-xs font-medium text-gray-400">{t('nav.switchTenant')}</p>
           </div>
           {tenants.map(tenant => {
             const ini = tenant.name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
@@ -116,14 +121,7 @@ const NAV_ITEMS = [
   { id: 'candidates',     label: 'Kandidaten',    icon: Users },
   { id: 'applications',   label: 'Sollicitaties', icon: FileText },
   { id: 'vacancies',      label: 'Vacatures',     icon: Briefcase },
-  {
-    id: 'customers', label: 'Klanten',  icon: Building2,
-    children: [
-      { id: 'customers.locations',   label: 'Locaties' },
-      { id: 'customers.departments', label: 'Afdelingen' },
-      { id: 'customers.contacts',    label: 'Contactpersonen' },
-    ],
-  },
+  { id: 'customers', label: 'Klanten', icon: Building2 },
 ]
 
 // Module pages — shown in a separate "Modules" nav group. All are gated by
@@ -132,12 +130,18 @@ const MODULE_NAV_ITEMS = [
   {
     id: 'shiftmanager', label: 'Shiftmanager', icon: BarChart3,
     children: [
+      // Rapporten
       { id: 'shiftmanager.candidates',  label: 'Kandidaten-SM' },
       { id: 'shiftmanager.customers',   label: 'Klanten-SM' },
       { id: 'shiftmanager.locations',   label: 'Locaties-SM' },
       { id: 'shiftmanager.departments', label: 'Afdelingen-SM' },
       { id: 'shiftmanager.contacts',    label: 'Contactpersonen-SM' },
       { id: 'shiftmanager.details',     label: 'Details-SM' },
+      // Tabellen
+      { id: 'shiftmanager.customers-table',   label: 'Klanten' },
+      { id: 'shiftmanager.locations-table',   label: 'Locaties' },
+      { id: 'shiftmanager.departments-table', label: 'Afdelingen' },
+      { id: 'shiftmanager.contacts-table',    label: 'Contactpersonen' },
     ],
   },
   {
@@ -247,6 +251,7 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
 }
 
 export default function Sidebar({ expanded, activePage, setActivePage, onTheme, koiosOpen, onToggleKoios }) {
+  const { t } = useTranslation('common')
   const [openItems, setOpenItems] = useState([])
   const auth = useAuth()
 
@@ -255,17 +260,20 @@ export default function Sidebar({ expanded, activePage, setActivePage, onTheme, 
 
   // Show only the pages/modules this user may access, driven by accessible_pages.
   // For items with children (e.g. Details), also filter each child by canAccessPage.
+  // Labels are resolved from i18n (common.nav.*) by id at the same time.
   const visibleNavItems = NAV_ITEMS
     .filter(item => canAccessPage(item.id, auth))
     .map(item => {
-      if (!item.children) return item
-      return { ...item, children: item.children.filter(child => canAccessPage(child.id, auth)) }
+      if (!item.children) return { ...item, label: navLabel(t, item.id) }
+      return { ...item, label: navLabel(t, item.id),
+        children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id) })) }
     })
   const visibleModuleItems = MODULE_NAV_ITEMS
     .filter(item => canAccessPage(item.id, auth))
     .map(item => {
-      if (!item.children) return item
-      return { ...item, children: item.children.filter(child => canAccessPage(child.id, auth)) }
+      if (!item.children) return { ...item, label: navLabel(t, item.id) }
+      return { ...item, label: navLabel(t, item.id),
+        children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id) })) }
     })
   const showSettings       = canAccessPage('settings', auth)
 
@@ -305,7 +313,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, onTheme, 
             {expanded && (
               <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--sidebar-muted)', letterSpacing: '0.08em',
                             textTransform: 'uppercase', padding: '0 10px 4px' }}>
-                Modules
+                {t('nav.modulesGroup')}
               </div>
             )}
             {visibleModuleItems.map(item => (
@@ -329,31 +337,31 @@ export default function Sidebar({ expanded, activePage, setActivePage, onTheme, 
             padding:        expanded ? '7px 10px' : '7px',
             justifyContent: expanded ? 'flex-start' : 'center',
             background: koiosOpen
-              ? 'linear-gradient(135deg, #6366F1, #8B5CF6)'
-              : 'linear-gradient(135deg, #6366F120, #8B5CF620)',
+              ? 'linear-gradient(135deg, var(--color-primary), #8B5CF6)'
+              : 'linear-gradient(135deg, var(--color-primary)20, #8B5CF620)',
             color: '#fff',
           }}
         >
           <div className="flex items-center justify-center rounded-full flex-shrink-0"
-            style={{ width: 18, height: 18, background: koiosOpen ? 'rgba(255,255,255,0.25)' : '#6366F1' }}>
+            style={{ width: 18, height: 18, background: koiosOpen ? 'rgba(255,255,255,0.25)' : 'var(--color-primary)' }}>
             <Bot size={11} color="white" />
           </div>
           {expanded && (
             <span style={{ fontSize: 13, fontWeight: 600, flex: 1, textAlign: 'left',
-              color: koiosOpen ? '#fff' : '#6366F1' }}>
+              color: koiosOpen ? '#fff' : 'var(--color-primary)' }}>
               Koios
             </span>
           )}
           {expanded && !koiosOpen && (
             <span style={{ fontSize: 9, fontWeight: 600, padding: '2px 6px',
-              background: '#6366F1', color: '#fff', borderRadius: 99, letterSpacing: '0.04em' }}>
+              background: 'var(--color-primary)', color: '#fff', borderRadius: 99, letterSpacing: '0.04em' }}>
               AI
             </span>
           )}
         </button>
 
         {showSettings && (
-          <NavItem item={{ id: 'settings', label: 'Instellingen', icon: Settings }}
+          <NavItem item={{ id: 'settings', label: t('nav.settings'), icon: Settings }}
             activePage={activePage} expanded={expanded}
             openItems={openItems} toggleOpen={toggleOpen} onNavigate={setActivePage} />
         )}

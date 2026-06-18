@@ -3,6 +3,7 @@
  * quick mail/call links. Opened from ContactPersonsTable.
  * InfoRow below = one labeled detail row (optionally a clickable mailto/tel link).
  */
+import { useTranslation } from 'react-i18next'
 import { X, Mail, Phone, Building2, MessageCircle, Briefcase, User } from 'lucide-react'
 
 // One labeled row of contact info; renders a mailto/tel link when href is given.
@@ -14,13 +15,14 @@ function InfoRow({ icon: Icon, label, value, href }) {
       <Icon size={13} color="#D1D5DB" style={{ flexShrink: 0, marginTop: 1 }} />
       <span style={{ fontSize: 12, color: '#9CA3AF', width: 130, flexShrink: 0 }}>{label}</span>
       {href
-        ? <a href={href} style={{ fontSize: 12, color: '#2563EB', textDecoration: 'none', wordBreak: 'break-all' }}>{value}</a>
+        ? <a href={href} style={{ fontSize: 12, color: 'var(--color-secondary)', textDecoration: 'none', wordBreak: 'break-all' }}>{value}</a>
         : <span style={{ fontSize: 12, color: '#374151' }}>{value}</span>}
     </div>
   )
 }
 
 export default function ContactPersonDrawer({ contact, onClose }) {
+  const { t } = useTranslation('reports')
   const fullName = [contact.firstname, contact.lastname].filter(Boolean).join(' ') || '—'
   const initials = fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   const isPlanning = Boolean(contact.scheduled_order_contact)
@@ -54,11 +56,11 @@ export default function ContactPersonDrawer({ contact, onClose }) {
                     display: 'inline-flex', alignItems: 'center', gap: 4,
                     borderRadius: 999, padding: '2px 8px', fontSize: 11, fontWeight: 500,
                     background: isPlanning ? '#F0FDF4' : '#F9FAFB',
-                    color:      isPlanning ? '#16A34A'  : '#9CA3AF',
+                    color:      isPlanning ? 'var(--color-success)'  : '#9CA3AF',
                     border:     `1px solid ${isPlanning ? '#BBF7D0' : '#E5E7EB'}`,
                   }}>
                     <MessageCircle size={10} />
-                    {isPlanning ? 'Planningscontact' : 'Geen planningscontact'}
+                    {isPlanning ? t('contactDrawer.planningContact') : t('contactDrawer.noPlanningContact')}
                   </span>
                 </div>
               </div>
@@ -74,7 +76,7 @@ export default function ContactPersonDrawer({ contact, onClose }) {
           </div>
         </div>
 
-        {/* Klant banner */}
+        {/* Customer banner */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px',
                       background: '#F8F9FF', borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
           <Building2 size={13} color="#6B7280" />
@@ -87,21 +89,21 @@ export default function ContactPersonDrawer({ contact, onClose }) {
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
           <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                         letterSpacing: '0.05em', marginBottom: 8 }}>
-            Contactgegevens
+            {t('contactDrawer.contactInfo')}
           </div>
 
-          <InfoRow icon={Mail}     label="E-mail"        value={contact.email}  href={contact.email ? `mailto:${contact.email}` : null} />
-          <InfoRow icon={Phone}    label="Mobiel"        value={contact.mobile} href={contact.mobile ? `tel:${contact.mobile}` : null} />
-          <InfoRow icon={Phone}    label="Telefoon"      value={contact.phone}  href={contact.phone  ? `tel:${contact.phone}`  : null} />
-          <InfoRow icon={Briefcase} label="Functie"      value={contact.function_title} />
-          <InfoRow icon={User}     label="Aanhef"        value={contact.salutation} />
-          <InfoRow icon={Building2} label="Klant"        value={contact.customer_name} />
+          <InfoRow icon={Mail}     label={t('dr.email')}                 value={contact.email}  href={contact.email ? `mailto:${contact.email}` : null} />
+          <InfoRow icon={Phone}    label={t('dr.mobile')}                value={contact.mobile} href={contact.mobile ? `tel:${contact.mobile}` : null} />
+          <InfoRow icon={Phone}    label={t('dr.phone')}                 value={contact.phone}  href={contact.phone  ? `tel:${contact.phone}`  : null} />
+          <InfoRow icon={Briefcase} label={t('contactDrawer.function')}  value={contact.function_title} />
+          <InfoRow icon={User}     label={t('contactDrawer.salutation')} value={contact.salutation} />
+          <InfoRow icon={Building2} label={t('dr.customer')}             value={contact.customer_name} />
 
           {contact.remarks && (
             <div style={{ marginTop: 16 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
                             letterSpacing: '0.05em', marginBottom: 8 }}>
-                Opmerkingen
+                {t('dr.remarks')}
               </div>
               <div style={{ fontSize: 12, color: '#374151', background: '#F9FAFB', borderRadius: 8,
                             padding: '10px 12px', lineHeight: 1.6 }}>
@@ -111,7 +113,7 @@ export default function ContactPersonDrawer({ contact, onClose }) {
           )}
         </div>
 
-        {/* Footer acties */}
+        {/* Footer actions */}
         <div style={{ padding: '12px 20px', borderTop: '1px solid #F3F4F6', flexShrink: 0,
                       display: 'flex', gap: 8 }}>
           {contact.email && (
@@ -119,7 +121,7 @@ export default function ContactPersonDrawer({ contact, onClose }) {
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                        fontSize: 13, fontWeight: 500, borderRadius: 8, textDecoration: 'none',
                        border: '1px solid #E5E7EB', background: '#F9FAFB', color: '#374151' }}>
-              <Mail size={13} /> E-mail sturen
+              <Mail size={13} /> {t('contactDrawer.sendEmail')}
             </a>
           )}
           {contact.mobile && (
@@ -127,7 +129,7 @@ export default function ContactPersonDrawer({ contact, onClose }) {
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                        fontSize: 13, fontWeight: 500, borderRadius: 8, textDecoration: 'none',
                        border: '1px solid #E5E7EB', background: '#F9FAFB', color: '#374151' }}>
-              <Phone size={13} /> Bellen
+              <Phone size={13} /> {t('contactDrawer.call')}
             </a>
           )}
         </div>

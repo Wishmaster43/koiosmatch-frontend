@@ -7,8 +7,8 @@ export default {
   category: 'Kandidaten',
   label: 'Kandidaten Ophalen',
   Icon:  UserSearch,
-  color: '#2563EB',
-  bg:    '#EFF6FF',
+  color: 'var(--color-secondary)',
+  bg:    'var(--color-secondary-bg)',
   schema: [
     { key: 'status',   label: 'Status',          type: 'select',      options: ['alle', 'active', 'inactive', 'available', 'uitgeschreven'] },
     { key: 'pools',    label: 'Pools',            type: 'multiselect', options: ['Pool 7', 'Pool 8', 'Pool 9', 'Pool 10', 'Pool ZZP'] },

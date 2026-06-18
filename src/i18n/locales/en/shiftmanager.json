@@ -1,0 +1,203 @@
+{
+  "orders": {
+    "title": "Details — Shifts",
+    "count": "{{count}} shifts",
+    "loading": "Loading shifts…",
+    "empty": "No shifts found",
+    "allMonths": "All months",
+    "search": "Search by ext. ID, order ref, customer…",
+    "status": {
+      "open": "Open",
+      "prognosis": "Forecast",
+      "completed": "Actual",
+      "in_process": "In progress",
+      "cancelled": "Cancelled"
+    },
+    "cols": {
+      "extId": "Ext. ID",
+      "orderRef": "Order ref",
+      "status": "Status",
+      "customer": "Customer",
+      "location": "Location",
+      "date": "Date",
+      "start": "Start",
+      "end": "End",
+      "hoursCand": "Hrs cand.",
+      "hoursCust": "Hrs cust.",
+      "ccCand": "CC cand.",
+      "ccCust": "CC cust."
+    },
+    "filterStatus": "Status",
+    "drawer": {
+      "title": "Shift details",
+      "identification": "Identification",
+      "shiftId": "Shift ID",
+      "externalId": "External ID",
+      "scheduledId": "Scheduled ID",
+      "orderRef": "Order ref",
+      "planning": "Planning",
+      "date": "Date",
+      "startTime": "Start time",
+      "endTime": "End time",
+      "jobType": "Position",
+      "persons": "Number of people",
+      "status": "Status",
+      "customerLocation": "Customer & location",
+      "customer": "Customer",
+      "location": "Location",
+      "address": "Address",
+      "hours": "Hours",
+      "hoursCand": "Candidate hours",
+      "hoursCust": "Customer hours",
+      "ccCand": "Cost center cand.",
+      "ccCust": "Cost center cust.",
+      "candidates": "Candidates",
+      "notes": "Notes"
+    }
+  },
+  "shiftsDrawer": {
+    "count": "{{count}} shifts",
+    "loadError": "Could not load shifts.",
+    "loading": "Loading…",
+    "empty": "No shifts found",
+    "search": "Search by position, location, order-ref, candidate…",
+    "shownOf": "{{shown}} of {{total}} shown",
+    "close": "Close",
+    "unknown": "Unknown",
+    "noCandidate": "No candidate linked yet",
+    "hoursUnit": "{{n}} h",
+    "status": {
+      "in_process": "Forecast",
+      "completed": "Actual",
+      "open": "No candidate",
+      "verwijderd": "Not filled",
+      "niet_factureerbaar": "Non-billable"
+    },
+    "fields": {
+      "email": "Email",
+      "mobile": "Mobile",
+      "scheduled": "Scheduled",
+      "workedHours": "Hours worked",
+      "contract": "Contract",
+      "date": "Date",
+      "persons": "People",
+      "customerId": "Customer ID",
+      "location": "Location",
+      "place": "Place",
+      "orderRef": "Order ref",
+      "subject": "Subject",
+      "shiftIdExt": "Shift ID (external)",
+      "orderIdExt": "Order ID (external)",
+      "rate": "Rate",
+      "pickup": "Pickup"
+    }
+  },
+  "charts": {
+    "hours": "Number of hours",
+    "shifts": "Number of shifts",
+    "loading": "Loading…",
+    "perMonthUnit": "month",
+    "perQuarterUnit": "quarter",
+    "periodLabel": "{{years}} — per {{unit}}",
+    "filters": {
+      "period": "Period",
+      "month": "Per month",
+      "quarter": "Per quarter",
+      "years": "Years",
+      "months": "Months",
+      "series": "Series",
+      "jobType": "Position",
+      "customer": "Customer",
+      "location": "Location"
+    },
+    "series": {
+      "totaal": "Total",
+      "niet_ingevuld": "Not filled",
+      "geen_kandidaat": "No candidate",
+      "prognose": "Forecast",
+      "werkelijk": "Actual"
+    }
+  },
+  "customersReport": {
+    "title": "Customers report",
+    "activeWord": "active",
+    "inactiveWord": "inactive",
+    "totalWord": "total",
+    "filterStatus": "Customer status",
+    "drill": {
+      "activeCustomers": "Active customers",
+      "allLocations": "All locations",
+      "allDepartments": "All departments",
+      "customersWithoutLocation": "Customers without location"
+    },
+    "sub": {
+      "locations": "{{count}} locations",
+      "avgPerCustomer": "avg. {{n}} per customer",
+      "avgPerLocation": "avg. {{n}} per location",
+      "notLinked": "Not linked yet",
+      "noLocationsLinked": "No locations linked"
+    }
+  },
+  "locationsReport": {
+    "title": "Locations report",
+    "activeWord": "active",
+    "inactiveWord": "inactive",
+    "totalWord": "total",
+    "filterStatus": "Location status",
+    "kpi": {
+      "activeLocations": "Active locations",
+      "totalDepartments": "Total departments",
+      "uniqueCustomers": "Unique customers",
+      "withoutDepartment": "Without department"
+    },
+    "drill": {
+      "activeLocations": "Active locations",
+      "allDepartments": "All departments",
+      "customers": "Customers",
+      "locationsWithoutDepartment": "Locations without department"
+    },
+    "sub": {
+      "avgPerLocation": "avg. {{n}} per location",
+      "notConfigured": "Not configured yet",
+      "allConfigured": "All configured"
+    },
+    "badge": {
+      "active": "active",
+      "noDepartments": "No departments"
+    }
+  },
+  "departmentsReport": {
+    "title": "Departments report",
+    "count": "{{count}} departments",
+    "filterCustomer": "Customer",
+    "kpi": {
+      "totalDepartments": "Total departments",
+      "uniqueLocations": "Unique locations",
+      "uniqueCustomers": "Unique customers",
+      "withCostCenter": "With cost center"
+    },
+    "sub": {
+      "avgPerLocation": "avg. {{n}} per location",
+      "linkedPct": "{{pct}}% linked"
+    }
+  },
+  "dashboard": {
+    "recentRuns": "Recent runs",
+    "recentConversations": "Recent conversations",
+    "viewAll": "View all →",
+    "candidates": "{{n}} candidates",
+    "stats": {
+      "openHours": "Open hours",
+      "hoursThisMonth": "Hours this month",
+      "occupancy": "Occupancy rate",
+      "messagesSent": "Messages sent",
+      "responseRate": "Response rate"
+    },
+    "statSub": {
+      "urgent": "{{n}} urgent",
+      "prevMonth": "{{pct}} previous month",
+      "thisMonth": "This month",
+      "historicAvg": "avg. {{pct}} historic"
+    }
+  }
+}

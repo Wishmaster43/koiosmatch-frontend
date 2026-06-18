@@ -4,6 +4,7 @@
  * in the right panel. KpiBlock below = one small KPI card.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Layers, MapPin, Building2, Hash, RefreshCw } from 'lucide-react'
 import api from '../../lib/api'
 import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
@@ -11,6 +12,7 @@ import { useRightPanel } from '../../context/RightPanelContext'
 import KpiBlock from '../../components/ui/KpiBlock'  // shared KPI card
 
 export default function DepartmentsReport() {
+  const { t } = useTranslation('shiftmanager')
   const [departments, setDepartments] = useState([])
   const [loading,     setLoading]     = useState(true)
   const [selectedCustomers, setSelectedCustomers] = useState([])
@@ -43,14 +45,14 @@ export default function DepartmentsReport() {
     [...new Set(departments.map(d => d.location_name).filter(Boolean))], [departments])
 
   const filterGroups = useMemo(() => uniqueCustomers.length === 0 ? [] : [{
-    key: 'klant', label: 'Klant', type: 'search-select',
+    key: 'klant', label: t('departmentsReport.filterCustomer'), type: 'search-select',
     selected: selectedCustomers,
     options: uniqueCustomers.map(c => ({
       value: c, label: c,
       count: departments.filter(d => d.customer_name === c).length,
     })),
     onToggle: v => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-  }], [uniqueCustomers, selectedCustomers, departments])
+  }], [t, uniqueCustomers, selectedCustomers, departments])
 
   useEffect(() => {
     registerFilters('departments-report', filterGroups)
@@ -63,7 +65,7 @@ export default function DepartmentsReport() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', letterSpacing: '-0.3px', flexShrink: 0 }}>
-          Afdelingen rapport
+          {t('departmentsReport.title')}
         </h2>
         {!loading && (
           <>
@@ -71,24 +73,24 @@ export default function DepartmentsReport() {
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
                            background: '#F9FAFB', color: '#6B7280', borderRadius: 999,
                            padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-              {departments.length} afdelingen
+              {t('departmentsReport.count', { count: departments.length })}
             </span>
           </>
         )}
         {loading && <RefreshCw size={14} className="animate-spin" style={{ color: '#D1D5DB' }} />}
       </div>
 
-      {/* KPI blokken */}
+      {/* KPI blocks */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
-        <KpiBlock label="Totaal afdelingen"  value={departments.length}        icon={Layers}    color="#7C3AED" bg="#F5F3FF" loading={loading} />
-        <KpiBlock label="Unieke locaties"    value={uniqueLocations.length}    icon={MapPin}    color="#2563EB" bg="#EFF6FF" loading={loading}
-          sub={uniqueLocations.length > 0 ? `gem. ${(departments.length / Math.max(uniqueLocations.length, 1)).toFixed(1)} per locatie` : undefined} />
-        <KpiBlock label="Unieke klanten"     value={uniqueCustomers.length}    icon={Building2} color="#059669" bg="#ECFDF5" loading={loading} />
-        <KpiBlock label="Met kostenplaats"
+        <KpiBlock label={t('departmentsReport.kpi.totalDepartments')}  value={departments.length}        icon={Layers}    color="#7C3AED" bg="#F5F3FF" loading={loading} />
+        <KpiBlock label={t('departmentsReport.kpi.uniqueLocations')}   value={uniqueLocations.length}    icon={MapPin}    color="var(--color-secondary)" bg="var(--color-secondary-bg)" loading={loading}
+          sub={uniqueLocations.length > 0 ? t('departmentsReport.sub.avgPerLocation', { n: (departments.length / Math.max(uniqueLocations.length, 1)).toFixed(1) }) : undefined} />
+        <KpiBlock label={t('departmentsReport.kpi.uniqueCustomers')}   value={uniqueCustomers.length}    icon={Building2} color="#059669" bg="#ECFDF5" loading={loading} />
+        <KpiBlock label={t('departmentsReport.kpi.withCostCenter')}
           value={departments.filter(d => d.cost_center).length}
-          icon={Hash} color="#D97706" bg="#FFFBEB" loading={loading}
+          icon={Hash} color="var(--color-warning)" bg="var(--color-warning-bg)" loading={loading}
           sub={departments.length > 0
-            ? `${Math.round(departments.filter(d => d.cost_center).length / departments.length * 100)}% gekoppeld`
+            ? t('departmentsReport.sub.linkedPct', { pct: Math.round(departments.filter(d => d.cost_center).length / departments.length * 100) })
             : undefined} />
       </div>
 

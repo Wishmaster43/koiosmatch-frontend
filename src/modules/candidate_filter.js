@@ -7,8 +7,8 @@ export default {
   category: 'Kandidaten',
   label: 'Kandidaten Filter',
   Icon:  Users,
-  color: '#534AB7',
-  bg:    '#EEEDFE',
+  color: 'var(--color-primary)',
+  bg:    'var(--color-primary-bg)',
   schema: [
     { key: 'status',                label: 'Status',              type: 'select',      options: ['actief','inactief','alle'] },
     { key: 'pools',                 label: 'Pools',               type: 'multiselect', options: ['Pool 7','Pool 8','Pool 9','Pool 10','Pool ZZP'] },

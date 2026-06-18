@@ -4,6 +4,7 @@
  * current theme plus a setter/toggle to the app via useTheme().
  */
 import { createContext, useContext, useState, useEffect } from 'react'
+import i18n from '../i18n'
 
 const ThemeContext = createContext()
 
@@ -19,6 +20,7 @@ export function ThemeProvider({ children }) {
   const setLanguage = (l) => {
     setLanguageState(l)
     localStorage.setItem('kc-language', l)
+    i18n.changeLanguage(l)
   }
 
   useEffect(() => {

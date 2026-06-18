@@ -7,7 +7,7 @@ export default {
   label:    'Numeriek samenvoegen',
   Icon:     Calculator,
   color:    '#0369A1',
-  bg:       '#E0F2FE',
+  bg:       'var(--color-info-bg)',
   schema: [
     { key: 'source_module', label: 'Bronmodule', type: 'text', placeholder: 'automatisch ingevuld' },
     { key: 'aggregate_function', label: 'Functie', type: 'select', options: ['SUM', 'COUNT', 'AVG', 'MAX', 'MIN'] },

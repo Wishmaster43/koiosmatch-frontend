@@ -5,38 +5,42 @@
  */
 import { X, Search, Phone, Mail, Calendar, Briefcase, Clock, CalendarCheck } from 'lucide-react'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 // Colored status pill (actief / nietactief / extern / ...) for a record.
 function StatusBadge({ status }) {
+  const { t } = useTranslation('reports')
   const styles = {
-    actief:     { bg: '#F0FDF4', color: '#16A34A' },
+    actief:     { bg: '#F0FDF4', color: 'var(--color-success)' },
     nietactief: { bg: '#FFF7ED', color: '#C2410C' },
-    extern:     { bg: '#EFF6FF', color: '#1D4ED8' },
+    extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
     intake:     { bg: '#FAF5FF', color: '#7C3AED' },
-    verwijderd: { bg: '#FEF2F2', color: '#DC2626' },
+    verwijderd: { bg: '#FEF2F2', color: 'var(--color-danger)' },
   }
-  const s = styles[status?.toLowerCase()] || { bg: '#F9FAFB', color: '#6B7280' }
+  const key = (status || '').toLowerCase()
+  const s = styles[key] || { bg: '#F9FAFB', color: '#6B7280' }
+  const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')
   return (
     <span className="rounded-full px-2 py-0.5 text-xs font-medium flex-shrink-0"
       style={{ background: s.bg, color: s.color }}>
-      {status || 'onbekend'}
+      {label}
     </span>
   )
 }
 
 function formatDate(dateStr) {
   if (!dateStr) return null
-  return new Date(dateStr).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(dateStr).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function InfoRow({ icon: Icon, label, value, highlight }) {
   if (value === null || value === undefined || value === '') return null
   return (
     <div className="flex items-center gap-1.5">
-      <Icon size={11} color={highlight ? '#D97706' : '#D1D5DB'} style={{ flexShrink: 0 }} />
+      <Icon size={11} color={highlight ? 'var(--color-warning)' : '#D1D5DB'} style={{ flexShrink: 0 }} />
       <span className="text-xs truncate">
         <span style={{ color: '#9CA3AF' }}>{label}: </span>
-        <span style={{ color: highlight ? '#D97706' : '#6B7280', fontWeight: highlight ? 500 : 400 }}>
+        <span style={{ color: highlight ? 'var(--color-warning)' : '#6B7280', fontWeight: highlight ? 500 : 400 }}>
           {value}
         </span>
       </span>
@@ -45,6 +49,7 @@ function InfoRow({ icon: Icon, label, value, highlight }) {
 }
 
 export default function DrillDownDrawer({ title, subtitle, candidates = [], onClose }) {
+  const { t } = useTranslation('reports')
   const [search, setSearch] = useState('')
 
   const filtered = candidates.filter(c => {
@@ -73,7 +78,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
           <div>
             <div className="font-semibold text-gray-900" style={{ fontSize: 15 }}>{title}</div>
             <div className="text-sm text-gray-400 mt-0.5">
-              {candidates.length} kandidaten
+              {t('drilldown.candidatesCount', { count: candidates.length })}
               {subtitle && <span className="ml-1 text-gray-300">· {subtitle}</span>}
             </div>
           </div>
@@ -86,7 +91,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
           </button>
         </div>
 
-        {/* Zoekbalk */}
+        {/* Search bar */}
         <div className="flex-shrink-0 px-4 py-3" style={{ borderBottom: '1px solid #F9FAFB' }}>
           <div className="flex items-center gap-2 px-3 rounded-lg"
             style={{ background: '#F9FAFB', border: '1px solid #E5E7EB' }}>
@@ -94,18 +99,18 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
-              placeholder="Zoek op naam, functie, mobiel of e-mail..."
+              placeholder={t('drilldown.searchFull')}
               className="flex-1 py-2 text-gray-700 bg-transparent outline-none"
               style={{ border: 'none', fontSize: 12 }}
             />
           </div>
         </div>
 
-        {/* Kandidaten lijst */}
+        {/* Candidates list */}
         <div className="flex-1 overflow-auto">
           {filtered.length === 0 ? (
             <div className="flex items-center justify-center h-32 text-sm text-gray-300">
-              Geen kandidaten gevonden
+              {t('candidates.empty')}
             </div>
           ) : (
             filtered.map((c, i) => {
@@ -128,31 +133,31 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      {/* Naam + status */}
+                      {/* Name + status */}
                       <div className="flex items-center gap-2 mb-2">
                         <span className="font-medium text-gray-800 truncate" style={{ fontSize: 13 }}>
-                          {fullName || 'Onbekend'}
+                          {fullName || t('candidateDrawer.unknownName')}
                         </span>
                         <StatusBadge status={c.status} />
                       </div>
 
                       {/* Details grid */}
                       <div className="grid gap-1" style={{ gridTemplateColumns: '1fr 1fr' }}>
-                        <InfoRow icon={Briefcase}    label="Functie"          value={c.position} />
-                        <InfoRow icon={Phone}        label="Mobiel"           value={c.mobile} />
-                        <InfoRow icon={Mail}         label="E-mail"           value={c.email} />
-                        <InfoRow icon={Calendar}     label="Geregistreerd"    value={formatDate(c.registration_date)} />
-                        <InfoRow icon={Clock}        label="Laatste inlog"    value={formatDate(c.last_login_at)} />
+                        <InfoRow icon={Briefcase}    label={t('drilldown.fields.position')}     value={c.position} />
+                        <InfoRow icon={Phone}        label={t('drilldown.fields.mobile')}       value={c.mobile} />
+                        <InfoRow icon={Mail}         label={t('drilldown.fields.email')}        value={c.email} />
+                        <InfoRow icon={Calendar}     label={t('drilldown.fields.registered')}   value={formatDate(c.registration_date)} />
+                        <InfoRow icon={Clock}        label={t('drilldown.fields.lastLogin')}    value={formatDate(c.last_login_at)} />
                         <InfoRow
                           icon={CalendarCheck}
-                          label="Gepland op"
-                          value={c.last_planned_shift ? formatDate(c.last_planned_shift) : 'Niet gepland'}
+                          label={t('drilldown.fields.plannedOn')}
+                          value={c.last_planned_shift ? formatDate(c.last_planned_shift) : t('drilldown.notPlanned')}
                           highlight={!isPlannedFuture}
                         />
-                        <InfoRow icon={CalendarCheck} label="Laatste dienst"   value={formatDate(c.last_worked_shift)} />
-                        <InfoRow icon={Clock}         label="Diensten gewerkt" value={c.number_of_times_worked ?? null} />
+                        <InfoRow icon={CalendarCheck} label={t('drilldown.fields.lastShift')}    value={formatDate(c.last_worked_shift)} />
+                        <InfoRow icon={Clock}         label={t('drilldown.fields.shiftsWorked')} value={c.number_of_times_worked ?? null} />
                         {c.no_show_count > 0 && (
-                          <InfoRow icon={Clock} label="No-shows" value={c.no_show_count} highlight />
+                          <InfoRow icon={Clock} label={t('drilldown.fields.noShows')} value={c.no_show_count} highlight />
                         )}
                       </div>
                     </div>
@@ -167,11 +172,11 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
         <div className="flex items-center justify-between flex-shrink-0 px-4 py-3"
           style={{ borderTop: '1px solid #F3F4F6', background: '#FAFAFA' }}>
           <span className="text-xs text-gray-400">
-            {filtered.length} van {candidates.length} getoond
+            {t('drilldown.shownOf', { shown: filtered.length, total: candidates.length })}
           </span>
           <button onClick={onClose} className="text-xs rounded-lg px-3 py-1.5"
             style={{ background: 'none', border: '1px solid #E5E7EB', cursor: 'pointer', color: '#6B7280' }}>
-            Sluiten
+            {t('dr.close')}
           </button>
         </div>
       </div>

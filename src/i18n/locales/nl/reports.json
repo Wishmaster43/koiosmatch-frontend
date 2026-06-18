@@ -1,0 +1,357 @@
+{
+  "candidates": {
+    "title": "Details — Kandidaten",
+    "summary": "{{shown}} van {{total}} kandidaten",
+    "search": "Zoeken op naam, e-mail, functie...",
+    "loading": "Kandidaten ophalen...",
+    "empty": "Geen kandidaten gevonden",
+    "emptyHint": "Pas de filters of zoekopdracht aan",
+    "unknown": "onbekend",
+    "more": "+{{count}} meer",
+    "cols": {
+      "name": "Naam",
+      "status": "Status",
+      "position": "Functie",
+      "mobile": "Mobiel",
+      "registration": "Registratie",
+      "lastLogin": "Laatste inlog",
+      "plannedShift": "Geplande dienst",
+      "lastShift": "Laatste dienst",
+      "shifts": "Diensten",
+      "features": "Kenmerken",
+      "globalRates": "Globale rates"
+    },
+    "filters": {
+      "year": "Registratiejaar",
+      "status": "Status",
+      "position": "Functie",
+      "features": "Kenmerken"
+    },
+    "status": {
+      "actief": "Actief",
+      "nietactief": "Niet actief",
+      "extern": "Extern",
+      "intake": "Intake",
+      "verwijderd": "Verwijderd",
+      "onbekend": "Onbekend"
+    }
+  },
+  "customers": {
+    "loading": "Klanten ophalen…",
+    "empty": "Geen klanten gevonden",
+    "loadError": "Kon klanten niet laden.",
+    "statusActive": "Actief",
+    "statusInactive": "Inactief",
+    "cols": {
+      "name": "Naam",
+      "debtorNumber": "Debiteur-nr",
+      "status": "Status",
+      "accountManager": "Accountmanager",
+      "locations": "Locaties",
+      "departments": "Afdelingen"
+    },
+    "filters": {
+      "status": "Status"
+    }
+  },
+  "common": {
+    "loadingShort": "Laden…",
+    "statusActive": "Actief",
+    "statusInactive": "Inactief"
+  },
+  "contacts": {
+    "title": "Contactpersonen",
+    "summary": "{{shown}} van {{total}} contactpersonen",
+    "search": "Zoek op naam, e-mail, locatie…",
+    "loading": "Contactpersonen ophalen…",
+    "empty": "Geen contactpersonen gevonden",
+    "cols": {
+      "customer": "Klant",
+      "name": "Naam",
+      "email": "E-mail",
+      "phone": "Telefoon",
+      "planningContact": "Planningscontact"
+    },
+    "filters": {
+      "customer": "Klant",
+      "planningContact": "Planningscontact"
+    },
+    "planningYes": "Planningscontact",
+    "planningNo": "Geen planningscontact",
+    "yes": "Ja",
+    "no": "Nee"
+  },
+  "departments": {
+    "title": "Details — Afdelingen",
+    "summary": "{{shown}} van {{total}} afdelingen",
+    "search": "Zoek op naam, locatie, kostenplaats…",
+    "loading": "Afdelingen ophalen…",
+    "empty": "Geen afdelingen gevonden",
+    "cols": {
+      "customer": "Klant",
+      "location": "Locatie",
+      "department": "Afdeling",
+      "costCenter": "Kostenplaats"
+    },
+    "filters": {
+      "customer": "Klant",
+      "locationStatus": "Status locatie"
+    }
+  },
+  "locations": {
+    "title": "Details — Locaties",
+    "summary": "{{shown}} van {{total}} locaties",
+    "search": "Zoek op naam, klant, adres…",
+    "loading": "Locaties ophalen…",
+    "empty": "Geen locaties gevonden",
+    "cols": {
+      "customer": "Klant",
+      "location": "Locatie",
+      "address": "Adres",
+      "status": "Status",
+      "departments": "Afdelingen"
+    },
+    "filters": {
+      "customer": "Klant",
+      "status": "Status"
+    }
+  },
+  "dr": {
+    "close": "Sluiten",
+    "remarks": "Opmerkingen",
+    "externalId": "Extern ID",
+    "customer": "Klant",
+    "location": "Locatie",
+    "costCenter": "Kostenplaats",
+    "address": "Adres",
+    "departments": "Afdelingen",
+    "email": "E-mail",
+    "mobile": "Mobiel",
+    "phone": "Telefoon"
+  },
+  "candidateDrawer": {
+    "unknownName": "Onbekend",
+    "candidateFallback": "kandidaat",
+    "default": "Standaard",
+    "tabs": {
+      "general": "Algemeen",
+      "conversation": "Conversatie",
+      "history": "History"
+    },
+    "sections": {
+      "contact": "Contact",
+      "timeline": "Tijdlijn",
+      "stats": "Statistieken",
+      "features": "Kenmerken",
+      "globalRole": "Globale functie"
+    },
+    "fields": {
+      "mobile": "Mobiel",
+      "email": "E-mail",
+      "city": "Woonplaats",
+      "registrationDate": "Registratiedatum",
+      "lastLogin": "Laatste inlog",
+      "plannedShift": "Geplande dienst",
+      "lastShift": "Laatste dienst",
+      "endEmployment": "Einde dienstverband"
+    },
+    "stats": {
+      "worked": "Diensten gewerkt",
+      "noShows": "No-shows",
+      "cancellations": "Annuleringen"
+    },
+    "conversationComing": "Conversatie komt eraan",
+    "conversationDesc": "WhatsApp gesprekken tussen Yessy AI en {{name}}",
+    "historyComing": "Diensthistory komt eraan",
+    "historyDesc": "Alle gewerkte diensten van {{name}}"
+  },
+  "customerDrawer": {
+    "debtorNumber": "Debiteur-nr",
+    "accountManager": "Accountmanager",
+    "locations": "Locaties",
+    "departments": "Afdelingen",
+    "noLocations": "Geen locaties bekend"
+  },
+  "contactDrawer": {
+    "contactInfo": "Contactgegevens",
+    "function": "Functie",
+    "salutation": "Aanhef",
+    "planningContact": "Planningscontact",
+    "noPlanningContact": "Geen planningscontact",
+    "sendEmail": "E-mail sturen",
+    "call": "Bellen"
+  },
+  "departmentDrawer": {
+    "info": "Afdelingsgegevens",
+    "name": "Afdelingsnaam"
+  },
+  "locationDrawer": {
+    "info": "Locatiegegevens",
+    "departmentsCount": "Afdelingen ({{count}})"
+  },
+  "report": {
+    "title": "Kandidaten rapport",
+    "activeWord": "actief",
+    "deregisteredWord": "uitgeschreven",
+    "totalWord": "totaal",
+    "loadError": "Kon kandidaten niet laden.",
+    "unitCandidates": "kandidaten",
+    "charts": {
+      "perPosition": "Per functie",
+      "lastLogin": "Laatste inlog",
+      "newPerMonth": "Nieuwe kandidaten per maand",
+      "newPerWeek": "Nieuwe kandidaten per week",
+      "endPerMonth": "Uitgeschreven per maand",
+      "endPerWeek": "Uitgeschreven per week",
+      "topCities": "Top {{n}} woonplaatsen"
+    },
+    "sub": {
+      "position": "Functie",
+      "lastLogin": "Laatste inlog",
+      "regMonth": "Registratie maand",
+      "regWeek": "Registratie week",
+      "city": "Woonplaats",
+      "endMonth": "Uitgeschreven maand",
+      "endWeek": "Uitgeschreven week",
+      "kpi": "KPI"
+    },
+    "filters": {
+      "view": "Weergave",
+      "numbers": "Getallen",
+      "percentages": "Percentages",
+      "year": "Jaar",
+      "status": "Status",
+      "position": "Functie"
+    }
+  },
+  "kpiRow": {
+    "attention": "Aandachtskandidaten",
+    "attentionNote": "Actief · nieuw · niet gepland",
+    "active": "Actieve kandidaten",
+    "activeNote": "{{planned}} / {{total}} gepland",
+    "inactive": "Niet actieve kandidaten",
+    "intake": "Intake kandidaten",
+    "newThisMonth": "Nieuw {{month}} (gem. {{avg}}/mnd)",
+    "drillActive": "Actief",
+    "drillInactive": "Niet actief",
+    "drillIntake": "Intake",
+    "drillNewIn": "Nieuw in {{month}}"
+  },
+  "drilldown": {
+    "searchFull": "Zoek op naam, functie, mobiel of e-mail...",
+    "searchShort": "Zoek op naam, functie of e-mail…",
+    "candidatesCount": "{{count}} kandidaten",
+    "shownOf": "{{shown}} van {{total}} getoond",
+    "notPlanned": "Niet gepland",
+    "registered": "Geregistreerd",
+    "deregistered": "Uitgeschreven",
+    "kpiPerMonth": "KPI: {{target}}/mnd",
+    "atKpi": "✓ KPI",
+    "calcLabel": "Berekening:",
+    "calcBody": "totaal nieuwe kandidaten in {{year}} t/m {{month}} ({{total}}) gedeeld door het aantal maanden ({{months}}) = {{avg}}/maand.",
+    "kpiGoal": "KPI doel is {{target}} per maand.",
+    "newThisMonth": "Nieuw deze maand",
+    "avgPerMonthLabel": "Gemiddelde /mnd",
+    "kpiTargetLabel": "KPI doel /mnd",
+    "perMonthYear": "Per maand — {{year}}",
+    "kpiGoalFoot": "KPI doel: {{target}} nieuwe kandidaten per maand",
+    "fields": {
+      "position": "Functie",
+      "mobile": "Mobiel",
+      "email": "E-mail",
+      "registered": "Geregistreerd",
+      "lastLogin": "Laatste inlog",
+      "plannedOn": "Gepland op",
+      "lastShift": "Laatste dienst",
+      "shiftsWorked": "Diensten gewerkt",
+      "noShows": "No-shows"
+    }
+  },
+  "messages": {
+    "title": "Details — Berichten",
+    "summary": "{{shown}} van {{total}} berichten",
+    "search": "Zoek op naam, onderwerp, workflow…",
+    "loading": "Berichten ophalen…",
+    "empty": "Geen berichten gevonden",
+    "cols": {
+      "sent": "Verstuurd",
+      "recipient": "Ontvanger",
+      "channel": "Kanaal",
+      "subject": "Onderwerp",
+      "status": "Status",
+      "workflow": "Workflow"
+    },
+    "channel": {
+      "whatsapp": "WhatsApp",
+      "email": "E-mail",
+      "sms": "SMS"
+    },
+    "status": {
+      "sent": "Verstuurd",
+      "delivered": "Bezorgd",
+      "read": "Gelezen",
+      "failed": "Mislukt",
+      "pending": "In wachtrij",
+      "bounced": "Bounced"
+    },
+    "filters": {
+      "channel": "Kanaal",
+      "status": "Status",
+      "workflow": "Workflow"
+    },
+    "drawer": {
+      "recipient": "Ontvanger",
+      "name": "Naam",
+      "mobile": "Mobiel",
+      "email": "E-mail",
+      "timeline": "Tijdlijn",
+      "sentAt": "Verstuurd op",
+      "deliveredAt": "Bezorgd op",
+      "readAt": "Gelezen op",
+      "workflow": "Workflow",
+      "template": "Template",
+      "body": "Berichtinhoud",
+      "error": "Foutmelding",
+      "messageFallback": "Bericht #{{id}}"
+    }
+  },
+  "runs": {
+    "title": "Details — Uitvoeringen",
+    "summary": "{{shown}} van {{total}} uitvoeringen",
+    "search": "Zoek op workflow, trigger, fout…",
+    "loading": "Uitvoeringen ophalen…",
+    "empty": "Geen uitvoeringen gevonden",
+    "cols": {
+      "started": "Gestart",
+      "workflow": "Workflow",
+      "status": "Status",
+      "candidates": "Kandidaten",
+      "duration": "Duur",
+      "trigger": "Trigger"
+    },
+    "status": {
+      "success": "Geslaagd",
+      "failed": "Mislukt",
+      "running": "Bezig",
+      "pending": "In wachtrij"
+    },
+    "filters": {
+      "status": "Status",
+      "workflow": "Workflow"
+    },
+    "drawer": {
+      "startedColon": "Gestart:",
+      "candidates": "Kandidaten",
+      "duration": "Duur",
+      "timeline": "Tijdlijn",
+      "started": "Gestart",
+      "finished": "Afgerond",
+      "trigger": "Trigger",
+      "createdBy": "Aangemaakt door",
+      "stepResults": "Stap-resultaten",
+      "step": "Stap {{n}}",
+      "error": "Foutmelding",
+      "workflowFallback": "Workflow #{{id}}"
+    }
+  }
+}
