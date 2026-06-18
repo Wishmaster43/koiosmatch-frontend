@@ -6,47 +6,51 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth }                   from './context/AuthContext'
 import { RightPanelProvider, useRightPanel }       from './context/RightPanelContext'
-import { useState, useEffect }                     from 'react'
+import { useState, useEffect, lazy, Suspense }     from 'react'
 import { SlidersHorizontal, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import './index.css'
 
-// ── Page imports ─────────────────────────────────────────────────────────────
+// ── Shell (always loaded) ────────────────────────────────────────────────────
 import LoginPage              from './pages/auth/LoginPage'
-import Dashboard              from './pages/dashboard/Dashboard'
-import WorkflowsPage          from './pages/ai/WorkflowsPage'
 import Sidebar                from './components/layout/Sidebar'
 import KoiosPanel             from './components/layout/KoiosPanel'
 import ReportFilterSidebar    from './components/reports/ReportFilterSidebar'
-import CandidatesReport        from './pages/shiftmanager/CandidatesReport'
-import CandidatesPage          from './pages/candidates/CandidatesPage'
-import CandidatesDetailPage   from './pages/shiftmanager/CandidatesDetailPage'
-import CustomerReport          from './pages/shiftmanager/CustomersReport'
-import CustomersDetailPage     from './pages/shiftmanager/CustomersDetailPage'
-import OrdersReport            from './pages/shiftmanager/OrdersReport'
-import SettingsPage            from './pages/settings/SettingsPage'
-import LocationsDetailPage     from './pages/shiftmanager/LocationsDetailPage'
-import LocationsReport         from './pages/shiftmanager/LocationsReport'
-import DepartmentsDetailPage   from './pages/shiftmanager/DepartmentsDetailPage'
-import DepartmentsReport       from './pages/shiftmanager/DepartmentsReport'
-import ContactsDetailPage      from './pages/shiftmanager/ContactsDetailPage'
-import ContactPersonsPage      from './pages/shiftmanager/ContactPersonsPage'
-import CustomersPage          from './pages/customers/CustomersPage'
-import SmCustomersPage        from './pages/shiftmanager/CustomersPage'
-import ContactsPage            from './pages/shiftmanager/ContactsPage'
-import LocationsPage          from './pages/shiftmanager/LocationsPage'
-import DepartmentsPage        from './pages/shiftmanager/DepartmentsPage'
-import ProfilePage            from './pages/auth/ProfilePage'
-import UsersPage              from './pages/users/UsersPage'
-import WhatsAppPage           from './pages/whatsapp/WhatsAppPage'
-import RunsDetailPage              from './pages/ai/RunsDetailPage'
-import MessagesDetailPage          from './pages/ai/MessagesDetailPage'
-import ShiftmanagerDetailsPage     from './pages/shiftmanager/ShiftmanagerDetailsPage'
-import ShiftmanagerDashboard       from './pages/shiftmanager/ShiftmanagerDashboard'
-import PlanningPage               from './pages/planning/PlanningPage'
-import ApplicationsPage          from './pages/applications/ApplicationsPage'
-import VacanciesPage             from './pages/vacancies/VacanciesPage'
+
+// ── Page imports (lazy) ──────────────────────────────────────────────────────
+// Each page is its own chunk, so heavy deps (workflow canvas, PDF renderer,
+// recharts, tiptap) only download when that page is actually opened.
+const Dashboard              = lazy(() => import('./pages/dashboard/Dashboard'))
+const WorkflowsPage          = lazy(() => import('./pages/ai/WorkflowsPage'))
+const CandidatesReport       = lazy(() => import('./pages/shiftmanager/CandidatesReport'))
+const CandidatesPage         = lazy(() => import('./pages/candidates/CandidatesPage'))
+const CandidatesDetailPage   = lazy(() => import('./pages/shiftmanager/CandidatesDetailPage'))
+const CustomerReport         = lazy(() => import('./pages/shiftmanager/CustomersReport'))
+const CustomersDetailPage    = lazy(() => import('./pages/shiftmanager/CustomersDetailPage'))
+const OrdersReport           = lazy(() => import('./pages/shiftmanager/OrdersReport'))
+const SettingsPage           = lazy(() => import('./pages/settings/SettingsPage'))
+const LocationsDetailPage    = lazy(() => import('./pages/shiftmanager/LocationsDetailPage'))
+const LocationsReport        = lazy(() => import('./pages/shiftmanager/LocationsReport'))
+const DepartmentsDetailPage  = lazy(() => import('./pages/shiftmanager/DepartmentsDetailPage'))
+const DepartmentsReport      = lazy(() => import('./pages/shiftmanager/DepartmentsReport'))
+const ContactsDetailPage     = lazy(() => import('./pages/shiftmanager/ContactsDetailPage'))
+const ContactPersonsPage     = lazy(() => import('./pages/shiftmanager/ContactPersonsPage'))
+const CustomersPage          = lazy(() => import('./pages/customers/CustomersPage'))
+const SmCustomersPage        = lazy(() => import('./pages/shiftmanager/CustomersPage'))
+const ContactsPage           = lazy(() => import('./pages/shiftmanager/ContactsPage'))
+const LocationsPage          = lazy(() => import('./pages/shiftmanager/LocationsPage'))
+const DepartmentsPage        = lazy(() => import('./pages/shiftmanager/DepartmentsPage'))
+const ProfilePage            = lazy(() => import('./pages/auth/ProfilePage'))
+const UsersPage              = lazy(() => import('./pages/users/UsersPage'))
+const WhatsAppPage           = lazy(() => import('./pages/whatsapp/WhatsAppPage'))
+const RunsDetailPage         = lazy(() => import('./pages/ai/RunsDetailPage'))
+const MessagesDetailPage     = lazy(() => import('./pages/ai/MessagesDetailPage'))
+const ShiftmanagerDetailsPage = lazy(() => import('./pages/shiftmanager/ShiftmanagerDetailsPage'))
+const ShiftmanagerDashboard  = lazy(() => import('./pages/shiftmanager/ShiftmanagerDashboard'))
+const PlanningPage           = lazy(() => import('./pages/planning/PlanningPage'))
+const ApplicationsPage       = lazy(() => import('./pages/applications/ApplicationsPage'))
+const VacanciesPage          = lazy(() => import('./pages/vacancies/VacanciesPage'))
 import { ThemeProvider }      from './context/ThemeContext'
-import { AppsProvider, useApps } from './context/AppsContext'
+import { AppsProvider } from './context/AppsContext'
 import { LookupsProvider } from './context/LookupsContext'
 import { canAccessPage, PACKAGE_DEFAULT_PAGE } from './lib/access'
 
@@ -107,6 +111,15 @@ function PlaceholderPage({ title }) {
   return (
     <div className="flex items-center justify-center h-full">
       <p className="font-mono text-sm text-gray-400">{title} — komt eraan</p>
+    </div>
+  )
+}
+
+// Fallback while a lazily-loaded page chunk is being fetched.
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <p className="text-sm text-gray-400 animate-pulse">Laden…</p>
     </div>
   )
 }
@@ -364,7 +377,9 @@ function DashboardLayout() {
         {/* Content row: page + optional right filter panel side by side */}
         <div className="flex flex-1 overflow-hidden">
           <div className="flex-1 overflow-auto">
-            {renderPage()}
+            <Suspense fallback={<PageLoader />}>
+              {renderPage()}
+            </Suspense>
           </div>
 
           {/* Right filter panel — same height as content, slides next to page */}

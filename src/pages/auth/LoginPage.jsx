@@ -79,6 +79,9 @@ function CredentialForm({ onMfaRequired }) {
   const [showPw,   setShowPw]  = useState(false)
   const [loading,  setLoading] = useState(false)
   const [error,    setError]   = useState('')
+  // Set by api.js when a 401 ended the previous session — show a hint, then clear.
+  const [expired] = useState(() => sessionStorage.getItem('kc_session_expired') === '1')
+  useEffect(() => { if (expired) sessionStorage.removeItem('kc_session_expired') }, [expired])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -102,6 +105,12 @@ function CredentialForm({ onMfaRequired }) {
     <>
       <h1 className="mb-1 text-2xl font-semibold text-gray-900">{t('login.title')}</h1>
       <p className="mb-8 text-sm text-gray-500">{t('login.subtitle')}</p>
+
+      {expired && !error && (
+        <div className="mb-4 rounded-lg px-3 py-2.5 text-sm text-amber-700 bg-amber-50 border border-amber-200">
+          {t('login.sessionExpired', { defaultValue: 'Je sessie is verlopen. Log opnieuw in.' })}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>

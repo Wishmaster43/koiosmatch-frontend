@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '../../context/RightPanelContext'
-import api from '../../lib/api'
+import api, { unwrapList } from '../../lib/api'
+import { USE_MOCKS, isAbortError } from '../../lib/mocks'
 import CandidateDrawer from './CandidateDrawer'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesTable from './CandidatesTable'
@@ -42,6 +43,7 @@ const DUMMY_CANDIDATES = [
 export default function CandidatesPage() {
   const [candidates,      setCandidates]      = useState([])
   const [loading,         setLoading]         = useState(true)
+  const [error,           setError]           = useState(null)
   const [page,            setPage]            = useState(1)
   const [pageSize,        setPageSize]        = useState(50)
   const [lastPage,        setLastPage]        = useState(1)
@@ -77,27 +79,30 @@ export default function CandidatesPage() {
   const handlePageSizeChange = (newSize) => { setPageSize(newSize); setPage(1) }
 
   useEffect(() => {
-    api.get('/candidates', { params: { page, per_page: pageSize } })
+    const ctrl = new AbortController()
+    setLoading(true)
+    setError(null)
+    api.get('/candidates', { params: { page, per_page: pageSize }, signal: ctrl.signal })
       .then(res => {
-        const body = res.data
-        const rows = Array.isArray(body) ? body : (body?.data ?? [])
-        if (rows.length > 0) {
-          setCandidates(rows.map(mapCandidate))
-          setTotal(body?.meta?.total ?? body?.total ?? rows.length)
-          setLastPage(body?.meta?.last_page ?? body?.last_page ?? 1)
+        const { rows, total, lastPage } = unwrapList(res)
+        if (rows.length === 0 && USE_MOCKS) {
+          setCandidates(DUMMY_CANDIDATES); setTotal(DUMMY_CANDIDATES.length); setLastPage(1)
         } else {
-          setCandidates(DUMMY_CANDIDATES)
-          setTotal(DUMMY_CANDIDATES.length)
-          setLastPage(1)
+          setCandidates(rows.map(mapCandidate)); setTotal(total); setLastPage(lastPage)
         }
       })
-      .catch(() => {
-        setCandidates(DUMMY_CANDIDATES)
-        setTotal(DUMMY_CANDIDATES.length)
-        setLastPage(1)
+      .catch(err => {
+        if (isAbortError(err)) return
+        if (USE_MOCKS) {
+          setCandidates(DUMMY_CANDIDATES); setTotal(DUMMY_CANDIDATES.length); setLastPage(1)
+        } else {
+          setError(t('page.loadError', { defaultValue: 'Kandidaten laden is mislukt.' }))
+          setCandidates([]); setTotal(0); setLastPage(1)
+        }
       })
-      .finally(() => setLoading(false))
-  }, [page, pageSize])
+      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
+    return () => ctrl.abort()
+  }, [page, pageSize, t])
 
   useEffect(() => {
     api.get('/users')
@@ -328,6 +333,11 @@ export default function CandidatesPage() {
 
           {/* Table */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+            {error && (
+              <div className="mb-3 rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">
+                {error}
+              </div>
+            )}
             <CandidatesTable
               rows={filtered}
               loading={loading}

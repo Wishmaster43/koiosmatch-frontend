@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '../../context/RightPanelContext'
-import api from '../../lib/api'
+import api, { unwrapList } from '../../lib/api'
+import { USE_MOCKS, isAbortError } from '../../lib/mocks'
 import CustomersTable from './CustomersTable'
 import CustomersInsightsRow from './CustomersInsightsRow'
 import AddCustomerModal from './AddCustomerModal'
@@ -61,6 +62,9 @@ export default function CustomersPage() {
 
   const [customers, setCustomers] = useState([])
   const [loading,   setLoading]   = useState(true)
+  const [error,     setError]     = useState(null)
+  const [lastPage,  setLastPage]  = useState(1)
+  const [total,     setTotal]     = useState(0)
   const [selected,  setSelected]  = useState(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [subAdd,    setSubAdd]    = useState(null) // { type: 'locations'|'departments'|'contacts', customer }
@@ -74,15 +78,30 @@ export default function CustomersPage() {
   const [selectedCity,   setSelectedCity]   = useState([])
 
   useEffect(() => {
-    api.get('/customers', { params: { page, per_page: pageSize } })
+    const ctrl = new AbortController()
+    setLoading(true)
+    setError(null)
+    api.get('/customers', { params: { page, per_page: pageSize }, signal: ctrl.signal })
       .then(res => {
-        const body = res.data
-        const rows = Array.isArray(body) ? body : (body?.data ?? [])
-        setCustomers((rows.length ? rows : DUMMY_CUSTOMERS).map(mapCustomer))
+        const { rows, total: rowTotal, lastPage: rowLastPage } = unwrapList(res)
+        if (rows.length === 0 && USE_MOCKS) {
+          setCustomers(DUMMY_CUSTOMERS.map(mapCustomer)); setTotal(DUMMY_CUSTOMERS.length); setLastPage(1)
+        } else {
+          setCustomers(rows.map(mapCustomer)); setTotal(rowTotal); setLastPage(rowLastPage)
+        }
       })
-      .catch(() => setCustomers(DUMMY_CUSTOMERS.map(mapCustomer)))
-      .finally(() => setLoading(false))
-  }, [page, pageSize])
+      .catch(err => {
+        if (isAbortError(err)) return
+        if (USE_MOCKS) {
+          setCustomers(DUMMY_CUSTOMERS.map(mapCustomer)); setTotal(DUMMY_CUSTOMERS.length); setLastPage(1)
+        } else {
+          setError(t('page.loadError', { defaultValue: 'Klanten laden is mislukt.' }))
+          setCustomers([]); setTotal(0); setLastPage(1)
+        }
+      })
+      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
+    return () => ctrl.abort()
+  }, [page, pageSize, t])
 
   // ── Filter option lists ──
   const optsFrom = (values) => {
@@ -181,10 +200,15 @@ export default function CustomersPage() {
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+            {error && (
+              <div className="mb-3 rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">
+                {error}
+              </div>
+            )}
             <CustomersTable rows={filtered} loading={loading} selectedId={selected?.id} onSelect={setSelected} />
           </div>
 
-          <PaginationBar page={page} totalPages={1} totalRows={filtered.length} pageSize={pageSize}
+          <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
             onPageChange={setPage} onPageSizeChange={(s) => { setPageSize(s); setPage(1) }} />
         </div>
 

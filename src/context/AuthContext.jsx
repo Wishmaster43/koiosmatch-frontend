@@ -101,6 +101,21 @@ export function AuthProvider({ children }) {
     }
   }
 
+  // ── Session expiry (401) ─────────────────────────────────────────────────────
+  // api.js fires 'kc:auth-expired' after a 401 (and has already cleared
+  // localStorage). We clear React state here so ProtectedRoute routes to /login
+  // within the SPA — no full-page reload, no lost router context.
+  useEffect(() => {
+    const onExpired = () => {
+      setUser(null)
+      setActiveTenantState(null)
+      setTenants([])
+      setAccessiblePages([])
+    }
+    window.addEventListener('kc:auth-expired', onExpired)
+    return () => window.removeEventListener('kc:auth-expired', onExpired)
+  }, [])
+
   // ── Startup: restore session from localStorage ───────────────────────────────
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
