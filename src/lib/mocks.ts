@@ -13,5 +13,7 @@ export const USE_MOCKS =
   import.meta.env.DEV && import.meta.env.VITE_USE_MOCKS === 'true'
 
 /** True when an axios error is just an aborted request (StrictMode / cleanup). */
-export const isAbortError = (err) =>
-  err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED'
+export const isAbortError = (err: unknown): boolean => {
+  const e = err as { name?: string; code?: string } | null
+  return e?.name === 'CanceledError' || e?.code === 'ERR_CANCELED'
+}

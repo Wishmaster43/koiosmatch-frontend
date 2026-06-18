@@ -15,8 +15,10 @@
  * UI gating only — the backend still enforces 403 on every gated endpoint.
  */
 
+import type { ModuleKey, Tenant } from '../types/api'
+
 // package id → module keys it grants. Mirrors PACKAGES in settings/ModulesSettings.
-export const PACKAGE_MODULES = {
+export const PACKAGE_MODULES: Record<string, ModuleKey[]> = {
   reporting_sm:          ['sm'],
   reporting_hf:          ['hf'],
   reporting_sm_hf:       ['sm', 'hf'],
@@ -35,23 +37,30 @@ export const PACKAGE_MODULES = {
   connect:                ['sm', 'hf', 'ai', 'ats', 'plan'],
 }
 
-const moduleKeyOf = (m) => (typeof m === 'string' ? m : m?.key ?? m?.name ?? null)
+type ModuleEntry = string | { key?: string; name?: string }
+
+const moduleKeyOf = (m: ModuleEntry): ModuleKey | null =>
+  (typeof m === 'string' ? m : m?.key ?? m?.name ?? null) as ModuleKey | null
 
 /** All module keys a tenant has — explicit `modules` array wins, else from package. */
-export function tenantModules(tenant) {
+export function tenantModules(tenant?: Tenant | null): ModuleKey[] {
   const explicit = tenant?.modules
   if (Array.isArray(explicit) && explicit.length) {
-    return explicit.map(moduleKeyOf).filter(Boolean)
+    return explicit.map(moduleKeyOf).filter((k): k is ModuleKey => Boolean(k))
   }
-  return PACKAGE_MODULES[tenant?.package] ?? []
+  return PACKAGE_MODULES[tenant?.package ?? ''] ?? []
 }
 
 /**
  * True if the tenant has the given module. Super admins always pass (the UI lets
  * them in; the backend still 403s if the switched-to tenant lacks the module).
  */
-export function hasModule(moduleKey, tenant, { isSuperAdmin = false } = {}) {
+export function hasModule(
+  moduleKey: ModuleKey | string | null | undefined,
+  tenant?: Tenant | null,
+  { isSuperAdmin = false }: { isSuperAdmin?: boolean } = {},
+): boolean {
   if (isSuperAdmin) return true
   if (!moduleKey) return false
-  return tenantModules(tenant).includes(moduleKey)
+  return tenantModules(tenant).includes(moduleKey as ModuleKey)
 }
