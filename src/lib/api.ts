@@ -1,4 +1,9 @@
-import axios from 'axios'
+import axios, {
+  type AxiosError,
+  type AxiosResponse,
+  type InternalAxiosRequestConfig,
+} from 'axios'
+import type { ListResult, PaginationMeta } from '../types/api'
 
 /**
  * api — the single shared axios instance for the whole app.
@@ -12,8 +17,7 @@ import axios from 'axios'
  *
  * timeout is a safety net against the backend's synchronous, occasionally
  * long-running operations (sync/workflows): a hung request becomes a catchable
- * error instead of a spinner that never resolves. It is generous on purpose so
- * realistic slow calls still succeed.
+ * error instead of a spinner that never resolves.
  */
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api',
@@ -32,7 +36,7 @@ const api = axios.create({
  * the header otherwise. SECURITY (#2): the token lives in localStorage and is
  * therefore readable by any JS on the page — an httpOnly cookie would be safer.
  */
-api.interceptors.request.use((config) => {
+api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token  = localStorage.getItem('auth_token')
   const tenant = localStorage.getItem('active_tenant')
   if (token)  config.headers.Authorization = `Bearer ${token}`
@@ -40,7 +44,12 @@ api.interceptors.request.use((config) => {
   return config
 })
 
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
+
+// axios doesn't know about our one-shot retry flag — extend the config type.
+interface RetryableConfig extends InternalAxiosRequestConfig {
+  _retried429?: boolean
+}
 
 /**
  * Response interceptor.
@@ -55,9 +64,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
  */
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  async (error: AxiosError<{ retry_after?: number; message?: string }>) => {
     const status = error.response?.status
-    const config = error.config ?? {}
+    const config = (error.config ?? {}) as RetryableConfig
     const url    = config.url ?? ''
     const method = (config.method ?? 'get').toLowerCase()
 
@@ -101,24 +110,26 @@ export default api
 //   2. bare object / bare array                            — response()->json($model)
 //   3. { data, total, per_page, current_page, last_page }  — custom /reports paginatie
 
+type ResponseLike = AxiosResponse | { data: unknown }
+
 /** Unwrap a single resource to its payload (handles { data } or a bare object). */
-export function unwrap(res) {
-  const body = res?.data ?? res
-  if (body && typeof body === 'object' && !Array.isArray(body) && 'data' in body) return body.data
-  return body
+export function unwrap<T = unknown>(res: ResponseLike): T {
+  const body = (res as { data?: unknown })?.data ?? res
+  if (body && typeof body === 'object' && !Array.isArray(body) && 'data' in body) {
+    return (body as { data: T }).data
+  }
+  return body as T
 }
 
-/**
- * Unwrap any list response into a stable, predictable shape.
- * @returns {{ rows: any[], total: number, page: number, lastPage: number, perPage: number }}
- */
-export function unwrapList(res) {
-  const body = res?.data ?? res
+/** Unwrap any list response into a stable, predictable shape. */
+export function unwrapList<T = unknown>(res: ResponseLike): ListResult<T> {
+  const body = (res as { data?: unknown })?.data ?? res
   if (Array.isArray(body)) {
-    return { rows: body, total: body.length, page: 1, lastPage: 1, perPage: body.length }
+    return { rows: body as T[], total: body.length, page: 1, lastPage: 1, perPage: body.length }
   }
-  const rows = Array.isArray(body?.data) ? body.data : []
-  const meta = body?.meta ?? body ?? {}
+  const obj  = (body ?? {}) as { data?: unknown; meta?: PaginationMeta } & PaginationMeta
+  const rows = Array.isArray(obj.data) ? (obj.data as T[]) : []
+  const meta = obj.meta ?? obj
   return {
     rows,
     total:    meta.total        ?? rows.length,
