@@ -69,8 +69,8 @@ export default function CustomersInsightsRow({ donuts = [], kpis = [] }) {
   return (
     <div style={{ padding: '16px 24px 12px', display: 'flex', gap: 10, flexShrink: 0,
       flexWrap: 'nowrap', overflowX: 'auto' }}>
-      {donuts.map(d => <DonutCard key={d.key} {...d} />)}
-      {kpis.map(k => <KpiCard key={k.key} {...k} />)}
+      {donuts.map(({ key, ...d }) => <DonutCard key={key} {...d} />)}
+      {kpis.map(({ key, ...k }) => <KpiCard key={key} {...k} />)}
     </div>
   )
 }

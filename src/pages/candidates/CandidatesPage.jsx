@@ -10,6 +10,7 @@ import CandidatesTable from './CandidatesTable'
 import CandidatesInsightsRow from './CandidatesInsightsRow'
 import PaginationBar from '../../components/ui/PaginationBar'
 import { mapCandidate } from './data/mapCandidate'
+import { NL_PROVINCES } from './drawer/constants'
 import { useLookups } from '../../context/LookupsContext'
 
 // ── Aandacht-predicaten (één bron voor zowel de tellingen als het filter) ──
@@ -54,24 +55,19 @@ export default function CandidatesPage() {
   const [addOpen,         setAddOpen]         = useState(false)
   const { data: users = [] } = useUsers()
 
-  const [selectedStatus,      setSelectedStatus]      = useState([])
-  const [selectedFunnel,      setSelectedFunnel]      = useState([])
-  const [selectedType,        setSelectedType]        = useState([])
-  const [selectedOwner,       setSelectedOwner]       = useState([])
-  const [selectedBranches,   setSelectedVestiging]   = useState([])
-  const [selectedGeslacht,    setSelectedGeslacht]    = useState([])
-  const [selectedNationaliteit, setSelectedNationaliteit] = useState([])
-  const [selectedProvince,    setSelectedProvince]    = useState([])
-  const [selectedTitle,       setSelectedTitle]       = useState([])
-  const [selectedSkills,      setSelectedSkills]      = useState([])
-  const [selectedLanguages,   setSelectedLanguages]   = useState([])
-  const [selectedCerts,       setSelectedCerts]       = useState([])
-  const [selectedTags,        setSelectedTags]        = useState([])
-  const [globalSearch,        setGlobalSearch]        = useState('')
-  const [locationCity,        setLocationCity]        = useState('')
-  const [locationRadius,      setLocationRadius]      = useState('')
+  // Server-side filter dimensions (the API supports these). Owner holds owner_ids.
+  const [selectedStatus,   setSelectedStatus]   = useState([])
+  const [selectedFunnel,   setSelectedFunnel]   = useState([])
+  const [selectedType,     setSelectedType]     = useState([])
+  const [selectedOwner,    setSelectedOwner]    = useState([])
+  const [selectedGeslacht, setSelectedGeslacht] = useState([])
+  const [selectedProvince, setSelectedProvince] = useState([])
+  const [selectedTitle,    setSelectedTitle]    = useState([])
+  const [globalSearch,     setGlobalSearch]     = useState('')
   // Aandacht-tile filter: null | 'stale6m' | 'noFollowup' (klik = aan/uit).
-  const [attentionFilter,     setAttentionFilter]     = useState(null)
+  const [attentionFilter,  setAttentionFilter]  = useState(null)
+  // Echte tellingen voor de charts/opties (GET /candidates/stats).
+  const [stats,            setStats]            = useState(null)
 
   const { registerFilters, unregisterFilters } = useRightPanel()
   const { t } = useTranslation('candidates')
@@ -79,11 +75,31 @@ export default function CandidatesPage() {
 
   const handlePageSizeChange = (newSize) => { setPageSize(newSize); setPage(1) }
 
+  // Server-side filter params (axios serialises arrays as `key[]`). Only the
+  // dimensions the API supports; the rest of the right panel is hidden for now.
+  const filterParams = useMemo(() => {
+    const p = {}
+    if (globalSearch.trim())     p.search         = globalSearch.trim()
+    if (selectedStatus.length)   p.status         = selectedStatus
+    if (selectedFunnel.length)   p.funnel_type    = selectedFunnel
+    if (selectedType.length)     p.candidate_type = selectedType
+    if (selectedOwner.length)    p.owner_id       = selectedOwner
+    if (selectedGeslacht.length) p.gender         = selectedGeslacht
+    if (selectedProvince.length) p.province       = selectedProvince
+    if (selectedTitle.length)    p.function_title = selectedTitle
+    return p
+  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle])
+  const filterKey = JSON.stringify(filterParams)
+
+  // Filters changed → back to page 1 (the filtered set has its own pagination).
+  useEffect(() => { setPage(1) }, [filterKey])
+
+  // ── List (paginated, server-filtered) ──
   useEffect(() => {
     const ctrl = new AbortController()
     setLoading(true)
     setError(null)
-    api.get('/candidates', { params: { page, per_page: pageSize }, signal: ctrl.signal })
+    api.get('/candidates', { params: { ...filterParams, page, per_page: pageSize }, signal: ctrl.signal })
       .then(res => {
         const { rows, total, lastPage } = unwrapList(res)
         if (rows.length === 0 && USE_MOCKS) {
@@ -103,7 +119,18 @@ export default function CandidatesPage() {
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [page, pageSize, t])
+  }, [filterParams, page, pageSize, t])
+
+  // ── Stats (real totals across the whole filtered set, not just the page) ──
+  // Depends only on the filters, not on pagination. Falls back to page-based
+  // counts (below) when the endpoint isn't available yet.
+  useEffect(() => {
+    const ctrl = new AbortController()
+    api.get('/candidates/stats', { params: filterParams, signal: ctrl.signal })
+      .then(res => setStats(res.data?.data ?? res.data ?? null))
+      .catch(err => { if (!isAbortError(err)) setStats(null) })
+    return () => ctrl.abort()
+  }, [filterParams])
 
   // Build {value,label,count} option lists from the loaded candidates.
   const optsFrom = (values, mapLabel = v => v) => {
@@ -112,26 +139,40 @@ export default function CandidatesPage() {
     return Object.keys(counts).map(v => ({ value: v, label: mapLabel(v), count: counts[v] }))
   }
 
-  // Lookup-driven options keep the config's order; only show values with matches.
+  const metaOf = (list, v) => list.find(x => x.value === v)
+
+  // Status / funnel / owner options come from stats (whole filtered set); fall
+  // back to page-based counts when stats is unavailable.
   const statusOptions = useMemo(() =>
-    statuses.map(s => ({ value: s.value, label: s.label, count: candidates.filter(c => c.status === s.value).length })).filter(o => o.count > 0)
-  , [candidates, statuses])
+    stats?.by_status
+      ? stats.by_status.map(o => ({ value: o.value, label: metaOf(statuses, o.value)?.label ?? o.value, count: o.count }))
+      : statuses.map(s => ({ value: s.value, label: s.label, count: candidates.filter(c => c.status === s.value).length })).filter(o => o.count > 0)
+  , [stats, candidates, statuses])
   const funnelOptions = useMemo(() =>
-    funnelTypes.map(f => ({ value: f.value, label: f.label, count: candidates.filter(c => c.stage === f.value).length })).filter(o => o.count > 0)
-  , [candidates, funnelTypes])
+    stats?.by_funnel
+      ? stats.by_funnel.map(o => ({ value: o.value, label: metaOf(funnelTypes, o.value)?.label ?? o.value, count: o.count }))
+      : funnelTypes.map(f => ({ value: f.value, label: f.label, count: candidates.filter(c => c.stage === f.value).length })).filter(o => o.count > 0)
+  , [stats, candidates, funnelTypes])
   const typeOptions = useMemo(() =>
     candidateTypes.map(ct => ({ value: ct.value, label: ct.label, count: candidates.filter(c => (c.candidateTypes ?? []).includes(ct.value)).length })).filter(o => o.count > 0)
   , [candidates, candidateTypes])
-  const ownerOptions        = useMemo(() => optsFrom(candidates.map(c => c.owner).filter(Boolean)), [candidates])
-  const branchOptions    = useMemo(() => optsFrom(candidates.flatMap(c => c.branches ?? [])), [candidates])
-  const geslachtOptions     = useMemo(() => optsFrom(candidates.map(c => c.gender).filter(v => v && v !== '-')), [candidates])
-  const nationaliteitOptions= useMemo(() => optsFrom(candidates.map(c => c.nationality).filter(v => v && v !== '-')), [candidates])
-  const provinceOptions     = useMemo(() => optsFrom(candidates.map(c => c.province).filter(Boolean)), [candidates])
-  const titleOptions        = useMemo(() => optsFrom(candidates.map(c => c.title).filter(Boolean)), [candidates])
-  const skillOptions        = useMemo(() => optsFrom(candidates.flatMap(c => c.skills ?? []).filter(Boolean)), [candidates])
-  const languageOptions     = useMemo(() => optsFrom(candidates.flatMap(c => (c.languages ?? []).map(l => l.language ?? l).filter(Boolean))), [candidates])
-  const certOptions         = useMemo(() => optsFrom(candidates.flatMap(c => (c.certifications ?? []).map(x => x.name ?? x).filter(Boolean))), [candidates])
-  const tagOptions          = useMemo(() => optsFrom(candidates.flatMap(c => c.tags ?? [])), [candidates])
+  // Owner is id-based: options + counts from stats.by_owner; fall back to the
+  // loaded page keyed on ownerId.
+  const ownerOptions = useMemo(() => {
+    if (stats?.by_owner) return stats.by_owner.map(o => ({ value: o.id, label: o.name, count: o.count }))
+    const m = {}
+    candidates.forEach(c => { if (c.ownerId) (m[c.ownerId] ??= { value: c.ownerId, label: c.owner, count: 0 }).count++ })
+    return Object.values(m)
+  }, [stats, candidates])
+  // Server-side filters whose option-lists aren't in stats: gender + province
+  // use fixed lists; title is page-derived until a dedicated options endpoint.
+  const genderOptions   = useMemo(() => [
+    { value: 'male',   label: t('modal.gender.male') },
+    { value: 'female', label: t('modal.gender.female') },
+    { value: 'other',  label: t('modal.gender.other') },
+  ], [t])
+  const provinceOptions = useMemo(() => NL_PROVINCES.map(p => ({ value: p, label: p })), [])
+  const titleOptions    = useMemo(() => optsFrom(candidates.map(c => c.title).filter(Boolean)), [candidates])
 
   const tog = (set) => (v) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
@@ -163,72 +204,38 @@ export default function CandidatesPage() {
   const catPerson         = t('filters.categories.person')
   const catOrganisation   = t('filters.categories.organisation')
 
+  // Only the dimensions the API filters server-side. tags/skills/languages/certs
+  // (sub-table joins) + radius (needs geocoding) are hidden until a later round.
   const filterGroups = useMemo(() => [
     { key: 'global-search', type: 'global-search', label: t('filters.search'), placeholder: t('page.searchPlaceholder'), value: globalSearch, onChange: setGlobalSearch },
-    { key: 'location',      type: 'location',      label: t('filters.radius'), city: locationCity, radius: locationRadius, onCityChange: setLocationCity, onRadiusChange: setLocationRadius },
     // ── Lifecycle ──
-    { key: 'status',     type: 'search-select', category: catLifecycle, label: t('filters.status'),        selected: selectedStatus,   options: statusOptions, onToggle: tog(setSelectedStatus) },
-    { key: 'funnel',     type: 'search-select', category: catLifecycle, label: t('filters.funnelType'),    selected: selectedFunnel,   options: funnelOptions, onToggle: tog(setSelectedFunnel) },
-    { key: 'type',       type: 'search-select', category: catLifecycle, label: t('filters.candidateType'), selected: selectedType,     options: typeOptions,   onToggle: tog(setSelectedType) },
+    { key: 'status', type: 'search-select', category: catLifecycle, label: t('filters.status'),        selected: selectedStatus, options: statusOptions, onToggle: tog(setSelectedStatus) },
+    { key: 'funnel', type: 'search-select', category: catLifecycle, label: t('filters.funnelType'),    selected: selectedFunnel, options: funnelOptions, onToggle: tog(setSelectedFunnel) },
+    { key: 'type',   type: 'search-select', category: catLifecycle, label: t('filters.candidateType'), selected: selectedType,   options: typeOptions,   onToggle: tog(setSelectedType) },
     // ── Kwalificaties ──
-    { key: 'title',      type: 'search-select', category: catQualifications, label: t('filters.function'),       selected: selectedTitle,     options: titleOptions,    onToggle: tog(setSelectedTitle) },
-    { key: 'skills',     type: 'search-select', category: catQualifications, label: t('filters.skills'),         selected: selectedSkills,    options: skillOptions,    onToggle: tog(setSelectedSkills) },
-    { key: 'languages',  type: 'search-select', category: catQualifications, label: t('filters.languages'),      selected: selectedLanguages, options: languageOptions, onToggle: tog(setSelectedLanguages) },
-    { key: 'certs',      type: 'search-select', category: catQualifications, label: t('filters.certifications'), selected: selectedCerts,     options: certOptions,     onToggle: tog(setSelectedCerts) },
+    { key: 'title',  type: 'search-select', category: catQualifications, label: t('filters.function'), selected: selectedTitle, options: titleOptions, onToggle: tog(setSelectedTitle) },
     // ── Persoon ──
-    { key: 'gender',        type: 'search-select', category: catPerson, label: t('filters.gender'),      selected: selectedGeslacht,      options: geslachtOptions,      onToggle: tog(setSelectedGeslacht) },
-    { key: 'nationaliteit', type: 'search-select', category: catPerson, label: t('filters.nationality'), selected: selectedNationaliteit, options: nationaliteitOptions, onToggle: tog(setSelectedNationaliteit) },
-    { key: 'province',      type: 'search-select', category: catPerson, label: t('filters.province'),    selected: selectedProvince,      options: provinceOptions,      onToggle: tog(setSelectedProvince) },
+    { key: 'gender',   type: 'search-select', category: catPerson, label: t('filters.gender'),   selected: selectedGeslacht, options: genderOptions,   onToggle: tog(setSelectedGeslacht) },
+    { key: 'province', type: 'search-select', category: catPerson, label: t('filters.province'), selected: selectedProvince, options: provinceOptions, onToggle: tog(setSelectedProvince) },
     // ── Organisatie ──
-    { key: 'owner',    type: 'search-select', category: catOrganisation, label: t('filters.owner'),  selected: selectedOwner,    options: ownerOptions,  onToggle: tog(setSelectedOwner) },
-    { key: 'branches', type: 'search-select', category: catOrganisation, label: t('filters.branch'), selected: selectedBranches, options: branchOptions, onToggle: tog(setSelectedVestiging) },
-    { key: 'tags',     type: 'search-select', category: catOrganisation, label: t('filters.tags'),   selected: selectedTags,     options: tagOptions,    onToggle: tog(setSelectedTags) },
-  ], [t, catLifecycle, catQualifications, catPerson, catOrganisation, globalSearch, locationCity, locationRadius,
-      selectedStatus, selectedFunnel, selectedType, selectedTitle, selectedSkills, selectedLanguages, selectedCerts,
-      selectedOwner, selectedBranches, selectedGeslacht, selectedNationaliteit, selectedProvince, selectedTags,
-      statusOptions, funnelOptions, typeOptions, titleOptions, skillOptions, languageOptions, certOptions,
-      ownerOptions, branchOptions, geslachtOptions, nationaliteitOptions, provinceOptions, tagOptions])
+    { key: 'owner', type: 'search-select', category: catOrganisation, label: t('filters.owner'), selected: selectedOwner, options: ownerOptions, onToggle: tog(setSelectedOwner) },
+  ], [t, catLifecycle, catQualifications, catPerson, catOrganisation, globalSearch,
+      selectedStatus, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner,
+      statusOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions])
 
   useEffect(() => {
     registerFilters('candidates-page', filterGroups)
     return () => unregisterFilters('candidates-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
+  // All real filters run server-side now; the only client-side refinement left is
+  // the attention tile (its predicate isn't a server filter yet). The loaded page
+  // is already the server-filtered + paginated slice.
   const filtered = useMemo(() => {
-    const q = globalSearch.trim().toLowerCase()
-    return candidates.filter(c => {
-      if (selectedStatus.length        && !selectedStatus.includes(c.status))                             return false
-      if (selectedFunnel.length        && !selectedFunnel.includes(c.stage))                              return false
-      if (selectedType.length          && !selectedType.some(v => (c.candidateTypes ?? []).includes(v)))   return false
-      if (selectedTitle.length         && !selectedTitle.includes(c.title))                               return false
-      if (selectedOwner.length         && !selectedOwner.includes(c.owner))                               return false
-      if (selectedBranches.length     && !selectedBranches.some(v => (c.branches ?? []).includes(v))) return false
-      if (selectedGeslacht.length      && !selectedGeslacht.includes(c.gender))                           return false
-      if (selectedNationaliteit.length && !selectedNationaliteit.includes(c.nationality))                 return false
-      if (selectedProvince.length      && !selectedProvince.includes(c.province))                         return false
-      if (selectedSkills.length        && !selectedSkills.some(v => (c.skills ?? []).includes(v)))        return false
-      if (selectedLanguages.length     && !selectedLanguages.some(v => (c.languages ?? []).some(l => (l.language ?? l) === v))) return false
-      if (selectedCerts.length         && !selectedCerts.some(v => (c.certifications ?? []).some(x => (x.name ?? x) === v)))    return false
-      if (selectedTags.length          && !selectedTags.some(t => (c.tags ?? []).includes(t)))           return false
-      if (attentionFilter === 'stale6m'    && !isStale(c))       return false
-      if (attentionFilter === 'noFollowup' && !isNoFollowup(c))  return false
-      if (q) {
-        const haystack = [
-          c.name, c.title, c.email, c.phone, c.address, c.status, c.owner,
-          c.gender, c.nationality, c.dob, c.summary,
-          ...(c.tags ?? []),
-          ...(c.branches ?? []),
-          ...(c.notes ?? []).map(n => `${n.title ?? ''} ${n.text ?? n.body ?? ''}`),
-          ...(c.documents ?? []).map(d => d.name ?? d.file_name ?? ''),
-          ...(c.experiences ?? []).map(e => `${e.title ?? ''} ${e.company ?? ''}`),
-          ...(c.educations ?? []).map(o => `${o.title ?? ''} ${o.school ?? ''}`),
-        ].join(' ').toLowerCase()
-        if (!haystack.includes(q)) return false
-      }
-      return true
-    })
-  }, [candidates, globalSearch, selectedStatus, selectedFunnel, selectedType, selectedTitle, selectedSkills, selectedLanguages, selectedCerts,
-      selectedOwner, selectedBranches, selectedGeslacht, selectedNationaliteit, selectedProvince, selectedTags, attentionFilter])
+    if (!attentionFilter) return candidates
+    const pred = attentionFilter === 'stale6m' ? isStale : isNoFollowup
+    return candidates.filter(pred)
+  }, [candidates, attentionFilter])
 
   // The list row is intentionally light; on open we fetch the full record
   // (GET /candidates/{id}) and hand THAT to the drawer. `detail` overrides the
