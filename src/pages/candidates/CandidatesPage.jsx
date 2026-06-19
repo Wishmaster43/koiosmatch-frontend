@@ -159,9 +159,12 @@ export default function CandidatesPage() {
   // Owner is id-based: options + counts from stats.by_owner; fall back to the
   // loaded page keyed on ownerId.
   const ownerOptions = useMemo(() => {
-    if (stats?.by_owner) return stats.by_owner.map(o => ({ value: o.id, label: o.name, count: o.count }))
+    if (stats?.by_owner) {
+      // Drop the "no owner" bucket (null id) and guard against a null name.
+      return stats.by_owner.filter(o => o.id).map(o => ({ value: o.id, label: o.name || '—', count: o.count }))
+    }
     const m = {}
-    candidates.forEach(c => { if (c.ownerId) (m[c.ownerId] ??= { value: c.ownerId, label: c.owner, count: 0 }).count++ })
+    candidates.forEach(c => { if (c.ownerId) (m[c.ownerId] ??= { value: c.ownerId, label: c.owner || '—', count: 0 }).count++ })
     return Object.values(m)
   }, [stats, candidates])
   // Server-side filters whose option-lists aren't in stats: gender + province

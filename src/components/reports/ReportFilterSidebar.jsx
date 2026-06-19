@@ -14,7 +14,7 @@ function SearchSelectGroup({ group }) {
   const [query, setQuery] = useState('')
 
   const visible = group.options.filter(o =>
-    o.label.toLowerCase().includes(query.toLowerCase())
+    (o.label ?? '').toLowerCase().includes(query.toLowerCase())
   )
   const hasSelected = group.selected.length > 0
 
