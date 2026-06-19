@@ -160,7 +160,11 @@
     "province": "Province",
     "language": "Language",
     "currency": "Currency",
-    "timezone": "Timezone"
+    "timezone": "Timezone",
+    "street": "Street",
+    "streetPlaceholder": "Street name",
+    "houseNumber": "House number",
+    "houseNumberSuffix": "Addition"
   },
   "locations": {
     "title": "Locations",
@@ -176,7 +180,13 @@
     "namePlaceholder": "Location name",
     "addressLabel": "Address",
     "addressPlaceholder": "Full address",
-    "createBtn": "Create"
+    "createBtn": "Create",
+    "street": "Street",
+    "houseNumber": "House number",
+    "houseNumberSuffix": "Addition",
+    "postalCode": "Postal code",
+    "city": "City",
+    "country": "Country"
   },
   "memory": {
     "title": "Memory",

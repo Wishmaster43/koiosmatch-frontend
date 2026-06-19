@@ -160,7 +160,11 @@
     "province": "Provincia",
     "language": "Idioma",
     "currency": "Moneda",
-    "timezone": "Zona horaria"
+    "timezone": "Zona horaria",
+    "street": "Calle",
+    "streetPlaceholder": "Nombre de la calle",
+    "houseNumber": "Número",
+    "houseNumberSuffix": "Complemento"
   },
   "locations": {
     "title": "Ubicaciones",
@@ -176,7 +180,13 @@
     "namePlaceholder": "Nombre de la ubicación",
     "addressLabel": "Dirección",
     "addressPlaceholder": "Dirección completa",
-    "createBtn": "Crear"
+    "createBtn": "Crear",
+    "street": "Calle",
+    "houseNumber": "Número",
+    "houseNumberSuffix": "Complemento",
+    "postalCode": "Código postal",
+    "city": "Ciudad",
+    "country": "País"
   },
   "memory": {
     "title": "Memoria",

@@ -3,12 +3,29 @@ import { useTranslation } from 'react-i18next'
 import { Plus, X } from 'lucide-react'
 import api from '../../../lib/api'
 
+// Structured address — kept as separate fields so it can be matched/validated and
+// composed consistently. Falls back to a legacy `address`/`full_address` string.
+const EMPTY_FORM = {
+  name: '', street: '', house_number: '', house_number_suffix: '',
+  postal_code: '', city: '', country: '',
+}
+
+function formatAddress(loc) {
+  if (loc.address)      return loc.address
+  if (loc.full_address) return loc.full_address
+  const streetLine = [loc.street, loc.house_number].filter(Boolean).join(' ')
+    + (loc.house_number_suffix ? ` ${loc.house_number_suffix}` : '')
+  const cityLine = [loc.postal_code, loc.city].filter(Boolean).join(' ')
+  const parts = [streetLine.trim(), cityLine.trim(), loc.country].filter(Boolean)
+  return parts.length ? parts.join(', ') : '—'
+}
+
 export default function LocationsSettings() {
   const { t } = useTranslation('settings')
   const [locations, setLocations] = useState([])
   const [loading,   setLoading]   = useState(true)
   const [showModal, setShowModal] = useState(false)
-  const [form,      setForm]      = useState({ name: '', address: '' })
+  const [form,      setForm]      = useState(EMPTY_FORM)
   const [saving,    setSaving]    = useState(false)
   const [page,      setPage]      = useState(1)
   const PER_PAGE = 10
@@ -24,7 +41,7 @@ export default function LocationsSettings() {
     try {
       const res = await api.post('/locations', form)
       setLocations(p => [res.data, ...p])
-      setShowModal(false); setForm({ name: '', address: '' })
+      setShowModal(false); setForm(EMPTY_FORM)
     } catch { /* noop */ } finally { setSaving(false) }
   }
 
@@ -65,7 +82,7 @@ export default function LocationsSettings() {
               ) : paginated.map((loc, i) => (
                 <tr key={loc.id ?? i}>
                   <td style={{ ...TD, fontWeight: 500, color: '#111827' }}>{loc.name}</td>
-                  <td style={TD}>{loc.address ?? loc.full_address ?? '—'}</td>
+                  <td style={TD}>{formatAddress(loc)}</td>
                   <td style={{ ...TD, color: '#9CA3AF', fontSize: 12 }}>
                     {loc.created_at ? new Date(loc.created_at).toLocaleString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
                   </td>
@@ -91,18 +108,40 @@ export default function LocationsSettings() {
       {showModal && (
         <>
           <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
-          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'white', borderRadius: 12, padding: 24, width: 420, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'white', borderRadius: 12, padding: 24, width: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <span style={{ fontSize: 15, fontWeight: 700 }}>{t('locations.create')}</span>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
             </div>
-            {[{ label: t('locations.nameLabel'), key: 'name', placeholder: t('locations.namePlaceholder') }, { label: t('locations.addressLabel'), key: 'address', placeholder: t('locations.addressPlaceholder') }].map(f => (
-              <div key={f.key} style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{f.label}</div>
-                <input value={form[f.key]} onChange={e => setForm(x => ({ ...x, [f.key]: e.target.value }))} placeholder={f.placeholder}
-                  style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
-              </div>
-            ))}
+
+            {(() => {
+              const lbl = { fontSize: 12, color: '#6B7280', marginBottom: 5 }
+              const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }
+              const setF = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }))
+              // Called as a function (not <F/>) so inputs keep focus while typing.
+              const field = (k, label, placeholder) => (
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={lbl}>{label}</div>
+                  <input value={form[k]} onChange={setF(k)} placeholder={placeholder} style={inp} />
+                </div>
+              )
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                  {field('name', t('locations.nameLabel'), t('locations.namePlaceholder'))}
+                  {field('street', t('locations.street'), t('locations.street'))}
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    {field('house_number', t('locations.houseNumber'), '28')}
+                    {field('house_number_suffix', t('locations.houseNumberSuffix'), 'A')}
+                  </div>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    {field('postal_code', t('locations.postalCode'), '1234 AB')}
+                    {field('city', t('locations.city'), t('locations.city'))}
+                  </div>
+                  {field('country', t('locations.country'), 'Nederland')}
+                </div>
+              )
+            })()}
+
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
               <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', cursor: 'pointer' }}>{t('common.cancel')}</button>
               <button onClick={create} disabled={saving || !form.name.trim()}

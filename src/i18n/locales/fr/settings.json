@@ -160,7 +160,11 @@
     "province": "Province",
     "language": "Langue",
     "currency": "Devise",
-    "timezone": "Fuseau horaire"
+    "timezone": "Fuseau horaire",
+    "street": "Rue",
+    "streetPlaceholder": "Nom de rue",
+    "houseNumber": "Numéro",
+    "houseNumberSuffix": "Complément"
   },
   "locations": {
     "title": "Emplacements",
@@ -176,7 +180,13 @@
     "namePlaceholder": "Nom de l'emplacement",
     "addressLabel": "Adresse",
     "addressPlaceholder": "Adresse complète",
-    "createBtn": "Créer"
+    "createBtn": "Créer",
+    "street": "Rue",
+    "houseNumber": "Numéro",
+    "houseNumberSuffix": "Complément",
+    "postalCode": "Code postal",
+    "city": "Ville",
+    "country": "Pays"
   },
   "memory": {
     "title": "Mémoire",

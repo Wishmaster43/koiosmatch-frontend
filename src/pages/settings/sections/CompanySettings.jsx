@@ -10,9 +10,48 @@ const CURRENCIES = ['Euro (€)','Dollar ($)','Pond (£)']
 const TIMEZONES  = ['Europa/Amsterdam','Europa/Brussel','Europa/Londen','UTC']
 const COUNTRIES  = ['Netherlands','Belgium','Germany','United Kingdom']
 
+// Module-scope so they keep a stable identity across renders (otherwise text
+// inputs lose focus on every keystroke).
+function Row({ label, children }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '14px 0', borderBottom: '1px solid #F9FAFB', gap: 24 }}>
+      <div style={{ width: 200, flexShrink: 0, fontSize: 13, color: '#6B7280', paddingTop: 8 }}>{label}</div>
+      <div style={{ flex: 1 }}>{children}</div>
+    </div>
+  )
+}
+
+const baseInput = {
+  height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8,
+  outline: 'none', color: '#111827', width: '100%', maxWidth: 360, boxSizing: 'border-box',
+}
+
+function Input({ value, onChange, placeholder, style }) {
+  return (
+    <input value={value ?? ''} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+      style={{ ...baseInput, ...style }} />
+  )
+}
+
+function Select({ value, onChange, options }) {
+  return (
+    <select value={value} onChange={e => onChange(e.target.value)}
+      style={{ ...baseInput, background: 'white' }}>
+      {options.map(o => <option key={o}>{o}</option>)}
+    </select>
+  )
+}
+
+const EMPTY = {
+  company_industry: '', company_country: 'Netherlands',
+  company_street: '', company_house_number: '', company_house_number_suffix: '',
+  company_address2: '', company_postcode: '', company_city: '', company_province: '',
+  company_language: 'Nederlands', company_currency: 'Euro (€)', company_timezone: 'Europa/Amsterdam',
+}
+
 export default function CompanySettings() {
   const { t } = useTranslation('settings')
-  const [form,       setForm]       = useState({ company_industry:'', company_country:'Netherlands', company_address1:'', company_address2:'', company_postcode:'', company_city:'', company_province:'', company_language:'Nederlands', company_currency:'Euro (€)', company_timezone:'Europa/Amsterdam' })
+  const [form,       setForm]       = useState(EMPTY)
   const [bannerUrl,  setBannerUrl]  = useState(null)
   const [saved,      setSaved]      = useState(false)
   const [saving,     setSaving]     = useState(false)
@@ -25,7 +64,10 @@ export default function CompanySettings() {
         ...f,
         company_industry: s.company_industry ?? '',
         company_country:  s.company_country  ?? 'Netherlands',
-        company_address1: s.company_address1 ?? '',
+        // Migrate legacy single-line address into the street field if needed.
+        company_street:              s.company_street              ?? s.company_address1 ?? '',
+        company_house_number:        s.company_house_number        ?? '',
+        company_house_number_suffix: s.company_house_number_suffix ?? '',
         company_address2: s.company_address2 ?? '',
         company_postcode: s.company_postcode ?? '',
         company_city:     s.company_city     ?? '',
@@ -60,25 +102,6 @@ export default function CompanySettings() {
     } catch { /* noop */ } finally { setSaving(false) }
   }
 
-  const Row = ({ label, children }) => (
-    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '14px 0', borderBottom: '1px solid #F9FAFB', gap: 24 }}>
-      <div style={{ width: 200, flexShrink: 0, fontSize: 13, color: '#6B7280', paddingTop: 8 }}>{label}</div>
-      <div style={{ flex: 1 }}>{children}</div>
-    </div>
-  )
-
-  const Input = ({ k, ...props }) => (
-    <input value={form[k]} onChange={e => set(k, e.target.value)} {...props}
-      style={{ height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#111827', width: '100%', maxWidth: 360 }} />
-  )
-
-  const Select = ({ k, options }) => (
-    <select value={form[k]} onChange={e => set(k, e.target.value)}
-      style={{ height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#111827', width: '100%', maxWidth: 360, background: 'white' }}>
-      {options.map(o => <option key={o}>{o}</option>)}
-    </select>
-  )
-
   return (
     <div style={{ maxWidth: 720 }}>
       <div className="flex items-center justify-between mb-5">
@@ -111,16 +134,23 @@ export default function CompanySettings() {
               </div>
             </div>
           </Row>
-          <Row label={t('company.industry')}><Select k="company_industry" options={INDUSTRIES} /></Row>
-          <Row label={t('company.country')}><Select k="company_country" options={COUNTRIES} /></Row>
-          <Row label={t('company.address1')}><Input k="company_address1" placeholder={t('company.address1Placeholder')} /></Row>
-          <Row label={t('company.address2')}><Input k="company_address2" placeholder="" /></Row>
-          <Row label={t('company.postcode')}><Input k="company_postcode" placeholder="1234 AB" /></Row>
-          <Row label={t('company.city')}><Input k="company_city" placeholder={t('company.cityPlaceholder')} /></Row>
-          <Row label={t('company.province')}><Input k="company_province" placeholder={t('company.province')} /></Row>
-          <Row label={t('company.language')}><Select k="company_language" options={LANGUAGES} /></Row>
-          <Row label={t('company.currency')}><Select k="company_currency" options={CURRENCIES} /></Row>
-          <Row label={t('company.timezone')}><Select k="company_timezone" options={TIMEZONES} /></Row>
+          <Row label={t('company.industry')}><Select value={form.company_industry} onChange={v => set('company_industry', v)} options={INDUSTRIES} /></Row>
+          <Row label={t('company.country')}><Select value={form.company_country} onChange={v => set('company_country', v)} options={COUNTRIES} /></Row>
+
+          <Row label={t('company.street')}><Input value={form.company_street} onChange={v => set('company_street', v)} placeholder={t('company.streetPlaceholder')} /></Row>
+          <Row label={t('company.houseNumber')}>
+            <div style={{ display: 'flex', gap: 12 }}>
+              <Input value={form.company_house_number} onChange={v => set('company_house_number', v)} placeholder="28" style={{ maxWidth: 170 }} />
+              <Input value={form.company_house_number_suffix} onChange={v => set('company_house_number_suffix', v)} placeholder={t('company.houseNumberSuffix')} style={{ maxWidth: 170 }} />
+            </div>
+          </Row>
+          <Row label={t('company.address2')}><Input value={form.company_address2} onChange={v => set('company_address2', v)} /></Row>
+          <Row label={t('company.postcode')}><Input value={form.company_postcode} onChange={v => set('company_postcode', v)} placeholder="1234 AB" /></Row>
+          <Row label={t('company.city')}><Input value={form.company_city} onChange={v => set('company_city', v)} placeholder={t('company.cityPlaceholder')} /></Row>
+          <Row label={t('company.province')}><Input value={form.company_province} onChange={v => set('company_province', v)} placeholder={t('company.province')} /></Row>
+          <Row label={t('company.language')}><Select value={form.company_language} onChange={v => set('company_language', v)} options={LANGUAGES} /></Row>
+          <Row label={t('company.currency')}><Select value={form.company_currency} onChange={v => set('company_currency', v)} options={CURRENCIES} /></Row>
+          <Row label={t('company.timezone')}><Select value={form.company_timezone} onChange={v => set('company_timezone', v)} options={TIMEZONES} /></Row>
         </div>
       )}
     </div>

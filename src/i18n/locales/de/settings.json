@@ -160,7 +160,11 @@
     "province": "Provinz",
     "language": "Sprache",
     "currency": "Währung",
-    "timezone": "Zeitzone"
+    "timezone": "Zeitzone",
+    "street": "Straße",
+    "streetPlaceholder": "Straßenname",
+    "houseNumber": "Hausnummer",
+    "houseNumberSuffix": "Zusatz"
   },
   "locations": {
     "title": "Standorte",
@@ -176,7 +180,13 @@
     "namePlaceholder": "Standortname",
     "addressLabel": "Adresse",
     "addressPlaceholder": "Vollständige Adresse",
-    "createBtn": "Erstellen"
+    "createBtn": "Erstellen",
+    "street": "Straße",
+    "houseNumber": "Hausnummer",
+    "houseNumberSuffix": "Zusatz",
+    "postalCode": "PLZ",
+    "city": "Ort",
+    "country": "Land"
   },
   "memory": {
     "title": "Speicher",

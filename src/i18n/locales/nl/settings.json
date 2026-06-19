@@ -160,7 +160,11 @@
     "province": "Provincie",
     "language": "Taal",
     "currency": "Valuta",
-    "timezone": "Tijdzone"
+    "timezone": "Tijdzone",
+    "street": "Straat",
+    "streetPlaceholder": "Straatnaam",
+    "houseNumber": "Huisnummer",
+    "houseNumberSuffix": "Toevoegsel"
   },
   "locations": {
     "title": "Locaties",
@@ -176,7 +180,13 @@
     "namePlaceholder": "Locatienaam",
     "addressLabel": "Adres",
     "addressPlaceholder": "Volledig adres",
-    "createBtn": "Aanmaken"
+    "createBtn": "Aanmaken",
+    "street": "Straat",
+    "houseNumber": "Huisnummer",
+    "houseNumberSuffix": "Toevoegsel",
+    "postalCode": "Postcode",
+    "city": "Plaats",
+    "country": "Land"
   },
   "memory": {
     "title": "Geheugen",
