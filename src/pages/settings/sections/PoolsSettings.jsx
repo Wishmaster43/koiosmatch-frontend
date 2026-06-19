@@ -12,6 +12,15 @@ export default function PoolsSettings() {
       endpoint="/pools"
       addLabel={t('poolsSettings.add')}
       withColor
+      extraField={{
+        key: 'context',
+        label: t('poolsSettings.contextLabel'),
+        default: 'recruitment',
+        options: [
+          { value: 'recruitment', label: t('poolsSettings.contextRecruitment') },
+          { value: 'planning',    label: t('poolsSettings.contextPlanning') },
+        ],
+      }}
     />
   )
 }

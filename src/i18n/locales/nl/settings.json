@@ -213,8 +213,11 @@
   },
   "poolsSettings": {
     "title": "Talentenpools",
-    "subtitle": "Beheer talentenpools met naam en kleur — voor lijsten van kandidaten.",
-    "add": "Pool toevoegen"
+    "subtitle": "Beheer pools met naam en kleur — voor lijsten van kandidaten.",
+    "add": "Pool toevoegen",
+    "contextLabel": "Soort pool",
+    "contextRecruitment": "Recruitment (talentenpool)",
+    "contextPlanning": "Planning (inzetpool)"
   },
   "lookups": {
     "title": "Kandidaat-lookups",

@@ -213,8 +213,11 @@
   },
   "poolsSettings": {
     "title": "Talent pools",
-    "subtitle": "Manage talent pools with a name and colour — for candidate lists.",
-    "add": "Add pool"
+    "subtitle": "Manage pools with a name and colour — for candidate lists.",
+    "add": "Add pool",
+    "contextLabel": "Pool type",
+    "contextRecruitment": "Recruitment (talent pool)",
+    "contextPlanning": "Planning (staffing pool)"
   },
   "lookups": {
     "title": "Candidate lookups",

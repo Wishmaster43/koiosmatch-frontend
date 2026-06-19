@@ -9,12 +9,15 @@ import { Check, Save, Plus, X, Trash2, RefreshCw } from 'lucide-react'
 import api from '../../../lib/api'
 import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
 
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false }) {
+// extraField (optioneel): { key, label, options: [{value,label}], default } —
+// rendert een extra keuzeveld in de aanmaak-modal + een badge in de rij.
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null }) {
   const { t } = useTranslation('settings')
+  const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(extraField ? { [extraField.key]: extraField.default } : {}) })
   const [items,     setItems]     = useState([])
   const [loading,   setLoading]   = useState(true)
   const [showModal, setShowModal] = useState(false)
-  const [draft,     setDraft]     = useState({ name: '', color: '#3B8FD4' })
+  const [draft,     setDraft]     = useState(emptyDraft)
   const [saving,    setSaving]    = useState(false)
   const [saved,     setSaved]     = useState(false)
   const [deleting,  setDeleting]  = useState(null)
@@ -28,8 +31,8 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     setSaving(true)
     try {
       const res = await api.post(endpoint, draft)
-      setItems(p => [...p, res.data])
-      setShowModal(false); setDraft({ name: '', color: '#3B8FD4' })
+      setItems(p => [...p, res.data?.data ?? res.data])
+      setShowModal(false); setDraft(emptyDraft())
     } catch { /* noop */ } finally { setSaving(false) }
   }
 
@@ -91,7 +94,12 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
               {withColor && <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />}
               {withColor
                 ? <ColorBadge label={item.name} color={item.color ?? '#6B7280'} />
-                : <span style={{ flex: 1, fontSize: 13, color: '#111827' }}>{item.name}</span>}
+                : <span style={{ fontSize: 13, color: '#111827' }}>{item.name}</span>}
+              {extraField && item[extraField.key] && (
+                <span style={{ fontSize: 11, color: '#6B7280', background: '#F3F4F6', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>
+                  {extraField.options.find(o => o.value === item[extraField.key])?.label ?? item[extraField.key]}
+                </span>
+              )}
               <div style={{ flex: 1 }} />
               <button onClick={() => remove(item)} disabled={deleting === item.id}
                 style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -121,6 +129,15 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
               <div style={{ marginBottom: 14 }}>
                 <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{t('statusList.colorLabel')}</div>
                 <ColorSwatch color={draft.color} onChange={c => setDraft(d => ({ ...d, color: c }))} />
+              </div>
+            )}
+            {extraField && (
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{extraField.label}</div>
+                <select value={draft[extraField.key]} onChange={e => setDraft(d => ({ ...d, [extraField.key]: e.target.value }))}
+                  style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'white' }}>
+                  {extraField.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
