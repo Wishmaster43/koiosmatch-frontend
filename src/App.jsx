@@ -15,7 +15,6 @@ import './index.css'
 // ── Shell (always loaded) ────────────────────────────────────────────────────
 import LoginPage              from './pages/auth/LoginPage'
 import Sidebar                from './components/layout/Sidebar'
-import TenantSwitcher         from './components/layout/TenantSwitcher'
 import KoiosPanel             from './components/layout/KoiosPanel'
 import ReportFilterSidebar    from './components/reports/ReportFilterSidebar'
 
@@ -257,11 +256,11 @@ function DashboardLayout() {
       <KoiosPanel open={koiosOpen} onClose={() => setKoiosOpen(false)} />
 
       {/* ── Right column: topbar + content + filter panel ── */}
-      <div className="kc-main-bg flex flex-col flex-1 overflow-hidden" style={{ background: 'var(--bg)' }}>
+      <div className="km-main-bg flex flex-col flex-1 overflow-hidden" style={{ background: 'var(--bg)' }}>
 
         {/* Topbar */}
         <div
-          className="kc-topbar flex items-center flex-shrink-0 gap-3 px-5"
+          className="km-topbar flex items-center flex-shrink-0 gap-3 px-5"
           style={{ height: 52, background: 'var(--topbar-bg)', borderBottom: '1px solid var(--border)' }}
         >
           {/* Sidebar toggle */}
@@ -279,8 +278,23 @@ function DashboardLayout() {
             {expanded ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
           </button>
 
-          {/* Tenant card / super-admin bureau-switcher */}
-          <TenantSwitcher />
+          {/* Tenant logo + naam (de bureau-switcher zelf zit in de Sidebar-kaart) */}
+          <div className="flex items-center flex-shrink-0 gap-2">
+            {tenant?.logo_url
+              ? <img src={tenant.logo_url} alt="" style={{ height: 22, borderRadius: 4 }} />
+              : (
+                <div
+                  className="flex items-center justify-center flex-shrink-0 rounded-md"
+                  style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 11, color: 'white', fontWeight: 700 }}
+                >
+                  {(tenant?.name ?? 'K').charAt(0).toUpperCase()}
+                </div>
+              )
+            }
+            <span className="font-semibold text-gray-900" style={{ fontSize: 13 }}>
+              {tenant?.name ?? 'KoiosMatch'}
+            </span>
+          </div>
 
           {/* Breadcrumb separator + page title */}
           <span style={{ color: 'var(--border)', fontSize: 16 }}>›</span>
@@ -370,7 +384,7 @@ function DashboardLayout() {
           {/* Right filter panel — same height as content, slides next to page */}
           {rightPanelOpen && hasFilters && (
             <div
-              className="kc-right-panel flex-shrink-0 overflow-y-auto"
+              className="km-right-panel flex-shrink-0 overflow-y-auto"
               style={{ width: 240, borderLeft: '1px solid var(--border)', background: 'var(--surface)' }}
             >
               <ReportFilterSidebar

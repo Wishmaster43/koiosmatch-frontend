@@ -83,6 +83,10 @@ interface RetryableConfig extends InternalAxiosRequestConfig {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<{ retry_after?: number; message?: string }>) => {
+    // Aborted/cancelled requests (StrictMode double-effect, navigating away,
+    // superseded fetches) are not real failures — skip logging + auth/retry logic.
+    if (axios.isCancel(error) || error.code === 'ERR_CANCELED') return Promise.reject(error)
+
     const status = error.response?.status
     const config = (error.config ?? {}) as RetryableConfig
     const url    = config.url ?? ''
@@ -111,8 +115,8 @@ api.interceptors.response.use(
       localStorage.removeItem('active_tenant')
       localStorage.removeItem('accessible_pages')
       if (window.location.pathname !== '/login') {
-        sessionStorage.setItem('kc_session_expired', '1')
-        window.dispatchEvent(new CustomEvent('kc:auth-expired'))
+        sessionStorage.setItem('km_session_expired', '1')
+        window.dispatchEvent(new CustomEvent('km:auth-expired'))
       }
     }
     return Promise.reject(error)

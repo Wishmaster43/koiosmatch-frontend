@@ -104,7 +104,7 @@ export function AuthProvider({ children }) {
   }
 
   // ── Session expiry (401) ─────────────────────────────────────────────────────
-  // api.js fires 'kc:auth-expired' after a 401 (and has already cleared
+  // api.js fires 'km:auth-expired' after a 401 (and has already cleared
   // localStorage). We clear React state here so ProtectedRoute routes to /login
   // within the SPA — no full-page reload, no lost router context.
   useEffect(() => {
@@ -114,8 +114,8 @@ export function AuthProvider({ children }) {
       setTenants([])
       setAccessiblePages([])
     }
-    window.addEventListener('kc:auth-expired', onExpired)
-    return () => window.removeEventListener('kc:auth-expired', onExpired)
+    window.addEventListener('km:auth-expired', onExpired)
+    return () => window.removeEventListener('km:auth-expired', onExpired)
   }, [])
 
   // ── Startup: restore session ─────────────────────────────────────────────────
@@ -263,7 +263,8 @@ export function AuthProvider({ children }) {
 
   const hasRole  = (role) => user?.roles?.some(r => (typeof r === 'string' ? r : r.name) === role) ?? false
   const isAdmin  = ()     => hasRole('admin') || hasRole('tenant_admin') || hasRole('super_admin')
-  const isSuperAdmin = () => user?.is_super_admin === true
+  // Super admin = explicit flag, the super_admin role, or a user without a tenant.
+  const isSuperAdmin = () => user?.is_super_admin === true || hasRole('super_admin') || (!!user && user.tenant_id == null && !user.tenant)
 
   // Capability check for paid add-on modules ('sm', 'hf', 'ai', 'ats', 'plan').
   // Used to gate SM nav/pages now that /sm/* is hard-gated server-side (403).

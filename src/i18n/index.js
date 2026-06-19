@@ -6,7 +6,7 @@
  * with Vite's import.meta.glob, so adding a language or a page's translation file
  * needs NO change here: just drop the JSON in the right folder.
  *
- * The active language lives in ThemeContext (persisted as `kc-language`); its
+ * The active language lives in ThemeContext (persisted as `km-language`); its
  * setLanguage() calls i18n.changeLanguage() to switch at runtime.
  */
 import i18n from 'i18next'
@@ -27,7 +27,7 @@ for (const path in modules) {
 
 i18n.use(initReactI18next).init({
   resources,
-  lng: localStorage.getItem('kc-language') || 'nl',
+  lng: localStorage.getItem('km-language') || 'nl',
   fallbackLng: 'nl',
   ns: [...namespaces],
   defaultNS: 'common',

@@ -80,8 +80,8 @@ function CredentialForm({ onMfaRequired }) {
   const [loading,  setLoading] = useState(false)
   const [error,    setError]   = useState('')
   // Set by api.js when a 401 ended the previous session — show a hint, then clear.
-  const [expired] = useState(() => sessionStorage.getItem('kc_session_expired') === '1')
-  useEffect(() => { if (expired) sessionStorage.removeItem('kc_session_expired') }, [expired])
+  const [expired] = useState(() => sessionStorage.getItem('km_session_expired') === '1')
+  useEffect(() => { if (expired) sessionStorage.removeItem('km_session_expired') }, [expired])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

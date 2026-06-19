@@ -9,17 +9,17 @@ import i18n from '../i18n'
 const ThemeContext = createContext()
 
 export function ThemeProvider({ children }) {
-  const [theme,    setThemeState]    = useState(() => localStorage.getItem('kc-theme')    || 'light')
-  const [language, setLanguageState] = useState(() => localStorage.getItem('kc-language') || 'nl')
+  const [theme,    setThemeState]    = useState(() => localStorage.getItem('km-theme')    || 'light')
+  const [language, setLanguageState] = useState(() => localStorage.getItem('km-language') || 'nl')
 
   const setTheme = (t) => {
     setThemeState(t)
-    localStorage.setItem('kc-theme', t)
+    localStorage.setItem('km-theme', t)
   }
 
   const setLanguage = (l) => {
     setLanguageState(l)
-    localStorage.setItem('kc-language', l)
+    localStorage.setItem('km-language', l)
     i18n.changeLanguage(l)
   }
 

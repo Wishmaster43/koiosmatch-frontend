@@ -64,16 +64,16 @@
 }
 
 /* Topbar + main content area */
-[data-theme="dark"] .kc-topbar {
+[data-theme="dark"] .km-topbar {
   background: var(--topbar-bg) !important;
   border-color: var(--border) !important;
 }
 
-[data-theme="dark"] .kc-main-bg {
+[data-theme="dark"] .km-main-bg {
   background: var(--bg) !important;
 }
 
-[data-theme="dark"] .kc-right-panel {
+[data-theme="dark"] .km-right-panel {
   background: var(--surface) !important;
   border-color: var(--border) !important;
 }
