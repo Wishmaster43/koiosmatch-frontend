@@ -30,6 +30,7 @@
   "bulk": {
     "selected": "{{count}} selected",
     "addToPool": "Add to pool",
+    "removeFromPool": "Remove from pool",
     "deselect": "Deselect",
     "noPools": "No pools configured yet."
   },

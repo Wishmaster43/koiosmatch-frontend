@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Sparkles, RefreshCw } from 'lucide-react'
+import { useDateFormat } from '../../../lib/datetime'
 
 /** AI advisory block (dummy insights for now — to be wired to the API later). */
 export default function KoiosAiBlock({ c }) {
   const { t } = useTranslation('candidates')
+  const { formatDate } = useDateFormat()
   const [loading, setLoading] = useState(false)
 
   const coreFields = [c.email, c.phone, c.dob, c.address, c.gender, c.nationality, c.summary]
@@ -25,7 +27,7 @@ export default function KoiosAiBlock({ c }) {
       type: t('ai.engagementLabel'),
       color: 'var(--color-secondary)',
       text: c.lastContactDate
-        ? t('ai.engagementContacted', { date: c.lastContactDate })
+        ? t('ai.engagementContacted', { date: formatDate(c.lastContactDate) })
         : t('ai.engagementNone'),
     },
   ]

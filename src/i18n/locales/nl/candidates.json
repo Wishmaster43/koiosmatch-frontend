@@ -30,6 +30,7 @@
   "bulk": {
     "selected": "{{count}} geselecteerd",
     "addToPool": "Toevoegen aan pool",
+    "removeFromPool": "Verwijderen uit pool",
     "deselect": "Deselecteren",
     "noPools": "Nog geen pools ingesteld."
   },

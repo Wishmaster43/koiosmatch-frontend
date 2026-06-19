@@ -303,6 +303,11 @@ export default function CandidatesPage() {
     if (ids.length) api.post(`/pools/${poolId}/candidates`, { candidate_ids: ids }).catch(() => {})
     setSelectedIds(new Set())
   }
+  const bulkRemoveFromPool = (poolId) => {
+    const ids = [...selectedIds]
+    if (ids.length) api.delete(`/pools/${poolId}/candidates`, { data: { candidate_ids: ids } }).catch(() => {})
+    setSelectedIds(new Set())
+  }
 
   // Recharts hands the clicked segment back at top level AND under `.payload`.
   const pickKey = (d) => d?.key ?? d?.payload?.key ?? d?.name
@@ -353,7 +358,8 @@ export default function CandidatesPage() {
           {/* Toolbar — bulk-bar zodra er selectie is, anders de toevoeg-knop */}
           <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
             {selectedIds.size > 0 ? (
-              <CandidatesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())} onPickPool={bulkAddToPool} />
+              <CandidatesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
+                onAddToPool={bulkAddToPool} onRemoveFromPool={bulkRemoveFromPool} />
             ) : (
               <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
                 background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
