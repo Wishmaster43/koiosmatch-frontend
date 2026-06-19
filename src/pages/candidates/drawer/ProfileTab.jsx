@@ -19,7 +19,13 @@ const NATIONALITIES = ['Nederlands','Belgisch','Duits','Frans','Brits','Pools','
  * Edit button switches here), so name + fields toggle together. */
 export default function ProfileTab({ c, editing, onEditSave, onEditCancel, onStartEdit }) {
   const { t } = useTranslation('candidates')
-  const [form, setForm] = useState({ gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '', email: c.email ?? '', phone: c.phone ?? '', address: c.address ?? '', province: c.province ?? '', linkedin: c.linkedin ?? '', summary: c.summary ?? '' })
+  const [form, setForm] = useState({
+    gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '',
+    email: c.email ?? '', phone: c.phone ?? '',
+    street: c.street ?? '', houseNumber: c.houseNumber ?? '', houseNumberSuffix: c.houseNumberSuffix ?? '',
+    postalCode: c.postalCode ?? '', city: c.city ?? '', province: c.province ?? '',
+    linkedin: c.linkedin ?? '', summary: c.summary ?? '',
+  })
   const setF = (k, v) => setForm(p => ({ ...p, [k]: v }))
 
   const inputStyle = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
@@ -37,14 +43,18 @@ export default function ProfileTab({ c, editing, onEditSave, onEditCancel, onSta
           </button>
         )}
         {[
-          [t('profile.gender'),      'gender'],
-          [t('profile.nationality'), 'nationality'],
-          [t('profile.dob'),         'dob'],
-          [t('profile.email'),       'email'],
-          [t('profile.phone'),       'phone'],
-          [t('profile.address'),     'address'],
-          [t('profile.province'),    'province'],
-          [t('profile.linkedin'),    'linkedin'],
+          [t('profile.gender'),            'gender'],
+          [t('profile.nationality'),       'nationality'],
+          [t('profile.dob'),               'dob'],
+          [t('profile.email'),             'email'],
+          [t('profile.phone'),             'phone'],
+          [t('profile.street'),            'street'],
+          [t('profile.houseNumber'),       'houseNumber'],
+          [t('profile.houseNumberSuffix'), 'houseNumberSuffix'],
+          [t('profile.postalCode'),        'postalCode'],
+          [t('profile.city'),              'city'],
+          [t('profile.province'),          'province'],
+          [t('profile.linkedin'),          'linkedin'],
         ].map(([label, key]) => (
           <div key={key} style={{ display: 'flex', alignItems: 'center', padding: '9px 12px', borderBottom: '1px solid var(--border)', gap: 16, background: 'var(--surface)' }}>
             <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
@@ -55,9 +65,9 @@ export default function ProfileTab({ c, editing, onEditSave, onEditCancel, onSta
               key === 'gender' ? (
                 <select value={form.gender} onChange={e => setF('gender', e.target.value)} style={inputStyle}>
                   <option value="">{t('common:select')}</option>
-                  <option value="man">{t('modal.gender.male')}</option>
-                  <option value="vrouw">{t('modal.gender.female')}</option>
-                  <option value="anders">{t('modal.gender.other')}</option>
+                  <option value="male">{t('modal.gender.male')}</option>
+                  <option value="female">{t('modal.gender.female')}</option>
+                  <option value="other">{t('modal.gender.other')}</option>
                 </select>
               ) : key === 'nationality' ? (
                 <select value={form.nationality} onChange={e => setF('nationality', e.target.value)} style={inputStyle}>

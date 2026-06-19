@@ -63,6 +63,7 @@ export function mapCandidate(c) {
     // Detail address parts (list only sends `address`/`city`).
     street:          c.street ?? '',
     houseNumber:     c.house_number ?? '',
+    houseNumberSuffix: c.house_number_suffix ?? c.house_number_addition ?? '',
     postalCode:      c.postal_code ?? '',
     address:         [c.street, c.city].filter(Boolean).join(', ') || c.address || c.city || '-',
     gender:          c.gender ?? c.sex ?? '-',

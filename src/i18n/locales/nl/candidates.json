@@ -144,9 +144,14 @@
     "email": "E-mailadres",
     "phone": "Telefoon",
     "address": "Adres",
+    "street": "Straat",
+    "houseNumber": "Huisnummer",
+    "houseNumberSuffix": "Toevoeging",
+    "postalCode": "Postcode",
+    "city": "Plaats",
     "province": "Provincie",
     "linkedin": "LinkedIn",
-    "summary": "Samenvatting",
+    "summary": "Profieltekst",
     "selectDate": "Selecteer een datum"
   },
   "addFields": {

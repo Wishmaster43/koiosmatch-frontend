@@ -144,9 +144,14 @@
     "email": "Email address",
     "phone": "Phone",
     "address": "Address",
+    "street": "Street",
+    "houseNumber": "House number",
+    "houseNumberSuffix": "Addition",
+    "postalCode": "Postal code",
+    "city": "City",
     "province": "Province",
     "linkedin": "LinkedIn",
-    "summary": "Summary",
+    "summary": "Profile text",
     "selectDate": "Select a date"
   },
   "addFields": {
