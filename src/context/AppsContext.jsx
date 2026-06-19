@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import api from '../lib/api'
+import { COOKIE_AUTH } from '../lib/authMode'
 
 /**
  * AppsContext — which paid add-on "apps" are enabled for the current tenant.
@@ -71,7 +72,8 @@ export function AppsProvider({ children }) {
   // Fetch the authoritative enabled-apps list once on mount and update the cache.
   // Backend contract: GET /settings/apps returns { enabled: ["whatsapp", ...] }.
   useEffect(() => {
-    if (!localStorage.getItem('auth_token')) {
+    // Cookie mode has no JS-visible token — let the request go and rely on 401.
+    if (!COOKIE_AUTH && !localStorage.getItem('auth_token')) {
       setLoading(false)
       return
     }

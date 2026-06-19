@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
-import api from '../lib/api'
+import api, { primeCsrf } from '../lib/api'
+import { COOKIE_AUTH } from '../lib/authMode'
 import { hasModule as tenantHasModule } from '../lib/modules'
 
 /**
@@ -117,18 +118,21 @@ export function AuthProvider({ children }) {
     return () => window.removeEventListener('kc:auth-expired', onExpired)
   }, [])
 
-  // ── Startup: restore session from localStorage ───────────────────────────────
+  // ── Startup: restore session ─────────────────────────────────────────────────
+  // Bearer mode: need a cached token to bother calling /auth/me.
+  // Cookie mode: there is no JS-visible token — always try /auth/me (the httpOnly
+  // cookie authenticates it; a 401 just means "not logged in").
   useEffect(() => {
     const token = localStorage.getItem('auth_token')
     const saved = localStorage.getItem('auth_user')
 
-    if (!token || !saved) {
+    if (!COOKIE_AUTH && (!token || !saved)) {
       setLoading(false)
       return
     }
 
-    try { setUser(JSON.parse(saved)) } catch {
-      localStorage.removeItem('auth_user')
+    if (saved) {
+      try { setUser(JSON.parse(saved)) } catch { localStorage.removeItem('auth_user') }
     }
 
     api.get('/auth/me')
@@ -155,6 +159,8 @@ export function AuthProvider({ children }) {
    * Returns the user object on normal success.
    */
   const login = async (email, password) => {
+    // Cookie mode: prime the CSRF cookie before the state-changing login POST.
+    await primeCsrf()
     const res = await api.post('/auth/login', { email, password })
 
     // MFA step-up: backend returns { mfa_required: true, mfa_token } — no auth
@@ -164,7 +170,8 @@ export function AuthProvider({ children }) {
     }
 
     const { token, tenant } = res.data
-    localStorage.setItem('auth_token', token)
+    // Bearer mode stores the token; cookie mode has no token in the body.
+    if (token) localStorage.setItem('auth_token', token)
     const u = applyAuthResponse(res.data)
 
     if (tenant?.id) {
@@ -198,7 +205,7 @@ export function AuthProvider({ children }) {
   const verifyMfa = async (mfaToken, code) => {
     const res = await api.post('/auth/mfa/verify', { mfa_token: mfaToken, code })
     const { token, tenant } = res.data
-    localStorage.setItem('auth_token', token)
+    if (token) localStorage.setItem('auth_token', token)  // cookie mode: no body token
     const u = applyAuthResponse(res.data)
 
     if (tenant?.id) {

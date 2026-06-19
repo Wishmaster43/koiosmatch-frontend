@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import api from '../lib/api'
+import { COOKIE_AUTH } from '../lib/authMode'
 
 /**
  * LookupsContext — the tenant-configurable candidate lookups.
@@ -72,7 +73,8 @@ export function LookupsProvider({ children }) {
   const [loading,        setLoading]        = useState(true)
 
   useEffect(() => {
-    if (!localStorage.getItem('auth_token')) { setLoading(false); return }
+    // Cookie mode has no JS-visible token — let the request go and rely on 401.
+    if (!COOKIE_AUTH && !localStorage.getItem('auth_token')) { setLoading(false); return }
     api.get('/settings/candidate-lookups')
       .then(res => {
         const d = res.data ?? {}

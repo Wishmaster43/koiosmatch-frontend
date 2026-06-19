@@ -4,6 +4,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios'
 import type { ListResult, PaginationMeta } from '../types/api'
+import { COOKIE_AUTH, CSRF_COOKIE_URL } from './authMode'
 
 /**
  * api — the single shared axios instance for the whole app.
@@ -22,11 +23,27 @@ import type { ListResult, PaginationMeta } from '../types/api'
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api',
   timeout: 120000,
+  // Cookie auth: send the httpOnly auth cookie + auto-attach the CSRF token from
+  // the XSRF-TOKEN cookie. Off by default so current CORS/Bearer flow is unchanged.
+  withCredentials: COOKIE_AUTH,
+  withXSRFToken: COOKIE_AUTH,
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
 })
+
+/**
+ * Prime the CSRF cookie before a state-changing auth call (login/logout).
+ * No-op in Bearer mode. Uses a bare axios call because the CSRF endpoint lives
+ * at the app root, not under the /api baseURL.
+ */
+export async function primeCsrf(): Promise<void> {
+  if (!COOKIE_AUTH) return
+  await axios.get(CSRF_COOKIE_URL, { withCredentials: true })
+}
 
 /**
  * Request interceptor — attaches the saved auth token + active tenant.
@@ -39,8 +56,9 @@ const api = axios.create({
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token  = localStorage.getItem('auth_token')
   const tenant = localStorage.getItem('active_tenant')
-  if (token)  config.headers.Authorization = `Bearer ${token}`
-  if (tenant) config.headers['X-Tenant']   = tenant
+  // In cookie mode the httpOnly cookie carries auth — never attach a Bearer header.
+  if (!COOKIE_AUTH && token) config.headers.Authorization = `Bearer ${token}`
+  if (tenant) config.headers['X-Tenant'] = tenant
   return config
 })
 
