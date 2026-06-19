@@ -5,7 +5,7 @@ import { CvDocument } from './CandidateCvTemplate'
 import { useCvSettings } from '../../lib/useCvSettings'
 import api from '../../lib/api'
 import { useTranslation } from 'react-i18next'
-import { useLocale } from '../../lib/datetime'
+import { useLocale, useDateFormat } from '../../lib/datetime'
 import EntityDrawer from '../../components/drawer/EntityDrawer'
 import EntityHeader from '../../components/drawer/EntityHeader'
 import SelectMenu from '../../components/ui/SelectMenu'
@@ -34,6 +34,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { settings: cvSettings } = useCvSettings()
   const { t } = useTranslation('candidates')
   const locale = useLocale()
+  const { formatDate } = useDateFormat()
   const { candidateTypes, funnelTypes, statuses, funnelMeta } = useLookups()
   // Cross-cutting state used by the header; tab-specific state lives in each tab.
   const [cvGenerating,  setCvGenerating]  = useState(false)
@@ -201,7 +202,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           {(c.lastContactDate || c.lastContactType) ? (
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
               {t('drawer.lastContact')}:&nbsp;
-              {c.lastContactDate && <span style={{ color: 'var(--text)' }}>{c.lastContactDate}</span>}
+              {c.lastContactDate && <span style={{ color: 'var(--text)' }}>{formatDate(c.lastContactDate)}</span>}
               {c.lastContactDate && c.lastContactType && <span> · </span>}
               {c.lastContactType && <span style={{ color: 'var(--text)' }}>{c.lastContactType}</span>}
             </div>

@@ -39,6 +39,7 @@
     "locations": "Locations",
     "memory": "Memory",
     "candidate_lookups": "Statuses & stages",
+    "pools": "Talent pools",
     "phases": "Phases",
     "candidate_status": "Candidate status",
     "vacancy": "Vacancy",
@@ -209,6 +210,11 @@
     "title": "Candidate status",
     "subtitle": "Manage your candidate statuses and their availability.",
     "add": "Add status"
+  },
+  "poolsSettings": {
+    "title": "Talent pools",
+    "subtitle": "Manage talent pools with a name and colour — for candidate lists.",
+    "add": "Add pool"
   },
   "lookups": {
     "title": "Candidate lookups",

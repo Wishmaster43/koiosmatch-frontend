@@ -39,6 +39,7 @@
     "locations": "Locaties",
     "memory": "Geheugen",
     "candidate_lookups": "Statussen & fasen",
+    "pools": "Talentenpools",
     "phases": "Fasen",
     "candidate_status": "Kandidaatstatus",
     "vacancy": "Vacature",
@@ -209,6 +210,11 @@
     "title": "Kandidaatstatus",
     "subtitle": "Beheer de status van je kandidaten en beheer hun beschikbaarheid.",
     "add": "Status toevoegen"
+  },
+  "poolsSettings": {
+    "title": "Talentenpools",
+    "subtitle": "Beheer talentenpools met naam en kleur — voor lijsten van kandidaten.",
+    "add": "Pool toevoegen"
   },
   "lookups": {
     "title": "Kandidaat-lookups",

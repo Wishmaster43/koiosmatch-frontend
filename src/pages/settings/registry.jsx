@@ -18,7 +18,7 @@
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, ClipboardList, Clock,
   CreditCard, Download, FileText, Key, LayoutDashboard, Lock, Mail, MapPin, MessageCircle,
-  Package, Palette, RotateCcw, Shield, Store, Tags, Target, Users, Webhook, XCircle, Zap,
+  Package, Palette, RotateCcw, Shield, Star, Store, Tags, Target, Users, Webhook, XCircle, Zap,
 } from 'lucide-react'
 
 import UsersPage from '../users/UsersPage'
@@ -29,6 +29,7 @@ import CompanySettings from './sections/CompanySettings'
 import LocationsSettings from './sections/LocationsSettings'
 import MemorySettings from './sections/MemorySettings'
 import CandidateLookupsSettings from './sections/CandidateLookupsSettings'
+import PoolsSettings from './sections/PoolsSettings'
 import VacancySettings from './sections/VacancySettings'
 import RejectionSettings from './sections/RejectionSettings'
 import CvTemplateSettings from './sections/CvTemplateSettings'
@@ -72,6 +73,7 @@ export const NAV_GROUPS = [
     items: [
       { id: 'memory',            label: 'Memory',            icon: BookOpen,  component: MemorySettings },
       { id: 'candidate_lookups', label: 'Candidate lookups', icon: Tags,      component: CandidateLookupsSettings },
+      { id: 'pools',             label: 'Talent pools',      icon: Star,      component: PoolsSettings },
       { id: 'vacancy',           label: 'Vacancy',           icon: Briefcase, component: VacancySettings },
       { id: 'rejection',         label: 'Rejection reasons', icon: XCircle,   component: RejectionSettings },
       { id: 'cv_template',       label: 'CV template',       icon: FileText,  component: CvTemplateSettings },

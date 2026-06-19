@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import StatsTab from '../../../components/drawer/tabs/StatsTab'
+import { useDateFormat } from '../../../lib/datetime'
 
 /** Statistics tab — maps the candidate onto the generic StatsTab. */
 export default function StatisticsTab({ c }) {
   const { t } = useTranslation('candidates')
+  const { formatDate } = useDateFormat()
   return (
     <StatsTab
       kpis={[
@@ -16,7 +18,7 @@ export default function StatisticsTab({ c }) {
         title: t('statistics.statusOverview'),
         rows: [
           [t('statistics.status'),      c.status ?? '-'],
-          [t('statistics.lastContact'), c.lastContactDate ?? '-'],
+          [t('statistics.lastContact'), c.lastContactDate ? formatDate(c.lastContactDate) : '-'],
           [t('statistics.contactType'), c.lastContactType ?? '-'],
           [t('statistics.memberSince'), c.created ?? '-'],
           [t('statistics.branch'),      (c.branches ?? []).join(', ') || '-'],
