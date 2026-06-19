@@ -22,6 +22,12 @@ const navLabel = (t, id) => t(`nav.${id.replace(/\./g, '_')}`)
 const tenantInitials = (name) =>
   name ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '??'
 
+// `domains` can be strings or Laravel-tenancy domain objects {domain, ...}.
+const tenantDomain = (tn) => {
+  const d = tn?.domains?.[0]
+  return (typeof d === 'string' ? d : d?.domain) ?? null
+}
+
 /**
  * TenantSwitcher — the active-bureau card top-left in the sidebar.
  *
@@ -170,7 +176,7 @@ function TenantSwitcher({ expanded }) {
                   </div>
                   <div className="flex-1 min-w-0 text-left">
                     <div className="text-sm font-medium text-gray-700 truncate">{tn.name ?? tn.id}</div>
-                    {tn.domains?.[0] && <div className="text-xs text-gray-400 truncate">{tn.domains[0]}</div>}
+                    {tenantDomain(tn) && <div className="text-xs text-gray-400 truncate">{tenantDomain(tn)}</div>}
                   </div>
                   {switching === tn.id
                     ? <Loader2 size={13} className="flex-shrink-0 animate-spin" style={{ color: '#9CA3AF' }} />
