@@ -15,6 +15,7 @@ import './index.css'
 // ── Shell (always loaded) ────────────────────────────────────────────────────
 import LoginPage              from './pages/auth/LoginPage'
 import Sidebar                from './components/layout/Sidebar'
+import TenantSwitcher         from './components/layout/TenantSwitcher'
 import KoiosPanel             from './components/layout/KoiosPanel'
 import ReportFilterSidebar    from './components/reports/ReportFilterSidebar'
 
@@ -278,27 +279,8 @@ function DashboardLayout() {
             {expanded ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
           </button>
 
-          {/* Tenant logo of initiaal-avatar + naam */}
-          <div className="flex items-center flex-shrink-0 gap-2">
-            {tenant?.logo_url
-              ? <img src={tenant.logo_url} alt="" style={{ height: 22, borderRadius: 4 }} />
-              : (
-                <div
-                  className="flex items-center justify-center flex-shrink-0 rounded-md"
-                  style={{
-                    width: 22, height: 22,
-                    background: 'var(--color-primary)',
-                    fontSize: 11, color: 'white', fontWeight: 700,
-                  }}
-                >
-                  {(tenant?.name ?? 'K').charAt(0).toUpperCase()}
-                </div>
-              )
-            }
-            <span className="font-semibold text-gray-900" style={{ fontSize: 13 }}>
-              {tenant?.name ?? 'KoiosMatch'}
-            </span>
-          </div>
+          {/* Tenant card / super-admin bureau-switcher */}
+          <TenantSwitcher />
 
           {/* Breadcrumb separator + page title */}
           <span style={{ color: 'var(--border)', fontSize: 16 }}>›</span>
@@ -378,7 +360,8 @@ function DashboardLayout() {
 
         {/* Content row: page + optional right filter panel side by side */}
         <div className="flex flex-1 overflow-hidden">
-          <div className="flex-1 overflow-auto">
+          {/* key on tenant id: switching bureau remounts the page so its data reloads */}
+          <div key={activeTenant?.id ?? 'none'} className="flex-1 overflow-auto">
             <Suspense fallback={<PageLoader />}>
               {renderPage()}
             </Suspense>
