@@ -26,7 +26,15 @@ export default function VacancySettings() {
 
   return (
     <div>
-      <StatusListEditor title={t('vacancy.title')} subtitle={t('vacancy.subtitle')} endpoint="/vacancy-statuses" addLabel={t('vacancy.add')} withColor />
+      {/* Statuses — backend /vacancy-statuses (now carries colour). */}
+      <StatusListEditor compact title={t('vacancy.title')} subtitle={t('vacancy.subtitle')}
+        endpoint="/vacancy-statuses" addLabel={t('vacancy.add')} withColor />
+
+      {/* Phases — backend /vacancy-phases (name + colour + sort_order). */}
+      <div style={{ marginTop: 32 }}>
+        <StatusListEditor compact title={t('vacancy.phasesTitle')} subtitle={t('vacancy.phasesSubtitle')}
+          endpoint="/vacancy-phases" addLabel={t('vacancy.phasesAdd')} withColor />
+      </div>
 
       <div style={{ marginTop: 32, maxWidth: 640 }}>
         <h3 style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 4 }}>{t('vacancy.customFields')}</h3>

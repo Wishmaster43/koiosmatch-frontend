@@ -1,55 +1,66 @@
 /**
- * EmailSettings — sender details + provider/SMTP connection for the email module,
- * with a "test connection" action. Manual SMTP shows host/port/credentials/security.
+ * EmailSettings — one full email connection PER context (klanten / kandidaten /
+ * planning), each its own tab. Because connecting e.g. Gmail for client reminders
+ * vs. planning means separate accounts, every context has its own provider/SMTP
+ * credentials, sender identity AND email signature. Everything is stored under
+ * `email_<context>_*` settings keys; the signature is HTML (RichTextEditor).
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, RefreshCw, Check, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react'
 import api from '../../../lib/api'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
+import RichTextEditor from '../../../components/ui/RichTextEditor'
 
-export default function EmailSettings() {
+export default function EmailSettings({ context = 'klanten' }) {
   const { t } = useTranslation('settings')
+  const K = `email_${context}_`   // settings-key prefix for this context
+
   const [provider,     setProvider]     = useState('manual')
-  const [fromName,     setFromName]     = useState('')
-  const [fromEmail,    setFromEmail]    = useState('')
-  const [smtpHost,     setSmtpHost]     = useState('')
-  const [smtpPort,     setSmtpPort]     = useState('587')
-  const [smtpUser,     setSmtpUser]     = useState('')
-  const [smtpPass,     setSmtpPass]     = useState('')
-  const [smtpPassSet,  setSmtpPassSet]  = useState(false)
-  const [smtpSecure,   setSmtpSecure]   = useState('tls')
-  const [showPass,     setShowPass]     = useState(false)
-  const [saved,        setSaved]        = useState(false)
-  const [saving,       setSaving]       = useState(false)
-  const [loading,      setLoading]      = useState(true)
-  const [testing,      setTesting]      = useState(false)
-  const [testResult,   setTestResult]   = useState(null)
+  const [fromName,     setFromName]      = useState('')
+  const [fromEmail,    setFromEmail]     = useState('')
+  const [smtpHost,     setSmtpHost]      = useState('')
+  const [smtpPort,     setSmtpPort]      = useState('587')
+  const [smtpUser,     setSmtpUser]      = useState('')
+  const [smtpPass,     setSmtpPass]      = useState('')
+  const [smtpPassSet,  setSmtpPassSet]   = useState(false)
+  const [smtpSecure,   setSmtpSecure]    = useState('tls')
+  const [signature,    setSignature]     = useState('')
+  const [sigExpanded,  setSigExpanded]    = useState(false)
+  const [showPass,     setShowPass]      = useState(false)
+  const [saved,        setSaved]         = useState(false)
+  const [saving,       setSaving]        = useState(false)
+  const [loading,      setLoading]       = useState(true)
+  const [testing,      setTesting]       = useState(false)
+  const [testResult,   setTestResult]    = useState(null)
 
   useEffect(() => {
+    setLoading(true)
     loadSettings()
       .then(stored => {
-        if (stored.email_provider)  setProvider(stored.email_provider)
-        if (stored.email_from_name) setFromName(stored.email_from_name)
-        if (stored.email_from)      setFromEmail(stored.email_from)
-        if (stored.smtp_host)       setSmtpHost(stored.smtp_host)
-        if (stored.smtp_port)       setSmtpPort(stored.smtp_port)
-        if (stored.smtp_user)       setSmtpUser(stored.smtp_user)
-        if (stored.smtp_secure)     setSmtpSecure(stored.smtp_secure)
-        if (stored.smtp_pass)       setSmtpPassSet(stored.smtp_pass === '••••••••')
+        setProvider(stored[`${K}provider`]  ?? 'manual')
+        setFromName(stored[`${K}from_name`] ?? '')
+        setFromEmail(stored[`${K}from`]     ?? '')
+        setSmtpHost(stored[`${K}smtp_host`] ?? '')
+        setSmtpPort(stored[`${K}smtp_port`] ?? '587')
+        setSmtpUser(stored[`${K}smtp_user`] ?? '')
+        setSmtpSecure(stored[`${K}smtp_secure`] ?? 'tls')
+        setSmtpPassSet(stored[`${K}smtp_pass`] === '••••••••')
+        setSignature(stored[`${K}signature`] ?? '')
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
+  }, [K])
 
   const save = async () => {
     setSaving(true)
     try {
       const payload = {
-        email_provider: provider, email_from_name: fromName, email_from: fromEmail,
-        smtp_host: smtpHost, smtp_port: smtpPort, smtp_user: smtpUser, smtp_secure: smtpSecure,
+        [`${K}provider`]: provider, [`${K}from_name`]: fromName, [`${K}from`]: fromEmail,
+        [`${K}smtp_host`]: smtpHost, [`${K}smtp_port`]: smtpPort, [`${K}smtp_user`]: smtpUser,
+        [`${K}smtp_secure`]: smtpSecure, [`${K}signature`]: signature,
       }
-      if (smtpPass) payload.smtp_pass = smtpPass
+      if (smtpPass) payload[`${K}smtp_pass`] = smtpPass
       await saveSettings(payload)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
@@ -61,7 +72,7 @@ export default function EmailSettings() {
     setTesting(true)
     setTestResult(null)
     try {
-      const res = await api.post('/settings/email/test')
+      const res = await api.post('/settings/email/test', { context })
       setTestResult({ ok: true, msg: res.data?.message ?? t('email.testSent') })
     } catch (err) {
       setTestResult({ ok: false, msg: err.response?.data?.message ?? t('email.testFailed') })
@@ -83,21 +94,21 @@ export default function EmailSettings() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-5">
-        <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{t('email.title')}</h2>
-          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{t('email.subtitle')}</p>
+      <div className="flex items-center justify-between" style={{ marginBottom: 20, gap: 16 }}>
+        <div style={{ minWidth: 0 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{t(`email.context.${context}.title`)}</h2>
+          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{t(`email.context.${context}.subtitle`)}</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           <button onClick={testConnection} disabled={testing}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px',
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', whiteSpace: 'nowrap',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: testing ? 'wait' : 'pointer',
                      border: '1px solid #E5E7EB', background: '#F9FAFB', color: '#374151', opacity: testing ? 0.6 : 1 }}>
             {testing ? <RefreshCw size={13} className="animate-spin" /> : <Mail size={13} />}
             {t('email.testConnection')}
           </button>
           <button onClick={save} disabled={saving}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', whiteSpace: 'nowrap',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: saving ? 'wait' : 'pointer',
                      border: 'none', opacity: saving ? 0.7 : 1,
                      background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white', transition: 'background 0.2s' }}>
@@ -225,6 +236,14 @@ export default function EmailSettings() {
             </div>
           </div>
         )}
+
+        {/* Email signature (per context) */}
+        <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '16px 18px' }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>{t('email.signature')}</div>
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>{t('email.signatureHint')}</div>
+          <RichTextEditor value={signature} onChange={setSignature}
+            expanded={sigExpanded} onToggleExpand={() => setSigExpanded(e => !e)} />
+        </div>
 
       </div>
     </div>

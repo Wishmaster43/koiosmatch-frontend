@@ -1,10 +1,13 @@
 {
   "shell": {
     "title": "Einstellungen",
-    "empty": "Keine Einstellungen für deine Rolle verfügbar."
+    "empty": "Keine Einstellungen für deine Rolle verfügbar.",
+    "search": "Einstellung suchen…",
+    "noResults": "Keine Einstellungen gefunden"
   },
   "common": {
     "save": "Speichern",
+    "unsavedConfirm": "Du hast ungespeicherte Änderungen. Diesen Bereich verlassen?",
     "saving": "Speichern…",
     "saved": "Gespeichert",
     "loading": "Einstellungen werden geladen…",
@@ -35,6 +38,7 @@
     "company": "Allgemein",
     "locations": "Standorte",
     "memory": "Speicher",
+    "candidate_lookups": "Status & Phasen",
     "phases": "Phasen",
     "candidate_status": "Kandidatenstatus",
     "vacancy": "Stelle",
@@ -48,7 +52,7 @@
     "notif_vacatures": "Stellen",
     "notif_facturering": "Abrechnung",
     "email": "E-Mail",
-    "whatsapp": "WhatsApp",
+    "whatsapp": "WhatsApp Business",
     "appstore": "App Store",
     "apikeys": "API-Schlüssel",
     "webhooks": "Webhooks",
@@ -63,7 +67,10 @@
     "roles": "Rollen & Rechte",
     "users": "Benutzer",
     "sync": "Synchronisierung",
-    "audit": "Audit-Log"
+    "audit": "Audit-Log",
+    "email_klanten": "E-Mail Kunden",
+    "email_kandidaten": "E-Mail Kandidaten",
+    "email_planning": "E-Mail Planung"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -194,12 +201,15 @@
     "add": "Status hinzufügen"
   },
   "vacancy": {
-    "title": "Stelle",
-    "subtitle": "Verwalte Stellenstatus und voreingestellte benutzerdefinierte Feldnamen.",
+    "title": "Status",
+    "subtitle": "Verwalte die Status deiner Stellen.",
     "add": "Status hinzufügen",
     "customFields": "Benutzerdefinierte Felder",
     "customFieldsHint": "Lege Feldnamen fest, die auf jeder Stelle erscheinen, um benutzerdefinierte Felder leichter auszufüllen.",
-    "fieldPlaceholder": "Feldname…"
+    "fieldPlaceholder": "Feldname…",
+    "phasesTitle": "Phasen",
+    "phasesSubtitle": "Verwalte die Phasen deiner Stellen.",
+    "phasesAdd": "Phase hinzufügen"
   },
   "rejection": {
     "title": "Ablehnungsgründe",
@@ -279,7 +289,23 @@
     "security": "Sicherheit",
     "secTls": "STARTTLS (Port 587)",
     "secSsl": "SSL/TLS (Port 465)",
-    "secNone": "Keine (nicht empfohlen)"
+    "secNone": "Keine (nicht empfohlen)",
+    "context": {
+      "klanten": {
+        "title": "Kunden",
+        "subtitle": "E-Mail-Verbindung und Signatur für Kundenkommunikation und Erinnerungen."
+      },
+      "kandidaten": {
+        "title": "Kandidaten",
+        "subtitle": "E-Mail-Verbindung und Signatur für Kandidatenkommunikation und Erinnerungen."
+      },
+      "planning": {
+        "title": "Planung",
+        "subtitle": "E-Mail-Verbindung und Signatur für Planungs-E-Mails."
+      }
+    },
+    "signature": "Signatur",
+    "signatureHint": "Wird an jede E-Mail dieses Typs angehängt."
   },
   "appStore": {
     "title": "App Store",

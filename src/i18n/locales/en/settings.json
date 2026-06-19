@@ -1,10 +1,13 @@
 {
   "shell": {
     "title": "Settings",
-    "empty": "No settings available for your role."
+    "empty": "No settings available for your role.",
+    "search": "Search a setting…",
+    "noResults": "No settings found"
   },
   "common": {
     "save": "Save",
+    "unsavedConfirm": "You have unsaved changes. Leave this section?",
     "saving": "Saving…",
     "saved": "Saved",
     "loading": "Loading settings…",
@@ -35,6 +38,7 @@
     "company": "General",
     "locations": "Locations",
     "memory": "Memory",
+    "candidate_lookups": "Statuses & stages",
     "phases": "Phases",
     "candidate_status": "Candidate status",
     "vacancy": "Vacancy",
@@ -48,7 +52,7 @@
     "notif_vacatures": "Vacancies",
     "notif_facturering": "Billing",
     "email": "Email",
-    "whatsapp": "WhatsApp",
+    "whatsapp": "WhatsApp Business",
     "appstore": "App store",
     "apikeys": "API keys",
     "webhooks": "Webhooks",
@@ -63,7 +67,10 @@
     "roles": "Roles & permissions",
     "users": "Users",
     "sync": "Synchronisation",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "email_klanten": "Email — clients",
+    "email_kandidaten": "Email — candidates",
+    "email_planning": "Email — planning"
   },
   "kpis": {
     "title": "KPI settings",
@@ -220,12 +227,15 @@
     }
   },
   "vacancy": {
-    "title": "Vacancy",
-    "subtitle": "Manage vacancy statuses and preset custom field names.",
+    "title": "Statuses",
+    "subtitle": "Manage the statuses of your vacancies.",
     "add": "Add status",
     "customFields": "Custom fields",
     "customFieldsHint": "Set field names that appear on every vacancy to make custom fields easier to fill.",
-    "fieldPlaceholder": "Field name…"
+    "fieldPlaceholder": "Field name…",
+    "phasesTitle": "Phases",
+    "phasesSubtitle": "Manage the phases of your vacancies.",
+    "phasesAdd": "Add phase"
   },
   "rejection": {
     "title": "Rejection reasons",
@@ -305,7 +315,23 @@
     "security": "Security",
     "secTls": "STARTTLS (port 587)",
     "secSsl": "SSL/TLS (port 465)",
-    "secNone": "None (not recommended)"
+    "secNone": "None (not recommended)",
+    "context": {
+      "klanten": {
+        "title": "Clients",
+        "subtitle": "Email connection and signature for client communication and reminders."
+      },
+      "kandidaten": {
+        "title": "Candidates",
+        "subtitle": "Email connection and signature for candidate communication and reminders."
+      },
+      "planning": {
+        "title": "Planning",
+        "subtitle": "Email connection and signature for planning emails."
+      }
+    },
+    "signature": "Signature",
+    "signatureHint": "Added to the bottom of every email of this type."
   },
   "appStore": {
     "title": "App store",

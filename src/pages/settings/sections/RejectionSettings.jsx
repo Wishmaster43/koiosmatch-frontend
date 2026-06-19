@@ -3,5 +3,5 @@ import StatusListEditor from './StatusListEditor'
 
 export default function RejectionSettings() {
   const { t } = useTranslation('settings')
-  return <StatusListEditor title={t('rejection.title')} subtitle={t('rejection.subtitle')} endpoint="/rejection-reasons" addLabel={t('rejection.add')} withColor={false} />
+  return <StatusListEditor title={t('rejection.title')} subtitle={t('rejection.subtitle')} endpoint="/candidate-rejection-reasons" addLabel={t('rejection.add')} withColor />
 }

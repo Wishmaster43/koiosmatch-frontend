@@ -1,10 +1,13 @@
 {
   "shell": {
     "title": "Instellingen",
-    "empty": "Geen instellingen beschikbaar voor jouw rol."
+    "empty": "Geen instellingen beschikbaar voor jouw rol.",
+    "search": "Zoek een instelling…",
+    "noResults": "Geen instellingen gevonden"
   },
   "common": {
     "save": "Opslaan",
+    "unsavedConfirm": "Je hebt niet-opgeslagen wijzigingen. Wil je deze sectie verlaten?",
     "saving": "Opslaan…",
     "saved": "Opgeslagen",
     "loading": "Instellingen ophalen…",
@@ -35,6 +38,7 @@
     "company": "Algemeen",
     "locations": "Locaties",
     "memory": "Geheugen",
+    "candidate_lookups": "Statussen & fasen",
     "phases": "Fasen",
     "candidate_status": "Kandidaatstatus",
     "vacancy": "Vacature",
@@ -48,7 +52,7 @@
     "notif_vacatures": "Vacatures",
     "notif_facturering": "Facturering",
     "email": "E-mail",
-    "whatsapp": "WhatsApp",
+    "whatsapp": "WhatsApp Business",
     "appstore": "App store",
     "apikeys": "API-keys",
     "webhooks": "Webhooks",
@@ -63,7 +67,10 @@
     "roles": "Rollen & Rechten",
     "users": "Gebruikersbeheer",
     "sync": "Synchronisatie",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "email_klanten": "E-mail klanten",
+    "email_kandidaten": "E-mail kandidaten",
+    "email_planning": "E-mail planning"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -220,12 +227,15 @@
     }
   },
   "vacancy": {
-    "title": "Vacature",
-    "subtitle": "Beheer vacaturestatussen en vooraf ingestelde aangepaste veldnamen.",
+    "title": "Statussen",
+    "subtitle": "Beheer de statussen van je vacatures.",
     "add": "Status toevoegen",
     "customFields": "Aangepaste velden",
     "customFieldsHint": "Stel veldnamen in die op elke vacature verschijnen om aangepaste velden makkelijker in te vullen.",
-    "fieldPlaceholder": "Veldnaam…"
+    "fieldPlaceholder": "Veldnaam…",
+    "phasesTitle": "Fasen",
+    "phasesSubtitle": "Beheer de fasen van je vacatures.",
+    "phasesAdd": "Fase toevoegen"
   },
   "rejection": {
     "title": "Afwijsredenen",
@@ -305,7 +315,23 @@
     "security": "Beveiliging",
     "secTls": "STARTTLS (poort 587)",
     "secSsl": "SSL/TLS (poort 465)",
-    "secNone": "Geen (niet aanbevolen)"
+    "secNone": "Geen (niet aanbevolen)",
+    "context": {
+      "klanten": {
+        "title": "Klanten",
+        "subtitle": "E-mailkoppeling en handtekening voor klantcommunicatie en reminders."
+      },
+      "kandidaten": {
+        "title": "Kandidaten",
+        "subtitle": "E-mailkoppeling en handtekening voor kandidaatcommunicatie en reminders."
+      },
+      "planning": {
+        "title": "Planning",
+        "subtitle": "E-mailkoppeling en handtekening voor planning-mails."
+      }
+    },
+    "signature": "Handtekening",
+    "signatureHint": "Wordt onder elke e-mail van dit type toegevoegd."
   },
   "appStore": {
     "title": "App store",

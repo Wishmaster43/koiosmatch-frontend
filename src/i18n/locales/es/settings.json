@@ -1,10 +1,13 @@
 {
   "shell": {
     "title": "Configuración",
-    "empty": "No hay configuración disponible para tu rol."
+    "empty": "No hay configuración disponible para tu rol.",
+    "search": "Buscar un ajuste…",
+    "noResults": "No se encontraron ajustes"
   },
   "common": {
     "save": "Guardar",
+    "unsavedConfirm": "Tienes cambios sin guardar. ¿Salir de esta sección?",
     "saving": "Guardando…",
     "saved": "Guardado",
     "loading": "Cargando configuración…",
@@ -35,6 +38,7 @@
     "company": "General",
     "locations": "Ubicaciones",
     "memory": "Memoria",
+    "candidate_lookups": "Estados y fases",
     "phases": "Fases",
     "candidate_status": "Estado del candidato",
     "vacancy": "Vacante",
@@ -48,7 +52,7 @@
     "notif_vacatures": "Vacantes",
     "notif_facturering": "Facturación",
     "email": "Correo",
-    "whatsapp": "WhatsApp",
+    "whatsapp": "WhatsApp Business",
     "appstore": "App store",
     "apikeys": "Claves API",
     "webhooks": "Webhooks",
@@ -63,7 +67,10 @@
     "roles": "Roles y permisos",
     "users": "Usuarios",
     "sync": "Sincronización",
-    "audit": "Registro de auditoría"
+    "audit": "Registro de auditoría",
+    "email_klanten": "Correo clientes",
+    "email_kandidaten": "Correo candidatos",
+    "email_planning": "Correo planificación"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -194,12 +201,15 @@
     "add": "Añadir estado"
   },
   "vacancy": {
-    "title": "Vacante",
-    "subtitle": "Gestiona los estados de vacantes y los nombres de campos personalizados.",
+    "title": "Estados",
+    "subtitle": "Gestiona los estados de tus vacantes.",
     "add": "Añadir estado",
     "customFields": "Campos personalizados",
     "customFieldsHint": "Define nombres de campos que aparecen en cada vacante para rellenarlos más fácilmente.",
-    "fieldPlaceholder": "Nombre del campo…"
+    "fieldPlaceholder": "Nombre del campo…",
+    "phasesTitle": "Fases",
+    "phasesSubtitle": "Gestiona las fases de tus vacantes.",
+    "phasesAdd": "Añadir fase"
   },
   "rejection": {
     "title": "Motivos de rechazo",
@@ -279,7 +289,23 @@
     "security": "Seguridad",
     "secTls": "STARTTLS (puerto 587)",
     "secSsl": "SSL/TLS (puerto 465)",
-    "secNone": "Ninguna (no recomendado)"
+    "secNone": "Ninguna (no recomendado)",
+    "context": {
+      "klanten": {
+        "title": "Clientes",
+        "subtitle": "Conexión de correo y firma para comunicación y recordatorios de clientes."
+      },
+      "kandidaten": {
+        "title": "Candidatos",
+        "subtitle": "Conexión de correo y firma para comunicación y recordatorios de candidatos."
+      },
+      "planning": {
+        "title": "Planificación",
+        "subtitle": "Conexión de correo y firma para correos de planificación."
+      }
+    },
+    "signature": "Firma",
+    "signatureHint": "Se añade al final de cada correo de este tipo."
   },
   "appStore": {
     "title": "App store",

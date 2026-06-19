@@ -9,7 +9,7 @@ import { Check, Save, Plus, X, Trash2, RefreshCw } from 'lucide-react'
 import api from '../../../lib/api'
 import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
 
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true }) {
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false }) {
   const { t } = useTranslation('settings')
   const [items,     setItems]     = useState([])
   const [loading,   setLoading]   = useState(true)
@@ -55,16 +55,19 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
 
   return (
     <div style={{ maxWidth: 640 }}>
-      <div className="flex items-center justify-between mb-5">
-        <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{title}</h2>
+      <div className="flex items-start justify-between" style={{ marginBottom: 20, gap: 16 }}>
+        <div style={{ minWidth: 0 }}>
+          {compact
+            ? <h3 style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{title}</h3>
+            : <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{title}</h2>}
           <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{subtitle}</p>
         </div>
-        <div style={{ display: 'flex', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           {withSave && (
             <button onClick={saveOrder} disabled={saving}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                        fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
+                       whiteSpace: 'nowrap', flexShrink: 0,
                        background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
               {saved ? <><Check size={13}/> {t('common.saved')}</> : <><Save size={13}/> {t('common.save')}</>}
             </button>
@@ -72,6 +75,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
           <button onClick={() => setShowModal(true)}
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid #E5E7EB',
+                     whiteSpace: 'nowrap', flexShrink: 0,
                      background: 'white', cursor: 'pointer', color: '#374151' }}>
             <Plus size={13} /> {addLabel}
           </button>

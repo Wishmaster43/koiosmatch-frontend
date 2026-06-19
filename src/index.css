@@ -88,6 +88,12 @@
   50%       { box-shadow: 0 0 0 10px var(--pulse-color, rgba(99,102,241,0.1)), 0 0 28px var(--pulse-color, rgba(99,102,241,0.4)); }
 }
 
+/* Settings skeleton shimmer (SettingsKit <SkeletonRows>) */
+@keyframes km-shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+
 * { box-sizing: border-box; }
 
 body {

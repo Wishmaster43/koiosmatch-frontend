@@ -1,10 +1,13 @@
 {
   "shell": {
     "title": "Paramètres",
-    "empty": "Aucun paramètre disponible pour votre rôle."
+    "empty": "Aucun paramètre disponible pour votre rôle.",
+    "search": "Rechercher un paramètre…",
+    "noResults": "Aucun paramètre trouvé"
   },
   "common": {
     "save": "Enregistrer",
+    "unsavedConfirm": "Vous avez des modifications non enregistrées. Quitter cette section ?",
     "saving": "Enregistrement…",
     "saved": "Enregistré",
     "loading": "Chargement des paramètres…",
@@ -35,6 +38,7 @@
     "company": "Général",
     "locations": "Emplacements",
     "memory": "Mémoire",
+    "candidate_lookups": "Statuts et étapes",
     "phases": "Phases",
     "candidate_status": "Statut candidat",
     "vacancy": "Offre",
@@ -48,7 +52,7 @@
     "notif_vacatures": "Offres",
     "notif_facturering": "Facturation",
     "email": "E-mail",
-    "whatsapp": "WhatsApp",
+    "whatsapp": "WhatsApp Business",
     "appstore": "App store",
     "apikeys": "Clés API",
     "webhooks": "Webhooks",
@@ -63,7 +67,10 @@
     "roles": "Rôles et droits",
     "users": "Utilisateurs",
     "sync": "Synchronisation",
-    "audit": "Journal d'audit"
+    "audit": "Journal d'audit",
+    "email_klanten": "E-mail clients",
+    "email_kandidaten": "E-mail candidats",
+    "email_planning": "E-mail planning"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -194,12 +201,15 @@
     "add": "Ajouter un statut"
   },
   "vacancy": {
-    "title": "Offre",
-    "subtitle": "Gérez les statuts d'offre et les noms de champs personnalisés prédéfinis.",
+    "title": "Statuts",
+    "subtitle": "Gérez les statuts de vos offres.",
     "add": "Ajouter un statut",
     "customFields": "Champs personnalisés",
     "customFieldsHint": "Définissez des noms de champs qui apparaissent sur chaque offre pour faciliter la saisie.",
-    "fieldPlaceholder": "Nom du champ…"
+    "fieldPlaceholder": "Nom du champ…",
+    "phasesTitle": "Phases",
+    "phasesSubtitle": "Gérez les phases de vos offres.",
+    "phasesAdd": "Ajouter une phase"
   },
   "rejection": {
     "title": "Motifs de refus",
@@ -279,7 +289,23 @@
     "security": "Sécurité",
     "secTls": "STARTTLS (port 587)",
     "secSsl": "SSL/TLS (port 465)",
-    "secNone": "Aucune (non recommandé)"
+    "secNone": "Aucune (non recommandé)",
+    "context": {
+      "klanten": {
+        "title": "Clients",
+        "subtitle": "Connexion e-mail et signature pour la communication et les rappels clients."
+      },
+      "kandidaten": {
+        "title": "Candidats",
+        "subtitle": "Connexion e-mail et signature pour la communication et les rappels candidats."
+      },
+      "planning": {
+        "title": "Planning",
+        "subtitle": "Connexion e-mail et signature pour les e-mails de planning."
+      }
+    },
+    "signature": "Signature",
+    "signatureHint": "Ajoutée au bas de chaque e-mail de ce type."
   },
   "appStore": {
     "title": "App store",
