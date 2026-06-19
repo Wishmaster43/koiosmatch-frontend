@@ -7,6 +7,7 @@ import { USE_MOCKS, isAbortError } from '../../lib/mocks'
 import CandidateDrawer from './CandidateDrawer'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesTable from './CandidatesTable'
+import CandidatesBulkBar from './CandidatesBulkBar'
 import CandidatesInsightsRow from './CandidatesInsightsRow'
 import PaginationBar from '../../components/ui/PaginationBar'
 import { mapCandidate } from './data/mapCandidate'
@@ -68,6 +69,8 @@ export default function CandidatesPage() {
   const [attentionFilter,  setAttentionFilter]  = useState(null)
   // Echte tellingen voor de charts/opties (GET /candidates/stats).
   const [stats,            setStats]            = useState(null)
+  // Bulk-selectie (checkboxes) — id-set; wordt gewist bij filter/pagina-wissel.
+  const [selectedIds,      setSelectedIds]      = useState(() => new Set())
 
   const { registerFilters, unregisterFilters } = useRightPanel()
   const { t } = useTranslation('candidates')
@@ -93,6 +96,8 @@ export default function CandidatesPage() {
 
   // Filters changed → back to page 1 (the filtered set has its own pagination).
   useEffect(() => { setPage(1) }, [filterKey])
+  // The visible rows change with the filter/page → drop the bulk selection.
+  useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize])
 
   // ── List (paginated, server-filtered) ──
   useEffect(() => {
@@ -282,6 +287,23 @@ export default function CandidatesPage() {
     if (Object.keys(body).length) api.patch(`/candidates/${id}`, body).catch(() => {})
   }
 
+  // ── Bulk selection ──
+  const toggleRow = (id) => setSelectedIds(prev => {
+    const next = new Set(prev)
+    next.has(id) ? next.delete(id) : next.add(id)
+    return next
+  })
+  const toggleAll = (ids, allSelected) => setSelectedIds(prev => {
+    const next = new Set(prev)
+    ids.forEach(id => allSelected ? next.delete(id) : next.add(id))
+    return next
+  })
+  const bulkAddToPool = (poolId) => {
+    const ids = [...selectedIds]
+    if (ids.length) api.post(`/pools/${poolId}/candidates`, { candidate_ids: ids }).catch(() => {})
+    setSelectedIds(new Set())
+  }
+
   // Recharts hands the clicked segment back at top level AND under `.payload`.
   const pickKey = (d) => d?.key ?? d?.payload?.key ?? d?.name
 
@@ -328,12 +350,16 @@ export default function CandidatesPage() {
           {/* Eén compacte strip: donuts + KPI's, allemaal gelijke grootte op 1 regel */}
           <CandidatesInsightsRow donuts={insightDonuts} kpis={insightKpis} />
 
-          {/* Toolbar */}
-          <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
-            <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
-              background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-              + {t('page.add')}
-            </button>
+          {/* Toolbar — bulk-bar zodra er selectie is, anders de toevoeg-knop */}
+          <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
+            {selectedIds.size > 0 ? (
+              <CandidatesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())} onPickPool={bulkAddToPool} />
+            ) : (
+              <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
+                background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+                + {t('page.add')}
+              </button>
+            )}
           </div>
 
           {/* Table */}
@@ -348,6 +374,10 @@ export default function CandidatesPage() {
               loading={loading}
               selectedId={selected?.id}
               onSelect={selectCandidate}
+              selectable
+              selectedIds={selectedIds}
+              onToggleRow={toggleRow}
+              onToggleAll={toggleAll}
             />
           </div>
 

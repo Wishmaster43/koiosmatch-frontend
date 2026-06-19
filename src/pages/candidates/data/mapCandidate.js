@@ -74,6 +74,12 @@ export function mapCandidate(c) {
     summary:         c.summary ?? c.bio ?? '',
     tags:            c.tags ?? [],
     branches:        c.branches ?? [],
+    // Talent pools the candidate belongs to. Each: { id, name, color, source? }.
+    // Accepts bare slugs/strings too (normalised to { id?, name }).
+    pools:           (c.pools ?? []).map(p => (typeof p === 'object' ? p : { name: p })),
+    // Koios AI advice, precomputed server-side (background job). Shape:
+    // { action: 'add_to_pool'|'contact'|'plan_intake'|'none', label?, reason?, score?, pool_hint? }.
+    koiosAdvice:     c.koios_advice ?? c.koiosAdvice ?? null,
 
     // ── Relations (detail only) — normalise snake_case → the camelCase the tabs use ──
     experiences:     c.experiences ?? c.work_experience ?? [],

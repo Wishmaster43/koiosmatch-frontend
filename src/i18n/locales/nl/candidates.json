@@ -16,7 +16,22 @@
     "lastContact": "Laatste contact",
     "city": "Woonplaats",
     "province": "Provincie",
+    "talentPool": "Talentenpool",
+    "koios": "Koios",
     "createdAt": "Gemaakt op"
+  },
+  "koios": {
+    "actions": {
+      "add_to_pool": "Voeg toe aan pool",
+      "contact": "Contacteer",
+      "plan_intake": "Plan intake"
+    }
+  },
+  "bulk": {
+    "selected": "{{count}} geselecteerd",
+    "addToPool": "Toevoegen aan pool",
+    "deselect": "Deselecteren",
+    "noPools": "Nog geen pools ingesteld."
   },
   "kpi": {
     "total": "Totaal",
@@ -302,6 +317,10 @@
     "documentsEmpty": "Geen documenten.",
     "branch": "Vestiging",
     "branchLink": "Vestiging koppelen",
+    "pools": "Talentenpools",
+    "poolAdd": "Toevoegen aan pool",
+    "poolsEmpty": "Nog geen pools ingesteld.",
+    "poolKoios": "Door Koios voorgesteld",
     "placements": "Plaatsingen",
     "placementsEmpty": "Nog geen plaatsingen.",
     "applications": "Sollicitaties",

@@ -16,7 +16,22 @@
     "lastContact": "Last contact",
     "city": "City",
     "province": "Province",
+    "talentPool": "Talent pool",
+    "koios": "Koios",
     "createdAt": "Created on"
+  },
+  "koios": {
+    "actions": {
+      "add_to_pool": "Add to pool",
+      "contact": "Contact",
+      "plan_intake": "Plan intake"
+    }
+  },
+  "bulk": {
+    "selected": "{{count}} selected",
+    "addToPool": "Add to pool",
+    "deselect": "Deselect",
+    "noPools": "No pools configured yet."
   },
   "kpi": {
     "total": "Total",
@@ -302,6 +317,10 @@
     "documentsEmpty": "No documents.",
     "branch": "Branch",
     "branchLink": "Link branch",
+    "pools": "Talent pools",
+    "poolAdd": "Add to pool",
+    "poolsEmpty": "No pools configured yet.",
+    "poolKoios": "Suggested by Koios",
     "placements": "Placements",
     "placementsEmpty": "No placements yet.",
     "applications": "Applications",

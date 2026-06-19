@@ -41,6 +41,11 @@ export default function DataTable({
   loading = false,
   loadingText = 'Loading…',
   emptyText = 'No results',
+  // Optional multi-select (off by default so other lists are unaffected).
+  selectable = false,
+  selectedIds,
+  onToggleRow,
+  onToggleAll,
 }) {
   // sort = { key, dir: 'asc' | 'desc' } | null
   const [sort, setSort] = useState(null)
@@ -61,6 +66,12 @@ export default function DataTable({
     return sort.dir === 'desc' ? sorted.reverse() : sorted
   }, [rows, sort, columns])
 
+  const pageIds      = sortedRows.map(getRowId)
+  const allSelected  = selectable && pageIds.length > 0 && pageIds.every(id => selectedIds?.has(id))
+  const someSelected = selectable && pageIds.some(id => selectedIds?.has(id))
+  const checkboxCol  = { width: 36, padding: '8px 10px', textAlign: 'center' }
+  const stop = (e) => e.stopPropagation()
+
   if (loading) {
     return (
       <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
@@ -73,6 +84,14 @@ export default function DataTable({
     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
       <thead>
         <tr style={{ borderBottom: '2px solid var(--border)' }}>
+          {selectable && (
+            <th style={checkboxCol}>
+              <input type="checkbox" checked={allSelected}
+                ref={el => { if (el) el.indeterminate = someSelected && !allSelected }}
+                onChange={() => onToggleAll?.(pageIds, allSelected)}
+                style={{ cursor: 'pointer' }} aria-label="Selecteer alles" />
+            </th>
+          )}
           {columns.map(col => {
             const active = sort?.key === col.key
             const baseStyle = { padding: '8px 10px', textAlign: col.align ?? 'left', fontSize: 11,
@@ -101,13 +120,21 @@ export default function DataTable({
         {sortedRows.map(row => {
           const id = getRowId(row)
           const isSelected = selectedId != null && id === selectedId
+          const isChecked  = selectable && selectedIds?.has(id)
+          const highlight  = isSelected || isChecked
           return (
             <tr key={id}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
               style={{ borderBottom: '1px solid var(--border)', cursor: onRowClick ? 'pointer' : 'default',
-                background: isSelected ? 'var(--color-primary-bg)' : 'transparent' }}
-              onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--hover-bg)' }}
-              onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}>
+                background: highlight ? 'var(--color-primary-bg)' : 'transparent' }}
+              onMouseEnter={e => { if (!highlight) e.currentTarget.style.background = 'var(--hover-bg)' }}
+              onMouseLeave={e => { if (!highlight) e.currentTarget.style.background = 'transparent' }}>
+              {selectable && (
+                <td style={checkboxCol} onClick={stop}>
+                  <input type="checkbox" checked={!!isChecked} onChange={() => onToggleRow?.(id)}
+                    style={{ cursor: 'pointer' }} aria-label="Selecteer rij" />
+                </td>
+              )}
               {columns.map(col => (
                 <td key={col.key} style={{ padding: '10px 10px', textAlign: col.align ?? 'left',
                   whiteSpace: col.nowrap ? 'nowrap' : undefined, ...col.cellStyle }}>
@@ -119,7 +146,7 @@ export default function DataTable({
         })}
         {sortedRows.length === 0 && (
           <tr>
-            <td colSpan={columns.length} style={{ padding: '40px 10px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
+            <td colSpan={columns.length + (selectable ? 1 : 0)} style={{ padding: '40px 10px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
               {emptyText}
             </td>
           </tr>
