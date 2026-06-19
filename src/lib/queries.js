@@ -16,3 +16,15 @@ export function useUsers() {
     queryFn: async ({ signal }) => unwrapList(await api.get('/users', { signal })).rows,
   })
 }
+
+/**
+ * Total candidate count — the same source the Candidates table paginates over
+ * (/candidates meta.total). per_page:1 keeps it cheap. Tenant-scoped: the cache
+ * is cleared on a bureau switch (see AuthContext.setActiveTenant).
+ */
+export function useCandidateCount() {
+  return useQuery({
+    queryKey: ['candidates', 'count'],
+    queryFn: async ({ signal }) => unwrapList(await api.get('/candidates', { params: { per_page: 1 }, signal })).total,
+  })
+}

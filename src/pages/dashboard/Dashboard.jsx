@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { useCandidateCount } from '../../lib/queries'
 import { useRightPanel } from '../../context/RightPanelContext'
 import { Users, Building2, FileText, Briefcase, TrendingUp, CheckCircle, AlertCircle, MessageCircle, CalendarDays } from 'lucide-react'
 
@@ -94,6 +95,12 @@ export default function Dashboard({ onNavigate }) {
   const hasWhatsApp = accessiblePages.includes('whatsapp')
   const hasAiAgents = accessiblePages.includes('aiagents')
 
+  // Live total — same source as the Candidates table (/candidates meta.total).
+  const { data: candidateTotal, isLoading: countLoading } = useCandidateCount()
+  const candidateTotalLabel = countLoading
+    ? '…'
+    : (candidateTotal ?? 0).toLocaleString('nl-NL')
+
   const [selPeriode,   setSelPeriode]   = useState([])
   const [selVestiging, setSelVestiging] = useState([])
   const [selStatus,    setSelStatus]    = useState([])
@@ -132,7 +139,7 @@ export default function Dashboard({ onNavigate }) {
       {/* KPI rij — ATS */}
       <div style={{ marginBottom: 6 }}>
         <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-          <KpiCard label="Totaal kandidaten"         value="2.845" sub="+34 deze maand"    color="var(--color-primary)" bg="var(--color-primary-bg)" Icon={Users}      onClick={() => onNavigate?.('candidates')} />
+          <KpiCard label="Totaal kandidaten"         value={candidateTotalLabel} sub="In het ATS"  color="var(--color-primary)" bg="var(--color-primary-bg)" Icon={Users}      onClick={() => onNavigate?.('candidates')} />
           <KpiCard label="Nieuwe kandidaten"         value="34"    sub="+12% vorige maand" color="var(--color-success)" bg="var(--color-success-bg)" Icon={TrendingUp}  onClick={() => onNavigate?.('candidates')} />
           <KpiCard label="Openstaande sollicitaties" value="18"    sub="5 nieuw vandaag"   color="var(--color-warning)" bg="var(--color-warning-bg)" Icon={FileText}    onClick={() => onNavigate?.('applications')} />
           <KpiCard label="Actieve vacatures"         value="9"     sub="3 urgent"          color="var(--color-danger)" bg="var(--color-danger-bg)" Icon={Briefcase}   onClick={() => onNavigate?.('vacancies')} />

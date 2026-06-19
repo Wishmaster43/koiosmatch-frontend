@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import api, { primeCsrf } from '../lib/api'
 import { COOKIE_AUTH } from '../lib/authMode'
 import { hasModule as tenantHasModule } from '../lib/modules'
+import { queryClient } from '../lib/queryClient'
 
 /**
  * AuthContext — global authentication + tenant state.
@@ -66,6 +67,9 @@ export function AuthProvider({ children }) {
   const setActiveTenant = async (tenant) => {
     localStorage.setItem('active_tenant', tenant.id)
     setActiveTenantState(tenant)
+    // Drop all cached per-tenant queries (counts, users, …) so they refetch for
+    // the newly selected bureau instead of showing the previous tenant's data.
+    queryClient.clear()
     try {
       const res = await api.get('/auth/me')
       applyAuthResponse(res.data)
