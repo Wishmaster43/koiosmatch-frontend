@@ -14,7 +14,7 @@
  *   - Node / edge components → how each block and connection looks on the canvas
  *   - Editor component       → owns state, save/run, and the config side panel
  */
-import { useState, useCallback, useRef, useEffect, createContext, useContext } from 'react'
+import { useState, useCallback, useEffect, createContext, useContext } from 'react'
 import {
   ReactFlow, Background, Controls, MiniMap,
   addEdge, useNodesState, useEdgesState,
@@ -25,7 +25,7 @@ import '@xyflow/react/dist/style.css'
 import {
   X, Save, Play, Loader2, Plus, Trash2,
   Zap, CheckCircle, AlertCircle, List, Clock, Filter,
-  ChevronDown, ChevronRight, CalendarDays, Repeat, Webhook,
+  ChevronDown, CalendarDays,
 } from 'lucide-react'
 import { MODULE_META, MODULE_SCHEMAS, MODULE_APP_MAP } from '../../modules/index'
 import { useApps } from '../../context/AppsContext'
@@ -34,7 +34,6 @@ import { AgentsTab, PromptsTab, FAQTab, KnowledgeTab, ToolsTab } from '../ai/AIM
 // ── Schedule helpers ──────────────────────────────────────────────────────────
 
 const DAYS_NL  = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za']
-const DAYS_FULL = ['Zondag', 'Maandag', 'Dinsdag', 'Woensdag', 'Donderdag', 'Vrijdag', 'Zaterdag']
 const MONTHS_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
 
 function scheduleLabel(trigger, cfg) {
@@ -658,7 +657,7 @@ function ModuleNode({ id, data, selected }) {
 
 const OPERATORS = ['=', '≠', '>', '<', '≥', '≤', 'bevat', 'bevat niet', 'is leeg', 'is gevuld']
 
-function EdgeFilterPanel({ edgeId, filters, onClose, onSave }) {
+function EdgeFilterPanel({ filters, onClose, onSave }) {
   const [conds, setConds] = useState(filters?.conditions ?? [])
   const [logic, setLogic] = useState(filters?.logic ?? 'AND')
 
@@ -741,7 +740,7 @@ function EdgeFilterPanel({ edgeId, filters, onClose, onSave }) {
 
 // ── JSON output viewer ────────────────────────────────────────────────────────
 
-function OutputPanel({ nodeId, output, onClose }) {
+function OutputPanel({ output, onClose }) {
   const [search, setSearch] = useState('')
   const json = JSON.stringify(output, null, 2)
   const lines = json.split('\n')
@@ -1219,8 +1218,8 @@ function EditorInner({ workflow, onClose, onSave }) {
   const [name,           setName]           = useState(workflow.name)
   const [trigger,        setTrigger]        = useState(workflow.trigger)
   const [scheduleConfig, setScheduleConfig] = useState(workflow.trigger_config?.schedule ?? null)
-  const [webhookId,      setWebhookId]      = useState(workflow.trigger_config?.webhook_id ?? null)
-  const [webhooks,       setWebhooks]       = useState([])
+  const [webhookId]                         = useState(workflow.trigger_config?.webhook_id ?? null)
+  const [, setWebhooks]                      = useState([])
   const [status,         setStatus]         = useState(workflow.status || 'draft')
   const [saved,          setSaved]          = useState(false)
   const [running,        setRunning]        = useState(false)
@@ -1280,7 +1279,6 @@ function EditorInner({ workflow, onClose, onSave }) {
         output = rows.slice(0, cfg.limit ?? 100)
 
       } else if (data.type === 'shift_fetcher') {
-        const cfg = data.config ?? {}
         const res = await api.get('/shifts', { params: { per_page: 100 } }).catch(() => null)
         output = res?.data?.data ?? res?.data ?? []
 

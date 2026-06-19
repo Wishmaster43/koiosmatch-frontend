@@ -169,7 +169,7 @@ function PlatformIcon({ type }) {
   )
 }
 
-function BarCell({ value, max = 200, color = 'var(--color-primary)', warning = false }) {
+function BarCell({ value, max = 200, warning = false }) {
   const pct = Math.min((value / max) * 100, 100)
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

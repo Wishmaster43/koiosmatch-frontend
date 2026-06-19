@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
+import { ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
 import { useRightPanel }      from '../../context/RightPanelContext'
 import { useAuth }            from '../../context/AuthContext'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
@@ -134,7 +134,7 @@ export default function CustomersTable() {
   const [customers,         setCustomers]         = useState([])
   const [loading,           setLoading]           = useState(true)
   const [error,             setError]             = useState(null)
-  const [search,            setSearch]            = useState('')
+  const [search]                                  = useState('')
   const [selectedStatuses,  setSelectedStatuses]  = useState(['active'])
   const [sort,              setSort]              = useState({ key: 'name', dir: 'asc' })
   const defaultPageSize = useDefaultPageSize()

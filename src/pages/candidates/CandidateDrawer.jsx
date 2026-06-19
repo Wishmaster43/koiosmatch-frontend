@@ -34,7 +34,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { settings: cvSettings } = useCvSettings()
   const { t } = useTranslation('candidates')
   const locale = useLocale()
-  const { candidateTypes, funnelTypes, statuses, typeMeta, funnelMeta } = useLookups()
+  const { candidateTypes, funnelTypes, statuses, funnelMeta } = useLookups()
   // Cross-cutting state used by the header; tab-specific state lives in each tab.
   const [cvGenerating,  setCvGenerating]  = useState(false)
   const [recruiter,     setRecruiter]     = useState(null)

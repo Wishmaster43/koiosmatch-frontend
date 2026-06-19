@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { canAccessPage } from '../../lib/access'
 import {
-  LayoutDashboard, Zap, Users, Building2,
+  LayoutDashboard, Users, Building2,
   MessageCircle, Settings, ChevronDown, Brain, BarChart3, TrendingUp, Bot,
   FileText, Briefcase, CalendarDays,
 } from 'lucide-react'
@@ -250,7 +250,7 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
   )
 }
 
-export default function Sidebar({ expanded, activePage, setActivePage, onTheme, koiosOpen, onToggleKoios }) {
+export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen, onToggleKoios }) {
   const { t } = useTranslation('common')
   const [openItems, setOpenItems] = useState([])
   const auth = useAuth()

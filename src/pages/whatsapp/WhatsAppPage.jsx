@@ -39,12 +39,6 @@ const timeAgo   = iso => {
   if (diff < 86400) return `${Math.floor(diff / 3600)}u`
   return `${Math.floor(diff / 86400)}d`
 }
-const formatDate = iso => {
-  if (!iso) return ''
-  const d = new Date(iso)
-  return `${PAD(d.getDate())}-${PAD(d.getMonth()+1)} ${PAD(d.getHours())}:${PAD(d.getMinutes())}`
-}
-
 const DIRECTION_COLOR = { inbound: 'var(--color-success)', outbound: '#3B8FD4' }
 // Escalation reason → colour. Label = t('reasons.<key>').
 const REASON_COLOR = {

@@ -57,7 +57,7 @@ export default function ContactPersonsTable() {
     if (selectedCustomers.length > 0)
       rows = rows.filter(c => selectedCustomers.includes(c.customer_name))
     if (selectedReceives.length > 0) {
-      rows = rows.filter(c => selectedReceives.includes(Boolean(c.scheduled_order_contact) ? 'ja' : 'nee'))
+      rows = rows.filter(c => selectedReceives.includes(c.scheduled_order_contact ? 'ja' : 'nee'))
     }
     if (search) {
       const q = search.toLowerCase()
@@ -101,7 +101,7 @@ export default function ContactPersonsTable() {
       selected: selectedReceives,
       options: [
         { value: 'ja',  label: t('contacts.planningYes'), count: contacts.filter(c => Boolean(c.scheduled_order_contact)).length },
-        { value: 'nee', label: t('contacts.planningNo'),  count: contacts.filter(c => !Boolean(c.scheduled_order_contact)).length },
+        { value: 'nee', label: t('contacts.planningNo'),  count: contacts.filter(c => !c.scheduled_order_contact).length },
       ],
       onToggle: v => setSelectedReceives(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     })

@@ -8,7 +8,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   Brain, Plus, Trash2, Save, RefreshCw, Send, Check,
-  Clock, ChevronDown, MessageSquare, Wrench,
+  Clock, ChevronDown, MessageSquare,
 } from 'lucide-react'
 import api from '../../lib/api'
 
@@ -127,7 +127,7 @@ function TextEditor({ value, onChange, onSave, saving, saved, versions, onRestor
 
 // ── SideList — reusable left-list + right-detail layout ──────────────────────
 
-function SideList({ title, items, selected, onSelect, onNew, loading, renderItem, children }) {
+function SideList({ title, items, selected, onNew, loading, renderItem, children }) {
   const { t } = useTranslation('workflows')
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 12, height: '100%', minHeight: 0 }}>

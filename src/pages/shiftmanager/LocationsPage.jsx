@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Search, MapPin, Building2, Layers, X, Phone, Mail, ChevronRight, Plus } from 'lucide-react'
+import { MapPin, Building2, Layers, X, Phone, Mail, ChevronRight, Plus } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api, { unwrapList } from '../../lib/api'
 import { USE_MOCKS, isAbortError } from '../../lib/mocks'
@@ -207,7 +207,7 @@ function LocationDrawer({ loc, onClose }) {
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LocationsPage() {
   const [locations, setLocations] = useState(USE_MOCKS ? DUMMY : [])
-  const [search,    setSearch]    = useState('')
+  const [search]                  = useState('')
   const [selected,  setSelected]  = useState(null)
   const [page,      setPage]      = useState(1)
   const [selStatuses,  setSelStatuses]  = useState([])

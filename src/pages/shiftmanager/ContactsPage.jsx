@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Search, Mail, Phone, MessageCircle, Building2, MapPin, X, ChevronRight } from 'lucide-react'
+import { Mail, Phone, MessageCircle, MapPin, X, ChevronRight } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 
 const DUMMY = [
@@ -126,7 +126,7 @@ function ContactDrawer({ contact, onClose }) {
 }
 
 export default function ContactsPage() {
-  const [search,      setSearch]      = useState('')
+  const [search]                      = useState('')
   const [selected,    setSelected]    = useState(null)
   const [page,        setPage]        = useState(1)
   const [selKlanten,  setSelKlanten]  = useState([])

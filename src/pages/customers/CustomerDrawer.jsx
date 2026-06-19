@@ -1,6 +1,5 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Building, Users, Plus, Trash2 } from 'lucide-react'
+import { MapPin, Building, Users, Plus } from 'lucide-react'
 import EntityDrawer from '../../components/drawer/EntityDrawer'
 import EntityHeader from '../../components/drawer/EntityHeader'
 

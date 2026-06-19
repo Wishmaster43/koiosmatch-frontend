@@ -44,7 +44,7 @@ export default function CandidatesReport() {
   // ── Data & filter state ───────────────────────────────────────────────────
   const [candidates,          setCandidates]          = useState([])
   const [selectedStatuses,    setSelectedStatuses]    = useState(['actief'])
-  const [selectedStatusesDEL, setSelectedStatusesDEL] = useState(['verwijderd']) 
+  const [selectedStatusesDEL] = useState(['verwijderd'])
   const [selectedPositions,   setSelectedPositions]   = useState([])
   const [selectedYear,        setSelectedYear]        = useState(new Date().getFullYear())
   const [showPercent,         setShowPercent]         = useState(false)

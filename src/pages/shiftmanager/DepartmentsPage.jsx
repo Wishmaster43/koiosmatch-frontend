@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Search, Layers, MapPin, Building2, Users, X, Plus, ChevronRight } from 'lucide-react'
+import { Layers, MapPin, Building2, Users, X, ChevronRight } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api, { unwrapList } from '../../lib/api'
 import { USE_MOCKS, isAbortError } from '../../lib/mocks'
@@ -159,7 +159,7 @@ function DepartmentDrawer({ dep, onClose }) {
 
 export default function DepartmentsPage() {
   const [departments, setDepartments] = useState(USE_MOCKS ? DUMMY : [])
-  const [search,      setSearch]      = useState('')
+  const [search]                      = useState('')
   const [selected,    setSelected]    = useState(null)
   const [page,        setPage]        = useState(1)
   const [selStatuses,  setSelStatuses]  = useState([])

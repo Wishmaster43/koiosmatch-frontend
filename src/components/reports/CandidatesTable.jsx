@@ -126,7 +126,7 @@ function buildColumns(t) {
     value: c => parseKenmerken(c.features).join(', '),
     render: c => <TagCell items={parseKenmerken(c.features)} color="var(--color-primary)" bg="var(--color-primary-bg)" /> },
   { key: 'global_rate', label: t('candidates.cols.globalRates'), type: 'string',
-    value: c => '',
+    value: () => '',
     render: c => <RateCell candidate={c} /> },
   ]
 }

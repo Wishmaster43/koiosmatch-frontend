@@ -16,7 +16,7 @@ import {
   Zap, Users, Calendar, MessageCircle, Database,
   Mail, Clock, Play, Plus, MoreHorizontal,
   CheckCircle, AlertCircle, Loader2,
-  Folder, FolderOpen, FolderPlus, Trash2, ChevronDown, ChevronRight,
+  Folder, FolderPlus, Trash2,
 } from 'lucide-react'
 import WorkflowCanvasEditor from '../../components/layout/WorkflowCanvasEditor'
 
