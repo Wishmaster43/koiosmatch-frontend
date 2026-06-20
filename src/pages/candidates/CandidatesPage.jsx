@@ -302,6 +302,7 @@ export default function CandidatesPage() {
     if ('province'          in patch) body.province          = patch.province
     if ('linkedin'          in patch) body.linkedin_slug     = patch.linkedin
     if ('summary'           in patch) body.summary           = patch.summary
+    if ('languages'         in patch) body.languages         = patch.languages
     if (Object.keys(body).length) api.patch(`/candidates/${id}`, body).catch(() => {})
   }
 
