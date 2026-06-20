@@ -144,8 +144,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         <Download size={11} />{cvGenerating ? t('drawer.generating') : t('drawer.downloadCv')}
       </button>
       <button onClick={() => { setEditing(e => !e); setActiveTab('profile') }}
-        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', fontSize: 12, fontWeight: 500, borderRadius: 7, cursor: 'pointer', background: editing ? 'var(--color-primary)' : 'var(--bg)', color: editing ? '#fff' : 'var(--text)', border: editing ? 'none' : '1px solid var(--border)' }}>
-        <Edit2 size={11} /> {editing ? t('drawer.editing') : t('drawer.edit')}
+        title={editing ? t('drawer.editing') : t('drawer.edit')}
+        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0,
+          background: editing ? 'var(--color-primary)' : 'var(--bg)', color: editing ? '#fff' : 'var(--text-muted)', border: editing ? 'none' : '1px solid var(--border)' }}>
+        <Edit2 size={13} />
       </button>
     </>
   )
