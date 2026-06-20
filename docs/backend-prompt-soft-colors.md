@@ -54,7 +54,23 @@ De frontend gebruikt nu een **zacht, rustig kleurpalet** (gedempte mid-tonen die
 #79B58E  #5FB0AC  #6FA8C4   (groen → teal → sky)
 ```
 
-## Na afloop
-`php artisan migrate:fresh` (+ tenant-migraties) → `php artisan candidates:seed-demo --count=500`. De API geeft dan zachte kleuren; de frontend toont ze meteen.
+## ⚡ Bestaande data omkleuren ZONDER reseed (aanrader — geen data-verlies)
+De seeder-fix raakt alleen verse seeds. De **al bestaande lookup-rijen** (wat de tenant nu ziet) houden hun oude, felle kleuren. Maak daarom een **eenmalige data-migratie** (tenant-scoped) die de kleuren **per slug** bijwerkt — geen `migrate:fresh` nodig:
 
-> Let op: dit verandert alleen de **begin-/seed-kleuren**. Kleuren die een tenant later zelf kiest blijven leidend (API = bron van waarheid).
+```php
+// candidate_statuses
+['prospect'=>'#94A3B8','intake'=>'#8C86D9','active'=>'#79B58E','inactive'=>'#C9AC64',
+ 'sick'=>'#D98A8A','leave'=>'#6FA8C4','external'=>'#DDA071','blocked'=>'#B96B6B',
+ 'outflow'=>'#8A94A6','deleted'=>'#64748B']
+// funnel_types
+['prospect'=>'#94A3B8','intake'=>'#8C86D9','pool'=>'#79B58E','alumni'=>'#6FA8C4']
+// candidate_types
+['on_call'=>'#6E8FD6','freelance'=>'#5FB0AC','payroll'=>'#A98AD1','temp_agency'=>'#DDA071',
+ 'secondment'=>'#6FA8C4','on_demand'=>'#C98BBA']
+```
+Per type: `UPDATE <tabel> SET color = :color WHERE value = :slug` voor elke entry hierboven. Draai dit over alle tenants. Daarna geeft de API meteen zachte kleuren — de frontend toont ze direct, geen herseed, geen data-verlies.
+
+## Alternatief: volledige reseed
+`php artisan migrate:fresh` (+ tenant-migraties) → `php artisan candidates:seed-demo --count=500`. Wist en herbouwt de demo-data.
+
+> Kleuren die een tenant later zelf kiest blijven daarna leidend (API = bron van waarheid).
