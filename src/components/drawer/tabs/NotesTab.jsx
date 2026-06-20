@@ -8,7 +8,7 @@
  *           timelineEmpty, conversations, conversationsEmpty, notePlaceholder(fn) }
  */
 import { useState } from 'react'
-import { Plus, MoreHorizontal } from 'lucide-react'
+import { Plus, Edit2, Save, X } from 'lucide-react'
 import Avatar from '../../ui/Avatar'
 import SafeHtml from '../../ui/SafeHtml'
 import RichTextEditor from '../../ui/RichTextEditor'
@@ -16,17 +16,29 @@ import SectionCard, { sectionBlock } from '../../ui/SectionCard'
 
 export default function NotesTab({
   notes = [], timeline = [], noteTypes = [], labels = {}, editorLabels,
-  authorInitials, timelineName, timelineInitials, onAddNote,
+  authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
 }) {
   const [adding, setAdding]   = useState(false)
+  const [editingIdx, setEditingIdx] = useState(null)   // null = nieuw; index = bewerken
   const [body, setBody]       = useState('')
   const [title, setTitle]     = useState('')
   const [type, setType]       = useState(noteTypes[0]?.value ?? '')
   const [expanded, setExpanded] = useState(false)
 
-  const reset = () => { setAdding(false); setBody(''); setTitle(''); setType(noteTypes[0]?.value ?? ''); setExpanded(false) }
-  const save = () => { onAddNote?.({ type, title, body }); reset() }
+  const reset = () => { setAdding(false); setEditingIdx(null); setBody(''); setTitle(''); setType(noteTypes[0]?.value ?? ''); setExpanded(false) }
+  const openEdit = (i) => {
+    const n = notes[i]
+    setType(n.type ?? noteTypes[0]?.value ?? ''); setTitle(n.title ?? ''); setBody(n.text ?? n.body ?? '')
+    setEditingIdx(i); setAdding(true)
+  }
+  const save = () => {
+    const payload = { type, title, body }
+    if (editingIdx == null) onAddNote?.(payload)
+    else onEditNote?.(editingIdx, payload)
+    reset()
+  }
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
+  const iconBtn = { width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer' }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -59,9 +71,11 @@ export default function NotesTab({
             <input value={title} onChange={e => setTitle(e.target.value)} placeholder={labels.notePlaceholder?.(typeLabel)}
               style={{ width: '100%', padding: '8px 12px', fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }} />
             <RichTextEditor value={body} onChange={setBody} expanded={expanded} onToggleExpand={() => setExpanded(e => !e)} labels={editorLabels} />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button onClick={reset} style={{ padding: '8px 16px', fontSize: 12, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>{labels.cancel}</button>
-              <button onClick={save} style={{ padding: '8px 18px', fontSize: 12, fontWeight: 600, borderRadius: 8, background: 'var(--text)', color: 'white', border: 'none', cursor: 'pointer' }}>{labels.save}</button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+              <button onClick={save} title={labels.save}
+                style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={15} /></button>
+              <button onClick={reset} title={labels.cancel}
+                style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={15} /></button>
             </div>
           </div>
         )}
@@ -77,7 +91,12 @@ export default function NotesTab({
                       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{n.title ?? n.author}</span>
                     </div>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{n.ago}</span>
-                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px' }}><MoreHorizontal size={14} /></button>
+                    {onEditNote && (
+                      <button onClick={() => openEdit(i)} title={labels.edit ?? 'Bewerken'}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
+                        <Edit2 size={13} />
+                      </button>
+                    )}
                   </div>
                   <SafeHtml style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} html={n.text ?? n.body ?? ''} />
                 </div>

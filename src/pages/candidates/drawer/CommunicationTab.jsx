@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import NotesTab from '../../../components/drawer/tabs/NotesTab'
 import { NOTE_TYPES } from './constants'
@@ -11,9 +12,12 @@ const EDITOR_LABELS = {
 /** Communication tab — wires the candidate's notes/timeline into the generic NotesTab. */
 export default function CommunicationTab({ c }) {
   const { t } = useTranslation('candidates')
+  const [notes, setNotes] = useState(c.notes ?? [])
   return (
     <NotesTab
-      notes={c.notes ?? []}
+      notes={notes}
+      onAddNote={n => setNotes(p => [{ ...n, ago: t('common:justNow', { defaultValue: 'zojuist' }) }, ...p])}
+      onEditNote={(i, n) => setNotes(p => p.map((x, idx) => idx === i ? { ...x, ...n } : x))}
       timeline={c.timeline ?? []}
       noteTypes={NOTE_TYPES.map(nt => ({ value: nt.value, label: t(`communication.noteTypes.${nt.key}`) }))}
       authorInitials={c.ownerInitials}
