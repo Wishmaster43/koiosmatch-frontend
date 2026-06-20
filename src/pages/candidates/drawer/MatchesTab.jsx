@@ -13,29 +13,29 @@ const toApi = (v) => ({
   contract_type: v.contractType, contract_duration: v.contractDuration,
 })
 
-/** Matches/placements list — optimistic local state that persists to
- * POST/PATCH/DELETE /candidates/{id}/placements. Fails soft (UI never breaks). */
-export default function PlacementsTab({ c }) {
+/** Matches list — optimistic local state that persists to
+ * POST/PATCH/DELETE /candidates/{id}/matches. Fails soft (UI never breaks). */
+export default function MatchesTab({ c }) {
   const { t } = useTranslation('candidates')
-  const [placements, setPlacements] = useState(c.placements ?? [])
+  const [matches, setMatches] = useState(c.matches ?? [])
 
   // add / edit-at-index / remove-at-index with optimistic persistence (negative temp id).
   const onAdd = (v) => {
     const id = -Date.now()
-    setPlacements(p => [...p, { ...v, id }])
-    api.post(`/candidates/${c.id}/placements`, toApi(v))
-      .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) setPlacements(p => p.map(x => x.id === id ? { ...v, ...it } : x)) })
+    setMatches(p => [...p, { ...v, id }])
+    api.post(`/candidates/${c.id}/matches`, toApi(v))
+      .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) setMatches(p => p.map(x => x.id === id ? { ...v, ...it } : x)) })
       .catch(() => {})
   }
   const onEdit = (i, v) => {
-    const id = placements[i]?.id
-    setPlacements(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))
-    if (id > 0) api.patch(`/candidates/${c.id}/placements/${id}`, toApi(v)).catch(() => {})
+    const id = matches[i]?.id
+    setMatches(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))
+    if (id > 0) api.patch(`/candidates/${c.id}/matches/${id}`, toApi(v)).catch(() => {})
   }
   const onRemove = (i) => {
-    const id = placements[i]?.id
-    setPlacements(p => p.filter((_, idx) => idx !== i))
-    if (id > 0) api.delete(`/candidates/${c.id}/placements/${id}`).catch(() => {})
+    const id = matches[i]?.id
+    setMatches(p => p.filter((_, idx) => idx !== i))
+    if (id > 0) api.delete(`/candidates/${c.id}/matches/${id}`).catch(() => {})
   }
 
   const fields = [
@@ -52,7 +52,7 @@ export default function PlacementsTab({ c }) {
   ]
   return (
     <AddableSection title={t('sections.placements')} emptyText={t('sections.placementsEmpty')}
-      items={placements} fields={fields}
+      items={matches} fields={fields}
       onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(p, i) => (
         <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>

@@ -107,7 +107,8 @@ export function mapCandidate(c) {
       type: d.type ?? null,
     })),
     applications:    c.applications ?? [],
-    placements:      (c.placements ?? []).map(p => ({
+    // Matches (formerly "placements"); accept either key from the API during migration.
+    matches:         (c.matches ?? c.placements ?? []).map(p => ({
       ...p,
       hourlyRate:       p.hourlyRate       ?? p.hourly_rate,
       hoursPerWeek:     p.hoursPerWeek      ?? p.hours_per_week,
@@ -129,7 +130,7 @@ export function mapCandidate(c) {
     planningSettings: c.planning_settings ?? {},
 
     // ── Stats (detail only) — read from data.stats ──
-    placementsCount:   stats.placements_count   ?? (c.placements ?? []).length,
+    matchesCount:      stats.matches_count ?? stats.placements_count ?? (c.matches ?? c.placements ?? []).length,
     applicationsCount: stats.applications_count ?? (c.applications ?? []).length,
     shiftsCount:       stats.shifts_count,
     hoursWorked:       stats.hours_worked,

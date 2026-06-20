@@ -462,17 +462,91 @@
     }
   },
   "webhooks": {
-    "title": "Webhooks",
-    "subtitle": "Erstelle eingehende Webhook-URLs, um Workflows aus externen Systemen auszulösen.",
-    "newWebhook": "Neuer Webhook",
-    "namePlaceholder": "Name (z.B. Eingehend WhatsApp)",
-    "descPlaceholder": "Beschreibung (optional)",
-    "create": "Erstellen",
-    "creating": "Wird erstellt…",
-    "empty": "Noch keine Webhooks erstellt.",
-    "lastTriggered": "Zuletzt",
-    "removeConfirm": "Webhook löschen?",
-    "copyUrl": "URL kopieren"
+    "tab": {
+      "outgoing": "Ausgehend",
+      "incoming": "Eingehend"
+    },
+    "incoming": {
+      "title": "Eingehende Webhooks",
+      "subtitle": "Erstellen Sie eingehende Webhook-URLs, um Workflows aus externen Systemen auszulösen.",
+      "newWebhook": "Neuer Webhook",
+      "namePlaceholder": "Name (z. B. Eingehendes WhatsApp)",
+      "descPlaceholder": "Beschreibung (optional)",
+      "create": "Erstellen",
+      "creating": "Wird erstellt…",
+      "empty": "Noch keine Webhooks erstellt.",
+      "lastTriggered": "Zuletzt",
+      "removeConfirm": "Webhook löschen?",
+      "copyUrl": "URL kopieren"
+    },
+    "outgoing": {
+      "title": "Ausgehende Webhooks",
+      "subtitle": "Senden Sie Events an einen externen Endpunkt und wählen Sie pro Webhook, welche Events abonniert werden.",
+      "new": "Neu",
+      "empty": "Noch keine ausgehenden Webhooks erstellt.",
+      "loadError": "Webhooks konnten nicht geladen werden.",
+      "retry": "Erneut versuchen",
+      "col": {
+        "name": "Name",
+        "url": "URL",
+        "status": "Status",
+        "events": "Events",
+        "lastTriggered": "Zuletzt ausgelöst"
+      },
+      "field": {
+        "name": "Name",
+        "url": "Endpunkt-URL",
+        "events": "Events"
+      },
+      "detailsTitle": "Details",
+      "namePlaceholder": "Name (z. B. ATS-Anbindung)",
+      "urlPlaceholder": "https://…",
+      "createTitle": "Neuer ausgehender Webhook",
+      "create": "Erstellen",
+      "creating": "Wird erstellt…",
+      "createError": "Erstellung fehlgeschlagen. Bitte erneut versuchen.",
+      "done": "Fertig",
+      "eventsCount": "{{count}} Events",
+      "secretOnce": "Kopieren Sie das Signing-Secret jetzt — es wird nicht erneut angezeigt.",
+      "copySecret": "Secret kopieren",
+      "signingHint": "Verwenden Sie dieses Secret, um die X-Koios-Signature (HMAC-SHA256) zu verifizieren.",
+      "dismiss": "Schließen",
+      "action": "Aktion",
+      "regenerate": "Secret neu erzeugen",
+      "activate": "Aktivieren",
+      "deactivate": "Deaktivieren",
+      "delete": "Löschen",
+      "deleteConfirm": "Webhook \"{{name}}\" löschen?",
+      "edit": "Bearbeiten",
+      "status": {
+        "active": "Aktiv",
+        "disabled": "Deaktiviert"
+      }
+    },
+    "events": {
+      "search": "Events suchen…",
+      "selectAll": "Alle auswählen",
+      "clear": "Alle löschen",
+      "noResults": "Keine Events gefunden.",
+      "selectedCount": "{{count}} ausgewählt",
+      "groups": {
+        "candidate": "Kandidat",
+        "customer": "Kunde",
+        "location": "Standort",
+        "contact_person": "Ansprechpartner",
+        "vacancy": "Stelle",
+        "order": "Auftrag",
+        "shift": "Schicht",
+        "shift_scheduling": "Einplanung"
+      },
+      "actions": {
+        "created": "Erstellt",
+        "updated": "Geändert",
+        "deleted": "Gelöscht",
+        "status_changed": "Status geändert",
+        "funnel_type_changed": "Phase geändert"
+      }
+    }
   },
   "sync": {
     "title": "Synchronisierung",

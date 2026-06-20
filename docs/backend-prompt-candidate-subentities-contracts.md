@@ -36,11 +36,15 @@ name, organisation, issue_date, expiry_date, license_number, description
 name, level
 ```
 
-**`placements`** (UI-naam: "Matches")
+**`matches`** (was "placements" — frontend gebruikt nu de route `/candidates/{id}/matches`)
 ```
 client, function_title, scale, step, hourly_rate, hours_per_week,
 start_date, end_date, contract_type, contract_duration
 ```
+> Hernoem de relatie/route naar **`matches`**. De frontend leest in de GET-detail
+> `matches: [...]` (met `placements` als tijdelijke fallback tijdens de migratie),
+> en `stats.matches_count`. Endpoints: `POST /candidates/{id}/matches`,
+> `PATCH …/matches/{id}`, `DELETE …/matches/{id}`.
 
 **`languages`** — wordt als **hele array** meegestuurd in `PATCH /candidates/{id}`
 (`{ languages: [{ language, spoken, written }, …] }`). Per-relatie-route mag ook,

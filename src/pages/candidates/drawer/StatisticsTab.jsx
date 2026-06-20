@@ -9,7 +9,7 @@ export default function StatisticsTab({ c }) {
   return (
     <StatsTab
       kpis={[
-        { label: t('statistics.placements'),  value: c.placements?.length ?? 0,     sub: t('statistics.total'),    color: 'var(--color-primary)' },
+        { label: t('statistics.placements'),  value: c.matches?.length ?? 0,        sub: t('statistics.total'),    color: 'var(--color-primary)' },
         { label: t('statistics.applications'), value: (c.applications ?? []).length, sub: t('statistics.total'),    color: 'var(--color-secondary)' },
         { label: t('statistics.shifts'),       value: c.shiftsCount ?? 24,         sub: t('statistics.thisYear'), color: 'var(--color-success)' },
         { label: t('statistics.hoursWorked'),  value: c.hoursWorked ?? 186,          sub: t('statistics.thisYear'), color: 'var(--color-warning)' },

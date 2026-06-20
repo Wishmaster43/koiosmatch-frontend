@@ -462,17 +462,91 @@
     }
   },
   "webhooks": {
-    "title": "Webhooks",
-    "subtitle": "Créez des URL de webhook entrantes pour déclencher des workflows depuis des systèmes externes.",
-    "newWebhook": "Nouveau webhook",
-    "namePlaceholder": "Nom (p.ex. WhatsApp entrant)",
-    "descPlaceholder": "Description (facultatif)",
-    "create": "Créer",
-    "creating": "Création…",
-    "empty": "Aucun webhook créé.",
-    "lastTriggered": "Dernier",
-    "removeConfirm": "Supprimer le webhook ?",
-    "copyUrl": "Copier l'URL"
+    "tab": {
+      "outgoing": "Sortant",
+      "incoming": "Entrant"
+    },
+    "incoming": {
+      "title": "Webhooks entrants",
+      "subtitle": "Créez des URL de webhook entrantes pour déclencher des workflows depuis des systèmes externes.",
+      "newWebhook": "Nouveau webhook",
+      "namePlaceholder": "Nom (ex. WhatsApp entrant)",
+      "descPlaceholder": "Description (facultatif)",
+      "create": "Créer",
+      "creating": "Création…",
+      "empty": "Aucun webhook créé pour le moment.",
+      "lastTriggered": "Dernier",
+      "removeConfirm": "Supprimer le webhook ?",
+      "copyUrl": "Copier l'URL"
+    },
+    "outgoing": {
+      "title": "Webhooks sortants",
+      "subtitle": "Envoyez des événements vers un endpoint externe et choisissez par webhook les événements auxquels vous abonner.",
+      "new": "Nouveau",
+      "empty": "Aucun webhook sortant créé pour le moment.",
+      "loadError": "Impossible de charger les webhooks.",
+      "retry": "Réessayer",
+      "col": {
+        "name": "Nom",
+        "url": "URL",
+        "status": "Statut",
+        "events": "Événements",
+        "lastTriggered": "Dernier déclenchement"
+      },
+      "field": {
+        "name": "Nom",
+        "url": "URL de l'endpoint",
+        "events": "Événements"
+      },
+      "detailsTitle": "Détails",
+      "namePlaceholder": "Nom (ex. intégration ATS)",
+      "urlPlaceholder": "https://…",
+      "createTitle": "Nouveau webhook sortant",
+      "create": "Créer",
+      "creating": "Création…",
+      "createError": "Échec de la création. Veuillez réessayer.",
+      "done": "Terminé",
+      "eventsCount": "{{count}} événements",
+      "secretOnce": "Copiez le secret de signature maintenant — il ne sera plus affiché.",
+      "copySecret": "Copier le secret",
+      "signingHint": "Utilisez ce secret pour vérifier le X-Koios-Signature (HMAC-SHA256).",
+      "dismiss": "Fermer",
+      "action": "Action",
+      "regenerate": "Régénérer le secret",
+      "activate": "Activer",
+      "deactivate": "Désactiver",
+      "delete": "Supprimer",
+      "deleteConfirm": "Supprimer le webhook « {{name}} » ?",
+      "edit": "Modifier",
+      "status": {
+        "active": "Actif",
+        "disabled": "Désactivé"
+      }
+    },
+    "events": {
+      "search": "Rechercher des événements…",
+      "selectAll": "Tout sélectionner",
+      "clear": "Tout effacer",
+      "noResults": "Aucun événement trouvé.",
+      "selectedCount": "{{count}} sélectionné(s)",
+      "groups": {
+        "candidate": "Candidat",
+        "customer": "Client",
+        "location": "Site",
+        "contact_person": "Personne de contact",
+        "vacancy": "Offre",
+        "order": "Commande",
+        "shift": "Service",
+        "shift_scheduling": "Planification"
+      },
+      "actions": {
+        "created": "Créé",
+        "updated": "Modifié",
+        "deleted": "Supprimé",
+        "status_changed": "Statut modifié",
+        "funnel_type_changed": "Phase modifiée"
+      }
+    }
   },
   "sync": {
     "title": "Synchronisation",

@@ -1,18 +1,17 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Download, Edit2, Save, X } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { CvDocument } from './CandidateCvTemplate'
 import { useCvSettings } from '../../lib/useCvSettings'
-import api from '../../lib/api'
 import { useTranslation } from 'react-i18next'
 import { useLocale, useDateFormat } from '../../lib/datetime'
 import EntityDrawer from '../../components/drawer/EntityDrawer'
 import EntityHeader from '../../components/drawer/EntityHeader'
-import SelectMenu from '../../components/ui/SelectMenu'
 import { useLookups } from '../../context/LookupsContext'
 import { useGenders } from '../../lib/useGenders'
 import { useAuth } from '../../context/AuthContext'
 import ProfilePanel from './drawer/ProfilePanel'
+import ApplicationStageChips from './drawer/ApplicationStageChips'
 import BackgroundTab from './drawer/BackgroundTab'
 import WorkTab from './drawer/WorkTab'
 import PlanningPanel from './drawer/PlanningPanel'
@@ -37,7 +36,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { t } = useTranslation('candidates')
   const locale = useLocale()
   const { formatDate } = useDateFormat()
-  const { candidateTypes, funnelTypes, statuses, funnelMeta } = useLookups()
+  const { candidateTypes, statuses } = useLookups()
   const { colorOf: genderColor } = useGenders()
   const { hasModule } = useAuth()
   // Planning-tab alleen tonen als de tenant de Planning-module heeft (zelfde gate als sidebar).
@@ -47,9 +46,6 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [recruiter,     setRecruiter]     = useState(null)
   const [status,        setStatus]        = useState(null)
   const [types,         setTypes]         = useState(null)
-  const [stageVal,      setStageVal]      = useState(null)
-  const [stageVacancy,  setStageVacancy]  = useState(null)
-  const [stageVacancies, setStageVacancies] = useState([])
   const [tags,          setTags]          = useState(null)
   // Header (name + function) edit — independent from the Profile-tab fields.
   const [headerEditing, setHeaderEditing] = useState(false)
@@ -63,32 +59,20 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [prevId, setPrevId] = useState(c?.id)
   if (c?.id !== prevId) {
     setPrevId(c?.id)
-    setRecruiter(null); setStatus(null); setTypes(null); setStageVal(null); setStageVacancy(null)
+    setRecruiter(null); setStatus(null); setTypes(null)
     setTags(null); setHeaderEditing(false); setProfileEdits(null); setPhotoUrl(null); setHeaderForm(null)
   }
 
-  // Vacancies for the optional link shown when stage = Applicant.
-  useEffect(() => {
-    api.get('/vacancies').then(r => {
-      const d = r.data; setStageVacancies(Array.isArray(d) ? d : (d?.data ?? []))
-    }).catch(() => {})
-  }, [])
-
   if (!c) return null
 
-  const funnelValues   = funnelTypes.map(f => f.value)
   const currentStatus  = status ?? c.status
   const currentTypes   = types ?? c.candidateTypes ?? []
-  const currentStage   = stageVal ?? (funnelValues.includes(c.stage) ? c.stage : (funnelValues[0] ?? ''))
-  const stageOptions   = funnelTypes.map(f => ({ value: f.value, label: f.label }))
-  const currentVacancy = stageVacancy ?? c.stageVacancyId ?? ''
   const toggleType = (v) => {
     const next = currentTypes.includes(v) ? currentTypes.filter(x => x !== v) : [...currentTypes, v]
     setTypes(next)
     onUpdate?.(c.id, { candidateTypes: next })
   }
   const changeStatus = (v) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
-  const changeStage  = (v) => { setStageVal(v); onUpdate?.(c.id, { stage: v }) }
   const currentTags    = tags ?? c.tags ?? []
 
   // Enter header edit: capture the fields so they're controlled + saveable.
@@ -206,7 +190,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.id === 'planning', render: () => renderTabContent(tab.id) }))}
       header={() => (
         <EntityHeader
-          label={funnelMeta(currentStage).label}
+          label={t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: c.initials, photo: photoUrl ?? c.photo, color: genderColor(c.gender), soft: true }}
           onPhotoChange={setPhotoUrl}
@@ -216,13 +200,12 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           meta={[
             { key: 'status', label: t('drawer.status'), value: currentStatus, options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 160 },
             { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions, onChange: onOwnerChange, menuWidth: 200 },
-            { key: 'stage', label: t('drawer.stage'), value: currentStage, options: stageOptions, onChange: changeStage, menuWidth: 180 },
           ]}
           tags={{ items: currentTags, onAdd: tag => setTags([...currentTags, tag]), onRemove: tag => setTags(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
           tagsLabel={t('drawer.tags')}
         >
           {/* Candidate type — multi-value contract form, rendered as toggle chips */}
-          <div style={{ marginBottom: 10 }}>
+          <div style={{ marginBottom: 14 }}>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.candidateType')}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
               {candidateTypes.map(ct => {
@@ -240,13 +223,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
               })}
             </div>
           </div>
-          {currentStage === 'intake' && (
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{t('modal.linkVacancy')}</div>
-              <SelectMenu value={currentVacancy} onChange={setStageVacancy} placeholder={t('common:optional')} menuWidth={280}
-                options={[{ value: '', label: t('common:optional') }, ...stageVacancies.map(v => ({ value: String(v.id), label: v.title ?? v.name ?? t('modal.vacancyFallback', { id: v.id }) }))]} />
-            </div>
-          )}
+          {/* Application stages — read-only chips, only for applicants (see model). */}
+          <ApplicationStageChips applications={c.applications} label={t('drawer.applications')} />
           {(c.lastContactDate || c.lastContactType) ? (
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
               {t('drawer.lastContact')}:&nbsp;

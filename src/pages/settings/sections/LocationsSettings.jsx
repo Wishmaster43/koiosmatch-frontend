@@ -122,22 +122,23 @@ export default function LocationsSettings() {
               const sectionLbl = { fontSize: 11, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', color: '#9CA3AF', marginTop: 4 }
               const setF = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }))
               // Called as a function (not <F/>) so inputs keep focus while typing.
-              const field = (k, label, placeholder, type = 'text') => (
-                <div style={{ flex: 1, minWidth: 0 }}>
+              const field = (k, label, placeholder, type = 'text', flex = 1) => (
+                <div style={{ flex, minWidth: 0 }}>
                   <div style={lbl}>{label}</div>
                   <input type={type} value={form[k]} onChange={setF(k)} placeholder={placeholder} aria-label={label} style={inp} />
                 </div>
               )
               return (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   {field('name', t('locations.nameLabel'), t('locations.namePlaceholder'))}
 
                   {/* Structured address — separate fields so they can be matched/validated. */}
                   <div style={sectionLbl}>{t('locations.sectionAddress')}</div>
-                  {field('street', t('locations.street'), t('locations.street'))}
+                  {/* Street + number + suffix on one line (compact, NL convention). */}
                   <div style={{ display: 'flex', gap: 12 }}>
-                    {field('house_number', t('locations.houseNumber'), '28')}
-                    {field('house_number_suffix', t('locations.houseNumberSuffix'), 'A')}
+                    {field('street', t('locations.street'), t('locations.street'), 'text', 3)}
+                    {field('house_number', t('locations.houseNumber'), '28', 'text', 1)}
+                    {field('house_number_suffix', t('locations.houseNumberSuffix'), 'A', 'text', 1)}
                   </div>
                   <div style={{ display: 'flex', gap: 12 }}>
                     {field('postal_code', t('locations.postalCode'), '1234 AB')}

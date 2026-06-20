@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import PlacementsTab from './PlacementsTab'
+import MatchesTab from './MatchesTab'
 import { sectionBlock } from './constants'
 
-/** Work tab — placements + paginated applications. */
+/** Work tab — matches + paginated applications. */
 export default function WorkTab({ c }) {
   const { t } = useTranslation('candidates')
   const soll = c.applications ?? []
@@ -14,7 +14,7 @@ export default function WorkTab({ c }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <PlacementsTab c={c} />
+      <MatchesTab c={c} />
       <div style={sectionBlock}>
         <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>
           {t('sections.applications')} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>{soll.length}</span>

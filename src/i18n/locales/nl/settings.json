@@ -504,17 +504,91 @@
     }
   },
   "webhooks": {
-    "title": "Webhooks",
-    "subtitle": "Maak inkomende webhook-URLs aan om workflows te triggeren vanuit externe systemen.",
-    "newWebhook": "Nieuwe webhook",
-    "namePlaceholder": "Naam (bijv. Inkomende WhatsApp)",
-    "descPlaceholder": "Omschrijving (optioneel)",
-    "create": "Aanmaken",
-    "creating": "Aanmaken...",
-    "empty": "Nog geen webhooks aangemaakt.",
-    "lastTriggered": "Laatst",
-    "removeConfirm": "Webhook verwijderen?",
-    "copyUrl": "Kopieer URL"
+    "tab": {
+      "outgoing": "Uitgaand",
+      "incoming": "Inkomend"
+    },
+    "incoming": {
+      "title": "Inkomende webhooks",
+      "subtitle": "Maak inkomende webhook-URLs aan om workflows te triggeren vanuit externe systemen.",
+      "newWebhook": "Nieuwe webhook",
+      "namePlaceholder": "Naam (bijv. Inkomende WhatsApp)",
+      "descPlaceholder": "Omschrijving (optioneel)",
+      "create": "Aanmaken",
+      "creating": "Aanmaken…",
+      "empty": "Nog geen webhooks aangemaakt.",
+      "lastTriggered": "Laatst",
+      "removeConfirm": "Webhook verwijderen?",
+      "copyUrl": "Kopieer URL"
+    },
+    "outgoing": {
+      "title": "Uitgaande webhooks",
+      "subtitle": "Stuur events naar een externe endpoint en kies per webhook op welke events je abonneert.",
+      "new": "Nieuw",
+      "empty": "Nog geen uitgaande webhooks aangemaakt.",
+      "loadError": "Webhooks konden niet worden geladen.",
+      "retry": "Opnieuw proberen",
+      "col": {
+        "name": "Naam",
+        "url": "URL",
+        "status": "Status",
+        "events": "Events",
+        "lastTriggered": "Laatst getriggerd"
+      },
+      "field": {
+        "name": "Naam",
+        "url": "Endpoint-URL",
+        "events": "Events"
+      },
+      "detailsTitle": "Gegevens",
+      "namePlaceholder": "Naam (bijv. ATS-koppeling)",
+      "urlPlaceholder": "https://…",
+      "createTitle": "Nieuwe uitgaande webhook",
+      "create": "Aanmaken",
+      "creating": "Aanmaken…",
+      "createError": "Aanmaken mislukt. Probeer opnieuw.",
+      "done": "Klaar",
+      "eventsCount": "{{count}} events",
+      "secretOnce": "Kopieer de signing-secret nu — hij wordt niet meer getoond.",
+      "copySecret": "Kopieer secret",
+      "signingHint": "Gebruik deze secret om de X-Koios-Signature (HMAC-SHA256) te verifiëren.",
+      "dismiss": "Sluiten",
+      "action": "Actie",
+      "regenerate": "Secret opnieuw genereren",
+      "activate": "Activeren",
+      "deactivate": "Deactiveren",
+      "delete": "Verwijderen",
+      "deleteConfirm": "Webhook \"{{name}}\" verwijderen?",
+      "edit": "Wijzigen",
+      "status": {
+        "active": "Actief",
+        "disabled": "Uitgeschakeld"
+      }
+    },
+    "events": {
+      "search": "Zoek events…",
+      "selectAll": "Alles selecteren",
+      "clear": "Alles wissen",
+      "noResults": "Geen events gevonden.",
+      "selectedCount": "{{count}} geselecteerd",
+      "groups": {
+        "candidate": "Kandidaat",
+        "customer": "Klant",
+        "location": "Locatie",
+        "contact_person": "Contactpersoon",
+        "vacancy": "Vacature",
+        "order": "Order",
+        "shift": "Dienst",
+        "shift_scheduling": "Inplanning"
+      },
+      "actions": {
+        "created": "Aangemaakt",
+        "updated": "Gewijzigd",
+        "deleted": "Verwijderd",
+        "status_changed": "Status gewijzigd",
+        "funnel_type_changed": "Fase gewijzigd"
+      }
+    }
   },
   "sync": {
     "title": "Synchronisatie",
