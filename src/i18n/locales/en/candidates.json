@@ -221,7 +221,7 @@
     }
   },
   "statistics": {
-    "placements": "Placements",
+    "placements": "Matches",
     "applications": "Applications",
     "shifts": "Shifts",
     "hoursWorked": "Hours worked",
@@ -322,8 +322,8 @@
     "poolAdd": "Add to pool",
     "poolsEmpty": "No pools configured yet.",
     "poolKoios": "Suggested by Koios",
-    "placements": "Placements",
-    "placementsEmpty": "No placements yet.",
+    "placements": "Matches",
+    "placementsEmpty": "No matches yet.",
     "applications": "Applications",
     "applicationsEmpty": "No applications yet.",
     "notes": "Notes",

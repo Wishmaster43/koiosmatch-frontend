@@ -221,7 +221,7 @@
     }
   },
   "statistics": {
-    "placements": "Plaatsingen",
+    "placements": "Matches",
     "applications": "Sollicitaties",
     "shifts": "Diensten",
     "hoursWorked": "Uren gewerkt",
@@ -322,8 +322,8 @@
     "poolAdd": "Toevoegen aan pool",
     "poolsEmpty": "Nog geen pools ingesteld.",
     "poolKoios": "Door Koios voorgesteld",
-    "placements": "Plaatsingen",
-    "placementsEmpty": "Nog geen plaatsingen.",
+    "placements": "Matches",
+    "placementsEmpty": "Nog geen matches.",
     "applications": "Sollicitaties",
     "applicationsEmpty": "Nog geen sollicitaties.",
     "notes": "Notities",
