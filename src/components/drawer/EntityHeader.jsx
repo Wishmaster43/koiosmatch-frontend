@@ -25,13 +25,13 @@ function PhotoAvatar({ avatar, onChange, labels }) {
     return () => document.removeEventListener('mousedown', h)
   }, [menuOpen])
 
-  if (!onChange) return <Avatar initials={avatar.initials} size={44} photo={avatar.photo} />
+  if (!onChange) return <Avatar initials={avatar.initials} size={44} photo={avatar.photo} color={avatar.color} />
 
   return (
     <div ref={ref} style={{ position: 'relative', flexShrink: 0 }}>
       <button onClick={() => setMenuOpen(o => !o)}
         style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'block', position: 'relative', borderRadius: '50%' }}>
-        <Avatar initials={avatar.initials} size={44} photo={avatar.photo} />
+        <Avatar initials={avatar.initials} size={44} photo={avatar.photo} color={avatar.color} />
         <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(0,0,0,0.35)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.15s' }}
           onMouseEnter={e => (e.currentTarget.style.opacity = 1)}

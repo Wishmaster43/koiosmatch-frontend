@@ -4,9 +4,9 @@
 import { useTranslation } from 'react-i18next'
 import EditableFieldTable from '../../../components/forms/EditableFieldTable'
 
-export function PreferencesTab({ c }) {
+export function PreferencesTab({ c, onSave }) {
   const { t } = useTranslation('candidates')
-  const pref = c.preferences ?? c.preferences ?? {}
+  const pref = c.preferences ?? {}
   const value = {
     beschikbaar_per: pref.available_from ?? '',
     hoursPerWeek:   pref.hours_per_week ?? '',
@@ -35,10 +35,24 @@ export function PreferencesTab({ c }) {
     { key: 'contract',        label: t('preferences.contract') },
     { key: 'remarks',     label: t('preferences.remarks') },
   ]
-  return <EditableFieldTable title={t('preferences.title')} fields={fields} value={value} labelWidth={160} onSave={() => {}} />
+  const toApi = (v) => ({
+    available_from:  v.beschikbaar_per,
+    hours_per_week:  v.hoursPerWeek,
+    preferred_days:  v.dagen,
+    max_travel_km:   v.reisafstand,
+    max_travel_min:  v.reistijd,
+    has_license:     v.rijbewijs,
+    own_transport:   v.eigen_vervoer,
+    function_pref:   v.function,
+    sector_pref:     v.branche,
+    min_rate:        v.min_tarief,
+    contract_pref:   v.contract,
+    remarks:         v.remarks,
+  })
+  return <EditableFieldTable title={t('preferences.title')} fields={fields} value={value} labelWidth={160} onSave={v => onSave?.(toApi(v))} />
 }
 
-export function ZzpTab({ c }) {
+export function ZzpTab({ c, onSave }) {
   const { t } = useTranslation('candidates')
   const zzp = c.zzp ?? {}
   const value = {
@@ -81,5 +95,25 @@ export function ZzpTab({ c }) {
     { key: 'bemiddelingskosten',label: t('zzp.mediationCosts'), prefix: '€' },
     { key: 'betaaltermijn',     label: t('zzp.paymentTerm') },
   ]
-  return <EditableFieldTable title={t('zzp.title')} fields={fields} value={value} labelWidth={180} onSave={() => {}} />
+  const toApi = (v) => ({
+    company_name:      v.bedrijfsnaam,
+    kvk_number:        v.kvk,
+    vat_number:        v.btw,
+    kor:               v.kor,
+    intracommunautair: v.intracommunautair,
+    street:            v.straat,
+    house_number:      v.huisnummer,
+    postal_code:       v.postcode,
+    city:              v.plaats,
+    country:           v.land,
+    creditor_number:   v.crediteur,
+    business_email:    v.email_zakelijk,
+    invoice_email:     v.email_factuur,
+    iban:              v.iban,
+    self_billing:      v.self_billing,
+    payment_discount:  v.betalingskorting,
+    mediation_costs:   v.bemiddelingskosten,
+    payment_term:      v.betaaltermijn,
+  })
+  return <EditableFieldTable title={t('zzp.title')} fields={fields} value={value} labelWidth={180} onSave={v => onSave?.(toApi(v))} />
 }

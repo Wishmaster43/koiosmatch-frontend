@@ -5,6 +5,7 @@ import Avatar from '../../components/ui/Avatar'
 import StatusPill from '../../components/ui/StatusPill'
 import { useDateFormat } from '../../lib/datetime'
 import { useLookups } from '../../context/LookupsContext'
+import { useGenders } from '../../lib/useGenders'
 
 const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
 
@@ -27,6 +28,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const { funnelTypes, funnelMeta, statusMeta, typeMeta } = useLookups()
+  const { colorOf: genderColor } = useGenders()
   // Sort the funnel column by lifecycle order (prospect → alumni), not alphabetically.
   const funnelOrder = Object.fromEntries(funnelTypes.map((f, i) => [f.value, i]))
 
@@ -35,7 +37,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
       key: 'name', header: t('columns.name'), sortable: true, sortValue: c => c.name,
       render: c => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Avatar initials={c.initials} size={26} />
+          <Avatar initials={c.initials} size={26} color={genderColor(c.gender)} />
           <span style={{ fontWeight: 500, color: 'var(--text)' }}>{c.name}</span>
         </div>
       ),
@@ -121,7 +123,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
       key: 'owner', header: t('columns.owner'), sortable: true, sortValue: c => c.owner,
       render: c => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {c.ownerInitials !== '?' && <Avatar initials={c.ownerInitials} size={20} />}
+          {c.ownerInitials !== '?' && <Avatar initials={c.ownerInitials} size={20} color={c.ownerColor} />}
           <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{c.owner || '—'}</span>
         </div>
       ),

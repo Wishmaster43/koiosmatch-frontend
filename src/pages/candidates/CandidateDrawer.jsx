@@ -10,6 +10,7 @@ import EntityDrawer from '../../components/drawer/EntityDrawer'
 import EntityHeader from '../../components/drawer/EntityHeader'
 import SelectMenu from '../../components/ui/SelectMenu'
 import { useLookups } from '../../context/LookupsContext'
+import { useGenders } from '../../lib/useGenders'
 import { useAuth } from '../../context/AuthContext'
 import ProfilePanel from './drawer/ProfilePanel'
 import BackgroundTab from './drawer/BackgroundTab'
@@ -37,6 +38,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const locale = useLocale()
   const { formatDate } = useDateFormat()
   const { candidateTypes, funnelTypes, statuses, funnelMeta } = useLookups()
+  const { colorOf: genderColor } = useGenders()
   const { hasModule } = useAuth()
   // Planning-tab alleen tonen als de tenant de Planning-module heeft (zelfde gate als sidebar).
   const tabs = TABS.filter(tab => tab.id !== 'planning' || hasModule('plan'))
@@ -116,8 +118,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       case 'background':   return <BackgroundTab c={c} />
       case 'work':          return <WorkTab c={c} />
       case 'planning':      return <PlanningPanel c={c} />
-      case 'preferences':    return <PreferencesTab c={c} />
-      case 'administration': return <ZzpTab c={c} />
+      case 'preferences':    return <PreferencesTab c={c} onSave={p => onUpdate?.(c.id, { preferences: p })} />
+      case 'administration': return <ZzpTab c={c} onSave={p => onUpdate?.(c.id, { zzp: p })} />
       case 'communication':  return <CommunicationTab c={c} />
       case 'statistics':  return <StatisticsTab c={c} />
       default:              return null
@@ -206,7 +208,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         <EntityHeader
           label={funnelMeta(currentStage).label}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
-          avatar={{ initials: c.initials, photo: photoUrl ?? c.photo }}
+          avatar={{ initials: c.initials, photo: photoUrl ?? c.photo, color: genderColor(c.gender) }}
           onPhotoChange={setPhotoUrl}
           photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
           renderTitle={renderTitle}

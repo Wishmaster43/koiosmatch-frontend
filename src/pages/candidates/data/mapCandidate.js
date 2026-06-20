@@ -50,6 +50,7 @@ export function mapCandidate(c) {
     status:          c.status ?? '',
     owner:           ownerName,
     ownerId:         c.owner?.id ?? c.owner_id ?? null,
+    ownerColor:      c.owner?.avatar_color ?? c.recruiter?.avatar_color ?? c.owner_avatar_color ?? null,
     ownerInitials:   initialsOf(ownerName),
     city:            c.city ?? '',
     province:        c.province ?? '',
