@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api, { unwrapList } from '../../lib/api'
 import { useUsers } from '../../lib/queries'
@@ -71,6 +72,9 @@ export default function CandidatesPage() {
   const [stats,            setStats]            = useState(null)
   // Bulk-selectie (checkboxes) — id-set; wordt gewist bij filter/pagina-wissel.
   const [selectedIds,      setSelectedIds]      = useState(() => new Set())
+  // Transient feedback for bulk mutations (success/error), auto-dismissed.
+  const [actionMsg,        setActionMsg]        = useState(null) // { type, text }
+  const msgTimer = useRef(null)
 
   const { registerFilters, unregisterFilters } = useRightPanel()
   const { t } = useTranslation('candidates')
@@ -319,14 +323,47 @@ export default function CandidatesPage() {
     ids.forEach(id => allSelected ? next.delete(id) : next.add(id))
     return next
   })
-  const bulkAddToPool = (poolId) => {
+  // Show a transient success/error message; replaces any previous one.
+  const notify = (type, text) => {
+    setActionMsg({ type, text })
+    if (msgTimer.current) clearTimeout(msgTimer.current)
+    msgTimer.current = setTimeout(() => setActionMsg(null), 4000)
+  }
+  // Clear the pending dismiss-timer on unmount.
+  useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
+
+  // Add the selection to a pool: patch the table's pool column optimistically,
+  // persist, and revert + warn on failure. `pool` carries name+colour so the
+  // chip renders immediately (only candidates lacking the pool actually change).
+  const bulkAddToPool = (pool) => {
     const ids = [...selectedIds]
-    if (ids.length) api.post(`/pools/${poolId}/candidates`, { candidate_ids: ids }).catch(() => {})
+    if (!ids.length || !pool) return
+    const poolId = pool.id ?? pool.name
+    const chip = { id: pool.id, name: pool.name, color: pool.color }
+    const changedIds = candidates.filter(c => ids.includes(c.id) && !(c.pools ?? []).some(p => (p.id ?? p.name) === poolId)).map(c => c.id)
+    setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: [...(c.pools ?? []), chip] } : c))
+    api.post(`/pools/${poolId}/candidates`, { candidate_ids: ids })
+      .then(() => notify('success', t('bulk.addedToPool', { pool: pool.name, count: ids.length })))
+      .catch(() => {
+        setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: (c.pools ?? []).filter(p => (p.id ?? p.name) !== poolId) } : c))
+        notify('error', t('bulk.poolError'))
+      })
     setSelectedIds(new Set())
   }
-  const bulkRemoveFromPool = (poolId) => {
+  // Remove the selection from a pool: same optimistic + revert pattern.
+  const bulkRemoveFromPool = (pool) => {
     const ids = [...selectedIds]
-    if (ids.length) api.delete(`/pools/${poolId}/candidates`, { data: { candidate_ids: ids } }).catch(() => {})
+    if (!ids.length || !pool) return
+    const poolId = pool.id ?? pool.name
+    const chip = { id: pool.id, name: pool.name, color: pool.color }
+    const changedIds = candidates.filter(c => ids.includes(c.id) && (c.pools ?? []).some(p => (p.id ?? p.name) === poolId)).map(c => c.id)
+    setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: (c.pools ?? []).filter(p => (p.id ?? p.name) !== poolId) } : c))
+    api.delete(`/pools/${poolId}/candidates`, { data: { candidate_ids: ids } })
+      .then(() => notify('success', t('bulk.removedFromPool', { pool: pool.name, count: ids.length })))
+      .catch(() => {
+        setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: [...(c.pools ?? []), chip] } : c))
+        notify('error', t('bulk.poolError'))
+      })
     setSelectedIds(new Set())
   }
 

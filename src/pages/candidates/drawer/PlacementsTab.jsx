@@ -1,11 +1,43 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import api from '../../../lib/api'
 import AddableSection from '../../../components/forms/AddableSection'
 
-/** Placements list (add + read-only cards). */
+// Form draft → API body (snake_case). Confirm column names with the backend:
+// client, function_title, scale, step, hourly_rate, hours_per_week,
+// start_date, end_date, contract_type, contract_duration.
+const toApi = (v) => ({
+  client: v.client, function_title: v.function, scale: v.scale, step: v.step,
+  hourly_rate: v.hourlyRate, hours_per_week: v.hoursPerWeek,
+  start_date: v.startDate, end_date: v.endDate,
+  contract_type: v.contractType, contract_duration: v.contractDuration,
+})
+
+/** Matches/placements list — optimistic local state that persists to
+ * POST/PATCH/DELETE /candidates/{id}/placements. Fails soft (UI never breaks). */
 export default function PlacementsTab({ c }) {
   const { t } = useTranslation('candidates')
   const [placements, setPlacements] = useState(c.placements ?? [])
+
+  // add / edit-at-index / remove-at-index with optimistic persistence (negative temp id).
+  const onAdd = (v) => {
+    const id = -Date.now()
+    setPlacements(p => [...p, { ...v, id }])
+    api.post(`/candidates/${c.id}/placements`, toApi(v))
+      .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) setPlacements(p => p.map(x => x.id === id ? { ...v, ...it } : x)) })
+      .catch(() => {})
+  }
+  const onEdit = (i, v) => {
+    const id = placements[i]?.id
+    setPlacements(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))
+    if (id > 0) api.patch(`/candidates/${c.id}/placements/${id}`, toApi(v)).catch(() => {})
+  }
+  const onRemove = (i) => {
+    const id = placements[i]?.id
+    setPlacements(p => p.filter((_, idx) => idx !== i))
+    if (id > 0) api.delete(`/candidates/${c.id}/placements/${id}`).catch(() => {})
+  }
+
   const fields = [
     { key: 'client',         label: t('work.client') },
     { key: 'function',       label: t('work.function') },
@@ -21,9 +53,7 @@ export default function PlacementsTab({ c }) {
   return (
     <AddableSection title={t('sections.placements')} emptyText={t('sections.placementsEmpty')}
       items={placements} fields={fields}
-      onAdd={v => setPlacements(p => [...p, v])}
-      onEdit={(i, v) => setPlacements(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))}
-      onRemove={i => setPlacements(p => p.filter((_, idx) => idx !== i))}
+      onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(p, i) => (
         <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
           <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

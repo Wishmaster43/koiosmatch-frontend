@@ -18,6 +18,15 @@
     "province": "Provinz",
     "createdAt": "Erstellt am"
   },
+  "bulk": {
+    "selected": "{{count}} ausgewählt",
+    "actions": "Massenmutationen",
+    "addToPool": "Zum Pool hinzufügen",
+    "removeFromPool": "Aus Pool entfernen",
+    "searchPool": "Pool suchen…",
+    "deselect": "Auswahl aufheben",
+    "noPools": "Noch keine Pools eingerichtet."
+  },
   "kpi": {
     "total": "Gesamt",
     "totalSub": "alle Kandidaten",
@@ -125,7 +134,9 @@
     "photoUpload": "Hochladen",
     "photoRemove": "Entfernen",
     "stage": "Funnel-Typ",
-    "candidateType": "Kandidatentyp"
+    "candidateType": "Kandidatentyp",
+    "entityLabel": "Kandidat",
+    "applications": "Bewerbungen"
   },
   "stage": {
     "lead": "Lead",

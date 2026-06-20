@@ -18,6 +18,15 @@
     "province": "Provincia",
     "createdAt": "Creado el"
   },
+  "bulk": {
+    "selected": "{{count}} seleccionado(s)",
+    "actions": "Acciones masivas",
+    "addToPool": "Añadir al pool",
+    "removeFromPool": "Quitar del pool",
+    "searchPool": "Buscar un pool…",
+    "deselect": "Anular selección",
+    "noPools": "Aún no hay pools configurados."
+  },
   "kpi": {
     "total": "Total",
     "totalSub": "todos los candidatos",
@@ -125,7 +134,9 @@
     "photoUpload": "Subir",
     "photoRemove": "Eliminar",
     "stage": "Tipo de embudo",
-    "candidateType": "Tipo de candidato"
+    "candidateType": "Tipo de candidato",
+    "entityLabel": "Candidato",
+    "applications": "Candidaturas"
   },
   "stage": {
     "lead": "Lead",

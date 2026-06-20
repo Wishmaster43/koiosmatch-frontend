@@ -16,9 +16,10 @@
  * (or a line to an existing schema) and skip writing a component entirely.
  */
 import {
-  AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, ClipboardList, Clock,
-  CreditCard, Download, FileText, Key, LayoutDashboard, Lock, Mail, MapPin, MessageCircle,
-  Languages, Package, Palette, RotateCcw, Shield, Star, Store, Tags, Target, Users, Webhook, XCircle, Zap,
+  AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays,
+  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Key, LayoutDashboard, LayoutGrid, Lock,
+  Mail, MapPin, MessageCircle, Languages, Package, Palette, RotateCcw, Shield, Sparkles, Star,
+  Store, Tags, Target, Users, Webhook, XCircle, Zap,
 } from 'lucide-react'
 
 import UsersPage from '../users/UsersPage'
@@ -32,6 +33,7 @@ import CandidateLookupsSettings from './sections/CandidateLookupsSettings'
 import PoolsSettings from './sections/PoolsSettings'
 import LanguageSettings from './sections/LanguageSettings'
 import GenderSettings from './sections/GenderSettings'
+import IndustrySettings from './sections/IndustrySettings'
 import VacancySettings from './sections/VacancySettings'
 import RejectionSettings from './sections/RejectionSettings'
 import CvTemplateSettings from './sections/CvTemplateSettings'
@@ -45,9 +47,10 @@ import AppsSettings from './sections/AppsSettings'
 import ModulesSettings from './sections/ModulesSettings'
 import WhatsAppSettings from './sections/WhatsAppSettings'
 import ImporterenSettings from './sections/ImporterenSettings'
-import ApiKeysSettings from './sections/ApiKeysSettings'
+import ApiKeysSettings from './sections/apikeys'
 import AppStoreSettings from './sections/AppStoreSettings'
 import NotificationsSettings from './sections/NotificationsSettings'
+import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
 import { PlanbeheerSettings, BetaalmethodenSettings, AutoOpwaarderenSettings, GebruikSettings, FacturenSettings } from './sections/BillingSettings'
 
 import kpisSchema from './schemas/kpis'
@@ -78,9 +81,19 @@ export const NAV_GROUPS = [
       { id: 'pools',             label: 'Talent pools',      icon: Star,      component: PoolsSettings },
       { id: 'languages',         label: 'Languages',         icon: Languages, component: LanguageSettings },
       { id: 'genders',           label: 'Gender',            icon: Users,     component: GenderSettings },
+      { id: 'industries',        label: 'Industries',        icon: Factory,   component: IndustrySettings },
       { id: 'vacancy',           label: 'Vacancy',           icon: Briefcase, component: VacancySettings },
       { id: 'rejection',         label: 'Rejection reasons', icon: XCircle,   component: RejectionSettings },
       { id: 'cv_template',       label: 'CV template',       icon: FileText,  component: CvTemplateSettings },
+    ],
+  },
+  {
+    key: 'planning', icon: CalendarDays,
+    items: [
+      { id: 'shift_types',     label: 'Shift types',     icon: Clock,         component: ShiftTypesSettings },
+      { id: 'availability',    label: 'Availability',    icon: CalendarCheck, component: AvailabilitySettings },
+      { id: 'automatch',       label: 'Auto-match rules', icon: Sparkles,     component: AutoMatchSettings },
+      { id: 'planning_board',  label: 'Planning board',  icon: LayoutGrid,    component: PlanningBoardSettings },
     ],
   },
   {

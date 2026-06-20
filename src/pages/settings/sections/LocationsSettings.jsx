@@ -8,6 +8,8 @@ import api from '../../../lib/api'
 const EMPTY_FORM = {
   name: '', street: '', house_number: '', house_number_suffix: '',
   postal_code: '', city: '', country: '',
+  // Business identifiers + contact details, so a location is a full entity.
+  coc_number: '', vat_number: '', contact_name: '', phone: '', email: '',
 }
 
 function formatAddress(loc) {
@@ -108,7 +110,7 @@ export default function LocationsSettings() {
       {showModal && (
         <>
           <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
-          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'white', borderRadius: 12, padding: 24, width: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'white', borderRadius: 12, padding: 24, width: 460, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <span style={{ fontSize: 15, fontWeight: 700 }}>{t('locations.create')}</span>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
@@ -117,17 +119,21 @@ export default function LocationsSettings() {
             {(() => {
               const lbl = { fontSize: 12, color: '#6B7280', marginBottom: 5 }
               const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }
+              const sectionLbl = { fontSize: 11, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', color: '#9CA3AF', marginTop: 4 }
               const setF = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }))
               // Called as a function (not <F/>) so inputs keep focus while typing.
-              const field = (k, label, placeholder) => (
+              const field = (k, label, placeholder, type = 'text') => (
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={lbl}>{label}</div>
-                  <input value={form[k]} onChange={setF(k)} placeholder={placeholder} style={inp} />
+                  <input type={type} value={form[k]} onChange={setF(k)} placeholder={placeholder} aria-label={label} style={inp} />
                 </div>
               )
               return (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                   {field('name', t('locations.nameLabel'), t('locations.namePlaceholder'))}
+
+                  {/* Structured address — separate fields so they can be matched/validated. */}
+                  <div style={sectionLbl}>{t('locations.sectionAddress')}</div>
                   {field('street', t('locations.street'), t('locations.street'))}
                   <div style={{ display: 'flex', gap: 12 }}>
                     {field('house_number', t('locations.houseNumber'), '28')}
@@ -138,6 +144,21 @@ export default function LocationsSettings() {
                     {field('city', t('locations.city'), t('locations.city'))}
                   </div>
                   {field('country', t('locations.country'), 'Nederland')}
+
+                  {/* Business identifiers for invoicing/registration. */}
+                  <div style={sectionLbl}>{t('locations.sectionBusiness')}</div>
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    {field('coc_number', t('locations.cocNumber'), '12345678')}
+                    {field('vat_number', t('locations.vatNumber'), 'NL000000000B01')}
+                  </div>
+
+                  {/* Contact details for this location. */}
+                  <div style={sectionLbl}>{t('locations.sectionContact')}</div>
+                  {field('contact_name', t('locations.contactName'), t('locations.contactName'))}
+                  <div style={{ display: 'flex', gap: 12 }}>
+                    {field('phone', t('locations.phone'), '+31 6 12345678', 'tel')}
+                    {field('email', t('locations.email'), 'name@company.com', 'email')}
+                  </div>
                 </div>
               )
             })()}

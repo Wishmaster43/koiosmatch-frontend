@@ -18,6 +18,15 @@
     "province": "Province",
     "createdAt": "Créé le"
   },
+  "bulk": {
+    "selected": "{{count}} sélectionné(s)",
+    "actions": "Actions groupées",
+    "addToPool": "Ajouter au pool",
+    "removeFromPool": "Retirer du pool",
+    "searchPool": "Rechercher un pool…",
+    "deselect": "Désélectionner",
+    "noPools": "Aucun pool configuré pour le moment."
+  },
   "kpi": {
     "total": "Total",
     "totalSub": "tous les candidats",
@@ -125,7 +134,9 @@
     "photoUpload": "Téléverser",
     "photoRemove": "Supprimer",
     "stage": "Type de tunnel",
-    "candidateType": "Type de candidat"
+    "candidateType": "Type de candidat",
+    "entityLabel": "Candidat",
+    "applications": "Candidatures"
   },
   "stage": {
     "lead": "Piste",

@@ -28,7 +28,8 @@
     "communication": "Kommunikation",
     "integrations": "Integrationen & API",
     "billing": "Abrechnung",
-    "administration": "Verwaltung"
+    "administration": "Verwaltung",
+    "planning": "Planung"
   },
   "nav": {
     "kpis": "KPIs",
@@ -70,7 +71,11 @@
     "audit": "Audit-Log",
     "email_klanten": "E-Mail Kunden",
     "email_kandidaten": "E-Mail Kandidaten",
-    "email_planning": "E-Mail Planung"
+    "email_planning": "E-Mail Planung",
+    "shift_types": "Diensttypen",
+    "availability": "Verfügbarkeit",
+    "automatch": "Auto-Match-Regeln",
+    "planning_board": "Planungstafel"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -151,9 +156,6 @@
     "banner": "Unternehmensbanner",
     "industry": "Branche",
     "country": "Land",
-    "address1": "Adresszeile 1",
-    "address1Placeholder": "Straße und Hausnummer",
-    "address2": "Adresszeile 2 (optional)",
     "postcode": "Postleitzahl",
     "city": "Stadt",
     "cityPlaceholder": "Stadt",
@@ -186,7 +188,15 @@
     "houseNumberSuffix": "Zusatz",
     "postalCode": "PLZ",
     "city": "Ort",
-    "country": "Land"
+    "country": "Land",
+    "sectionAddress": "Adresse",
+    "sectionBusiness": "Unternehmensdaten",
+    "sectionContact": "Kontakt",
+    "vatNumber": "USt-IdNr.",
+    "cocNumber": "Handelsregisternr.",
+    "contactName": "Ansprechpartner",
+    "phone": "Telefon",
+    "email": "E-Mail"
   },
   "memory": {
     "title": "Speicher",
@@ -369,16 +379,87 @@
   },
   "apiKeys": {
     "title": "API-Schlüssel",
-    "subtitle": "Verwalte API-Schlüssel für externe Integrationen.",
-    "newKeyBanner": "Neuer API-Schlüssel — jetzt kopieren, er wird nicht erneut angezeigt.",
-    "close": "Schließen",
+    "count": "{{count}} Schlüssel",
+    "new": "Neu",
+    "empty": "Noch keine API-Schlüssel erstellt.",
+    "loadError": "API-Schlüssel konnten nicht geladen werden.",
+    "retry": "Erneut versuchen",
+    "action": "Aktion",
+    "regenerate": "Secret neu erzeugen",
+    "activate": "Aktivieren",
+    "deactivate": "Deaktivieren",
+    "delete": "Löschen",
+    "deleteConfirm": "API-Schlüssel \"{{name}}\" löschen?",
+    "edit": "Bearbeiten",
+    "createTitle": "Neuer API-Schlüssel",
     "namePlaceholder": "Name für den API-Schlüssel…",
     "create": "Erstellen",
-    "empty": "Noch keine API-Schlüssel erstellt.",
-    "created": "Erstellt",
-    "used": "Verwendet",
-    "revokeConfirm": "API-Schlüssel „{{name}}\" widerrufen?",
-    "revoke": "Widerrufen"
+    "creating": "Wird erstellt…",
+    "createError": "Erstellung fehlgeschlagen. Bitte erneut versuchen.",
+    "done": "Fertig",
+    "secretOnce": "Kopieren Sie das Secret jetzt — es wird nicht erneut angezeigt.",
+    "copySecret": "Secret kopieren",
+    "secretHidden": "nur bei Erstellung angezeigt",
+    "dismiss": "Schließen",
+    "allowedIps": "Erlaubte IPs",
+    "allowedIpsHint": "Optional. Leer lassen für keine IP-Beschränkung. IPv4/IPv6 oder CIDR (z. B. 192.168.0.0/24).",
+    "noIps": "Keine IP-Beschränkung",
+    "ipPlaceholder": "IP oder CIDR…",
+    "col": {
+      "name": "Anzeigename",
+      "status": "Status",
+      "organisation": "Organisation",
+      "type": "Typ",
+      "guid": "GUID",
+      "created": "Erstellt",
+      "updated": "Zuletzt geändert"
+    },
+    "field": {
+      "name": "Anzeigename",
+      "type": "Typ",
+      "organisation": "Organisation",
+      "description": "Beschreibung",
+      "guid": "GUID",
+      "secret": "Secret",
+      "created": "Registrierungsdatum",
+      "updated": "Zuletzt geändert",
+      "contactName": "Ansprechpartner",
+      "contactEmail": "E-Mail"
+    },
+    "type": {
+      "primary": "Primär",
+      "additional": "Zusätzlich"
+    },
+    "status": {
+      "active": "In Gebrauch",
+      "disabled": "Deaktiviert"
+    },
+    "level": {
+      "read": "Leserechte",
+      "read_write": "Lese- und Schreibrechte"
+    },
+    "tab": {
+      "general": "Allgemein",
+      "access": "Zugriff"
+    },
+    "access": {
+      "subtitle": "Legen Sie pro Ressource fest, ob dieser Schlüssel Zugriff hat und auf welcher Ebene."
+    },
+    "scopes": {
+      "candidates": "Kandidaten",
+      "customers": "Kunden",
+      "locations": "Standorte",
+      "departments": "Abteilungen",
+      "contact_persons": "Ansprechpartner",
+      "vacancies": "Stellen",
+      "applications": "Bewerbungen",
+      "orders": "Aufträge",
+      "shifts": "Schichten",
+      "shift_schedulings": "Einplanungen",
+      "contracts": "Verträge",
+      "documents": "Dokumente",
+      "reporting": "Berichte"
+    }
   },
   "webhooks": {
     "title": "Webhooks",
@@ -684,6 +765,24 @@
     "statuses": {
       "title": "Status",
       "subtitle": "Operativer Status mit Farbe (Aktiv, Inaktiv, Krank …)."
+    }
+  },
+  "planning": {
+    "shiftTypes": {
+      "title": "Diensttypen",
+      "desc": "Verwalten Sie Dienstarten, Zeiten und Farben."
+    },
+    "availability": {
+      "title": "Verfügbarkeit",
+      "desc": "Regeln für Kandidatenverfügbarkeit und Ruhezeiten."
+    },
+    "automatch": {
+      "title": "Auto-Match-Regeln",
+      "desc": "Legen Sie fest, wie Kandidaten automatisch Diensten zugeordnet werden."
+    },
+    "board": {
+      "title": "Planungstafel",
+      "desc": "Spalten und Standardansicht der Planungstafel."
     }
   }
 }

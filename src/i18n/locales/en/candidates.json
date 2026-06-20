@@ -29,8 +29,10 @@
   },
   "bulk": {
     "selected": "{{count}} selected",
+    "actions": "Bulk actions",
     "addToPool": "Add to pool",
     "removeFromPool": "Remove from pool",
+    "searchPool": "Search a pool…",
     "deselect": "Deselect",
     "noPools": "No pools configured yet."
   },
@@ -141,7 +143,9 @@
     "photoUpload": "Upload",
     "photoRemove": "Remove",
     "stage": "Funnel type",
-    "candidateType": "Candidate type"
+    "candidateType": "Candidate type",
+    "entityLabel": "Candidate",
+    "applications": "Applications"
   },
   "stage": {
     "lead": "Lead",

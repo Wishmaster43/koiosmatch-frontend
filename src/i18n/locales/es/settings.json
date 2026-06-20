@@ -28,7 +28,8 @@
     "communication": "Comunicación",
     "integrations": "Integraciones y API",
     "billing": "Facturación",
-    "administration": "Administración"
+    "administration": "Administración",
+    "planning": "Planificación"
   },
   "nav": {
     "kpis": "KPI",
@@ -70,7 +71,11 @@
     "audit": "Registro de auditoría",
     "email_klanten": "Correo clientes",
     "email_kandidaten": "Correo candidatos",
-    "email_planning": "Correo planificación"
+    "email_planning": "Correo planificación",
+    "shift_types": "Tipos de turno",
+    "availability": "Disponibilidad",
+    "automatch": "Reglas de coincidencia",
+    "planning_board": "Tablero de planificación"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -151,9 +156,6 @@
     "banner": "Banner de la empresa",
     "industry": "Sector",
     "country": "País",
-    "address1": "Dirección línea 1",
-    "address1Placeholder": "Calle y número",
-    "address2": "Dirección línea 2 (opcional)",
     "postcode": "Código postal",
     "city": "Ciudad",
     "cityPlaceholder": "Ciudad",
@@ -186,7 +188,15 @@
     "houseNumberSuffix": "Complemento",
     "postalCode": "Código postal",
     "city": "Ciudad",
-    "country": "País"
+    "country": "País",
+    "sectionAddress": "Dirección",
+    "sectionBusiness": "Datos de empresa",
+    "sectionContact": "Contacto",
+    "vatNumber": "Número de IVA",
+    "cocNumber": "Número CIF/NIF",
+    "contactName": "Persona de contacto",
+    "phone": "Teléfono",
+    "email": "Correo electrónico"
   },
   "memory": {
     "title": "Memoria",
@@ -369,16 +379,87 @@
   },
   "apiKeys": {
     "title": "Claves API",
-    "subtitle": "Gestiona claves API para integraciones externas.",
-    "newKeyBanner": "Nueva clave API: cópiala ahora, no se volverá a mostrar.",
-    "close": "Cerrar",
+    "count": "{{count}} claves",
+    "new": "Nuevo",
+    "empty": "Aún no se han creado claves API.",
+    "loadError": "No se pudieron cargar las claves API.",
+    "retry": "Reintentar",
+    "action": "Acción",
+    "regenerate": "Regenerar secreto",
+    "activate": "Activar",
+    "deactivate": "Desactivar",
+    "delete": "Eliminar",
+    "deleteConfirm": "¿Eliminar la clave API \"{{name}}\"?",
+    "edit": "Editar",
+    "createTitle": "Nueva clave API",
     "namePlaceholder": "Nombre de la clave API…",
     "create": "Crear",
-    "empty": "Aún no hay claves API.",
-    "created": "Creada",
-    "used": "Usada",
-    "revokeConfirm": "¿Revocar la clave API \"{{name}}\"?",
-    "revoke": "Revocar"
+    "creating": "Creando…",
+    "createError": "Error al crear. Inténtalo de nuevo.",
+    "done": "Listo",
+    "secretOnce": "Copia el secreto ahora — no se mostrará de nuevo.",
+    "copySecret": "Copiar secreto",
+    "secretHidden": "se muestra solo al crear",
+    "dismiss": "Cerrar",
+    "allowedIps": "IP permitidas",
+    "allowedIpsHint": "Opcional. Déjalo vacío para no restringir IP. IPv4/IPv6 o CIDR (p. ej. 192.168.0.0/24).",
+    "noIps": "Sin restricción de IP",
+    "ipPlaceholder": "IP o CIDR…",
+    "col": {
+      "name": "Nombre descriptivo",
+      "status": "Estado",
+      "organisation": "Organización",
+      "type": "Tipo",
+      "guid": "GUID",
+      "created": "Creado",
+      "updated": "Última modificación"
+    },
+    "field": {
+      "name": "Nombre descriptivo",
+      "type": "Tipo",
+      "organisation": "Organización",
+      "description": "Descripción",
+      "guid": "GUID",
+      "secret": "Secreto",
+      "created": "Fecha de registro",
+      "updated": "Última modificación",
+      "contactName": "Persona de contacto",
+      "contactEmail": "Correo"
+    },
+    "type": {
+      "primary": "Principal",
+      "additional": "Adicional"
+    },
+    "status": {
+      "active": "En uso",
+      "disabled": "Desactivado"
+    },
+    "level": {
+      "read": "Lectura",
+      "read_write": "Lectura y escritura"
+    },
+    "tab": {
+      "general": "General",
+      "access": "Acceso"
+    },
+    "access": {
+      "subtitle": "Define por recurso si esta clave tiene acceso y a qué nivel."
+    },
+    "scopes": {
+      "candidates": "Candidatos",
+      "customers": "Clientes",
+      "locations": "Ubicaciones",
+      "departments": "Departamentos",
+      "contact_persons": "Personas de contacto",
+      "vacancies": "Vacantes",
+      "applications": "Solicitudes",
+      "orders": "Pedidos",
+      "shifts": "Turnos",
+      "shift_schedulings": "Planificaciones",
+      "contracts": "Contratos",
+      "documents": "Documentos",
+      "reporting": "Informes"
+    }
   },
   "webhooks": {
     "title": "Webhooks",
@@ -684,6 +765,24 @@
     "statuses": {
       "title": "Estados",
       "subtitle": "Estado operativo con color (Activo, Inactivo, Enfermo …)."
+    }
+  },
+  "planning": {
+    "shiftTypes": {
+      "title": "Tipos de turno",
+      "desc": "Gestiona los tipos de turno, horarios y colores."
+    },
+    "availability": {
+      "title": "Disponibilidad",
+      "desc": "Reglas de disponibilidad de candidatos y periodos de descanso."
+    },
+    "automatch": {
+      "title": "Reglas de coincidencia",
+      "desc": "Configura cómo se asignan automáticamente los candidatos a los turnos."
+    },
+    "board": {
+      "title": "Tablero de planificación",
+      "desc": "Columnas y diseño predeterminado del tablero de planificación."
     }
   }
 }

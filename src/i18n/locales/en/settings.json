@@ -28,7 +28,8 @@
     "communication": "Communication",
     "integrations": "Integrations & API",
     "billing": "Billing",
-    "administration": "Administration"
+    "administration": "Administration",
+    "planning": "Planning"
   },
   "nav": {
     "kpis": "KPIs",
@@ -73,7 +74,12 @@
     "email_kandidaten": "Email — candidates",
     "email_planning": "Email — planning",
     "languages": "Languages",
-    "genders": "Gender"
+    "genders": "Gender",
+    "industries": "Industries",
+    "shift_types": "Shift types",
+    "availability": "Availability",
+    "automatch": "Auto-match rules",
+    "planning_board": "Planning board"
   },
   "kpis": {
     "title": "KPI settings",
@@ -154,9 +160,6 @@
     "banner": "Company banner",
     "industry": "Industry",
     "country": "Country",
-    "address1": "Address line 1",
-    "address1Placeholder": "Street and number",
-    "address2": "Address line 2 (optional)",
     "postcode": "Postal code",
     "city": "City",
     "cityPlaceholder": "City",
@@ -189,7 +192,15 @@
     "houseNumberSuffix": "Addition",
     "postalCode": "Postal code",
     "city": "City",
-    "country": "Country"
+    "country": "Country",
+    "sectionAddress": "Address",
+    "sectionBusiness": "Business details",
+    "sectionContact": "Contact",
+    "vatNumber": "VAT number",
+    "cocNumber": "Chamber of Commerce no.",
+    "contactName": "Contact person",
+    "phone": "Phone",
+    "email": "Email"
   },
   "memory": {
     "title": "Memory",
@@ -410,16 +421,87 @@
   },
   "apiKeys": {
     "title": "API keys",
-    "subtitle": "Manage API keys for external integrations.",
-    "newKeyBanner": "New API key — copy it now, it will not be shown again.",
-    "close": "Close",
+    "count": "{{count}} keys",
+    "new": "New",
+    "empty": "No API keys created yet.",
+    "loadError": "Could not load API keys.",
+    "retry": "Try again",
+    "action": "Action",
+    "regenerate": "Regenerate secret",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "delete": "Delete",
+    "deleteConfirm": "Delete API key \"{{name}}\"?",
+    "edit": "Edit",
+    "createTitle": "New API key",
     "namePlaceholder": "Name for the API key…",
     "create": "Create",
-    "empty": "No API keys created yet.",
-    "created": "Created",
-    "used": "Used",
-    "revokeConfirm": "Revoke API key \"{{name}}\"?",
-    "revoke": "Revoke"
+    "creating": "Creating…",
+    "createError": "Creation failed. Please try again.",
+    "done": "Done",
+    "secretOnce": "Copy the secret now — it will not be shown again.",
+    "copySecret": "Copy secret",
+    "secretHidden": "shown only at creation",
+    "dismiss": "Dismiss",
+    "allowedIps": "Allowed IPs",
+    "allowedIpsHint": "Optional. Leave empty for no IP restriction. IPv4/IPv6 or CIDR (e.g. 192.168.0.0/24).",
+    "noIps": "No IP restriction",
+    "ipPlaceholder": "IP or CIDR…",
+    "col": {
+      "name": "Friendly name",
+      "status": "Status",
+      "organisation": "Organisation",
+      "type": "Type",
+      "guid": "GUID",
+      "created": "Created",
+      "updated": "Last modified"
+    },
+    "field": {
+      "name": "Friendly name",
+      "type": "Type",
+      "organisation": "Organisation",
+      "description": "Description",
+      "guid": "GUID",
+      "secret": "Secret",
+      "created": "Registration date",
+      "updated": "Last modified",
+      "contactName": "Contact name",
+      "contactEmail": "Email"
+    },
+    "type": {
+      "primary": "Primary",
+      "additional": "Additional"
+    },
+    "status": {
+      "active": "In use",
+      "disabled": "Disabled"
+    },
+    "level": {
+      "read": "Read",
+      "read_write": "Read & write"
+    },
+    "tab": {
+      "general": "General",
+      "access": "Access"
+    },
+    "access": {
+      "subtitle": "Set per resource whether this key has access and at what level."
+    },
+    "scopes": {
+      "candidates": "Candidates",
+      "customers": "Customers",
+      "locations": "Locations",
+      "departments": "Departments",
+      "contact_persons": "Contact persons",
+      "vacancies": "Vacancies",
+      "applications": "Applications",
+      "orders": "Orders",
+      "shifts": "Shifts",
+      "shift_schedulings": "Schedulings",
+      "contracts": "Contracts",
+      "documents": "Documents",
+      "reporting": "Reporting"
+    }
   },
   "webhooks": {
     "title": "Webhooks",
@@ -709,9 +791,32 @@
     "levelsSubtitle": "Proficiency levels (e.g. Poor → Very good, Native).",
     "addLevel": "Add level"
   },
+  "industrySettings": {
+    "title": "Industries",
+    "subtitle": "Manage the industries selectable in your company profile.",
+    "add": "Add industry"
+  },
   "genderSettings": {
     "title": "Gender",
     "subtitle": "Genders with a colour — drives the candidate icon colour.",
     "add": "Add gender"
+  },
+  "planning": {
+    "shiftTypes": {
+      "title": "Shift types",
+      "desc": "Manage shift kinds, times and colours."
+    },
+    "availability": {
+      "title": "Availability",
+      "desc": "Rules for candidate availability and rest periods."
+    },
+    "automatch": {
+      "title": "Auto-match rules",
+      "desc": "Configure how candidates are automatically matched to shifts."
+    },
+    "board": {
+      "title": "Planning board",
+      "desc": "Columns and default layout of the planning board."
+    }
   }
 }

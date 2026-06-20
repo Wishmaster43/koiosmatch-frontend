@@ -28,7 +28,8 @@
     "communication": "Communicatie",
     "integrations": "Integraties en API",
     "billing": "Facturering",
-    "administration": "Beheer"
+    "administration": "Beheer",
+    "planning": "Planning"
   },
   "nav": {
     "kpis": "KPI's",
@@ -73,7 +74,12 @@
     "email_kandidaten": "E-mail kandidaten",
     "email_planning": "E-mail planning",
     "languages": "Talen",
-    "genders": "Geslacht"
+    "genders": "Geslacht",
+    "industries": "Industrieën",
+    "shift_types": "Diensttypes",
+    "availability": "Beschikbaarheid",
+    "automatch": "Automatch-regels",
+    "planning_board": "Planbord-weergave"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -154,9 +160,6 @@
     "banner": "Bedrijfsbanner",
     "industry": "Industrie",
     "country": "Land",
-    "address1": "Adresregel 1",
-    "address1Placeholder": "Straat en huisnummer",
-    "address2": "Adresregel 2 (optioneel)",
     "postcode": "Postcode",
     "city": "Plaats",
     "cityPlaceholder": "Stad",
@@ -189,7 +192,15 @@
     "houseNumberSuffix": "Toevoegsel",
     "postalCode": "Postcode",
     "city": "Plaats",
-    "country": "Land"
+    "country": "Land",
+    "sectionAddress": "Adres",
+    "sectionBusiness": "Bedrijfsgegevens",
+    "sectionContact": "Contact",
+    "vatNumber": "BTW-nummer",
+    "cocNumber": "KvK-nummer",
+    "contactName": "Contactpersoon",
+    "phone": "Telefoon",
+    "email": "E-mailadres"
   },
   "memory": {
     "title": "Geheugen",
@@ -410,16 +421,87 @@
   },
   "apiKeys": {
     "title": "API-keys",
-    "subtitle": "Beheer API-sleutels voor externe koppelingen.",
-    "newKeyBanner": "Nieuwe API-key — kopieer deze nu, hij wordt niet meer getoond.",
-    "close": "Sluiten",
+    "count": "Aantal: {{count}}",
+    "new": "Nieuw",
+    "empty": "Nog geen API-keys aangemaakt.",
+    "loadError": "API-keys konden niet worden geladen.",
+    "retry": "Opnieuw proberen",
+    "action": "Actie",
+    "regenerate": "Secret opnieuw genereren",
+    "activate": "Activeren",
+    "deactivate": "Deactiveren",
+    "delete": "Verwijderen",
+    "deleteConfirm": "API-key \"{{name}}\" verwijderen?",
+    "edit": "Wijzigen",
+    "createTitle": "Nieuwe API-key",
     "namePlaceholder": "Naam voor de API-key…",
     "create": "Aanmaken",
-    "empty": "Nog geen API-keys aangemaakt.",
-    "created": "Aangemaakt",
-    "used": "Gebruikt",
-    "revokeConfirm": "API-key \"{{name}}\" intrekken?",
-    "revoke": "Intrekken"
+    "creating": "Aanmaken…",
+    "createError": "Aanmaken mislukt. Probeer opnieuw.",
+    "done": "Klaar",
+    "secretOnce": "Kopieer de secret nu — hij wordt niet meer getoond.",
+    "copySecret": "Kopieer secret",
+    "secretHidden": "alleen bij aanmaken getoond",
+    "dismiss": "Sluiten",
+    "allowedIps": "Toegestane IP's",
+    "allowedIpsHint": "Optioneel. Laat leeg voor geen IP-restrictie. IPv4/IPv6 of CIDR (bv. 192.168.0.0/24).",
+    "noIps": "Geen IP-restrictie",
+    "ipPlaceholder": "IP of CIDR…",
+    "col": {
+      "name": "Friendly name",
+      "status": "Status",
+      "organisation": "Organisatie",
+      "type": "Type",
+      "guid": "GUID",
+      "created": "Aangemaakt",
+      "updated": "Laatst gewijzigd"
+    },
+    "field": {
+      "name": "Friendly name",
+      "type": "Type",
+      "organisation": "Organisatie",
+      "description": "Omschrijving",
+      "guid": "GUID",
+      "secret": "Secret",
+      "created": "Registratiedatum",
+      "updated": "Laatst gewijzigd",
+      "contactName": "Contactpersoon",
+      "contactEmail": "E-mail"
+    },
+    "type": {
+      "primary": "Primair",
+      "additional": "Additioneel"
+    },
+    "status": {
+      "active": "In gebruik",
+      "disabled": "Uitgeschakeld"
+    },
+    "level": {
+      "read": "Leesrechten",
+      "read_write": "Lees- en schrijfrechten"
+    },
+    "tab": {
+      "general": "Algemeen",
+      "access": "Toegang"
+    },
+    "access": {
+      "subtitle": "Bepaal per onderdeel of deze key toegang heeft en welk niveau."
+    },
+    "scopes": {
+      "candidates": "Kandidaten",
+      "customers": "Klanten",
+      "locations": "Locaties",
+      "departments": "Afdelingen",
+      "contact_persons": "Contactpersonen",
+      "vacancies": "Vacatures",
+      "applications": "Sollicitaties",
+      "orders": "Orders",
+      "shifts": "Diensten",
+      "shift_schedulings": "Inplanningen",
+      "contracts": "Contracten",
+      "documents": "Documenten",
+      "reporting": "Rapportages"
+    }
   },
   "webhooks": {
     "title": "Webhooks",
@@ -709,9 +791,32 @@
     "levelsSubtitle": "Beheersingsniveaus (bijv. Slecht → Zeer goed, Moedertaal).",
     "addLevel": "Niveau toevoegen"
   },
+  "industrySettings": {
+    "title": "Industrieën",
+    "subtitle": "Beheer de branches die je kunt kiezen bij je bedrijfsprofiel.",
+    "add": "Industrie toevoegen"
+  },
   "genderSettings": {
     "title": "Geslacht",
     "subtitle": "Geslachten met een kleur — bepaalt de kleur van het kandidaat-icoon.",
     "add": "Geslacht toevoegen"
+  },
+  "planning": {
+    "shiftTypes": {
+      "title": "Diensttypes",
+      "desc": "Beheer soorten diensten, tijden en kleuren."
+    },
+    "availability": {
+      "title": "Beschikbaarheid",
+      "desc": "Regels voor kandidaat-beschikbaarheid en rusttijden."
+    },
+    "automatch": {
+      "title": "Automatch-regels",
+      "desc": "Stel in hoe kandidaten automatisch op diensten worden gematcht."
+    },
+    "board": {
+      "title": "Planbord-weergave",
+      "desc": "Kolommen en standaardweergave van het planbord."
+    }
   }
 }

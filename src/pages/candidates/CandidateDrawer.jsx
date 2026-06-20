@@ -208,7 +208,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         <EntityHeader
           label={funnelMeta(currentStage).label}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
-          avatar={{ initials: c.initials, photo: photoUrl ?? c.photo, color: genderColor(c.gender) }}
+          avatar={{ initials: c.initials, photo: photoUrl ?? c.photo, color: genderColor(c.gender), soft: true }}
           onPhotoChange={setPhotoUrl}
           photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
           renderTitle={renderTitle}
@@ -230,9 +230,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                 return (
                   <button key={ct.value} type="button" onClick={() => toggleType(ct.value)}
                     style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer',
-                      background: active ? ct.color : 'var(--surface)',
-                      color: active ? '#fff' : 'var(--text-muted)',
-                      border: `1px solid ${active ? ct.color : 'var(--border)'}`, transition: 'all 0.12s' }}>
+                      fontWeight: active ? 600 : 400,
+                      background: active ? ct.color + '1A' : 'var(--surface)',
+                      color: active ? ct.color : 'var(--text-muted)',
+                      border: `1px solid ${active ? ct.color + '55' : 'var(--border)'}`, transition: 'all 0.12s' }}>
                     {ct.label}
                   </button>
                 )

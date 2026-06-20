@@ -1,10 +1,13 @@
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Plus, X, FileText, Pencil, Eye } from 'lucide-react'
+import api from '../../../lib/api'
 import { DOC_TYPES, DOC_COLORS, sectionBlock } from './constants'
 import DocPreviewModal from './DocPreviewModal'
 
-/** Documents section — owns its own docs state, upload, rename, search and preview. */
+/** Documents section — owns its own docs state, upload, rename, search and preview.
+ * Persists to /candidates/{id}/documents (multipart upload, PATCH rename, DELETE).
+ * New rows keep their local blob preview until the server doc (with url) returns. */
 export default function DocumentsSection({ c }) {
   const { t } = useTranslation('candidates')
   const [docs,        setDocs]        = useState(c.documents ?? [])
@@ -18,6 +21,31 @@ export default function DocumentsSection({ c }) {
 
   // Map a stored doc-type value (e.g. 'ID-bewijs') to its translated label.
   const docTypeLabel = (val) => { const m = DOC_TYPES.find(x => x.value === val); return m ? t(`documents.types.${m.key}`) : val }
+
+  // Upload the pending file (multipart) and optimistically show it right away.
+  const upload = () => {
+    const tmpId = -Date.now()
+    const optimistic = { id: tmpId, name: pendingFile.name, size: pendingFile.size, type: pendingType, objectUrl: pendingFile.objectUrl }
+    setDocs(d => [...d, optimistic])
+    const fd = new FormData()
+    fd.append('file', pendingFile.file); fd.append('type', pendingType); fd.append('name', pendingFile.name)
+    setPendingFile(null)
+    api.post(`/candidates/${c.id}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) setDocs(d => d.map(x => x.id === tmpId ? { ...optimistic, ...it } : x)) })
+      .catch(() => {})
+  }
+
+  // Rename / delete persist once the row has a real (server) id.
+  const rename = (i, name) => {
+    const id = docs[i]?.id
+    setDocs(docs.map((x, j) => j === i ? { ...x, name } : x)); setRenamingDoc(null)
+    if (id > 0) api.patch(`/candidates/${c.id}/documents/${id}`, { name }).catch(() => {})
+  }
+  const removeDoc = (i) => {
+    const id = docs[i]?.id
+    setDocs(docs.filter((_, j) => j !== i))
+    if (id > 0) api.delete(`/candidates/${c.id}/documents/${id}`).catch(() => {})
+  }
 
   return (
     <div style={sectionBlock}>
@@ -51,7 +79,7 @@ export default function DocumentsSection({ c }) {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => { setDocs([...docs, { name: pendingFile.name, size: pendingFile.size, type: pendingType, objectUrl: pendingFile.objectUrl }]); setPendingFile(null) }}
+            <button onClick={upload}
               style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'white', border: 'none', cursor: 'pointer' }}>{t('common:add')}</button>
             <button onClick={() => { URL.revokeObjectURL(pendingFile.objectUrl); setPendingFile(null) }}
               style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'none', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
@@ -74,8 +102,8 @@ export default function DocumentsSection({ c }) {
                 <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: DOC_COLORS[d.type] ?? '#6B7280', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={13} color="white" /></div>
                 {renamingDoc === i
                   ? <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') { setDocs(docs.map((x, j) => j === i ? { ...x, name: renameValue } : x)); setRenamingDoc(null) } if (e.key === 'Escape') setRenamingDoc(null) }}
-                      onBlur={() => { setDocs(docs.map((x, j) => j === i ? { ...x, name: renameValue } : x)); setRenamingDoc(null) }}
+                      onKeyDown={e => { if (e.key === 'Enter') rename(i, renameValue); if (e.key === 'Escape') setRenamingDoc(null) }}
+                      onBlur={() => rename(i, renameValue)}
                       style={{ flex: 1, fontSize: 12, fontWeight: 500, padding: '3px 7px', borderRadius: 6, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', boxSizing: 'border-box', minWidth: 0 }} />
                   : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
                 }
@@ -86,7 +114,7 @@ export default function DocumentsSection({ c }) {
                 <div style={{ display: 'flex' }}>
                   <button onClick={() => { setRenamingDoc(i); setRenameValue(d.name ?? d.file_name ?? '') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
                   <button onClick={() => setPreviewDoc(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
-                  <button onClick={() => setDocs(docs.filter((_, j) => j !== i))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
+                  <button onClick={() => removeDoc(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
                 </div>
               </div>
             </div>

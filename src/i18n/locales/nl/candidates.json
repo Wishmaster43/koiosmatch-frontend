@@ -29,8 +29,10 @@
   },
   "bulk": {
     "selected": "{{count}} geselecteerd",
+    "actions": "Massa mutaties",
     "addToPool": "Toevoegen aan pool",
     "removeFromPool": "Verwijderen uit pool",
+    "searchPool": "Zoek een pool…",
     "deselect": "Deselecteren",
     "noPools": "Nog geen pools ingesteld."
   },
@@ -141,7 +143,9 @@
     "photoUpload": "Uploaden",
     "photoRemove": "Verwijderen",
     "stage": "Funnel type",
-    "candidateType": "Kandidaat type"
+    "candidateType": "Kandidaat type",
+    "entityLabel": "Kandidaat",
+    "applications": "Sollicitaties"
   },
   "stage": {
     "lead": "Lead",

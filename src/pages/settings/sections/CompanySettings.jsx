@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save } from 'lucide-react'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
+import { useIndustries } from '../../../lib/useIndustries'
 
-// Option lists (data — kept as-is; only labels are translated).
-const INDUSTRIES = ['Werving','Uitzendbureau','Horeca','Logistiek','Zorg','IT','Bouw','Onderwijs','Financiën','Overig']
+// Option lists (data — kept as-is; only labels are translated). Industries are
+// now tenant-configurable (Settings → Personalisation → Industries).
 const LANGUAGES  = ['Nederlands','Engels','Duits','Frans']
 const CURRENCIES = ['Euro (€)','Dollar ($)','Pond (£)']
 const TIMEZONES  = ['Europa/Amsterdam','Europa/Brussel','Europa/Londen','UTC']
@@ -45,12 +46,14 @@ function Select({ value, onChange, options }) {
 const EMPTY = {
   company_industry: '', company_country: 'Netherlands',
   company_street: '', company_house_number: '', company_house_number_suffix: '',
-  company_address2: '', company_postcode: '', company_city: '', company_province: '',
+  company_postcode: '', company_city: '', company_province: '',
   company_language: 'Nederlands', company_currency: 'Euro (€)', company_timezone: 'Europa/Amsterdam',
 }
 
 export default function CompanySettings() {
   const { t } = useTranslation('settings')
+  // Tenant-configurable industry options for the dropdown below.
+  const { industries } = useIndustries()
   const [form,       setForm]       = useState(EMPTY)
   const [bannerUrl,  setBannerUrl]  = useState(null)
   const [saved,      setSaved]      = useState(false)
@@ -68,7 +71,6 @@ export default function CompanySettings() {
         company_street:              s.company_street              ?? s.company_address1 ?? '',
         company_house_number:        s.company_house_number        ?? '',
         company_house_number_suffix: s.company_house_number_suffix ?? '',
-        company_address2: s.company_address2 ?? '',
         company_postcode: s.company_postcode ?? '',
         company_city:     s.company_city     ?? '',
         company_province: s.company_province ?? '',
@@ -134,7 +136,7 @@ export default function CompanySettings() {
               </div>
             </div>
           </Row>
-          <Row label={t('company.industry')}><Select value={form.company_industry} onChange={v => set('company_industry', v)} options={INDUSTRIES} /></Row>
+          <Row label={t('company.industry')}><Select value={form.company_industry} onChange={v => set('company_industry', v)} options={industries} /></Row>
           <Row label={t('company.country')}><Select value={form.company_country} onChange={v => set('company_country', v)} options={COUNTRIES} /></Row>
 
           <Row label={t('company.street')}><Input value={form.company_street} onChange={v => set('company_street', v)} placeholder={t('company.streetPlaceholder')} /></Row>
@@ -144,7 +146,6 @@ export default function CompanySettings() {
               <Input value={form.company_house_number_suffix} onChange={v => set('company_house_number_suffix', v)} placeholder={t('company.houseNumberSuffix')} style={{ maxWidth: 170 }} />
             </div>
           </Row>
-          <Row label={t('company.address2')}><Input value={form.company_address2} onChange={v => set('company_address2', v)} /></Row>
           <Row label={t('company.postcode')}><Input value={form.company_postcode} onChange={v => set('company_postcode', v)} placeholder="1234 AB" /></Row>
           <Row label={t('company.city')}><Input value={form.company_city} onChange={v => set('company_city', v)} placeholder={t('company.cityPlaceholder')} /></Row>
           <Row label={t('company.province')}><Input value={form.company_province} onChange={v => set('company_province', v)} placeholder={t('company.province')} /></Row>
