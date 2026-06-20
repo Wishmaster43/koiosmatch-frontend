@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Download, Edit2, Check } from 'lucide-react'
+import { Download, Edit2, Save, X } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { CvDocument } from './CandidateCvTemplate'
 import { useCvSettings } from '../../lib/useCvSettings'
@@ -10,6 +10,7 @@ import EntityDrawer from '../../components/drawer/EntityDrawer'
 import EntityHeader from '../../components/drawer/EntityHeader'
 import SelectMenu from '../../components/ui/SelectMenu'
 import { useLookups } from '../../context/LookupsContext'
+import { useAuth } from '../../context/AuthContext'
 import ProfilePanel from './drawer/ProfilePanel'
 import BackgroundTab from './drawer/BackgroundTab'
 import WorkTab from './drawer/WorkTab'
@@ -36,6 +37,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const locale = useLocale()
   const { formatDate } = useDateFormat()
   const { candidateTypes, funnelTypes, statuses, funnelMeta } = useLookups()
+  const { hasModule } = useAuth()
+  // Planning-tab alleen tonen als de tenant de Planning-module heeft (zelfde gate als sidebar).
+  const tabs = TABS.filter(tab => tab.id !== 'planning' || hasModule('plan'))
   // Cross-cutting state used by the header; tab-specific state lives in each tab.
   const [cvGenerating,  setCvGenerating]  = useState(false)
   const [recruiter,     setRecruiter]     = useState(null)
@@ -45,7 +49,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [stageVacancy,  setStageVacancy]  = useState(null)
   const [stageVacancies, setStageVacancies] = useState([])
   const [tags,          setTags]          = useState(null)
-  const [editing,       setEditing]       = useState(false)
+  // Header (name + function) edit — independent from the Profile-tab fields.
+  const [headerEditing, setHeaderEditing] = useState(false)
   const [profileEdits,  setProfileEdits]  = useState(null)
   const [photoUrl,      setPhotoUrl]      = useState(null)
   // Header name + function fields (controlled while editing).
@@ -57,7 +62,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   if (c?.id !== prevId) {
     setPrevId(c?.id)
     setRecruiter(null); setStatus(null); setTypes(null); setStageVal(null); setStageVacancy(null)
-    setTags(null); setEditing(false); setProfileEdits(null); setPhotoUrl(null); setHeaderForm(null)
+    setTags(null); setHeaderEditing(false); setProfileEdits(null); setPhotoUrl(null); setHeaderForm(null)
   }
 
   // Vacancies for the optional link shown when stage = Applicant.
@@ -84,16 +89,15 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const changeStage  = (v) => { setStageVal(v); onUpdate?.(c.id, { stage: v }) }
   const currentTags    = tags ?? c.tags ?? []
 
-  // Enter edit mode: capture the header fields so they're controlled + saveable.
-  const startEdit = (setActiveTab) => {
+  // Enter header edit: capture the fields so they're controlled + saveable.
+  const startHeaderEdit = () => {
     setHeaderForm({
       firstname:  c.firstname  ?? c.name?.split(' ')[0] ?? '',
       lastname:   c.lastname   ?? c.name?.split(' ').slice(-1)[0] ?? '',
       middleName: c.middleName ?? '',
       title:      c.title ?? '',
     })
-    setEditing(true)
-    setActiveTab('profile')
+    setHeaderEditing(true)
   }
   const setHF = (k, v) => setHeaderForm(f => ({ ...f, [k]: v }))
   const saveHeader = () => {
@@ -101,14 +105,14 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       const name = [headerForm.firstname, headerForm.middleName, headerForm.lastname].filter(Boolean).join(' ')
       onUpdate?.(c.id, { ...headerForm, name })
     }
-    setEditing(false)
+    setHeaderEditing(false)
   }
   const hf = (k) => headerForm?.[k] ?? ''
 
   const renderTabContent = (activeTab) => {
     const mergedC = { ...c, ...(profileEdits ?? {}) }
     switch (activeTab) {
-      case 'profile':       return <ProfilePanel c={mergedC} editing={editing} onEditSave={v => { setProfileEdits(v); setEditing(false) }} onEditCancel={() => setEditing(false)} onStartEdit={() => setEditing(true)} />
+      case 'profile':       return <ProfilePanel c={mergedC} onEditSave={v => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
       case 'background':   return <BackgroundTab c={c} />
       case 'work':          return <WorkTab c={c} />
       case 'planning':      return <PlanningPanel c={c} />
@@ -132,7 +136,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     if (u) setRecruiter({ ...u, initials: ownerInitialsOf(u.name) })
   }
 
-  const renderTitle = () => editing ? (
+  const renderTitle = () => headerEditing ? (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6 }}>
         <input placeholder={t('modal.fields.firstName')} value={hf('firstname')} onChange={e => setHF('firstname', e.target.value)}
@@ -147,12 +151,12 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     </div>
   ) : (
     <>
-      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{profileEdits ? [c.firstname, c.middleName, c.lastname].filter(Boolean).join(' ') || c.name : c.name}</div>
+      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.title || '—'}</div>
     </>
   )
 
-  const headerActions = (setActiveTab) => (
+  const headerActions = () => (
     <>
       <button disabled={cvGenerating}
         onClick={async () => {
@@ -168,17 +172,24 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: cvGenerating ? 'not-allowed' : 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white', opacity: cvGenerating ? 0.7 : 1 }}>
         <Download size={11} />{cvGenerating ? t('drawer.generating') : t('drawer.downloadCv')}
       </button>
-      <button onClick={() => editing ? setEditing(false) : startEdit(setActiveTab)}
-        title={editing ? t('common:cancel') : t('drawer.edit')}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0,
-          background: editing ? 'var(--color-primary)' : 'var(--bg)', color: editing ? '#fff' : 'var(--text-muted)', border: editing ? 'none' : '1px solid var(--border)' }}>
-        <Edit2 size={13} />
-      </button>
-      {editing && (
-        <button onClick={saveHeader} title={t('common:save')}
+      {headerEditing ? (
+        <>
+          <button onClick={saveHeader} title={t('common:save')}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0,
+              background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
+            <Save size={14} />
+          </button>
+          <button onClick={() => setHeaderEditing(false)} title={t('common:cancel')}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0,
+              background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+            <X size={14} />
+          </button>
+        </>
+      ) : (
+        <button onClick={startHeaderEdit} title={t('drawer.edit')}
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0,
-            background: 'var(--color-success)', color: '#fff', border: 'none' }}>
-          <Check size={14} />
+            background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+          <Edit2 size={13} />
         </button>
       )}
     </>
@@ -190,8 +201,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       expanded={expanded}
       onToggleExpand={onToggleExpand}
       footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: c.created ?? '—' })}</span>}
-      tabs={TABS.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.id === 'planning', render: () => renderTabContent(tab.id) }))}
-      header={({ setActiveTab }) => (
+      tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.id === 'planning', render: () => renderTabContent(tab.id) }))}
+      header={() => (
         <EntityHeader
           label={funnelMeta(currentStage).label}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
@@ -199,7 +210,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           onPhotoChange={setPhotoUrl}
           photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
           renderTitle={renderTitle}
-          actions={headerActions(setActiveTab)}
+          actions={headerActions()}
           meta={[
             { key: 'status', label: t('drawer.status'), value: currentStatus, options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 160 },
             { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions, onChange: onOwnerChange, menuWidth: 200 },

@@ -288,6 +288,20 @@ export default function CandidatesPage() {
     if ('lastname'       in patch) body.last_name       = patch.lastname
     if ('middleName'     in patch) body.middle_name     = patch.middleName
     if ('title'          in patch) body.function_title  = patch.title
+    // Profile-tab fields (drawer) → API keys. Backend saves what it validates.
+    if ('gender'            in patch) body.gender            = patch.gender
+    if ('nationality'       in patch) body.nationality       = patch.nationality
+    if ('dob'               in patch) body.date_of_birth     = patch.dob
+    if ('email'             in patch) body.email             = patch.email
+    if ('phone'             in patch) body.phone             = patch.phone
+    if ('street'            in patch) body.street            = patch.street
+    if ('houseNumber'       in patch) body.house_number      = patch.houseNumber
+    if ('houseNumberSuffix' in patch) body.house_number_suffix = patch.houseNumberSuffix
+    if ('postalCode'        in patch) body.postcode          = patch.postalCode
+    if ('city'              in patch) body.city              = patch.city
+    if ('province'          in patch) body.province          = patch.province
+    if ('linkedin'          in patch) body.linkedin_slug     = patch.linkedin
+    if ('summary'           in patch) body.summary           = patch.summary
     if (Object.keys(body).length) api.patch(`/candidates/${id}`, body).catch(() => {})
   }
 

@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2 } from 'lucide-react'
+import { Edit2, Save, X } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import { NL_PROVINCES } from './constants'
-import { SaveCancel } from '../../../components/forms/fields'
 
 function LinkedinIcon({ size = 12, color = '#0A66C2' }) {
   return (
@@ -15,33 +14,49 @@ function LinkedinIcon({ size = 12, color = '#0A66C2' }) {
 
 const NATIONALITIES = ['Nederlands','Belgisch','Duits','Frans','Brits','Pools','Turks','Marokkaans','Surinaams','Antilliaans','Overig']
 
-/** Editable profile fields. `editing` is controlled by the drawer (the header
- * Edit button switches here), so name + fields toggle together. */
-export default function ProfileTab({ c, editing, onEditSave, onEditCancel, onStartEdit }) {
+/** Editable profile fields. Owns its own edit state: an in-place pencil that
+ * turns into save (diskette) + cancel — independent from the header. */
+export default function ProfileTab({ c, onEditSave }) {
   const { t } = useTranslation('candidates')
-  const [form, setForm] = useState({
+  const emptyForm = () => ({
     gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '',
     email: c.email ?? '', phone: c.phone ?? '',
     street: c.street ?? '', houseNumber: c.houseNumber ?? '', houseNumberSuffix: c.houseNumberSuffix ?? '',
     postalCode: c.postalCode ?? '', city: c.city ?? '', province: c.province ?? '',
     linkedin: c.linkedin ?? '', summary: c.summary ?? '',
   })
+  const [editing, setEditing] = useState(false)
+  const [form, setForm] = useState(emptyForm)
   const setF = (k, v) => setForm(p => ({ ...p, [k]: v }))
+  const save   = () => { onEditSave?.(form); setEditing(false) }
+  const cancel = () => { setForm(emptyForm()); setEditing(false) }
 
   const inputStyle = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
+  const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 
   return (
     <div>
       {/* Profile fields */}
       <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: 16, position: 'relative' }}>
-        {!editing && (
-          <button onClick={onStartEdit}
-            style={{ position: 'absolute', top: 8, right: 8, background: 'none', border: 'none', cursor: 'pointer',
-              color: 'var(--text-muted)', padding: 4, display: 'flex', zIndex: 1 }}
-            title={t('common:edit')}>
-            <Edit2 size={13} />
-          </button>
-        )}
+        <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: 4, zIndex: 1 }}>
+          {editing ? (
+            <>
+              <button onClick={save} title={t('common:save')}
+                style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
+                <Save size={13} />
+              </button>
+              <button onClick={cancel} title={t('common:cancel')}
+                style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+                <X size={13} />
+              </button>
+            </>
+          ) : (
+            <button onClick={() => setEditing(true)} title={t('common:edit')}
+              style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: 'none' }}>
+              <Edit2 size={13} />
+            </button>
+          )}
+        </div>
         {[
           [t('profile.gender'),            'gender'],
           [t('profile.nationality'),       'nationality'],
@@ -117,9 +132,6 @@ export default function ProfileTab({ c, editing, onEditSave, onEditCancel, onSta
           }
         </div>
       </div>
-      {editing && (
-        <SaveCancel onSave={() => onEditSave(form)} onCancel={onEditCancel} />
-      )}
     </div>
   )
 }

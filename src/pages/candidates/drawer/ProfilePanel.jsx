@@ -7,12 +7,12 @@ import BranchSection from './BranchSection'
 import PoolsSection from './PoolsSection'
 
 /** Profile tab — profile fields + AI block + languages + documents + branch.
- * `editing` stays controlled by the drawer (header Edit button). */
-export default function ProfilePanel({ c, editing, onEditSave, onEditCancel, onStartEdit }) {
+ * ProfileTab owns its own edit state (in-place pencil ↔ save). */
+export default function ProfilePanel({ c, onEditSave }) {
   const [languages, setLanguages] = useState(c.languages ?? [])
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <ProfileTab c={c} editing={editing} onEditSave={onEditSave} onEditCancel={onEditCancel} onStartEdit={onStartEdit} />
+      <ProfileTab c={c} onEditSave={onEditSave} />
       <KoiosAiBlock c={c} />
       <LanguageTab items={languages} onAdd={v => setLanguages(p => [...p, v])} />
       <DocumentsSection c={c} />
