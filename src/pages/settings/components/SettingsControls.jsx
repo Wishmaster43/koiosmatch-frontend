@@ -5,9 +5,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { GripVertical } from 'lucide-react'
 
+// Soft, muted mid-tones — calm in light mode and still readable on dark surfaces
+// (used everywhere colours are configured: statuses, phases, vacancy, pools, …).
 const COLOR_PRESETS = [
-  'var(--color-danger)','#F97316','var(--color-warning)','#84CC16','var(--color-success)','#14B8A6',
-  '#3B8FD4','var(--color-primary)','#8B5CF6','#EC4899','#6B7280','#111827',
+  '#64748B', '#94A3B8', '#6E8FD6', '#8C86D9', '#A98AD1', '#C98BBA',
+  '#D98A8A', '#B96B6B', '#DDA071', '#C9AC64', '#79B58E', '#5FB0AC', '#6FA8C4',
 ]
 
 function ColorPickerPopup({ color, onChange, onClose }) {

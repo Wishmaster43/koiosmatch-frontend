@@ -27,32 +27,32 @@ import { COOKIE_AUTH } from '../lib/authMode'
 // Slugs zijn Engels/stabiel (matchen de backend); labels/kleuren zijn per tenant
 // instelbaar en komen normaal uit GET /settings/candidate-lookups.
 export const DEFAULT_CANDIDATE_TYPES = [
-  { value: 'on_call',     label: 'Oproepkracht',  color: '#1B60A9' },
-  { value: 'freelance',   label: 'ZZP',           color: '#0F766E' },
-  { value: 'payroll',     label: 'Payroll',       color: '#7C3AED' },
-  { value: 'temp_agency', label: 'Uitzendkracht', color: '#B45309' },
-  { value: 'secondment',  label: 'Detachering',   color: '#0369A1' },
-  { value: 'on_demand',   label: 'Demand',        color: '#BE185D' },
+  { value: 'on_call',     label: 'Oproepkracht',  color: '#6E8FD6' },
+  { value: 'freelance',   label: 'ZZP',           color: '#5FB0AC' },
+  { value: 'payroll',     label: 'Payroll',       color: '#A98AD1' },
+  { value: 'temp_agency', label: 'Uitzendkracht', color: '#DDA071' },
+  { value: 'secondment',  label: 'Detachering',   color: '#6FA8C4' },
+  { value: 'on_demand',   label: 'Demand',        color: '#C98BBA' },
 ]
 
 export const DEFAULT_FUNNEL_TYPES = [
-  { value: 'prospect', label: 'Prospect',     color: '#6B7280' },
-  { value: 'intake',   label: 'Intake',       color: '#8B5CF6' },
-  { value: 'pool',     label: 'Actieve pool', color: '#16A34A' },
-  { value: 'alumni',   label: 'Alumni',       color: '#0EA5E9' },
+  { value: 'prospect', label: 'Prospect',     color: '#94A3B8' },
+  { value: 'intake',   label: 'Intake',       color: '#8C86D9' },
+  { value: 'pool',     label: 'Actieve pool', color: '#79B58E' },
+  { value: 'alumni',   label: 'Alumni',       color: '#6FA8C4' },
 ]
 
 export const DEFAULT_STATUSES = [
-  { value: 'prospect', label: 'Prospect',     color: '#9CA3AF' },
-  { value: 'intake',   label: 'Intake',       color: '#8B5CF6' },
-  { value: 'active',   label: 'Actief',       color: '#16A34A' },
-  { value: 'inactive', label: 'Niet actief',  color: '#D97706' },
-  { value: 'sick',     label: 'Ziek',         color: '#DC2626' },
-  { value: 'leave',    label: 'Verlof',       color: '#0EA5E9' },
-  { value: 'external', label: 'Extern',       color: '#F0AB00' },
-  { value: 'blocked',  label: 'Geblokkeerd',  color: '#991B1B' },
-  { value: 'outflow',  label: 'Uitgestroomd', color: '#9CA3AF' },
-  { value: 'deleted',  label: 'Verwijderd',   color: '#9CA3AF' },
+  { value: 'prospect', label: 'Prospect',     color: '#94A3B8' },
+  { value: 'intake',   label: 'Intake',       color: '#8C86D9' },
+  { value: 'active',   label: 'Actief',       color: '#79B58E' },
+  { value: 'inactive', label: 'Niet actief',  color: '#C9AC64' },
+  { value: 'sick',     label: 'Ziek',         color: '#D98A8A' },
+  { value: 'leave',    label: 'Verlof',       color: '#6FA8C4' },
+  { value: 'external', label: 'Extern',       color: '#DDA071' },
+  { value: 'blocked',  label: 'Geblokkeerd',  color: '#B96B6B' },
+  { value: 'outflow',  label: 'Uitgestroomd', color: '#8A94A6' },
+  { value: 'deleted',  label: 'Verwijderd',   color: '#64748B' },
 ]
 
 // Normalise a raw API list: keep active items, sort by order, fall back to seed.
