@@ -14,6 +14,8 @@ import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControl
 export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null }) {
   const { t } = useTranslation('settings')
   const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(extraField ? { [extraField.key]: extraField.default } : {}) })
+  // Lookups differ in their display field: name (phases/status) vs label/value (genders/languages).
+  const labelOf = (i) => i.name ?? i.label ?? i.value ?? ''
   const [items,     setItems]     = useState([])
   const [loading,   setLoading]   = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -30,14 +32,15 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     if (!draft.name.trim()) return
     setSaving(true)
     try {
-      const res = await api.post(endpoint, draft)
+      // Send name + label so both name-based and label/value-based lookups accept it.
+      const res = await api.post(endpoint, { ...draft, label: draft.name })
       setItems(p => [...p, res.data?.data ?? res.data])
       setShowModal(false); setDraft(emptyDraft())
     } catch { /* noop */ } finally { setSaving(false) }
   }
 
   const remove = async (item) => {
-    if (!confirm(t('statusList.confirmDelete', { name: item.name }))) return
+    if (!confirm(t('statusList.confirmDelete', { name: labelOf(item) }))) return
     setDeleting(item.id)
     try { await api.delete(`${endpoint}/${item.id}`); setItems(p => p.filter(x => x.id !== item.id)) }
     catch { /* noop */ } finally { setDeleting(null) }
@@ -93,8 +96,8 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
             <>
               {withColor && <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />}
               {withColor
-                ? <ColorBadge label={item.name} color={item.color ?? '#6B7280'} />
-                : <span style={{ fontSize: 13, color: '#111827' }}>{item.name}</span>}
+                ? <ColorBadge label={labelOf(item)} color={item.color ?? '#6B7280'} />
+                : <span style={{ fontSize: 13, color: '#111827' }}>{labelOf(item)}</span>}
               {extraField && item[extraField.key] && (
                 <span style={{ fontSize: 11, color: '#6B7280', background: '#F3F4F6', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>
                   {extraField.options.find(o => o.value === item[extraField.key])?.label ?? item[extraField.key]}
