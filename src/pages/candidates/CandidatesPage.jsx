@@ -279,11 +279,15 @@ export default function CandidatesPage() {
     setSelected(prev => (prev && prev.id === id ? { ...prev, ...patch } : prev))
     setDetail(prev  => (prev && prev.id === id ? { ...prev, ...patch } : prev))
 
-    // Translate the UI patch → API keys (3-layer model) and persist.
+    // Translate the UI patch → API keys (3-layer model + header fields) and persist.
     const body = {}
     if ('candidateTypes' in patch) body.candidate_types = patch.candidateTypes
     if ('status'         in patch) body.status          = patch.status
     if ('stage'          in patch) body.funnel_type     = patch.stage
+    if ('firstname'      in patch) body.first_name      = patch.firstname
+    if ('lastname'       in patch) body.last_name       = patch.lastname
+    if ('middleName'     in patch) body.middle_name     = patch.middleName
+    if ('title'          in patch) body.function_title  = patch.title
     if (Object.keys(body).length) api.patch(`/candidates/${id}`, body).catch(() => {})
   }
 

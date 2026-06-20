@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Download, Edit2 } from 'lucide-react'
+import { Download, Edit2, Check } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { CvDocument } from './CandidateCvTemplate'
 import { useCvSettings } from '../../lib/useCvSettings'
@@ -48,6 +48,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [editing,       setEditing]       = useState(false)
   const [profileEdits,  setProfileEdits]  = useState(null)
   const [photoUrl,      setPhotoUrl]      = useState(null)
+  // Header name + function fields (controlled while editing).
+  const [headerForm,    setHeaderForm]    = useState(null)
 
   // Reset the header overrides when a different candidate is shown — done by
   // adjusting state during render (React's recommended pattern) so there's no effect.
@@ -55,7 +57,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   if (c?.id !== prevId) {
     setPrevId(c?.id)
     setRecruiter(null); setStatus(null); setTypes(null); setStageVal(null); setStageVacancy(null)
-    setTags(null); setEditing(false); setProfileEdits(null); setPhotoUrl(null)
+    setTags(null); setEditing(false); setProfileEdits(null); setPhotoUrl(null); setHeaderForm(null)
   }
 
   // Vacancies for the optional link shown when stage = Applicant.
@@ -81,6 +83,27 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const changeStatus = (v) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
   const changeStage  = (v) => { setStageVal(v); onUpdate?.(c.id, { stage: v }) }
   const currentTags    = tags ?? c.tags ?? []
+
+  // Enter edit mode: capture the header fields so they're controlled + saveable.
+  const startEdit = (setActiveTab) => {
+    setHeaderForm({
+      firstname:  c.firstname  ?? c.name?.split(' ')[0] ?? '',
+      lastname:   c.lastname   ?? c.name?.split(' ').slice(-1)[0] ?? '',
+      middleName: c.middleName ?? '',
+      title:      c.title ?? '',
+    })
+    setEditing(true)
+    setActiveTab('profile')
+  }
+  const setHF = (k, v) => setHeaderForm(f => ({ ...f, [k]: v }))
+  const saveHeader = () => {
+    if (headerForm) {
+      const name = [headerForm.firstname, headerForm.middleName, headerForm.lastname].filter(Boolean).join(' ')
+      onUpdate?.(c.id, { ...headerForm, name })
+    }
+    setEditing(false)
+  }
+  const hf = (k) => headerForm?.[k] ?? ''
 
   const renderTabContent = (activeTab) => {
     const mergedC = { ...c, ...(profileEdits ?? {}) }
@@ -112,13 +135,15 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const renderTitle = () => editing ? (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6 }}>
-        <input placeholder={t('modal.fields.firstName')} defaultValue={c.firstname ?? c.name?.split(' ')[0] ?? ''}
+        <input placeholder={t('modal.fields.firstName')} value={hf('firstname')} onChange={e => setHF('firstname', e.target.value)}
           style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', padding: '6px 10px', fontSize: 13, fontWeight: 600, borderRadius: 6, border: '1px solid var(--border)', outline: 'none' }} />
-        <input placeholder={t('modal.fields.lastName')} defaultValue={c.lastname ?? c.name?.split(' ').slice(-1)[0] ?? ''}
+        <input placeholder={t('modal.fields.lastName')} value={hf('lastname')} onChange={e => setHF('lastname', e.target.value)}
           style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', padding: '6px 10px', fontSize: 13, fontWeight: 600, borderRadius: 6, border: '1px solid var(--border)', outline: 'none' }} />
       </div>
-      <input placeholder={t('modal.fields.middleName')} defaultValue={c.middleName ?? ''}
+      <input placeholder={t('modal.fields.middleName')} value={hf('middleName')} onChange={e => setHF('middleName', e.target.value)}
         style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text-muted)' }} />
+      <input placeholder={t('columns.function')} value={hf('title')} onChange={e => setHF('title', e.target.value)}
+        style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />
     </div>
   ) : (
     <>
@@ -143,12 +168,19 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: cvGenerating ? 'not-allowed' : 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white', opacity: cvGenerating ? 0.7 : 1 }}>
         <Download size={11} />{cvGenerating ? t('drawer.generating') : t('drawer.downloadCv')}
       </button>
-      <button onClick={() => { setEditing(e => !e); setActiveTab('profile') }}
-        title={editing ? t('drawer.editing') : t('drawer.edit')}
+      <button onClick={() => editing ? setEditing(false) : startEdit(setActiveTab)}
+        title={editing ? t('common:cancel') : t('drawer.edit')}
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0,
           background: editing ? 'var(--color-primary)' : 'var(--bg)', color: editing ? '#fff' : 'var(--text-muted)', border: editing ? 'none' : '1px solid var(--border)' }}>
         <Edit2 size={13} />
       </button>
+      {editing && (
+        <button onClick={saveHeader} title={t('common:save')}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0,
+            background: 'var(--color-success)', color: '#fff', border: 'none' }}>
+          <Check size={14} />
+        </button>
+      )}
     </>
   )
 
