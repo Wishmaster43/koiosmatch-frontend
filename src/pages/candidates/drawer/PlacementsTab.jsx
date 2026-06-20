@@ -20,7 +20,10 @@ export default function PlacementsTab({ c }) {
   ]
   return (
     <AddableSection title={t('sections.placements')} emptyText={t('sections.placementsEmpty')}
-      items={placements} fields={fields} onAdd={v => setPlacements(p => [...p, v])}
+      items={placements} fields={fields}
+      onAdd={v => setPlacements(p => [...p, v])}
+      onEdit={(i, v) => setPlacements(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))}
+      onRemove={i => setPlacements(p => p.filter((_, idx) => idx !== i))}
       renderItem={(p, i) => (
         <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
           <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
