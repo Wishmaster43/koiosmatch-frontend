@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { GripVertical } from 'lucide-react'
 import AddableSection from '../../../components/forms/AddableSection'
 
-export function ExperienceTab({ items = [], onAdd }) {
+export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }) {
   const { t } = useTranslation('candidates')
   const fields = [
     { key: 'title',    label: t('addFields.functionTitle') },
@@ -18,7 +18,7 @@ export function ExperienceTab({ items = [], onAdd }) {
   ]
   return (
     <AddableSection title={t('sections.experience')} emptyText={t('sections.experienceEmpty')}
-      items={items} fields={fields} onAdd={onAdd}
+      items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(e, i, arr) => (
         <div key={e.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
           <GripVertical size={14} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 2 }} />
@@ -34,7 +34,7 @@ export function ExperienceTab({ items = [], onAdd }) {
   )
 }
 
-export function EducationTab({ items = [], onAdd }) {
+export function EducationTab({ items = [], onAdd, onEdit, onRemove }) {
   const { t } = useTranslation('candidates')
   const fields = [
     { key: 'title',   label: t('addFields.diploma') },
@@ -46,7 +46,7 @@ export function EducationTab({ items = [], onAdd }) {
   ]
   return (
     <AddableSection title={t('sections.education')} emptyText={t('sections.educationEmpty')}
-      items={items} fields={fields} onAdd={onAdd}
+      items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(o, i, arr) => (
         <div key={o.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
           <GripVertical size={14} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 2 }} />
@@ -61,7 +61,7 @@ export function EducationTab({ items = [], onAdd }) {
   )
 }
 
-export function LanguageTab({ items = [], onAdd }) {
+export function LanguageTab({ items = [], onAdd, onEdit, onRemove }) {
   const { t } = useTranslation('candidates')
   const fields = [
     { key: 'language',        label: t('addFields.language') },
@@ -70,7 +70,7 @@ export function LanguageTab({ items = [], onAdd }) {
   ]
   return (
     <AddableSection title={t('sections.languages')} emptyText={t('sections.languagesEmpty')}
-      items={items} fields={fields} onAdd={onAdd} layout="tags"
+      items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove} layout="tags"
       renderItem={(t0, i) => (
         <span key={t0.id ?? i} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 99,
           border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
@@ -80,7 +80,7 @@ export function LanguageTab({ items = [], onAdd }) {
   )
 }
 
-export function CertificationsTab({ items = [], onAdd }) {
+export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }) {
   const { t } = useTranslation('candidates')
   const fields = [
     { key: 'name',    label: t('addFields.certName') },
@@ -92,7 +92,7 @@ export function CertificationsTab({ items = [], onAdd }) {
   ]
   return (
     <AddableSection title={t('sections.certifications')} emptyText={t('sections.certificationsEmpty')}
-      items={items} fields={fields} onAdd={onAdd}
+      items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(cert, i, arr) => (
         <div key={cert.id ?? i} style={{ display: 'flex', gap: 8, padding: '8px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#8B5CF6', flexShrink: 0, marginTop: 4 }} />
@@ -110,7 +110,7 @@ export function CertificationsTab({ items = [], onAdd }) {
   )
 }
 
-export function SkillsTab({ items = [], onAdd }) {
+export function SkillsTab({ items = [], onAdd, onEdit, onRemove }) {
   const { t } = useTranslation('candidates')
   const fields = [
     { key: 'name',  label: t('addFields.skill') },
@@ -118,7 +118,7 @@ export function SkillsTab({ items = [], onAdd }) {
   ]
   return (
     <AddableSection title={t('sections.skills')} emptyText={t('sections.skillsEmpty')}
-      items={items} fields={fields} onAdd={onAdd} layout="tags"
+      items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove} layout="tags"
       renderItem={(v, i) => (
         <span key={i} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 99,
           border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>

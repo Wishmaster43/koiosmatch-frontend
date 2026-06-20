@@ -10,18 +10,28 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { TextField, TextArea, DateField, SaveCancel } from './fields'
+import { Save, X } from 'lucide-react'
+import { TextField, TextArea, DateField } from './fields'
 
 function FieldInput({ f, value, onChange }) {
   if (f.textarea) return <TextArea placeholder={f.label} value={value} onChange={onChange} />
   if (f.date)     return <DateField placeholder={f.label} value={value} onChange={onChange} />
+  if (f.options)  return (
+    <select value={value ?? ''} onChange={e => onChange(e.target.value)}
+      style={{ width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }}>
+      <option value="">{f.label}</option>
+      {f.options.map(o => <option key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</option>)}
+    </select>
+  )
   return <TextField placeholder={f.label} value={value} onChange={onChange} type={f.type} />
 }
 
-export default function AddForm({ fields, onSave, onCancel }) {
+// `initial` (optioneel) prefilt de velden → zelfde formulier voor toevoegen én bewerken.
+export default function AddForm({ fields, onSave, onCancel, initial }) {
   const { t } = useTranslation('common')
-  const [values, setValues] = useState(() => Object.fromEntries(fields.map(f => [f.key, ''])))
+  const [values, setValues] = useState(() => ({ ...Object.fromEntries(fields.map(f => [f.key, ''])), ...(initial ?? {}) }))
   const set = (k, v) => setValues(p => ({ ...p, [k]: v }))
+  const iconBtn = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer' }
 
   const rows = []
   for (let i = 0; i < fields.length; i++) {
@@ -47,7 +57,16 @@ export default function AddForm({ fields, onSave, onCancel }) {
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 10,
       background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 8 }}>
       {rows}
-      <SaveCancel onSave={() => onSave(values)} onCancel={onCancel} />
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+        <button onClick={() => onSave(values)} title={t('save')}
+          style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
+          <Save size={14} />
+        </button>
+        <button onClick={onCancel} title={t('cancel')}
+          style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+          <X size={14} />
+        </button>
+      </div>
     </div>
   )
 }
