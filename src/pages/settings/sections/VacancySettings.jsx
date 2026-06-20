@@ -20,6 +20,16 @@ export default function VacancySettings() {
     } catch { /* noop */ } finally { setAddingField(false) }
   }
 
+  // An item is protected when the backend marks it as referenced by existing data.
+  const inUse = (i) => Boolean(i.in_use ?? i.is_used ?? i.locked ?? ((i.usage_count ?? 0) > 0))
+
+  // Delete a custom field unless it is still in use; 409 = backend rejects + flags it.
+  const removeField = async (f) => {
+    if (inUse(f)) return
+    try { await api.delete(`/vacancy-custom-fields/${f.id}`); setCustomFields(p => p.filter(x => x.id !== f.id)) }
+    catch (e) { if (e?.response?.status === 409) setCustomFields(p => p.map(x => x.id === f.id ? { ...x, in_use: true } : x)) }
+  }
+
   useEffect(() => {
     api.get('/vacancy-custom-fields').then(r => setCustomFields(r.data?.data ?? r.data ?? [])).catch(() => {})
   }, [])
@@ -44,8 +54,9 @@ export default function VacancySettings() {
           {customFields.map((f, i) => (
             <div key={f.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'white', border: '1px solid #F3F4F6', borderRadius: 8 }}>
               <span style={{ flex: 1, fontSize: 13, color: '#111827' }}>{f.name}</span>
-              <button onClick={async () => { await api.delete(`/vacancy-custom-fields/${f.id}`); setCustomFields(p => p.filter(x => x.id !== f.id)) }}
-                style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FEF2F2', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--color-danger)' }}>
+              <button onClick={() => removeField(f)} disabled={inUse(f)} title={inUse(f) ? t('statusList.inUse') : undefined}
+                style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FEF2F2', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
+                         cursor: inUse(f) ? 'not-allowed' : 'pointer', opacity: inUse(f) ? 0.4 : 1 }}>
                 <Trash2 size={11} />
               </button>
             </div>

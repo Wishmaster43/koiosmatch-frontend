@@ -201,7 +201,10 @@
     "namePlaceholder": "Name",
     "colorLabel": "Colour",
     "addBtn": "Add",
-    "confirmDelete": "Delete \"{{name}}\"?"
+    "confirmDelete": "Delete \"{{name}}\"?",
+    "edit": "Edit",
+    "editTitle": "Edit",
+    "inUse": "In use — cannot delete"
   },
   "phases": {
     "title": "Phases",
@@ -245,7 +248,8 @@
     "statuses": {
       "title": "Statuses",
       "subtitle": "Operational status with a colour (Active, Inactive, Sick …)."
-    }
+    },
+    "inUse": "In use — cannot delete"
   },
   "vacancy": {
     "title": "Statuses",

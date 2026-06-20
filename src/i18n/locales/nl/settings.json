@@ -201,7 +201,10 @@
     "namePlaceholder": "Naam",
     "colorLabel": "Kleur",
     "addBtn": "Toevoegen",
-    "confirmDelete": "Weet je zeker dat je \"{{name}}\" wilt verwijderen?"
+    "confirmDelete": "Weet je zeker dat je \"{{name}}\" wilt verwijderen?",
+    "edit": "Bewerken",
+    "editTitle": "Bewerken",
+    "inUse": "In gebruik — kan niet verwijderen"
   },
   "phases": {
     "title": "Fasen",
@@ -245,7 +248,8 @@
     "statuses": {
       "title": "Statussen",
       "subtitle": "Operationele status met kleur (Actief, Niet actief, Ziek …)."
-    }
+    },
+    "inUse": "In gebruik — kan niet verwijderen"
   },
   "vacancy": {
     "title": "Statussen",

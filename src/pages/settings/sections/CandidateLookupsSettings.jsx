@@ -53,11 +53,18 @@ function LookupBlock({ slug, title, subtitle, items, setItems }) {
     try { await api.put(`${BASE}/${slug}/${it.id}`, { label: it.label, color }) } catch { /* noop */ }
   }
 
+  // An item is protected when the backend marks it as referenced by existing data.
+  const inUse = (i) => Boolean(i.in_use ?? i.is_used ?? i.locked ?? ((i.usage_count ?? i.candidates_count ?? 0) > 0))
+
   const remove = async (it) => {
+    if (inUse(it)) return
     if (!confirm(t('lookups.confirmDelete', { name: it.label }))) return
     setDeleting(it.id)
+    // 409 = backend rejects deletion of an in-use item; keep the row and flag it.
     try { await api.delete(`${BASE}/${slug}/${it.id}`); setItems(p => p.filter(x => x.id !== it.id)) }
-    catch { /* noop */ } finally { setDeleting(null) }
+    catch (e) {
+      if (e?.response?.status === 409) setItems(p => p.map(x => x.id === it.id ? { ...x, in_use: true } : x))
+    } finally { setDeleting(null) }
   }
 
   const reorder = async (next) => {
@@ -94,9 +101,11 @@ function LookupBlock({ slug, title, subtitle, items, setItems }) {
                        background: '#F3F4F6', border: 'none', borderRadius: 6, cursor: 'pointer', color: '#6B7280' }}>
               <Pencil size={11} />
             </button>
-            <button onClick={() => remove(item)} disabled={deleting === item.id}
+            <button onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
+              title={inUse(item) ? t('lookups.inUse') : undefined}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: '#FEF2F2', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--color-danger)' }}>
+                       background: '#FEF2F2', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
+                       cursor: inUse(item) ? 'not-allowed' : 'pointer', opacity: inUse(item) ? 0.4 : 1 }}>
               {deleting === item.id ? <RefreshCw size={11} className="animate-spin" /> : <Trash2 size={11} />}
             </button>
           </>
