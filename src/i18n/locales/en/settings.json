@@ -71,7 +71,9 @@
     "audit": "Audit log",
     "email_klanten": "Email — clients",
     "email_kandidaten": "Email — candidates",
-    "email_planning": "Email — planning"
+    "email_planning": "Email — planning",
+    "languages": "Languages",
+    "genders": "Gender"
   },
   "kpis": {
     "title": "KPI settings",
@@ -694,5 +696,18 @@
       "after": "After",
       "role": "Role"
     }
+  },
+  "languageSettings": {
+    "languagesTitle": "Languages",
+    "languagesSubtitle": "The languages you can pick on candidates.",
+    "addLanguage": "Add language",
+    "levelsTitle": "Levels",
+    "levelsSubtitle": "Proficiency levels (e.g. Poor → Very good, Native).",
+    "addLevel": "Add level"
+  },
+  "genderSettings": {
+    "title": "Gender",
+    "subtitle": "Genders with a colour — drives the candidate icon colour.",
+    "add": "Add gender"
   }
 }

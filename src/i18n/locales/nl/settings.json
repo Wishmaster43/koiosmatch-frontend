@@ -71,7 +71,9 @@
     "audit": "Audit log",
     "email_klanten": "E-mail klanten",
     "email_kandidaten": "E-mail kandidaten",
-    "email_planning": "E-mail planning"
+    "email_planning": "E-mail planning",
+    "languages": "Talen",
+    "genders": "Geslacht"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -694,5 +696,18 @@
       "after": "Na",
       "role": "Rol"
     }
+  },
+  "languageSettings": {
+    "languagesTitle": "Talen",
+    "languagesSubtitle": "De talen die je bij kandidaten kunt kiezen.",
+    "addLanguage": "Taal toevoegen",
+    "levelsTitle": "Niveaus",
+    "levelsSubtitle": "Beheersingsniveaus (bijv. Slecht → Zeer goed, Moedertaal).",
+    "addLevel": "Niveau toevoegen"
+  },
+  "genderSettings": {
+    "title": "Geslacht",
+    "subtitle": "Geslachten met een kleur — bepaalt de kleur van het kandidaat-icoon.",
+    "add": "Geslacht toevoegen"
   }
 }
