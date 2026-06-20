@@ -25,7 +25,10 @@
     "removeFromPool": "Retirer du pool",
     "searchPool": "Rechercher un pool…",
     "deselect": "Désélectionner",
-    "noPools": "Aucun pool configuré pour le moment."
+    "noPools": "Aucun pool configuré pour le moment.",
+    "addedToPool": "Ajouté à {{pool}} ({{count}})",
+    "removedFromPool": "Retiré de {{pool}} ({{count}})",
+    "poolError": "Échec de l’action. Veuillez réessayer."
   },
   "kpi": {
     "total": "Total",

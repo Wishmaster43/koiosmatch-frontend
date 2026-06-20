@@ -34,7 +34,10 @@
     "removeFromPool": "Verwijderen uit pool",
     "searchPool": "Zoek een pool…",
     "deselect": "Deselecteren",
-    "noPools": "Nog geen pools ingesteld."
+    "noPools": "Nog geen pools ingesteld.",
+    "addedToPool": "Toegevoegd aan {{pool}} ({{count}})",
+    "removedFromPool": "Verwijderd uit {{pool}} ({{count}})",
+    "poolError": "Actie mislukt. Probeer het opnieuw."
   },
   "kpi": {
     "total": "Totaal",

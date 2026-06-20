@@ -413,6 +413,22 @@ export default function CandidatesPage() {
           {/* Eén compacte strip: donuts + KPI's, allemaal gelijke grootte op 1 regel */}
           <CandidatesInsightsRow donuts={insightDonuts} kpis={insightKpis} />
 
+          {/* Transient feedback for bulk mutations (aria-live for screen readers) */}
+          {actionMsg && (
+            <div role="status" aria-live="polite" style={{ margin: '0 24px 10px', display: 'flex', alignItems: 'center', gap: 8,
+              padding: '8px 12px', borderRadius: 8, fontSize: 12.5,
+              background: actionMsg.type === 'error' ? 'var(--color-danger-bg)' : 'var(--color-success-bg)',
+              color: actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
+              border: `1px solid ${actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)'}` }}>
+              {actionMsg.type === 'error' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
+              <span style={{ flex: 1 }}>{actionMsg.text}</span>
+              <button onClick={() => setActionMsg(null)} aria-label={t('close', { ns: 'common' })}
+                style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 2 }}>
+                <X size={13} />
+              </button>
+            </div>
+          )}
+
           {/* Toolbar — bulk-bar zodra er selectie is, anders de toevoeg-knop */}
           <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
             {selectedIds.size > 0 ? (

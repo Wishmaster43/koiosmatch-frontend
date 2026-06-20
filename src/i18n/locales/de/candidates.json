@@ -25,7 +25,10 @@
     "removeFromPool": "Aus Pool entfernen",
     "searchPool": "Pool suchen…",
     "deselect": "Auswahl aufheben",
-    "noPools": "Noch keine Pools eingerichtet."
+    "noPools": "Noch keine Pools eingerichtet.",
+    "addedToPool": "Zu {{pool}} hinzugefügt ({{count}})",
+    "removedFromPool": "Aus {{pool}} entfernt ({{count}})",
+    "poolError": "Aktion fehlgeschlagen. Bitte erneut versuchen."
   },
   "kpi": {
     "total": "Gesamt",
