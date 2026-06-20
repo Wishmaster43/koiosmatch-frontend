@@ -13,8 +13,8 @@
  * `onCancel`, e.g. the drawer's global edit mode) or left internal (the default).
  */
 import { useState } from 'react'
-import { Edit2 } from 'lucide-react'
-import { SelectField, CheckboxField, DateField, SaveCancel } from './fields'
+import { Edit2, Save, X } from 'lucide-react'
+import { SelectField, CheckboxField, DateField } from './fields'
 
 const compact = {
   width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6,
@@ -37,7 +37,7 @@ function EditPencil({ onClick, style }) {
 
 export default function EditableFieldTable({
   title, fields, value = {}, onSave, labelWidth = 130, editButton = 'header',
-  editing: editingProp, onStartEdit, onCancel, saveLabel, cancelLabel,
+  editing: editingProp, onStartEdit, onCancel,
 }) {
   const controlled = editingProp !== undefined
   const [editingState, setEditingState] = useState(false)
@@ -55,6 +55,14 @@ export default function EditableFieldTable({
 
   const startEdit = () => (controlled ? onStartEdit?.() : setEditingState(true))
   const cancel    = () => { setForm(saved); controlled ? onCancel?.() : setEditingState(false) }
+  const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
+  // In-place save (diskette) + cancel (✕), same spot as the pencil.
+  const editControls = () => (
+    <div style={{ display: 'flex', gap: 4 }}>
+      <button onClick={save} title="Opslaan" style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>
+      <button onClick={cancel} title="Annuleren" style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
+    </div>
+  )
   const save      = () => { setSaved(form); onSave?.(form); if (!controlled) setEditingState(false) }
 
   const renderControl = (f) => {
@@ -77,13 +85,15 @@ export default function EditableFieldTable({
       {editButton === 'header' && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
           <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
-          {!editing && <EditPencil onClick={startEdit} />}
+          {editing ? editControls() : <EditPencil onClick={startEdit} />}
         </div>
       )}
 
       <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: 16, position: 'relative' }}>
-        {editButton === 'inside' && !editing && (
-          <EditPencil onClick={startEdit} style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }} />
+        {editButton === 'inside' && (
+          <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
+            {editing ? editControls() : <EditPencil onClick={startEdit} />}
+          </div>
         )}
         {fields.map((f, i) => {
           const last = i === fields.length - 1
@@ -105,8 +115,6 @@ export default function EditableFieldTable({
           )
         })}
       </div>
-
-      {editing && <SaveCancel onSave={save} onCancel={cancel} saveLabel={saveLabel} cancelLabel={cancelLabel} />}
     </div>
   )
 }
