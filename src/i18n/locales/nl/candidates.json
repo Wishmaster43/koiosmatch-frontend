@@ -188,7 +188,11 @@
     "expiryDate": "Vervaldatum",
     "licenseNumber": "licentienummer",
     "skill": "Vaardigheid",
-    "skillLevel": "Vaardigheidsniveau"
+    "skillLevel": "Vaardigheidsniveau",
+    "currentJob": "Huidige functie",
+    "inProgress": "Nog in opleiding",
+    "expectedEnd": "Verwachte einddatum",
+    "present": "heden"
   },
   "work": {
     "client": "Klant",

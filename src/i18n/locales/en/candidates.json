@@ -188,7 +188,11 @@
     "expiryDate": "Expiry date",
     "licenseNumber": "licence number",
     "skill": "Skill",
-    "skillLevel": "Skill level"
+    "skillLevel": "Skill level",
+    "currentJob": "Current job",
+    "inProgress": "Still studying",
+    "expectedEnd": "Expected end date",
+    "present": "present"
   },
   "work": {
     "client": "Client",

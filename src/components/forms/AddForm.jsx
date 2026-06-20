@@ -13,17 +13,26 @@ import { useTranslation } from 'react-i18next'
 import { Save, X } from 'lucide-react'
 import { TextField, TextArea, DateField } from './fields'
 
-function FieldInput({ f, value, onChange }) {
-  if (f.textarea) return <TextArea placeholder={f.label} value={value} onChange={onChange} />
-  if (f.date)     return <DateField placeholder={f.label} value={value} onChange={onChange} />
+function FieldInput({ f, value, onChange, values }) {
+  // A field's label can switch based on another field (altLabelWhen) — e.g. an
+  // education end date becomes "Verwachte einddatum" when "Nog in opleiding" is on.
+  const label = (f.altLabelWhen && values?.[f.altLabelWhen]) ? f.altLabel : f.label
+  if (f.checkbox) return (
+    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text)', cursor: 'pointer' }}>
+      <input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked)} style={{ cursor: 'pointer' }} />
+      {f.label}
+    </label>
+  )
+  if (f.textarea) return <TextArea placeholder={label} value={value} onChange={onChange} />
+  if (f.date)     return <DateField placeholder={label} value={value} onChange={onChange} />
   if (f.options)  return (
     <select value={value ?? ''} onChange={e => onChange(e.target.value)}
       style={{ width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }}>
-      <option value="">{f.label}</option>
+      <option value="">{label}</option>
       {f.options.map(o => <option key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</option>)}
     </select>
   )
-  return <TextField placeholder={f.label} value={value} onChange={onChange} type={f.type} />
+  return <TextField placeholder={label} value={value} onChange={onChange} type={f.type} />
 }
 
 // `initial` (optioneel) prefilt de velden → zelfde formulier voor toevoegen én bewerken.
@@ -42,14 +51,14 @@ export default function AddForm({ fields, onSave, onCancel, initial }) {
         <div key={f.key} style={f.separator
           ? { display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, alignItems: 'center' }
           : { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <FieldInput f={f}    value={values[f.key]}    onChange={v => set(f.key, v)} />
+          <FieldInput f={f}    value={values[f.key]}    onChange={v => set(f.key, v)} values={values} />
           {f.separator && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('to')}</span>}
-          <FieldInput f={next} value={values[next.key]} onChange={v => set(next.key, v)} />
+          <FieldInput f={next} value={values[next.key]} onChange={v => set(next.key, v)} values={values} />
         </div>
       )
       i++
     } else {
-      rows.push(<FieldInput key={f.key} f={f} value={values[f.key]} onChange={v => set(f.key, v)} />)
+      rows.push(<FieldInput key={f.key} f={f} value={values[f.key]} onChange={v => set(f.key, v)} values={values} />)
     }
   }
 

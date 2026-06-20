@@ -14,6 +14,7 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }) {
     { key: 'location', label: t('addFields.location') },
     { key: 'start',    label: t('addFields.startDate'), half: true, date: true },
     { key: 'end',      label: t('addFields.endDate'),   half: true, date: true },
+    { key: 'current',  label: t('addFields.currentJob'), checkbox: true },
     { key: 'desc',     label: t('addFields.description'), textarea: true },
   ]
   return (
@@ -27,7 +28,11 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }) {
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{e.title ?? e.function_title}</div>
             {(e.company ?? e.employer) && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{e.company ?? e.employer}</div>}
             {e.location && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{e.location}</div>}
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{e.period ?? [e.start_date, e.end_date].filter(Boolean).join(' – ')}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              {e.current
+                ? `${e.start ?? e.start_date ?? ''} – ${t('addFields.present')}`
+                : (e.period ?? [e.start ?? e.start_date, e.end ?? e.end_date].filter(Boolean).join(' – '))}
+            </div>
           </div>
         </div>
       )} />
@@ -37,12 +42,14 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }) {
 export function EducationTab({ items = [], onAdd, onEdit, onRemove }) {
   const { t } = useTranslation('candidates')
   const fields = [
-    { key: 'title',   label: t('addFields.diploma') },
-    { key: 'school',  label: t('addFields.institution') },
-    { key: 'start',   label: t('addFields.startDate'), half: true, date: true },
-    { key: 'end',     label: t('addFields.endDate'),   half: true, date: true },
-    { key: 'desc',    label: t('addFields.description'), textarea: true },
-    { key: 'issued',  label: t('addFields.issueDate'), date: true },
+    { key: 'title',     label: t('addFields.diploma') },
+    { key: 'school',    label: t('addFields.institution') },
+    { key: 'start',     label: t('addFields.startDate'), half: true, date: true },
+    { key: 'end',       label: t('addFields.endDate'),   half: true, date: true,
+      altLabel: t('addFields.expectedEnd'), altLabelWhen: 'inProgress' },
+    { key: 'inProgress', label: t('addFields.inProgress'), checkbox: true },
+    { key: 'desc',      label: t('addFields.description'), textarea: true },
+    { key: 'issued',    label: t('addFields.issueDate'), date: true },
   ]
   return (
     <AddableSection title={t('sections.education')} emptyText={t('sections.educationEmpty')}
