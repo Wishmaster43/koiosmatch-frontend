@@ -4,44 +4,13 @@
  * the event filter. Status toggle, secret regeneration (one-time banner) and
  * deletion live in the Action menu and bubble back to the list via onPatch/onDelete.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Check, ChevronDown, Copy, MoreHorizontal, Pencil, Power, RefreshCw, Save, Trash2, Webhook, X } from 'lucide-react'
+import { ArrowLeft, Check, Copy, MoreHorizontal, Pencil, Power, RefreshCw, Save, Trash2, Webhook, X } from 'lucide-react'
 import StatusBadge from '../../../../components/ui/StatusBadge'
+import ActionMenu from '../../../../components/ui/ActionMenu'
 import { getSubscription, updateSubscription, deleteSubscription, regenerateSecret } from './webhooksApi'
 import EventCatalog from './EventCatalog'
-
-// Lightweight action dropdown for the header (regenerate / toggle / delete).
-function ActionMenu({ status, onRegenerate, onToggleStatus, onDelete }) {
-  const { t } = useTranslation('settings')
-  const [open, setOpen] = useState(false)
-  const ref = useRef(null)
-  useEffect(() => {
-    if (!open) return
-    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
-    document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
-  }, [open])
-
-  const item = { display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '9px 12px', fontSize: 13, textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text)' }
-  const run = (fn) => () => { setOpen(false); fn() }
-
-  return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', fontSize: 13, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
-        <MoreHorizontal size={14} /> {t('webhooks.outgoing.action')} <ChevronDown size={13} style={{ color: 'var(--text-muted)' }} />
-      </button>
-      {open && (
-        <div role="menu" style={{ position: 'absolute', right: 0, top: '100%', marginTop: 4, minWidth: 220, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', overflow: 'hidden', zIndex: 200 }}>
-          <button role="menuitem" style={item} onClick={run(onRegenerate)}><RefreshCw size={14} style={{ color: 'var(--text-muted)' }} /> {t('webhooks.outgoing.regenerate')}</button>
-          <button role="menuitem" style={item} onClick={run(onToggleStatus)}><Power size={14} style={{ color: 'var(--text-muted)' }} /> {status === 'active' ? t('webhooks.outgoing.deactivate') : t('webhooks.outgoing.activate')}</button>
-          <button role="menuitem" style={{ ...item, color: 'var(--color-danger)', borderTop: '1px solid var(--border)' }} onClick={run(onDelete)}><Trash2 size={14} /> {t('webhooks.outgoing.delete')}</button>
-        </div>
-      )}
-    </div>
-  )
-}
 
 export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelete }) {
   const { t } = useTranslation('settings')
@@ -121,7 +90,12 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
           <StatusBadge status={sub.status ?? 'active'} map={statusMap} />
           {loading && <RefreshCw size={13} className="animate-spin" style={{ color: 'var(--text-muted)' }} />}
         </div>
-        <ActionMenu status={sub.status ?? 'active'} onRegenerate={regenerate} onToggleStatus={toggleStatus} onDelete={remove} />
+        <ActionMenu label={t('webhooks.outgoing.action')} icon={MoreHorizontal} align="right" menuWidth={220}
+          items={[
+            { key: 'regenerate', label: t('webhooks.outgoing.regenerate'), icon: RefreshCw, onSelect: regenerate },
+            { key: 'toggle', label: (sub.status ?? 'active') === 'active' ? t('webhooks.outgoing.deactivate') : t('webhooks.outgoing.activate'), icon: Power, onSelect: toggleStatus },
+            { key: 'delete', label: t('webhooks.outgoing.delete'), icon: Trash2, danger: true, onSelect: remove },
+          ]} />
       </div>
 
       {/* One-time secret banner after regenerate */}

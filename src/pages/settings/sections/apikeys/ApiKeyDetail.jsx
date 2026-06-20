@@ -6,45 +6,14 @@
  * toggle, secret regeneration (one-time banner) and deletion all flow through
  * here and bubble back to the list via onPatch / onDelete.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ArrowLeft, Check, ChevronDown, Copy, Key, MoreHorizontal, Power, RefreshCw, Trash2 } from 'lucide-react'
+import { ArrowLeft, Check, Copy, Key, MoreHorizontal, Power, RefreshCw, Trash2 } from 'lucide-react'
 import StatusBadge from '../../../../components/ui/StatusBadge'
+import ActionMenu from '../../../../components/ui/ActionMenu'
 import { getApiKey, updateApiKey, deleteApiKey, regenerateApiKey } from './apiKeysApi'
 import ApiKeyGeneralTab from './ApiKeyGeneralTab'
 import ApiKeyAccessTab from './ApiKeyAccessTab'
-
-// Lightweight action dropdown for the header (regenerate / toggle / delete).
-function ActionMenu({ status, onRegenerate, onToggleStatus, onDelete }) {
-  const { t } = useTranslation('settings')
-  const [open, setOpen] = useState(false)
-  const ref = useRef(null)
-  useEffect(() => {
-    if (!open) return
-    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
-    document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
-  }, [open])
-
-  const item = { display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '9px 12px', fontSize: 13, textAlign: 'left', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text)' }
-  const run = (fn) => () => { setOpen(false); fn() }
-
-  return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <button onClick={() => setOpen((o) => !o)} aria-haspopup="menu" aria-expanded={open}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', fontSize: 13, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
-        <MoreHorizontal size={14} /> {t('apiKeys.action')} <ChevronDown size={13} style={{ color: 'var(--text-muted)' }} />
-      </button>
-      {open && (
-        <div role="menu" style={{ position: 'absolute', right: 0, top: '100%', marginTop: 4, minWidth: 220, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', overflow: 'hidden', zIndex: 200 }}>
-          <button role="menuitem" style={item} onClick={run(onRegenerate)}><RefreshCw size={14} style={{ color: 'var(--text-muted)' }} /> {t('apiKeys.regenerate')}</button>
-          <button role="menuitem" style={item} onClick={run(onToggleStatus)}><Power size={14} style={{ color: 'var(--text-muted)' }} /> {status === 'active' ? t('apiKeys.deactivate') : t('apiKeys.activate')}</button>
-          <button role="menuitem" style={{ ...item, color: 'var(--color-danger)', borderTop: '1px solid var(--border)' }} onClick={run(onDelete)}><Trash2 size={14} /> {t('apiKeys.delete')}</button>
-        </div>
-      )}
-    </div>
-  )
-}
 
 export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete }) {
   const { t } = useTranslation('settings')
@@ -115,7 +84,12 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
           </div>
           <StatusBadge status={apiKey.status ?? 'active'} map={statusMap} />
         </div>
-        <ActionMenu status={apiKey.status ?? 'active'} onRegenerate={regenerate} onToggleStatus={toggleStatus} onDelete={remove} />
+        <ActionMenu label={t('apiKeys.action')} icon={MoreHorizontal} align="right" menuWidth={220}
+          items={[
+            { key: 'regenerate', label: t('apiKeys.regenerate'), icon: RefreshCw, onSelect: regenerate },
+            { key: 'toggle', label: (apiKey.status ?? 'active') === 'active' ? t('apiKeys.deactivate') : t('apiKeys.activate'), icon: Power, onSelect: toggleStatus },
+            { key: 'delete', label: t('apiKeys.delete'), icon: Trash2, danger: true, onSelect: remove },
+          ]} />
       </div>
 
       {/* One-time secret banner after regenerate */}
