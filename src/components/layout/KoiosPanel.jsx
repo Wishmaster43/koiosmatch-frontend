@@ -1,27 +1,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Plus, Bot, Sparkles, AtSign, Paperclip, ArrowUp, ChevronDown } from 'lucide-react'
-import api from '../../lib/api'
-
-// ── Fallback responses ────────────────────────────────────────────────────────
-const FALLBACK = [
-  { match: ['kandidaat','kandidaten'],            reply: 'Je hebt momenteel 2.845 kandidaten in het systeem. Wil je filteren op beschikbaarheid, functie of locatie?' },
-  { match: ['planning','dienst','inplannen'],     reply: 'Ik kan je helpen met het inplannen van diensten. Ga naar Planning → klik op een dag en ik help je de juiste kandidaat te vinden op basis van beschikbaarheid en afstand.' },
-  { match: ['klant','klanten','crm'],             reply: 'Je hebt 47 actieve klanten. De meeste zijn zorginstellingen. Wil je een overzicht van openstaande diensten per klant?' },
-  { match: ['sollicitatie','vacature'],           reply: 'Er zijn 18 openstaande sollicitaties en 9 actieve vacatures. Wil je een overzicht per vacature of per kandidaat?' },
-  { match: ['rapport','rapportage'],              reply: 'Je kunt rapporten bekijken via Shiftmanager → Details. Ik kan ook specifieke data ophalen. Wat wil je weten?' },
-  { match: ['whatsapp','bericht'],                reply: 'Via de WhatsApp module kun je automatisch berichten sturen. Wil je een berichtcampagne instellen voor een specifieke groep kandidaten?' },
-  { match: ['workflow','agent','automatisering'], reply: 'Je hebt momenteel actieve workflows draaien. Wil je een nieuwe workflow aanmaken of een bestaande bekijken?' },
-  { match: ['hallo','hoi','hey','goedemorgen','goedemiddag'], reply: 'Hallo! Ik ben Koios, jouw AI agent voor KoiosMatch. Ik kan je helpen met kandidaten, planning, rapportages en meer. Wat kan ik voor je doen?' },
-  { match: ['help','wat kun','wat kan'],          reply: 'Ik kan je helpen met:\n• Kandidaten zoeken en matchen\n• Diensten inplannen\n• Rapportages ophalen\n• Klantinformatie bekijken\n• Workflows beheren\n\nStel me gerust een vraag!' },
-]
-function getFallbackReply(text) {
-  const lower = text.toLowerCase()
-  for (const f of FALLBACK) {
-    if (f.match.some(m => lower.includes(m))) return f.reply
-  }
-  return `Ik begrijp je vraag. Ik ben momenteel nog niet volledig gekoppeld aan de KoiosMatch backend, maar ik kan je helpen met: kandidaten, planning, klanten, rapportages of workflows.`
-}
+import { X, Plus, Bot, Sparkles, AtSign, Paperclip, ArrowUp } from 'lucide-react'
+import { useLocale } from '../../lib/datetime'
+import { useKoiosChat } from './koios/useKoiosChat'
+import { useKoiosSettings } from './koios/useKoiosSettings'
+import KoiosSteps from './koios/KoiosSteps'
+import KoiosUsage from './koios/KoiosUsage'
+import KoiosModelPicker from './koios/KoiosModelPicker'
 
 // ── Mention picker items ──────────────────────────────────────────────────────
 // Mention items; label = t('nav.<navKey>'). desc is illustrative demo data.
@@ -33,30 +18,56 @@ const MENTIONS = [
   { id: 'workflows',  navKey: 'workflows',  desc: 'Automatisering' },
 ]
 
+// gradient used for the assistant avatar + user bubble.
+const GRADIENT = 'linear-gradient(135deg,var(--color-primary),#8B5CF6)'
+
+// Resolve a message to its display text + whether it's a calm system notice
+// (notices carry no steps/usage). Keeps the JSX below readable.
+function resolveMessage(msg, t) {
+  if (msg.kind === 'welcome')   return { text: t('koios.welcome'),       notice: false }
+  if (msg.kind === 'error')     return { text: t('koios.errorReply'),    notice: true }
+  if (msg.kind === 'forbidden') return { text: t('koios.forbidden'),     notice: true }
+  if (msg.role === 'user')      return { text: msg.content,              notice: false }
+  if (msg.stopReason === 'not_configured')
+    return { text: msg.answer || t('koios.notConfigured'),               notice: true }
+  return { text: msg.answer, notice: false }
+}
+
 // ── Chat bubble ───────────────────────────────────────────────────────────────
-function KoiosMessage({ msg, isNew }) {
-  const isKoios = msg.role === 'assistant'
+function KoiosMessage({ msg, isNew, t, locale }) {
+  const isKoios = msg.role !== 'user'
+  const { text, notice } = resolveMessage(msg, t)
+  // Subtle tag under the bubble for a self-refusal or an unfinished (max_steps) run.
+  const stopTag = isKoios && !notice && msg.stopReason === 'refusal' ? t('koios.stopRefused')
+    : isKoios && !notice && msg.stopReason === 'max_steps' ? t('koios.stopMaxSteps') : null
+
   return (
-    <div style={{ display: 'flex', gap: 8,
-      flexDirection: isKoios ? 'row' : 'row-reverse', alignItems: 'flex-end',
-      animation: isNew ? 'fadeSlideIn 0.2s ease' : 'none' }}>
+    <div style={{ display: 'flex', gap: 8, flexDirection: isKoios ? 'row' : 'row-reverse',
+      alignItems: 'flex-end', animation: isNew ? 'fadeSlideIn 0.2s ease' : 'none' }}>
       {isKoios && (
         <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, marginBottom: 2,
-          background: 'linear-gradient(135deg,var(--color-primary),#8B5CF6)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Bot size={13} color="white" />
         </div>
       )}
-      <div style={{
-        maxWidth: '84%', padding: '9px 13px',
-        borderRadius: isKoios ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
-        fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap',
-        background: isKoios ? 'var(--surface)' : 'linear-gradient(135deg,var(--color-primary),#8B5CF6)',
-        color:      isKoios ? 'var(--text)'    : '#fff',
-        border:     isKoios ? '1px solid var(--border)' : 'none',
-        boxShadow:  isKoios ? 'none' : '0 2px 10px rgba(99,102,241,0.35)',
-      }}>
-        {msg.content}
+      <div style={{ maxWidth: '84%', display: 'flex', flexDirection: 'column',
+        alignItems: isKoios ? 'flex-start' : 'flex-end' }}>
+        <div style={{
+          padding: '9px 13px',
+          borderRadius: isKoios ? '4px 16px 16px 16px' : '16px 4px 16px 16px',
+          fontSize: 13, lineHeight: 1.6, whiteSpace: 'pre-wrap',
+          background: isKoios ? 'var(--surface)' : GRADIENT,
+          color:      isKoios ? (notice ? 'var(--text-muted)' : 'var(--text)') : '#fff',
+          border:     isKoios ? '1px solid var(--border)' : 'none',
+          boxShadow:  isKoios ? 'none' : '0 2px 10px rgba(99,102,241,0.35)',
+        }}>
+          {text}
+        </div>
+        {stopTag && <div style={{ marginTop: 4, fontSize: 10, color: 'var(--text-muted)' }}>{stopTag}</div>}
+        {isKoios && !notice && <KoiosSteps steps={msg.steps} t={t} />}
+        {isKoios && !notice && msg.stopReason !== 'not_configured' && (
+          <KoiosUsage usage={msg.usage} model={msg.model} t={t} locale={locale} />
+        )}
       </div>
     </div>
   )
@@ -67,16 +78,15 @@ function TypingIndicator() {
   return (
     <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end' }}>
       <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
-        background: 'linear-gradient(135deg,var(--color-primary),#8B5CF6)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <Bot size={13} color="white" />
       </div>
       <div style={{ padding: '10px 14px', borderRadius: '4px 16px 16px 16px',
         background: 'var(--surface)', border: '1px solid var(--border)',
         display: 'flex', gap: 4, alignItems: 'center' }}>
-        {[0,1,2].map(i => (
+        {[0, 1, 2].map(i => (
           <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: '#8B5CF6',
-            display: 'block', animation: 'bounce 1.2s infinite', animationDelay: `${i*0.18}s` }} />
+            display: 'block', animation: 'bounce 1.2s infinite', animationDelay: `${i * 0.18}s` }} />
         ))}
       </div>
     </div>
@@ -95,27 +105,27 @@ const QUICK = [
 // ── Main panel ────────────────────────────────────────────────────────────────
 export default function KoiosPanel({ open, onClose }) {
   const { t } = useTranslation('common')
+  const locale = useLocale()
+  // All chat state + the synchronous /ai/koios/chat call live in the hook.
+  const { messages, loading, model, setModel, send, reset } = useKoiosChat()
+  // Settings (selectable models + connection status), loaded on first open.
+  const { settings } = useKoiosSettings(open)
+  // Connection status (optimistic until loaded; only `false` flips to "offline").
+  const connected = settings?.status?.claude_configured !== false
   const mentions = MENTIONS.map(m => ({ ...m, label: t(`nav.${m.navKey}`) }))
   const quick    = QUICK.map(q => ({ ...q, label: t(`koios.${q.key}`) }))
-  const [messages,    setMessages]    = useState([
-    { role: 'assistant', content: 'Hallo! Ik ben Koios, jouw intelligente AI agent.\n\nIk kan je helpen met kandidaten, planning, klanten en rapportages. Wat kan ik voor je doen?' }
-  ])
-  const [newMsgIdx,   setNewMsgIdx]   = useState(null)
   const [input,       setInput]       = useState('')
-  const [loading,     setLoading]     = useState(false)
   const [focused,     setFocused]     = useState(false)
-  const [agentMode,   setAgentMode]   = useState(true)
   const [showMention, setShowMention] = useState(false)
   const [mentionQ,    setMentionQ]    = useState('')
   const textareaRef = useRef(null)
   const bottomRef   = useRef(null)
   const mentionRef  = useRef(null)
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, loading])
+  // Keep the latest message in view.
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, loading])
 
-  // Auto-resize textarea
+  // Auto-resize the textarea up to a cap.
   useEffect(() => {
     const ta = textareaRef.current
     if (!ta) return
@@ -123,61 +133,37 @@ export default function KoiosPanel({ open, onClose }) {
     ta.style.height = Math.min(ta.scrollHeight, 100) + 'px'
   }, [input])
 
-  // Close mention picker on outside click
+  // Close the mention picker on an outside click.
   useEffect(() => {
     const handler = (e) => {
-      if (mentionRef.current && !mentionRef.current.contains(e.target)) {
-        setShowMention(false)
-      }
+      if (mentionRef.current && !mentionRef.current.contains(e.target)) setShowMention(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  const sendMessage = async (text) => {
-    const trimmed = text.trim()
+  // Submit the composer: hand the text to the hook, then clear + refocus.
+  const submit = (text) => {
+    const trimmed = (text ?? '').trim()
     if (!trimmed || loading) return
+    send(trimmed)
     setInput('')
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
-    const idx = messages.length + 1
-    setNewMsgIdx(idx)
-    setMessages(prev => [...prev, { role: 'user', content: trimmed }])
-    setLoading(true)
-
-    try {
-      const res = await api.post('/koios/chat', {
-        message: trimmed,
-        history: messages.slice(-6).map(m => ({ role: m.role, content: m.content })),
-        agent_mode: agentMode,
-      })
-      setMessages(prev => [...prev, { role: 'assistant', content: res.data?.reply || res.data?.message || 'Geen antwoord ontvangen.' }])
-    } catch {
-      await new Promise(r => setTimeout(r, 500 + Math.random() * 400))
-      setMessages(prev => [...prev, { role: 'assistant', content: getFallbackReply(trimmed) }])
-    } finally {
-      setLoading(false)
-      setNewMsgIdx(null)
-      setTimeout(() => textareaRef.current?.focus(), 50)
-    }
+    setShowMention(false)
+    setTimeout(() => textareaRef.current?.focus(), 50)
   }
 
   const handleInput = (e) => {
     const val = e.target.value
     setInput(val)
     const lastAt = val.lastIndexOf('@')
-    if (lastAt !== -1 && lastAt === val.length - 1) {
-      setShowMention(true)
-      setMentionQ('')
-    } else if (lastAt !== -1 && val.slice(lastAt + 1).match(/^\w*$/)) {
-      setShowMention(true)
-      setMentionQ(val.slice(lastAt + 1).toLowerCase())
-    } else {
-      setShowMention(false)
-    }
+    if (lastAt !== -1 && lastAt === val.length - 1) { setShowMention(true); setMentionQ('') }
+    else if (lastAt !== -1 && val.slice(lastAt + 1).match(/^\w*$/)) { setShowMention(true); setMentionQ(val.slice(lastAt + 1).toLowerCase()) }
+    else setShowMention(false)
   }
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input) }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(input) }
     if (e.key === 'Escape') setShowMention(false)
   }
 
@@ -189,14 +175,10 @@ export default function KoiosPanel({ open, onClose }) {
     textareaRef.current?.focus()
   }
 
-  const newChat = () => {
-    setMessages([{ role: 'assistant', content: 'Nieuwe chat gestart. Hoe kan ik je helpen?' }])
-    setInput('')
-    setShowMention(false)
-  }
+  const newChat = () => { reset(); setInput(''); setShowMention(false) }
 
   const filteredMentions = mentions.filter(m =>
-    !mentionQ || m.label.toLowerCase().includes(mentionQ) || m.id.includes(mentionQ)
+    !mentionQ || m.label.toLowerCase().includes(mentionQ) || m.id.includes(mentionQ),
   )
 
   if (!open) return null
@@ -209,15 +191,17 @@ export default function KoiosPanel({ open, onClose }) {
       <div style={{ height: 56, borderBottom: '1px solid var(--sidebar-border)', flexShrink: 0,
         display: 'flex', alignItems: 'center', padding: '0 14px', gap: 8 }}>
         <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-          background: 'linear-gradient(135deg,var(--color-primary),#8B5CF6)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Sparkles size={13} color="white" />
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--sidebar-text)', lineHeight: 1.2 }}>Koios</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', display: 'block' }} />
-            <span style={{ fontSize: 10, color: 'var(--color-success)', fontWeight: 500 }}>{t('koios.online')}</span>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', display: 'block',
+              background: connected ? 'var(--color-success)' : 'var(--color-warning)' }} />
+            <span style={{ fontSize: 10, fontWeight: 500, color: connected ? 'var(--color-success)' : 'var(--color-warning)' }}>
+              {t(connected ? 'koios.online' : 'koios.offline')}
+            </span>
           </div>
         </div>
         <button onClick={newChat} title={t('koios.newChat')}
@@ -228,7 +212,7 @@ export default function KoiosPanel({ open, onClose }) {
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}>
           <Plus size={10} /> {t('koios.newChatShort')}
         </button>
-        <button onClick={onClose}
+        <button onClick={onClose} aria-label={t('common:close', { defaultValue: 'Sluiten' })}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sidebar-muted)',
             padding: 4, display: 'flex', borderRadius: 6, transition: 'background 0.1s' }}
           onMouseEnter={e => e.currentTarget.style.background = 'var(--sidebar-hover)'}
@@ -241,17 +225,17 @@ export default function KoiosPanel({ open, onClose }) {
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 12px',
         display: 'flex', flexDirection: 'column', gap: 12 }}>
         {messages.map((msg, i) => (
-          <KoiosMessage key={i} msg={msg} isNew={i === newMsgIdx} />
+          <KoiosMessage key={i} msg={msg} isNew={i === messages.length - 1} t={t} locale={locale} />
         ))}
         {loading && <TypingIndicator />}
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Quick suggestions (only on welcome screen) ── */}
+      {/* ── Quick suggestions (only on the welcome screen) ── */}
       {messages.length === 1 && !loading && (
         <div style={{ padding: '0 12px 10px', display: 'flex', flexDirection: 'column', gap: 5 }}>
           {quick.map(q => (
-            <button key={q.key} onClick={() => sendMessage(q.label)}
+            <button key={q.key} onClick={() => submit(q.label)}
               style={{ textAlign: 'left', padding: '8px 11px', fontSize: 12,
                 border: '1px solid var(--sidebar-border)', borderRadius: 10, background: 'none',
                 color: 'var(--sidebar-text)', cursor: 'pointer', transition: 'all 0.15s',
@@ -349,27 +333,20 @@ export default function KoiosPanel({ open, onClose }) {
               <Paperclip size={14} />
             </button>
 
-            {/* Agent mode toggle */}
-            <button
-              onClick={() => setAgentMode(v => !v)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 5, padding: '4px 9px',
-                borderRadius: 999, border: 'none', cursor: 'pointer', fontSize: 11, fontWeight: 600,
-                background: agentMode ? '#F5E6D3' : 'var(--hover-bg)',
-                color:      agentMode ? '#C2724A' : 'var(--text-muted)',
-                transition: 'all 0.15s',
-              }}>
-              <Bot size={12} color={agentMode ? '#C2724A' : 'var(--text-muted)'} />
-              Agent
-              <ChevronDown size={10} style={{ opacity: 0.6 }} />
-            </button>
+            {/* Model picker — only renders when there is more than one selectable model */}
+            <KoiosModelPicker
+              models={settings?.models?.selectable}
+              value={model ?? settings?.models?.active}
+              onChange={setModel}
+            />
 
             <div style={{ flex: 1 }} />
 
             {/* Send */}
             <button
-              onClick={() => sendMessage(input)}
+              onClick={() => submit(input)}
               disabled={!input.trim() || loading}
+              aria-label={t('koios.taskPlaceholder')}
               style={{
                 width: 30, height: 30, borderRadius: '50%', border: 'none', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -377,7 +354,6 @@ export default function KoiosPanel({ open, onClose }) {
                 color: 'white',
                 cursor: input.trim() && !loading ? 'pointer' : 'default',
                 transition: 'background 0.15s, transform 0.1s',
-                transform: 'scale(1)',
               }}
               onMouseEnter={e => { if (input.trim() && !loading) e.currentTarget.style.transform = 'scale(1.08)' }}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}>
@@ -387,7 +363,7 @@ export default function KoiosPanel({ open, onClose }) {
         </div>
 
         <div style={{ fontSize: 10, color: 'var(--sidebar-muted)', textAlign: 'center', marginTop: 7 }}>
-          Shift+Enter voor nieuwe regel · @ voor context
+          {t('koios.inputHint')}
         </div>
       </div>
 

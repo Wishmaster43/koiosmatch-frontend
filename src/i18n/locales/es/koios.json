@@ -1,0 +1,28 @@
+{
+  "title": "Koios AI",
+  "subtitle": "Modelos, estado de conexión y tarifas del asistente Koios.",
+  "loading": "Cargando…",
+  "loadError": "No se pudieron cargar los ajustes de Koios.",
+  "unavailable": "Koios no está disponible para esta organización.",
+  "status": {
+    "title": "Estado",
+    "connection": "Conexión",
+    "connected": "Conectado",
+    "notConnected": "No conectado",
+    "policy": "Política cargada",
+    "loaded": "Cargada",
+    "notLoaded": "No cargada"
+  },
+  "models": {
+    "title": "Modelos",
+    "active": "Modelo activo",
+    "selectable": "Modelos seleccionables"
+  },
+  "pricing": {
+    "title": "Tarifas",
+    "subtitle": "Precio por 1 M de tokens.",
+    "model": "Modelo",
+    "input": "Entrada",
+    "output": "Salida"
+  }
+}

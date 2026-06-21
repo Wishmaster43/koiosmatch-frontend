@@ -25,24 +25,29 @@ const unwrap = (res) => res?.data?.data ?? res?.data
 
 function LookupBlock({ slug, title, subtitle, items, setItems }) {
   const { t } = useTranslation('settings')
-  const [modal,    setModal]    = useState(null) // null | { mode, id?, value, label, color }
+  const [modal,    setModal]    = useState(null) // null | { mode, id?, value, label, color, is_applicant }
   const [busy,     setBusy]     = useState(false)
   const [deleting, setDeleting] = useState(null)
 
-  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4' })
-  const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280' })
+  // The is_applicant flag (funnel-revealing status) lives only on the statuses lookup.
+  const isStatusBlock = slug === 'statuses'
+
+  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', is_applicant: false })
+  const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280', is_applicant: it.is_applicant === true })
 
   const save = async () => {
     if (!modal.label.trim()) return
     setBusy(true)
+    // Only send is_applicant where the column exists (statuses); the backend guards too.
+    const applicantField = isStatusBlock ? { is_applicant: modal.is_applicant } : {}
     try {
       if (modal.mode === 'add') {
         const value = modal.value.trim() || slugify(modal.label)
-        const created = unwrap(await api.post(`${BASE}/${slug}`, { value, label: modal.label.trim(), color: modal.color }))
+        const created = unwrap(await api.post(`${BASE}/${slug}`, { value, label: modal.label.trim(), color: modal.color, ...applicantField }))
         setItems(p => [...p, created])
       } else {
-        await api.put(`${BASE}/${slug}/${modal.id}`, { label: modal.label.trim(), color: modal.color })
-        setItems(p => p.map(x => x.id === modal.id ? { ...x, label: modal.label.trim(), color: modal.color } : x))
+        await api.put(`${BASE}/${slug}/${modal.id}`, { label: modal.label.trim(), color: modal.color, ...applicantField })
+        setItems(p => p.map(x => x.id === modal.id ? { ...x, label: modal.label.trim(), color: modal.color, ...applicantField } : x))
       }
       setModal(null)
     } catch { /* noop */ } finally { setBusy(false) }
@@ -95,6 +100,13 @@ function LookupBlock({ slug, title, subtitle, items, setItems }) {
             <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />
             <ColorBadge label={item.label} color={item.color ?? '#6B7280'} />
             <code style={{ fontSize: 11, color: '#9CA3AF' }}>{item.value}</code>
+            {/* Funnel badge: marks the status that reveals the application funnel. */}
+            {isStatusBlock && item.is_applicant && (
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
+                             background: 'var(--color-primary-bg, #EEF2FF)', padding: '2px 7px', borderRadius: 999 }}>
+                {t('lookups.applicantBadge')}
+              </span>
+            )}
             <div style={{ flex: 1 }} />
             <button onClick={() => openEdit(item)} title={t('lookups.edit')}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -147,6 +159,18 @@ function LookupBlock({ slug, title, subtitle, items, setItems }) {
               <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{t('lookups.colorField')}</div>
               <ColorSwatch color={modal.color} onChange={c => setModal(m => ({ ...m, color: c }))} />
             </div>
+
+            {/* Funnel-reveal toggle — statuses only; flags the applicant status. */}
+            {isStatusBlock && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={modal.is_applicant}
+                    onChange={e => setModal(m => ({ ...m, is_applicant: e.target.checked }))} />
+                  <span style={{ fontSize: 13, color: '#374151' }}>{t('lookups.isApplicant')}</span>
+                </label>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{t('lookups.isApplicantHint')}</div>
+              </div>
+            )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
               <button onClick={() => setModal(null)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', cursor: 'pointer' }}>{t('common.cancel')}</button>

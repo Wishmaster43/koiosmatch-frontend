@@ -12,6 +12,7 @@
  *   submenu    : { key, label, icon?, items: Node[] }
  *   optionList : { key, label, icon?, searchable?, searchPlaceholder?, emptyText?,
  *                  options: [{ value, label, color?, icon? }], onPick }
+ *   input      : { key, label, icon?, input: true, placeholder?, submitLabel?, onSubmit }
  */
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { ChevronDown, ChevronRight, ArrowLeft, Search } from 'lucide-react'
@@ -55,17 +56,18 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
   // otherwise the first menu item, so the menu is keyboard-operable immediately.
   useEffect(() => {
     if (!open) return
-    ref.current?.querySelector('input, [data-menuitem]')?.focus()
+    ref.current?.querySelector('input, textarea, [data-menuitem]')?.focus()
   }, [open, path])
 
   // Current level: root items, or the node we last drilled into.
   const current = path[path.length - 1] ?? null
   const levelItems = current ? (current.items ?? null) : items
   const optionNode = current && current.options ? current : null
+  const inputNode = current && current.input ? current : null
 
-  // Drill into a submenu/option node, or fire a leaf action and close.
+  // Drill into a submenu/option/input node, or fire a leaf action and close.
   const choose = (node) => {
-    if (node.items || node.options) { setPath(p => [...p, node]); setQuery('') }
+    if (node.items || node.options || node.input) { setPath(p => [...p, node]); setQuery('') }
     else { node.onSelect?.(); close() }
   }
 
@@ -76,9 +78,9 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
   const onKeyDown = (e) => {
     if (e.key === 'Escape') { e.stopPropagation(); path.length ? back() : close(); return }
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      e.preventDefault()
       const nodes = [...(ref.current?.querySelectorAll('[data-menuitem]') ?? [])]
       if (!nodes.length) return
+      e.preventDefault()
       const i = nodes.indexOf(document.activeElement)
       const n = nodes.length
       nodes[e.key === 'ArrowDown' ? (i + 1) % n : (i - 1 + n) % n]?.focus()
@@ -128,6 +130,21 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
             </div>
           )}
 
+          {/* Free-text input level: textarea + submit (e.g. add a note) */}
+          {inputNode && (
+            <div style={{ padding: 10 }}>
+              <textarea value={query} onChange={e => setQuery(e.target.value)} rows={4} placeholder={inputNode.placeholder ?? ''}
+                style={{ width: '100%', resize: 'vertical', border: '1px solid var(--border)', borderRadius: 7, padding: '8px 10px',
+                  fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box' }} />
+              <button type="button" disabled={!query.trim()}
+                onClick={() => { const v = query.trim(); if (v) { inputNode.onSubmit?.(v); close() } }}
+                style={{ marginTop: 8, width: '100%', padding: '8px 10px', fontSize: 12, fontWeight: 500, border: 'none', borderRadius: 7,
+                  background: 'var(--color-primary)', color: '#fff', cursor: query.trim() ? 'pointer' : 'not-allowed', opacity: query.trim() ? 1 : 0.5 }}>
+                {inputNode.submitLabel ?? t('save')}
+              </button>
+            </div>
+          )}
+
           <div style={{ maxHeight: 260, overflowY: 'auto' }}>
             {/* Submenu / root: action + drill rows */}
             {levelItems && levelItems.map(node => (
@@ -135,7 +152,7 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
                 style={rowStyle(node.danger)} onMouseEnter={hoverOn} onMouseLeave={hoverOff}>
                 {node.icon && <node.icon size={14} style={{ flexShrink: 0 }} />}
                 <span style={{ flex: 1 }}>{node.label}</span>
-                {(node.items || node.options) && <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
+                {(node.items || node.options || node.input) && <ChevronRight size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />}
               </button>
             ))}
 

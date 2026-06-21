@@ -17,10 +17,13 @@
     "loadingShort": "Cargando…",
     "copied": "¡Copiado!",
     "back": "Atrás",
-    "next": "Siguiente"
+    "next": "Siguiente",
+    "edit": "Editar"
   },
   "groups": {
+    "kpis": "KPI",
     "general": "General",
+    "security": "Seguridad",
     "company": "Empresa",
     "personalisation": "Personalización",
     "views": "Vistas",
@@ -29,7 +32,10 @@
     "integrations": "Integraciones y API",
     "billing": "Facturación",
     "administration": "Administración",
-    "planning": "Planificación"
+    "planning": "Planificación",
+    "modules": "Módulos",
+    "superadmin": "Súper Admin",
+    "audit": "Registro de auditoría"
   },
   "nav": {
     "kpis": "KPI",
@@ -63,7 +69,7 @@
     "billing_auto": "Recarga automática",
     "billing_usage": "Uso",
     "billing_invoices": "Facturas",
-    "modules": "Módulos",
+    "modules": "Paquete",
     "apps": "Apps (conectores)",
     "roles": "Roles y permisos",
     "users": "Usuarios",
@@ -75,7 +81,11 @@
     "shift_types": "Tipos de turno",
     "availability": "Disponibilidad",
     "automatch": "Reglas de coincidencia",
-    "planning_board": "Tablero de planificación"
+    "planning_board": "Tablero de planificación",
+    "messaging": "Mensajería",
+    "koios": "Koios AI",
+    "mod_shiftmanager": "Shiftmanager",
+    "mod_helloflex": "HelloFlex"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -601,7 +611,10 @@
     "types": {
       "candidates": "Candidatos",
       "cvs": "CV",
-      "vacancies": "Vacantes"
+      "vacancies": "Vacantes",
+      "documents": "Documentos",
+      "customers": "Clientes",
+      "shifts": "Turnos"
     },
     "title": "Importar {{type}}",
     "subtitle": "Importa tus datos de {{type}} existentes con un archivo CSV.",
@@ -648,7 +661,11 @@
       "ats_crm_ai": "ATS & CRM + AI & Workflow",
       "ats_crm_planning": "ATS & CRM + Planning",
       "ats_crm_ai_planning": "ATS & CRM + AI & Workflow + Planning"
-    }
+    },
+    "emptyTitle": "Aún no hay ajustes",
+    "emptyDesc": "Los ajustes de este módulo llegarán pronto.",
+    "smKpiTitle": "KPI de Shiftmanager",
+    "smKpiDesc": "Objetivos KPI separados para el panel de Shiftmanager. Configuración próximamente."
   },
   "whatsapp": {
     "loading": "Cargando datos de WhatsApp…",
@@ -813,7 +830,9 @@
       "before": "Antes",
       "after": "Después",
       "role": "Rol"
-    }
+    },
+    "export": "Exportar",
+    "loadMore": "Cargar más ({{count}})"
   },
   "lookups": {
     "add": "Añadir",
@@ -825,6 +844,9 @@
     "title": "Lookups de candidatos",
     "subtitle": "Gestiona los tipos de contrato, las fases del funnel y los estados (etiquetas, colores y orden).",
     "confirmDelete": "¿Eliminar «{{name}}»? Si está en uso, se archivará.",
+    "isApplicant": "Muestra el funnel de candidatura",
+    "isApplicantHint": "Los candidatos con este estado muestran el funnel de candidatura. Normalmente un solo estado (p. ej. \"Solicitante\").",
+    "applicantBadge": "Funnel",
     "valueField": "Slug (valor)",
     "valueHint": "Clave estable; déjalo vacío para generar una a partir de la etiqueta.",
     "valueImmutable": "El slug no se puede cambiar tras la creación.",
@@ -857,6 +879,74 @@
     "board": {
       "title": "Tablero de planificación",
       "desc": "Columnas y diseño predeterminado del tablero de planificación."
+    }
+  },
+  "messaging": {
+    "title": "Mensajería",
+    "subtitle": "Límites, costes y retención de tu tráfico de mensajes.",
+    "loadError": "No se pudieron cargar los datos.",
+    "tab": {
+      "limits": "Límites",
+      "costs": "Costes",
+      "retention": "Retención"
+    },
+    "limits": {
+      "subtitle": "Configura el límite de mensajes. El techo lo fijamos nosotros y no se puede superar.",
+      "label": "Límite de mensajes",
+      "unit": "por día",
+      "ceiling": "Techo: {{value}} {{unit}}",
+      "overCeiling": "Máximo {{value}} {{unit}} permitidos."
+    },
+    "costs": {
+      "subtitle": "Uso y costes de este periodo.",
+      "numbers": "Números de teléfono",
+      "waba": "Mensajes de WhatsApp Business",
+      "base": "Tarifa base",
+      "total": "Total",
+      "byNumber": "Por número",
+      "messages": "{{count}} mensajes"
+    },
+    "retention": {
+      "subtitle": "Cuánto tiempo se conservan los mensajes. El periodo efectivo es el menor de los dos.",
+      "tenant": "Organización",
+      "tenantHint": "Se aplica a toda la organización",
+      "own": "Personal",
+      "ownHint": "Solo tus mensajes",
+      "days": "días",
+      "effective": "Retención efectiva:",
+      "effectiveDays": "{{count}} días",
+      "unlimited": "Ilimitado"
+    }
+  },
+  "smKpis": {
+    "title": "Ajustes de KPI de Shiftmanager",
+    "subtitle": "Objetivos para el panel de Shiftmanager",
+    "fields": {
+      "sm_occupancy_target": {
+        "label": "Objetivo de ocupación",
+        "description": "Tasa de ocupación objetivo",
+        "unit": "%"
+      },
+      "sm_fill_rate_target": {
+        "label": "Objetivo de tasa de cobertura",
+        "description": "Porcentaje objetivo de turnos cubiertos",
+        "unit": "%"
+      },
+      "sm_open_shifts_warning": {
+        "label": "Aviso de turnos abiertos",
+        "description": "Número de turnos abiertos que activa un aviso",
+        "unit": "turnos"
+      },
+      "sm_no_show_threshold": {
+        "label": "Umbral de ausencias",
+        "description": "Porcentaje de ausencias que activa un aviso",
+        "unit": "%"
+      },
+      "sm_filled_shifts_target": {
+        "label": "Objetivo de turnos cubiertos / semana",
+        "description": "Objetivo semanal de turnos cubiertos",
+        "unit": "turnos"
+      }
     }
   }
 }

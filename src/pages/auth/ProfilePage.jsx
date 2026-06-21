@@ -13,6 +13,7 @@ import { PAGE_SIZE_OPTIONS }  from '../../components/ui/PaginationBar'
 import Avatar                 from '../../components/ui/Avatar'
 import ProfileWhatsAppWeb     from './ProfileWhatsAppWeb'
 import ProfileEmailConnect    from './ProfileEmailConnect'
+import SecuritySettings        from '../settings/sections/SecuritySettings'
 
 const LANGUAGES = [
   { value: 'nl', label: 'Nederlands',  flag: '🇳🇱' },
@@ -104,6 +105,7 @@ function ProfileTabs({ tabs, active, onSelect }) {
 export default function ProfilePage() {
   const { t } = useTranslation('auth')
   const { t: tUsers } = useTranslation('users')
+  const { t: tSettings } = useTranslation('settings')
   const { user, refreshUser } = useAuth()
   const { theme, setTheme, language, setLanguage } = useTheme()
 
@@ -187,10 +189,11 @@ export default function ProfilePage() {
     { id: 'email',    label: t('profile.tabs.email'),   icon: Mail },
     { id: 'display',  label: t('profile.tabs.display'), icon: Sun },
     { id: 'whatsapp', label: t('profile.whatsappWeb.title'), icon: MessageCircle },
+    { id: 'security', label: tSettings('nav.security'), icon: Shield },
   ]
 
   return (
-    <div style={{ maxWidth: 620, margin: '0 auto', padding: '32px 24px' }}>
+    <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 32px' }}>
 
       {/* Avatar (uploadable) + name header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
@@ -404,6 +407,13 @@ export default function ProfilePage() {
       {tab === 'whatsapp' && (
         <Section title={t('profile.whatsappWeb.title')}>
           <ProfileWhatsAppWeb />
+        </Section>
+      )}
+
+      {/* ── Security (personal 2FA/MFA — moved here from org settings) ── */}
+      {tab === 'security' && (
+        <Section title={tSettings('nav.security')}>
+          <SecuritySettings />
         </Section>
       )}
     </div>

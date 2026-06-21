@@ -72,4 +72,17 @@ describe('ActionMenu', () => {
     expect(screen.queryByPlaceholderText('Search pool')).toBeNull()
     expect(screen.getByText('Delete')).toBeInTheDocument()
   })
+
+  it('drills into a free-text input node and submits the text', async () => {
+    const user = userEvent.setup()
+    const onSubmit = vi.fn()
+    const items = [{ key: 'note', label: 'Add note', input: true, placeholder: 'Write a note', submitLabel: 'Save', onSubmit }]
+    render(<ActionMenu label="Bulk" items={items} />)
+    await user.click(screen.getByText('Bulk'))
+    await user.click(screen.getByText('Add note'))
+    await user.type(screen.getByPlaceholderText('Write a note'), 'Called, no answer')
+    await user.click(screen.getByText('Save'))
+    expect(onSubmit).toHaveBeenCalledWith('Called, no answer')
+    expect(screen.queryByPlaceholderText('Write a note')).toBeNull()
+  })
 })

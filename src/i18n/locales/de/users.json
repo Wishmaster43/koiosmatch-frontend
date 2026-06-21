@@ -10,6 +10,8 @@
   "createFailed": "Erstellen fehlgeschlagen.",
   "pwPlaceholder": "Mindestens 8 Zeichen",
   "changeRole": "Rolle ändern",
+  "avatarColor": "Symbolfarbe",
+  "avatarColorAuto": "Automatisch",
   "title": "Benutzer",
   "summary": "{{shown}} von {{total}} Benutzern",
   "loading": "Benutzer werden geladen…",
@@ -30,5 +32,6 @@
     "tenant_admin": "Admin",
     "planner": "Planer",
     "user": "Benutzer"
-  }
+  },
+  "noRoles": "Keine Rollen verfügbar"
 }

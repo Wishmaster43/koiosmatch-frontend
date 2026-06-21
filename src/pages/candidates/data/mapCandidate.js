@@ -48,6 +48,8 @@ export function mapCandidate(c) {
     stageVacancyId:  c.funnel_vacancy_id ?? c.stage_vacancy_id ?? c.vacancy_id ?? '',
     // Operational status (single slug: active | inactive | …).
     status:          c.status ?? '',
+    // Availability — separate axis from status (single slug, null until set).
+    availability:    c.availability ?? null,
     owner:           ownerName,
     ownerId:         c.owner?.id ?? c.owner_id ?? null,
     ownerColor:      c.owner?.avatar_color ?? c.recruiter?.avatar_color ?? c.owner_avatar_color ?? null,
@@ -128,6 +130,16 @@ export function mapCandidate(c) {
     preferences:     c.preferences ?? {},
     zzp:             c.zzp ?? {},
     planningSettings: c.planning_settings ?? {},
+    // Channel consent (AVG opt-in): per-channel flag + the moment it was given.
+    // Flags default off; `_at` is set server-side when a flag flips on.
+    consent: {
+      whatsapp_consent:      c.whatsapp_consent      ?? false,
+      email_consent:         c.email_consent         ?? false,
+      newsletter_consent:    c.newsletter_consent    ?? false,
+      whatsapp_consent_at:   c.whatsapp_consent_at   ?? null,
+      email_consent_at:      c.email_consent_at      ?? null,
+      newsletter_consent_at: c.newsletter_consent_at ?? null,
+    },
 
     // ── Stats (detail only) — read from data.stats ──
     matchesCount:      stats.matches_count ?? stats.placements_count ?? (c.matches ?? c.placements ?? []).length,

@@ -1,12 +1,14 @@
 /** ImporterenSettings — CSV import wizard (entity type → upload → map → done). */
 import { useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, CloudUpload, X, Users, FileText, Briefcase } from 'lucide-react'
+import { Check, CloudUpload, X, Users, FileText, Briefcase, Building2, CalendarDays } from 'lucide-react'
 
 const IMPORT_TYPES = [
   { id: 'candidates', icon: Users },
-  { id: 'cvs',        icon: FileText },
+  { id: 'documents',  icon: FileText },
   { id: 'vacancies',  icon: Briefcase },
+  { id: 'customers',  icon: Building2 },
+  { id: 'shifts',     icon: CalendarDays },
 ]
 
 export default function ImporterenSettings() {

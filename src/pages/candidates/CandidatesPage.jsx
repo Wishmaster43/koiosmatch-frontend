@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
+import { useAuth } from '../../context/AuthContext'
 import api, { unwrapList } from '../../lib/api'
 import { useUsers } from '../../lib/queries'
 import { USE_MOCKS, isAbortError } from '../../lib/mocks'
@@ -24,6 +25,8 @@ const isStale = (c) => {
 }
 // Geen opvolging: nieuwe prospect zonder enig contact.
 const isNoFollowup = (c) => c.stage === 'prospect' && !c.lastContactAt
+// Never contacted: no recorded contact moment at all (page-local fallback predicate).
+const isNeverContacted = (c) => !c.lastContactAt
 
 // Zet precies één waarde in een multi-select, of wis bij nogmaals dezelfde (toggle).
 // Module-scope zodat het een stabiele referentie is (geen memo-dependency nodig).
@@ -79,6 +82,7 @@ export default function CandidatesPage() {
   const { registerFilters, unregisterFilters } = useRightPanel()
   const { t } = useTranslation('candidates')
   const { candidateTypes, funnelTypes, statuses } = useLookups()
+  const { hasPermission } = useAuth()
 
   const handlePageSizeChange = (newSize) => { setPageSize(newSize); setPage(1) }
 
@@ -154,12 +158,12 @@ export default function CandidatesPage() {
   // back to page-based counts when stats is unavailable.
   const statusOptions = useMemo(() =>
     stats?.by_status
-      ? stats.by_status.map(o => ({ value: o.value, label: metaOf(statuses, o.value)?.label ?? o.value, count: o.count }))
+      ? stats.by_status.map(o => { const v = o.value ?? o.status; return { value: v, label: metaOf(statuses, v)?.label ?? v, count: o.count } })
       : statuses.map(s => ({ value: s.value, label: s.label, count: candidates.filter(c => c.status === s.value).length })).filter(o => o.count > 0)
   , [stats, candidates, statuses])
   const funnelOptions = useMemo(() =>
     stats?.by_funnel
-      ? stats.by_funnel.map(o => ({ value: o.value, label: metaOf(funnelTypes, o.value)?.label ?? o.value, count: o.count }))
+      ? stats.by_funnel.map(o => { const v = o.value ?? o.funnel_type; return { value: v, label: metaOf(funnelTypes, v)?.label ?? v, count: o.count } })
       : funnelTypes.map(f => ({ value: f.value, label: f.label, count: candidates.filter(c => c.stage === f.value).length })).filter(o => o.count > 0)
   , [stats, candidates, funnelTypes])
   const typeOptions = useMemo(() =>
@@ -169,8 +173,8 @@ export default function CandidatesPage() {
   // loaded page keyed on ownerId.
   const ownerOptions = useMemo(() => {
     if (stats?.by_owner) {
-      // Drop the "no owner" bucket (null id) and guard against a null name.
-      return stats.by_owner.filter(o => o.id).map(o => ({ value: o.id, label: o.name || '—', count: o.count }))
+      // Accept both shapes (id | owner_id); drop the "no owner" bucket + guard a null name.
+      return stats.by_owner.map(o => ({ value: o.id ?? o.owner_id, label: o.name || '—', count: o.count })).filter(o => o.value)
     }
     const m = {}
     candidates.forEach(c => { if (c.ownerId) (m[c.ownerId] ??= { value: c.ownerId, label: c.owner || '—', count: 0 }).count++ })
@@ -203,8 +207,11 @@ export default function CandidatesPage() {
     ownerOptions.map(o => ({ name: o.label, value: o.count, key: o.value }))
   , [ownerOptions])
 
-  // Aandacht-tellingen (zelfde predicaten als het filter hieronder).
-  const staleCount      = useMemo(() => candidates.filter(isStale).length, [candidates])
+  // Attention counts: prefer the server-wide totals from GET /candidates/stats
+  // (they honour the active filters); fall back to counting the loaded page.
+  const staleCount          = stats?.attention?.stale_6m        ?? candidates.filter(isStale).length
+  const neverContactedCount = stats?.attention?.never_contacted ?? candidates.filter(isNeverContacted).length
+  // "No follow-up planned" has no server column yet — page-local only (see worklist.md).
   const noFollowupCount = useMemo(() => candidates.filter(isNoFollowup).length, [candidates])
   const toggleAttention = (key) => setAttentionFilter(prev => prev === key ? null : key)
   const pickStatus = pickOne(setSelectedStatus)
@@ -245,7 +252,9 @@ export default function CandidatesPage() {
   // is already the server-filtered + paginated slice.
   const filtered = useMemo(() => {
     if (!attentionFilter) return candidates
-    const pred = attentionFilter === 'stale6m' ? isStale : isNoFollowup
+    const pred = attentionFilter === 'stale6m' ? isStale
+               : attentionFilter === 'neverContacted' ? isNeverContacted
+               : isNoFollowup
     return candidates.filter(pred)
   }, [candidates, attentionFilter])
 
@@ -287,6 +296,7 @@ export default function CandidatesPage() {
     const body = {}
     if ('candidateTypes' in patch) body.candidate_types = patch.candidateTypes
     if ('status'         in patch) body.status          = patch.status
+    if ('availability'   in patch) body.availability    = patch.availability
     if ('stage'          in patch) body.funnel_type     = patch.stage
     if ('firstname'      in patch) body.first_name      = patch.firstname
     if ('lastname'       in patch) body.last_name       = patch.lastname
@@ -309,6 +319,14 @@ export default function CandidatesPage() {
     if ('languages'         in patch) body.languages         = patch.languages
     if ('preferences'       in patch) body.preferences       = patch.preferences
     if ('zzp'               in patch) body.zzp               = patch.zzp
+    // Consent toggles flatten to the backend's flat fields (the `_at` timestamps
+    // are stamped server-side, so we only send the booleans).
+    if ('consent' in patch) {
+      const cs = patch.consent ?? {}
+      if ('whatsapp_consent'   in cs) body.whatsapp_consent   = cs.whatsapp_consent
+      if ('email_consent'      in cs) body.email_consent      = cs.email_consent
+      if ('newsletter_consent' in cs) body.newsletter_consent = cs.newsletter_consent
+    }
     if (Object.keys(body).length) api.patch(`/candidates/${id}`, body).catch(() => {})
   }
 
@@ -343,7 +361,13 @@ export default function CandidatesPage() {
     const changedIds = candidates.filter(c => ids.includes(c.id) && !(c.pools ?? []).some(p => (p.id ?? p.name) === poolId)).map(c => c.id)
     setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: [...(c.pools ?? []), chip] } : c))
     api.post(`/pools/${poolId}/candidates`, { candidate_ids: ids })
-      .then(() => notify('success', t('bulk.addedToPool', { pool: pool.name, count: ids.length })))
+      .then((res) => {
+        // Reconcile with the server: keep the chip only on candidates it actually added.
+        const added = Array.isArray(res.data?.added) ? new Set(res.data.added) : null
+        if (added) setCandidates(prev => prev.map(c => (changedIds.includes(c.id) && !added.has(c.id))
+          ? { ...c, pools: (c.pools ?? []).filter(p => (p.id ?? p.name) !== poolId) } : c))
+        notify('success', t('bulk.addedToPool', { pool: pool.name, count: added ? added.size : changedIds.length }))
+      })
       .catch(() => {
         setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: (c.pools ?? []).filter(p => (p.id ?? p.name) !== poolId) } : c))
         notify('error', t('bulk.poolError'))
@@ -359,11 +383,118 @@ export default function CandidatesPage() {
     const changedIds = candidates.filter(c => ids.includes(c.id) && (c.pools ?? []).some(p => (p.id ?? p.name) === poolId)).map(c => c.id)
     setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: (c.pools ?? []).filter(p => (p.id ?? p.name) !== poolId) } : c))
     api.delete(`/pools/${poolId}/candidates`, { data: { candidate_ids: ids } })
-      .then(() => notify('success', t('bulk.removedFromPool', { pool: pool.name, count: ids.length })))
+      .then((res) => {
+        // Reconcile: re-add the chip to any candidate the server reports it did NOT remove.
+        const removed = Array.isArray(res.data?.removed) ? new Set(res.data.removed) : null
+        if (removed) setCandidates(prev => prev.map(c => (changedIds.includes(c.id) && !removed.has(c.id))
+          ? { ...c, pools: [...(c.pools ?? []), chip] } : c))
+        notify('success', t('bulk.removedFromPool', { pool: pool.name, count: removed ? removed.size : changedIds.length }))
+      })
       .catch(() => {
         setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: [...(c.pools ?? []), chip] } : c))
         notify('error', t('bulk.poolError'))
       })
+    setSelectedIds(new Set())
+  }
+
+  // Snapshot a subset of fields, for optimistic revert/reconcile.
+  const subsetOf = (obj, keys) => keys.reduce((a, k) => { a[k] = obj[k]; return a }, {})
+  // Initials from a name, e.g. "Bente de Jong" → "BJ".
+  const initialsOf = (name = '') => name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
+
+  // Generic optimistic bulk field mutation: apply `patch` to the selected rows,
+  // persist, reconcile against the server's `updated` list, revert on failure.
+  const bulkMutate = ({ url, body, patch, keys, onSuccess }) => {
+    const ids = [...selectedIds]
+    if (!ids.length) return
+    const snap = new Map(candidates.filter(c => ids.includes(c.id)).map(c => [c.id, subsetOf(c, keys)]))
+    setCandidates(prev => prev.map(c => ids.includes(c.id) ? { ...c, ...patch } : c))
+    api.post(url, { candidate_ids: ids, ...body })
+      .then((res) => {
+        const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
+        if (updated) setCandidates(prev => prev.map(c => (ids.includes(c.id) && !updated.has(c.id)) ? { ...c, ...snap.get(c.id) } : c))
+        onSuccess(updated ? updated.size : ids.length)
+      })
+      .catch(() => {
+        setCandidates(prev => prev.map(c => ids.includes(c.id) ? { ...c, ...snap.get(c.id) } : c))
+        notify('error', t('bulk.mutateError'))
+      })
+    setSelectedIds(new Set())
+  }
+  // Change the owner/recruiter for the selection.
+  const bulkSetOwner = (user) => bulkMutate({
+    url: '/candidates/bulk/owner', body: { owner_id: user.id },
+    patch: { owner: user.name, ownerId: user.id, ownerInitials: initialsOf(user.name), ownerColor: undefined },
+    keys: ['owner', 'ownerId', 'ownerInitials', 'ownerColor'],
+    onSuccess: (n) => notify('success', t('bulk.ownerChanged', { name: user.name, count: n })),
+  })
+  // Move the selection to a funnel stage.
+  const bulkSetStage = (stage) => bulkMutate({
+    url: '/candidates/bulk/funnel-stage', body: { funnel_type: stage },
+    patch: { stage }, keys: ['stage'],
+    onSuccess: (n) => notify('success', t('bulk.stageChanged', { value: metaOf(funnelTypes, stage)?.label ?? stage, count: n })),
+  })
+  // Replace the candidate type for the selection (single chosen type).
+  const bulkSetType = (type) => bulkMutate({
+    url: '/candidates/bulk/candidate-type', body: { candidate_type: type },
+    patch: { candidateTypes: [type] }, keys: ['candidateTypes'],
+    onSuccess: (n) => notify('success', t('bulk.typeChanged', { value: metaOf(candidateTypes, type)?.label ?? type, count: n })),
+  })
+
+  // Union of tags across the selected candidates — the "remove tag" option list.
+  const selectedTags = useMemo(() => {
+    const set = new Set()
+    candidates.forEach(c => { if (selectedIds.has(c.id)) (c.tags ?? []).forEach(tg => set.add(tg)) })
+    return [...set]
+  }, [candidates, selectedIds])
+
+  // Remove a tag from every selected candidate that has it (optimistic + reconcile).
+  const bulkRemoveTag = (tag) => {
+    const ids = [...selectedIds]
+    if (!ids.length || !tag) return
+    const changedIds = candidates.filter(c => ids.includes(c.id) && (c.tags ?? []).includes(tag)).map(c => c.id)
+    setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, tags: (c.tags ?? []).filter(x => x !== tag) } : c))
+    api.post('/candidates/bulk/tags/remove', { candidate_ids: ids, tag })
+      .then((res) => {
+        const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
+        if (updated) setCandidates(prev => prev.map(c => (changedIds.includes(c.id) && !updated.has(c.id)) ? { ...c, tags: [...(c.tags ?? []), tag] } : c))
+        notify('success', t('bulk.tagRemoved', { tag, count: updated ? updated.size : changedIds.length }))
+      })
+      .catch(() => {
+        setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, tags: [...(c.tags ?? []), tag] } : c))
+        notify('error', t('bulk.mutateError'))
+      })
+    setSelectedIds(new Set())
+  }
+
+  // Add the same note to every selected candidate (no table column → toast only).
+  const bulkAddNote = (text) => {
+    const ids = [...selectedIds]
+    if (!ids.length || !text.trim()) return
+    api.post('/candidates/bulk/notes', { candidate_ids: ids, text: text.trim() })
+      .then((res) => {
+        const n = Array.isArray(res.data?.updated) ? res.data.updated.length : ids.length
+        notify('success', t('bulk.noteAdded', { count: n }))
+      })
+      .catch(() => notify('error', t('bulk.mutateError')))
+    setSelectedIds(new Set())
+  }
+
+  // Archive (soft-delete) the selection. Confirmation first; rows drop only once
+  // the server confirms. Authorization is UI-gated here and re-checked server-side.
+  const bulkArchive = () => {
+    const ids = [...selectedIds]
+    if (!ids.length) return
+    if (!window.confirm(t('bulk.archiveConfirm', { count: ids.length }))) return
+    api.post('/candidates/bulk/archive', { candidate_ids: ids })
+      .then((res) => {
+        const archived = Array.isArray(res.data?.archived) ? res.data.archived : ids
+        const set = new Set(archived)
+        setCandidates(prev => prev.filter(c => !set.has(c.id)))
+        setTotal(tt => Math.max(0, tt - archived.length))
+        notify('success', t('bulk.archived', { count: archived.length }))
+      })
+      .catch(() => notify('error', t('bulk.archiveError')))
     setSelectedIds(new Set())
   }
 
@@ -391,6 +522,8 @@ export default function CandidatesPage() {
   const insightKpis = [
     { key: 'stale',      label: t('analytics.stale6m'),    value: staleCount,      sub: t('analytics.stale6mSub'),    color: 'var(--color-warning)',
       onClick: () => toggleAttention('stale6m'),    active: attentionFilter === 'stale6m' },
+    { key: 'neverContacted', label: t('analytics.neverContacted'), value: neverContactedCount, sub: t('analytics.neverContactedSub'), color: '#0EA5E9',
+      onClick: () => toggleAttention('neverContacted'), active: attentionFilter === 'neverContacted' },
     { key: 'noFollowup', label: t('analytics.noFollowup'), value: noFollowupCount, sub: t('analytics.noFollowupSub'), color: 'var(--color-danger)',
       onClick: () => toggleAttention('noFollowup'), active: attentionFilter === 'noFollowup' },
     { key: 'intake',     label: t('kpi.intake'),           value: intakeCount,     sub: t('kpi.intakeSub'),           color: '#8B5CF6',
@@ -433,7 +566,11 @@ export default function CandidatesPage() {
           <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
             {selectedIds.size > 0 ? (
               <CandidatesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
-                onAddToPool={bulkAddToPool} onRemoveFromPool={bulkRemoveFromPool} />
+                onAddToPool={bulkAddToPool} onRemoveFromPool={bulkRemoveFromPool}
+                onSetOwner={bulkSetOwner} onSetStage={bulkSetStage} onSetType={bulkSetType}
+                onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
+                canArchive={hasPermission('candidates.delete')}
+                users={users} funnelTypes={funnelTypes} candidateTypes={candidateTypes} selectedTags={selectedTags} />
             ) : (
               <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
                 background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>

@@ -8,10 +8,17 @@ import { useState } from 'react'
 import { useApiKeys } from './useApiKeys'
 import ApiKeyList from './ApiKeyList'
 import ApiKeyDetail from './ApiKeyDetail'
+import ApiKeyCreate from './ApiKeyCreate'
 
 export default function ApiKeysSettings() {
   const { keys, loading, error, reload, add, patch, drop } = useApiKeys()
   const [selectedId, setSelectedId] = useState(null)
+  const [creating, setCreating] = useState(false)
+
+  // Create view replaces the list (inline, no modal) — same pattern as detail.
+  if (creating) {
+    return <ApiKeyCreate onBack={() => setCreating(false)} onCreated={add} />
+  }
 
   // Detail replaces the list while a key is open.
   if (selectedId) {
@@ -33,7 +40,7 @@ export default function ApiKeysSettings() {
       error={error}
       onReload={reload}
       onOpen={setSelectedId}
-      onCreated={add}
+      onNew={() => setCreating(true)}
     />
   )
 }

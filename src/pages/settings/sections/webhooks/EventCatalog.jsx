@@ -1,12 +1,14 @@
 /**
- * EventCatalog — the event filter for a subscription. Grouped checkboxes with a
+ * EventCatalog — the event filter for a subscription. Grouped pill toggles with a
  * search box and a per-group "select all", plus a global select-all / clear. It's
  * controlled: `value` is the array of selected event keys, edits flow via onChange.
+ * Uses the shared PermissionToggle so the control matches the rest of settings.
  */
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { EVENT_GROUPS, ALL_EVENTS, actionOf } from './webhookEvents'
+import { PermissionToggle } from '../../components/SettingsControls'
 
 export default function EventCatalog({ value = [], onChange }) {
   const { t } = useTranslation('settings')
@@ -68,26 +70,23 @@ export default function EventCatalog({ value = [], onChange }) {
         {groups.map(({ group, events }) => {
           const fullGroup = EVENT_GROUPS.find((g) => g.group === group)?.events ?? []
           const groupAllOn = fullGroup.every((e) => selected.has(e))
-          const groupSome  = fullGroup.some((e) => selected.has(e))
           return (
             <div key={group} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-              {/* Group header with select-all */}
-              <label style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--hover-bg)', cursor: 'pointer' }}>
-                <input type="checkbox" checked={groupAllOn}
-                  ref={(el) => { if (el) el.indeterminate = groupSome && !groupAllOn }}
-                  onChange={() => toggleGroup(fullGroup)} style={{ cursor: 'pointer' }} />
-                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)' }}>{groupLabel(group)}</span>
+              {/* Group header with a select-all toggle */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--hover-bg)' }}>
+                <PermissionToggle checked={groupAllOn} onChange={() => toggleGroup(fullGroup)} />
+                <span onClick={() => toggleGroup(fullGroup)} style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', cursor: 'pointer' }}>{groupLabel(group)}</span>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>
                   {fullGroup.filter((e) => selected.has(e)).length}/{fullGroup.length}
                 </span>
-              </label>
+              </div>
               {/* Events in the group */}
               {events.map((ev) => (
-                <label key={ev} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderTop: '1px solid var(--border)', cursor: 'pointer' }}>
-                  <input type="checkbox" checked={selected.has(ev)} onChange={() => toggle(ev)} style={{ cursor: 'pointer' }} />
-                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{actionLabel(actionOf(ev))}</span>
+                <div key={ev} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px', borderTop: '1px solid var(--border)' }}>
+                  <PermissionToggle checked={selected.has(ev)} onChange={() => toggle(ev)} />
+                  <span onClick={() => toggle(ev)} style={{ fontSize: 13, color: 'var(--text)', cursor: 'pointer' }}>{actionLabel(actionOf(ev))}</span>
                   <code style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{ev}</code>
-                </label>
+                </div>
               ))}
             </div>
           )

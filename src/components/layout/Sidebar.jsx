@@ -12,12 +12,27 @@ import api, { unwrapList } from '../../lib/api'
 import { canAccessPage } from '../../lib/access'
 import {
   LayoutDashboard, Users, Building2,
-  MessageCircle, Settings, ChevronDown, Brain, BarChart3, TrendingUp, Bot,
+  MessageCircle, Settings, ChevronDown, Brain, BarChart3, TrendingUp, BrainCircuit,
   FileText, Briefcase, CalendarDays, Search, Loader2,
 } from 'lucide-react'
 
 // Resolve a nav item's label from i18n by id (dots → underscores to stay flat).
 const navLabel = (t, id) => t(`nav.${id.replace(/\./g, '_')}`)
+
+// Koios entitlement (cosmetic only — the backend still enforces 403). Fail-open:
+// hide the toggle only when the auth payload explicitly excludes the `koios_ai`
+// module or the `koios.use` permission, mirroring the "absence = open" convention
+// in lib/access.js so Koios isn't hidden before the payload carries these.
+function canUseKoios(auth) {
+  if (auth?.isSuperAdmin?.()) return true
+  const mods = (auth?.activeTenant ?? auth?.user?.tenant)?.modules
+  const moduleOk = !Array.isArray(mods) ||
+    mods.some(m => (typeof m === 'string' ? m : m?.key ?? m?.name) === 'koios_ai')
+  const perms = auth?.user?.permissions
+  const permOk = !Array.isArray(perms) ||
+    perms.some(p => (typeof p === 'string' ? p : p?.name) === 'koios.use')
+  return moduleOk && permOk
+}
 
 const tenantInitials = (name) =>
   name ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '??'
@@ -341,6 +356,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
   const { t } = useTranslation('common')
   const [openItems, setOpenItems] = useState([])
   const auth = useAuth()
+  const koiosEntitled = canUseKoios(auth)
 
   const toggleOpen = (id) =>
     setOpenItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])
@@ -414,7 +430,8 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
 
       {/* Bottom — Koios toggle + Settings */}
       <div style={{ padding: '6px 6px 10px', borderTop: '1px solid var(--sidebar-border)' }}>
-        {/* Koios AI knop */}
+        {/* Koios AI knop — alleen als de tenant de module + permissie heeft */}
+        {koiosEntitled && (
         <button
           onClick={onToggleKoios}
           title="Koios AI"
@@ -431,7 +448,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
         >
           <div className="flex items-center justify-center rounded-full flex-shrink-0"
             style={{ width: 18, height: 18, background: koiosOpen ? 'rgba(255,255,255,0.25)' : 'var(--color-primary)' }}>
-            <Bot size={11} color="white" />
+            <BrainCircuit size={11} color="white" />
           </div>
           {expanded && (
             <span style={{ fontSize: 13, fontWeight: 600, flex: 1, textAlign: 'left',
@@ -446,6 +463,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
             </span>
           )}
         </button>
+        )}
 
         {showSettings && (
           <NavItem item={{ id: 'settings', label: t('nav.settings'), icon: Settings }}

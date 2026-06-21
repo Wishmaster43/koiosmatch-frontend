@@ -17,10 +17,13 @@
     "loadingShort": "Loading…",
     "copied": "Copied!",
     "back": "Back",
-    "next": "Next"
+    "next": "Next",
+    "edit": "Edit"
   },
   "groups": {
+    "kpis": "KPIs",
     "general": "General",
+    "security": "Security",
     "company": "Company",
     "personalisation": "Personalisation",
     "views": "Views",
@@ -29,7 +32,10 @@
     "integrations": "Integrations & API",
     "billing": "Billing",
     "administration": "Administration",
-    "planning": "Planning"
+    "planning": "Planning",
+    "modules": "Modules",
+    "superadmin": "Super Admin",
+    "audit": "Audit log"
   },
   "nav": {
     "kpis": "KPIs",
@@ -64,7 +70,7 @@
     "billing_auto": "Auto top-up",
     "billing_usage": "Usage",
     "billing_invoices": "Invoices",
-    "modules": "Modules",
+    "modules": "Package",
     "apps": "Apps (connectors)",
     "roles": "Roles & permissions",
     "users": "Users",
@@ -75,11 +81,16 @@
     "email_planning": "Email — planning",
     "languages": "Languages",
     "genders": "Gender",
+    "candidate_availability": "Availability",
     "industries": "Industries",
     "shift_types": "Shift types",
     "availability": "Availability",
     "automatch": "Auto-match rules",
-    "planning_board": "Planning board"
+    "planning_board": "Planning board",
+    "messaging": "Messaging",
+    "koios": "Koios AI",
+    "mod_shiftmanager": "Shiftmanager",
+    "mod_helloflex": "HelloFlex"
   },
   "kpis": {
     "title": "KPI settings",
@@ -248,6 +259,9 @@
     "valueImmutable": "The slug cannot be changed after creation.",
     "colorField": "Colour",
     "confirmDelete": "Delete \"{{name}}\"? If it is in use it will be archived.",
+    "isApplicant": "Reveals the application funnel",
+    "isApplicantHint": "Candidates with this status show the application funnel. Usually one status (e.g. \"Applicant\").",
+    "applicantBadge": "Funnel",
     "candidate_types": {
       "title": "Contract types",
       "subtitle": "Multiple per candidate (e.g. On-call, Freelance, Payroll)."
@@ -643,7 +657,10 @@
     "types": {
       "candidates": "Candidates",
       "cvs": "CVs",
-      "vacancies": "Vacancies"
+      "vacancies": "Vacancies",
+      "documents": "Documents",
+      "customers": "Customers",
+      "shifts": "Shifts"
     },
     "title": "Import {{type}}",
     "subtitle": "Import your existing {{type}} data with a CSV file.",
@@ -690,7 +707,11 @@
       "ats_crm_ai": "ATS & CRM + AI & Workflow",
       "ats_crm_planning": "ATS & CRM + Planning",
       "ats_crm_ai_planning": "ATS & CRM + AI & Workflow + Planning"
-    }
+    },
+    "emptyTitle": "No settings yet",
+    "emptyDesc": "Settings for this module are coming.",
+    "smKpiTitle": "Shiftmanager KPIs",
+    "smKpiDesc": "Separate KPI targets for the Shiftmanager dashboard (distinct from the main Dashboard KPIs). Configuration coming."
   },
   "whatsapp": {
     "loading": "Loading WhatsApp data…",
@@ -855,7 +876,9 @@
       "before": "Before",
       "after": "After",
       "role": "Role"
-    }
+    },
+    "export": "Export",
+    "loadMore": "Load more ({{count}})"
   },
   "languageSettings": {
     "languagesTitle": "Languages",
@@ -864,6 +887,11 @@
     "levelsTitle": "Levels",
     "levelsSubtitle": "Proficiency levels (e.g. Poor → Very good, Native).",
     "addLevel": "Add level"
+  },
+  "availabilitySettings": {
+    "title": "Availability",
+    "subtitle": "Manage the availability options — a separate axis next to status.",
+    "add": "Add option"
   },
   "industrySettings": {
     "title": "Industries",
@@ -891,6 +919,74 @@
     "board": {
       "title": "Planning board",
       "desc": "Columns and default layout of the planning board."
+    }
+  },
+  "messaging": {
+    "title": "Messaging",
+    "subtitle": "Limits, costs and retention for your messaging traffic.",
+    "loadError": "Could not load the data.",
+    "tab": {
+      "limits": "Limits",
+      "costs": "Costs",
+      "retention": "Retention"
+    },
+    "limits": {
+      "subtitle": "Set the messaging limit. The ceiling is set by us and cannot be exceeded.",
+      "label": "Messaging limit",
+      "unit": "per day",
+      "ceiling": "Ceiling: {{value}} {{unit}}",
+      "overCeiling": "At most {{value}} {{unit}} allowed."
+    },
+    "costs": {
+      "subtitle": "Usage and costs for this period.",
+      "numbers": "Phone numbers",
+      "waba": "WhatsApp Business messages",
+      "base": "Base rate",
+      "total": "Total",
+      "byNumber": "Per number",
+      "messages": "{{count}} messages"
+    },
+    "retention": {
+      "subtitle": "How long messages are kept. The effective period is the lowest of the two.",
+      "tenant": "Organisation",
+      "tenantHint": "Applies to the whole organisation",
+      "own": "Personal",
+      "ownHint": "Only your messages",
+      "days": "days",
+      "effective": "Effective retention:",
+      "effectiveDays": "{{count}} days",
+      "unlimited": "Unlimited"
+    }
+  },
+  "smKpis": {
+    "title": "Shiftmanager KPI settings",
+    "subtitle": "Targets for the Shiftmanager dashboard",
+    "fields": {
+      "sm_occupancy_target": {
+        "label": "Occupancy target",
+        "description": "Target occupancy rate",
+        "unit": "%"
+      },
+      "sm_fill_rate_target": {
+        "label": "Fill-rate target",
+        "description": "Target percentage of filled shifts",
+        "unit": "%"
+      },
+      "sm_open_shifts_warning": {
+        "label": "Open shifts warning",
+        "description": "Number of open shifts that triggers a warning",
+        "unit": "shifts"
+      },
+      "sm_no_show_threshold": {
+        "label": "No-show threshold",
+        "description": "No-show percentage that triggers a warning",
+        "unit": "%"
+      },
+      "sm_filled_shifts_target": {
+        "label": "Filled shifts target / week",
+        "description": "Weekly target for filled shifts",
+        "unit": "shifts"
+      }
     }
   }
 }

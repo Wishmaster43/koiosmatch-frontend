@@ -3,19 +3,16 @@
  * and a themed DataTable mirroring the SM "API gebruikers" columns. Clicking a
  * row opens the detail. Handles the loading / error / empty / success states.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, RefreshCw } from 'lucide-react'
 import DataTable from '../../../../components/ui/DataTable'
 import StatusBadge from '../../../../components/ui/StatusBadge'
 import { useDateFormat } from '../../../../lib/datetime'
 import { shortGuid } from './constants'
-import ApiKeyCreateModal from './ApiKeyCreateModal'
 
-export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onCreated }) {
+export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onNew }) {
   const { t } = useTranslation('settings')
   const { formatDate } = useDateFormat()
-  const [creating, setCreating] = useState(false)
 
   // Status pill colours for active / disabled keys (shared StatusBadge override).
   const statusMap = {
@@ -52,7 +49,7 @@ export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onC
             {t('apiKeys.count', { count: keys.length })}
           </p>
         </div>
-        <button onClick={() => setCreating(true)}
+        <button onClick={onNew}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
           <Plus size={14} /> {t('apiKeys.new')}
         </button>
@@ -76,10 +73,6 @@ export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onC
           loadingText={t('common.loadingShort')}
           emptyText={t('apiKeys.empty')}
         />
-      )}
-
-      {creating && (
-        <ApiKeyCreateModal onClose={() => setCreating(false)} onCreated={onCreated} />
       )}
     </div>
   )

@@ -1,0 +1,43 @@
+/**
+ * MessagingSettings — the Messaging section. A local sub-tab strip splits the
+ * three areas: Limits (editable cap ≤ ceiling), Costs (read-only breakdown) and
+ * Retention (tenant + own, effective = lowest). Each tab owns its own data load.
+ */
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import MessagingLimits from './MessagingLimits'
+import MessagingCosts from './MessagingCosts'
+import MessageRetention from './MessageRetention'
+
+export default function MessagingSettings() {
+  const { t } = useTranslation('settings')
+  const [tab, setTab] = useState('limits')
+
+  const tabs = [
+    ['limits', t('messaging.tab.limits')],
+    ['costs', t('messaging.tab.costs')],
+    ['retention', t('messaging.tab.retention')],
+  ]
+
+  return (
+    <div>
+      <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('messaging.title')}</h2>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 18 }}>{t('messaging.subtitle')}</p>
+
+      {/* Sub-tabs */}
+      <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 24 }}>
+        {tabs.map(([id, label]) => {
+          const active = id === tab
+          return (
+            <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
+              style={{ padding: '9px 14px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 13, fontWeight: active ? 600 : 500, color: active ? 'var(--color-primary)' : 'var(--text-muted)', borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`, marginBottom: -1 }}>
+              {label}
+            </button>
+          )
+        })}
+      </div>
+
+      {tab === 'limits' ? <MessagingLimits /> : tab === 'costs' ? <MessagingCosts /> : <MessageRetention />}
+    </div>
+  )
+}

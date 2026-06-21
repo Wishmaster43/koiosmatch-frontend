@@ -80,6 +80,32 @@ export default function EditableFieldTable({
     return <span style={{ fontSize: 12, color: 'var(--text)' }}>{f.prefix ? `${f.prefix} ` : ''}{v || '-'}</span>
   }
 
+  // One row — full-width for textarea, label-left otherwise.
+  const renderRow = (f, last) => f.type === 'textarea' ? (
+    <div key={f.key} style={{ padding: '9px 12px', background: 'var(--surface)', borderBottom: last ? 'none' : '1px solid var(--border)' }}>
+      <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{f.label}</span>
+      {editing ? renderControl(f) : renderValue(f)}
+    </div>
+  ) : (
+    <div key={f.key} style={{ ...rowStyle, borderBottom: last ? 'none' : '1px solid var(--border)' }}>
+      <span style={{ fontSize: 12, color: 'var(--text-muted)', width: labelWidth, flexShrink: 0 }}>{f.label}</span>
+      {editing ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}</div> : renderValue(f)}
+    </div>
+  )
+
+  // Optional grouping — fields carrying a `group` render as separate titled cards.
+  const hasGroups = fields.some(f => f.group)
+  const groups = hasGroups
+    ? fields.reduce((acc, f) => {
+        const prev = acc[acc.length - 1]
+        if (prev && prev.group === (f.group ?? '')) prev.fields.push(f)
+        else acc.push({ group: f.group ?? '', fields: [f] })
+        return acc
+      }, [])
+    : null
+  const cardStyle = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }
+  const groupTitleStyle = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }
+
   return (
     <div>
       {editButton === 'header' && (
@@ -89,32 +115,25 @@ export default function EditableFieldTable({
         </div>
       )}
 
-      <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', marginBottom: 16, position: 'relative' }}>
-        {editButton === 'inside' && (
-          <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
-            {editing ? editControls() : <EditPencil onClick={startEdit} />}
-          </div>
-        )}
-        {fields.map((f, i) => {
-          const last = i === fields.length - 1
-          if (f.type === 'textarea') {
-            return (
-              <div key={f.key} style={{ padding: '9px 12px', background: 'var(--surface)', borderBottom: last ? 'none' : '1px solid var(--border)' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{f.label}</span>
-                {editing ? renderControl(f) : renderValue(f)}
-              </div>
-            )
-          }
-          return (
-            <div key={f.key} style={{ ...rowStyle, borderBottom: last ? 'none' : '1px solid var(--border)' }}>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)', width: labelWidth, flexShrink: 0 }}>{f.label}</span>
-              {editing
-                ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}</div>
-                : renderValue(f)}
+      {hasGroups ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 16 }}>
+          {groups.map(g => (
+            <div key={g.group}>
+              {g.group && <div style={groupTitleStyle}>{g.group}</div>}
+              <div style={cardStyle}>{g.fields.map((f, i) => renderRow(f, i === g.fields.length - 1))}</div>
             </div>
-          )
-        })}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <div style={{ ...cardStyle, marginBottom: 16, position: 'relative' }}>
+          {editButton === 'inside' && (
+            <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
+              {editing ? editControls() : <EditPencil onClick={startEdit} />}
+            </div>
+          )}
+          {fields.map((f, i) => renderRow(f, i === fields.length - 1))}
+        </div>
+      )}
     </div>
   )
 }

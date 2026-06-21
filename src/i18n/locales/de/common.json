@@ -86,6 +86,19 @@
     "newChatShort": "Neu",
     "addContext": "Kontext hinzufügen",
     "taskPlaceholder": "Aufgabe eingeben",
-    "attachFile": "Anhang hinzufügen"
+    "attachFile": "Anhang hinzufügen",
+    "welcome": "Hallo! Ich bin Koios, dein KI-Assistent für KoiosMatch.\n\nIch helfe dir bei Kandidaten, Planung, Kunden und Berichten. Was kann ich für dich tun?",
+    "newChatStarted": "Neuer Chat gestartet. Wie kann ich helfen?",
+    "inputHint": "Umschalt+Enter für eine neue Zeile · @ für Kontext",
+    "stepsToggle": "Details ({{count}})",
+    "refusedOrg": "In deiner Organisation nicht erlaubt.",
+    "refusedRights": "Du hast nicht genügend Rechte für diese Aktion.",
+    "stopRefused": "Abgelehnt",
+    "stopMaxSteps": "Konnte innerhalb der Schritte nicht abgeschlossen werden",
+    "notConfigured": "Koios ist noch nicht verbunden.",
+    "errorReply": "Koios konnte nicht erreicht werden. Bitte erneut versuchen.",
+    "forbidden": "Du hast keinen Zugriff auf Koios.",
+    "usageLine": "{{model}} · {{tokens}} Tokens · {{cost}}",
+    "offline": "Nicht verbunden"
   }
 }

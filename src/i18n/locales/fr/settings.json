@@ -17,10 +17,13 @@
     "loadingShort": "Chargement…",
     "copied": "Copié !",
     "back": "Retour",
-    "next": "Suivant"
+    "next": "Suivant",
+    "edit": "Modifier"
   },
   "groups": {
+    "kpis": "KPI",
     "general": "Général",
+    "security": "Sécurité",
     "company": "Entreprise",
     "personalisation": "Personnalisation",
     "views": "Vues",
@@ -29,7 +32,10 @@
     "integrations": "Intégrations et API",
     "billing": "Facturation",
     "administration": "Administration",
-    "planning": "Planification"
+    "planning": "Planification",
+    "modules": "Modules",
+    "superadmin": "Super Admin",
+    "audit": "Journal d'audit"
   },
   "nav": {
     "kpis": "KPI",
@@ -63,7 +69,7 @@
     "billing_auto": "Recharge automatique",
     "billing_usage": "Utilisation",
     "billing_invoices": "Factures",
-    "modules": "Modules",
+    "modules": "Forfait",
     "apps": "Apps (connecteurs)",
     "roles": "Rôles et droits",
     "users": "Utilisateurs",
@@ -75,7 +81,11 @@
     "shift_types": "Types de service",
     "availability": "Disponibilité",
     "automatch": "Règles de correspondance",
-    "planning_board": "Tableau de planification"
+    "planning_board": "Tableau de planification",
+    "messaging": "Messagerie",
+    "koios": "Koios AI",
+    "mod_shiftmanager": "Shiftmanager",
+    "mod_helloflex": "HelloFlex"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -601,7 +611,10 @@
     "types": {
       "candidates": "Candidats",
       "cvs": "CV",
-      "vacancies": "Offres"
+      "vacancies": "Offres",
+      "documents": "Documents",
+      "customers": "Clients",
+      "shifts": "Services"
     },
     "title": "Importer {{type}}",
     "subtitle": "Importez vos données {{type}} existantes avec un fichier CSV.",
@@ -648,7 +661,11 @@
       "ats_crm_ai": "ATS & CRM + AI & Workflow",
       "ats_crm_planning": "ATS & CRM + Planning",
       "ats_crm_ai_planning": "ATS & CRM + AI & Workflow + Planning"
-    }
+    },
+    "emptyTitle": "Pas encore de réglages",
+    "emptyDesc": "Les réglages de ce module arrivent.",
+    "smKpiTitle": "KPI Shiftmanager",
+    "smKpiDesc": "Objectifs KPI distincts pour le tableau de bord Shiftmanager. Configuration à venir."
   },
   "whatsapp": {
     "loading": "Chargement des données WhatsApp…",
@@ -813,7 +830,9 @@
       "before": "Avant",
       "after": "Après",
       "role": "Rôle"
-    }
+    },
+    "export": "Exporter",
+    "loadMore": "Charger plus ({{count}})"
   },
   "lookups": {
     "add": "Ajouter",
@@ -825,6 +844,9 @@
     "title": "Lookups candidats",
     "subtitle": "Gérez les types de contrat, les étapes du funnel et les statuts (libellés, couleurs et ordre).",
     "confirmDelete": "Supprimer « {{name}} » ? S'il est utilisé, il sera archivé.",
+    "isApplicant": "Affiche le funnel de candidature",
+    "isApplicantHint": "Les candidats avec ce statut affichent le funnel de candidature. Généralement un seul statut (p. ex. « Candidat »).",
+    "applicantBadge": "Funnel",
     "valueField": "Slug (valeur)",
     "valueHint": "Clé stable ; laissez vide pour en générer une à partir du libellé.",
     "valueImmutable": "Le slug ne peut plus être modifié après la création.",
@@ -857,6 +879,74 @@
     "board": {
       "title": "Tableau de planification",
       "desc": "Colonnes et disposition par défaut du tableau de planification."
+    }
+  },
+  "messaging": {
+    "title": "Messagerie",
+    "subtitle": "Limites, coûts et conservation de votre trafic de messages.",
+    "loadError": "Impossible de charger les données.",
+    "tab": {
+      "limits": "Limites",
+      "costs": "Coûts",
+      "retention": "Conservation"
+    },
+    "limits": {
+      "subtitle": "Définissez la limite de messages. Le plafond est fixé par nos soins et ne peut être dépassé.",
+      "label": "Limite de messages",
+      "unit": "par jour",
+      "ceiling": "Plafond : {{value}} {{unit}}",
+      "overCeiling": "Au maximum {{value}} {{unit}} autorisés."
+    },
+    "costs": {
+      "subtitle": "Utilisation et coûts de cette période.",
+      "numbers": "Numéros de téléphone",
+      "waba": "Messages WhatsApp Business",
+      "base": "Tarif de base",
+      "total": "Total",
+      "byNumber": "Par numéro",
+      "messages": "{{count}} messages"
+    },
+    "retention": {
+      "subtitle": "Durée de conservation des messages. La durée effective est la plus basse des deux.",
+      "tenant": "Organisation",
+      "tenantHint": "S'applique à toute l'organisation",
+      "own": "Personnel",
+      "ownHint": "Uniquement vos messages",
+      "days": "jours",
+      "effective": "Conservation effective :",
+      "effectiveDays": "{{count}} jours",
+      "unlimited": "Illimité"
+    }
+  },
+  "smKpis": {
+    "title": "Réglages KPI Shiftmanager",
+    "subtitle": "Objectifs pour le tableau de bord Shiftmanager",
+    "fields": {
+      "sm_occupancy_target": {
+        "label": "Objectif de taux d’occupation",
+        "description": "Taux d’occupation cible",
+        "unit": "%"
+      },
+      "sm_fill_rate_target": {
+        "label": "Objectif de taux de remplissage",
+        "description": "Pourcentage cible de services pourvus",
+        "unit": "%"
+      },
+      "sm_open_shifts_warning": {
+        "label": "Alerte services ouverts",
+        "description": "Nombre de services ouverts déclenchant une alerte",
+        "unit": "services"
+      },
+      "sm_no_show_threshold": {
+        "label": "Seuil d’absence",
+        "description": "Pourcentage d’absences déclenchant une alerte",
+        "unit": "%"
+      },
+      "sm_filled_shifts_target": {
+        "label": "Objectif services pourvus / semaine",
+        "description": "Objectif hebdomadaire de services pourvus",
+        "unit": "services"
+      }
     }
   }
 }

@@ -28,7 +28,31 @@
     "noPools": "Aucun pool configuré pour le moment.",
     "addedToPool": "Ajouté à {{pool}} ({{count}})",
     "removedFromPool": "Retiré de {{pool}} ({{count}})",
-    "poolError": "Échec de l’action. Veuillez réessayer."
+    "poolError": "Échec de l’action. Veuillez réessayer.",
+    "pool": "Vivier de talents",
+    "changeOwner": "Changer de responsable",
+    "searchOwner": "Rechercher un utilisateur…",
+    "noUsers": "Aucun utilisateur trouvé.",
+    "changeStage": "Changer l’étape du tunnel",
+    "searchStage": "Rechercher une étape…",
+    "changeType": "Changer le type de candidat",
+    "searchType": "Rechercher un type…",
+    "ownerChanged": "Responsable changé en {{name}} ({{count}})",
+    "stageChanged": "Étape du tunnel → {{value}} ({{count}})",
+    "typeChanged": "Type de candidat → {{value}} ({{count}})",
+    "mutateError": "Échec de l’action. Veuillez réessayer.",
+    "removeTag": "Supprimer l’étiquette",
+    "searchTag": "Rechercher une étiquette…",
+    "noTags": "Aucune étiquette sur la sélection.",
+    "tagRemoved": "Étiquette '{{tag}}' supprimée ({{count}})",
+    "addNote": "Ajouter une note",
+    "notePlaceholder": "Écrire une note…",
+    "noteSubmit": "Ajouter",
+    "noteAdded": "Note ajoutée ({{count}})",
+    "archive": "Archiver",
+    "archiveConfirm": "Voulez-vous vraiment archiver {{count}} candidats ?",
+    "archived": "Archivé ({{count}})",
+    "archiveError": "Échec de l’archivage. Veuillez réessayer."
   },
   "kpi": {
     "total": "Total",
@@ -50,7 +74,9 @@
     "stale6mSub": "longtemps sans contact",
     "noFollowup": "Sans suivi",
     "noFollowupSub": "nouveau, sans contact",
-    "conversations": "Conversations actives"
+    "conversations": "Conversations actives",
+    "neverContacted": "Jamais contacté",
+    "neverContactedSub": "aucun contact pour l'instant"
   },
   "filters": {
     "search": "Rechercher",
@@ -110,6 +136,8 @@
     "vacancyFallback": "Offre {{id}}"
   },
   "drawer": {
+    "availability": "Disponibilité",
+    "availabilityNone": "Aucune",
     "label": "Candidat",
     "tabs": {
       "profile": "Profil",
@@ -161,7 +189,10 @@
     "province": "Province",
     "linkedin": "LinkedIn",
     "summary": "Résumé",
-    "selectDate": "Sélectionner une date"
+    "selectDate": "Sélectionner une date",
+    "groupPersonal": "Personnel",
+    "groupContact": "Contact",
+    "groupAddress": "Adresse"
   },
   "addFields": {
     "functionTitle": "Intitulé du poste",
@@ -211,7 +242,12 @@
       "appointment": "Rendez-vous",
       "followup": "Suivi",
       "warning": "Avertissement"
-    }
+    },
+    "consentTitle": "Consentements",
+    "consentWhatsapp": "Messages WhatsApp",
+    "consentEmail": "E-mail",
+    "consentNewsletter": "Newsletter",
+    "consentGivenAt": "Consentement donné le {{date}}"
   },
   "statistics": {
     "placements": "Placements",
@@ -336,7 +372,11 @@
     "sector": "Secteur préféré",
     "minRate": "Taux horaire min. (€)",
     "contract": "Préférence de contrat",
-    "remarks": "Remarques"
+    "remarks": "Remarques",
+    "groupAvailability": "Disponibilité",
+    "groupTravel": "Déplacements",
+    "groupWork": "Préférences de travail",
+    "groupOther": "Autre"
   },
   "zzp": {
     "title": "Indépendant",
@@ -357,7 +397,11 @@
     "selfBilling": "Auto-facturation",
     "paymentDiscount": "Remise sur heures et majorations",
     "mediationCosts": "Frais d'intermédiation journaliers",
-    "paymentTerm": "Délai de paiement"
+    "paymentTerm": "Délai de paiement",
+    "groupCompany": "Entreprise",
+    "groupAddress": "Adresse",
+    "groupInvoicing": "Facturation",
+    "groupPayment": "Paiement"
   },
   "certified": {
     "issued": "Délivré",

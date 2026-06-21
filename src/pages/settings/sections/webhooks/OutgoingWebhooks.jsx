@@ -8,10 +8,17 @@ import { useState } from 'react'
 import { useWebhookSubscriptions } from './useWebhookSubscriptions'
 import WebhookList from './WebhookList'
 import WebhookDetail from './WebhookDetail'
+import WebhookCreate from './WebhookCreate'
 
 export default function OutgoingWebhooks() {
   const { subs, loading, error, reload, add, patch, drop } = useWebhookSubscriptions()
   const [selectedId, setSelectedId] = useState(null)
+  const [creating, setCreating] = useState(false)
+
+  // Create view replaces the list (inline, no modal) — same pattern as detail.
+  if (creating) {
+    return <WebhookCreate onBack={() => setCreating(false)} onCreated={add} />
+  }
 
   // Detail replaces the list while a subscription is open.
   if (selectedId) {
@@ -33,7 +40,7 @@ export default function OutgoingWebhooks() {
       error={error}
       onReload={reload}
       onOpen={setSelectedId}
-      onCreated={add}
+      onNew={() => setCreating(true)}
     />
   )
 }

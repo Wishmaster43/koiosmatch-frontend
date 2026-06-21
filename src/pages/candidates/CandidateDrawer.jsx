@@ -7,8 +7,10 @@ import { useTranslation } from 'react-i18next'
 import { useLocale, useDateFormat } from '../../lib/datetime'
 import EntityDrawer from '../../components/drawer/EntityDrawer'
 import EntityHeader from '../../components/drawer/EntityHeader'
+import CreatableSelect from '../../components/ui/CreatableSelect'
 import { useLookups } from '../../context/LookupsContext'
 import { useGenders } from '../../lib/useGenders'
+import { useFunctions } from '../../lib/useFunctions'
 import { useAuth } from '../../context/AuthContext'
 import ProfilePanel from './drawer/ProfilePanel'
 import ApplicationStageChips from './drawer/ApplicationStageChips'
@@ -36,8 +38,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { t } = useTranslation('candidates')
   const locale = useLocale()
   const { formatDate } = useDateFormat()
-  const { candidateTypes, statuses } = useLookups()
+  const { candidateTypes, statuses, availability: availabilityOptions, funnelMeta, isApplicantStatus, hasApplicantStatus } = useLookups()
   const { colorOf: genderColor } = useGenders()
+  const { functions, allowFreeEntry } = useFunctions()
   const { hasModule } = useAuth()
   // Planning-tab alleen tonen als de tenant de Planning-module heeft (zelfde gate als sidebar).
   const tabs = TABS.filter(tab => tab.id !== 'planning' || hasModule('plan'))
@@ -45,6 +48,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [cvGenerating,  setCvGenerating]  = useState(false)
   const [recruiter,     setRecruiter]     = useState(null)
   const [status,        setStatus]        = useState(null)
+  const [availability,  setAvailability]  = useState(null)
   const [types,         setTypes]         = useState(null)
   const [tags,          setTags]          = useState(null)
   // Header (name + function) edit — independent from the Profile-tab fields.
@@ -59,7 +63,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [prevId, setPrevId] = useState(c?.id)
   if (c?.id !== prevId) {
     setPrevId(c?.id)
-    setRecruiter(null); setStatus(null); setTypes(null)
+    setRecruiter(null); setStatus(null); setAvailability(null); setTypes(null)
     setTags(null); setHeaderEditing(false); setProfileEdits(null); setPhotoUrl(null); setHeaderForm(null)
   }
 
@@ -67,13 +71,25 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
 
   const currentStatus  = status ?? c.status
   const currentTypes   = types ?? c.candidateTypes ?? []
+  // Funnel display — per-application chips when available, else a single read-only
+  // chip from the legacy stage (until the backend sends `candidate.applications`).
+  const hasApplications = !!c.applications?.length
+  const stageChips = hasApplications
+    ? c.applications
+    : (c.stage ? [{ id: 'stage', stageLabel: funnelMeta(c.stage).label, stageColor: funnelMeta(c.stage).color }] : [])
   const toggleType = (v) => {
     const next = currentTypes.includes(v) ? currentTypes.filter(x => x !== v) : [...currentTypes, v]
     setTypes(next)
     onUpdate?.(c.id, { candidateTypes: next })
   }
   const changeStatus = (v) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
+  // Availability — separate axis from status; empty value clears it (→ null).
+  const currentAvailability = availability ?? c.availability
+  const changeAvailability = (v) => { setAvailability(v); onUpdate?.(c.id, { availability: v || null }) }
   const currentTags    = tags ?? c.tags ?? []
+  // Funnel is an applicant concern: show it only for an applicant-flagged status.
+  // Until a tenant flags one (additive rollout), keep showing it as before.
+  const showFunnel = !hasApplicantStatus || isApplicantStatus(currentStatus)
 
   // Enter header edit: capture the fields so they're controlled + saveable.
   const startHeaderEdit = () => {
@@ -104,7 +120,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       case 'planning':      return <PlanningPanel c={c} />
       case 'preferences':    return <PreferencesTab c={c} onSave={p => onUpdate?.(c.id, { preferences: p })} />
       case 'administration': return <ZzpTab c={c} onSave={p => onUpdate?.(c.id, { zzp: p })} />
-      case 'communication':  return <CommunicationTab c={c} />
+      case 'communication':  return <CommunicationTab c={c} onSave={p => onUpdate?.(c.id, { consent: p })} />
       case 'statistics':  return <StatisticsTab c={c} />
       default:              return null
     }
@@ -132,8 +148,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       </div>
       <input placeholder={t('modal.fields.middleName')} value={hf('middleName')} onChange={e => setHF('middleName', e.target.value)}
         style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text-muted)' }} />
-      <input placeholder={t('columns.function')} value={hf('title')} onChange={e => setHF('title', e.target.value)}
-        style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />
+      <CreatableSelect value={hf('title')} options={functions} onChange={v => setHF('title', v)}
+        allowCreate={allowFreeEntry} placeholder={t('columns.function')} menuWidth={260} />
     </div>
   ) : (
     <>
@@ -200,6 +216,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           meta={[
             { key: 'status', label: t('drawer.status'), value: currentStatus, options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 160 },
             { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions, onChange: onOwnerChange, menuWidth: 200 },
+            { key: 'availability', label: t('drawer.availability'), value: currentAvailability ?? '', placeholder: t('drawer.availabilityNone'),
+              options: [{ value: '', label: t('drawer.availabilityNone') }, ...availabilityOptions.map(a => ({ value: a.value, label: a.label }))],
+              onChange: changeAvailability, menuWidth: 170 },
           ]}
           tags={{ items: currentTags, onAdd: tag => setTags([...currentTags, tag]), onRemove: tag => setTags(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
           tagsLabel={t('drawer.tags')}
@@ -223,8 +242,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
               })}
             </div>
           </div>
-          {/* Application stages — read-only chips, only for applicants (see model). */}
-          <ApplicationStageChips applications={c.applications} label={t('drawer.applications')} />
+          {/* Funnel — read-only chips, only for an applicant-status candidate. */}
+          {showFunnel && (
+            <ApplicationStageChips applications={stageChips} label={t(hasApplications ? 'drawer.applications' : 'drawer.stage')} />
+          )}
           {(c.lastContactDate || c.lastContactType) ? (
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
               {t('drawer.lastContact')}:&nbsp;

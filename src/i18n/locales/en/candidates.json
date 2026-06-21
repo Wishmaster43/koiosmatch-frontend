@@ -37,7 +37,31 @@
     "noPools": "No pools configured yet.",
     "addedToPool": "Added to {{pool}} ({{count}})",
     "removedFromPool": "Removed from {{pool}} ({{count}})",
-    "poolError": "Action failed. Please try again."
+    "poolError": "Action failed. Please try again.",
+    "pool": "Talent pool",
+    "changeOwner": "Change owner",
+    "searchOwner": "Search a user…",
+    "noUsers": "No users found.",
+    "changeStage": "Change funnel stage",
+    "searchStage": "Search a stage…",
+    "changeType": "Change candidate type",
+    "searchType": "Search a type…",
+    "ownerChanged": "Owner changed to {{name}} ({{count}})",
+    "stageChanged": "Funnel stage → {{value}} ({{count}})",
+    "typeChanged": "Candidate type → {{value}} ({{count}})",
+    "mutateError": "Action failed. Please try again.",
+    "removeTag": "Remove tag",
+    "searchTag": "Search a tag…",
+    "noTags": "No tags on the selection.",
+    "tagRemoved": "Tag '{{tag}}' removed ({{count}})",
+    "addNote": "Add note",
+    "notePlaceholder": "Write a note…",
+    "noteSubmit": "Add",
+    "noteAdded": "Note added ({{count}})",
+    "archive": "Archive",
+    "archiveConfirm": "Are you sure you want to archive {{count}} candidates?",
+    "archived": "Archived ({{count}})",
+    "archiveError": "Archiving failed. Please try again."
   },
   "kpi": {
     "total": "Total",
@@ -59,7 +83,9 @@
     "stale6mSub": "no contact for a while",
     "noFollowup": "No follow-up",
     "noFollowupSub": "new, no contact",
-    "conversations": "Active conversations"
+    "conversations": "Active conversations",
+    "neverContacted": "Never contacted",
+    "neverContactedSub": "no contact moment yet"
   },
   "filters": {
     "search": "Search",
@@ -119,6 +145,8 @@
     "vacancyFallback": "Vacancy {{id}}"
   },
   "drawer": {
+    "availability": "Availability",
+    "availabilityNone": "None",
     "label": "Candidate",
     "tabs": {
       "profile": "Profile",
@@ -175,7 +203,10 @@
     "province": "Province",
     "linkedin": "LinkedIn",
     "summary": "Profile text",
-    "selectDate": "Select a date"
+    "selectDate": "Select a date",
+    "groupPersonal": "Personal",
+    "groupContact": "Contact",
+    "groupAddress": "Address"
   },
   "addFields": {
     "functionTitle": "Job title",
@@ -229,7 +260,12 @@
       "appointment": "Appointment",
       "followup": "Follow-up",
       "warning": "Warning"
-    }
+    },
+    "consentTitle": "Consent",
+    "consentWhatsapp": "WhatsApp messages",
+    "consentEmail": "Email",
+    "consentNewsletter": "Newsletter",
+    "consentGivenAt": "Consent given on {{date}}"
   },
   "statistics": {
     "placements": "Matches",
@@ -358,7 +394,11 @@
     "sector": "Preferred sector",
     "minRate": "Min. hourly rate (€)",
     "contract": "Contract preference",
-    "remarks": "Remarks"
+    "remarks": "Remarks",
+    "groupAvailability": "Availability",
+    "groupTravel": "Travel",
+    "groupWork": "Work preferences",
+    "groupOther": "Other"
   },
   "zzp": {
     "title": "Freelancer",
@@ -379,7 +419,11 @@
     "selfBilling": "Self billing",
     "paymentDiscount": "Discount on hours and surcharges",
     "mediationCosts": "Daily mediation fee",
-    "paymentTerm": "Payment term"
+    "paymentTerm": "Payment term",
+    "groupCompany": "Company",
+    "groupAddress": "Address",
+    "groupInvoicing": "Invoicing",
+    "groupPayment": "Payment"
   },
   "certified": {
     "issued": "Issued",

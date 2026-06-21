@@ -8,12 +8,14 @@
  *   - NewUserModal  → create-user dialog (POST /users)
  *   - (further down)→ the searchable user table + role rendering
  */
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck, Shield, User, Plus, X, Loader2, ChevronDown } from 'lucide-react'
 import api from '../../lib/api'
 import { useAuth } from '../../context/AuthContext'
 import { useRightPanel } from '../../context/RightPanelContext'
+import { COLOR_PRESETS } from '../../lib/colorPresets'
 
 // Selectable roles in the new-user form; labels = t('users.roles.<value>').
 const ROLES = ['tenant_admin', 'planner', 'user']
@@ -143,6 +145,14 @@ function RoleSelector({ user: u, availableRoles, onChanged }) {
   const { t } = useTranslation('users')
   const [open,    setOpen]    = useState(false)
   const [saving,  setSaving]  = useState(false)
+  const [menuPos, setMenuPos] = useState(null)
+  const btnRef = useRef(null)
+
+  // Open below the button via a portal so the menu escapes the table's `overflow: hidden`.
+  const toggle = () => {
+    if (!open) { const r = btnRef.current?.getBoundingClientRect(); if (r) setMenuPos({ top: r.bottom + 4, left: r.left }) }
+    setOpen(o => !o)
+  }
 
   const currentRoleName = (u.roles ?? [])
     .map(r => typeof r === 'string' ? r : r?.name)
@@ -168,7 +178,7 @@ function RoleSelector({ user: u, availableRoles, onChanged }) {
       )}
 
       {/* Change role button */}
-      <button onClick={() => setOpen(o => !o)} disabled={saving}
+      <button ref={btnRef} onClick={toggle} disabled={saving}
         title={t('changeRole')}
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                  width: 22, height: 22, borderRadius: 6, border: '1px solid #E5E7EB',
@@ -181,16 +191,19 @@ function RoleSelector({ user: u, availableRoles, onChanged }) {
           : <ChevronDown size={11} />}
       </button>
 
-      {open && (
+      {open && menuPos && createPortal(
         <>
-          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
-          <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 4, zIndex: 20,
+          <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 60 }} />
+          <div style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, zIndex: 61,
                          background: 'white', border: '1px solid #E5E7EB', borderRadius: 10,
                          boxShadow: '0 4px 20px rgba(0,0,0,0.1)', minWidth: 160, overflow: 'hidden' }}>
             <div style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, color: '#9CA3AF',
                            textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid #F3F4F6' }}>
               {t('changeRole')}
             </div>
+            {availableRoles.length === 0 && (
+              <div style={{ padding: '10px 12px', fontSize: 12, color: '#9CA3AF' }}>{t('noRoles')}</div>
+            )}
             {availableRoles.map(role => {
               const meta    = ROLE_META[role.name] ?? ROLE_META.default
               const isCurrent = role.name === currentRoleName
@@ -219,21 +232,61 @@ function RoleSelector({ user: u, availableRoles, onChanged }) {
   )
 }
 
-function Avatar({ user: u }) {
-  const initials = (
+// Derive up-to-2 initials from name parts, falling back to the e-mail.
+function avatarInitials(u) {
+  return (
     [u.firstname, u.lastname].filter(Boolean).map(n => n[0]).join('').toUpperCase()
     || (u.name ?? '').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
     || (u.email ?? '').slice(0, 2).toUpperCase()
     || '?'
   )
+}
+
+// Round initials bubble, soft-tinted with the user's chosen `avatar_color` (neutral
+// primary tint when none). When `onPick` is given it doubles as a colour picker
+// (click → soft palette popup) so recruiter icons get a recognisable, settable colour.
+function EditableAvatar({ user: u, onPick }) {
+  const { t } = useTranslation('users')
+  const [open, setOpen] = useState(false)
+  const c = u.avatar_color || null
+  const bubble = {
+    width: 30, height: 30, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700,
+    background: c ? c + '22' : 'var(--color-primary-bg)',
+    color: c || 'var(--color-primary)',
+    border: c ? `1px solid ${c}55` : '1px solid transparent',
+  }
+  if (!onPick) return <div style={bubble}>{avatarInitials(u)}</div>
+
+  // Commit a colour (or null = back to the auto/initials colour) and close.
+  const choose = (color) => { setOpen(false); onPick(color) }
   return (
-    <div style={{
-      width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-      background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: 11, fontWeight: 700,
-    }}>
-      {initials}
+    <div style={{ position: 'relative' }}>
+      <button onClick={() => setOpen(o => !o)} title={t('avatarColor')}
+        style={{ ...bubble, cursor: 'pointer', padding: 0 }}>
+        {avatarInitials(u)}
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div style={{ position: 'absolute', top: 36, left: 0, zIndex: 20, width: 192,
+                         background: 'white', border: '1px solid #E5E7EB', borderRadius: 10,
+                         padding: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {COLOR_PRESETS.map(col => (
+                <button key={col} onClick={() => choose(col)} aria-label={col}
+                  style={{ width: 26, height: 26, borderRadius: 6, background: col, cursor: 'pointer',
+                           border: col === c ? '2px solid #111827' : '2px solid transparent' }} />
+              ))}
+            </div>
+            <button onClick={() => choose(null)}
+              style={{ marginTop: 10, width: '100%', fontSize: 12, color: '#6B7280', background: 'none',
+                       border: '1px solid #E5E7EB', borderRadius: 7, padding: '5px 0', cursor: 'pointer' }}>
+              {t('avatarColorAuto')}
+            </button>
+          </div>
+        </>
+      )}
     </div>
   )
 }
@@ -283,6 +336,17 @@ export default function UsersPage() {
     if (!selectedRole.length) return users
     return users.filter(u => selectedRole.some(r => (u.roles ?? []).some(x => x.name === r)))
   }, [users, selectedRole])
+
+  // Optimistically set a user's icon colour (PATCH /users/{id}); revert on failure.
+  const setColor = async (u, color) => {
+    const prev = u.avatar_color ?? null
+    setUsers(list => list.map(x => x.id === u.id ? { ...x, avatar_color: color } : x))
+    try {
+      await api.patch(`/users/${u.id}`, { avatar_color: color })
+    } catch {
+      setUsers(list => list.map(x => x.id === u.id ? { ...x, avatar_color: prev } : x))
+    }
+  }
 
   return (
     <div style={{ padding: 24 }}>
@@ -349,7 +413,7 @@ export default function UsersPage() {
                 >
                   <td style={{ ...TD, minWidth: 200 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                      <Avatar user={u} />
+                      <EditableAvatar user={u} onPick={color => setColor(u, color)} />
                       <div>
                         <div style={{ fontWeight: 500, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
                           {name}

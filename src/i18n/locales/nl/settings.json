@@ -17,10 +17,13 @@
     "loadingShort": "Laden…",
     "copied": "Gekopieerd!",
     "back": "Terug",
-    "next": "Volgende"
+    "next": "Volgende",
+    "edit": "Bewerken"
   },
   "groups": {
+    "kpis": "KPI's",
     "general": "Algemeen",
+    "security": "Beveiliging",
     "company": "Bedrijf",
     "personalisation": "Personalisatie",
     "views": "Weergave",
@@ -29,7 +32,10 @@
     "integrations": "Integraties en API",
     "billing": "Facturering",
     "administration": "Beheer",
-    "planning": "Planning"
+    "planning": "Planning",
+    "modules": "Modules",
+    "superadmin": "Super Admin",
+    "audit": "Audit log"
   },
   "nav": {
     "kpis": "KPI's",
@@ -64,7 +70,7 @@
     "billing_auto": "Automatisch opwaarderen",
     "billing_usage": "Gebruik",
     "billing_invoices": "Facturen",
-    "modules": "Modules",
+    "modules": "Pakket",
     "apps": "Apps (connectors)",
     "roles": "Rollen & Rechten",
     "users": "Gebruikersbeheer",
@@ -75,11 +81,16 @@
     "email_planning": "E-mail planning",
     "languages": "Talen",
     "genders": "Geslacht",
+    "candidate_availability": "Beschikbaarheid",
     "industries": "Industrieën",
     "shift_types": "Diensttypes",
     "availability": "Beschikbaarheid",
     "automatch": "Automatch-regels",
-    "planning_board": "Planbord-weergave"
+    "planning_board": "Planbord-weergave",
+    "messaging": "Berichten",
+    "koios": "Koios AI",
+    "mod_shiftmanager": "Shiftmanager",
+    "mod_helloflex": "HelloFlex"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -248,6 +259,9 @@
     "valueImmutable": "De slug kan na aanmaken niet meer gewijzigd worden.",
     "colorField": "Kleur",
     "confirmDelete": "\"{{name}}\" verwijderen? Als deze in gebruik is, wordt hij gearchiveerd.",
+    "isApplicant": "Toont de sollicitatie-funnel",
+    "isApplicantHint": "Kandidaten met deze status tonen de sollicitatie-funnel. Meestal één status (bijv. \"Sollicitant\").",
+    "applicantBadge": "Funnel",
     "candidate_types": {
       "title": "Contractvormen",
       "subtitle": "Meerdere per kandidaat (bijv. Oproepkracht, ZZP, Payroll)."
@@ -643,7 +657,10 @@
     "types": {
       "candidates": "Kandidaten",
       "cvs": "CV's",
-      "vacancies": "Vacatures"
+      "vacancies": "Vacatures",
+      "documents": "Documenten",
+      "customers": "Klanten",
+      "shifts": "Diensten"
     },
     "title": "{{type}} importeren",
     "subtitle": "Importeer je bestaande {{type}}-gegevens met een CSV-bestand.",
@@ -690,7 +707,11 @@
       "ats_crm_ai": "ATS & CRM + AI & Workflow",
       "ats_crm_planning": "ATS & CRM + Planning",
       "ats_crm_ai_planning": "ATS & CRM + AI & Workflow + Planning"
-    }
+    },
+    "emptyTitle": "Nog geen instellingen",
+    "emptyDesc": "Instellingen voor deze module volgen.",
+    "smKpiTitle": "Shiftmanager-KPI’s",
+    "smKpiDesc": "Aparte KPI-doelen voor het Shiftmanager-dashboard (los van de Dashboard-KPI’s). Configuratie volgt."
   },
   "whatsapp": {
     "loading": "WhatsApp gegevens ophalen…",
@@ -855,7 +876,9 @@
       "before": "Voor",
       "after": "Na",
       "role": "Rol"
-    }
+    },
+    "export": "Exporteren",
+    "loadMore": "Meer laden ({{count}})"
   },
   "languageSettings": {
     "languagesTitle": "Talen",
@@ -864,6 +887,11 @@
     "levelsTitle": "Niveaus",
     "levelsSubtitle": "Beheersingsniveaus (bijv. Slecht → Zeer goed, Moedertaal).",
     "addLevel": "Niveau toevoegen"
+  },
+  "availabilitySettings": {
+    "title": "Beschikbaarheid",
+    "subtitle": "Beheer de beschikbaarheidsopties — een aparte as naast de status.",
+    "add": "Optie toevoegen"
   },
   "industrySettings": {
     "title": "Industrieën",
@@ -891,6 +919,74 @@
     "board": {
       "title": "Planbord-weergave",
       "desc": "Kolommen en standaardweergave van het planbord."
+    }
+  },
+  "messaging": {
+    "title": "Berichten",
+    "subtitle": "Limieten, kosten en bewaartermijn voor je berichtenverkeer.",
+    "loadError": "Kon de gegevens niet laden.",
+    "tab": {
+      "limits": "Limieten",
+      "costs": "Kosten",
+      "retention": "Bewaartermijn"
+    },
+    "limits": {
+      "subtitle": "Stel de berichtenlimiet in. Het plafond is door ons bepaald en kan niet worden overschreden.",
+      "label": "Berichtenlimiet",
+      "unit": "per dag",
+      "ceiling": "Plafond: {{value}} {{unit}}",
+      "overCeiling": "Maximaal {{value}} {{unit}} toegestaan."
+    },
+    "costs": {
+      "subtitle": "Verbruik en kosten van deze periode.",
+      "numbers": "Telefoonnummers",
+      "waba": "WhatsApp Business-berichten",
+      "base": "Basistarief",
+      "total": "Totaal",
+      "byNumber": "Per nummer",
+      "messages": "{{count}} berichten"
+    },
+    "retention": {
+      "subtitle": "Hoe lang berichten bewaard blijven. De effectieve termijn is de laagste van beide.",
+      "tenant": "Organisatie",
+      "tenantHint": "Geldt voor de hele organisatie",
+      "own": "Persoonlijk",
+      "ownHint": "Alleen jouw berichten",
+      "days": "dagen",
+      "effective": "Effectieve bewaartermijn:",
+      "effectiveDays": "{{count}} dagen",
+      "unlimited": "Onbeperkt"
+    }
+  },
+  "smKpis": {
+    "title": "Shiftmanager KPI-instellingen",
+    "subtitle": "Streefwaarden voor het Shiftmanager-dashboard",
+    "fields": {
+      "sm_occupancy_target": {
+        "label": "Bezettingsgraad doel",
+        "description": "Streefwaarde voor de bezettingsgraad",
+        "unit": "%"
+      },
+      "sm_fill_rate_target": {
+        "label": "Vervullingsgraad doel",
+        "description": "Streefpercentage gevulde diensten",
+        "unit": "%"
+      },
+      "sm_open_shifts_warning": {
+        "label": "Openstaande diensten waarschuwing",
+        "description": "Aantal openstaande diensten waarbij een waarschuwing verschijnt",
+        "unit": "diensten"
+      },
+      "sm_no_show_threshold": {
+        "label": "No-show drempel",
+        "description": "Percentage no-shows waarbij een waarschuwing verschijnt",
+        "unit": "%"
+      },
+      "sm_filled_shifts_target": {
+        "label": "Doel ingevulde diensten / week",
+        "description": "Wekelijks streefgetal voor ingevulde diensten",
+        "unit": "diensten"
+      }
     }
   }
 }

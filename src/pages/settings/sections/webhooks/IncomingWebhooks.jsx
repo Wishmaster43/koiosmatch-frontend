@@ -6,7 +6,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Copy, Plus, Trash2 } from 'lucide-react'
+import { Check, Copy, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
 import api from '../../../../lib/api'
 
 // Inbound webhook URLs hang off the API root's /webhook path, not under /api.
@@ -21,6 +21,19 @@ export default function IncomingWebhooks() {
   const [desc,     setDesc]     = useState('')
   const [creating, setCreating] = useState(false)
   const [copied,   setCopied]   = useState(null)
+  const [editId,   setEditId]   = useState(null)
+  const [editName, setEditName] = useState('')
+  const [editDesc, setEditDesc] = useState('')
+
+  // Start / save an in-place edit of an existing webhook (name + description).
+  const startEdit = (wh) => { setEditId(wh.id); setEditName(wh.name ?? ''); setEditDesc(wh.description ?? '') }
+  const saveEdit = async (id) => {
+    const nm = editName.trim(); if (!nm) return
+    const description = editDesc.trim() || null
+    setWebhooks((prev) => prev.map((w) => (w.id === id ? { ...w, name: nm, description } : w)))
+    setEditId(null)
+    await api.patch(`/webhooks/${id}`, { name: nm, description }).catch(() => {})
+  }
 
   // Load the inbound webhooks for the active tenant.
   useEffect(() => {
@@ -85,16 +98,43 @@ export default function IncomingWebhooks() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {webhooks.map((wh) => (
             <div key={wh.id} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '12px 16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{wh.name}</div>
-                  {wh.description && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{wh.description}</div>}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {wh.last_triggered_at && (
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+                {editId === wh.id ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, minWidth: 0 }}>
+                    <input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder={t('webhooks.incoming.namePlaceholder')}
+                      onKeyDown={(e) => e.key === 'Enter' && saveEdit(wh.id)}
+                      style={{ padding: '6px 10px', fontSize: 13, fontWeight: 600, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }} />
+                    <input value={editDesc} onChange={(e) => setEditDesc(e.target.value)} placeholder={t('webhooks.incoming.descPlaceholder')}
+                      style={{ padding: '6px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }} />
+                  </div>
+                ) : (
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{wh.name}</div>
+                    {wh.description && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{wh.description}</div>}
+                  </div>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                  {wh.last_triggered_at && editId !== wh.id && (
                     <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                       {t('webhooks.incoming.lastTriggered')}: {new Date(wh.last_triggered_at).toLocaleDateString('nl-NL')}
                     </span>
+                  )}
+                  {editId === wh.id ? (
+                    <>
+                      <button onClick={() => saveEdit(wh.id)} title={t('common.save')}
+                        style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-primary)', border: 'none', borderRadius: 6, cursor: 'pointer', color: '#fff' }}>
+                        <Save size={12} />
+                      </button>
+                      <button onClick={() => setEditId(null)} title={t('common.cancel')}
+                        style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)' }}>
+                        <X size={12} />
+                      </button>
+                    </>
+                  ) : (
+                    <button onClick={() => startEdit(wh)} title={t('common.edit')}
+                      style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)' }}>
+                      <Edit2 size={12} />
+                    </button>
                   )}
                   <button onClick={() => remove(wh.id)} aria-label={t('webhooks.incoming.removeConfirm')}
                     style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FEF2F2', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--color-danger)' }}>

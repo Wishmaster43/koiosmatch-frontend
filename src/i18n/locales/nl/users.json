@@ -10,6 +10,8 @@
   "createFailed": "Aanmaken mislukt.",
   "pwPlaceholder": "Minimaal 8 tekens",
   "changeRole": "Rol wijzigen",
+  "avatarColor": "Kleur van het icoon",
+  "avatarColorAuto": "Automatisch",
   "title": "Gebruikers",
   "summary": "{{shown}} van {{total}} gebruikers",
   "loading": "Gebruikers ophalen…",
@@ -30,5 +32,6 @@
     "tenant_admin": "Admin",
     "planner": "Planner",
     "user": "Gebruiker"
-  }
+  },
+  "noRoles": "Geen rollen beschikbaar"
 }

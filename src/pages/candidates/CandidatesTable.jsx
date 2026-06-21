@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Target, Phone, CalendarPlus, Sparkles } from 'lucide-react'
 import DataTable from '../../components/ui/DataTable'
 import Avatar from '../../components/ui/Avatar'
+import KoiosAiMark from '../../components/ui/KoiosAiMark'
 import StatusPill from '../../components/ui/StatusPill'
 import { useDateFormat } from '../../lib/datetime'
 import { useLookups } from '../../context/LookupsContext'
@@ -102,7 +103,12 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
       },
     },
     {
-      key: 'koios', header: t('columns.koios'), nowrap: true, sortable: false,
+      key: 'koios', nowrap: true, sortable: false,
+      header: (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <KoiosAiMark size={16} />{t('columns.koios')}
+        </span>
+      ),
       render: c => {
         const a = c.koiosAdvice
         if (!a || !a.action || a.action === 'none') return <span style={{ color: 'var(--text-muted)' }}>—</span>

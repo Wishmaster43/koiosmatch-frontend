@@ -86,6 +86,19 @@
     "newChatShort": "Nouveau",
     "addContext": "Ajouter du contexte",
     "taskPlaceholder": "Saisissez une tâche",
-    "attachFile": "Joindre un fichier"
+    "attachFile": "Joindre un fichier",
+    "welcome": "Bonjour ! Je suis Koios, votre assistant IA pour KoiosMatch.\n\nJe peux vous aider avec les candidats, la planification, les clients et les rapports. Que puis-je faire pour vous ?",
+    "newChatStarted": "Nouveau chat démarré. Comment puis-je aider ?",
+    "inputHint": "Maj+Entrée pour une nouvelle ligne · @ pour le contexte",
+    "stepsToggle": "Détails ({{count}})",
+    "refusedOrg": "Non autorisé au sein de votre organisation.",
+    "refusedRights": "Vous n'avez pas les droits suffisants pour cette action.",
+    "stopRefused": "Refusé",
+    "stopMaxSteps": "N'a pas pu être terminé dans les étapes",
+    "notConfigured": "Koios n'est pas encore connecté.",
+    "errorReply": "Impossible de joindre Koios. Veuillez réessayer.",
+    "forbidden": "Vous n'avez pas accès à Koios.",
+    "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
+    "offline": "Non connecté"
   }
 }

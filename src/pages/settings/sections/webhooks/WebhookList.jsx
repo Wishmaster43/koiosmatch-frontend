@@ -3,18 +3,15 @@
  * button and a themed DataTable. Clicking a row opens the detail. Handles the
  * loading / error / empty / success states.
  */
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, RefreshCw } from 'lucide-react'
 import DataTable from '../../../../components/ui/DataTable'
 import StatusBadge from '../../../../components/ui/StatusBadge'
 import { useDateFormat } from '../../../../lib/datetime'
-import WebhookCreateModal from './WebhookCreateModal'
 
-export default function WebhookList({ subs, loading, error, onReload, onOpen, onCreated }) {
+export default function WebhookList({ subs, loading, error, onReload, onOpen, onNew }) {
   const { t } = useTranslation('settings')
   const { formatDate } = useDateFormat()
-  const [creating, setCreating] = useState(false)
 
   // Status pill colours for active / disabled subscriptions.
   const statusMap = {
@@ -44,7 +41,7 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
           <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('webhooks.outgoing.title')}</h2>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('webhooks.outgoing.subtitle')}</p>
         </div>
-        <button onClick={() => setCreating(true)}
+        <button onClick={onNew}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
           <Plus size={14} /> {t('webhooks.outgoing.new')}
         </button>
@@ -68,8 +65,6 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
           emptyText={t('webhooks.outgoing.empty')}
         />
       )}
-
-      {creating && <WebhookCreateModal onClose={() => setCreating(false)} onCreated={onCreated} />}
     </div>
   )
 }

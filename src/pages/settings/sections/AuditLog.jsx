@@ -5,7 +5,7 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, X } from 'lucide-react'
+import { Search, X, Download } from 'lucide-react'
 import api from '../../../lib/api'
 import { useRightPanel } from '../../../context/RightPanelContext'
 
@@ -349,6 +349,7 @@ export default function AuditLog() {
   const [dateFrom,       setDateFrom]       = useState('')
   const [dateTo,         setDateTo]         = useState('')
   const [drill,          setDrill]          = useState(null)
+  const [visibleCount,   setVisibleCount]   = useState(50)
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -387,6 +388,9 @@ export default function AuditLog() {
     })
   }, [logs, search, selectedTypes, selectedUsers, selectedRoles, dateFrom, dateTo])
 
+  // Reset the visible window whenever the filter set changes.
+  useEffect(() => { setVisibleCount(50) }, [search, selectedTypes, selectedUsers, selectedRoles, dateFrom, dateTo])
+
   const filterGroups = useMemo(() => [
     {
       key: 'type', label: t('audit.filterType'),
@@ -423,6 +427,26 @@ export default function AuditLog() {
     return () => unregisterFilters('audit-log')
   }, [filterGroups, registerFilters, unregisterFilters])
 
+  // Export the currently-filtered log to CSV (UTF-8 BOM for Excel; AVG accountability).
+  const exportCsv = () => {
+    const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const who = (e) => e.causer_email
+      ? `${e.causer_name ?? t('audit.system')} (${e.causer_email})`
+      : (e.causer_name ?? t('audit.system'))
+    const header = [t('audit.colDateTime'), t('audit.colWho'), t('audit.colType'), t('audit.colAction'), t('audit.colOldValue'), t('audit.colNewValue')]
+    const rows = filtered.map(e => {
+      const { beforeCell, afterCell } = buildDiffCells(e, t)
+      return [new Date(e.created_at).toLocaleString('nl-NL'), who(e),
+        t(`audit.logName.${e.log_name}`, { defaultValue: e.log_name }),
+        e.description ?? '', beforeCell, afterCell]
+    })
+    const csv = '﻿' + [header, ...rows].map(r => r.map(esc).join(',')).join('\r\n')
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
+    const a = document.createElement('a')
+    a.href = url; a.download = `audit-log-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
+  }
+
   const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
                color: '#9CA3AF', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6',
                whiteSpace: 'nowrap' }
@@ -457,6 +481,14 @@ export default function AuditLog() {
               style={{ height: 34, width: 220, paddingLeft: 28, paddingRight: 10, fontSize: 12,
                        border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
           </div>
+          {/* Export the filtered log to CSV (AVG accountability). */}
+          <button onClick={exportCsv} disabled={filtered.length === 0}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', fontSize: 12,
+                     fontWeight: 500, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white',
+                     color: '#374151', cursor: filtered.length ? 'pointer' : 'not-allowed',
+                     opacity: filtered.length ? 1 : 0.5, whiteSpace: 'nowrap' }}>
+            <Download size={13} /> {t('audit.export')}
+          </button>
         </div>
       </div>
 
@@ -487,7 +519,7 @@ export default function AuditLog() {
                     {t('audit.noEntries')}
                   </td>
                 </tr>
-              ) : filtered.map((entry, i) => {
+              ) : filtered.slice(0, visibleCount).map((entry, i) => {
                 const { beforeCell, afterCell } = buildDiffCells(entry, t)
                 return (
                   <tr key={entry.id ?? i}
@@ -518,6 +550,17 @@ export default function AuditLog() {
               })}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Load-more pagination — reveal the next page of the filtered log. */}
+      {!loading && !error && filtered.length > visibleCount && (
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
+          <button onClick={() => setVisibleCount(c => c + 50)}
+            style={{ height: 34, padding: '0 16px', fontSize: 12, fontWeight: 500, border: '1px solid #E5E7EB',
+                     borderRadius: 8, background: 'white', color: '#374151', cursor: 'pointer' }}>
+            {t('audit.loadMore', { count: Math.min(50, filtered.length - visibleCount) })}
+          </button>
         </div>
       )}
 

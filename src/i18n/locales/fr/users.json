@@ -10,6 +10,8 @@
   "createFailed": "Échec de la création.",
   "pwPlaceholder": "Au moins 8 caractères",
   "changeRole": "Changer de rôle",
+  "avatarColor": "Couleur de l'icône",
+  "avatarColorAuto": "Automatique",
   "title": "Utilisateurs",
   "summary": "{{shown}} sur {{total}} utilisateurs",
   "loading": "Chargement des utilisateurs…",
@@ -30,5 +32,6 @@
     "tenant_admin": "Admin",
     "planner": "Planificateur",
     "user": "Utilisateur"
-  }
+  },
+  "noRoles": "Aucun rôle disponible"
 }

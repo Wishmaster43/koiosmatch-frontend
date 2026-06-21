@@ -17,8 +17,8 @@
  */
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays,
-  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Key, LayoutDashboard, LayoutGrid, Lock,
-  Mail, MapPin, MessageCircle, Languages, Package, Palette, RotateCcw, Shield, Sparkles, Star,
+  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Key, LayoutDashboard, LayoutGrid,
+  Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Shield, Sparkles, Star,
   Store, Tags, Target, Users, Webhook, XCircle, Zap,
 } from 'lucide-react'
 
@@ -34,36 +34,49 @@ import PoolsSettings from './sections/PoolsSettings'
 import LanguageSettings from './sections/LanguageSettings'
 import GenderSettings from './sections/GenderSettings'
 import IndustrySettings from './sections/IndustrySettings'
+import CandidateAvailabilitySettings from './sections/CandidateAvailabilitySettings'
 import VacancySettings from './sections/VacancySettings'
 import RejectionSettings from './sections/RejectionSettings'
 import CvTemplateSettings from './sections/CvTemplateSettings'
-import SecuritySettings from './sections/SecuritySettings'
 import EmailSettings from './sections/EmailSettings'
 import AuditLog from './sections/AuditLog'
 import RolesSettings from './sections/RolesSettings'
-import SyncSettings from './sections/SyncSettings'
+import ShiftmanagerModuleSettings from './sections/ShiftmanagerModuleSettings'
 import WebhooksSettings from './sections/webhooks'
 import AppsSettings from './sections/AppsSettings'
 import ModulesSettings from './sections/ModulesSettings'
+import ModulePlaceholder from './sections/ModulePlaceholder'
 import WhatsAppSettings from './sections/WhatsAppSettings'
 import ImporterenSettings from './sections/ImporterenSettings'
 import ApiKeysSettings from './sections/apikeys'
-import AppStoreSettings from './sections/AppStoreSettings'
+import MessagingSettings from './sections/messaging'
+import KoiosSettings from './sections/koios'
 import NotificationsSettings from './sections/NotificationsSettings'
 import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
 import { PlanbeheerSettings, BetaalmethodenSettings, AutoOpwaarderenSettings, GebruikSettings, FacturenSettings } from './sections/BillingSettings'
 
 import kpisSchema from './schemas/kpis'
-import displaySchema from './schemas/display'
 
 export const NAV_GROUPS = [
   {
+    key: 'kpis', icon: Target,
+    items: [
+      { id: 'kpis', label: 'KPIs', icon: Target, schema: kpisSchema },
+    ],
+  },
+  {
     key: 'general', icon: LayoutDashboard,
     items: [
-      { id: 'kpis',     label: 'KPIs',     icon: Target,  schema: kpisSchema },
-      { id: 'display',  label: 'Display',  icon: BarChart2, schema: displaySchema },
-      { id: 'branding', label: 'Brand',    icon: Palette, component: BrandSettings },
-      { id: 'security', label: 'Security', icon: Lock,    component: SecuritySettings },
+      // Personal 2FA/MFA (Security) now lives on the user's own Profile, not here.
+      { id: 'branding', label: 'Brand', icon: Palette, component: BrandSettings },
+    ],
+  },
+  {
+    key: 'modules', icon: LayoutGrid,
+    items: [
+      // Per-module settings — one tab per product module (Shiftmanager, HelloFlex, …).
+      { id: 'mod_shiftmanager', label: 'Shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings },
+      { id: 'mod_helloflex',    label: 'HelloFlex',    icon: Zap,       render: () => <ModulePlaceholder /> },
     ],
   },
   {
@@ -81,6 +94,7 @@ export const NAV_GROUPS = [
       { id: 'pools',             label: 'Talent pools',      icon: Star,      component: PoolsSettings },
       { id: 'languages',         label: 'Languages',         icon: Languages, component: LanguageSettings },
       { id: 'genders',           label: 'Gender',            icon: Users,     component: GenderSettings },
+      { id: 'candidate_availability', label: 'Availability', icon: CalendarCheck, component: CandidateAvailabilitySettings },
       { id: 'industries',        label: 'Industries',        icon: Factory,   component: IndustrySettings },
       { id: 'vacancy',           label: 'Vacancy',           icon: Briefcase, component: VacancySettings },
       { id: 'rejection',         label: 'Rejection reasons', icon: XCircle,   component: RejectionSettings },
@@ -120,15 +134,17 @@ export const NAV_GROUPS = [
       { id: 'email_kandidaten', label: 'Email — candidates', icon: Mail, render: () => <EmailSettings context="kandidaten" /> },
       { id: 'email_planning',   label: 'Email — planning',   icon: Mail, render: () => <EmailSettings context="planning" /> },
       { id: 'whatsapp',         label: 'WhatsApp',           icon: MessageCircle, component: WhatsAppSettings, requiresPage: 'whatsapp' },
+      { id: 'messaging',        label: 'Messaging',          icon: MessageSquare, component: MessagingSettings },
     ],
   },
   {
     key: 'integrations', icon: Store,
     items: [
-      { id: 'appstore',   label: 'App store', icon: Store,    component: AppStoreSettings },
+      { id: 'apps',       label: 'Apps (connectors)', icon: AppWindow, component: AppsSettings, superAdminOnly: true },
       { id: 'apikeys',    label: 'API keys',  icon: Key,      component: ApiKeysSettings },
       { id: 'webhooks',   label: 'Webhooks',  icon: Webhook,  component: WebhooksSettings },
       { id: 'importeren', label: 'Import',    icon: Download, component: ImporterenSettings },
+      { id: 'koios',      label: 'Koios AI',  icon: Sparkles, component: KoiosSettings },
     ],
   },
   {
@@ -142,14 +158,24 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    key: 'administration', icon: Shield,
+    key: 'administration', icon: Users,
     items: [
-      { id: 'modules', label: 'Modules',             icon: Package,       component: ModulesSettings, superAdminOnly: true },
-      { id: 'apps',    label: 'Apps (connectors)',   icon: AppWindow,     component: AppsSettings,    superAdminOnly: true },
-      { id: 'roles',   label: 'Roles & permissions', icon: Shield,        component: RolesSettings },
-      { id: 'users',   label: 'Users',               icon: Users,         component: UsersPage },
-      { id: 'sync',    label: 'Synchronisation',     icon: RotateCcw,     component: SyncSettings },
-      { id: 'audit',   label: 'Audit log',           icon: ClipboardList, component: AuditLog },
+      { id: 'roles', label: 'Roles & permissions', icon: Shield, component: RolesSettings },
+      { id: 'users', label: 'Users',               icon: Users,  component: UsersPage },
+    ],
+  },
+  {
+    // Super-admin-only — the package/tier matrix; the group hides for regular admins
+    // because its item is superAdminOnly (empty groups are filtered out).
+    key: 'superadmin', icon: Shield,
+    items: [
+      { id: 'modules', label: 'Package', icon: Package, component: ModulesSettings, superAdminOnly: true },
+    ],
+  },
+  {
+    key: 'audit', icon: ClipboardList,
+    items: [
+      { id: 'audit', label: 'Audit log', icon: ClipboardList, component: AuditLog },
     ],
   },
 ]

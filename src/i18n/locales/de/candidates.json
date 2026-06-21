@@ -28,7 +28,31 @@
     "noPools": "Noch keine Pools eingerichtet.",
     "addedToPool": "Zu {{pool}} hinzugefügt ({{count}})",
     "removedFromPool": "Aus {{pool}} entfernt ({{count}})",
-    "poolError": "Aktion fehlgeschlagen. Bitte erneut versuchen."
+    "poolError": "Aktion fehlgeschlagen. Bitte erneut versuchen.",
+    "pool": "Talentpool",
+    "changeOwner": "Eigentümer ändern",
+    "searchOwner": "Benutzer suchen…",
+    "noUsers": "Keine Benutzer gefunden.",
+    "changeStage": "Funnel-Phase ändern",
+    "searchStage": "Phase suchen…",
+    "changeType": "Kandidatentyp ändern",
+    "searchType": "Typ suchen…",
+    "ownerChanged": "Eigentümer geändert zu {{name}} ({{count}})",
+    "stageChanged": "Funnel-Phase → {{value}} ({{count}})",
+    "typeChanged": "Kandidatentyp → {{value}} ({{count}})",
+    "mutateError": "Aktion fehlgeschlagen. Bitte erneut versuchen.",
+    "removeTag": "Tag entfernen",
+    "searchTag": "Tag suchen…",
+    "noTags": "Keine Tags in der Auswahl.",
+    "tagRemoved": "Tag '{{tag}}' entfernt ({{count}})",
+    "addNote": "Notiz hinzufügen",
+    "notePlaceholder": "Notiz schreiben…",
+    "noteSubmit": "Hinzufügen",
+    "noteAdded": "Notiz hinzugefügt ({{count}})",
+    "archive": "Archivieren",
+    "archiveConfirm": "Möchten Sie {{count}} Kandidaten wirklich archivieren?",
+    "archived": "Archiviert ({{count}})",
+    "archiveError": "Archivierung fehlgeschlagen. Bitte erneut versuchen."
   },
   "kpi": {
     "total": "Gesamt",
@@ -50,7 +74,9 @@
     "stale6mSub": "lange kein Kontakt",
     "noFollowup": "Keine Nachverfolgung",
     "noFollowupSub": "neu, kein Kontakt",
-    "conversations": "Aktive Gespräche"
+    "conversations": "Aktive Gespräche",
+    "neverContacted": "Nie kontaktiert",
+    "neverContactedSub": "noch kein Kontakt"
   },
   "filters": {
     "search": "Suchen",
@@ -110,6 +136,8 @@
     "vacancyFallback": "Stelle {{id}}"
   },
   "drawer": {
+    "availability": "Verfügbarkeit",
+    "availabilityNone": "Keine",
     "label": "Kandidat",
     "tabs": {
       "profile": "Profil",
@@ -161,7 +189,10 @@
     "province": "Provinz",
     "linkedin": "LinkedIn",
     "summary": "Zusammenfassung",
-    "selectDate": "Datum auswählen"
+    "selectDate": "Datum auswählen",
+    "groupPersonal": "Persönlich",
+    "groupContact": "Kontakt",
+    "groupAddress": "Adresse"
   },
   "addFields": {
     "functionTitle": "Berufsbezeichnung",
@@ -211,7 +242,12 @@
       "appointment": "Termin",
       "followup": "Follow-up",
       "warning": "Warnung"
-    }
+    },
+    "consentTitle": "Einwilligungen",
+    "consentWhatsapp": "WhatsApp-Nachrichten",
+    "consentEmail": "E-Mail",
+    "consentNewsletter": "Newsletter",
+    "consentGivenAt": "Einwilligung erteilt am {{date}}"
   },
   "statistics": {
     "placements": "Vermittlungen",
@@ -336,7 +372,11 @@
     "sector": "Bevorzugte Branche",
     "minRate": "Min. Stundensatz (€)",
     "contract": "Vertragspräferenz",
-    "remarks": "Bemerkungen"
+    "remarks": "Bemerkungen",
+    "groupAvailability": "Verfügbarkeit",
+    "groupTravel": "Reisen",
+    "groupWork": "Arbeitspräferenzen",
+    "groupOther": "Sonstiges"
   },
   "zzp": {
     "title": "Freiberufler",
@@ -357,7 +397,11 @@
     "selfBilling": "Gutschriftverfahren",
     "paymentDiscount": "Rabatt auf Stunden und Zuschläge",
     "mediationCosts": "Tägliche Vermittlungsgebühr",
-    "paymentTerm": "Zahlungsziel"
+    "paymentTerm": "Zahlungsziel",
+    "groupCompany": "Unternehmen",
+    "groupAddress": "Adresse",
+    "groupInvoicing": "Rechnungsstellung",
+    "groupPayment": "Zahlung"
   },
   "certified": {
     "issued": "Ausgestellt",

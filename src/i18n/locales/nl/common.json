@@ -86,6 +86,19 @@
     "newChatShort": "Nieuw",
     "addContext": "Context toevoegen",
     "taskPlaceholder": "Geef een taak op",
-    "attachFile": "Bijlage toevoegen"
+    "attachFile": "Bijlage toevoegen",
+    "welcome": "Hoi! Ik ben Koios, jouw AI-assistent voor KoiosMatch.\n\nIk help je met kandidaten, planning, klanten en rapportages. Wat kan ik voor je doen?",
+    "newChatStarted": "Nieuwe chat gestart. Hoe kan ik je helpen?",
+    "inputHint": "Shift+Enter voor een nieuwe regel · @ voor context",
+    "stepsToggle": "Details ({{count}})",
+    "refusedOrg": "Niet toegestaan binnen je organisatie.",
+    "refusedRights": "Je hebt onvoldoende rechten voor deze actie.",
+    "stopRefused": "Geweigerd",
+    "stopMaxSteps": "Kon niet binnen de stappen worden afgerond",
+    "notConfigured": "Koios is nog niet gekoppeld.",
+    "errorReply": "Kon Koios niet bereiken. Probeer het opnieuw.",
+    "forbidden": "Je hebt geen toegang tot Koios.",
+    "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
+    "offline": "Niet gekoppeld"
   }
 }

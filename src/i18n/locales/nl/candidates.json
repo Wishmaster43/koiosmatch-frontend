@@ -37,7 +37,31 @@
     "noPools": "Nog geen pools ingesteld.",
     "addedToPool": "Toegevoegd aan {{pool}} ({{count}})",
     "removedFromPool": "Verwijderd uit {{pool}} ({{count}})",
-    "poolError": "Actie mislukt. Probeer het opnieuw."
+    "poolError": "Actie mislukt. Probeer het opnieuw.",
+    "pool": "Talentenpool",
+    "changeOwner": "Eigenaar wijzigen",
+    "searchOwner": "Zoek een gebruiker…",
+    "noUsers": "Geen gebruikers gevonden.",
+    "changeStage": "Funnel-stage wijzigen",
+    "searchStage": "Zoek een stage…",
+    "changeType": "Kandidaattype wijzigen",
+    "searchType": "Zoek een type…",
+    "ownerChanged": "Eigenaar gewijzigd naar {{name}} ({{count}})",
+    "stageChanged": "Funnel-stage → {{value}} ({{count}})",
+    "typeChanged": "Kandidaattype → {{value}} ({{count}})",
+    "mutateError": "Actie mislukt. Probeer het opnieuw.",
+    "removeTag": "Tag verwijderen",
+    "searchTag": "Zoek een tag…",
+    "noTags": "Geen tags op de selectie.",
+    "tagRemoved": "Tag '{{tag}}' verwijderd ({{count}})",
+    "addNote": "Notitie toevoegen",
+    "notePlaceholder": "Schrijf een notitie…",
+    "noteSubmit": "Toevoegen",
+    "noteAdded": "Notitie toegevoegd ({{count}})",
+    "archive": "Archiveren",
+    "archiveConfirm": "Weet je zeker dat je {{count}} kandidaten wilt archiveren?",
+    "archived": "Gearchiveerd ({{count}})",
+    "archiveError": "Archiveren mislukt. Probeer het opnieuw."
   },
   "kpi": {
     "total": "Totaal",
@@ -59,7 +83,9 @@
     "stale6mSub": "lang geen contact",
     "noFollowup": "Geen opvolging",
     "noFollowupSub": "nieuw, geen contact",
-    "conversations": "Actieve gesprekken"
+    "conversations": "Actieve gesprekken",
+    "neverContacted": "Nooit benaderd",
+    "neverContactedSub": "nog geen contactmoment"
   },
   "filters": {
     "search": "Zoeken",
@@ -119,6 +145,8 @@
     "vacancyFallback": "Vacature {{id}}"
   },
   "drawer": {
+    "availability": "Beschikbaarheid",
+    "availabilityNone": "Geen",
     "label": "Kandidaat",
     "tabs": {
       "profile": "Profiel",
@@ -175,7 +203,10 @@
     "province": "Provincie",
     "linkedin": "LinkedIn",
     "summary": "Profieltekst",
-    "selectDate": "Selecteer een datum"
+    "selectDate": "Selecteer een datum",
+    "groupPersonal": "Persoonlijk",
+    "groupContact": "Contact",
+    "groupAddress": "Adres"
   },
   "addFields": {
     "functionTitle": "Functietitel",
@@ -229,7 +260,12 @@
       "appointment": "Afspraak",
       "followup": "Follow-up",
       "warning": "Waarschuwing"
-    }
+    },
+    "consentTitle": "Toestemmingen",
+    "consentWhatsapp": "WhatsApp-berichten",
+    "consentEmail": "E-mail",
+    "consentNewsletter": "Nieuwsbrief",
+    "consentGivenAt": "Toestemming gegeven op {{date}}"
   },
   "statistics": {
     "placements": "Matches",
@@ -358,7 +394,11 @@
     "sector": "Voorkeurs branche",
     "minRate": "Min. uurtarief (€)",
     "contract": "Contract voorkeur",
-    "remarks": "Opmerkingen"
+    "remarks": "Opmerkingen",
+    "groupAvailability": "Beschikbaarheid",
+    "groupTravel": "Reizen",
+    "groupWork": "Werkvoorkeuren",
+    "groupOther": "Overig"
   },
   "zzp": {
     "title": "ZZP'er",
@@ -379,7 +419,11 @@
     "selfBilling": "Self Billing",
     "paymentDiscount": "Betalingskorting uren en toeslagen",
     "mediationCosts": "Dagelijkse bemiddelingskosten",
-    "paymentTerm": "Betaaltermijn"
+    "paymentTerm": "Betaaltermijn",
+    "groupCompany": "Bedrijf",
+    "groupAddress": "Adres",
+    "groupInvoicing": "Facturatie",
+    "groupPayment": "Betaling"
   },
   "certified": {
     "issued": "Uitgegeven",

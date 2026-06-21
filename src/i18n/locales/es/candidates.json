@@ -28,7 +28,31 @@
     "noPools": "Aún no hay pools configurados.",
     "addedToPool": "Añadido a {{pool}} ({{count}})",
     "removedFromPool": "Quitado de {{pool}} ({{count}})",
-    "poolError": "La acción falló. Inténtalo de nuevo."
+    "poolError": "La acción falló. Inténtalo de nuevo.",
+    "pool": "Bolsa de talento",
+    "changeOwner": "Cambiar responsable",
+    "searchOwner": "Buscar un usuario…",
+    "noUsers": "No se encontraron usuarios.",
+    "changeStage": "Cambiar etapa del embudo",
+    "searchStage": "Buscar una etapa…",
+    "changeType": "Cambiar tipo de candidato",
+    "searchType": "Buscar un tipo…",
+    "ownerChanged": "Responsable cambiado a {{name}} ({{count}})",
+    "stageChanged": "Etapa del embudo → {{value}} ({{count}})",
+    "typeChanged": "Tipo de candidato → {{value}} ({{count}})",
+    "mutateError": "La acción falló. Inténtalo de nuevo.",
+    "removeTag": "Quitar etiqueta",
+    "searchTag": "Buscar una etiqueta…",
+    "noTags": "No hay etiquetas en la selección.",
+    "tagRemoved": "Etiqueta '{{tag}}' eliminada ({{count}})",
+    "addNote": "Añadir nota",
+    "notePlaceholder": "Escribe una nota…",
+    "noteSubmit": "Añadir",
+    "noteAdded": "Nota añadida ({{count}})",
+    "archive": "Archivar",
+    "archiveConfirm": "¿Seguro que quieres archivar {{count}} candidatos?",
+    "archived": "Archivado ({{count}})",
+    "archiveError": "Error al archivar. Inténtalo de nuevo."
   },
   "kpi": {
     "total": "Total",
@@ -50,7 +74,9 @@
     "stale6mSub": "mucho sin contacto",
     "noFollowup": "Sin seguimiento",
     "noFollowupSub": "nuevo, sin contacto",
-    "conversations": "Conversaciones activas"
+    "conversations": "Conversaciones activas",
+    "neverContacted": "Nunca contactado",
+    "neverContactedSub": "sin contacto aún"
   },
   "filters": {
     "search": "Buscar",
@@ -110,6 +136,8 @@
     "vacancyFallback": "Vacante {{id}}"
   },
   "drawer": {
+    "availability": "Disponibilidad",
+    "availabilityNone": "Ninguna",
     "label": "Candidato",
     "tabs": {
       "profile": "Perfil",
@@ -161,7 +189,10 @@
     "province": "Provincia",
     "linkedin": "LinkedIn",
     "summary": "Resumen",
-    "selectDate": "Seleccionar una fecha"
+    "selectDate": "Seleccionar una fecha",
+    "groupPersonal": "Personal",
+    "groupContact": "Contacto",
+    "groupAddress": "Dirección"
   },
   "addFields": {
     "functionTitle": "Puesto",
@@ -211,7 +242,12 @@
       "appointment": "Cita",
       "followup": "Seguimiento",
       "warning": "Advertencia"
-    }
+    },
+    "consentTitle": "Consentimientos",
+    "consentWhatsapp": "Mensajes de WhatsApp",
+    "consentEmail": "Correo electrónico",
+    "consentNewsletter": "Boletín",
+    "consentGivenAt": "Consentimiento otorgado el {{date}}"
   },
   "statistics": {
     "placements": "Colocaciones",
@@ -336,7 +372,11 @@
     "sector": "Sector preferido",
     "minRate": "Tarifa horaria mín. (€)",
     "contract": "Preferencia de contrato",
-    "remarks": "Observaciones"
+    "remarks": "Observaciones",
+    "groupAvailability": "Disponibilidad",
+    "groupTravel": "Desplazamientos",
+    "groupWork": "Preferencias de trabajo",
+    "groupOther": "Otros"
   },
   "zzp": {
     "title": "Autónomo",
@@ -357,7 +397,11 @@
     "selfBilling": "Autofacturación",
     "paymentDiscount": "Descuento en horas y recargos",
     "mediationCosts": "Gastos de mediación diarios",
-    "paymentTerm": "Plazo de pago"
+    "paymentTerm": "Plazo de pago",
+    "groupCompany": "Empresa",
+    "groupAddress": "Dirección",
+    "groupInvoicing": "Facturación",
+    "groupPayment": "Pago"
   },
   "certified": {
     "issued": "Emitido",
