@@ -38,7 +38,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { t } = useTranslation('candidates')
   const locale = useLocale()
   const { formatDate } = useDateFormat()
-  const { candidateTypes, statuses, availability: availabilityOptions, funnelMeta, isApplicantStatus, hasApplicantStatus } = useLookups()
+  const { candidateTypes, statuses, funnelMeta, isApplicantStatus, hasApplicantStatus } = useLookups()
   const { colorOf: genderColor } = useGenders()
   const { functions, allowFreeEntry } = useFunctions()
   const { hasModule } = useAuth()
@@ -48,7 +48,6 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [cvGenerating,  setCvGenerating]  = useState(false)
   const [recruiter,     setRecruiter]     = useState(null)
   const [status,        setStatus]        = useState(null)
-  const [availability,  setAvailability]  = useState(null)
   const [types,         setTypes]         = useState(null)
   const [tags,          setTags]          = useState(null)
   // Header (name + function) edit — independent from the Profile-tab fields.
@@ -63,7 +62,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [prevId, setPrevId] = useState(c?.id)
   if (c?.id !== prevId) {
     setPrevId(c?.id)
-    setRecruiter(null); setStatus(null); setAvailability(null); setTypes(null)
+    setRecruiter(null); setStatus(null); setTypes(null)
     setTags(null); setHeaderEditing(false); setProfileEdits(null); setPhotoUrl(null); setHeaderForm(null)
   }
 
@@ -83,9 +82,6 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     onUpdate?.(c.id, { candidateTypes: next })
   }
   const changeStatus = (v) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
-  // Availability — separate axis from status; empty value clears it (→ null).
-  const currentAvailability = availability ?? c.availability
-  const changeAvailability = (v) => { setAvailability(v); onUpdate?.(c.id, { availability: v || null }) }
   const currentTags    = tags ?? c.tags ?? []
   // Funnel is an applicant concern: show it only for an applicant-flagged status.
   // Until a tenant flags one (additive rollout), keep showing it as before.
@@ -214,11 +210,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           renderTitle={renderTitle}
           actions={headerActions()}
           meta={[
-            { key: 'status', label: t('drawer.status'), value: currentStatus, options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 160 },
-            { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions, onChange: onOwnerChange, menuWidth: 200 },
-            { key: 'availability', label: t('drawer.availability'), value: currentAvailability ?? '', placeholder: t('drawer.availabilityNone'),
-              options: [{ value: '', label: t('drawer.availabilityNone') }, ...availabilityOptions.map(a => ({ value: a.value, label: a.label }))],
-              onChange: changeAvailability, menuWidth: 170 },
+            { key: 'status', label: t('drawer.status'), value: currentStatus, options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 160, width: 150 },
+            { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions, onChange: onOwnerChange, menuWidth: 200, width: 190 },
           ]}
           tags={{ items: currentTags, onAdd: tag => setTags([...currentTags, tag]), onRemove: tag => setTags(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
           tagsLabel={t('drawer.tags')}

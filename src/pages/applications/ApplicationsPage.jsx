@@ -553,8 +553,11 @@ export default function ApplicationsPage() {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   const filtered = useMemo(() => sollicitaties.filter(s => {
+    // Three buckets: matched (= hired/'Aangenomen'), rejected, and active (the rest).
     const isAfgewezen = s.fase === 'Afgewezen'
-    if (tab === 'actief'    && isAfgewezen)  return false
+    const isMatched   = s.fase === 'Aangenomen'
+    if (tab === 'actief'    && (isAfgewezen || isMatched)) return false
+    if (tab === 'matched'   && !isMatched)   return false
     if (tab === 'afgewezen' && !isAfgewezen) return false
     if (selectedFase.length && !selectedFase.includes(s.fase))              return false
     if (selectedVac.length  && !selectedVac.includes(String(s.vacatureId))) return false
@@ -614,7 +617,7 @@ export default function ApplicationsPage() {
         padding: '8px 20px', background: 'var(--surface)',
         borderBottom: '1px solid var(--border)', flexShrink: 0,
       }}>
-        {['actief', 'afgewezen'].map(t => (
+        {['actief', 'matched', 'afgewezen'].map(t => (
           <button key={t} onClick={() => setTab(t)} style={{
             padding: '5px 14px', fontSize: 13, fontWeight: tab === t ? 600 : 400,
             background: tab === t ? 'var(--color-primary)' : 'transparent',

@@ -55,7 +55,7 @@ export default function SchemaSection({ schema }) {
 
   return (
     <SettingsScaffold
-      title={t(`${k}.title`)}
+      title={t(schema.titleI18n ?? `${k}.title`)}
       subtitle={t(`${k}.subtitle`, '')}
       maxWidth={schema.maxWidth ?? 720}
       form={form}>

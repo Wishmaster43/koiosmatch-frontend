@@ -60,7 +60,7 @@ export default function CustomersPage() {
     const ctrl = new AbortController()
     setLoading(true)
     setError(null)
-    api.get('/sm/customers', { params: { page, per_page: pageSize }, signal: ctrl.signal })
+    api.get('/sm_customers', { params: { page, per_page: pageSize }, signal: ctrl.signal })
       .then(res => {
         const { rows, total: rowTotal, lastPage: rowLastPage } = unwrapList(res)
         if (rows.length === 0 && USE_MOCKS) {

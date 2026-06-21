@@ -12,11 +12,11 @@ const COOLDOWN_SECS = 60
 
 // key drives i18n (sync.items.<key>.label/desc); endpoint null = not available yet.
 const SYNC_ENDPOINTS = [
-  { key: 'candidates',  endpoint: '/sm/candidates/sync' },
-  { key: 'customers',   endpoint: '/sm/customers/sync' },
-  { key: 'locations',   endpoint: '/sm/customers/sync', viaCustomers: true },
-  { key: 'departments', endpoint: '/sm/customers/sync', viaCustomers: true },
-  { key: 'contacts',    endpoint: '/sm/customers/sync', viaCustomers: true },
+  { key: 'candidates',  endpoint: '/sm_candidates/sync' },
+  { key: 'customers',   endpoint: '/sm_customers/sync' },
+  { key: 'locations',   endpoint: '/sm_customers/sync', viaCustomers: true },
+  { key: 'departments', endpoint: '/sm_customers/sync', viaCustomers: true },
+  { key: 'contacts',    endpoint: '/sm_customers/sync', viaCustomers: true },
   { key: 'orders',      endpoint: null, disabled: true },
   { key: 'shifts',      endpoint: null, disabled: true },
   { key: 'invites',     endpoint: null, disabled: true },

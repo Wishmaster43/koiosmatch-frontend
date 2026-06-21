@@ -1,4 +1,7 @@
 {
+  "filters": {"status":"Status","direction":"Richting"},
+  "msgStatus": {"read":"Gelezen","delivered":"Afgeleverd","sent":"Verzonden","failed":"Mislukt"},
+  "msgDirection": {"inbound":"Inkomend","outbound":"Uitgaand"},
   "title": "WhatsApp",
   "updatedAt": "Bijgewerkt om {{time}}",
   "refresh": "Verversen",

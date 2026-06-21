@@ -60,7 +60,7 @@ export default function CandidatesReport() {
     setLoading(true)
     setError(null)
     try {
-      const res  = await api.get(`/sm/candidates?per_page=${candidates_per_page}`)
+      const res  = await api.get(`/sm_candidates?per_page=${candidates_per_page}`)
       const body = res.data
       setCandidates(Array.isArray(body) ? body : (body?.data ?? []))
     } catch {

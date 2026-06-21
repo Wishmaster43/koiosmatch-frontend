@@ -22,7 +22,7 @@ export default function LocationsReport() {
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   useEffect(() => {
-    api.get('/sm/customers')
+    api.get('/sm_customers')
       .then(res => {
         const customers = res.data?.data ?? res.data ?? []
         setLocations(customers.flatMap(c =>

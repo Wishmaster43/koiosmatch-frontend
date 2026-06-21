@@ -172,7 +172,7 @@ export default function DepartmentsPage() {
   // Dummy only in mock mode — a failed/empty call shows an empty list in prod.
   useEffect(() => {
     const ctrl = new AbortController()
-    api.get('/sm/customers', { signal: ctrl.signal })
+    api.get('/sm_customers', { signal: ctrl.signal })
       .then(res => {
         const { rows: customers } = unwrapList(res)
         const flat = customers.flatMap(c =>

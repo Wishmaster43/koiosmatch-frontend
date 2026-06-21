@@ -221,7 +221,7 @@ export default function LocationsPage() {
   // failed/empty call shows an empty list in prod, never fabricated rows.
   useEffect(() => {
     const ctrl = new AbortController()
-    api.get('/sm/customers', { signal: ctrl.signal })
+    api.get('/sm_customers', { signal: ctrl.signal })
       .then(res => {
         const { rows: customers } = unwrapList(res)
         const flat = customers.flatMap(c =>

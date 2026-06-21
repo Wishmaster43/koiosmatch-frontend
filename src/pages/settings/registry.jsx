@@ -55,13 +55,17 @@ import NotificationsSettings from './sections/NotificationsSettings'
 import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
 import { PlanbeheerSettings, BetaalmethodenSettings, AutoOpwaarderenSettings, GebruikSettings, FacturenSettings } from './sections/BillingSettings'
 
-import kpisSchema from './schemas/kpis'
+import { kpisLeads, kpisCandidates, kpisApplications, kpisCustomers } from './schemas/kpis'
 
 export const NAV_GROUPS = [
   {
     key: 'kpis', icon: Target,
     items: [
-      { id: 'kpis', label: 'KPIs', icon: Target, schema: kpisSchema },
+      // Sub-tabs per KPI area; labels via nav.<id>, fields share the `kpis.*` i18n.
+      { id: 'kpis_leads',        label: 'Leads KPIs',       icon: Target,        schema: kpisLeads },
+      { id: 'kpis_candidates',   label: 'Candidate KPIs',   icon: Users,         schema: kpisCandidates },
+      { id: 'kpis_applications', label: 'Application KPIs', icon: ClipboardList, schema: kpisApplications },
+      { id: 'kpis_customers',    label: 'Customer KPIs',    icon: Building2,      schema: kpisCustomers },
     ],
   },
   {

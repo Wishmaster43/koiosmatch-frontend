@@ -37,7 +37,7 @@ export default function ShiftmanagerDashboard() {
   const [loading,    setLoading]    = useState(true)
 
   useEffect(() => {
-    api.get(`/sm/candidates?per_page=${candidates_per_page}`)
+    api.get(`/sm_candidates?per_page=${candidates_per_page}`)
       .then(res => {
         const body = res.data
         setCandidates(Array.isArray(body) ? body : (body?.data ?? []))

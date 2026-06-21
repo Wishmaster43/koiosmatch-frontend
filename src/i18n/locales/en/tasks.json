@@ -1,0 +1,14 @@
+{
+  "title": "Tasks",
+  "loading": "Loading tasks…",
+  "empty": "No tasks yet.",
+  "error": "Couldn't load tasks.",
+  "cols": {
+    "task": "Task",
+    "candidate": "Candidate",
+    "type": "Type",
+    "status": "Status",
+    "assignee": "Assigned to",
+    "due": "Due date"
+  }
+}

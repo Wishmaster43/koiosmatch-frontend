@@ -1,4 +1,7 @@
 {
+  "filters": {"status":"Status","direction":"Direction"},
+  "msgStatus": {"read":"Read","delivered":"Delivered","sent":"Sent","failed":"Failed"},
+  "msgDirection": {"inbound":"Inbound","outbound":"Outbound"},
   "title": "WhatsApp",
   "updatedAt": "Updated at {{time}}",
   "refresh": "Refresh",

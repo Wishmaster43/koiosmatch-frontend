@@ -22,7 +22,7 @@ export default function CustomersReport() {
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   useEffect(() => {
-    api.get('/sm/customers')
+    api.get('/sm_customers')
       .then(res => {
         const data = res.data
         setCustomers(Array.isArray(data) ? data : (data?.data ?? []))

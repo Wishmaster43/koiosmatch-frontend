@@ -1,5 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useRightPanel } from '../../context/RightPanelContext'
 import { ChevronLeft, ChevronRight, Plus, X, Clock, MapPin, User, Save, Star, Search } from 'lucide-react'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -609,6 +610,35 @@ export default function PlanningPage() {
   const [modal,      setModal]      = useState(null) // date to add shift for
   const todayDate = useMemo(() => new Date(), [])
 
+  // Right-panel filters (shift type + location). Registering them makes the shared
+  // topbar filter button appear and feeds the ReportFilterSidebar — same as the
+  // candidates/applications pages.
+  const [selectedShift,    setSelectedShift]    = useState([])
+  const [selectedLocation, setSelectedLocation] = useState([])
+  const { registerFilters, unregisterFilters } = useRightPanel()
+
+  const shiftOptions    = useMemo(() => [...new Set(shifts.map(s => s.title))].map(v => ({ value: v, label: v, count: shifts.filter(s => s.title === v).length })), [shifts])
+  const locationOptions = useMemo(() => [...new Set(shifts.map(s => s.location))].map(v => ({ value: v, label: v, count: shifts.filter(s => s.location === v).length })), [shifts])
+
+  const filterGroups = useMemo(() => [
+    { key: 'shift',    label: t('filters.shift'),    selected: selectedShift,    options: shiftOptions,
+      onToggle: v => setSelectedShift(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+    { key: 'location', label: t('filters.location'), selected: selectedLocation, options: locationOptions,
+      onToggle: v => setSelectedLocation(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+  ], [t, selectedShift, selectedLocation, shiftOptions, locationOptions])
+
+  useEffect(() => {
+    registerFilters('planning-page', filterGroups)
+    return () => unregisterFilters('planning-page')
+  }, [filterGroups, registerFilters, unregisterFilters])
+
+  // Apply the active filters to the shifts shown in every view.
+  const filteredShifts = useMemo(() => shifts.filter(s => {
+    if (selectedShift.length    && !selectedShift.includes(s.title))       return false
+    if (selectedLocation.length && !selectedLocation.includes(s.location)) return false
+    return true
+  }), [shifts, selectedShift, selectedLocation])
+
   const navigate = (dir) => {
     const d = new Date(current)
     if (view === 'month') d.setMonth(d.getMonth() + dir)
@@ -691,10 +721,10 @@ export default function PlanningPage() {
 
       {/* ── Calendar body ── */}
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {view === 'month' && <MonthView current={current} shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
-        {view === 'week'  && <WeekView  current={current} shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
-        {view === 'day'   && <DayView   current={current} shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
-        {view === 'list'  && <ListView  shifts={shifts} today={todayDate} onDayClick={handleDayClick} />}
+        {view === 'month' && <MonthView current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
+        {view === 'week'  && <WeekView  current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
+        {view === 'day'   && <DayView   current={current} shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
+        {view === 'list'  && <ListView  shifts={filteredShifts} today={todayDate} onDayClick={handleDayClick} />}
       </div>
 
       {/* ── Modal ── */}

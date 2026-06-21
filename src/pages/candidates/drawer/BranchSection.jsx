@@ -14,7 +14,7 @@ export default function BranchSection({ c }) {
   const ref = useRef(null)
 
   useEffect(() => {
-    api.get('/crm/customers').then(r => {
+    api.get('/customers').then(r => {
       const d = r.data; setAllLocations(Array.isArray(d) ? d : (d?.data ?? []))
     }).catch(() => {})
   }, [])

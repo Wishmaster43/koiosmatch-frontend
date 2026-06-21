@@ -1,4 +1,5 @@
 {
+  "filters": { "status": "Status", "module": "Module" },
   "schedule": {
     "header": "Schedule",
     "run": "Run",

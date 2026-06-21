@@ -1,0 +1,15 @@
+{
+  "title": "Matches",
+  "loading": "Matches laden…",
+  "empty": "Nog geen matches.",
+  "error": "Matches konden niet geladen worden.",
+  "cols": {
+    "candidate": "Kandidaat",
+    "vacancy": "Vacature",
+    "client": "Klant",
+    "score": "Match",
+    "stage": "Fase",
+    "owner": "Eigenaar",
+    "date": "Aangemaakt"
+  }
+}

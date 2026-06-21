@@ -39,6 +39,10 @@
   },
   "nav": {
     "kpis": "KPI's",
+    "kpis_leads": "Leads",
+    "kpis_candidates": "Kandidaten",
+    "kpis_applications": "Sollicitaties",
+    "kpis_customers": "Klanten",
     "display": "Weergave",
     "branding": "Huisstijl",
     "security": "Beveiliging",

@@ -44,7 +44,7 @@ export default function LocationsTable() {
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   useEffect(() => {
-    api.get('/sm/customers')
+    api.get('/sm_customers')
       .then(res => {
         const customers = res.data?.data ?? res.data ?? []
         const flat = customers.flatMap(c =>

@@ -124,7 +124,9 @@ export default function EntityHeader({
       {meta.length > 0 && (
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginBottom: 12 }}>
           {meta.map(m => (
-            <div key={m.key} style={{ flex: 1, minWidth: 0 }}>
+            // Compact, fixed-width picker (no flex-grow) so the pickers stay tight
+            // and left-aligned instead of stretching across the whole header.
+            <div key={m.key} style={{ width: m.width ?? 200, maxWidth: '100%', minWidth: 0, flexShrink: 0 }}>
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{m.label}</div>
               <SelectMenu value={m.value} options={m.options} onChange={m.onChange} placeholder={m.placeholder} menuWidth={m.menuWidth ?? 180} />
             </div>

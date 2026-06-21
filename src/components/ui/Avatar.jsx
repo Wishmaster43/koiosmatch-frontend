@@ -20,14 +20,18 @@ export default function Avatar({ initials, size = 28, photo, color, soft = false
     )
   }
   // Soft variant — pale tinted bubble with dark, legible initials (calmer than a
-  // saturated solid fill); used in detail headers where the avatar is large.
-  const isHex = typeof bg === 'string' && bg.startsWith('#')
+  // saturated solid fill); used in detail headers where the avatar is large. The
+  // tint must work for hex (+alpha suffix) AND CSS-var colours (via color-mix), so a
+  // no-photo avatar ALWAYS shows a coloured placeholder — never a blank/grey bubble.
+  const isHex      = typeof bg === 'string' && bg.startsWith('#')
+  const softBg     = isHex ? bg + '1A' : `color-mix(in srgb, ${bg} 12%, transparent)`
+  const softBorder = isHex ? bg + '55' : `color-mix(in srgb, ${bg} 40%, transparent)`
   return (
     <div style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: soft ? (isHex ? bg + '1A' : 'var(--bg)') : bg,
+      background: soft ? softBg : bg,
       color: soft ? 'var(--text)' : '#fff',
-      border: soft ? `1px solid ${isHex ? bg + '55' : 'var(--border)'}` : 'none',
+      border: soft ? `1px solid ${softBorder}` : 'none',
       fontSize: size * 0.36, fontWeight: 700 }}>
       {initials}
     </div>

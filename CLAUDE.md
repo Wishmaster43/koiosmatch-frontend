@@ -291,6 +291,13 @@ not borders. Always handle the four UI states (loading/error/empty/success).
   **ShiftManager → `sm_`** (`/sm_customers`, `/sm_candidates`, `/sm_kpis`, `/sm_reports/…`) and
   **HelloFlex → `hf_`** (`/hf_customers`, `/hf_candidates`, …). Never prefix a native resource,
   and never let an external mirror occupy a clean name (e.g. no `/crm/…` path prefix for native).
+- **Backend/DB is out of scope here.** This is the frontend repo. Never write migrations,
+  models or controllers in `koiosmatch-api` from a frontend task — diagnose and hand it to
+  backend-Claude. **DB-migratie-conventie (backend):** **NOOIT** een `add_*` / `alter_*` /
+  `change_*`-migratie maken — vouw elke schemawijziging in de bestaande `create_<table>`-migratie
+  (een nieuw migratiebestand = alleen voor een nieuwe tabel). Toepassen gebeurt via
+  `migrate:fresh` / `php artisan dev:reset` (pre-release). De volledige regel staat in de
+  backend-CLAUDE.md.
 
 ---
 

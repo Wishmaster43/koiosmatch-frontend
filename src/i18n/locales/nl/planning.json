@@ -1,4 +1,5 @@
 {
+  "filters": { "shift": "Dienst", "location": "Locatie" },
   "addShift": "Dienst toevoegen",
   "sectionOrder": "Order",
   "sectionLocation": "Locatie",

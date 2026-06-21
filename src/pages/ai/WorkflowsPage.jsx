@@ -9,9 +9,10 @@
  *   - MODULE_META   → local label/icon lookup for the module chips shown per workflow
  *   - (further down)→ folder tree, workflow rows, run/create handlers, editor mount
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
+import { useRightPanel } from '../../context/RightPanelContext'
 import {
   Zap, Users, Calendar, MessageCircle, Database,
   Mail, Clock, Play, Plus, MoreHorizontal,
@@ -272,6 +273,32 @@ export default function WorkflowsPage() {
   const [dragOverFolder,  setDragOverFolder]  = useState(null)
   const dragWf = useRef(null)
 
+  // Right-panel filters (status + module type) — registering them shows the topbar
+  // filter button, just like the candidates/planning pages.
+  const [selectedStatus, setSelectedStatus] = useState([])
+  const [selectedModule, setSelectedModule] = useState([])
+  const { registerFilters, unregisterFilters } = useRightPanel()
+
+  const statusOptions = useMemo(() => [...new Set(workflows.map(w => w.status))].filter(Boolean)
+    .map(v => ({ value: v, label: t(`status.${v}`, { defaultValue: v }), count: workflows.filter(w => w.status === v).length })), [workflows, t])
+  const moduleOptions = useMemo(() => {
+    const counts = {}
+    workflows.forEach(w => new Set((w.steps ?? []).map(s => s.type)).forEach(ty => { counts[ty] = (counts[ty] ?? 0) + 1 }))
+    return Object.keys(counts).map(v => ({ value: v, label: t(`modules.${v}`, { defaultValue: v }), count: counts[v] }))
+  }, [workflows, t])
+
+  const filterGroups = useMemo(() => [
+    { key: 'status', label: t('filters.status'), selected: selectedStatus, options: statusOptions,
+      onToggle: v => setSelectedStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+    { key: 'module', label: t('filters.module'), selected: selectedModule, options: moduleOptions,
+      onToggle: v => setSelectedModule(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+  ], [t, selectedStatus, selectedModule, statusOptions, moduleOptions])
+
+  useEffect(() => {
+    registerFilters('workflows-page', filterGroups)
+    return () => unregisterFilters('workflows-page')
+  }, [filterGroups, registerFilters, unregisterFilters])
+
   useEffect(() => {
     Promise.all([
       api.get('/workflows').then(r => (r.data?.data ?? r.data ?? []).map(normalizeWorkflow)).catch(() => MOCK_WORKFLOWS),
@@ -333,9 +360,13 @@ export default function WorkflowsPage() {
   }
 
   const visibleWorkflows = workflows.filter(wf => {
-    if (selectedFolder === null) return true
-    if (selectedFolder === 'unassigned') return !wf.folder_id
-    return wf.folder_id === selectedFolder
+    // Folder filter (left list)
+    if (selectedFolder === 'unassigned' && wf.folder_id) return false
+    if (selectedFolder && selectedFolder !== 'unassigned' && wf.folder_id !== selectedFolder) return false
+    // Right-panel filters
+    if (selectedStatus.length && !selectedStatus.includes(wf.status)) return false
+    if (selectedModule.length && !(wf.steps ?? []).some(s => selectedModule.includes(s.type))) return false
+    return true
   })
 
   return (

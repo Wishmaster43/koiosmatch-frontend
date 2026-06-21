@@ -1,0 +1,14 @@
+{
+  "title": "Taken",
+  "loading": "Taken laden…",
+  "empty": "Nog geen taken.",
+  "error": "Taken konden niet geladen worden.",
+  "cols": {
+    "task": "Taak",
+    "candidate": "Kandidaat",
+    "type": "Type",
+    "status": "Status",
+    "assignee": "Toegewezen aan",
+    "due": "Vervaldatum"
+  }
+}

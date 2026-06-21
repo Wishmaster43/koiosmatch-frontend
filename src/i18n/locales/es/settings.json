@@ -39,6 +39,10 @@
   },
   "nav": {
     "kpis": "KPI",
+    "kpis_leads": "Leads",
+    "kpis_candidates": "Candidatos",
+    "kpis_applications": "Candidaturas",
+    "kpis_customers": "Clientes",
     "display": "Visualización",
     "branding": "Marca",
     "security": "Seguridad",

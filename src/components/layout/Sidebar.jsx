@@ -13,7 +13,7 @@ import { canAccessPage } from '../../lib/access'
 import {
   LayoutDashboard, Users, Building2,
   MessageCircle, Settings, ChevronDown, Brain, BarChart3, TrendingUp, BrainCircuit,
-  FileText, Briefcase, CalendarDays, Search, Loader2,
+  FileText, Briefcase, CalendarDays, Search, Loader2, Handshake, ListChecks,
 } from 'lucide-react'
 
 // Resolve a nav item's label from i18n by id (dots → underscores to stay flat).
@@ -216,14 +216,19 @@ function TenantSwitcher({ expanded }) {
 }
 
 // Regular top-level pages. Gated entries (see lib/access.js) are filtered by
-// accessible_pages below. AI Agents + Workflows are NOT here — they are modules
-// shown in their own group (MODULE_NAV_ITEMS) and only for users who may access them.
+// accessible_pages below. Planning, AI & Workflows and WhatsApp live here too
+// (moved up out of "Modules"); they stay gated per page via accessible_pages.
 const NAV_ITEMS = [
-  { id: 'dashboard',      label: 'Dashboard',     icon: LayoutDashboard },
-  { id: 'candidates',     label: 'Kandidaten',    icon: Users },
-  { id: 'applications',   label: 'Sollicitaties', icon: FileText },
-  { id: 'vacancies',      label: 'Vacatures',     icon: Briefcase },
-  { id: 'customers', label: 'Klanten', icon: Building2 },
+  { id: 'dashboard',      label: 'Dashboard',      icon: LayoutDashboard },
+  { id: 'candidates',     label: 'Kandidaten',     icon: Users },
+  { id: 'applications',   label: 'Sollicitaties',  icon: FileText },
+  { id: 'vacancies',      label: 'Vacatures',      icon: Briefcase },
+  { id: 'matches',        label: 'Matches',        icon: Handshake },
+  { id: 'tasks',          label: 'Taken',          icon: ListChecks },
+  { id: 'customers',      label: 'Klanten',        icon: Building2 },
+  { id: 'planning',       label: 'Planning',       icon: CalendarDays },
+  { id: 'aiagents',       label: 'AI & Workflows', icon: Brain },
+  { id: 'whatsapp',       label: 'WhatsApp',       icon: MessageCircle },
 ]
 
 // Module pages — shown in a separate "Modules" nav group. All are gated by
@@ -252,9 +257,6 @@ const MODULE_NAV_ITEMS = [
       { id: 'helloflex.dashboard', label: 'Dashboard-HF' },
     ],
   },
-  { id: 'planning',  label: 'Planning',       icon: CalendarDays },
-  { id: 'aiagents',  label: 'AI & Workflows', icon: Brain },
-  { id: 'whatsapp',  label: 'WhatsApp',       icon: MessageCircle },
 ]
 
 function SubNavItem({ item, active, onNavigate }) {

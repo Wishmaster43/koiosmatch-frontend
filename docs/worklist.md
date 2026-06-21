@@ -141,16 +141,19 @@ Dingen die alleen jij kunt beslissen of testen.
   per type uitbreiden (#3); fetch laten respecteren `activity_log_limit` (Modules→Shiftmanager);
   **per-kandidaat changelog-tab** op de kandidaat (#10/#4) die `/candidates/{id}/activity` toont.
   Hangt op C-16.
-- [ ] **B-15 · Endpoint-rename doortrekken (gecoördineerd met C-17).** Native schoon, ShiftManager `sm_`,
-  HelloFlex `hf_` (CLAUDE.md §10). Frontend-calls aanpassen volgens de audit: `/crm/customers` →
-  `/customers` (`CustomersPage`, `BranchSection`); `/sm/customers*` → `/sm_customers*` (`SyncSettings`
-  + `pages/shiftmanager/*`); `/sm/candidates` → `/sm_candidates`; `/sm/reports/*` → `/sm_reports/*`
-  (`components/reports/*` + `pages/shiftmanager/*Report`). **Pas omzetten als C-17 live is** (geen
-  fallback → anders 404). Wacht op C-17.
+- [x] **B-15 · Endpoint-rename doortrekken — KLAAR (2026-06-21, door backend-Claude op Danny's verzoek).**
+  Alle frontend-calls omgezet en 1-op-1 geverifieerd tegen de backend-routes: `/crm/customers` →
+  **`/customers`** (`CustomersPage`, `BranchSection`); alle `/sm/*` → **`/sm_*`** — `/sm_customers(/sync)`
+  (`SyncSettings`, `reports/*Table`, `pages/shiftmanager/*`), `/sm_candidates(/sync)` (`WorkflowCanvasEditor`,
+  `CandidatesReport`, `ShiftmanagerDashboard`, `CandidatesDetailPage`), `/sm_reports/*` (`ShiftsChartsBlock`,
+  `OrdersTable`). 19 bestanden, alleen quoted endpoint-strings (comments ongemoeid). Geen `/crm/`- of
+  `/sm/`-endpoint meer in `src/`. ShiftManager-pagina's + Klanten laden weer.
 
 ### ◐ Recent afgerond aan de frontend (ter context)
-**KPI's = eigen settings-menu** (uit groep "Algemeen" gehaald) · **2FA/Security verplaatst naar het
-eigen Profiel** (tab "Beveiliging"; weg uit org-instellingen — MFA is per-gebruiker) ·
+**KPI's = eigen settings-menu** met **subtabjes** (Leads / Kandidaten / Sollicitaties / Klanten —
+schema-gedreven, bestaande KPI's verdeeld; meer per categorie kan Danny aanvullen) · **2FA/Security
+verplaatst naar het eigen Profiel** (tab "Beveiliging"; weg uit org-instellingen — MFA is per-gebruiker;
+Profiel breder gemaakt) · ontbrekende `groups.kpis`/`groups.security`-labels toegevoegd (5 talen) ·
 Industrie instelbaar (lookup + `useIndustries`, wacht op C-7) · locatie-formulier
 volwaardig (straat/huisnr/toevoeging/postcode/plaats/land + KvK/BTW/contact, wacht op C-6) ·
 "Adresregel 2" verwijderd · placements → **matches** (UI + code + endpoint, backend moet
@@ -178,7 +181,8 @@ secret 1×/regenerate) · **uitgaande webhooks** + event-filter (`EventCatalog`,
 **bulk-acties fase 1** (eigenaar · funnel-fase · kandidaat-type · tag verwijderen · notitie · archiveren) op
 generieke `ActionMenu` + `bulkMutate`, met autorisatie-gate op archiveren (wacht op C-15). ·
 **Per-recruiter-donut gefixt** (defensieve stats-lezers, B-5) · **recruiter-kleurkiezer** in *Beheer → Gebruikers* (B-11) + palet naar `lib/colorPresets.js`. ·
-**Beschikbaarheid (availability) als aparte as** (A4): lookup-sectie *Personalisatie → Beschikbaarheid* (`/availability-options`) + drawer-picker los van status; `LookupsContext`+`mapCandidate`+PATCH `availability`. `is_applicant`-funnel-gating zat al in de drawer.
+**Beschikbaarheid (availability) als aparte as** (A4): lookup-sectie *Personalisatie → Beschikbaarheid* (`/availability-options`) + drawer-picker los van status; `LookupsContext`+`mapCandidate`+PATCH `availability`. `is_applicant`-funnel-gating zat al in de drawer. ·
+**Sidebar: Matches + Taken** (modulaire pages `pages/matches/`+`pages/tasks/`, gegate als ATS-pagina, GET `/matches`·`/tasks` met lege-staat) · **Sollicitaties: tab "Matched"** (fase Aangenomen, uit Actief).
 
 ---
 
@@ -323,14 +327,11 @@ opgeslagen via `PATCH /candidates/{id}` als `consent: { whatsapp_opt_in, email_o
 newsletter_opt_in }` (bool). AVG: leg per toestemming ook **tijdstip + bron** vast
 (wanneer/hoe gegeven) en lever die terug in GET-detail. Geen marketing-verzending zonder opt-in.
 
-### ☐ C-12 · Recruiter-kleur in de owner-payload  *(NIEUW — klein)*
-Update-endpoint + opslag bestaan al: `PUT/PATCH /users/{id}` accepteert `avatar_color`
-(`UserController::update`, in `$fillable`) en `/users` geeft het terug → de kiezer (B-11)
-werkt. **Alleen nog dit:**
-- Voeg **`avatar_color`** toe aan de owner-payload van `/candidates`: in `attachOwners()`
-  het `User::...->get([...])` uitbreiden met `'avatar_color'` (+ de owner-velden van de
-  list/detail-resource), zodat het eigenaar-icoon in de kandidatentabel de kleur toont.
-- Optioneel: seed recruiters met een kleur uit het zachte palet (anders fallback-kleur).
+### ✅ C-12 · Recruiter-kleur in de owner-payload — BACKEND KLAAR (2026-06-21)
+`GET /candidates` geeft nu per rij `owner: { id, name, avatar_color }` terug (`avatar_color`
+toegevoegd in `attachOwners()` + `CandidateListResource`). `null` als de recruiter geen
+kleur heeft gekozen → frontend valt terug op de automatische kleur. Het eigenaar-icoon in
+de kandidatentabel kan nu de gekozen kleur tonen.
 
 ### ◐ In uitvoering / groot
 - **WhatsApp WABA + WAHA (NOWEB) self-hosted gateway** — warm (WABA) + koud (gateway),
@@ -366,7 +367,23 @@ Voedt het Functie-veld (creatable combobox) op kandidaat, voorkeuren en vacature
 lijst) zodat de frontend de "te corrigeren"-werklijst kan tonen; pas de setting niet toe zolang er
 mismatches zijn. Terug naar `true` mag altijd zonder check.
 
-### ☐ C-15 · Kandidaat-bulk-mutaties — endpoints  *(NIEUW — blokkeert B-3)*
+### ✅ C-15 · Kandidaat-bulk-mutaties — BACKEND KLAAR (2026-06-21)
+Geleverd + getest (11 tests: feature + authz + tenant-isolatie). **B-3 kan live.** Bevestigd:
+- **Response-keys:** `owner|funnel-stage|candidate-type|tags/remove|notes` → `200 { updated[], skipped[] }`;
+  `archive` → `{ archived[], skipped[] }`; `restore` → `{ restored[], skipped[] }`. `skipped` = onbekend /
+  andere tenant / al in doeltoestand.
+- **`candidate_ids`** = 1..**500** (`>500` → 422 op `candidate_ids`), elk een uuid.
+- **`candidate-type` = REPLACE** (zet `candidate_types` op exact `[candidate_type]`).
+- **`funnel_type`** wordt gevalideerd tegen de `funnel_types`-lookup (= `prospect|intake|pool|alumni`);
+  `candidate_type` tegen `candidate_types`.
+- **`owner_id`** moet een user **in deze tenant** zijn (anders 422 op `owner_id`).
+- **Archiveren = soft-delete** (`deleted_at`, herstelbaar via `restore`). `GET /candidates` én
+  `/candidates/stats` **verbergen gearchiveerden standaard**; `?include_archived=1` toont ze.
+- **Perm:** `archive`/`restore` = `candidates.delete` (403 zonder), de rest = `candidates.update`.
+  Audit-log `candidates` per actie met **alleen ids/slugs** (tag-tekst en notitie-body níet gelogd).
+
+<details><summary>oorspronkelijke spec (ter referentie)</summary>
+
 Frontend roept deze al aan (optimistisch + revert tot ze live zijn). Alles tenant-scoped
 via de tenant-connectie (cross-tenant onmogelijk), Eloquent-bindings, batch `max:500` → 422,
 idempotent, audit met **alleen ids** (geen PII). Kandidaten via UUID `id`. Standaard-response:
@@ -380,6 +397,7 @@ doeltoestand). Pool-endpoints zijn al klaar (zie D).
 - `POST /candidates/bulk/archive` `{ candidate_ids }` — **perm `candidates.delete`** (strenger; 403 zonder). SOFT-DELETE (`deleted_at`/`archived_at`), herstelbaar, audit. Response `{ archived, skipped }`. `GET /candidates` + `/candidates/stats` moeten gearchiveerden **standaard verbergen**; `?include_archived=1` om te tonen.
 - `POST /candidates/bulk/restore` `{ candidate_ids }` — perm `candidates.delete`; un-archive. Response `{ restored, skipped }`.
 Bevestig: routes, response-keys, replace-vs-append, en hoe gearchiveerde rijen uit de default-lijst blijven.
+</details>
 
 ### ☐ C-16 · Audit log — meer dekking + per-entiteit endpoint  *(NIEUW)*
 - Log méér events (tenant-scoped, geen PII in properties waar vermijdbaar): kandidaat

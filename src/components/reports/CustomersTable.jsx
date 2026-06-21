@@ -148,7 +148,7 @@ export default function CustomersTable() {
   const load = () => {
     setLoading(true)
     setError(null)
-    api.get('/sm/customers')
+    api.get('/sm_customers')
       .then(res => {
         const { rows: real } = unwrapList(res)
         if (USE_MOCKS) {

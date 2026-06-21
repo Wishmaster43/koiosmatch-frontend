@@ -12,7 +12,7 @@
  *   - MessageFeed       → recent messages with direction + status
  *   - EscalationList    → conversations flagged for human follow-up
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   MessageCircle, Users, CheckSquare, AlertTriangle,
@@ -23,6 +23,7 @@ import {
   Tooltip, ResponsiveContainer, Legend,
 } from 'recharts'
 import api from '../../lib/api'
+import { useRightPanel } from '../../context/RightPanelContext'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -315,6 +316,36 @@ export default function WhatsAppPage() {
 
   useEffect(() => { load() }, [])
 
+  // Right-panel filters for the message feed (status + direction). Registering them
+  // shows the shared topbar filter button — consistent with the other pages.
+  const [selectedStatus,    setSelectedStatus]    = useState([])
+  const [selectedDirection, setSelectedDirection] = useState([])
+  const { registerFilters, unregisterFilters } = useRightPanel()
+
+  const statusOptions = useMemo(() => [...new Set(messages.map(m => m.status))].filter(Boolean)
+    .map(v => ({ value: v, label: t(`msgStatus.${v}`, { defaultValue: v }), count: messages.filter(m => m.status === v).length })), [messages, t])
+  const directionOptions = useMemo(() => [...new Set(messages.map(m => m.direction))].filter(Boolean)
+    .map(v => ({ value: v, label: t(`msgDirection.${v}`, { defaultValue: v }), count: messages.filter(m => m.direction === v).length })), [messages, t])
+
+  const filterGroups = useMemo(() => [
+    { key: 'status',    label: t('filters.status'),    selected: selectedStatus,    options: statusOptions,
+      onToggle: v => setSelectedStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+    { key: 'direction', label: t('filters.direction'), selected: selectedDirection, options: directionOptions,
+      onToggle: v => setSelectedDirection(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+  ], [t, selectedStatus, selectedDirection, statusOptions, directionOptions])
+
+  // Only register groups that actually have options (none while disconnected/empty).
+  useEffect(() => {
+    registerFilters('whatsapp-page', filterGroups.filter(g => g.options.length > 0))
+    return () => unregisterFilters('whatsapp-page')
+  }, [filterGroups, registerFilters, unregisterFilters])
+
+  const filteredMessages = useMemo(() => messages.filter(m => {
+    if (selectedStatus.length    && !selectedStatus.includes(m.status))       return false
+    if (selectedDirection.length && !selectedDirection.includes(m.direction)) return false
+    return true
+  }), [messages, selectedStatus, selectedDirection])
+
   if (noConnection && !loading.stats) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -382,7 +413,7 @@ export default function WhatsAppPage() {
 
       {/* Feed + Escalaties */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 14 }}>
-        <MessageFeed    messages={messages}       loading={loading.messages} />
+        <MessageFeed    messages={filteredMessages} loading={loading.messages} />
         <EscalationList escalations={escalations} loading={loading.escalations} />
       </div>
 

@@ -1,0 +1,15 @@
+{
+  "title": "Matches",
+  "loading": "Loading matches…",
+  "empty": "No matches yet.",
+  "error": "Couldn't load matches.",
+  "cols": {
+    "candidate": "Candidate",
+    "vacancy": "Vacancy",
+    "client": "Client",
+    "score": "Match",
+    "stage": "Stage",
+    "owner": "Owner",
+    "date": "Created"
+  }
+}

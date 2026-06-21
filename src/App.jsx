@@ -51,6 +51,8 @@ const ShiftmanagerDashboard  = lazy(() => import('./pages/shiftmanager/Shiftmana
 const PlanningPage           = lazy(() => import('./pages/planning/PlanningPage'))
 const ApplicationsPage       = lazy(() => import('./pages/applications/ApplicationsPage'))
 const VacanciesPage          = lazy(() => import('./pages/vacancies/VacanciesPage'))
+const MatchesPage            = lazy(() => import('./pages/matches/MatchesPage'))
+const TasksPage              = lazy(() => import('./pages/tasks/TasksPage'))
 import { ThemeProvider }      from './context/ThemeContext'
 import { AppsProvider } from './context/AppsContext'
 import { LookupsProvider } from './context/LookupsContext'
@@ -68,6 +70,8 @@ const PAGE_TITLES = {
   candidates:                   'Candidates',
   applications:                 'Applications',
   vacancies:                    'Vacancies',
+  matches:                      'Matches',
+  tasks:                        'Tasks',
   customers:                    'Customers',
   'customers.locations':        'Customers — Locations',
   'customers.departments':      'Customers — Departments',
@@ -194,6 +198,8 @@ function DashboardLayout() {
       case 'candidates':             return <CandidatesPage />
       case 'applications':           return <ApplicationsPage />
       case 'vacancies':              return <VacanciesPage />
+      case 'matches':                return <MatchesPage />
+      case 'tasks':                  return <TasksPage />
       case 'customers':              return <CustomersPage />
       case 'planning':               return <PlanningPage />
 
