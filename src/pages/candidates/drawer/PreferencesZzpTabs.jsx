@@ -22,7 +22,7 @@ export function PreferencesTab({ c, onSave }) {
     remarks:     pref.remarks        ?? '',
   }
   const fields = [
-    { key: 'beschikbaar_per', label: t('preferences.availableFrom'), group: t('preferences.groupAvailability') },
+    { key: 'beschikbaar_per', label: t('preferences.availableFrom'), group: t('preferences.groupAvailability'), type: 'date' },
     { key: 'hoursPerWeek',   label: t('preferences.hoursPerWeek'),  group: t('preferences.groupAvailability') },
     { key: 'dagen',           label: t('preferences.days'),          group: t('preferences.groupAvailability') },
     { key: 'reisafstand',     label: t('preferences.maxDistance'),   group: t('preferences.groupTravel') },

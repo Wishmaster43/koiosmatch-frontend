@@ -1,0 +1,65 @@
+import { useTranslation } from 'react-i18next'
+import { FileText } from 'lucide-react'
+import EntityDrawer from '../../components/drawer/EntityDrawer'
+import EntityHeader from '../../components/drawer/EntityHeader'
+import ApplicationTab from './drawer/ApplicationTab'
+import CandidateTab from './drawer/CandidateTab'
+import VacancyTab from './drawer/VacancyTab'
+import InterviewsTab from './drawer/InterviewsTab'
+import AppointmentsTab from './drawer/AppointmentsTab'
+import NotesTab from './drawer/NotesTab'
+import Timeline from './drawer/Timeline'
+
+// The tab order (matches the screenshots).
+const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'timeline', 'notes']
+
+/**
+ * ApplicationDrawer — thin container: declares the header config + tab list and
+ * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
+ */
+export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore }) {
+  const { t } = useTranslation('applications')
+  if (!a) return null
+
+  // Map a tab id to its content component.
+  const renderTab = (id) => {
+    switch (id) {
+      case 'application':  return <ApplicationTab application={a} onReject={onReject} onAdjustScore={onAdjustScore} />
+      case 'candidate':    return <CandidateTab application={a} />
+      case 'vacancy':      return <VacancyTab application={a} />
+      case 'interviews':   return <InterviewsTab application={a} />
+      case 'appointments': return <AppointmentsTab application={a} />
+      case 'timeline':     return <Timeline items={a.timeline ?? []} emptyText={t('timeline.empty')} />
+      case 'notes':        return <NotesTab application={a} />
+      default:             return null
+    }
+  }
+
+  return (
+    <EntityDrawer
+      entity={a}
+      expanded={expanded}
+      onToggleExpand={onToggleExpand}
+      footer={(
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: a.created || '—' })}</span>
+          <button style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 500,
+            padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)',
+            background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+            <FileText size={12} /> {t('drawer.downloadCv')}
+          </button>
+        </div>
+      )}
+      tabs={TAB_IDS.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: () => renderTab(id) }))}
+      header={() => (
+        <EntityHeader
+          label={t('drawer.label')}
+          expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
+          avatar={{ initials: a.candidateInitials, soft: true }}
+          title={a.candidateName}
+          subtitle={a.vacancyTitle}
+        />
+      )}
+    />
+  )
+}

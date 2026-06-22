@@ -1,27 +1,31 @@
 /**
  * ModulesSettings — super-admin tab to set a tenant's package (tier). Each package
- * maps to a set of accessible_pages on the backend. Package labels come from i18n;
- * the feature matrix columns are product names kept as-is.
+ * maps to a set of accessible_pages on the backend. Package labels come from i18n.
+ * Rows are grouped into commercial plans (Koios Core/Plus/Suite) and standalone
+ * reporting modules (Shiftmanager / HelloFlex / AI Agents).
  */
-import { useState, useEffect } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Package, RefreshCw, Save } from 'lucide-react'
 import api from '../../../lib/api'
 import { useAuth } from '../../../context/AuthContext'
 
 // Package IDs must match what the backend accepts in PUT /tenant-modules { package }.
-// Matrix model: 10 packages × 5 feature dimensions (col = feature, row = package).
+// Matrix model: 10 packages × 5 feature dimensions (col = feature, row = package),
+// split into 'plans' (ATS-based tiers) and 'standalone' (reporting modules).
 const PACKAGES = [
-  { id: 'reporting_sm',        nr: 1,  sm: true,  hf: false, ai: false, ats: false, plan: false },
-  { id: 'reporting_hf',        nr: 2,  sm: false, hf: true,  ai: false, ats: false, plan: false },
-  { id: 'reporting_sm_hf',     nr: 3,  sm: true,  hf: true,  ai: false, ats: false, plan: false },
-  { id: 'reporting_sm_ai',     nr: 4,  sm: true,  hf: false, ai: true,  ats: false, plan: false },
-  { id: 'reporting_hf_ai',     nr: 5,  sm: false, hf: true,  ai: true,  ats: false, plan: false },
-  { id: 'reporting_sm_hf_ai',  nr: 6,  sm: true,  hf: true,  ai: true,  ats: false, plan: false },
-  { id: 'ats_crm',             nr: 7,  sm: false, hf: false, ai: false, ats: true,  plan: false },
-  { id: 'ats_crm_ai',          nr: 8,  sm: false, hf: false, ai: true,  ats: true,  plan: false },
-  { id: 'ats_crm_planning',    nr: 9,  sm: false, hf: false, ai: false, ats: true,  plan: true  },
-  { id: 'ats_crm_ai_planning', nr: 10, sm: false, hf: false, ai: true,  ats: true,  plan: true  },
+  // Pakketten — ATS-based commercial tiers (Koios Core / Plus / Suite)
+  { id: 'ats_crm',             group: 'plans',      sm: false, hf: false, ai: false, ats: true,  plan: false },
+  { id: 'ats_crm_ai',          group: 'plans',      sm: false, hf: false, ai: true,  ats: true,  plan: false },
+  { id: 'ats_crm_ai_planning', group: 'plans',      sm: false, hf: false, ai: true,  ats: true,  plan: true  },
+  { id: 'ats_crm_planning',    group: 'plans',      sm: false, hf: false, ai: false, ats: true,  plan: true  },
+  // Losse modules — standalone reporting (Shiftmanager / HelloFlex / AI Agents)
+  { id: 'reporting_sm',        group: 'standalone', sm: true,  hf: false, ai: false, ats: false, plan: false },
+  { id: 'reporting_hf',        group: 'standalone', sm: false, hf: true,  ai: false, ats: false, plan: false },
+  { id: 'reporting_sm_hf',     group: 'standalone', sm: true,  hf: true,  ai: false, ats: false, plan: false },
+  { id: 'reporting_sm_ai',     group: 'standalone', sm: true,  hf: false, ai: true,  ats: false, plan: false },
+  { id: 'reporting_hf_ai',     group: 'standalone', sm: false, hf: true,  ai: true,  ats: false, plan: false },
+  { id: 'reporting_sm_hf_ai',  group: 'standalone', sm: true,  hf: true,  ai: true,  ats: false, plan: false },
 ]
 
 // Feature columns — product/feature names, kept as-is.
@@ -131,43 +135,55 @@ export default function ModulesSettings() {
             {PACKAGES.map((pkg, i) => {
               const isActive   = currentPkgId === pkg.id
               const isSelected = selectedId   === pkg.id
+              // Sub-header row before the first package of each group.
+              const isFirstOfGroup = i === 0 || PACKAGES[i - 1].group !== pkg.group
               return (
-                <tr key={pkg.id}
-                  onClick={() => setSelectedId(pkg.id)}
-                  style={{
-                    cursor: 'pointer',
-                    borderBottom: i < PACKAGES.length - 1 ? '1px solid var(--border)' : 'none',
-                    background: isSelected ? 'var(--color-secondary-bg)' : isActive ? '#F0FDF4' : 'white',
-                    transition: 'background 0.1s',
-                  }}
-                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#F9FAFB' }}
-                  onMouseLeave={e => { e.currentTarget.style.background = isSelected ? 'var(--color-secondary-bg)' : isActive ? '#F0FDF4' : 'white' }}
-                >
-                  <td style={{ padding: '11px 16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: '#9CA3AF', minWidth: 22 }}>{pkg.nr}</span>
-                      <span style={{ fontSize: 13, fontWeight: isSelected || isActive ? 600 : 400,
-                                      color: isSelected ? '#1D4ED8' : '#111827' }}>
-                        {pkgLabel(pkg.id)}
-                      </span>
-                      {isActive && (
-                        <span style={{ fontSize: 10, fontWeight: 600, color: '#059669',
-                                        background: 'var(--color-success-bg)', borderRadius: 999, padding: '1px 7px' }}>
-                          {t('modules.current')}
+                <Fragment key={pkg.id}>
+                  {isFirstOfGroup && (
+                    <tr style={{ background: 'var(--surface-alt, #F9FAFB)', borderBottom: '1px solid var(--border)' }}>
+                      <td colSpan={MATRIX_COLS.length + 2}
+                        style={{ padding: '7px 16px', fontSize: 10, fontWeight: 700, color: 'var(--text-muted)',
+                                 textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                        {t(`modules.groups.${pkg.group}`)}
+                      </td>
+                    </tr>
+                  )}
+                  <tr
+                    onClick={() => setSelectedId(pkg.id)}
+                    style={{
+                      cursor: 'pointer',
+                      borderBottom: i < PACKAGES.length - 1 ? '1px solid var(--border)' : 'none',
+                      background: isSelected ? 'var(--color-secondary-bg)' : isActive ? '#F0FDF4' : 'white',
+                      transition: 'background 0.1s',
+                    }}
+                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#F9FAFB' }}
+                    onMouseLeave={e => { e.currentTarget.style.background = isSelected ? 'var(--color-secondary-bg)' : isActive ? '#F0FDF4' : 'white' }}
+                  >
+                    <td style={{ padding: '11px 16px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 13, fontWeight: isSelected || isActive ? 600 : 400,
+                                        color: isSelected ? '#1D4ED8' : '#111827' }}>
+                          {pkgLabel(pkg.id)}
                         </span>
-                      )}
-                    </div>
-                  </td>
-                  {MATRIX_COLS.map(col => <MatrixCell key={col.key} active={pkg[col.key]} />)}
-                  <td style={{ textAlign: 'center', paddingRight: 12 }}>
-                    {isSelected && (
-                      <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#1D4ED8',
-                                     display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Check size={10} color="white" />
+                        {isActive && (
+                          <span style={{ fontSize: 10, fontWeight: 600, color: '#059669',
+                                          background: 'var(--color-success-bg)', borderRadius: 999, padding: '1px 7px' }}>
+                            {t('modules.current')}
+                          </span>
+                        )}
                       </div>
-                    )}
-                  </td>
-                </tr>
+                    </td>
+                    {MATRIX_COLS.map(col => <MatrixCell key={col.key} active={pkg[col.key]} />)}
+                    <td style={{ textAlign: 'center', paddingRight: 12 }}>
+                      {isSelected && (
+                        <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#1D4ED8',
+                                       display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <Check size={10} color="white" />
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                </Fragment>
               )
             })}
           </tbody>

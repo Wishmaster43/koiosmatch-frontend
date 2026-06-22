@@ -1,0 +1,212 @@
+{
+  "page": {
+    "title": "Vacancies",
+    "subtitle": "Easily manage and publish all your open positions.",
+    "add": "New vacancy",
+    "searchPlaceholder": "Search vacancies",
+    "loading": "Loading vacancies…",
+    "empty": "No vacancies yet.",
+    "loadError": "Couldn't load vacancies.",
+    "count": "All vacancies"
+  },
+  "buckets": {
+    "all": "All"
+  },
+  "columns": {
+    "title": "Title",
+    "code": "#",
+    "status": "Status",
+    "leads": "Leads",
+    "applications": "Applications",
+    "published": "Published",
+    "owner": "Owner",
+    "client": "Client",
+    "createdAt": "Created on"
+  },
+  "publishedState": {
+    "yes": "Published",
+    "no": "Not published"
+  },
+  "insights": {
+    "statusTitle": "Status",
+    "ownerTitle": "Recruiter",
+    "clientTitle": "Client",
+    "clearFilter": "Clear filter"
+  },
+  "kpi": {
+    "applied": "Applied",
+    "accepted": "Accepted",
+    "invited": "Invited",
+    "proposed": "Proposal sent",
+    "hired": "Hired",
+    "rejected": "Rejected"
+  },
+  "filters": {
+    "search": "Search",
+    "status": "Status",
+    "owner": "Recruiter",
+    "client": "Client",
+    "category": "Category",
+    "industry": "Industry",
+    "employmentType": "Employment type",
+    "categories": {
+      "general": "General",
+      "organisation": "Organisation"
+    }
+  },
+  "bulk": {
+    "selected": "{{count}} selected",
+    "actions": "Bulk actions",
+    "deselect": "Deselect",
+    "changeOwner": "Change recruiter",
+    "searchOwner": "Search recruiter",
+    "noUsers": "No users",
+    "changeStatus": "Change status",
+    "searchStatus": "Search status",
+    "changeClient": "Change client",
+    "searchClient": "Search client",
+    "noClients": "No clients",
+    "publishing": "Publishing",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "removeTag": "Remove tag",
+    "searchTag": "Search tag",
+    "noTags": "No tags",
+    "addNote": "Add note",
+    "notePlaceholder": "Write a note…",
+    "noteSubmit": "Add",
+    "archive": "Archive",
+    "archiveConfirm": "Archive {{count}} vacancies?",
+    "ownerChanged": "Recruiter changed for {{count}} vacancies.",
+    "statusChanged": "Status set to {{value}} for {{count}} vacancies.",
+    "clientChanged": "Client changed for {{count}} vacancies.",
+    "published_one": "{{count}} vacancy published.",
+    "published_other": "{{count}} vacancies published.",
+    "unpublished_one": "{{count}} vacancy unpublished.",
+    "unpublished_other": "{{count}} vacancies unpublished.",
+    "tagRemoved": "Tag “{{tag}}” removed from {{count}} vacancies.",
+    "noteAdded": "Note added to {{count}} vacancies.",
+    "archived": "{{count}} vacancies archived.",
+    "mutateError": "Couldn't apply the change.",
+    "archiveError": "Couldn't archive."
+  },
+  "drawer": {
+    "entityLabel": "Vacancy",
+    "createdAt": "Created on {{date}}",
+    "edit": "Edit",
+    "status": "Status",
+    "owner": "Recruiter",
+    "client": "Client",
+    "selectClient": "Select a client",
+    "tags": "Tags",
+    "published": "Published",
+    "notPublished": "Not published",
+    "tabs": {
+      "details": "Details",
+      "applicants": "Applications",
+      "matching": "Matching",
+      "publishing": "Publish",
+      "documents": "Documents",
+      "timeline": "Timeline",
+      "notes": "Notes",
+      "statistics": "Statistics"
+    }
+  },
+  "matching": {
+    "title": "AI matching weights",
+    "subtitle": "Set how important each dimension is for this vacancy. The AI weighs candidates accordingly.",
+    "less": "Less important",
+    "balanced": "Balanced",
+    "very": "Very important",
+    "save": "Save",
+    "saved": "Saved",
+    "dim": {
+      "qualifications": "Qualifications",
+      "technical_fit": "Technical fit",
+      "soft_skills": "Soft skills",
+      "cultural_alignment": "Cultural alignment",
+      "career_aspirations": "Career aspirations",
+      "location": "Location"
+    }
+  },
+  "details": {
+    "groups": {
+      "general": "General",
+      "requirements": "Requirements",
+      "conditions": "Conditions"
+    },
+    "id": "Vacancy ID",
+    "status": "Status",
+    "employmentType": "Employment type",
+    "location": "Location",
+    "salary": "Salary",
+    "hours": "Weekly hours",
+    "experience": "Experience",
+    "seniority": "Seniority",
+    "education": "Education",
+    "industry": "Industry",
+    "category": "Category",
+    "skills": "Required skills",
+    "addSkill": "Add skill",
+    "noSkills": "No skills yet.",
+    "description": "Description",
+    "descriptionPlaceholder": "Describe the position…"
+  },
+  "publishing": {
+    "channels": "Job boards",
+    "applicationSettings": "Application settings",
+    "fields": {
+      "cv": "CV",
+      "cover_letter": "Cover letter",
+      "photo": "Photo",
+      "remarks": "Remarks",
+      "interview_consent": "Interview consent"
+    },
+    "values": {
+      "required": "Required",
+      "optional": "Optional",
+      "hidden": "Hidden"
+    },
+    "customFields": "Custom fields",
+    "noCustomFields": "No custom fields configured.",
+    "integrate": "Integrate",
+    "publishedOn": "Published",
+    "notPublished": "Not published"
+  },
+  "applicants": {
+    "title": "Applications",
+    "empty": "No applications yet.",
+    "leads": "Leads",
+    "totalLeads": "Total leads",
+    "phase": "Phase",
+    "source": "Source",
+    "byPhase": "By phase",
+    "candidate": "Candidate"
+  },
+  "statistics": {
+    "title": "Conversion",
+    "conversionRate": "Conversion rate",
+    "appliedToHired": "Applied → hired",
+    "bySource": "By source",
+    "leadsToApplications": "Leads → applications",
+    "empty": "Not enough data yet."
+  },
+  "modal": {
+    "title": "New vacancy",
+    "fields": {
+      "title": "Title",
+      "client": "Client",
+      "status": "Status",
+      "owner": "Recruiter",
+      "employmentType": "Employment type",
+      "industry": "Industry",
+      "category": "Category",
+      "location": "Location"
+    },
+    "titlePlaceholder": "e.g. Nurse | The Hague",
+    "create": "Create vacancy",
+    "cancel": "Cancel",
+    "creating": "Creating…",
+    "required": "Title is required."
+  }
+}

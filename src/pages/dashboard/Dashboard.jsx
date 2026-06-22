@@ -1,49 +1,45 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useCandidateCount } from '../../lib/queries'
 import { useRightPanel } from '../../context/RightPanelContext'
-import { Users, Building2, FileText, Briefcase, TrendingUp, CheckCircle, AlertCircle, MessageCircle, CalendarDays } from 'lucide-react'
+import { useLookups } from '../../context/LookupsContext'
+import api from '../../lib/api'
+import PieChartCard from '../../components/charts/PieChartCard'
+import BarChartCard from '../../components/charts/BarChartCard'
+import LineChartCard from '../../components/charts/LineChartCard'
+import WeeklyBarChartCard from '../../components/charts/WeeklyBarChartCard'
+import { Users, CheckCircle, AlertCircle, Target, Euro } from 'lucide-react'
 
-const RECENT_CANDIDATES = [
-  { name: 'Ismail Eddahchouri',    initials: 'IE', status: 'Beschikbaar',     statusColor: 'var(--color-success)', role: 'Verzorgende IG',   time: '22:00' },
-  { name: 'Merel Van Muijlwijk',   initials: 'MV', status: 'Beschikbaar',     statusColor: 'var(--color-success)', role: 'Helpende',         time: '16:36' },
-  { name: 'Raginie Rasoelbaks',    initials: 'RR', status: 'In procedure',    statusColor: 'var(--color-warning)', role: 'Verpleegkundige',  time: '16:02' },
-  { name: 'Elif Akagündüz',        initials: 'EA', status: 'Beschikbaar',     statusColor: 'var(--color-success)', role: 'Gastvrouw',        time: '14:00' },
-  { name: 'Rubina Rosella Milan',  initials: 'RM', status: 'Intake gepland',  statusColor: 'var(--color-secondary)', role: 'Verzorgende',      time: '11:18' },
-]
+// Recent lists, AI runs and conversations are now live (GET /dashboard, C-30/C-31).
+// The demo placeholder arrays were removed — data is mapped from the endpoint below.
 
-const RECENT_APPLICATIONS = [
-  { candidate: 'Ismail Eddahchouri',   vacancy: 'Verzorgende IG — Papendrecht',  status: 'In behandeling', statusColor: 'var(--color-warning)', time: '12 jun' },
-  { candidate: 'Merel Van Muijlwijk',  vacancy: 'Helpende — Utrecht',            status: 'Afgewezen',      statusColor: 'var(--color-danger)', time: '11 jun' },
-  { candidate: 'Figen Ooijevaar',      vacancy: 'Zorgmedewerker — Den Haag',     status: 'Nieuw',          statusColor: 'var(--color-primary)', time: '11 jun' },
-  { candidate: 'Priscilla Benjamin',   vacancy: 'Verpleegkundige — Tilburg',      status: 'Aangenomen',     statusColor: 'var(--color-success)', time: '10 jun' },
-]
+// Turn a backend slug (status/funnel/stage value) into a readable label.
+const humanize = (s) =>
+  typeof s === 'string' && s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/[_-]/g, ' ') : (s ?? '—')
 
-const RECENT_LEADS = [
-  { name: 'Zorgcentrum De Eik',      contact: 'Linda Brouwer',  status: 'Warm',    statusColor: 'var(--color-warning)', time: '12 jun' },
-  { name: 'Thuiszorg Noord-Holland', contact: 'Peter van Dam',  status: 'Nieuw',   statusColor: 'var(--color-primary)', time: '11 jun' },
-  { name: 'Verpleeghuis Zonnehoek',  contact: 'Anke Smits',     status: 'Contact', statusColor: 'var(--color-secondary)', time: '10 jun' },
-]
+// Initials from a full name (max 2 letters), with a safe fallback.
+const initialsOf = (name) =>
+  (name || '').split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase() || '–'
 
-const RUNS = [
-  { name: 'Kandidaten Matching Agent', time: '08:00', ok: true,  n: 23  },
-  { name: 'No Response Checker',       time: '09:00', ok: true,  n: 12  },
-  { name: 'Shift Reminder',            time: '10:00', ok: false, err: 'API timeout' },
-  { name: 'Wekelijkse Rapportage',     time: '07:00', ok: true,  n: 441 },
-]
+// Compact "when": today → HH:mm, otherwise a short nl-NL date (e.g. "12 jun").
+const fmtWhen = (iso) => {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  return d.toDateString() === new Date().toDateString()
+    ? d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
+    : d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })
+}
 
-const CONVERSATIONS = [
-  { name: 'Jan de Vries', msg: 'Ik kan morgen om 09:00 starten',  time: '08:45' },
-  { name: 'Sofia Ahmed',  msg: 'Is de planning aangepast?',        time: '08:30' },
-  { name: 'Mark Jansen',  msg: 'Bedankt voor de update!',          time: '07:58' },
-  { name: 'Lisa Wong',    msg: 'Ik ben beschikbaar volgende week', time: '07:40' },
-]
+const eur = (v) =>
+  new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Number(v) || 0)
 
 function KpiCard({ label, value, sub, color, bg, Icon, onClick }) {
   return (
     <div onClick={onClick}
       style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
-        padding: '16px', cursor: onClick ? 'pointer' : 'default', flex: 1 }}>
+        padding: '16px', cursor: onClick ? 'pointer' : 'default', flex: 1, minWidth: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>{label}</span>
         <div style={{ width: 32, height: 32, borderRadius: 8, background: bg,
@@ -52,7 +48,16 @@ function KpiCard({ label, value, sub, color, bg, Icon, onClick }) {
         </div>
       </div>
       <div style={{ fontSize: 24, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{value}</div>
-      <div style={{ fontSize: 11, color: sub?.startsWith('+') ? 'var(--color-success)' : sub?.startsWith('-') ? 'var(--color-danger)' : 'var(--text-muted)' }}>{sub}</div>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{sub}</div>
+    </div>
+  )
+}
+
+// Themed container that hosts a (theme-agnostic) chart card.
+function Panel({ children }) {
+  return (
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
+      {children}
     </div>
   )
 }
@@ -87,19 +92,114 @@ function StatusBadge({ label, color }) {
     background: color + '20', color, whiteSpace: 'nowrap' }}>{label}</span>
 }
 
-const VESTIGINGEN = ['Yesway zorg B.V.', 'Yesway works B.V.', 'Yesway flex B.V.', 'Yesway recruitment B.V.']
-const PERIODES    = ['Vandaag', 'Deze week', 'Deze maand', 'Dit kwartaal', 'Dit jaar']
+// Period filter options: backend enum value → Dutch label. Vestiging + status
+// options now come live from GET /dashboard (filters.locations / filters.statuses).
+const PERIODES = [
+  ['vandaag', 'Vandaag'], ['week', 'Deze week'], ['maand', 'Deze maand'],
+  ['kwartaal', 'Dit kwartaal'], ['jaar', 'Dit jaar'],
+]
 
 export default function Dashboard({ onNavigate }) {
-  const { accessiblePages = [] } = useAuth()
-  const hasWhatsApp = accessiblePages.includes('whatsapp')
-  const hasAiAgents = accessiblePages.includes('aiagents')
+  const { t } = useTranslation('dashboard')
+  const { activeTenant } = useAuth()
 
   // Live total — same source as the Candidates table (/candidates meta.total).
   const { data: candidateTotal, isLoading: countLoading } = useCandidateCount()
-  const candidateTotalLabel = countLoading
-    ? '…'
-    : (candidateTotal ?? 0).toLocaleString('nl-NL')
+  const candidateTotalLabel = countLoading ? '…' : (candidateTotal ?? 0).toLocaleString('nl-NL')
+
+  // Live distributions/counts. /candidates/stats is live; /opportunities/stats
+  // is best-effort (renders only if it returns). Defensive field readers mirror
+  // the Candidates page (by_status→status, by_funnel→funnel_type, by_owner→owner_id).
+  const [stats, setStats] = useState(null)
+  const [opp,   setOpp]   = useState(null)
+  // One call (C-30/C-31) for the extra KPIs, recent lists, the timeseries chart and
+  // the module feeds (ai_runs / conversations). Returns the object directly (no wrapper).
+  const [dash,  setDash]  = useState(null)
+  useEffect(() => {
+    const ctrl = new AbortController()
+    api.get('/candidates/stats', { signal: ctrl.signal })
+      .then(r => setStats(r.data?.data ?? r.data ?? null)).catch(() => {})
+    api.get('/opportunities/stats', { signal: ctrl.signal })
+      .then(r => setOpp(r.data?.data ?? r.data ?? null)).catch(() => setOpp(null))
+    return () => ctrl.abort()
+  }, [activeTenant?.id])
+
+  // Status/funnel labels + colours come from the tenant lookups (NL, configurable)
+  // — never humanised backend slugs. Mirrors how the Candidates page renders them.
+  const { statusMeta, funnelMeta } = useLookups()
+
+  // Chart data: [{ name, value, color }] for the shared chart cards.
+  const statusData = useMemo(() =>
+    (stats?.by_status ?? []).map(o => { const v = o.value ?? o.status; const m = statusMeta(v); return { name: m.label, value: o.count ?? 0, color: m.color, filterValue: v } }).filter(d => d.value), [stats, statusMeta])
+  const recruiterData = useMemo(() =>
+    (stats?.by_owner ?? []).map(o => ({ name: o.name || '—', value: o.count ?? 0, filterValue: o.id ?? o.owner_id })).filter(d => d.value), [stats])
+  const funnelData = useMemo(() =>
+    (dash?.charts?.by_funnel ?? []).map(o => ({ name: o.label, value: o.count ?? 0, color: o.color, filterValue: o.value })).filter(d => d.value), [dash])
+  const oppStageData = useMemo(() =>
+    (opp?.by_stage ?? []).map(o => ({ name: o.label ?? humanize(o.key), value: o.value ?? 0, color: o.color, filterValue: o.key })).filter(d => d.value), [opp])
+
+  // Live feeds from GET /dashboard, mapped to the shapes the lists/charts render.
+  // Status/stage labels + colours come from the tenant lookups (never raw slugs).
+  const recentCandidates = useMemo(() => (dash?.recent?.candidates ?? []).map(c => {
+    const m = statusMeta(c.status_value)
+    return { name: c.name, initials: initialsOf(c.name), role: c.role || '—',
+      status: m.label, statusColor: m.color, time: fmtWhen(c.last_activity_at) }
+  }), [dash, statusMeta])
+
+  const recentApplications = useMemo(() => (dash?.recent?.applications ?? []).map(a => {
+    const m = funnelMeta(a.stage_value)
+    return { candidate: a.candidate_name || '—', vacancy: a.vacancy_title || '—',
+      status: m.label, statusColor: m.color, time: fmtWhen(a.created_at) }
+  }), [dash, funnelMeta])
+
+  const recentLeads = useMemo(() => (dash?.recent?.leads ?? []).map(l => ({
+    name: l.name, contact: l.contact_name || '—',
+    status: humanize(l.status_value), statusColor: 'var(--color-secondary)', time: fmtWhen(l.created_at),
+  })), [dash])
+
+  const runs = useMemo(() => (dash?.ai_runs ?? []).map(r => ({
+    name: r.name || '—', time: fmtWhen(r.ran_at), ok: r.ok, n: r.processed, err: r.error,
+  })), [dash])
+
+  const conversations = useMemo(() => (dash?.conversations ?? []).map(c => ({
+    name: c.name || '—', msg: c.last_message || '', time: fmtWhen(c.at),
+  })), [dash])
+
+  // Render the runs/conversations blocks on data presence — the backend already
+  // gates these feeds per module (workflows/whatsapp), so this avoids a page-flag
+  // mismatch hiding data a role legitimately has.
+  const showRuns = runs.length > 0
+  const showConv = conversations.length > 0
+
+  // Weekly trend (C-31): merge the three aligned series (same buckets) into one row
+  // per period for the grouped bar chart. Only series that have data are rendered.
+  const trendData = useMemo(() => {
+    const ts = dash?.charts?.timeseries ?? {}
+    const byName = new Map()
+    const add = (arr, key) => (arr ?? []).forEach(p => {
+      const row = byName.get(p.name) ?? { name: p.name }
+      row[key] = p.value ?? 0
+      byName.set(p.name, row)
+    })
+    add(ts.candidates_in, 'kandidaten')
+    add(ts.applications,  'sollicitaties')
+    add(ts.matches,       'matches')
+    return [...byName.values()]
+  }, [dash])
+  const trendSeries = useMemo(() => {
+    const present = new Set()
+    trendData.forEach(r => Object.keys(r).forEach(k => k !== 'name' && r[k] != null && present.add(k)))
+    return [
+      { key: 'kandidaten',    label: t('chart.series.candidates'),   color: 'var(--color-primary)' },
+      { key: 'sollicitaties', label: t('chart.series.applications'), color: 'var(--color-secondary)' },
+      { key: 'matches',       label: t('chart.series.matches'),      color: 'var(--color-accent)' },
+    ].filter(s => present.has(s.key))
+  }, [trendData, t])
+
+  const att = stats?.attention ?? {}
+  const num = (v) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
+  // Extract the filter value from a clicked chart datum (sector or legend item).
+  const fv = (d) => (d && (d.filterValue ?? d.payload?.filterValue)) || undefined
 
   const [selPeriode,   setSelPeriode]   = useState([])
   const [selVestiging, setSelVestiging] = useState([])
@@ -107,61 +207,88 @@ export default function Dashboard({ onNavigate }) {
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   const filterGroups = useMemo(() => [
-    {
-      key: 'periode', label: 'Periode',
-      selected: selPeriode,
-      options: PERIODES.map(p => ({ value: p, label: p })),
-      onToggle: v => setSelPeriode(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-    },
-    {
-      key: 'vestiging', label: 'Vestiging',
-      selected: selVestiging,
-      options: VESTIGINGEN.map(v => ({ value: v, label: v })),
-      onToggle: v => setSelVestiging(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-    },
-    {
-      key: 'kandidaatstatus', label: 'Kandidaatstatus',
-      selected: selStatus,
-      options: ['Beschikbaar','Nieuw kandidaat','In procedure','Intake gepland','Niet beschikbaar'].map(s => ({ value: s, label: s })),
-      onToggle: v => setSelStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
-    },
-  ], [selPeriode, selVestiging, selStatus])
+    { key: 'periode', label: 'Periode', selected: selPeriode,
+      options: PERIODES.map(([value, label]) => ({ value, label })),
+      onToggle: v => setSelPeriode(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+    { key: 'vestiging', label: 'Vestiging', selected: selVestiging,
+      options: (dash?.filters?.locations ?? []).map(l => ({ value: l.id, label: l.name })),
+      onToggle: v => setSelVestiging(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+    { key: 'kandidaatstatus', label: 'Kandidaatstatus', selected: selStatus,
+      options: (dash?.filters?.statuses ?? []).map(s => ({ value: s.value, label: s.label })),
+      onToggle: v => setSelStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+  ], [selPeriode, selVestiging, selStatus, dash])
 
   useEffect(() => {
     registerFilters('dashboard', filterGroups)
     return () => unregisterFilters('dashboard')
   }, [filterGroups, registerFilters, unregisterFilters])
 
+  // Refetch the summary whenever a filter changes. The dashboard is single-value per
+  // dimension, so the first selected entry is sent (period enum / status slug / branch id).
+  useEffect(() => {
+    const ctrl = new AbortController()
+    const params = {}
+    if (selPeriode[0])   params.period = selPeriode[0]
+    if (selStatus[0])    params.status = selStatus[0]
+    if (selVestiging[0]) params.location_id = selVestiging[0]
+    api.get('/dashboard', { params, signal: ctrl.signal })
+      .then(r => setDash(r.data ?? null)).catch(() => {})
+    return () => ctrl.abort()
+  }, [activeTenant?.id, selPeriode, selVestiging, selStatus])
+
+  // KPI strip — only metrics we have live data for (no faked numbers).
+  const kpis = [
+    { label: t('kpi.candidatesTotal'), value: candidateTotalLabel, sub: t('kpi.inAts'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: Users, onClick: () => onNavigate?.('candidates') },
+    { label: t('kpi.notContacted6m'), value: num(att.stale_6m), sub: t('kpi.attentionNeeded'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'stale6m' }) },
+    { label: t('kpi.neverContacted'), value: num(att.never_contacted), sub: t('kpi.attentionNeeded'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'neverContacted' }) },
+    { label: t('kpi.openTasks'), value: num(att.tasks), sub: t('kpi.linkedToCandidates'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: CheckCircle, onClick: () => onNavigate?.('tasks', { status: 'open' }) },
+    ...(opp ? [
+      { label: t('kpi.opportunities'), value: num(opp.total), sub: t('kpi.openOpportunities'), color: '#8B5CF6', bg: '#F3E8FF', Icon: Target, onClick: () => onNavigate?.('opportunities', { stage: 'open' }) },
+      { label: t('kpi.pipelineValue'), value: opp.pipeline_value != null ? eur(opp.pipeline_value) : '—', sub: t('kpi.sumOpenOpps'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Euro, onClick: () => onNavigate?.('opportunities', { stage: 'open' }) },
+    ] : []),
+  ]
+
   return (
     <div style={{ padding: 24, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
 
-
-      {/* KPI rij — ATS */}
-      <div style={{ marginBottom: 6 }}>
-        <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
-          <KpiCard label="Totaal kandidaten"         value={candidateTotalLabel} sub="In het ATS"  color="var(--color-primary)" bg="var(--color-primary-bg)" Icon={Users}      onClick={() => onNavigate?.('candidates')} />
-          <KpiCard label="Nieuwe kandidaten"         value="34"    sub="+12% vorige maand" color="var(--color-success)" bg="var(--color-success-bg)" Icon={TrendingUp}  onClick={() => onNavigate?.('candidates')} />
-          <KpiCard label="Openstaande sollicitaties" value="18"    sub="5 nieuw vandaag"   color="var(--color-warning)" bg="var(--color-warning-bg)" Icon={FileText}    onClick={() => onNavigate?.('applications')} />
-          <KpiCard label="Actieve vacatures"         value="9"     sub="3 urgent"          color="var(--color-danger)" bg="var(--color-danger-bg)" Icon={Briefcase}   onClick={() => onNavigate?.('vacancies')} />
-        </div>
+      {/* KPI-strip — live data */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+        {kpis.map(k => <KpiCard key={k.label} {...k} />)}
       </div>
 
-      {/* KPI rij — CRM */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <KpiCard label="Actieve klanten"     value="47"    sub="+3 deze maand"  color="var(--color-secondary)" bg="var(--color-secondary-bg)" Icon={Building2}    onClick={() => onNavigate?.('customers')} />
-          <KpiCard label="Leads in pipeline"   value="12"    sub="4 warm"         color="#8B5CF6" bg="#F3E8FF" Icon={TrendingUp}   />
-          <KpiCard label="Geplande diensten"   value="138"   sub="Deze week"      color="var(--color-success)" bg="var(--color-success-bg)" Icon={CalendarDays} onClick={() => onNavigate?.('planning')} />
-          {hasWhatsApp && <KpiCard label="Berichten verstuurd" value="1.847" sub="Deze maand" color="var(--color-info)" bg="var(--color-info-bg)" Icon={MessageCircle} onClick={() => onNavigate?.('whatsapp')} />}
-        </div>
-      </div>
-
-      {/* Blokken rij 1 */}
+      {/* Charts rij 1 — verdelingen uit /candidates/stats */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-        <Block title="Recente kandidaten" action="Alle kandidaten" onAction={() => onNavigate?.('candidates')}>
-          {RECENT_CANDIDATES.map((c, i) => (
+        <Panel><PieChartCard title={t('chart.byStatus')} data={statusData} colors={statusData.map(d => d.color)} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { status: fv(d) } : undefined)} /></Panel>
+        <Panel><PieChartCard title={t('chart.byRecruiter')} data={recruiterData} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { owner: fv(d) } : undefined)} /></Panel>
+      </div>
+
+      {/* Charts rij 2 — funnel + (kansen indien beschikbaar) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        <Panel><BarChartCard title={t('chart.funnel')} data={funnelData} colors={funnelData.map(d => d.color)} showAverage onBarClick={(d) => onNavigate?.('applications', fv(d) ? { stage: fv(d) } : undefined)} /></Panel>
+        <Panel>
+          {opp
+            ? <PieChartCard title={t('chart.byStage')} data={oppStageData} colors={oppStageData.map(d => d.color)} onItemClick={(d) => onNavigate?.('opportunities', fv(d) ? { stage: fv(d) } : undefined)} />
+            : <LineChartCard title={t('chart.intakeOverTime')} data={[]} />}
+        </Panel>
+      </div>
+
+      {/* Wekelijkse instroom — gegroepeerde bar: kandidaten · sollicitaties · matches (C-31). */}
+      <div style={{ marginBottom: 16 }}>
+        <Panel>
+          <WeeklyBarChartCard title={t('chart.intakeWeekly')} data={trendData} series={trendSeries}
+            onBarClick={(row, s) => {
+              const page = s.key === 'sollicitaties' ? 'applications' : s.key === 'matches' ? 'matches' : 'candidates'
+              onNavigate?.(page, row?.name ? { period: row.name } : undefined)
+            }} />
+        </Panel>
+      </div>
+
+      {/* Recente lijsten — demo-data tot er een feed is (B-22/C-30) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        <Block title={t('block.recentCandidates')} action={t('action.allCandidates')} onAction={() => onNavigate?.('candidates')}>
+          {recentCandidates.map((c, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
-              borderBottom: i < RECENT_CANDIDATES.length - 1 ? '1px solid var(--border)' : 'none' }}>
+              borderBottom: i < recentCandidates.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <Avatar initials={c.initials} size={28} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{c.name}</div>
@@ -173,10 +300,10 @@ export default function Dashboard({ onNavigate }) {
           ))}
         </Block>
 
-        <Block title="Recente sollicitaties" action="Alle sollicitaties" onAction={() => onNavigate?.('applications')}>
-          {RECENT_APPLICATIONS.map((a, i) => (
+        <Block title={t('block.recentApplications')} action={t('action.allApplications')} onAction={() => onNavigate?.('applications')}>
+          {recentApplications.map((a, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
-              borderBottom: i < RECENT_APPLICATIONS.length - 1 ? '1px solid var(--border)' : 'none' }}>
+              borderBottom: i < recentApplications.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{a.candidate}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.vacancy}</div>
@@ -188,12 +315,12 @@ export default function Dashboard({ onNavigate }) {
         </Block>
       </div>
 
-      {/* Blokken rij 2 */}
-      <div style={{ display: 'grid', gridTemplateColumns: hasAiAgents || hasWhatsApp ? '1fr 1fr 1fr' : '1fr', gap: 16, marginBottom: 16 }}>
-        <Block title="Leads in pipeline" action="Alle klanten" onAction={() => onNavigate?.('customers')}>
-          {RECENT_LEADS.map((l, i) => (
+      {/* Leads + (AI-runs / conversaties) — getoond op data-aanwezigheid (backend gate't per module) */}
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${1 + (showRuns ? 1 : 0) + (showConv ? 1 : 0)}, 1fr)`, gap: 16 }}>
+        <Block title={t('block.leadsPipeline')} action={t('action.allCustomers')} onAction={() => onNavigate?.('customers')}>
+          {recentLeads.map((l, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
-              borderBottom: i < RECENT_LEADS.length - 1 ? '1px solid var(--border)' : 'none' }}>
+              borderBottom: i < recentLeads.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{l.name}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{l.contact}</div>
@@ -204,11 +331,11 @@ export default function Dashboard({ onNavigate }) {
           ))}
         </Block>
 
-        {hasAiAgents && (
-          <Block title="Recente uitvoeringen" action="Alles" onAction={() => onNavigate?.('details.runs')}>
-            {RUNS.map((r, i) => (
+        {showRuns && (
+          <Block title={t('block.recentRuns')} action={t('action.all')} onAction={() => onNavigate?.('details.runs')}>
+            {runs.map((r, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
-                borderBottom: i < RUNS.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                borderBottom: i < runs.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0,
                   background: r.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -216,7 +343,7 @@ export default function Dashboard({ onNavigate }) {
                 </div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.ok ? `${r.n} verwerkt` : r.err}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{r.ok ? t('run.processed', { count: r.n }) : r.err}</div>
                 </div>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{r.time}</span>
               </div>
@@ -224,11 +351,11 @@ export default function Dashboard({ onNavigate }) {
           </Block>
         )}
 
-        {hasWhatsApp && (
-          <Block title="Recente conversaties" action="Alles" onAction={() => onNavigate?.('details.messages')}>
-            {CONVERSATIONS.map((c, i) => (
+        {showConv && (
+          <Block title={t('block.recentConversations')} action={t('action.all')} onAction={() => onNavigate?.('details.messages')}>
+            {conversations.map((c, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
-                borderBottom: i < CONVERSATIONS.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                borderBottom: i < conversations.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <Avatar initials={c.name.split(' ').map(n=>n[0]).join('')} size={28} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>{c.name}</div>

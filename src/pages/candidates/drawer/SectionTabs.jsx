@@ -123,14 +123,21 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove }) {
     { key: 'name',  label: t('addFields.skill') },
     { key: 'level', label: t('addFields.skillLevel') },
   ]
+  // Skills render as a vertical list (one per row) so edit/remove read clearly.
   return (
     <AddableSection title={t('sections.skills')} emptyText={t('sections.skillsEmpty')}
-      items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove} layout="tags"
-      renderItem={(v, i) => (
-        <span key={i} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 99,
-          border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
-          {typeof v === 'string' ? v : (v.name ?? v.skill)}
-        </span>
-      )} />
+      items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
+      renderItem={(v, i, arr) => {
+        const name  = typeof v === 'string' ? v : (v.name ?? v.skill ?? '')
+        const level = typeof v === 'string' ? '' : (v.level ?? '')
+        return (
+          <div key={v.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 0', paddingRight: 56,
+            borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0 }} />
+            <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{name}</span>
+            {level && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>· {level}</span>}
+          </div>
+        )
+      }} />
   )
 }

@@ -1,0 +1,299 @@
+{
+  "title": "Kunden",
+  "page": {
+    "add": "Kunde hinzufügen",
+    "searchPlaceholder": "Kunde, Debitorennr., Account-Manager suchen…",
+    "empty": "Keine Kunden gefunden.",
+    "loading": "Lädt…",
+    "loadError": "Kunden konnten nicht geladen werden."
+  },
+  "cols": {
+    "name": "Name",
+    "debtorNumber": "Debitorennr.",
+    "status": "Status",
+    "accountManager": "Account-Manager",
+    "locations": "Standorte",
+    "departments": "Abteilungen",
+    "contacts": "Kontakte",
+    "openVacancies": "Offene Stellen",
+    "city": "Ort",
+    "industry": "Branche"
+  },
+  "filters": {
+    "search": "Suchen",
+    "status": "Status",
+    "accountManager": "Account-Manager",
+    "city": "Ort",
+    "industry": "Branche",
+    "categories": {
+      "general": "Allgemein",
+      "organisation": "Organisation"
+    }
+  },
+  "insights": {
+    "statusTitle": "Status",
+    "amTitle": "Nach Account-Manager",
+    "clearFilter": "Filter zurücksetzen",
+    "locations": "Standorte",
+    "locationsSub": "Standorte gesamt",
+    "departments": "Abteilungen",
+    "departmentsSub": "Abteilungen gesamt",
+    "contacts": "Kontakte",
+    "contactsSub": "Kontakte gesamt",
+    "openVacancies": "Offene Stellen",
+    "openVacanciesSub": "offen",
+    "activeMatches": "Aktuell im Einsatz",
+    "activeMatchesSub": "aktive Matches",
+    "noContact": "Ohne Kontakt",
+    "noContactSub": "kein Kontakt verknüpft"
+  },
+  "drawer": {
+    "entityLabel": "Kunde",
+    "createdAt": "Erstellt am {{date}}",
+    "edit": "Bearbeiten",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "owner": "Account-Manager",
+    "status": "Status",
+    "tags": "Tags",
+    "addTag": "Tag hinzufügen",
+    "back": "Zurück",
+    "tabs": {
+      "overview": "Übersicht",
+      "locations": "Standorte",
+      "departments": "Abteilungen",
+      "contacts": "Kontakte",
+      "vacancies": "Stellen",
+      "opportunities": "Chancen",
+      "planning": "Planung",
+      "statistics": "Statistiken",
+      "documents": "Dokumente",
+      "notes": "Notizen"
+    }
+  },
+  "overview": {
+    "general": "Allgemein",
+    "online": "Online",
+    "settings": "Einstellungen",
+    "textsTitle": "Texte",
+    "website": "Website",
+    "employeeCount": "Mitarbeiter",
+    "toneOfVoice": "Tone of Voice",
+    "industry": "Branche",
+    "debtorNumber": "Debitorennummer",
+    "city": "Ort",
+    "hideCompanyName": "Firmennamen verbergen",
+    "hasCareerPage": "Hat Karriereseite",
+    "showInVacancies": "In meinen Stellen anzeigen",
+    "excludeFromSourcing": "Vom Sourcing ausschließen",
+    "privacyPolicyUrl": "URL Datenschutzerklärung",
+    "description": "Beschreibung",
+    "recruitmentProblems": "Recruiting-Herausforderungen"
+  },
+  "locations": {
+    "empty": "Noch keine Standorte",
+    "add": "Standort hinzufügen",
+    "searchPlaceholder": "Standort suchen…",
+    "col": {
+      "name": "Name",
+      "city": "Ort",
+      "departments": "Abteilungen",
+      "contacts": "Kontakte"
+    },
+    "detail": {
+      "addressTitle": "Adresse & Daten",
+      "street": "Straße",
+      "houseNumber": "Nr.",
+      "houseNumberSuffix": "Zusatz",
+      "postalCode": "PLZ",
+      "city": "Ort",
+      "country": "Land",
+      "coc": "Handelsregisternr.",
+      "vat": "USt-IdNr.",
+      "contactName": "Ansprechpartner",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "departmentsHere": "Abteilungen an diesem Standort",
+      "contactsHere": "Kontakte an diesem Standort",
+      "none": "Noch nichts verknüpft"
+    }
+  },
+  "departments": {
+    "empty": "Noch keine Abteilungen",
+    "add": "Abteilung hinzufügen",
+    "searchPlaceholder": "Abteilung suchen…",
+    "col": {
+      "name": "Name",
+      "location": "Standort",
+      "contacts": "Kontakte"
+    },
+    "detail": {
+      "infoTitle": "Abteilung",
+      "name": "Name",
+      "location": "Standort",
+      "description": "Beschreibung",
+      "contactsHere": "Kontakte in dieser Abteilung",
+      "none": "Noch nichts verknüpft"
+    }
+  },
+  "contacts": {
+    "empty": "Noch keine Kontakte",
+    "add": "Kontakt hinzufügen",
+    "searchPlaceholder": "Kontakt suchen…",
+    "col": {
+      "name": "Name",
+      "role": "Funktion",
+      "email": "E-Mail",
+      "phone": "Telefon"
+    },
+    "detail": {
+      "infoTitle": "Kontakt",
+      "name": "Name",
+      "role": "Funktion",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "primary": "Hauptkontakt",
+      "location": "Standort",
+      "department": "Abteilung",
+      "none": "Nicht angegeben"
+    }
+  },
+  "vacancies": {
+    "empty": "Keine Stellen für diesen Kunden.",
+    "col": {
+      "title": "Titel",
+      "status": "Status",
+      "applications": "Bewerbungen"
+    }
+  },
+  "opportunities": {
+    "openVacancies": "Offene Stellen",
+    "openVacanciesEmpty": "Keine offenen Stellen.",
+    "openShifts": "Offene Flex-Dienste",
+    "openShiftsEmpty": "Keine offenen Dienste.",
+    "planningOff": "Offene Dienste erscheinen, sobald das Planungsmodul aktiv ist.",
+    "col": {
+      "title": "Titel",
+      "status": "Status",
+      "applications": "Bewerbungen",
+      "date": "Datum",
+      "shift": "Dienst",
+      "department": "Abteilung"
+    }
+  },
+  "planning": {
+    "title": "Planung",
+    "activeNow": "Aktuell im Einsatz",
+    "activeNowSub": "aktive Einsätze",
+    "upcoming": "Kommende Dienste",
+    "upcomingEmpty": "Keine kommenden Dienste.",
+    "off": "Planungsinformationen erscheinen, sobald das Planungsmodul aktiv ist.",
+    "open": "Offen"
+  },
+  "statistics": {
+    "matchesTotal": "Matches gesamt",
+    "matchesTotalSub": "historisch",
+    "activeMatches": "Aktuell im Einsatz",
+    "activeMatchesSub": "aktive Matches",
+    "openVacancies": "Offene Stellen",
+    "openVacanciesSub": "offen",
+    "fillRate": "Besetzungsquote",
+    "fillRateSub": "besetzte Stellen",
+    "loadError": "Statistiken konnten nicht geladen werden.",
+    "overviewTitle": "Übersicht"
+  },
+  "documents": {
+    "empty": "Noch keine Dokumente."
+  },
+  "notes": {
+    "notes": "Notizen",
+    "newNote": "Neue Notiz",
+    "type": "Typ",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "notesEmpty": "Noch keine Notizen.",
+    "notePlaceholder": "Titel der Notiz",
+    "timeline": "Verlauf",
+    "timelineEmpty": "Noch keine Aktivität.",
+    "conversations": "Gespräche",
+    "conversationsEmpty": "Noch keine Gespräche."
+  },
+  "bulk": {
+    "selected": "{{count}} ausgewählt",
+    "actions": "Massenaktionen",
+    "deselect": "Auswahl aufheben",
+    "changeOwner": "Account-Manager ändern",
+    "searchOwner": "Benutzer suchen…",
+    "noUsers": "Keine Benutzer",
+    "changeStatus": "Status ändern",
+    "searchStatus": "Status suchen…",
+    "addTag": "Tag hinzufügen",
+    "tagPlaceholder": "Tag-Name",
+    "tagSubmit": "Hinzufügen",
+    "removeTag": "Tag entfernen",
+    "searchTag": "Tag suchen…",
+    "noTags": "Keine Tags",
+    "addNote": "Notiz hinzufügen",
+    "notePlaceholder": "Notiz eingeben…",
+    "noteSubmit": "Hinzufügen",
+    "archive": "Archivieren",
+    "archiveConfirm": "{{count}} Kunde(n) archivieren?",
+    "archived": "{{count}} Kunde(n) archiviert.",
+    "archiveError": "Archivieren fehlgeschlagen.",
+    "ownerChanged": "Account-Manager geändert zu {{name}} ({{count}}).",
+    "statusChanged": "Status geändert zu {{value}} ({{count}}).",
+    "tagAdded": "Tag „{{tag}}“ hinzugefügt ({{count}}).",
+    "tagRemoved": "Tag „{{tag}}“ entfernt ({{count}}).",
+    "noteAdded": "Notiz hinzugefügt ({{count}}).",
+    "mutateError": "Die Aktion ist fehlgeschlagen."
+  },
+  "modal": {
+    "title": "Kunde hinzufügen",
+    "subtitle": "Geben Sie die Daten des neuen Kunden ein",
+    "fillRequired": "Bitte Pflichtfelder ausfüllen",
+    "required": "Pflichtfeld",
+    "create": "Kunde anlegen",
+    "cancel": "Abbrechen",
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "z. B. Rivas Pflegegruppe",
+      "debtorNumber": "Debitorennummer",
+      "status": "Status",
+      "accountManager": "Account-Manager",
+      "selectOwner": "Account-Manager wählen",
+      "industry": "Branche",
+      "selectIndustry": "Branche wählen",
+      "city": "Ort",
+      "cityPlaceholder": "z. B. Gorinchem"
+    }
+  },
+  "subModal": {
+    "addLocation": "Standort hinzufügen",
+    "addDepartment": "Abteilung hinzufügen",
+    "addContact": "Kontakt hinzufügen",
+    "locationName": "Standortname",
+    "locationPlaceholder": "z. B. Hauptstandort",
+    "departmentName": "Abteilungsname",
+    "departmentPlaceholder": "z. B. Ambulante Pflege",
+    "selectLocation": "Standort",
+    "noLocationsFirst": "Zuerst einen Standort anlegen",
+    "contactName": "Name",
+    "contactPlaceholder": "z. B. Max Mustermann",
+    "role": "Funktion",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "isPrimary": "Hauptkontakt",
+    "street": "Straße",
+    "houseNumber": "Nr.",
+    "houseNumberSuffix": "Zusatz",
+    "postalCode": "PLZ",
+    "city": "Ort",
+    "country": "Land",
+    "coc": "Handelsregisternr.",
+    "vat": "USt-IdNr.",
+    "create": "Hinzufügen",
+    "cancel": "Abbrechen",
+    "required": "Pflichtfeld"
+  }
+}

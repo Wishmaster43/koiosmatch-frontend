@@ -49,7 +49,7 @@
     }
   },
   "modules": {
-    "candidate_filter": "Kandidaten Filter",
+    "candidates": "Kandidaten",
     "shift_fetcher": "Diensten Ophalen",
     "whatsapp_send": "WhatsApp Sturen",
     "database_update": "Database Updaten",

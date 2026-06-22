@@ -18,7 +18,8 @@
     "province": "Provincie",
     "talentPool": "Talentenpool",
     "koios": "Koios",
-    "createdAt": "Gemaakt op"
+    "createdAt": "Gemaakt op",
+    "lastContactType": "Contact-type"
   },
   "koios": {
     "actions": {
@@ -61,7 +62,10 @@
     "archive": "Archiveren",
     "archiveConfirm": "Weet je zeker dat je {{count}} kandidaten wilt archiveren?",
     "archived": "Gearchiveerd ({{count}})",
-    "archiveError": "Archiveren mislukt. Probeer het opnieuw."
+    "archiveError": "Archiveren mislukt. Probeer het opnieuw.",
+    "typeSubmit": "Toepassen",
+    "noTypes": "Geen typen",
+    "noneLabel": "geen"
   },
   "kpi": {
     "total": "Totaal",
@@ -73,7 +77,9 @@
     "inProgress": "In procedure",
     "inProgressSub": "lopende procedures",
     "intake": "Intake gepland",
-    "intakeSub": "komende intakes"
+    "intakeSub": "komende intakes",
+    "tasks": "Taken",
+    "tasksSub": "Open taken bij kandidaten"
   },
   "analytics": {
     "statusTitle": "Status",
@@ -135,14 +141,21 @@
       "province": "Provincie",
       "emailPlaceholder": "naam@voorbeeld.nl",
       "phonePlaceholder": "+31 6 12345678",
-      "cityPlaceholder": "Bijv. Amsterdam"
+      "cityPlaceholder": "Bijv. Amsterdam",
+      "street": "Straat",
+      "streetPlaceholder": "Bijv. Hoofdstraat",
+      "houseNumber": "Huisnummer",
+      "houseNumberSuffix": "Toevoeging",
+      "postalCode": "Postcode"
     },
     "gender": {
       "male": "Man",
       "female": "Vrouw",
       "other": "Anders / niet opgegeven"
     },
-    "vacancyFallback": "Vacature {{id}}"
+    "vacancyFallback": "Vacature {{id}}",
+    "statusPanelTitle": "Status",
+    "statusPanelHint": "Standaard Lead. Een nieuwe kandidaat begint als Lead."
   },
   "drawer": {
     "availability": "Beschikbaarheid",
@@ -156,7 +169,8 @@
       "preferences": "Voorkeuren",
       "zzp": "ZZP",
       "communication": "Communicatie",
-      "statistics": "Statistieken"
+      "statistics": "Statistieken",
+      "changelog": "Wijzigingslog"
     },
     "status": "Status",
     "owner": "Eigenaar",
@@ -206,7 +220,11 @@
     "selectDate": "Selecteer een datum",
     "groupPersonal": "Persoonlijk",
     "groupContact": "Contact",
-    "groupAddress": "Adres"
+    "groupAddress": "Adres",
+    "placeOfBirth": "Geboorteplaats",
+    "clear": "Wissen",
+    "expand": "Vergroten",
+    "collapse": "Verkleinen"
   },
   "addFields": {
     "functionTitle": "Functietitel",
@@ -478,5 +496,25 @@
     "madeBy": "Opgemaakt door {{company}}",
     "madeVia": "Opgemaakt via KoiosMatch",
     "nameFallback": "Naam"
+  },
+  "changelog": {
+    "loading": "Wijzigingen laden…",
+    "error": "Wijzigingslog kon niet geladen worden.",
+    "empty": "Nog geen wijzigingen vastgelegd.",
+    "system": "Systeem"
+  },
+  "matchesView": {
+    "title": "Matches",
+    "empty": "Nog geen matches.",
+    "client": "Klant",
+    "stage": "Fase",
+    "contract": "Contract",
+    "backofficeLinked": "Gekoppeld met backoffice (HelloFlex)",
+    "contractStatus": {
+      "none": "Geen contract",
+      "pending": "In behandeling",
+      "active": "Actief",
+      "ended": "Beëindigd"
+    }
   }
 }

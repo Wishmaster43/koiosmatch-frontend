@@ -25,7 +25,7 @@ import '@xyflow/react/dist/style.css'
 import {
   X, Save, Play, Loader2, Plus, Trash2,
   Zap, CheckCircle, AlertCircle, List, Clock, Filter,
-  ChevronDown, CalendarDays,
+  ChevronDown, CalendarDays, Copy, Check,
 } from 'lucide-react'
 import { MODULE_META, MODULE_SCHEMAS, MODULE_APP_MAP } from '../../modules/index'
 import { useApps } from '../../context/AppsContext'
@@ -404,6 +404,171 @@ function FaqSelectField({ value, onChange, fieldKey }) {
   )
 }
 
+// ── Webhook select field ────────────────────────────────────────────────────────
+// Lets a Webhook Trigger pick — or inline-create — an inbound webhook from the same
+// /webhooks resource as Settings, then shows the receiving URL to hand to externals
+// (Facebook, Intus, …). One webhook binds to one workflow (Make-style).
+const WEBHOOK_API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
+const WEBHOOK_BASE    = `${WEBHOOK_API_URL}/webhook`
+
+function WebhookSelectField({ value, onChange, fieldKey }) {
+  const [hooks,    setHooks]    = useState([])
+  const [loading,  setLoading]  = useState(true)
+  const [error,    setError]    = useState(false)
+  const [creating, setCreating] = useState(false)
+  const [showNew,  setShowNew]  = useState(false)
+  const [newName,  setNewName]  = useState('')
+  const [copied,   setCopied]   = useState(false)
+
+  // Load the tenant's inbound webhooks (same resource as Settings).
+  useEffect(() => {
+    import('../../lib/api').then(m => m.default.get('/webhooks'))
+      .then(r => setHooks(r.data?.data ?? r.data ?? []))
+      .catch(() => setError(true))
+      .finally(() => setLoading(false))
+  }, [])
+
+  const selected = hooks.find(h => String(h.id) === String(value))
+
+  // Create a new inbound webhook inline and select it immediately.
+  const create = async () => {
+    const name = newName.trim()
+    if (!name) return
+    setCreating(true)
+    try {
+      const api = (await import('../../lib/api')).default
+      const r   = await api.post('/webhooks', { name })
+      const wh  = r.data?.data ?? r.data
+      setHooks(prev => [...prev, wh])
+      onChange(fieldKey, wh.id)
+      setNewName(''); setShowNew(false)
+    } catch { setError(true) }
+    setCreating(false)
+  }
+
+  // Copy the receiving URL — the address external systems POST to.
+  const copy = () => {
+    if (!selected?.token) return
+    navigator.clipboard.writeText(`${WEBHOOK_BASE}/${selected.token}`)
+    setCopied(true); setTimeout(() => setCopied(false), 2000)
+  }
+
+  if (loading) return <div style={{ fontSize: 12, color: '#9CA3AF', padding: '4px 0' }}>Webhooks ophalen…</div>
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      {error && <div style={{ fontSize: 11, color: 'var(--color-danger)' }}>Webhooks konden niet worden geladen.</div>}
+
+      {/* Picker — existing inbound webhooks */}
+      <select value={value || ''} onChange={e => onChange(fieldKey, e.target.value)}
+        style={{ width: '100%', padding: '7px 9px', border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', fontSize: 13, color: '#111', outline: 'none', cursor: 'pointer' }}>
+        <option value="">{hooks.length ? 'Selecteer een webhook…' : 'Nog geen webhooks'}</option>
+        {hooks.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
+      </select>
+
+      {/* Inline create — mirrors Make's "Create a webhook" */}
+      {showNew ? (
+        <div style={{ display: 'flex', gap: 6 }}>
+          <input autoFocus value={newName} onChange={e => setNewName(e.target.value)}
+            placeholder="Naam (bv. Facebook Leads)" onKeyDown={e => e.key === 'Enter' && create()}
+            style={{ flex: 1, padding: '6px 9px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none' }} />
+          <button type="button" onClick={create} disabled={!newName.trim() || creating}
+            style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 8, cursor: newName.trim() ? 'pointer' : 'not-allowed', opacity: newName.trim() ? 1 : 0.5, display: 'flex', alignItems: 'center', gap: 4 }}>
+            {creating ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />} Aanmaken
+          </button>
+          <button type="button" onClick={() => { setShowNew(false); setNewName('') }}
+            style={{ padding: '6px 8px', background: 'none', border: '1px solid #E5E7EB', borderRadius: 8, cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
+            <X size={12} />
+          </button>
+        </div>
+      ) : (
+        <button type="button" onClick={() => setShowNew(true)}
+          style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer' }}>
+          <Plus size={11} /> Webhook aanmaken
+        </button>
+      )}
+
+      {/* Receiving URL — what you give to the external system */}
+      {selected?.token && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ontvangst-URL</div>
+          <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <code style={{ flex: 1, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 6, padding: '6px 8px', color: '#374151', wordBreak: 'break-all' }}>
+              {WEBHOOK_BASE}/{selected.token}
+            </code>
+            <button type="button" onClick={copy} title="URL kopiëren"
+              style={{ padding: '6px 8px', background: copied ? 'var(--color-success-bg)' : '#F9FAFB', color: copied ? 'var(--color-success)' : '#6B7280', border: '1px solid #E5E7EB', borderRadius: 6, cursor: 'pointer', display: 'flex' }}>
+              {copied ? <Check size={12} /> : <Copy size={12} />}
+            </button>
+          </div>
+          <div style={{ fontSize: 11, color: '#9CA3AF' }}>Geef dit adres aan het externe systeem (Facebook, Intus…) om data te ontvangen.</div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Filters field ───────────────────────────────────────────────────────────────
+// Inline conditions builder (field / operator / value + AND-OR), used inside an
+// entity module so fetch + filter live in one module. Reuses the edge OPERATORS;
+// `field.fields` supplies the selectable field list. The standalone Filter/Router
+// between modules stays untouched (for multi-status branching).
+function FiltersField({ field, value, onChange }) {
+  const logic = value?.logic ?? 'AND'
+  const conds = Array.isArray(value?.conditions) ? value.conditions : []
+  const opts  = field.fields ?? []
+
+  const set      = next        => onChange(field.key, next)
+  const setLogic = l           => set({ logic: l, conditions: conds })
+  const add      = ()          => set({ logic, conditions: [...conds, { field: '', operator: '=', value: '' }] })
+  const del      = i           => set({ logic, conditions: conds.filter((_, j) => j !== i) })
+  const upd      = (i, k, v)   => set({ logic, conditions: conds.map((c, j) => j === i ? { ...c, [k]: v } : c) })
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      {/* AND / OR */}
+      {conds.length > 1 && (
+        <div style={{ display: 'flex', gap: 6 }}>
+          {[['AND', 'ALLE'], ['OR', 'MINSTENS ÉÉN']].map(([l, lbl]) => (
+            <button key={l} type="button" onClick={() => setLogic(l)}
+              style={{ padding: '3px 10px', fontSize: 11, fontWeight: 600, borderRadius: 999, border: 'none', cursor: 'pointer',
+                background: logic === l ? 'var(--color-primary)' : '#F3F4F6', color: logic === l ? 'white' : '#6B7280' }}>{lbl}</button>
+          ))}
+        </div>
+      )}
+      {/* Condition rows */}
+      {conds.map((c, i) => {
+        const needsValue = !['is leeg', 'is gevuld'].includes(c.operator)
+        return (
+          <div key={i} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            <select value={c.field} onChange={e => upd(i, 'field', e.target.value)}
+              style={{ flex: 1, minWidth: 0, padding: '5px 6px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none', background: 'white', cursor: 'pointer' }}>
+              <option value="">veld…</option>
+              {opts.map(o => { const v = typeof o === 'object' ? o.value : o; const l = typeof o === 'object' ? o.label : o; return <option key={v} value={v}>{l}</option> })}
+            </select>
+            <select value={c.operator} onChange={e => upd(i, 'operator', e.target.value)}
+              style={{ padding: '5px 4px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none', background: 'white', cursor: 'pointer' }}>
+              {OPERATORS.map(op => <option key={op} value={op}>{op}</option>)}
+            </select>
+            {needsValue && (
+              <input value={c.value ?? ''} onChange={e => upd(i, 'value', e.target.value)} placeholder="waarde"
+                style={{ flex: 1, minWidth: 0, padding: '5px 7px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none' }} />
+            )}
+            <button type="button" onClick={() => del(i)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 2, display: 'flex' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}><X size={13} /></button>
+          </div>
+        )
+      })}
+      <button type="button" onClick={add}
+        style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer' }}>
+        <Plus size={10} /> Conditie toevoegen
+      </button>
+    </div>
+  )
+}
+
 // ── Response structure builder ─────────────────────────────────────────────────
 
 const RS_TYPES = ['Text', 'Number', 'Boolean', 'Date', 'Array', 'Collection', 'Any']
@@ -459,6 +624,12 @@ function FieldInput({ field, value, onChange }) {
   if (field.type === 'agent_select') {
     return <AgentSelectField value={value} onChange={onChange} fieldKey={field.key} />
   }
+  if (field.type === 'webhook_select') {
+    return <WebhookSelectField value={value} onChange={onChange} fieldKey={field.key} />
+  }
+  if (field.type === 'filters') {
+    return <FiltersField field={field} value={value} onChange={onChange} />
+  }
   if (field.type === 'faq_select') {
     return <FaqSelectField value={value} onChange={onChange} fieldKey={field.key} />
   }
@@ -501,9 +672,9 @@ function FieldInput({ field, value, onChange }) {
   }
   if (field.type === 'select') {
     return (
-      <select value={value || ''} onChange={e => onChange(field.key, e.target.value)}
+      <select value={value ?? field.default ?? ''} onChange={e => onChange(field.key, e.target.value)}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', fontSize: 13, color: '#111', outline: 'none' }}>
-        <option value="">Selecteer...</option>
+        {field.default == null && <option value="">Selecteer...</option>}
         {(field.options ?? []).map(o => {
           const val = typeof o === 'object' ? o.value : o
           const lbl = typeof o === 'object' ? o.label : o
@@ -831,7 +1002,7 @@ const EDGE_TYPES = { addable: AddableEdge }
 
 // ── Module picker ─────────────────────────────────────────────────────────────
 
-const CATEGORY_ORDER = ['Alle', 'Triggers', 'Kandidaten', 'Diensten', 'Berichten', 'AI', 'Integraties', 'Flow beheer', 'Tekst & Parsing', 'Foutafhandeling']
+const CATEGORY_ORDER = ['Alle', 'Triggers', 'Kandidaten', 'Sollicitaties', 'Diensten', 'Berichten', 'AI', 'ShiftManager', 'HelloFlex', 'Intus', 'Flow beheer', 'Tekst & Parsing', 'Foutafhandeling']
 
 function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
   const [search, setSearch] = useState('')
@@ -901,7 +1072,7 @@ function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.35)' }}
       onClick={onClose}>
-      <div style={{ width: 400, maxHeight: '82vh', background: 'white', borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 40px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column' }}
+      <div style={{ width: 880, maxWidth: '94vw', maxHeight: '82vh', background: 'white', borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 40px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header + zoeken */}
@@ -918,7 +1089,7 @@ function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', overflowX: 'auto', borderBottom: '1px solid #F3F4F6', flexShrink: 0, padding: '0 8px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', borderBottom: '1px solid #F3F4F6', flexShrink: 0, padding: '0 8px' }}>
           {CATEGORY_ORDER.filter(c => c === 'Alle' || counts[c]).map(cat => (
             <button key={cat} type="button" onClick={() => { setTab(cat); }}
               style={{
@@ -1033,7 +1204,10 @@ function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
           {schema
             .filter(field => {
               if (!field.showIf) return true
-              return node.data.config[field.showIf.key] === field.showIf.value
+              const ctrl = schema.find(f => f.key === field.showIf.key)
+              const cur  = node.data.config[field.showIf.key] ?? ctrl?.default
+              const want = field.showIf.value
+              return Array.isArray(want) ? want.includes(cur) : cur === want
             })
             .map(field => (
             <div key={field.key}>
@@ -1262,20 +1436,15 @@ function EditorInner({ workflow, onClose, onSave }) {
     let output = null
 
     try {
-      if (data.type === 'candidates_fetch' || data.type === 'candidate_filter') {
+      if (data.type === 'candidates') {
+        // Entity module: only the "Ophalen" action reads; filters live in cfg.filters.
         const cfg = data.config ?? {}
         const params = { per_page: cfg.limit ?? 100 }
-        // ShiftManager-sync (oude shape: firstname/pools/features) → /sm/candidates,
-        // dat de oorspronkelijke Nederlandse status-waarden gebruikt (geen remap).
-        if (cfg.status && cfg.status !== 'alle') params.status = cfg.status
+        // Translate a status condition into a query param (other filters: backend later).
+        const statusCond = (cfg.filters?.conditions ?? []).find(c => c.field === 'status' && c.value)
+        if (statusCond) params.status = statusCond.value
         const res = await api.get('/sm_candidates', { params })
-        let rows = res.data?.data ?? res.data ?? []
-
-        // Client-side filter op pools en features (backend filtert hier nog niet op)
-        if (cfg.pools?.length)    rows = rows.filter(c => cfg.pools.some(p => (c.pools ?? []).includes(p)))
-        if (cfg.features?.length) rows = rows.filter(c => cfg.features.some(f => (c.features ?? []).includes(f)))
-        if (cfg.order_by === 'naam') rows = [...rows].sort((a, b) => `${a.firstname} ${a.lastname}`.localeCompare(`${b.firstname} ${b.lastname}`))
-
+        const rows = res.data?.data ?? res.data ?? []
         output = rows.slice(0, cfg.limit ?? 100)
 
       } else if (data.type === 'shift_fetcher') {

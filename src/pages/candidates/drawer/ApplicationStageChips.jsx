@@ -8,14 +8,15 @@
  *
  * applications: Array<{ id, vacancyTitle, stageLabel, stageColor }>
  */
-export default function ApplicationStageChips({ applications = [], label, onOpen }) {
+export default function ApplicationStageChips({ applications = [], label, onOpen, compact = false }) {
   // Nothing to show for non-applicants — keeps the header calm by default.
   if (!applications.length) return null
 
   const clickable = typeof onOpen === 'function'
 
+  // `compact` drops the bottom margin so it aligns inside the header's picker row.
   return (
-    <div style={{ marginBottom: 14 }}>
+    <div style={{ marginBottom: compact ? 0 : 14 }}>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{label}</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
         {applications.map(app => {

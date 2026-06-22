@@ -1,739 +1,424 @@
-import { useState, useMemo, useEffect } from 'react'
-import { Plus, Edit2, X, FileText, ChevronDown } from 'lucide-react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
+import { useAuth } from '../../context/AuthContext'
+import api, { unwrapList } from '../../lib/api'
+import { useUsers } from '../../lib/queries'
+import { USE_MOCKS, isAbortError } from '../../lib/mocks'
+import { VacancyLookupsProvider, useVacancyLookups } from '../../context/VacancyLookupsContext'
+import InsightsRow from '../../components/insights/InsightsRow'
+import PaginationBar from '../../components/ui/PaginationBar'
+import VacanciesTable from './VacanciesTable'
+import VacanciesBulkBar from './VacanciesBulkBar'
+import VacancyDrawer from './VacancyDrawer'
+import AddVacancyModal from './AddVacancyModal'
+import { mapVacancy, mapVacancyDetail } from './data/mapVacancy'
 
-// ── Dummy data ────────────────────────────────────────────────────────────────
-const VACATURES = [
-  { id: '00101', titel: 'Verzorgende IG – Avond- en Nachtdiensten | PG-zorg Rotterdam Zuid | 24 uur per week',
-    status: 'Open', leads: 0, sollicitaties: 0, gepubliceerd: ['career'], eigenaar: { naam: 'Wiktoria Opalenyk', initials: 'WO' },
-    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '2 jun 2026, 16:37',
-    locatie: 'Rotterdam Zuid Rotterdam', dienstverband: 'Vaste termijn', salaris: '€ 2.643,00 – € 3.471,00 maandelijks',
-    uren: 'Van 24 tot 24 uur', ervaring: '1 jaar', senioriteit: 'Professional',
-    opleiding: 'MBO / Beroepssecundair onderwijs', branche: 'Gezondheidszorg', categorie: 'Zorg',
-    beschrijving: 'Wanneer de rust op de afdeling terugkeert en de dag langzaam overgaat in de avond, ben jij op je best. Juist op een PG-afdeling maken aandacht, geduld en een vertrouwde aanwezigheid het verschil.\n\nVoor een warme zorglocatie in Rotterdam Zuid zijn wij op zoek naar een Verzorgende IG die graag werkt met bewoners met psychogeriatrische problematiek.',
-    tags: ['Verzorgende IG', 'PG-zorg', 'Rotterdam', 'Nachtdienst', 'flex'],
-    tijdlijn: [
-      { naam: 'Wiktoria Opalenyk', initials: 'W', datum: '9 jun · 23:41', actie: 'Vacaturegegevens bijgewerkt' },
-      { naam: 'Wiktoria Opalenyk', initials: 'W', datum: '9 jun · 23:41', actie: 'Vacaturegegevens bijgewerkt' },
-      { naam: 'Wiktoria Opalenyk', initials: 'W', datum: '9 jun · 23:40', actie: 'Vacaturegegevens bijgewerkt' },
-    ],
-    recruiter: 'Wiktoria Opalenyk', vestiging: 'Yesway zorg B.V.',
-  },
-  { id: '00100', titel: 'Verzorgende IG – Revalidatiezorg | Rotterdam Zuid | Dag- en avonddiensten | 20–32 uur',
-    status: 'Open', leads: 0, sollicitaties: 1, gepubliceerd: ['career','werkzoeken'], eigenaar: { naam: 'Wiktoria Opalenyk', initials: 'WO' },
-    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '2 jun 2026, 16:13',
-    locatie: 'Rotterdam Zuid', dienstverband: 'Vaste termijn', salaris: '€ 2.400,00 – € 3.100,00 maandelijks',
-    uren: 'Van 20 tot 32 uur', ervaring: '1 jaar', senioriteit: 'Medior',
-    opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Verpleging',
-    beschrijving: 'Als Verzorgende IG in de revalidatiezorg help je patiënten bij hun herstel. Je werkt in dag- en avonddiensten op een dynamische afdeling.',
-    tags: ['Verzorgende IG', 'Revalidatie', 'Rotterdam'],
-    tijdlijn: [{ naam: 'Wiktoria Opalenyk', initials: 'W', datum: '2 jun · 16:13', actie: 'Vacature aangemaakt' }],
-    recruiter: 'Wiktoria Opalenyk', vestiging: 'Yesway zorg B.V.',
-  },
-  { id: '00099', titel: 'Teamleider (Zorg met bedrijfskundige power)',
-    status: 'Open', leads: 63, sollicitaties: 0, gepubliceerd: ['career'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '21 mei 2026, 15:43',
-    locatie: 'Den Haag', dienstverband: 'Vaste termijn', salaris: '€ 3.500,00 – € 4.200,00 maandelijks',
-    uren: 'Van 32 tot 40 uur', ervaring: '3 jaar', senioriteit: 'Senior',
-    opleiding: 'HBO', branche: 'Gezondheidszorg', categorie: 'Management',
-    beschrijving: 'Je combineert je zorghart met een scherp zakelijk inzicht. Als teamleider ben je verantwoordelijk voor een team van 15 medewerkers.',
-    tags: ['Teamleider', 'Management', 'Zorg'],
-    tijdlijn: [{ naam: 'Kelly van Vliet', initials: 'K', datum: '21 mei · 15:43', actie: 'Vacature aangemaakt' }],
-    recruiter: 'Kelly van Vliet', vestiging: 'Yesway zorg B.V.',
-  },
-  { id: '00098', titel: 'Verzorgende IG PG – Den Haag & omgeving | Flexibele diensten + bonus',
-    status: 'Open', leads: 0, sollicitaties: 0, gepubliceerd: ['career','werkzoeken'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '19 mei 2026, 13:55',
-    locatie: 'Den Haag', dienstverband: 'Flexibel', salaris: '€ 2.643,00 – € 3.200,00 maandelijks',
-    uren: 'Van 16 tot 32 uur', ervaring: '1 jaar', senioriteit: 'Professional',
-    opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Zorg',
-    beschrijving: 'Flexibele inzet op een PG-afdeling in de regio Den Haag. Bonus bij beschikbaarheid in weekenden.',
-    tags: ['Verzorgende IG', 'PG', 'Den Haag', 'Flexibel'],
-    tijdlijn: [{ naam: 'Kelly van Vliet', initials: 'K', datum: '19 mei · 13:55', actie: 'Vacature aangemaakt' }],
-    recruiter: 'Kelly van Vliet', vestiging: 'Yesway zorg B.V.',
-  },
-  { id: '00097', titel: 'Startende Verzorgende IG – Groei, begeleiding & zekerheid | Regio Den Haag',
-    status: 'Open', leads: 0, sollicitaties: 0, gepubliceerd: ['career','werkzoeken'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '19 mei 2026, 13:53',
-    locatie: 'Den Haag', dienstverband: 'Vaste termijn', salaris: '€ 2.200,00 – € 2.800,00 maandelijks',
-    uren: 'Van 20 tot 32 uur', ervaring: '0 jaar', senioriteit: 'Junior',
-    opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Zorg',
-    beschrijving: 'Net afgestudeerd of wisselend van richting? Wij begeleiden je naar een succesvolle start in de zorg.',
-    tags: ['Starter', 'Verzorgende IG', 'Den Haag'],
-    tijdlijn: [{ naam: 'Kelly van Vliet', initials: 'K', datum: '19 mei · 13:53', actie: 'Vacature aangemaakt' }],
-    recruiter: 'Kelly van Vliet', vestiging: 'Yesway zorg B.V.',
-  },
-  { id: '00096', titel: 'Verzorgende IG – Den Haag - Somatische zorg - Goed salaris + bonus',
-    status: 'Open', leads: 37, sollicitaties: 0, gepubliceerd: ['career','werkzoeken'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '19 mei 2026, 13:50',
-    locatie: 'Den Haag', dienstverband: 'Flexibel', salaris: '€ 2.643,00 – € 3.471,00 maandelijks',
-    uren: 'Van 16 tot 32 uur', ervaring: '1 jaar', senioriteit: 'Professional',
-    opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Somatiek',
-    beschrijving: 'Somatische zorg in het hart van Den Haag. Competitief salaris en bonus bij inzet in weekenden.',
-    tags: ['Somatiek', 'Den Haag', 'bonus'],
-    tijdlijn: [{ naam: 'Kelly van Vliet', initials: 'K', datum: '19 mei · 13:50', actie: 'Vacature aangemaakt' }],
-    recruiter: 'Kelly van Vliet', vestiging: 'Yesway zorg B.V.',
-  },
-  { id: '00095', titel: 'Persoonlijk begeleider | LVB+ | Den Haag',
-    status: 'Open', leads: 155, sollicitaties: 1, gepubliceerd: ['career','werkzoeken'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '11 mei 2026, 10:31',
-    locatie: 'Den Haag', dienstverband: 'Vaste termijn', salaris: '€ 2.400,00 – € 3.100,00 maandelijks',
-    uren: 'Van 24 tot 32 uur', ervaring: '2 jaar', senioriteit: 'Medior',
-    opleiding: 'HBO / MBO', branche: 'Gezondheidszorg', categorie: 'Begeleiding',
-    beschrijving: 'Als persoonlijk begeleider ondersteun je cliënten met een licht verstandelijke beperking bij hun dagelijks functioneren.',
-    tags: ['LVB', 'Begeleider', 'Den Haag'],
-    tijdlijn: [{ naam: 'Kelly van Vliet', initials: 'K', datum: '11 mei · 10:31', actie: 'Vacature aangemaakt' }],
-    recruiter: 'Kelly van Vliet', vestiging: 'Yesway zorg B.V.',
-  },
-  { id: '00094', titel: 'Verzorgende IG – Kleinschalig wonen | PG & Somatiek | Dag en avond',
-    status: 'Open', leads: 0, sollicitaties: 0, gepubliceerd: ['career'], eigenaar: { naam: 'Wiktoria Opalenyk', initials: 'WO' },
-    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '8 mei 2026, 14:12',
-    locatie: 'Utrecht', dienstverband: 'Vaste termijn', salaris: '€ 2.643,00 – € 3.200,00 maandelijks',
-    uren: 'Van 20 tot 32 uur', ervaring: '1 jaar', senioriteit: 'Professional',
-    opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Zorg',
-    beschrijving: 'Kleinschalig wonen biedt een huiselijke omgeving voor bewoners met PG en somatische aandoeningen.',
-    tags: ['Kleinschalig wonen', 'PG', 'Somatiek'],
-    tijdlijn: [{ naam: 'Wiktoria Opalenyk', initials: 'W', datum: '8 mei · 14:12', actie: 'Vacature aangemaakt' }],
-    recruiter: 'Wiktoria Opalenyk', vestiging: 'Yesway zorg B.V.',
-  },
-  { id: '00093', titel: 'Begeleider | Zuid-Holland | DUMMY',
-    status: 'Open', leads: 0, sollicitaties: 197, gepubliceerd: ['career'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway works', color: 'var(--color-primary)' }, datum: '7 mei 2026, 14:48',
-    locatie: 'Zuid-Holland', dienstverband: 'Flexibel', salaris: '€ 2.000,00 – € 2.800,00 maandelijks',
-    uren: 'Van 16 tot 32 uur', ervaring: '0 jaar', senioriteit: 'Junior',
-    opleiding: 'MBO', branche: 'Zorg & Welzijn', categorie: 'Begeleiding',
-    beschrijving: 'Dummy vacature voor test- en demonstratiedoeleinden.',
-    tags: ['Begeleider', 'DUMMY'],
-    tijdlijn: [{ naam: 'Kelly van Vliet', initials: 'K', datum: '7 mei · 14:48', actie: 'Vacature aangemaakt' }],
-    recruiter: 'Kelly van Vliet', vestiging: 'Yesway works B.V.',
-  },
-  { id: '00092', titel: 'Verzorgende IG – Den Haag - Avond en Nachtdiensten',
-    status: 'Open', leads: 37, sollicitaties: 0, gepubliceerd: ['career'], eigenaar: { naam: 'Kelly van Vliet', initials: 'KV' },
-    klant: { naam: 'Yesway zorg', color: 'var(--color-warning)' }, datum: '1 mei 2026, 15:54',
-    locatie: 'Den Haag', dienstverband: 'Flexibel', salaris: '€ 2.643,00 – € 3.471,00 maandelijks',
-    uren: 'Van 16 tot 24 uur', ervaring: '1 jaar', senioriteit: 'Professional',
-    opleiding: 'MBO', branche: 'Gezondheidszorg', categorie: 'Zorg',
-    beschrijving: 'Avond- en nachtdiensten in Den Haag. Flexibele inzet met toeslag voor onregelmatige uren.',
-    tags: ['Avond', 'Nacht', 'Den Haag'],
-    tijdlijn: [{ naam: 'Kelly van Vliet', initials: 'K', datum: '1 mei · 15:54', actie: 'Vacature aangemaakt' }],
-    recruiter: 'Kelly van Vliet', vestiging: 'Yesway zorg B.V.',
-  },
-]
+// Set exactly one value in a multi-select, or clear when it's already the only one.
+const toggleOneValue = (set, value) =>
+  set(p => (p.length === 1 && p[0] === value) ? [] : [value])
 
-const FASE_STATS = [
-  { label: 'Gesolliciteerd', color: 'var(--color-warning)', count: 428 },
-  { label: 'Geaccepteerd',   color: '#8B5CF6', count: 18 },
-  { label: 'Uitgenodigd',    color: 'var(--color-secondary)', count: 12 },
-  { label: 'Voorstel gedaan',color: '#9CA3AF', count: 7 },
-  { label: 'Aangenomen',     color: 'var(--color-success)', count: 0 },
-  { label: 'Afgewezen',      color: 'var(--color-danger)', count: 183 },
-]
+// Two-letter initials from a name, e.g. "Bente de Jong" → "BJ".
+const initialsOf = (name = '') => name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
 
-const AVATAR_COLORS = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6','#EC4899']
-function ac(s) { return AVATAR_COLORS[s.charCodeAt(0) % AVATAR_COLORS.length] }
+// Recharts hands the clicked segment back at top level AND under `.payload`.
+const pickKey = (d) => d?.key ?? d?.payload?.key ?? d?.name
 
-function Avatar({ initials, size = 26 }) {
-  return (
-    <div style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0,
-      background: ac(initials), display: 'flex', alignItems: 'center',
-      justifyContent: 'center', color: '#fff', fontSize: size * 0.38, fontWeight: 700 }}>
-      {initials}
-    </div>
-  )
-}
-
-function KlantLogo({ klant }) {
-  return (
-    <div style={{ width: 20, height: 20, borderRadius: 4, flexShrink: 0,
-      background: klant.color, display: 'flex', alignItems: 'center',
-      justifyContent: 'center', fontSize: 8, fontWeight: 800, color: '#fff' }}>
-      {klant.naam.charAt(0)}
-    </div>
-  )
-}
-
-function PlatformIcon({ type }) {
-  const icons = {
-    career:    { label: '🌐', bg: '#1F2937' },
-    werkzoeken:{ label: 'W',  bg: 'var(--color-danger)' },
-    google:    { label: 'G',  bg: '#4285F4' },
-    indeed:    { label: 'i',  bg: '#003A9B' },
-  }
-  const ic = icons[type] || { label: '?', bg: '#6B7280' }
-  return (
-    <div style={{ width: 18, height: 18, borderRadius: '50%', background: ic.bg,
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: 9, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
-      {ic.label}
-    </div>
-  )
-}
-
-function BarCell({ value, max = 200, warning = false }) {
-  const pct = Math.min((value / max) * 100, 100)
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <div style={{ width: 80, height: 16, borderRadius: 4, background: 'var(--hover-bg)', overflow: 'hidden', flexShrink: 0 }}>
-        {value > 0 && (
-          <div style={{ height: '100%', width: `${pct}%`, borderRadius: 4,
-            background: warning ? '#FCA5A5' : '#D1D5DB' }} />
-        )}
-      </div>
-      {value > 0 && (
-        <span style={{ fontSize: 12, color: warning ? 'var(--color-danger)' : 'var(--text-muted)', fontWeight: warning ? 600 : 400 }}>
-          {value}
-        </span>
-      )}
-      {value === 0 && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>0</span>}
-    </div>
-  )
-}
-
-// ── Toggle switch component ───────────────────────────────────────────────────
-function Toggle({ on, onChange }) {
-  return (
-    <button onClick={() => onChange(!on)}
-      style={{ width: 40, height: 22, borderRadius: 999, border: 'none', cursor: 'pointer',
-        background: on ? 'var(--color-warning)' : '#D1D5DB', position: 'relative', flexShrink: 0,
-        transition: 'background 0.2s' }}>
-      <div style={{ position: 'absolute', top: 2, left: on ? 20 : 2, width: 18, height: 18,
-        borderRadius: '50%', background: '#fff', boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-        transition: 'left 0.2s' }} />
-    </button>
-  )
-}
-
-// ── Vacature drawer ───────────────────────────────────────────────────────────
-function VacatureDrawer({ vac, onClose }) {
-  const [platforms, setPlatforms] = useState({ career: true, google: false, werkzoeken: false })
-
-  if (!vac) return null
-
-  const togglePlatform = (p) => setPlatforms(prev => ({ ...prev, [p]: !prev[p] }))
-
-  return (
-    <div style={{ width: 400, flexShrink: 0, borderLeft: '1px solid var(--border)',
-      background: 'var(--surface)', display: 'flex', flexDirection: 'column', height: '100%' }}>
-
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>Vacature</span>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer',
-          color: 'var(--text-muted)', display: 'flex', borderRadius: 6, padding: 4 }}>
-          <X size={16} />
-        </button>
-      </div>
-
-      {/* Scrollable content */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-
-        {/* Cover + logo */}
-        <div style={{ position: 'relative', height: 120, flexShrink: 0,
-          background: 'linear-gradient(135deg,#1F2937,#374151,#4B5563)',
-          backgroundSize: 'cover' }}>
-          <div style={{ position: 'absolute', bottom: -20, left: 20, width: 52, height: 52,
-            borderRadius: 12, background: vac.klant.color, border: '3px solid var(--surface)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.2)' }}>
-            <span style={{ fontSize: 18, fontWeight: 900, color: '#fff' }}>{vac.klant.naam.charAt(0)}</span>
-          </div>
-          <button style={{ position: 'absolute', top: 10, right: 10, width: 28, height: 28, borderRadius: 8,
-            background: 'rgba(255,255,255,0.9)', border: 'none', cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Edit2 size={12} color="#374151" />
-          </button>
-        </div>
-
-        <div style={{ padding: '28px 20px 0' }}>
-          {/* Title */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', lineHeight: 1.4 }}>{vac.titel}</div>
-            <button style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px',
-              fontSize: 11, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-              background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
-              <Edit2 size={11} /> Bewerken
-            </button>
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 18 }}>{vac.klant.naam}</div>
-
-          {/* Details grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px 24px', marginBottom: 18 }}>
-            {[
-              ['Vacature-ID', vac.id, false],
-              ['Status', vac.status, true],
-              ['Soort dienstverband', vac.dienstverband, false],
-              ['Locatie', vac.locatie, false],
-              ['Salaris', vac.salaris, false],
-              ['Wekelijkse werktijden', vac.uren, false],
-              ['Ervaring', vac.ervaring, false],
-              ['Senioriteit', vac.senioriteit, false],
-              ['Opleiding', vac.opleiding, false],
-              ['Branche', vac.branche, false],
-              ['Categorie', vac.categorie, false],
-            ].map(([l, v, isStatus]) => (
-              <div key={l}>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{l}</div>
-                {isStatus
-                  ? <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 10px', borderRadius: 999,
-                      background: 'var(--color-success-bg)', color: 'var(--color-success)', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      {v} <X size={9} />
-                    </span>
-                  : <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.4 }}>{v}</div>
-                }
-              </div>
-            ))}
-          </div>
-
-          <button style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 14px', fontSize: 12,
-            fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-            background: 'none', color: 'var(--text)', cursor: 'pointer', marginBottom: 20 }}>
-            <Edit2 size={12} /> Bewerken
-          </button>
-
-          <Divider />
-
-          {/* Vaardigheden */}
-          <Section title="Vereiste vaardigheden">
-            <button style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, color: 'var(--color-primary)',
-              background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
-              <Plus size={13} /> Vaardigheid toevoegen
-            </button>
-          </Section>
-
-          <Divider />
-
-          {/* Tags */}
-          <Section title="Tags">
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-              {vac.tags.map(t => (
-                <span key={t} style={{ fontSize: 11, padding: '3px 10px', borderRadius: 999,
-                  background: 'var(--hover-bg)', border: '1px solid var(--border)', color: 'var(--text)' }}>
-                  {t}
-                </span>
-              ))}
-              <button style={{ fontSize: 11, padding: '3px 8px', borderRadius: 999,
-                background: 'none', border: '1px dashed var(--border)', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                +
-              </button>
-            </div>
-          </Section>
-
-          <Divider />
-
-          {/* Beschrijving */}
-          <Section title="Beschrijving">
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>Opzoek naar jou!</div>
-            <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.65, whiteSpace: 'pre-wrap' }}>{vac.beschrijving}</div>
-          </Section>
-
-          <Divider />
-
-          {/* Sollicitatie instellingen */}
-          <Section title="Sollicitatie instellingen">
-            {[['CV','Optioneel'],['Motivatiebrief','Optioneel'],['Foto','Optioneel'],
-              ['Opmerkingen','Optioneel'],['Toestemming voor interviews','Verborgen']].map(([l,v]) => (
-              <div key={l} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-                <span style={{ fontSize: 13, color: 'var(--text)' }}>{l}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer',
-                  color: 'var(--text-muted)', fontSize: 13 }}>
-                  {v} <ChevronDown size={13} />
-                </div>
-              </div>
-            ))}
-          </Section>
-
-          <Divider />
-
-          {/* Vacaturesites */}
-          <Section title="Vacaturesites">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {[
-                { key: 'career',     label: 'Carrière-pagina', ext: true },
-                { key: 'google',     label: 'Google Jobs',      ext: false },
-                { key: 'indeed',     label: 'Indeed',           ext: false, integreer: true },
-                { key: 'werkzoeken', label: 'Werkzoeken',       ext: false },
-              ].map(p => (
-                <div key={p.key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <PlatformIcon type={p.key} />
-                  <span style={{ flex: 1, fontSize: 13, color: 'var(--text)' }}>
-                    {p.label} {p.ext && <span style={{ fontSize: 11, color: 'var(--color-primary)' }}>↗</span>}
-                  </span>
-                  {p.integreer
-                    ? <span style={{ fontSize: 12, color: 'var(--color-primary)', fontWeight: 500 }}>Integreer</span>
-                    : <>
-                        <Toggle on={platforms[p.key]} onChange={() => togglePlatform(p.key)} />
-                        <span style={{ fontSize: 12, color: 'var(--text-muted)', minWidth: 90 }}>
-                          {platforms[p.key] ? 'Gepubliceerd' : 'Niet gepubliceerd'}
-                        </span>
-                      </>
-                  }
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          <Divider />
-
-          {/* Sollicitaties teller */}
-          <Section title="Sollicitaties">
-            <div style={{ background: 'var(--hover-bg)', borderRadius: 6, padding: '8px 12px',
-              fontSize: 13, color: 'var(--text)', marginBottom: 12 }}>{vac.sollicitaties}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '6px 0' }}>
-              {FASE_STATS.map(f => (
-                <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: '50%', background: f.color, flexShrink: 0 }} />
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{f.label}</span>
-                </div>
-              ))}
-            </div>
-          </Section>
-
-          <Divider />
-
-          {/* Leads */}
-          <Section title="Leads">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: 'var(--hover-bg)', borderRadius: 6, padding: '8px 12px' }}>
-              <span style={{ fontSize: 13, color: 'var(--color-warning)' }}>Totale leads</span>
-              <span style={{ fontSize: 13, color: 'var(--text)', fontWeight: 600 }}>{vac.leads}</span>
-            </div>
-          </Section>
-
-          <Divider />
-
-          {/* Eigen velden */}
-          <Section title="Eigen velden">
-            <button style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12,
-              fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-              background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
-              <Plus size={12} /> Eigen veld toevoegen
-            </button>
-          </Section>
-
-          <Divider />
-
-          {/* Documenten */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>Documenten</span>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>0</span>
-            </div>
-            <button style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 12,
-              fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-              background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
-              <Plus size={12} /> Document toevoegen
-            </button>
-          </div>
-
-          <Divider />
-
-          {/* Tijdlijn */}
-          <Section title="Tijdlijn">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              {vac.tijdlijn.map((t, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0 }} />
-                    <Avatar initials={t.initials} size={24} />
-                    <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{t.naam}</span>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{t.datum}</span>
-                  </div>
-                  <div style={{ marginLeft: 32, display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px',
-                    background: 'var(--hover-bg)', borderRadius: 8 }}>
-                    <FileText size={13} color="var(--text-muted)" />
-                    <span style={{ fontSize: 12, color: 'var(--text)' }}>{t.actie}</span>
-                  </div>
-                </div>
-              ))}
-              <button style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none',
-                cursor: 'pointer', color: 'var(--text-muted)', fontSize: 12, padding: 0 }}>
-                ↓ Meer laden
-              </button>
-            </div>
-          </Section>
-
-          <Divider />
-
-          {/* Notities */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>Notities</span>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>0</span>
-            </div>
-            <button style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 12,
-              fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-              background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
-              <Plus size={12} /> Nieuwe notitie
-            </button>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 32,
-            paddingBottom: 32, color: 'var(--text-muted)' }}>
-            <FileText size={36} style={{ opacity: 0.2, marginBottom: 10 }} />
-            <div style={{ fontSize: 14, fontWeight: 500 }}>Nog geen notities</div>
-            <div style={{ fontSize: 12, marginTop: 4, textAlign: 'center', maxWidth: 220, lineHeight: 1.5 }}>
-              Voeg interne notities toe om je team op één lijn te houden over deze kandidaat.
-            </div>
-          </div>
-
-          <Divider />
-
-          {/* Eigenaarschap */}
-          <Section title="Eigenaarschap">
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>Recruiter</div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--input-bg)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <Avatar initials="W" size={22} />
-                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{vac.recruiter}</span>
-                </div>
-                <ChevronDown size={13} color="var(--text-muted)" />
-              </div>
-            </div>
-            <div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>Vestiging</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 12, padding: '3px 10px', borderRadius: 999,
-                  background: 'var(--hover-bg)', border: '1px solid var(--border)', color: 'var(--text)' }}>
-                  {vac.vestiging}
-                </span>
-                <button style={{ width: 24, height: 24, borderRadius: '50%', border: '1px solid var(--border)',
-                  background: 'none', cursor: 'pointer', fontSize: 14, color: 'var(--text-muted)' }}>+</button>
-              </div>
-            </div>
-          </Section>
-
-          <Divider />
-
-          {/* Klantinformatie */}
-          <Section title="Klantinformatie">
-            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>Klant</div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--input-bg)' }}>
-              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>Selecteer een klant</span>
-              <ChevronDown size={13} color="var(--text-muted)" />
-            </div>
-          </Section>
-
-          <div style={{ height: 20 }} />
-        </div>
-      </div>
-
-      {/* Footer */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '12px 20px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>Gemaakt op {vac.datum.split(',')[0]}</span>
-      </div>
-    </div>
-  )
-}
-
-function Divider() {
-  return <div style={{ height: 1, background: 'var(--border)', margin: '0 0 20px' }} />
-}
-
-function Section({ title, children }) {
-  return (
-    <div style={{ marginBottom: 20 }}>
-      <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{title}</div>
-      {children}
-    </div>
-  )
-}
-
-// ── Main page ─────────────────────────────────────────────────────────────────
-export default function VacanciesPage() {
-  const [selected,        setSelected]        = useState(null)
-  const [page,            setPage]            = useState(1)
-  const [selStatuses,     setSelStatuses]     = useState([])
-  const [selEigenaren,    setSelEigenaren]    = useState([])
-  const [selKlanten,      setSelKlanten]      = useState([])
-  const [selCategorieen,  setSelCategorieen]  = useState([])
-  const pageSize = 10
-
+function VacanciesPageInner() {
+  const { t } = useTranslation('vacancies')
   const { registerFilters, unregisterFilters } = useRightPanel()
+  const { hasPermission } = useAuth()
+  const { statuses, phases, statusMeta } = useVacancyLookups()
+  const { data: users = [] } = useUsers()
 
-  const toggle = setter => val =>
-    setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
+  const [vacancies, setVacancies] = useState([])
+  const [loading,   setLoading]   = useState(true)
+  const [error,     setError]     = useState(null)
+  const [page,      setPage]      = useState(1)
+  const [pageSize,  setPageSize]  = useState(50)
+  const [lastPage,  setLastPage]  = useState(1)
+  const [total,     setTotal]     = useState(0)
+  const [stats,     setStats]     = useState(null)
+  const [customers, setCustomers] = useState([])
 
-  const statusOptions    = useMemo(() => [...new Set(VACATURES.map(v => v.status))].sort(), [])
-  const eigenaarOptions  = useMemo(() => [...new Set(VACATURES.map(v => v.eigenaar.naam))].sort(), [])
-  const klantOptions     = useMemo(() => [...new Set(VACATURES.map(v => v.klant.naam))].sort(), [])
-  const categorieOptions = useMemo(() => [...new Set(VACATURES.map(v => v.categorie))].sort(), [])
+  const [selected,       setSelected]       = useState(null)
+  const [detail,         setDetail]         = useState(null)
+  const [drawerExpanded, setDrawerExpanded] = useState(false)
+  const [addOpen,        setAddOpen]        = useState(false)
+  const [selectedIds,    setSelectedIds]    = useState(() => new Set())
+  const [actionMsg,      setActionMsg]      = useState(null)
+  const msgTimer = useRef(null)
 
+  // Server-side filter dimensions. Status is driven by the tab bar (single value).
+  const [statusBucket,   setStatusBucket]   = useState('all')
+  const [selectedOwner,  setSelectedOwner]  = useState([])
+  const [selectedClient, setSelectedClient] = useState([])
+  const [globalSearch,   setGlobalSearch]   = useState('')
+
+  const handlePageSizeChange = (newSize) => { setPageSize(newSize); setPage(1) }
+
+  // Server-side filter params (axios serialises arrays as `key[]`).
+  const filterParams = useMemo(() => {
+    const p = {}
+    if (globalSearch.trim())    p.search      = globalSearch.trim()
+    if (statusBucket !== 'all') p.status      = [statusBucket]
+    if (selectedOwner.length)   p.owner_id    = selectedOwner
+    if (selectedClient.length)  p.customer_id = selectedClient
+    return p
+  }, [globalSearch, statusBucket, selectedOwner, selectedClient])
+  const filterKey = JSON.stringify(filterParams)
+
+  // Filters changed → back to page 1; the visible rows change → drop the selection.
+  useEffect(() => { setPage(1) }, [filterKey])
+  useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize])
+
+  // Load the customers once for the filters/drawer/modal/bulk pickers.
+  useEffect(() => {
+    const ctrl = new AbortController()
+    api.get('/customers', { signal: ctrl.signal })
+      .then(res => setCustomers(unwrapList(res).rows.map(c => ({ id: c.id, name: c.name ?? c.company_name ?? '—' }))))
+      .catch(() => {})
+    return () => ctrl.abort()
+  }, [])
+
+  // ── List (paginated, server-filtered) ──
+  useEffect(() => {
+    const ctrl = new AbortController()
+    setLoading(true); setError(null)
+    api.get('/vacancies', { params: { ...filterParams, page, per_page: pageSize }, signal: ctrl.signal })
+      .then(res => {
+        const { rows, total, lastPage } = unwrapList(res)
+        setVacancies(rows.map(mapVacancy)); setTotal(total); setLastPage(lastPage)
+      })
+      .catch(err => {
+        if (isAbortError(err)) return
+        // A 404 means the endpoint isn't built yet (C-26) → empty, not an error.
+        if (err?.response?.status && err.response.status !== 404 && !USE_MOCKS) {
+          setError(t('page.loadError'))
+        }
+        setVacancies([]); setTotal(0); setLastPage(1)
+      })
+      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
+    return () => ctrl.abort()
+  }, [filterParams, page, pageSize, t])
+
+  // ── Stats (server-wide totals; honour the filters) ──
+  useEffect(() => {
+    const ctrl = new AbortController()
+    api.get('/vacancies/stats', { params: filterParams, signal: ctrl.signal })
+      .then(res => setStats(res.data?.data ?? res.data ?? null))
+      .catch(err => { if (!isAbortError(err)) setStats(null) })
+    return () => ctrl.abort()
+  }, [filterParams])
+
+  // ── Donut data (status / owner / client) — stats first, page-derived fallback ──
+  const statusData = useMemo(() => {
+    if (stats?.by_status) return stats.by_status.map(o => { const v = o.value ?? o.status; const m = statusMeta(v); return { name: m.label, value: o.count, key: v, color: m.color } })
+    return statuses.map(s => ({ name: s.label, key: s.value, color: s.color, value: vacancies.filter(v => v.statusValue === s.value).length })).filter(d => d.value > 0)
+  }, [stats, statuses, vacancies, statusMeta])
+  const ownerData = useMemo(() => {
+    if (stats?.by_owner) return stats.by_owner.map(o => ({ name: o.name || '—', key: o.id ?? o.owner_id, value: o.count })).filter(o => o.key)
+    const m = {}
+    vacancies.forEach(v => { if (v.owner?.id) (m[v.owner.id] ??= { name: v.owner.name || '—', key: v.owner.id, color: v.owner.color, value: 0 }).value++ })
+    return Object.values(m)
+  }, [stats, vacancies])
+  const clientData = useMemo(() => {
+    if (stats?.by_client) return stats.by_client.map(o => ({ name: o.name || '—', key: o.id ?? o.customer_id, value: o.count })).filter(o => o.key)
+    const m = {}
+    vacancies.forEach(v => { if (v.clientId) (m[v.clientId] ??= { name: v.clientName || '—', key: v.clientId, value: 0 }).value++ })
+    return Object.values(m)
+  }, [stats, vacancies])
+
+  // ── KPI cards = funnel-phase counts across applications (the screenshot KPIs) ──
+  const phaseCounts = useMemo(() => {
+    if (stats?.by_phase) {
+      if (Array.isArray(stats.by_phase)) return Object.fromEntries(stats.by_phase.map(o => [o.value ?? o.phase, o.count]))
+      return stats.by_phase
+    }
+    // Fallback: sum the per-vacancy phase breakdown on the loaded page.
+    const acc = {}
+    vacancies.forEach(v => Object.entries(v.applicationsByPhase ?? {}).forEach(([k, n]) => { acc[k] = (acc[k] ?? 0) + (Number(n) || 0) }))
+    return acc
+  }, [stats, vacancies])
+
+  // Option lists for the right-panel filters.
+  const ownerOptions  = useMemo(() => ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })), [ownerData])
+  const clientOptions = useMemo(() => clientData.map(d => ({ value: d.key, label: d.name, count: d.value })), [clientData])
+
+  const tog = (set) => (v) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
+  const pickOne = (set) => (v) => { if (v != null) toggleOneValue(set, v) }
+
+  // Register the right-panel filters (owner + client; status is the tab bar).
+  const catOrg = t('filters.categories.organisation')
   const filterGroups = useMemo(() => [
-    { key: 'status',    label: 'Status',
-      options: statusOptions.map(s    => ({ value: s, label: s })),
-      selected: selStatuses,    onToggle: toggle(setSelStatuses) },
-    { key: 'eigenaar',  label: 'Eigenaar',
-      options: eigenaarOptions.map(e  => ({ value: e, label: e })),
-      selected: selEigenaren,   onToggle: toggle(setSelEigenaren) },
-    { key: 'klant',     label: 'Klant',
-      options: klantOptions.map(k     => ({ value: k, label: k })),
-      selected: selKlanten,     onToggle: toggle(setSelKlanten) },
-    { key: 'categorie', label: 'Categorie',
-      options: categorieOptions.map(c => ({ value: c, label: c })),
-      selected: selCategorieen, onToggle: toggle(setSelCategorieen) },
-  ], [statusOptions, eigenaarOptions, klantOptions, categorieOptions,
-      selStatuses, selEigenaren, selKlanten, selCategorieen])
+    { key: 'global-search', type: 'global-search', label: t('filters.search'), placeholder: t('page.searchPlaceholder'), value: globalSearch, onChange: setGlobalSearch },
+    { key: 'owner',  type: 'search-select', category: catOrg, label: t('filters.owner'),  selected: selectedOwner,  options: ownerOptions,  onToggle: tog(setSelectedOwner) },
+    { key: 'client', type: 'search-select', category: catOrg, label: t('filters.client'), selected: selectedClient, options: clientOptions, onToggle: tog(setSelectedClient) },
+  ], [t, catOrg, globalSearch, selectedOwner, selectedClient, ownerOptions, clientOptions])
 
   useEffect(() => {
-    registerFilters('vacancies', filterGroups)
-    return () => unregisterFilters('vacancies')
+    registerFilters('vacancies-page', filterGroups)
+    return () => unregisterFilters('vacancies-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  const filtered = useMemo(() => {
-    let rows = VACATURES
-    if (selStatuses.length)    rows = rows.filter(v => selStatuses.includes(v.status))
-    if (selEigenaren.length)   rows = rows.filter(v => selEigenaren.includes(v.eigenaar.naam))
-    if (selKlanten.length)     rows = rows.filter(v => selKlanten.includes(v.klant.naam))
-    if (selCategorieen.length) rows = rows.filter(v => selCategorieen.includes(v.categorie))
-    return rows
-  }, [selStatuses, selEigenaren, selKlanten, selCategorieen])
+  // ── Drawer: light row first, then fetch the full detail (ref-guarded) ──
+  const selectedIdRef = useRef(null)
+  const selectVacancy = (v) => {
+    if (selected?.id === v.id) { closeDrawer(); return }
+    selectedIdRef.current = v.id
+    setSelected(v); setDetail(null); setDrawerExpanded(false)
+    api.get(`/vacancies/${v.id}`)
+      .then(r => { if (selectedIdRef.current === v.id) setDetail(mapVacancyDetail(r.data?.data ?? r.data)) })
+      .catch(() => {})
+  }
+  const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
 
-  const totalPages = Math.ceil(filtered.length / pageSize)
-  const paged = filtered.slice((page - 1) * pageSize, page * pageSize)
+  // A freshly created vacancy: prepend + open its drawer (which fetches the detail).
+  const handleCreated = (v) => { setVacancies(prev => [v, ...prev]); setTotal(prev => prev + 1); setAddOpen(false); selectVacancy(v) }
+
+  // Header/picker edits flow back here: optimistic locally, then PATCH the API.
+  const updateVacancy = (id, patch) => {
+    const local = { ...patch }
+    if ('statusValue' in patch) { const m = statusMeta(patch.statusValue); local.statusLabel = m.label; local.statusColor = m.color }
+    if ('ownerId' in patch) { const u = users.find(x => x.id === patch.ownerId); local.owner = { id: patch.ownerId, name: u?.name ?? '', initials: initialsOf(u?.name ?? ''), color: null } }
+    if ('clientId' in patch) { const c = customers.find(x => x.id === patch.clientId); local.clientName = c?.name ?? '' }
+
+    setVacancies(prev => prev.map(x => x.id === id ? { ...x, ...local } : x))
+    setSelected(prev => (prev && prev.id === id ? { ...prev, ...local } : prev))
+    setDetail(prev   => (prev && prev.id === id ? { ...prev, ...local } : prev))
+
+    const body = {}
+    if ('statusValue'        in patch) body.status              = patch.statusValue
+    if ('ownerId'            in patch) body.owner_id            = patch.ownerId
+    if ('clientId'           in patch) body.customer_id         = patch.clientId
+    if ('tags'               in patch) body.tags                = patch.tags
+    if ('channels'           in patch) body.published_channels  = patch.channels
+    if ('applicationSettings' in patch) body.application_settings = patch.applicationSettings
+    if ('matchWeights'        in patch) body.match_weights        = patch.matchWeights
+    if (Object.keys(body).length) api.patch(`/vacancies/${id}`, body).catch(() => {})
+  }
+
+  // ── Bulk selection ──
+  const toggleRow = (id) => setSelectedIds(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next })
+  const toggleAll = (ids, allSelected) => setSelectedIds(prev => { const next = new Set(prev); ids.forEach(id => allSelected ? next.delete(id) : next.add(id)); return next })
+
+  const notify = (type, text) => {
+    setActionMsg({ type, text })
+    if (msgTimer.current) clearTimeout(msgTimer.current)
+    msgTimer.current = setTimeout(() => setActionMsg(null), 4000)
+  }
+  useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
+
+  // Snapshot a subset of fields, for optimistic revert/reconcile.
+  const subsetOf = (obj, keys) => keys.reduce((a, k) => { a[k] = obj[k]; return a }, {})
+
+  // Generic optimistic bulk mutation: apply `patch`, persist, reconcile on the
+  // server's `updated` list, revert on failure. Mirrors the candidate bulkMutate.
+  const bulkMutate = ({ url, body, patch, keys, onSuccess }) => {
+    const ids = [...selectedIds]
+    if (!ids.length) return
+    const snap = new Map(vacancies.filter(v => ids.includes(v.id)).map(v => [v.id, subsetOf(v, keys)]))
+    setVacancies(prev => prev.map(v => ids.includes(v.id) ? { ...v, ...patch } : v))
+    api.post(url, { vacancy_ids: ids, ...body })
+      .then((res) => {
+        const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
+        if (updated) setVacancies(prev => prev.map(v => (ids.includes(v.id) && !updated.has(v.id)) ? { ...v, ...snap.get(v.id) } : v))
+        onSuccess(updated ? updated.size : ids.length)
+      })
+      .catch(() => {
+        setVacancies(prev => prev.map(v => ids.includes(v.id) ? { ...v, ...snap.get(v.id) } : v))
+        notify('error', t('bulk.mutateError'))
+      })
+    setSelectedIds(new Set())
+  }
+  const bulkSetOwner = (user) => bulkMutate({
+    url: '/vacancies/bulk/owner', body: { owner_id: user.id },
+    patch: { owner: { id: user.id, name: user.name, initials: initialsOf(user.name), color: null } }, keys: ['owner'],
+    onSuccess: (n) => notify('success', t('bulk.ownerChanged', { count: n })),
+  })
+  const bulkSetStatus = (statusValue) => { const m = statusMeta(statusValue); bulkMutate({
+    url: '/vacancies/bulk/status', body: { status: statusValue },
+    patch: { statusValue, statusLabel: m.label, statusColor: m.color }, keys: ['statusValue', 'statusLabel', 'statusColor'],
+    onSuccess: (n) => notify('success', t('bulk.statusChanged', { value: m.label, count: n })),
+  }) }
+  const bulkSetClient = (customer) => bulkMutate({
+    url: '/vacancies/bulk/client', body: { customer_id: customer.id },
+    patch: { clientId: customer.id, clientName: customer.name }, keys: ['clientId', 'clientName'],
+    onSuccess: (n) => notify('success', t('bulk.clientChanged', { count: n })),
+  })
+  const bulkPublish = (published) => bulkMutate({
+    url: '/vacancies/bulk/publish', body: { published },
+    patch: { published }, keys: ['published'],
+    onSuccess: (n) => notify('success', t(published ? 'bulk.published' : 'bulk.unpublished', { count: n })),
+  })
+
+  // Remove a tag from every selected vacancy that has it (optimistic + reconcile).
+  const bulkRemoveTag = (tag) => {
+    const ids = [...selectedIds]
+    if (!ids.length || !tag) return
+    const changed = vacancies.filter(v => ids.includes(v.id) && (v.tags ?? []).includes(tag)).map(v => v.id)
+    setVacancies(prev => prev.map(v => changed.includes(v.id) ? { ...v, tags: (v.tags ?? []).filter(x => x !== tag) } : v))
+    api.post('/vacancies/bulk/tags/remove', { vacancy_ids: ids, tag })
+      .then((res) => {
+        const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
+        if (updated) setVacancies(prev => prev.map(v => (changed.includes(v.id) && !updated.has(v.id)) ? { ...v, tags: [...(v.tags ?? []), tag] } : v))
+        notify('success', t('bulk.tagRemoved', { tag, count: updated ? updated.size : changed.length }))
+      })
+      .catch(() => {
+        setVacancies(prev => prev.map(v => changed.includes(v.id) ? { ...v, tags: [...(v.tags ?? []), tag] } : v))
+        notify('error', t('bulk.mutateError'))
+      })
+    setSelectedIds(new Set())
+  }
+  // Add the same note to every selected vacancy (no table column → toast only).
+  const bulkAddNote = (text) => {
+    const ids = [...selectedIds]
+    if (!ids.length || !text.trim()) return
+    api.post('/vacancies/bulk/notes', { vacancy_ids: ids, text: text.trim() })
+      .then((res) => notify('success', t('bulk.noteAdded', { count: Array.isArray(res.data?.updated) ? res.data.updated.length : ids.length })))
+      .catch(() => notify('error', t('bulk.mutateError')))
+    setSelectedIds(new Set())
+  }
+  // Archive (soft-delete) the selection — confirm first; rows drop on server confirm.
+  const bulkArchive = () => {
+    const ids = [...selectedIds]
+    if (!ids.length) return
+    if (!window.confirm(t('bulk.archiveConfirm', { count: ids.length }))) return
+    api.post('/vacancies/bulk/archive', { vacancy_ids: ids })
+      .then((res) => {
+        const archived = Array.isArray(res.data?.archived) ? res.data.archived : ids
+        const set = new Set(archived)
+        setVacancies(prev => prev.filter(v => !set.has(v.id)))
+        setTotal(tt => Math.max(0, tt - archived.length))
+        notify('success', t('bulk.archived', { count: archived.length }))
+      })
+      .catch(() => notify('error', t('bulk.archiveError')))
+    setSelectedIds(new Set())
+  }
+
+  // Union of tags across the selected vacancies — the "remove tag" option list.
+  const selectedTags = useMemo(() => {
+    const set = new Set()
+    vacancies.forEach(v => { if (selectedIds.has(v.id)) (v.tags ?? []).forEach(tg => set.add(tg)) })
+    return [...set]
+  }, [vacancies, selectedIds])
+
+  // ── Insights strip: 3 donuts + funnel-phase KPI cards (the requested KPI block) ──
+  // Status donut click toggles the status tab; owner/client click set a single filter.
+  const insightDonuts = [
+    { key: 'status', title: t('insights.statusTitle'), data: statusData,
+      onPick: d => { const k = pickKey(d); setStatusBucket(prev => (prev === k ? 'all' : (k ?? 'all'))) },
+      active: statusBucket !== 'all', onClear: () => setStatusBucket('all') },
+    { key: 'owner',  title: t('insights.ownerTitle'),  data: ownerData,  onPick: d => pickOne(setSelectedOwner)(pickKey(d)),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
+    { key: 'client', title: t('insights.clientTitle'), data: clientData, onPick: d => pickOne(setSelectedClient)(pickKey(d)), active: selectedClient.length > 0, onClear: () => setSelectedClient([]) },
+  ]
+  // KPI cards = funnel-phase counts, lookup-driven (label via i18n, colour from the lookup).
+  const insightKpis = phases.map(p => ({
+    key: p.value, label: t(`kpi.${p.value}`, p.label), value: phaseCounts[p.value] ?? 0, color: p.color,
+  }))
+
+  // Status tab bar: "All" + one button per configured status.
+  const buckets = [{ value: 'all', label: t('buckets.all') }, ...statuses.map(s => ({ value: s.value, label: s.label }))]
 
   return (
-    <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
+    <>
+      {addOpen && <AddVacancyModal onClose={() => setAddOpen(false)} onCreated={handleCreated} users={users} customers={customers} />}
+      <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-        {/* KPI row */}
-        <div style={{
-          display: 'flex', gap: 10, padding: '20px 24px 16px', flexShrink: 0,
-        }}>
-          {[
-            { label: 'Totaal open',     value: VACATURES.length,  color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
-            ...FASE_STATS.map(f => ({ label: f.label, value: f.count, color: f.color, bg: f.color + '22' })),
-          ].map(k => (
-            <div key={k.label} style={{
-              display: 'flex', alignItems: 'center', gap: 12,
-              background: 'var(--surface)', border: '1px solid var(--border)',
-              borderRadius: 10, padding: '13px 16px', flex: 1, minWidth: 0,
-            }}>
-              <div style={{
-                width: 34, height: 34, borderRadius: 8, background: k.bg,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-              }}>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: k.color, display: 'block' }} />
-              </div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 21, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>{k.value}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{k.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+          {/* KPI block: donuts + funnel-phase KPI cards (same row as candidates) */}
+          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
-        {/* Table */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 24px' }}>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  <th style={{ width: 32, padding: '10px 12px' }}>
-                    <input type="checkbox" style={{ cursor: 'pointer' }} />
-                  </th>
-                  {['Titel','#','Status','Leads','Sollicitaties','Gepubliceerd','Eigenaar','Klant','Gemaakt op'].map(h => (
-                    <th key={h} style={{ padding: '10px 12px', textAlign: 'left', fontSize: 11,
-                      fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap',
-                      letterSpacing: '0.04em', textTransform: 'uppercase' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {paged.map((vac, i) => {
-                  const isSel = selected?.id === vac.id
-                  return (
-                    <tr key={vac.id} onClick={() => setSelected(isSel ? null : vac)}
-                      style={{ borderBottom: i < paged.length - 1 ? '1px solid var(--border)' : 'none',
-                        cursor: 'pointer', background: isSel ? 'var(--color-primary-bg)' : 'transparent',
-                        transition: 'background 0.1s' }}
-                      onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = 'var(--hover-bg)' }}
-                      onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = 'transparent' }}>
-                      <td style={{ padding: '11px 12px' }} onClick={e => e.stopPropagation()}>
-                        <input type="checkbox" style={{ cursor: 'pointer' }} />
-                      </td>
-                      <td style={{ padding: '11px 12px', maxWidth: 320 }}>
-                        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)',
-                          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {vac.titel}
-                        </div>
-                      </td>
-                      <td style={{ padding: '11px 12px', fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                        {vac.id}
-                      </td>
-                      <td style={{ padding: '11px 12px' }}>
-                        <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 999,
-                          background: 'var(--color-success-bg)', color: 'var(--color-success)' }}>{vac.status}</span>
-                      </td>
-                      <td style={{ padding: '11px 12px' }}>
-                        <BarCell value={vac.leads} max={200} />
-                      </td>
-                      <td style={{ padding: '11px 12px' }}>
-                        <BarCell value={vac.sollicitaties} max={500} warning={vac.sollicitaties > 100} />
-                      </td>
-                      <td style={{ padding: '11px 12px' }}>
-                        <div style={{ display: 'flex', gap: 4 }}>
-                          {vac.gepubliceerd.map(p => <PlatformIcon key={p} type={p} />)}
-                        </div>
-                      </td>
-                      <td style={{ padding: '11px 12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <Avatar initials={vac.eigenaar.initials} size={22} />
-                          <span style={{ fontSize: 12, color: 'var(--text)', whiteSpace: 'nowrap' }}>{vac.eigenaar.naam}</span>
-                        </div>
-                      </td>
-                      <td style={{ padding: '11px 12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                          <KlantLogo klant={vac.klant} />
-                          <span style={{ fontSize: 12, color: 'var(--text)', whiteSpace: 'nowrap' }}>{vac.klant.naam}</span>
-                        </div>
-                      </td>
-                      <td style={{ padding: '11px 12px', fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                        {vac.datum}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+          {/* Status tab bar */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+            padding: '0 24px 10px', flexShrink: 0 }}>
+            {buckets.map(b => (
+              <button key={b.value} onClick={() => setStatusBucket(b.value)}
+                style={{ padding: '5px 14px', fontSize: 13, fontWeight: statusBucket === b.value ? 600 : 400, borderRadius: 7, cursor: 'pointer',
+                  background: statusBucket === b.value ? 'var(--color-primary)' : 'transparent',
+                  color: statusBucket === b.value ? '#fff' : 'var(--text)',
+                  border: statusBucket === b.value ? 'none' : '1px solid var(--border)' }}>
+                {b.label}
+              </button>
+            ))}
           </div>
 
-          {/* Pagination */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginTop: 14, fontSize: 13, color: 'var(--text-muted)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span>Resultaten per pagina</span>
-              <select style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '2px 8px',
-                background: 'var(--input-bg)', color: 'var(--text)', fontSize: 12 }}>
-                <option>10</option><option>25</option><option>50</option>
-              </select>
+          {/* Transient feedback for bulk mutations (aria-live for screen readers) */}
+          {actionMsg && (
+            <div role="status" aria-live="polite" style={{ margin: '0 24px 10px', display: 'flex', alignItems: 'center', gap: 8,
+              padding: '8px 12px', borderRadius: 8, fontSize: 12.5,
+              background: actionMsg.type === 'error' ? 'var(--color-danger-bg)' : 'var(--color-success-bg)',
+              color: actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
+              border: `1px solid ${actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)'}` }}>
+              {actionMsg.type === 'error' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
+              <span style={{ flex: 1 }}>{actionMsg.text}</span>
+              <button onClick={() => setActionMsg(null)} aria-label={t('common:close', 'Sluiten')}
+                style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 2 }}>
+                <X size={13} />
+              </button>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span>1–{Math.min(pageSize, filtered.length)} van {filtered.length}</span>
-              <div style={{ display: 'flex', gap: 4 }}>
-                <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}
-                  style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid var(--border)',
-                    background: 'none', cursor: page > 1 ? 'pointer' : 'default',
-                    color: page > 1 ? 'var(--text)' : 'var(--text-muted)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  ‹
-                </button>
-                <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page === totalPages}
-                  style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid var(--border)',
-                    background: 'none', cursor: page < totalPages ? 'pointer' : 'default',
-                    color: page < totalPages ? 'var(--text)' : 'var(--text-muted)', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  ›
-                </button>
-              </div>
-            </div>
+          )}
+
+          {/* Toolbar — bulk-bar when there's a selection, otherwise the add button */}
+          <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
+            {selectedIds.size > 0 ? (
+              <VacanciesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
+                onSetOwner={bulkSetOwner} onSetStatus={bulkSetStatus} onSetClient={bulkSetClient}
+                onPublish={() => bulkPublish(true)} onUnpublish={() => bulkPublish(false)}
+                onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
+                canArchive={hasPermission('vacancies.delete')}
+                users={users} statuses={statuses} customers={customers} selectedTags={selectedTags} />
+            ) : (
+              <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
+                background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+                + {t('page.add')}
+              </button>
+            )}
           </div>
+
+          {/* Table */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+            {error && (
+              <div className="mb-3 rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">{error}</div>
+            )}
+            <VacanciesTable
+              rows={vacancies}
+              loading={loading}
+              selectedId={selected?.id}
+              onSelect={selectVacancy}
+              selectable
+              selectedIds={selectedIds}
+              onToggleRow={toggleRow}
+              onToggleAll={toggleAll}
+            />
+          </div>
+
+          <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+            onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
         </div>
+
+        {/* Drawer — remounts (key) when the full detail arrives so tabs re-init */}
+        <VacancyDrawer
+          key={selected ? `${selected.id}-${detail ? 'full' : 'lite'}` : 'none'}
+          vacancy={detail ?? selected}
+          onClose={closeDrawer}
+          expanded={drawerExpanded}
+          onToggleExpand={() => setDrawerExpanded(v => !v)}
+          onUpdate={updateVacancy}
+          users={users}
+          customers={customers}
+        />
       </div>
+    </>
+  )
+}
 
-      <VacatureDrawer vac={selected} onClose={() => setSelected(null)} />
-    </div>
+// Page-scoped provider so the table/drawer/modal/bulk share one lookups fetch.
+export default function VacanciesPage() {
+  return (
+    <VacancyLookupsProvider>
+      <VacanciesPageInner />
+    </VacancyLookupsProvider>
   )
 }

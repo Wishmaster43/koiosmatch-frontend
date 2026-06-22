@@ -8,10 +8,12 @@ import { COOKIE_AUTH } from '../lib/authMode'
  * Three separate layers (a mature flex-staffing ATS keeps these apart):
  *   1. candidateTypes — contract form, MULTI-value per candidate (oproepkracht,
  *      zzp, payroll, uitzend, detachering, demand). Rarely changes.
- *   2. funnelTypes    — acquisition phase, single value (prospect → intake →
- *      pool → alumni). Changes once-ish per candidate.
- *   3. statuses       — operational status, single value with a colour
- *      (actief, ziek, verlof, geblokkeerd, …). Changes often.
+ *   2. funnelTypes    — application pipeline phase, single value PER APPLICATION
+ *      (applied → invited/intake → proposal → hired → rejected). Lives on the
+ *      application; on the candidate only as read-only chips (move = B-10/C-10).
+ *   3. statuses       — person lifecycle, single value with a colour
+ *      (lead → candidate → placed → inactive). Driven by funnel automation
+ *      (hired → placed); availability (sick/leave) is a separate axis.
  *
  * These are NOT hardcoded enums: each tenant configures the values/labels/colours
  * in Settings. The defaults below are the seed shipped for new tenants and the
@@ -35,24 +37,26 @@ export const DEFAULT_CANDIDATE_TYPES = [
   { value: 'on_demand',   label: 'Demand',        color: '#C98BBA' },
 ]
 
+// Application pipeline (per application). `invited` is the intake stage that
+// carries `requires_appointment` once configured (see §3B / C-22).
 export const DEFAULT_FUNNEL_TYPES = [
-  { value: 'prospect', label: 'Prospect',     color: '#94A3B8' },
-  { value: 'intake',   label: 'Intake',       color: '#8C86D9' },
-  { value: 'pool',     label: 'Actieve pool', color: '#79B58E' },
-  { value: 'alumni',   label: 'Alumni',       color: '#6FA8C4' },
+  { value: 'applied',  label: 'Gesolliciteerd',     color: '#94A3B8' },
+  { value: 'invited',  label: 'Uitgenodigd/Intake', color: '#8C86D9' },
+  { value: 'proposal', label: 'Voorgesteld',        color: '#6FA8C4' },
+  { value: 'hired',    label: 'Aangenomen',         color: '#79B58E' },
+  { value: 'rejected', label: 'Afgewezen',          color: '#D98A8A' },
 ]
 
+// Person lifecycle (single value), confirmed model (decision 16). `matched` is set
+// by the hired → match automation. Blacklist is a SEPARATE flag (not here); Archived
+// = soft-delete (deleted_at). `unplaceable` carries an "available again" date that
+// drives a re-activation workflow. Sick/Leave live on the availability axis.
 export const DEFAULT_STATUSES = [
-  { value: 'prospect', label: 'Prospect',     color: '#94A3B8' },
-  { value: 'intake',   label: 'Intake',       color: '#8C86D9' },
-  { value: 'active',   label: 'Actief',       color: '#79B58E' },
-  { value: 'inactive', label: 'Niet actief',  color: '#C9AC64' },
-  { value: 'sick',     label: 'Ziek',         color: '#D98A8A' },
-  { value: 'leave',    label: 'Verlof',       color: '#6FA8C4' },
-  { value: 'external', label: 'Extern',       color: '#DDA071' },
-  { value: 'blocked',  label: 'Geblokkeerd',  color: '#B96B6B' },
-  { value: 'outflow',  label: 'Uitgestroomd', color: '#8A94A6' },
-  { value: 'deleted',  label: 'Verwijderd',   color: '#64748B' },
+  { value: 'lead',        label: 'Lead',              color: '#94A3B8' },
+  { value: 'candidate',   label: 'Kandidaat',         color: '#79B58E' },
+  { value: 'matched',     label: 'Gematched',         color: '#6E8FD6' },
+  { value: 'inactive',    label: 'Inactief',          color: '#C9AC64' },
+  { value: 'unplaceable', label: 'Niet bemiddelbaar', color: '#D98A8A' },
 ]
 
 // Availability is a SEPARATE axis from the lifecycle status (a candidate can be

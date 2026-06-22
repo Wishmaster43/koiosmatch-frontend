@@ -35,7 +35,15 @@
     "planning": "Planification",
     "modules": "Modules",
     "superadmin": "Super Admin",
-    "audit": "Journal d'audit"
+    "audit": "Journal d'audit",
+    "candidate_lookups": "Listes de candidats",
+    "languages": "Langues",
+    "vacancies": "Postes",
+    "customers": "Clients",
+    "candidate": "Candidat",
+    "applications": "Candidatures",
+    "shared": "Partagé",
+    "whatsapp": "WhatsApp"
   },
   "nav": {
     "kpis": "KPI",
@@ -60,7 +68,7 @@
     "view_sales": "Ventes",
     "view_candidates": "Candidats",
     "notif_sollicitaties": "Candidatures",
-    "notif_vacatures": "Offres",
+    "notif_vacatures": "Postes",
     "notif_facturering": "Facturation",
     "email": "E-mail",
     "whatsapp": "WhatsApp Business",
@@ -69,7 +77,7 @@
     "webhooks": "Webhooks",
     "importeren": "Importer",
     "billing_plans": "Forfait",
-    "billing_pay": "Moyens de paiement",
+    "billing_pay": "Paiement & recharge",
     "billing_auto": "Recharge automatique",
     "billing_usage": "Utilisation",
     "billing_invoices": "Factures",
@@ -86,10 +94,24 @@
     "availability": "Disponibilité",
     "automatch": "Règles de correspondance",
     "planning_board": "Tableau de planification",
-    "messaging": "Messagerie",
+    "messaging": "Messages",
     "koios": "Koios AI",
     "mod_shiftmanager": "Shiftmanager",
-    "mod_helloflex": "HelloFlex"
+    "mod_helloflex": "HelloFlex",
+    "contract_forms": "Types de contrat",
+    "funnel_stages": "Étapes de l'entonnoir",
+    "candidate_statuses": "Statuts",
+    "lang_languages": "Langues",
+    "lang_levels": "Niveaux",
+    "vacancy_statuses": "Statuts",
+    "vacancy_phases": "Phases",
+    "vacancy_fields": "Champs personnalisés",
+    "customer_statuses": "Statuts clients",
+    "location_statuses": "Statuts de site",
+    "department_statuses": "Statuts de département",
+    "contact_statuses": "Statuts de contact",
+    "last_contact_types": "Type de contact",
+    "note_types": "Types de note"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -654,17 +676,21 @@
     "savedActive": "Enregistré & actif",
     "activate": "Activer le forfait",
     "changeFromTo": "Changement de {{from}} à {{to}}",
+    "groups": {
+      "plans": "Forfaits",
+      "standalone": "Modules indépendants"
+    },
     "packages": {
       "reporting_sm": "Rapports Shiftmanager",
       "reporting_hf": "Rapports HelloFlex",
-      "reporting_sm_hf": "Rapports SM + HF",
-      "reporting_sm_ai": "Rapports SM + AI & Workflow",
-      "reporting_hf_ai": "Rapports HF + AI & Workflow",
-      "reporting_sm_hf_ai": "Rapports SM + HF + AI & Workflow",
-      "ats_crm": "ATS & CRM",
-      "ats_crm_ai": "ATS & CRM + AI & Workflow",
-      "ats_crm_planning": "ATS & CRM + Planning",
-      "ats_crm_ai_planning": "ATS & CRM + AI & Workflow + Planning"
+      "reporting_sm_hf": "Rapports Shiftmanager + HelloFlex",
+      "reporting_sm_ai": "Rapports Shiftmanager + AI Agents",
+      "reporting_hf_ai": "Rapports HelloFlex + AI Agents",
+      "reporting_sm_hf_ai": "Rapports SM + HF + AI Agents",
+      "ats_crm": "Koios Core",
+      "ats_crm_ai": "Koios Plus",
+      "ats_crm_planning": "Koios Core + Planning",
+      "ats_crm_ai_planning": "Koios Suite"
     },
     "emptyTitle": "Pas encore de réglages",
     "emptyDesc": "Les réglages de ce module arrivent.",
@@ -865,7 +891,13 @@
     "statuses": {
       "title": "Statuts",
       "subtitle": "Statut opérationnel avec une couleur (Actif, Inactif, Malade …)."
-    }
+    },
+    "requiresAppointment": "Nécessite un rendez-vous",
+    "requiresAppointmentHint": "Cette étape attend un rendez-vous planifié (intake). S'il manque, c'est signalé sur le candidat.",
+    "appointmentBadge": "Rendez-vous requis",
+    "requiresReason": "Motif obligatoire",
+    "requiresReasonHint": "Ce statut exige un motif (p. ex. Inactif).",
+    "reasonBadge": "Motif"
   },
   "planning": {
     "shiftTypes": {
@@ -952,5 +984,37 @@
         "unit": "services"
       }
     }
+  },
+  "customerLookups": {
+    "statuses": {
+      "title": "Statuts clients",
+      "subtitle": "Gérez les statuts qu’un client peut avoir (Actif, Prospect, …).",
+      "add": "Ajouter un statut"
+    },
+    "locationStatuses": {
+      "title": "Statuts de site",
+      "subtitle": "Gérez les statuts qu’un site client peut avoir.",
+      "add": "Ajouter un statut"
+    },
+    "departmentStatuses": {
+      "title": "Statuts de département",
+      "subtitle": "Gérez les statuts qu’un département peut avoir.",
+      "add": "Ajouter un statut"
+    },
+    "contactStatuses": {
+      "title": "Statuts de contact",
+      "subtitle": "Gérez les statuts qu’une personne de contact peut avoir.",
+      "add": "Ajouter un statut"
+    }
+  },
+  "lastContactTypes": {
+    "title": "Types de contact",
+    "subtitle": "Canaux du 'dernier contact' (E-mail, Téléphone, WhatsApp).",
+    "add": "Ajouter un type"
+  },
+  "noteTypes": {
+    "title": "Types de note",
+    "subtitle": "Catégories pour les notes candidats.",
+    "add": "Ajouter un type"
   }
 }

@@ -1,12 +1,16 @@
 /**
- * CustomersInsightsRow — compact strip of equal-size cards (donuts + KPIs) above
- * the customers table. Same layout contract as the candidates strip.
+ * InsightsRow — one compact strip of equal-footprint cards: config-driven donuts
+ * + KPI cards, all the same size so donuts and KPI numbers line up on a single
+ * row. Shared by every entity list (candidates, applications, …).
  *
- *   donuts: Array<{ key, title, data, colors?, onPick, active?, onClear? }>
- *   kpis:   Array<{ key, label, value, sub?, color, onClick?, active? }>
+ *   donuts: Array<{ key, title, data, colors?, onPick?, active?, onClear? }>
+ *   kpis:   Array<{ key, label, value, sub?, color, onClick?, active?, channels? }>
+ *
+ * `clearTitle` is the tooltip on a donut's clear-filter button (pass a translated
+ * string so the shared component stays free of hardcoded copy).
  */
 import { FilterX } from 'lucide-react'
-import MiniDonut from '../../components/charts/MiniDonut'
+import MiniDonut from '../charts/MiniDonut'
 
 const CARD = {
   flex: '1 1 0', minWidth: 0, height: 96, boxSizing: 'border-box',
@@ -18,12 +22,12 @@ const TITLE = {
   letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
 }
 
-function DonutCard({ title, data, colors, onPick, active, onClear }) {
+function DonutCard({ title, data, colors, onPick, active, onClear, clearTitle }) {
   return (
     <div style={{ ...CARD, position: 'relative' }}>
       <div style={TITLE}>{title}</div>
       {active && onClear && (
-        <button onClick={onClear} title="Filter wissen"
+        <button onClick={onClear} title={clearTitle}
           style={{ position: 'absolute', top: 6, right: 6, width: 20, height: 20, borderRadius: 5,
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: 'none', padding: 0 }}
@@ -41,7 +45,7 @@ function DonutCard({ title, data, colors, onPick, active, onClear }) {
   )
 }
 
-function KpiCard({ label, value, sub, color, onClick, active }) {
+function KpiCard({ label, value, sub, color, onClick, active, channels }) {
   const clickable = typeof onClick === 'function'
   return (
     <div onClick={onClick} title={sub || undefined}
@@ -56,20 +60,29 @@ function KpiCard({ label, value, sub, color, onClick, active }) {
         <div style={{ fontSize: 24, fontWeight: 700, lineHeight: 1, color: color || 'var(--text)' }}>
           {value.toLocaleString('nl-NL')}
         </div>
-        {sub && (
+        {channels ? (
+          <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+            {channels.map(ch => (
+              <span key={ch.label} title={ch.label}
+                style={{ fontSize: 10, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: ch.color, flexShrink: 0 }} />
+                {ch.value}
+              </span>
+            ))}
+          </div>
+        ) : sub ? (
           <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4, whiteSpace: 'nowrap',
             overflow: 'hidden', textOverflow: 'ellipsis' }}>{sub}</div>
-        )}
+        ) : null}
       </div>
     </div>
   )
 }
 
-export default function CustomersInsightsRow({ donuts = [], kpis = [] }) {
+export default function InsightsRow({ donuts = [], kpis = [], padding = '16px 24px 12px', clearTitle }) {
   return (
-    <div style={{ padding: '16px 24px 12px', display: 'flex', gap: 10, flexShrink: 0,
-      flexWrap: 'nowrap', overflowX: 'auto' }}>
-      {donuts.map(({ key, ...d }) => <DonutCard key={key} {...d} />)}
+    <div style={{ padding, display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'nowrap', overflowX: 'auto' }}>
+      {donuts.map(({ key, ...d }) => <DonutCard key={key} {...d} clearTitle={clearTitle} />)}
       {kpis.map(({ key, ...k }) => <KpiCard key={key} {...k} />)}
     </div>
   )

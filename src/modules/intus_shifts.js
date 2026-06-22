@@ -1,15 +1,16 @@
-// http_request module — make a custom HTTP request to an external API.
-import { Globe } from 'lucide-react'
+// intus_shifts module — HTTP call to the Intus API for shifts (diensten).
+// Same fields as the generic HTTP Request, branded with the Intus mark.
+import IntusMark from '../components/ui/IntusMark'
 
 export default {
-  type:  'http_request',
-  category: 'Integraties',
-  label: 'HTTP Request',
-  Icon:  Globe,
-  color: '#0369A1',
-  bg:    'var(--color-info-bg)',
+  type:  'intus_shifts',
+  category: 'Intus',
+  label: 'Diensten',
+  Icon:  IntusMark,
+  color: '#0E3A53',
+  bg:    '#E7EEF3',
   schema: [
-    { key: 'url',    label: 'URL',    type: 'text',   placeholder: 'https://api.example.com/endpoint', required: true },
+    { key: 'url',    label: 'URL',    type: 'text',   placeholder: 'https://api.intus.example/shifts', required: true },
     { key: 'method', label: 'Method', type: 'select', options: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'], required: true },
     { key: 'authentication_type', label: 'Authenticatie', type: 'select', options: ['Geen', 'API Key', 'Basic Auth', 'OAuth'] },
     {

@@ -10,7 +10,7 @@ import CandidateDrawer from './CandidateDrawer'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesTable from './CandidatesTable'
 import CandidatesBulkBar from './CandidatesBulkBar'
-import CandidatesInsightsRow from './CandidatesInsightsRow'
+import InsightsRow from '../../components/insights/InsightsRow'
 import PaginationBar from '../../components/ui/PaginationBar'
 import { mapCandidate } from './data/mapCandidate'
 import { NL_PROVINCES } from './drawer/constants'
@@ -23,8 +23,8 @@ const isStale = (c) => {
   const t = c.lastContactAt ? new Date(c.lastContactAt).getTime() : null
   return t == null || (Date.now() - t) > SIX_MONTHS_MS
 }
-// Geen opvolging: nieuwe prospect zonder enig contact.
-const isNoFollowup = (c) => c.stage === 'prospect' && !c.lastContactAt
+// Geen opvolging: nieuwe lead zonder enig contact.
+const isNoFollowup = (c) => c.status === 'lead' && !c.lastContactAt
 // Never contacted: no recorded contact moment at all (page-local fallback predicate).
 const isNeverContacted = (c) => !c.lastContactAt
 
@@ -35,19 +35,19 @@ const toggleOneValue = (set, value) =>
 
 // Temporary dummy data — replace once API returns candidates
 const DUMMY_CANDIDATES = [
-  { id: 1,  name: 'Ismail Eddahchouri',    initials: 'IE', title: 'Verzorgende IG',  candidateTypes: ['on_call'],        stage: 'pool', status: 'active',     statusColor: 'var(--color-success)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: 'Papendrecht', province: 'Zuid-Holland', lastContactAt: '2026-06-09', client: 'Stichting Rivas Zorggroep', created: '12 jun 2026', email: 'i-s-m-a-i-l2007@outlook.com', phone: '+31624159406', address: 'Papendrecht', gender: 'Man',   nationality: 'Marokkaans',  dob: '15 maart 1995 (31 jaar)', summary: 'Verzorgende IG met ruime experiences in de ouderenzorg.', tags: ['Papendrecht', 'Verzorging', 'IG', 'MBO'], branches: ['Koios flex B.V.', 'Koios zorg B.V.'], experiences: [{ id: 1, title: 'Verzorgende IG', company: 'Stichting Rivas Zorggroep', location: 'Papendrecht', period: 'jan 2022–heden', desc: 'Via KoiosMatch' }, { id: 2, title: 'Helpende', company: 'Verpleeghuis Oudshoorn, Alrijne', location: 'Oudshoorn', period: 'jul 2020–dec 2021', desc: '' }], educations: [{ id: 1, title: 'MBO 4, Verzorgende IG', school: 'ROC Mondriaan', period: 'Uitgegeven jan 2022' }, { id: 2, title: 'VMBO Kader', school: 'Dongemond College', period: 'Uitgegeven jun 2018' }], languages: [{ id: 1, language: 'Nederlands', spoken: 'Goed', written: 'Goed' }], certifications: [], skills: ['Rijbewijs B', 'BHV'], documents: [{ name: 'CV_Ismail.pdf', size: '44856' }], applications: [], notes: [{ author: 'Wiktoria Opalenyk', ago: '1 week geleden', text: 'Kandidaat heeft interesse in vaste dienst.' }] },
-  { id: 2,  name: 'Merel Van Muijlwijk',   initials: 'MV', title: 'Helpende',        candidateTypes: ['freelance'],         stage: 'pool', status: 'active',     statusColor: 'var(--color-success)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: 'Utrecht',     province: 'Utrecht', lastContactAt: '2026-06-12', client: 'Stichting Rivas Zorggroep', created: '12 jun 2026', email: 'merel.vm@gmail.com', phone: '+31612345678', address: 'Herenhof 12, 3500 AA, Utrecht', gender: 'Vrouw', nationality: 'Nederlands', dob: '22 juli 1998 (27 jaar)', summary: 'Helpende met experiences in woonzorg.', tags: ['Utrecht', 'HR medewerker', 'MBO', 'Senior'], branches: ['Koios flex B.V.', 'Koios zorg B.V.', 'Koios works B.V.'], experiences: [{ id: 1, title: 'ZZP Helpende', company: 'Verpleeghuis Oudshoorn, Alrijne', location: 'Oudshoorn', period: 'jul 2022–sep 2024', desc: 'Via Yesway' }], educations: [{ id: 1, title: 'MBO 2, Helpende Zorg & Welzijn', school: 'Regionaal Opleidingen Centrum Gouda', period: 'Uitgegeven jan 2015' }], languages: [{ id: 1, language: 'Nederlands', spoken: 'Goed', written: 'Goed' }], certifications: [], skills: ['Rijbewijs B'], documents: [{ name: 'Merel Van Muijlwijk - CV.pdf', size: '495516' }], applications: [], notes: [{ author: 'Danny Polak', ago: '2 maanden geleden', text: 'Beschikbaar vanaf: 16-08-2024\nUren per week: 24-32' }] },
-  { id: 3,  name: 'Raginie Rasoelbaks',    initials: 'RR', title: 'Verpleegkundige', candidateTypes: ['payroll'], stage: 'intake', status: 'intake',    statusColor: 'var(--color-warning)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: 'Rotterdam',   province: 'Zuid-Holland', lastContactAt: '2026-06-10', client: '',                         created: '12 jun 2026', email: 'raginie.r@hotmail.com',   phone: '+31687654321', address: 'Rotterdam',  gender: 'Vrouw', nationality: 'Surinaams',   dob: '4 nov 1993 (32 jaar)',  summary: '', tags: ['Rotterdam'],          branches: ['Koios zorg B.V.'],  experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
-  { id: 4,  name: 'Elif Akagündüz',        initials: 'EA', title: 'Gastvrouw',       candidateTypes: ['on_call'],        stage: 'prospect', status: 'active',     statusColor: 'var(--color-success)',   owner: 'Kelly van Vliet',   ownerInitials: 'KV', city: 'Amsterdam',   province: 'Noord-Holland', lastContactAt: '2026-06-05', client: 'Yesway Zorg',            created: '12 jun 2026', email: 'elif.ak@gmail.com',       phone: '+31698765432', address: 'Amsterdam', gender: 'Vrouw', nationality: 'Turks',       dob: '30 mei 2000 (25 jaar)', summary: '', tags: ['Amsterdam', 'MBO'],   branches: ['Koios zorg B.V.'],  experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
-  { id: 5,  name: 'Dina [Niet opgegeven]', initials: 'DI', title: '',                candidateTypes: [],            stage: 'prospect', status: 'active',     statusColor: 'var(--color-success)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: '',             province: '', lastContactAt: null,         client: '',                         created: '12 jun 2026', email: '-',               phone: '-',            address: '-',         gender: '-',   nationality: '-',           dob: '-',                     summary: '', tags: [],                    branches: [],                   experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
-  { id: 6,  name: 'Figen Ooijevaar',       initials: 'FO', title: 'Zorgmedewerker', candidateTypes: ['on_call'],        stage: 'prospect', status: 'prospect', statusColor: 'var(--color-primary)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: 'Den Haag',    province: 'Zuid-Holland', lastContactAt: '2026-06-11', client: '',                         created: '11 jun 2026', email: 'figen.o@gmail.com',       phone: '+31645678901', address: 'Den Haag',  gender: 'Vrouw', nationality: 'Nederlands',  dob: '18 sep 1996 (29 jaar)', summary: '', tags: ['Den Haag'],          branches: ['Koios zorg B.V.'],  experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
-  { id: 7,  name: 'Fernanda Vogel-Andrade',initials: 'FV', title: 'Helpende',        candidateTypes: ['freelance'],         stage: 'pool', status: 'active',     statusColor: 'var(--color-success)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: 'Eindhoven',   province: 'Noord-Brabant', lastContactAt: '2026-06-03', client: '',                         created: '11 jun 2026', email: 'fernanda.va@gmail.com',   phone: '+31623456789', address: 'Eindhoven', gender: 'Vrouw', nationality: 'Braziliaans', dob: '11 feb 1994 (31 jaar)', summary: '', tags: ['Eindhoven', 'MBO'],  branches: [],                   experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
-  { id: 8,  name: 'Rubina Rosella Milan',  initials: 'RM', title: 'Verzorgende',     candidateTypes: ['payroll'], stage: 'intake', status: 'intake',  statusColor: 'var(--color-secondary)', owner: 'Kelly van Vliet',   ownerInitials: 'KV', city: 'Breda',       province: 'Noord-Brabant', lastContactAt: '2026-06-08', client: 'Stichting WoonzorgGroep', created: '11 jun 2026', email: 'rubina.rm@outlook.com',   phone: '+31678901234', address: 'Breda',     gender: 'Vrouw', nationality: 'Nederlands',  dob: '25 dec 1991 (34 jaar)', summary: '', tags: ['Breda', 'Verzorging'], branches: ['Koios zorg B.V.'],  experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
-  { id: 9,  name: 'Priscilla Benjamin',    initials: 'PB', title: 'Verpleegkundige', candidateTypes: ['on_call'],        stage: 'prospect', status: 'prospect', statusColor: 'var(--color-primary)',   owner: 'Bente de Jong',     ownerInitials: 'BD', city: 'Tilburg',     province: 'Noord-Brabant', lastContactAt: null,         client: '',                         created: '11 jun 2026', email: 'p.benjamin@gmail.com',    phone: '+31634567890', address: 'Tilburg',   gender: 'Vrouw', nationality: 'Surinaams',   dob: '7 aug 1997 (28 jaar)',  summary: '', tags: ['Tilburg'],           branches: [],                   experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
-  { id: 10, name: 'Petra Kuiters',         initials: 'PK', title: 'Helpende',        candidateTypes: ['freelance'],         stage: 'prospect', status: 'prospect', statusColor: 'var(--color-primary)',   owner: 'Bente de Jong',     ownerInitials: 'BD', city: 'Groningen',   province: 'Groningen', lastContactAt: '2026-05-28', client: '',                         created: '11 jun 2026', email: 'petra.k@hotmail.com',     phone: '+31656789012', address: 'Groningen', gender: 'Vrouw', nationality: 'Nederlands',  dob: '14 apr 1989 (37 jaar)', summary: '', tags: ['Groningen', 'Senior'], branches: [],                   experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
+  { id: 1,  name: 'Ismail Eddahchouri',    initials: 'IE', title: 'Verzorgende IG',  candidateTypes: ['on_call'],        stage: '', status: 'candidate',     statusColor: 'var(--color-success)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: 'Papendrecht', province: 'Zuid-Holland', lastContactAt: '2026-06-09', client: 'Stichting Rivas Zorggroep', created: '12 jun 2026', email: 'i-s-m-a-i-l2007@outlook.com', phone: '+31624159406', address: 'Papendrecht', gender: 'Man',   nationality: 'Marokkaans',  dob: '15 maart 1995 (31 jaar)', summary: 'Verzorgende IG met ruime experiences in de ouderenzorg.', tags: ['Papendrecht', 'Verzorging', 'IG', 'MBO'], branches: ['Koios flex B.V.', 'Koios zorg B.V.'], experiences: [{ id: 1, title: 'Verzorgende IG', company: 'Stichting Rivas Zorggroep', location: 'Papendrecht', period: 'jan 2022–heden', desc: 'Via KoiosMatch' }, { id: 2, title: 'Helpende', company: 'Verpleeghuis Oudshoorn, Alrijne', location: 'Oudshoorn', period: 'jul 2020–dec 2021', desc: '' }], educations: [{ id: 1, title: 'MBO 4, Verzorgende IG', school: 'ROC Mondriaan', period: 'Uitgegeven jan 2022' }, { id: 2, title: 'VMBO Kader', school: 'Dongemond College', period: 'Uitgegeven jun 2018' }], languages: [{ id: 1, language: 'Nederlands', spoken: 'Goed', written: 'Goed' }], certifications: [], skills: ['Rijbewijs B', 'BHV'], documents: [{ name: 'CV_Ismail.pdf', size: '44856' }], applications: [], notes: [{ author: 'Wiktoria Opalenyk', ago: '1 week geleden', text: 'Kandidaat heeft interesse in vaste dienst.' }] },
+  { id: 2,  name: 'Merel Van Muijlwijk',   initials: 'MV', title: 'Helpende',        candidateTypes: ['freelance'],         stage: '', status: 'candidate',     statusColor: 'var(--color-success)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: 'Utrecht',     province: 'Utrecht', lastContactAt: '2026-06-12', client: 'Stichting Rivas Zorggroep', created: '12 jun 2026', email: 'merel.vm@gmail.com', phone: '+31612345678', address: 'Herenhof 12, 3500 AA, Utrecht', gender: 'Vrouw', nationality: 'Nederlands', dob: '22 juli 1998 (27 jaar)', summary: 'Helpende met experiences in woonzorg.', tags: ['Utrecht', 'HR medewerker', 'MBO', 'Senior'], branches: ['Koios flex B.V.', 'Koios zorg B.V.', 'Koios works B.V.'], experiences: [{ id: 1, title: 'ZZP Helpende', company: 'Verpleeghuis Oudshoorn, Alrijne', location: 'Oudshoorn', period: 'jul 2022–sep 2024', desc: 'Via Yesway' }], educations: [{ id: 1, title: 'MBO 2, Helpende Zorg & Welzijn', school: 'Regionaal Opleidingen Centrum Gouda', period: 'Uitgegeven jan 2015' }], languages: [{ id: 1, language: 'Nederlands', spoken: 'Goed', written: 'Goed' }], certifications: [], skills: ['Rijbewijs B'], documents: [{ name: 'Merel Van Muijlwijk - CV.pdf', size: '495516' }], applications: [], notes: [{ author: 'Danny Polak', ago: '2 maanden geleden', text: 'Beschikbaar vanaf: 16-08-2024\nUren per week: 24-32' }] },
+  { id: 3,  name: 'Raginie Rasoelbaks',    initials: 'RR', title: 'Verpleegkundige', candidateTypes: ['payroll'], stage: 'invited', status: 'candidate',    statusColor: 'var(--color-warning)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: 'Rotterdam',   province: 'Zuid-Holland', lastContactAt: '2026-06-10', client: '',                         created: '12 jun 2026', email: 'raginie.r@hotmail.com',   phone: '+31687654321', address: 'Rotterdam',  gender: 'Vrouw', nationality: 'Surinaams',   dob: '4 nov 1993 (32 jaar)',  summary: '', tags: ['Rotterdam'],          branches: ['Koios zorg B.V.'],  experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
+  { id: 4,  name: 'Elif Akagündüz',        initials: 'EA', title: 'Gastvrouw',       candidateTypes: ['on_call'],        stage: '', status: 'candidate',     statusColor: 'var(--color-success)',   owner: 'Kelly van Vliet',   ownerInitials: 'KV', city: 'Amsterdam',   province: 'Noord-Holland', lastContactAt: '2026-06-05', client: 'Yesway Zorg',            created: '12 jun 2026', email: 'elif.ak@gmail.com',       phone: '+31698765432', address: 'Amsterdam', gender: 'Vrouw', nationality: 'Turks',       dob: '30 mei 2000 (25 jaar)', summary: '', tags: ['Amsterdam', 'MBO'],   branches: ['Koios zorg B.V.'],  experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
+  { id: 5,  name: 'Dina [Niet opgegeven]', initials: 'DI', title: '',                candidateTypes: [],            stage: '', status: 'candidate',     statusColor: 'var(--color-success)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: '',             province: '', lastContactAt: null,         client: '',                         created: '12 jun 2026', email: '-',               phone: '-',            address: '-',         gender: '-',   nationality: '-',           dob: '-',                     summary: '', tags: [],                    branches: [],                   experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
+  { id: 6,  name: 'Figen Ooijevaar',       initials: 'FO', title: 'Zorgmedewerker', candidateTypes: ['on_call'],        stage: '', status: 'lead', statusColor: 'var(--color-primary)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: 'Den Haag',    province: 'Zuid-Holland', lastContactAt: '2026-06-11', client: '',                         created: '11 jun 2026', email: 'figen.o@gmail.com',       phone: '+31645678901', address: 'Den Haag',  gender: 'Vrouw', nationality: 'Nederlands',  dob: '18 sep 1996 (29 jaar)', summary: '', tags: ['Den Haag'],          branches: ['Koios zorg B.V.'],  experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
+  { id: 7,  name: 'Fernanda Vogel-Andrade',initials: 'FV', title: 'Helpende',        candidateTypes: ['freelance'],         stage: '', status: 'candidate',     statusColor: 'var(--color-success)',   owner: 'Wiktoria Opalenyk', ownerInitials: 'WO', city: 'Eindhoven',   province: 'Noord-Brabant', lastContactAt: '2026-06-03', client: '',                         created: '11 jun 2026', email: 'fernanda.va@gmail.com',   phone: '+31623456789', address: 'Eindhoven', gender: 'Vrouw', nationality: 'Braziliaans', dob: '11 feb 1994 (31 jaar)', summary: '', tags: ['Eindhoven', 'MBO'],  branches: [],                   experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
+  { id: 8,  name: 'Rubina Rosella Milan',  initials: 'RM', title: 'Verzorgende',     candidateTypes: ['payroll'], stage: 'invited', status: 'candidate',  statusColor: 'var(--color-secondary)', owner: 'Kelly van Vliet',   ownerInitials: 'KV', city: 'Breda',       province: 'Noord-Brabant', lastContactAt: '2026-06-08', client: 'Stichting WoonzorgGroep', created: '11 jun 2026', email: 'rubina.rm@outlook.com',   phone: '+31678901234', address: 'Breda',     gender: 'Vrouw', nationality: 'Nederlands',  dob: '25 dec 1991 (34 jaar)', summary: '', tags: ['Breda', 'Verzorging'], branches: ['Koios zorg B.V.'],  experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
+  { id: 9,  name: 'Priscilla Benjamin',    initials: 'PB', title: 'Verpleegkundige', candidateTypes: ['on_call'],        stage: '', status: 'lead', statusColor: 'var(--color-primary)',   owner: 'Bente de Jong',     ownerInitials: 'BD', city: 'Tilburg',     province: 'Noord-Brabant', lastContactAt: null,         client: '',                         created: '11 jun 2026', email: 'p.benjamin@gmail.com',    phone: '+31634567890', address: 'Tilburg',   gender: 'Vrouw', nationality: 'Surinaams',   dob: '7 aug 1997 (28 jaar)',  summary: '', tags: ['Tilburg'],           branches: [],                   experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
+  { id: 10, name: 'Petra Kuiters',         initials: 'PK', title: 'Helpende',        candidateTypes: ['freelance'],         stage: '', status: 'lead', statusColor: 'var(--color-primary)',   owner: 'Bente de Jong',     ownerInitials: 'BD', city: 'Groningen',   province: 'Groningen', lastContactAt: '2026-05-28', client: '',                         created: '11 jun 2026', email: 'petra.k@hotmail.com',     phone: '+31656789012', address: 'Groningen', gender: 'Vrouw', nationality: 'Nederlands',  dob: '14 apr 1989 (37 jaar)', summary: '', tags: ['Groningen', 'Senior'], branches: [],                   experiences: [], educations: [], languages: [], certifications: [], skills: [], documents: [], applications: [], notes: [] },
 ]
 
-export default function CandidatesPage() {
+export default function CandidatesPage({ intent } = {}) {
   const [candidates,      setCandidates]      = useState([])
   const [loading,         setLoading]         = useState(true)
   const [error,           setError]           = useState(null)
@@ -68,6 +68,8 @@ export default function CandidatesPage() {
   const [selectedGeslacht, setSelectedGeslacht] = useState([])
   const [selectedProvince, setSelectedProvince] = useState([])
   const [selectedTitle,    setSelectedTitle]    = useState([])
+  const [selectedLocation, setSelectedLocation] = useState([])
+  const [locations,        setLocations]        = useState([]) // /locations — vestiging-filter opties
   const [globalSearch,     setGlobalSearch]     = useState('')
   // Aandacht-tile filter: null | 'stale6m' | 'noFollowup' (klik = aan/uit).
   const [attentionFilter,  setAttentionFilter]  = useState(null)
@@ -84,6 +86,17 @@ export default function CandidatesPage() {
   const { candidateTypes, funnelTypes, statuses } = useLookups()
   const { hasPermission } = useAuth()
 
+  // Seed filters from a navigation intent (e.g. a dashboard KPI/chart click).
+  // Runs once per intent; a cleared intent (plain sidebar nav) seeds nothing.
+  useEffect(() => {
+    if (!intent) return
+    if (intent.attention)     setAttentionFilter(intent.attention)
+    if (intent.status)        setSelectedStatus([intent.status])
+    if (intent.owner != null) setSelectedOwner([intent.owner])
+    if (intent.funnel)        setSelectedFunnel([intent.funnel])
+    if (intent.location)      setSelectedLocation([intent.location])
+  }, [intent])
+
   const handlePageSizeChange = (newSize) => { setPageSize(newSize); setPage(1) }
 
   // Server-side filter params (axios serialises arrays as `key[]`). Only the
@@ -98,8 +111,9 @@ export default function CandidatesPage() {
     if (selectedGeslacht.length) p.gender         = selectedGeslacht
     if (selectedProvince.length) p.province       = selectedProvince
     if (selectedTitle.length)    p.function_title = selectedTitle
+    if (selectedLocation.length) p.location_id    = selectedLocation
     return p
-  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle])
+  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1 (the filtered set has its own pagination).
@@ -123,6 +137,15 @@ export default function CandidatesPage() {
       })
       .catch(err => {
         if (isAbortError(err)) return
+        // 422 = the backend rejected a filter value (e.g. a status the API doesn't
+        // accept yet). Keep the page usable: empty result + a soft notice, so the
+        // filters stay visible and the user can clear the offending one — instead
+        // of a hard "loading failed" that blocks the whole page.
+        if (err?.response?.status === 422) {
+          setCandidates([]); setTotal(0); setLastPage(1); setError(null)
+          setActionMsg({ type: 'error', text: t('page.filterUnsupported', { defaultValue: 'Dit filter wordt (nog) niet door de server ondersteund.' }) })
+          return
+        }
         if (USE_MOCKS) {
           setCandidates(DUMMY_CANDIDATES); setTotal(DUMMY_CANDIDATES.length); setLastPage(1)
         } else {
@@ -144,6 +167,16 @@ export default function CandidatesPage() {
       .catch(err => { if (!isAbortError(err)) setStats(null) })
     return () => ctrl.abort()
   }, [filterParams])
+
+  // ── Vestiging (location) filter options ──
+  // From /locations; the backend supports ?location_id[] on /candidates. Best-effort.
+  useEffect(() => {
+    const ctrl = new AbortController()
+    api.get('/locations', { signal: ctrl.signal })
+      .then(res => setLocations(res.data?.data ?? res.data ?? []))
+      .catch(err => { if (!isAbortError(err)) setLocations([]) })
+    return () => ctrl.abort()
+  }, [])
 
   // Build {value,label,count} option lists from the loaded candidates.
   const optsFrom = (values, mapLabel = v => v) => {
@@ -189,6 +222,7 @@ export default function CandidatesPage() {
   ], [t])
   const provinceOptions = useMemo(() => NL_PROVINCES.map(p => ({ value: p, label: p })), [])
   const titleOptions    = useMemo(() => optsFrom(candidates.map(c => c.title).filter(Boolean)), [candidates])
+  const locationOptions = useMemo(() => (locations ?? []).map(l => ({ value: l.id, label: l.name })).filter(o => o.value != null), [locations])
 
   const tog = (set) => (v) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
@@ -237,10 +271,11 @@ export default function CandidatesPage() {
     { key: 'gender',   type: 'search-select', category: catPerson, label: t('filters.gender'),   selected: selectedGeslacht, options: genderOptions,   onToggle: tog(setSelectedGeslacht) },
     { key: 'province', type: 'search-select', category: catPerson, label: t('filters.province'), selected: selectedProvince, options: provinceOptions, onToggle: tog(setSelectedProvince) },
     // ── Organisatie ──
-    { key: 'owner', type: 'search-select', category: catOrganisation, label: t('filters.owner'), selected: selectedOwner, options: ownerOptions, onToggle: tog(setSelectedOwner) },
+    { key: 'owner',    type: 'search-select', category: catOrganisation, label: t('filters.owner'),  selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
+    { key: 'location', type: 'search-select', category: catOrganisation, label: t('filters.branch'), selected: selectedLocation, options: locationOptions, onToggle: tog(setSelectedLocation) },
   ], [t, catLifecycle, catQualifications, catPerson, catOrganisation, globalSearch,
-      selectedStatus, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner,
-      statusOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions])
+      selectedStatus, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner, selectedLocation,
+      statusOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
 
   useEffect(() => {
     registerFilters('candidates-page', filterGroups)
@@ -306,6 +341,7 @@ export default function CandidatesPage() {
     if ('gender'            in patch) body.gender            = patch.gender
     if ('nationality'       in patch) body.nationality       = patch.nationality
     if ('dob'               in patch) body.date_of_birth     = patch.dob
+    if ('placeOfBirth'      in patch) body.place_of_birth    = patch.placeOfBirth
     if ('email'             in patch) body.email             = patch.email
     if ('phone'             in patch) body.phone             = patch.phone
     if ('street'            in patch) body.street            = patch.street
@@ -434,11 +470,15 @@ export default function CandidatesPage() {
     patch: { stage }, keys: ['stage'],
     onSuccess: (n) => notify('success', t('bulk.stageChanged', { value: metaOf(funnelTypes, stage)?.label ?? stage, count: n })),
   })
-  // Replace the candidate type for the selection (single chosen type).
-  const bulkSetType = (type) => bulkMutate({
-    url: '/candidates/bulk/candidate-type', body: { candidate_type: type },
-    patch: { candidateTypes: [type] }, keys: ['candidateTypes'],
-    onSuccess: (n) => notify('success', t('bulk.typeChanged', { value: metaOf(candidateTypes, type)?.label ?? type, count: n })),
+  // Set the EXACT candidate-type set for the selection (multi-select add/remove).
+  // An empty set clears all types — so an unused type can then be deleted in Settings.
+  const bulkSetTypes = (types) => bulkMutate({
+    url: '/candidates/bulk/candidate-type', body: { candidate_types: types },
+    patch: { candidateTypes: types }, keys: ['candidateTypes'],
+    onSuccess: (n) => notify('success', t('bulk.typeChanged', {
+      value: types.length ? types.map(v => metaOf(candidateTypes, v)?.label ?? v).join(', ') : t('bulk.noneLabel'),
+      count: n,
+    })),
   })
 
   // Union of tags across the selected candidates — the "remove tag" option list.
@@ -501,7 +541,7 @@ export default function CandidatesPage() {
   // Recharts hands the clicked segment back at top level AND under `.payload`.
   const pickKey = (d) => d?.key ?? d?.payload?.key ?? d?.name
 
-  const intakeCount = useMemo(() => candidates.filter(c => c.status === 'intake').length, [candidates])
+  const intakeCount = useMemo(() => candidates.filter(c => c.stage === 'invited').length, [candidates])
   // Proxy for "active conversations" until the backend exposes WhatsApp/e-mail
   // threads: candidates contacted in the last 14 days. Channel split TBD.
   // Cutoff captured once at mount (lazy init) so the memo stays pure.
@@ -509,6 +549,8 @@ export default function CandidatesPage() {
   const activeConvCount = useMemo(() =>
     candidates.filter(c => c.lastContactAt && new Date(c.lastContactAt).getTime() > convCutoff).length
   , [candidates, convCutoff])
+  // Open candidate-linked tasks (server total from stats.attention.tasks, C-21).
+  const tasksCount = stats?.attention?.tasks ?? 0
 
   // ── One strip: 3 donuts + 4 KPI cards, all equal size ──
   const insightDonuts = [
@@ -527,12 +569,14 @@ export default function CandidatesPage() {
     { key: 'noFollowup', label: t('analytics.noFollowup'), value: noFollowupCount, sub: t('analytics.noFollowupSub'), color: 'var(--color-danger)',
       onClick: () => toggleAttention('noFollowup'), active: attentionFilter === 'noFollowup' },
     { key: 'intake',     label: t('kpi.intake'),           value: intakeCount,     sub: t('kpi.intakeSub'),           color: '#8B5CF6',
-      onClick: () => toggleOneValue(setSelectedStatus, 'intake'), active: selectedStatus.length === 1 && selectedStatus[0] === 'intake' },
+      onClick: () => toggleOneValue(setSelectedFunnel, 'invited'), active: selectedFunnel.length === 1 && selectedFunnel[0] === 'invited' },
     { key: 'conversations', label: t('analytics.conversations'), value: activeConvCount, color: 'var(--color-success)', channels: [
       { label: 'WhatsApp Business', value: '–', color: '#25D366' },
       { label: 'WhatsApp Web',      value: '–', color: '#128C7E' },
       { label: 'E-mail',            value: '–', color: '#3B8FD4' },
     ] },
+    // Candidate tasks KPI (decision 10) — shown alongside conversations.
+    { key: 'tasks', label: t('kpi.tasks'), value: tasksCount, sub: t('kpi.tasksSub'), color: '#0D9488' },
   ]
 
   return (
@@ -544,7 +588,8 @@ export default function CandidatesPage() {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           {/* Eén compacte strip: donuts + KPI's, allemaal gelijke grootte op 1 regel */}
-          <CandidatesInsightsRow donuts={insightDonuts} kpis={insightKpis} />
+          <InsightsRow donuts={insightDonuts} kpis={insightKpis}
+            clearTitle={t('analytics.clearFilter', { defaultValue: 'Filter wissen' })} />
 
           {/* Transient feedback for bulk mutations (aria-live for screen readers) */}
           {actionMsg && (
@@ -567,7 +612,7 @@ export default function CandidatesPage() {
             {selectedIds.size > 0 ? (
               <CandidatesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
                 onAddToPool={bulkAddToPool} onRemoveFromPool={bulkRemoveFromPool}
-                onSetOwner={bulkSetOwner} onSetStage={bulkSetStage} onSetType={bulkSetType}
+                onSetOwner={bulkSetOwner} onSetStage={bulkSetStage} onSetTypes={bulkSetTypes}
                 onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
                 canArchive={hasPermission('candidates.delete')}
                 users={users} funnelTypes={funnelTypes} candidateTypes={candidateTypes} selectedTags={selectedTags} />

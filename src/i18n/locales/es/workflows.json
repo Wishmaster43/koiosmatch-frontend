@@ -48,7 +48,7 @@
     }
   },
   "modules": {
-    "candidate_filter": "Filtro de candidatos",
+    "candidates": "Candidatos",
     "shift_fetcher": "Obtener turnos",
     "whatsapp_send": "Enviar WhatsApp",
     "database_update": "Actualizar base de datos",

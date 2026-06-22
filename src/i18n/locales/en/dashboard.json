@@ -1,0 +1,41 @@
+{
+  "kpi": {
+    "candidatesTotal": "Total candidates",
+    "inAts": "In the ATS",
+    "notContacted6m": "Not contacted >6 mo",
+    "neverContacted": "Never contacted",
+    "openTasks": "Open tasks",
+    "attentionNeeded": "Needs attention",
+    "linkedToCandidates": "Linked to candidates",
+    "opportunities": "Opportunities in pipeline",
+    "openOpportunities": "Open opportunities",
+    "pipelineValue": "Pipeline value",
+    "sumOpenOpps": "Sum of open opportunities"
+  },
+  "chart": {
+    "byStatus": "Candidates by status",
+    "byRecruiter": "Candidates by recruiter",
+    "funnel": "Application funnel",
+    "byStage": "Opportunities by stage",
+    "intakeOverTime": "Inflow over time",
+    "intakeWeekly": "Candidate & application inflow (weekly)",
+    "comingSoon": "Chart appears once the time-series data is available.",
+    "series": { "candidates": "Candidates", "applications": "Applications", "matches": "Matches" }
+  },
+  "block": {
+    "recentCandidates": "Recent candidates",
+    "recentApplications": "Recent applications",
+    "leadsPipeline": "Leads in pipeline",
+    "recentRuns": "Recent runs",
+    "recentConversations": "Recent conversations"
+  },
+  "action": {
+    "allCandidates": "All candidates",
+    "allApplications": "All applications",
+    "allCustomers": "All customers",
+    "all": "All"
+  },
+  "run": {
+    "processed": "{{count}} processed"
+  }
+}

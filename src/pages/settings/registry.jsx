@@ -17,8 +17,8 @@
  */
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays,
-  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Key, LayoutDashboard, LayoutGrid,
-  Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Shield, Sparkles, Star,
+  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Key, LayoutGrid,
+  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Shield, Sparkles, Star,
   Store, Tags, Target, Users, Webhook, XCircle, Zap,
 } from 'lucide-react'
 
@@ -29,13 +29,17 @@ import BrandSettings from './sections/BrandSettings'
 import CompanySettings from './sections/CompanySettings'
 import LocationsSettings from './sections/LocationsSettings'
 import MemorySettings from './sections/MemorySettings'
-import CandidateLookupsSettings from './sections/CandidateLookupsSettings'
+import { ContractFormsSettings, FunnelStagesSettings, CandidateStatusesSettings } from './sections/CandidateLookupsSettings'
+import { LastContactTypesSettings, NoteTypesSettings } from './sections/CandidateCommSettings'
+import { CustomerStatusesSettings, LocationStatusesSettings, DepartmentStatusesSettings, ContactStatusesSettings } from './sections/CustomerSettings'
 import PoolsSettings from './sections/PoolsSettings'
-import LanguageSettings from './sections/LanguageSettings'
+import { LanguageListSettings, LanguageLevelSettings } from './sections/LanguageSettings'
 import GenderSettings from './sections/GenderSettings'
 import IndustrySettings from './sections/IndustrySettings'
 import CandidateAvailabilitySettings from './sections/CandidateAvailabilitySettings'
-import VacancySettings from './sections/VacancySettings'
+import { VacancyStatusSettings, VacancyPhaseSettings, VacancyFieldsSettings, VacancyEmploymentTypeSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings } from './sections/VacancySettings'
+import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
+import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
 import RejectionSettings from './sections/RejectionSettings'
 import CvTemplateSettings from './sections/CvTemplateSettings'
 import EmailSettings from './sections/EmailSettings'
@@ -53,7 +57,7 @@ import MessagingSettings from './sections/messaging'
 import KoiosSettings from './sections/koios'
 import NotificationsSettings from './sections/NotificationsSettings'
 import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
-import { PlanbeheerSettings, BetaalmethodenSettings, AutoOpwaarderenSettings, GebruikSettings, FacturenSettings } from './sections/BillingSettings'
+import { BetaalmethodenSettings, AutoOpwaarderenSettings, GebruikSettings, FacturenSettings } from './sections/BillingSettings'
 
 import { kpisLeads, kpisCandidates, kpisApplications, kpisCustomers } from './schemas/kpis'
 
@@ -69,40 +73,86 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    key: 'general', icon: LayoutDashboard,
-    items: [
-      // Personal 2FA/MFA (Security) now lives on the user's own Profile, not here.
-      { id: 'branding', label: 'Brand', icon: Palette, component: BrandSettings },
-    ],
-  },
-  {
+    // Per-module settings + the package/tier matrix (Super Admin, gated) — kept together (Danny).
     key: 'modules', icon: LayoutGrid,
     items: [
-      // Per-module settings — one tab per product module (Shiftmanager, HelloFlex, …).
       { id: 'mod_shiftmanager', label: 'Shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings },
       { id: 'mod_helloflex',    label: 'HelloFlex',    icon: Zap,       render: () => <ModulePlaceholder /> },
+      { id: 'modules',          label: 'Package',      icon: Package,   component: ModulesSettings, superAdminOnly: true },
     ],
   },
   {
+    // Company / organisation: profile, locations, brand + per-module view config.
     key: 'company', icon: Building2,
     items: [
       { id: 'company',   label: 'General',   icon: Building2, component: CompanySettings },
+      { id: 'memory',    label: 'Memory',    icon: BookOpen,  component: MemorySettings },
       { id: 'locations', label: 'Locations', icon: MapPin,    component: LocationsSettings },
+      { id: 'branding',  label: 'Brand',     icon: Palette,   component: BrandSettings },
     ],
   },
   {
+    // Personalisation = shared/general tenant lookups (used across candidates, customers, contacts, …).
     key: 'personalisation', icon: BookOpen,
     items: [
-      { id: 'memory',            label: 'Memory',            icon: BookOpen,  component: MemorySettings },
-      { id: 'candidate_lookups', label: 'Candidate lookups', icon: Tags,      component: CandidateLookupsSettings },
-      { id: 'pools',             label: 'Talent pools',      icon: Star,      component: PoolsSettings },
-      { id: 'languages',         label: 'Languages',         icon: Languages, component: LanguageSettings },
-      { id: 'genders',           label: 'Gender',            icon: Users,     component: GenderSettings },
-      { id: 'candidate_availability', label: 'Availability', icon: CalendarCheck, component: CandidateAvailabilitySettings },
-      { id: 'industries',        label: 'Industries',        icon: Factory,   component: IndustrySettings },
-      { id: 'vacancy',           label: 'Vacancy',           icon: Briefcase, component: VacancySettings },
-      { id: 'rejection',         label: 'Rejection reasons', icon: XCircle,   component: RejectionSettings },
-      { id: 'cv_template',       label: 'CV template',       icon: FileText,  component: CvTemplateSettings },
+      { id: 'industries',         label: 'Industries',   icon: Factory,       component: IndustrySettings },
+      { id: 'lang_languages',     label: 'Languages',    icon: Languages,     component: LanguageListSettings },
+      { id: 'lang_levels',        label: 'Levels',       icon: BarChart2,     component: LanguageLevelSettings },
+      { id: 'genders',            label: 'Gender',       icon: Users,         component: GenderSettings },
+      { id: 'last_contact_types', label: 'Contact type', icon: MessageCircle, component: LastContactTypesSettings },
+      { id: 'note_types',         label: 'Note types',   icon: MessageSquare, component: NoteTypesSettings },
+    ],
+  },
+  {
+    // Candidate-specific settings (Danny: "Kandidaat").
+    key: 'candidate', icon: Users,
+    items: [
+      { id: 'candidate_statuses',     label: 'Statuses',          icon: Users,         component: CandidateStatusesSettings },
+      { id: 'contract_forms',         label: 'Contract forms',    icon: Tags,          component: ContractFormsSettings },
+      { id: 'candidate_availability', label: 'Availability',      icon: CalendarCheck, component: CandidateAvailabilitySettings },
+      { id: 'pools',                  label: 'Talent pools',      icon: Star,          component: PoolsSettings },
+      { id: 'cv_template',            label: 'CV template',       icon: FileText,      component: CvTemplateSettings },
+    ],
+  },
+  {
+    // Application (sollicitatie) lookups — funnel stages + rejection reasons live on the
+    // application, not the candidate (Danny). Rejection messaging is handled by workflows.
+    key: 'applications', icon: ClipboardList,
+    items: [
+      { id: 'funnel_stages', label: 'Funnel stages',     icon: Target,  component: FunnelStagesSettings },
+      { id: 'rejection',     label: 'Rejection reasons', icon: XCircle, component: RejectionSettings },
+    ],
+  },
+  {
+    // Customer-domain lookups — statuses for the customer and its sub-entities.
+    key: 'customers', icon: Building2,
+    items: [
+      { id: 'customer_statuses',   label: 'Statuses',          icon: Tags,      component: CustomerStatusesSettings },
+      { id: 'location_statuses',   label: 'Location statuses',  icon: MapPin,    component: LocationStatusesSettings },
+      { id: 'department_statuses', label: 'Department statuses', icon: Building2, component: DepartmentStatusesSettings },
+      { id: 'contact_statuses',    label: 'Contact statuses',   icon: Users,     component: ContactStatusesSettings },
+    ],
+  },
+  {
+    key: 'vacancies', icon: Briefcase,
+    items: [
+      { id: 'vacancy_statuses',    label: 'Statuses',         icon: Briefcase,      component: VacancyStatusSettings },
+      { id: 'vacancy_phases',      label: 'Phases',           icon: Target,         component: VacancyPhaseSettings },
+      { id: 'vacancy_employment',  label: 'Employment types', icon: ClipboardList,  component: VacancyEmploymentTypeSettings },
+      { id: 'vacancy_seniority',   label: 'Seniority',        icon: BarChart2,      component: VacancySenioritySettings },
+      { id: 'vacancy_education',   label: 'Education',        icon: BookOpen,       component: VacancyEducationSettings },
+      { id: 'vacancy_channels',    label: 'Job boards',       icon: Store,          component: VacancyChannelSettings },
+      { id: 'vacancy_fields',      label: 'Custom fields',    icon: FileText,       component: VacancyFieldsSettings },
+      { id: 'vacancy_matching',    label: 'Matching',         icon: Sparkles,       component: VacancyMatchingSettings },
+    ],
+  },
+  {
+    // Task (activity) lookups — own top-level menu, one sub-tab per list (decision §3B).
+    key: 'tasks', icon: ListChecks,
+    items: [
+      { id: 'task_statuses',   label: 'Statuses',       icon: ListChecks, component: TaskStatusSettings },
+      { id: 'task_types',      label: 'Activity types', icon: Tags,       component: TaskTypeSettings },
+      { id: 'task_priorities', label: 'Priorities',     icon: Flag,       component: TaskPrioritySettings },
     ],
   },
   {
@@ -124,21 +174,29 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    // Communication = e-mail per context (clients / candidates / planning).
+    key: 'communication', icon: Mail,
+    items: [
+      { id: 'email_klanten',    label: 'Email — clients',    icon: Mail, render: () => <EmailSettings context="klanten" /> },
+      { id: 'email_kandidaten', label: 'Email — candidates', icon: Mail, render: () => <EmailSettings context="kandidaten" /> },
+      { id: 'email_planning',   label: 'Email — planning',   icon: Mail, render: () => <EmailSettings context="planning" /> },
+    ],
+  },
+  {
+    // WhatsApp — connection + messaging (WhatsApp Business).
+    key: 'whatsapp', icon: MessageCircle,
+    items: [
+      { id: 'whatsapp',  label: 'WhatsApp',  icon: MessageCircle, component: WhatsAppSettings, requiresPage: 'whatsapp' },
+      { id: 'messaging', label: 'Messages',  icon: MessageSquare, component: MessagingSettings },
+    ],
+  },
+  {
+    // Notifications — its own menu (per context).
     key: 'notifications', icon: Bell,
     items: [
       { id: 'notif_sollicitaties', label: 'Applications', icon: Bell, render: () => <NotificationsSettings context="sollicitaties" /> },
       { id: 'notif_vacatures',     label: 'Vacancies',    icon: Bell, render: () => <NotificationsSettings context="vacatures" /> },
       { id: 'notif_facturering',   label: 'Billing',      icon: Bell, render: () => <NotificationsSettings context="facturering" /> },
-    ],
-  },
-  {
-    key: 'communication', icon: MessageCircle,
-    items: [
-      { id: 'email_klanten',    label: 'Email — clients',    icon: Mail, render: () => <EmailSettings context="klanten" /> },
-      { id: 'email_kandidaten', label: 'Email — candidates', icon: Mail, render: () => <EmailSettings context="kandidaten" /> },
-      { id: 'email_planning',   label: 'Email — planning',   icon: Mail, render: () => <EmailSettings context="planning" /> },
-      { id: 'whatsapp',         label: 'WhatsApp',           icon: MessageCircle, component: WhatsAppSettings, requiresPage: 'whatsapp' },
-      { id: 'messaging',        label: 'Messaging',          icon: MessageSquare, component: MessagingSettings },
     ],
   },
   {
@@ -154,32 +212,24 @@ export const NAV_GROUPS = [
   {
     key: 'billing', icon: CreditCard,
     items: [
-      { id: 'billing_plans',    label: 'Plan',            icon: CreditCard, component: PlanbeheerSettings },
-      { id: 'billing_pay',      label: 'Payment methods', icon: CreditCard, component: BetaalmethodenSettings },
-      { id: 'billing_auto',     label: 'Auto top-up',     icon: Zap,        component: AutoOpwaarderenSettings },
-      { id: 'billing_usage',    label: 'Usage',           icon: BarChart2,  component: GebruikSettings },
-      { id: 'billing_invoices', label: 'Invoices',        icon: FileText,   component: FacturenSettings },
+      // Payment methods + auto top-up merged into one tab; the standalone Plan tab dropped (Danny).
+      { id: 'billing_pay', label: 'Payment', icon: CreditCard, render: () => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
+          <BetaalmethodenSettings />
+          <AutoOpwaarderenSettings />
+        </div>
+      ) },
+      { id: 'billing_usage',    label: 'Usage',    icon: BarChart2, component: GebruikSettings },
+      { id: 'billing_invoices', label: 'Invoices', icon: FileText,  component: FacturenSettings },
     ],
   },
   {
+    // Administration: roles, users + the audit log.
     key: 'administration', icon: Users,
     items: [
-      { id: 'roles', label: 'Roles & permissions', icon: Shield, component: RolesSettings },
-      { id: 'users', label: 'Users',               icon: Users,  component: UsersPage },
-    ],
-  },
-  {
-    // Super-admin-only — the package/tier matrix; the group hides for regular admins
-    // because its item is superAdminOnly (empty groups are filtered out).
-    key: 'superadmin', icon: Shield,
-    items: [
-      { id: 'modules', label: 'Package', icon: Package, component: ModulesSettings, superAdminOnly: true },
-    ],
-  },
-  {
-    key: 'audit', icon: ClipboardList,
-    items: [
-      { id: 'audit', label: 'Audit log', icon: ClipboardList, component: AuditLog },
+      { id: 'roles', label: 'Roles & permissions', icon: Shield,        component: RolesSettings },
+      { id: 'users', label: 'Users',               icon: Users,         component: UsersPage },
+      { id: 'audit', label: 'Audit log',           icon: ClipboardList, component: AuditLog },
     ],
   },
 ]

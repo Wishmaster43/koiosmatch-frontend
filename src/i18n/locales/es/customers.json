@@ -1,0 +1,299 @@
+{
+  "title": "Clientes",
+  "page": {
+    "add": "Añadir cliente",
+    "searchPlaceholder": "Buscar cliente, n.º deudor, gestor…",
+    "empty": "No se encontraron clientes.",
+    "loading": "Cargando…",
+    "loadError": "No se pudieron cargar los clientes."
+  },
+  "cols": {
+    "name": "Nombre",
+    "debtorNumber": "N.º deudor",
+    "status": "Estado",
+    "accountManager": "Gestor de cuenta",
+    "locations": "Ubicaciones",
+    "departments": "Departamentos",
+    "contacts": "Contactos",
+    "openVacancies": "Vacantes abiertas",
+    "city": "Ciudad",
+    "industry": "Sector"
+  },
+  "filters": {
+    "search": "Buscar",
+    "status": "Estado",
+    "accountManager": "Gestor de cuenta",
+    "city": "Ciudad",
+    "industry": "Sector",
+    "categories": {
+      "general": "General",
+      "organisation": "Organización"
+    }
+  },
+  "insights": {
+    "statusTitle": "Estado",
+    "amTitle": "Por gestor",
+    "clearFilter": "Borrar filtro",
+    "locations": "Ubicaciones",
+    "locationsSub": "sedes en total",
+    "departments": "Departamentos",
+    "departmentsSub": "departamentos en total",
+    "contacts": "Contactos",
+    "contactsSub": "contactos en total",
+    "openVacancies": "Vacantes abiertas",
+    "openVacanciesSub": "abiertas",
+    "activeMatches": "Trabajando ahora",
+    "activeMatchesSub": "matches activos",
+    "noContact": "Sin contacto",
+    "noContactSub": "sin contacto vinculado"
+  },
+  "drawer": {
+    "entityLabel": "Cliente",
+    "createdAt": "Creado el {{date}}",
+    "edit": "Editar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "owner": "Gestor de cuenta",
+    "status": "Estado",
+    "tags": "Etiquetas",
+    "addTag": "Añadir etiqueta",
+    "back": "Volver",
+    "tabs": {
+      "overview": "Resumen",
+      "locations": "Ubicaciones",
+      "departments": "Departamentos",
+      "contacts": "Contactos",
+      "vacancies": "Vacantes",
+      "opportunities": "Oportunidades",
+      "planning": "Planificación",
+      "statistics": "Estadísticas",
+      "documents": "Documentos",
+      "notes": "Notas"
+    }
+  },
+  "overview": {
+    "general": "General",
+    "online": "En línea",
+    "settings": "Ajustes",
+    "textsTitle": "Textos",
+    "website": "Sitio web",
+    "employeeCount": "Empleados",
+    "toneOfVoice": "Tono de voz",
+    "industry": "Sector",
+    "debtorNumber": "Número de deudor",
+    "city": "Ciudad",
+    "hideCompanyName": "Ocultar nombre de empresa",
+    "hasCareerPage": "Tiene página de empleo",
+    "showInVacancies": "Mostrar en mis vacantes",
+    "excludeFromSourcing": "Excluir del sourcing",
+    "privacyPolicyUrl": "URL política de privacidad",
+    "description": "Descripción",
+    "recruitmentProblems": "Retos de contratación"
+  },
+  "locations": {
+    "empty": "Aún no hay ubicaciones",
+    "add": "Añadir ubicación",
+    "searchPlaceholder": "Buscar ubicación…",
+    "col": {
+      "name": "Nombre",
+      "city": "Ciudad",
+      "departments": "Departamentos",
+      "contacts": "Contactos"
+    },
+    "detail": {
+      "addressTitle": "Dirección y datos",
+      "street": "Calle",
+      "houseNumber": "N.º",
+      "houseNumberSuffix": "Complemento",
+      "postalCode": "Código postal",
+      "city": "Ciudad",
+      "country": "País",
+      "coc": "N.º registro",
+      "vat": "N.º IVA",
+      "contactName": "Persona de contacto",
+      "phone": "Teléfono",
+      "email": "Correo electrónico",
+      "departmentsHere": "Departamentos en esta ubicación",
+      "contactsHere": "Contactos en esta ubicación",
+      "none": "Nada vinculado aún"
+    }
+  },
+  "departments": {
+    "empty": "Aún no hay departamentos",
+    "add": "Añadir departamento",
+    "searchPlaceholder": "Buscar departamento…",
+    "col": {
+      "name": "Nombre",
+      "location": "Ubicación",
+      "contacts": "Contactos"
+    },
+    "detail": {
+      "infoTitle": "Departamento",
+      "name": "Nombre",
+      "location": "Ubicación",
+      "description": "Descripción",
+      "contactsHere": "Contactos en este departamento",
+      "none": "Nada vinculado aún"
+    }
+  },
+  "contacts": {
+    "empty": "Aún no hay contactos",
+    "add": "Añadir contacto",
+    "searchPlaceholder": "Buscar contacto…",
+    "col": {
+      "name": "Nombre",
+      "role": "Función",
+      "email": "Correo electrónico",
+      "phone": "Teléfono"
+    },
+    "detail": {
+      "infoTitle": "Contacto",
+      "name": "Nombre",
+      "role": "Función",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "primary": "Contacto principal",
+      "location": "Ubicación",
+      "department": "Departamento",
+      "none": "No indicado"
+    }
+  },
+  "vacancies": {
+    "empty": "No hay vacantes para este cliente.",
+    "col": {
+      "title": "Título",
+      "status": "Estado",
+      "applications": "Candidaturas"
+    }
+  },
+  "opportunities": {
+    "openVacancies": "Vacantes abiertas",
+    "openVacanciesEmpty": "No hay vacantes abiertas.",
+    "openShifts": "Turnos flex abiertos",
+    "openShiftsEmpty": "No hay turnos abiertos.",
+    "planningOff": "Los turnos abiertos aparecen cuando el módulo de Planificación esté activo.",
+    "col": {
+      "title": "Título",
+      "status": "Estado",
+      "applications": "Candidaturas",
+      "date": "Fecha",
+      "shift": "Turno",
+      "department": "Departamento"
+    }
+  },
+  "planning": {
+    "title": "Planificación",
+    "activeNow": "Trabajando ahora",
+    "activeNowSub": "colocaciones activas",
+    "upcoming": "Próximos turnos",
+    "upcomingEmpty": "No hay próximos turnos.",
+    "off": "La información de planificación aparece cuando el módulo de Planificación esté activo.",
+    "open": "Abierto"
+  },
+  "statistics": {
+    "matchesTotal": "Matches totales",
+    "matchesTotalSub": "histórico",
+    "activeMatches": "Trabajando ahora",
+    "activeMatchesSub": "matches activos",
+    "openVacancies": "Vacantes abiertas",
+    "openVacanciesSub": "abiertas",
+    "fillRate": "Tasa de cobertura",
+    "fillRateSub": "vacantes cubiertas",
+    "loadError": "No se pudieron cargar las estadísticas.",
+    "overviewTitle": "Resumen"
+  },
+  "documents": {
+    "empty": "Aún no hay documentos."
+  },
+  "notes": {
+    "notes": "Notas",
+    "newNote": "Nueva nota",
+    "type": "Tipo",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "notesEmpty": "Aún no hay notas.",
+    "notePlaceholder": "Título de la nota",
+    "timeline": "Cronología",
+    "timelineEmpty": "Aún no hay actividad.",
+    "conversations": "Conversaciones",
+    "conversationsEmpty": "Aún no hay conversaciones."
+  },
+  "bulk": {
+    "selected": "{{count}} seleccionado(s)",
+    "actions": "Acciones masivas",
+    "deselect": "Borrar selección",
+    "changeOwner": "Cambiar gestor",
+    "searchOwner": "Buscar usuario…",
+    "noUsers": "Sin usuarios",
+    "changeStatus": "Cambiar estado",
+    "searchStatus": "Buscar estado…",
+    "addTag": "Añadir etiqueta",
+    "tagPlaceholder": "Nombre de etiqueta",
+    "tagSubmit": "Añadir",
+    "removeTag": "Quitar etiqueta",
+    "searchTag": "Buscar etiqueta…",
+    "noTags": "Sin etiquetas",
+    "addNote": "Añadir nota",
+    "notePlaceholder": "Escribe una nota…",
+    "noteSubmit": "Añadir",
+    "archive": "Archivar",
+    "archiveConfirm": "¿Archivar {{count}} cliente(s)?",
+    "archived": "{{count}} cliente(s) archivado(s).",
+    "archiveError": "Error al archivar.",
+    "ownerChanged": "Gestor cambiado a {{name}} ({{count}}).",
+    "statusChanged": "Estado cambiado a {{value}} ({{count}}).",
+    "tagAdded": "Etiqueta «{{tag}}» añadida ({{count}}).",
+    "tagRemoved": "Etiqueta «{{tag}}» quitada ({{count}}).",
+    "noteAdded": "Nota añadida ({{count}}).",
+    "mutateError": "La acción ha fallado."
+  },
+  "modal": {
+    "title": "Añadir cliente",
+    "subtitle": "Introduzca los datos del nuevo cliente",
+    "fillRequired": "Rellene los campos obligatorios",
+    "required": "Campo obligatorio",
+    "create": "Crear cliente",
+    "cancel": "Cancelar",
+    "fields": {
+      "name": "Nombre",
+      "namePlaceholder": "P. ej. Grupo de cuidados Rivas",
+      "debtorNumber": "Número de deudor",
+      "status": "Estado",
+      "accountManager": "Gestor de cuenta",
+      "selectOwner": "Elegir gestor",
+      "industry": "Sector",
+      "selectIndustry": "Elegir sector",
+      "city": "Ciudad",
+      "cityPlaceholder": "P. ej. Gorinchem"
+    }
+  },
+  "subModal": {
+    "addLocation": "Añadir ubicación",
+    "addDepartment": "Añadir departamento",
+    "addContact": "Añadir contacto",
+    "locationName": "Nombre de ubicación",
+    "locationPlaceholder": "P. ej. Sede central",
+    "departmentName": "Nombre de departamento",
+    "departmentPlaceholder": "P. ej. Atención domiciliaria",
+    "selectLocation": "Ubicación",
+    "noLocationsFirst": "Cree primero una ubicación",
+    "contactName": "Nombre",
+    "contactPlaceholder": "P. ej. Juan Pérez",
+    "role": "Función",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "isPrimary": "Contacto principal",
+    "street": "Calle",
+    "houseNumber": "N.º",
+    "houseNumberSuffix": "Complemento",
+    "postalCode": "Código postal",
+    "city": "Ciudad",
+    "country": "País",
+    "coc": "N.º registro",
+    "vat": "N.º IVA",
+    "create": "Añadir",
+    "cancel": "Cancelar",
+    "required": "Campo obligatorio"
+  }
+}

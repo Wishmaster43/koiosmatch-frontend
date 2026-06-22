@@ -1,8 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X } from 'lucide-react'
+import { Edit2, Save, X, Trash2 } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import { NL_PROVINCES } from './constants'
+import { useDateFormat } from '../../../lib/datetime'
+import RichTextEditor from '../../../components/ui/RichTextEditor'
+import SafeHtml from '../../../components/ui/SafeHtml'
 
 function LinkedinIcon({ size = 12, color = '#0A66C2' }) {
   return (
@@ -20,8 +23,9 @@ const NATIONALITIES = ['Nederlands','Belgisch','Duits','Frans','Brits','Pools','
  * short fields into two columns to keep the panel calm and scannable. */
 export default function ProfileTab({ c, onEditSave }) {
   const { t } = useTranslation('candidates')
+  const { formatDate } = useDateFormat()
   const emptyForm = () => ({
-    gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '',
+    gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '', placeOfBirth: c.placeOfBirth ?? '',
     email: c.email ?? '', phone: c.phone ?? '',
     street: c.street ?? '', houseNumber: c.houseNumber ?? '', houseNumberSuffix: c.houseNumberSuffix ?? '',
     postalCode: c.postalCode ?? '', city: c.city ?? '', province: c.province ?? '',
@@ -29,6 +33,7 @@ export default function ProfileTab({ c, onEditSave }) {
   })
   const [editing,        setEditing]        = useState(false)
   const [summaryEditing, setSummaryEditing] = useState(false)
+  const [summaryExpanded, setSummaryExpanded] = useState(false)
   const [form,    setForm]    = useState(emptyForm)
   const [summary, setSummary] = useState(c.summary ?? '')
   const setF = (k, v) => setForm(p => ({ ...p, [k]: v }))
@@ -102,6 +107,8 @@ export default function ProfileTab({ c, onEditSave }) {
   // The read-only value for one field — contact fields render as actionable links.
   const renderValue = (key) => {
     const v = c[key]
+    // Birthdate renders as DD-MM-YYYY (a parseable ISO value); dummy strings pass through.
+    if (key === 'dob') return <span style={{ fontSize: 12, color: v && v !== '-' ? 'var(--text)' : 'var(--text-muted)' }}>{v && v !== '-' ? formatDate(v) : '-'}</span>
     if (key === 'linkedin') {
       return v
         ? <a href={v.startsWith('http') ? v : `https://${v}`} target="_blank" rel="noopener noreferrer"
@@ -124,7 +131,8 @@ export default function ProfileTab({ c, onEditSave }) {
         {key === 'linkedin' && <LinkedinIcon size={12} color="#0A66C2" />}
         {label}
       </div>
-      {editing ? renderInput(key) : renderValue(key)}
+      {/* Read value reserves the input's height so the row doesn't grow on edit. */}
+      {editing ? renderInput(key) : <div style={{ minHeight: 33, display: 'flex', alignItems: 'center' }}>{renderValue(key)}</div>}
     </div>
   )
 
@@ -151,7 +159,7 @@ export default function ProfileTab({ c, onEditSave }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {card(t('profile.groupPersonal'), <>
             {pair(field('gender', t('profile.gender')), field('nationality', t('profile.nationality')))}
-            {field('dob', t('profile.dob'))}
+            {pair(field('dob', t('profile.dob')), field('placeOfBirth', t('profile.placeOfBirth')))}
           </>)}
           {card(t('profile.groupContact'), <>
             {field('email', t('profile.email'))}
@@ -167,17 +175,29 @@ export default function ProfileTab({ c, onEditSave }) {
         </div>
       </div>
 
-      {/* ── Profile text (edited separately) ── */}
+      {/* ── Profile text — same rich editor as Notes (formatting + HTML toggle + expand) ── */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('profile.summary')}</span>
-          {editControls(summaryEditing, saveSummary, cancelSummary, () => setSummaryEditing(true))}
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            {/* Clear the profile text (edit mode only). */}
+            {summaryEditing && (
+              <button onClick={() => setSummary('')} title={t('profile.clear')} aria-label={t('profile.clear')}
+                style={{ ...iconBtn, background: 'none', color: 'var(--color-danger)', border: '1px solid var(--border)' }}>
+                <Trash2 size={13} />
+              </button>
+            )}
+            {editControls(summaryEditing, saveSummary, cancelSummary, () => setSummaryEditing(true))}
+          </div>
         </div>
-        <div style={{ ...blockStyle, padding: '10px 12px' }}>
-          {summaryEditing
-            ? <textarea value={summary} onChange={e => setSummary(e.target.value)} rows={3} style={{ ...inputStyle, resize: 'vertical' }} />
-            : <span style={{ fontSize: 12, color: 'var(--text)' }}>{c.summary || '-'}</span>}
-        </div>
+        {summaryEditing
+          ? <RichTextEditor value={summary} onChange={setSummary}
+              expanded={summaryExpanded} onToggleExpand={() => setSummaryExpanded(v => !v)} />
+          : (c.summary
+              ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}>
+                  <SafeHtml html={c.summary} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
+                </div>
+              : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>-</div>)}
       </div>
     </div>
   )

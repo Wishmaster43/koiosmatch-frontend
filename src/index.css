@@ -108,6 +108,9 @@ body {
 ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 2px; }
 /* Tiptap editor */
 .ProseMirror { outline: none; min-height: inherit; }
+/* Fill mode — editor body grows to fill a stretched parent, keeping the whole area clickable. */
+.km-editor-fill { display: flex; flex-direction: column; }
+.km-editor-fill .ProseMirror { flex: 1; }
 .ProseMirror p { margin: 0 0 6px; }
 .ProseMirror ul, .ProseMirror ol { padding-left: 20px; margin: 0 0 6px; }
 .ProseMirror h2 { font-size: 14px; font-weight: 700; margin: 0 0 6px; }

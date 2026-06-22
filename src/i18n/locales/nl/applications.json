@@ -1,0 +1,157 @@
+{
+  "title": "Sollicitaties",
+  "loading": "Sollicitaties laden…",
+  "empty": "Nog geen sollicitaties.",
+  "error": "Sollicitaties laden is mislukt.",
+  "buckets": {
+    "active": "Actief",
+    "matched": "Matched",
+    "rejected": "Afgewezen"
+  },
+  "view": {
+    "table": "Lijstweergave",
+    "board": "Kanban-weergave"
+  },
+  "add": {
+    "button": "Nieuwe sollicitatie",
+    "title": "Nieuwe sollicitatie",
+    "candidate": "Kandidaat",
+    "candidatePlaceholder": "Selecteer een kandidaat",
+    "vacancy": "Vacature",
+    "vacancyPlaceholder": "Selecteer een vacature",
+    "search": "Zoeken…",
+    "create": "Aanmaken",
+    "cancel": "Annuleren"
+  },
+  "pagination": {
+    "perPage": "Resultaten per pagina",
+    "range": "{{from}}-{{to}} van {{total}}"
+  },
+  "cols": {
+    "candidate": "Naam",
+    "vacancy": "Vacature",
+    "score": "Match",
+    "task": "Taak",
+    "phase": "Fase",
+    "source": "Bron",
+    "owner": "Eigenaar",
+    "client": "Klant",
+    "status": "Status van de sollicitant"
+  },
+  "kpi": {
+    "totalActive": "Totaal actief",
+    "applied": "Gesolliciteerd",
+    "accepted": "Geaccepteerd",
+    "invited": "Uitgenodigd",
+    "proposed": "Voorstel gedaan",
+    "rejected": "Afgewezen",
+    "matched": "Matched",
+    "new": "Nieuw"
+  },
+  "insights": {
+    "phase": "Fase",
+    "owner": "Recruiter",
+    "source": "Bron",
+    "clearFilter": "Filter wissen"
+  },
+  "drawer": {
+    "label": "Sollicitatie",
+    "createdAt": "Gemaakt op {{date}}",
+    "downloadCv": "CV",
+    "tabs": {
+      "application": "Sollicitatie",
+      "candidate": "Kandidaat",
+      "vacancy": "Vacature",
+      "interviews": "Interviews",
+      "appointments": "Afspraken",
+      "timeline": "Tijdlijn",
+      "notes": "Notities"
+    },
+    "phase": "Fase",
+    "source": "Bron",
+    "owner": "Recruiter",
+    "task": "Taak",
+    "details": "Details",
+    "vacancy": "Vacature",
+    "client": "Klant"
+  },
+  "matchScore": {
+    "title": "Match score",
+    "overall": "Algemeen",
+    "hard": "Hard",
+    "edit": "Aanpassen",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "manualNote": "Handmatig aangepast · AI: {{score}}%",
+    "detailsSoon": "De criteria-uitsplitsing verschijnt hier zodra de scoring is ingesteld."
+  },
+  "profile": {
+    "function": "Functie",
+    "gender": "Geslacht",
+    "nationality": "Nationaliteit",
+    "dob": "Geboortedatum",
+    "email": "E-mailadres",
+    "phone": "Telefoon",
+    "address": "Adres",
+    "summary": "Samenvatting",
+    "timeline": "Tijdlijn"
+  },
+  "vacancyDetail": {
+    "id": "Vacature-ID",
+    "status": "Status",
+    "employment": "Soort dienstverband",
+    "location": "Locatie",
+    "salary": "Salaris",
+    "hours": "Wekelijkse werktijden",
+    "experience": "Ervaring",
+    "seniority": "Senioriteit",
+    "education": "Opleiding",
+    "branch": "Branche",
+    "category": "Categorie",
+    "skills": "Vereiste vaardigheden",
+    "tags": "Tags"
+  },
+  "interview": {
+    "title": "WhatsApp-interview",
+    "done": "Klaar",
+    "summary": "Samenvatting",
+    "transcript": "Transcript",
+    "empty": "Nog geen interviews."
+  },
+  "appointments": {
+    "empty": "Geen afspraken ingepland.",
+    "hint": "Plan een interview of gesprek met deze kandidaat.",
+    "new": "Nieuwe afspraak",
+    "with": "Met",
+    "statusPlanned": "Gepland"
+  },
+  "notes": {
+    "title": "Notities",
+    "new": "Nieuwe notitie",
+    "empty": "Nog geen notities.",
+    "hint": "Voeg interne notities toe om je team op één lijn te houden over deze kandidaat.",
+    "placeholder": "Schrijf een notitie…",
+    "save": "Opslaan",
+    "cancel": "Annuleren"
+  },
+  "timeline": {
+    "empty": "Nog geen activiteit."
+  },
+  "rejection": {
+    "title": "Afwijzing",
+    "reason": "Reden",
+    "reasonPlaceholder": "Selecteer reden",
+    "note": "Toelichting",
+    "notePlaceholder": "Optionele toelichting…",
+    "channel": "Kanaal",
+    "channelEmail": "E-mail",
+    "channelWhatsapp": "WhatsApp",
+    "preview": "Voorvertoning bericht",
+    "noTemplate": "Nog geen template voor deze reden — stel er één in bij Instellingen.",
+    "confirm": "Afwijzen",
+    "rejected": "Afgewezen",
+    "aiAdvice": "Koios adviseert afwijzen",
+    "aiAuto": "Harde criteria niet gehaald — auto-afwijzen mogelijk.",
+    "aiConfirm": "Beoordeel en bevestig voordat er een bericht uitgaat."
+  }
+}

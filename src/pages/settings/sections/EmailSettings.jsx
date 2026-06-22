@@ -81,10 +81,13 @@ export default function EmailSettings({ context = 'klanten' }) {
   }
 
   const inputStyle = {
-    height: 36, width: '100%', padding: '0 12px', fontSize: 13,
+    height: 34, width: '100%', padding: '0 10px', fontSize: 13,
     border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#111827',
   }
   const labelStyle = { fontSize: 12, fontWeight: 500, color: '#374151', marginBottom: 4, display: 'block' }
+  // Shared card chrome — matches the settings kit's SettingCard so this section
+  // reads at the same compact density as every other settings panel.
+  const cardStyle = { background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '14px 16px' }
 
   const PROVIDERS = [
     { id: 'gmail',  label: 'Gmail',                 desc: t('email.gmailDesc') },
@@ -93,7 +96,7 @@ export default function EmailSettings({ context = 'klanten' }) {
   ]
 
   return (
-    <div>
+    <div style={{ maxWidth: 940 }}>
       <div className="flex items-center justify-between" style={{ marginBottom: 20, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
           <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{t(`email.context.${context}.title`)}</h2>
@@ -132,15 +135,20 @@ export default function EmailSettings({ context = 'klanten' }) {
 
       {loading && <p style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 12 }}>{t('common.loading')}</p>}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Two columns: connection settings stacked left, signature alongside right.
+          items-stretch lets the signature card match the left column's height. */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 items-stretch">
+
+        {/* Left column — provider, sender identity and SMTP credentials */}
+        <div className="flex flex-col gap-3">
 
         {/* Provider choice */}
-        <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '16px 18px' }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 12 }}>{t('email.provider')}</div>
-          <div style={{ display: 'flex', gap: 10 }}>
+        <div style={cardStyle}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 10 }}>{t('email.provider')}</div>
+          <div style={{ display: 'flex', gap: 8 }}>
             {PROVIDERS.map(p => (
               <button key={p.id} onClick={() => setProvider(p.id)}
-                style={{ flex: 1, padding: '12px 14px', borderRadius: 10, cursor: 'pointer', textAlign: 'left',
+                style={{ flex: 1, padding: '10px 12px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
                          border: `1px solid ${provider === p.id ? 'var(--color-primary)' : '#E5E7EB'}`,
                          background: provider === p.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : '#F9FAFB',
                          transition: 'all 0.15s' }}>
@@ -162,9 +170,9 @@ export default function EmailSettings({ context = 'klanten' }) {
         </div>
 
         {/* Sender details */}
-        <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '16px 18px' }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 14 }}>{t('email.senderDetails')}</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <div style={cardStyle}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 12 }}>{t('email.senderDetails')}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <label style={labelStyle}>{t('email.senderName')}</label>
               <input value={fromName} onChange={e => setFromName(e.target.value)} placeholder={t('email.senderNamePlaceholder')} style={inputStyle} />
@@ -178,9 +186,9 @@ export default function EmailSettings({ context = 'klanten' }) {
 
         {/* SMTP (manual only) */}
         {provider === 'manual' && (
-          <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '16px 18px' }}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 14 }}>{t('email.smtpConfig')}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 14, marginBottom: 14 }}>
+          <div style={cardStyle}>
+            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 12 }}>{t('email.smtpConfig')}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={labelStyle}>{t('email.smtpServer')}</label>
                 <input value={smtpHost} onChange={e => setSmtpHost(e.target.value)} placeholder={t('email.smtpServerPlaceholder')} style={inputStyle} />
@@ -190,7 +198,7 @@ export default function EmailSettings({ context = 'klanten' }) {
                 <input type="number" value={smtpPort} onChange={e => setSmtpPort(e.target.value)} style={inputStyle} />
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={labelStyle}>{t('email.username')}</label>
                 <input value={smtpUser} onChange={e => setSmtpUser(e.target.value)} placeholder={t('email.usernamePlaceholder')} style={inputStyle} />
@@ -237,11 +245,13 @@ export default function EmailSettings({ context = 'klanten' }) {
           </div>
         )}
 
-        {/* Email signature (per context) */}
-        <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '16px 18px' }}>
+        </div>{/* end left column */}
+
+        {/* Right column — email signature (per context); fills the column height alongside the connection blocks */}
+        <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>{t('email.signature')}</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>{t('email.signatureHint')}</div>
-          <RichTextEditor value={signature} onChange={setSignature}
+          <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>{t('email.signatureHint')}</div>
+          <RichTextEditor value={signature} onChange={setSignature} fill
             expanded={sigExpanded} onToggleExpand={() => setSigExpanded(e => !e)} />
         </div>
 

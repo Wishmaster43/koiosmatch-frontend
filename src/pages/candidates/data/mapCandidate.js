@@ -20,6 +20,11 @@ const fmtSize = (b) => {
   return `${(n / 1024 / 1024).toFixed(1)} MB`
 }
 
+// Newest-first sort for dated lists. Unparseable dates (dummy "period" strings)
+// fall back to keeping order (stable sort); ongoing items sort to the top.
+const dateVal = (v) => { if (!v) return 0; const t = new Date(v).getTime(); return Number.isNaN(t) ? 0 : t }
+const byNewest = (list, getKey) => [...list].sort((a, b) => getKey(b) - getKey(a))
+
 export function mapCandidate(c) {
   const name = c.name || c.full_name
     || [c.firstname, c.lastname].filter(Boolean).join(' ')
@@ -74,6 +79,7 @@ export function mapCandidate(c) {
     gender:          c.gender ?? c.sex ?? '-',
     nationality:     c.nationality ?? '-',
     dob:             c.date_of_birth ?? c.dob ?? c.birthdate ?? '-',
+    placeOfBirth:    c.place_of_birth ?? c.placeOfBirth ?? '',
     linkedin:        c.linkedin ?? '',
     photoUrl:        c.photo_url ?? c.photoUrl ?? null,
     summary:         c.summary ?? c.bio ?? '',
@@ -86,20 +92,25 @@ export function mapCandidate(c) {
     // { action: 'add_to_pool'|'contact'|'plan_intake'|'none', label?, reason?, score?, pool_hint? }.
     koiosAdvice:     c.koios_advice ?? c.koiosAdvice ?? null,
 
-    // ── Relations (detail only) — normalise snake_case → the camelCase the tabs use ──
-    experiences:     c.experiences ?? c.work_experience ?? [],
-    educations:      c.educations ?? c.education ?? [],
+    // ── Relations (detail only) — normalise snake_case → camelCase, newest first ──
+    experiences:     byNewest(c.experiences ?? c.work_experience ?? [],
+      e => e.current ? Infinity : Math.max(dateVal(e.end_date ?? e.end), dateVal(e.start_date ?? e.start))),
+    educations:      byNewest(c.educations ?? c.education ?? [],
+      e => e.in_progress ? Infinity : Math.max(dateVal(e.end_date ?? e.end), dateVal(e.issue_date ?? e.issued), dateVal(e.start_date ?? e.start))),
     languages:       (c.languages ?? []).map(l => ({
       ...l,
       spoken:  l.spoken  ?? l.spoken_level,
       written: l.written ?? l.written_level,
     })),
-    certifications:  (c.certifications ?? []).map(x => ({
-      ...x,
-      org:     x.org     ?? x.organisation,
-      issued:  x.issued  ?? x.issue_date,
-      expires: x.expires ?? x.expiry_date,
-    })),
+    certifications:  byNewest(
+      (c.certifications ?? []).map(x => ({
+        ...x,
+        org:     x.org     ?? x.organisation,
+        issued:  x.issued  ?? x.issue_date,
+        expires: x.expires ?? x.expiry_date,
+      })),
+      x => Math.max(dateVal(x.issued), dateVal(x.expires)),
+    ),
     skills:          c.skills ?? [],
     documents:       (c.documents ?? []).map(d => ({
       ...d,
@@ -109,15 +120,17 @@ export function mapCandidate(c) {
       type: d.type ?? null,
     })),
     applications:    c.applications ?? [],
-    // Matches (formerly "placements"); accept either key from the API during migration.
-    matches:         (c.matches ?? c.placements ?? []).map(p => ({
-      ...p,
-      hourlyRate:       p.hourlyRate       ?? p.hourly_rate,
-      hoursPerWeek:     p.hoursPerWeek      ?? p.hours_per_week,
-      contractType:     p.contractType     ?? p.contract_type,
-      contractDuration: p.contractDuration ?? p.contract_duration,
-      startDate:        p.startDate        ?? p.start_date,
-      endDate:          p.endDate          ?? p.end_date,
+    // Matches = own entity (read-only on the candidate). The contract lives in
+    // HelloFlex — we only surface its status + the link GUID. No placements/contract fields.
+    matches:         (c.matches ?? []).map(m => ({
+      ...m,
+      vacancyTitle:   m.vacancyTitle ?? m.vacancy?.title ?? m.vacancy_title ?? '',
+      client:         m.client ?? m.customer?.name ?? m.client_name ?? '',
+      score:          m.score ?? m.match_score ?? null,
+      stage:          m.stageLabel ?? m.stage ?? null,
+      stageColor:     m.stageColor ?? m.stage_color ?? null,
+      contractStatus: m.contract_status ?? m.contractStatus ?? null,
+      createdAt:      m.created_at ?? m.createdAt ?? null,
     })),
     notes:           c.notes ?? [],
     timeline:        (c.timeline ?? []).map(ev => ({
@@ -142,7 +155,7 @@ export function mapCandidate(c) {
     },
 
     // ── Stats (detail only) — read from data.stats ──
-    matchesCount:      stats.matches_count ?? stats.placements_count ?? (c.matches ?? c.placements ?? []).length,
+    matchesCount:      stats.matches_count ?? (c.matches ?? []).length,
     applicationsCount: stats.applications_count ?? (c.applications ?? []).length,
     shiftsCount:       stats.shifts_count,
     hoursWorked:       stats.hours_worked,

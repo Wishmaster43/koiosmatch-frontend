@@ -1,0 +1,72 @@
+import { useTranslation } from 'react-i18next'
+import StatusPill from '../../../components/ui/StatusPill'
+import KoiosAiMark from '../../../components/ui/KoiosAiMark'
+import MatchScoreBlock from './MatchScoreBlock'
+import RejectionBlock from './RejectionBlock'
+
+// A small label-above-value field.
+function Field({ label, children }) {
+  return (
+    <div style={{ minWidth: 0 }}>
+      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{label}</div>
+      <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.4 }}>{children}</div>
+    </div>
+  )
+}
+
+/**
+ * ApplicationTab — the "Sollicitatie" tab: phase/source, the AI task, the key
+ * details and the overall match score. The full criteria breakdown + rejection
+ * block land in later steps (MatchScoreBlock / RejectionBlock).
+ */
+export default function ApplicationTab({ application: a, onReject, onAdjustScore }) {
+  const { t } = useTranslation('applications')
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      {/* Phase + source */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 20px' }}>
+        <div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.phase')}</div>
+          <StatusPill label={a.phaseLabel} color={a.phaseColor} />
+        </div>
+        <Field label={t('drawer.source')}>{a.source || '—'}</Field>
+      </div>
+
+      {/* AI task */}
+      {a.task && (
+        <div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('drawer.task')}</div>
+          <div style={{ display: 'flex', gap: 8, padding: '10px 12px', background: 'var(--color-primary-bg)',
+            borderRadius: 8, alignItems: 'flex-start' }}>
+            <KoiosAiMark size={20} />
+            <span style={{ fontSize: 13, color: 'var(--color-primary)', lineHeight: 1.5 }}>{a.task}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Details */}
+      <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('drawer.details')}</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 20px' }}>
+          <Field label={t('drawer.owner')}>{a.owner?.name || '—'}</Field>
+          <Field label={t('drawer.client')}>{a.client || '—'}</Field>
+          <div style={{ gridColumn: '1 / -1' }}>
+            <Field label={t('drawer.vacancy')}>{a.vacancyTitle || '—'}</Field>
+          </div>
+        </div>
+      </div>
+
+      {/* Match score — overall + configured criteria breakdown. */}
+      <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matchScore.title')}</div>
+        <MatchScoreBlock score={a.score} criteria={a.matchCriteria} summary={a.matchSummary}
+          source={a.matchSource} aiScore={a.aiScore}
+          onSave={onAdjustScore ? (payload) => onAdjustScore(a.id, payload) : undefined} />
+      </div>
+
+      {/* Rejection — hidden once the application is a placement (matched). */}
+      {a.bucket !== 'matched' && <RejectionBlock application={a} onReject={onReject} />}
+    </div>
+  )
+}

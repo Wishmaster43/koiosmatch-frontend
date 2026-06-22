@@ -52,6 +52,7 @@ const PlanningPage           = lazy(() => import('./pages/planning/PlanningPage'
 const ApplicationsPage       = lazy(() => import('./pages/applications/ApplicationsPage'))
 const VacanciesPage          = lazy(() => import('./pages/vacancies/VacanciesPage'))
 const MatchesPage            = lazy(() => import('./pages/matches/MatchesPage'))
+const OpportunitiesPage      = lazy(() => import('./pages/opportunities/OpportunitiesPage'))
 const TasksPage              = lazy(() => import('./pages/tasks/TasksPage'))
 import { ThemeProvider }      from './context/ThemeContext'
 import { AppsProvider } from './context/AppsContext'
@@ -71,6 +72,7 @@ const PAGE_TITLES = {
   applications:                 'Applications',
   vacancies:                    'Vacancies',
   matches:                      'Matches',
+  opportunities:                'Opportunities',
   tasks:                        'Tasks',
   customers:                    'Customers',
   'customers.locations':        'Customers — Locations',
@@ -166,6 +168,10 @@ function DashboardLayout() {
   const auth0                               = useAuth()
   const pkg0                                = auth0?.activeTenant?.package ?? auth0?.user?.tenant?.package
   const [activePage,     setActivePage]     = useState(PACKAGE_DEFAULT_PAGE[pkg0] ?? 'dashboard')
+  // Navigation intent: a filter the target page should apply when navigated to
+  // (e.g. a dashboard KPI/chart click). Plain navigation (sidebar) clears it.
+  const [navIntent,      setNavIntent]      = useState(null)
+  const goTo = (page, intent = null) => { setNavIntent(intent); setActivePage(page) }
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
   const [koiosOpen,      setKoiosOpen]      = useState(false)
   const auth                                = auth0
@@ -189,23 +195,24 @@ function DashboardLayout() {
     switch (activePage) {
 
       // ── Core ──────────────────────────────────────────────────────────────
-      case 'dashboard':   return <Dashboard onNavigate={setActivePage} />
+      case 'dashboard':   return <Dashboard onNavigate={goTo} />
       case 'profile':     return <ProfilePage />
       case 'users':       return <UsersPage />
       case 'settings':    return <SettingsPage />
 
       // ── ATS & CRM ─────────────────────────────────────────────────────────
-      case 'candidates':             return <CandidatesPage />
-      case 'applications':           return <ApplicationsPage />
+      case 'candidates':             return <CandidatesPage intent={navIntent} />
+      case 'applications':           return <ApplicationsPage intent={navIntent} />
       case 'vacancies':              return <VacanciesPage />
-      case 'matches':                return <MatchesPage />
-      case 'tasks':                  return <TasksPage />
+      case 'matches':                return <MatchesPage intent={navIntent} />
+      case 'opportunities':          return <OpportunitiesPage intent={navIntent} />
+      case 'tasks':                  return <TasksPage intent={navIntent} />
       case 'customers':              return <CustomersPage />
       case 'planning':               return <PlanningPage />
 
       // ── Shiftmanager module ───────────────────────────────────────────────
       case 'shiftmanager':
-      case 'shiftmanager.dashboard':   return <ShiftmanagerDashboard onNavigate={setActivePage} />
+      case 'shiftmanager.dashboard':   return <ShiftmanagerDashboard onNavigate={goTo} />
       // Reports
       case 'shiftmanager.candidates':  return <CandidatesReport initialTab="candidates" />
       case 'shiftmanager.customers':   return <CustomerReport />
@@ -252,7 +259,7 @@ function DashboardLayout() {
         expanded={expanded}
         setExpanded={setExpanded}
         activePage={activePage}
-        setActivePage={setActivePage}
+        setActivePage={goTo}
         onTheme={() => {}}
         koiosOpen={koiosOpen}
         onToggleKoios={() => setKoiosOpen(o => !o)}
@@ -320,7 +327,7 @@ function DashboardLayout() {
               )
               return (
                 <button
-                  onClick={() => setActivePage('profile')}
+                  onClick={() => goTo('profile')}
                   title={[user?.firstname, user?.lastname].filter(Boolean).join(' ') || user?.name || 'Profiel'}
                   style={{
                     width: 30, height: 30, borderRadius: '50%', flexShrink: 0,

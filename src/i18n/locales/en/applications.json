@@ -1,0 +1,157 @@
+{
+  "title": "Applications",
+  "loading": "Loading applications…",
+  "empty": "No applications yet.",
+  "error": "Couldn't load applications.",
+  "buckets": {
+    "active": "Active",
+    "matched": "Matched",
+    "rejected": "Rejected"
+  },
+  "view": {
+    "table": "List view",
+    "board": "Board view"
+  },
+  "add": {
+    "button": "New application",
+    "title": "New application",
+    "candidate": "Candidate",
+    "candidatePlaceholder": "Select a candidate",
+    "vacancy": "Vacancy",
+    "vacancyPlaceholder": "Select a vacancy",
+    "search": "Search…",
+    "create": "Create",
+    "cancel": "Cancel"
+  },
+  "pagination": {
+    "perPage": "Results per page",
+    "range": "{{from}}-{{to}} of {{total}}"
+  },
+  "cols": {
+    "candidate": "Name",
+    "vacancy": "Vacancy",
+    "score": "Match",
+    "task": "Task",
+    "phase": "Phase",
+    "source": "Source",
+    "owner": "Owner",
+    "client": "Client",
+    "status": "Candidate status"
+  },
+  "kpi": {
+    "totalActive": "Total active",
+    "applied": "Applied",
+    "accepted": "Accepted",
+    "invited": "Invited",
+    "proposed": "Proposal sent",
+    "rejected": "Rejected",
+    "matched": "Matched",
+    "new": "New"
+  },
+  "insights": {
+    "phase": "Phase",
+    "owner": "Recruiter",
+    "source": "Source",
+    "clearFilter": "Clear filter"
+  },
+  "drawer": {
+    "label": "Application",
+    "createdAt": "Created on {{date}}",
+    "downloadCv": "CV",
+    "tabs": {
+      "application": "Application",
+      "candidate": "Candidate",
+      "vacancy": "Vacancy",
+      "interviews": "Interviews",
+      "appointments": "Appointments",
+      "timeline": "Timeline",
+      "notes": "Notes"
+    },
+    "phase": "Phase",
+    "source": "Source",
+    "owner": "Recruiter",
+    "task": "Task",
+    "details": "Details",
+    "vacancy": "Vacancy",
+    "client": "Client"
+  },
+  "matchScore": {
+    "title": "Match score",
+    "overall": "Overall",
+    "hard": "Hard",
+    "edit": "Adjust",
+    "save": "Save",
+    "cancel": "Cancel",
+    "manualNote": "Manually adjusted · AI: {{score}}%",
+    "detailsSoon": "The criteria breakdown appears here once scoring is configured."
+  },
+  "profile": {
+    "function": "Function",
+    "gender": "Gender",
+    "nationality": "Nationality",
+    "dob": "Date of birth",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "summary": "Summary",
+    "timeline": "Timeline"
+  },
+  "vacancyDetail": {
+    "id": "Vacancy ID",
+    "status": "Status",
+    "employment": "Employment type",
+    "location": "Location",
+    "salary": "Salary",
+    "hours": "Weekly hours",
+    "experience": "Experience",
+    "seniority": "Seniority",
+    "education": "Education",
+    "branch": "Industry",
+    "category": "Category",
+    "skills": "Required skills",
+    "tags": "Tags"
+  },
+  "interview": {
+    "title": "WhatsApp interview",
+    "done": "Done",
+    "summary": "Summary",
+    "transcript": "Transcript",
+    "empty": "No interviews yet."
+  },
+  "appointments": {
+    "empty": "No appointments scheduled.",
+    "hint": "Schedule an interview or call with this candidate.",
+    "new": "New appointment",
+    "with": "With",
+    "statusPlanned": "Planned"
+  },
+  "notes": {
+    "title": "Notes",
+    "new": "New note",
+    "empty": "No notes yet.",
+    "hint": "Add internal notes to keep your team aligned on this candidate.",
+    "placeholder": "Write a note…",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "timeline": {
+    "empty": "No activity yet."
+  },
+  "rejection": {
+    "title": "Rejection",
+    "reason": "Reason",
+    "reasonPlaceholder": "Select a reason",
+    "note": "Note",
+    "notePlaceholder": "Optional note…",
+    "channel": "Channel",
+    "channelEmail": "Email",
+    "channelWhatsapp": "WhatsApp",
+    "preview": "Message preview",
+    "noTemplate": "No template for this reason yet — set one in Settings.",
+    "confirm": "Reject",
+    "rejected": "Rejected",
+    "aiAdvice": "Koios advises rejection",
+    "aiAuto": "Hard criteria failed — auto-rejection eligible.",
+    "aiConfirm": "Review and confirm before a message is sent."
+  }
+}

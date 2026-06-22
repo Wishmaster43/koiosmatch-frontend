@@ -15,6 +15,7 @@
 import { useState } from 'react'
 import { Edit2, Save, X } from 'lucide-react'
 import { SelectField, CheckboxField, DateField } from './fields'
+import { useDateFormat } from '../../lib/datetime'
 
 const compact = {
   width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6,
@@ -39,6 +40,7 @@ export default function EditableFieldTable({
   title, fields, value = {}, onSave, labelWidth = 130, editButton = 'header',
   editing: editingProp, onStartEdit, onCancel,
 }) {
+  const { formatDate } = useDateFormat()
   const controlled = editingProp !== undefined
   const [editingState, setEditingState] = useState(false)
   const editing = controlled ? editingProp : editingState
@@ -77,6 +79,8 @@ export default function EditableFieldTable({
   const renderValue = (f) => {
     const v = saved[f.key]
     if (f.type === 'checkbox') return <CheckboxField checked={v} disabled onChange={() => {}} />
+    // Dates render as DD-MM-YYYY in read mode (the edit control already is).
+    if (f.type === 'date') return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v ? formatDate(v) : '-'}</span>
     return <span style={{ fontSize: 12, color: 'var(--text)' }}>{f.prefix ? `${f.prefix} ` : ''}{v || '-'}</span>
   }
 
@@ -89,7 +93,8 @@ export default function EditableFieldTable({
   ) : (
     <div key={f.key} style={{ ...rowStyle, borderBottom: last ? 'none' : '1px solid var(--border)' }}>
       <span style={{ fontSize: 12, color: 'var(--text-muted)', width: labelWidth, flexShrink: 0 }}>{f.label}</span>
-      {editing ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}</div> : renderValue(f)}
+      {/* Read value reserves the control's height → no row growth when editing starts. */}
+      {editing ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}</div> : <div style={{ flex: 1, minWidth: 0, minHeight: 33, display: 'flex', alignItems: 'center' }}>{renderValue(f)}</div>}
     </div>
   )
 

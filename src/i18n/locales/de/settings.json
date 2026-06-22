@@ -35,7 +35,15 @@
     "planning": "Planung",
     "modules": "Module",
     "superadmin": "Super-Admin",
-    "audit": "Audit-Log"
+    "audit": "Audit-Log",
+    "candidate_lookups": "Kandidatenlisten",
+    "languages": "Sprachen",
+    "vacancies": "Stellen",
+    "customers": "Kunden",
+    "candidate": "Kandidat",
+    "applications": "Bewerbungen",
+    "shared": "Gemeinsam",
+    "whatsapp": "WhatsApp"
   },
   "nav": {
     "kpis": "KPIs",
@@ -69,7 +77,7 @@
     "webhooks": "Webhooks",
     "importeren": "Importieren",
     "billing_plans": "Tarif",
-    "billing_pay": "Zahlungsmethoden",
+    "billing_pay": "Zahlung & Aufladen",
     "billing_auto": "Automatisch aufladen",
     "billing_usage": "Nutzung",
     "billing_invoices": "Rechnungen",
@@ -86,10 +94,24 @@
     "availability": "Verfügbarkeit",
     "automatch": "Auto-Match-Regeln",
     "planning_board": "Planungstafel",
-    "messaging": "Messaging",
+    "messaging": "Nachrichten",
     "koios": "Koios AI",
     "mod_shiftmanager": "Shiftmanager",
-    "mod_helloflex": "HelloFlex"
+    "mod_helloflex": "HelloFlex",
+    "contract_forms": "Vertragsarten",
+    "funnel_stages": "Funnel-Phasen",
+    "candidate_statuses": "Status",
+    "lang_languages": "Sprachen",
+    "lang_levels": "Niveaus",
+    "vacancy_statuses": "Status",
+    "vacancy_phases": "Phasen",
+    "vacancy_fields": "Benutzerdefinierte Felder",
+    "customer_statuses": "Kundenstatus",
+    "location_statuses": "Standortstatus",
+    "department_statuses": "Abteilungsstatus",
+    "contact_statuses": "Kontaktstatus",
+    "last_contact_types": "Kontakttyp",
+    "note_types": "Notiztypen"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -654,17 +676,21 @@
     "savedActive": "Gespeichert & aktiv",
     "activate": "Paket aktivieren",
     "changeFromTo": "Änderung von {{from}} zu {{to}}",
+    "groups": {
+      "plans": "Pakete",
+      "standalone": "Einzelmodule"
+    },
     "packages": {
       "reporting_sm": "Reporting Shiftmanager",
       "reporting_hf": "Reporting HelloFlex",
-      "reporting_sm_hf": "Reporting SM + HF",
-      "reporting_sm_ai": "Reporting SM + AI & Workflow",
-      "reporting_hf_ai": "Reporting HF + AI & Workflow",
-      "reporting_sm_hf_ai": "Reporting SM + HF + AI & Workflow",
-      "ats_crm": "ATS & CRM",
-      "ats_crm_ai": "ATS & CRM + AI & Workflow",
-      "ats_crm_planning": "ATS & CRM + Planning",
-      "ats_crm_ai_planning": "ATS & CRM + AI & Workflow + Planning"
+      "reporting_sm_hf": "Reporting Shiftmanager + HelloFlex",
+      "reporting_sm_ai": "Reporting Shiftmanager + AI Agents",
+      "reporting_hf_ai": "Reporting HelloFlex + AI Agents",
+      "reporting_sm_hf_ai": "Reporting SM + HF + AI Agents",
+      "ats_crm": "Koios Core",
+      "ats_crm_ai": "Koios Plus",
+      "ats_crm_planning": "Koios Core + Planning",
+      "ats_crm_ai_planning": "Koios Suite"
     },
     "emptyTitle": "Noch keine Einstellungen",
     "emptyDesc": "Einstellungen für dieses Modul folgen.",
@@ -865,7 +891,13 @@
     "statuses": {
       "title": "Status",
       "subtitle": "Operativer Status mit Farbe (Aktiv, Inaktiv, Krank …)."
-    }
+    },
+    "requiresAppointment": "Erfordert einen Termin",
+    "requiresAppointmentHint": "Diese Phase erwartet einen geplanten Termin (Intake). Fehlt er, wird es beim Kandidaten markiert.",
+    "appointmentBadge": "Termin erforderlich",
+    "requiresReason": "Begründung erforderlich",
+    "requiresReasonHint": "Dieser Status erfordert eine Begründung (z. B. Inaktiv).",
+    "reasonBadge": "Begründung"
   },
   "planning": {
     "shiftTypes": {
@@ -952,5 +984,37 @@
         "unit": "Dienste"
       }
     }
+  },
+  "customerLookups": {
+    "statuses": {
+      "title": "Kundenstatus",
+      "subtitle": "Verwalten Sie die möglichen Kundenstatus (Aktiv, Interessent, …).",
+      "add": "Status hinzufügen"
+    },
+    "locationStatuses": {
+      "title": "Standortstatus",
+      "subtitle": "Verwalten Sie die möglichen Status eines Kundenstandorts.",
+      "add": "Status hinzufügen"
+    },
+    "departmentStatuses": {
+      "title": "Abteilungsstatus",
+      "subtitle": "Verwalten Sie die möglichen Status einer Abteilung.",
+      "add": "Status hinzufügen"
+    },
+    "contactStatuses": {
+      "title": "Kontaktstatus",
+      "subtitle": "Verwalten Sie die möglichen Status einer Kontaktperson.",
+      "add": "Status hinzufügen"
+    }
+  },
+  "lastContactTypes": {
+    "title": "Kontakttypen",
+    "subtitle": "Kanäle für 'letzter Kontakt' (E-Mail, Telefon, WhatsApp).",
+    "add": "Typ hinzufügen"
+  },
+  "noteTypes": {
+    "title": "Notiztypen",
+    "subtitle": "Kategorien für Kandidaten-Notizen.",
+    "add": "Typ hinzufügen"
   }
 }

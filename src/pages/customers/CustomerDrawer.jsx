@@ -1,71 +1,107 @@
+/**
+ * CustomerDrawer — thin container for the customer detail. Wires data (header
+ * config + tab list) onto the shared EntityDrawer/EntityHeader shell; all heavy
+ * UI lives in one small component per tab under drawer/. Mirrors CandidateDrawer.
+ *
+ * The Planning tab is gated on the Planning module (same gate as the candidate
+ * Planning tab); the Opportunities tab's flex-shift section is gated inside it.
+ */
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MapPin, Building, Users, Plus } from 'lucide-react'
 import EntityDrawer from '../../components/drawer/EntityDrawer'
 import EntityHeader from '../../components/drawer/EntityHeader'
+import NotesTab from '../../components/drawer/tabs/NotesTab'
+import { useAuth } from '../../context/AuthContext'
+import { useDateFormat } from '../../lib/datetime'
+import OverviewTab from './drawer/OverviewTab'
+import LocationsTab from './drawer/LocationsTab'
+import DepartmentsTab from './drawer/DepartmentsTab'
+import ContactsTab from './drawer/ContactsTab'
+import VacanciesTab from './drawer/VacanciesTab'
+import OpportunitiesTab from './drawer/OpportunitiesTab'
+import PlanningTab from './drawer/PlanningTab'
+import StatisticsTab from './drawer/StatisticsTab'
+import DocumentsTab from './drawer/DocumentsTab'
 
-const STATUS_COLORS = { actief: '#16A34A', prospect: '#1B60A9', inactief: '#D97706', geblokkeerd: '#DC2626' }
+const TABS = [
+  { id: 'overview',      tKey: 'overview' },
+  { id: 'locations',     tKey: 'locations' },
+  { id: 'departments',   tKey: 'departments' },
+  { id: 'contacts',      tKey: 'contacts' },
+  { id: 'vacancies',     tKey: 'vacancies' },
+  { id: 'opportunities', tKey: 'opportunities' },
+  { id: 'planning',      tKey: 'planning' },
+  { id: 'statistics',    tKey: 'statistics' },
+  { id: 'documents',     tKey: 'documents' },
+  { id: 'notes',         tKey: 'notes' },
+]
 
-const sectionCard = { border: '1px solid var(--border)', borderRadius: 10, background: 'var(--surface)', overflow: 'hidden' }
-const rowStyle = { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: '1px solid var(--border)', fontSize: 13 }
+const initialsOf = (name = '') => name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
 
-function EmptyState({ label }) {
-  return <div style={{ padding: '24px 14px', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>{label}</div>
-}
-
-/**
- * CustomerDrawer — clean customer detail with the sub-entities as tabs
- * (Locaties / Afdelingen / Contactpersonen), mirroring the candidate drawer.
- */
-export default function CustomerDrawer({ customer: c, onClose, expanded, onToggleExpand, onAdd }) {
+export default function CustomerDrawer({
+  customer: c, onClose, expanded, onToggleExpand, onUpdate, onAddSub, onAddNote,
+  users = [], statuses = [],
+}) {
   const { t } = useTranslation('customers')
+  const { hasModule } = useAuth()
+  const { formatDate } = useDateFormat()
+
+  // Header overrides — reset when a different customer is shown (during render).
+  const [status, setStatus] = useState(null)
+  const [owner,  setOwner]  = useState(null)
+  const [tags,   setTags]   = useState(null)
+  const [prevId, setPrevId] = useState(c?.id)
+  if (c?.id !== prevId) { setPrevId(c?.id); setStatus(null); setOwner(null); setTags(null) }
+
   if (!c) return null
 
-  const locations = c.locations ?? []
-  const departments = locations.flatMap(l => (l.departments ?? []).map(d => ({ ...d, location: l.name })))
-  const contacts = c.contacts ?? []
+  // Planning tab only for tenants with the Planning module (same gate as sidebar).
+  const tabs = TABS.filter(tab => tab.id !== 'planning' || hasModule('plan'))
 
-  const TABS = [
-    { id: 'locations',   icon: MapPin,   label: t('cols.locations'),   count: locations.length },
-    { id: 'departments', icon: Building, label: t('cols.departments'), count: departments.length },
-    { id: 'contacts',    icon: Users,    label: t('cols.contacts'),    count: contacts.length },
+  const currentStatus = status ?? c.status
+  const currentTags   = tags ?? c.tags ?? []
+  const changeStatus  = (v) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
+
+  // Owner (account manager) picker — current value first, then the user list.
+  const ownerOptions = [
+    ...(owner ? [] : [{ value: '__current', label: c.owner || '—', initials: c.ownerInitials }]),
+    ...users.map(u => ({ value: u.id, label: u.name, initials: initialsOf(u.name) })),
   ]
+  const ownerValue = owner?.id ?? '__current'
+  const onOwnerChange = (id) => {
+    if (id === '__current') return
+    const u = users.find(x => x.id === id)
+    if (u) { setOwner({ ...u }); onUpdate?.(c.id, { ownerId: u.id, owner: u.name, ownerInitials: initialsOf(u.name), ownerColor: u.avatar_color ?? null }) }
+  }
 
   const renderTab = (id) => {
-    if (id === 'locations') return (
-      <div style={sectionCard}>
-        {locations.length === 0 ? <EmptyState label={t('drawer.noLocations')} /> : locations.map((l, i) => (
-          <div key={l.id ?? i} style={{ ...rowStyle, borderBottom: i < locations.length - 1 ? rowStyle.borderBottom : 'none' }}>
-            <MapPin size={14} color="var(--color-secondary)" style={{ flexShrink: 0 }} />
-            <span style={{ flex: 1, color: 'var(--text)' }}>{l.name ?? `${t('cols.locations')} ${i + 1}`}</span>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{(l.departments ?? []).length} {t('cols.departments').toLowerCase()}</span>
-          </div>
-        ))}
-      </div>
-    )
-    if (id === 'departments') return (
-      <div style={sectionCard}>
-        {departments.length === 0 ? <EmptyState label={t('drawer.noDepartments')} /> : departments.map((d, i) => (
-          <div key={d.id ?? i} style={{ ...rowStyle, borderBottom: i < departments.length - 1 ? rowStyle.borderBottom : 'none' }}>
-            <Building size={14} color="#8B5CF6" style={{ flexShrink: 0 }} />
-            <span style={{ flex: 1, color: 'var(--text)' }}>{d.name ?? `${t('cols.departments')} ${i + 1}`}</span>
-            {d.location && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{d.location}</span>}
-          </div>
-        ))}
-      </div>
-    )
-    return (
-      <div style={sectionCard}>
-        {contacts.length === 0 ? <EmptyState label={t('drawer.noContacts')} /> : contacts.map((p, i) => (
-          <div key={p.id ?? i} style={{ ...rowStyle, borderBottom: i < contacts.length - 1 ? rowStyle.borderBottom : 'none' }}>
-            <Users size={14} color="var(--color-primary)" style={{ flexShrink: 0 }} />
-            <div style={{ flex: 1 }}>
-              <div style={{ color: 'var(--text)' }}>{p.name ?? `${t('cols.contacts')} ${i + 1}`}</div>
-              {(p.role || p.email) && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{[p.role, p.email].filter(Boolean).join(' · ')}</div>}
-            </div>
-          </div>
-        ))}
-      </div>
-    )
+    switch (id) {
+      case 'overview':      return <OverviewTab c={c} onSave={v => onUpdate?.(c.id, v)} />
+      case 'locations':     return <LocationsTab customerId={c.id} locations={c.locations} onAdd={() => onAddSub?.('locations', c)} />
+      case 'departments':   return <DepartmentsTab customerId={c.id} departments={c.departments} onAdd={() => onAddSub?.('departments', c)} />
+      case 'contacts':      return <ContactsTab contacts={c.contacts} onAdd={() => onAddSub?.('contacts', c)} />
+      case 'vacancies':     return <VacanciesTab customerId={c.id} />
+      case 'opportunities': return <OpportunitiesTab customerId={c.id} />
+      case 'planning':      return <PlanningTab customerId={c.id} />
+      case 'statistics':    return <StatisticsTab c={c} />
+      case 'documents':     return <DocumentsTab documents={c.documents} />
+      case 'notes':         return (
+        <NotesTab
+          notes={c.notes ?? []}
+          noteTypes={[]}
+          authorInitials="?" timelineName="" timelineInitials="?"
+          onAddNote={(payload) => onAddNote?.(c.id, payload)}
+          labels={{
+            notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
+            save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
+            notesEmpty: t('notes.notesEmpty'), timeline: t('notes.timeline'), timelineEmpty: t('notes.timelineEmpty'),
+            conversations: t('notes.conversations'), conversationsEmpty: t('notes.conversationsEmpty'),
+            notePlaceholder: () => t('notes.notePlaceholder'),
+          }}
+        />
+      )
+      default: return null
+    }
   }
 
   return (
@@ -73,40 +109,29 @@ export default function CustomerDrawer({ customer: c, onClose, expanded, onToggl
       entity={c}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.debtorNumber ? `${t('cols.debtorNumber')} ${c.debtorNumber}` : ''}</span>}
-      tabs={TABS.map(tab => ({
-        id: tab.id,
-        label: `${tab.label} (${tab.count})`,
-        render: () => (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button onClick={() => onAdd?.(tab.id, c)}
-                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', fontSize: 12, fontWeight: 500,
-                  background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 7, cursor: 'pointer' }}>
-                <Plus size={12} /> {tab.label}
-              </button>
-            </div>
-            {renderTab(tab.id)}
-          </div>
-        ),
-      }))}
+      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: c.created ? formatDate(c.created) : '—' })}</span>}
+      tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: () => renderTab(tab.id) }))}
       header={() => (
         <EntityHeader
-          label={t('title')}
+          label={t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
-          avatar={{ initials: c.initials }}
+          avatar={{ initials: c.initials, soft: true }}
           renderTitle={() => (
             <>
               <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.city || '—'}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{[c.city, c.industry].filter(Boolean).join(' · ') || '—'}</div>
             </>
           )}
           meta={[
-            { key: 'status', label: t('cols.status'), value: c.status,
-              options: Object.keys(STATUS_COLORS).map(s => ({ value: s, label: t(`status.${s}`) })), onChange: () => {}, menuWidth: 160 },
-            { key: 'am', label: t('cols.accountManager'), value: c.accountManager || '—',
-              options: [{ value: c.accountManager || '—', label: c.accountManager || '—' }], onChange: () => {}, menuWidth: 200 },
+            { key: 'status', label: t('drawer.status'), value: currentStatus, width: 160,
+              options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 170 },
+            { key: 'owner', label: t('drawer.owner'), value: ownerValue, width: 200,
+              options: ownerOptions, onChange: onOwnerChange, menuWidth: 200 },
           ]}
+          tags={{ items: currentTags, onAdd: tag => { const next = [...currentTags, tag]; setTags(next); onUpdate?.(c.id, { tags: next }) },
+                  onRemove: tag => { const next = currentTags.filter(x => x !== tag); setTags(next); onUpdate?.(c.id, { tags: next }) },
+                  addLabel: t('drawer.addTag') }}
+          tagsLabel={t('drawer.tags')}
         />
       )}
     />

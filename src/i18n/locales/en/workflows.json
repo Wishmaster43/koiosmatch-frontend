@@ -49,7 +49,7 @@
     }
   },
   "modules": {
-    "candidate_filter": "Candidate filter",
+    "candidates": "Candidates",
     "shift_fetcher": "Fetch shifts",
     "whatsapp_send": "Send WhatsApp",
     "database_update": "Update database",

@@ -18,7 +18,8 @@
     "province": "Province",
     "talentPool": "Talent pool",
     "koios": "Koios",
-    "createdAt": "Created on"
+    "createdAt": "Created on",
+    "lastContactType": "Contact type"
   },
   "koios": {
     "actions": {
@@ -61,7 +62,10 @@
     "archive": "Archive",
     "archiveConfirm": "Are you sure you want to archive {{count}} candidates?",
     "archived": "Archived ({{count}})",
-    "archiveError": "Archiving failed. Please try again."
+    "archiveError": "Archiving failed. Please try again.",
+    "typeSubmit": "Apply",
+    "noTypes": "No types",
+    "noneLabel": "none"
   },
   "kpi": {
     "total": "Total",
@@ -73,7 +77,9 @@
     "inProgress": "In progress",
     "inProgressSub": "ongoing procedures",
     "intake": "Intake planned",
-    "intakeSub": "upcoming intakes"
+    "intakeSub": "upcoming intakes",
+    "tasks": "Tasks",
+    "tasksSub": "Open candidate tasks"
   },
   "analytics": {
     "statusTitle": "Status",
@@ -135,14 +141,21 @@
       "province": "Province",
       "emailPlaceholder": "name@example.com",
       "phonePlaceholder": "+31 6 12345678",
-      "cityPlaceholder": "e.g. Amsterdam"
+      "cityPlaceholder": "e.g. Amsterdam",
+      "street": "Street",
+      "streetPlaceholder": "e.g. Main Street",
+      "houseNumber": "House number",
+      "houseNumberSuffix": "Addition",
+      "postalCode": "Postal code"
     },
     "gender": {
       "male": "Male",
       "female": "Female",
       "other": "Other / not specified"
     },
-    "vacancyFallback": "Vacancy {{id}}"
+    "vacancyFallback": "Vacancy {{id}}",
+    "statusPanelTitle": "Status",
+    "statusPanelHint": "Defaults to Lead. A new candidate starts as a Lead."
   },
   "drawer": {
     "availability": "Availability",
@@ -156,7 +169,8 @@
       "preferences": "Preferences",
       "zzp": "Freelance",
       "communication": "Communication",
-      "statistics": "Statistics"
+      "statistics": "Statistics",
+      "changelog": "Changelog"
     },
     "status": "Status",
     "owner": "Owner",
@@ -206,7 +220,11 @@
     "selectDate": "Select a date",
     "groupPersonal": "Personal",
     "groupContact": "Contact",
-    "groupAddress": "Address"
+    "groupAddress": "Address",
+    "placeOfBirth": "Place of birth",
+    "clear": "Clear",
+    "expand": "Expand",
+    "collapse": "Collapse"
   },
   "addFields": {
     "functionTitle": "Job title",
@@ -478,5 +496,25 @@
     "madeBy": "Created by {{company}}",
     "madeVia": "Created with KoiosMatch",
     "nameFallback": "Name"
+  },
+  "changelog": {
+    "loading": "Loading changes…",
+    "error": "Could not load the changelog.",
+    "empty": "No changes recorded yet.",
+    "system": "System"
+  },
+  "matchesView": {
+    "title": "Matches",
+    "empty": "No matches yet.",
+    "client": "Client",
+    "stage": "Stage",
+    "contract": "Contract",
+    "backofficeLinked": "Linked to backoffice (HelloFlex)",
+    "contractStatus": {
+      "none": "No contract",
+      "pending": "Pending",
+      "active": "Active",
+      "ended": "Ended"
+    }
   }
 }

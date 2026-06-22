@@ -1,0 +1,41 @@
+{
+  "kpi": {
+    "candidatesTotal": "Totaal kandidaten",
+    "inAts": "In het ATS",
+    "notContacted6m": "Niet benaderd >6 mnd",
+    "neverContacted": "Nooit benaderd",
+    "openTasks": "Openstaande taken",
+    "attentionNeeded": "Aandacht nodig",
+    "linkedToCandidates": "Aan kandidaten gekoppeld",
+    "opportunities": "Kansen in pijplijn",
+    "openOpportunities": "Open kansen",
+    "pipelineValue": "Pijplijnwaarde",
+    "sumOpenOpps": "Som open kansen"
+  },
+  "chart": {
+    "byStatus": "Kandidaten per status",
+    "byRecruiter": "Kandidaten per recruiter",
+    "funnel": "Sollicitatie-funnel",
+    "byStage": "Kansen per fase",
+    "intakeOverTime": "Instroom over tijd",
+    "intakeWeekly": "Instroom kandidaten & sollicitaties (per week)",
+    "comingSoon": "Grafiek volgt zodra de tijdreeks-data beschikbaar is.",
+    "series": { "candidates": "Kandidaten", "applications": "Sollicitaties", "matches": "Matches" }
+  },
+  "block": {
+    "recentCandidates": "Recente kandidaten",
+    "recentApplications": "Recente sollicitaties",
+    "leadsPipeline": "Leads in pipeline",
+    "recentRuns": "Recente uitvoeringen",
+    "recentConversations": "Recente conversaties"
+  },
+  "action": {
+    "allCandidates": "Alle kandidaten",
+    "allApplications": "Alle sollicitaties",
+    "allCustomers": "Alle klanten",
+    "all": "Alles"
+  },
+  "run": {
+    "processed": "{{count}} verwerkt"
+  }
+}

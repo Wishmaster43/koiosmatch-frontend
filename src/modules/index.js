@@ -1,7 +1,17 @@
 import webhook           from './webhook'
-import http_request      from './http_request'
-import candidate_filter  from './candidate_filter'
-import candidates_fetch  from './candidates_fetch'
+import sm_candidates     from './sm_candidates'
+import sm_customers      from './sm_customers'
+import sm_shifts         from './sm_shifts'
+import hf_candidates     from './hf_candidates'
+import hf_customers      from './hf_customers'
+import hf_shifts         from './hf_shifts'
+import intus_candidates  from './intus_candidates'
+import intus_shifts      from './intus_shifts'
+import candidates        from './candidates'
+import applicants_fetch  from './applicants_fetch'
+import applicant_filter  from './applicant_filter'
+import applicant_event   from './applicant_event'
+import applicant_message from './applicant_message'
 import shift_fetcher     from './shift_fetcher'
 import shifts_fetch      from './shifts_fetch'
 import shifts_input      from './shifts_input'
@@ -35,6 +45,10 @@ import html_table_parser from './html_table_parser'
 import text_parser       from './text_parser'
 import advanced_parser   from './advanced_parser'
 import gateway_mail_hook from './gateway_mail_hook'
+import task_create       from './task_create'
+import wait              from './wait'
+import ai_match          from './ai_match'
+import condition         from './condition'
 
 /**
  * Module registry — the single source of truth for every workflow building block.
@@ -49,9 +63,19 @@ import gateway_mail_hook from './gateway_mail_hook'
  */
 const MODULES = [
   webhook,
-  http_request,
-  candidates_fetch,
-  candidate_filter,
+  sm_candidates,
+  sm_customers,
+  sm_shifts,
+  hf_candidates,
+  hf_customers,
+  hf_shifts,
+  intus_candidates,
+  intus_shifts,
+  candidates,
+  applicants_fetch,
+  applicant_filter,
+  applicant_event,
+  applicant_message,
   shift_fetcher,
   shifts_fetch,
   shifts_input,
@@ -85,6 +109,10 @@ const MODULES = [
   text_parser,
   advanced_parser,
   gateway_mail_hook,
+  task_create,
+  wait,
+  ai_match,
+  condition,
 ]
 
 export const MODULE_META = Object.fromEntries(

@@ -48,7 +48,7 @@
     }
   },
   "modules": {
-    "candidate_filter": "Kandidatenfilter",
+    "candidates": "Kandidaten",
     "shift_fetcher": "Einsätze abrufen",
     "whatsapp_send": "WhatsApp senden",
     "database_update": "Datenbank aktualisieren",

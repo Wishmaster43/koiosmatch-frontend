@@ -1,9 +1,14 @@
 /**
- * CandidateLookupsSettings — manage the three candidate lookups (contract types,
- * funnel stages, statuses) that drive the 3-layer ATS model. CRUD + drag-reorder
- * against /settings/candidate-lookups/{type}. The `value` slug is immutable once
- * created (only label/colour/order/active change); a new item's slug is derived
- * from its label but can be overridden. Colours/labels are per-tenant.
+ * Candidate lookups — the three lookups behind the candidate model, each now its
+ * own settings sub-tab (Contract forms · Funnel stages · Statuses). CRUD +
+ * drag-reorder against /settings/candidate-lookups/{type}. The `value` slug is
+ * immutable once created (only label/colour/order/active change); a new item's
+ * slug is derived from its label but can be overridden. Colours/labels per tenant.
+ *
+ * Two per-item flags live here:
+ *   - statuses    → `is_applicant`        (legacy funnel-reveal flag, model A)
+ *   - funnel_types→ `requires_appointment` (this stage expects a planned intake
+ *                    appointment; missing one is flagged — see §3B / C-22)
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,42 +17,43 @@ import api from '../../../lib/api'
 import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
 
 const BASE = '/settings/candidate-lookups'
-const TYPES = [
-  { key: 'candidate_types', slug: 'candidate-types' },
-  { key: 'funnel_types',    slug: 'funnel-types' },
-  { key: 'statuses',        slug: 'statuses' },
-]
+const unwrap = (res) => res?.data?.data ?? res?.data
 
 // "Niet actief" → "niet_actief" — a stable English-ish slug suggestion.
 const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')
 
-const unwrap = (res) => res?.data?.data ?? res?.data
-
-function LookupBlock({ slug, title, subtitle, items, setItems }) {
+// One lookup list (contract forms / funnel stages / statuses) with inline CRUD.
+export function LookupBlock({ slug, title, subtitle, items, setItems }) {
   const { t } = useTranslation('settings')
-  const [modal,    setModal]    = useState(null) // null | { mode, id?, value, label, color, is_applicant }
+  const [modal,    setModal]    = useState(null) // null | { mode, id?, value, label, color, is_applicant, requires_appointment }
   const [busy,     setBusy]     = useState(false)
   const [deleting, setDeleting] = useState(null)
 
-  // The is_applicant flag (funnel-revealing status) lives only on the statuses lookup.
+  // Per-item flag location: is_applicant on statuses, requires_appointment on the funnel.
   const isStatusBlock = slug === 'statuses'
+  const isFunnelBlock = slug === 'funnel-types'
 
-  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', is_applicant: false })
-  const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280', is_applicant: it.is_applicant === true })
+  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', is_applicant: false, requires_appointment: false, requires_reason: false, is_match: false, is_rejected: false })
+  const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280',
+    is_applicant: it.is_applicant === true, requires_appointment: it.requires_appointment === true, requires_reason: it.requires_reason === true,
+    is_match: it.is_match === true, is_rejected: it.is_rejected === true })
 
   const save = async () => {
     if (!modal.label.trim()) return
     setBusy(true)
-    // Only send is_applicant where the column exists (statuses); the backend guards too.
-    const applicantField = isStatusBlock ? { is_applicant: modal.is_applicant } : {}
+    // Only send the flag that exists on this lookup; the backend guards the rest.
+    const flagFields = {
+      ...(isStatusBlock ? { is_applicant: modal.is_applicant, requires_reason: modal.requires_reason } : {}),
+      ...(isFunnelBlock ? { requires_appointment: modal.requires_appointment, is_match: modal.is_match, is_rejected: modal.is_rejected } : {}),
+    }
     try {
       if (modal.mode === 'add') {
         const value = modal.value.trim() || slugify(modal.label)
-        const created = unwrap(await api.post(`${BASE}/${slug}`, { value, label: modal.label.trim(), color: modal.color, ...applicantField }))
+        const created = unwrap(await api.post(`${BASE}/${slug}`, { value, label: modal.label.trim(), color: modal.color, ...flagFields }))
         setItems(p => [...p, created])
       } else {
-        await api.put(`${BASE}/${slug}/${modal.id}`, { label: modal.label.trim(), color: modal.color, ...applicantField })
-        setItems(p => p.map(x => x.id === modal.id ? { ...x, label: modal.label.trim(), color: modal.color, ...applicantField } : x))
+        await api.put(`${BASE}/${slug}/${modal.id}`, { label: modal.label.trim(), color: modal.color, ...flagFields })
+        setItems(p => p.map(x => x.id === modal.id ? { ...x, label: modal.label.trim(), color: modal.color, ...flagFields } : x))
       }
       setModal(null)
     } catch { /* noop */ } finally { setBusy(false) }
@@ -107,6 +113,20 @@ function LookupBlock({ slug, title, subtitle, items, setItems }) {
                 {t('lookups.applicantBadge')}
               </span>
             )}
+            {/* Reason badge: marks a status that requires a reason when set (e.g. Inactive). */}
+            {isStatusBlock && item.requires_reason && (
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-warning)',
+                             background: 'var(--color-warning-bg, #FEF3C7)', padding: '2px 7px', borderRadius: 999 }}>
+                {t('lookups.reasonBadge')}
+              </span>
+            )}
+            {/* Appointment badge: marks the funnel stage that requires a planned intake. */}
+            {isFunnelBlock && item.requires_appointment && (
+              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
+                             background: 'var(--color-primary-bg, #EEF2FF)', padding: '2px 7px', borderRadius: 999 }}>
+                {t('lookups.appointmentBadge')}
+              </span>
+            )}
             <div style={{ flex: 1 }} />
             <button onClick={() => openEdit(item)} title={t('lookups.edit')}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -143,7 +163,7 @@ function LookupBlock({ slug, title, subtitle, items, setItems }) {
 
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{t('lookups.valueField')}</div>
-              <input value={modal.mode === 'add' ? modal.value : modal.value}
+              <input value={modal.value}
                 disabled={modal.mode === 'edit'}
                 onChange={e => setModal(m => ({ ...m, value: e.target.value }))}
                 placeholder={modal.label ? slugify(modal.label) : 'slug'}
@@ -172,6 +192,54 @@ function LookupBlock({ slug, title, subtitle, items, setItems }) {
               </div>
             )}
 
+            {/* Reason-required toggle — statuses only (e.g. Inactive needs a reason). */}
+            {isStatusBlock && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={modal.requires_reason}
+                    onChange={e => setModal(m => ({ ...m, requires_reason: e.target.checked }))} />
+                  <span style={{ fontSize: 13, color: '#374151' }}>{t('lookups.requiresReason')}</span>
+                </label>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{t('lookups.requiresReasonHint')}</div>
+              </div>
+            )}
+
+            {/* Appointment toggle — funnel stages only; flags the intake stage. */}
+            {isFunnelBlock && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={modal.requires_appointment}
+                    onChange={e => setModal(m => ({ ...m, requires_appointment: e.target.checked }))} />
+                  <span style={{ fontSize: 13, color: '#374151' }}>{t('lookups.requiresAppointment')}</span>
+                </label>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{t('lookups.requiresAppointmentHint')}</div>
+              </div>
+            )}
+
+            {/* Match toggle — funnel stages only; this stage turns the application into a Match (matched bucket). */}
+            {isFunnelBlock && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={modal.is_match}
+                    onChange={e => setModal(m => ({ ...m, is_match: e.target.checked }))} />
+                  <span style={{ fontSize: 13, color: '#374151' }}>{t('lookups.isMatch')}</span>
+                </label>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{t('lookups.isMatchHint')}</div>
+              </div>
+            )}
+
+            {/* Rejected toggle — funnel stages only; this stage is the rejected bucket. */}
+            {isFunnelBlock && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={modal.is_rejected}
+                    onChange={e => setModal(m => ({ ...m, is_rejected: e.target.checked }))} />
+                  <span style={{ fontSize: 13, color: '#374151' }}>{t('lookups.isRejected')}</span>
+                </label>
+                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{t('lookups.isRejectedHint')}</div>
+              </div>
+            )}
+
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
               <button onClick={() => setModal(null)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', cursor: 'pointer' }}>{t('common.cancel')}</button>
               <button onClick={save} disabled={busy || !modal.label.trim()}
@@ -186,48 +254,40 @@ function LookupBlock({ slug, title, subtitle, items, setItems }) {
   )
 }
 
-export default function CandidateLookupsSettings() {
+// One candidate-lookup type rendered as its own settings tab. Each tab loads the
+// combined endpoint and renders only its slice, so the tabs stay independent.
+function CandidateLookupSection({ typeKey, slug }) {
   const { t } = useTranslation('settings')
-  const [data,    setData]    = useState({ candidate_types: [], funnel_types: [], statuses: [] })
+  const [items,   setItems]   = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     api.get(BASE)
-      .then(r => {
-        const d = unwrap(r) ?? {}
-        setData({
-          candidate_types: d.candidate_types ?? [],
-          funnel_types:    d.funnel_types    ?? [],
-          statuses:        d.statuses        ?? [],
-        })
-      })
+      .then(r => { const d = unwrap(r) ?? {}; setItems(d[typeKey] ?? []) })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
-
-  // Returns a setItems(updater|value) bound to one lookup type.
-  const setType = (key) => (updater) =>
-    setData(prev => ({ ...prev, [key]: typeof updater === 'function' ? updater(prev[key]) : updater }))
+  }, [typeKey])
 
   return (
     <div style={{ maxWidth: 640 }}>
-      <div className="mb-6">
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{t('lookups.title')}</h2>
-        <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{t('lookups.subtitle')}</p>
-      </div>
-
-      {loading ? <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('common.loadingShort')}</p> : (
-        TYPES.map(({ key, slug }) => (
-          <LookupBlock
-            key={key}
-            slug={slug}
-            title={t(`lookups.${key}.title`)}
-            subtitle={t(`lookups.${key}.subtitle`)}
-            items={data[key]}
-            setItems={setType(key)}
-          />
-        ))
-      )}
+      {loading
+        ? <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('common.loadingShort')}</p>
+        : <LookupBlock slug={slug} title={t(`lookups.${typeKey}.title`)} subtitle={t(`lookups.${typeKey}.subtitle`)} items={items} setItems={setItems} />}
     </div>
   )
+}
+
+// Contract forms (multi-value per candidate).
+export function ContractFormsSettings() {
+  return <CandidateLookupSection typeKey="candidate_types" slug="candidate-types" />
+}
+
+// Funnel stages (per application) — carries the requires_appointment flag.
+export function FunnelStagesSettings() {
+  return <CandidateLookupSection typeKey="funnel_types" slug="funnel-types" />
+}
+
+// Candidate statuses (person lifecycle).
+export function CandidateStatusesSettings() {
+  return <CandidateLookupSection typeKey="statuses" slug="statuses" />
 }

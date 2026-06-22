@@ -16,7 +16,8 @@
     "lastContact": "Letzter Kontakt",
     "city": "Wohnort",
     "province": "Provinz",
-    "createdAt": "Erstellt am"
+    "createdAt": "Erstellt am",
+    "lastContactType": "Kontakttyp"
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
@@ -52,7 +53,10 @@
     "archive": "Archivieren",
     "archiveConfirm": "Möchten Sie {{count}} Kandidaten wirklich archivieren?",
     "archived": "Archiviert ({{count}})",
-    "archiveError": "Archivierung fehlgeschlagen. Bitte erneut versuchen."
+    "archiveError": "Archivierung fehlgeschlagen. Bitte erneut versuchen.",
+    "typeSubmit": "Anwenden",
+    "noTypes": "Keine Typen",
+    "noneLabel": "keine"
   },
   "kpi": {
     "total": "Gesamt",
@@ -64,7 +68,9 @@
     "inProgress": "In Bearbeitung",
     "inProgressSub": "laufende Verfahren",
     "intake": "Aufnahme geplant",
-    "intakeSub": "anstehende Aufnahmen"
+    "intakeSub": "anstehende Aufnahmen",
+    "tasks": "Aufgaben",
+    "tasksSub": "Offene Kandidaten-Aufgaben"
   },
   "analytics": {
     "statusTitle": "Status",
@@ -126,14 +132,21 @@
       "province": "Provinz",
       "emailPlaceholder": "name@beispiel.de",
       "phonePlaceholder": "+31 6 12345678",
-      "cityPlaceholder": "z.B. Amsterdam"
+      "cityPlaceholder": "z.B. Amsterdam",
+      "street": "Straße",
+      "streetPlaceholder": "z. B. Hauptstraße",
+      "houseNumber": "Hausnummer",
+      "houseNumberSuffix": "Zusatz",
+      "postalCode": "PLZ"
     },
     "gender": {
       "male": "Männlich",
       "female": "Weiblich",
       "other": "Andere / keine Angabe"
     },
-    "vacancyFallback": "Stelle {{id}}"
+    "vacancyFallback": "Stelle {{id}}",
+    "statusPanelTitle": "Status",
+    "statusPanelHint": "Standard: Lead. Ein neuer Kandidat beginnt als Lead."
   },
   "drawer": {
     "availability": "Verfügbarkeit",
@@ -147,7 +160,8 @@
       "preferences": "Präferenzen",
       "zzp": "Freiberufler",
       "communication": "Kommunikation",
-      "statistics": "Statistiken"
+      "statistics": "Statistiken",
+      "changelog": "Änderungsprotokoll"
     },
     "status": "Status",
     "owner": "Eigentümer",
@@ -192,7 +206,11 @@
     "selectDate": "Datum auswählen",
     "groupPersonal": "Persönlich",
     "groupContact": "Kontakt",
-    "groupAddress": "Adresse"
+    "groupAddress": "Adresse",
+    "placeOfBirth": "Geburtsort",
+    "clear": "Leeren",
+    "expand": "Vergrößern",
+    "collapse": "Verkleinern"
   },
   "addFields": {
     "functionTitle": "Berufsbezeichnung",
@@ -456,5 +474,25 @@
     "madeBy": "Erstellt von {{company}}",
     "madeVia": "Erstellt mit KoiosMatch",
     "nameFallback": "Name"
+  },
+  "changelog": {
+    "loading": "Änderungen werden geladen…",
+    "error": "Änderungsprotokoll konnte nicht geladen werden.",
+    "empty": "Noch keine Änderungen erfasst.",
+    "system": "System"
+  },
+  "matchesView": {
+    "title": "Matches",
+    "empty": "Noch keine Matches.",
+    "client": "Kunde",
+    "stage": "Phase",
+    "contract": "Vertrag",
+    "backofficeLinked": "Mit Backoffice verknüpft (HelloFlex)",
+    "contractStatus": {
+      "none": "Kein Vertrag",
+      "pending": "In Bearbeitung",
+      "active": "Aktiv",
+      "ended": "Beendet"
+    }
   }
 }

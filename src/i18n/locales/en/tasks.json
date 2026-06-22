@@ -3,12 +3,104 @@
   "loading": "Loading tasks…",
   "empty": "No tasks yet.",
   "error": "Couldn't load tasks.",
+  "add": "Add activity",
+  "bureau": "Agency",
+  "overdue": "Overdue",
+  "view": {
+    "table": "List view",
+    "board": "Board view"
+  },
   "cols": {
     "task": "Task",
-    "candidate": "Candidate",
     "type": "Type",
     "status": "Status",
+    "priority": "Priority",
+    "links": "Link",
     "assignee": "Assigned to",
     "due": "Due date"
+  },
+  "kpi": {
+    "open": "Open",
+    "overdue": "Overdue",
+    "dueToday": "Due today",
+    "completed": "Completed"
+  },
+  "insights": {
+    "status": "Status",
+    "priority": "Priority",
+    "type": "Type",
+    "clearFilter": "Clear filter"
+  },
+  "board": {
+    "empty": "Drag tasks here"
+  },
+  "drawer": {
+    "label": "Activity",
+    "createdAt": "Created on {{date}}",
+    "tabs": {
+      "details": "Details",
+      "links": "Links",
+      "comments": "Comments",
+      "activity": "Activity"
+    }
+  },
+  "details": {
+    "title": "Activity details",
+    "type": "Activity type",
+    "status": "Status",
+    "priority": "Priority",
+    "due": "Due date",
+    "assignee": "Assigned to",
+    "owner": "Owner",
+    "description": "Description"
+  },
+  "comments": {
+    "title": "Comments",
+    "empty": "No comments yet.",
+    "placeholder": "Write a comment…",
+    "send": "Post"
+  },
+  "links": {
+    "title": "Links",
+    "empty": "No links yet.",
+    "candidate": "Candidate",
+    "application": "Application",
+    "vacancy": "Vacancy",
+    "match": "Match",
+    "customer": "Client",
+    "location": "Location",
+    "department": "Department",
+    "contact": "Contact",
+    "workflow": "Workflow"
+  },
+  "activity": {
+    "empty": "No activity yet."
+  },
+  "modal": {
+    "title": "Add activity",
+    "type": "Activity type",
+    "typePlaceholder": "Choose type",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Enter…",
+    "assignee": "Assign to",
+    "assigneePlaceholder": "Agency (nobody)",
+    "status": "Status",
+    "due": "Due date",
+    "priority": "Priority",
+    "description": "Description",
+    "descriptionPlaceholder": "Enter…",
+    "charsLeft": "Characters available: {{count}}",
+    "detailsTitle": "Activity details",
+    "owner": "Owner",
+    "candidate": "Candidate",
+    "candidatePlaceholder": "Select candidate",
+    "customer": "Client",
+    "customerPlaceholder": "Select client",
+    "contact": "Contact",
+    "contactPlaceholder": "Select contact",
+    "create": "Create",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "required": "Required"
   }
 }

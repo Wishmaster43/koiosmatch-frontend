@@ -10,7 +10,7 @@ vi.mock('../../lib/api', () => ({ default: { get: vi.fn(() => Promise.resolve({ 
 const baseProps = () => ({
   count: 3, onClear: vi.fn(),
   onAddToPool: vi.fn(), onRemoveFromPool: vi.fn(),
-  onSetOwner: vi.fn(), onSetStage: vi.fn(), onSetType: vi.fn(),
+  onSetOwner: vi.fn(), onSetStage: vi.fn(), onSetTypes: vi.fn(),
   onRemoveTag: vi.fn(), onAddNote: vi.fn(), onArchive: vi.fn(),
   users: [{ id: 'u1', name: 'Bente de Jong' }, { id: 'u2', name: 'Kelly van Vliet' }],
   funnelTypes: [{ value: 'pool', label: 'Pool' }, { value: 'intake', label: 'Intake' }],
@@ -54,5 +54,16 @@ describe('CandidatesBulkBar', () => {
     await user.click(screen.getByText('bulk.changeStage'))
     await user.click(screen.getByText('Pool'))
     expect(props.onSetStage).toHaveBeenCalledWith('pool')
+  })
+
+  it('applies the exact candidate-type set via the multi-select (add/remove)', async () => {
+    const user = userEvent.setup()
+    const props = baseProps()
+    render(<CandidatesBulkBar {...props} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.changeType'))
+    await user.click(screen.getByText('ZZP'))            // toggle the type on
+    await user.click(screen.getByText(/bulk\.typeSubmit/)) // confirm bar shows "key (1)"
+    expect(props.onSetTypes).toHaveBeenCalledWith(['freelance'])
   })
 })

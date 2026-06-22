@@ -1,0 +1,299 @@
+{
+  "title": "Clients",
+  "page": {
+    "add": "Ajouter un client",
+    "searchPlaceholder": "Rechercher client, n° débiteur, gestionnaire…",
+    "empty": "Aucun client trouvé.",
+    "loading": "Chargement…",
+    "loadError": "Échec du chargement des clients."
+  },
+  "cols": {
+    "name": "Nom",
+    "debtorNumber": "N° débiteur",
+    "status": "Statut",
+    "accountManager": "Gestionnaire de compte",
+    "locations": "Sites",
+    "departments": "Services",
+    "contacts": "Contacts",
+    "openVacancies": "Postes ouverts",
+    "city": "Ville",
+    "industry": "Secteur"
+  },
+  "filters": {
+    "search": "Rechercher",
+    "status": "Statut",
+    "accountManager": "Gestionnaire de compte",
+    "city": "Ville",
+    "industry": "Secteur",
+    "categories": {
+      "general": "Général",
+      "organisation": "Organisation"
+    }
+  },
+  "insights": {
+    "statusTitle": "Statut",
+    "amTitle": "Par gestionnaire",
+    "clearFilter": "Effacer le filtre",
+    "locations": "Sites",
+    "locationsSub": "sites au total",
+    "departments": "Services",
+    "departmentsSub": "services au total",
+    "contacts": "Contacts",
+    "contactsSub": "contacts au total",
+    "openVacancies": "Postes ouverts",
+    "openVacanciesSub": "ouverts",
+    "activeMatches": "Actuellement en poste",
+    "activeMatchesSub": "matches actifs",
+    "noContact": "Sans contact",
+    "noContactSub": "aucun contact lié"
+  },
+  "drawer": {
+    "entityLabel": "Client",
+    "createdAt": "Créé le {{date}}",
+    "edit": "Modifier",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "owner": "Gestionnaire de compte",
+    "status": "Statut",
+    "tags": "Étiquettes",
+    "addTag": "Ajouter une étiquette",
+    "back": "Retour",
+    "tabs": {
+      "overview": "Aperçu",
+      "locations": "Sites",
+      "departments": "Services",
+      "contacts": "Contacts",
+      "vacancies": "Postes",
+      "opportunities": "Opportunités",
+      "planning": "Planning",
+      "statistics": "Statistiques",
+      "documents": "Documents",
+      "notes": "Notes"
+    }
+  },
+  "overview": {
+    "general": "Général",
+    "online": "En ligne",
+    "settings": "Paramètres",
+    "textsTitle": "Textes",
+    "website": "Site web",
+    "employeeCount": "Employés",
+    "toneOfVoice": "Tonalité",
+    "industry": "Secteur",
+    "debtorNumber": "Numéro de débiteur",
+    "city": "Ville",
+    "hideCompanyName": "Masquer le nom de l'entreprise",
+    "hasCareerPage": "Possède une page carrière",
+    "showInVacancies": "Afficher dans mes postes",
+    "excludeFromSourcing": "Exclure du sourcing",
+    "privacyPolicyUrl": "URL politique de confidentialité",
+    "description": "Description",
+    "recruitmentProblems": "Difficultés de recrutement"
+  },
+  "locations": {
+    "empty": "Aucun site pour le moment",
+    "add": "Ajouter un site",
+    "searchPlaceholder": "Rechercher un site…",
+    "col": {
+      "name": "Nom",
+      "city": "Ville",
+      "departments": "Services",
+      "contacts": "Contacts"
+    },
+    "detail": {
+      "addressTitle": "Adresse & informations",
+      "street": "Rue",
+      "houseNumber": "N°",
+      "houseNumberSuffix": "Complément",
+      "postalCode": "Code postal",
+      "city": "Ville",
+      "country": "Pays",
+      "coc": "N° registre",
+      "vat": "N° TVA",
+      "contactName": "Personne de contact",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "departmentsHere": "Services sur ce site",
+      "contactsHere": "Contacts sur ce site",
+      "none": "Rien de lié pour le moment"
+    }
+  },
+  "departments": {
+    "empty": "Aucun service pour le moment",
+    "add": "Ajouter un service",
+    "searchPlaceholder": "Rechercher un service…",
+    "col": {
+      "name": "Nom",
+      "location": "Site",
+      "contacts": "Contacts"
+    },
+    "detail": {
+      "infoTitle": "Service",
+      "name": "Nom",
+      "location": "Site",
+      "description": "Description",
+      "contactsHere": "Contacts dans ce service",
+      "none": "Rien de lié pour le moment"
+    }
+  },
+  "contacts": {
+    "empty": "Aucun contact pour le moment",
+    "add": "Ajouter un contact",
+    "searchPlaceholder": "Rechercher un contact…",
+    "col": {
+      "name": "Nom",
+      "role": "Fonction",
+      "email": "E-mail",
+      "phone": "Téléphone"
+    },
+    "detail": {
+      "infoTitle": "Contact",
+      "name": "Nom",
+      "role": "Fonction",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "primary": "Contact principal",
+      "location": "Site",
+      "department": "Service",
+      "none": "Non renseigné"
+    }
+  },
+  "vacancies": {
+    "empty": "Aucun poste pour ce client.",
+    "col": {
+      "title": "Titre",
+      "status": "Statut",
+      "applications": "Candidatures"
+    }
+  },
+  "opportunities": {
+    "openVacancies": "Postes ouverts",
+    "openVacanciesEmpty": "Aucun poste ouvert.",
+    "openShifts": "Missions flex ouvertes",
+    "openShiftsEmpty": "Aucune mission ouverte.",
+    "planningOff": "Les missions ouvertes apparaissent dès que le module Planning est actif.",
+    "col": {
+      "title": "Titre",
+      "status": "Statut",
+      "applications": "Candidatures",
+      "date": "Date",
+      "shift": "Mission",
+      "department": "Service"
+    }
+  },
+  "planning": {
+    "title": "Planning",
+    "activeNow": "Actuellement en poste",
+    "activeNowSub": "placements actifs",
+    "upcoming": "Missions à venir",
+    "upcomingEmpty": "Aucune mission à venir.",
+    "off": "Les informations de planning apparaissent dès que le module Planning est actif.",
+    "open": "Ouvert"
+  },
+  "statistics": {
+    "matchesTotal": "Total des matches",
+    "matchesTotalSub": "historique",
+    "activeMatches": "Actuellement en poste",
+    "activeMatchesSub": "matches actifs",
+    "openVacancies": "Postes ouverts",
+    "openVacanciesSub": "ouverts",
+    "fillRate": "Taux de pourvoi",
+    "fillRateSub": "postes pourvus",
+    "loadError": "Échec du chargement des statistiques.",
+    "overviewTitle": "Aperçu"
+  },
+  "documents": {
+    "empty": "Aucun document pour le moment."
+  },
+  "notes": {
+    "notes": "Notes",
+    "newNote": "Nouvelle note",
+    "type": "Type",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "edit": "Modifier",
+    "notesEmpty": "Aucune note pour le moment.",
+    "notePlaceholder": "Titre de la note",
+    "timeline": "Chronologie",
+    "timelineEmpty": "Aucune activité pour le moment.",
+    "conversations": "Conversations",
+    "conversationsEmpty": "Aucune conversation pour le moment."
+  },
+  "bulk": {
+    "selected": "{{count}} sélectionné(s)",
+    "actions": "Actions groupées",
+    "deselect": "Effacer la sélection",
+    "changeOwner": "Changer le gestionnaire",
+    "searchOwner": "Rechercher un utilisateur…",
+    "noUsers": "Aucun utilisateur",
+    "changeStatus": "Changer le statut",
+    "searchStatus": "Rechercher un statut…",
+    "addTag": "Ajouter une étiquette",
+    "tagPlaceholder": "Nom de l'étiquette",
+    "tagSubmit": "Ajouter",
+    "removeTag": "Retirer l'étiquette",
+    "searchTag": "Rechercher une étiquette…",
+    "noTags": "Aucune étiquette",
+    "addNote": "Ajouter une note",
+    "notePlaceholder": "Saisir une note…",
+    "noteSubmit": "Ajouter",
+    "archive": "Archiver",
+    "archiveConfirm": "Archiver {{count}} client(s) ?",
+    "archived": "{{count}} client(s) archivé(s).",
+    "archiveError": "Échec de l'archivage.",
+    "ownerChanged": "Gestionnaire changé en {{name}} ({{count}}).",
+    "statusChanged": "Statut changé en {{value}} ({{count}}).",
+    "tagAdded": "Étiquette « {{tag}} » ajoutée ({{count}}).",
+    "tagRemoved": "Étiquette « {{tag}} » retirée ({{count}}).",
+    "noteAdded": "Note ajoutée ({{count}}).",
+    "mutateError": "L'action a échoué."
+  },
+  "modal": {
+    "title": "Ajouter un client",
+    "subtitle": "Saisissez les informations du nouveau client",
+    "fillRequired": "Remplissez les champs obligatoires",
+    "required": "Champ obligatoire",
+    "create": "Créer le client",
+    "cancel": "Annuler",
+    "fields": {
+      "name": "Nom",
+      "namePlaceholder": "P. ex. Groupe de soins Rivas",
+      "debtorNumber": "Numéro de débiteur",
+      "status": "Statut",
+      "accountManager": "Gestionnaire de compte",
+      "selectOwner": "Choisir un gestionnaire",
+      "industry": "Secteur",
+      "selectIndustry": "Choisir un secteur",
+      "city": "Ville",
+      "cityPlaceholder": "P. ex. Gorinchem"
+    }
+  },
+  "subModal": {
+    "addLocation": "Ajouter un site",
+    "addDepartment": "Ajouter un service",
+    "addContact": "Ajouter un contact",
+    "locationName": "Nom du site",
+    "locationPlaceholder": "P. ex. Siège",
+    "departmentName": "Nom du service",
+    "departmentPlaceholder": "P. ex. Soins à domicile",
+    "selectLocation": "Site",
+    "noLocationsFirst": "Créez d'abord un site",
+    "contactName": "Nom",
+    "contactPlaceholder": "P. ex. Jean Dupont",
+    "role": "Fonction",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "isPrimary": "Contact principal",
+    "street": "Rue",
+    "houseNumber": "N°",
+    "houseNumberSuffix": "Complément",
+    "postalCode": "Code postal",
+    "city": "Ville",
+    "country": "Pays",
+    "coc": "N° registre",
+    "vat": "N° TVA",
+    "create": "Ajouter",
+    "cancel": "Annuler",
+    "required": "Champ obligatoire"
+  }
+}

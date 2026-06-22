@@ -35,7 +35,16 @@
     "planning": "Planning",
     "modules": "Modules",
     "superadmin": "Super Admin",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "candidate_lookups": "Candidate lists",
+    "languages": "Languages",
+    "vacancies": "Vacancies",
+    "tasks": "Tasks",
+    "customers": "Customers",
+    "candidate": "Candidate",
+    "applications": "Applications",
+    "shared": "Shared",
+    "whatsapp": "WhatsApp"
   },
   "nav": {
     "kpis": "KPIs",
@@ -54,6 +63,7 @@
     "phases": "Phases",
     "candidate_status": "Candidate status",
     "vacancy": "Vacancy",
+    "assessment_criteria": "Assessment criteria",
     "rejection": "Rejection reasons",
     "cv_template": "CV template",
     "view_customers": "Customers",
@@ -70,7 +80,7 @@
     "webhooks": "Webhooks",
     "importeren": "Import",
     "billing_plans": "Plan",
-    "billing_pay": "Payment methods",
+    "billing_pay": "Payment & top-up",
     "billing_auto": "Auto top-up",
     "billing_usage": "Usage",
     "billing_invoices": "Invoices",
@@ -91,10 +101,32 @@
     "availability": "Availability",
     "automatch": "Auto-match rules",
     "planning_board": "Planning board",
-    "messaging": "Messaging",
+    "messaging": "Messages",
     "koios": "Koios AI",
     "mod_shiftmanager": "Shiftmanager",
-    "mod_helloflex": "HelloFlex"
+    "mod_helloflex": "HelloFlex",
+    "contract_forms": "Contract types",
+    "funnel_stages": "Funnel stages",
+    "candidate_statuses": "Statuses",
+    "lang_languages": "Languages",
+    "lang_levels": "Levels",
+    "vacancy_statuses": "Statuses",
+    "vacancy_phases": "Phases",
+    "vacancy_employment": "Employment types",
+    "vacancy_seniority": "Seniority",
+    "vacancy_education": "Education",
+    "vacancy_channels": "Job boards",
+    "vacancy_fields": "Custom fields",
+    "vacancy_matching": "Matching",
+    "task_statuses": "Statuses",
+    "task_types": "Activity types",
+    "task_priorities": "Priorities",
+    "customer_statuses": "Customer statuses",
+    "location_statuses": "Location statuses",
+    "department_statuses": "Department statuses",
+    "contact_statuses": "Contact statuses",
+    "last_contact_types": "Contact type",
+    "note_types": "Note types"
   },
   "kpis": {
     "title": "KPI settings",
@@ -278,7 +310,17 @@
       "title": "Statuses",
       "subtitle": "Operational status with a colour (Active, Inactive, Sick …)."
     },
-    "inUse": "In use — cannot delete"
+    "inUse": "In use — cannot delete",
+    "requiresAppointment": "Requires an appointment",
+    "requiresAppointmentHint": "This stage expects a planned appointment (intake). A missing one is flagged on the candidate.",
+    "isMatch": "Creates a match",
+    "isMatchHint": "Reaching this stage turns the application into a match (the Matched bucket).",
+    "isRejected": "Is a rejection",
+    "isRejectedHint": "Applications in this stage count as rejected (the Rejected bucket).",
+    "appointmentBadge": "Appointment required",
+    "requiresReason": "Reason required",
+    "requiresReasonHint": "Setting this status requires the user to give a reason (e.g. Inactive).",
+    "reasonBadge": "Reason required"
   },
   "vacancy": {
     "title": "Statuses",
@@ -289,12 +331,92 @@
     "fieldPlaceholder": "Field name…",
     "phasesTitle": "Phases",
     "phasesSubtitle": "Manage the phases of your vacancies.",
-    "phasesAdd": "Add phase"
+    "phasesAdd": "Add phase",
+    "employmentTitle": "Employment types",
+    "employmentSubtitle": "Manage the employment types your vacancies can use.",
+    "employmentAdd": "Add employment type",
+    "seniorityTitle": "Seniority",
+    "senioritySubtitle": "Manage the seniority levels for your vacancies.",
+    "seniorityAdd": "Add seniority level",
+    "educationTitle": "Education",
+    "educationSubtitle": "Manage the education levels for your vacancies.",
+    "educationAdd": "Add education level",
+    "channelsTitle": "Job boards",
+    "channelsSubtitle": "Manage the job boards you can publish vacancies on.",
+    "channelsAdd": "Add job board"
+  },
+  "tasks": {
+    "statusTitle": "Statuses",
+    "statusSubtitle": "Manage the columns of your task board (status + colour).",
+    "statusAdd": "Add status",
+    "typeTitle": "Activity types",
+    "typeSubtitle": "Manage the activity types (task, call, email…).",
+    "typeAdd": "Add type",
+    "priorityTitle": "Priorities",
+    "prioritySubtitle": "Manage the priorities of your tasks (low, normal, high).",
+    "priorityAdd": "Add priority"
   },
   "rejection": {
     "title": "Rejection reasons",
     "subtitle": "Manage the reasons for rejecting applications.",
-    "add": "Add reason"
+    "add": "Add reason",
+    "channelTitle": "Channel & templates",
+    "channelSubtitle": "The default channel and the message sent per reason.",
+    "defaultChannel": "Default channel",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "emailSubject": "Email subject",
+    "emailBody": "Email body",
+    "whatsappBody": "WhatsApp message",
+    "tokensHint": "Tokens: {candidate}, {vacancy}, {reason}, {recruiter}",
+    "save": "Save templates",
+    "saved": "Saved",
+    "loading": "Loading…",
+    "noReasons": "Add a rejection reason first."
+  },
+  "assessment": {
+    "title": "Assessment criteria",
+    "subtitle": "Reusable scoring-criteria groups Koios AI uses to assess candidates. Link a group to a vacancy and override per vacancy.",
+    "addGroup": "Add group",
+    "empty": "No criteria groups yet.",
+    "loading": "Loading…",
+    "groupName": "Group name",
+    "groupNamePlaceholder": "e.g. Care — IG nurse",
+    "description": "Description",
+    "descriptionPlaceholder": "Optional description…",
+    "criteria": "Criteria",
+    "addCriterion": "Add criterion",
+    "criterionPlaceholder": "e.g. Travel distance < 30 km",
+    "dimension": "Dimension",
+    "weight": "Weight",
+    "hard": "Hard",
+    "hardHint": "A hard criterion may trigger AI auto-rejection.",
+    "noCriteria": "No criteria yet.",
+    "criteriaCount_one": "{{count}} criterion",
+    "criteriaCount_other": "{{count}} criteria",
+    "inUse": "In use — linked to a vacancy.",
+    "save": "Save",
+    "cancel": "Cancel",
+    "newGroup": "New group",
+    "editGroup": "Edit group",
+    "dimensions": {
+      "qualifications": "Qualifications",
+      "location": "Location",
+      "culture": "Culture",
+      "soft_skills": "Soft skills",
+      "technical": "Technical",
+      "ambition": "Ambition"
+    }
+  },
+  "matching": {
+    "title": "Matching strictness",
+    "subtitle": "How critical the AI matcher is when scoring candidates against your vacancies. Stricter settings produce lower, harder-earned match scores.",
+    "lenient": "Lenient",
+    "balanced": "Balanced",
+    "strict": "Strict",
+    "save": "Save",
+    "saved": "Saved",
+    "perVacancyHint": "What matters per vacancy (qualifications, location, …) is set on the vacancy itself."
   },
   "cvTemplate": {
     "title": "CV template",
@@ -700,17 +822,21 @@
     "savedActive": "Saved & active",
     "activate": "Activate package",
     "changeFromTo": "Change from {{from}} to {{to}}",
+    "groups": {
+      "plans": "Plans",
+      "standalone": "Standalone modules"
+    },
     "packages": {
       "reporting_sm": "Reporting Shiftmanager",
       "reporting_hf": "Reporting HelloFlex",
-      "reporting_sm_hf": "Reporting SM + HF",
-      "reporting_sm_ai": "Reporting SM + AI & Workflow",
-      "reporting_hf_ai": "Reporting HF + AI & Workflow",
-      "reporting_sm_hf_ai": "Reporting SM + HF + AI & Workflow",
-      "ats_crm": "ATS & CRM",
-      "ats_crm_ai": "ATS & CRM + AI & Workflow",
-      "ats_crm_planning": "ATS & CRM + Planning",
-      "ats_crm_ai_planning": "ATS & CRM + AI & Workflow + Planning"
+      "reporting_sm_hf": "Reporting Shiftmanager + HelloFlex",
+      "reporting_sm_ai": "Reporting Shiftmanager + AI Agents",
+      "reporting_hf_ai": "Reporting HelloFlex + AI Agents",
+      "reporting_sm_hf_ai": "Reporting SM + HF + AI Agents",
+      "ats_crm": "Koios Core",
+      "ats_crm_ai": "Koios Plus",
+      "ats_crm_planning": "Koios Core + Planning",
+      "ats_crm_ai_planning": "Koios Suite"
     },
     "emptyTitle": "No settings yet",
     "emptyDesc": "Settings for this module are coming.",
@@ -992,5 +1118,37 @@
         "unit": "shifts"
       }
     }
+  },
+  "customerLookups": {
+    "statuses": {
+      "title": "Customer statuses",
+      "subtitle": "Manage the statuses a customer can have (Active, Prospect, …).",
+      "add": "Add status"
+    },
+    "locationStatuses": {
+      "title": "Location statuses",
+      "subtitle": "Manage the statuses a customer location can have.",
+      "add": "Add status"
+    },
+    "departmentStatuses": {
+      "title": "Department statuses",
+      "subtitle": "Manage the statuses a department can have.",
+      "add": "Add status"
+    },
+    "contactStatuses": {
+      "title": "Contact statuses",
+      "subtitle": "Manage the statuses a contact person can have.",
+      "add": "Add status"
+    }
+  },
+  "lastContactTypes": {
+    "title": "Contact types",
+    "subtitle": "Channels for 'last contact' (Email, Phone, WhatsApp).",
+    "add": "Add type"
+  },
+  "noteTypes": {
+    "title": "Note types",
+    "subtitle": "Categories for candidate notes.",
+    "add": "Add type"
   }
 }

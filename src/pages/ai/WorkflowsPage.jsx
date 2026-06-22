@@ -23,7 +23,7 @@ import WorkflowCanvasEditor from '../../components/layout/WorkflowCanvasEditor'
 
 // Module chip icon + colours; label = t('modules.<type>').
 const MODULE_META = {
-  candidate_filter: { Icon: Users,         color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
+  candidates: { Icon: Users,         color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
   shift_fetcher:    { Icon: Calendar,      color: '#0F6E56', bg: '#E1F5EE' },
   whatsapp_send:    { Icon: MessageCircle, color: '#3B6D11', bg: '#EAF3DE' },
   database_update:  { Icon: Database,      color: '#185FA5', bg: '#E6F1FB' },
@@ -39,7 +39,7 @@ const MOCK_WORKFLOWS = [
     status: 'active',
     last_run: { time: 'Vandaag 08:00', ok: true, candidates: 87 },
     steps: [
-      { type: 'candidate_filter', config: { status: 'actief', pools: ['Pool 7', 'Pool 8'], limit: 100 } },
+      { type: 'candidates', config: { status: 'actief', pools: ['Pool 7', 'Pool 8'], limit: 100 } },
       { type: 'shift_fetcher',    config: { connection_id: 'ShiftManager (Yesway)', hours_ahead: 72 } },
       { type: 'whatsapp_send',    config: { message_type: 'flow', phone_number_id: '085 020 5160' } },
       { type: 'database_update',  config: { model: 'Conversation', set_status: 'AWAITING_SHIFTS_OFFERED' } },
@@ -52,7 +52,7 @@ const MOCK_WORKFLOWS = [
     status: 'active',
     last_run: { time: 'Vandaag 09:00', ok: true, candidates: 12 },
     steps: [
-      { type: 'candidate_filter', config: { status: 'actief' } },
+      { type: 'candidates', config: { status: 'actief' } },
       { type: 'whatsapp_send',    config: { message_type: 'template', template_name: 'geen_reactie' } },
       { type: 'database_update',  config: { model: 'Conversation' } },
     ],
@@ -64,7 +64,7 @@ const MOCK_WORKFLOWS = [
     status: 'active',
     last_run: { time: 'Vandaag 10:00', ok: false, error: 'API timeout' },
     steps: [
-      { type: 'candidate_filter', config: {} },
+      { type: 'candidates', config: {} },
       { type: 'shift_fetcher',    config: {} },
       { type: 'whatsapp_send',    config: { message_type: 'template' } },
     ],
@@ -76,7 +76,7 @@ const MOCK_WORKFLOWS = [
     status: 'draft',
     last_run: null,
     steps: [
-      { type: 'candidate_filter', config: {} },
+      { type: 'candidates', config: {} },
       { type: 'email_send',       config: { to: 'flex@yesway.nu' } },
     ],
   },

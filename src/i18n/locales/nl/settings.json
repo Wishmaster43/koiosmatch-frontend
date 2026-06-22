@@ -35,7 +35,16 @@
     "planning": "Planning",
     "modules": "Modules",
     "superadmin": "Super Admin",
-    "audit": "Audit log"
+    "audit": "Audit log",
+    "candidate_lookups": "Kandidaatlijsten",
+    "languages": "Talen",
+    "vacancies": "Vacatures",
+    "tasks": "Taken",
+    "customers": "Klanten",
+    "candidate": "Kandidaat",
+    "applications": "Sollicitaties",
+    "shared": "Gedeeld",
+    "whatsapp": "WhatsApp"
   },
   "nav": {
     "kpis": "KPI's",
@@ -54,6 +63,7 @@
     "phases": "Fasen",
     "candidate_status": "Kandidaatstatus",
     "vacancy": "Vacature",
+    "assessment_criteria": "Beoordelingscriteria",
     "rejection": "Afwijsredenen",
     "cv_template": "CV-sjabloon",
     "view_customers": "Klanten",
@@ -70,7 +80,7 @@
     "webhooks": "Webhooks",
     "importeren": "Importeren",
     "billing_plans": "Planbeheer",
-    "billing_pay": "Betaalmethoden",
+    "billing_pay": "Betaling & opwaarderen",
     "billing_auto": "Automatisch opwaarderen",
     "billing_usage": "Gebruik",
     "billing_invoices": "Facturen",
@@ -94,7 +104,29 @@
     "messaging": "Berichten",
     "koios": "Koios AI",
     "mod_shiftmanager": "Shiftmanager",
-    "mod_helloflex": "HelloFlex"
+    "mod_helloflex": "HelloFlex",
+    "contract_forms": "Contractvormen",
+    "funnel_stages": "Funnelfasen",
+    "candidate_statuses": "Statussen",
+    "lang_languages": "Talen",
+    "lang_levels": "Niveaus",
+    "vacancy_statuses": "Statussen",
+    "vacancy_phases": "Fasen",
+    "vacancy_employment": "Soort dienstverband",
+    "vacancy_seniority": "Senioriteit",
+    "vacancy_education": "Opleiding",
+    "vacancy_channels": "Vacaturesites",
+    "vacancy_fields": "Aangepaste velden",
+    "vacancy_matching": "Matching",
+    "task_statuses": "Statussen",
+    "task_types": "Activiteit-types",
+    "task_priorities": "Prioriteiten",
+    "customer_statuses": "Klant statussen",
+    "location_statuses": "Locatie statussen",
+    "department_statuses": "Afdeling statussen",
+    "contact_statuses": "Contactpersoon statussen",
+    "last_contact_types": "Contacttype",
+    "note_types": "Notitietypes"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -278,7 +310,17 @@
       "title": "Statussen",
       "subtitle": "Operationele status met kleur (Actief, Niet actief, Ziek …)."
     },
-    "inUse": "In gebruik — kan niet verwijderen"
+    "inUse": "In gebruik — kan niet verwijderen",
+    "requiresAppointment": "Vereist een afspraak",
+    "requiresAppointmentHint": "Bij deze fase hoort een geplande afspraak (intake). Ontbreekt die, dan volgt een melding bij de kandidaat.",
+    "isMatch": "Maakt een match",
+    "isMatchHint": "Zodra een sollicitatie deze fase bereikt, wordt het een match (de Matched-bucket).",
+    "isRejected": "Is een afwijzing",
+    "isRejectedHint": "Sollicitaties in deze fase tellen als afgewezen (de Rejected-bucket).",
+    "appointmentBadge": "Afspraak vereist",
+    "requiresReason": "Reden verplicht",
+    "requiresReasonHint": "Bij deze status moet de gebruiker een reden opgeven (bv. Inactief).",
+    "reasonBadge": "Reden vereist"
   },
   "vacancy": {
     "title": "Statussen",
@@ -289,12 +331,92 @@
     "fieldPlaceholder": "Veldnaam…",
     "phasesTitle": "Fasen",
     "phasesSubtitle": "Beheer de fasen van je vacatures.",
-    "phasesAdd": "Fase toevoegen"
+    "phasesAdd": "Fase toevoegen",
+    "employmentTitle": "Soort dienstverband",
+    "employmentSubtitle": "Beheer de dienstverbanden die je vacatures kunnen gebruiken.",
+    "employmentAdd": "Dienstverband toevoegen",
+    "seniorityTitle": "Senioriteit",
+    "senioritySubtitle": "Beheer de senioriteitsniveaus voor je vacatures.",
+    "seniorityAdd": "Niveau toevoegen",
+    "educationTitle": "Opleiding",
+    "educationSubtitle": "Beheer de opleidingsniveaus voor je vacatures.",
+    "educationAdd": "Niveau toevoegen",
+    "channelsTitle": "Vacaturesites",
+    "channelsSubtitle": "Beheer de vacaturesites waarop je vacatures kunt publiceren.",
+    "channelsAdd": "Vacaturesite toevoegen"
+  },
+  "tasks": {
+    "statusTitle": "Statussen",
+    "statusSubtitle": "Beheer de kolommen van je takenbord (status + kleur).",
+    "statusAdd": "Status toevoegen",
+    "typeTitle": "Activiteit-types",
+    "typeSubtitle": "Beheer de soorten activiteiten (taak, belafspraak, e-mail…).",
+    "typeAdd": "Type toevoegen",
+    "priorityTitle": "Prioriteiten",
+    "prioritySubtitle": "Beheer de prioriteiten van je taken (laag, normaal, hoog).",
+    "priorityAdd": "Prioriteit toevoegen"
   },
   "rejection": {
     "title": "Afwijsredenen",
     "subtitle": "Beheer de redenen voor de afwijzing van je sollicitaties.",
-    "add": "Reden toevoegen"
+    "add": "Reden toevoegen",
+    "channelTitle": "Kanaal & templates",
+    "channelSubtitle": "Het standaardkanaal en het bericht dat per reden wordt verstuurd.",
+    "defaultChannel": "Standaardkanaal",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp",
+    "emailSubject": "E-mail onderwerp",
+    "emailBody": "E-mail bericht",
+    "whatsappBody": "WhatsApp-bericht",
+    "tokensHint": "Tokens: {candidate}, {vacancy}, {reason}, {recruiter}",
+    "save": "Templates opslaan",
+    "saved": "Opgeslagen",
+    "loading": "Laden…",
+    "noReasons": "Voeg eerst een afwijsreden toe."
+  },
+  "assessment": {
+    "title": "Beoordelingscriteria",
+    "subtitle": "Herbruikbare criteria-groepen die Koios AI gebruikt om kandidaten te beoordelen. Koppel een groep aan een vacature en pas 'm per vacature aan.",
+    "addGroup": "Groep toevoegen",
+    "empty": "Nog geen criteria-groepen.",
+    "loading": "Laden…",
+    "groupName": "Groepsnaam",
+    "groupNamePlaceholder": "bijv. Zorg — Verzorgende IG",
+    "description": "Omschrijving",
+    "descriptionPlaceholder": "Optionele omschrijving…",
+    "criteria": "Criteria",
+    "addCriterion": "Criterium toevoegen",
+    "criterionPlaceholder": "bijv. Reisafstand < 30 km",
+    "dimension": "Dimensie",
+    "weight": "Gewicht",
+    "hard": "Hard",
+    "hardHint": "Een hard criterium kan AI-auto-afwijzen activeren.",
+    "noCriteria": "Nog geen criteria.",
+    "criteriaCount_one": "{{count}} criterium",
+    "criteriaCount_other": "{{count}} criteria",
+    "inUse": "In gebruik — gekoppeld aan een vacature.",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "newGroup": "Nieuwe groep",
+    "editGroup": "Groep bewerken",
+    "dimensions": {
+      "qualifications": "Kwalificaties",
+      "location": "Locatie",
+      "culture": "Cultuur",
+      "soft_skills": "Soft skills",
+      "technical": "Techniek",
+      "ambition": "Ambitie"
+    }
+  },
+  "matching": {
+    "title": "Matching-strengheid",
+    "subtitle": "Hoe kritisch de AI-matcher scoort bij het beoordelen van kandidaten tegen je vacatures. Strenger geeft lagere, moeilijker verdiende match-scores.",
+    "lenient": "Soepel",
+    "balanced": "Gebalanceerd",
+    "strict": "Streng",
+    "save": "Opslaan",
+    "saved": "Opgeslagen",
+    "perVacancyHint": "Wat per vacature belangrijk is (kwalificaties, locatie, …) stel je op de vacature zelf in."
   },
   "cvTemplate": {
     "title": "CV-sjabloon",
@@ -700,17 +822,21 @@
     "savedActive": "Opgeslagen & actief",
     "activate": "Pakket activeren",
     "changeFromTo": "Wijziging van {{from}} naar {{to}}",
+    "groups": {
+      "plans": "Pakketten",
+      "standalone": "Losse modules"
+    },
     "packages": {
       "reporting_sm": "Rapportage Shiftmanager",
       "reporting_hf": "Rapportage HelloFlex",
-      "reporting_sm_hf": "Rapportage SM + HF",
-      "reporting_sm_ai": "Rapportage SM + AI & Workflow",
-      "reporting_hf_ai": "Rapportage HF + AI & Workflow",
-      "reporting_sm_hf_ai": "Rapportage SM + HF + AI & Workflow",
-      "ats_crm": "ATS & CRM",
-      "ats_crm_ai": "ATS & CRM + AI & Workflow",
-      "ats_crm_planning": "ATS & CRM + Planning",
-      "ats_crm_ai_planning": "ATS & CRM + AI & Workflow + Planning"
+      "reporting_sm_hf": "Rapportage Shiftmanager + HelloFlex",
+      "reporting_sm_ai": "Rapportage Shiftmanager + AI Agents",
+      "reporting_hf_ai": "Rapportage HelloFlex + AI Agents",
+      "reporting_sm_hf_ai": "Rapportage SM + HF + AI Agents",
+      "ats_crm": "Koios Core",
+      "ats_crm_ai": "Koios Plus",
+      "ats_crm_planning": "Koios Core + Planning",
+      "ats_crm_ai_planning": "Koios Suite"
     },
     "emptyTitle": "Nog geen instellingen",
     "emptyDesc": "Instellingen voor deze module volgen.",
@@ -992,5 +1118,37 @@
         "unit": "diensten"
       }
     }
+  },
+  "customerLookups": {
+    "statuses": {
+      "title": "Klant statussen",
+      "subtitle": "Beheer de statussen die een klant kan hebben (Actief, Prospect, …).",
+      "add": "Status toevoegen"
+    },
+    "locationStatuses": {
+      "title": "Locatie statussen",
+      "subtitle": "Beheer de statussen die een klantlocatie kan hebben.",
+      "add": "Status toevoegen"
+    },
+    "departmentStatuses": {
+      "title": "Afdeling statussen",
+      "subtitle": "Beheer de statussen die een afdeling kan hebben.",
+      "add": "Status toevoegen"
+    },
+    "contactStatuses": {
+      "title": "Contactpersoon statussen",
+      "subtitle": "Beheer de statussen die een contactpersoon kan hebben.",
+      "add": "Status toevoegen"
+    }
+  },
+  "lastContactTypes": {
+    "title": "Contacttypes",
+    "subtitle": "Kanalen voor 'laatste contact' (Email, Telefonisch, WhatsApp).",
+    "add": "Type toevoegen"
+  },
+  "noteTypes": {
+    "title": "Notitietypes",
+    "subtitle": "Categorieën voor notities bij kandidaten.",
+    "add": "Type toevoegen"
   }
 }

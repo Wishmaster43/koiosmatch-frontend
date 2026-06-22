@@ -1,0 +1,212 @@
+{
+  "page": {
+    "title": "Vacatures",
+    "subtitle": "Beheer en publiceer eenvoudig al je openstaande functies.",
+    "add": "Nieuwe vacature",
+    "searchPlaceholder": "Zoek naar vacatures",
+    "loading": "Vacatures laden…",
+    "empty": "Nog geen vacatures.",
+    "loadError": "Vacatures laden is mislukt.",
+    "count": "Alle vacatures"
+  },
+  "buckets": {
+    "all": "Alle"
+  },
+  "columns": {
+    "title": "Titel",
+    "code": "#",
+    "status": "Status",
+    "leads": "Leads",
+    "applications": "Sollicitaties",
+    "published": "Gepubliceerd",
+    "owner": "Eigenaar",
+    "client": "Klant",
+    "createdAt": "Gemaakt op"
+  },
+  "publishedState": {
+    "yes": "Gepubliceerd",
+    "no": "Niet gepubliceerd"
+  },
+  "insights": {
+    "statusTitle": "Status",
+    "ownerTitle": "Recruiter",
+    "clientTitle": "Klant",
+    "clearFilter": "Filter wissen"
+  },
+  "kpi": {
+    "applied": "Gesolliciteerd",
+    "accepted": "Geaccepteerd",
+    "invited": "Uitgenodigd",
+    "proposed": "Voorstel gedaan",
+    "hired": "Aangenomen",
+    "rejected": "Afgewezen"
+  },
+  "filters": {
+    "search": "Zoeken",
+    "status": "Status",
+    "owner": "Recruiter",
+    "client": "Klant",
+    "category": "Categorie",
+    "industry": "Branche",
+    "employmentType": "Soort dienstverband",
+    "categories": {
+      "general": "Algemeen",
+      "organisation": "Organisatie"
+    }
+  },
+  "bulk": {
+    "selected": "{{count}} geselecteerd",
+    "actions": "Massa-acties",
+    "deselect": "Deselecteren",
+    "changeOwner": "Recruiter wijzigen",
+    "searchOwner": "Zoek recruiter",
+    "noUsers": "Geen gebruikers",
+    "changeStatus": "Status wijzigen",
+    "searchStatus": "Zoek status",
+    "changeClient": "Klant wijzigen",
+    "searchClient": "Zoek klant",
+    "noClients": "Geen klanten",
+    "publishing": "Publiceren",
+    "publish": "Publiceren",
+    "unpublish": "Depubliceren",
+    "removeTag": "Tag verwijderen",
+    "searchTag": "Zoek tag",
+    "noTags": "Geen tags",
+    "addNote": "Notitie toevoegen",
+    "notePlaceholder": "Schrijf een notitie…",
+    "noteSubmit": "Toevoegen",
+    "archive": "Archiveren",
+    "archiveConfirm": "{{count}} vacatures archiveren?",
+    "ownerChanged": "Recruiter gewijzigd voor {{count}} vacatures.",
+    "statusChanged": "Status op {{value}} gezet voor {{count}} vacatures.",
+    "clientChanged": "Klant gewijzigd voor {{count}} vacatures.",
+    "published_one": "{{count}} vacature gepubliceerd.",
+    "published_other": "{{count}} vacatures gepubliceerd.",
+    "unpublished_one": "{{count}} vacature gedepubliceerd.",
+    "unpublished_other": "{{count}} vacatures gedepubliceerd.",
+    "tagRemoved": "Tag “{{tag}}” verwijderd van {{count}} vacatures.",
+    "noteAdded": "Notitie toegevoegd aan {{count}} vacatures.",
+    "archived": "{{count}} vacatures gearchiveerd.",
+    "mutateError": "De wijziging kon niet worden toegepast.",
+    "archiveError": "Archiveren is mislukt."
+  },
+  "drawer": {
+    "entityLabel": "Vacature",
+    "createdAt": "Gemaakt op {{date}}",
+    "edit": "Bewerken",
+    "status": "Status",
+    "owner": "Recruiter",
+    "client": "Klant",
+    "selectClient": "Selecteer een klant",
+    "tags": "Tags",
+    "published": "Gepubliceerd",
+    "notPublished": "Niet gepubliceerd",
+    "tabs": {
+      "details": "Details",
+      "applicants": "Sollicitaties",
+      "matching": "Matching",
+      "publishing": "Publiceren",
+      "documents": "Documenten",
+      "timeline": "Tijdlijn",
+      "notes": "Notities",
+      "statistics": "Statistieken"
+    }
+  },
+  "matching": {
+    "title": "AI-matchweging",
+    "subtitle": "Geef per dimensie aan hoe belangrijk die is voor deze vacature. De AI weegt kandidaten zo.",
+    "less": "Minder belangrijk",
+    "balanced": "Gebalanceerd",
+    "very": "Zeer belangrijk",
+    "save": "Opslaan",
+    "saved": "Opgeslagen",
+    "dim": {
+      "qualifications": "Kwalificaties",
+      "technical_fit": "Technische pasvorm",
+      "soft_skills": "Soft skills",
+      "cultural_alignment": "Culturele afstemming",
+      "career_aspirations": "Carrière-ambities",
+      "location": "Locatie"
+    }
+  },
+  "details": {
+    "groups": {
+      "general": "Algemeen",
+      "requirements": "Functie-eisen",
+      "conditions": "Voorwaarden"
+    },
+    "id": "Vacature-ID",
+    "status": "Status",
+    "employmentType": "Soort dienstverband",
+    "location": "Locatie",
+    "salary": "Salaris",
+    "hours": "Wekelijkse werktijden",
+    "experience": "Ervaring",
+    "seniority": "Senioriteit",
+    "education": "Opleiding",
+    "industry": "Branche",
+    "category": "Categorie",
+    "skills": "Vereiste vaardigheden",
+    "addSkill": "Vaardigheid toevoegen",
+    "noSkills": "Nog geen vaardigheden.",
+    "description": "Beschrijving",
+    "descriptionPlaceholder": "Beschrijf de functie…"
+  },
+  "publishing": {
+    "channels": "Vacaturesites",
+    "applicationSettings": "Sollicitatie-instellingen",
+    "fields": {
+      "cv": "CV",
+      "cover_letter": "Motivatiebrief",
+      "photo": "Foto",
+      "remarks": "Opmerkingen",
+      "interview_consent": "Toestemming voor interviews"
+    },
+    "values": {
+      "required": "Verplicht",
+      "optional": "Optioneel",
+      "hidden": "Verborgen"
+    },
+    "customFields": "Eigen velden",
+    "noCustomFields": "Geen eigen velden geconfigureerd.",
+    "integrate": "Integreer",
+    "publishedOn": "Gepubliceerd",
+    "notPublished": "Niet gepubliceerd"
+  },
+  "applicants": {
+    "title": "Sollicitaties",
+    "empty": "Nog geen sollicitaties.",
+    "leads": "Leads",
+    "totalLeads": "Totale leads",
+    "phase": "Fase",
+    "source": "Bron",
+    "byPhase": "Per fase",
+    "candidate": "Kandidaat"
+  },
+  "statistics": {
+    "title": "Conversie",
+    "conversionRate": "Conversieratio",
+    "appliedToHired": "Gesolliciteerd → aangenomen",
+    "bySource": "Per bron",
+    "leadsToApplications": "Leads → sollicitaties",
+    "empty": "Nog onvoldoende gegevens."
+  },
+  "modal": {
+    "title": "Nieuwe vacature",
+    "fields": {
+      "title": "Titel",
+      "client": "Klant",
+      "status": "Status",
+      "owner": "Recruiter",
+      "employmentType": "Soort dienstverband",
+      "industry": "Branche",
+      "category": "Categorie",
+      "location": "Locatie"
+    },
+    "titlePlaceholder": "bijv. Verpleegkundige | Den Haag",
+    "create": "Vacature aanmaken",
+    "cancel": "Annuleren",
+    "creating": "Aanmaken…",
+    "required": "Titel is verplicht."
+  }
+}

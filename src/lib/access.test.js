@@ -25,6 +25,11 @@ describe('canAccessPage — standard ATS pages', () => {
     expect(canAccessPage('candidates', { user: {}, activeTenant: { package: 'ats_crm' } })).toBe(true)
   })
 
+  it('allows opportunities on an ats_crm package but blocks it on a reporting package', () => {
+    expect(canAccessPage('opportunities', { user: {}, activeTenant: { package: 'ats_crm' } })).toBe(true)
+    expect(canAccessPage('opportunities', { user: {}, activeTenant: { package: 'reporting_sm' } })).toBe(false)
+  })
+
   it('respects page.* permission whitelists on restrictable pages', () => {
     const auth = {
       user: { permissions: ['page.customers'] },

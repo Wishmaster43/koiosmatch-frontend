@@ -34,19 +34,23 @@ export default function SettingsPage() {
   const { isSuperAdmin } = auth
   const { t } = useTranslation('settings')
 
-  // Role/tenant gating — same rules as before, applied per item.
+  // Role/tenant gating + alphabetical sub-tabs (by translated label, language-aware).
   const visibleGroups = useMemo(() => NAV_GROUPS
     .map(group => ({
       ...group,
-      items: group.items.filter(it => {
-        if (it.superAdminOnly && !isSuperAdmin()) return false
-        if (it.requiresPage && !canAccessPage(it.requiresPage, auth)) return false
-        if (it.id === 'users' && !canAccessPage('users', auth)) return false
-        return true
-      }),
+      items: group.items
+        .filter(it => {
+          if (it.superAdminOnly && !isSuperAdmin()) return false
+          if (it.requiresPage && !canAccessPage(it.requiresPage, auth)) return false
+          if (it.id === 'users' && !canAccessPage('users', auth)) return false
+          return true
+        })
+        .sort((a, b) => t(`nav.${a.id}`).localeCompare(t(`nav.${b.id}`), undefined, { sensitivity: 'base' })),
     }))
-    .filter(group => group.items.length > 0),
-    [auth, isSuperAdmin])
+    .filter(group => group.items.length > 0)
+    // Sidebar categories alphabetical too (by translated group label).
+    .sort((a, b) => t(`groups.${a.key}`).localeCompare(t(`groups.${b.key}`), undefined, { sensitivity: 'base' })),
+    [auth, isSuperAdmin, t])
 
   const findLocation = (groupKey, tabId) => {
     const group = visibleGroups.find(g => g.key === groupKey)

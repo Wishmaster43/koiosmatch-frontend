@@ -20,7 +20,7 @@ export default function StatisticsTab({ c }) {
           [t('statistics.status'),      c.status ?? '-'],
           [t('statistics.lastContact'), c.lastContactDate ? formatDate(c.lastContactDate) : '-'],
           [t('statistics.contactType'), c.lastContactType ?? '-'],
-          [t('statistics.memberSince'), c.created ?? '-'],
+          [t('statistics.memberSince'), c.created ? formatDate(c.created) : '-'],
           [t('statistics.branch'),      (c.branches ?? []).join(', ') || '-'],
         ],
       }}

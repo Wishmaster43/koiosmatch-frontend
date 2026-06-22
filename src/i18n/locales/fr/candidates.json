@@ -16,7 +16,8 @@
     "lastContact": "Dernier contact",
     "city": "Ville",
     "province": "Province",
-    "createdAt": "Créé le"
+    "createdAt": "Créé le",
+    "lastContactType": "Type de contact"
   },
   "bulk": {
     "selected": "{{count}} sélectionné(s)",
@@ -52,7 +53,10 @@
     "archive": "Archiver",
     "archiveConfirm": "Voulez-vous vraiment archiver {{count}} candidats ?",
     "archived": "Archivé ({{count}})",
-    "archiveError": "Échec de l’archivage. Veuillez réessayer."
+    "archiveError": "Échec de l’archivage. Veuillez réessayer.",
+    "typeSubmit": "Appliquer",
+    "noTypes": "Aucun type",
+    "noneLabel": "aucun"
   },
   "kpi": {
     "total": "Total",
@@ -64,7 +68,9 @@
     "inProgress": "En cours",
     "inProgressSub": "procédures en cours",
     "intake": "Entretien prévu",
-    "intakeSub": "entretiens à venir"
+    "intakeSub": "entretiens à venir",
+    "tasks": "Tâches",
+    "tasksSub": "Tâches candidats ouvertes"
   },
   "analytics": {
     "statusTitle": "Statut",
@@ -126,14 +132,21 @@
       "province": "Province",
       "emailPlaceholder": "nom@exemple.fr",
       "phonePlaceholder": "+31 6 12345678",
-      "cityPlaceholder": "p.ex. Amsterdam"
+      "cityPlaceholder": "p.ex. Amsterdam",
+      "street": "Rue",
+      "streetPlaceholder": "p. ex. Rue Principale",
+      "houseNumber": "Numéro",
+      "houseNumberSuffix": "Complément",
+      "postalCode": "Code postal"
     },
     "gender": {
       "male": "Homme",
       "female": "Femme",
       "other": "Autre / non précisé"
     },
-    "vacancyFallback": "Offre {{id}}"
+    "vacancyFallback": "Offre {{id}}",
+    "statusPanelTitle": "Statut",
+    "statusPanelHint": "Par défaut Lead. Un nouveau candidat commence comme Lead."
   },
   "drawer": {
     "availability": "Disponibilité",
@@ -147,7 +160,8 @@
       "preferences": "Préférences",
       "zzp": "Indépendant",
       "communication": "Communication",
-      "statistics": "Statistiques"
+      "statistics": "Statistiques",
+      "changelog": "Journal"
     },
     "status": "Statut",
     "owner": "Responsable",
@@ -192,7 +206,11 @@
     "selectDate": "Sélectionner une date",
     "groupPersonal": "Personnel",
     "groupContact": "Contact",
-    "groupAddress": "Adresse"
+    "groupAddress": "Adresse",
+    "placeOfBirth": "Lieu de naissance",
+    "clear": "Effacer",
+    "expand": "Agrandir",
+    "collapse": "Réduire"
   },
   "addFields": {
     "functionTitle": "Intitulé du poste",
@@ -456,5 +474,25 @@
     "madeBy": "Établi par {{company}}",
     "madeVia": "Créé avec KoiosMatch",
     "nameFallback": "Nom"
+  },
+  "changelog": {
+    "loading": "Chargement…",
+    "error": "Impossible de charger le journal.",
+    "empty": "Aucune modification enregistrée.",
+    "system": "Système"
+  },
+  "matchesView": {
+    "title": "Matches",
+    "empty": "Aucun match.",
+    "client": "Client",
+    "stage": "Étape",
+    "contract": "Contrat",
+    "backofficeLinked": "Lié au backoffice (HelloFlex)",
+    "contractStatus": {
+      "none": "Aucun contrat",
+      "pending": "En cours",
+      "active": "Actif",
+      "ended": "Terminé"
+    }
   }
 }

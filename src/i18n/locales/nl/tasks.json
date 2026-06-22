@@ -3,12 +3,104 @@
   "loading": "Taken laden…",
   "empty": "Nog geen taken.",
   "error": "Taken konden niet geladen worden.",
+  "add": "Activiteit toevoegen",
+  "bureau": "Bureau",
+  "overdue": "Te laat",
+  "view": {
+    "table": "Lijstweergave",
+    "board": "Takenbord"
+  },
   "cols": {
     "task": "Taak",
-    "candidate": "Kandidaat",
     "type": "Type",
     "status": "Status",
+    "priority": "Prioriteit",
+    "links": "Koppeling",
     "assignee": "Toegewezen aan",
     "due": "Vervaldatum"
+  },
+  "kpi": {
+    "open": "Open",
+    "overdue": "Te laat",
+    "dueToday": "Vandaag",
+    "completed": "Afgerond"
+  },
+  "insights": {
+    "status": "Status",
+    "priority": "Prioriteit",
+    "type": "Type",
+    "clearFilter": "Filter wissen"
+  },
+  "board": {
+    "empty": "Sleep taken hierheen"
+  },
+  "drawer": {
+    "label": "Activiteit",
+    "createdAt": "Aangemaakt op {{date}}",
+    "tabs": {
+      "details": "Details",
+      "links": "Koppelingen",
+      "comments": "Reacties",
+      "activity": "Activiteit"
+    }
+  },
+  "details": {
+    "title": "Activiteitdetails",
+    "type": "Activiteit type",
+    "status": "Status",
+    "priority": "Prioriteit",
+    "due": "Vervaldatum",
+    "assignee": "Toegewezen aan",
+    "owner": "Eigenaar",
+    "description": "Omschrijving"
+  },
+  "comments": {
+    "title": "Reacties",
+    "empty": "Nog geen reacties.",
+    "placeholder": "Schrijf een reactie…",
+    "send": "Plaatsen"
+  },
+  "links": {
+    "title": "Koppelingen",
+    "empty": "Nog geen koppelingen.",
+    "candidate": "Kandidaat",
+    "application": "Sollicitatie",
+    "vacancy": "Vacature",
+    "match": "Match",
+    "customer": "Opdrachtgever",
+    "location": "Locatie",
+    "department": "Afdeling",
+    "contact": "Contactpersoon",
+    "workflow": "Workflow"
+  },
+  "activity": {
+    "empty": "Nog geen activiteit."
+  },
+  "modal": {
+    "title": "Activiteit toevoegen",
+    "type": "Activiteit type",
+    "typePlaceholder": "Kies type",
+    "titleLabel": "Titel",
+    "titlePlaceholder": "Invullen",
+    "assignee": "Toewijzen aan",
+    "assigneePlaceholder": "Bureau (niemand)",
+    "status": "Status",
+    "due": "Einddatum",
+    "priority": "Prioriteit",
+    "description": "Omschrijving",
+    "descriptionPlaceholder": "Invullen",
+    "charsLeft": "Tekens beschikbaar: {{count}}",
+    "detailsTitle": "Activiteit details",
+    "owner": "Eigenaar",
+    "candidate": "Kandidaat",
+    "candidatePlaceholder": "Selecteer kandidaat",
+    "customer": "Opdrachtgever",
+    "customerPlaceholder": "Selecteer opdrachtgever",
+    "contact": "Contactpersoon",
+    "contactPlaceholder": "Selecteer contactpersoon",
+    "create": "Registreren",
+    "saving": "Opslaan…",
+    "cancel": "Annuleren",
+    "required": "Verplicht"
   }
 }

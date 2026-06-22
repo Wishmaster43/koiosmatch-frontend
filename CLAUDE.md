@@ -6,10 +6,11 @@ finance). You think like someone who has maintained code for a decade: every
 decision optimizes for the engineer who reads this code in two years, for the
 end user who depends on it, and for the attacker who will probe it.
 
-You build **Koios Match** (a.k.a. KoiosConnect): a **multi-tenant SaaS** for
-Dutch healthcare flex-staffing. Primary tenant: Yesway Flex B.V. The data is
-**special-category personal data (health)** under the GDPR/AVG. Treat every
-line accordingly.
+You build **Koios Match** (also written **KoiosMatch**): a **multi-tenant SaaS** for
+Dutch healthcare flex-staffing. **The product name is _Koios Match_ — never
+"KoiosConnect" or "Koios Connect". Do not use that name anywhere.** Primary tenant:
+Yesway Flex B.V. The data is **special-category personal data (health)** under the
+GDPR/AVG. Treat every line accordingly.
 
 ---
 
@@ -179,6 +180,144 @@ literal option lists inside components.
 **Calm by default (rust).** One accent colour (primary); colour only where it carries
 meaning (status/stage), never as decoration; hierarchy via typography and whitespace,
 not borders. Always handle the four UI states (loading/error/empty/success).
+
+---
+
+## 3B. Candidates — Working Spec (active focus)
+
+> The candidate domain is the **current build focus**. This is the durable spec —
+> the live task state (FE/BE split, what backend-Claude still owes) lives in
+> `docs/worklist.md` §E1. **Domain golden rule: nothing hardcoded.** Every value,
+> label, colour and option comes from a **tenant lookup via the API**, and every
+> user-facing string — including the labels of tenant-created lookup values — goes
+> through i18n in both locales (§5). If a screen needs an option list, there is a
+> Settings-managed lookup behind it; the frontend only ships a seed fallback.
+
+### Configurable lookups (Settings → API, never hardcoded)
+
+Each lookup is a **tenant-scoped backend table**, **seeded with demo defaults**,
+exposed via a CRUD endpoint, **in-use-protected** (a value referenced by live data
+is not deletable → 409 + "in use" flag), and **reorderable**. The frontend reads it
+through a `useX()` hook / `LookupsContext` with a seed fallback; never a literal list.
+
+| Lookup | Endpoint | Drives |
+|---|---|---|
+| Contract forms (multi) | `/settings/candidate-lookups/candidate-types` | `candidate.candidate_types[]` |
+| Funnel stages | `…/funnel-types` | application phase |
+| Statuses (lifecycle) | `…/statuses` | status Lead→Candidate |
+| Availability | `/availability-options` | availability axis (separate) |
+| Talent pools | `/pools` | pool chips |
+| Languages · Levels | `/languages` · `/language-levels` | Languages section |
+| Genders | `/genders` | gender + avatar colour |
+| Industries | `/industries` | company + (later) customers & vacancies |
+| Functions | `/functions` (+ `allow_free_entry`) | function field |
+| Rejection reasons | `/candidate-rejection-reasons` | application rejection |
+| Last-contact type | `/last-contact-types` *(NEW)* | last-contact channel (seed Email/Phone/WhatsApp) |
+| Note types | `/note-types` *(NEW)* | note categorisation |
+| Vacancy statuses/phases/custom fields | `/vacancy-*` | vacancy |
+
+**Settings reorganisation (decided 2026-06-21).** Multi-list editors become real
+sub-tabs: Candidate lookups → **Contract forms · Funnel stages · Statuses**;
+Languages → **Languages · Levels**; Vacancy → **Statuses · Phases · Custom fields**.
+Each is **promoted to its own top-level settings menu** (out of `personalisation`),
+with its own sub-tab bar.
+
+### The axes — confirmed model (never collapse them; memory `project_candidate_status_funnel_model`)
+
+Three lookups + availability describe one person; conflating them is the mess we are
+fixing. Each answers a different question:
+
+- **Candidate type** = contract form, **multi-value** (on-call · freelance/ZZP · payroll ·
+  temp-agency · secondment). *"In which contract form(s) can/will they work?"* Rarely changes.
+- **Status (person lifecycle)** = single value, seed **Lead · Candidate · Matched · Inactive ·
+  Unplaceable**. **Blacklist is a separate flag** (orthogonal — a Candidate can be blacklisted);
+  **Archived = the soft-delete state** (`deleted_at`), not a status. *"Where does this person stand?"*
+  Driven by **workflow automation**, not a stored status↔funnel coupling. **Unplaceable** carries an
+  **"available again" date** that triggers a re-activation workflow. Inactive/Blacklist/Archived are
+  **off by default in filters** (still searchable, so KPI totals drop). Setting **Matched** manually
+  prompts to **link a Match** (Matched without a Match is a data error → flagged).
+- **Funnel stage** = single value **per application**, seed **Applied · Invited/Intake ·
+  Proposed · Hired · Rejected**. *"Where is this person in this one application?"* Editable on
+  the application; on the candidate only read-only chips. "Applicant" is **derived** (≥1 live
+  application). The old candidate-level funnel `prospect/intake/pool/alumni` is **retired** —
+  it split three axes into one; its meanings move to status (lead/inactive), the application
+  funnel (intake), and talent pools (`/pools`).
+- **Availability** (Available/Sick/Leave) is a **separate axis**.
+
+**Status ↔ funnel are linked by automation, not by one field.** Default rules (seeded for all
+tenants, editable in workflows): first application → Lead becomes Candidate; funnel **Hired** →
+create a Match and set status **Matched**; **Rejected** with no other live application → stays
+Candidate. A person can hold one status while having several applications, each with its own funnel.
+**Inactive guard:** Inactive is only allowed when there is **no active Match** and (planning module)
+**no future scheduling** — otherwise block with a reason. Inactive requires a **reason**.
+
+**Status & availability changes are dated and reasoned.** Every status/availability transition
+records an **effective date** and (for availability) a **reason** — show e.g. "Inactive since
+31-05-2026" or "Unavailable since … · reason". When a placement/assignment ends and the candidate
+does not work again, automation sets status **Inactive** effective the assignment end date; the
+"actually stopped working" signal also consults the **planning module** once it lands. The backend
+keeps a small change-log (`effective_from` + `reason`), tied to the audit trail (§3B / C-16).
+
+**Two paths to a placement** (both entry sources — a new **Lead** or an existing **Candidate**):
+1. **Via application (funnel):** couple to a vacancy → application → funnel runs → **Hired**
+   becomes a **Match → placement**.
+2. **Direct match:** create a Match without the funnel → placement.
+Both end in a placement; automation sets status → **Matched**. (A Match auto-adds a **work experience**
+entry at the top via a workflow; experience/education/certs sort newest-first.)
+
+### Appointment-gated stages & intake reporting
+
+- A **funnel stage can require an appointment** — a per-stage settings checkbox
+  `requires_appointment` (mirrors the `is_applicant` flag). Tenants name stages
+  differently, so we **never hardcode "which stage is the intake"** — it is a flag.
+  Setting a candidate/application to such a stage **expects a planned appointment**;
+  if none exists, surface an **inconsistency flag** on the candidate (icon + a
+  `missing_appointment` attention count). Prompt, don't hard-block the recruiter.
+- **Appointments** are a structured, tenant-scoped entity (`scheduled_at`,
+  recruiter/owner, location/branch, type, status) linked to the candidate (and
+  optionally the application). This is the data we **enforce** so intakes are reportable.
+- **Intake reporting** slices by **day/week/month × recruiter × branch × source ×
+  function × region** (`GET /reports/intakes`). The "Intake planned" KPI derives from
+  appointments at a `requires_appointment` stage, **not** from a status value. Ship an
+  intake **agenda** view alongside the report.
+
+### Fields & formatting
+
+- Dates render **DD-MM-YYYY** (`nl-NL`, `lib/formatters`) — birthdate, available-from, everywhere.
+- Add **birthplace** (`place_of_birth`); surface **Facebook Lead ID** (when present) in drawer + table.
+- `last_contact_at` + `last_contact_type` shown in table + drawer; seeder randomises both so KPIs test.
+- Skills render as a vertical **list** (edit/remove per row), not inline chips.
+- Summary/profile text: clear button + expand/collapse editor (Make/JS-style); CV styled like Notes.
+- Function field: lookup combobox + tenant toggle dropdown↔free-text. Switching to strict
+  requires a preflight listing non-conforming values to fix first — never silently drop data.
+
+### Surface (mirror the §3A blueprint)
+
+- **KPIs** (click-to-filter, counts from `GET /candidates/stats`, server-wide not page):
+  Status · Funnel · Per recruiter · Not-contacted >6m · Never contacted · No follow-up ·
+  Intake planned · Active conversations · **Tasks** (candidate-linked).
+- **Table:** soft chips only; add Facebook Lead ID + last-contact-type columns; compact status/owner.
+- **Drawer:** thin container + one component per tab; add a **Changelog** tab (`/candidates/{id}/activity`).
+- **Matches tab = read-only.** A match is the continuation of an application → placement.
+  Coupling to **Backoffice (HelloFlex)** and **ShiftManager** happens three ways — manual,
+  bulk, workflow — all **authorization-gated**. Bulk uses a **queue + rate-limit** (HelloFlex),
+  writes the GUID to a mapping table, and **surfaces a coupling error + reason on the candidate**
+  until resolved. A subtle icon marks a backoffice-linked candidate.
+- **Bulk:** extend the existing `ActionMenu` / `bulkMutate`. Candidate-type becomes a
+  **multi-select (add/remove)** that sets the exact type set — so a type can be cleared off
+  candidates and then deleted in Settings (replaces the old single REPLACE action).
+
+### Deletion & privacy (special-category health data, §8)
+
+- Candidates are **soft-delete only**. Before soft-deleting, check for **active linked
+  objects** (live applications/matches/placements); if any exist, block and offer a
+  reassign/transfer path — never silently orphan. **Hard delete is backend-only**, allowed
+  only when nothing hangs (API-enforced). Respect erased/anonymised state — never render it.
+
+### Theming
+
+- Full **light/dark** via design tokens only. Hardcoded hex in candidate/settings
+  components is a bug — migrate to `--color-*` / `--text*` tokens (§4).
 
 ---
 

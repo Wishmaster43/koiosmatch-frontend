@@ -91,7 +91,7 @@ function TagRow({ items = [], onAdd, onRemove, addLabel }) {
 
 export default function EntityHeader({
   label, avatar, onPhotoChange, photoLabels, title, subtitle, renderTitle,
-  actions, meta = [], tags, tagsLabel, children, expanded, onToggleExpand, onClose,
+  actions, meta = [], metaExtra, tags, tagsLabel, children, expanded, onToggleExpand, onClose,
 }) {
   return (
     <>
@@ -121,8 +121,8 @@ export default function EntityHeader({
       </div>
 
       {/* Meta pickers (status / owner / type / …) */}
-      {meta.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 12, marginBottom: 12 }}>
+      {(meta.length > 0 || metaExtra) && (
+        <div style={{ display: 'flex', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
           {meta.map(m => (
             // Compact, fixed-width picker (no flex-grow) so the pickers stay tight
             // and left-aligned instead of stretching across the whole header.
@@ -131,6 +131,8 @@ export default function EntityHeader({
               <SelectMenu value={m.value} options={m.options} onChange={m.onChange} placeholder={m.placeholder} menuWidth={m.menuWidth ?? 180} />
             </div>
           ))}
+          {/* Trailing meta content (e.g. funnel chips) fills the space beside the pickers. */}
+          {metaExtra && <div style={{ flex: 1, minWidth: 140, alignSelf: 'flex-end' }}>{metaExtra}</div>}
         </div>
       )}
 

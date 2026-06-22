@@ -3,10 +3,10 @@ import { Target, Phone, CalendarPlus, Sparkles } from 'lucide-react'
 import DataTable from '../../components/ui/DataTable'
 import Avatar from '../../components/ui/Avatar'
 import KoiosAiMark from '../../components/ui/KoiosAiMark'
-import StatusPill from '../../components/ui/StatusPill'
 import { useDateFormat } from '../../lib/datetime'
 import { useLookups } from '../../context/LookupsContext'
 import { useGenders } from '../../lib/useGenders'
+import { useLastContactTypes } from '../../lib/useLastContactTypes'
 
 const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
 
@@ -30,6 +30,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
   const { formatDate } = useDateFormat()
   const { funnelTypes, funnelMeta, statusMeta, typeMeta } = useLookups()
   const { colorOf: genderColor } = useGenders()
+  const { labelOf: lastContactLabel } = useLastContactTypes()
   // Sort the funnel column by lifecycle order (prospect → alumni), not alphabetically.
   const funnelOrder = Object.fromEntries(funnelTypes.map((f, i) => [f.value, i]))
 
@@ -45,7 +46,9 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
     },
     {
       key: 'status', header: t('columns.status'), sortable: true, sortValue: c => statusMeta(c.status).label,
-      render: c => { const m = statusMeta(c.status); return <StatusPill label={m.label} color={m.color} /> },
+      render: c => { const m = statusMeta(c.status)
+        return <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
+          background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span> },
     },
     {
       key: 'funnelType', header: t('columns.funnelType'), nowrap: true,
@@ -129,12 +132,13 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
       key: 'owner', header: t('columns.owner'), sortable: true, sortValue: c => c.owner,
       render: c => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {c.ownerInitials !== '?' && <Avatar initials={c.ownerInitials} size={20} color={c.ownerColor} />}
-          <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{c.owner || '—'}</span>
+          {c.ownerInitials !== '?' && <Avatar initials={c.ownerInitials} size={18} color={c.ownerColor} />}
+          <span style={{ color: 'var(--text-muted)', fontSize: 11.5 }}>{c.owner || '—'}</span>
         </div>
       ),
     },
     { key: 'lastContact', header: t('columns.lastContact'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.lastContactAt, render: c => formatDate(c.lastContactAt) },
+    { key: 'lastContactType', header: t('columns.lastContactType'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => lastContactLabel(c.lastContactType), render: c => lastContactLabel(c.lastContactType) || '—' },
     { key: 'city',        header: t('columns.city'),        nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.city,     render: c => c.city || '—' },
     { key: 'province',    header: t('columns.province'),    nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.province, render: c => c.province || '—' },
     { key: 'created',     header: t('columns.createdAt'),   nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.createdSort ?? c.created, render: c => formatDate(c.created) },

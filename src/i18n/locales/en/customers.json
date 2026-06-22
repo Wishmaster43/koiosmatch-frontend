@@ -1,0 +1,299 @@
+{
+  "title": "Customers",
+  "page": {
+    "add": "Add customer",
+    "searchPlaceholder": "Search customer, debtor no., account manager…",
+    "empty": "No customers found.",
+    "loading": "Loading…",
+    "loadError": "Failed to load customers."
+  },
+  "cols": {
+    "name": "Name",
+    "debtorNumber": "Debtor no.",
+    "status": "Status",
+    "accountManager": "Account manager",
+    "locations": "Locations",
+    "departments": "Departments",
+    "contacts": "Contacts",
+    "openVacancies": "Open vacancies",
+    "city": "City",
+    "industry": "Industry"
+  },
+  "filters": {
+    "search": "Search",
+    "status": "Status",
+    "accountManager": "Account manager",
+    "city": "City",
+    "industry": "Industry",
+    "categories": {
+      "general": "General",
+      "organisation": "Organisation"
+    }
+  },
+  "insights": {
+    "statusTitle": "Status",
+    "amTitle": "By account manager",
+    "clearFilter": "Clear filter",
+    "locations": "Locations",
+    "locationsSub": "total sites",
+    "departments": "Departments",
+    "departmentsSub": "total departments",
+    "contacts": "Contacts",
+    "contactsSub": "total contacts",
+    "openVacancies": "Open vacancies",
+    "openVacanciesSub": "open",
+    "activeMatches": "Currently at work",
+    "activeMatchesSub": "active matches",
+    "noContact": "Without contact",
+    "noContactSub": "no contact linked"
+  },
+  "drawer": {
+    "entityLabel": "Customer",
+    "createdAt": "Created on {{date}}",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "owner": "Account manager",
+    "status": "Status",
+    "tags": "Tags",
+    "addTag": "Add tag",
+    "back": "Back",
+    "tabs": {
+      "overview": "Overview",
+      "locations": "Locations",
+      "departments": "Departments",
+      "contacts": "Contacts",
+      "vacancies": "Vacancies",
+      "opportunities": "Opportunities",
+      "planning": "Planning",
+      "statistics": "Statistics",
+      "documents": "Documents",
+      "notes": "Notes"
+    }
+  },
+  "overview": {
+    "general": "General",
+    "online": "Online",
+    "settings": "Settings",
+    "textsTitle": "Texts",
+    "website": "Website",
+    "employeeCount": "Employees",
+    "toneOfVoice": "Tone of voice",
+    "industry": "Industry",
+    "debtorNumber": "Debtor number",
+    "city": "City",
+    "hideCompanyName": "Hide company name",
+    "hasCareerPage": "Has career page",
+    "showInVacancies": "Show in my vacancies",
+    "excludeFromSourcing": "Exclude from sourcing",
+    "privacyPolicyUrl": "Privacy policy URL",
+    "description": "Description",
+    "recruitmentProblems": "Recruitment challenges"
+  },
+  "locations": {
+    "empty": "No locations yet",
+    "add": "Add location",
+    "searchPlaceholder": "Search location…",
+    "col": {
+      "name": "Name",
+      "city": "City",
+      "departments": "Departments",
+      "contacts": "Contacts"
+    },
+    "detail": {
+      "addressTitle": "Address & details",
+      "street": "Street",
+      "houseNumber": "No.",
+      "houseNumberSuffix": "Suffix",
+      "postalCode": "Postal code",
+      "city": "City",
+      "country": "Country",
+      "coc": "CoC number",
+      "vat": "VAT number",
+      "contactName": "Contact person",
+      "phone": "Phone",
+      "email": "Email",
+      "departmentsHere": "Departments at this location",
+      "contactsHere": "Contacts at this location",
+      "none": "Nothing linked yet"
+    }
+  },
+  "departments": {
+    "empty": "No departments yet",
+    "add": "Add department",
+    "searchPlaceholder": "Search department…",
+    "col": {
+      "name": "Name",
+      "location": "Location",
+      "contacts": "Contacts"
+    },
+    "detail": {
+      "infoTitle": "Department",
+      "name": "Name",
+      "location": "Location",
+      "description": "Description",
+      "contactsHere": "Contacts in this department",
+      "none": "Nothing linked yet"
+    }
+  },
+  "contacts": {
+    "empty": "No contacts yet",
+    "add": "Add contact",
+    "searchPlaceholder": "Search contact…",
+    "col": {
+      "name": "Name",
+      "role": "Role",
+      "email": "Email",
+      "phone": "Phone"
+    },
+    "detail": {
+      "infoTitle": "Contact",
+      "name": "Name",
+      "role": "Role",
+      "email": "Email",
+      "phone": "Phone",
+      "primary": "Primary contact",
+      "location": "Location",
+      "department": "Department",
+      "none": "Not provided"
+    }
+  },
+  "vacancies": {
+    "empty": "No vacancies for this customer.",
+    "col": {
+      "title": "Title",
+      "status": "Status",
+      "applications": "Applications"
+    }
+  },
+  "opportunities": {
+    "openVacancies": "Open vacancies",
+    "openVacanciesEmpty": "No open vacancies.",
+    "openShifts": "Open flex shifts",
+    "openShiftsEmpty": "No open shifts.",
+    "planningOff": "Open shifts appear once the Planning module is active.",
+    "col": {
+      "title": "Title",
+      "status": "Status",
+      "applications": "Applications",
+      "date": "Date",
+      "shift": "Shift",
+      "department": "Department"
+    }
+  },
+  "planning": {
+    "title": "Planning",
+    "activeNow": "Currently at work",
+    "activeNowSub": "active placements",
+    "upcoming": "Upcoming shifts",
+    "upcomingEmpty": "No upcoming shifts.",
+    "off": "Planning information appears once the Planning module is active.",
+    "open": "Open"
+  },
+  "statistics": {
+    "matchesTotal": "Matches total",
+    "matchesTotalSub": "historical",
+    "activeMatches": "Currently at work",
+    "activeMatchesSub": "active matches",
+    "openVacancies": "Open vacancies",
+    "openVacanciesSub": "open",
+    "fillRate": "Fill rate",
+    "fillRateSub": "filled vacancies",
+    "loadError": "Failed to load statistics.",
+    "overviewTitle": "Overview"
+  },
+  "documents": {
+    "empty": "No documents yet."
+  },
+  "notes": {
+    "notes": "Notes",
+    "newNote": "New note",
+    "type": "Type",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "notesEmpty": "No notes yet.",
+    "notePlaceholder": "Note title",
+    "timeline": "Timeline",
+    "timelineEmpty": "No activity yet.",
+    "conversations": "Conversations",
+    "conversationsEmpty": "No conversations yet."
+  },
+  "bulk": {
+    "selected": "{{count}} selected",
+    "actions": "Bulk actions",
+    "deselect": "Clear selection",
+    "changeOwner": "Change account manager",
+    "searchOwner": "Search user…",
+    "noUsers": "No users",
+    "changeStatus": "Change status",
+    "searchStatus": "Search status…",
+    "addTag": "Add tag",
+    "tagPlaceholder": "Tag name",
+    "tagSubmit": "Add",
+    "removeTag": "Remove tag",
+    "searchTag": "Search tag…",
+    "noTags": "No tags",
+    "addNote": "Add note",
+    "notePlaceholder": "Type a note…",
+    "noteSubmit": "Add",
+    "archive": "Archive",
+    "archiveConfirm": "Archive {{count}} customer(s)?",
+    "archived": "{{count}} customer(s) archived.",
+    "archiveError": "Archiving failed.",
+    "ownerChanged": "Account manager changed to {{name}} ({{count}}).",
+    "statusChanged": "Status changed to {{value}} ({{count}}).",
+    "tagAdded": "Tag “{{tag}}” added ({{count}}).",
+    "tagRemoved": "Tag “{{tag}}” removed ({{count}}).",
+    "noteAdded": "Note added ({{count}}).",
+    "mutateError": "The action failed."
+  },
+  "modal": {
+    "title": "Add customer",
+    "subtitle": "Enter the new customer's details",
+    "fillRequired": "Fill in the required fields",
+    "required": "Required field",
+    "create": "Create customer",
+    "cancel": "Cancel",
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "E.g. Rivas Care Group",
+      "debtorNumber": "Debtor number",
+      "status": "Status",
+      "accountManager": "Account manager",
+      "selectOwner": "Choose account manager",
+      "industry": "Industry",
+      "selectIndustry": "Choose industry",
+      "city": "City",
+      "cityPlaceholder": "E.g. Gorinchem"
+    }
+  },
+  "subModal": {
+    "addLocation": "Add location",
+    "addDepartment": "Add department",
+    "addContact": "Add contact",
+    "locationName": "Location name",
+    "locationPlaceholder": "E.g. Head office",
+    "departmentName": "Department name",
+    "departmentPlaceholder": "E.g. Home care",
+    "selectLocation": "Location",
+    "noLocationsFirst": "Create a location first",
+    "contactName": "Name",
+    "contactPlaceholder": "E.g. John Smith",
+    "role": "Role",
+    "email": "Email",
+    "phone": "Phone",
+    "isPrimary": "Primary contact",
+    "street": "Street",
+    "houseNumber": "No.",
+    "houseNumberSuffix": "Suffix",
+    "postalCode": "Postal code",
+    "city": "City",
+    "country": "Country",
+    "coc": "CoC number",
+    "vat": "VAT number",
+    "create": "Add",
+    "cancel": "Cancel",
+    "required": "Required field"
+  }
+}

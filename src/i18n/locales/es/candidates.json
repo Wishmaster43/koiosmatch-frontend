@@ -16,7 +16,8 @@
     "lastContact": "Último contacto",
     "city": "Ciudad",
     "province": "Provincia",
-    "createdAt": "Creado el"
+    "createdAt": "Creado el",
+    "lastContactType": "Tipo de contacto"
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",
@@ -52,7 +53,10 @@
     "archive": "Archivar",
     "archiveConfirm": "¿Seguro que quieres archivar {{count}} candidatos?",
     "archived": "Archivado ({{count}})",
-    "archiveError": "Error al archivar. Inténtalo de nuevo."
+    "archiveError": "Error al archivar. Inténtalo de nuevo.",
+    "typeSubmit": "Aplicar",
+    "noTypes": "Sin tipos",
+    "noneLabel": "ninguno"
   },
   "kpi": {
     "total": "Total",
@@ -64,7 +68,9 @@
     "inProgress": "En proceso",
     "inProgressSub": "procesos en curso",
     "intake": "Entrevista prevista",
-    "intakeSub": "próximas entrevistas"
+    "intakeSub": "próximas entrevistas",
+    "tasks": "Tareas",
+    "tasksSub": "Tareas de candidatos abiertas"
   },
   "analytics": {
     "statusTitle": "Estado",
@@ -126,14 +132,21 @@
       "province": "Provincia",
       "emailPlaceholder": "nombre@ejemplo.es",
       "phonePlaceholder": "+31 6 12345678",
-      "cityPlaceholder": "p.ej. Ámsterdam"
+      "cityPlaceholder": "p.ej. Ámsterdam",
+      "street": "Calle",
+      "streetPlaceholder": "Ej. Calle Mayor",
+      "houseNumber": "Número",
+      "houseNumberSuffix": "Adición",
+      "postalCode": "Código postal"
     },
     "gender": {
       "male": "Hombre",
       "female": "Mujer",
       "other": "Otro / no especificado"
     },
-    "vacancyFallback": "Vacante {{id}}"
+    "vacancyFallback": "Vacante {{id}}",
+    "statusPanelTitle": "Estado",
+    "statusPanelHint": "Por defecto Lead. Un candidato nuevo empieza como Lead."
   },
   "drawer": {
     "availability": "Disponibilidad",
@@ -147,7 +160,8 @@
       "preferences": "Preferencias",
       "zzp": "Autónomo",
       "communication": "Comunicación",
-      "statistics": "Estadísticas"
+      "statistics": "Estadísticas",
+      "changelog": "Registro de cambios"
     },
     "status": "Estado",
     "owner": "Responsable",
@@ -192,7 +206,11 @@
     "selectDate": "Seleccionar una fecha",
     "groupPersonal": "Personal",
     "groupContact": "Contacto",
-    "groupAddress": "Dirección"
+    "groupAddress": "Dirección",
+    "placeOfBirth": "Lugar de nacimiento",
+    "clear": "Borrar",
+    "expand": "Ampliar",
+    "collapse": "Reducir"
   },
   "addFields": {
     "functionTitle": "Puesto",
@@ -456,5 +474,25 @@
     "madeBy": "Elaborado por {{company}}",
     "madeVia": "Creado con KoiosMatch",
     "nameFallback": "Nombre"
+  },
+  "changelog": {
+    "loading": "Cargando cambios…",
+    "error": "No se pudo cargar el registro.",
+    "empty": "Aún no hay cambios registrados.",
+    "system": "Sistema"
+  },
+  "matchesView": {
+    "title": "Coincidencias",
+    "empty": "Aún no hay coincidencias.",
+    "client": "Cliente",
+    "stage": "Fase",
+    "contract": "Contrato",
+    "backofficeLinked": "Vinculado al backoffice (HelloFlex)",
+    "contractStatus": {
+      "none": "Sin contrato",
+      "pending": "Pendiente",
+      "active": "Activo",
+      "ended": "Finalizado"
+    }
   }
 }

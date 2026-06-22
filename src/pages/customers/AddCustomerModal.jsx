@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Building2, ChevronDown } from 'lucide-react'
+import { useIndustries } from '../../lib/useIndustries'
 
 const iStyle = {
   width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,
   border: '1px solid var(--border)', background: 'var(--surface)',
   color: 'var(--text)', boxSizing: 'border-box', outline: 'none',
 }
+const selectStyle = { ...iStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer' }
+const chevron = { position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', pointerEvents: 'none' }
 
 function Label({ children, required }) {
   return (
@@ -16,21 +19,23 @@ function Label({ children, required }) {
   )
 }
 
-const STATUSES = ['actief', 'prospect', 'inactief', 'geblokkeerd']
-
-export default function AddCustomerModal({ onClose, onCreate }) {
+/**
+ * AddCustomerModal — create a customer. Status comes from the tenant lookup,
+ * account manager from the user list and industry from /industries — never
+ * hardcoded option lists. Returns the raw form via onCreate; the page persists.
+ */
+export default function AddCustomerModal({ onClose, onCreate, users = [], statuses = [] }) {
   const { t } = useTranslation('customers')
+  const { industries } = useIndustries()
   const [errors, setErrors] = useState({})
-  const [form, setForm] = useState({ name: '', debtorNumber: '', status: 'prospect', accountManager: '', city: '' })
+  const [form, setForm] = useState({ name: '', debtorNumber: '', status: statuses[0]?.value ?? '', ownerId: '', industry: '', city: '' })
 
   const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
 
   const handleSubmit = () => {
     if (!form.name.trim()) { setErrors({ name: true }); return }
     onCreate?.(form)
-    onClose()
   }
-
   const canSubmit = !!form.name.trim()
 
   return (
@@ -75,11 +80,10 @@ export default function AddCustomerModal({ onClose, onCreate }) {
             <div>
               <Label>{t('modal.fields.status')}</Label>
               <div style={{ position: 'relative' }}>
-                <select value={form.status} onChange={e => set('status', e.target.value)}
-                  style={{ ...iStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer' }}>
-                  {STATUSES.map(s => <option key={s} value={s}>{t(`status.${s}`)}</option>)}
+                <select value={form.status} onChange={e => set('status', e.target.value)} style={selectStyle}>
+                  {statuses.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
-                <ChevronDown size={13} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', pointerEvents: 'none' }} />
+                <ChevronDown size={13} style={chevron} />
               </div>
             </div>
           </div>
@@ -87,12 +91,29 @@ export default function AddCustomerModal({ onClose, onCreate }) {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <Label>{t('modal.fields.accountManager')}</Label>
-              <input value={form.accountManager} onChange={e => set('accountManager', e.target.value)} placeholder="—" style={iStyle} />
+              <div style={{ position: 'relative' }}>
+                <select value={form.ownerId} onChange={e => set('ownerId', e.target.value)} style={selectStyle}>
+                  <option value="">{t('modal.fields.selectOwner')}</option>
+                  {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                </select>
+                <ChevronDown size={13} style={chevron} />
+              </div>
             </div>
             <div>
-              <Label>{t('modal.fields.city')}</Label>
-              <input value={form.city} onChange={e => set('city', e.target.value)} placeholder={t('modal.fields.cityPlaceholder')} style={iStyle} />
+              <Label>{t('modal.fields.industry')}</Label>
+              <div style={{ position: 'relative' }}>
+                <select value={form.industry} onChange={e => set('industry', e.target.value)} style={selectStyle}>
+                  <option value="">{t('modal.fields.selectIndustry')}</option>
+                  {industries.map(i => <option key={i} value={i}>{i}</option>)}
+                </select>
+                <ChevronDown size={13} style={chevron} />
+              </div>
             </div>
+          </div>
+
+          <div>
+            <Label>{t('modal.fields.city')}</Label>
+            <input value={form.city} onChange={e => set('city', e.target.value)} placeholder={t('modal.fields.cityPlaceholder')} style={iStyle} />
           </div>
         </div>
 

@@ -11,7 +11,7 @@ import ActionMenu from '../../components/ui/ActionMenu'
  * (users, lookups, tags) comes in via props so this stays a thin assembler.
  */
 export default function CandidatesBulkBar({
-  count, onClear, onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetType,
+  count, onClear, onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes,
   onRemoveTag, onAddNote, onArchive, canArchive = false,
   users = [], funnelTypes = [], candidateTypes = [], selectedTags = [],
 }) {
@@ -47,8 +47,9 @@ export default function CandidatesBulkBar({
     ] },
     { key: 'stage', label: t('bulk.changeStage'), icon: Milestone,
       searchPlaceholder: t('bulk.searchStage'), options: stageOptions, onPick: onSetStage },
-    { key: 'type', label: t('bulk.changeType'), icon: Briefcase,
-      searchPlaceholder: t('bulk.searchType'), options: typeOptions, onPick: onSetType },
+    { key: 'type', label: t('bulk.changeType'), icon: Briefcase, multiSelect: true,
+      searchPlaceholder: t('bulk.searchType'), emptyText: t('bulk.noTypes'), options: typeOptions,
+      submitLabel: t('bulk.typeSubmit'), onSubmit: onSetTypes },
     { key: 'tag', label: t('bulk.removeTag'), icon: Tag,
       searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: onRemoveTag },
     { key: 'note', label: t('bulk.addNote'), icon: StickyNote, input: true,

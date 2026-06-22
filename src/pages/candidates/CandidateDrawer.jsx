@@ -10,6 +10,7 @@ import EntityHeader from '../../components/drawer/EntityHeader'
 import CreatableSelect from '../../components/ui/CreatableSelect'
 import { useLookups } from '../../context/LookupsContext'
 import { useGenders } from '../../lib/useGenders'
+import { useLastContactTypes } from '../../lib/useLastContactTypes'
 import { useFunctions } from '../../lib/useFunctions'
 import { useAuth } from '../../context/AuthContext'
 import ProfilePanel from './drawer/ProfilePanel'
@@ -20,6 +21,7 @@ import PlanningPanel from './drawer/PlanningPanel'
 import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'
 import CommunicationTab from './drawer/CommunicationTab'
 import StatisticsTab from './drawer/StatisticsTab'
+import ChangelogTab from './drawer/ChangelogTab'
 
 // ── Candidate Drawer ──────────────────────────────────────────────────────────
 const TABS = [
@@ -31,6 +33,7 @@ const TABS = [
   { id: 'administration', tKey: 'zzp'           },
   { id: 'communication',  tKey: 'communication' },
   { id: 'statistics',  tKey: 'statistics'    },
+  { id: 'changelog',   tKey: 'changelog'     },
 ]
 
 export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, users = [] }) {
@@ -38,8 +41,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { t } = useTranslation('candidates')
   const locale = useLocale()
   const { formatDate } = useDateFormat()
-  const { candidateTypes, statuses, funnelMeta, isApplicantStatus, hasApplicantStatus } = useLookups()
+  const { candidateTypes, statuses, funnelMeta } = useLookups()
   const { colorOf: genderColor } = useGenders()
+  const { labelOf: lastContactLabel } = useLastContactTypes()
   const { functions, allowFreeEntry } = useFunctions()
   const { hasModule } = useAuth()
   // Planning-tab alleen tonen als de tenant de Planning-module heeft (zelfde gate als sidebar).
@@ -83,9 +87,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   }
   const changeStatus = (v) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
   const currentTags    = tags ?? c.tags ?? []
-  // Funnel is an applicant concern: show it only for an applicant-flagged status.
-  // Until a tenant flags one (additive rollout), keep showing it as before.
-  const showFunnel = !hasApplicantStatus || isApplicantStatus(currentStatus)
+  // Funnel = per-application concern (decided model): strictly it shows only with a
+  // running application (hasApplications). TEMPORARY until C-10 sends
+  // candidate.applications: also fall back to the legacy `stage` chip so it's visible now.
+  const showFunnel = hasApplications || !!c.stage
 
   // Enter header edit: capture the fields so they're controlled + saveable.
   const startHeaderEdit = () => {
@@ -118,6 +123,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       case 'administration': return <ZzpTab c={c} onSave={p => onUpdate?.(c.id, { zzp: p })} />
       case 'communication':  return <CommunicationTab c={c} onSave={p => onUpdate?.(c.id, { consent: p })} />
       case 'statistics':  return <StatisticsTab c={c} />
+      case 'changelog':   return <ChangelogTab c={c} />
       default:              return null
     }
   }
@@ -213,6 +219,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             { key: 'status', label: t('drawer.status'), value: currentStatus, options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 160, width: 150 },
             { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions, onChange: onOwnerChange, menuWidth: 200, width: 190 },
           ]}
+          metaExtra={showFunnel && (
+            <ApplicationStageChips applications={stageChips} label={t(hasApplications ? 'drawer.applications' : 'drawer.stage')} compact />
+          )}
           tags={{ items: currentTags, onAdd: tag => setTags([...currentTags, tag]), onRemove: tag => setTags(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
           tagsLabel={t('drawer.tags')}
         >
@@ -235,16 +244,12 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
               })}
             </div>
           </div>
-          {/* Funnel — read-only chips, only for an applicant-status candidate. */}
-          {showFunnel && (
-            <ApplicationStageChips applications={stageChips} label={t(hasApplications ? 'drawer.applications' : 'drawer.stage')} />
-          )}
           {(c.lastContactDate || c.lastContactType) ? (
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>
               {t('drawer.lastContact')}:&nbsp;
               {c.lastContactDate && <span style={{ color: 'var(--text)' }}>{formatDate(c.lastContactDate)}</span>}
               {c.lastContactDate && c.lastContactType && <span> · </span>}
-              {c.lastContactType && <span style={{ color: 'var(--text)' }}>{c.lastContactType}</span>}
+              {c.lastContactType && <span style={{ color: 'var(--text)' }}>{lastContactLabel(c.lastContactType)}</span>}
             </div>
           ) : (
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>

@@ -4,7 +4,8 @@
     "add": "Klant toevoegen",
     "searchPlaceholder": "Zoek klant, debiteurnr, accountmanager…",
     "empty": "Geen klanten gevonden.",
-    "loading": "Laden…"
+    "loading": "Laden…",
+    "loadError": "Klanten laden is mislukt."
   },
   "cols": {
     "name": "Naam",
@@ -14,40 +15,258 @@
     "locations": "Locaties",
     "departments": "Afdelingen",
     "contacts": "Contactpersonen",
-    "city": "Plaats"
-  },
-  "status": {
-    "actief": "Actief",
-    "prospect": "Prospect",
-    "inactief": "Inactief",
-    "geblokkeerd": "Geblokkeerd"
+    "openVacancies": "Open vacatures",
+    "city": "Plaats",
+    "industry": "Branche"
   },
   "filters": {
     "search": "Zoeken",
     "status": "Status",
     "accountManager": "Accountmanager",
     "city": "Plaats",
+    "industry": "Branche",
     "categories": {
       "general": "Algemeen",
       "organisation": "Organisatie"
     }
   },
-  "analytics": {
+  "insights": {
     "statusTitle": "Status",
     "amTitle": "Per accountmanager",
+    "clearFilter": "Filter wissen",
     "locations": "Locaties",
     "locationsSub": "totaal vestigingen",
     "departments": "Afdelingen",
     "departmentsSub": "totaal afdelingen",
     "contacts": "Contactpersonen",
     "contactsSub": "totaal contacten",
+    "openVacancies": "Open vacatures",
+    "openVacanciesSub": "openstaand",
+    "activeMatches": "Nu aan het werk",
+    "activeMatchesSub": "actieve matches",
     "noContact": "Zonder contactpersoon",
     "noContactSub": "geen contact gekoppeld"
   },
   "drawer": {
-    "noLocations": "Nog geen locaties",
-    "noDepartments": "Nog geen afdelingen",
-    "noContacts": "Nog geen contactpersonen"
+    "entityLabel": "Klant",
+    "createdAt": "Aangemaakt op {{date}}",
+    "edit": "Bewerken",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "owner": "Accountmanager",
+    "status": "Status",
+    "tags": "Tags",
+    "addTag": "Tag toevoegen",
+    "back": "Terug",
+    "tabs": {
+      "overview": "Overzicht",
+      "locations": "Locaties",
+      "departments": "Afdelingen",
+      "contacts": "Contactpersonen",
+      "vacancies": "Vacatures",
+      "opportunities": "Kansen",
+      "planning": "Planning",
+      "statistics": "Statistieken",
+      "documents": "Documenten",
+      "notes": "Notities"
+    }
+  },
+  "overview": {
+    "general": "Algemeen",
+    "online": "Online",
+    "settings": "Instellingen",
+    "textsTitle": "Teksten",
+    "website": "Website",
+    "employeeCount": "Werknemers",
+    "toneOfVoice": "Tone of voice",
+    "industry": "Branche",
+    "debtorNumber": "Debiteurnummer",
+    "city": "Plaats",
+    "hideCompanyName": "Bedrijfsnaam verbergen",
+    "hasCareerPage": "Heeft carrièrepagina",
+    "showInVacancies": "Toon in mijn vacatures",
+    "excludeFromSourcing": "Uitsluiten van sourcing",
+    "privacyPolicyUrl": "URL privacybeleid",
+    "description": "Beschrijving",
+    "recruitmentProblems": "Wervingsproblemen"
+  },
+  "locations": {
+    "empty": "Nog geen locaties",
+    "add": "Locatie toevoegen",
+    "searchPlaceholder": "Zoek locatie…",
+    "col": {
+      "name": "Naam",
+      "city": "Plaats",
+      "departments": "Afdelingen",
+      "contacts": "Contacten"
+    },
+    "detail": {
+      "addressTitle": "Adres & gegevens",
+      "street": "Straat",
+      "houseNumber": "Huisnr.",
+      "houseNumberSuffix": "Toevoeging",
+      "postalCode": "Postcode",
+      "city": "Plaats",
+      "country": "Land",
+      "coc": "KvK-nummer",
+      "vat": "BTW-nummer",
+      "contactName": "Contactpersoon",
+      "phone": "Telefoon",
+      "email": "E-mailadres",
+      "departmentsHere": "Afdelingen op deze locatie",
+      "contactsHere": "Contactpersonen op deze locatie",
+      "none": "Nog niets gekoppeld"
+    }
+  },
+  "departments": {
+    "empty": "Nog geen afdelingen",
+    "add": "Afdeling toevoegen",
+    "searchPlaceholder": "Zoek afdeling…",
+    "col": {
+      "name": "Naam",
+      "location": "Locatie",
+      "contacts": "Contacten"
+    },
+    "detail": {
+      "infoTitle": "Afdeling",
+      "name": "Naam",
+      "location": "Locatie",
+      "description": "Omschrijving",
+      "contactsHere": "Contactpersonen op deze afdeling",
+      "none": "Nog niets gekoppeld"
+    }
+  },
+  "contacts": {
+    "empty": "Nog geen contactpersonen",
+    "add": "Contactpersoon toevoegen",
+    "searchPlaceholder": "Zoek contactpersoon…",
+    "col": {
+      "name": "Naam",
+      "role": "Functie",
+      "email": "E-mailadres",
+      "phone": "Telefoon"
+    },
+    "detail": {
+      "infoTitle": "Contactpersoon",
+      "name": "Naam",
+      "role": "Functie",
+      "email": "E-mailadres",
+      "phone": "Telefoon",
+      "primary": "Primair contact",
+      "location": "Locatie",
+      "department": "Afdeling",
+      "none": "Niet opgegeven"
+    }
+  },
+  "vacancies": {
+    "empty": "Geen vacatures voor deze klant.",
+    "col": {
+      "title": "Titel",
+      "status": "Status",
+      "applications": "Sollicitaties"
+    }
+  },
+  "opportunities": {
+    "openVacancies": "Open vacatures",
+    "openVacanciesEmpty": "Geen open vacatures.",
+    "openShifts": "Open flex-diensten",
+    "openShiftsEmpty": "Geen open diensten.",
+    "planningOff": "Open diensten worden getoond zodra de Planning-module actief is.",
+    "col": {
+      "title": "Titel",
+      "status": "Status",
+      "applications": "Sollicitaties",
+      "date": "Datum",
+      "shift": "Dienst",
+      "department": "Afdeling"
+    }
+  },
+  "planning": {
+    "title": "Planning",
+    "activeNow": "Nu aan het werk",
+    "activeNowSub": "actieve plaatsingen",
+    "upcoming": "Aankomende diensten",
+    "upcomingEmpty": "Geen aankomende diensten.",
+    "off": "Planning-informatie komt zodra de Planning-module actief is.",
+    "open": "Open"
+  },
+  "statistics": {
+    "matchesTotal": "Matches totaal",
+    "matchesTotalSub": "historisch",
+    "activeMatches": "Nu aan het werk",
+    "activeMatchesSub": "actieve matches",
+    "openVacancies": "Open vacatures",
+    "openVacanciesSub": "openstaand",
+    "fillRate": "Vervulgraad",
+    "fillRateSub": "vervulde vacatures",
+    "loadError": "Statistieken laden is mislukt.",
+    "overviewTitle": "Overzicht"
+  },
+  "documents": {
+    "empty": "Nog geen documenten."
+  },
+  "notes": {
+    "notes": "Notities",
+    "newNote": "Nieuwe notitie",
+    "type": "Type",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "edit": "Bewerken",
+    "notesEmpty": "Nog geen notities.",
+    "notePlaceholder": "Titel van de notitie",
+    "timeline": "Tijdlijn",
+    "timelineEmpty": "Nog geen activiteit.",
+    "conversations": "Gesprekken",
+    "conversationsEmpty": "Nog geen gesprekken."
+  },
+  "bulk": {
+    "selected": "{{count}} geselecteerd",
+    "actions": "Massa mutaties",
+    "deselect": "Selectie wissen",
+    "changeOwner": "Accountmanager wijzigen",
+    "searchOwner": "Zoek gebruiker…",
+    "noUsers": "Geen gebruikers",
+    "changeStatus": "Status wijzigen",
+    "searchStatus": "Zoek status…",
+    "addTag": "Tag toevoegen",
+    "tagPlaceholder": "Tagnaam",
+    "tagSubmit": "Toevoegen",
+    "removeTag": "Tag verwijderen",
+    "searchTag": "Zoek tag…",
+    "noTags": "Geen tags",
+    "addNote": "Notitie toevoegen",
+    "notePlaceholder": "Typ een notitie…",
+    "noteSubmit": "Toevoegen",
+    "archive": "Archiveren",
+    "archiveConfirm": "{{count}} klant(en) archiveren?",
+    "archived": "{{count}} klant(en) gearchiveerd.",
+    "archiveError": "Archiveren is mislukt.",
+    "ownerChanged": "Accountmanager gewijzigd naar {{name}} ({{count}}).",
+    "statusChanged": "Status gewijzigd naar {{value}} ({{count}}).",
+    "tagAdded": "Tag “{{tag}}” toegevoegd ({{count}}).",
+    "tagRemoved": "Tag “{{tag}}” verwijderd ({{count}}).",
+    "noteAdded": "Notitie toegevoegd ({{count}}).",
+    "mutateError": "Bewerking is mislukt."
+  },
+  "modal": {
+    "title": "Klant toevoegen",
+    "subtitle": "Vul de gegevens van de nieuwe klant in",
+    "fillRequired": "Vul de verplichte velden in",
+    "required": "Verplicht veld",
+    "create": "Klant aanmaken",
+    "cancel": "Annuleren",
+    "fields": {
+      "name": "Naam",
+      "namePlaceholder": "Bijv. Stichting Rivas Zorggroep",
+      "debtorNumber": "Debiteurnummer",
+      "status": "Status",
+      "accountManager": "Accountmanager",
+      "selectOwner": "Kies accountmanager",
+      "industry": "Branche",
+      "selectIndustry": "Kies branche",
+      "city": "Plaats",
+      "cityPlaceholder": "Bijv. Gorinchem"
+    }
   },
   "subModal": {
     "addLocation": "Locatie toevoegen",
@@ -63,26 +282,18 @@
     "contactPlaceholder": "Bijv. Jan de Vries",
     "role": "Functie",
     "email": "E-mailadres",
+    "phone": "Telefoon",
+    "isPrimary": "Primair contact",
+    "street": "Straat",
+    "houseNumber": "Huisnr.",
+    "houseNumberSuffix": "Toevoeging",
+    "postalCode": "Postcode",
     "city": "Plaats",
+    "country": "Land",
+    "coc": "KvK-nummer",
+    "vat": "BTW-nummer",
     "create": "Toevoegen",
     "cancel": "Annuleren",
     "required": "Verplicht veld"
-  },
-  "modal": {
-    "title": "Klant toevoegen",
-    "subtitle": "Vul de gegevens van de nieuwe klant in",
-    "fillRequired": "Vul de verplichte velden in",
-    "required": "Verplicht veld",
-    "create": "Klant aanmaken",
-    "cancel": "Annuleren",
-    "fields": {
-      "name": "Naam",
-      "namePlaceholder": "Bijv. Stichting Rivas Zorggroep",
-      "debtorNumber": "Debiteurnummer",
-      "status": "Status",
-      "accountManager": "Accountmanager",
-      "city": "Plaats",
-      "cityPlaceholder": "Bijv. Gorinchem"
-    }
   }
 }

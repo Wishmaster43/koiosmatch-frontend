@@ -1,0 +1,68 @@
+{
+  "title": "Opportunities",
+  "loading": "Loading opportunities…",
+  "empty": "No opportunities yet.",
+  "error": "Opportunities could not be loaded.",
+  "page": {
+    "add": "Add opportunity"
+  },
+  "cols": {
+    "title": "Opportunity",
+    "client": "Client",
+    "stage": "Stage",
+    "value": "Value",
+    "owner": "Owner",
+    "date": "Created"
+  },
+  "insights": {
+    "stage": "Stage",
+    "owner": "Owner",
+    "clearFilter": "Clear filter"
+  },
+  "kpi": {
+    "total": "Opportunities",
+    "pipeline": "Pipeline value (€)",
+    "avg": "Avg. value (€)"
+  },
+  "drawer": {
+    "entityLabel": "Opportunity",
+    "stage": "Stage",
+    "owner": "Owner",
+    "client": "Client",
+    "selectStage": "Select stage",
+    "selectOwner": "Select owner",
+    "selectClient": "Select client",
+    "createdAt": "Created on {{date}}",
+    "tabs": {
+      "details": "Details"
+    }
+  },
+  "details": {
+    "stage": "Stage",
+    "value": "Value",
+    "expectedClose": "Expected close",
+    "client": "Client",
+    "owner": "Owner",
+    "created": "Created",
+    "groups": {
+      "deal": "Deal",
+      "organisation": "Organisation"
+    }
+  },
+  "modal": {
+    "title": "New opportunity",
+    "titlePlaceholder": "E.g. 5 nurses — Zorggroep Noord",
+    "required": "Title is required",
+    "create": "Create",
+    "creating": "Saving…",
+    "cancel": "Cancel",
+    "fields": {
+      "title": "Title",
+      "client": "Client",
+      "stage": "Stage",
+      "value": "Value (€)",
+      "expectedClose": "Expected close",
+      "owner": "Owner"
+    }
+  }
+}

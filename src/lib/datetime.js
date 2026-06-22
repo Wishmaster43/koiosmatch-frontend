@@ -14,7 +14,8 @@ export function useLocale() {
 
 export function useDateFormat() {
   const locale = useLocale()
-  const formatDate = (value, opts = { day: '2-digit', month: 'short', year: 'numeric' }) => {
+  // Default to numeric DD-MM-YYYY (the app-wide standard, see CLAUDE.md §3B).
+  const formatDate = (value, opts = { day: '2-digit', month: '2-digit', year: 'numeric' }) => {
     if (!value) return '—'
     const d = new Date(value)
     return isNaN(d.getTime()) ? String(value) : d.toLocaleDateString(locale, opts)

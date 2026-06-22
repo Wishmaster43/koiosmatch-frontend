@@ -1,15 +1,23 @@
 import { useTranslation } from 'react-i18next'
 import StatusListEditor from './StatusListEditor'
 
-/** Talen — two configurable lists: the language list and the proficiency levels.
- * Feed the dropdowns in the candidate Talen-sectie (useLanguageLookups). */
-export default function LanguageSettings() {
+/** Languages — the language list, its own sub-tab. Feeds the candidate Talen-sectie. */
+export function LanguageListSettings() {
   const { t } = useTranslation('settings')
   return (
-    <div style={{ maxWidth: 640, display: 'flex', flexDirection: 'column', gap: 28 }}>
+    <div style={{ maxWidth: 640 }}>
       <StatusListEditor compact withColor={false}
         title={t('languageSettings.languagesTitle')} subtitle={t('languageSettings.languagesSubtitle')}
         endpoint="/languages" addLabel={t('languageSettings.addLanguage')} />
+    </div>
+  )
+}
+
+/** Levels — the proficiency levels (spoken/written), its own sub-tab. */
+export function LanguageLevelSettings() {
+  const { t } = useTranslation('settings')
+  return (
+    <div style={{ maxWidth: 640 }}>
       <StatusListEditor compact withColor={false}
         title={t('languageSettings.levelsTitle')} subtitle={t('languageSettings.levelsSubtitle')}
         endpoint="/language-levels" addLabel={t('languageSettings.addLevel')} />

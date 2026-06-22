@@ -1,0 +1,68 @@
+{
+  "title": "Kansen",
+  "loading": "Kansen laden…",
+  "empty": "Nog geen kansen.",
+  "error": "Kansen konden niet geladen worden.",
+  "page": {
+    "add": "Kans toevoegen"
+  },
+  "cols": {
+    "title": "Kans",
+    "client": "Klant",
+    "stage": "Fase",
+    "value": "Waarde",
+    "owner": "Eigenaar",
+    "date": "Aangemaakt"
+  },
+  "insights": {
+    "stage": "Fase",
+    "owner": "Eigenaar",
+    "clearFilter": "Filter wissen"
+  },
+  "kpi": {
+    "total": "Kansen",
+    "pipeline": "Pijplijnwaarde (€)",
+    "avg": "Gem. waarde (€)"
+  },
+  "drawer": {
+    "entityLabel": "Kans",
+    "stage": "Fase",
+    "owner": "Eigenaar",
+    "client": "Klant",
+    "selectStage": "Kies fase",
+    "selectOwner": "Kies eigenaar",
+    "selectClient": "Kies klant",
+    "createdAt": "Aangemaakt op {{date}}",
+    "tabs": {
+      "details": "Details"
+    }
+  },
+  "details": {
+    "stage": "Fase",
+    "value": "Waarde",
+    "expectedClose": "Verwachte sluiting",
+    "client": "Klant",
+    "owner": "Eigenaar",
+    "created": "Aangemaakt",
+    "groups": {
+      "deal": "Deal",
+      "organisation": "Organisatie"
+    }
+  },
+  "modal": {
+    "title": "Nieuwe kans",
+    "titlePlaceholder": "Bijv. 5 verpleegkundigen — Zorggroep Noord",
+    "required": "Titel is verplicht",
+    "create": "Aanmaken",
+    "creating": "Bezig…",
+    "cancel": "Annuleren",
+    "fields": {
+      "title": "Titel",
+      "client": "Klant",
+      "stage": "Fase",
+      "value": "Waarde (€)",
+      "expectedClose": "Verwachte sluiting",
+      "owner": "Eigenaar"
+    }
+  }
+}

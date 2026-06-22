@@ -41,7 +41,7 @@ const PAGE_REQUIRED_MODULE = {
 // Pakket  9  ats_crm_planning        ATS & CRM + Planning
 // Pakket 10  ats_crm_ai_planning     ATS & CRM + AI & WF + Planning
 
-const ATS_BASE   = ['dashboard', 'candidates', 'applications', 'vacancies', 'matches', 'tasks', 'customers', 'locations', 'departments', 'contacts', 'details', 'users']
+const ATS_BASE   = ['dashboard', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'customers', 'locations', 'departments', 'contacts', 'details', 'users']
 const AI_PAGES   = ['aiagents', 'whatsapp', 'workflows', 'apps']
 const PLANNING   = ['planning']
 
@@ -80,7 +80,7 @@ export const PACKAGE_DEFAULT_PAGE = {
 // All pages that require an explicit package grant.
 const GATED_PAGES = [
   'dashboard',
-  'candidates', 'applications', 'vacancies', 'matches', 'tasks',
+  'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks',
   'customers', 'locations', 'departments', 'contacts',
   'planning', 'details',
   'shiftmanager', 'helloflex',
