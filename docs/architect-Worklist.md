@@ -10,7 +10,7 @@
 > **Laatst bijgewerkt:** 2026-06-23 · door architect-Claude.
 > **Legenda:** ☐ open · ◐ deels / wacht op backend · ✅ opgelost · 🔒 geblokkeerd op backend
 >
-> **Bron van waarheid:** `docs/ARCHITECTURE.md` **bestaat nog niet** (zie P-1). Tot dan
+> **Bron van waarheid:** `docs/ARCHITECTURE.md` bestaat (2026-06-23, P-1 ✅) als bron-van-waarheid. Aanvullend
 > leven het entiteit-/relatie-model en het API-contract verspreid over `worklist.md`
 > (C-secties), `CLAUDE.md` §3A/§3B/§10 en de memories.
 
@@ -295,11 +295,11 @@ blijven voor nieuwe gedeelde componenten.)
    zonder aparte mega-PR.
 
 ## Proces / bron van waarheid
-- [ ] **P-1 · `docs/ARCHITECTURE.md` aanmaken.** De architect-skill noemt dit als enige bron, maar
-  het bestaat niet. Voor een "alles is gelinkt"-systeem hoort in één doc: (a) entiteiten + relaties
-  (Candidate↔Application↔Vacancy↔Match↔Task↔Workflow↔Customer→Location→Department), (b) het
-  workflow-module-contract (`type × action`, `filters/sort/limit/fields/target`, graaf `connections`),
-  (c) het polymorfe `task_links`-contract, (d) het gedeelde filter-`field`-vocabulaire.
+- [✅] **P-1 · `docs/ARCHITECTURE.md` AANGEMAAKT 2026-06-23.** Bron-van-waarheid met status-markers
+  (✅/⚠️/☐/🔒) per punt: entiteiten + relaties, de 3 assen + status↔funnel-automatisering, match-model,
+  blueprint, lookups, workflow-modules (graaf), filter-vocabulaire, task_links, tenant/pakket, theming-
+  tokens, auth, endpoint-naamgeving, API-contract-pointers, maat/modulariteit, en §11 "openstaand —
+  punt voor punt afronden" (verwijst hierheen). **Punt-voor-punt afronden** = de openstaande markers vullen.
 
 ## Backend-coördinatie (samenvatting)
 1. **C-27** — graaf opslaan/teruggeven (`position` + `connections`), stabiele step-`id`'s,
