@@ -270,6 +270,46 @@ zit het dichtst bij spec; oudere gebieden niet. Cijfers zijn metingen, geen scha
 > RF-refactors — één bestand aanraken = cap + hex→token + inline→? + PropTypes + NL→EN + alias in één pass.
 > **Beslis eerst CS-3** (Tailwind vs inline-tokens): dat bepaalt hoe CS-3/CS-4 samen worden aangepakt.
 
+## Data-audit 2026-06-23 (komt alles uit de API? duplicates?)
+Scan op hardcoded/dummy-data, mock-fallbacks en duplicatie (§3B "niets hardcoded", DRY).
+Markers: ☐ open · ⚠️ jouw input · ◐ deels · ✅ klaar. Werk punt voor punt af.
+
+### ⚠️ EERST: welke API's zijn LIVE? (bepaalt of de mock eruit kan)
+Per pagina de endpoints die de fallback-mock voedt. **Live → mock eruit + lege staat; mist → mock blijft.**
+- [ ] **PlanningPage** — **0 api-calls**, 100% `INITIAL_SHIFTS`. Endpoint? (`/planning` of `/shifts`) → live? ⚠️
+- [ ] **ContactsPage (SM)** — 0 api-calls, pure dummy. ⚠️
+- [ ] **CandidatesPage** — `/candidates · /candidates/stats · /candidates/bulk/* · /locations` → live? ⚠️
+- [ ] **ApplicationsPage** — `/applications · /applications/stats` → live? ⚠️
+- [ ] **VacanciesPage** — `/vacancies · /vacancies/stats · /vacancies/bulk/* · /customers` → live? ⚠️
+- [ ] **WorkflowsPage** — `/workflows · /workflow-folders` → live? ⚠️
+- [ ] **SM Customers/Locations/Departments** — `/sm_customers` → live? ⚠️
+
+### 🔴 DS — Data-sourcing (hardcoded/dummy i.p.v. API)
+- [ ] **DS-1 · PlanningPage draait 100% op dummy** (`INITIAL_SHIFTS`, 0 api-calls). → echte planning-API + vier UI-states.
+- [ ] **DS-2 · ContactsPage (SM) pure dummy** (0 api-calls). → `/sm_*`-bron of lege staat.
+- [ ] **DS-3 · Mock-fallbacks eruit** (CandidatesPage `DUMMY_CANDIDATES` · WorkflowsPage `MOCK_WORKFLOWS` ·
+  applications/vacancies/SM `USE_MOCKS`): API wordt al geroepen, maar dummy bij fout → **lege staat** i.p.v. dummy.
+  Verwijderen zodra het endpoint live is (zie ⚠️-lijst). **Mag nooit in productie tonen.**
+- [ ] **DS-4 · `MOCK_LOGS`** in `WorkflowCanvasEditor` → echte run-logs-feed (workflow-server, memory `project-workflow-separate-server`).
+
+### 🔁 DUP — Duplicatie (geen dubbele data/select/iets)
+- [ ] **DUP-1 · 9 inline custom dropdowns** herbouwen open/close/outside-click zelf i.p.v. een gedeelde select:
+  `BranchSection · UsersPage · AddApplicationModal · EntityHeader · KoiosModelPicker · MatchScoreBlock ·
+  SettingsControls · KoiosSteps · ai/management/shared`. → vervangen door `SelectMenu`/`SearchSelect`/`CreatableSelect`.
+- [ ] **DUP-2 · 4 select-componenten** (`SearchSelect` multi · `SelectMenu` single · `CreatableSelect` combobox ·
+  `SelectField` basic) — deels legitiem; documenteer wanneer welke + zorg dat niemand een 5e bouwt.
+- [ ] **DUP-3 · `LANGUAGES` in 2 bestanden** (`CompanySettings` + kandidaat-talen) → één lookup (`/languages`).
+- [ ] **DUP-4 · SM `STATUSES`/`AddCustomerModal STATUSES` hardcoded** terwijl kandidaat-statussen een lookup zijn → consolideren.
+
+### 🟠 VOC — Hardcoded vocab → lookups (§3B)
+- [ ] **VOC-1 · `NATIONALITIES`** (`ProfileTab`, 11 hardcoded) → lookup/gedeelde lijst.
+- [ ] **VOC-2 · `CompanySettings`** (`LANGUAGES/CURRENCIES/TIMEZONES/COUNTRIES`) → lookups/standaardlijsten.
+- [ ] **VOC-3 · SM `AddCustomerModal STATUSES`** → lookup.
+
+### ✅ Wél OK (structuur/contract-keys, geen tenant-data)
+`lib/access.js` page-keys · `AI_PACKAGES`/`ATS_BASE` · `TAB_IDS` · `BUCKETS`/`DIMENSIONS`/`APP_FIELDS`/
+`BUILTIN_TOOLS`/`ROLES`/`QUARTERS`/`LEVELS` — mogen hardcoded (geen lookup nodig).
+
 ## Advies & aanbevolen volgorde (2026-06-23)
 De lijst is compleet: **AW** = data-coherentie, **RF** = bestandsgrootte, **CS** = standaard-consistentie.
 Aanbevolen aanpak — veilig, hoogste ROI eerst, geen big-bang.
