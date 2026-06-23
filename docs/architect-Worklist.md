@@ -105,9 +105,13 @@ doel — de echte regel is **single-purpose, niet line-count**. Bij naderen van 
 ## Refactor-check 2026-06-23 — complete inventaris (frontend `src/`)
 Volledige scan op de afgesproken size-discipline. **Backend (`koiosmatch-api`) = aparte repo,
 niet in deze workspace** → backend-Claude draait daar dezelfde scan.
-**Doelen:** JSX (component/page) ≤ 250 / splitsen > 300 · hook/util/data ≤ 150 · harde cap **1000** (beide).
-**Stand:** **45 JSX-bestanden > 250** (waarvan **32 > 300** = split-now, 13 in de 250–300-band), **3 JS-bestanden > 150**.
-De JS-laag is gezond; al het werk zit in JSX. Afvinken = gesplitst tot onder het doel.
+**Doelen (bijgewerkt):** JSX ≤ ~250 streven · 250–400 = oordeel (cohesief mag) · **> ~400 = splitsen** ·
+1000 = harde cap. JS hook/util/data ≤ ~150.
+**Stand (2026-06-23):** de 7 grootste/over-400 zijn gesplitst (WorkflowCanvasEditor·PlanningPage·
+AIManagementTabs·WorkflowsPage·AuditLog·UsersPage·Sidebar — zie ✅ hieronder). Resterend > 400: de
+419–469-band (ReportFilterSidebar/ShiftsChartsBlock/App/ScheduleSettings/LocationsPage/OrdersTable/
+VacanciesPage/MessagesTable/WhatsAppPage/ProfilePage/PlanningPanel) + CandidatesPage 670 & het
+WorkflowCanvasEditor-restant 863 (architectuur/hook-keuzes). JS-laag gezond.
 
 ### 🟢 Tier 0 — RF-1 CAP OPGELOST 2026-06-23 (1848 → 863 r, onder de 1000-cap)
 - [◐] **RF-1 · `components/layout/WorkflowCanvasEditor.jsx` — was 1848 r (~37 units, ~2× cap) → nu 863 r.**
