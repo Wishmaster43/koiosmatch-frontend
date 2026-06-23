@@ -46,10 +46,9 @@ graaf-serialisatie) is vooruit-correct; de frontend leunt op nog-niet-bevestigde
   `applications.js`; backend = C-27.)*
 
 ### ☐ HIGH
-- [ ] **AW-5 · LinksTab dekt 4 van 9 koppel-types.** Toevoegen kan alleen candidate/customer/
-  contact/vacancy; **application/match/location/department/workflow ontbreken** — juist de
-  "alles is gelinkt"-kern. → `TYPE_ENDPOINTS` config-gedreven uitbreiden. *(file: `LinksTab.jsx:10-15`;
-  cross-ref B-20.)*
+- [✅] **AW-5 · LinksTab dekt nu alle 9 koppel-types** (2026-06-23). `TYPE_ENDPOINTS` uitgebreid met
+  application/match/location/department/workflow (i18n-keys bestonden al). *(Server-side search/cap via AW-2;
+  filtert pas server-side als de backend `?search=` levert.)*
 - [✅] **AW-6 · WorkflowCard/StepPill voedt nu uit de gedeelde `MODULE_META` (`@/modules/index`)** (2026-06-23); de lokale 6-type-map is weg, alle module-types renderen. i18n-label valt terug op de registry-label.
 - [ ] **AW-7 · Module-registry hardcodet NL-labels/categorieën + hex.** Nieuwe `src/modules/*.js`
   erven de bestaande schuld (`label:'Kandidaten'`, `category:'Matches'`, `color:'#2563EB'`).
@@ -60,9 +59,8 @@ graaf-serialisatie) is vooruit-correct; de frontend leunt op nog-niet-bevestigde
 ### ☐ MEDIUM
 - [ ] **AW-8 · `CATEGORY_ORDER` = handmatige NL-lijst, gekoppeld aan module-`category`.**
   Key = label; nieuwe categorie = twee plekken bijwerken. → stabiele key + i18n-label.
-- [ ] **AW-9 · `date`-veld rendert als tekst-input in de editor.** `effective_from`
-  (gedateerde statuswissel) wordt vrij tekstveld i.p.v. datepicker; botst met `DD-MM-YYYY` (§3B).
-  *(file: `WorkflowCanvasEditor.jsx:743`.)*
+- [✅] **AW-9 · `date`-veld → native datepicker** (2026-06-23). `workflow/fields.jsx` FieldInput-default
+  rendert nu `type='date'` voor date-velden (`effective_from` etc.).
 
 ### ☐ LOW
 - [✅] **AW-10 · LinksTab-verwijderknop `#FEF2F2` → `var(--color-danger-bg)`** (2026-06-23, one-touch bij AW-2).

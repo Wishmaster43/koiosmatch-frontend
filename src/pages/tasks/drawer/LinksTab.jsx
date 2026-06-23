@@ -7,11 +7,17 @@ import SearchSelect from '../../../components/ui/SearchSelect'
 
 // Link types you can add from the drawer + how to fetch/label their entities.
 // (Other polymorphic types stay supported on existing links via the read row.)
+const personName = r => r.name || [r.first_name, r.last_name].filter(Boolean).join(' ') || `#${r.id}`
 const TYPE_ENDPOINTS = {
-  candidate: { url: '/candidates', label: r => r.name || [r.first_name, r.last_name].filter(Boolean).join(' ') || `#${r.id}` },
-  customer:  { url: '/customers',  label: r => r.name || `#${r.id}` },
-  contact:   { url: '/contacts',   label: r => r.name || [r.first_name, r.last_name].filter(Boolean).join(' ') || `#${r.id}` },
-  vacancy:   { url: '/vacancies',  label: r => r.title || r.name || `#${r.id}` },
+  candidate:   { url: '/candidates',   label: personName },
+  application: { url: '/applications', label: r => r.candidate?.name || r.candidateName || r.vacancyTitle || r.title || `#${r.id}` },
+  vacancy:     { url: '/vacancies',    label: r => r.title || r.name || `#${r.id}` },
+  match:       { url: '/matches',      label: r => r.candidate?.name || r.candidateName || r.title || `#${r.id}` },
+  customer:    { url: '/customers',    label: r => r.name || `#${r.id}` },
+  location:    { url: '/locations',    label: r => r.name || `#${r.id}` },
+  department:  { url: '/departments',  label: r => r.name || `#${r.id}` },
+  contact:     { url: '/contacts',     label: personName },
+  workflow:    { url: '/workflows',    label: r => r.name || `#${r.id}` },
 }
 
 // Inline "add link" row: pick a type, then pick an entity of that type (already
