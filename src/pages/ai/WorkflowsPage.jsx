@@ -20,6 +20,7 @@ import {
   Folder, FolderPlus, Trash2,
 } from 'lucide-react'
 import WorkflowCanvasEditor from '../../components/layout/WorkflowCanvasEditor'
+import { normalizeWorkflow, denormalizeWorkflow } from './data/workflowMap'
 
 // Module chip icon + colours; label = t('modules.<type>').
 const MODULE_META = {
@@ -198,74 +199,6 @@ function WorkflowCard({ workflow, onRun, onEdit }) {
       </div>
     </div>
   )
-}
-
-// Vertaal backend formaat → frontend formaat
-function normalizeWorkflow(wf) {
-  // trigger: string samengesteld uit trigger_type + trigger_config, of al een string
-  const trigger = typeof wf.trigger === 'string'
-    ? wf.trigger
-    : wf.trigger_type ?? 'Handmatig'
-
-  // status: active boolean → string
-  const status = typeof wf.status === 'string'
-    ? wf.status
-    : (wf.active ? 'active' : 'inactive')
-
-  // steps: normaliseren naar { id, type, config, position, next } — next = uitgaande
-  // verbindingen (graaf), zodat Router-takken + verbindingsfilters bewaard blijven.
-  const rawSteps = Array.isArray(wf.steps) ? wf.steps : (wf.workflow_steps ?? [])
-  const steps = rawSteps.map(s => ({
-    id:       s.id ? String(s.id) : undefined,
-    type:     s.module_type ?? s.type,
-    config:   s.config ?? s.parameters ?? {},
-    position: s.position ?? undefined,
-    next:     (s.next ?? s.connections ?? []).map(n => ({
-      target:  n.target != null ? String(n.target) : n.target,
-      filters: n.filters ?? null,
-    })),
-  }))
-
-  // last_run: uit laatste WorkflowRun of direct
-  const lastRun = wf.last_run ?? (wf.latest_run
-    ? { time: wf.latest_run.created_at, ok: wf.latest_run.status === 'success' }
-    : null)
-
-  return { ...wf, trigger, status, steps, last_run: lastRun }
-}
-
-// Vertaal frontend trigger string → trigger_type + trigger_config
-function parseTrigger(trigger) {
-  if (!trigger || trigger === 'Handmatig') return { trigger_type: 'manual', trigger_config: {} }
-  if (trigger.toLowerCase().includes('webhook')) return { trigger_type: 'webhook', trigger_config: {} }
-  // "Dagelijks 08:00", "Elk uur", "Maandag 07:00" → scheduled
-  const timeMatch = trigger.match(/(\d{2}:\d{2})/)
-  return {
-    trigger_type: 'scheduled',
-    trigger_config: { schedule_label: trigger, schedule_time: timeMatch?.[1] ?? '09:00' },
-  }
-}
-
-// Vertaal frontend formaat → backend formaat voor opslaan
-function denormalizeWorkflow(wf) {
-  const { trigger_type, trigger_config } = parseTrigger(wf.trigger)
-  return {
-    name:           wf.name,
-    trigger_type,
-    trigger_config: wf.schedule ? { ...trigger_config, schedule: wf.schedule } : trigger_config,
-    active:         wf.status === 'active',
-    status:         wf.status ?? 'draft',
-    steps:          (wf.steps ?? []).map((s, i) => ({
-      id:          s.id ?? null,
-      module_type: s.type,
-      config:      s.config ?? {},
-      label:       s.label ?? null,
-      order:       i,
-      position:    s.position ?? null,
-      // Outgoing connections (graph): target = step id, optional edge filter.
-      connections: (s.next ?? []).map(n => ({ target: n.target, filters: n.filters ?? null })),
-    })),
-  }
 }
 
 // ── Folder sidebar ────────────────────────────────────────────────────────────
