@@ -196,7 +196,7 @@ export default function CandidatesPage({ intent } = {}) {
   , [stats, candidates, statuses])
   const funnelOptions = useMemo(() =>
     stats?.by_funnel
-      ? stats.by_funnel.map(o => { const v = o.value ?? o.funnel_type; return { value: v, label: metaOf(funnelTypes, v)?.label ?? v, count: o.count } })
+      ? stats.by_funnel.map(o => { const v = o.value ?? o.funnel_type; return { value: v, label: o.label ?? metaOf(funnelTypes, v)?.label ?? v, color: o.color, count: o.count } })
       : funnelTypes.map(f => ({ value: f.value, label: f.label, count: candidates.filter(c => c.stage === f.value).length })).filter(o => o.count > 0)
   , [stats, candidates, funnelTypes])
   const typeOptions = useMemo(() =>
@@ -235,7 +235,7 @@ export default function CandidatesPage({ intent } = {}) {
     statusOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: colorFor(statuses, o.value) }))
   , [statusOptions, statuses])
   const funnelData = useMemo(() =>
-    funnelOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: colorFor(funnelTypes, o.value) }))
+    funnelOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: o.color ?? colorFor(funnelTypes, o.value) }))
   , [funnelOptions, funnelTypes])
   const rcData = useMemo(() =>
     ownerOptions.map(o => ({ name: o.label, value: o.count, key: o.value }))

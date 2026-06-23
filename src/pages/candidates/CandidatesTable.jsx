@@ -55,9 +55,12 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
       sortable: true, sortValue: c => funnelOrder[c.stage] ?? 99,
       render: c => {
         if (!c.stage) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        // Chip from the API's flat funnel_label/funnel_color; the lookup is the fallback.
         const m = funnelMeta(c.stage)
+        const label = c.stageLabel ?? m.label
+        const color = c.stageColor ?? m.color
         return <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
-          background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span>
+          background: color + '1A', color, border: `1px solid ${color}55` }}>{label}</span>
       },
     },
     {

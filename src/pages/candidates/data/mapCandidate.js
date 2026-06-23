@@ -48,8 +48,10 @@ export function mapCandidate(c) {
     title:           c.function_title ?? c.title ?? '',
     // Contract form (multi-value slugs); label/colour via the lookups.
     candidateTypes,
-    // Funnel stage (single slug: prospect | intake | pool | alumni).
+    // Funnel stage — flat fields from the API: key + NL label + colour (null = not in procedure).
     stage:           c.funnel_type ?? c.stage ?? c.lifecycle ?? '',
+    stageLabel:      c.funnel_label ?? null,
+    stageColor:      c.funnel_color ?? null,
     stageVacancyId:  c.funnel_vacancy_id ?? c.stage_vacancy_id ?? c.vacancy_id ?? '',
     // Operational status (single slug: active | inactive | …).
     status:          c.status ?? '',
