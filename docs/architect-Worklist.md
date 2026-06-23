@@ -161,7 +161,7 @@ De JS-laag is gezond; al het werk zit in JSX. Afvinken = gesplitst tot onder het
 - [ ] `components/layout/KoiosPanel.jsx` — 376
 
 **AI / workflows:**
-- [ ] `components/ai/AIManagementTabs.jsx` — 712  *(per-tab componenten)*
+- [◐] `components/ai/AIManagementTabs.jsx` — **712 → 542** (2026-06-23): gedeelde primitives → `components/ai/management/shared.jsx` (174). Rest: 5 tabs + ChatTest/AgentForm → eigen files.
 - [ ] `components/workflows/ScheduleSettings.jsx` — 451
 
 **Reports:**

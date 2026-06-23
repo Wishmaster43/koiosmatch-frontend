@@ -6,12 +6,9 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import {
-  Brain, Plus, Trash2, Save, RefreshCw, Send, Check,
-  Clock, ChevronDown, MessageSquare,
-} from 'lucide-react'
+import { Brain, Trash2, Send, Check, MessageSquare } from 'lucide-react'
 import api from '../../lib/api'
-import { MODELS, Field, Badge, SaveBar, VersionList, TextEditor, SideList, ListRow } from './management/shared'
+import { MODELS, STRENGTH_COLORS, inputStyle, Field, Badge, SaveBar, TextEditor, SideList, ListRow } from './management/shared'
 
 // ── Chat test ─────────────────────────────────────────────────────────────────
 

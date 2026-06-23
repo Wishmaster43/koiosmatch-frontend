@@ -22,9 +22,9 @@ export const MODELS = [
 ]
 
 // Strength → colour; label = t('ai.strength.<key>').
-const STRENGTH_COLORS = { high: '#7C3AED', medium: '#0369A1', fast: '#16A34A', reasoning: '#D97706' }
+export const STRENGTH_COLORS = { high: '#7C3AED', medium: '#0369A1', fast: '#16A34A', reasoning: '#D97706' }
 
-const inputStyle = {
+export const inputStyle = {
   width: '100%', padding: '7px 10px', fontSize: 13, borderRadius: 8,
   border: '1px solid var(--border)', background: 'var(--input-bg)',
   color: 'var(--text)', outline: 'none', boxSizing: 'border-box',
