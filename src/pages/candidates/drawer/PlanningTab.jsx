@@ -29,11 +29,11 @@ export default function PlanningTab({ c }) {
   const [pools,        setPools]       = useState(plan.pools ?? [])
   const [shiftType,   setShiftType]  = useState(plan.shiftType ?? [])
   const [drivingLicences,  setDrivingLicences] = useState(plan.drivingLicences ?? [])
-  const [rijOpen,      setRijOpen]     = useState(false)
+  const [rowOpen,      setRowOpen]     = useState(false)
   const rijRef = useRef(null)
 
   useEffect(() => {
-    const h = e => { if (rijRef.current && !rijRef.current.contains(e.target)) setRijOpen(false) }
+    const h = e => { if (rijRef.current && !rijRef.current.contains(e.target)) setRowOpen(false) }
     document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h)
   }, [])
 
@@ -104,12 +104,12 @@ export default function PlanningTab({ c }) {
           </div>
         )}
         <div ref={rijRef} style={{ position: 'relative' }}>
-          <button onClick={() => setRijOpen(o => !o)}
+          <button onClick={() => setRowOpen(o => !o)}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', fontSize: 11, fontWeight: 500,
               border: '1px dashed var(--border)', borderRadius: 7, background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
             <Plus size={11} /> {t('planning.addLicense')}
           </button>
-          {rijOpen && (
+          {rowOpen && (
             <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 200, marginTop: 4,
               background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
               boxShadow: '0 4px 16px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 180 }}>

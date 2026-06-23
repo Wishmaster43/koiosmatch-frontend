@@ -183,7 +183,7 @@ export default function PlanningPanel({ c }) {
           const has = f.shiftTypes.includes(dt)
           return { ...f, shiftTypes: has ? f.shiftTypes.filter(x => x !== dt) : [...f.shiftTypes, dt] }
         })
-        const toggleIngepland = (id) => setScheduledIds(prev => {
+        const toggleScheduled = (id) => setScheduledIds(prev => {
           const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n
         })
         return (
@@ -236,10 +236,10 @@ export default function PlanningPanel({ c }) {
                   {t('planning.noOpenShifts')}
                 </div>
               ) : filtered.map((d, i) => {
-                const isGepland   = scheduledIds.has(d.id)
-                const isFavKlant  = favorites.clients.includes(d.client)
-                const isBlKlant   = blacklist.clients.includes(d.client)
-                const isBlLocatie = blacklist.locations.includes(d.location)
+                const isScheduled   = scheduledIds.has(d.id)
+                const isFavCustomer  = favorites.clients.includes(d.client)
+                const isBlockedCustomer   = blacklist.clients.includes(d.client)
+                const isBlockedLocation = blacklist.locations.includes(d.location)
                 const tags = [
                   { label: `${d.distance} km`, ok: d.distance <= 35 },
                   { label: d.shiftType, ok: openFilters.shiftTypes.includes(d.shiftType) },
@@ -248,13 +248,13 @@ export default function PlanningPanel({ c }) {
                 return (
                   <div key={d.id} style={{ padding: '10px 0', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
                     display: 'flex', gap: 10, alignItems: 'flex-start',
-                    opacity: isBlKlant || isBlLocatie ? 0.4 : 1 }}>
+                    opacity: isBlockedCustomer || isBlockedLocation ? 0.4 : 1 }}>
                     <div style={{ width: 3, alignSelf: 'stretch', borderRadius: 3, background: d.color, flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2, flexWrap: 'wrap' }}>
                         <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>{d.client}</span>
-                        {isFavKlant && <Heart size={11} color="var(--color-danger)" fill="var(--color-danger)" />}
-                        {isBlKlant  && <Ban size={11} color="#EF4444" />}
+                        {isFavCustomer && <Heart size={11} color="var(--color-danger)" fill="var(--color-danger)" />}
+                        {isBlockedCustomer  && <Ban size={11} color="#EF4444" />}
                         {d.openSpots === 1 && (
                           <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: '#FEF3C7', color: '#D97706', fontWeight: 600 }}>{t('planning.lastSpot')}</span>
                         )}
@@ -272,13 +272,13 @@ export default function PlanningPanel({ c }) {
                         ))}
                       </div>
                     </div>
-                    <button onClick={() => toggleIngepland(d.id)} disabled={isBlKlant || isBlLocatie}
+                    <button onClick={() => toggleScheduled(d.id)} disabled={isBlockedCustomer || isBlockedLocation}
                       style={{ flexShrink: 0, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7,
-                        cursor: isBlKlant || isBlLocatie ? 'not-allowed' : 'pointer', minWidth: 90,
-                        border: isGepland ? '1px solid var(--color-success)' : '1px solid var(--color-primary)',
-                        background: isGepland ? 'var(--color-success-bg)' : 'var(--color-primary)',
-                        color: isGepland ? 'var(--color-success)' : 'white' }}>
-                      {isGepland ? `✓ ${t('planning.scheduled')}` : t('planning.schedule')}
+                        cursor: isBlockedCustomer || isBlockedLocation ? 'not-allowed' : 'pointer', minWidth: 90,
+                        border: isScheduled ? '1px solid var(--color-success)' : '1px solid var(--color-primary)',
+                        background: isScheduled ? 'var(--color-success-bg)' : 'var(--color-primary)',
+                        color: isScheduled ? 'var(--color-success)' : 'white' }}>
+                      {isScheduled ? `✓ ${t('planning.scheduled')}` : t('planning.schedule')}
                     </button>
                   </div>
                 )

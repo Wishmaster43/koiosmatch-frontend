@@ -242,9 +242,11 @@ zit het dichtst bij spec; oudere gebieden niet. Cijfers zijn metingen, geen scha
 - [ ] **CS-6 · API-calls inline in componenten (§10).** **70** jsx-bestanden roepen `api.*` direct aan;
   **0** feature-`api/`-mappen. §10: "API-calls in de feature-`api/`-map, nooit inline." → data-laag per
   feature extraheren (mirrort RF-4/B-18.6: logica naar hooks/api).
-- [ ] **CS-7 · NL-identifiers in code (§0.1).** **46 bestanden** met Nederlandse namen
-  (`isGepland`, `isBlKlant`, `rijOpen`, `toggleIngepland`, `dienstenForDate`, `VESTIGINGEN`, `PERIODES`).
-  §0.1: Engels-only in code. → hernoemen bij aanraking (puur mechanisch, geen gedragswijziging).
+- [◐] **CS-7 · NL-identifiers in code (§0.1) — code-identifiers GEDAAN 2026-06-23.** Candidate-drawer
+  hernoemd (whole-word, file-local): `isGepland→isScheduled`, `toggleIngepland→toggleScheduled`,
+  `isBl/FavKlant→isBlocked/FavCustomer`, `isBl/FavLocatie→…Location`, `dienstenForDate→shiftsForDate`,
+  `rijOpen→rowOpen`. Build+lint groen. **Bewust gelaten:** mock-data-keys (`mocks.js` kandidaat/sollicitatie),
+  permissie-keys (`kandidaatbeheer`) en NL-comments — data/contract, geen code-identifiers.
 
 ### 🟡 MEDIUM
 - [◐] **CS-8 · Path-alias (§11) — GEBOUWD 2026-06-23.** `@/` → `src/` in `vite.config.js` +

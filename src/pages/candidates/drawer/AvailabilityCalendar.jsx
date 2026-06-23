@@ -64,7 +64,7 @@ export default function AvailabilityCalendar() {
   const getMon     = (d)    => { const r = new Date(d); const dw = r.getDay(); r.setDate(r.getDate() - (dw === 0 ? 6 : dw - 1)); r.setHours(0,0,0,0); return r }
   const getDOW     = (d)    => { const d0 = d.getDay(); return d0 === 0 ? 6 : d0 - 1 }
 
-  const dienstenForDate = (d) => AGENDA_SHIFTS.filter(s => s.date === fmtD(d))
+  const shiftsForDate = (d) => AGENDA_SHIFTS.filter(s => s.date === fmtD(d))
 
   const nav = (n) => {
     setSelected(null)
@@ -108,7 +108,7 @@ export default function AvailabilityCalendar() {
           <div key={h} style={{ display: 'grid', gridTemplateColumns: '44px repeat(7, 1fr)', borderBottom: '1px solid var(--border)', minHeight: 32 }}>
             <div style={{ fontSize: 10, color: 'var(--text-muted)', padding: '6px 6px 0', textAlign: 'right', background: 'var(--bg)', borderRight: '1px solid var(--border)' }}>{h}:00</div>
             {days.map((d, i) => {
-              const ds = dienstenForDate(d).filter(s => h >= s.start && h < s.end)
+              const ds = shiftsForDate(d).filter(s => h >= s.start && h < s.end)
               return (
                 <div key={i} style={{ display: 'flex', borderLeft: i > 0 ? '1px solid var(--border)' : 'none', background: i >= 5 ? 'var(--hover-bg)' : 'transparent' }}>
                   {ds.map((s, j) => (
@@ -157,7 +157,7 @@ export default function AvailabilityCalendar() {
           <div key={ri} style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', borderBottom: ri < rows.length - 1 ? '1px solid var(--border)' : 'none' }}>
             {row.map((day, ci) => {
               const d = day ? new Date(year, month, day) : null
-              const ds = d ? dienstenForDate(d) : []
+              const ds = d ? shiftsForDate(d) : []
               const tod = isToday(day)
               return (
                 <div key={ci} style={{ height: 92, padding: '4px', overflow: 'hidden', boxSizing: 'border-box',
@@ -194,7 +194,7 @@ export default function AvailabilityCalendar() {
   }
 
   const renderDay = () => {
-    const ds = dienstenForDate(base)
+    const ds = shiftsForDate(base)
     const today = new Date(); const isToday = base.toDateString() === today.toDateString()
     const dow = getDOW(base)
     return (
