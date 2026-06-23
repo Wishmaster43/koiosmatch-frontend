@@ -50,6 +50,12 @@
   },
   "modules": {
     "candidates": "Candidates",
+    "applications": "Applications",
+    "vacancies": "Vacancies",
+    "matches": "Matches",
+    "opportunities": "Opportunities",
+    "tasks": "Tasks",
+    "customers": "Customers",
     "planning": "Planning",
     "whatsapp_send": "Send WhatsApp",
     "database_update": "Update database",

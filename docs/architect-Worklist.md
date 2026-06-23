@@ -50,11 +50,12 @@ graaf-serialisatie) is vooruit-correct; de frontend leunt op nog-niet-bevestigde
   application/match/location/department/workflow (i18n-keys bestonden al). *(Server-side search/cap via AW-2;
   filtert pas server-side als de backend `?search=` levert.)*
 - [✅] **AW-6 · WorkflowCard/StepPill voedt nu uit de gedeelde `MODULE_META` (`@/modules/index`)** (2026-06-23); de lokale 6-type-map is weg, alle module-types renderen. i18n-label valt terug op de registry-label.
-- [ ] **AW-7 · Module-registry hardcodet NL-labels/categorieën + hex.** Nieuwe `src/modules/*.js`
-  erven de bestaande schuld (`label:'Kandidaten'`, `category:'Matches'`, `color:'#2563EB'`).
-  Schendt §0.1/§5/§4. → labels/categorieën via i18n, kleuren via `--color-*`; minstens de 8
-  ontbrekende `modules.*`-keys (nl+en). *(files: alle `src/modules/*.js`, `CATEGORY_ORDER`
-  `WorkflowCanvasEditor.jsx:1025`.)*
+- [◐] **AW-7 · Module-labels i18n — zichtbare chips GEDAAN 2026-06-23.** De **WorkflowsPage-kaart-chips**
+  (StepPill, via AW-6 `t('modules.*')`) vertalen nu: entity-module-keys (applications/vacancies/matches/
+  opportunities/tasks/customers) toegevoegd in nl+en. **Rest = grotere taak:** de **workflow-editor**
+  (ModulePicker/ConfigPanel) gebruikt **nergens `useTranslation`** → volledig hardcoded NL; module-labels
+  daar i18n-en heeft pas zin met een hele editor-i18n-pass. Module-kleuren (hex in `src/modules/*.js`) +
+  categorieën = AW-8.
 
 ### ☐ MEDIUM
 - [ ] **AW-8 · `CATEGORY_ORDER` = handmatige NL-lijst, gekoppeld aan module-`category`.**
