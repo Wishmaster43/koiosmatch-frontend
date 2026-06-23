@@ -283,14 +283,14 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
           ) : (
             <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 1100 }}>
               <thead>
-                <tr style={{ position: 'sticky', top: 0, zIndex: 1, background: '#fff' }}>
+                <tr style={{ position: 'sticky', top: 0, zIndex: 1, background: 'var(--surface)' }}>
                   {columns.map(col => {
                     const active = sort.key === col.key
                     return (
                       <th key={col.key} onClick={() => onSort(col.key)}
                         style={{ textAlign: col.align || 'left', padding: '11px 14px',
                                  borderBottom: '1px solid var(--border)', cursor: 'pointer',
-                                 userSelect: 'none', whiteSpace: 'nowrap', background: '#fff' }}
+                                 userSelect: 'none', whiteSpace: 'nowrap', background: 'var(--surface)' }}
                         className="transition-colors hover:bg-[var(--hover-bg)]">
                         <span className="inline-flex items-center gap-1"
                           style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase',

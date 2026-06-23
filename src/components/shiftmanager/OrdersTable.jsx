@@ -330,7 +330,7 @@ export default function OrdersTable() {
         <div className="flex items-center gap-2">
           <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}
             style={{ height: 34, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)',
-                     borderRadius: 8, color: 'var(--text)', background: 'white', cursor: 'pointer' }}>
+                     borderRadius: 8, color: 'var(--text)', background: 'var(--surface)', cursor: 'pointer' }}>
             <option value="">{t('orders.allMonths')}</option>
             {monthOptions.map(m => (
               <option key={m} value={m}>{formatMonth(m)}</option>

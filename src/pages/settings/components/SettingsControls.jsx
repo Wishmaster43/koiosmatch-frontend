@@ -18,7 +18,7 @@ function ColorPickerPopup({ color, onChange, onClose }) {
   // Curated soft palette only — no free colour wheel/hex, so labels stay calm and
   // consistent in light + dark across statuses / funnel / candidate types / pools / …
   return (
-    <div ref={ref} style={{ position: 'absolute', zIndex: 100, background: 'white', border: '1px solid #E5E7EB',
+    <div ref={ref} style={{ position: 'absolute', zIndex: 100, background: 'var(--surface)', border: '1px solid var(--border)',
                              borderRadius: 10, padding: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', top: 36, left: 0, width: 192 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {COLOR_PRESETS.map(c => (

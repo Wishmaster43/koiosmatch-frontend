@@ -85,7 +85,7 @@ export default function BrandSettings() {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-        <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '16px 18px' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 4 }}>{t('brand.companyName')}</div>
           <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>{t('brand.companyNameHint')}</div>
           <input
@@ -97,7 +97,7 @@ export default function BrandSettings() {
           />
         </div>
 
-        <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '16px 18px' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 4 }}>{t('brand.primaryColor')}</div>
           <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>{t('brand.primaryColorHint')}</div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -125,13 +125,13 @@ export default function BrandSettings() {
           </div>
         </div>
 
-        <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '16px 18px' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '16px 18px' }}>
           <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 4 }}>{t('brand.logo')}</div>
           <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 12 }}>{t('brand.logoHint')}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             {logoPreview ? (
               <img src={logoPreview} alt="Logo" style={{ height: 48, maxWidth: 120, objectFit: 'contain',
-                border: '1px solid #F3F4F6', borderRadius: 8, padding: 4 }} />
+                border: '1px solid var(--border)', borderRadius: 8, padding: 4 }} />
             ) : (
               <div style={{ width: 80, height: 48, borderRadius: 8, background: '#F9FAFB',
                             border: '1px dashed #D1D5DB', display: 'flex', alignItems: 'center',
