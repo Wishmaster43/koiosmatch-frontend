@@ -350,7 +350,7 @@ export default function KoiosPanel({ open, onClose }) {
               style={{
                 width: 30, height: 30, borderRadius: '50%', border: 'none', flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: input.trim() && !loading ? '#1F2937' : '#E5E7EB',
+                background: input.trim() && !loading ? '#1F2937' : 'var(--border)',
                 color: 'white',
                 cursor: input.trim() && !loading ? 'pointer' : 'default',
                 transition: 'background 0.15s, transform 0.1s',

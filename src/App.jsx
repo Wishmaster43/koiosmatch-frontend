@@ -119,7 +119,7 @@ const PAGE_TITLES = {
 function PlaceholderPage({ title }) {
   return (
     <div className="flex items-center justify-center h-full">
-      <p className="font-mono text-sm text-gray-400">{title} — komt eraan</p>
+      <p className="font-mono text-sm text-[var(--text-muted)]">{title} — komt eraan</p>
     </div>
   )
 }
@@ -128,7 +128,7 @@ function PlaceholderPage({ title }) {
 function PageLoader() {
   return (
     <div className="flex items-center justify-center h-full">
-      <p className="text-sm text-gray-400 animate-pulse">Laden…</p>
+      <p className="text-sm text-[var(--text-muted)] animate-pulse">Laden…</p>
     </div>
   )
 }
@@ -139,7 +139,7 @@ function NoAccessPage() {
     <div className="flex items-center justify-center h-full">
       <div className="text-center">
         <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>Geen toegang</p>
-        <p className="mt-1 text-xs text-gray-400">Je hebt geen rechten voor deze pagina.</p>
+        <p className="mt-1 text-xs text-[var(--text-muted)]">Je hebt geen rechten voor deze pagina.</p>
       </div>
     </div>
   )
@@ -305,7 +305,7 @@ function DashboardLayout() {
                 </div>
               )
             }
-            <span className="font-semibold text-gray-900" style={{ fontSize: 13 }}>
+            <span className="font-semibold text-[var(--text)]" style={{ fontSize: 13 }}>
               {tenant?.name ?? 'KoiosMatch'}
             </span>
           </div>
@@ -354,9 +354,9 @@ function DashboardLayout() {
                 style={{
                   position: 'relative',
                   width: 30, height: 30,
-                  background: rightPanelOpen ? 'var(--color-primary-bg)' : '#F9FAFB',
-                  border:     `1px solid ${rightPanelOpen ? 'var(--color-primary)' : '#E5E7EB'}`,
-                  color:      rightPanelOpen ? 'var(--color-primary)' : '#6B7280',
+                  background: rightPanelOpen ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
+                  border:     `1px solid ${rightPanelOpen ? 'var(--color-primary)' : 'var(--border)'}`,
+                  color:      rightPanelOpen ? 'var(--color-primary)' : 'var(--text-muted)',
                   cursor: 'pointer',
                 }}
               >
@@ -379,7 +379,7 @@ function DashboardLayout() {
             <button
               onClick={logout}
               className="text-xs rounded-md px-3 py-1.5"
-              style={{ background: '#F9FAFB', border: '1px solid #E5E7EB', cursor: 'pointer', color: '#6B7280' }}
+              style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
             >
               Uitloggen
             </button>
@@ -419,13 +419,13 @@ function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen" style={{ background: '#F5F5F7' }}>
+      <div className="flex items-center justify-center h-screen" style={{ background: 'var(--bg)' }}>
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center justify-center rounded-xl animate-pulse"
             style={{ width: 40, height: 40, background: 'var(--color-primary)' }}>
             <span style={{ color: 'white', fontSize: 18 }}>⚡</span>
           </div>
-          <p className="text-sm text-gray-400">Laden...</p>
+          <p className="text-sm text-[var(--text-muted)]">Laden...</p>
         </div>
       </div>
     )
