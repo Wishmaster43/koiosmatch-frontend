@@ -165,7 +165,7 @@ De JS-laag is gezond; al het werk zit in JSX. Afvinken = gesplitst tot onder het
 - [ ] `components/layout/KoiosPanel.jsx` — 376
 
 **AI / workflows:**
-- [◐] `components/ai/AIManagementTabs.jsx` — **712 → 542** (2026-06-23): gedeelde primitives → `components/ai/management/shared.jsx` (174). Rest: 5 tabs + ChatTest/AgentForm → eigen files.
+- [✅] `components/ai/AIManagementTabs.jsx` — **712 → 292** (2026-06-23): primitives → `management/shared.jsx` (174); `AgentForm`+`ChatTest` → `management/AgentForm.jsx` (260). Alle 3 < 400. Build+lint groen. *(5 tabs blijven in de hoofdfile, ruim onder de trigger.)*
 - [ ] `components/workflows/ScheduleSettings.jsx` — 451
 
 **Reports:**
