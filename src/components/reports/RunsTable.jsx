@@ -28,15 +28,15 @@ function formatDuration(ms) {
 
 // Run status → colour + icon. Label = t('runs.status.<key>').
 const STATUS_META = {
-  success:  { bg: '#F0FDF4', color: 'var(--color-success)', Icon: CheckCircle },
-  failed:   { bg: '#FEF2F2', color: 'var(--color-danger)', Icon: XCircle     },
+  success:  { bg: 'var(--color-success-bg)', color: 'var(--color-success)', Icon: CheckCircle },
+  failed:   { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)', Icon: XCircle     },
   running:  { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)', Icon: RotateCcw   },
-  pending:  { bg: '#F9FAFB', color: '#6B7280', Icon: Clock       },
+  pending:  { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock       },
 }
 
 function StatusBadge({ status }) {
   const { t } = useTranslation('reports')
-  const m = STATUS_META[status] ?? { bg: '#F9FAFB', color: '#6B7280', Icon: Clock }
+  const m = STATUS_META[status] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock }
   const Icon = m.Icon
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
@@ -48,7 +48,7 @@ function StatusBadge({ status }) {
 }
 
 function SortIcon({ active, dir }) {
-  if (!active) return <ChevronsUpDown size={12} style={{ color: '#D1D5DB' }} />
+  if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
     ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
     : <ChevronDown size={12} style={{ color: 'var(--color-primary)' }} />
@@ -63,29 +63,29 @@ function RunDrawer({ run, onClose }) {
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-white"
+      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 500, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}
-        <div style={{ padding: '18px 20px', borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
+        <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <Zap size={15} color="var(--color-primary)" />
-                <span style={{ fontWeight: 700, fontSize: 15, color: '#111827' }}>
+                <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>
                   {run.workflow_name ?? t('runs.drawer.workflowFallback', { id: run.workflow_id ?? run.id })}
                 </span>
                 <StatusBadge status={run.status} />
               </div>
-              <div style={{ fontSize: 12, color: '#9CA3AF' }}>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                 {t('runs.drawer.startedColon')} {formatDT(run.started_at ?? run.created_at)}
               </div>
             </div>
             <button onClick={onClose}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF',
+                       background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
                        borderRadius: 6, marginLeft: 10, flexShrink: 0 }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               <X size={15} />
             </button>
@@ -93,18 +93,18 @@ function RunDrawer({ run, onClose }) {
         </div>
 
         {/* Metrics */}
-        <div style={{ display: 'flex', gap: 1, background: '#F9FAFB',
-                      borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
+        <div style={{ display: 'flex', gap: 1, background: 'var(--hover-bg)',
+                      borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           {[
             { label: t('runs.drawer.candidates'), value: run.candidates_count ?? run.candidates ?? '—', Icon: Users },
             { label: t('runs.drawer.duration'),   value: formatDuration(run.duration_ms ?? run.duration), Icon: Clock },
           ].map(b => (
             <div key={b.label} style={{ flex: 1, padding: '10px 16px', textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
-                <b.Icon size={12} color="#9CA3AF" />
-                <span style={{ fontSize: 18, fontWeight: 700, color: '#111827' }}>{b.value}</span>
+                <b.Icon size={12} color="var(--text-muted)" />
+                <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{b.value}</span>
               </div>
-              <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1 }}>{b.label}</div>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{b.label}</div>
             </div>
           ))}
         </div>
@@ -113,7 +113,7 @@ function RunDrawer({ run, onClose }) {
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
 
           {/* Timeline */}
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
                         letterSpacing: '0.05em', marginBottom: 10 }}>
             {t('runs.drawer.timeline')}
           </div>
@@ -125,9 +125,9 @@ function RunDrawer({ run, onClose }) {
               { label: t('runs.drawer.createdBy'), value: run.triggered_by ?? run.user_name },
             ].filter(r => r.value && r.value !== '—').map(r => (
               <div key={r.label} style={{ display: 'flex', gap: 8, padding: '7px 0',
-                                          borderBottom: '1px solid #F9FAFB' }}>
-                <span style={{ fontSize: 12, color: '#9CA3AF', width: 140, flexShrink: 0 }}>{r.label}</span>
-                <span style={{ fontSize: 12, color: '#374151' }}>{r.value}</span>
+                                          borderBottom: '1px solid var(--hover-bg)' }}>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 140, flexShrink: 0 }}>{r.label}</span>
+                <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.value}</span>
               </div>
             ))}
           </div>
@@ -135,22 +135,22 @@ function RunDrawer({ run, onClose }) {
           {/* Step results */}
           {(run.step_results ?? run.steps ?? []).length > 0 && (
             <>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
                             letterSpacing: '0.05em', marginBottom: 10 }}>
                 {t('runs.drawer.stepResults')} ({(run.step_results ?? run.steps).length})
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
                 {(run.step_results ?? run.steps).map((step, i) => (
-                  <div key={i} style={{ background: '#F9FAFB', borderRadius: 8, padding: '10px 12px' }}>
+                  <div key={i} style={{ background: 'var(--hover-bg)', borderRadius: 8, padding: '10px 12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                   marginBottom: step.message ? 4 : 0 }}>
-                      <span style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>
+                      <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>
                         {step.label ?? step.type ?? t('runs.drawer.step', { n: i + 1 })}
                       </span>
                       <StatusBadge status={step.status ?? (step.ok ? 'success' : 'failed')} />
                     </div>
                     {step.message && (
-                      <div style={{ fontSize: 11, color: '#6B7280', marginTop: 4 }}>{step.message}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{step.message}</div>
                     )}
                   </div>
                 ))}
@@ -160,13 +160,13 @@ function RunDrawer({ run, onClose }) {
 
           {/* Error message */}
           {run.error_message && (
-            <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 8,
+            <div style={{ background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 8,
                           padding: '12px 14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                 <AlertTriangle size={13} color="var(--color-danger)" />
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-danger)' }}>{t('runs.drawer.error')}</span>
               </div>
-              <pre style={{ fontSize: 11, color: '#374151', whiteSpace: 'pre-wrap',
+              <pre style={{ fontSize: 11, color: 'var(--text)', whiteSpace: 'pre-wrap',
                             wordBreak: 'break-all', margin: 0, fontFamily: 'monospace' }}>
                 {run.error_message}
               </pre>
@@ -181,9 +181,9 @@ function RunDrawer({ run, onClose }) {
 // ─── Tabel ────────────────────────────────────────────────────────────────────
 
 const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-             color: '#9CA3AF', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6',
+             color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
              whiteSpace: 'nowrap', userSelect: 'none' }
-const TD = { padding: '10px 12px', fontSize: 13, color: '#374151', borderBottom: '1px solid #F9FAFB' }
+const TD = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 const COL_KEYS = [
   { key: 'started_at',       tKey: 'started',    sortable: true  },
@@ -292,23 +292,23 @@ export default function RunsTable() {
       {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>{t('runs.title')}</h1>
-          <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('runs.title')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
             {loading ? t('common.loadingShort') : t('runs.summary', { shown: filtered.length, total: rows.length })}
           </p>
         </div>
         <div className="relative">
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
-                                     transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+                                     transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t('runs.search')}
             style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
-                     border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
+                     border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
         </div>
       </div>
 
-      <div className="flex flex-1 min-h-0 overflow-hidden bg-white rounded-xl"
-        style={{ border: '1px solid #F3F4F6' }}>
+      <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
+        style={{ border: '1px solid var(--border)' }}>
         <div className="flex-1 min-w-0 overflow-auto">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -326,12 +326,12 @@ export default function RunsTable() {
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
+                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
                   {t('runs.loading')}
                 </td></tr>
               )}
               {!loading && sorted.length === 0 && (
-                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
+                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
                   {t('runs.empty')}
                 </td></tr>
               )}
@@ -339,17 +339,17 @@ export default function RunsTable() {
                   <tr key={r.id ?? i}
                     style={{ cursor: 'pointer' }}
                     onClick={() => setDrill(r)}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ ...TD, fontSize: 12, whiteSpace: 'nowrap' }}>
-                      <div style={{ fontWeight: 500, color: '#111827' }}>
+                      <div style={{ fontWeight: 500, color: 'var(--text)' }}>
                         {r.started_at ? new Date(r.started_at).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
                       </div>
-                      <div style={{ fontSize: 11, color: '#9CA3AF' }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                         {r.started_at ? new Date(r.started_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : ''}
                       </div>
                     </td>
-                    <td style={{ ...TD, fontWeight: 500, color: '#111827' }}>
+                    <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                         <Zap size={13} color="var(--color-primary)" />
                         {r.workflow_name ?? t('runs.drawer.workflowFallback', { id: r.workflow_id ?? r.id })}
@@ -357,13 +357,13 @@ export default function RunsTable() {
                     </td>
                     <td style={TD}><StatusBadge status={r.status} /></td>
                     <td style={{ ...TD, fontWeight: 500 }}>
-                      {r.candidates_count ?? r.candidates ?? <span style={{ color: '#D1D5DB' }}>—</span>}
+                      {r.candidates_count ?? r.candidates ?? <span style={{ color: 'var(--border)' }}>—</span>}
                     </td>
-                    <td style={{ ...TD, fontSize: 12, color: '#6B7280' }}>
+                    <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>
                       {formatDuration(r.duration_ms ?? r.duration)}
                     </td>
-                    <td style={{ ...TD, fontSize: 12, color: '#6B7280' }}>
-                      {r.trigger ?? r.trigger_type ?? <span style={{ color: '#D1D5DB' }}>—</span>}
+                    <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>
+                      {r.trigger ?? r.trigger_type ?? <span style={{ color: 'var(--border)' }}>—</span>}
                     </td>
                   </tr>
                 ))}

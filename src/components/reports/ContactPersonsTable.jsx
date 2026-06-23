@@ -114,9 +114,9 @@ export default function ContactPersonsTable() {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   const TH = { padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-               color: '#9CA3AF', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6',
+               color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
                whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '0.04em' }
-  const TD = { padding: '10px 14px', borderBottom: '1px solid #F9FAFB', verticalAlign: 'middle' }
+  const TD = { padding: '10px 14px', borderBottom: '1px solid var(--hover-bg)', verticalAlign: 'middle' }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
@@ -124,27 +124,27 @@ export default function ContactPersonsTable() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
         <div>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', letterSpacing: '-0.2px' }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.2px' }}>
             {t('contacts.title')}
           </h2>
           {!loading && (
-            <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
               {t('contacts.summary', { shown: filtered.length, total: contacts.length })}
             </p>
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px',
-                      background: 'white', border: '1px solid #E5E7EB', borderRadius: 8, width: 260 }}>
-          <Search size={13} color="#9CA3AF" />
+                      background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, width: 260 }}>
+          <Search size={13} color="var(--text-muted)" />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t('contacts.search')}
             style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                     fontSize: 12, color: '#374151' }} />
+                     fontSize: 12, color: 'var(--text)' }} />
         </div>
       </div>
 
       {/* Table */}
-      <div style={{ background: 'white', borderRadius: 12, border: '1px solid #F3F4F6', overflow: 'hidden', flex: 1 }}>
+      <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden', flex: 1 }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
@@ -158,12 +158,12 @@ export default function ContactPersonsTable() {
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={5} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
+                <tr><td colSpan={5} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
                   {t('contacts.loading')}
                 </td></tr>
               )}
               {!loading && filtered.length === 0 && (
-                <tr><td colSpan={5} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
+                <tr><td colSpan={5} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
                   {t('contacts.empty')}
                 </td></tr>
               )}
@@ -177,14 +177,14 @@ export default function ContactPersonsTable() {
                   <tr key={c.id ?? i}
                     style={{ transition: 'background 0.1s', cursor: 'pointer' }}
                     onClick={() => setDrill(c)}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#FAFAFA')}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                   >
                     {/* Customer — first column */}
                     <td style={{ ...TD, minWidth: 140 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Building2 size={12} color="#9CA3AF" style={{ flexShrink: 0 }} />
-                        <span style={{ fontWeight: 500, color: '#374151' }}>
+                        <Building2 size={12} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                        <span style={{ fontWeight: 500, color: 'var(--text)' }}>
                           {c.customer_name ?? '—'}
                         </span>
                       </div>
@@ -200,9 +200,9 @@ export default function ContactPersonsTable() {
                           {initials || '?'}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 500, color: '#111827' }}>{name}</div>
+                          <div style={{ fontWeight: 500, color: 'var(--text)' }}>{name}</div>
                           {c.function_title && (
-                            <div style={{ fontSize: 11, color: '#9CA3AF' }}>{c.function_title}</div>
+                            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.function_title}</div>
                           )}
                         </div>
                       </div>
@@ -216,16 +216,16 @@ export default function ContactPersonsTable() {
                                      color: 'var(--color-secondary)', textDecoration: 'none', fontSize: 12 }}>
                             <Mail size={11} />{c.email}
                           </a>
-                        : <span style={{ color: '#D1D5DB' }}>—</span>}
+                        : <span style={{ color: 'var(--border)' }}>—</span>}
                     </td>
 
                     {/* Phone */}
                     <td style={{ ...TD, minWidth: 130 }}>
                       {c.mobile
-                        ? <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#374151' }}>
-                            <Phone size={11} color="#9CA3AF" />{c.mobile}
+                        ? <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text)' }}>
+                            <Phone size={11} color="var(--text-muted)" />{c.mobile}
                           </div>
-                        : <span style={{ color: '#D1D5DB' }}>—</span>}
+                        : <span style={{ color: 'var(--border)' }}>—</span>}
                     </td>
 
                     {/* Planning contact */}
@@ -233,13 +233,13 @@ export default function ContactPersonsTable() {
                       <span style={{
                         display: 'inline-flex', alignItems: 'center', gap: 5,
                         borderRadius: 999, padding: '3px 10px', fontSize: 11, fontWeight: 500,
-                        background: isPlanning ? '#F0FDF4' : '#F9FAFB',
-                        color:      isPlanning ? 'var(--color-success)'  : '#9CA3AF',
-                        border:     `1px solid ${isPlanning ? '#BBF7D0' : '#E5E7EB'}`,
+                        background: isPlanning ? 'var(--color-success-bg)' : 'var(--hover-bg)',
+                        color:      isPlanning ? 'var(--color-success)'  : 'var(--text-muted)',
+                        border:     `1px solid ${isPlanning ? '#BBF7D0' : 'var(--border)'}`,
                       }}>
                         {isPlanning
                           ? <><MessageCircle size={10} /> {t('contacts.yes')}</>
-                          : <><span style={{ width: 5, height: 5, borderRadius: '50%', background: '#D1D5DB' }} /> {t('contacts.no')}</>}
+                          : <><span style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--border)' }} /> {t('contacts.no')}</>}
                       </span>
                     </td>
                   </tr>

@@ -13,14 +13,14 @@ import { useRightPanel }     from '../../context/RightPanelContext'
 function StatusBadge({ status }) {
   const { t } = useTranslation('reports')
   const styles = {
-    actief:     { bg: '#F0FDF4', color: 'var(--color-success)' },
-    nietactief: { bg: '#FFF7ED', color: '#C2410C' },
+    actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
+    nietactief: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
     extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
     intake:     { bg: '#FAF5FF', color: '#7C3AED' },
-    verwijderd: { bg: '#FEF2F2', color: 'var(--color-danger)' },
+    verwijderd: { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)' },
   }
   const key = (status || '').toLowerCase().replace(/\s+/g, '')
-  const s = styles[key] || { bg: '#F9FAFB', color: '#6B7280' }
+  const s = styles[key] || { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')
   return (
     <span style={{ background: s.bg, color: s.color, fontSize: 11, fontWeight: 500,
@@ -47,13 +47,13 @@ function TagPill({ value, color = 'var(--color-primary)', bg = 'var(--color-prim
 }
 
 function TagCell({ items, color, bg }) {
-  if (!items?.length) return <span style={{ color: '#D1D5DB' }}>—</span>
+  if (!items?.length) return <span style={{ color: 'var(--border)' }}>—</span>
   const visible = items.slice(0, 2)
   const rest    = items.length - 2
   return (
     <div className="flex flex-wrap gap-1">
       {visible.map((v, i) => <TagPill key={i} value={v} color={color} bg={bg} />)}
-      {rest > 0 && <TagPill value={`+${rest}`} color="#6B7280" bg="#F3F4F6" />}
+      {rest > 0 && <TagPill value={`+${rest}`} color="var(--text-muted)" bg="var(--border)" />}
     </div>
   )
 }
@@ -61,20 +61,20 @@ function TagCell({ items, color, bg }) {
 function RateCell({ candidate }) {
   const { t } = useTranslation('reports')
   const rates = candidate.global_rate_summary
-  if (!Array.isArray(rates) || !rates.length) return <span style={{ color: '#D1D5DB' }}>—</span>
+  if (!Array.isArray(rates) || !rates.length) return <span style={{ color: 'var(--border)' }}>—</span>
   const visible = rates.slice(0, 2)
   return (
     <div className="flex flex-col gap-0.5">
       {visible.map((r, i) => (
-        <span key={i} style={{ fontSize: 11, color: '#374151', whiteSpace: 'nowrap' }}>
-          <span style={{ color: '#9CA3AF' }}>
+        <span key={i} style={{ fontSize: 11, color: 'var(--text)', whiteSpace: 'nowrap' }}>
+          <span style={{ color: 'var(--text-muted)' }}>
             {r.global_rate?.internal_description ?? r.step_name ?? '—'}:&nbsp;
           </span>
           {r.hour_rate != null ? `€${Number(r.hour_rate).toFixed(2)}` : '—'}
         </span>
       ))}
       {rates.length > 2 && (
-        <span style={{ fontSize: 10, color: '#9CA3AF' }}>{t('candidates.more', { count: rates.length - 2 })}</span>
+        <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t('candidates.more', { count: rates.length - 2 })}</span>
       )}
     </div>
   )
@@ -92,10 +92,10 @@ function buildColumns(t) {
     value: c => `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim(),
     render: c => (
       <div>
-        <div style={{ fontWeight: 500, color: '#111827', fontSize: 13 }}>
+        <div style={{ fontWeight: 500, color: 'var(--text)', fontSize: 13 }}>
           {`${c.firstname ?? ''} ${c.lastname ?? ''}`.trim() || '—'}
         </div>
-        {c.email && <div style={{ fontSize: 11, color: '#9CA3AF' }}>{c.email}</div>}
+        {c.email && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.email}</div>}
       </div>
     )},
   { key: 'status', label: t('candidates.cols.status'), type: 'string',
@@ -147,7 +147,7 @@ function compareValues(a, b, col, dir) {
 }
 
 function SortIcon({ active, dir }) {
-  if (!active) return <ChevronsUpDown size={11} style={{ color: '#D1D5DB' }} />
+  if (!active) return <ChevronsUpDown size={11} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
     ? <ChevronUp size={11} style={{ color: 'var(--color-primary)' }} />
     : <ChevronDown size={11} style={{ color: 'var(--color-primary)' }} />
@@ -248,30 +248,30 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
 
       <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>{t('candidates.title')}</h1>
-          <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('candidates.title')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
             {t('candidates.summary', { shown: filtered.length, total: candidates.length })}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
             <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
-                                       transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+                                       transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder={t('candidates.search')}
               style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
-                       border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
+                       border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
           </div>
         </div>
       </div>
 
-      <div className="flex flex-1 min-h-0 overflow-hidden bg-white rounded-xl"
-        style={{ border: '1px solid #F3F4F6' }}>
+      <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
+        style={{ border: '1px solid var(--border)' }}>
         <div className="flex-1 min-w-0 overflow-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center gap-3"
               style={{ height: '100%', minHeight: 300 }}>
-              <RefreshCw size={20} className="animate-spin" style={{ color: '#D1D5DB' }} />
+              <RefreshCw size={20} className="animate-spin" style={{ color: 'var(--border)' }} />
               <p className="text-sm text-gray-400">{t('candidates.loading')}</p>
             </div>
           ) : sorted.length === 0 ? (
@@ -289,13 +289,13 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
                     return (
                       <th key={col.key} onClick={() => onSort(col.key)}
                         style={{ textAlign: col.align || 'left', padding: '11px 14px',
-                                 borderBottom: '1px solid #F3F4F6', cursor: 'pointer',
+                                 borderBottom: '1px solid var(--border)', cursor: 'pointer',
                                  userSelect: 'none', whiteSpace: 'nowrap', background: '#fff' }}
                         className="transition-colors hover:bg-gray-50">
                         <span className="inline-flex items-center gap-1"
                           style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase',
                                    letterSpacing: '0.04em',
-                                   color: active ? '#374151' : '#9CA3AF' }}>
+                                   color: active ? 'var(--text)' : 'var(--text-muted)' }}>
                           {col.label}
                           <SortIcon active={active} dir={sort.dir} />
                         </span>
@@ -309,11 +309,11 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
                   <tr key={c.id ?? i}
                     onClick={() => setDetail(c)}
                     className="transition-colors hover:bg-gray-50"
-                    style={{ borderBottom: '1px solid #F9FAFB', cursor: 'pointer' }}>
+                    style={{ borderBottom: '1px solid var(--hover-bg)', cursor: 'pointer' }}>
                     {columns.map(col => (
                       <td key={col.key}
                         style={{ padding: '10px 14px', textAlign: col.align || 'left',
-                                 color: '#374151', fontSize: 13 }}>
+                                 color: 'var(--text)', fontSize: 13 }}>
                         {col.render(c)}
                       </td>
                     ))}

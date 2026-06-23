@@ -118,16 +118,16 @@ const DUMMY_CUSTOMERS = [
 ]
 
 function SortIcon({ active, dir }) {
-  if (!active) return <ChevronsUpDown size={12} style={{ color: '#D1D5DB' }} />
+  if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
     ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
     : <ChevronDown size={12} style={{ color: 'var(--color-primary)' }} />
 }
 
 const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-             color: '#9CA3AF', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6',
+             color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
              whiteSpace: 'nowrap', userSelect: 'none' }
-const TD = { padding: '10px 12px', fontSize: 13, color: '#374151', borderBottom: '1px solid #F9FAFB' }
+const TD = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 export default function CustomersTable() {
   const { t } = useTranslation('reports')
@@ -252,23 +252,23 @@ export default function CustomersTable() {
 
       {error && (
         <div style={{ padding: '10px 14px', marginBottom: 12, fontSize: 13, color: 'var(--color-danger)',
-                      background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 8 }}>
+                      background: 'var(--color-danger-bg)', border: '1px solid #FECACA', borderRadius: 8 }}>
           {error}
         </div>
       )}
 
       {/* Table */}
-      <div className="flex flex-1 min-h-0 overflow-hidden bg-white rounded-xl"
-        style={{ border: '1px solid #F3F4F6' }}>
+      <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
+        style={{ border: '1px solid var(--border)' }}>
         <div className="flex-1 min-w-0 overflow-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center gap-3" style={{ height: 240 }}>
-              <RefreshCw size={18} className="animate-spin" style={{ color: '#D1D5DB' }} />
-              <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('customers.loading')}</p>
+              <RefreshCw size={18} className="animate-spin" style={{ color: 'var(--border)' }} />
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('customers.loading')}</p>
             </div>
           ) : sorted.length === 0 ? (
             <div className="flex items-center justify-center" style={{ height: 180 }}>
-              <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('customers.empty')}</p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('customers.empty')}</p>
             </div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -294,26 +294,26 @@ export default function CustomersTable() {
                     <tr key={c.id ?? i}
                       style={{ cursor: 'pointer' }}
                       onClick={() => setDetail(c)}
-                      onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
                     >
                       <td style={TD}>
-                        <span style={{ fontWeight: 500, color: '#111827' }}>{c.name}</span>
+                        <span style={{ fontWeight: 500, color: 'var(--text)' }}>{c.name}</span>
                       </td>
                       <td style={TD}>
                         <span style={{ fontFamily: 'monospace', fontSize: 12 }}>
-                          {c.debtor_number || <span style={{ color: '#D1D5DB' }}>—</span>}
+                          {c.debtor_number || <span style={{ color: 'var(--border)' }}>—</span>}
                         </span>
                       </td>
                       <td style={TD}><StatusBadge status={c.status} /></td>
-                      <td style={TD}>{c.account_manager || <span style={{ color: '#D1D5DB' }}>—</span>}</td>
+                      <td style={TD}>{c.account_manager || <span style={{ color: 'var(--border)' }}>—</span>}</td>
                       <td style={TD}>
                         <span style={{ fontWeight: 500 }}>{locCount}</span>
-                        {locCount === 0 && <span style={{ color: '#D1D5DB', marginLeft: 4, fontSize: 11 }}>—</span>}
+                        {locCount === 0 && <span style={{ color: 'var(--border)', marginLeft: 4, fontSize: 11 }}>—</span>}
                       </td>
                       <td style={TD}>
                         <span style={{ fontWeight: 500 }}>{deptCount}</span>
-                        {deptCount === 0 && <span style={{ color: '#D1D5DB', marginLeft: 4, fontSize: 11 }}>—</span>}
+                        {deptCount === 0 && <span style={{ color: 'var(--border)', marginLeft: 4, fontSize: 11 }}>—</span>}
                       </td>
                     </tr>
                   )

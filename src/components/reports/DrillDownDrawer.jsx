@@ -11,14 +11,14 @@ import { useTranslation } from 'react-i18next'
 function StatusBadge({ status }) {
   const { t } = useTranslation('reports')
   const styles = {
-    actief:     { bg: '#F0FDF4', color: 'var(--color-success)' },
-    nietactief: { bg: '#FFF7ED', color: '#C2410C' },
+    actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
+    nietactief: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
     extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
     intake:     { bg: '#FAF5FF', color: '#7C3AED' },
-    verwijderd: { bg: '#FEF2F2', color: 'var(--color-danger)' },
+    verwijderd: { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)' },
   }
   const key = (status || '').toLowerCase()
-  const s = styles[key] || { bg: '#F9FAFB', color: '#6B7280' }
+  const s = styles[key] || { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   const label = status ? t(`candidates.status.${key}`, { defaultValue: status }) : t('candidates.unknown')
   return (
     <span className="rounded-full px-2 py-0.5 text-xs font-medium flex-shrink-0"
@@ -37,10 +37,10 @@ function InfoRow({ icon: Icon, label, value, highlight }) {
   if (value === null || value === undefined || value === '') return null
   return (
     <div className="flex items-center gap-1.5">
-      <Icon size={11} color={highlight ? 'var(--color-warning)' : '#D1D5DB'} style={{ flexShrink: 0 }} />
+      <Icon size={11} color={highlight ? 'var(--color-warning)' : 'var(--border)'} style={{ flexShrink: 0 }} />
       <span className="text-xs truncate">
-        <span style={{ color: '#9CA3AF' }}>{label}: </span>
-        <span style={{ color: highlight ? 'var(--color-warning)' : '#6B7280', fontWeight: highlight ? 500 : 400 }}>
+        <span style={{ color: 'var(--text-muted)' }}>{label}: </span>
+        <span style={{ color: highlight ? 'var(--color-warning)' : 'var(--text-muted)', fontWeight: highlight ? 500 : 400 }}>
           {value}
         </span>
       </span>
@@ -69,12 +69,12 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
       {/* Drawer */}
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-white"
+      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 560, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}
         <div className="flex items-start justify-between flex-shrink-0"
-          style={{ padding: '16px 20px', borderBottom: '1px solid #F3F4F6' }}>
+          style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
           <div>
             <div className="font-semibold text-gray-900" style={{ fontSize: 15 }}>{title}</div>
             <div className="text-sm text-gray-400 mt-0.5">
@@ -84,18 +84,18 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
           </div>
           <button onClick={onClose}
             className="flex items-center justify-center flex-shrink-0 rounded-lg"
-            style={{ width: 30, height: 30, background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', marginLeft: 12 }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+            style={{ width: 30, height: 30, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', marginLeft: 12 }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             <X size={16} />
           </button>
         </div>
 
         {/* Search bar */}
-        <div className="flex-shrink-0 px-4 py-3" style={{ borderBottom: '1px solid #F9FAFB' }}>
+        <div className="flex-shrink-0 px-4 py-3" style={{ borderBottom: '1px solid var(--hover-bg)' }}>
           <div className="flex items-center gap-2 px-3 rounded-lg"
-            style={{ background: '#F9FAFB', border: '1px solid #E5E7EB' }}>
-            <Search size={13} color="#9CA3AF" />
+            style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)' }}>
+            <Search size={13} color="var(--text-muted)" />
             <input
               value={search}
               onChange={e => setSearch(e.target.value)}
@@ -121,8 +121,8 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
               return (
                 <div key={c.id || i}
                   className="px-4 py-4 transition-colors"
-                  style={{ borderBottom: '1px solid #F9FAFB' }}
-                  onMouseEnter={e => (e.currentTarget.style.background = '#FAFAFA')}
+                  style={{ borderBottom: '1px solid var(--hover-bg)' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                   onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                 >
                   <div className="flex items-start gap-3">
@@ -170,12 +170,12 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
 
         {/* Footer */}
         <div className="flex items-center justify-between flex-shrink-0 px-4 py-3"
-          style={{ borderTop: '1px solid #F3F4F6', background: '#FAFAFA' }}>
+          style={{ borderTop: '1px solid var(--border)', background: 'var(--hover-bg)' }}>
           <span className="text-xs text-gray-400">
             {t('drilldown.shownOf', { shown: filtered.length, total: candidates.length })}
           </span>
           <button onClick={onClose} className="text-xs rounded-lg px-3 py-1.5"
-            style={{ background: 'none', border: '1px solid #E5E7EB', cursor: 'pointer', color: '#6B7280' }}>
+            style={{ background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}>
             {t('dr.close')}
           </button>
         </div>

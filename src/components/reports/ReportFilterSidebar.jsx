@@ -26,9 +26,9 @@ function SearchSelectGroup({ group }) {
         style={{
           width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           padding: '5px 8px', borderRadius: 6, fontSize: 12, cursor: 'pointer',
-          background: hasSelected ? 'var(--color-primary-bg)' : '#F9FAFB',
-          border: `1px solid ${hasSelected ? 'var(--color-primary)' : '#E5E7EB'}`,
-          color: hasSelected ? 'var(--color-primary)' : '#374151',
+          background: hasSelected ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
+          border: `1px solid ${hasSelected ? 'var(--color-primary)' : 'var(--border)'}`,
+          color: hasSelected ? 'var(--color-primary)' : 'var(--text)',
         }}
       >
         <span className="truncate">
@@ -44,23 +44,23 @@ function SearchSelectGroup({ group }) {
 
       {/* Dropdown */}
       {open && (
-        <div style={{ marginTop: 4, border: '1px solid #E5E7EB', borderRadius: 6,
+        <div style={{ marginTop: 4, border: '1px solid var(--border)', borderRadius: 6,
                       background: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
           {/* Search bar */}
-          <div style={{ padding: '6px 8px', borderBottom: '1px solid #F3F4F6',
+          <div style={{ padding: '6px 8px', borderBottom: '1px solid var(--border)',
                         display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Search size={11} color="#9CA3AF" style={{ flexShrink: 0 }} />
+            <Search size={11} color="var(--text-muted)" style={{ flexShrink: 0 }} />
             <input
               autoFocus
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder={t('search')}
               style={{ flex: 1, border: 'none', outline: 'none', fontSize: 11,
-                       color: '#374151', background: 'transparent', padding: 0 }}
+                       color: 'var(--text)', background: 'transparent', padding: 0 }}
             />
             {query && (
               <button onClick={() => setQuery('')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: 0 }}>
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0 }}>
                 <X size={9} />
               </button>
             )}
@@ -69,10 +69,10 @@ function SearchSelectGroup({ group }) {
           {/* Options */}
           <div style={{ maxHeight: 160, overflowY: 'auto', padding: '4px 0' }}>
             {group.options.length === 0 && (
-              <div style={{ padding: '6px 10px', fontSize: 11, color: '#9CA3AF' }}>{t('filters.noData')}</div>
+              <div style={{ padding: '6px 10px', fontSize: 11, color: 'var(--text-muted)' }}>{t('filters.noData')}</div>
             )}
             {group.options.length > 0 && visible.length === 0 && (
-              <div style={{ padding: '6px 10px', fontSize: 11, color: '#9CA3AF' }}>{t('noResults')}</div>
+              <div style={{ padding: '6px 10px', fontSize: 11, color: 'var(--text-muted)' }}>{t('noResults')}</div>
             )}
             {visible.map(opt => {
               const checked = group.selected.includes(opt.value)
@@ -80,13 +80,13 @@ function SearchSelectGroup({ group }) {
                 <label key={opt.value}
                   style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '4px 10px',
                            cursor: 'pointer', background: checked ? 'var(--color-primary-bg)' : 'transparent' }}
-                  onMouseEnter={e => { if (!checked) e.currentTarget.style.background = '#F9FAFB' }}
+                  onMouseEnter={e => { if (!checked) e.currentTarget.style.background = 'var(--hover-bg)' }}
                   onMouseLeave={e => { if (!checked) e.currentTarget.style.background = 'transparent' }}
                 >
                   <input type="checkbox" checked={checked}
                     onChange={() => group.onToggle(opt.value)}
                     style={{ accentColor: 'var(--color-primary)', width: 12, height: 12, flexShrink: 0 }} />
-                  <span style={{ fontSize: 12, color: checked ? 'var(--color-primary)' : '#374151',
+                  <span style={{ fontSize: 12, color: checked ? 'var(--color-primary)' : 'var(--text)',
                                  fontWeight: checked ? 500 : 400, overflow: 'hidden',
                                  textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {opt.label}
@@ -98,7 +98,7 @@ function SearchSelectGroup({ group }) {
 
           {/* Selected tags */}
           {hasSelected && (
-            <div style={{ padding: '5px 8px', borderTop: '1px solid #F3F4F6',
+            <div style={{ padding: '5px 8px', borderTop: '1px solid var(--border)',
                           display: 'flex', flexWrap: 'wrap', gap: 4 }}>
               {group.selected.map(val => {
                 const opt = group.options.find(o => o.value === val)
@@ -183,7 +183,7 @@ function PeriodGroup({ group }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 
       {/* Granularity toggle */}
-      <div style={{ display: 'flex', background: '#F3F4F6', borderRadius: 7, padding: 2, gap: 2 }}>
+      <div style={{ display: 'flex', background: 'var(--border)', borderRadius: 7, padding: 2, gap: 2 }}>
         {[
           { id: 'month',   label: t('filters.granMonth')   },
           { id: 'quarter', label: t('filters.granQuarter') },
@@ -194,9 +194,9 @@ function PeriodGroup({ group }) {
             <button key={g.id}
               onClick={() => setGranularity(g.id)}
               style={{ ...btnBase, flex: 1, padding: '4px 0',
-                       border: active ? '1px solid #E5E7EB' : '1px solid transparent',
+                       border: active ? '1px solid var(--border)' : '1px solid transparent',
                        background: active ? 'white' : 'transparent',
-                       color: active ? '#111827' : '#6B7280',
+                       color: active ? 'var(--text)' : 'var(--text-muted)',
                        boxShadow: active ? '0 1px 2px rgba(0,0,0,0.06)' : 'none' }}>
               {g.label}
             </button>
@@ -212,8 +212,8 @@ function PeriodGroup({ group }) {
             return (
               <button key={y} onClick={() => setYear(y)}
                 style={{ ...btnBase, padding: '3px 9px',
-                         background: active ? 'var(--color-primary)' : '#F3F4F6',
-                         color:      active ? 'white'                : '#374151',
+                         background: active ? 'var(--color-primary)' : 'var(--border)',
+                         color:      active ? 'white'                : 'var(--text)',
                          fontWeight: active ? 600 : 400 }}>
                 {y}
               </button>
@@ -231,9 +231,9 @@ function PeriodGroup({ group }) {
             return (
               <button key={sub} onClick={() => setSub(sub)}
                 style={{ ...btnBase, padding: '4px 0', textAlign: 'center',
-                         background: active ? 'var(--color-primary-bg)' : '#F9FAFB',
-                         color:      active ? 'var(--color-primary)'    : '#374151',
-                         border: `1px solid ${active ? 'var(--color-primary)' : '#E5E7EB'}`,
+                         background: active ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
+                         color:      active ? 'var(--color-primary)'    : 'var(--text)',
+                         border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
                          fontWeight: active ? 600 : 400 }}>
                 {monthAbbr(i)}
               </button>
@@ -251,9 +251,9 @@ function PeriodGroup({ group }) {
             return (
               <button key={sub} onClick={() => setSub(sub)}
                 style={{ ...btnBase, padding: '6px 0', textAlign: 'center',
-                         background: active ? 'var(--color-primary-bg)' : '#F9FAFB',
-                         color:      active ? 'var(--color-primary)'    : '#374151',
-                         border: `1px solid ${active ? 'var(--color-primary)' : '#E5E7EB'}`,
+                         background: active ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
+                         color:      active ? 'var(--color-primary)'    : 'var(--text)',
+                         border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
                          fontWeight: active ? 600 : 400, fontSize: 12 }}>
                 {q}
               </button>
@@ -267,7 +267,7 @@ function PeriodGroup({ group }) {
         <button onClick={() => group.onChange('')}
           style={{ ...btnBase, display: 'flex', alignItems: 'center', justifyContent: 'center',
                    gap: 4, padding: '4px 0', background: 'none',
-                   color: '#9CA3AF', fontSize: 11, fontWeight: 400 }}>
+                   color: 'var(--text-muted)', fontSize: 11, fontWeight: 400 }}>
           <RotateCcw size={10} /> {t('filters.clearPeriod')}
         </button>
       )}
@@ -296,14 +296,14 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
   }
 
   return (
-    <div className="flex flex-col flex-shrink-0 bg-white"
-      style={{ width: 220, borderLeft: '1px solid #F3F4F6' }}>
+    <div className="flex flex-col flex-shrink-0 bg-[var(--surface)]"
+      style={{ width: 220, borderLeft: '1px solid var(--border)' }}>
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '10px 12px', borderBottom: '1px solid #F3F4F6' }}>
+                    padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontWeight: 600, fontSize: 12, color: '#111827' }}>{title}</span>
+          <span style={{ fontWeight: 600, fontSize: 12, color: 'var(--text)' }}>{title}</span>
           {activeCount > 0 && (
             <span style={{ background: 'var(--color-primary)', color: 'white',
                            borderRadius: 999, padding: '1px 6px', fontSize: 10, fontWeight: 600 }}>
@@ -316,8 +316,8 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
             <button onClick={clearAll} title={t('filters.clearAll')}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                        width: 22, height: 22, background: 'none', border: 'none',
-                       cursor: 'pointer', color: '#9CA3AF', borderRadius: 4 }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#F3F4F6')}
+                       cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 4 }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               <RotateCcw size={12} />
             </button>
@@ -325,8 +325,8 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
           <button onClick={onClose}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                      width: 22, height: 22, background: 'none', border: 'none',
-                     cursor: 'pointer', color: '#9CA3AF', borderRadius: 4 }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F3F4F6')}
+                     cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 4 }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             <X size={13} />
           </button>
@@ -335,15 +335,15 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
 
       {/* Global search (type: 'global-search') — rendered at top before filter groups */}
       {groups.filter(g => g.type === 'global-search').map(g => (
-        <div key={g.key} style={{ padding: '8px 12px', borderBottom: '1px solid #F3F4F6' }}>
+        <div key={g.key} style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px',
-            borderRadius: 7, border: '1px solid #E5E7EB', background: '#F9FAFB' }}>
-            <Search size={12} color="#9CA3AF" style={{ flexShrink: 0 }} />
+            borderRadius: 7, border: '1px solid var(--border)', background: 'var(--hover-bg)' }}>
+            <Search size={12} color="var(--text-muted)" style={{ flexShrink: 0 }} />
             <input autoFocus={false} value={g.value ?? ''} onChange={e => g.onChange(e.target.value)}
               placeholder={g.placeholder ?? t('filters.searchAll')}
-              style={{ flex: 1, border: 'none', outline: 'none', fontSize: 12, color: '#374151', background: 'transparent', padding: 0 }} />
+              style={{ flex: 1, border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'transparent', padding: 0 }} />
             {g.value && (
-              <button onClick={() => g.onChange('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: 0, display: 'flex' }}>
+              <button onClick={() => g.onChange('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}>
                 <X size={10} />
               </button>
             )}
@@ -353,23 +353,23 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
 
       {/* Location radius (type: 'location') */}
       {groups.filter(g => g.type === 'location').map(g => (
-        <div key={g.key} style={{ padding: '8px 12px', borderBottom: '1px solid #F3F4F6' }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+        <div key={g.key} style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
             {t('filters.radius')}
           </div>
           <input value={g.city ?? ''} onChange={e => g.onCityChange(e.target.value)}
             placeholder={t('filters.cityPlaceholder')}
             style={{ width: '100%', padding: '6px 8px', fontSize: 12, borderRadius: 6,
-              border: '1px solid #E5E7EB', background: '#F9FAFB', color: '#374151',
+              border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)',
               outline: 'none', boxSizing: 'border-box', marginBottom: 6 }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <input value={g.radius ?? ''} onChange={e => g.onRadiusChange(e.target.value)}
               placeholder="35"
               type="number" min="1"
               style={{ width: 70, padding: '6px 8px', fontSize: 12, borderRadius: 6,
-                border: '1px solid #E5E7EB', background: '#F9FAFB', color: '#374151',
+                border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)',
                 outline: 'none', boxSizing: 'border-box' }} />
-            <span style={{ fontSize: 12, color: '#6B7280' }}>km</span>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>km</span>
           </div>
         </div>
       ))}
@@ -383,21 +383,21 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
             {group.category && group.category !== arr[i - 1]?.category && (
               <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text)', textTransform: 'uppercase',
                             letterSpacing: '0.06em', marginBottom: 8,
-                            paddingBottom: 4, borderBottom: '1px solid #F3F4F6' }}>
+                            paddingBottom: 4, borderBottom: '1px solid var(--border)' }}>
                 {group.category}
               </div>
             )}
             {/* Label + clear button */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                           marginBottom: 5 }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF',
+              <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)',
                             textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {group.label}
               </div>
               {group.type !== 'period' && group.selected?.length > 0 && (
                 <button
                   onClick={() => group.selected.forEach(v => group.onToggle(v))}
-                  style={{ fontSize: 9, color: '#9CA3AF', background: 'none', border: 'none',
+                  style={{ fontSize: 9, color: 'var(--text-muted)', background: 'none', border: 'none',
                            cursor: 'pointer', padding: 0 }}>
                   {t('filters.clear')}
                 </button>
@@ -409,7 +409,7 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
             ) : group.type === 'search-select' ? (
               <SearchSelectGroup group={group} />
             ) : group.type === 'radio' ? (
-              <div style={{ display: 'flex', background: '#F3F4F6', borderRadius: 7,
+              <div style={{ display: 'flex', background: 'var(--border)', borderRadius: 7,
                             padding: 2, gap: 2 }}>
                 {group.options.map(opt => {
                   const active = group.selected.includes(opt.value)
@@ -418,9 +418,9 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
                       style={{
                         flex: 1, padding: '4px 0', borderRadius: 5, fontSize: 11,
                         fontWeight: active ? 600 : 400, cursor: 'pointer',
-                        border: active ? '1px solid #E5E7EB' : '1px solid transparent',
+                        border: active ? '1px solid var(--border)' : '1px solid transparent',
                         background: active ? 'white' : 'transparent',
-                        color: active ? '#111827' : '#6B7280',
+                        color: active ? 'var(--text)' : 'var(--text-muted)',
                         boxShadow: active ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
                         transition: 'all 0.1s',
                       }}>
@@ -441,7 +441,7 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
                         <input type="checkbox" checked={checked}
                           onChange={() => group.onToggle(opt.value)}
                           style={{ accentColor: 'var(--color-primary)', width: 12, height: 12, flexShrink: 0 }} />
-                        <span style={{ fontSize: 12, color: checked ? '#111827' : '#6B7280',
+                        <span style={{ fontSize: 12, color: checked ? 'var(--text)' : 'var(--text-muted)',
                                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {opt.label}
                         </span>
@@ -450,8 +450,8 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
                         <span style={{
                           flexShrink: 0, fontFamily: 'monospace', borderRadius: 999,
                           padding: '1px 5px', fontSize: 10,
-                          background: checked ? 'var(--color-primary-bg)' : '#F3F4F6',
-                          color:      checked ? 'var(--color-primary)'    : '#9CA3AF',
+                          background: checked ? 'var(--color-primary-bg)' : 'var(--border)',
+                          color:      checked ? 'var(--color-primary)'    : 'var(--text-muted)',
                         }}>
                           {opt.count}
                         </span>

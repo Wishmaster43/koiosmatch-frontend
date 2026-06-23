@@ -31,18 +31,18 @@ const CHANNEL_META = {
 
 // Status → colour + icon. Label = t('messages.status.<key>').
 const STATUS_META = {
-  sent:       { bg: '#F0FDF4', color: 'var(--color-success)', Icon: CheckCheck  },
+  sent:       { bg: 'var(--color-success-bg)', color: 'var(--color-success)', Icon: CheckCheck  },
   delivered:  { bg: '#ECFDF5', color: '#059669', Icon: CheckCheck  },
   read:       { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)', Icon: CheckCheck  },
-  failed:     { bg: '#FEF2F2', color: 'var(--color-danger)', Icon: XCircle     },
-  pending:    { bg: '#F9FAFB', color: '#6B7280', Icon: Clock     },
-  bounced:    { bg: '#FFF7ED', color: '#C2410C', Icon: AlertTriangle },
+  failed:     { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)', Icon: XCircle     },
+  pending:    { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock     },
+  bounced:    { bg: 'var(--color-warning-bg)', color: '#C2410C', Icon: AlertTriangle },
 }
 
 function ChannelBadge({ channel }) {
   const { t } = useTranslation('reports')
   const key = channel?.toLowerCase()
-  const m = CHANNEL_META[key] ?? { bg: '#F9FAFB', color: '#6B7280', Icon: MessageCircle }
+  const m = CHANNEL_META[key] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: MessageCircle }
   const Icon = m.Icon
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
@@ -56,7 +56,7 @@ function ChannelBadge({ channel }) {
 function StatusBadge({ status }) {
   const { t } = useTranslation('reports')
   const key = status?.toLowerCase()
-  const m = STATUS_META[key] ?? { bg: '#F9FAFB', color: '#6B7280', Icon: Clock }
+  const m = STATUS_META[key] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock }
   const Icon = m.Icon
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
@@ -68,7 +68,7 @@ function StatusBadge({ status }) {
 }
 
 function SortIcon({ active, dir }) {
-  if (!active) return <ChevronsUpDown size={12} style={{ color: '#D1D5DB' }} />
+  if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
     ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
     : <ChevronDown size={12} style={{ color: 'var(--color-primary)' }} />
@@ -85,16 +85,16 @@ function MessageDrawer({ message, onClose }) {
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-white"
+      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 480, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}
-        <div style={{ padding: '18px 20px', borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
+        <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                 <ChannelIcon size={15} color={channelMeta.color} />
-                <span style={{ fontWeight: 700, fontSize: 15, color: '#111827' }}>
+                <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>
                   {message.subject ?? message.template_name ?? t('messages.drawer.messageFallback', { id: message.id })}
                 </span>
               </div>
@@ -105,9 +105,9 @@ function MessageDrawer({ message, onClose }) {
             </div>
             <button onClick={onClose}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF',
+                       background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
                        borderRadius: 6, marginLeft: 10, flexShrink: 0 }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               <X size={15} />
             </button>
@@ -118,7 +118,7 @@ function MessageDrawer({ message, onClose }) {
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
 
           {/* Recipient */}
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
                         letterSpacing: '0.05em', marginBottom: 8 }}>
             {t('messages.drawer.recipient')}
           </div>
@@ -128,15 +128,15 @@ function MessageDrawer({ message, onClose }) {
             { icon: Mail,  label: t('messages.drawer.email'),  value: message.recipient_email ?? message.to_email },
           ].filter(r => r.value).map(r => (
             <div key={r.label} style={{ display: 'flex', gap: 8, padding: '7px 0',
-                                        borderBottom: '1px solid #F9FAFB' }}>
-              <r.icon size={13} color="#D1D5DB" style={{ flexShrink: 0, marginTop: 1 }} />
-              <span style={{ fontSize: 12, color: '#9CA3AF', width: 120, flexShrink: 0 }}>{r.label}</span>
-              <span style={{ fontSize: 12, color: '#374151' }}>{r.value}</span>
+                                        borderBottom: '1px solid var(--hover-bg)' }}>
+              <r.icon size={13} color="var(--border)" style={{ flexShrink: 0, marginTop: 1 }} />
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 120, flexShrink: 0 }}>{r.label}</span>
+              <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.value}</span>
             </div>
           ))}
 
           {/* Timeline */}
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
                         letterSpacing: '0.05em', marginTop: 20, marginBottom: 8 }}>
             {t('messages.drawer.timeline')}
           </div>
@@ -148,21 +148,21 @@ function MessageDrawer({ message, onClose }) {
             { label: t('messages.drawer.template'),    value: message.template_name },
           ].filter(r => r.value && r.value !== '—').map(r => (
             <div key={r.label} style={{ display: 'flex', gap: 8, padding: '7px 0',
-                                        borderBottom: '1px solid #F9FAFB' }}>
-              <span style={{ fontSize: 12, color: '#9CA3AF', width: 130, flexShrink: 0 }}>{r.label}</span>
-              <span style={{ fontSize: 12, color: '#374151' }}>{r.value}</span>
+                                        borderBottom: '1px solid var(--hover-bg)' }}>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{r.label}</span>
+              <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.value}</span>
             </div>
           ))}
 
           {/* Message content */}
           {message.body && (
             <div style={{ marginTop: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
                             letterSpacing: '0.05em', marginBottom: 8 }}>
                 {t('messages.drawer.body')}
               </div>
-              <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '12px 14px',
-                            fontSize: 13, color: '#374151', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+              <div style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '12px 14px',
+                            fontSize: 13, color: 'var(--text)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
                 {message.body}
               </div>
             </div>
@@ -170,13 +170,13 @@ function MessageDrawer({ message, onClose }) {
 
           {/* Error message */}
           {message.error_message && (
-            <div style={{ marginTop: 16, background: '#FEF2F2', border: '1px solid #FCA5A5',
+            <div style={{ marginTop: 16, background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5',
                           borderRadius: 8, padding: '12px 14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
                 <AlertTriangle size={13} color="var(--color-danger)" />
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-danger)' }}>{t('messages.drawer.error')}</span>
               </div>
-              <pre style={{ fontSize: 11, color: '#374151', whiteSpace: 'pre-wrap',
+              <pre style={{ fontSize: 11, color: 'var(--text)', whiteSpace: 'pre-wrap',
                             wordBreak: 'break-all', margin: 0, fontFamily: 'monospace' }}>
                 {message.error_message}
               </pre>
@@ -191,9 +191,9 @@ function MessageDrawer({ message, onClose }) {
 // ─── Tabel ────────────────────────────────────────────────────────────────────
 
 const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-             color: '#9CA3AF', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6',
+             color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
              whiteSpace: 'nowrap', userSelect: 'none' }
-const TD = { padding: '10px 12px', fontSize: 13, color: '#374151', borderBottom: '1px solid #F9FAFB' }
+const TD = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 const COL_KEYS = [
   { key: 'sent_at',         tKey: 'sent',      sortable: true },
@@ -325,23 +325,23 @@ export default function MessagesTable() {
       {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>{t('messages.title')}</h1>
-          <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('messages.title')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
             {loading ? t('common.loadingShort') : t('messages.summary', { shown: filtered.length, total: rows.length })}
           </p>
         </div>
         <div className="relative">
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
-                                     transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+                                     transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t('messages.search')}
             style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
-                     border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
+                     border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
         </div>
       </div>
 
-      <div className="flex flex-1 min-h-0 overflow-hidden bg-white rounded-xl"
-        style={{ border: '1px solid #F3F4F6' }}>
+      <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
+        style={{ border: '1px solid var(--border)' }}>
         <div className="flex-1 min-w-0 overflow-auto">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -359,12 +359,12 @@ export default function MessagesTable() {
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
+                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
                   {t('messages.loading')}
                 </td></tr>
               )}
               {!loading && sorted.length === 0 && (
-                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: '#9CA3AF' }}>
+                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
                   {t('messages.empty')}
                 </td></tr>
               )}
@@ -372,26 +372,26 @@ export default function MessagesTable() {
                   <tr key={r.id ?? i}
                     style={{ cursor: 'pointer' }}
                     onClick={() => setDrill(r)}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ ...TD, fontSize: 12, whiteSpace: 'nowrap' }}>
-                      <div style={{ fontWeight: 500, color: '#111827' }}>
+                      <div style={{ fontWeight: 500, color: 'var(--text)' }}>
                         {(r.sent_at ?? r.created_at)
                           ? new Date(r.sent_at ?? r.created_at).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' })
                           : '—'}
                       </div>
-                      <div style={{ fontSize: 11, color: '#9CA3AF' }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                         {(r.sent_at ?? r.created_at)
                           ? new Date(r.sent_at ?? r.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
                           : ''}
                       </div>
                     </td>
                     <td style={TD}>
-                      <div style={{ fontWeight: 500, color: '#111827' }}>
+                      <div style={{ fontWeight: 500, color: 'var(--text)' }}>
                         {r.recipient_name ?? '—'}
                       </div>
                       {(r.recipient_email ?? r.recipient_phone) && (
-                        <div style={{ fontSize: 11, color: '#9CA3AF' }}>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                           {r.recipient_email ?? r.recipient_phone}
                         </div>
                       )}
@@ -399,13 +399,13 @@ export default function MessagesTable() {
                     <td style={TD}><ChannelBadge channel={r.channel} /></td>
                     <td style={{ ...TD, maxWidth: 220 }}>
                       <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                                    fontSize: 13, color: '#374151' }}>
-                        {r.subject ?? r.template_name ?? <span style={{ color: '#D1D5DB' }}>—</span>}
+                                    fontSize: 13, color: 'var(--text)' }}>
+                        {r.subject ?? r.template_name ?? <span style={{ color: 'var(--border)' }}>—</span>}
                       </div>
                     </td>
                     <td style={TD}><StatusBadge status={r.status} /></td>
-                    <td style={{ ...TD, fontSize: 12, color: '#6B7280' }}>
-                      {r.workflow_name ?? <span style={{ color: '#D1D5DB' }}>—</span>}
+                    <td style={{ ...TD, fontSize: 12, color: 'var(--text-muted)' }}>
+                      {r.workflow_name ?? <span style={{ color: 'var(--border)' }}>—</span>}
                     </td>
                   </tr>
                 ))}

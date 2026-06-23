@@ -11,12 +11,12 @@ function InfoRow({ icon: Icon, label, value, href }) {
   if (!value) return null
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8,
-                  padding: '8px 0', borderBottom: '1px solid #F9FAFB' }}>
-      <Icon size={13} color="#D1D5DB" style={{ flexShrink: 0, marginTop: 1 }} />
-      <span style={{ fontSize: 12, color: '#9CA3AF', width: 130, flexShrink: 0 }}>{label}</span>
+                  padding: '8px 0', borderBottom: '1px solid var(--hover-bg)' }}>
+      <Icon size={13} color="var(--border)" style={{ flexShrink: 0, marginTop: 1 }} />
+      <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{label}</span>
       {href
         ? <a href={href} style={{ fontSize: 12, color: 'var(--color-secondary)', textDecoration: 'none', wordBreak: 'break-all' }}>{value}</a>
-        : <span style={{ fontSize: 12, color: '#374151' }}>{value}</span>}
+        : <span style={{ fontSize: 12, color: 'var(--text)' }}>{value}</span>}
     </div>
   )
 }
@@ -31,11 +31,11 @@ export default function ContactPersonDrawer({ contact, onClose }) {
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-white"
+      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 440, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}
-        <div style={{ padding: '18px 20px', borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
+        <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
@@ -45,19 +45,19 @@ export default function ContactPersonDrawer({ contact, onClose }) {
                 {initials || '?'}
               </div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: 15, color: '#111827', marginBottom: 2 }}>
+                <div style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)', marginBottom: 2 }}>
                   {fullName}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   {contact.function_title && (
-                    <span style={{ fontSize: 12, color: '#6B7280' }}>{contact.function_title}</span>
+                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{contact.function_title}</span>
                   )}
                   <span style={{
                     display: 'inline-flex', alignItems: 'center', gap: 4,
                     borderRadius: 999, padding: '2px 8px', fontSize: 11, fontWeight: 500,
-                    background: isPlanning ? '#F0FDF4' : '#F9FAFB',
-                    color:      isPlanning ? 'var(--color-success)'  : '#9CA3AF',
-                    border:     `1px solid ${isPlanning ? '#BBF7D0' : '#E5E7EB'}`,
+                    background: isPlanning ? 'var(--color-success-bg)' : 'var(--hover-bg)',
+                    color:      isPlanning ? 'var(--color-success)'  : 'var(--text-muted)',
+                    border:     `1px solid ${isPlanning ? '#BBF7D0' : 'var(--border)'}`,
                   }}>
                     <MessageCircle size={10} />
                     {isPlanning ? t('contactDrawer.planningContact') : t('contactDrawer.noPlanningContact')}
@@ -67,9 +67,9 @@ export default function ContactPersonDrawer({ contact, onClose }) {
             </div>
             <button onClick={onClose}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF',
+                       background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
                        borderRadius: 6, marginLeft: 10, flexShrink: 0 }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               <X size={15} />
             </button>
@@ -78,16 +78,16 @@ export default function ContactPersonDrawer({ contact, onClose }) {
 
         {/* Customer banner */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 20px',
-                      background: '#F8F9FF', borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
-          <Building2 size={13} color="#6B7280" />
-          <span style={{ fontSize: 12, color: '#374151', fontWeight: 500 }}>
+                      background: '#F8F9FF', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+          <Building2 size={13} color="var(--text-muted)" />
+          <span style={{ fontSize: 12, color: 'var(--text)', fontWeight: 500 }}>
             {contact.customer_name ?? '—'}
           </span>
         </div>
 
         {/* Details */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
-          <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
+          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
                         letterSpacing: '0.05em', marginBottom: 8 }}>
             {t('contactDrawer.contactInfo')}
           </div>
@@ -101,11 +101,11 @@ export default function ContactPersonDrawer({ contact, onClose }) {
 
           {contact.remarks && (
             <div style={{ marginTop: 16 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
                             letterSpacing: '0.05em', marginBottom: 8 }}>
                 {t('dr.remarks')}
               </div>
-              <div style={{ fontSize: 12, color: '#374151', background: '#F9FAFB', borderRadius: 8,
+              <div style={{ fontSize: 12, color: 'var(--text)', background: 'var(--hover-bg)', borderRadius: 8,
                             padding: '10px 12px', lineHeight: 1.6 }}>
                 {contact.remarks}
               </div>
@@ -114,13 +114,13 @@ export default function ContactPersonDrawer({ contact, onClose }) {
         </div>
 
         {/* Footer actions */}
-        <div style={{ padding: '12px 20px', borderTop: '1px solid #F3F4F6', flexShrink: 0,
+        <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', flexShrink: 0,
                       display: 'flex', gap: 8 }}>
           {contact.email && (
             <a href={`mailto:${contact.email}`}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                        fontSize: 13, fontWeight: 500, borderRadius: 8, textDecoration: 'none',
-                       border: '1px solid #E5E7EB', background: '#F9FAFB', color: '#374151' }}>
+                       border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)' }}>
               <Mail size={13} /> {t('contactDrawer.sendEmail')}
             </a>
           )}
@@ -128,7 +128,7 @@ export default function ContactPersonDrawer({ contact, onClose }) {
             <a href={`tel:${contact.mobile}`}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                        fontSize: 13, fontWeight: 500, borderRadius: 8, textDecoration: 'none',
-                       border: '1px solid #E5E7EB', background: '#F9FAFB', color: '#374151' }}>
+                       border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)' }}>
               <Phone size={13} /> {t('contactDrawer.call')}
             </a>
           )}

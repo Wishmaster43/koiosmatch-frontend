@@ -14,16 +14,16 @@ import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '../../lib/usePageSize'
 
 function SortIcon({ active, dir }) {
-  if (!active) return <ChevronsUpDown size={12} style={{ color: '#D1D5DB' }} />
+  if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
     ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
     : <ChevronDown size={12} style={{ color: 'var(--color-primary)' }} />
 }
 
 const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-             color: '#9CA3AF', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6',
+             color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
              whiteSpace: 'nowrap', userSelect: 'none' }
-const TD = { padding: '10px 12px', fontSize: 13, color: '#374151', borderBottom: '1px solid #F9FAFB' }
+const TD = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 export default function DepartmentsTable() {
   const { t } = useTranslation('reports')
@@ -150,31 +150,31 @@ export default function DepartmentsTable() {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>{t('departments.title')}</h1>
-          <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('departments.title')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
             {loading ? t('common.loadingShort') : t('departments.summary', { shown: filtered.length, total: rows.length })}
           </p>
         </div>
         <div className="relative">
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
-                                     transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+                                     transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
             placeholder={t('departments.search')}
             style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
-                     border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
+                     border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
         </div>
       </div>
 
-      <div className="flex flex-1 min-h-0 overflow-hidden bg-white rounded-xl"
-        style={{ border: '1px solid #F3F4F6' }}>
+      <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
+        style={{ border: '1px solid var(--border)' }}>
         <div className="flex-1 min-w-0 overflow-auto">
           {loading ? (
             <div className="flex items-center justify-center" style={{ height: 200 }}>
-              <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('departments.loading')}</p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('departments.loading')}</p>
             </div>
           ) : sorted.length === 0 ? (
             <div className="flex items-center justify-center" style={{ height: 160 }}>
-              <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('departments.empty')}</p>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('departments.empty')}</p>
             </div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -197,15 +197,15 @@ export default function DepartmentsTable() {
                   <tr key={r.id ?? i}
                     style={{ cursor: 'pointer' }}
                     onClick={() => setDrill(r)}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={TD}>{r.customer_name}</td>
                     <td style={TD}>{r.location_name}</td>
-                    <td style={{ ...TD, fontWeight: 500, color: '#111827' }}>{r.name}</td>
+                    <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{r.name}</td>
                     <td style={TD}>
                       {r.cost_center
                         ? <span style={{ fontFamily: 'monospace', fontSize: 12 }}>{r.cost_center}</span>
-                        : <span style={{ color: '#D1D5DB' }}>—</span>}
+                        : <span style={{ color: 'var(--border)' }}>—</span>}
                     </td>
                   </tr>
                 ))}
