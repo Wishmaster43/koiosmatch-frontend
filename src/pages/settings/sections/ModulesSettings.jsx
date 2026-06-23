@@ -9,7 +9,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Package, RefreshCw, Save, Plug } from 'lucide-react'
+import { Check, RefreshCw, Save } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 
@@ -89,16 +89,6 @@ export default function ModulesSettings() {
 
   return (
     <div style={{ maxWidth: 720 }}>
-      {/* Super admin notice */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px',
-                    background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 10, marginBottom: 24 }}>
-        <Package size={15} color="#7C3AED" style={{ flexShrink: 0, marginTop: 1 }} />
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#5B21B6' }}>{t('modules.superAdminTitle')}</div>
-          <div style={{ fontSize: 12, color: '#7C3AED', marginTop: 2 }}>{t('modules.superAdminDesc')}</div>
-        </div>
-      </div>
-
       {/* Base package (one of three) */}
       <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
                     letterSpacing: '0.07em', marginBottom: 10 }}>
@@ -160,15 +150,6 @@ export default function ModulesSettings() {
             </div>
           )
         })}
-      </div>
-
-      {/* Connectors live under Integrations → Apps */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px',
-                    background: 'var(--color-info-bg)', border: '1px solid var(--border)', borderRadius: 10, marginBottom: 28 }}>
-        <Plug size={15} color="var(--color-info)" style={{ flexShrink: 0, marginTop: 1 }} />
-        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-          {t('modules.connectorsHint', { defaultValue: 'Connectors (ShiftManager, HelloFlex, Elanza…) beheer je per klant onder Integraties → Apps. Aanzetten kost geld én ontsluit de workflow-templates.' })}
-        </div>
       </div>
 
       {/* Save */}

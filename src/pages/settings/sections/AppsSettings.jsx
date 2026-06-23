@@ -2,10 +2,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Check } from 'lucide-react'
-import api from '../../../lib/api'
-import { useAuth } from '../../../context/AuthContext'
-import { useApps, AVAILABLE_APPS } from '../../../context/AppsContext'
-import { canAccessPage } from '../../../lib/access'
+import api from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
+import { useApps, AVAILABLE_APPS } from '@/context/AppsContext'
+import { canAccessPage } from '@/lib/access'
 
 export default function AppsSettings() {
   const { t } = useTranslation('settings')
@@ -45,16 +45,6 @@ export default function AppsSettings() {
           </div>
         </div>
       )}
-
-      {/* Cost warning */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px',
-                    background: 'var(--color-warning-bg)', border: '1px solid #FDE68A', borderRadius: 10, marginBottom: 24 }}>
-        <AlertTriangle size={16} color="var(--color-warning)" style={{ flexShrink: 0, marginTop: 1 }} />
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#92400E' }}>{t('apps.costTitle')}</div>
-          <div style={{ fontSize: 12, color: '#B45309', marginTop: 2 }}>{t('apps.costDesc')}</div>
-        </div>
-      </div>
 
       {!canEdit && (
         <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 16, padding: '10px 14px',
