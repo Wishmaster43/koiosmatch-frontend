@@ -11,6 +11,9 @@ import { useAuth } from '@/context/AuthContext'
 
 const num = (v) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
 
+// Connector key → brand label (proper nouns, not translatable).
+const CONNECTOR_LABELS = { sm: 'ShiftManager', hf: 'HelloFlex', intus: 'Intus', elanza: 'Elanza', aelio: 'Aelio' }
+
 // Build the last 12 months as { value: 'YYYY-MM', label } — newest first.
 function buildMonths() {
   return Array.from({ length: 12 }, (_, i) => {
@@ -100,7 +103,7 @@ export default function TenantUsageSettings() {
               : connectors.map((c, i) => (
                 <div key={c.key ?? i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                   padding: '10px 16px', borderTop: i ? '1px solid var(--border)' : 'none' }}>
-                  <span style={{ fontSize: 13, color: 'var(--text)', textTransform: 'capitalize' }}>{c.key}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{CONNECTOR_LABELS[c.key] ?? c.key}</span>
                   <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono', monospace", color: 'var(--text)' }}>{num(c.usage)}</span>
                 </div>
               ))}
