@@ -160,7 +160,7 @@ De JS-laag is gezond; al het werk zit in JSX. Afvinken = gesplitst tot onder het
 - [ ] `pages/settings/sections/CvTemplateSettings.jsx` — 330
 
 **Layout / shell:**
-- [ ] `components/layout/Sidebar.jsx` — 478
+- [✅] `components/layout/Sidebar.jsx` — **478 → 297** (2026-06-23): `TenantSwitcher` → `TenantSwitcher.jsx` (190). < 400. Build+lint groen.
 - [ ] `App.jsx` — 463  *(routing/providers → splitsen)*
 - [ ] `components/layout/KoiosPanel.jsx` — 376
 
