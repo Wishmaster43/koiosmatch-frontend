@@ -54,6 +54,12 @@ cite `file:line`.
    radius, thresholds, rejection templates, the "this status creates a Match"
    flag — all settings-driven, _nothing hardcoded_. Flag every hardcoded value
    the product says must be instelbaar.
+   **i18n is part of this — all-or-nothing per area, never again:** every user-facing
+   string goes through `t()` (incl. the module registry labels/categories, not just pages).
+   A component with visible text but **no `useTranslation`/`t()` is a finding**; a
+   half-translated area (Dutch islands), a hardcoded label kept *next to* a `t()` key, or a
+   missing key that silently falls back to Dutch are all coherence defects. Keys exist in
+   every shipped locale (nl+en minimum). Multi-tenant SaaS must not ship Dutch-only screens.
 
 5. **Filter / KPI / chart consistency.** Do KPI rows, charts, and tables all
    react to the same global filter context (RightPanelContext)? Do totals exclude

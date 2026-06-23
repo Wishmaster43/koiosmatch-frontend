@@ -375,6 +375,14 @@ entry at the top via a workflow; experience/education/certs sort newest-first.)
   is in scope too: module **labels and categories go through i18n** (`t('modules.*')`,
   `t('modules.categories.*')`) and module **colours use `--color-*` tokens** (§4) — never
   Dutch literals or ad-hoc hex in `src/modules/` or the picker's category list.
+- **i18n is all-or-nothing per area — never partial. This must never regress again.**
+  Any component or screen you create *or touch* runs **every** user-facing string through
+  `t()` and imports `useTranslation`. A component with visible text and **zero `t()` calls
+  is a bug** (e.g. the workflow editor must not stay hardcoded Dutch). **Half-translated is
+  worse than untranslated** — it produces Dutch islands for non-NL tenants. **One source per
+  label:** never keep a hardcoded label *and* a `t()` key (two truths drift). **No silent
+  Dutch fallback:** add the key to **every shipped locale** (nl+en minimum; keep de/fr/es in
+  parity) — a missing key is a finding, not "fine because it falls back".
 
 ---
 

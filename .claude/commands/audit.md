@@ -44,6 +44,11 @@ never invent findings.
 
 5. **Internationalization** — Hardcoded user-facing strings (grep for literals in
    JSX)? Missing keys in nl or en? Manual date/number formatting instead of `Intl`?
+   **i18n is all-or-nothing per area (never again):** a component with visible text but
+   **zero `t()` calls / no `useTranslation`** is a finding (HIGH) — the whole area must be
+   translated, not partially. Flag **Dutch islands** (a hardcoded string next to translated
+   ones), a **hardcoded label kept alongside a `t()` key** (two sources), and any **missing
+   key that silently falls back to Dutch** (add to every shipped locale, nl+en minimum).
 
 6. **Accessibility (WCAG 2.2 AA)** — Missing labels/`aria-label`? Non-semantic
    markup? Keyboard traps? Focus not restored after modal/drawer close? Contrast
