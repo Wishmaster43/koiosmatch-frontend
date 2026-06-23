@@ -19,6 +19,13 @@ import type { ModuleKey, Tenant } from '../types/api'
 
 // package id → module keys it grants. Mirrors PACKAGES in settings/ModulesSettings.
 export const PACKAGE_MODULES: Record<string, ModuleKey[]> = {
+  // 3-package model (besloten 2026-06-23): base packages. Add-ons (plan/sm/hf/sm_ai)
+  // are layered on top via the tenant.modules array the backend sends (base + add-ons);
+  // these entries are only the package fallback when no explicit modules array is present.
+  core:                  ['ats'],
+  pro:                   ['ats', 'ai'],
+  enterprise:            ['ats', 'ai', 'api', 'insights'],
+  // Legacy 10-package model — kept so existing tenants keep working (backward-compat).
   reporting_sm:          ['sm'],
   reporting_hf:          ['hf'],
   reporting_sm_hf:       ['sm', 'hf'],

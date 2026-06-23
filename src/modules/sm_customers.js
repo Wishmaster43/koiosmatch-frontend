@@ -3,6 +3,7 @@ import ShiftManagerMark from '../components/ui/ShiftManagerMark'
 
 export default {
   type:  'sm_customers',
+  app:   'shiftmanager',
   category: 'ShiftManager',
   label: 'Klanten',
   Icon:  ShiftManagerMark,

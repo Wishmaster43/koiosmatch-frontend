@@ -30,6 +30,16 @@ export const AVAILABLE_APPS = [
     monthly:     true,
   },
   {
+    id:          'helloflex',
+    label:       'HelloFlex',
+    description: 'Backoffice-koppeling met HelloFlex (verloning, facturatie, contracten).',
+    icon:        '🟡',
+    color:       '#CA8A04',
+    bg:          'var(--color-warning-bg)',
+    border:      '#FDE68A',
+    monthly:     true,
+  },
+  {
     id:          'intus',
     label:       'Intus',
     description: 'Koppeling met Intus planning voor het ophalen van diensten en kandidaten.',

@@ -386,6 +386,22 @@ Dingen die alleen jij kunt beslissen of testen.
   Hangt op **B-24** (intent) + **C-31** — die moet `timeseries.applications[]` **én** `timeseries.matches[]`
   leveren (nu alleen `candidates_in`).
 
+- [ ] **B-26 · Pakket-/module-herstructurering → 3 pakketten + add-ons + connectors + Super Admin.** *(NIEUW 2026-06-23 — BESLOTEN, memory `project-pricing-model`)* — ◐ **FE-stappen 1–6 KLAAR** (module-model + **Super Admin-groep** [Pakket & modules · Connectors · **Verbruik-tab** uit `/admin/usage` met per-tenant-fallback] + workflow-connector-gating + sidebar/Planning-gating + i18n). **Open:** backend `GET /admin/usage` (alle-klanten-overzicht) + apps→Enterprise-finalize.
+  Van 10 vaste packages → **3 basispakketten (Core/Pro/Enterprise) + los toggle-bare add-ons + connectors**; de
+  Modules-tab wordt **Super Admin** (alleen super-admin; per klant alles inrichten + verbruik zien). Puntgewijs:
+  1. **Module-model** (`lib/modules.ts` + `lib/access.js`): `PACKAGE_MODULES` → 3 pakketten (Core=`ats`, Pro=`ats`+`ai`,
+     Enterprise=+`api`/`insights`/connector-recht). Add-ons als **extra module-keys** bovenop (`plan`/`sm`/`hf`/`sm_ai`)
+     via de bestaande `tenant.modules`-array. Connectors blijven in `AppsContext`/`/settings/apps`.
+  2. **Super Admin-sectie** (hernoem/verplaats `ModulesSettings`): per gekozen tenant → **pakket-radio** + **add-on-toggles**
+     (Rapportage SM/HF/SM-AI; Planning verborgen tot het er is) + **connectors**. Super-admin-gated. Schrijft `{ package, addons[] }`.
+  3. **Verbruik per klant** in Super Admin — **alleen hoeveelheden, GÉÉN tarieven**: AI-credits/tokens, **aantal gekoppelde
+     WhatsApp-nummers** (business+privé), verwerkte uren, connector-verbruik → handmatige facturatie. Bron = C-32-usage-endpoint.
+  4. **Workflow-builder gating**: node-palet + **template-folders** filteren op `AppsContext.enabled` (connector uit →
+     `sm_*`/`hf_*`/`intus_*`-folders + templates onzichtbaar/onbruikbaar; aan → zichtbaar).
+  5. **Sidebar/page-gating**: pages afleiden uit pakket + add-ons; **Planning uit de size-bar** (verborgen tenzij add-on aan).
+  6. **Opruimen**: oude 10-package-matrix + reporting-combo's weg; i18n-labels bijwerken (5 talen).
+  Hangt op **C-32**. Prijzen/inhoud: memory `project-pricing-model`.
+
 ### ◐ Recent afgerond aan de frontend (ter context)
 **Opportunities (Kansen)-shell** — eigen folder `pages/opportunities/` (zoals Matches), met config-gedreven
 KPI-row (donuts Fase/Eigenaar + KPI's Kansen/Pijplijnwaarde/Gem. waarde via de gedeelde `InsightsRow`),
@@ -1161,6 +1177,17 @@ verwijderd uit Settings, en de workflow-canvas-modules: `applicants_fetch` + `ap
 i.p.v. vrij tekstveld (module-schema's ondersteunen nu nog geen dynamische lookup-selects), de beschikbare **tokens** per event
 tonen/invoegen, en de event-lijst uit `GET /workflow-events`. Cross-ref **C-10** (status/funnel), **B-18** (sollicitaties-feature),
 `project_whatsapp_web_personal`.
+
+### ☐ C-32 · Pakket-/module-model: 3 pakketten + add-ons + connectors + super-admin-usage  *(NIEUW 2026-06-23 — voedt B-26)*
+Van de 10 vaste packages → **3 basispakketten + los toggle-bare add-ons + connectors**. Tenant-scoped; inrichting super-admin-only.
+- **Tenant-config:** `PUT /tenant-modules { package: 'core'|'pro'|'enterprise', addons:[...] }` (add-ons = `plan`/`sm`/`hf`/`sm_ai`);
+  `GET /tenant-modules` + `/auth/me` geven de **effectieve modules** (pakket-basis + add-ons). Reporting-/planning-endpoints
+  gaten op de **add-on** (niet meer op de oude package-string). Backward-compat: map de bestaande 10 packages → nieuw model.
+- **Connectors:** `/settings/apps` (bestaat) → per connector **kostprijs/verbruik-registratie**; "aan" ontsluit de workflow-templates.
+- **Super-admin-usage per tenant** (handmatige facturatie — **alleen hoeveelheden, geen bedragen**):
+  `GET /admin/tenants/{id}/usage` → `{ ai:{credits,tokens}, whatsapp:{business_numbers,private_numbers}, planning:{processed_hours},
+  connectors:[{key,usage}] }`. Tenant-scoped, super-admin-only, geen PII.
+- Bevestig: package-enum + addon-keys + connector-keys (sm/hf/intus|elanza).
 
 ---
 

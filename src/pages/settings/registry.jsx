@@ -23,7 +23,7 @@ import {
 } from 'lucide-react'
 
 import UsersPage from '../users/UsersPage'
-import ViewConfigEditor from '../../components/settings/ViewConfigEditor'
+import ViewConfigEditor from '@/components/settings/ViewConfigEditor'
 
 import BrandSettings from './sections/BrandSettings'
 import CompanySettings from './sections/CompanySettings'
@@ -50,6 +50,7 @@ import WebhooksSettings from './sections/webhooks'
 import AppsSettings from './sections/AppsSettings'
 import ModulesSettings from './sections/ModulesSettings'
 import ModulePlaceholder from './sections/ModulePlaceholder'
+import TenantUsageSettings from './sections/TenantUsageSettings'
 import WhatsAppSettings from './sections/WhatsAppSettings'
 import ImporterenSettings from './sections/ImporterenSettings'
 import ApiKeysSettings from './sections/apikeys'
@@ -73,12 +74,11 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    // Per-module settings + the package/tier matrix (Super Admin, gated) — kept together (Danny).
+    // Per-module settings (Shiftmanager/HelloFlex). Package + connectors + usage live in the Super Admin group.
     key: 'modules', icon: LayoutGrid,
     items: [
       { id: 'mod_shiftmanager', label: 'Shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings },
       { id: 'mod_helloflex',    label: 'HelloFlex',    icon: Zap,       render: () => <ModulePlaceholder /> },
-      { id: 'modules',          label: 'Package',      icon: Package,   component: ModulesSettings, superAdminOnly: true },
     ],
   },
   {
@@ -202,7 +202,6 @@ export const NAV_GROUPS = [
   {
     key: 'integrations', icon: Store,
     items: [
-      { id: 'apps',       label: 'Apps (connectors)', icon: AppWindow, component: AppsSettings, superAdminOnly: true },
       { id: 'apikeys',    label: 'API keys',  icon: Key,      component: ApiKeysSettings },
       { id: 'webhooks',   label: 'Webhooks',  icon: Webhook,  component: WebhooksSettings },
       { id: 'importeren', label: 'Import',    icon: Download, component: ImporterenSettings },
@@ -221,6 +220,15 @@ export const NAV_GROUPS = [
       ) },
       { id: 'billing_usage',    label: 'Usage',    icon: BarChart2, component: GebruikSettings },
       { id: 'billing_invoices', label: 'Invoices', icon: FileText,  component: FacturenSettings },
+    ],
+  },
+  {
+    // Super Admin (super-admin-only): per-tenant package + add-ons, connectors, and usage.
+    key: 'superadmin', icon: Shield,
+    items: [
+      { id: 'modules', label: 'Package',           icon: Package,   component: ModulesSettings,    superAdminOnly: true },
+      { id: 'apps',    label: 'Apps (connectors)', icon: AppWindow, component: AppsSettings,        superAdminOnly: true },
+      { id: 'usage',   label: 'Usage',             icon: BarChart2, component: TenantUsageSettings, superAdminOnly: true },
     ],
   },
   {

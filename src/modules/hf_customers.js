@@ -3,6 +3,7 @@ import HelloFlexMark from '../components/ui/HelloFlexMark'
 
 export default {
   type:  'hf_customers',
+  app:   'helloflex',
   category: 'HelloFlex',
   label: 'Klanten',
   Icon:  HelloFlexMark,

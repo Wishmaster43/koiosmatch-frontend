@@ -1,107 +1,94 @@
 /**
- * ModulesSettings — super-admin tab to set a tenant's package (tier). Each package
- * maps to a set of accessible_pages on the backend. Package labels come from i18n.
- * Rows are grouped into commercial plans (Koios Core/Plus/Suite) and standalone
- * reporting modules (Shiftmanager / HelloFlex / AI Agents).
+ * ModulesSettings — super-admin, per-tenant configuration (Super Admin tab).
+ * Picks the base package (Core / Pro / Enterprise) + toggles add-ons (reporting /
+ * AI planner / planning). Writes { package, addons } to PUT /tenant-modules.
+ * Connectors live under Integrations → Apps. Super-admin-only; the backend re-checks.
+ *
+ * Model: besloten 2026-06-23 (memory `project-pricing-model`). Legacy package strings
+ * are normalised to the new tier for display until the backend sends {package, addons}.
  */
-import { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, Package, RefreshCw, Save } from 'lucide-react'
-import api from '../../../lib/api'
-import { useAuth } from '../../../context/AuthContext'
+import { Check, Package, RefreshCw, Save, Plug } from 'lucide-react'
+import api from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 
-// Package IDs must match what the backend accepts in PUT /tenant-modules { package }.
-// Matrix model: 10 packages × 5 feature dimensions (col = feature, row = package),
-// split into 'plans' (ATS-based tiers) and 'standalone' (reporting modules).
-const PACKAGES = [
-  // Pakketten — ATS-based commercial tiers (Koios Core / Plus / Suite)
-  { id: 'ats_crm',             group: 'plans',      sm: false, hf: false, ai: false, ats: true,  plan: false },
-  { id: 'ats_crm_ai',          group: 'plans',      sm: false, hf: false, ai: true,  ats: true,  plan: false },
-  { id: 'ats_crm_ai_planning', group: 'plans',      sm: false, hf: false, ai: true,  ats: true,  plan: true  },
-  { id: 'ats_crm_planning',    group: 'plans',      sm: false, hf: false, ai: false, ats: true,  plan: true  },
-  // Losse modules — standalone reporting (Shiftmanager / HelloFlex / AI Agents)
-  { id: 'reporting_sm',        group: 'standalone', sm: true,  hf: false, ai: false, ats: false, plan: false },
-  { id: 'reporting_hf',        group: 'standalone', sm: false, hf: true,  ai: false, ats: false, plan: false },
-  { id: 'reporting_sm_hf',     group: 'standalone', sm: true,  hf: true,  ai: false, ats: false, plan: false },
-  { id: 'reporting_sm_ai',     group: 'standalone', sm: true,  hf: false, ai: true,  ats: false, plan: false },
-  { id: 'reporting_hf_ai',     group: 'standalone', sm: false, hf: true,  ai: true,  ats: false, plan: false },
-  { id: 'reporting_sm_hf_ai',  group: 'standalone', sm: true,  hf: true,  ai: true,  ats: false, plan: false },
+// Base tiers (the "size bar"). `desc` lists what each tier adds over the previous one.
+const TIERS = [
+  { id: 'core',       name: 'Koios Core',       desc: 'ATS + CRM' },
+  { id: 'pro',        name: 'Koios Pro',        desc: '+ Koios AI + AI Agents + Workflows + WhatsApp Business' },
+  { id: 'enterprise', name: 'Koios Enterprise', desc: '+ REST API + WhatsApp persoonlijk + Insights+ + Connectors + SLA' },
 ]
 
-// Feature columns — product/feature names, kept as-is.
-const MATRIX_COLS = [
-  { key: 'sm',   label: 'Shiftmanager',  icon: '📊', color: '#6B7280' },
-  { key: 'hf',   label: 'HelloFlex',     icon: '🟡', color: '#0891B2' },
-  { key: 'ai',   label: 'AI & Workflow', icon: '🤖', color: '#7C3AED' },
-  { key: 'ats',  label: 'ATS & CRM',     icon: '📋', color: '#059669' },
-  { key: 'plan', label: 'Planning',      icon: '📅', color: 'var(--color-info)' },
+// Add-ons (toggle on top of any tier). Planning is hidden until its module (portal + app) exists.
+const ADDONS = [
+  { id: 'sm',    name: 'Rapportage Shiftmanager' },
+  { id: 'hf',    name: 'Rapportage HelloFlex' },
+  { id: 'sm_ai', name: 'Shiftmanager AI Planner' },
+  { id: 'plan',  name: 'Planning', comingSoon: true },
 ]
 
-function MatrixCell({ active }) {
-  return (
-    <td style={{ textAlign: 'center', padding: '0 4px' }}>
-      {active
-        ? <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                          width: 20, height: 20, borderRadius: '50%', background: 'var(--color-success-bg)' }}>
-            <Check size={11} color="#059669" />
-          </span>
-        : <span style={{ display: 'inline-block', width: 14, height: 2, borderRadius: 1, background: '#E5E7EB' }} />
-      }
-    </td>
-  )
+// Legacy package string → new base tier (display only; the backend sends {package, addons}
+// once migrated, and that wins). Keeps the UI sensible for not-yet-migrated tenants.
+const LEGACY_TO_TIER = {
+  core: 'core', pro: 'pro', enterprise: 'enterprise',
+  ats_crm: 'core', ats_crm_planning: 'core',
+  reporting_sm: 'core', reporting_hf: 'core', reporting_sm_hf: 'core',
+  reporting_shiftmanager: 'core', reporting_helloflex: 'core',
+  ats_crm_ai: 'pro', ats_crm_aiagents: 'pro', ats_crm_ai_planning: 'pro',
+  reporting_sm_ai: 'pro', reporting_hf_ai: 'pro', reporting_sm_hf_ai: 'pro',
+  ats_crm_workflows: 'enterprise', connect: 'enterprise',
 }
+
+const sameSet = (a, b) => a.length === b.length && [...a].sort().join() === [...b].sort().join()
 
 export default function ModulesSettings() {
   const { t } = useTranslation('settings')
   const { activeTenant, refreshUser } = useAuth()
-  const [currentPkgId, setCurrentPkgId] = useState(null)
-  const [selectedId,   setSelectedId]   = useState(null)
-  const [loading,      setLoading]      = useState(true)
-  const [saving,       setSaving]       = useState(false)
-  const [saved,        setSaved]        = useState(false)
+  const [pkg,     setPkg]     = useState('core')
+  const [addons,  setAddons]  = useState([])
+  const [savedAt, setSavedAt] = useState({ pkg: 'core', addons: [] }) // last-saved snapshot
+  const [loading, setLoading] = useState(true)
+  const [saving,  setSaving]  = useState(false)
+  const [savedOk, setSavedOk] = useState(false)
 
-  const pkgLabel = (id) => t(`modules.packages.${id}`)
-
+  // Load the tenant's current package + add-ons.
   useEffect(() => {
     if (!activeTenant?.id) return
     setLoading(true)
     api.get('/tenant-modules', { params: { tenant_id: activeTenant.id } })
       .then(res => {
-        const pkg = res.data?.package ?? PACKAGES[0].id
-        setCurrentPkgId(pkg)
-        setSelectedId(pkg)
+        const tier = LEGACY_TO_TIER[res.data?.package] ?? 'core'
+        const ad   = Array.isArray(res.data?.addons) ? res.data.addons : []
+        setPkg(tier); setAddons(ad); setSavedAt({ pkg: tier, addons: ad })
       })
-      .catch(() => {
-        setCurrentPkgId(PACKAGES[0].id)
-        setSelectedId(PACKAGES[0].id)
-      })
+      .catch(() => { setPkg('core'); setAddons([]); setSavedAt({ pkg: 'core', addons: [] }) })
       .finally(() => setLoading(false))
   }, [activeTenant?.id])
 
-  const currentPkg = PACKAGES.find(p => p.id === currentPkgId) ?? PACKAGES[0]
-  const selected   = PACKAGES.find(p => p.id === selectedId)   ?? PACKAGES[0]
-  const hasChange  = selectedId !== currentPkgId
+  const hasChange = pkg !== savedAt.pkg || !sameSet(addons, savedAt.addons)
+  const toggleAddon = (id) => setAddons(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
 
+  // Persist { package, addons }. The backend re-checks authorization + validates.
   const save = async () => {
     setSaving(true)
     try {
-      await api.put('/tenant-modules', { tenant_id: activeTenant?.id, package: selected.id })
-      setCurrentPkgId(selected.id)
+      await api.put('/tenant-modules', { tenant_id: activeTenant?.id, package: pkg, addons })
+      setSavedAt({ pkg, addons })
       await refreshUser()
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
+      setSavedOk(true); setTimeout(() => setSavedOk(false), 2500)
     } catch { /* noop */ }
     setSaving(false)
   }
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 160 }}>
-      <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('modules.loading')}</p>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('modules.loading')}</p>
     </div>
   )
 
   return (
-    <div style={{ maxWidth: 860 }}>
+    <div style={{ maxWidth: 720 }}>
       {/* Super admin notice */}
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px',
                     background: '#F5F3FF', border: '1px solid #DDD6FE', borderRadius: 10, marginBottom: 24 }}>
@@ -112,82 +99,76 @@ export default function ModulesSettings() {
         </div>
       </div>
 
-      {/* Matrix table */}
-      <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden', marginBottom: 24 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead>
-            <tr style={{ background: 'var(--surface-alt, #F9FAFB)', borderBottom: '1px solid var(--border)' }}>
-              <th style={{ padding: '10px 16px', textAlign: 'left', fontSize: 11, fontWeight: 700,
-                            color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.07em', width: '40%' }}>
-                {t('modules.pkgCol')}
-              </th>
-              {MATRIX_COLS.map(col => (
-                <th key={col.key} style={{ padding: '10px 8px', textAlign: 'center', fontSize: 11, fontWeight: 600,
-                                            color: col.color, whiteSpace: 'nowrap' }}>
-                  <div>{col.icon}</div>
-                  <div style={{ marginTop: 2 }}>{col.label}</div>
-                </th>
-              ))}
-              <th style={{ width: 36 }} />
-            </tr>
-          </thead>
-          <tbody>
-            {PACKAGES.map((pkg, i) => {
-              const isActive   = currentPkgId === pkg.id
-              const isSelected = selectedId   === pkg.id
-              // Sub-header row before the first package of each group.
-              const isFirstOfGroup = i === 0 || PACKAGES[i - 1].group !== pkg.group
-              return (
-                <Fragment key={pkg.id}>
-                  {isFirstOfGroup && (
-                    <tr style={{ background: 'var(--surface-alt, #F9FAFB)', borderBottom: '1px solid var(--border)' }}>
-                      <td colSpan={MATRIX_COLS.length + 2}
-                        style={{ padding: '7px 16px', fontSize: 10, fontWeight: 700, color: 'var(--text-muted)',
-                                 textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-                        {t(`modules.groups.${pkg.group}`)}
-                      </td>
-                    </tr>
-                  )}
-                  <tr
-                    onClick={() => setSelectedId(pkg.id)}
-                    style={{
-                      cursor: 'pointer',
-                      borderBottom: i < PACKAGES.length - 1 ? '1px solid var(--border)' : 'none',
-                      background: isSelected ? 'var(--color-secondary-bg)' : isActive ? '#F0FDF4' : 'white',
-                      transition: 'background 0.1s',
-                    }}
-                    onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = '#F9FAFB' }}
-                    onMouseLeave={e => { e.currentTarget.style.background = isSelected ? 'var(--color-secondary-bg)' : isActive ? '#F0FDF4' : 'white' }}
-                  >
-                    <td style={{ padding: '11px 16px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ fontSize: 13, fontWeight: isSelected || isActive ? 600 : 400,
-                                        color: isSelected ? '#1D4ED8' : '#111827' }}>
-                          {pkgLabel(pkg.id)}
-                        </span>
-                        {isActive && (
-                          <span style={{ fontSize: 10, fontWeight: 600, color: '#059669',
-                                          background: 'var(--color-success-bg)', borderRadius: 999, padding: '1px 7px' }}>
-                            {t('modules.current')}
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    {MATRIX_COLS.map(col => <MatrixCell key={col.key} active={pkg[col.key]} />)}
-                    <td style={{ textAlign: 'center', paddingRight: 12 }}>
-                      {isSelected && (
-                        <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#1D4ED8',
-                                       display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <Check size={10} color="white" />
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                </Fragment>
-              )
-            })}
-          </tbody>
-        </table>
+      {/* Base package (one of three) */}
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
+                    letterSpacing: '0.07em', marginBottom: 10 }}>
+        {t('modules.tierHeading', { defaultValue: 'Pakket' })}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+        {TIERS.map(tier => {
+          const active = pkg === tier.id
+          return (
+            <div key={tier.id} onClick={() => setPkg(tier.id)}
+              style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px', cursor: 'pointer',
+                borderRadius: 10, transition: 'border-color 0.12s, background 0.12s',
+                background: active ? 'var(--color-primary-bg)' : 'var(--surface)',
+                border: `1.5px solid ${active ? 'var(--color-primary)' : 'var(--border)'}` }}>
+              <div style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, marginTop: 1,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                border: `2px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
+                background: active ? 'var(--color-primary)' : 'transparent' }}>
+                {active && <Check size={11} color="#fff" />}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{tier.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`modules.tierDesc.${tier.id}`, { defaultValue: tier.desc })}</div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Add-ons (toggle on top of the package) */}
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
+                    letterSpacing: '0.07em', marginBottom: 10 }}>
+        {t('modules.addonsHeading', { defaultValue: 'Losse modules (add-ons)' })}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 28 }}>
+        {ADDONS.map(addon => {
+          const on = addons.includes(addon.id)
+          const disabled = addon.comingSoon
+          return (
+            <div key={addon.id}
+              onClick={disabled ? undefined : () => toggleAddon(addon.id)}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+                borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.55 : 1,
+                background: on ? 'var(--color-success-bg)' : 'var(--surface)',
+                border: `1px solid ${on ? 'var(--color-success)' : 'var(--border)'}` }}>
+              {/* Switch */}
+              <div style={{ width: 34, height: 20, borderRadius: 999, flexShrink: 0, position: 'relative',
+                background: on ? 'var(--color-success)' : '#D1D5DB', transition: 'background 0.15s' }}>
+                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#fff', position: 'absolute',
+                  top: 2, left: on ? 16 : 2, transition: 'left 0.15s' }} />
+              </div>
+              <span style={{ flex: 1, fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{t(`modules.addon.${addon.id}`, { defaultValue: addon.name })}</span>
+              {disabled && (
+                <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-info)',
+                  background: 'var(--color-info-bg)', borderRadius: 999, padding: '2px 8px' }}>
+                  {t('modules.comingSoon', { defaultValue: 'binnenkort' })}
+                </span>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Connectors live under Integrations → Apps */}
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 16px',
+                    background: 'var(--color-info-bg)', border: '1px solid var(--border)', borderRadius: 10, marginBottom: 28 }}>
+        <Plug size={15} color="var(--color-info)" style={{ flexShrink: 0, marginTop: 1 }} />
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+          {t('modules.connectorsHint', { defaultValue: 'Connectors (ShiftManager, HelloFlex, Elanza…) beheer je per klant onder Integraties → Apps. Aanzetten kost geld én ontsluit de workflow-templates.' })}
+        </div>
       </div>
 
       {/* Save */}
@@ -195,18 +176,13 @@ export default function ModulesSettings() {
         <button onClick={save} disabled={saving || !hasChange}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 20px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none',
-                   background: saved ? 'var(--color-success)' : hasChange ? 'var(--color-primary)' : '#D1D5DB',
+                   background: savedOk ? 'var(--color-success)' : hasChange ? 'var(--color-primary)' : '#D1D5DB',
                    color: 'white', cursor: (saving || !hasChange) ? 'not-allowed' : 'pointer',
                    transition: 'background 0.2s', opacity: saving ? 0.7 : 1 }}>
-          {saved  ? <><Check size={13} /> {t('modules.savedActive')}</>
-          : saving ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</>
-          :          <><Save size={13} /> {t('modules.activate')}</>}
+          {savedOk ? <><Check size={13} /> {t('modules.savedActive')}</>
+          : saving  ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</>
+          :           <><Save size={13} /> {t('modules.activate')}</>}
         </button>
-        {hasChange && !saved && (
-          <span style={{ fontSize: 12, color: '#9CA3AF' }}>
-            {t('modules.changeFromTo', { from: pkgLabel(currentPkg.id), to: pkgLabel(selected.id) })}
-          </span>
-        )}
       </div>
     </div>
   )

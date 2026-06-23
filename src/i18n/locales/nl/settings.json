@@ -85,6 +85,7 @@
     "billing_usage": "Gebruik",
     "billing_invoices": "Facturen",
     "modules": "Pakket",
+    "usage": "Verbruik",
     "apps": "Apps (connectors)",
     "roles": "Rollen & Rechten",
     "users": "Gebruikersbeheer",
@@ -817,6 +818,21 @@
     "loading": "Pakket ophalen…",
     "superAdminTitle": "Alleen zichtbaar voor super admins",
     "superAdminDesc": "Pakket wijzigen heeft direct invloed op de klantfactuur. Elke wijziging wordt gelogd.",
+    "tierHeading": "Pakket",
+    "addonsHeading": "Losse modules (add-ons)",
+    "comingSoon": "binnenkort",
+    "connectorsHint": "Connectors (ShiftManager, HelloFlex, Elanza…) beheer je per klant onder Integraties → Apps. Aanzetten kost geld én ontsluit de workflow-templates.",
+    "tierDesc": {
+      "core": "ATS + CRM",
+      "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",
+      "enterprise": "+ REST API + WhatsApp persoonlijk + Insights+ + Connectors + SLA"
+    },
+    "addon": {
+      "sm": "Rapportage Shiftmanager",
+      "hf": "Rapportage HelloFlex",
+      "sm_ai": "Shiftmanager AI Planner",
+      "plan": "Planning"
+    },
     "pkgCol": "Pakket",
     "current": "Huidig",
     "savedActive": "Opgeslagen & actief",

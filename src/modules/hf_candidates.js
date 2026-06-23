@@ -3,6 +3,7 @@ import HelloFlexMark from '../components/ui/HelloFlexMark'
 
 export default {
   type:  'hf_candidates',
+  app:   'helloflex',
   category: 'HelloFlex',
   label: 'Kandidaten',
   Icon:  HelloFlexMark,

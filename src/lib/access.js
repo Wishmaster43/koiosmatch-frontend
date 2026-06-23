@@ -12,7 +12,7 @@
  * Everything here is cosmetic. The backend enforces real authorization on every endpoint.
  */
 
-import { hasModule } from './modules'
+import { hasModule, tenantModules } from './modules'
 
 // Pages that require a paid add-on module. These are ALSO hard-gated server-side
 // (e.g. /sm/* → 403 without the 'sm' module), so this is just UI mirroring.
@@ -44,6 +44,20 @@ const PAGE_REQUIRED_MODULE = {
 const ATS_BASE   = ['dashboard', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'customers', 'locations', 'departments', 'contacts', 'details', 'users']
 const AI_PAGES   = ['aiagents', 'whatsapp', 'workflows', 'apps']
 const PLANNING   = ['planning']
+
+// Module key → pages it grants. A tenant's accessible pages are the union over its
+// effective modules (base package + add-ons). This unifies page + module gating and
+// lets add-ons (sm/hf/sm_ai/plan) extend access automatically, with no separate map.
+const MODULE_TO_PAGES = {
+  ats:      ATS_BASE,
+  ai:       AI_PAGES,
+  plan:     PLANNING,
+  sm:       ['shiftmanager'],
+  sm_ai:    ['shiftmanager'],   // ShiftManager reporting + AI
+  hf:       ['helloflex'],
+  api:      [],                 // REST API lives in settings (no top-level nav page)
+  insights: [],                 // Insights+ within reporting/settings (no separate gate yet)
+}
 
 const PACKAGE_PAGES = {
   reporting_sm:          ['shiftmanager'],
@@ -111,13 +125,23 @@ export const MODULE_PAGES = [
 ]
 
 function accessiblePages(auth) {
-  // Package is the source of truth — check activeTenant, then user.tenant
-  const pkg = auth?.activeTenant?.package ?? auth?.user?.tenant?.package ?? null
+  const tenant = auth?.activeTenant ?? auth?.user?.tenant ?? null
+  // Derive from the tenant's effective modules (base package + add-ons). The explicit
+  // tenant.modules array (backend: base + add-ons) wins; otherwise modules come from the
+  // package id. This reproduces the legacy PACKAGE_PAGES exactly and makes add-ons extend
+  // the accessible pages without a separate package→pages map.
+  const modules = tenantModules(tenant)
+  if (modules.length > 0) {
+    const pages = new Set()
+    modules.forEach(m => (MODULE_TO_PAGES[m] ?? []).forEach(p => pages.add(p)))
+    if (pages.size > 0) return [...pages]
+  }
+  // Legacy fallback: explicit package→pages map, then backend accessible_pages.
+  const pkg = tenant?.package ?? null
   if (pkg && PACKAGE_PAGES[pkg]) return PACKAGE_PAGES[pkg]
-  // Fall back to backend accessible_pages
   const fromBackend = auth?.accessiblePages ?? auth?.user?.accessible_pages ?? []
   if (fromBackend.length > 0) return fromBackend
-  // Last resort: if no package and no pages, assume full access (legacy/dev)
+  // Last resort: no package and no pages → assume full access (legacy/dev).
   return null
 }
 

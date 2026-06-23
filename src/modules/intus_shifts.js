@@ -4,6 +4,7 @@ import IntusMark from '../components/ui/IntusMark'
 
 export default {
   type:  'intus_shifts',
+  app:   'intus',
   category: 'Intus',
   label: 'Diensten',
   Icon:  IntusMark,

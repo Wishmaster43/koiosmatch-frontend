@@ -3,6 +3,7 @@ import HelloFlexMark from '../components/ui/HelloFlexMark'
 
 export default {
   type:  'hf_shifts',
+  app:   'helloflex',
   category: 'HelloFlex',
   label: 'Diensten',
   Icon:  HelloFlexMark,

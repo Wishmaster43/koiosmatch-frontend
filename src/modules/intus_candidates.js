@@ -4,6 +4,7 @@ import IntusMark from '../components/ui/IntusMark'
 
 export default {
   type:  'intus_candidates',
+  app:   'intus',
   category: 'Intus',
   label: 'Kandidaten',
   Icon:  IntusMark,

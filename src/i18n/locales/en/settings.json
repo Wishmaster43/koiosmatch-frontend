@@ -85,6 +85,7 @@
     "billing_usage": "Usage",
     "billing_invoices": "Invoices",
     "modules": "Package",
+    "usage": "Usage",
     "apps": "Apps (connectors)",
     "roles": "Roles & permissions",
     "users": "Users",
@@ -817,6 +818,21 @@
     "loading": "Loading package…",
     "superAdminTitle": "Visible to super admins only",
     "superAdminDesc": "Changing the package directly affects the customer invoice. Every change is logged.",
+    "tierHeading": "Package",
+    "addonsHeading": "Add-on modules",
+    "comingSoon": "soon",
+    "connectorsHint": "Connectors (ShiftManager, HelloFlex, Elanza…) are managed per client under Integrations → Apps. Enabling them costs money and unlocks the workflow templates.",
+    "tierDesc": {
+      "core": "ATS + CRM",
+      "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",
+      "enterprise": "+ REST API + personal WhatsApp + Insights+ + Connectors + SLA"
+    },
+    "addon": {
+      "sm": "Reporting Shiftmanager",
+      "hf": "Reporting HelloFlex",
+      "sm_ai": "Shiftmanager AI Planner",
+      "plan": "Planning"
+    },
     "pkgCol": "Package",
     "current": "Current",
     "savedActive": "Saved & active",
