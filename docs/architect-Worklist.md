@@ -137,7 +137,7 @@ De JS-laag is gezond; al het werk zit in JSX. Afvinken = gesplitst tot onder het
 
 ### 🟠 Tier 1 — > 300 r (split-now), gegroepeerd per gebied
 **Pages (horen thin §2 — logica → hooks/api, UI → subcomponenten):**
-- [◐] `pages/planning/PlanningPage.jsx` — **740 → 420** (2026-06-23): `AddShiftModal` + cast → `planning/AddShiftModal.jsx` (318); date-helpers → `planning/helpers.js` (16). Build+lint groen. Rest: views (Month/Week/Day/List) → `planning/views.jsx` → onder ~200; draait nog op dummy-data (B-22).
+- [✅] `pages/planning/PlanningPage.jsx` — **740 → 162** (thin) (2026-06-23): `AddShiftModal`+cast → `AddShiftModal.jsx` (318); views Month/Week/Day/List+ShiftPill → `views.jsx` (268); date-helpers → `helpers.js` (16). Build+lint groen. *(Draait nog op dummy-data → B-22; AddShiftModal/views nog boven ~250 maar cohesief, evt. later verder splitsen.)*
 - [ ] `pages/candidates/CandidatesPage.jsx` — 670  *(stats/predicaten → hooks; InsightsRow extraheren, B-18.6)*
 - [ ] `pages/ai/WorkflowsPage.jsx` — 501  *(`StepPill` uit registry, AW-6)*
 - [ ] `pages/users/UsersPage.jsx` — 464
