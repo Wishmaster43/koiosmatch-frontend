@@ -107,7 +107,7 @@ function YearIndicator({ years }) {
 function ChartCard({ title, subtitle, loading, error, children }) {
   const { t } = useTranslation('shiftmanager')
   return (
-    <div className="overflow-hidden bg-white border shadow-sm rounded-2xl border-slate-200">
+    <div className="overflow-hidden bg-[var(--surface)] border shadow-sm rounded-2xl border-slate-200">
       <div className="p-5">
         <div className="mb-4">
           <h3 className="text-base font-semibold text-slate-900">{title}</h3>

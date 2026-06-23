@@ -11,15 +11,15 @@ import api from '../../lib/api'
 // Shift status → badge colours. Label = t('shiftsDrawer.status.<key>').
 const STATUS_META = {
   in_process:         { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
-  completed:          { bg: '#F0FDF4', color: 'var(--color-success)' },
-  open:               { bg: '#FFF7ED', color: '#C2410C' },
-  verwijderd:         { bg: '#FEF2F2', color: 'var(--color-danger)' },
-  niet_factureerbaar: { bg: '#F9FAFB', color: '#6B7280' },
+  completed:          { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
+  open:               { bg: 'var(--color-warning-bg)', color: '#C2410C' },
+  verwijderd:         { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)' },
+  niet_factureerbaar: { bg: 'var(--hover-bg)', color: 'var(--text-muted)' },
 }
 
 function Badge({ status }) {
   const { t } = useTranslation('shiftmanager')
-  const s = STATUS_META[status] ?? { bg: '#F9FAFB', color: '#6B7280' }
+  const s = STATUS_META[status] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   return (
     <span style={{ background: s.bg, color: s.color, borderRadius: 999,
                    padding: '2px 8px', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>
@@ -32,9 +32,9 @@ function Row({ icon: Icon, label, value, mono }) {
   if (value === null || value === undefined || value === '') return null
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12 }}>
-      <Icon size={12} color="#D1D5DB" style={{ flexShrink: 0, marginTop: 1 }} />
-      <span style={{ color: '#9CA3AF', flexShrink: 0 }}>{label}:</span>
-      <span style={{ color: '#374151', fontFamily: mono ? 'monospace' : undefined,
+      <Icon size={12} color="var(--border)" style={{ flexShrink: 0, marginTop: 1 }} />
+      <span style={{ color: 'var(--text-muted)', flexShrink: 0 }}>{label}:</span>
+      <span style={{ color: 'var(--text)', fontFamily: mono ? 'monospace' : undefined,
                      fontSize: mono ? 11 : 12, wordBreak: 'break-all' }}>
         {value}
       </span>
@@ -75,7 +75,7 @@ function CandidateBlock({ invite }) {
                       fontSize: 10, fontWeight: 600 }}>
           {ini}
         </div>
-        <span style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>
+        <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>
           {name || t('shiftsDrawer.unknown')}
         </span>
       </div>
@@ -131,37 +131,37 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-white"
+      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 620, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-                      padding: '14px 18px', borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
+                      padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div>
-            <div style={{ fontWeight: 600, fontSize: 15, color: '#111827' }}>{title}</div>
-            <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>
+            <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{title}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
               {loading ? t('shiftsDrawer.loading') : t('shiftsDrawer.count', { count: shifts.length })}
             </div>
           </div>
           <button onClick={onClose}
             style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF',
+                     background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
                      borderRadius: 6, marginLeft: 10 }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             <X size={15} />
           </button>
         </div>
 
         {/* Search bar */}
-        <div style={{ flexShrink: 0, padding: '8px 14px', borderBottom: '1px solid #F9FAFB' }}>
+        <div style={{ flexShrink: 0, padding: '8px 14px', borderBottom: '1px solid var(--hover-bg)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px',
-                        background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 7 }}>
-            <Search size={13} color="#9CA3AF" />
+                        background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7 }}>
+            <Search size={13} color="var(--text-muted)" />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder={t('shiftsDrawer.search')}
               style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                       fontSize: 12, color: '#374151' }} />
+                       fontSize: 12, color: 'var(--text)' }} />
           </div>
         </div>
 
@@ -169,7 +169,7 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {loading && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          height: 120, fontSize: 13, color: '#9CA3AF' }}>{t('shiftsDrawer.loading')}</div>
+                          height: 120, fontSize: 13, color: 'var(--text-muted)' }}>{t('shiftsDrawer.loading')}</div>
           )}
           {error && !loading && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -177,7 +177,7 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
           )}
           {!loading && !error && filtered.length === 0 && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          height: 120, fontSize: 13, color: '#9CA3AF' }}>{t('shiftsDrawer.empty')}</div>
+                          height: 120, fontSize: 13, color: 'var(--text-muted)' }}>{t('shiftsDrawer.empty')}</div>
           )}
 
           {!loading && !error && filtered.map((shift, i) => {
@@ -190,14 +190,14 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
 
             return (
               <div key={shift.id ?? i}
-                style={{ padding: '12px 16px', borderBottom: '1px solid #F3F4F6' }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#FAFAFA')}
+                style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'none')}
               >
                 {/* Row 1: position + status */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                  <Briefcase size={13} color="#9CA3AF" style={{ flexShrink: 0 }} />
-                  <span style={{ fontWeight: 600, fontSize: 13, color: '#111827', flex: 1 }}>
+                  <Briefcase size={13} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+                  <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)', flex: 1 }}>
                     {shift.job_type ?? t('shiftsDrawer.unknown')}
                   </span>
                   <Badge status={shift.own_status} />
@@ -249,7 +249,7 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
                 {planned && (
                   <div style={{ marginTop: 8, paddingLeft: 21 }}>
                     {invites.length === 0 ? (
-                      <div style={{ fontSize: 11, color: '#9CA3AF', fontStyle: 'italic' }}>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
                         {t('shiftsDrawer.noCandidate')}
                       </div>
                     ) : (
@@ -264,14 +264,14 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
 
         {/* Footer */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '8px 16px', borderTop: '1px solid #F3F4F6', background: '#FAFAFA',
+                      padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'var(--hover-bg)',
                       flexShrink: 0 }}>
-          <span style={{ fontSize: 11, color: '#9CA3AF' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
             {loading ? '…' : t('shiftsDrawer.shownOf', { shown: filtered.length, total: shifts.length })}
           </span>
           <button onClick={onClose}
             style={{ fontSize: 12, borderRadius: 6, padding: '4px 12px',
-                     background: 'none', border: '1px solid #E5E7EB', cursor: 'pointer', color: '#6B7280' }}>
+                     background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}>
             {t('shiftsDrawer.close')}
           </button>
         </div>

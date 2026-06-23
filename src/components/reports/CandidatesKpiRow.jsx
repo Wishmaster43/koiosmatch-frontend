@@ -78,7 +78,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
         note={t('kpiRow.attentionNote')}
         value={aandachtItems.length}
         icon={AlertTriangle}
-        iconBg="#FFF7ED"
+        iconBg="var(--color-warning-bg)"
         iconColor="var(--color-warning)"
         loading={loading}
         onClick={drill(t('kpiRow.attention'), calcAandacht)}
@@ -90,7 +90,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
         note={t('kpiRow.activeNote', { planned: geplandItems.length, total: actiefTotal })}
         value={actiefTotal}
         icon={UserCheck}
-        iconBg="#F0FDF4"
+        iconBg="var(--color-success-bg)"
         iconColor="var(--color-success)"
         loading={loading}
         onClick={drill(t('kpiRow.drillActive'), c => c.filter(x => (x.status || '').toLowerCase() === 'actief'))}
@@ -101,7 +101,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
         label={t('kpiRow.inactive')}
         value={count(candidates, 'nietactief')}
         icon={UserX}
-        iconBg="#FFF7ED"
+        iconBg="var(--color-warning-bg)"
         iconColor="#C2410C"
         loading={loading}
         onClick={drill(t('kpiRow.drillInactive'), c => c.filter(x => (x.status || '').toLowerCase() === 'nietactief'))}

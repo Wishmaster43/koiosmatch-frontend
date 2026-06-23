@@ -210,8 +210,8 @@ function TabConversatie({ c }) {
         <MessageSquare size={20} style={{ color: 'var(--border)' }} />
       </div>
       <div>
-        <p className="font-medium text-gray-400" style={{ fontSize: 14 }}>{t('candidateDrawer.conversationComing')}</p>
-        <p className="mt-1 text-gray-300" style={{ fontSize: 12 }}>
+        <p className="font-medium text-[var(--text-muted)]" style={{ fontSize: 14 }}>{t('candidateDrawer.conversationComing')}</p>
+        <p className="mt-1 text-[var(--text-muted)]" style={{ fontSize: 12 }}>
           {t('candidateDrawer.conversationDesc', { name: c.firstname ?? t('candidateDrawer.candidateFallback') })}
         </p>
       </div>
@@ -229,8 +229,8 @@ function TabHistory({ c }) {
         <History size={20} style={{ color: 'var(--border)' }} />
       </div>
       <div>
-        <p className="font-medium text-gray-400" style={{ fontSize: 14 }}>{t('candidateDrawer.historyComing')}</p>
-        <p className="mt-1 text-gray-300" style={{ fontSize: 12 }}>
+        <p className="font-medium text-[var(--text-muted)]" style={{ fontSize: 14 }}>{t('candidateDrawer.historyComing')}</p>
+        <p className="mt-1 text-[var(--text-muted)]" style={{ fontSize: 12 }}>
           {t('candidateDrawer.historyDesc', { name: c.firstname ?? t('candidateDrawer.candidateFallback') })}
         </p>
       </div>

@@ -76,10 +76,10 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
         <div className="flex items-start justify-between flex-shrink-0"
           style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
           <div>
-            <div className="font-semibold text-gray-900" style={{ fontSize: 15 }}>{title}</div>
-            <div className="text-sm text-gray-400 mt-0.5">
+            <div className="font-semibold text-[var(--text)]" style={{ fontSize: 15 }}>{title}</div>
+            <div className="text-sm text-[var(--text-muted)] mt-0.5">
               {t('drilldown.candidatesCount', { count: candidates.length })}
-              {subtitle && <span className="ml-1 text-gray-300">· {subtitle}</span>}
+              {subtitle && <span className="ml-1 text-[var(--text-muted)]">· {subtitle}</span>}
             </div>
           </div>
           <button onClick={onClose}
@@ -100,7 +100,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
               value={search}
               onChange={e => setSearch(e.target.value)}
               placeholder={t('drilldown.searchFull')}
-              className="flex-1 py-2 text-gray-700 bg-transparent outline-none"
+              className="flex-1 py-2 text-[var(--text)] bg-transparent outline-none"
               style={{ border: 'none', fontSize: 12 }}
             />
           </div>
@@ -109,7 +109,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
         {/* Candidates list */}
         <div className="flex-1 overflow-auto">
           {filtered.length === 0 ? (
-            <div className="flex items-center justify-center h-32 text-sm text-gray-300">
+            <div className="flex items-center justify-center h-32 text-sm text-[var(--text-muted)]">
               {t('candidates.empty')}
             </div>
           ) : (
@@ -135,7 +135,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
                     <div className="flex-1 min-w-0">
                       {/* Name + status */}
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="font-medium text-gray-800 truncate" style={{ fontSize: 13 }}>
+                        <span className="font-medium text-[var(--text)] truncate" style={{ fontSize: 13 }}>
                           {fullName || t('candidateDrawer.unknownName')}
                         </span>
                         <StatusBadge status={c.status} />
@@ -171,7 +171,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
         {/* Footer */}
         <div className="flex items-center justify-between flex-shrink-0 px-4 py-3"
           style={{ borderTop: '1px solid var(--border)', background: 'var(--hover-bg)' }}>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-[var(--text-muted)]">
             {t('drilldown.shownOf', { shown: filtered.length, total: candidates.length })}
           </span>
           <button onClick={onClose} className="text-xs rounded-lg px-3 py-1.5"

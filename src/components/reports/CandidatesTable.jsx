@@ -272,13 +272,13 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
             <div className="flex flex-col items-center justify-center gap-3"
               style={{ height: '100%', minHeight: 300 }}>
               <RefreshCw size={20} className="animate-spin" style={{ color: 'var(--border)' }} />
-              <p className="text-sm text-gray-400">{t('candidates.loading')}</p>
+              <p className="text-sm text-[var(--text-muted)]">{t('candidates.loading')}</p>
             </div>
           ) : sorted.length === 0 ? (
             <div className="flex flex-col items-center justify-center gap-2 text-center"
               style={{ height: '100%', minHeight: 300 }}>
-              <p className="text-sm font-medium text-gray-400">{t('candidates.empty')}</p>
-              <p className="text-xs text-gray-300">{t('candidates.emptyHint')}</p>
+              <p className="text-sm font-medium text-[var(--text-muted)]">{t('candidates.empty')}</p>
+              <p className="text-xs text-[var(--text-muted)]">{t('candidates.emptyHint')}</p>
             </div>
           ) : (
             <table className="w-full" style={{ borderCollapse: 'collapse', minWidth: 1100 }}>
@@ -291,7 +291,7 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
                         style={{ textAlign: col.align || 'left', padding: '11px 14px',
                                  borderBottom: '1px solid var(--border)', cursor: 'pointer',
                                  userSelect: 'none', whiteSpace: 'nowrap', background: '#fff' }}
-                        className="transition-colors hover:bg-gray-50">
+                        className="transition-colors hover:bg-[var(--hover-bg)]">
                         <span className="inline-flex items-center gap-1"
                           style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase',
                                    letterSpacing: '0.04em',
@@ -308,7 +308,7 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
                 {sorted.map((c, i) => (
                   <tr key={c.id ?? i}
                     onClick={() => setDetail(c)}
-                    className="transition-colors hover:bg-gray-50"
+                    className="transition-colors hover:bg-[var(--hover-bg)]"
                     style={{ borderBottom: '1px solid var(--hover-bg)', cursor: 'pointer' }}>
                     {columns.map(col => (
                       <td key={col.key}

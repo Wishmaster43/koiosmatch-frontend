@@ -26,14 +26,14 @@ const PAD = n => String(n).padStart(2, '0')
 const STATUS_LABELS = {
   open:       { bg: '#F0F9FF', color: '#0369A1' },
   prognosis:  { bg: '#F5F3FF', color: '#6D28D9' },
-  completed:  { bg: '#F0FDF4', color: 'var(--color-success)' },
+  completed:  { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
   in_process: { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
   cancelled:  { bg: 'var(--color-danger-bg)', color: '#E11D48' },
 }
 
 function StatusBadge({ status }) {
   const { t } = useTranslation('shiftmanager')
-  const s = STATUS_LABELS[status] ?? { bg: '#F9FAFB', color: '#6B7280' }
+  const s = STATUS_LABELS[status] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   return (
     <span style={{ background: s.bg, color: s.color, fontSize: 11, fontWeight: 500,
                    padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
@@ -43,22 +43,22 @@ function StatusBadge({ status }) {
 }
 
 function SortIcon({ active, dir }) {
-  if (!active) return <ChevronsUpDown size={12} style={{ color: '#D1D5DB' }} />
+  if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
     ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
     : <ChevronDown size={12} style={{ color: 'var(--color-primary)' }} />
 }
 
 const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-             color: '#9CA3AF', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6',
+             color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
              whiteSpace: 'nowrap', userSelect: 'none' }
-const TD = { padding: '9px 12px', fontSize: 12, color: '#374151', borderBottom: '1px solid #F9FAFB',
+const TD = { padding: '9px 12px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)',
              whiteSpace: 'nowrap' }
 
 const formatDate   = dt => { if (!dt) return '—'; const d = new Date(dt); return `${PAD(d.getDate())}-${PAD(d.getMonth()+1)}-${d.getFullYear()}` }
 const formatTime   = dt => { if (!dt) return '—'; const d = new Date(dt); return `${PAD(d.getHours())}:${PAD(d.getMinutes())}` }
 const formatHours  = h  => h != null ? Number(h).toFixed(2) : '—'
-const dash         = v  => v || <span style={{ color: '#D1D5DB' }}>—</span>
+const dash         = v  => v || <span style={{ color: 'var(--border)' }}>—</span>
 
 function DetailDrawer({ row, onClose }) {
   const { t } = useTranslation('shiftmanager')
@@ -70,8 +70,8 @@ function DetailDrawer({ row, onClose }) {
 
   const Field = ({ label, value }) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <span style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
-      <span style={{ fontSize: 13, color: '#111827' }}>{value || '—'}</span>
+      <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
+      <span style={{ fontSize: 13, color: 'var(--text)' }}>{value || '—'}</span>
     </div>
   )
 
@@ -166,7 +166,7 @@ function DetailDrawer({ row, onClose }) {
 function Section({ title, children }) {
   return (
     <div>
-      <p style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase',
+      <p style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
                   letterSpacing: '0.07em', marginBottom: 10 }}>{title}</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10,
                     padding: '12px 14px', background: 'var(--bg)',
@@ -322,15 +322,15 @@ export default function OrdersTable() {
       {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0" style={{ marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>{t('orders.title')}</h1>
-          <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>
+          <h1 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>{t('orders.title')}</h1>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>
             {loading ? t('charts.loading') : t('orders.count', { count: total })}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <select value={selectedMonth} onChange={e => setSelectedMonth(e.target.value)}
-            style={{ height: 34, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB',
-                     borderRadius: 8, color: '#374151', background: 'white', cursor: 'pointer' }}>
+            style={{ height: 34, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)',
+                     borderRadius: 8, color: 'var(--text)', background: 'white', cursor: 'pointer' }}>
             <option value="">{t('orders.allMonths')}</option>
             {monthOptions.map(m => (
               <option key={m} value={m}>{formatMonth(m)}</option>
@@ -338,18 +338,18 @@ export default function OrdersTable() {
           </select>
           <div className="relative">
             <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
-                                       transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+                                       transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder={t('orders.search')}
               style={{ height: 34, width: 240, paddingLeft: 32, paddingRight: 12, fontSize: 13,
-                       border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
+                       border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
           </div>
         </div>
       </div>
 
       {/* Table */}
-      <div className="flex flex-1 min-h-0 overflow-hidden bg-white rounded-xl"
-        style={{ border: '1px solid #F3F4F6' }}>
+      <div className="flex flex-1 min-h-0 overflow-hidden bg-[var(--surface)] rounded-xl"
+        style={{ border: '1px solid var(--border)' }}>
         <div className="flex-1 min-w-0 overflow-auto">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -367,12 +367,12 @@ export default function OrdersTable() {
             </thead>
             <tbody>
               {loading && (
-                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 48, color: '#9CA3AF', fontSize: 13 }}>
+                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)', fontSize: 13 }}>
                   {t('orders.loading')}
                 </td></tr>
               )}
               {!loading && sorted.length === 0 && (
-                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 48, color: '#9CA3AF', fontSize: 13 }}>
+                <tr><td colSpan={COLS.length} style={{ textAlign: 'center', padding: 48, color: 'var(--text-muted)', fontSize: 13 }}>
                   {t('orders.empty')}
                 </td></tr>
               )}
@@ -380,16 +380,16 @@ export default function OrdersTable() {
                 <tr key={r.id ?? i}
                   onClick={() => setSelected(r)}
                   style={{ cursor: 'pointer', background: selected?.id === r.id ? 'var(--color-secondary-bg)' : undefined }}
-                  onMouseEnter={e => { if (selected?.id !== r.id) e.currentTarget.style.background = '#F9FAFB' }}
+                  onMouseEnter={e => { if (selected?.id !== r.id) e.currentTarget.style.background = 'var(--hover-bg)' }}
                   onMouseLeave={e => { if (selected?.id !== r.id) e.currentTarget.style.background = 'transparent' }}>
-                  <td style={{ ...TD, fontFamily: 'monospace', fontSize: 11, color: '#6B7280' }}>
+                  <td style={{ ...TD, fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)' }}>
                     {dash(r.external_id)}
                   </td>
                   <td style={{ ...TD, fontFamily: 'monospace', fontSize: 11 }}>
                     {dash(r.order_ref)}
                   </td>
                   <td style={TD}><StatusBadge status={r.own_status} /></td>
-                  <td style={{ ...TD, fontWeight: 500, color: '#111827', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <td style={{ ...TD, fontWeight: 500, color: 'var(--text)', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {dash(r.customer_name)}
                   </td>
                   <td style={{ ...TD, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
@@ -404,8 +404,8 @@ export default function OrdersTable() {
                   <td style={{ ...TD, textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
                     {formatHours(r.worked_hours_customer)}
                   </td>
-                  <td style={{ ...TD, fontSize: 11, color: '#6B7280' }}>{dash(r.cost_center_candidate)}</td>
-                  <td style={{ ...TD, fontSize: 11, color: '#6B7280' }}>{dash(r.cost_center_customer)}</td>
+                  <td style={{ ...TD, fontSize: 11, color: 'var(--text-muted)' }}>{dash(r.cost_center_candidate)}</td>
+                  <td style={{ ...TD, fontSize: 11, color: 'var(--text-muted)' }}>{dash(r.cost_center_customer)}</td>
                 </tr>
               ))}
             </tbody>
