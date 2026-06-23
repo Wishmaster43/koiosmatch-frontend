@@ -143,7 +143,7 @@ De JS-laag is gezond; al het werk zit in JSX. Afvinken = gesplitst tot onder het
 **Pages (horen thin §2 — logica → hooks/api, UI → subcomponenten):**
 - [✅] `pages/planning/PlanningPage.jsx` — **740 → 162** (thin) (2026-06-23): `AddShiftModal`+cast → `AddShiftModal.jsx` (318); views Month/Week/Day/List+ShiftPill → `views.jsx` (268); date-helpers → `helpers.js` (16). Build+lint groen. *(Draait nog op dummy-data → B-22; AddShiftModal/views nog boven ~250 maar cohesief, evt. later verder splitsen.)*
 - [ ] `pages/candidates/CandidatesPage.jsx` — 670  *(stats/predicaten → hooks; InsightsRow extraheren, B-18.6)*
-- [◐] `pages/ai/WorkflowsPage.jsx` — **501 → 434** (2026-06-23): pure API-shape transforms (`normalizeWorkflow`/`denormalizeWorkflow`/`parseTrigger`) → `pages/ai/data/workflowMap.js` (72). Rest: `StepPill`+`WorkflowCard`+`MODULE_META`+`STATUS_STYLES` → `WorkflowCard.jsx` (brengt 'm onder 400; AW-6: StepPill uit registry).
+- [✅] `pages/ai/WorkflowsPage.jsx` — **501 → 303** (2026-06-23): transforms → `data/workflowMap.js` (72); `StepPill`+`WorkflowCard`+`MODULE_META`+`STATUS_STYLES` → `WorkflowCard.jsx` (136). Alle 3 < 400. Build+lint groen. *(AW-6 nog open: StepPill uit gedeelde registry voeden i.p.v. lokale MODULE_META.)*
 - [ ] `pages/users/UsersPage.jsx` — 464
 - [ ] `pages/shiftmanager/LocationsPage.jsx` — 441
 - [ ] `pages/vacancies/VacanciesPage.jsx` — 424  *(B-19 loopt)*
