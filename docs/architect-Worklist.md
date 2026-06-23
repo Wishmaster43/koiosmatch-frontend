@@ -50,10 +50,7 @@ graaf-serialisatie) is vooruit-correct; de frontend leunt op nog-niet-bevestigde
   contact/vacancy; **application/match/location/department/workflow ontbreken** — juist de
   "alles is gelinkt"-kern. → `TYPE_ENDPOINTS` config-gedreven uitbreiden. *(file: `LinksTab.jsx:10-15`;
   cross-ref B-20.)*
-- [ ] **AW-6 · WorkflowsPage-preview laat onbekende module-types vallen.** `StepPill` doet
-  `if (!meta) return null`; `MODULE_META` kent maar 6 types → `matches`/`tasks`/`vacancies`/…
-  worden onzichtbaar in de kaart-preview. → `StepPill` uit de gedeelde registry (`src/modules/index.js`)
-  voeden i.p.v. een tweede handmatige map. *(file: `WorkflowsPage.jsx:94-95`.)*
+- [✅] **AW-6 · WorkflowCard/StepPill voedt nu uit de gedeelde `MODULE_META` (`@/modules/index`)** (2026-06-23); de lokale 6-type-map is weg, alle module-types renderen. i18n-label valt terug op de registry-label.
 - [ ] **AW-7 · Module-registry hardcodet NL-labels/categorieën + hex.** Nieuwe `src/modules/*.js`
   erven de bestaande schuld (`label:'Kandidaten'`, `category:'Matches'`, `color:'#2563EB'`).
   Schendt §0.1/§5/§4. → labels/categorieën via i18n, kleuren via `--color-*`; minstens de 8

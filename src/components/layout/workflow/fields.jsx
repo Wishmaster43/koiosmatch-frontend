@@ -386,7 +386,7 @@ export function FieldInput({ field, value, onChange }) {
     )
   }
   return (
-    <input type={field.type === 'number' ? 'number' : 'text'}
+    <input type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
       value={value || ''}
       placeholder={field.placeholder || ''}
       onChange={e => onChange(field.key, field.type === 'number' ? Number(e.target.value) : e.target.value)}

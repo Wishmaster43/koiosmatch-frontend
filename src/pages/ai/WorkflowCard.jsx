@@ -1,21 +1,13 @@
 /**
  * WorkflowCard — one workflow tile: name, status badge, module-chip row (StepPill +
- * the local MODULE_META lookup), last-run state and run/edit actions. Extracted from
- * WorkflowsPage. (AW-6 follow-up: feed StepPill from the shared module registry.)
+ * the shared module registry), last-run state and run/edit actions. Extracted from WorkflowsPage.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Users, Calendar, MessageCircle, Database, Mail, Clock, AlertCircle, CheckCircle, Loader2, MoreHorizontal, Play, Zap } from 'lucide-react'
-
-// Module chip icon + colours; label = t('modules.<type>').
-const MODULE_META = {
-  candidates: { Icon: Users,         color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
-  planning:    { Icon: Calendar,      color: '#0F6E56', bg: '#E1F5EE' },
-  whatsapp_send:    { Icon: MessageCircle, color: '#3B6D11', bg: '#EAF3DE' },
-  database_update:  { Icon: Database,      color: '#185FA5', bg: '#E6F1FB' },
-  email_send:       { Icon: Mail,          color: '#854F0B', bg: '#FAEEDA' },
-  delay:            { Icon: Clock,         color: '#5F5E5A', bg: '#F1EFE8' },
-}
+import { AlertCircle, CheckCircle, Loader2, MoreHorizontal, Play, Zap } from 'lucide-react'
+// Shared module registry — every module type (label/Icon/colours), so no step chip
+// silently disappears (AW-6). The local 6-type map is gone.
+import { MODULE_META } from '@/modules/index'
 
 // Status badge colours; label = t('status.<key>').
 const STATUS_STYLES = {
@@ -29,7 +21,7 @@ function StepPill({ type }) {
   const meta = MODULE_META[type]
   if (!meta) return null
   const Icon = meta.Icon
-  const label = t(`modules.${type}`, { defaultValue: type })
+  const label = t(`modules.${type}`, { defaultValue: meta.label ?? type })
   return (
     <div
       className="flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
