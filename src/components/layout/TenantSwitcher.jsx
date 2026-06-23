@@ -110,41 +110,41 @@ export default function TenantSwitcher({ expanded }) {
       <button
         onClick={() => canSwitch && setOpen(o => !o)}
         className="flex items-center w-full transition-colors rounded-lg"
-        style={{ gap: 8, padding: '7px 9px', background: '#F8F9FF', border: '1px solid #EBEBF5', cursor: canSwitch ? 'pointer' : 'default' }}
-        onMouseEnter={e => canSwitch && (e.currentTarget.style.background = '#F0F0FF')}
-        onMouseLeave={e => (e.currentTarget.style.background = '#F8F9FF')}
+        style={{ gap: 8, padding: '7px 9px', background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: canSwitch ? 'pointer' : 'default' }}
+        onMouseEnter={e => canSwitch && (e.currentTarget.style.background = 'var(--hover-bg)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
       >
         <div className="flex items-center justify-center flex-shrink-0 rounded"
           style={{ width: 22, height: 22, background: '#3B8FD4', fontSize: 8, color: 'white', fontWeight: 700 }}>
           {initials}
         </div>
         <div className="flex-1 min-w-0 text-left">
-          <div style={{ fontSize: 11, fontWeight: 500, color: '#374151', lineHeight: 1.2 }} className="truncate">
+          <div style={{ fontSize: 11, fontWeight: 500, color: 'var(--text)', lineHeight: 1.2 }} className="truncate">
             {tenant?.name ?? 'Selecteer bureau'}
           </div>
-          <div style={{ fontSize: 9, color: '#9CA3AF' }}>
+          <div style={{ fontSize: 9, color: 'var(--text-muted)' }}>
             {canSwitch ? 'Super admin' : 'Flex staffing'}
           </div>
         </div>
         {canSwitch && (
-          <ChevronDown size={12} style={{ color: '#9CA3AF', flexShrink: 0,
+          <ChevronDown size={12} style={{ color: 'var(--text-muted)', flexShrink: 0,
             transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
         )}
       </button>
 
       {open && canSwitch && (
-        <div className="absolute left-0 right-0 z-50 mt-1 overflow-hidden bg-white top-full rounded-xl"
-          style={{ border: '1px solid #E5E7EB', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
+        <div className="absolute left-0 right-0 z-50 mt-1 overflow-hidden bg-[var(--surface)] top-full rounded-xl"
+          style={{ border: '1px solid var(--border)', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }}>
           <div className="p-2 border-b border-gray-100">
             <div className="relative">
-              <Search size={13} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+              <Search size={13} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input
                 autoFocus
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder={t('nav.switchTenant', { defaultValue: 'Zoek bureau…' })}
                 className="w-full"
-                style={{ padding: '7px 8px 7px 28px', fontSize: 13, borderRadius: 7, border: '1px solid #E5E7EB', outline: 'none' }}
+                style={{ padding: '7px 8px 7px 28px', fontSize: 13, borderRadius: 7, border: '1px solid var(--border)', outline: 'none' }}
               />
             </div>
           </div>
@@ -155,8 +155,8 @@ export default function TenantSwitcher({ expanded }) {
               return (
                 <button key={tn.id} onClick={() => pick(tn)} disabled={switching != null}
                   className="flex items-center gap-3 w-full px-2 py-2 rounded-md transition-colors"
-                  style={{ background: isActive ? '#F8F9FF' : 'none', border: 'none', cursor: switching != null ? 'wait' : 'pointer' }}
-                  onMouseEnter={e => !isActive && (e.currentTarget.style.background = '#F9FAFB')}
+                  style={{ background: isActive ? 'var(--hover-bg)' : 'none', border: 'none', cursor: switching != null ? 'wait' : 'pointer' }}
+                  onMouseEnter={e => !isActive && (e.currentTarget.style.background = 'var(--hover-bg)')}
                   onMouseLeave={e => !isActive && (e.currentTarget.style.background = 'none')}
                 >
                   <div className="flex items-center justify-center flex-shrink-0 rounded"
@@ -164,23 +164,23 @@ export default function TenantSwitcher({ expanded }) {
                     {tenantInitials(tn.name)}
                   </div>
                   <div className="flex-1 min-w-0 text-left">
-                    <div className="text-sm font-medium text-gray-700 truncate">{tn.name ?? tn.id}</div>
-                    {tenantDomain(tn) && <div className="text-xs text-gray-400 truncate">{tenantDomain(tn)}</div>}
+                    <div className="text-sm font-medium text-[var(--text)] truncate">{tn.name ?? tn.id}</div>
+                    {tenantDomain(tn) && <div className="text-xs text-[var(--text-muted)] truncate">{tenantDomain(tn)}</div>}
                   </div>
                   {switching === tn.id
-                    ? <Loader2 size={13} className="flex-shrink-0 animate-spin" style={{ color: '#9CA3AF' }} />
+                    ? <Loader2 size={13} className="flex-shrink-0 animate-spin" style={{ color: 'var(--text-muted)' }} />
                     : isActive && <div className="flex-shrink-0 rounded-full" style={{ width: 6, height: 6, background: 'var(--color-primary)' }} />}
                 </button>
               )
             })}
 
             {loading && (
-              <div className="flex items-center justify-center gap-2 py-3" style={{ fontSize: 12, color: '#9CA3AF' }}>
+              <div className="flex items-center justify-center gap-2 py-3" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                 <Loader2 size={13} className="animate-spin" /> Laden…
               </div>
             )}
             {!loading && results.length === 0 && (
-              <div style={{ padding: '12px 10px', fontSize: 12, color: '#9CA3AF' }}>Geen bureaus gevonden</div>
+              <div style={{ padding: '12px 10px', fontSize: 12, color: 'var(--text-muted)' }}>Geen bureaus gevonden</div>
             )}
           </div>
         </div>

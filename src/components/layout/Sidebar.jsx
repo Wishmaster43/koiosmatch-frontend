@@ -141,7 +141,7 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
             {item.soon && (
               <span style={{
                 fontSize: 9, fontWeight: 600, letterSpacing: '0.04em', padding: '2px 5px',
-                background: '#F3F4F6', color: '#9CA3AF', borderRadius: 4, flexShrink: 0,
+                background: 'var(--hover-bg)', color: 'var(--text-muted)', borderRadius: 4, flexShrink: 0,
               }}>
                 binnenkort
               </span>
