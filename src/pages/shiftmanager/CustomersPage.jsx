@@ -160,7 +160,7 @@ export default function CustomersPage() {
 
           <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
             <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
-              background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+              background: 'var(--color-primary)', color: 'var(--surface)', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
               + {t('page.add')}
             </button>
           </div>

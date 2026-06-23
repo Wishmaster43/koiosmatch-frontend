@@ -37,7 +37,7 @@ export default function AddCustomerModal({ onClose, onCreate }) {
     <div onClick={e => e.target === e.currentTarget && onClose()}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 520,
+      <div style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 520,
         boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
 
         {/* Header */}
@@ -79,7 +79,7 @@ export default function AddCustomerModal({ onClose, onCreate }) {
                   style={{ ...iStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer' }}>
                   {STATUSES.map(s => <option key={s} value={s}>{t(`status.${s}`)}</option>)}
                 </select>
-                <ChevronDown size={13} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', pointerEvents: 'none' }} />
+                <ChevronDown size={13} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
               </div>
             </div>
           </div>
@@ -98,14 +98,14 @@ export default function AddCustomerModal({ onClose, onCreate }) {
 
         {/* Footer */}
         <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
-          display: 'flex', justifyContent: 'flex-end', gap: 8, background: '#FAFAFA' }}>
+          display: 'flex', justifyContent: 'flex-end', gap: 8, background: 'var(--hover-bg)' }}>
           <button onClick={onClose}
             style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
             {t('modal.cancel')}
           </button>
           <button onClick={handleSubmit} disabled={!canSubmit}
             style={{ padding: '8px 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-              background: canSubmit ? 'var(--color-primary)' : '#E5E7EB', color: canSubmit ? 'white' : '#9CA3AF',
+              background: canSubmit ? 'var(--color-primary)' : 'var(--border)', color: canSubmit ? 'white' : 'var(--text-muted)',
               cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
             {t('modal.create')}
           </button>

@@ -42,7 +42,7 @@ function ModuleNode({ id, data, selected }) {
       )}
       {!data.isFirst && (
         <Handle type="target" position={Position.Left}
-          style={{ width: 10, height: 10, background: '#D1D5DB', border: '2px solid white', top: '38%' }} />
+          style={{ width: 10, height: 10, background: 'var(--border)', border: '2px solid white', top: '38%' }} />
       )}
       <div style={{ position: 'relative' }}>
         <div style={{
@@ -66,7 +66,7 @@ function ModuleNode({ id, data, selected }) {
           style={{
             position: 'absolute', bottom: -2, right: -2,
             width: 22, height: 22, borderRadius: '50%',
-            background: busy ? '#E5E7EB' : 'white',
+            background: busy ? 'var(--border)' : 'var(--surface)',
             border: `1.5px solid ${meta.color}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', color: meta.color,
@@ -88,7 +88,7 @@ function ModuleNode({ id, data, selected }) {
         )}
       </div>
       <div style={{ textAlign: 'center', width: NODE_W }}>
-        <div style={{ fontSize: 11, fontWeight: 600, color: '#374151', lineHeight: 1.3 }}>{meta.label}</div>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>{meta.label}</div>
         {data.output && (
           <div style={{ fontSize: 9, color: 'var(--color-success)', marginTop: 1 }}>
             {Array.isArray(data.output) ? `${data.output.length} records` : 'Klaar'}
@@ -96,7 +96,7 @@ function ModuleNode({ id, data, selected }) {
         )}
       </div>
       <Handle type="source" position={Position.Right}
-        style={{ width: 10, height: 10, background: '#D1D5DB', border: '2px solid white', top: '38%' }} />
+        style={{ width: 10, height: 10, background: 'var(--border)', border: '2px solid white', top: '38%' }} />
     </div>
   )
 }
@@ -117,12 +117,12 @@ export function EdgeFilterPanel({ filters, onClose, onSave }) {
       background: 'rgba(0,0,0,0.3)',
     }} onClick={onClose}>
       <div style={{
-        background: 'white', borderRadius: 14, padding: 24, width: 520, maxHeight: '80vh', overflow: 'auto',
+        background: 'var(--surface)', borderRadius: 14, padding: 24, width: 520, maxHeight: '80vh', overflow: 'auto',
         boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
       }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: '#111827' }}>Filter instellen</div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
+          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Filter instellen</div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
         </div>
 
         {/* AND / OR toggle */}
@@ -130,11 +130,11 @@ export function EdgeFilterPanel({ filters, onClose, onSave }) {
           {['AND', 'OR'].map(l => (
             <button key={l} onClick={() => setLogic(l)} style={{
               padding: '4px 14px', fontSize: 12, fontWeight: 600, borderRadius: 999, border: 'none', cursor: 'pointer',
-              background: logic === l ? 'var(--color-primary)' : '#F3F4F6',
-              color: logic === l ? 'white' : '#6B7280',
+              background: logic === l ? 'var(--color-primary)' : 'var(--border)',
+              color: logic === l ? 'white' : 'var(--text-muted)',
             }}>{l}</button>
           ))}
-          <span style={{ fontSize: 12, color: '#9CA3AF', alignSelf: 'center', marginLeft: 4 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)', alignSelf: 'center', marginLeft: 4 }}>
             {logic === 'AND' ? 'Alle condities moeten kloppen' : 'Minimaal één conditie moet kloppen'}
           </span>
         </div>
@@ -144,20 +144,20 @@ export function EdgeFilterPanel({ filters, onClose, onSave }) {
           {conds.map((c, i) => (
             <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               {i > 0 && (
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', width: 28, textAlign: 'center', flexShrink: 0 }}>{logic}</div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', width: 28, textAlign: 'center', flexShrink: 0 }}>{logic}</div>
               )}
               {i === 0 && <div style={{ width: 28, flexShrink: 0 }} />}
               <input value={c.field} onChange={e => updCond(i, 'field', e.target.value)}
                 placeholder="veld (bijv. status)"
-                style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none' }} />
+                style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
               <select value={c.operator} onChange={e => updCond(i, 'operator', e.target.value)}
-                style={{ padding: '6px 8px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none', background: 'white' }}>
+                style={{ padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)' }}>
                 {OPERATORS.map(op => <option key={op} value={op}>{op}</option>)}
               </select>
               {!['is leeg', 'is gevuld'].includes(c.operator) && (
                 <input value={c.value} onChange={e => updCond(i, 'value', e.target.value)}
                   placeholder="waarde"
-                  style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none' }} />
+                  style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
               )}
               <button onClick={() => delCond(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: 4 }}><Trash2 size={12} /></button>
             </div>
@@ -173,7 +173,7 @@ export function EdgeFilterPanel({ filters, onClose, onSave }) {
         </button>
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', cursor: 'pointer', color: '#6B7280' }}>Annuleren</button>
+          <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>Annuleren</button>
           <button onClick={() => { onSave({ logic, conditions: conds }); onClose() }}
             style={{ padding: '8px 16px', fontSize: 13, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>
             Opslaan
@@ -207,7 +207,7 @@ export function OutputPanel({ output, onClose }) {
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Zoeken..."
               style={{ padding: '5px 10px', fontSize: 12, background: '#2D2D3F', border: '1px solid #3D3D4F', borderRadius: 6, color: '#E2E8F0', outline: 'none', width: 160 }} />
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280' }}><X size={16} /></button>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
           </div>
         </div>
         <pre style={{
@@ -231,7 +231,7 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data })
   const midX = (sourceX + targetX) / 2
   const midY = (sourceY + targetY) / 2
   const hasFilters = data?.filters?.conditions?.length > 0
-  const stroke = hasFilters ? '#7C3AED' : (selected ? 'var(--color-primary)' : '#D1D5DB')
+  const stroke = hasFilters ? '#7C3AED' : (selected ? 'var(--color-primary)' : 'var(--border)')
   return (
     <>
       <BaseEdge id={id} path={path} style={{ stroke, strokeWidth: hasFilters ? 2.5 : 2, strokeDasharray: hasFilters ? '6 3' : undefined }} />
@@ -248,21 +248,21 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data })
             </div>
           )}
           <button onClick={() => onAdd && onAdd(id)} title="Module invoegen"
-            style={{ width: 22, height: 22, borderRadius: '50%', background: 'white', border: '1.5px solid #D1D5DB', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#9CA3AF', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
+            style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--surface)', border: '1.5px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#D1D5DB'; e.currentTarget.style.color = '#9CA3AF' }}>
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)' }}>
             <Plus size={11} />
           </button>
           <button onClick={() => onFilter && onFilter(id)} title="Filter instellen"
-            style={{ width: 22, height: 22, borderRadius: '50%', background: hasFilters ? '#F3E8FF' : 'white', border: `1.5px solid ${hasFilters ? '#7C3AED' : '#D1D5DB'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: hasFilters ? '#7C3AED' : '#9CA3AF', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
+            style={{ width: 22, height: 22, borderRadius: '50%', background: hasFilters ? '#F3E8FF' : 'var(--surface)', border: `1.5px solid ${hasFilters ? '#7C3AED' : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: hasFilters ? '#7C3AED' : 'var(--text-muted)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#7C3AED'; e.currentTarget.style.color = '#7C3AED' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = hasFilters ? '#7C3AED' : '#D1D5DB'; e.currentTarget.style.color = hasFilters ? '#7C3AED' : '#9CA3AF' }}>
+            onMouseLeave={e => { e.currentTarget.style.borderColor = hasFilters ? '#7C3AED' : 'var(--border)'; e.currentTarget.style.color = hasFilters ? '#7C3AED' : 'var(--text-muted)' }}>
             <Filter size={11} />
           </button>
           <button onClick={() => onDelete && onDelete(id)} title="Verbinding verbreken"
-            style={{ width: 22, height: 22, borderRadius: '50%', background: 'white', border: '1.5px solid #D1D5DB', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#9CA3AF', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
+            style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--surface)', border: '1.5px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-danger)'; e.currentTarget.style.color = 'var(--color-danger)' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = '#D1D5DB'; e.currentTarget.style.color = '#9CA3AF' }}>
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)' }}>
             <X size={11} />
           </button>
         </div>

@@ -43,13 +43,13 @@ function ContactDrawer({ contact, onClose }) {
         <div style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
           <div style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
             background: ac(name), display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18, fontWeight: 700, color: '#fff' }}>{initials}</div>
+            fontSize: 18, fontWeight: 700, color: 'var(--surface)' }}>{initials}</div>
           <div>
             <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>{name}</div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{contact.function_title}</div>
             {contact.planning && (
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, marginTop: 6,
-                padding: '2px 8px', borderRadius: 999, background: '#F0FDF4', color: 'var(--color-success)',
+                padding: '2px 8px', borderRadius: 999, background: 'var(--color-success-bg)', color: 'var(--color-success)',
                 border: '1px solid #BBF7D0', fontWeight: 500 }}>
                 <MessageCircle size={10} /> Planningscontact
               </span>
@@ -92,7 +92,7 @@ function ContactDrawer({ contact, onClose }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 34, height: 34, borderRadius: 8, background: ac(contact.customer),
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
+              fontSize: 13, fontWeight: 800, color: 'var(--surface)', flexShrink: 0 }}>
               {contact.customer?.charAt(0)}
             </div>
             <div style={{ flex: 1 }}>
@@ -224,7 +224,7 @@ export default function ContactsPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
                           <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
                             background: ac(name), display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 11, fontWeight: 700, color: '#fff' }}>{initials}</div>
+                            fontSize: 11, fontWeight: 700, color: 'var(--surface)' }}>{initials}</div>
                           <div>
                             <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{name}</div>
                             {c.function_title && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.function_title}</div>}
@@ -237,7 +237,7 @@ export default function ContactsPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
                           <div style={{ width: 20, height: 20, borderRadius: 5, background: ac(c.customer),
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 8, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
+                            fontSize: 8, fontWeight: 800, color: 'var(--surface)', flexShrink: 0 }}>
                             {c.customer?.charAt(0)}
                           </div>
                           <span style={{ fontSize: 12, color: 'var(--text)', maxWidth: 140,
@@ -274,9 +274,9 @@ export default function ContactsPage() {
                       <td style={{ padding: '11px 14px' }}>
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4,
                           fontSize: 11, fontWeight: 500, padding: '3px 9px', borderRadius: 999,
-                          background: c.planning ? '#F0FDF4' : '#F9FAFB',
-                          color:      c.planning ? 'var(--color-success)'  : '#9CA3AF',
-                          border:     `1px solid ${c.planning ? '#BBF7D0' : '#E5E7EB'}` }}>
+                          background: c.planning ? 'var(--color-success-bg)' : 'var(--hover-bg)',
+                          color:      c.planning ? 'var(--color-success)'  : 'var(--text-muted)',
+                          border:     `1px solid ${c.planning ? '#BBF7D0' : 'var(--border)'}` }}>
                           {c.planning ? <><MessageCircle size={10} /> Ja</> : 'Nee'}
                         </span>
                       </td>

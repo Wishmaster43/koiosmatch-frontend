@@ -183,14 +183,14 @@ export default function WorkflowsPage() {
   return (
     <div style={{ display: 'flex', height: '100%' }}>
       {/* Folder sidebar — drag targets */}
-      <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid #F3F4F6', display: 'flex', flexDirection: 'column', background: 'white' }}>
+      <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
         <div style={{ padding: '16px 16px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#9CA3AF', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{t('page.folders')}</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{t('page.folders')}</span>
           <button onClick={() => {
             const name = prompt(t('page.folderNamePrompt'))
             if (name?.trim()) createFolder(name.trim())
           }} title={t('page.newFolder')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: 2, display: 'flex' }}>
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
             <FolderPlus size={15} />
           </button>
         </div>
@@ -208,7 +208,7 @@ export default function WorkflowsPage() {
               onDrop={() => { moveToFolder(dragWf.current, item.id === 'unassigned' ? null : item.id); setDragOverFolder(null) }}
             />
           ))}
-          <div style={{ height: 1, background: '#F3F4F6', margin: '4px 12px' }} />
+          <div style={{ height: 1, background: 'var(--border)', margin: '4px 12px' }} />
           {folders.map(f => (
             <SidebarRow key={f.id} label={f.name} icon={<Folder size={13} />}
               active={selectedFolder === f.id}
@@ -227,12 +227,12 @@ export default function WorkflowsPage() {
       <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <div>
-            <h2 style={{ fontSize: 18, fontWeight: 600, color: '#111827' }}>
+            <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>
               {selectedFolder === null ? t('page.allWorkflows')
                : selectedFolder === 'unassigned' ? t('page.unassigned')
                : (folders.find(f => f.id === selectedFolder)?.name ?? t('page.workflowsTitle'))}
             </h2>
-            <p style={{ fontSize: 13, color: '#9CA3AF', marginTop: 2 }}>{t('page.countWorkflows', { n: visibleWorkflows.length })}</p>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{t('page.countWorkflows', { n: visibleWorkflows.length })}</p>
           </div>
           <button
             onClick={() => setEditingWorkflow({ name: t('page.newWorkflow'), trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
@@ -243,7 +243,7 @@ export default function WorkflowsPage() {
         </div>
 
         {loading ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#9CA3AF', fontSize: 13 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 13 }}>
             <Loader2 size={14} className="animate-spin" /> {t('page.loading')}
           </div>
         ) : (
@@ -258,7 +258,7 @@ export default function WorkflowsPage() {
               </div>
             ))}
             {visibleWorkflows.length === 0 && (
-              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: '#9CA3AF', fontSize: 14 }}>
+              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: 'var(--text-muted)', fontSize: 14 }}>
                 {t('page.empty')}
               </div>
             )}
@@ -285,13 +285,13 @@ function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDr
       style={{
         display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px',
         cursor: 'pointer', borderRadius: 6, margin: '1px 6px',
-        background: isDragOver ? 'var(--color-secondary-bg)' : active ? 'var(--color-primary-bg)' : hover ? '#F9FAFB' : 'transparent',
+        background: isDragOver ? 'var(--color-secondary-bg)' : active ? 'var(--color-primary-bg)' : hover ? 'var(--hover-bg)' : 'transparent',
         border: isDragOver ? '1.5px dashed var(--color-secondary)' : '1.5px solid transparent',
-        color: active ? 'var(--color-primary)' : '#374151',
+        color: active ? 'var(--color-primary)' : 'var(--text)',
         transition: 'background 0.1s',
       }}
     >
-      <span style={{ color: isDragOver ? 'var(--color-secondary)' : active ? 'var(--color-primary)' : '#9CA3AF', flexShrink: 0 }}>{icon}</span>
+      <span style={{ color: isDragOver ? 'var(--color-secondary)' : active ? 'var(--color-primary)' : 'var(--text-muted)', flexShrink: 0 }}>{icon}</span>
       <span style={{ fontSize: 13, flex: 1, fontWeight: active ? 600 : 400, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</span>
       {onDelete && hover && (
         <button onClick={e => { e.stopPropagation(); onDelete() }}

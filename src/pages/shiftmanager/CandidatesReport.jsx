@@ -7,9 +7,9 @@ import CandidatesReport from "../../components/reports/CandidatesReport";
 // Placeholder shown for tabs that are not built yet.
 function ComingSoon({ label }) {
   return (
-    <div className="flex items-center justify-center h-64 bg-white rounded-xl"
-      style={{ border: '1px solid #F3F4F6' }}>
-      <p className="font-mono text-sm text-gray-300">{label} — komt eraan</p>
+    <div className="flex items-center justify-center h-64 bg-[var(--surface)] rounded-xl"
+      style={{ border: '1px solid var(--border)' }}>
+      <p className="font-mono text-sm text-[var(--text-muted)]">{label} — komt eraan</p>
     </div>
   )
 }

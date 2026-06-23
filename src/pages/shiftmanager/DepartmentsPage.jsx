@@ -36,7 +36,7 @@ function Avatar({ label, size = 30, radius = 8 }) {
   return (
     <div style={{ width: size, height: size, borderRadius: radius, flexShrink: 0,
       background: ac(label), display: 'flex', alignItems: 'center',
-      justifyContent: 'center', color: '#fff', fontSize: size * 0.34, fontWeight: 700 }}>
+      justifyContent: 'center', color: 'var(--surface)', fontSize: size * 0.34, fontWeight: 700 }}>
       {(label || '?').charAt(0).toUpperCase()}
     </div>
   )
@@ -46,8 +46,8 @@ function StatusBadge({ status }) {
   const active = status?.toLowerCase() === 'actief'
   return (
     <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 9px', borderRadius: 999,
-      background: active ? 'var(--color-success-bg)' : '#F3F4F6',
-      color:      active ? 'var(--color-success)' : '#6B7280', whiteSpace: 'nowrap' }}>
+      background: active ? 'var(--color-success-bg)' : 'var(--border)',
+      color:      active ? 'var(--color-success)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
       {status}
     </span>
   )
@@ -87,7 +87,7 @@ function DepartmentDrawer({ dep, onClose }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 36, height: 36, borderRadius: 8, background: ac(dep.customer),
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
+              fontSize: 14, fontWeight: 800, color: 'var(--surface)', flexShrink: 0 }}>
               {dep.customer?.charAt(0)}
             </div>
             <div style={{ flex: 1 }}>
@@ -300,7 +300,7 @@ export default function DepartmentsPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <div style={{ width: 20, height: 20, borderRadius: 5, background: ac(dep.customer),
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 8, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
+                            fontSize: 8, fontWeight: 800, color: 'var(--surface)', flexShrink: 0 }}>
                             {dep.customer?.charAt(0)}
                           </div>
                           <span style={{ fontSize: 12, color: 'var(--text)', whiteSpace: 'nowrap', maxWidth: 160,

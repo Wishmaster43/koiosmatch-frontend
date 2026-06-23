@@ -27,7 +27,7 @@ function Avatar({ label, size = 32 }) {
   return (
     <div style={{ width: size, height: size, borderRadius: 8, flexShrink: 0,
       background: ac(label), display: 'flex', alignItems: 'center',
-      justifyContent: 'center', color: '#fff', fontSize: size * 0.34, fontWeight: 700 }}>
+      justifyContent: 'center', color: 'var(--surface)', fontSize: size * 0.34, fontWeight: 700 }}>
       {(label || '?').charAt(0).toUpperCase()}
     </div>
   )
@@ -37,8 +37,8 @@ function StatusBadge({ status }) {
   const active = status?.toLowerCase() === 'actief' || status?.toLowerCase() === 'active'
   return (
     <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 9px', borderRadius: 999,
-      background: active ? 'var(--color-success-bg)' : '#F3F4F6',
-      color:      active ? 'var(--color-success)' : '#6B7280', whiteSpace: 'nowrap' }}>
+      background: active ? 'var(--color-success-bg)' : 'var(--border)',
+      color:      active ? 'var(--color-success)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
       {status || 'Onbekend'}
     </span>
   )
@@ -84,7 +84,7 @@ function LocationDrawer({ loc, onClose }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 36, height: 36, borderRadius: 8, background: ac(loc.customer),
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
+              fontSize: 14, fontWeight: 800, color: 'var(--surface)', flexShrink: 0 }}>
               {loc.customer?.charAt(0)}
             </div>
             <div>
@@ -354,7 +354,7 @@ export default function LocationsPage() {
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <div style={{ width: 22, height: 22, borderRadius: 5, background: ac(loc.customer),
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 9, fontWeight: 800, color: '#fff', flexShrink: 0 }}>
+                            fontSize: 9, fontWeight: 800, color: 'var(--surface)', flexShrink: 0 }}>
                             {loc.customer?.charAt(0)}
                           </div>
                           <span style={{ fontSize: 13, color: 'var(--text)', whiteSpace: 'nowrap' }}>{loc.customer}</span>

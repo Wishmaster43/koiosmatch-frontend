@@ -99,7 +99,7 @@ function SyncRow({ item, user, canSync, onLog }) {
   const blocked = running || cooldown > 0 || item.disabled || !canSync
 
   return (
-    <div style={{ background: item.disabled ? 'var(--hover-bg)' : 'white',
+    <div style={{ background: item.disabled ? 'var(--hover-bg)' : 'var(--surface)',
                   border: '1px solid var(--border)', borderRadius: 10,
                   padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 16,
                   opacity: item.disabled ? 0.55 : 1 }}>

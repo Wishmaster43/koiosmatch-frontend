@@ -89,7 +89,7 @@ export default function DataTable({
               <input type="checkbox" checked={allSelected}
                 ref={el => { if (el) el.indeterminate = someSelected && !allSelected }}
                 onChange={() => onToggleAll?.(pageIds, allSelected)}
-                style={{ cursor: 'pointer' }} aria-label="Selecteer alles" />
+                style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }} aria-label="Selecteer alles" />
             </th>
           )}
           {columns.map(col => {
@@ -132,7 +132,7 @@ export default function DataTable({
               {selectable && (
                 <td style={checkboxCol} onClick={stop}>
                   <input type="checkbox" checked={!!isChecked} onChange={() => onToggleRow?.(id)}
-                    style={{ cursor: 'pointer' }} aria-label="Selecteer rij" />
+                    style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }} aria-label="Selecteer rij" />
                 </td>
               )}
               {columns.map(col => (

@@ -63,22 +63,22 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
     onSave('Scheduled', cfg)
   }
 
-  const inputStyle = { padding: '6px 10px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13, outline: 'none', background: 'white', color: '#374151' }
+  const inputStyle = { padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }
   const selectStyle = { ...inputStyle, cursor: 'pointer' }
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}
       onClick={onClose}>
-      <div style={{ width: 480, background: 'white', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
+      <div style={{ width: 480, background: 'var(--surface)', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #F3F4F6' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <CalendarDays size={16} color="var(--color-primary)" />
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Planning instellen</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>Planning instellen</span>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}><X size={16} /></button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
         </div>
 
         <div style={{ overflowY: 'auto', flex: 1, padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -94,12 +94,12 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
                   padding: '14px 12px', borderRadius: 10, cursor: 'pointer',
-                  border: `2px solid ${type === id ? 'var(--color-primary)' : '#E5E7EB'}`,
-                  background: type === id ? 'var(--color-primary-bg)' : 'white',
+                  border: `2px solid ${type === id ? 'var(--color-primary)' : 'var(--border)'}`,
+                  background: type === id ? 'var(--color-primary-bg)' : 'var(--surface)',
                 }}>
-                <Ic size={20} color={type === id ? 'var(--color-primary)' : '#9CA3AF'} />
-                <span style={{ fontSize: 13, fontWeight: 600, color: type === id ? 'var(--color-primary)' : '#374151' }}>{label}</span>
-                <span style={{ fontSize: 11, color: '#9CA3AF', textAlign: 'center' }}>{desc}</span>
+                <Ic size={20} color={type === id ? 'var(--color-primary)' : 'var(--text-muted)'} />
+                <span style={{ fontSize: 13, fontWeight: 600, color: type === id ? 'var(--color-primary)' : 'var(--text)' }}>{label}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', textAlign: 'center' }}>{desc}</span>
               </button>
             ))}
           </div>
@@ -108,7 +108,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
           {type === 'scheduled' && (
             <>
               <div>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Frequentie</label>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Frequentie</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                   {[
                     { id: 'interval',  label: 'Interval' },
@@ -121,9 +121,9 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
                     <button key={o.id} type="button" onClick={() => setSType(o.id)}
                       style={{
                         padding: '7px 4px', borderRadius: 8, fontSize: 12, fontWeight: sType === o.id ? 600 : 400,
-                        border: `1.5px solid ${sType === o.id ? 'var(--color-primary)' : '#E5E7EB'}`,
-                        background: sType === o.id ? 'var(--color-primary-bg)' : 'white',
-                        color: sType === o.id ? 'var(--color-primary)' : '#374151',
+                        border: `1.5px solid ${sType === o.id ? 'var(--color-primary)' : 'var(--border)'}`,
+                        background: sType === o.id ? 'var(--color-primary-bg)' : 'var(--surface)',
+                        color: sType === o.id ? 'var(--color-primary)' : 'var(--text)',
                         cursor: 'pointer',
                       }}>{o.label}</button>
                   ))}
@@ -133,7 +133,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
               {/* Interval */}
               {sType === 'interval' && (
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Elke</label>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Elke</label>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <input type="number" min={1} max={999} value={intVal} onChange={e => setIntVal(e.target.value)}
                       style={{ ...inputStyle, width: 80 }} />
@@ -142,7 +142,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
                       <option value="hours">Uren</option>
                     </select>
                   </div>
-                  <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 6 }}>Min. interval: 1 minuut</p>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>Min. interval: 1 minuut</p>
                 </div>
               )}
 
@@ -150,7 +150,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
               {sType === 'daily' && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tijdstippen</label>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tijdstippen</label>
                     <button type="button" onClick={addTime}
                       style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>+ Tijdstip toevoegen</button>
                   </div>
@@ -160,9 +160,9 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
                         <input type="time" value={t} onChange={e => updateTime(i, e.target.value)} style={{ ...inputStyle, flex: 1 }} />
                         {times.length > 1 && (
                           <button type="button" onClick={() => removeTime(i)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', display: 'flex', padding: 4 }}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', display: 'flex', padding: 4 }}
                             onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
-                            onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}>
+                            onMouseLeave={e => (e.currentTarget.style.color = 'var(--border)')}>
                             <X size={14} />
                           </button>
                         )}
@@ -176,21 +176,21 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
               {sType === 'weekly' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Dagen</label>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Dagen</label>
                     <div style={{ display: 'flex', gap: 6 }}>
                       {DAYS_NL.map((d, i) => (
                         <button key={i} type="button" onClick={() => toggleDay(i)}
                           style={{
                             width: 38, height: 38, borderRadius: '50%', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-                            border: `1.5px solid ${dow.includes(i) ? 'var(--color-primary)' : '#E5E7EB'}`,
-                            background: dow.includes(i) ? 'var(--color-primary)' : 'white',
-                            color: dow.includes(i) ? 'white' : '#374151',
+                            border: `1.5px solid ${dow.includes(i) ? 'var(--color-primary)' : 'var(--border)'}`,
+                            background: dow.includes(i) ? 'var(--color-primary)' : 'var(--surface)',
+                            color: dow.includes(i) ? 'white' : 'var(--text)',
                           }}>{d}</button>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
                     <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
                   </div>
                 </div>
@@ -200,21 +200,21 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
               {sType === 'monthly' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Dag van de maand</label>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Dag van de maand</label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
                         <button key={d} type="button" onClick={() => setDom(d)}
                           style={{
                             width: 34, height: 34, borderRadius: 8, fontSize: 12, fontWeight: dom === d ? 700 : 400, cursor: 'pointer',
-                            border: `1.5px solid ${dom === d ? 'var(--color-primary)' : '#E5E7EB'}`,
-                            background: dom === d ? 'var(--color-primary)' : 'white',
-                            color: dom === d ? 'white' : '#374151',
+                            border: `1.5px solid ${dom === d ? 'var(--color-primary)' : 'var(--border)'}`,
+                            background: dom === d ? 'var(--color-primary)' : 'var(--surface)',
+                            color: dom === d ? 'white' : 'var(--text)',
                           }}>{d}</button>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
                     <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
                   </div>
                 </div>
@@ -223,8 +223,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
               {/* Quarterly */}
               {sType === 'quarterly' && (
                 <div>
-                  <p style={{ fontSize: 12, color: '#6B7280', marginBottom: 10 }}>Wordt uitgevoerd op de eerste dag van elk kwartaal (jan, apr, jul, okt).</p>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>Wordt uitgevoerd op de eerste dag van elk kwartaal (jan, apr, jul, okt).</p>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
                   <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
                 </div>
               )}
@@ -234,17 +234,17 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div style={{ display: 'flex', gap: 12 }}>
                     <div style={{ flex: 1 }}>
-                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Maand</label>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Maand</label>
                       <select value={month} onChange={e => setMonth(+e.target.value)} style={{ ...selectStyle, width: '100%' }}>
                         {MONTHS_NL.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Dag</label>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Dag</label>
                       <input type="number" min={1} max={31} value={dom} onChange={e => setDom(+e.target.value)} style={{ ...inputStyle, width: 70 }} />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
                       <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
                     </div>
                   </div>
@@ -253,8 +253,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
 
               {/* Preview */}
               <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 14px' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Voorbeeld</div>
-                <div style={{ fontSize: 13, color: '#374151', fontWeight: 500 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Voorbeeld</div>
+                <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>
                   {scheduleLabel('Scheduled', {
                     schedule_type: sType,
                     interval_value: intVal, interval_unit: intUnit,
@@ -267,8 +267,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
         </div>
 
         {/* Footer */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 20px', borderTop: '1px solid #F3F4F6' }}>
-          <button onClick={onClose} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: '1px solid #E5E7EB', background: 'white', cursor: 'pointer', color: '#374151' }}>Annuleren</button>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 20px', borderTop: '1px solid var(--border)' }}>
+          <button onClick={onClose} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>Annuleren</button>
           <button onClick={handleSave} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>Opslaan</button>
         </div>
       </div>

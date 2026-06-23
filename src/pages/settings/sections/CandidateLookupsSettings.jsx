@@ -169,7 +169,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
                 placeholder={modal.label ? slugify(modal.label) : 'slug'}
                 style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, fontFamily: 'monospace',
                          border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
-                         background: modal.mode === 'edit' ? 'var(--hover-bg)' : 'white', color: modal.mode === 'edit' ? 'var(--text-muted)' : 'var(--text)' }} />
+                         background: modal.mode === 'edit' ? 'var(--hover-bg)' : 'var(--surface)', color: modal.mode === 'edit' ? 'var(--text-muted)' : 'var(--text)' }} />
               <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
                 {modal.mode === 'edit' ? t('lookups.valueImmutable') : t('lookups.valueHint')}
               </div>

@@ -21,8 +21,8 @@ function AgentSelectField({ value, onChange, fieldKey }) {
   }, [])
   return (
     <select value={value || ''} onChange={e => onChange(fieldKey, e.target.value)}
-      style={{ width: '100%', padding: '7px 9px', border: '1px solid #E5E7EB', borderRadius: 8,
-               background: 'white', fontSize: 13, color: '#111', outline: 'none', cursor: 'pointer' }}>
+      style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8,
+               background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
       <option value="">{loading ? 'Agents ophalen…' : 'Selecteer een agent…'}</option>
       {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
     </select>
@@ -48,21 +48,21 @@ function FaqSelectField({ value, onChange, fieldKey }) {
     onChange(fieldKey, next)
   }
 
-  if (loading) return <div style={{ fontSize: 12, color: '#9CA3AF', padding: '4px 0' }}>FAQ's ophalen…</div>
+  if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>FAQ's ophalen…</div>
   if (faqs.length === 0) return (
-    <div style={{ fontSize: 12, color: '#9CA3AF', padding: '6px 10px', border: '1px solid #E5E7EB', borderRadius: 8 }}>
+    <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8 }}>
       Geen FAQ's gevonden
     </div>
   )
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 5, border: '1px solid #E5E7EB', borderRadius: 8, padding: '8px 10px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 5, border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' }}>
       {faqs.map(faq => {
         const active = selected.includes(faq.id)
         return (
           <label key={faq.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
             <input type="checkbox" checked={active} onChange={() => toggle(faq.id)}
               style={{ accentColor: 'var(--color-primary)', width: 14, height: 14, cursor: 'pointer' }} />
-            <span style={{ fontSize: 12, color: '#374151' }}>{faq.name ?? faq.title ?? `FAQ ${faq.id}`}</span>
+            <span style={{ fontSize: 12, color: 'var(--text)' }}>{faq.name ?? faq.title ?? `FAQ ${faq.id}`}</span>
           </label>
         )
       })}
@@ -119,7 +119,7 @@ function WebhookSelectField({ value, onChange, fieldKey }) {
     setCopied(true); setTimeout(() => setCopied(false), 2000)
   }
 
-  if (loading) return <div style={{ fontSize: 12, color: '#9CA3AF', padding: '4px 0' }}>Webhooks ophalen…</div>
+  if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>Webhooks ophalen…</div>
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -127,7 +127,7 @@ function WebhookSelectField({ value, onChange, fieldKey }) {
 
       {/* Picker — existing inbound webhooks */}
       <select value={value || ''} onChange={e => onChange(fieldKey, e.target.value)}
-        style={{ width: '100%', padding: '7px 9px', border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', fontSize: 13, color: '#111', outline: 'none', cursor: 'pointer' }}>
+        style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
         <option value="">{hooks.length ? 'Selecteer een webhook…' : 'Nog geen webhooks'}</option>
         {hooks.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
       </select>
@@ -137,13 +137,13 @@ function WebhookSelectField({ value, onChange, fieldKey }) {
         <div style={{ display: 'flex', gap: 6 }}>
           <input autoFocus value={newName} onChange={e => setNewName(e.target.value)}
             placeholder="Naam (bv. Facebook Leads)" onKeyDown={e => e.key === 'Enter' && create()}
-            style={{ flex: 1, padding: '6px 9px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none' }} />
+            style={{ flex: 1, padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, outline: 'none' }} />
           <button type="button" onClick={create} disabled={!newName.trim() || creating}
             style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 8, cursor: newName.trim() ? 'pointer' : 'not-allowed', opacity: newName.trim() ? 1 : 0.5, display: 'flex', alignItems: 'center', gap: 4 }}>
             {creating ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />} Aanmaken
           </button>
           <button type="button" onClick={() => { setShowNew(false); setNewName('') }}
-            style={{ padding: '6px 8px', background: 'none', border: '1px solid #E5E7EB', borderRadius: 8, cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
+            style={{ padding: '6px 8px', background: 'none', border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
             <X size={12} />
           </button>
         </div>
@@ -157,17 +157,17 @@ function WebhookSelectField({ value, onChange, fieldKey }) {
       {/* Receiving URL — what you give to the external system */}
       {selected?.token && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ontvangst-URL</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ontvangst-URL</div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-            <code style={{ flex: 1, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 6, padding: '6px 8px', color: '#374151', wordBreak: 'break-all' }}>
+            <code style={{ flex: 1, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px', color: 'var(--text)', wordBreak: 'break-all' }}>
               {WEBHOOK_BASE}/{selected.token}
             </code>
             <button type="button" onClick={copy} title="URL kopiëren"
-              style={{ padding: '6px 8px', background: copied ? 'var(--color-success-bg)' : '#F9FAFB', color: copied ? 'var(--color-success)' : '#6B7280', border: '1px solid #E5E7EB', borderRadius: 6, cursor: 'pointer', display: 'flex' }}>
+              style={{ padding: '6px 8px', background: copied ? 'var(--color-success-bg)' : 'var(--hover-bg)', color: copied ? 'var(--color-success)' : 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', display: 'flex' }}>
               {copied ? <Check size={12} /> : <Copy size={12} />}
             </button>
           </div>
-          <div style={{ fontSize: 11, color: '#9CA3AF' }}>Geef dit adres aan het externe systeem (Facebook, Intus…) om data te ontvangen.</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Geef dit adres aan het externe systeem (Facebook, Intus…) om data te ontvangen.</div>
         </div>
       )}
     </div>
@@ -198,7 +198,7 @@ function FiltersField({ field, value, onChange }) {
           {[['AND', 'ALLE'], ['OR', 'MINSTENS ÉÉN']].map(([l, lbl]) => (
             <button key={l} type="button" onClick={() => setLogic(l)}
               style={{ padding: '3px 10px', fontSize: 11, fontWeight: 600, borderRadius: 999, border: 'none', cursor: 'pointer',
-                background: logic === l ? 'var(--color-primary)' : '#F3F4F6', color: logic === l ? 'white' : '#6B7280' }}>{lbl}</button>
+                background: logic === l ? 'var(--color-primary)' : 'var(--border)', color: logic === l ? 'white' : 'var(--text-muted)' }}>{lbl}</button>
           ))}
         </div>
       )}
@@ -208,22 +208,22 @@ function FiltersField({ field, value, onChange }) {
         return (
           <div key={i} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             <select value={c.field} onChange={e => upd(i, 'field', e.target.value)}
-              style={{ flex: 1, minWidth: 0, padding: '5px 6px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none', background: 'white', cursor: 'pointer' }}>
+              style={{ flex: 1, minWidth: 0, padding: '5px 6px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
               <option value="">veld…</option>
               {opts.map(o => { const v = typeof o === 'object' ? o.value : o; const l = typeof o === 'object' ? o.label : o; return <option key={v} value={v}>{l}</option> })}
             </select>
             <select value={c.operator} onChange={e => upd(i, 'operator', e.target.value)}
-              style={{ padding: '5px 4px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none', background: 'white', cursor: 'pointer' }}>
+              style={{ padding: '5px 4px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
               {OPERATORS.map(op => <option key={op} value={op}>{op}</option>)}
             </select>
             {needsValue && (
               <input value={c.value ?? ''} onChange={e => upd(i, 'value', e.target.value)} placeholder="waarde"
-                style={{ flex: 1, minWidth: 0, padding: '5px 7px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none' }} />
+                style={{ flex: 1, minWidth: 0, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
             )}
             <button type="button" onClick={() => del(i)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 2, display: 'flex' }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', padding: 2, display: 'flex' }}
               onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}><X size={13} /></button>
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--border)')}><X size={13} /></button>
           </div>
         )
       })}
@@ -250,8 +250,8 @@ function ResponseStructureField({ value, onChange, fieldKey }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       {items.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px 22px', gap: 4, padding: '0 2px', marginBottom: 2 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Item naam</div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Type</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Item naam</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Type</div>
           <div />
         </div>
       )}
@@ -259,17 +259,17 @@ function ResponseStructureField({ value, onChange, fieldKey }) {
         <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 90px 22px', gap: 4, alignItems: 'center' }}>
           <input value={item.name} onChange={e => update(i, 'name', e.target.value)}
             placeholder="item_naam"
-            style={{ padding: '5px 7px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none', minWidth: 0 }}
+            style={{ padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', minWidth: 0 }}
             onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
-            onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+            onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
           <select value={item.type} onChange={e => update(i, 'type', e.target.value)}
-            style={{ padding: '5px 5px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none', background: 'white', cursor: 'pointer' }}>
+            style={{ padding: '5px 5px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
             {RS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
           <button type="button" onClick={() => remove(i)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
-            onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}>
+            onMouseLeave={e => (e.currentTarget.style.color = 'var(--border)')}>
             <X size={13} />
           </button>
         </div>
@@ -306,10 +306,10 @@ export function FieldInput({ field, value, onChange }) {
     return (
       <button type="button" onClick={() => onChange(field.key, !value)}
         style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}>
-        <div style={{ position: 'relative', width: 32, height: 17, borderRadius: 999, background: value ? 'var(--color-primary)' : '#D1D5DB', flexShrink: 0, transition: 'background 0.2s' }}>
-          <div style={{ position: 'absolute', top: 2, left: value ? 17 : 2, width: 13, height: 13, borderRadius: '50%', background: 'white', transition: 'left 0.2s' }} />
+        <div style={{ position: 'relative', width: 32, height: 17, borderRadius: 999, background: value ? 'var(--color-primary)' : 'var(--border)', flexShrink: 0, transition: 'background 0.2s' }}>
+          <div style={{ position: 'absolute', top: 2, left: value ? 17 : 2, width: 13, height: 13, borderRadius: '50%', background: 'var(--surface)', transition: 'left 0.2s' }} />
         </div>
-        <span style={{ fontSize: 12, color: '#6B7280' }}>{value ? 'Aan' : 'Uit'}</span>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{value ? 'Aan' : 'Uit'}</span>
       </button>
     )
   }
@@ -324,9 +324,9 @@ export function FieldInput({ field, value, onChange }) {
               onClick={() => onChange(field.key, active ? selected.filter(v => v !== opt) : [...selected, opt])}
               style={{
                 padding: '3px 10px', borderRadius: 999, fontSize: 12,
-                background: active ? 'var(--color-primary-bg)' : '#F9FAFB',
-                color:      active ? 'var(--color-primary)'    : '#6B7280',
-                border:     `1px solid ${active ? '#C4C0F0' : '#E5E7EB'}`,
+                background: active ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
+                color:      active ? 'var(--color-primary)'    : 'var(--text-muted)',
+                border:     `1px solid ${active ? '#C4C0F0' : 'var(--border)'}`,
                 cursor: 'pointer',
               }}>
               {opt}
@@ -339,7 +339,7 @@ export function FieldInput({ field, value, onChange }) {
   if (field.type === 'select') {
     return (
       <select value={value ?? field.default ?? ''} onChange={e => onChange(field.key, e.target.value)}
-        style={{ width: '100%', padding: '7px 9px', border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', fontSize: 13, color: '#111', outline: 'none' }}>
+        style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none' }}>
         {field.default == null && <option value="">Selecteer...</option>}
         {(field.options ?? []).map(o => {
           const val = typeof o === 'object' ? o.value : o
@@ -354,9 +354,9 @@ export function FieldInput({ field, value, onChange }) {
       <textarea value={value || ''} placeholder={field.placeholder || ''}
         onChange={e => onChange(field.key, e.target.value)}
         rows={4}
-        style={{ width: '100%', padding: '7px 9px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 12, color: '#111', background: 'white', outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace', resize: 'vertical' }}
+        style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace', resize: 'vertical' }}
         onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
-        onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+        onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
     )
   }
   if (field.type === 'keyvalue') {
@@ -369,9 +369,9 @@ export function FieldInput({ field, value, onChange }) {
         {pairs.map((p, i) => (
           <div key={i} style={{ display: 'flex', gap: 4 }}>
             <input value={p.name} onChange={e => update(i, 'name', e.target.value)} placeholder="Naam"
-              style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none' }} />
+              style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
             <input value={p.value} onChange={e => update(i, 'value', e.target.value)} placeholder="Waarde"
-              style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 6, outline: 'none' }} />
+              style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
             <button type="button" onClick={() => remove(i)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: '0 4px' }}>
               <X size={12} />
@@ -390,8 +390,8 @@ export function FieldInput({ field, value, onChange }) {
       value={value || ''}
       placeholder={field.placeholder || ''}
       onChange={e => onChange(field.key, field.type === 'number' ? Number(e.target.value) : e.target.value)}
-      style={{ width: '100%', padding: '7px 9px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13, color: '#111', background: 'white', outline: 'none', boxSizing: 'border-box' }}
+      style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box' }}
       onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
-      onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+      onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
   )
 }

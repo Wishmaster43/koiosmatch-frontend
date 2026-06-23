@@ -73,13 +73,13 @@ function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
       <button key={type} type="button"
         onClick={() => { onSelect(type, insertAfterEdgeId); onClose() }}
         style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 16px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-        onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+        onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
         onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
         <div style={{ width: 34, height: 34, borderRadius: '50%', background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
           <Icon size={15} color={meta.color} />
         </div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 500, color: '#374151' }}>{meta.label}</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{meta.label}</div>
         </div>
       </button>
     )
@@ -97,8 +97,8 @@ function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
     const remaining = Object.keys(groups).filter(c => !CATEGORY_ORDER.includes(c))
     return [...orderedCats, ...remaining].map((cat, i) => (
       <div key={cat}>
-        {i > 0 && <div style={{ height: 1, background: '#F3F4F6', margin: '4px 0' }} />}
-        <div style={{ padding: '6px 16px 2px', fontSize: 10, fontWeight: 700, color: '#9CA3AF', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{cat}</div>
+        {i > 0 && <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />}
+        <div style={{ padding: '6px 16px 2px', fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{cat}</div>
         {groups[cat].map(renderRow)}
       </div>
     ))
@@ -107,29 +107,29 @@ function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.35)' }}
       onClick={onClose}>
-      <div style={{ width: 880, maxWidth: '94vw', maxHeight: '82vh', background: 'white', borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 40px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column' }}
+      <div style={{ width: 880, maxWidth: '94vw', maxHeight: '82vh', background: 'var(--surface)', borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 40px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header + zoeken */}
         <div style={{ padding: '14px 16px 0', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Module kiezen</span>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>Module kiezen</span>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
               <X size={16} />
             </button>
           </div>
           <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Zoeken..."
-            style={{ width: '100%', padding: '7px 10px', border: '1px solid #E5E7EB', borderRadius: 8, fontSize: 13, outline: 'none', background: '#F9FAFB', boxSizing: 'border-box', marginBottom: 12 }} />
+            style={{ width: '100%', padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--hover-bg)', boxSizing: 'border-box', marginBottom: 12 }} />
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', borderBottom: '1px solid #F3F4F6', flexShrink: 0, padding: '0 8px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', borderBottom: '1px solid var(--border)', flexShrink: 0, padding: '0 8px' }}>
           {CATEGORY_ORDER.filter(c => c === 'Alle' || counts[c]).map(cat => (
             <button key={cat} type="button" onClick={() => { setTab(cat); }}
               style={{
                 padding: '7px 12px', fontSize: 12, fontWeight: tab === cat ? 700 : 400,
-                color: tab === cat ? 'var(--color-primary)' : '#6B7280',
+                color: tab === cat ? 'var(--color-primary)' : 'var(--text-muted)',
                 background: 'none', border: 'none', borderBottom: tab === cat ? '2px solid var(--color-primary)' : '2px solid transparent',
                 cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: -1,
               }}>
@@ -141,7 +141,7 @@ function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
         {/* Lijst */}
         <div style={{ overflowY: 'auto', flex: 1, paddingBottom: 8 }}>
           {visible.length === 0 && (
-            <p style={{ padding: '32px 16px', textAlign: 'center', fontSize: 13, color: '#9CA3AF' }}>Geen modules gevonden</p>
+            <p style={{ padding: '32px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>Geen modules gevonden</p>
           )}
           {visible.length > 0 && (tab === 'Alle' || search)
             ? renderGrouped()
@@ -168,10 +168,10 @@ function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
   if (!node) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 12, padding: 24 }}>
-        <div style={{ width: 44, height: 44, borderRadius: '50%', background: '#F3F4F6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Zap size={20} color="#D1D5DB" />
+        <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <Zap size={20} color="var(--border)" />
         </div>
-        <p style={{ fontSize: 12, color: '#9CA3AF', textAlign: 'center', lineHeight: 1.5 }}>Klik op een module<br />om de configuratie te zien</p>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>Klik op een module<br />om de configuratie te zien</p>
       </div>
     )
   }
@@ -188,20 +188,20 @@ function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
           {Icon && <Icon size={16} color={meta?.color} />}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{meta?.label}</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF' }}>{meta?.category}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{meta?.label}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{meta?.category}</div>
         </div>
         <button onClick={() => onDelete(node.id)}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#D1D5DB', padding: 4, display: 'flex' }}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', padding: 4, display: 'flex' }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
-          onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}
+          onMouseLeave={e => (e.currentTarget.style.color = 'var(--border)')}
           title="Module verwijderen">
           <Trash2 size={14} />
         </button>
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #F3F4F6', flexShrink: 0, padding: '8px 16px 0', overflowX: 'auto' }}>
+      <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', flexShrink: 0, padding: '8px 16px 0', overflowX: 'auto' }}>
         {[
           { id: 'instellingen', label: 'Instellingen' },
           { id: 'uitvoering',   label: output ? `Uitvoering (${Array.isArray(output) ? output.length : 1})` : 'Uitvoering' },
@@ -216,7 +216,7 @@ function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
           <button key={t.id} type="button" onClick={() => switchTab(t.id)}
             style={{
               padding: '5px 10px', fontSize: 12, fontWeight: activeTab === t.id ? 600 : 400,
-              color: activeTab === t.id ? 'var(--color-primary)' : '#6B7280',
+              color: activeTab === t.id ? 'var(--color-primary)' : 'var(--text-muted)',
               background: 'none', border: 'none',
               borderBottom: activeTab === t.id ? '2px solid var(--color-primary)' : '2px solid transparent',
               cursor: 'pointer', marginBottom: -1, whiteSpace: 'nowrap',
@@ -246,31 +246,31 @@ function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
             })
             .map(field => (
             <div key={field.key}>
-              <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+              <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
                 {field.label}
               </label>
               <FieldInput field={field} value={node.data.config[field.key]}
                 onChange={(key, val) => onUpdate(node.id, key, val)} />
-              {field.hint && <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{field.hint}</div>}
+              {field.hint && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{field.hint}</div>}
             </div>
           ))}
           {schema.length === 0 && (
-            <p style={{ fontSize: 12, color: '#9CA3AF' }}>Geen configuratie vereist.</p>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Geen configuratie vereist.</p>
           )}
         </div>
       ) : !MANAGE_TABS.includes(activeTab) ? (
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {!output ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 10, padding: 24 }}>
-              <Play size={24} color="#D1D5DB" />
-              <p style={{ fontSize: 12, color: '#9CA3AF', textAlign: 'center', lineHeight: 1.5 }}>
+              <Play size={24} color="var(--border)" />
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>
                 Nog geen uitvoerdata.<br />Druk op ▶ bij de module om te testen.
               </p>
             </div>
           ) : (
             <div style={{ padding: 12 }}>
               {Array.isArray(output) && (
-                <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 8, fontWeight: 500 }}>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, fontWeight: 500 }}>
                   {output.length} {output.length === 1 ? 'item' : 'items'}
                 </div>
               )}
@@ -338,12 +338,12 @@ function LogsPanel({ onClose }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <List size={14} color="var(--color-primary)" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: '#111827' }}>Uitvoeringen</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Uitvoeringen</span>
         </div>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', display: 'flex' }}>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
           <X size={15} />
         </button>
       </div>
@@ -353,12 +353,12 @@ function LogsPanel({ onClose }) {
         {MOCK_LOGS.map(log => {
           const isOpen = expanded === log.id
           return (
-            <div key={log.id} style={{ borderBottom: '1px solid #F3F4F6' }}>
+            <div key={log.id} style={{ borderBottom: '1px solid var(--border)' }}>
               {/* Row */}
               <button type="button"
                 onClick={() => setExpanded(isOpen ? null : log.id)}
                 style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', gap: 8, textAlign: 'left' }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
                 {log.ok
                   ? <CheckCircle size={13} color="var(--color-success)" style={{ flexShrink: 0 }} />
@@ -366,19 +366,19 @@ function LogsPanel({ onClose }) {
                 }
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: 12, fontWeight: 500, color: log.ok ? '#111827' : 'var(--color-danger)' }}>
+                    <span style={{ fontSize: 12, fontWeight: 500, color: log.ok ? 'var(--text)' : 'var(--color-danger)' }}>
                       {log.ok ? 'Geslaagd' : 'Mislukt'}
                     </span>
-                    <span style={{ fontSize: 11, color: '#9CA3AF' }}>{log.duration}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{log.duration}</span>
                   </div>
-                  <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
                     {log.ts} · {log.operations} operaties · {log.bundles} bundles
                   </div>
                   {!log.ok && log.error && (
                     <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 2 }}>{log.error}</div>
                   )}
                 </div>
-                <ChevronDown size={12} color="#D1D5DB"
+                <ChevronDown size={12} color="var(--border)"
                   style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
               </button>
 
@@ -390,10 +390,10 @@ function LogsPanel({ onClose }) {
                       <div style={{ width: 6, height: 6, borderRadius: '50%', background: step.ok ? 'var(--color-success)' : 'var(--color-danger)', marginTop: 5, flexShrink: 0 }} />
                       <div style={{ flex: 1 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: 11, fontWeight: 500, color: '#374151' }}>{step.label}</span>
-                          <span style={{ fontSize: 11, color: '#9CA3AF' }}>{step.duration}</span>
+                          <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text)' }}>{step.label}</span>
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{step.duration}</span>
                         </div>
-                        <div style={{ fontSize: 11, color: '#6B7280' }}>
+                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                           {step.ok ? `${step.bundles} bundles` : step.error}
                         </div>
                       </div>
@@ -666,7 +666,7 @@ function EditorInner({ workflow, onClose, onSave }) {
         <div style={{
           display: 'flex', alignItems: 'center', gap: 12,
           height: 56, padding: '0 20px', flexShrink: 0,
-          background: 'white', borderBottom: '1px solid #F3F4F6',
+          background: 'var(--surface)', borderBottom: '1px solid var(--border)',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ width: 30, height: 30, borderRadius: 8, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -674,35 +674,35 @@ function EditorInner({ workflow, onClose, onSave }) {
             </div>
             <input
               value={name} onChange={e => setName(e.target.value)}
-              style={{ fontSize: 14, fontWeight: 600, color: '#111827', border: 'none', background: 'transparent', outline: 'none', minWidth: 60, maxWidth: 240 }}
+              style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', border: 'none', background: 'transparent', outline: 'none', minWidth: 60, maxWidth: 240 }}
             />
           </div>
 
-          <div style={{ width: 1, height: 20, background: '#E5E7EB', flexShrink: 0 }} />
+          <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
 
           <button onClick={() => setShowSchedule(true)}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8,
-              border: '1px solid #E5E7EB', background: '#F9FAFB', cursor: 'pointer',
-              fontSize: 12, color: '#374151', fontWeight: 500,
+              border: '1px solid var(--border)', background: 'var(--hover-bg)', cursor: 'pointer',
+              fontSize: 12, color: 'var(--text)', fontWeight: 500,
             }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F3F4F6')}
-            onMouseLeave={e => (e.currentTarget.style.background = '#F9FAFB')}>
-            <Clock size={13} color="#9CA3AF" />
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'var(--hover-bg)')}>
+            <Clock size={13} color="var(--text-muted)" />
             {scheduleLabel(trigger, scheduleConfig)}
           </button>
 
-          <div style={{ width: 1, height: 20, background: '#E5E7EB', flexShrink: 0 }} />
+          <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
 
           <button onClick={() => setStatus(s => s === 'active' ? 'inactive' : 'active')}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px', borderRadius: 999,
-              background: status === 'active' ? '#F0FDF4' : '#F9FAFB',
-              color:      status === 'active' ? 'var(--color-success)' : '#9CA3AF',
-              border:     `1px solid ${status === 'active' ? '#BBF7D0' : '#E5E7EB'}`,
+              background: status === 'active' ? 'var(--color-success-bg)' : 'var(--hover-bg)',
+              color:      status === 'active' ? 'var(--color-success)' : 'var(--text-muted)',
+              border:     `1px solid ${status === 'active' ? '#BBF7D0' : 'var(--border)'}`,
               cursor: 'pointer', fontSize: 11, fontWeight: 500,
             }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? 'var(--color-success)' : '#D1D5DB' }} />
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? 'var(--color-success)' : 'var(--border)' }} />
             {status === 'active' ? 'Actief' : 'Inactief'}
           </button>
 
@@ -711,9 +711,9 @@ function EditorInner({ workflow, onClose, onSave }) {
           <button onClick={() => setShowLogs(s => !s)}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-              background: showLogs ? 'var(--color-primary-bg)' : '#F9FAFB',
-              color:      showLogs ? 'var(--color-primary)'    : '#6B7280',
-              border:     `1px solid ${showLogs ? 'var(--color-primary)' : '#E5E7EB'}`,
+              background: showLogs ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
+              color:      showLogs ? 'var(--color-primary)'    : 'var(--text-muted)',
+              border:     `1px solid ${showLogs ? 'var(--color-primary)' : 'var(--border)'}`,
               cursor: 'pointer',
             }}>
             <List size={13} />
@@ -723,8 +723,8 @@ function EditorInner({ workflow, onClose, onSave }) {
           <button onClick={handleRun} disabled={running}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-              background: running ? '#F3F4F6' : 'var(--color-primary-bg)',
-              color:      running ? '#9CA3AF' : 'var(--color-primary)',
+              background: running ? 'var(--border)' : 'var(--color-primary-bg)',
+              color:      running ? 'var(--text-muted)' : 'var(--color-primary)',
               border: 'none', cursor: running ? 'not-allowed' : 'pointer',
             }}>
             {running ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
@@ -742,8 +742,8 @@ function EditorInner({ workflow, onClose, onSave }) {
           </button>
 
           <button onClick={onClose}
-            style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: '1px solid #E5E7EB', cursor: 'pointer', color: '#9CA3AF' }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+            style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             <X size={15} />
           </button>
@@ -771,12 +771,12 @@ function EditorInner({ workflow, onClose, onSave }) {
               maxZoom={2}
               proOptions={{ hideAttribution: true }}
             >
-              <Background color="#E5E7EB" gap={20} />
+              <Background color="var(--border)" gap={20} />
               <Controls position="bottom-left" showInteractive={false} />
               <MiniMap
-                nodeColor={n => MODULE_META[n.data?.type]?.color ?? '#D1D5DB'}
+                nodeColor={n => MODULE_META[n.data?.type]?.color ?? 'var(--border)'}
                 nodeStrokeWidth={0}
-                style={{ borderRadius: 10, border: '1px solid #E5E7EB' }}
+                style={{ borderRadius: 10, border: '1px solid var(--border)' }}
               />
             </ReactFlow>
 
@@ -798,7 +798,7 @@ function EditorInner({ workflow, onClose, onSave }) {
           </div>
 
           {/* Right panel — widens when management tabs (Agents/Prompts/FAQ/etc.) are active */}
-          <div style={{ width: widePanelActive ? 560 : 280, flexShrink: 0, background: 'white', borderLeft: '1px solid #F3F4F6', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'width 0.2s ease' }}>
+          <div style={{ width: widePanelActive ? 560 : 280, flexShrink: 0, background: 'var(--surface)', borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'width 0.2s ease' }}>
             {showLogs
               ? <LogsPanel onClose={() => setShowLogs(false)} />
               : <ConfigPanel node={selectedNode} onUpdate={updateNodeConfig} onDelete={deleteNode}

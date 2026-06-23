@@ -61,14 +61,14 @@ export default function ShiftmanagerDashboard() {
       {hasAI && <div className="grid grid-cols-2 gap-4 mt-6 mb-6">
 
         {/* Recent runs */}
-        <div className="overflow-hidden bg-white rounded-xl" style={{ border: '1px solid #F3F4F6' }}>
-          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid #F3F4F6' }}>
-            <span className="font-medium text-gray-900" style={{ fontSize: 13 }}>{t('dashboard.recentRuns')}</span>
-            <span className="text-xs text-gray-400 cursor-pointer">{t('dashboard.viewAll')}</span>
+        <div className="overflow-hidden bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+            <span className="font-medium text-[var(--text)]" style={{ fontSize: 13 }}>{t('dashboard.recentRuns')}</span>
+            <span className="text-xs text-[var(--text-muted)] cursor-pointer">{t('dashboard.viewAll')}</span>
           </div>
           {RUNS.map((r, i) => (
             <div key={i} className="flex items-center gap-3 px-4 py-3"
-              style={{ borderBottom: i < RUNS.length - 1 ? '1px solid #F9FAFB' : 'none' }}>
+              style={{ borderBottom: i < RUNS.length - 1 ? '1px solid var(--hover-bg)' : 'none' }}>
               <div className="flex items-center justify-center flex-shrink-0 rounded-lg"
                 style={{ width: 28, height: 28, background: r.ok ? '#EAF3DE' : '#FCEBEB' }}>
                 {r.ok
@@ -76,19 +76,19 @@ export default function ShiftmanagerDashboard() {
                   : <AlertCircle size={13} color="#A32D2D" />}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-gray-800 truncate" style={{ fontSize: 13 }}>{r.name}</div>
-                <div className="text-xs text-gray-400">{r.ok ? t('dashboard.candidates', { n: r.n }) : r.err}</div>
+                <div className="font-medium text-[var(--text)] truncate" style={{ fontSize: 13 }}>{r.name}</div>
+                <div className="text-xs text-[var(--text-muted)]">{r.ok ? t('dashboard.candidates', { n: r.n }) : r.err}</div>
               </div>
-              <span className="flex-shrink-0 text-xs text-gray-400">{r.time}</span>
+              <span className="flex-shrink-0 text-xs text-[var(--text-muted)]">{r.time}</span>
             </div>
           ))}
         </div>
 
         {/* Recent conversations */}
-        <div className="overflow-hidden bg-white rounded-xl" style={{ border: '1px solid #F3F4F6' }}>
-          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid #F3F4F6' }}>
-            <span className="font-medium text-gray-900" style={{ fontSize: 13 }}>{t('dashboard.recentConversations')}</span>
-            <span className="text-xs text-gray-400 cursor-pointer">{t('dashboard.viewAll')}</span>
+        <div className="overflow-hidden bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+            <span className="font-medium text-[var(--text)]" style={{ fontSize: 13 }}>{t('dashboard.recentConversations')}</span>
+            <span className="text-xs text-[var(--text-muted)] cursor-pointer">{t('dashboard.viewAll')}</span>
           </div>
           {[
             { name: 'Jan de Vries', msg: 'Ik kan morgen om 09:00 starten',  time: '08:45' },
@@ -97,16 +97,16 @@ export default function ShiftmanagerDashboard() {
             { name: 'Lisa Wong',    msg: 'Ik ben beschikbaar volgende week', time: '07:40' },
           ].map((c, i) => (
             <div key={i} className="flex items-start gap-3 px-4 py-3"
-              style={{ borderBottom: i < 3 ? '1px solid #F9FAFB' : 'none' }}>
+              style={{ borderBottom: i < 3 ? '1px solid var(--hover-bg)' : 'none' }}>
               <div className="flex items-center justify-center flex-shrink-0 rounded-full"
                 style={{ width: 28, height: 28, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', fontSize: 11 }}>
                 {c.name.split(' ').map(n => n[0]).join('')}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-medium text-gray-800 truncate" style={{ fontSize: 13 }}>{c.name}</div>
-                <div className="text-xs text-gray-400 truncate">{c.msg}</div>
+                <div className="font-medium text-[var(--text)] truncate" style={{ fontSize: 13 }}>{c.name}</div>
+                <div className="text-xs text-[var(--text-muted)] truncate">{c.msg}</div>
               </div>
-              <span className="flex-shrink-0 text-xs text-gray-400">{c.time}</span>
+              <span className="flex-shrink-0 text-xs text-[var(--text-muted)]">{c.time}</span>
             </div>
           ))}
         </div>

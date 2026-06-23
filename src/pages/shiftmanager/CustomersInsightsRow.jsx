@@ -27,7 +27,7 @@ function DonutCard({ title, data, colors, onPick, active, onClear }) {
           style={{ position: 'absolute', top: 6, right: 6, width: 20, height: 20, borderRadius: 5,
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: 'none', padding: 0 }}
-          onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-primary)', e.currentTarget.style.color = '#fff')}
+          onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-primary)', e.currentTarget.style.color = 'var(--surface)')}
           onMouseLeave={e => (e.currentTarget.style.background = 'var(--color-primary-bg)', e.currentTarget.style.color = 'var(--color-primary)')}>
           <FilterX size={12} />
         </button>

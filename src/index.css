@@ -5,6 +5,7 @@
 @tailwind utilities;
 
 :root {
+  color-scheme: light;
   /* ── Koiosmatch huisstijl ── */
   --color-primary:       #19A5CA;
   --color-primary-light: #4DBEDD;
@@ -42,6 +43,8 @@
 }
 
 [data-theme="dark"] {
+  /* Render native form controls (checkboxes, inputs, scrollbars) dark too. */
+  color-scheme: dark;
   --sidebar-bg:     #1C1C2E;
   --sidebar-text:   #F3F4F6;
   --sidebar-muted:  #6B7280;

@@ -64,20 +64,20 @@ export default function DepartmentsReport() {
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', letterSpacing: '-0.3px', flexShrink: 0 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px', flexShrink: 0 }}>
           {t('departmentsReport.title')}
         </h2>
         {!loading && (
           <>
-            <div style={{ width: 1, height: 18, background: '#E5E7EB', flexShrink: 0 }} />
+            <div style={{ width: 1, height: 18, background: 'var(--border)', flexShrink: 0 }} />
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                           background: '#F9FAFB', color: '#6B7280', borderRadius: 999,
+                           background: 'var(--hover-bg)', color: 'var(--text-muted)', borderRadius: 999,
                            padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
               {t('departmentsReport.count', { count: departments.length })}
             </span>
           </>
         )}
-        {loading && <RefreshCw size={14} className="animate-spin" style={{ color: '#D1D5DB' }} />}
+        {loading && <RefreshCw size={14} className="animate-spin" style={{ color: 'var(--border)' }} />}
       </div>
 
       {/* KPI blocks */}

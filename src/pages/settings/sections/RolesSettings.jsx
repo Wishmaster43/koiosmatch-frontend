@@ -108,7 +108,7 @@ function RoleDetail({ role, permissions, onBack, onUpdate }) {
                     return (
                       <div key={perm.name}
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                 padding: '10px 16px', background: i % 2 ? '#FCFCFD' : 'white',
+                                 padding: '10px 16px', background: i % 2 ? '#FCFCFD' : 'var(--surface)',
                                  borderTop: '1px solid var(--hover-bg)' }}>
                         <div>
                           <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: checked ? 500 : 400 }}>

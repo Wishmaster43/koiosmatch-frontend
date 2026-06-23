@@ -49,7 +49,7 @@ export default function LocationsReport() {
     secondary:  l.customer_name,
     badge:      t('locationsReport.badge.active'),
     badgeColor: 'var(--color-success)',
-    badgeBg:    '#F0FDF4',
+    badgeBg:    'var(--color-success-bg)',
   }))
   const drillDepartments = locations.flatMap(l =>
     (l.departments ?? []).map(d => ({ primary: d.name, secondary: l.name }))
@@ -87,36 +87,36 @@ export default function LocationsReport() {
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', letterSpacing: '-0.3px', flexShrink: 0 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px', flexShrink: 0 }}>
           {t('locationsReport.title')}
         </h2>
         {!loading && (
           <>
-            <div style={{ width: 1, height: 18, background: '#E5E7EB', flexShrink: 0 }} />
+            <div style={{ width: 1, height: 18, background: 'var(--border)', flexShrink: 0 }} />
             <div className="flex items-center gap-2">
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: '#F0FDF4', color: 'var(--color-success)', borderRadius: 999,
+                             background: 'var(--color-success-bg)', color: 'var(--color-success)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)' }} />
                 {active.length} {t('locationsReport.activeWord')}
               </span>
               {inactive.length > 0 && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                               background: '#FFF7ED', color: '#C2410C', borderRadius: 999,
+                               background: 'var(--color-warning-bg)', color: '#C2410C', borderRadius: 999,
                                padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C2410C' }} />
                   {inactive.length} {t('locationsReport.inactiveWord')}
                 </span>
               )}
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: '#F9FAFB', color: '#6B7280', borderRadius: 999,
+                             background: 'var(--hover-bg)', color: 'var(--text-muted)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                 {locations.length} {t('locationsReport.totalWord')}
               </span>
             </div>
           </>
         )}
-        {loading && <RefreshCw size={14} className="animate-spin" style={{ color: '#D1D5DB' }} />}
+        {loading && <RefreshCw size={14} className="animate-spin" style={{ color: 'var(--border)' }} />}
       </div>
 
       {/* KPI blocks */}

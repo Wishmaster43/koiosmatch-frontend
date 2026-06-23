@@ -45,7 +45,7 @@ export default function CustomersReport() {
     secondary:   t('customersReport.sub.locations', { count: c.locations?.length ?? 0 }),
     badge:       t('customersReport.activeWord'),
     badgeColor:  'var(--color-success)',
-    badgeBg:     '#F0FDF4',
+    badgeBg:     'var(--color-success-bg)',
   }))
   const drillLocations = customers.flatMap(c =>
     (c.locations ?? []).map(l => ({ primary: l.name, secondary: c.name }))
@@ -63,7 +63,7 @@ export default function CustomersReport() {
     secondary: t('customersReport.sub.noLocationsLinked'),
     badge:     inactive.includes(c) ? t('customersReport.inactiveWord') : t('customersReport.activeWord'),
     badgeColor: inactive.includes(c) ? '#C2410C' : 'var(--color-success)',
-    badgeBg:   inactive.includes(c) ? '#FFF7ED' : '#F0FDF4',
+    badgeBg:   inactive.includes(c) ? 'var(--color-warning-bg)' : 'var(--color-success-bg)',
   }))
 
   // Values for the configurable "customers" module view (keyed by block id).
@@ -116,36 +116,36 @@ export default function CustomersReport() {
 
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', letterSpacing: '-0.3px', flexShrink: 0 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', letterSpacing: '-0.3px', flexShrink: 0 }}>
           {t('customersReport.title')}
         </h2>
         {!loading && (
           <>
-            <div style={{ width: 1, height: 18, background: '#E5E7EB', flexShrink: 0 }} />
+            <div style={{ width: 1, height: 18, background: 'var(--border)', flexShrink: 0 }} />
             <div className="flex items-center gap-2">
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: '#F0FDF4', color: 'var(--color-success)', borderRadius: 999,
+                             background: 'var(--color-success-bg)', color: 'var(--color-success)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-success)', flexShrink: 0 }} />
                 {active.length} {t('customersReport.activeWord')}
               </span>
               {inactive.length > 0 && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                               background: '#FFF7ED', color: '#C2410C', borderRadius: 999,
+                               background: 'var(--color-warning-bg)', color: '#C2410C', borderRadius: 999,
                                padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C2410C', flexShrink: 0 }} />
                   {inactive.length} {t('customersReport.inactiveWord')}
                 </span>
               )}
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                             background: '#F9FAFB', color: '#6B7280', borderRadius: 999,
+                             background: 'var(--hover-bg)', color: 'var(--text-muted)', borderRadius: 999,
                              padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
                 {customers.length} {t('customersReport.totalWord')}
               </span>
             </div>
           </>
         )}
-        {loading && <RefreshCw size={14} className="animate-spin" style={{ color: '#D1D5DB' }} />}
+        {loading && <RefreshCw size={14} className="animate-spin" style={{ color: 'var(--border)' }} />}
       </div>
 
       {/* KPI blocks — layout configurable in Settings → Views → Klanten */}
