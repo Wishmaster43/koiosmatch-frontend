@@ -24,9 +24,10 @@ compliant alternative.
 2. **One short English comment per logical block** — above each meaningful
    block (function, hook, effect, handler, mapping), write a single concise
    line describing _what it does and why_. The developer learns by reading.
-3. **Hard file-size cap: a file must never exceed 1000 lines.** Target is
-   far lower: components ≤ ~200 lines, hooks ≤ ~150. Approaching the cap is a
-   design smell — split it.
+3. **Hard file-size cap: a file must never exceed 1000 lines.** The cap is the
+   ceiling, not the goal — the real rule is **single-purpose, not line-count**
+   (component ≤ ~250, hook/util ≤ ~150; full per-layer table in §3). Approaching
+   a target means **extract, don't "just add a bit more"**.
 4. **Strict modularity** — small, single-responsibility, reusable units. No
    monolithic components. Logic lives in hooks, not in JSX.
 5. **Feature-based folders** — never let the frontend become a flat mess. See
@@ -105,6 +106,21 @@ Rules:
 - **Props are typed** (PropTypes/TS) and documented with one comment line.
 - **No prop drilling beyond 2 levels** — use context or composition.
 - Prefer **composition over configuration** (children/slots over 20 boolean props).
+
+**Size discipline — single-purpose, not line-count.** The 1000-line cap (§0.3) is
+the ceiling; split long before it. Nearing a target = **extract, don't add more**.
+
+| Layer | Target | Split when |
+|---|---|---|
+| FE component | ≤ ~250 | > ~300 → subcomponents |
+| FE hook / util | ≤ ~150 (separate from components) | logic living in a component → its own hook |
+| BE controller | ≤ ~150 (thin: receive → delegate → Resource; no logic/queries) | > ~150 → logic to a Service/Action |
+| BE Service / Action | ~200–300, one public method | > ~300 or two responsibilities |
+| BE Model / Resource / Request | ≤ ~200 | god-model → split into traits/relations |
+
+> Backend rows are the **shared standard agreed with backend-Claude** (mirror in
+> backend-CLAUDE.md). Backend code itself stays out of scope for this repo (§10) —
+> the rows are here only so both sides apply one rule.
 
 ---
 
@@ -351,6 +367,10 @@ entry at the top via a workflow; experience/education/certs sort newest-first.)
   via `Intl` (`nl-NL`) in `lib/formatters` — never manual string formatting.
 - Use **ICU plurals** and interpolation, never string concatenation.
 - New feature ⇒ new translation keys in **both** locales in the same change.
+- **Non-page surfaces are not exempt.** The workflow module registry (`src/modules/`)
+  is in scope too: module **labels and categories go through i18n** (`t('modules.*')`,
+  `t('modules.categories.*')`) and module **colours use `--color-*` tokens** (§4) — never
+  Dutch literals or ad-hoc hex in `src/modules/` or the picker's category list.
 
 ---
 
@@ -437,6 +457,19 @@ entry at the top via a workflow; experience/education/certs sort newest-first.)
   (een nieuw migratiebestand = alleen voor een nieuwe tabel). Toepassen gebeurt via
   `migrate:fresh` / `php artisan dev:reset` (pre-release). De volledige regel staat in de
   backend-CLAUDE.md.
+- **Workflow modules (automation graph).** Workflow nodes live in `src/modules/` as a
+  registry; per-entity modules are built from one `makeEntityModule({...})` factory (one
+  **`action`** selector — Ophalen / Aanmaken / Bijwerken / … — whose `filters` / `sort` /
+  `limit` / `fields` / `target` sections show via `showIf`). Rules: (1) **filter VALUES come
+  from tenant lookups**, never hardcoded vocabularies — wire `status` / `pool` / `funnel` / …
+  to `useX()` / `LookupsContext`; (2) the filter **`field` keys must match the backend filter
+  vocabulary / data model** (`function_title`, `owner_id`, `funnel_type` — not `function` /
+  `owner` / `funnel_stage`); (3) the editor persists a **graph** per step (`position` +
+  `connections[]` = `{ target, filters }`), and step **`id`s must stay stable** across
+  save/reload or Router branches collapse to a straight line (backend contract — worklist
+  §C-27); (4) labels / categories / colours follow §5 / §4 (i18n + tokens). A new entity is
+  **one thin config file**, not a new shape; keep **one registry source** (`src/modules/index.js`)
+  — never a second hand-maintained module map.
 
 ---
 

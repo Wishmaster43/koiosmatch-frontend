@@ -17,6 +17,7 @@ import LoginPage              from './pages/auth/LoginPage'
 import Sidebar                from './components/layout/Sidebar'
 import KoiosPanel             from './components/layout/KoiosPanel'
 import ReportFilterSidebar    from './components/reports/ReportFilterSidebar'
+import ErrorBoundary          from '@/components/ui/ErrorBoundary'
 
 // ── Page imports (lazy) ──────────────────────────────────────────────────────
 // Each page is its own chunk, so heavy deps (workflow canvas, PDF renderer,
@@ -449,10 +450,14 @@ export default function App() {
         <LookupsProvider>
         {/* RightPanelProvider inside AuthProvider so components can use both auth and filter panel context */}
         <RightPanelProvider>
-          <Routes>
-            <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-            <Route path="/*"     element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} />
-          </Routes>
+          {/* Global boundary: a crash in any page shows a recoverable fallback,
+              not a blank screen (§3). Heavy widgets get their own local boundaries. */}
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+              <Route path="/*"     element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>} />
+            </Routes>
+          </ErrorBoundary>
         </RightPanelProvider>
         </LookupsProvider>
         </AppsProvider>

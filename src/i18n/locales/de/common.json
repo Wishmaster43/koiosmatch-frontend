@@ -28,6 +28,13 @@
   "avg": "Ø",
   "clickBar": "Balken anklicken für Details",
   "clickSegment": "Segment anklicken",
+  "error": {
+    "title": "Etwas ist schiefgelaufen",
+    "body": "Dieser Bereich konnte nicht geladen werden. Bitte erneut versuchen.",
+    "retry": "Erneut versuchen",
+    "reload": "Seite neu laden",
+    "details": "Technische Details"
+  },
   "status": {
     "active": "Aktiv",
     "actief": "Aktiv",

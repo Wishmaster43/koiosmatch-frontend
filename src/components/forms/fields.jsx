@@ -67,7 +67,7 @@ export function SelectField({ value, onChange, options = [], placeholder, style 
         {opts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
       </select>
       <ChevronDown size={13} style={{ position: 'absolute', right: 9, top: '50%',
-        transform: 'translateY(-50%)', color: '#9CA3AF', pointerEvents: 'none' }} />
+        transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
     </div>
   )
 }

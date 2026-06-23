@@ -10,17 +10,17 @@ import { useTranslation } from 'react-i18next'
 
 // Common statuses shared across the app (candidates + active/inactive entities).
 const DEFAULT_MAP = {
-  actief:     { bg: '#F0FDF4', color: 'var(--color-success)' },
-  active:     { bg: '#F0FDF4', color: 'var(--color-success)' },
-  nietactief: { bg: '#FFF7ED', color: '#C2410C' },
-  inactive:   { bg: '#FFF7ED', color: '#C2410C' },
-  extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
+  actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
+  active:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
+  nietactief: { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
+  inactive:   { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
+  extern:     { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
 }
 
 export default function StatusBadge({ status, map = {}, size = 12 }) {
   const { t } = useTranslation('common')
   const key = String(status ?? '').toLowerCase()
-  const s = { ...DEFAULT_MAP, ...map }[key] ?? { bg: '#F9FAFB', color: '#6B7280' }
+  const s = { ...DEFAULT_MAP, ...map }[key] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   // Caller-provided label wins; otherwise translate known defaults; else show raw status.
   const label = map[key]?.label
     ?? (DEFAULT_MAP[key] ? t(`status.${key}`, { defaultValue: status }) : (status ?? '—'))

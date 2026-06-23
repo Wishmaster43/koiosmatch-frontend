@@ -50,7 +50,7 @@
   },
   "modules": {
     "candidates": "Candidates",
-    "shift_fetcher": "Fetch shifts",
+    "planning": "Planning",
     "whatsapp_send": "Send WhatsApp",
     "database_update": "Update database",
     "email_send": "Send email",

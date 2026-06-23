@@ -6,7 +6,7 @@ import { Send } from 'lucide-react'
 
 export default {
   type:  'applicant_message',
-  category: 'Berichten',
+  category: 'Communicatie',
   label: 'Bericht naar sollicitant',
   Icon:  Send,
   color: '#3B6D11',

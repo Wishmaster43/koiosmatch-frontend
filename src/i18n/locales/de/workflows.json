@@ -49,7 +49,7 @@
   },
   "modules": {
     "candidates": "Kandidaten",
-    "shift_fetcher": "Einsätze abrufen",
+    "planning": "Planung",
     "whatsapp_send": "WhatsApp senden",
     "database_update": "Datenbank aktualisieren",
     "email_send": "E-Mail senden",

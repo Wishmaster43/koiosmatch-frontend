@@ -111,7 +111,7 @@ export default function PlanningTab({ c }) {
           </button>
           {rijOpen && (
             <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 200, marginTop: 4,
-              background: 'white', border: '1px solid var(--border)', borderRadius: 8,
+              background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
               boxShadow: '0 4px 16px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 180 }}>
               {DRIVING_LICENCES.map(r => {
                 const sel = drivingLicences.includes(r)
@@ -121,7 +121,7 @@ export default function PlanningTab({ c }) {
                       background: sel ? 'var(--color-primary-bg)' : 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
                     <div style={{ width: 14, height: 14, borderRadius: 3, flexShrink: 0,
                       border: `2px solid ${sel ? 'var(--color-primary)' : 'var(--border)'}`,
-                      background: sel ? 'var(--color-primary)' : 'white',
+                      background: sel ? 'var(--color-primary)' : 'var(--surface)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {sel && <Check size={9} color="white" />}
                     </div>

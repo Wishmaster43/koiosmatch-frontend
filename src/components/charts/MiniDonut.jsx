@@ -18,8 +18,8 @@ function MiniTooltip({ active, payload, total }) {
   const pct  = total ? Math.round((item.value / total) * 100) : 0
   return (
     <div style={{ padding: '5px 9px', fontSize: 11, background: 'white', borderRadius: 8,
-      border: '1px solid #F3F4F6', boxShadow: '0 4px 16px rgba(0,0,0,0.10)', whiteSpace: 'nowrap' }}>
-      <span style={{ fontWeight: 600, color: '#374151' }}>{item.name}</span>
+      border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.10)', whiteSpace: 'nowrap' }}>
+      <span style={{ fontWeight: 600, color: 'var(--text)' }}>{item.name}</span>
       <span style={{ color: item.payload.fill, marginLeft: 6 }}>{item.value} · {pct}%</span>
     </div>
   )

@@ -18,6 +18,14 @@ const projectRules = {
   // component definitions, etc.) — kept visible as warnings, a real refactor for later.
   'react-hooks/static-components': 'warn',
   'react-hooks/immutability': 'warn',
+  // Steer new code to the "@/" alias; deep ../../ chains are flagged but the 400+
+  // existing ones stay warnings (converted per-touch, CLAUDE.md §11 / CS-8).
+  'no-restricted-imports': ['warn', {
+    patterns: [{
+      group: ['../../**'],
+      message: 'Use the "@/" alias instead of deep relative imports (../../…). See CLAUDE.md §11.',
+    }],
+  }],
 }
 
 export default defineConfig([

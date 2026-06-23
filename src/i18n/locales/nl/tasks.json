@@ -63,6 +63,9 @@
   "links": {
     "title": "Koppelingen",
     "empty": "Nog geen koppelingen.",
+    "add": "Koppeling toevoegen",
+    "selectEntity": "Selecteer…",
+    "remove": "Verwijderen",
     "candidate": "Kandidaat",
     "application": "Sollicitatie",
     "vacancy": "Vacature",

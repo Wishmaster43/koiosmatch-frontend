@@ -220,7 +220,10 @@ Dingen die alleen jij kunt beslissen of testen.
      (array, REPLACE) i.p.v. alleen single `candidate_type`. ◐ **individuele soft-delete** met check op actieve
      gekoppelde objecten — nog open (wacht op C-21).
   7. **Changelog-tab** op de kandidaat (= B-14, `/candidates/{id}/activity`, wacht op C-16).
-  8. **Dark-mode-audit**: hardcoded hex in candidate/settings-componenten → tokens (`--color-*`/`--text*`).
+  8. ◐ **Dark-mode-audit**: ✅ **kandidaat-drawer dark-proof** — neutrale bg/border/input → tokens, semantische
+     bg (`#FEF2F2`/`#F0FDF4`/`#16A34A`…) → `--color-*-bg`/`--color-*`; accent-fallbacks (`#6B7280`) + tekst-op-kleur
+     bewust behouden (Profile/Documents/DocPreview/AvailabilityCalendar/Planning/Pools/Languages/Branch).
+     **Rest:** settings-secties (hardcoded `#111827`/`#9CA3AF`/white → holistische pass; settings wordt nog co-edited).
   9. ◐ **Matches read-only** — GEBOUWD: `MatchesTab` is nu weergave-only + subtiel backoffice-link-icoon
      (`helloflex_contract_guid`). **Rest (na backend):** koppel-knoppen Backoffice/ShiftManager (handmatig/bulk/
      workflow, autorisatie-gated, error-terug bij mapping-fout) — groot.
@@ -439,10 +442,20 @@ Backend moet per `type × action` een **uitvoer-template/handler** hebben:
   - Kandidaat-specifiek: Bijwerken met `reason` + `effective_from` (was `status_set` — gedateerde/beredeneerde statuswissel);
     `action: 'Werkervaring toevoegen'` met `experience_source`/`experience_position` (was `experience_add`).
 - **Operators** in filters: `= ≠ > < ≥ ≤ bevat "bevat niet" "is leeg" "is gevuld"`. `action` ontbreekt → behandel als `'Ophalen'`.
-- **Vervangen/verwijderd** (frontend weg): `candidates_fetch`, `candidate_filter`, `status_set`, `experience_add`.
-  Volgt nog: idem voor `applicants_*` en `shifts_*` zodra die entiteit-modules er zijn.
+- **Vervangen/verwijderd** (frontend weg): `candidates_fetch`, `candidate_filter`, `status_set`, `experience_add`,
+  `applicants_fetch`, `applicant_filter`, `shifts_fetch`, `shift_fetcher`, `task_create`.
+- **Nieuwe entiteit-modules** (action-based via factory `_entityModule.js`): `candidates`, `applications`, `vacancies`,
+  `matches`, `opportunities`, `tasks`, `customers`, `planning`. Plus hercategorisering: `ai_match` → tab **Matches**;
+  `email_send`/`whatsapp_send`/`applicant_message` → **Communicatie**; `error_*` → **Flow beheer**; `shifts_input`
+  ("Diensten Plakken") → **Planning**. Backend levert per `type × action` de handler + (later) de **veld-/lookup-templates**
+  per entiteit (nu vrij getypte velden/filters).
 - **Webhook-trigger (1→1):** de trigger-stap draagt `webhook_id`; `POST /webhook/{token}` moet de gekoppelde workflow
   draaien met de payload als trigger-output. Lookups voeden later de filter-waarden (status/pool/…); nu vrij getypt.
+- **🔴 Graaf-opslag i.p.v. lineaire keten (Router-bug).** De editor stuurt nu per stap **`position`** + **`connections[]`**
+  (`{ target: <step-id>, filters }`) mee. De backend slaat nu alleen een geordende lijst op (`order`, geen edges) → bij
+  herladen wordt elke vertakking platgeslagen tot **één rechte lijn** en gaan **verbindingsfilters** verloren. Backend moet
+  per stap **`position` + `connections`** opslaan **en teruggeven**, en de **step-`id`'s stabiel houden** (anders verwijzen
+  de `target`-id's naar niets). Pas dan blijven Router-takken na opslaan bestaan.
 
 ### 🔴 C-0 · Volledige seeder (Yesway **én** demo) — cross-cutting eis (Danny)
 **Beide tenants moeten een volledige database hebben.** De seeder (`php artisan dev:reset` / `migrate:fresh`)

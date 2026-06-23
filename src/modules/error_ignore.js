@@ -3,7 +3,7 @@ import { EyeOff } from 'lucide-react'
 
 export default {
   type:     'error_ignore',
-  category: 'Foutafhandeling',
+  category: 'Flow beheer',
   label:    'Negeren',
   Icon:     EyeOff,
   color:    '#6B7280',

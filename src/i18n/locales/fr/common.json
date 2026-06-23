@@ -28,6 +28,13 @@
   "avg": "moy.",
   "clickBar": "cliquez sur une barre pour les détails",
   "clickSegment": "cliquez sur un segment",
+  "error": {
+    "title": "Une erreur s’est produite",
+    "body": "Cette section n’a pas pu être chargée. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "reload": "Recharger la page",
+    "details": "Détails techniques"
+  },
   "status": {
     "active": "Actif",
     "actief": "Actif",

@@ -10,7 +10,7 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
 
   if (loading) {
     return (
-      <div className="p-5 bg-white rounded-xl" style={{ border: '1px solid #F3F4F6' }}>
+      <div className="p-5 bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
         <div className="w-10 h-10 mb-4 bg-gray-100 rounded-lg animate-pulse" />
         <div className="w-16 mb-1 bg-gray-100 rounded h-7 animate-pulse" />
         <div className="h-4 bg-gray-100 rounded w-28 animate-pulse" />
@@ -20,9 +20,9 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
 
   return (
     <div
-      className="flex flex-col gap-3 p-5 bg-white rounded-xl"
+      className="flex flex-col gap-3 p-5 bg-[var(--surface)] rounded-xl"
       style={{
-        border: '1px solid #F3F4F6',
+        border: '1px solid var(--border)',
         cursor: onClick ? 'pointer' : 'default',
         transition: 'box-shadow 0.15s',
       }}
@@ -37,7 +37,7 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
         </div>
         {!isNeutral && (
           <div className="flex items-center gap-1 px-2 py-1 rounded-full"
-            style={{ background: isPositive ? '#F0FDF4' : '#FEF2F2', color: isPositive ? 'var(--color-success)' : 'var(--color-danger)' }}>
+            style={{ background: isPositive ? 'var(--color-success-bg)' : 'var(--color-danger-bg)', color: isPositive ? 'var(--color-success)' : 'var(--color-danger)' }}>
             {isPositive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
             <span style={{ fontSize: 11, fontWeight: 600 }}>
               {isPositive ? `+${delta}` : delta}%
@@ -47,10 +47,10 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
       </div>
       <div>
         <div className="mb-1 font-semibold leading-none"
-          style={{ fontSize: 26, color: '#111827', letterSpacing: '-0.5px' }}>
+          style={{ fontSize: 26, color: 'var(--text)', letterSpacing: '-0.5px' }}>
           {value ?? '—'}
         </div>
-        <div style={{ fontSize: 13, color: '#9CA3AF' }}>{label}</div>
+        <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</div>
         {note && (
           <div style={{ fontSize: 11, color: '#A78BFA', marginTop: 3, fontWeight: 500 }}>
             {note}

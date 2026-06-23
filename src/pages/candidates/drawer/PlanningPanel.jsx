@@ -146,7 +146,7 @@ export default function PlanningPanel({ c }) {
                     </div>
                   ))}
                   {d.workedBefore > 0 && (
-                    <div style={{ padding: '7px 14px', background: '#F0FDF4', borderBottom: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ padding: '7px 14px', background: 'var(--color-success-bg)', borderBottom: '1px solid var(--color-success)', display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Check size={11} color="var(--color-success)" />
                       <span style={{ fontSize: 11, color: '#15803D', fontWeight: 500 }}>{t('planning.knownShort')}</span>
                     </div>
@@ -160,7 +160,7 @@ export default function PlanningPanel({ c }) {
                   <div style={{ padding: '10px 14px' }}>
                     <button onClick={handleUnschedule}
                       style={{ width: '100%', padding: '7px 0', fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: 'pointer',
-                        border: '1px solid #FCA5A5', background: '#FEF2F2', color: '#EF4444' }}>
+                        border: '1px solid var(--color-danger)', background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
                       {t('planning.unschedule')}
                     </button>
                   </div>
@@ -265,8 +265,8 @@ export default function PlanningPanel({ c }) {
                       <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
                         {tags.map((tag, j) => (
                           <span key={j} style={{ fontSize: 9, padding: '1px 6px', borderRadius: 99,
-                            background: tag.ok ? '#F0FDF4' : '#FEF2F2',
-                            color: tag.ok ? '#16A34A' : '#EF4444', fontWeight: 500 }}>
+                            background: tag.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
+                            color: tag.ok ? 'var(--color-success)' : 'var(--color-danger)', fontWeight: 500 }}>
                             {tag.ok ? '✓' : '✗'} {tag.label}
                           </span>
                         ))}
@@ -275,9 +275,9 @@ export default function PlanningPanel({ c }) {
                     <button onClick={() => toggleIngepland(d.id)} disabled={isBlKlant || isBlLocatie}
                       style={{ flexShrink: 0, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7,
                         cursor: isBlKlant || isBlLocatie ? 'not-allowed' : 'pointer', minWidth: 90,
-                        border: isGepland ? '1px solid #BBF7D0' : '1px solid var(--color-primary)',
-                        background: isGepland ? '#F0FDF4' : 'var(--color-primary)',
-                        color: isGepland ? '#16A34A' : 'white' }}>
+                        border: isGepland ? '1px solid var(--color-success)' : '1px solid var(--color-primary)',
+                        background: isGepland ? 'var(--color-success-bg)' : 'var(--color-primary)',
+                        color: isGepland ? 'var(--color-success)' : 'white' }}>
                       {isGepland ? `✓ ${t('planning.scheduled')}` : t('planning.schedule')}
                     </button>
                   </div>

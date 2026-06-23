@@ -36,7 +36,7 @@ export default function AddableSection({
       )}
       {onRemove && (
         <button onClick={() => onRemove(i)} title={t('remove', { defaultValue: 'Verwijderen' })}
-          style={{ ...ctrlBtn, background: '#FEF2F2', color: 'var(--color-danger)' }}><Trash2 size={11} /></button>
+          style={{ ...ctrlBtn, background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><Trash2 size={11} /></button>
       )}
     </div>
   )

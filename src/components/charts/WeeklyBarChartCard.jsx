@@ -13,13 +13,13 @@ function MultiTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null
   return (
     <div style={{ padding: '8px 11px', fontSize: 12, background: 'white', borderRadius: 10,
-      border: '1px solid #F3F4F6', boxShadow: '0 4px 16px rgba(0,0,0,0.10)', minWidth: 130 }}>
-      <div style={{ fontWeight: 600, color: '#374151', marginBottom: 5 }}>{label}</div>
+      border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.10)', minWidth: 130 }}>
+      <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: 5 }}>{label}</div>
       {payload.map(p => (
         <div key={p.dataKey} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color, flexShrink: 0 }} />
-          <span style={{ flex: 1, color: '#6B7280' }}>{p.name}</span>
-          <strong style={{ color: '#374151' }}>{p.value}</strong>
+          <span style={{ flex: 1, color: 'var(--text-muted)' }}>{p.name}</span>
+          <strong style={{ color: 'var(--text)' }}>{p.value}</strong>
         </div>
       ))}
     </div>
@@ -41,8 +41,8 @@ export default function WeeklyBarChartCard({ title, data = [], series = [], heig
       <div className="mb-4 text-sm font-medium text-gray-600">{title}</div>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-          <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
+          <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false} />
           <Tooltip content={<MultiTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 6 }} iconType="circle" iconSize={8} />
           {series.map(s => (

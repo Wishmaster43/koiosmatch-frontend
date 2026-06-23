@@ -24,7 +24,7 @@ import WorkflowCanvasEditor from '../../components/layout/WorkflowCanvasEditor'
 // Module chip icon + colours; label = t('modules.<type>').
 const MODULE_META = {
   candidates: { Icon: Users,         color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
-  shift_fetcher:    { Icon: Calendar,      color: '#0F6E56', bg: '#E1F5EE' },
+  planning:    { Icon: Calendar,      color: '#0F6E56', bg: '#E1F5EE' },
   whatsapp_send:    { Icon: MessageCircle, color: '#3B6D11', bg: '#EAF3DE' },
   database_update:  { Icon: Database,      color: '#185FA5', bg: '#E6F1FB' },
   email_send:       { Icon: Mail,          color: '#854F0B', bg: '#FAEEDA' },
@@ -40,7 +40,7 @@ const MOCK_WORKFLOWS = [
     last_run: { time: 'Vandaag 08:00', ok: true, candidates: 87 },
     steps: [
       { type: 'candidates', config: { status: 'actief', pools: ['Pool 7', 'Pool 8'], limit: 100 } },
-      { type: 'shift_fetcher',    config: { connection_id: 'ShiftManager (Yesway)', hours_ahead: 72 } },
+      { type: 'planning',    config: { connection_id: 'ShiftManager (Yesway)', hours_ahead: 72 } },
       { type: 'whatsapp_send',    config: { message_type: 'flow', phone_number_id: '085 020 5160' } },
       { type: 'database_update',  config: { model: 'Conversation', set_status: 'AWAITING_SHIFTS_OFFERED' } },
     ],
@@ -65,7 +65,7 @@ const MOCK_WORKFLOWS = [
     last_run: { time: 'Vandaag 10:00', ok: false, error: 'API timeout' },
     steps: [
       { type: 'candidates', config: {} },
-      { type: 'shift_fetcher',    config: {} },
+      { type: 'planning',    config: {} },
       { type: 'whatsapp_send',    config: { message_type: 'template' } },
     ],
   },
@@ -212,13 +212,18 @@ function normalizeWorkflow(wf) {
     ? wf.status
     : (wf.active ? 'active' : 'inactive')
 
-  // steps: altijd normaliseren naar { id, type, config, position }
+  // steps: normaliseren naar { id, type, config, position, next } — next = uitgaande
+  // verbindingen (graaf), zodat Router-takken + verbindingsfilters bewaard blijven.
   const rawSteps = Array.isArray(wf.steps) ? wf.steps : (wf.workflow_steps ?? [])
   const steps = rawSteps.map(s => ({
     id:       s.id ? String(s.id) : undefined,
     type:     s.module_type ?? s.type,
     config:   s.config ?? s.parameters ?? {},
     position: s.position ?? undefined,
+    next:     (s.next ?? s.connections ?? []).map(n => ({
+      target:  n.target != null ? String(n.target) : n.target,
+      filters: n.filters ?? null,
+    })),
   }))
 
   // last_run: uit laatste WorkflowRun of direct
@@ -251,10 +256,14 @@ function denormalizeWorkflow(wf) {
     active:         wf.status === 'active',
     status:         wf.status ?? 'draft',
     steps:          (wf.steps ?? []).map((s, i) => ({
+      id:          s.id ?? null,
       module_type: s.type,
       config:      s.config ?? {},
       label:       s.label ?? null,
       order:       i,
+      position:    s.position ?? null,
+      // Outgoing connections (graph): target = step id, optional edge filter.
+      connections: (s.next ?? []).map(n => ({ target: n.target, filters: n.filters ?? null })),
     })),
   }
 }

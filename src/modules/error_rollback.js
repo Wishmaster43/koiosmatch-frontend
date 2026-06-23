@@ -3,7 +3,7 @@ import { RotateCcw } from 'lucide-react'
 
 export default {
   type:     'error_rollback',
-  category: 'Foutafhandeling',
+  category: 'Flow beheer',
   label:    'Terugdraaien (Rollback)',
   Icon:     RotateCcw,
   color:    'var(--color-warning)',

@@ -26,7 +26,7 @@ export default function LanguagesSection({ c, onEditSave }) {
   const cancel = () => { setRows(initial()); setEditing(false) }
 
   const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
-  const selectStyle = { flex: 1, minWidth: 0, padding: '6px 8px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
+  const selectStyle = { flex: 1, minWidth: 0, padding: '6px 8px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
   const view = c.languages ?? []
 
   return (
@@ -61,7 +61,7 @@ export default function LanguagesSection({ c, onEditSave }) {
                   {levels.map(l => <option key={l} value={l}>{l}</option>)}
                 </select>
                 <button onClick={() => removeRow(i)} title={t('common:remove', { defaultValue: 'Verwijderen' })}
-                  style={{ ...iconBtn, flexShrink: 0, background: '#FEF2F2', color: 'var(--color-danger)', border: 'none' }}>
+                  style={{ ...iconBtn, flexShrink: 0, background: 'var(--color-danger-bg)', color: 'var(--color-danger)', border: 'none' }}>
                   <Trash2 size={12} />
                 </button>
               </div>

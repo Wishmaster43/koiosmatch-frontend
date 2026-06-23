@@ -46,12 +46,12 @@ function PhotoAvatar({ avatar, onChange, labels }) {
           border: '1px solid var(--border)', borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 140 }}>
           <button onClick={() => { fileRef.current?.click(); setMenuOpen(false) }}
             style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text)' }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')} onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')} onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             {labels?.upload ?? 'Upload'}
           </button>
           <button onClick={() => { onChange(''); setMenuOpen(false) }}
             style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)' }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#FEF2F2')} onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-danger-bg)')} onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             {labels?.remove ?? 'Remove'}
           </button>
         </div>

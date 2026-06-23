@@ -4,7 +4,7 @@ function LineTooltip({ active, payload, label, onItemClick }) {
   if (!active || !payload?.length) return null
   return (
     <div className="px-3 py-2 text-sm bg-white rounded-xl"
-      style={{ border: '1px solid #F3F4F6', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+      style={{ border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
       <div className="mb-0.5 font-medium text-gray-500" style={{ fontSize: 11 }}>{label}</div>
       <div style={{ color: 'var(--color-primary)', fontSize: 13, fontWeight: 600 }}>
         {payload[0].value} kandidaten
@@ -34,9 +34,9 @@ export default function LineChartCard({ title, data = [], color = 'var(--color-p
       </div>
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 4, right: 16, left: -20, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
-          <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+          <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false} />
           <Tooltip content={<LineTooltip onItemClick={onItemClick} />} />
           <Line
             type="monotone"

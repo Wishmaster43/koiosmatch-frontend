@@ -49,7 +49,7 @@
   },
   "modules": {
     "candidates": "Candidats",
-    "shift_fetcher": "Récupérer les missions",
+    "planning": "Planning",
     "whatsapp_send": "Envoyer WhatsApp",
     "database_update": "Mettre à jour la base",
     "email_send": "Envoyer un e-mail",

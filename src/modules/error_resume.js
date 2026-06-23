@@ -3,7 +3,7 @@ import { PlayCircle } from 'lucide-react'
 
 export default {
   type:     'error_resume',
-  category: 'Foutafhandeling',
+  category: 'Flow beheer',
   label:    'Hervatten (Resume)',
   Icon:     PlayCircle,
   color:    'var(--color-success)',

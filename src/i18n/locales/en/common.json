@@ -28,6 +28,13 @@
   "avg": "avg.",
   "clickBar": "click a bar for details",
   "clickSegment": "click a segment",
+  "error": {
+    "title": "Something went wrong",
+    "body": "This section couldn’t be loaded. Please try again.",
+    "retry": "Try again",
+    "reload": "Reload page",
+    "details": "Technical details"
+  },
   "status": {
     "active": "Active",
     "actief": "Active",

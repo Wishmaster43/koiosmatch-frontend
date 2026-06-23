@@ -18,7 +18,7 @@ const TAB_IDS = ['details', 'links', 'comments', 'activity']
  * to the shared EntityDrawer shell. No heavy JSX, no business logic (the page owns
  * the data + mutations via onUpdate / onAddComment).
  */
-export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddComment }) {
+export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddComment, onAddLink, onRemoveLink }) {
   const { t } = useTranslation('tasks')
   const { formatDate } = useDateFormat()
   if (!task) return null
@@ -27,7 +27,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   const renderTab = (id) => {
     switch (id) {
       case 'details':  return <DetailsTab task={task} onUpdate={(patch) => onUpdate(task.id, patch)} />
-      case 'links':    return <LinksTab task={task} />
+      case 'links':    return <LinksTab task={task} onAddLink={(link) => onAddLink(task.id, link)} onRemoveLink={(link) => onRemoveLink(task.id, link)} />
       case 'comments': return <CommentsTab task={task} onAdd={(body) => onAddComment(task.id, body)} />
       case 'activity': return <ActivityTab task={task} />
       default:         return null

@@ -3,11 +3,11 @@
 export default function StatCard({ label, value, sub, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)', icon: Icon, onClick }) {
   return (
     <div
-      className="flex flex-col gap-3 p-5 bg-white rounded-xl"
-      style={{ border: '1px solid #F3F4F6', cursor: onClick ? 'pointer' : undefined, transition: 'background 0.1s' }}
+      className="flex flex-col gap-3 p-5 bg-[var(--surface)] rounded-xl"
+      style={{ border: '1px solid var(--border)', cursor: onClick ? 'pointer' : undefined, transition: 'background 0.1s' }}
       onClick={onClick}
-      onMouseEnter={onClick ? e => (e.currentTarget.style.background = '#F9FAFB') : undefined}
-      onMouseLeave={onClick ? e => (e.currentTarget.style.background = 'white') : undefined}
+      onMouseEnter={onClick ? e => (e.currentTarget.style.background = 'var(--hover-bg)') : undefined}
+      onMouseLeave={onClick ? e => (e.currentTarget.style.background = 'var(--surface)') : undefined}
     >
       <div className="flex items-center justify-between">
         {Icon && (
@@ -19,10 +19,10 @@ export default function StatCard({ label, value, sub, color = 'var(--color-prima
       </div>
       <div>
         <div className="mb-1 font-semibold leading-none"
-          style={{ fontSize: 26, color: '#111827', letterSpacing: '-0.5px' }}>
+          style={{ fontSize: 26, color: 'var(--text)', letterSpacing: '-0.5px' }}>
           {value}
         </div>
-        <div style={{ fontSize: 13, color: '#9CA3AF' }}>{label}</div>
+        <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</div>
         {sub && (
           <div style={{ fontSize: 11, color: '#C4B5FD', marginTop: 3, fontWeight: 500 }}>
             {sub}

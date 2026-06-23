@@ -8,12 +8,15 @@ import hf_shifts         from './hf_shifts'
 import intus_candidates  from './intus_candidates'
 import intus_shifts      from './intus_shifts'
 import candidates        from './candidates'
-import applicants_fetch  from './applicants_fetch'
-import applicant_filter  from './applicant_filter'
+import applications      from './applications'
+import vacancies         from './vacancies'
+import matches           from './matches'
+import opportunities     from './opportunities'
+import tasks             from './tasks'
+import customers         from './customers'
+import planning          from './planning'
 import applicant_event   from './applicant_event'
 import applicant_message from './applicant_message'
-import shift_fetcher     from './shift_fetcher'
-import shifts_fetch      from './shifts_fetch'
 import shifts_input      from './shifts_input'
 import iterator          from './iterator'
 import aggregator        from './aggregator'
@@ -45,7 +48,6 @@ import html_table_parser from './html_table_parser'
 import text_parser       from './text_parser'
 import advanced_parser   from './advanced_parser'
 import gateway_mail_hook from './gateway_mail_hook'
-import task_create       from './task_create'
 import wait              from './wait'
 import ai_match          from './ai_match'
 import condition         from './condition'
@@ -72,12 +74,15 @@ const MODULES = [
   intus_candidates,
   intus_shifts,
   candidates,
-  applicants_fetch,
-  applicant_filter,
+  applications,
+  vacancies,
+  matches,
+  opportunities,
+  tasks,
+  customers,
+  planning,
   applicant_event,
   applicant_message,
-  shift_fetcher,
-  shifts_fetch,
   shifts_input,
   iterator,
   aggregator,
@@ -109,7 +114,6 @@ const MODULES = [
   text_parser,
   advanced_parser,
   gateway_mail_hook,
-  task_create,
   wait,
   ai_match,
   condition,

@@ -89,6 +89,20 @@ cite `file:line`.
 12. **Geo.** Does the UI consume LAT/LNG and support a radius filter (e.g. 35 km
     around Den Haag), and is the behavior correct and explained?
 
+13. **Modularity & file-size discipline.** Code must stay modular — small,
+    single-responsibility, reusable units, **logic in hooks, not JSX**. Hard cap:
+    **no file over 1000 lines** — but the cap is the ceiling, not the goal; the rule
+    is **single-purpose, not line-count** (component ≤ ~250 / split > ~300, hook/util
+    ≤ ~150; full per-layer table in CLAUDE.md §3). A monolithic page/component
+    that inlines data-fetch + transform + drawer + business logic is an **architecture
+    finding**, not a style nit: it blocks reuse, hides the entity graph, and resists
+    the "10 floors on the house" extensibility (dimension 11). Flag oversized/monolithic
+    files and prescribe the split (thin container → hooks/api/utils + one component per
+    tab/section; the candidate feature is the blueprint). A feature is only coherent if
+    it is also decomposed so a new status/tab/entity drops in by configuration, not
+    rewrite. (Backend mirror: controller ≤ ~150 thin, Service/Action ~200–300, Model/
+    Resource/Request ≤ ~200 — see CLAUDE.md §0.3/§3/§3A and docs/architect-Worklist.md.)
+
 ## Severity
 
 - **BLOCKER** — contract mismatch (UI relies on data the backend doesn't
@@ -96,7 +110,8 @@ cite `file:line`.
 - **CRITICAL** — broken entity linkage; hardcoded value that must be
   configurable; missing status side-effect; KPI/filter inconsistency.
 - **HIGH** — missing change log; search not covering all fields; non-reusable
-  duplicated building blocks.
+  duplicated building blocks; a file over the 1000-line cap, or a monolith mixing
+  data-fetch + business logic + JSX.
 - **MEDIUM** — extensibility gaps; inconsistent tabs/placement; pop-out/format
   missing.
 - **LOW** — minor naming/placement polish.
@@ -111,7 +126,8 @@ cite `file:line`.
 
 ## Model & Contract Alignment (scorecard ✅/⚠️/❌ + one line)
 Contract | Derived fields | Linkage | Configurability | Filters/KPI | Search |
-Status side-effects | Reusable blocks | Change log | Workflows | Extensibility | Geo
+Status side-effects | Reusable blocks | Change log | Workflows | Extensibility | Geo |
+Modularity
 
 ## Findings (by severity)
 - [SEVERITY] <title>
@@ -138,5 +154,7 @@ Status side-effects | Reusable blocks | Change log | Workflows | Extensibility |
 
 Rules: you review and design, you do not implement. Tie every finding to the
 model/contract. Where a fix needs the backend, say so explicitly (the backend
-architect owns that side). No rubber-stamping; confirm what is genuinely
+architect owns that side). Treat **modularity & the 1000-line cap** as a
+first-class dimension — an oversized or monolithic component is a finding even
+when the data contract is correct. No rubber-stamping; confirm what is genuinely
 coherent. Default language English; Dutch on request.

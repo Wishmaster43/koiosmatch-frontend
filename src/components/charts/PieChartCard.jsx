@@ -14,7 +14,7 @@ function ChartTooltip({ active, payload, total, showPercent, unit }) {
   const pct  = total ? ((item.value / total) * 100).toFixed(1) : 0
   return (
     <div className="px-4 py-3 text-sm bg-white rounded-xl"
-      style={{ border: '1px solid #F3F4F6', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+      style={{ border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
       <div className="mb-1 font-medium text-gray-800">{item.name}</div>
       <div style={{ color: item.payload.fill }}>
         {showPercent ? `${pct}%` : `${item.value}${unit ? ' ' + unit : ''}`}
@@ -76,7 +76,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
                 className="flex items-center justify-between gap-2 rounded px-1 py-0.5"
                 onClick={() => onItemClick && onItemClick(entry)}
                 style={{ cursor: onItemClick ? 'pointer' : 'default' }}
-                onMouseEnter={e => onItemClick && (e.currentTarget.style.background = '#F9FAFB')}
+                onMouseEnter={e => onItemClick && (e.currentTarget.style.background = 'var(--hover-bg)')}
                 onMouseLeave={e => onItemClick && (e.currentTarget.style.background = 'none')}
               >
                 <div className="flex items-center min-w-0 gap-2">
@@ -90,7 +90,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
               </div>
             )
           })}
-          <div className="pt-2 mt-1" style={{ borderTop: '1px solid #F9FAFB' }}>
+          <div className="pt-2 mt-1" style={{ borderTop: '1px solid var(--hover-bg)' }}>
             <span className="text-xs text-gray-400">
               {t('total')}: <strong className="text-gray-700">{total}</strong>
             </span>

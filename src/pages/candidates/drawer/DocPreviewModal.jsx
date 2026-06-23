@@ -14,7 +14,7 @@ export default function DocPreviewModal({ doc, onClose }) {
     <div onClick={e => e.target === e.currentTarget && onClose()}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 300,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: 'white', borderRadius: 12, overflow: 'hidden', maxWidth: 800, width: '100%',
+      <div style={{ background: 'var(--surface)', borderRadius: 12, overflow: 'hidden', maxWidth: 800, width: '100%',
         maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
         <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--border)', gap: 10 }}>
           <div style={{ width: 28, height: 28, borderRadius: 6, background: DOC_COLORS[doc.type] ?? '#6B7280',
@@ -29,7 +29,7 @@ export default function DocPreviewModal({ doc, onClose }) {
             <X size={18} />
           </button>
         </div>
-        <div style={{ flex: 1, overflow: 'auto', background: '#F3F4F6', minHeight: 400 }}>
+        <div style={{ flex: 1, overflow: 'auto', background: 'var(--bg)', minHeight: 400 }}>
           {!url ? (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>
               {t('documents.noPreview')}

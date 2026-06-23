@@ -169,6 +169,29 @@ function TasksPageInner() {
     api.post(`/tasks/${id}/comments`, { body }).catch(() => {})
   }
 
+  // Apply the authoritative task detail returned by the link endpoints to both the
+  // open drawer and the matching list row (links + the table's first-link cell).
+  const applyDetail = (id, res) => {
+    const detail = decorate(mapTaskDetail(res?.data?.data ?? res?.data))
+    setSelected(prev => (prev && prev.id === id ? detail : prev))
+    setTasks(prev => prev.map(x => x.id === id ? { ...x, links: detail.links, linkLabel: detail.linkLabel } : x))
+  }
+
+  // Add a polymorphic link from the drawer; show it optimistically, then POST and
+  // re-sync from the returned detail (which carries the resolved label).
+  const handleAddLink = (id, link) => {
+    setSelected(prev => (prev && prev.id === id ? { ...prev, links: [...(prev.links ?? []), link] } : prev))
+    api.post(`/tasks/${id}/links`, { type: link.type, id: link.id }).then(r => applyDetail(id, r)).catch(() => {})
+  }
+
+  // Remove a link from the drawer; drop it optimistically, then DELETE and re-sync.
+  const handleRemoveLink = (id, link) => {
+    setSelected(prev => (prev && prev.id === id
+      ? { ...prev, links: (prev.links ?? []).filter(l => !(l.type === link.type && String(l.id) === String(link.id))) }
+      : prev))
+    api.delete(`/tasks/${id}/links`, { data: { type: link.type, id: link.id } }).then(r => applyDetail(id, r)).catch(() => {})
+  }
+
   // A new task created in the modal — prepend it to the list.
   const handleCreated = (raw) => { setTasks(prev => [mapTask(raw), ...prev]); setAddOpen(false) }
 
@@ -240,6 +263,8 @@ function TasksPageInner() {
         onToggleExpand={() => setExpanded(v => !v)}
         onUpdate={handleUpdate}
         onAddComment={handleAddComment}
+        onAddLink={handleAddLink}
+        onRemoveLink={handleRemoveLink}
       />
 
       {/* Add-activity modal */}

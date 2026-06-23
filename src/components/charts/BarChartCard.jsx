@@ -8,7 +8,7 @@ function BarTooltip({ active, payload, label, total, showPercent }) {
   const pct   = total ? ((value / total) * 100).toFixed(1) : 0
   return (
     <div className="px-3 py-2 text-sm bg-white rounded-xl"
-      style={{ border: '1px solid #F3F4F6', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
+      style={{ border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
       <div className="mb-0.5 font-medium text-gray-800" style={{ fontSize: 12 }}>{label}</div>
       <div style={{ color: payload[0].fill, fontSize: 13, fontWeight: 500 }}>
         {showPercent ? `${pct}%` : value}
@@ -56,10 +56,10 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
 
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={displayData} margin={{ top: 4, right: showAverage ? 50 : 8, left: -20, bottom: 60 }}>
-          <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#9CA3AF' }}
+          <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
             angle={-35} textAnchor="end" interval={0} />
           <YAxis
-            tick={{ fontSize: 10, fill: '#9CA3AF' }}
+            tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
             allowDecimals={showPercent}
             tickFormatter={v => showPercent ? `${v}%` : v}
             domain={showPercent ? [0, 100] : undefined}
@@ -90,8 +90,8 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
       </ResponsiveContainer>
 
       <div className="flex justify-center mt-2">
-        <span style={{ fontSize: 11, color: '#9CA3AF' }}>
-          {t('total')}: <strong style={{ color: '#374151' }}>{rawTotal}</strong>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          {t('total')}: <strong style={{ color: 'var(--text)' }}>{rawTotal}</strong>
         </span>
       </div>
     </div>

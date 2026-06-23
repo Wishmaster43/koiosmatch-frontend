@@ -75,7 +75,7 @@ export default function DocumentsSection({ c }) {
               <button key={dt.value} onClick={() => setPendingType(dt.value)}
                 style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: pendingType === dt.value ? 600 : 400,
                   border: `1px solid ${pendingType === dt.value ? 'var(--color-primary)' : 'var(--border)'}`,
-                  background: pendingType === dt.value ? 'var(--color-primary)' : 'white', color: pendingType === dt.value ? 'white' : 'var(--text)' }}>{t(`documents.types.${dt.key}`)}</button>
+                  background: pendingType === dt.value ? 'var(--color-primary)' : 'var(--surface)', color: pendingType === dt.value ? 'white' : 'var(--text)' }}>{t(`documents.types.${dt.key}`)}</button>
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>

@@ -36,7 +36,7 @@ function ShiftDetail({ s, onClose }) {
         </div>
       ))}
       {s.workedBefore > 0 && (
-        <div style={{ padding: '8px 14px', background: '#F0FDF4', borderTop: '1px solid #BBF7D0', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div style={{ padding: '8px 14px', background: 'var(--color-success-bg)', borderTop: '1px solid var(--color-success)', display: 'flex', alignItems: 'center', gap: 6 }}>
           <Check size={12} color="var(--color-success)" />
           <span style={{ fontSize: 11, color: '#15803D', fontWeight: 500 }}>{t('planning.knownAtClient')}</span>
         </div>
@@ -110,7 +110,7 @@ export default function AvailabilityCalendar() {
             {days.map((d, i) => {
               const ds = dienstenForDate(d).filter(s => h >= s.start && h < s.end)
               return (
-                <div key={i} style={{ display: 'flex', borderLeft: i > 0 ? '1px solid var(--border)' : 'none', background: i >= 5 ? '#FAFAFA' : 'transparent' }}>
+                <div key={i} style={{ display: 'flex', borderLeft: i > 0 ? '1px solid var(--border)' : 'none', background: i >= 5 ? 'var(--hover-bg)' : 'transparent' }}>
                   {ds.map((s, j) => (
                     <div key={j} onClick={() => setSelected(s)}
                       style={{ flex: 1, minWidth: 0, boxSizing: 'border-box',
@@ -149,7 +149,7 @@ export default function AvailabilityCalendar() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
           {DAY_NAMES.map((d, i) => (
             <div key={d} style={{ textAlign: 'center', padding: '7px 4px', fontSize: 10, fontWeight: 700,
-              color: i >= 5 ? '#9CA3AF' : 'var(--text-muted)', textTransform: 'uppercase',
+              color: 'var(--text-muted)', textTransform: 'uppercase',
               borderLeft: i > 0 ? '1px solid var(--border)' : 'none' }}>{d}</div>
           ))}
         </div>
@@ -162,12 +162,12 @@ export default function AvailabilityCalendar() {
               return (
                 <div key={ci} style={{ height: 92, padding: '4px', overflow: 'hidden', boxSizing: 'border-box',
                   display: 'flex', flexDirection: 'column', borderLeft: ci > 0 ? '1px solid var(--border)' : 'none',
-                  background: ci >= 5 ? '#FAFAFA' : 'white' }}>
+                  background: ci >= 5 ? 'var(--hover-bg)' : 'var(--surface)' }}>
                   {day && (
                     <>
                       <div style={{ width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         background: tod ? 'var(--color-primary)' : 'transparent', marginBottom: 2, flexShrink: 0,
-                        fontSize: 11, fontWeight: tod ? 700 : 400, color: tod ? 'white' : ci >= 5 ? '#9CA3AF' : 'var(--text)' }}>
+                        fontSize: 11, fontWeight: tod ? 700 : 400, color: tod ? 'white' : ci >= 5 ? 'var(--text-muted)' : 'var(--text)' }}>
                         {day}
                       </div>
                       {ds.slice(0, 2).map((s, j) => (

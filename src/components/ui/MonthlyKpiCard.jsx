@@ -5,7 +5,7 @@
  */
 import { useState } from 'react'
 import KpiDrillDownDrawer from '../reports/KpiDrillDownDrawer'
-import { useKpiSettings } from '../../lib/useKpiSettings'
+import { useKpiSettings } from '@/lib/useKpiSettings'
 
 export default function MonthlyKpiCard({ candidates = [], loading = false, statusFilter = ['actief'] }) {
   const { new_candidates_target: KPI_TARGET } = useKpiSettings()
@@ -13,7 +13,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
 
   if (loading) {
     return (
-      <div className="p-5 bg-white rounded-xl" style={{ border: '1px solid #F3F4F6' }}>
+      <div className="p-5 bg-[var(--surface)] rounded-xl" style={{ border: '1px solid var(--border)' }}>
         <div className="w-40 h-4 mb-4 bg-gray-100 rounded animate-pulse" />
         <div className="flex gap-4">
           {[1,2,3,4].map(i => (
@@ -81,8 +81,8 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
 
   return (
     <>
-      <div className="flex flex-col gap-4 p-5 bg-white rounded-xl"
-        style={{ border: '1px solid #F3F4F6' }}>
+      <div className="flex flex-col gap-4 p-5 bg-[var(--surface)] rounded-xl"
+        style={{ border: '1px solid var(--border)' }}>
 
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -99,13 +99,13 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
         </div>
 
         {/* Vier klikbare waarden */}
-        <div className="flex" style={{ borderTop: '1px solid #F9FAFB', paddingTop: 14 }}>
+        <div className="flex" style={{ borderTop: '1px solid var(--hover-bg)', paddingTop: 14 }}>
 
           {/* Nieuw */}
           <div
             style={blockStyle(true)}
             onClick={() => openDrill('nieuw', `Nieuw in ${now.toLocaleString('nl-NL', { month: 'long' })}`, nieuweKandidaten)}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             title="Klik voor details"
           >
@@ -116,41 +116,41 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
             <div className="text-xs text-gray-400">Nieuw</div>
           </div>
 
-          <div style={{ width: 1, background: '#F3F4F6', margin: '0 4px' }} />
+          <div style={{ width: 1, background: 'var(--border)', margin: '0 4px' }} />
 
           {/* Gemiddelde */}
           <div
             style={blockStyle(true)}
             onClick={() => openDrill('average', 'Gemiddelde berekening', candidates)}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             title="Klik voor uitleg berekening"
           >
             <div className="mb-1 font-semibold leading-none"
-              style={{ fontSize: 26, color: '#374151', letterSpacing: '-0.5px' }}>
+              style={{ fontSize: 26, color: 'var(--text)', letterSpacing: '-0.5px' }}>
               {gemiddeld}
             </div>
             <div className="text-xs text-gray-400">Gemiddelde</div>
           </div>
 
-          <div style={{ width: 1, background: '#F3F4F6', margin: '0 4px' }} />
+          <div style={{ width: 1, background: 'var(--border)', margin: '0 4px' }} />
 
           {/* KPI doel */}
           <div
             style={blockStyle(true)}
             onClick={() => openDrill('average', 'KPI doel & voortgang', candidates)}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             title="Klik voor KPI voortgang"
           >
             <div className="mb-1 font-semibold leading-none"
-              style={{ fontSize: 26, color: '#9CA3AF', letterSpacing: '-0.5px' }}>
+              style={{ fontSize: 26, color: 'var(--text-muted)', letterSpacing: '-0.5px' }}>
               {KPI_TARGET}
             </div>
             <div className="text-xs text-gray-400">KPI doel</div>
           </div>
 
-          <div style={{ width: 1, background: '#F3F4F6', margin: '0 4px' }} />
+          <div style={{ width: 1, background: 'var(--border)', margin: '0 4px' }} />
 
           {/* Uitgeschreven */}
           <div
@@ -158,12 +158,12 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
             onClick={uitgeschreven > 0
               ? () => openDrill('uitgeschreven', `Uitgeschreven in ${now.toLocaleString('nl-NL', { month: 'long' })}`, uitgeschrevenKandidaten)
               : undefined}
-            onMouseEnter={e => { if (uitgeschreven > 0) e.currentTarget.style.background = '#F9FAFB' }}
+            onMouseEnter={e => { if (uitgeschreven > 0) e.currentTarget.style.background = 'var(--hover-bg)' }}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             title={uitgeschreven > 0 ? 'Klik voor details' : undefined}
           >
             <div className="mb-1 font-semibold leading-none"
-              style={{ fontSize: 26, color: uitgeschreven > 0 ? 'var(--color-danger)' : '#9CA3AF', letterSpacing: '-0.5px' }}>
+              style={{ fontSize: 26, color: uitgeschreven > 0 ? 'var(--color-danger)' : 'var(--text-muted)', letterSpacing: '-0.5px' }}>
               {uitgeschreven}
             </div>
             <div className="text-xs text-gray-400">Uitgeschreven</div>
@@ -171,7 +171,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
         </div>
 
         {/* Progress bar */}
-        <div className="overflow-hidden rounded-full" style={{ height: 4, background: '#F3F4F6' }}>
+        <div className="overflow-hidden rounded-full" style={{ height: 4, background: 'var(--border)' }}>
           <div className="h-full transition-all rounded-full"
             style={{ width: `${Math.min(pctVsKpi, 100)}%`, background: color }} />
         </div>

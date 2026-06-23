@@ -3,7 +3,7 @@ import { Mail } from 'lucide-react'
 
 export default {
   type:  'email_send',
-  category: 'Berichten',
+  category: 'Communicatie',
   label: 'E-mail Sturen',
   Icon:  Mail,
   color: '#854F0B',

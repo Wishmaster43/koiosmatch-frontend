@@ -26,30 +26,30 @@ export default function EntityListDrawer({ title, items, onClose }) {
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
-                      padding: '14px 18px', borderBottom: '1px solid #F3F4F6', flexShrink: 0 }}>
+                      padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div>
-            <div style={{ fontWeight: 600, fontSize: 15, color: '#111827' }}>{title}</div>
-            <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{items.length} resultaten</div>
+            <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{title}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{items.length} resultaten</div>
           </div>
           <button onClick={onClose}
             style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                     background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF',
+                     background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
                      borderRadius: 6, marginLeft: 10 }}
-            onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             <X size={15} />
           </button>
         </div>
 
         {/* Search */}
-        <div style={{ flexShrink: 0, padding: '8px 14px', borderBottom: '1px solid #F9FAFB' }}>
+        <div style={{ flexShrink: 0, padding: '8px 14px', borderBottom: '1px solid var(--hover-bg)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px',
-                        background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 7 }}>
-            <Search size={13} color="#9CA3AF" />
+                        background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7 }}>
+            <Search size={13} color="var(--text-muted)" />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder="Zoeken…"
               style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                       fontSize: 12, color: '#374151' }} />
+                       fontSize: 12, color: 'var(--text)' }} />
           </div>
         </div>
 
@@ -57,27 +57,27 @@ export default function EntityListDrawer({ title, items, onClose }) {
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {filtered.length === 0 && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          height: 120, fontSize: 13, color: '#9CA3AF' }}>
+                          height: 120, fontSize: 13, color: 'var(--text-muted)' }}>
               Geen resultaten
             </div>
           )}
           {filtered.map((item, i) => (
             <div key={i}
-              style={{ padding: '10px 16px', borderBottom: '1px solid #F3F4F6',
+              style={{ padding: '10px 16px', borderBottom: '1px solid var(--border)',
                        display: 'flex', alignItems: 'center', gap: 10 }}
-              onMouseEnter={e => (e.currentTarget.style.background = '#FAFAFA')}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 500, fontSize: 13, color: '#111827',
+                <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)',
                                whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {item.primary}
                 </div>
                 {item.secondary && (
-                  <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{item.secondary}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{item.secondary}</div>
                 )}
               </div>
               {item.badge && (
-                <span style={{ background: item.badgeBg ?? '#F9FAFB', color: item.badgeColor ?? '#6B7280',
+                <span style={{ background: item.badgeBg ?? 'var(--hover-bg)', color: item.badgeColor ?? 'var(--text-muted)',
                                borderRadius: 999, padding: '2px 8px', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>
                   {item.badge}
                 </span>
@@ -88,14 +88,14 @@ export default function EntityListDrawer({ title, items, onClose }) {
 
         {/* Footer */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                      padding: '8px 16px', borderTop: '1px solid #F3F4F6', background: '#FAFAFA',
+                      padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'var(--hover-bg)',
                       flexShrink: 0 }}>
-          <span style={{ fontSize: 11, color: '#9CA3AF' }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
             {filtered.length} van {items.length} getoond
           </span>
           <button onClick={onClose}
             style={{ fontSize: 12, borderRadius: 6, padding: '4px 12px',
-                     background: 'none', border: '1px solid #E5E7EB', cursor: 'pointer', color: '#6B7280' }}>
+                     background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}>
             Sluiten
           </button>
         </div>

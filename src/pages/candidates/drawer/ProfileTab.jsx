@@ -43,7 +43,7 @@ export default function ProfileTab({ c, onEditSave }) {
   const saveSummary   = () => { onEditSave?.({ summary }); setSummaryEditing(false) }
   const cancelSummary = () => { setSummary(c.summary ?? ''); setSummaryEditing(false) }
 
-  const inputStyle = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
+  const inputStyle = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
   const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
 
   // Render fn (not a nested component) so the field inputs keep focus.

@@ -28,6 +28,13 @@
   "avg": "prom.",
   "clickBar": "haz clic en una barra para más detalles",
   "clickSegment": "haz clic en un segmento",
+  "error": {
+    "title": "Algo salió mal",
+    "body": "No se pudo cargar esta sección. Inténtalo de nuevo.",
+    "retry": "Intentar de nuevo",
+    "reload": "Recargar la página",
+    "details": "Detalles técnicos"
+  },
   "status": {
     "active": "Activo",
     "actief": "Activo",

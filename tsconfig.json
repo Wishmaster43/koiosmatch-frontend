@@ -7,6 +7,9 @@
     "jsx": "react-jsx",
     "types": ["vite/client"],
 
+    "baseUrl": ".",
+    "paths": { "@/*": ["./src/*"] },
+
     "allowJs": true,
     "checkJs": false,
     "noEmit": true,

@@ -3,7 +3,7 @@ import { OctagonX } from 'lucide-react'
 
 export default {
   type:     'error_break',
-  category: 'Foutafhandeling',
+  category: 'Flow beheer',
   label:    'Stoppen (Break)',
   Icon:     OctagonX,
   color:    'var(--color-danger)',

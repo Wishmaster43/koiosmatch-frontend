@@ -28,6 +28,13 @@
   "avg": "gem.",
   "clickBar": "klik op balk voor details",
   "clickSegment": "klik op segment",
+  "error": {
+    "title": "Er ging iets mis",
+    "body": "Dit onderdeel kon niet worden geladen. Probeer het opnieuw.",
+    "retry": "Probeer opnieuw",
+    "reload": "Pagina herladen",
+    "details": "Technische details"
+  },
   "status": {
     "active": "Actief",
     "actief": "Actief",
