@@ -72,7 +72,7 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
         {result ? (
           // Phase 2 — one-time secret reveal.
           <div>
-            <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: 16, marginBottom: 16 }}>
+            <div style={{ background: 'var(--color-success-bg)', border: '1px solid #BBF7D0', borderRadius: 10, padding: 16, marginBottom: 16 }}>
               <div style={{ fontSize: 12, fontWeight: 600, color: '#166534', marginBottom: 8 }}>{t('apiKeys.secretOnce')}</div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid #BBF7D0', borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</code>

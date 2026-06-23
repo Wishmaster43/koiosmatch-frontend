@@ -136,7 +136,7 @@ export default function ModulesSettings() {
                 border: `1px solid ${on ? 'var(--color-success)' : 'var(--border)'}` }}>
               {/* Switch */}
               <div style={{ width: 34, height: 20, borderRadius: 999, flexShrink: 0, position: 'relative',
-                background: on ? 'var(--color-success)' : '#D1D5DB', transition: 'background 0.15s' }}>
+                background: on ? 'var(--color-success)' : 'var(--border)', transition: 'background 0.15s' }}>
                 <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#fff', position: 'absolute',
                   top: 2, left: on ? 16 : 2, transition: 'left 0.15s' }} />
               </div>
@@ -157,7 +157,7 @@ export default function ModulesSettings() {
         <button onClick={save} disabled={saving || !hasChange}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 20px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none',
-                   background: savedOk ? 'var(--color-success)' : hasChange ? 'var(--color-primary)' : '#D1D5DB',
+                   background: savedOk ? 'var(--color-success)' : hasChange ? 'var(--color-primary)' : 'var(--border)',
                    color: 'white', cursor: (saving || !hasChange) ? 'not-allowed' : 'pointer',
                    transition: 'background 0.2s', opacity: saving ? 0.7 : 1 }}>
           {savedOk ? <><Check size={13} /> {t('modules.savedActive')}</>

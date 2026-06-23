@@ -51,19 +51,19 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }) {
       display: 'flex', alignItems: 'flex-start', justifyContent: 'center', paddingTop: '12vh',
     }}>
       <div onMouseDown={e => e.stopPropagation()} style={{
-        width: 'min(560px, 92vw)', background: 'white', borderRadius: 14,
+        width: 'min(560px, 92vw)', background: 'var(--surface)', borderRadius: 14,
         boxShadow: '0 24px 64px rgba(0,0,0,0.25)', overflow: 'hidden',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', borderBottom: '1px solid #F3F4F6' }}>
-          <Search size={16} style={{ color: '#9CA3AF', flexShrink: 0 }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 16px', borderBottom: '1px solid var(--border)' }}>
+          <Search size={16} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
           <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)} onKeyDown={onKeyDown}
             placeholder={t('shell.search')}
-            style={{ flex: 1, border: 'none', outline: 'none', fontSize: 15, color: '#111827', background: 'transparent' }} />
+            style={{ flex: 1, border: 'none', outline: 'none', fontSize: 15, color: 'var(--text)', background: 'transparent' }} />
         </div>
 
         <div style={{ maxHeight: '50vh', overflowY: 'auto', padding: 6 }}>
           {results.length === 0 && (
-            <div style={{ padding: '22px 14px', textAlign: 'center', fontSize: 13, color: '#9CA3AF' }}>
+            <div style={{ padding: '22px 14px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
               {t('shell.noResults')}
             </div>
           )}
@@ -77,9 +77,9 @@ export default function SettingsSearch({ open, onClose, groups, onSelect }) {
                   border: 'none', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
                   background: isActive ? 'var(--color-primary-bg)' : 'transparent',
                 }}>
-                {Icon && <Icon size={15} style={{ flexShrink: 0, color: isActive ? 'var(--color-primary)' : '#9CA3AF' }} />}
-                <span style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>{e.label}</span>
-                <span style={{ fontSize: 11, color: '#9CA3AF', marginLeft: 'auto' }}>{e.group}</span>
+                {Icon && <Icon size={15} style={{ flexShrink: 0, color: isActive ? 'var(--color-primary)' : 'var(--text-muted)' }} />}
+                <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{e.label}</span>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', marginLeft: 'auto' }}>{e.group}</span>
                 {isActive && <CornerDownLeft size={13} style={{ color: '#C4C4CF', flexShrink: 0 }} />}
               </button>
             )

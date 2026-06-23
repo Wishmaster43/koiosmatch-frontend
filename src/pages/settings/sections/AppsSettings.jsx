@@ -47,8 +47,8 @@ export default function AppsSettings() {
       )}
 
       {!canEdit && (
-        <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 16, padding: '10px 14px',
-                      background: '#F9FAFB', borderRadius: 8, border: '1px solid #E5E7EB' }}>
+        <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16, padding: '10px 14px',
+                      background: 'var(--hover-bg)', borderRadius: 8, border: '1px solid var(--border)' }}>
           {t('apps.adminOnly')}
         </div>
       )}
@@ -68,7 +68,7 @@ export default function AppsSettings() {
               opacity: !canEdit && !on ? 0.6 : 1,
             }}>
               <div style={{ fontSize: 26, flexShrink: 0, width: 44, height: 44, borderRadius: 10,
-                             background: on ? app.color + '18' : '#F3F4F6',
+                             background: on ? app.color + '18' : 'var(--border)',
                              display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {app.icon}
               </div>
@@ -96,14 +96,14 @@ export default function AppsSettings() {
                 title={!canEdit ? t('apps.noRights') : on ? t('apps.disable') : t('apps.enable')}
                 style={{
                   width: 44, height: 24, borderRadius: 999, border: 'none', flexShrink: 0,
-                  background: on ? app.color : '#D1D5DB',
+                  background: on ? app.color : 'var(--border)',
                   cursor: canEdit ? 'pointer' : 'not-allowed',
                   position: 'relative', transition: 'background 0.2s',
                   opacity: isSaving ? 0.6 : 1,
                 }}>
                 <div style={{
                   position: 'absolute', top: 3, width: 18, height: 18, borderRadius: '50%',
-                  background: 'white', transition: 'left 0.2s',
+                  background: 'var(--surface)', transition: 'left 0.2s',
                   left: on ? 22 : 3, boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
                 }} />
               </button>

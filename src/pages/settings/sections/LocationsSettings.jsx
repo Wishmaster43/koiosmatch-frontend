@@ -50,26 +50,26 @@ export default function LocationsSettings() {
   const paginated = locations.slice((page - 1) * PER_PAGE, page * PER_PAGE)
   const totalPages = Math.ceil(locations.length / PER_PAGE)
 
-  const TH = { padding: '8px 14px', fontSize: 11, fontWeight: 600, color: '#9CA3AF', textAlign: 'left', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6' }
-  const TD = { padding: '12px 14px', fontSize: 13, color: '#374151', borderBottom: '1px solid #F9FAFB' }
+  const TH = { padding: '8px 14px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textAlign: 'left', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }
+  const TD = { padding: '12px 14px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{t('locations.title')}</h2>
-          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{t('locations.subtitle')}</p>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('locations.title')}</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('locations.subtitle')}</p>
         </div>
         <button onClick={() => setShowModal(true)}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                   fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid #E5E7EB',
-                   background: 'white', cursor: 'pointer', color: '#374151' }}>
+                   fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
+                   background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
           <Plus size={13} /> {t('locations.create')}
         </button>
       </div>
 
-      {loading ? <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('common.loadingShort')}</p> : (
-        <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, overflow: 'hidden' }}>
+      {loading ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p> : (
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
@@ -80,12 +80,12 @@ export default function LocationsSettings() {
             </thead>
             <tbody>
               {paginated.length === 0 ? (
-                <tr><td colSpan={3} style={{ ...TD, textAlign: 'center', color: '#9CA3AF', padding: '32px 0' }}>{t('locations.empty')}</td></tr>
+                <tr><td colSpan={3} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>{t('locations.empty')}</td></tr>
               ) : paginated.map((loc, i) => (
                 <tr key={loc.id ?? i}>
-                  <td style={{ ...TD, fontWeight: 500, color: '#111827' }}>{loc.name}</td>
+                  <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{loc.name}</td>
                   <td style={TD}>{formatAddress(loc)}</td>
-                  <td style={{ ...TD, color: '#9CA3AF', fontSize: 12 }}>
+                  <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
                     {loc.created_at ? new Date(loc.created_at).toLocaleString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
                   </td>
                 </tr>
@@ -93,13 +93,13 @@ export default function LocationsSettings() {
             </tbody>
           </table>
           {totalPages > 1 && (
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '10px 14px', borderTop: '1px solid #F3F4F6' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '10px 14px', borderTop: '1px solid var(--border)' }}>
               <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}
-                style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 7, background: 'white', cursor: page === 1 ? 'not-allowed' : 'pointer', color: page === 1 ? '#D1D5DB' : '#374151' }}>
+                style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: page === 1 ? 'not-allowed' : 'pointer', color: page === 1 ? 'var(--border)' : 'var(--text)' }}>
                 {t('locations.prev')}
               </button>
               <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page === totalPages}
-                style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 7, background: 'white', cursor: page === totalPages ? 'not-allowed' : 'pointer', color: page === totalPages ? '#D1D5DB' : '#374151' }}>
+                style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: page === totalPages ? 'not-allowed' : 'pointer', color: page === totalPages ? 'var(--border)' : 'var(--text)' }}>
                 {t('locations.next')}
               </button>
             </div>
@@ -110,16 +110,16 @@ export default function LocationsSettings() {
       {showModal && (
         <>
           <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
-          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'white', borderRadius: 12, padding: 24, width: 460, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 460, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <span style={{ fontSize: 15, fontWeight: 700 }}>{t('locations.create')}</span>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
             </div>
 
             {(() => {
-              const lbl = { fontSize: 12, color: '#6B7280', marginBottom: 5 }
-              const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }
-              const sectionLbl = { fontSize: 11, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', color: '#9CA3AF', marginTop: 4 }
+              const lbl = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
+              const inp = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }
+              const sectionLbl = { fontSize: 11, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', color: 'var(--text-muted)', marginTop: 4 }
               const setF = (k) => (e) => setForm(x => ({ ...x, [k]: e.target.value }))
               // Called as a function (not <F/>) so inputs keep focus while typing.
               const field = (k, label, placeholder, type = 'text', flex = 1) => (
@@ -165,7 +165,7 @@ export default function LocationsSettings() {
             })()}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-              <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', cursor: 'pointer' }}>{t('common.cancel')}</button>
+              <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>
               <button onClick={create} disabled={saving || !form.name.trim()}
                 style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: form.name.trim() ? 1 : 0.4 }}>
                 {saving ? t('common.saving') : t('locations.createBtn')}

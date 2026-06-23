@@ -166,9 +166,9 @@ export default function AuditLog() {
   }
 
   const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-               color: '#9CA3AF', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6',
+               color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
                whiteSpace: 'nowrap' }
-  const TD = { padding: '10px 12px', fontSize: 12, color: '#374151', borderBottom: '1px solid #F9FAFB',
+  const TD = { padding: '10px 12px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)',
                verticalAlign: 'top' }
 
   return (
@@ -176,34 +176,34 @@ export default function AuditLog() {
       {/* Header + search bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{t('audit.title')}</h2>
-          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('audit.title')}</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
             {loading ? t('audit.loading') : t('audit.countSummary', { shown: filtered.length, total: logs.length })}
           </p>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Date from */}
           <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-            style={{ height: 34, padding: '0 10px', fontSize: 12, border: '1px solid #E5E7EB',
-                     borderRadius: 8, color: '#374151', outline: 'none' }} />
-          <span style={{ fontSize: 12, color: '#9CA3AF' }}>{t('audit.dateTo')}</span>
+            style={{ height: 34, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)',
+                     borderRadius: 8, color: 'var(--text)', outline: 'none' }} />
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('audit.dateTo')}</span>
           <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-            style={{ height: 34, padding: '0 10px', fontSize: 12, border: '1px solid #E5E7EB',
-                     borderRadius: 8, color: '#374151', outline: 'none' }} />
+            style={{ height: 34, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)',
+                     borderRadius: 8, color: 'var(--text)', outline: 'none' }} />
           {/* Search bar */}
           <div style={{ position: 'relative' }}>
             <Search size={13} style={{ position: 'absolute', left: 9, top: '50%',
-                                       transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+                                       transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input value={search} onChange={e => setSearch(e.target.value)}
               placeholder={t('audit.searchPlaceholder')}
               style={{ height: 34, width: 220, paddingLeft: 28, paddingRight: 10, fontSize: 12,
-                       border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
+                       border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
           </div>
           {/* Export the filtered log to CSV (AVG accountability). */}
           <button onClick={exportCsv} disabled={filtered.length === 0}
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', fontSize: 12,
-                     fontWeight: 500, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white',
-                     color: '#374151', cursor: filtered.length ? 'pointer' : 'not-allowed',
+                     fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)',
+                     color: 'var(--text)', cursor: filtered.length ? 'pointer' : 'not-allowed',
                      opacity: filtered.length ? 1 : 0.5, whiteSpace: 'nowrap' }}>
             <Download size={13} /> {t('audit.export')}
           </button>
@@ -218,7 +218,7 @@ export default function AuditLog() {
       )}
 
       {!loading && !error && (
-        <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, overflow: 'hidden' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
@@ -233,7 +233,7 @@ export default function AuditLog() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ ...TD, textAlign: 'center', color: '#9CA3AF', padding: '32px 0' }}>
+                  <td colSpan={6} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>
                     {t('audit.noEntries')}
                   </td>
                 </tr>
@@ -243,24 +243,24 @@ export default function AuditLog() {
                   <tr key={entry.id ?? i}
                     style={{ cursor: 'pointer' }}
                     onClick={() => setDrill(entry)}
-                    onMouseEnter={e => (e.currentTarget.style.background = '#F9FAFB')}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ ...TD, whiteSpace: 'nowrap', fontSize: 11 }}>
-                      <div style={{ color: '#111827', fontWeight: 500 }}>
+                      <div style={{ color: 'var(--text)', fontWeight: 500 }}>
                         {new Date(entry.created_at).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </div>
-                      <div style={{ color: '#9CA3AF', fontSize: 10 }}>
+                      <div style={{ color: 'var(--text-muted)', fontSize: 10 }}>
                         {new Date(entry.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </td>
                     <td style={TD}>
-                      <div style={{ fontWeight: 500, color: '#111827' }}>{entry.causer_name ?? t('audit.system')}</div>
+                      <div style={{ fontWeight: 500, color: 'var(--text)' }}>{entry.causer_name ?? t('audit.system')}</div>
                       {entry.causer_email && (
-                        <div style={{ fontSize: 10, color: '#9CA3AF' }}>{entry.causer_email}</div>
+                        <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{entry.causer_email}</div>
                       )}
                     </td>
                     <td style={TD}><LogBadge logName={entry.log_name} /></td>
-                    <td style={{ ...TD, fontWeight: 500, color: '#111827' }}>{entry.description}</td>
+                    <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{entry.description}</td>
                     <td style={{ ...TD, fontSize: 11, color: 'var(--color-danger)' }}>{beforeCell}</td>
                     <td style={{ ...TD, fontSize: 11, color: 'var(--color-success)' }}>{afterCell}</td>
                   </tr>
@@ -275,8 +275,8 @@ export default function AuditLog() {
       {!loading && !error && filtered.length > visibleCount && (
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
           <button onClick={() => setVisibleCount(c => c + 50)}
-            style={{ height: 34, padding: '0 16px', fontSize: 12, fontWeight: 500, border: '1px solid #E5E7EB',
-                     borderRadius: 8, background: 'white', color: '#374151', cursor: 'pointer' }}>
+            style={{ height: 34, padding: '0 16px', fontSize: 12, fontWeight: 500, border: '1px solid var(--border)',
+                     borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
             {t('audit.loadMore', { count: Math.min(50, filtered.length - visibleCount) })}
           </button>
         </div>

@@ -16,7 +16,7 @@ export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onN
 
   // Status pill colours for active / disabled keys (shared StatusBadge override).
   const statusMap = {
-    active:   { label: t('apiKeys.status.active'),   bg: '#F0FDF4', color: 'var(--color-success)' },
+    active:   { label: t('apiKeys.status.active'),   bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
     disabled: { label: t('apiKeys.status.disabled'), bg: 'var(--hover-bg)', color: 'var(--text-muted)' },
   }
 

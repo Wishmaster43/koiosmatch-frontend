@@ -99,15 +99,15 @@ function SyncRow({ item, user, canSync, onLog }) {
   const blocked = running || cooldown > 0 || item.disabled || !canSync
 
   return (
-    <div style={{ background: item.disabled ? '#FAFAFA' : 'white',
-                  border: '1px solid #F3F4F6', borderRadius: 10,
+    <div style={{ background: item.disabled ? 'var(--hover-bg)' : 'white',
+                  border: '1px solid var(--border)', borderRadius: 10,
                   padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 16,
                   opacity: item.disabled ? 0.55 : 1 }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 13, fontWeight: 500, color: '#111827' }}>{label}</span>
+          <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{label}</span>
           {item.viaCustomers && (
-            <span style={{ fontSize: 10, color: '#9CA3AF', background: '#F3F4F6',
+            <span style={{ fontSize: 10, color: 'var(--text-muted)', background: 'var(--border)',
                            borderRadius: 4, padding: '1px 6px' }}>{t('sync.viaCustomers')}</span>
           )}
           {item.disabled && (
@@ -117,9 +117,9 @@ function SyncRow({ item, user, canSync, onLog }) {
             </span>
           )}
         </div>
-        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2 }}>{description}</div>
+        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{description}</div>
         {running && (
-          <div style={{ marginTop: 6, fontSize: 12, color: '#6B7280', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <div style={{ marginTop: 6, fontSize: 12, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
             <Clock size={11} />
             {t('sync.busy')} {elapsed}s
           </div>
@@ -139,15 +139,15 @@ function SyncRow({ item, user, canSync, onLog }) {
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8,
                    cursor: blocked ? 'not-allowed' : 'pointer',
-                   border: `1px solid ${!canSync ? '#FCA5A5' : '#E5E7EB'}`,
-                   background: !canSync ? '#FFF5F5' : '#F9FAFB',
-                   color: !canSync ? 'var(--color-danger)' : '#374151',
+                   border: `1px solid ${!canSync ? '#FCA5A5' : 'var(--border)'}`,
+                   background: !canSync ? '#FFF5F5' : 'var(--hover-bg)',
+                   color: !canSync ? 'var(--color-danger)' : 'var(--text)',
                    opacity: (running || cooldown > 0 || item.disabled) ? 0.5 : 1 }}>
           <RotateCcw size={13} className={running ? 'animate-spin' : ''} />
           {running ? `${elapsed}s…` : !canSync ? t('sync.noAccess') : t('sync.syncBtn')}
         </button>
         {cooldown > 0 && (
-          <span style={{ fontSize: 10, color: '#9CA3AF' }}>
+          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
             {t('sync.cooldown')}: {cooldown}s
           </span>
         )}
@@ -176,8 +176,8 @@ export default function SyncSettings() {
   return (
     <div>
       <div className="mb-5">
-        <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{t('sync.title')}</h2>
-        <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{t('sync.subtitle', { secs: COOLDOWN_SECS })}</p>
+        <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('sync.title')}</h2>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('sync.subtitle', { secs: COOLDOWN_SECS })}</p>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
@@ -188,18 +188,18 @@ export default function SyncSettings() {
 
       {log.length > 0 && (
         <div>
-          <h3 style={{ fontSize: 13, fontWeight: 600, color: '#374151', marginBottom: 10 }}>{t('sync.sessionLog')}</h3>
-          <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, overflow: 'hidden' }}>
+          <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 10 }}>{t('sync.sessionLog')}</h3>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
             {log.map((entry, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px',
-                                    borderBottom: i < log.length - 1 ? '1px solid #F9FAFB' : 'none' }}>
+                                    borderBottom: i < log.length - 1 ? '1px solid var(--hover-bg)' : 'none' }}>
                 <div style={{ width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
                               background: entry.ok ? 'var(--color-success)' : 'var(--color-danger)' }} />
-                <span style={{ fontSize: 12, fontWeight: 500, color: '#111827', width: 120, flexShrink: 0 }}>{entry.label}</span>
+                <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', width: 120, flexShrink: 0 }}>{entry.label}</span>
                 <span style={{ fontSize: 12, color: entry.ok ? 'var(--color-success)' : 'var(--color-danger)', flex: 1 }}>{entry.msg}</span>
-                {entry.elapsed && <span style={{ fontSize: 11, color: '#9CA3AF' }}>{entry.elapsed}s</span>}
-                <span style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>{entry.user}</span>
-                <span style={{ fontSize: 11, color: '#D1D5DB', flexShrink: 0 }}>{entry.at}</span>
+                {entry.elapsed && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{entry.elapsed}s</span>}
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{entry.user}</span>
+                <span style={{ fontSize: 11, color: 'var(--border)', flexShrink: 0 }}>{entry.at}</span>
               </div>
             ))}
           </div>

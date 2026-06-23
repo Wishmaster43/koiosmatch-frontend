@@ -87,13 +87,13 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
     <div style={{ marginBottom: 28 }}>
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{title}</h3>
-          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{subtitle}</p>
+          <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
         </div>
         <button onClick={openAdd}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px',
-                   fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid #E5E7EB',
-                   background: 'white', cursor: 'pointer', color: '#374151' }}>
+                   fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
+                   background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
           <Plus size={13} /> {t('lookups.add')}
         </button>
       </div>
@@ -105,7 +105,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
           <>
             <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />
             <ColorBadge label={item.label} color={item.color ?? '#6B7280'} />
-            <code style={{ fontSize: 11, color: '#9CA3AF' }}>{item.value}</code>
+            <code style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.value}</code>
             {/* Funnel badge: marks the status that reveals the application funnel. */}
             {isStatusBlock && item.is_applicant && (
               <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
@@ -130,53 +130,53 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
             <div style={{ flex: 1 }} />
             <button onClick={() => openEdit(item)} title={t('lookups.edit')}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: '#F3F4F6', border: 'none', borderRadius: 6, cursor: 'pointer', color: '#6B7280' }}>
+                       background: 'var(--border)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text-muted)' }}>
               <Pencil size={11} />
             </button>
             <button onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
               title={inUse(item) ? t('lookups.inUse') : undefined}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: '#FEF2F2', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
+                       background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
                        cursor: inUse(item) ? 'not-allowed' : 'pointer', opacity: inUse(item) ? 0.4 : 1 }}>
               {deleting === item.id ? <RefreshCw size={11} className="animate-spin" /> : <Trash2 size={11} />}
             </button>
           </>
         )}
       />
-      {items.length === 0 && <p style={{ fontSize: 12, color: '#9CA3AF', padding: '8px 0' }}>{t('lookups.empty')}</p>}
+      {items.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }}>{t('lookups.empty')}</p>}
 
       {modal && (
         <>
           <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={() => setModal(null)} />
-          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'white', borderRadius: 12, padding: 24, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <span style={{ fontSize: 15, fontWeight: 700 }}>{modal.mode === 'add' ? t('lookups.add') : t('lookups.edit')}</span>
-              <button onClick={() => setModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
+              <button onClick={() => setModal(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
             </div>
 
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{t('lookups.labelField')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.labelField')}</div>
               <input value={modal.label} autoFocus onChange={e => setModal(m => ({ ...m, label: e.target.value }))}
                 placeholder={t('lookups.labelPlaceholder')}
-                style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
+                style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
             </div>
 
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{t('lookups.valueField')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.valueField')}</div>
               <input value={modal.value}
                 disabled={modal.mode === 'edit'}
                 onChange={e => setModal(m => ({ ...m, value: e.target.value }))}
                 placeholder={modal.label ? slugify(modal.label) : 'slug'}
                 style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, fontFamily: 'monospace',
-                         border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
-                         background: modal.mode === 'edit' ? '#F9FAFB' : 'white', color: modal.mode === 'edit' ? '#9CA3AF' : '#111827' }} />
-              <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>
+                         border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box',
+                         background: modal.mode === 'edit' ? 'var(--hover-bg)' : 'white', color: modal.mode === 'edit' ? 'var(--text-muted)' : 'var(--text)' }} />
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
                 {modal.mode === 'edit' ? t('lookups.valueImmutable') : t('lookups.valueHint')}
               </div>
             </div>
 
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{t('lookups.colorField')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.colorField')}</div>
               <ColorSwatch color={modal.color} onChange={c => setModal(m => ({ ...m, color: c }))} />
             </div>
 
@@ -186,9 +186,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <input type="checkbox" checked={modal.is_applicant}
                     onChange={e => setModal(m => ({ ...m, is_applicant: e.target.checked }))} />
-                  <span style={{ fontSize: 13, color: '#374151' }}>{t('lookups.isApplicant')}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isApplicant')}</span>
                 </label>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{t('lookups.isApplicantHint')}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isApplicantHint')}</div>
               </div>
             )}
 
@@ -198,9 +198,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <input type="checkbox" checked={modal.requires_reason}
                     onChange={e => setModal(m => ({ ...m, requires_reason: e.target.checked }))} />
-                  <span style={{ fontSize: 13, color: '#374151' }}>{t('lookups.requiresReason')}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresReason')}</span>
                 </label>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{t('lookups.requiresReasonHint')}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.requiresReasonHint')}</div>
               </div>
             )}
 
@@ -210,9 +210,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <input type="checkbox" checked={modal.requires_appointment}
                     onChange={e => setModal(m => ({ ...m, requires_appointment: e.target.checked }))} />
-                  <span style={{ fontSize: 13, color: '#374151' }}>{t('lookups.requiresAppointment')}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresAppointment')}</span>
                 </label>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{t('lookups.requiresAppointmentHint')}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.requiresAppointmentHint')}</div>
               </div>
             )}
 
@@ -222,9 +222,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <input type="checkbox" checked={modal.is_match}
                     onChange={e => setModal(m => ({ ...m, is_match: e.target.checked }))} />
-                  <span style={{ fontSize: 13, color: '#374151' }}>{t('lookups.isMatch')}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isMatch')}</span>
                 </label>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{t('lookups.isMatchHint')}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isMatchHint')}</div>
               </div>
             )}
 
@@ -234,14 +234,14 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
                 <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <input type="checkbox" checked={modal.is_rejected}
                     onChange={e => setModal(m => ({ ...m, is_rejected: e.target.checked }))} />
-                  <span style={{ fontSize: 13, color: '#374151' }}>{t('lookups.isRejected')}</span>
+                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isRejected')}</span>
                 </label>
-                <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4 }}>{t('lookups.isRejectedHint')}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isRejectedHint')}</div>
               </div>
             )}
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-              <button onClick={() => setModal(null)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', cursor: 'pointer' }}>{t('common.cancel')}</button>
+              <button onClick={() => setModal(null)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>
               <button onClick={save} disabled={busy || !modal.label.trim()}
                 style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: modal.label.trim() ? 1 : 0.4 }}>
                 {busy ? t('common.saving') : t('common.save')}
@@ -271,7 +271,7 @@ function CandidateLookupSection({ typeKey, slug }) {
   return (
     <div style={{ maxWidth: 640 }}>
       {loading
-        ? <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('common.loadingShort')}</p>
+        ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
         : <LookupBlock slug={slug} title={t(`lookups.${typeKey}.title`)} subtitle={t(`lookups.${typeKey}.subtitle`)} items={items} setItems={setItems} />}
     </div>
   )

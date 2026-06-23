@@ -15,7 +15,7 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
 
   // Status pill colours for active / disabled subscriptions.
   const statusMap = {
-    active:   { label: t('webhooks.outgoing.status.active'),   bg: '#F0FDF4', color: 'var(--color-success)' },
+    active:   { label: t('webhooks.outgoing.status.active'),   bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
     disabled: { label: t('webhooks.outgoing.status.disabled'), bg: 'var(--hover-bg)', color: 'var(--text-muted)' },
   }
 

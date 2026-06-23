@@ -11,24 +11,24 @@ import api from '../../../lib/api'
 
 // Phone-number quality ratings → colour. Label = t('whatsapp.quality<KEY>').
 const QUALITY_META = {
-  GREEN:  { color: 'var(--color-success)', bg: '#F0FDF4' },
+  GREEN:  { color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
   YELLOW: { color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
-  RED:    { color: 'var(--color-danger)',  bg: '#FEF2F2' },
+  RED:    { color: 'var(--color-danger)',  bg: 'var(--color-danger-bg)' },
 }
 
 // Template review status → colour. Label = t('whatsapp.status<KEY>').
 const TEMPLATE_STATUS_META = {
-  APPROVED: { color: 'var(--color-success)', bg: '#F0FDF4' },
+  APPROVED: { color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
   PENDING:  { color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
-  REJECTED: { color: 'var(--color-danger)',  bg: '#FEF2F2' },
-  PAUSED:   { color: '#6B7280',              bg: '#F9FAFB' },
+  REJECTED: { color: 'var(--color-danger)',  bg: 'var(--color-danger-bg)' },
+  PAUSED:   { color: 'var(--text-muted)',              bg: 'var(--hover-bg)' },
 }
 
 // Connection status → colour. Label = t('whatsapp.status<Active|Inactive|Expired>').
 const STATUS_CONN = {
-  active:   { dotColor: 'var(--color-success)', border: '#86EFAC', bg: '#F0FDF4', labelColor: 'var(--color-success)' },
-  inactive: { dotColor: '#9CA3AF',              border: '#E5E7EB', bg: '#F9FAFB', labelColor: '#6B7280' },
-  expired:  { dotColor: 'var(--color-danger)',  border: '#FCA5A5', bg: '#FEF2F2', labelColor: 'var(--color-danger)' },
+  active:   { dotColor: 'var(--color-success)', border: '#86EFAC', bg: 'var(--color-success-bg)', labelColor: 'var(--color-success)' },
+  inactive: { dotColor: 'var(--text-muted)',              border: 'var(--border)', bg: 'var(--hover-bg)', labelColor: 'var(--text-muted)' },
+  expired:  { dotColor: 'var(--color-danger)',  border: '#FCA5A5', bg: 'var(--color-danger-bg)', labelColor: 'var(--color-danger)' },
 }
 
 export default function WhatsAppSettings() {
@@ -95,7 +95,7 @@ export default function WhatsAppSettings() {
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200 }}>
-      <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('whatsapp.loading')}</p>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('whatsapp.loading')}</p>
     </div>
   )
 
@@ -104,14 +104,14 @@ export default function WhatsAppSettings() {
 
       {/* ── Connection status ── */}
       <div style={{ marginBottom: 28 }}>
-        <h3 style={{ fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 12 }}>{t('whatsapp.connection')}</h3>
+        <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>{t('whatsapp.connection')}</h3>
         {noConn ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 18px',
-                        background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: 12 }}>
+                        background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 12 }}>
             <div style={{ width: 10, height: 10, borderRadius: '50%', background: 'var(--color-danger)', flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>{t('whatsapp.notConnected')}</div>
-              <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>{t('whatsapp.notConnectedDesc')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('whatsapp.notConnectedDesc')}</div>
             </div>
           </div>
         ) : cs ? (
@@ -120,26 +120,26 @@ export default function WhatsAppSettings() {
               <div style={{ width: 10, height: 10, borderRadius: '50%', background: cs.dotColor, flexShrink: 0 }} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: cs.labelColor }}>{connLabel(connection.status)}</div>
-                <div style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
                   {connection.provider && (
                     <span style={{ textTransform: 'capitalize', marginRight: 8 }}>{connection.provider}</span>
                   )}
                   {connection.waba_id && (
-                    <span style={{ fontFamily: 'monospace', fontSize: 11, color: '#9CA3AF' }}>
+                    <span style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-muted)' }}>
                       WABA: {connection.waba_id}
                     </span>
                   )}
                 </div>
               </div>
               {connection.last_checked_at && (
-                <div style={{ fontSize: 11, color: '#9CA3AF', flexShrink: 0 }}>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>
                   {t('whatsapp.checked')} {new Date(connection.last_checked_at).toLocaleDateString()}
                 </div>
               )}
             </div>
         ) : (
-          <div style={{ padding: '16px 18px', background: '#F9FAFB', border: '1px solid #E5E7EB',
-                        borderRadius: 12, fontSize: 13, color: '#6B7280' }}>
+          <div style={{ padding: '16px 18px', background: 'var(--hover-bg)', border: '1px solid var(--border)',
+                        borderRadius: 12, fontSize: 13, color: 'var(--text-muted)' }}>
             {t('whatsapp.statusUnavailable')}
           </div>
         )}
@@ -147,7 +147,7 @@ export default function WhatsAppSettings() {
 
       {syncMsg && (
         <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, fontSize: 12,
-                      background: syncMsg.ok ? '#F0FDF4' : '#FEF2F2',
+                      background: syncMsg.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
                       color: syncMsg.ok ? 'var(--color-success)' : 'var(--color-danger)',
                       border: `1px solid ${syncMsg.ok ? '#86EFAC' : '#FCA5A5'}` }}>
           {syncMsg.text}
@@ -157,10 +157,10 @@ export default function WhatsAppSettings() {
       {/* ── Phone numbers ── */}
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
             {t('whatsapp.phoneNumbers')}
             {phones.length > 0 && (
-              <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 500, color: '#9CA3AF' }}>
+              <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 500, color: 'var(--text-muted)' }}>
                 {t('whatsapp.linked', { count: phones.length })}
               </span>
             )}
@@ -169,15 +169,15 @@ export default function WhatsAppSettings() {
             <button onClick={syncNumbers} disabled={syncing === 'numbers'}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 12px',
                        fontSize: 12, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                       border: '1px solid #E5E7EB', background: 'white', color: '#374151' }}>
+                       border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
               <RefreshCw size={11} style={{ animation: syncing === 'numbers' ? 'spin 1s linear infinite' : 'none' }} />
               {t('whatsapp.sync')}
             </button>
           )}
         </div>
         {phones.length === 0 ? (
-          <div style={{ padding: '16px 18px', background: '#F9FAFB', border: '1px solid #E5E7EB',
-                        borderRadius: 12, fontSize: 13, color: '#9CA3AF' }}>
+          <div style={{ padding: '16px 18px', background: 'var(--hover-bg)', border: '1px solid var(--border)',
+                        borderRadius: 12, fontSize: 13, color: 'var(--text-muted)' }}>
             {t('whatsapp.noNumbers')}
           </div>
         ) : (
@@ -186,18 +186,18 @@ export default function WhatsAppSettings() {
               const q = QUALITY_META[p.quality_rating] ?? QUALITY_META.GREEN
               return (
                 <div key={p.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 14,
-                                               padding: '14px 18px', background: 'white',
-                                               border: '1px solid #F3F4F6', borderRadius: 12 }}>
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: '#F0FDF4',
+                                               padding: '14px 18px', background: 'var(--surface)',
+                                               border: '1px solid var(--border)', borderRadius: 12 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--color-success-bg)',
                                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <MessageCircle size={16} color="var(--color-success)" />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>
                       {p.name ?? p.display_number}
                     </div>
                     {p.display_number && (
-                      <div style={{ fontSize: 12, color: '#9CA3AF', fontFamily: 'monospace', marginTop: 1 }}>
+                      <div style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: 1 }}>
                         {p.display_number}
                       </div>
                     )}
@@ -209,9 +209,9 @@ export default function WhatsAppSettings() {
                     </span>
                   )}
                   {p.code_verification_status && (
-                    <span style={{ fontSize: 11, color: '#6B7280', background: '#F9FAFB',
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--hover-bg)',
                                    borderRadius: 999, padding: '2px 10px', flexShrink: 0,
-                                   border: '1px solid #E5E7EB' }}>
+                                   border: '1px solid var(--border)' }}>
                       {p.code_verification_status}
                     </span>
                   )}
@@ -225,10 +225,10 @@ export default function WhatsAppSettings() {
       {/* ── Templates ── */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>
+          <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
             {t('whatsapp.templates')}
             {templates.length > 0 && (
-              <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 500, color: '#9CA3AF' }}>
+              <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 500, color: 'var(--text-muted)' }}>
                 {t('whatsapp.total', { count: templates.length })}
               </span>
             )}
@@ -238,7 +238,7 @@ export default function WhatsAppSettings() {
               <button onClick={syncTemplates} disabled={syncing === 'templates'}
                 style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 12px',
                          fontSize: 12, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                         border: '1px solid #E5E7EB', background: 'white', color: '#374151' }}>
+                         border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
                 <RefreshCw size={11} style={{ animation: syncing === 'templates' ? 'spin 1s linear infinite' : 'none' }} />
                 {t('whatsapp.sync')}
               </button>
@@ -246,30 +246,30 @@ export default function WhatsAppSettings() {
             {templates.length > 0 && (
               <div style={{ position: 'relative' }}>
                 <Search size={12} style={{ position: 'absolute', left: 8, top: '50%',
-                                            transform: 'translateY(-50%)', color: '#9CA3AF' }} />
+                                            transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <input value={search} onChange={e => setSearch(e.target.value)}
                   placeholder={t('whatsapp.searchPlaceholder')}
                   style={{ height: 30, paddingLeft: 24, paddingRight: 10, fontSize: 12, width: 180,
-                           border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#374151' }} />
+                           border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
               </div>
             )}
           </div>
         </div>
 
         {templates.length === 0 ? (
-          <div style={{ padding: '16px 18px', background: '#F9FAFB', border: '1px solid #E5E7EB',
-                        borderRadius: 12, fontSize: 13, color: '#9CA3AF' }}>
+          <div style={{ padding: '16px 18px', background: 'var(--hover-bg)', border: '1px solid var(--border)',
+                        borderRadius: 12, fontSize: 13, color: 'var(--text-muted)' }}>
             {t('whatsapp.noTemplates')}
           </div>
         ) : (
-          <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 12, overflow: 'hidden' }}>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ background: '#FAFAFA' }}>
+                <tr style={{ background: 'var(--hover-bg)' }}>
                   {[t('whatsapp.colName'), t('whatsapp.colCategory'), t('whatsapp.colLang'), t('whatsapp.colStatus')].map(h => (
                     <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-                                          color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em',
-                                          borderBottom: '1px solid #F3F4F6' }}>
+                                          color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em',
+                                          borderBottom: '1px solid var(--border)' }}>
                       {h}
                     </th>
                   ))}
@@ -278,7 +278,7 @@ export default function WhatsAppSettings() {
               <tbody>
                 {filteredTemplates.length === 0 && (
                   <tr><td colSpan={4} style={{ padding: '20px 14px', textAlign: 'center',
-                                                fontSize: 13, color: '#9CA3AF' }}>
+                                                fontSize: 13, color: 'var(--text-muted)' }}>
                     {t('whatsapp.noResults')}
                   </td></tr>
                 )}
@@ -291,24 +291,24 @@ export default function WhatsAppSettings() {
                   const statusLabel = t(`whatsapp.status${tpl.status}`, { defaultValue: tpl.status })
                   return (
                     <tr key={tpl.id ?? i}
-                      style={{ borderBottom: '1px solid #F9FAFB' }}
-                      onMouseEnter={e => (e.currentTarget.style.background = '#FAFAFA')}
+                      style={{ borderBottom: '1px solid var(--hover-bg)' }}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                       onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                       <td style={{ padding: '11px 14px' }}>
-                        <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', fontFamily: 'monospace' }}>
+                        <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', fontFamily: 'monospace' }}>
                           {tpl.name}
                         </div>
                         {bodyText && (
-                          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 2,
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2,
                                          maxWidth: 320, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {bodyText}
                           </div>
                         )}
                       </td>
-                      <td style={{ padding: '11px 14px', fontSize: 12, color: '#6B7280' }}>
+                      <td style={{ padding: '11px 14px', fontSize: 12, color: 'var(--text-muted)' }}>
                         {catKey}
                       </td>
-                      <td style={{ padding: '11px 14px', fontSize: 12, color: '#6B7280' }}>
+                      <td style={{ padding: '11px 14px', fontSize: 12, color: 'var(--text-muted)' }}>
                         {tpl.language ?? '—'}
                       </td>
                       <td style={{ padding: '11px 14px' }}>

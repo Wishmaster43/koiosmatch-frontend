@@ -82,12 +82,12 @@ export default function EmailSettings({ context = 'klanten' }) {
 
   const inputStyle = {
     height: 34, width: '100%', padding: '0 10px', fontSize: 13,
-    border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', color: '#111827',
+    border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)',
   }
-  const labelStyle = { fontSize: 12, fontWeight: 500, color: '#374151', marginBottom: 4, display: 'block' }
+  const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text)', marginBottom: 4, display: 'block' }
   // Shared card chrome — matches the settings kit's SettingCard so this section
   // reads at the same compact density as every other settings panel.
-  const cardStyle = { background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '14px 16px' }
+  const cardStyle = { background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px' }
 
   const PROVIDERS = [
     { id: 'gmail',  label: 'Gmail',                 desc: t('email.gmailDesc') },
@@ -99,14 +99,14 @@ export default function EmailSettings({ context = 'klanten' }) {
     <div style={{ maxWidth: 940 }}>
       <div className="flex items-center justify-between" style={{ marginBottom: 20, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{t(`email.context.${context}.title`)}</h2>
-          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{t(`email.context.${context}.subtitle`)}</p>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t(`email.context.${context}.title`)}</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t(`email.context.${context}.subtitle`)}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           <button onClick={testConnection} disabled={testing}
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', whiteSpace: 'nowrap',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: testing ? 'wait' : 'pointer',
-                     border: '1px solid #E5E7EB', background: '#F9FAFB', color: '#374151', opacity: testing ? 0.6 : 1 }}>
+                     border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)', opacity: testing ? 0.6 : 1 }}>
             {testing ? <RefreshCw size={13} className="animate-spin" /> : <Mail size={13} />}
             {t('email.testConnection')}
           </button>
@@ -125,7 +125,7 @@ export default function EmailSettings({ context = 'klanten' }) {
       {testResult && (
         <div style={{ marginBottom: 14, padding: '10px 14px', borderRadius: 8, fontSize: 13,
                       display: 'flex', alignItems: 'center', gap: 8,
-                      background: testResult.ok ? '#F0FDF4' : '#FEF2F2',
+                      background: testResult.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
                       border: `1px solid ${testResult.ok ? '#86EFAC' : '#FCA5A5'}`,
                       color: testResult.ok ? 'var(--color-success)' : 'var(--color-danger)' }}>
           {testResult.ok ? <Check size={14} /> : <AlertTriangle size={14} />}
@@ -133,7 +133,7 @@ export default function EmailSettings({ context = 'klanten' }) {
         </div>
       )}
 
-      {loading && <p style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 12 }}>{t('common.loading')}</p>}
+      {loading && <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('common.loading')}</p>}
 
       {/* Two columns: connection settings stacked left, signature alongside right.
           items-stretch lets the signature card match the left column's height. */}
@@ -144,19 +144,19 @@ export default function EmailSettings({ context = 'klanten' }) {
 
         {/* Provider choice */}
         <div style={cardStyle}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 10 }}>{t('email.provider')}</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 10 }}>{t('email.provider')}</div>
           <div style={{ display: 'flex', gap: 8 }}>
             {PROVIDERS.map(p => (
               <button key={p.id} onClick={() => setProvider(p.id)}
                 style={{ flex: 1, padding: '10px 12px', borderRadius: 8, cursor: 'pointer', textAlign: 'left',
-                         border: `1px solid ${provider === p.id ? 'var(--color-primary)' : '#E5E7EB'}`,
-                         background: provider === p.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : '#F9FAFB',
+                         border: `1px solid ${provider === p.id ? 'var(--color-primary)' : 'var(--border)'}`,
+                         background: provider === p.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : 'var(--hover-bg)',
                          transition: 'all 0.15s' }}>
                 <div style={{ fontSize: 13, fontWeight: 600,
-                              color: provider === p.id ? 'var(--color-primary)' : '#111827', marginBottom: 2 }}>
+                              color: provider === p.id ? 'var(--color-primary)' : 'var(--text)', marginBottom: 2 }}>
                   {p.label}
                 </div>
-                <div style={{ fontSize: 11, color: '#9CA3AF' }}>{p.desc}</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{p.desc}</div>
               </button>
             ))}
           </div>
@@ -171,7 +171,7 @@ export default function EmailSettings({ context = 'klanten' }) {
 
         {/* Sender details */}
         <div style={cardStyle}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 12 }}>{t('email.senderDetails')}</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>{t('email.senderDetails')}</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <label style={labelStyle}>{t('email.senderName')}</label>
@@ -187,7 +187,7 @@ export default function EmailSettings({ context = 'klanten' }) {
         {/* SMTP (manual only) */}
         {provider === 'manual' && (
           <div style={cardStyle}>
-            <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 12 }}>{t('email.smtpConfig')}</div>
+            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 12 }}>{t('email.smtpConfig')}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px', gap: 12, marginBottom: 12 }}>
               <div>
                 <label style={labelStyle}>{t('email.smtpServer')}</label>
@@ -217,7 +217,7 @@ export default function EmailSettings({ context = 'klanten' }) {
                     style={{ ...inputStyle, paddingRight: 36 }} />
                   <button onClick={() => setShowPass(s => !s)}
                     style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-                             background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}>
+                             background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                     {showPass ? <EyeOff size={14} /> : <Eye size={14} />}
                   </button>
                 </div>
@@ -233,9 +233,9 @@ export default function EmailSettings({ context = 'klanten' }) {
                 ].map(s => (
                   <button key={s.id} onClick={() => setSmtpSecure(s.id)}
                     style={{ padding: '6px 14px', borderRadius: 20, fontSize: 12, cursor: 'pointer',
-                             border: `1px solid ${smtpSecure === s.id ? 'var(--color-primary)' : '#E5E7EB'}`,
-                             background: smtpSecure === s.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : '#F9FAFB',
-                             color: smtpSecure === s.id ? 'var(--color-primary)' : '#374151',
+                             border: `1px solid ${smtpSecure === s.id ? 'var(--color-primary)' : 'var(--border)'}`,
+                             background: smtpSecure === s.id ? 'var(--color-primary-bg, var(--color-secondary-bg))' : 'var(--hover-bg)',
+                             color: smtpSecure === s.id ? 'var(--color-primary)' : 'var(--text)',
                              fontWeight: smtpSecure === s.id ? 500 : 400 }}>
                     {s.label}
                   </button>
@@ -249,8 +249,8 @@ export default function EmailSettings({ context = 'klanten' }) {
 
         {/* Right column — email signature (per context); fills the column height alongside the connection blocks */}
         <div style={{ ...cardStyle, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: '#111827', marginBottom: 2 }}>{t('email.signature')}</div>
-          <div style={{ fontSize: 11, color: '#9CA3AF', marginBottom: 10 }}>{t('email.signatureHint')}</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', marginBottom: 2 }}>{t('email.signature')}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('email.signatureHint')}</div>
           <RichTextEditor value={signature} onChange={setSignature} fill
             expanded={sigExpanded} onToggleExpand={() => setSigExpanded(e => !e)} />
         </div>

@@ -104,15 +104,15 @@ export function VacancyFieldsSettings() {
 
   return (
     <div style={{ maxWidth: 640 }}>
-      <h3 style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 4 }}>{t('vacancy.customFields')}</h3>
-      <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 14 }}>{t('vacancy.customFieldsHint')}</p>
+      <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('vacancy.customFields')}</h3>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('vacancy.customFieldsHint')}</p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
         {customFields.map((f, i) => (
-          <div key={f.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'white', border: '1px solid #F3F4F6', borderRadius: 8 }}>
-            <span style={{ flex: 1, fontSize: 13, color: '#111827' }}>{f.name}</span>
+          <div key={f.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8 }}>
+            <span style={{ flex: 1, fontSize: 13, color: 'var(--text)' }}>{f.name}</span>
             <button onClick={() => removeField(f)} disabled={inUse(f)} title={inUse(f) ? t('statusList.inUse') : undefined}
-              style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FEF2F2', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
+              style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
                        cursor: inUse(f) ? 'not-allowed' : 'pointer', opacity: inUse(f) ? 0.4 : 1 }}>
               <Trash2 size={11} />
             </button>
@@ -122,12 +122,12 @@ export function VacancyFieldsSettings() {
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <button onClick={addField} disabled={addingField}
-          style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed #D1D5DB', borderRadius: 6, background: 'white', cursor: 'pointer', color: '#9CA3AF' }}>
+          style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>
           <Plus size={14} />
         </button>
         <input value={newField} onChange={e => setNewField(e.target.value)} placeholder={t('vacancy.fieldPlaceholder')}
           onKeyDown={e => e.key === 'Enter' && addField()}
-          style={{ height: 32, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 7, outline: 'none', color: '#111827' }} />
+          style={{ height: 32, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 7, outline: 'none', color: 'var(--text)' }} />
       </div>
     </div>
   )

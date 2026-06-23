@@ -88,9 +88,9 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       <div className="flex items-start justify-between" style={{ marginBottom: 20, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
           {compact
-            ? <h3 style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{title}</h3>
-            : <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{title}</h2>}
-          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{subtitle}</p>
+            ? <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
+            : <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{title}</h2>}
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
           {withSave && (
@@ -104,15 +104,15 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
           )}
           <button onClick={openCreate}
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                     fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid #E5E7EB',
+                     fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
                      whiteSpace: 'nowrap', flexShrink: 0,
-                     background: 'white', cursor: 'pointer', color: '#374151' }}>
+                     background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
             <Plus size={13} /> {addLabel}
           </button>
         </div>
       </div>
 
-      {loading ? <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('common.loadingShort')}</p> : (
+      {loading ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p> : (
         <DragList
           items={items}
           onReorder={setItems}
@@ -121,23 +121,23 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
               {withColor && <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />}
               {withColor
                 ? <ColorBadge label={labelOf(item)} color={item.color ?? '#6B7280'} />
-                : <span style={{ fontSize: 13, color: '#111827' }}>{labelOf(item)}</span>}
+                : <span style={{ fontSize: 13, color: 'var(--text)' }}>{labelOf(item)}</span>}
               {extraField && item[extraField.key] && (
-                <span style={{ fontSize: 11, color: '#6B7280', background: '#F3F4F6', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--border)', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>
                   {extraField.options.find(o => o.value === item[extraField.key])?.label ?? item[extraField.key]}
                 </span>
               )}
               <div style={{ flex: 1 }} />
               <button onClick={() => openEdit(item)} title={t('statusList.edit')}
                 style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         background: '#F3F4F6', border: 'none', borderRadius: 6, cursor: 'pointer', color: '#374151' }}>
+                         background: 'var(--border)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text)' }}>
                 <Pencil size={11} />
               </button>
               {/* Delete is disabled when the item is still referenced by existing data. */}
               <button onClick={() => remove(item)} disabled={deleting === item.id || inUse(item)}
                 title={inUse(item) ? t('statusList.inUse') : undefined}
                 style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         background: '#FEF2F2', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
+                         background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
                          cursor: inUse(item) ? 'not-allowed' : 'pointer', opacity: inUse(item) ? 0.4 : 1 }}>
                 {deleting === item.id ? <RefreshCw size={11} className="animate-spin" /> : <Trash2 size={11} />}
               </button>
@@ -149,34 +149,34 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
       {showModal && (
         <>
           <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
-          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'white', borderRadius: 12, padding: 24, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
+          <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
               <span style={{ fontSize: 15, fontWeight: 700 }}>{editing ? t('statusList.editTitle') : addLabel}</span>
-              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
             </div>
             <div style={{ marginBottom: 14 }}>
-              <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{t('statusList.nameLabel')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('statusList.nameLabel')}</div>
               <input value={draft.name} onChange={e => setDraft(d => ({ ...d, name: e.target.value }))}
                 placeholder={t('statusList.namePlaceholder')}
-                style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
+                style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
             </div>
             {withColor && (
               <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{t('statusList.colorLabel')}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('statusList.colorLabel')}</div>
                 <ColorSwatch color={draft.color} onChange={c => setDraft(d => ({ ...d, color: c }))} />
               </div>
             )}
             {extraField && (
               <div style={{ marginBottom: 14 }}>
-                <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{extraField.label}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{extraField.label}</div>
                 <select value={draft[extraField.key]} onChange={e => setDraft(d => ({ ...d, [extraField.key]: e.target.value }))}
-                  style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'white' }}>
+                  style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)' }}>
                   {extraField.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
-              <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', cursor: 'pointer' }}>{t('common.cancel')}</button>
+              <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>
               <button onClick={submit} disabled={saving || !draft.name.trim()}
                 style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: draft.name.trim() ? 1 : 0.4 }}>
                 {saving ? t('common.saving') : (editing ? t('common.save') : t('statusList.addBtn'))}

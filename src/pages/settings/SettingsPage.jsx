@@ -133,18 +133,18 @@ export default function SettingsPage() {
 
         {/* ── Category sidebar (desktop) ── */}
         <div className="hidden md:flex" style={{
-          flexDirection: 'column', width: 240, flexShrink: 0, borderRight: '1px solid #F3F4F6',
-          background: 'white', overflowY: 'auto', padding: '20px 12px',
+          flexDirection: 'column', width: 240, flexShrink: 0, borderRight: '1px solid var(--border)',
+          background: 'var(--surface)', overflowY: 'auto', padding: '20px 12px',
         }}>
           <div style={{ padding: '0 8px', marginBottom: 14 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: '#111827' }}>{t('shell.title')}</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('shell.title')}</div>
           </div>
 
           {/* Search trigger */}
           <button onClick={() => setSearchOpen(true)} style={{
             display: 'flex', alignItems: 'center', gap: 8, width: '100%', height: 34, padding: '0 10px',
-            marginBottom: 16, border: '1px solid #EEF0F3', borderRadius: 9, background: '#F9FAFB',
-            cursor: 'pointer', color: '#9CA3AF',
+            marginBottom: 16, border: '1px solid #EEF0F3', borderRadius: 9, background: 'var(--hover-bg)',
+            cursor: 'pointer', color: 'var(--text-muted)',
           }}>
             <Search size={14} />
             <span style={{ fontSize: 13 }}>{t('shell.search')}</span>
@@ -161,11 +161,11 @@ export default function SettingsPage() {
                   padding: '8px 10px', borderRadius: 8, border: 'none', cursor: 'pointer',
                   fontSize: 13, fontWeight: isActive ? 600 : 500, textAlign: 'left', marginBottom: 2,
                   background: isActive ? 'var(--color-primary-bg)' : 'transparent',
-                  color: isActive ? 'var(--color-primary)' : '#374151', transition: 'background 0.12s',
+                  color: isActive ? 'var(--color-primary)' : 'var(--text)', transition: 'background 0.12s',
                 }}
-                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = '#F9FAFB' }}
+                onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--hover-bg)' }}
                 onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}>
-                {Icon && <Icon size={15} style={{ flexShrink: 0, color: isActive ? 'var(--color-primary)' : '#9CA3AF' }} />}
+                {Icon && <Icon size={15} style={{ flexShrink: 0, color: isActive ? 'var(--color-primary)' : 'var(--text-muted)' }} />}
                 {t(`groups.${group.key}`)}
               </button>
             )
@@ -178,14 +178,14 @@ export default function SettingsPage() {
           {currentGroup && (
             <div className="md:hidden" style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
               <select value={category} onChange={e => selectCategory(e.target.value)}
-                style={{ flex: 1, height: 38, padding: '0 10px', fontSize: 14, border: '1px solid #E5E7EB',
-                         borderRadius: 9, background: 'white', color: '#111827' }}>
+                style={{ flex: 1, height: 38, padding: '0 10px', fontSize: 14, border: '1px solid var(--border)',
+                         borderRadius: 9, background: 'var(--surface)', color: 'var(--text)' }}>
                 {visibleGroups.map(g => <option key={g.key} value={g.key}>{t(`groups.${g.key}`)}</option>)}
               </select>
               <button onClick={() => setSearchOpen(true)} aria-label={t('shell.search')}
                 style={{ width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                         border: '1px solid #E5E7EB', borderRadius: 9, background: 'white', cursor: 'pointer' }}>
-                <Search size={16} style={{ color: '#9CA3AF' }} />
+                         border: '1px solid var(--border)', borderRadius: 9, background: 'var(--surface)', cursor: 'pointer' }}>
+                <Search size={16} style={{ color: 'var(--text-muted)' }} />
               </button>
             </div>
           )}

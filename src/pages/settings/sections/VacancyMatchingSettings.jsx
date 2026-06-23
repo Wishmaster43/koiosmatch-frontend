@@ -35,8 +35,8 @@ export default function VacancyMatchingSettings() {
     <div style={{ maxWidth: 560 }}>
       <div className="flex items-start justify-between" style={{ marginBottom: 16, gap: 16 }}>
         <div style={{ minWidth: 0 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{t('matching.title')}</h2>
-          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{t('matching.subtitle')}</p>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('matching.title')}</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.subtitle')}</p>
         </div>
         <button onClick={save} disabled={saving}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', fontSize: 13, fontWeight: 500,
@@ -51,7 +51,7 @@ export default function VacancyMatchingSettings() {
           labels={[t('matching.lenient'), t('matching.balanced'), t('matching.strict')]} ariaLabel={t('matching.title')} />
       </div>
 
-      <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 22 }}>{t('matching.perVacancyHint')}</p>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 22 }}>{t('matching.perVacancyHint')}</p>
     </div>
   )
 }

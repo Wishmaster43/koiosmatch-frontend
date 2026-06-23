@@ -3,8 +3,8 @@
 export default function PlaceholderSettings({ title, description }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                  height: 260, color: '#9CA3AF', gap: 8 }}>
-      <div style={{ fontSize: 15, fontWeight: 600, color: '#374151' }}>{title}</div>
+                  height: 260, color: 'var(--text-muted)', gap: 8 }}>
+      <div style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{title}</div>
       <div style={{ fontSize: 13 }}>{description}</div>
     </div>
   )

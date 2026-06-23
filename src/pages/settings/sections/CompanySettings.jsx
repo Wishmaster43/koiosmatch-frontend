@@ -15,16 +15,16 @@ const COUNTRIES  = ['Netherlands','Belgium','Germany','United Kingdom']
 // inputs lose focus on every keystroke).
 function Row({ label, children }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '14px 0', borderBottom: '1px solid #F9FAFB', gap: 24 }}>
-      <div style={{ width: 200, flexShrink: 0, fontSize: 13, color: '#6B7280', paddingTop: 8 }}>{label}</div>
+    <div style={{ display: 'flex', alignItems: 'flex-start', padding: '14px 0', borderBottom: '1px solid var(--hover-bg)', gap: 24 }}>
+      <div style={{ width: 200, flexShrink: 0, fontSize: 13, color: 'var(--text-muted)', paddingTop: 8 }}>{label}</div>
       <div style={{ flex: 1 }}>{children}</div>
     </div>
   )
 }
 
 const baseInput = {
-  height: 36, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8,
-  outline: 'none', color: '#111827', width: '100%', maxWidth: 360, boxSizing: 'border-box',
+  height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8,
+  outline: 'none', color: 'var(--text)', width: '100%', maxWidth: 360, boxSizing: 'border-box',
 }
 
 function Input({ value, onChange, placeholder, style }) {
@@ -37,7 +37,7 @@ function Input({ value, onChange, placeholder, style }) {
 function Select({ value, onChange, options }) {
   return (
     <select value={value} onChange={e => onChange(e.target.value)}
-      style={{ ...baseInput, background: 'white' }}>
+      style={{ ...baseInput, background: 'var(--surface)' }}>
       {options.map(o => <option key={o}>{o}</option>)}
     </select>
   )
@@ -108,8 +108,8 @@ export default function CompanySettings() {
     <div style={{ maxWidth: 720 }}>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{t('company.title')}</h2>
-          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{t('company.subtitle')}</p>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('company.title')}</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('company.subtitle')}</p>
         </div>
         <button onClick={save} disabled={saving}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
@@ -120,19 +120,19 @@ export default function CompanySettings() {
       </div>
 
       {/* Company name & logo live under Brand — kept in one place to avoid duplicates. */}
-      <p style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 12 }}>{t('company.managedUnder')}</p>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>{t('company.managedUnder')}</p>
 
-      {loading && <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('common.loading')}</p>}
+      {loading && <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loading')}</p>}
 
       {!loading && (
-        <div style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 12, padding: '0 24px' }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: '0 24px' }}>
           <Row label={t('company.banner')}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {bannerUrl && <img src={bannerUrl} alt="" style={{ width: '100%', maxWidth: 400, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid #F3F4F6' }} />}
+              {bannerUrl && <img src={bannerUrl} alt="" style={{ width: '100%', maxWidth: 400, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />}
               <div style={{ display: 'flex', gap: 8 }}>
                 <input ref={bannerRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBannerFile} />
-                <button onClick={() => bannerRef.current?.click()} style={{ height: 32, padding: '0 12px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 7, background: 'white', cursor: 'pointer', color: '#374151' }}>{t('common.upload')}</button>
-                {bannerUrl && <button onClick={() => setBannerUrl(null)} style={{ height: 32, padding: '0 12px', fontSize: 12, border: '1px solid #E5E7EB', borderRadius: 7, background: 'white', cursor: 'pointer', color: '#374151' }}>{t('common.remove')}</button>}
+                <button onClick={() => bannerRef.current?.click()} style={{ height: 32, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.upload')}</button>
+                {bannerUrl && <button onClick={() => setBannerUrl(null)} style={{ height: 32, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.remove')}</button>}
               </div>
             </div>
           </Row>

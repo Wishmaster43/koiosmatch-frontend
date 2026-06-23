@@ -137,7 +137,7 @@ export default function IncomingWebhooks() {
                     </button>
                   )}
                   <button onClick={() => remove(wh.id)} aria-label={t('webhooks.incoming.removeConfirm')}
-                    style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#FEF2F2', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--color-danger)' }}>
+                    style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--color-danger)' }}>
                     <Trash2 size={12} />
                   </button>
                 </div>

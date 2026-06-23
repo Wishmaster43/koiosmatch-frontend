@@ -43,7 +43,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
   }
 
   const statusMap = {
-    active:   { label: t('apiKeys.status.active'),   bg: '#F0FDF4', color: 'var(--color-success)' },
+    active:   { label: t('apiKeys.status.active'),   bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
     disabled: { label: t('apiKeys.status.disabled'), bg: 'var(--hover-bg)', color: 'var(--text-muted)' },
   }
 
@@ -94,7 +94,7 @@ export default function ApiKeyDetail({ keyId, listRow, onBack, onPatch, onDelete
 
       {/* One-time secret banner after regenerate */}
       {secret && (
-        <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: 10, padding: 14, margin: '14px 0' }}>
+        <div style={{ background: 'var(--color-success-bg)', border: '1px solid #BBF7D0', borderRadius: 10, padding: 14, margin: '14px 0' }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: '#166534', marginBottom: 8 }}>{t('apiKeys.secretOnce')}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid #BBF7D0', borderRadius: 6, padding: '8px 10px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{secret}</code>

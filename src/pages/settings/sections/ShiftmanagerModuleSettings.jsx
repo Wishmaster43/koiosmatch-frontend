@@ -21,16 +21,16 @@ export default function ShiftmanagerModuleSettings() {
   return (
     <div>
       {/* Sub-tab bar (one level below the Modules tab). */}
-      <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: '1px solid #F3F4F6', marginBottom: 24, overflowX: 'auto' }}>
+      <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 24, overflowX: 'auto' }}>
         {SUBTABS.map(s => {
           const active = s.id === sub
           return (
             <button key={s.id} role="tab" aria-selected={active} onClick={() => setSub(s.id)}
               style={{ padding: '9px 12px', border: 'none', background: 'transparent', cursor: 'pointer', whiteSpace: 'nowrap',
-                fontSize: 13, fontWeight: active ? 600 : 500, color: active ? 'var(--color-primary)' : '#6B7280',
+                fontSize: 13, fontWeight: active ? 600 : 500, color: active ? 'var(--color-primary)' : 'var(--text-muted)',
                 borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`, marginBottom: -1 }}
-              onMouseEnter={e => { if (!active) e.currentTarget.style.color = '#111827' }}
-              onMouseLeave={e => { if (!active) e.currentTarget.style.color = '#6B7280' }}>
+              onMouseEnter={e => { if (!active) e.currentTarget.style.color = 'var(--text)' }}
+              onMouseLeave={e => { if (!active) e.currentTarget.style.color = 'var(--text-muted)' }}>
               {t(s.labelKey)}
             </button>
           )

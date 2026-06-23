@@ -60,8 +60,8 @@ function RoleDetail({ role, permissions, onBack, onUpdate }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
         <button onClick={onBack}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px',
-                   fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, background: '#F9FAFB',
-                   color: '#374151', cursor: 'pointer' }}>
+                   fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)',
+                   color: 'var(--text)', cursor: 'pointer' }}>
           <ArrowLeft size={13} /> {t('common.back')}
         </button>
         <Shield size={14} style={{ color: 'var(--color-primary)' }} />
@@ -70,15 +70,15 @@ function RoleDetail({ role, permissions, onBack, onUpdate }) {
             onChange={e => setDraftName(e.target.value)}
             onBlur={saveName}
             onKeyDown={e => { if (e.key === 'Enter') saveName(); if (e.key === 'Escape') { setDraftName(localRole.name); setEditName(false) } }}
-            style={{ fontSize: 18, fontWeight: 700, color: '#111827', border: '1px solid var(--color-primary)',
+            style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', border: '1px solid var(--color-primary)',
                      borderRadius: 8, padding: '4px 10px', outline: 'none' }} />
         ) : (
           <h2 onClick={() => setEditName(true)} title={t('roles.editNameTitle')}
-            style={{ fontSize: 18, fontWeight: 700, color: '#111827', cursor: 'text', margin: 0 }}>
+            style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', cursor: 'text', margin: 0 }}>
             {localRole.name}
           </h2>
         )}
-        {saving && <RefreshCw size={13} className="animate-spin" style={{ color: '#9CA3AF' }} />}
+        {saving && <RefreshCw size={13} className="animate-spin" style={{ color: 'var(--text-muted)' }} />}
       </div>
 
       {/* Permission groups */}
@@ -86,13 +86,13 @@ function RoleDetail({ role, permissions, onBack, onUpdate }) {
         {groups.map(([group, perms]) => {
           const isOpen = !collapsed[group]
           return (
-            <div key={group} style={{ background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, overflow: 'hidden' }}>
+            <div key={group} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
               {/* Group header — click to collapse */}
               <button onClick={() => setCollapsed(c => ({ ...c, [group]: !c[group] }))}
                 style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px',
-                         background: '#FAFAFA', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
-                {isOpen ? <ChevronDown size={13} style={{ color: '#9CA3AF' }} /> : <ChevronRight size={13} style={{ color: '#9CA3AF' }} />}
-                <span style={{ fontSize: 12, fontWeight: 700, color: '#374151', textTransform: 'capitalize' }}>
+                         background: 'var(--hover-bg)', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+                {isOpen ? <ChevronDown size={13} style={{ color: 'var(--text-muted)' }} /> : <ChevronRight size={13} style={{ color: 'var(--text-muted)' }} />}
+                <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', textTransform: 'capitalize' }}>
                   {groupLabel(group)}
                 </span>
                 <span style={{ fontSize: 11, color: '#C4C4CF', marginLeft: 'auto' }}>
@@ -109,12 +109,12 @@ function RoleDetail({ role, permissions, onBack, onUpdate }) {
                       <div key={perm.name}
                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                  padding: '10px 16px', background: i % 2 ? '#FCFCFD' : 'white',
-                                 borderTop: '1px solid #F9FAFB' }}>
+                                 borderTop: '1px solid var(--hover-bg)' }}>
                         <div>
-                          <div style={{ fontSize: 13, color: '#111827', fontWeight: checked ? 500 : 400 }}>
+                          <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: checked ? 500 : 400 }}>
                             {actionLabel(action)}
                           </div>
-                          <div style={{ fontSize: 11, color: '#9CA3AF', fontFamily: 'monospace' }}>{perm.name}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{perm.name}</div>
                         </div>
                         <PermissionToggle checked={checked} onChange={() => togglePermission(perm.name)} />
                       </div>
@@ -179,7 +179,7 @@ export default function RolesSettings() {
 
   if (loading) return (
     <div className="flex items-center justify-center" style={{ height: 200 }}>
-      <p style={{ fontSize: 13, color: '#9CA3AF' }}>{t('roles.loading')}</p>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('roles.loading')}</p>
     </div>
   )
 
@@ -203,15 +203,15 @@ export default function RolesSettings() {
     <div>
       <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: '#111827' }}>{t('roles.title')}</h2>
-          <p style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>{t('roles.subtitle')}</p>
+          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('roles.title')}</h2>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('roles.subtitle')}</p>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <input value={newRoleName} onChange={e => setNewRoleName(e.target.value)}
             placeholder={t('roles.newPlaceholder')}
             onKeyDown={e => e.key === 'Enter' && createRole()}
-            style={{ height: 34, padding: '0 10px', fontSize: 13, border: '1px solid #E5E7EB',
-                     borderRadius: 8, outline: 'none', color: '#374151', width: 150 }} />
+            style={{ height: 34, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)',
+                     borderRadius: 8, outline: 'none', color: 'var(--text)', width: 150 }} />
           <button onClick={createRole} disabled={creating || !newRoleName.trim()}
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer', border: 'none',
@@ -229,14 +229,14 @@ export default function RolesSettings() {
           return (
             <div key={role.id}
               style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px',
-                       background: 'white', border: '1px solid #F3F4F6', borderRadius: 12 }}>
+                       background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
               <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--color-primary-bg)',
                              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Shield size={16} style={{ color: 'var(--color-primary)' }} />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{role.name}</div>
-                <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 2 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{role.name}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
                   {t('roles.rightsCount', { count: permCount })} · {t('roles.usersCount', { count: userCount })}
                 </div>
               </div>
@@ -256,11 +256,11 @@ export default function RolesSettings() {
                     width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     border: 'none', borderRadius: 8,
                     cursor: canDelete ? 'pointer' : 'not-allowed',
-                    background: canDelete ? '#FEF2F2' : '#F9FAFB',
-                    color: canDelete ? 'var(--color-danger)' : '#D1D5DB',
+                    background: canDelete ? 'var(--color-danger-bg)' : 'var(--hover-bg)',
+                    color: canDelete ? 'var(--color-danger)' : 'var(--border)',
                   }}
                   onMouseEnter={e => { if (canDelete) e.currentTarget.style.background = 'var(--color-danger-bg)' }}
-                  onMouseLeave={e => { if (canDelete) e.currentTarget.style.background = '#FEF2F2' }}>
+                  onMouseLeave={e => { if (canDelete) e.currentTarget.style.background = 'var(--color-danger-bg)' }}>
                   {deleting === role.id ? <RefreshCw size={12} className="animate-spin" /> : <Trash2 size={12} />}
                 </button>
               </div>
@@ -268,7 +268,7 @@ export default function RolesSettings() {
           )
         })}
         {visibleRoles.length === 0 && (
-          <p style={{ fontSize: 13, color: '#9CA3AF', padding: '20px 0' }}>{t('roles.empty')}</p>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: '20px 0' }}>{t('roles.empty')}</p>
         )}
       </div>
     </div>

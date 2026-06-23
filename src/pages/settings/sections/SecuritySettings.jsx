@@ -77,14 +77,14 @@ export default function SecuritySettings() {
   if (step === 'recovery') return (
     <div style={{ maxWidth: 480 }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 16px',
-                    background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: 12, marginBottom: 24 }}>
+                    background: 'var(--color-success-bg)', border: '1px solid #86EFAC', borderRadius: 12, marginBottom: 24 }}>
         <ShieldCheck size={18} color="var(--color-success)" style={{ flexShrink: 0, marginTop: 1 }} />
         <div>
           <div style={{ fontSize: 13, fontWeight: 600, color: '#15803D' }}>{t('security.enabledTitle')}</div>
           <div style={{ fontSize: 12, color: 'var(--color-success)', marginTop: 2 }}>{t('security.enabledDesc')}</div>
         </div>
       </div>
-      <h3 style={{ fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 12 }}>{t('security.recoveryCodes')}</h3>
+      <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>{t('security.recoveryCodes')}</h3>
       <div style={{ background: '#1E1E2E', borderRadius: 10, padding: '16px 20px', marginBottom: 16,
                     display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 24px' }}>
         {recoveryCodes.map(c => (
@@ -95,7 +95,7 @@ export default function SecuritySettings() {
         <button onClick={copyRecovery}
           style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
-                   border: '1px solid #E5E7EB', background: 'white', color: '#374151' }}>
+                   border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
           <Copy size={13} /> {copied ? t('security.copied') : t('security.copy')}
         </button>
         <button onClick={reset}
@@ -111,44 +111,44 @@ export default function SecuritySettings() {
   if (step === 'setup') return (
     <div style={{ maxWidth: 420 }}>
       <button onClick={reset} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13,
-                                        color: '#6B7280', background: 'none', border: 'none',
+                                        color: 'var(--text-muted)', background: 'none', border: 'none',
                                         cursor: 'pointer', padding: 0, marginBottom: 20 }}>
         <ArrowLeft size={13} /> {t('security.back')}
       </button>
-      <h3 style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 6 }}>{t('security.scanTitle')}</h3>
-      <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 20, lineHeight: 1.6 }}>{t('security.scanDesc')}</p>
+      <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>{t('security.scanTitle')}</h3>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.6 }}>{t('security.scanDesc')}</p>
       {otpauthUrl && (
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <div style={{ padding: 12, background: 'white', border: '1px solid #E5E7EB', borderRadius: 12 }}>
+          <div style={{ padding: 12, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12 }}>
             <QRCodeSVG value={otpauthUrl} size={180} />
           </div>
         </div>
       )}
       {secret && (
-        <div style={{ background: '#F9FAFB', borderRadius: 8, padding: '10px 14px', marginBottom: 20,
-                       textAlign: 'center', fontFamily: 'monospace', fontSize: 14, letterSpacing: '0.12em', color: '#374151' }}>
+        <div style={{ background: 'var(--hover-bg)', borderRadius: 8, padding: '10px 14px', marginBottom: 20,
+                       textAlign: 'center', fontFamily: 'monospace', fontSize: 14, letterSpacing: '0.12em', color: 'var(--text)' }}>
           {secret}
-          <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 4, fontFamily: 'inherit', letterSpacing: 0 }}>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, fontFamily: 'inherit', letterSpacing: 0 }}>
             {t('security.manualEntry')}
           </div>
         </div>
       )}
       <form onSubmit={confirmSetup} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <div>
-          <label style={{ fontSize: 12, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 6 }}>
+          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', display: 'block', marginBottom: 6 }}>
             {t('security.codeLabel')}
           </label>
           <input type="text" inputMode="numeric" value={code}
             onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
             placeholder="123456" maxLength={6} required autoFocus
-            style={{ width: '100%', padding: '10px 14px', border: '1px solid #E5E7EB', borderRadius: 8,
-                     fontSize: 18, letterSpacing: '0.2em', textAlign: 'center', outline: 'none', color: '#111827',
+            style={{ width: '100%', padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 8,
+                     fontSize: 18, letterSpacing: '0.2em', textAlign: 'center', outline: 'none', color: 'var(--text)',
                      boxSizing: 'border-box' }}
             onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
-            onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+            onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
         </div>
         {error && (
-          <div style={{ fontSize: 13, color: 'var(--color-danger)', background: '#FEF2F2',
+          <div style={{ fontSize: 13, color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
                          border: '1px solid #FCA5A5', borderRadius: 8, padding: '8px 12px' }}>
             {error}
           </div>
@@ -156,7 +156,7 @@ export default function SecuritySettings() {
         <button type="submit" disabled={loading || code.length < 6}
           style={{ height: 36, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
                    border: 'none', cursor: (loading || code.length < 6) ? 'not-allowed' : 'pointer',
-                   background: (loading || code.length < 6) ? '#D1D5DB' : 'var(--color-primary)', color: 'white' }}>
+                   background: (loading || code.length < 6) ? 'var(--border)' : 'var(--color-primary)', color: 'white' }}>
           {loading ? t('security.working') : t('security.confirmEnable')}
         </button>
       </form>
@@ -167,22 +167,22 @@ export default function SecuritySettings() {
   if (step === 'disabling') return (
     <div style={{ maxWidth: 420 }}>
       <button onClick={reset} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13,
-                                        color: '#6B7280', background: 'none', border: 'none',
+                                        color: 'var(--text-muted)', background: 'none', border: 'none',
                                         cursor: 'pointer', padding: 0, marginBottom: 20 }}>
         <ArrowLeft size={13} /> {t('security.back')}
       </button>
-      <h3 style={{ fontSize: 14, fontWeight: 700, color: '#111827', marginBottom: 6 }}>{t('security.disableTitle')}</h3>
-      <p style={{ fontSize: 13, color: '#6B7280', marginBottom: 20, lineHeight: 1.6 }}>{t('security.disableDesc')}</p>
+      <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 6 }}>{t('security.disableTitle')}</h3>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.6 }}>{t('security.disableDesc')}</p>
       <form onSubmit={handleDisable} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         <input type="text" inputMode="numeric" value={disableCode}
           onChange={e => setDisableCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
           placeholder="123456" maxLength={6} required autoFocus
-          style={{ padding: '10px 14px', border: '1px solid #E5E7EB', borderRadius: 8,
-                   fontSize: 18, letterSpacing: '0.2em', textAlign: 'center', outline: 'none', color: '#111827' }}
+          style={{ padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 8,
+                   fontSize: 18, letterSpacing: '0.2em', textAlign: 'center', outline: 'none', color: 'var(--text)' }}
           onFocus={e => (e.target.style.borderColor = 'var(--color-danger)')}
-          onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
+          onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
         {error && (
-          <div style={{ fontSize: 13, color: 'var(--color-danger)', background: '#FEF2F2',
+          <div style={{ fontSize: 13, color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
                          border: '1px solid #FCA5A5', borderRadius: 8, padding: '8px 12px' }}>
             {error}
           </div>
@@ -190,7 +190,7 @@ export default function SecuritySettings() {
         <button type="submit" disabled={loading || disableCode.length < 6}
           style={{ height: 36, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
                    border: 'none', cursor: (loading || disableCode.length < 6) ? 'not-allowed' : 'pointer',
-                   background: (loading || disableCode.length < 6) ? '#D1D5DB' : 'var(--color-danger)', color: 'white' }}>
+                   background: (loading || disableCode.length < 6) ? 'var(--border)' : 'var(--color-danger)', color: 'white' }}>
           {loading ? t('security.working') : t('security.disableBtn')}
         </button>
       </form>
@@ -200,18 +200,18 @@ export default function SecuritySettings() {
   // Idle view — status + action
   return (
     <div style={{ maxWidth: 480 }}>
-      <div style={{ padding: '20px', background: 'white', border: '1px solid #F3F4F6',
+      <div style={{ padding: '20px', background: 'var(--surface)', border: '1px solid var(--border)',
                     borderRadius: 14, display: 'flex', alignItems: 'center', gap: 16 }}>
         <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0,
                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: mfaEnabled ? '#F0FDF4' : '#F9FAFB' }}>
+                       background: mfaEnabled ? 'var(--color-success-bg)' : 'var(--hover-bg)' }}>
           {mfaEnabled
             ? <ShieldCheck size={22} color="var(--color-success)" />
-            : <Lock size={22} color="#9CA3AF" />}
+            : <Lock size={22} color="var(--text-muted)" />}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 14, fontWeight: 600, color: '#111827' }}>{t('security.twoFactor')}</div>
-          <div style={{ fontSize: 12, color: mfaEnabled ? 'var(--color-success)' : '#9CA3AF', marginTop: 2 }}>
+          <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t('security.twoFactor')}</div>
+          <div style={{ fontSize: 12, color: mfaEnabled ? 'var(--color-success)' : 'var(--text-muted)', marginTop: 2 }}>
             {mfaEnabled ? t('security.statusOn') : t('security.statusOff')}
           </div>
         </div>
@@ -219,7 +219,7 @@ export default function SecuritySettings() {
           ? (
             <button onClick={() => { setStep('disabling'); setError('') }}
               style={{ height: 32, padding: '0 14px', fontSize: 12, fontWeight: 500, borderRadius: 8,
-                       cursor: 'pointer', border: '1px solid #FCA5A5', background: '#FEF2F2', color: 'var(--color-danger)', flexShrink: 0 }}>
+                       cursor: 'pointer', border: '1px solid #FCA5A5', background: 'var(--color-danger-bg)', color: 'var(--color-danger)', flexShrink: 0 }}>
               {t('security.disable')}
             </button>
           ) : (
@@ -233,16 +233,16 @@ export default function SecuritySettings() {
         }
       </div>
       {error && (
-        <div style={{ fontSize: 13, color: 'var(--color-danger)', background: '#FEF2F2', border: '1px solid #FCA5A5',
+        <div style={{ fontSize: 13, color: 'var(--color-danger)', background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5',
                        borderRadius: 8, padding: '8px 12px', marginTop: 12 }}>
           {error}
         </div>
       )}
-      <div style={{ marginTop: 20, padding: '14px 16px', background: '#F9FAFB',
-                    border: '1px solid #F3F4F6', borderRadius: 10 }}>
-        <div style={{ fontSize: 12, fontWeight: 600, color: '#374151', marginBottom: 8 }}>{t('security.supportedApps')}</div>
+      <div style={{ marginTop: 20, padding: '14px 16px', background: 'var(--hover-bg)',
+                    border: '1px solid var(--border)', borderRadius: 10 }}>
+        <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('security.supportedApps')}</div>
         {['Google Authenticator', 'Microsoft Authenticator', 'Bitwarden', 'Authy', '1Password'].map(app => (
-          <div key={app} style={{ fontSize: 12, color: '#6B7280', padding: '3px 0' }}>· {app}</div>
+          <div key={app} style={{ fontSize: 12, color: 'var(--text-muted)', padding: '3px 0' }}>· {app}</div>
         ))}
       </div>
     </div>
