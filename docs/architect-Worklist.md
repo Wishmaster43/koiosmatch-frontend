@@ -86,7 +86,7 @@ doel — de echte regel is **single-purpose, niet line-count**. Bij naderen van 
 
 | Laag | Richtlijn (doel) | Splitsen bij |
 |---|---|---|
-| **FE — component** | ≤ ~250 | > ~300 → subcomponenten |
+| **FE — component** | ≤ ~250 (250–400 OK als single-purpose) | **> ~400 → subcomponenten** (groeit het door 400 = splitsen, ook als het werkt) |
 | **FE — hook / util** | ≤ ~150 (los van componenten) | logica in component → eigen hook |
 | **BE — controller** | ≤ ~150 (thin: receive → delegate → Resource; geen logica/queries) | > ~150 → logica naar Service/Action |
 | **BE — Service / Action** | ~200–300, één publieke methode | > ~300 of twee verantwoordelijkheden |
@@ -135,7 +135,11 @@ De JS-laag is gezond; al het werk zit in JSX. Afvinken = gesplitst tot onder het
   + `ScheduleModal.jsx` + `serialization.js` (pure) + thin `EditorInner`. Meenemen: `MOCK_LOGS` → echte
   feed; `DAYS_NL/MONTHS_NL/CATEGORY_ORDER` → i18n + `lib/formatters` (AW-7/AW-8).
 
-### 🟠 Tier 1 — > 300 r (split-now), gegroepeerd per gebied
+### 🟠 Tier 1 — grote bestanden, gegroepeerd per gebied
+> **Regel (bijgewerkt):** **> ~400 r = splitsen** (ook als het werkt). **300–400 = oordeel** — alleen
+> splitsen als het >1 ding doet of nog groeit; cohesief single-purpose mag blijven. De lijst hieronder is
+> op 300 gesorteerd, maar behandel < ~400 als review-trigger, geen overtreding. (Pages horen sowieso thin, §2.)
+
 **Pages (horen thin §2 — logica → hooks/api, UI → subcomponenten):**
 - [✅] `pages/planning/PlanningPage.jsx` — **740 → 162** (thin) (2026-06-23): `AddShiftModal`+cast → `AddShiftModal.jsx` (318); views Month/Week/Day/List+ShiftPill → `views.jsx` (268); date-helpers → `helpers.js` (16). Build+lint groen. *(Draait nog op dummy-data → B-22; AddShiftModal/views nog boven ~250 maar cohesief, evt. later verder splitsen.)*
 - [ ] `pages/candidates/CandidatesPage.jsx` — 670  *(stats/predicaten → hooks; InsightsRow extraheren, B-18.6)*
@@ -181,7 +185,7 @@ De JS-laag is gezond; al het werk zit in JSX. Afvinken = gesplitst tot onder het
 - [ ] `pages/candidates/drawer/PlanningPanel.jsx` — 419
 - [ ] `context/AuthContext.jsx` — 312
 
-### 🟡 Tier 2 — 250–300 r (nadert de trigger; meenemen bij volgende aanraking)
+### 🟡 Tier 2 — 250–300 r (onder de 400-trigger; cohesief = prima, meenemen bij volgende aanraking)
 - [ ] `CandidateLookupsSettings` 293 · `pages/candidates/CandidateCvTemplate` 288 ·
   `ShiftsDrillDownDrawer` 281 · `KpiDrillDownDrawer` 278 · `RolesSettings` 276 ·
   `pages/tasks/TasksPage` 274 · `pages/auth/LoginPage` 269 · `drawer/AvailabilityCalendar` 266 ·

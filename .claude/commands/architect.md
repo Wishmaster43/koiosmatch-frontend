@@ -92,8 +92,10 @@ cite `file:line`.
 13. **Modularity & file-size discipline.** Code must stay modular — small,
     single-responsibility, reusable units, **logic in hooks, not JSX**. Hard cap:
     **no file over 1000 lines** — but the cap is the ceiling, not the goal; the rule
-    is **single-purpose, not line-count** (component ≤ ~250 / split > ~300, hook/util
-    ≤ ~150; full per-layer table in CLAUDE.md §3). A monolithic page/component
+    is **single-purpose, not line-count** (component aim ≤ ~250; 250–400 OK if it does
+    one thing; **split when growing past ~400**; hook/util ≤ ~150; full per-layer table
+    in CLAUDE.md §3). A file a little over its target is not a finding; a monolith is.
+    A monolithic page/component
     that inlines data-fetch + transform + drawer + business logic is an **architecture
     finding**, not a style nit: it blocks reuse, hides the entity graph, and resists
     the "10 floors on the house" extensibility (dimension 11). Flag oversized/monolithic

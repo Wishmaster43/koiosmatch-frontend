@@ -108,11 +108,15 @@ Rules:
 - Prefer **composition over configuration** (children/slots over 20 boolean props).
 
 **Size discipline — single-purpose, not line-count.** The 1000-line cap (§0.3) is
-the ceiling; split long before it. Nearing a target = **extract, don't add more**.
+the absolute ceiling you must never approach; split long before it. The real test
+is single-purpose: a file a bit over its target is fine **if it does one thing**.
+Practical trigger: **a file growing past ~400 lines = split it, even if it works.**
+So: ≤ ~250 = aim · 250–400 = judgment (cohesive is OK, don't force-split for a
+number) · **> ~400 = split** · 1000 = hard cap (you should never get near it).
 
 | Layer | Target | Split when |
 |---|---|---|
-| FE component | ≤ ~250 | > ~300 → subcomponents |
+| FE component | ≤ ~250 | **> ~400** → subcomponents (250–400 OK if single-purpose) |
 | FE hook / util | ≤ ~150 (separate from components) | logic living in a component → its own hook |
 | BE controller | ≤ ~150 (thin: receive → delegate → Resource; no logic/queries) | > ~150 → logic to a Service/Action |
 | BE Service / Action | ~200–300, one public method | > ~300 or two responsibilities |
