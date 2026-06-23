@@ -155,7 +155,7 @@ De JS-laag is gezond; al het werk zit in JSX. Afvinken = gesplitst tot onder het
 - [ ] `pages/shiftmanager/ContactsPage.jsx` — 318
 
 **Settings-secties:**
-- [ ] `pages/settings/sections/AuditLog.jsx` — 570  *(tabel/filter/detail splitsen)*
+- [✅] `pages/settings/sections/AuditLog.jsx` — **570 → 288** (2026-06-23): drill-down → `AuditDrawer.jsx` (264); badge/kleur/KPI-keys → `auditShared.jsx` (35, voorkomt circulaire import). Alle < 400. Build+lint groen.
 - [ ] `pages/settings/sections/WhatsAppSettings.jsx` — 330
 - [ ] `pages/settings/sections/CvTemplateSettings.jsx` — 330
 
@@ -305,3 +305,7 @@ blijven voor nieuwe gedeelde componenten.)
 2. **C-18** — bevestig de **aparte** `POST|DELETE /tasks/{id}/links` (return = task-detail met
    `links:[{type,id,label}]`).
 3. **Picker-endpoints** — `search`+`limit` op `/candidates|/customers|/contacts|/vacancies`.
+4. **Workflow-engine op aparte server** (beslissing Danny 2026-06-23 · memory `project_workflow_separate_server`):
+   uitvoering/runs/logs/queues hoort apart van de hoofd-API. **FE-consequentie:** workflow-execution-/runs-/
+   logs-/queue-endpoints via een **configureerbare base-URL** (bv. `VITE_WORKFLOW_API_URL`) + run/logs-UI
+   **async/queue-aware** (poll/queue-staat, geen synchroon resultaat). `MOCK_LOGS` → echte feed.
