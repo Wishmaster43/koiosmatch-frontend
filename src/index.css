@@ -57,6 +57,17 @@
   --input-bg:  #252540;
   --hover-bg:  #252540;
   --topbar-bg: #1C1C2E;
+
+  /* Soft semantic backgrounds — dark tints, so active states + badges read as a
+     subtle coloured block in dark mode instead of a bright/white one. The matching
+     --color-* foreground tokens stay vivid (defined in :root) and remain readable. */
+  --color-primary-bg:   rgba(25, 165, 202, 0.18);
+  --color-secondary-bg: rgba(27, 96, 169, 0.24);
+  --color-success-bg:   rgba(22, 163, 74, 0.20);
+  --color-warning-bg:   rgba(217, 119, 6, 0.20);
+  --color-danger-bg:    rgba(220, 38, 38, 0.22);
+  --color-info-bg:      rgba(14, 165, 233, 0.18);
+  --color-accent-bg:    rgba(240, 171, 0, 0.18);
 }
 
 [data-theme="dark"] body {
