@@ -30,11 +30,10 @@ graaf-serialisatie) is vooruit-correct; de frontend leunt op nog-niet-bevestigde
   stabiele id's. *(file: `WorkflowCanvasEditor.jsx:316-362`; backend = worklist C-27.)*
 
 ### ☐ CRITICAL
-- [ ] **AW-2 · LinksTab laadt volledige entiteitslijsten (privacy + schaal).**
-  `api.get('/candidates')` zonder `search`/`limit` om één kandidaat te kiezen → trekt alle
-  special-category (gezondheids)data binnen. Schendt CLAUDE.md §8 (data-minimisatie) + §9
-  (schaal). → server-side zoeken (debounced `?search=`+`limit`). *(file: `LinksTab.jsx:24-30`;
-  backend: `search`-param op picker-endpoints; cross-ref B-20 / C-18.)*
+- [◐] **AW-2 · LinksTab — FE-fix GEBOUWD 2026-06-23.** `SearchSelect` kreeg een optionele
+  `onSearch`-prop (debounced, skip client-filter); `AddLinkRow` fetcht nu `{ search, per_page: 25 }`
+  i.p.v. de hele tabel → geen volledige special-category-lijst meer in de client (§8/§9). Build+lint groen.
+  **Rest = backend:** `search`-param op `/candidates|/customers|/contacts|/vacancies` (anders cap-only).
 - [ ] **AW-3 · `/tasks/{id}/links`-variant niet bevestigd.** C-18 laat de keuze open
   (body-embedded vs aparte `POST|DELETE`); FE koos eenzijdig de aparte endpoints met silent
   `catch`. Implementeert backend de body-variant → koppelen no-op't stil. → backend bevestigt
@@ -69,8 +68,7 @@ graaf-serialisatie) is vooruit-correct; de frontend leunt op nog-niet-bevestigde
   *(file: `WorkflowCanvasEditor.jsx:743`.)*
 
 ### ☐ LOW
-- [ ] **AW-10 · Hardcoded `#FEF2F2` in LinksTab-verwijderknop** terwijl dezelfde diff het elders
-  naar `var(--color-danger-bg)` migreerde → breekt in dark-mode. *(file: `LinksTab.jsx:103`.)*
+- [✅] **AW-10 · LinksTab-verwijderknop `#FEF2F2` → `var(--color-danger-bg)`** (2026-06-23, one-touch bij AW-2).
 
 ---
 

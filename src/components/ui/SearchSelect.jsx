@@ -12,7 +12,7 @@ import { Plus, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export default function SearchSelect({
-  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 240,
+  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 240, onSearch,
 }) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
@@ -26,8 +26,17 @@ export default function SearchSelect({
     return () => document.removeEventListener('mousedown', h)
   }, [open])
 
+  // Server-side search: when onSearch is given, debounce the query up to the parent
+  // (which re-fetches a capped list) and skip the local filter — so we never pull
+  // the whole table into the client.
+  useEffect(() => {
+    if (!onSearch) return
+    const id = setTimeout(() => onSearch(query), 250)
+    return () => clearTimeout(id)
+  }, [query, onSearch])
+
   const opts = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
-  const shown = query ? opts.filter(o => o.label.toLowerCase().includes(query.toLowerCase())) : opts
+  const shown = onSearch ? opts : (query ? opts.filter(o => o.label.toLowerCase().includes(query.toLowerCase())) : opts)
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
@@ -38,7 +47,7 @@ export default function SearchSelect({
       </button>
       {open && (
         <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 200, marginTop: 4, width,
-          background: 'white', border: '1px solid var(--border)', borderRadius: 10,
+          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
           boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
           {searchable && (
             <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border)' }}>

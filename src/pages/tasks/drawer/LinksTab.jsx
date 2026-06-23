@@ -20,15 +20,18 @@ function AddLinkRow({ existing, onAdd, onClose }) {
   const { t } = useTranslation('tasks')
   const [type, setType] = useState('candidate')
   const [rows, setRows] = useState([])
+  const [query, setQuery] = useState('')
 
-  // Load the chosen type's entities once; a missing endpoint keeps the list empty.
+  // Load a capped, server-searched page for the chosen type — never the whole table
+  // (AW-2: privacy + scale). `query` arrives debounced from SearchSelect's onSearch.
   useEffect(() => {
     setRows([])
     const cfg = TYPE_ENDPOINTS[type]; if (!cfg) return
     let alive = true
-    api.get(cfg.url).then(r => { if (alive) setRows(unwrapList(r).rows) }).catch(() => {})
+    api.get(cfg.url, { params: { search: query, per_page: 25 } })
+      .then(r => { if (alive) setRows(unwrapList(r).rows) }).catch(() => {})
     return () => { alive = false }
-  }, [type])
+  }, [type, query])
 
   const cfg = TYPE_ENDPOINTS[type]
   const linked = new Set(existing.filter(l => l.type === type).map(l => String(l.id)))
@@ -39,9 +42,9 @@ function AddLinkRow({ existing, onAdd, onClose }) {
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px',
       border: '1px dashed var(--border)', borderRadius: 10, marginBottom: 8 }}>
       <div style={{ width: 150, flexShrink: 0 }}>
-        <SelectField value={type} onChange={setType} options={typeOptions} />
+        <SelectField value={type} onChange={(v) => { setType(v); setQuery('') }} options={typeOptions} />
       </div>
-      <SearchSelect triggerLabel={t('links.selectEntity')} options={options} selected={[]}
+      <SearchSelect triggerLabel={t('links.selectEntity')} options={options} selected={[]} onSearch={setQuery}
         onToggle={(v) => { const r = rows.find(x => String(x.id) === v); onAdd({ type, id: v, label: r ? cfg.label(r) : '' }); onClose() }} />
       <div style={{ flex: 1 }} />
       <button onClick={onClose} aria-label={t('modal.cancel')}
@@ -100,7 +103,7 @@ export default function LinksTab({ task, onAddLink, onRemoveLink }) {
               </div>
               <button onClick={() => onRemoveLink({ type: l.type, id: l.id })} title={t('links.remove')} aria-label={t('links.remove')}
                 style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                  background: '#FEF2F2', border: 'none', borderRadius: 6, color: 'var(--color-danger)', cursor: 'pointer' }}>
+                  background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)', cursor: 'pointer' }}>
                 <X size={13} />
               </button>
             </div>
