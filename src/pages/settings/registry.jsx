@@ -19,7 +19,7 @@ import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays,
   ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Shield, Sparkles, Star,
-  Store, Tags, Target, Users, Webhook, XCircle, Zap,
+  Store, Tags, Target, Users, Webhook, XCircle,
 } from 'lucide-react'
 
 import UsersPage from '../users/UsersPage'
@@ -49,7 +49,6 @@ import ShiftmanagerModuleSettings from './sections/ShiftmanagerModuleSettings'
 import WebhooksSettings from './sections/webhooks'
 import AppsSettings from './sections/AppsSettings'
 import ModulesSettings from './sections/ModulesSettings'
-import ModulePlaceholder from './sections/ModulePlaceholder'
 import TenantUsageSettings from './sections/TenantUsageSettings'
 import WhatsAppSettings from './sections/WhatsAppSettings'
 import ImporterenSettings from './sections/ImporterenSettings'
@@ -71,14 +70,6 @@ export const NAV_GROUPS = [
       { id: 'kpis_candidates',   label: 'Candidate KPIs',   icon: Users,         schema: kpisCandidates },
       { id: 'kpis_applications', label: 'Application KPIs', icon: ClipboardList, schema: kpisApplications },
       { id: 'kpis_customers',    label: 'Customer KPIs',    icon: Building2,      schema: kpisCustomers },
-    ],
-  },
-  {
-    // Per-module settings (Shiftmanager/HelloFlex). Package + connectors + usage live in the Super Admin group.
-    key: 'modules', icon: LayoutGrid,
-    items: [
-      { id: 'mod_shiftmanager', label: 'Shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings },
-      { id: 'mod_helloflex',    label: 'HelloFlex',    icon: Zap,       render: () => <ModulePlaceholder /> },
     ],
   },
   {
@@ -202,6 +193,7 @@ export const NAV_GROUPS = [
   {
     key: 'integrations', icon: Store,
     items: [
+      { id: 'mod_shiftmanager', label: 'Shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresPage: 'shiftmanager' },
       { id: 'apikeys',    label: 'API keys',  icon: Key,      component: ApiKeysSettings },
       { id: 'webhooks',   label: 'Webhooks',  icon: Webhook,  component: WebhooksSettings },
       { id: 'importeren', label: 'Import',    icon: Download, component: ImporterenSettings },

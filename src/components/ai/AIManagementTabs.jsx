@@ -11,6 +11,7 @@ import {
   Clock, ChevronDown, MessageSquare,
 } from 'lucide-react'
 import api from '../../lib/api'
+import { MODELS, Field, Badge, SaveBar, VersionList, TextEditor, SideList, ListRow } from './management/shared'
 
 // ── Chat test ─────────────────────────────────────────────────────────────────
 
