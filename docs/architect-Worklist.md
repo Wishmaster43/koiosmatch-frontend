@@ -16,6 +16,33 @@
 
 ---
 
+## ▶️ OPEN — afwerklijst (uitvoervolgorde)
+> Alle open architect-issues, in volgorde. Detail per item in de secties hieronder (AW/CS/RF/DS/DUP/VOC).
+> Marker: ☐ open · ◐ deels · ⚠️ jouw input · 🔒 backend.
+
+**Solo (samen afwerken — frontend, geen backend/beslissing nodig):**
+1. ☐ **DUP-3 — `LANGUAGES` consolideren.** Twee hardcoded talenlijsten → één bron. *(klein, eerst)*
+2. ☐ **i18n-eilandjes dichten.** `AddShiftModal` (7) · `MonthlyKpiCard` (3) · `LineChartCard` (2) → alles via `t()`.
+3. ☐ **DUP-1 — 9 inline dropdowns → gedeelde select** (`SelectMenu`/`SearchSelect`): BranchSection · UsersPage · AddApplicationModal · EntityHeader · KoiosModelPicker · MatchScoreBlock · SettingsControls · KoiosSteps · ai/management/shared.
+4. ☐ **i18n shiftmanager-pagina's** (Locations/Contacts/Departments, ~22 strings, 0×`t()`) → volledig vertalen.
+5. ☐ **CS-7 rest — NL-identifiers** die nog verspreid staan (buiten candidate-drawer al gedaan).
+6. ☐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal.
+7. ☐ **Editor-i18n-pass (AW-7/AW-8 + AW editor-strings).** Workflow-editor (~60 strings, 0×`t()`) + module-registry labels/categorieën + `CATEGORY_ORDER` → keys. *(groot, ~1–2 dagen, maar solo)*
+8. ☐ **CS-4 rest — chrome-hex** die per-touch meelift (data-kleuren blijven).
+9. ☐ **DUP-2 — select-componenten documenteren** (wanneer `SearchSelect`/`SelectMenu`/`CreatableSelect`/`SelectField`) zodat niemand een 5e bouwt.
+
+**Wacht op verificatie/afstemming (jouw input / backend):**
+10. ⚠️ **API-status invullen** (welke endpoints live) → **DS-3: mock-fallbacks eruit** (`DUMMY_CANDIDATES`/`MOCK_WORKFLOWS`/`USE_MOCKS` → lege staat).
+11. ⚠️ **DS-1/DS-2 — PlanningPage + ContactsPage** (0 api-calls, 100% dummy): welk endpoint? (`/planning`/`/shifts` · `/sm_*`).
+12. 🔒 **VOC-1/2/3 + DUP-4 — vocab → lookups** (`NATIONALITIES` · CompanySettings-lijsten · SM-statussen) — vereist backend-lookups.
+13. 🔒 **AW-1/3/4 — graaf-opslag · links-contract · filter-vocabulaire** (backend C-27/C-18).
+14. 🔒 **CS-1 — auth httpOnly-cookie-flip** (gecoördineerd met backend).
+15. ⚠️ **CandidatesPage (670) + WorkflowCanvasEditor-restant (863)** — jouw hook-/architectuur-input nodig.
+16. ⚠️ **CS-5/6/9 — PropTypes · inline-api→`api/`-laag · tests** (dagen elk; apart inplannen).
+17. 🔒 **DS-4 — `MOCK_LOGS`** → echte run-logs-feed (workflow-server).
+
+---
+
 ## Review 2026-06-23 — niet-gecommitte wijzigingen
 **Scope:** workflow-modules rename (`src/modules/` + `makeEntityModule`) · Taken/LinksTab ·
 kandidaat-drawer token-migratie · WorkflowCanvasEditor graaf-opslag.
