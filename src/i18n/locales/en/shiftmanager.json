@@ -297,7 +297,8 @@
       "status": "Status",
       "customer": "Customer",
       "location": "Location"
-    }
+    },
+    "costCenter": "Cost center"
   },
   "monthlyKpi": {
     "title": "Candidate overview",

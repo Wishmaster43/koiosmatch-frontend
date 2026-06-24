@@ -297,7 +297,8 @@
       "status": "Statut",
       "customer": "Client",
       "location": "Site"
-    }
+    },
+    "costCenter": "Centre de coûts"
   },
   "monthlyKpi": {
     "title": "Aperçu des candidats",

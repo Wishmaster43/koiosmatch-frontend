@@ -297,7 +297,8 @@
       "status": "Estado",
       "customer": "Cliente",
       "location": "Ubicación"
-    }
+    },
+    "costCenter": "Centro de costes"
   },
   "monthlyKpi": {
     "title": "Resumen de candidatos",

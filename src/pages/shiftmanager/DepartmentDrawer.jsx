@@ -73,6 +73,17 @@ export default function DepartmentDrawer({ dep, onClose }) {
           </div>
         </div>
 
+        {/* Cost center (from /sm_departments) */}
+        {dep.costCenter && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: 'var(--hover-bg)', borderRadius: 10, padding: '12px 16px', marginBottom: 20,
+            border: '1px solid var(--border)' }}>
+            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
+              textTransform: 'uppercase' }}>{t('departmentsPage.costCenter')}</span>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', fontFamily: 'JetBrains Mono, monospace' }}>{dep.costCenter}</span>
+          </div>
+        )}
+
         {/* Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
           {[
