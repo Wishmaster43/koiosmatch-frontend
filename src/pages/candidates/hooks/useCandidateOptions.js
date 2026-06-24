@@ -1,0 +1,82 @@
+/**
+ * useCandidateOptions — derives the filter option-lists, the donut chart data and
+ * the attention/intake/conversation counts for CandidatesPage. Prefers the
+ * server-wide totals from /candidates/stats; falls back to counting the loaded
+ * page when stats is unavailable. Pure derivation from data + lookups.
+ */
+import { useMemo, useState } from 'react'
+import { metaOf, optsFrom, isStale, isNeverContacted, isNoFollowup } from '../data/candidatesShared'
+import { NL_PROVINCES } from '../drawer/constants'
+
+export function useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, t }) {
+  // Status / funnel / owner options come from stats (whole filtered set); fall
+  // back to page-based counts when stats is unavailable.
+  const statusOptions = useMemo(() =>
+    stats?.by_status
+      ? stats.by_status.map(o => { const v = o.value ?? o.status; return { value: v, label: metaOf(statuses, v)?.label ?? v, count: o.count } })
+      : statuses.map(s => ({ value: s.value, label: s.label, count: candidates.filter(c => c.status === s.value).length })).filter(o => o.count > 0)
+  , [stats, candidates, statuses])
+  const funnelOptions = useMemo(() =>
+    stats?.by_funnel
+      ? stats.by_funnel.map(o => { const v = o.value ?? o.funnel_type; return { value: v, label: o.label ?? metaOf(funnelTypes, v)?.label ?? v, color: o.color, count: o.count } })
+      : funnelTypes.map(f => ({ value: f.value, label: f.label, count: candidates.filter(c => c.stage === f.value).length })).filter(o => o.count > 0)
+  , [stats, candidates, funnelTypes])
+  const typeOptions = useMemo(() =>
+    candidateTypes.map(ct => ({ value: ct.value, label: ct.label, count: candidates.filter(c => (c.candidateTypes ?? []).includes(ct.value)).length })).filter(o => o.count > 0)
+  , [candidates, candidateTypes])
+  // Owner is id-based: options + counts from stats.by_owner; fall back to the page.
+  const ownerOptions = useMemo(() => {
+    if (stats?.by_owner) {
+      // Accept both shapes (id | owner_id); drop the "no owner" bucket + guard a null name.
+      return stats.by_owner.map(o => ({ value: o.id ?? o.owner_id, label: o.name || '—', count: o.count })).filter(o => o.value)
+    }
+    const m = {}
+    candidates.forEach(c => { if (c.ownerId) (m[c.ownerId] ??= { value: c.ownerId, label: c.owner || '—', count: 0 }).count++ })
+    return Object.values(m)
+  }, [stats, candidates])
+  // Server-side filters whose option-lists aren't in stats: gender + province
+  // use fixed lists; title is page-derived until a dedicated options endpoint.
+  const genderOptions   = useMemo(() => [
+    { value: 'male',   label: t('modal.gender.male') },
+    { value: 'female', label: t('modal.gender.female') },
+    { value: 'other',  label: t('modal.gender.other') },
+  ], [t])
+  const provinceOptions = useMemo(() => NL_PROVINCES.map(p => ({ value: p, label: p })), [])
+  const titleOptions    = useMemo(() => optsFrom(candidates.map(c => c.title).filter(Boolean)), [candidates])
+  const locationOptions = useMemo(() => (locations ?? []).map(l => ({ value: l.id, label: l.name })).filter(o => o.value != null), [locations])
+
+  // Donut-data: reuse the count-options, enriched with the lookup colour per value.
+  const colorFor = (list, v) => list.find(x => x.value === v)?.color
+  const statusData = useMemo(() =>
+    statusOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: colorFor(statuses, o.value) }))
+  , [statusOptions, statuses])
+  const funnelData = useMemo(() =>
+    funnelOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: o.color ?? colorFor(funnelTypes, o.value) }))
+  , [funnelOptions, funnelTypes])
+  const rcData = useMemo(() =>
+    ownerOptions.map(o => ({ name: o.label, value: o.count, key: o.value }))
+  , [ownerOptions])
+
+  // Attention counts: prefer server-wide totals from /candidates/stats (they honour
+  // the active filters); fall back to counting the loaded page.
+  const staleCount          = stats?.attention?.stale_6m        ?? candidates.filter(isStale).length
+  const neverContactedCount = stats?.attention?.never_contacted ?? candidates.filter(isNeverContacted).length
+  // "No follow-up planned" has no server column yet — page-local only.
+  const noFollowupCount = useMemo(() => candidates.filter(isNoFollowup).length, [candidates])
+  const intakeCount     = useMemo(() => candidates.filter(c => c.stage === 'invited').length, [candidates])
+  // Proxy for "active conversations" until WhatsApp/e-mail threads exist: contacted
+  // in the last 14 days. Cutoff captured once (lazy init) so the memo stays pure.
+  const [convCutoff] = useState(() => Date.now() - 14 * 86400000)
+  const activeConvCount = useMemo(() =>
+    candidates.filter(c => c.lastContactAt && new Date(c.lastContactAt).getTime() > convCutoff).length
+  , [candidates, convCutoff])
+  // Open candidate-linked tasks (server total from stats.attention.tasks).
+  const tasksCount = stats?.attention?.tasks ?? 0
+
+  return {
+    statusOptions, funnelOptions, typeOptions, ownerOptions,
+    genderOptions, provinceOptions, titleOptions, locationOptions,
+    statusData, funnelData, rcData,
+    staleCount, neverContactedCount, noFollowupCount, intakeCount, activeConvCount, tasksCount,
+  }
+}
