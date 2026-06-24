@@ -38,11 +38,12 @@
    `AddApplicationModal SearchField` → `CreatableSelect` (single). **De "9" was opgeblazen:** de rest is **geen**
    duplicate-select — `SettingsControls`/`UsersPage` = kleur-pickers · `KoiosSteps`/`MatchScoreBlock` = uitklap-toggles ·
    `EntityHeader`/`KoiosModelPicker` = custom meta-pickers (avatars/model-rendering). Niets meer te swappen.
-4. ☐ **i18n shiftmanager-pagina's** (Locations/Contacts/Departments, ~22 strings, 0×`t()`) → volledig vertalen.
+4. ◐ **i18n shiftmanager-pagina's** (Locations/Contacts/Departments, 0×`t()`) → volledig vertalen.
+   ✅ **LocationsPage gedaan 2026-06-24** (`locationsPage`-sectie in alle 5 locales). Resterend: ContactsPage · DepartmentsPage.
 5. ☐ **CS-7 rest — NL-identifiers** die nog verspreid staan (buiten candidate-drawer al gedaan).
 6. ◐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal.
-   - ✅ **gedaan 2026-06-24:** ProfilePage 421→172 · PlanningPanel 419→79 · ShiftsChartsBlock 468→141 · OrdersTable 428→182.
-   - ☐ **veilig voor mij (mijn domein, buiten hun WIP):** `LocationsPage` 441 (split **+** i18n, want 0×`t()`).
+   - ✅ **gedaan 2026-06-24:** ProfilePage 421→172 · PlanningPanel 419→79 · ShiftsChartsBlock 468→141 · OrdersTable 428→182 · LocationsPage 441→269 (+ i18n).
+   - ✅ **Veilige RF-band (mijn domein) leeg.** Resterend zijn hun-WIP/routing (zie onder).
    - ⚠️ **App.jsx** 468 — buiten WIP maar routing/providers; de andere Claude voegt net routes toe → conflictrisico, alleen pakken als hun status schoon blijft.
    - 🤝 **uitgesteld (hun domein/WIP):** `ReportFilterSidebar` 469 · `VacanciesPage` 424 · `MessagesTable` 423 (reports).
 7. ☐ **Editor-i18n-pass (AW-7/AW-8 + AW editor-strings).** Workflow-editor (~60 strings, 0×`t()`) + module-registry labels/categorieën + `CATEGORY_ORDER` → keys. *(groot, ~1–2 dagen, maar solo)*
@@ -191,7 +192,7 @@ WorkflowCanvasEditor-restant 863 (architectuur/hook-keuzes). JS-laag gezond.
 - [ ] `pages/candidates/CandidatesPage.jsx` — 670  *(stats/predicaten → hooks; InsightsRow extraheren, B-18.6)*
 - [✅] `pages/ai/WorkflowsPage.jsx` — **501 → 303** (2026-06-23): transforms → `data/workflowMap.js` (72); `StepPill`+`WorkflowCard`+`MODULE_META`+`STATUS_STYLES` → `WorkflowCard.jsx` (136). Alle 3 < 400. Build+lint groen. *(AW-6 nog open: StepPill uit gedeelde registry voeden i.p.v. lokale MODULE_META.)*
 - [✅] `pages/users/UsersPage.jsx` — **464 → 374** (2026-06-23): `NewUserModal`+`ROLES` → `NewUserModal.jsx` (100). < 400. Build+lint groen. *(RoleSelector/EditableAvatar evt. later, cohesief.)*
-- [ ] `pages/shiftmanager/LocationsPage.jsx` — 441
+- [✅] `pages/shiftmanager/LocationsPage.jsx` — **441 → 269** (2026-06-24): `LocationDrawer` (169) + `locationParts` (36, Avatar/StatusBadge/ac) + **i18n** (`locationsPage`-sectie × 5 locales). Build+lint groen. *(269 = cohesief, DUMMY-mock + tabel-render; < 400.)*
 - [ ] `pages/vacancies/VacanciesPage.jsx` — 424  *(B-19 loopt)*
 - [ ] `pages/whatsapp/WhatsAppPage.jsx` — 422
 - [✅] `pages/auth/ProfilePage.jsx` — **421 → 172** (2026-06-24): `profileParts.jsx` (98, gedeelde blocks) + `ProfileDetailsTab` (95) + `ProfileDisplayTab` (107). Build+lint groen.
