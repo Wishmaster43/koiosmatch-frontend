@@ -268,7 +268,7 @@ export default function Dashboard({ onNavigate }) {
         <Panel>
           {opp
             ? <PieChartCard title={t('chart.byStage')} data={oppStageData} colors={oppStageData.map(d => d.color)} onItemClick={(d) => onNavigate?.('opportunities', fv(d) ? { stage: fv(d) } : undefined)} />
-            : <LineChartCard title={t('chart.intakeOverTime')} data={[]} />}
+            : <LineChartCard title={t('chart.intakeOverTime')} data={[]} unit={t('common:units.candidates')} />}
         </Panel>
       </div>
 

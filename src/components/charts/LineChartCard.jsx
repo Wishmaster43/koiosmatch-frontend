@@ -1,26 +1,32 @@
+import { useTranslation } from 'react-i18next'
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts'
 
-function LineTooltip({ active, payload, label, onItemClick }) {
+// Tooltip showing the point value + a caller-supplied unit (e.g. "candidates").
+function LineTooltip({ active, payload, label, onItemClick, unit, t }) {
   if (!active || !payload?.length) return null
   return (
     <div className="px-3 py-2 text-sm bg-white rounded-xl"
       style={{ border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
       <div className="mb-0.5 font-medium text-gray-500" style={{ fontSize: 11 }}>{label}</div>
       <div style={{ color: 'var(--color-primary)', fontSize: 13, fontWeight: 600 }}>
-        {payload[0].value} kandidaten
+        {payload[0].value}{unit ? ` ${unit}` : ''}
       </div>
-      {onItemClick && <div className="mt-1 text-xs text-gray-300">klik voor details</div>}
+      {onItemClick && <div className="mt-1 text-xs text-gray-300">{t('clickForDetails')}</div>}
     </div>
   )
 }
 
-export default function LineChartCard({ title, data = [], color = 'var(--color-primary)', height = 220, onItemClick }) {
+// `unit` is the noun shown after the value in the tooltip; the caller passes it
+// (the chart is generic), e.g. t('common:units.candidates').
+export default function LineChartCard({ title, data = [], color = 'var(--color-primary)', height = 220, onItemClick, unit = '' }) {
+  const { t } = useTranslation('common')
+
   if (!data.length) {
     return (
       <div className="flex flex-col flex-1 min-w-0">
         <div className="mb-4 text-sm font-medium text-gray-600">{title}</div>
         <div className="flex items-center justify-center text-xs text-gray-300" style={{ height }}>
-          Geen data
+          {t('noData')}
         </div>
       </div>
     )
@@ -30,14 +36,14 @@ export default function LineChartCard({ title, data = [], color = 'var(--color-p
     <div className="flex flex-col flex-1 min-w-0">
       <div className="flex items-center justify-between mb-4">
         <div className="text-sm font-medium text-gray-600">{title}</div>
-        {onItemClick && <span className="text-xs text-gray-300">klik op punt</span>}
+        {onItemClick && <span className="text-xs text-gray-300">{t('clickPoint')}</span>}
       </div>
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 4, right: 16, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
           <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
           <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false} />
-          <Tooltip content={<LineTooltip onItemClick={onItemClick} />} />
+          <Tooltip content={<LineTooltip onItemClick={onItemClick} unit={unit} t={t} />} />
           <Line
             type="monotone"
             dataKey="value"

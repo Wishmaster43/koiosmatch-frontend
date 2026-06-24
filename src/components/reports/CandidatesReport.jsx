@@ -288,6 +288,7 @@ export default function CandidatesReport() {
             <LineChartCard
               title={`${t('report.charts.newPerWeek')}${selectedYear ? ` (${selectedYear})` : ''}`}
               data={weekData} color={MONTH_COLOR} height={260}
+              unit={t('common:units.candidates')}
               onItemClick={handleWeekDrillDown}
             />
           </div>
@@ -306,6 +307,7 @@ export default function CandidatesReport() {
             <LineChartCard
               title={`${t('report.charts.endPerWeek')}${selectedYear ? ` (${selectedYear})` : ''}`}
               data={endWeekData} color={END_COLOR} height={260}
+              unit={t('common:units.candidates')}
               onItemClick={handleEndWeekDrillDown}
             />
           </div>

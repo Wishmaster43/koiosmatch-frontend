@@ -107,5 +107,11 @@
     "forbidden": "No tienes acceso a Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "No conectado"
+  },
+  "clickForDetails": "Haz clic para ver detalles",
+  "clickPoint": "Haz clic en un punto",
+  "units": {
+    "candidates": "candidatos",
+    "intakes": "intakes"
   }
 }
