@@ -237,5 +237,34 @@
       "activeShifts": "Actieve diensten",
       "edit": "Locatie bewerken"
     }
+  },
+  "contactsPage": {
+    "drawerTitle": "Contactpersoon",
+    "planningContact": "Planningscontact",
+    "noPlanningContact": "Geen planningscontact",
+    "contactDetails": "Contactgegevens",
+    "email": "E-mail",
+    "phone": "Telefoon",
+    "customer": "Klant",
+    "linkedCustomer": "Gekoppelde klant",
+    "location": "Locatie",
+    "workLocation": "Werklocatie",
+    "yes": "Ja",
+    "no": "Nee",
+    "empty": "Geen contactpersonen gevonden",
+    "count": "{{count}} contactpersonen",
+    "kpi": {
+      "contacts": "Contactpersonen",
+      "planningContacts": "Planningscontact",
+      "customers": "Klanten"
+    },
+    "cols": {
+      "name": "Naam",
+      "customer": "Klant",
+      "location": "Locatie",
+      "email": "E-mail",
+      "phone": "Telefoon",
+      "planning": "Planningscontact"
+    }
   }
 }

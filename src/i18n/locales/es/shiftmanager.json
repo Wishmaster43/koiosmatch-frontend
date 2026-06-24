@@ -237,5 +237,34 @@
       "activeShifts": "Turnos activos",
       "edit": "Editar ubicación"
     }
+  },
+  "contactsPage": {
+    "drawerTitle": "Contacto",
+    "planningContact": "Contacto de planificación",
+    "noPlanningContact": "Sin contacto de planificación",
+    "contactDetails": "Datos de contacto",
+    "email": "Correo electrónico",
+    "phone": "Teléfono",
+    "customer": "Cliente",
+    "linkedCustomer": "Cliente vinculado",
+    "location": "Ubicación",
+    "workLocation": "Lugar de trabajo",
+    "yes": "Sí",
+    "no": "No",
+    "empty": "No se encontraron contactos",
+    "count": "{{count}} contactos",
+    "kpi": {
+      "contacts": "Contactos",
+      "planningContacts": "Contactos de planificación",
+      "customers": "Clientes"
+    },
+    "cols": {
+      "name": "Nombre",
+      "customer": "Cliente",
+      "location": "Ubicación",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "planning": "Contacto de planificación"
+    }
   }
 }

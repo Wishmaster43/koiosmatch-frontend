@@ -237,5 +237,34 @@
       "activeShifts": "Aktive Einsätze",
       "edit": "Standort bearbeiten"
     }
+  },
+  "contactsPage": {
+    "drawerTitle": "Kontaktperson",
+    "planningContact": "Planungskontakt",
+    "noPlanningContact": "Kein Planungskontakt",
+    "contactDetails": "Kontaktdaten",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "customer": "Kunde",
+    "linkedCustomer": "Verknüpfter Kunde",
+    "location": "Standort",
+    "workLocation": "Arbeitsort",
+    "yes": "Ja",
+    "no": "Nein",
+    "empty": "Keine Kontaktpersonen gefunden",
+    "count": "{{count}} Kontaktpersonen",
+    "kpi": {
+      "contacts": "Kontaktpersonen",
+      "planningContacts": "Planungskontakte",
+      "customers": "Kunden"
+    },
+    "cols": {
+      "name": "Name",
+      "customer": "Kunde",
+      "location": "Standort",
+      "email": "E-Mail",
+      "phone": "Telefon",
+      "planning": "Planungskontakt"
+    }
   }
 }

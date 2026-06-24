@@ -237,5 +237,34 @@
       "activeShifts": "Missions actives",
       "edit": "Modifier le site"
     }
+  },
+  "contactsPage": {
+    "drawerTitle": "Contact",
+    "planningContact": "Contact planification",
+    "noPlanningContact": "Sans contact planification",
+    "contactDetails": "Coordonnées",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "customer": "Client",
+    "linkedCustomer": "Client lié",
+    "location": "Site",
+    "workLocation": "Lieu de travail",
+    "yes": "Oui",
+    "no": "Non",
+    "empty": "Aucun contact trouvé",
+    "count": "{{count}} contacts",
+    "kpi": {
+      "contacts": "Contacts",
+      "planningContacts": "Contacts planification",
+      "customers": "Clients"
+    },
+    "cols": {
+      "name": "Nom",
+      "customer": "Client",
+      "location": "Site",
+      "email": "E-mail",
+      "phone": "Téléphone",
+      "planning": "Contact planification"
+    }
   }
 }

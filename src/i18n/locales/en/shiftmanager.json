@@ -237,5 +237,34 @@
       "activeShifts": "Active shifts",
       "edit": "Edit location"
     }
+  },
+  "contactsPage": {
+    "drawerTitle": "Contact",
+    "planningContact": "Planning contact",
+    "noPlanningContact": "No planning contact",
+    "contactDetails": "Contact details",
+    "email": "Email",
+    "phone": "Phone",
+    "customer": "Customer",
+    "linkedCustomer": "Linked customer",
+    "location": "Location",
+    "workLocation": "Work location",
+    "yes": "Yes",
+    "no": "No",
+    "empty": "No contacts found",
+    "count": "{{count}} contacts",
+    "kpi": {
+      "contacts": "Contacts",
+      "planningContacts": "Planning contacts",
+      "customers": "Customers"
+    },
+    "cols": {
+      "name": "Name",
+      "customer": "Customer",
+      "location": "Location",
+      "email": "Email",
+      "phone": "Phone",
+      "planning": "Planning contact"
+    }
   }
 }

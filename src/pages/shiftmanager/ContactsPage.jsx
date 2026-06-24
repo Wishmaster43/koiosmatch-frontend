@@ -1,7 +1,13 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Mail, Phone, MessageCircle, MapPin, X, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
+import api, { unwrapList } from '../../lib/api'
+import { USE_MOCKS, isAbortError } from '../../lib/mocks'
+import { ac, ContactAvatar } from './contactParts'
+import ContactDrawer from './ContactDrawer'
 
+// ── Dummy fallback data (only rendered under USE_MOCKS) ───────────────────────
 const DUMMY = [
   { id: 1,  firstname: 'Sophie',  lastname: 'van den Berg',  function_title: 'HR Manager',           customer: 'Stichting Rivas Zorggroep',    location: 'Rivas Zorggroep — Papendrecht',        email: 'sophie.vandenberg@rivas.nl',      mobile: '06-12345678', planning: true  },
   { id: 2,  firstname: 'Mark',    lastname: 'de Vries',      function_title: 'Hoofd Planning',        customer: 'Stichting Rivas Zorggroep',    location: 'Rivas Zorggroep — Gorinchem',           email: 'mark.devries@rivas.nl',           mobile: '06-23456789', planning: true  },
@@ -18,114 +24,9 @@ const DUMMY = [
   { id: 13, firstname: 'Fleur',   lastname: 'van Amstel',    function_title: 'HR Coördinator',        customer: 'Den Haag Zorginstellingen',    location: 'Den Haag Zorginstellingen — Centrum',  email: 'f.vanamstel@dhzi.nl',             mobile: '06-33445566', planning: false },
 ]
 
-const COLORS = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6']
-function ac(s) { return COLORS[(s || '?').charCodeAt(0) % COLORS.length] }
-
-function ContactDrawer({ contact, onClose }) {
-  if (!contact) return null
-  const name     = [contact.firstname, contact.lastname].filter(Boolean).join(' ')
-  const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-  return (
-    <div style={{ width: 380, flexShrink: 0, borderLeft: '1px solid var(--border)',
-      background: 'var(--surface)', display: 'flex', flexDirection: 'column', height: '100%' }}>
-
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>Contactpersoon</span>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer',
-          color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
-          <X size={16} />
-        </button>
-      </div>
-
-      <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-        {/* Hero */}
-        <div style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
-          <div style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0,
-            background: ac(name), display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 18, fontWeight: 700, color: 'var(--surface)' }}>{initials}</div>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>{name}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{contact.function_title}</div>
-            {contact.planning && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, marginTop: 6,
-                padding: '2px 8px', borderRadius: 999, background: 'var(--color-success-bg)', color: 'var(--color-success)',
-                border: '1px solid #BBF7D0', fontWeight: 500 }}>
-                <MessageCircle size={10} /> Planningscontact
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Contact info */}
-        <div style={{ marginBottom: 20 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', marginBottom: 10 }}>Contactgegevens</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--hover-bg)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', flexShrink: 0 }}>
-                <Mail size={13} color="var(--text-muted)" />
-              </div>
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>E-mail</div>
-                <a href={`mailto:${contact.email}`} style={{ fontSize: 13, color: 'var(--color-secondary)', textDecoration: 'none' }}>{contact.email}</a>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--hover-bg)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', flexShrink: 0 }}>
-                <Phone size={13} color="var(--text-muted)" />
-              </div>
-              <div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Telefoon</div>
-                <div style={{ fontSize: 13, color: 'var(--text)' }}>{contact.mobile}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Klant */}
-        <div style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '14px 16px',
-          marginBottom: 12, border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
-            textTransform: 'uppercase', marginBottom: 10 }}>Klant</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 8, background: ac(contact.customer),
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 13, fontWeight: 800, color: 'var(--surface)', flexShrink: 0 }}>
-              {contact.customer?.charAt(0)}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{contact.customer}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Gekoppelde klant</div>
-            </div>
-            <ChevronRight size={14} color="var(--text-muted)" />
-          </div>
-        </div>
-
-        {/* Locatie */}
-        <div style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '14px 16px',
-          border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
-            textTransform: 'uppercase', marginBottom: 10 }}>Locatie</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 8, background: 'var(--color-primary-bg)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <MapPin size={14} color="var(--color-primary)" />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{contact.location}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Werklocatie</div>
-            </div>
-            <ChevronRight size={14} color="var(--text-muted)" />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export default function ContactsPage() {
+  const { t } = useTranslation('shiftmanager')
+  const [contacts,    setContacts]    = useState(USE_MOCKS ? DUMMY : [])
   const [search]                      = useState('')
   const [selected,    setSelected]    = useState(null)
   const [page,        setPage]        = useState(1)
@@ -135,22 +36,47 @@ export default function ContactsPage() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
+  // Load contacts from the ShiftManager mirror. Dummy only in mock mode — a
+  // failed/empty call shows an empty list in prod, never fabricated rows.
+  useEffect(() => {
+    const ctrl = new AbortController()
+    api.get('/sm_contacts', { signal: ctrl.signal })
+      .then(res => {
+        const { rows } = unwrapList(res)
+        const mapped = rows.map(c => ({
+          id:             c.id,
+          firstname:      c.first_name ?? c.firstname ?? '',
+          lastname:       c.last_name ?? c.lastname ?? '',
+          function_title: c.function_title ?? '',
+          customer:       c.customer?.name ?? c.customer ?? '',
+          location:       c.location?.name ?? c.location ?? '',
+          email:          c.email ?? '',
+          mobile:         c.mobile ?? '',
+          planning:       !!c.planning,
+        }))
+        if (mapped.length > 0) setContacts(mapped)
+        else if (!USE_MOCKS) setContacts([])
+      })
+      .catch(err => { if (!isAbortError(err) && !USE_MOCKS) setContacts([]) })
+    return () => ctrl.abort()
+  }, [])
+
   const toggle = setter => val =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
-  const klantOptions = useMemo(() => [...new Set(DUMMY.map(c => c.customer))].sort(), [])
+  const klantOptions = useMemo(() => [...new Set(contacts.map(c => c.customer).filter(Boolean))].sort(), [contacts])
 
   const filterGroups = useMemo(() => [
-    { key: 'klant', label: 'Klant',
-      options: klantOptions.map(k => ({ value: k, label: k, count: DUMMY.filter(c => c.customer === k).length })),
+    { key: 'klant', label: t('contactsPage.cols.customer'),
+      options: klantOptions.map(k => ({ value: k, label: k, count: contacts.filter(c => c.customer === k).length })),
       selected: selKlanten, onToggle: toggle(setSelKlanten) },
-    { key: 'planning', label: 'Planningscontact',
+    { key: 'planning', label: t('contactsPage.planningContact'),
       options: [
-        { value: 'ja',  label: 'Planningscontact',      count: DUMMY.filter(c => c.planning).length },
-        { value: 'nee', label: 'Geen planningscontact', count: DUMMY.filter(c => !c.planning).length },
+        { value: 'ja',  label: t('contactsPage.planningContact'),   count: contacts.filter(c => c.planning).length },
+        { value: 'nee', label: t('contactsPage.noPlanningContact'), count: contacts.filter(c => !c.planning).length },
       ],
       selected: selPlanning, onToggle: toggle(setSelPlanning) },
-  ], [klantOptions, selKlanten, selPlanning])
+  ], [t, klantOptions, contacts, selKlanten, selPlanning])
 
   useEffect(() => {
     registerFilters('klanten-contacts', filterGroups)
@@ -158,7 +84,7 @@ export default function ContactsPage() {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   const filtered = useMemo(() => {
-    let rows = DUMMY
+    let rows = contacts
     if (selKlanten.length)  rows = rows.filter(c => selKlanten.includes(c.customer))
     if (selPlanning.length) rows = rows.filter(c => selPlanning.includes(c.planning ? 'ja' : 'nee'))
     if (search.trim()) {
@@ -169,10 +95,21 @@ export default function ContactsPage() {
       })
     }
     return rows
-  }, [search, selKlanten, selPlanning])
+  }, [contacts, search, selKlanten, selPlanning])
 
   const totalPages = Math.ceil(filtered.length / pageSize) || 1
   const paged      = filtered.slice((page - 1) * pageSize, page * pageSize)
+
+  const kpis = [
+    { label: t('contactsPage.kpi.contacts'),         value: contacts.length },
+    { label: t('contactsPage.kpi.planningContacts'), value: contacts.filter(c => c.planning).length },
+    { label: t('contactsPage.kpi.customers'),        value: klantOptions.length },
+  ]
+
+  const headers = [
+    t('contactsPage.cols.name'), t('contactsPage.cols.customer'), t('contactsPage.cols.location'),
+    t('contactsPage.cols.email'), t('contactsPage.cols.phone'), t('contactsPage.cols.planning'),
+  ]
 
   return (
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
@@ -180,11 +117,7 @@ export default function ContactsPage() {
 
         {/* KPI strip */}
         <div style={{ padding: '20px 24px 18px', display: 'flex', gap: 16, flexShrink: 0 }}>
-          {[
-            { label: 'Contactpersonen', value: DUMMY.length },
-            { label: 'Planningscontact', value: DUMMY.filter(c => c.planning).length },
-            { label: 'Klanten', value: klantOptions.length },
-          ].map(k => (
+          {kpis.map(k => (
             <div key={k.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)',
               borderRadius: 10, padding: '14px 18px', flex: 1 }}>
               <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{k.value}</div>
@@ -199,7 +132,7 @@ export default function ContactsPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  {['Naam','Klant','Locatie','E-mail','Telefoon','Planningscontact'].map(h => (
+                  {headers.map(h => (
                     <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11,
                       fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.04em',
                       textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{h}</th>
@@ -208,9 +141,8 @@ export default function ContactsPage() {
               </thead>
               <tbody>
                 {paged.map((c, i) => {
-                  const name     = [c.firstname, c.lastname].filter(Boolean).join(' ')
-                  const initials = name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-                  const isSel    = selected?.id === c.id
+                  const name  = [c.firstname, c.lastname].filter(Boolean).join(' ')
+                  const isSel = selected?.id === c.id
                   return (
                     <tr key={c.id} onClick={() => setSelected(isSel ? null : c)}
                       style={{ borderBottom: i < paged.length - 1 ? '1px solid var(--border)' : 'none',
@@ -222,9 +154,7 @@ export default function ContactsPage() {
                       {/* Naam */}
                       <td style={{ padding: '11px 14px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                          <div style={{ width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
-                            background: ac(name), display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 11, fontWeight: 700, color: 'var(--surface)' }}>{initials}</div>
+                          <ContactAvatar name={name} size={30} />
                           <div>
                             <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{name}</div>
                             {c.function_title && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.function_title}</div>}
@@ -277,7 +207,7 @@ export default function ContactsPage() {
                           background: c.planning ? 'var(--color-success-bg)' : 'var(--hover-bg)',
                           color:      c.planning ? 'var(--color-success)'  : 'var(--text-muted)',
                           border:     `1px solid ${c.planning ? '#BBF7D0' : 'var(--border)'}` }}>
-                          {c.planning ? <><MessageCircle size={10} /> Ja</> : 'Nee'}
+                          {c.planning ? <><MessageCircle size={10} /> {t('contactsPage.yes')}</> : t('contactsPage.no')}
                         </span>
                       </td>
                     </tr>
@@ -285,7 +215,7 @@ export default function ContactsPage() {
                 })}
                 {paged.length === 0 && (
                   <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center',
-                    color: 'var(--text-muted)', fontSize: 13 }}>Geen contactpersonen gevonden</td></tr>
+                    color: 'var(--text-muted)', fontSize: 13 }}>{t('contactsPage.empty')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -293,7 +223,7 @@ export default function ContactsPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             marginTop: 14, fontSize: 13, color: 'var(--text-muted)' }}>
-            <span>{filtered.length} contactpersonen</span>
+            <span>{t('contactsPage.count', { count: filtered.length })}</span>
             {totalPages > 1 && (
               <div style={{ display: 'flex', gap: 4 }}>
                 <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}
