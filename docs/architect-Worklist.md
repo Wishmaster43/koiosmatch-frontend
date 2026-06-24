@@ -7,8 +7,17 @@
 > (backend) item in [`docs/worklist.md`](worklist.md), dat de enige bron blijft.
 > Hier staat het *waarom het samenhangt*, daar staat het *wat te bouwen*.
 >
-> **Laatst bijgewerkt:** 2026-06-23 · door architect-Claude.
+> **Laatst bijgewerkt:** 2026-06-24 · door architect-Claude.
 > **Legenda:** ☐ open · ◐ deels / wacht op backend · ✅ opgelost · 🔒 geblokkeerd op backend
+>
+> **Samenwerkings-afspraak (2 Claudes parallel, besloten 2026-06-24):** ik (refactor-Claude)
+> pak **alleen bestanden die NIET in de WIP van de andere Claude staan** (`git status`
+> vóór elke edit checken) — zo kan niemands ongecommitte werk overschreven worden. De
+> overlap-bestanden (hun actieve domein: candidates · entities vacancies/customers/matches/
+> opportunities/applications/tasks · reports · workflow-editor · settings/registry+AuditLog ·
+> i18n-locales) doen **zij of later** als hun status schoon is. Mijn veilige domein:
+> shiftmanager · auth · whatsapp · dashboard · app-shell/layout (excl. workflow) · components/ui
+> (excl. DataTable). **Geen handoff/domein-split** afgesproken — puur "veilige files first".
 >
 > **Bron van waarheid:** `docs/ARCHITECTURE.md` bestaat (2026-06-23, P-1 ✅) als bron-van-waarheid. Aanvullend
 > leven het entiteit-/relatie-model en het API-contract verspreid over `worklist.md`
@@ -31,7 +40,11 @@
    `EntityHeader`/`KoiosModelPicker` = custom meta-pickers (avatars/model-rendering). Niets meer te swappen.
 4. ☐ **i18n shiftmanager-pagina's** (Locations/Contacts/Departments, ~22 strings, 0×`t()`) → volledig vertalen.
 5. ☐ **CS-7 rest — NL-identifiers** die nog verspreid staan (buiten candidate-drawer al gedaan).
-6. ◐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal. *(✅ ProfilePage 421→172 · PlanningPanel 419→79 · ShiftsChartsBlock 468→141, gedaan 2026-06-24; resterend: App 463 · ReportFilterSidebar 469 (in WIP andere Claude) · LocationsPage · OrdersTable · VacanciesPage 424 (in WIP) · MessagesTable 423 (reports-domein))*
+6. ◐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal.
+   - ✅ **gedaan 2026-06-24:** ProfilePage 421→172 · PlanningPanel 419→79 · ShiftsChartsBlock 468→141.
+   - ☐ **veilig voor mij (mijn domein, buiten hun WIP):** `LocationsPage` 441 · `OrdersTable` 428 (beide shiftmanager).
+   - ⚠️ **App.jsx** 468 — buiten WIP maar routing/providers; de andere Claude voegt net routes toe → conflictrisico, alleen pakken als hun status schoon blijft.
+   - 🤝 **uitgesteld (hun domein/WIP):** `ReportFilterSidebar` 469 · `VacanciesPage` 424 · `MessagesTable` 423 (reports).
 7. ☐ **Editor-i18n-pass (AW-7/AW-8 + AW editor-strings).** Workflow-editor (~60 strings, 0×`t()`) + module-registry labels/categorieën + `CATEGORY_ORDER` → keys. *(groot, ~1–2 dagen, maar solo)*
 8. ☐ **CS-4 rest — chrome-hex** die per-touch meelift (data-kleuren blijven).
 9. ☐ **DUP-2 — select-componenten documenteren** (wanneer `SearchSelect`/`SelectMenu`/`CreatableSelect`/`SelectField`) zodat niemand een 5e bouwt.
