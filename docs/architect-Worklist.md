@@ -60,7 +60,9 @@
 12. 🔒 **VOC-1/2/3 + DUP-4 — vocab → lookups** (`NATIONALITIES` · CompanySettings-lijsten · SM-statussen) — vereist backend-lookups.
 13. 🔒 **AW-1/3/4 — graaf-opslag · links-contract · filter-vocabulaire** (backend C-27/C-18).
 14. 🔒 **CS-1 — auth httpOnly-cookie-flip** (gecoördineerd met backend).
-15. ⚠️ **CandidatesPage (670) + WorkflowCanvasEditor-restant (863)** — jouw hook-/architectuur-input nodig.
+15. ◐ **CandidatesPage + WorkflowCanvasEditor-restant.** ✅ **CandidatesPage 674→308 gesplitst (2026-06-25)**:
+    `hooks/useCandidatesData` (fetch) · `useCandidateOptions` (opties/donuts/counts) · `useCandidateBulkActions`
+    (bulk) + `data/candidatesShared` (predicaten/`buildCandidatePatch`) + `data/candidatesMock`. ⚠️ WorkflowCanvasEditor-restant (863) = hun domein.
 16. ⚠️ **CS-5/6/9 — PropTypes · inline-api→`api/`-laag · tests** (dagen elk; apart inplannen).
 17. 🔒 **DS-4 — `MOCK_LOGS`** → echte run-logs-feed (workflow-server).
 
