@@ -81,7 +81,7 @@ Velden die de frontend rendert (uit `DUMMY_CANDIDATES` + `mapCandidate`). UUID `
 | `funnel_*` | — | **niet** op kandidaat (alleen op application) — read-only chips afgeleid |
 | `owner_id` | uuid | recruiter; Resource geeft `owner{ name, initials }` |
 | `city`, `province`, `address`, `place_of_birth` | string | adres |
-| `lat`, `lng` | float | **geo** — voor radius-filter (35 km) |
+| `lat`, `lng` | float | **geo (native) — backend TOEVOEGEN + geocoding** uit adres; voor radius-filter (35 km). Zie §10. |
 | `email`, `phone` | string | |
 | `gender` | enum(lookup `/genders`) | + avatar-kleur |
 | `nationality` | string(lookup) | VOC — zie §5 |
@@ -147,7 +147,7 @@ candidate · vacancy · application · customer · location · department · con
 Elke type heeft een zoek-endpoint (`GET /{resource}?search=&per_page=`). Zie ook C-18.
 
 ### A5/A6 · Customers + Locations (native) — `/customers`, `/locations`
-`/customers` (vacancy-koppeling), `/locations` (kandidaat-radius-filter, dus **`lat`/`lng`**).
+`/customers` (vacancy-koppeling), `/locations` (kandidaat-radius-filter → **`lat`/`lng` toevoegen + geocoding**, native; zie §10).
 Bevestig dat dit native Koios-resources zijn (niet de SM-spiegel).
 
 ### A7 · Workflows — `/workflows`
@@ -344,3 +344,27 @@ schoon, SM-spiegel `sm_`-prefix).
 > **Niet in deze prompt (bestaan al / buiten mock-scope):** auth/MFA · settings/* · users/roles/
 > permissions · api-keys/webhooks · tenant-modules/admin · ai/* · profile/* · whatsapp/* — alleen
 > bevestigen dat ze leven; geen mock-data erachter.
+
+---
+
+## 10. Geo — ALLEEN op native data (besloten 2026-06-25)
+
+**Verduidelijking:** geo (`lat`/`lng`) is **alleen nodig op onze eigen Koios-data**. De radius-filter
+(35 km) en matching draaien op **native candidates ↔ native customers/locaties**. **SM-data heeft al
+geo** (bron `sm_customer_locations.latitude/longitude`) → **geen backend-werk** daar; de frontend
+consumeert het alleen nog niet (mag later, bv. een SM-rapportagekaart).
+
+**Backend bouwt (native):**
+- **`/candidates`** — `lat`/`lng` toevoegen + **geocoding** uit het adres.
+- **`/customers`(+locaties)** — `lat`/`lng` + geocoding op de native klant-locaties.
+- **Geocoding server-side** (bij opslaan/wijzigen adres → coördinaten), zodat de frontend niets hoeft
+  te geocoden. Cache de uitkomst; her-geocode alleen bij adreswijziging.
+- Dit is het **fundament** voor de radius-filter én de native planning-module (afstand-gefilterde open
+  diensten). **Lever het vóór de native planning-write-module.**
+
+**Geen backend-werk (SM-spiegel):** `/sm_locations` / `/sm_customers` exposen de bestaande
+`latitude`/`longitude` al — niets toevoegen.
+
+**Volgorde (besloten):** (1) **geo op native candidates + customers** → (2) **native planning-module**
+(Orders · Shifts · ScheduledShifts + `POST /shifts/{id}/schedule`) die de geo gebruikt → SM blijft
+read-only spiegel ernaast. **Vraag terug:** gebeurt de geocoding server-side? (ja/nee + welke provider)
