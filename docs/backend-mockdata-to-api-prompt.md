@@ -53,10 +53,10 @@
 | B1 | SM Customers (mirror) | `/sm_customers` (nested locations→departments, contacts) | `DUMMY_CUSTOMERS` | verifieer nested-shape |
 | B2 | SM Candidates (mirror) | `/sm_candidates` | dashboard | verifieer |
 | B3 | SM Reports | `/sm_reports/shifts-per-month`, `…/shifts-filter-options`, `…/detail` | werkt (charts) | verifieer |
-| **C1** | **Contacts** | **`/sm_contacts`** *(of `/contacts` — zie §6 beslissing)* | **100% dummy, GEEN endpoint** | **NIEUW** |
+| **C1** | **Contacts** | **`/sm_contacts`** ✅ besloten (ShiftManager-spiegel) | **100% dummy, GEEN endpoint** | **NIEUW** |
 | **C2** | **SM Locations (flat)** | **`/sm_locations`** | nu client-side geplat uit `/sm_customers` | **NIEUW (aanrader)** |
 | **C3** | **SM Departments (flat)** | **`/sm_departments`** | nu client-side geplat uit `/sm_customers` | **NIEUW (aanrader)** |
-| **C4** | **Planning / Shifts-module** | `/planning/*` of `/shifts/*` (zie §7) | AGENDA/ROSTER/OPEN_SHIFTS/FAV = 100% dummy | **NIEUW (groot, eigen module)** |
+| **C4** | **Native planning-module** — **Orders · Shifts · Scheduled-Shifts** | `/orders` · `/shifts` · `/scheduled-shifts` (**schoon/native**) | AGENDA/ROSTER/OPEN_SHIFTS/FAV = 100% dummy | **NIEUW (groot, eigen module — volledig incl. inroosteren)** |
 | **C5** | **Dashboard-KPIs** | **`/sm_reports/dashboard`** | `DUMMY_STATS` | **NIEUW** |
 | **C6** | **Workflow run-logs** | `/workflow-runs` (workflow-server, async) | `RUNS` + `MOCK_LOGS` | **NIEUW (workflow-server)** |
 
@@ -187,7 +187,7 @@ Dashboard leest `?per_page=`. Bevestig shape (zelfde kern als A1, maar **read-on
 
 ## 4. Echt ontbrekende endpoints (C) — bouwen
 
-### C1 · Contacts — `/sm_contacts` *(beslissing §6)*
+### C1 · Contacts — `/sm_contacts` ✅ (ShiftManager-spiegel, besloten 2026-06-24)
 `ContactsPage` is **100% dummy, geen enkele api-call**. Velden (`DUMMY`):
 `{ id, first_name, last_name, function_title, customer_id (+customer naam), location_id (+location naam),
 email, mobile, planning (bool — "ontvangt planning") }`. Tenant-scoped, paginatie, zoek
@@ -202,20 +202,51 @@ departments[]{id,name}, shift_count, lat, lng }`. Filters: status · customer ·
 `DepartmentsPage` plat nu `/sm_customers`. Plat:
 `{ id, name, customer_id (+customer), location_id (+location), city, status, employee_count, shift_count }`.
 
-### C4 · Planning / Shifts-module — `/planning/*` of `/shifts/*` *(beslissing §7)*
-Kandidaat-drawer planning-tab + (toekomstige) `PlanningPage` zijn 100% dummy. Vier datasets:
-- **Roster / ingeroosterd** (`DUMMY_SHIFTS_LIST`): `{ id, date, start, end, candidate_id, customer/client,
-  function, location, address, color, worked_before (int), favorite (bool), remarks }`.
-- **Agenda** (`AGENDA_SHIFTS`): zelfde, voor de beschikbaarheids-kalender.
-- **Open diensten** (`DUMMY_OPEN_SHIFTS`): `{ id, date, time, customer/client, function, level (1-7),
-  location, distance (km, uit geo), pool, shift_type (Dag/Avond/Nacht), department, open_spots, color }`.
-  Filtert op afstand (geo!), niveau, shift_type → vereist kandidaat-`lat/lng` + locatie-`lat/lng`.
-- **Favoriet/blacklist-zoek** (`FAV_SEARCH_DATA`): zoek over customers · locations · departments →
-  is gewoon zoek op C1/C2/C3, geen aparte tabel. Favorieten/blacklist per kandidaat opslaan:
-  `candidate_planning_prefs{ candidate_id, favorites{clients[],locations[],departments[]},
-  blacklist{clients[],locations[],departments[]} }`.
-- **Acties:** dienst inroosteren/uitroosteren op kandidaat. Dit is een **eigen module** (zwaar) —
-  bevestig scope vóór bouw.
+### C4 · Native planning-module — Orders · Shifts · Scheduled-Shifts ✅ (besloten 2026-06-24)
+
+**Beslissing:** bouw een **eigen, native** planning-module — **zoals ShiftManager, maar voor onszelf**
+(eigen data, **schone/native endpoints zonder `sm_`-prefix**). **Volledige scope**: lezen **én**
+inroosteren/uitroosteren. ShiftManager blijft daarnaast de externe spiegel (`sm_*`); deze module is
+de Koios-eigen variant (welke een tenant gebruikt hangt af van het pakket).
+
+Drie entiteiten (hiërarchie zoals ShiftManager: opdracht → dienst → toewijzing):
+
+**1. `Order` — `/orders`** (klant-opdracht / uitvraag voor inzet). Genereert Shifts.
+`{ id, customer_id (+naam), location_id (+naam), department_id (+naam), function_title (lookup),
+level (1-7), start_date, end_date, hours_per_week, status (open/partial/filled/closed),
+shifts_count, filled_count, account_manager_id, created_at }`.
+→ `GET /orders` (+`/stats`, `/{id}`), CRUD, `PATCH`. (Dit is de **native** OrdersTable — los van de
+SM-spiegel `OrdersTable` in shiftmanager.)
+
+**2. `Shift` — `/shifts`** (één dienst-slot; = de "open diensten", `DUMMY_OPEN_SHIFTS`).
+`{ id, order_id, date, start_time, end_time, customer_id (+naam), location_id (+naam, lat, lng),
+department_id (+naam), function_title, level (1-7), pool (lookup), shift_type (Dag/Avond/Nacht),
+open_spots, status (open/scheduled/filled/cancelled), color (afgeleid van shift_type/pool) }`.
+→ **`GET /shifts?candidate_id=&distance=&max_level=&shift_type[]=&status=open`** — open diensten,
+gefilterd op **geo-radius** (kandidaat-`lat/lng` ↔ locatie-`lat/lng` → `distance` km in de response),
+niveau en type. **Vereist dus geo op candidates én locations.**
+
+**3. `ScheduledShift` — toewijzing** (kandidaat ingeroosterd op een shift; = het "rooster",
+`DUMMY_SHIFTS_LIST`). `{ id, shift_id, candidate_id, status (scheduled/confirmed/declined/completed/
+no_show), worked_before (int — hoe vaak kandidaat eerder bij die klant werkte), remarks, address,
+scheduled_at, scheduled_by }`. De Resource verrijkt met de shift-velden (date/time/client/function/
+location/color) zodat het rooster in één call rendert.
+→ **`GET /candidates/{id}/scheduled-shifts`** (roster) · **`POST /shifts/{id}/schedule { candidate_id }`**
+(inroosteren → `open_spots--`, ScheduledShift aan) · **`DELETE /scheduled-shifts/{id}`** (uitroosteren →
+`open_spots++`). Mail-rooster doet de frontend client-side (mailto).
+
+**Agenda/beschikbaarheid** (`AGENDA_SHIFTS`): `GET /candidates/{id}/scheduled-shifts?from=&to=` voedt de
+beschikbaarheids-kalender (zelfde ScheduledShift-data, datumrange). Beschikbaarheid (Available/Sick/Leave)
+= aparte as → `/availability-options` + `candidate_availability{ candidate_id, date, state, reason }`.
+
+**Favoriet/blacklist** (`FAV_SEARCH_DATA`): de zoek is gewoon zoeken op customers/locations/departments
+(C1/C2/C3 — geen aparte tabel). Voorkeuren per kandidaat opslaan:
+`candidate_planning_prefs{ candidate_id, favorites{clients[],locations[],departments[]},
+blacklist{clients[],locations[],departments[]} }`. Geblokkeerde klant/locatie → shift niet inroosterbaar
+(frontend dimt + disabled; **backend re-checkt**).
+
+**Seed:** maak demo-orders → daaruit shifts → een paar ScheduledShifts voor demo-kandidaten (de mock-data
+is de seed). Zo tonen rooster, open diensten en agenda direct echte rijen.
 
 ### C5 · Dashboard-KPIs — `/sm_reports/dashboard`
 `DUMMY_STATS`: `{ open_hours, hours_this_month, occupancy_pct, messages_sent, response_rate_pct }`
@@ -242,18 +273,15 @@ mock-waarden zijn de seed-defaults:
 
 ---
 
-## 6. Open beslissing — Contacts naming
-`ContactsPage` staat onder de **Shiftmanager**-sidebar. Twee opties:
-- **`/sm_contacts`** — als het SM-spiegeldata is (read-only, `external_id`). *(waarschijnlijk dit)*
-- **`/contacts`** — als het een native Koios-entiteit is die ook handmatig beheerd wordt.
+## 6. Beslissing — Contacts naming ✅ (2026-06-24)
+**`/sm_contacts`** — Contacts is **ShiftManager-spiegeldata** (read-only, `external_id`). Native
+`/contacts` vervalt. Locations/Departments krijgen een eigen platte `sm_`-endpoint (C2/C3, aanrader).
 
-→ **Danny/​backend kiest.** Frontend volgt. (Idem of Locations/Departments een eigen `sm_`-endpoint
-krijgen (C2/C3, aanrader) of genest in `/sm_customers` blijven.)
-
-## 7. Open beslissing — Planning-module scope
-De planning-tab (C4) is de grootste missende brok en raakt geo (radius), beschikbaarheid en
-inroostering. Bevestig: **eigen module nu bouwen**, of eerst alleen lees-endpoints (roster + open
-diensten) en inroosteren later?
+## 7. Beslissing — Planning-module scope ✅ (2026-06-24)
+**Volledige native module nu bouwen** — Orders · Shifts · Scheduled-Shifts (C4), **inclusief
+inroosteren/uitroosteren**, niet alleen lees-endpoints. Schone/native endpoints (geen `sm_`),
+eigen data "zoals ShiftManager maar voor onszelf". Raakt **geo** (radius-filter op open diensten →
+`lat/lng` op candidates én locations), beschikbaarheid en de toewijzing.
 
 ---
 

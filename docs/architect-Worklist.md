@@ -51,7 +51,10 @@
 
 **Wacht op verificatie/afstemming (jouw input / backend):**
 10. ⚠️ **API-status invullen** (welke endpoints live) → **DS-3: mock-fallbacks eruit** (`DUMMY_CANDIDATES`/`MOCK_WORKFLOWS`/`USE_MOCKS` → lege staat). → **Backend-prompt klaar (2026-06-24):** [`docs/backend-mockdata-to-api-prompt.md`](backend-mockdata-to-api-prompt.md) — volledige mock-inventaris met endpoints/velden/seed; backend bouwt, koppelt per entiteit terug welke live zijn, dan sloop ik de fallback.
-11. ⚠️ **DS-1/DS-2 — PlanningPage + ContactsPage** (0 api-calls, 100% dummy): welk endpoint? (`/planning`/`/shifts` · `/sm_*`).
+11. ◐ **DS-1/DS-2 — PlanningPage + ContactsPage** (0 api-calls, 100% dummy). **Besloten 2026-06-24:**
+    ContactsPage → **`/sm_contacts`** (SM-spiegel); PlanningPage → **native module Orders · Shifts ·
+    Scheduled-Shifts** (volledig, incl. inroosteren, schone endpoints "zoals ShiftManager maar voor
+    onszelf"). Specs in [`backend-mockdata-to-api-prompt.md`](backend-mockdata-to-api-prompt.md) §C4. Backend bouwt → dan FE wiren.
 12. 🔒 **VOC-1/2/3 + DUP-4 — vocab → lookups** (`NATIONALITIES` · CompanySettings-lijsten · SM-statussen) — vereist backend-lookups.
 13. 🔒 **AW-1/3/4 — graaf-opslag · links-contract · filter-vocabulaire** (backend C-27/C-18).
 14. 🔒 **CS-1 — auth httpOnly-cookie-flip** (gecoördineerd met backend).
