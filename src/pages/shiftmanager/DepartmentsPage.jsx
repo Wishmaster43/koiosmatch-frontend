@@ -1,9 +1,13 @@
 import { useState, useMemo, useEffect } from 'react'
-import { Layers, MapPin, Building2, Users, X, ChevronRight } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import { Layers, MapPin, Building2, Users } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api, { unwrapList } from '../../lib/api'
 import { USE_MOCKS, isAbortError } from '../../lib/mocks'
+import { ac, Avatar, StatusBadge } from './departmentParts'
+import DepartmentDrawer from './DepartmentDrawer'
 
+// ── Dummy fallback data (only rendered under USE_MOCKS) ───────────────────────
 const DUMMY = [
   { id: 1,  name: 'Verpleging',           customer: 'Stichting Rivas Zorggroep', location: 'Rivas Zorggroep — Papendrecht', city: 'Papendrecht', status: 'Actief',   employees: 24, shifts: 18 },
   { id: 2,  name: 'PG-afdeling',          customer: 'Stichting Rivas Zorggroep', location: 'Rivas Zorggroep — Papendrecht', city: 'Papendrecht', status: 'Actief',   employees: 16, shifts: 12 },
@@ -29,135 +33,8 @@ const DUMMY = [
   { id: 22, name: 'Somatiek',             customer: 'Stichting Rivas Zorggroep', location: 'Rivas Zorggroep — Sliedrecht', city: 'Sliedrecht',  status: 'Actief',   employees: 5,  shifts: 3  },
 ]
 
-const AVATAR_COLORS = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6']
-function ac(s) { return AVATAR_COLORS[(s || '?').charCodeAt(0) % AVATAR_COLORS.length] }
-
-function Avatar({ label, size = 30, radius = 8 }) {
-  return (
-    <div style={{ width: size, height: size, borderRadius: radius, flexShrink: 0,
-      background: ac(label), display: 'flex', alignItems: 'center',
-      justifyContent: 'center', color: 'var(--surface)', fontSize: size * 0.34, fontWeight: 700 }}>
-      {(label || '?').charAt(0).toUpperCase()}
-    </div>
-  )
-}
-
-function StatusBadge({ status }) {
-  const active = status?.toLowerCase() === 'actief'
-  return (
-    <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 9px', borderRadius: 999,
-      background: active ? 'var(--color-success-bg)' : 'var(--border)',
-      color:      active ? 'var(--color-success)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-      {status}
-    </span>
-  )
-}
-
-function DepartmentDrawer({ dep, onClose }) {
-  if (!dep) return null
-  return (
-    <div style={{ width: 380, flexShrink: 0, borderLeft: '1px solid var(--border)',
-      background: 'var(--surface)', display: 'flex', flexDirection: 'column', height: '100%' }}>
-
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>Afdeling</span>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer',
-          color: 'var(--text-muted)', display: 'flex', padding: 4, borderRadius: 6 }}>
-          <X size={16} />
-        </button>
-      </div>
-
-      <div style={{ flex: 1, overflowY: 'auto', padding: 20 }}>
-
-        {/* Hero */}
-        <div style={{ display: 'flex', gap: 14, marginBottom: 24 }}>
-          <Avatar label={dep.name} size={52} radius={10} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{dep.name}</div>
-            <StatusBadge status={dep.status} />
-          </div>
-        </div>
-
-        {/* Klant */}
-        <div style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '14px 16px',
-          marginBottom: 16, border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
-            textTransform: 'uppercase', marginBottom: 10 }}>Klant</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 8, background: ac(dep.customer),
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 14, fontWeight: 800, color: 'var(--surface)', flexShrink: 0 }}>
-              {dep.customer?.charAt(0)}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{dep.customer}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Gekoppelde klant</div>
-            </div>
-            <ChevronRight size={14} color="var(--text-muted)" />
-          </div>
-        </div>
-
-        {/* Locatie */}
-        <div style={{ background: 'var(--hover-bg)', borderRadius: 10, padding: '14px 16px',
-          marginBottom: 20, border: '1px solid var(--border)' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.06em',
-            textTransform: 'uppercase', marginBottom: 10 }}>Locatie</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 8, background: 'var(--color-primary-bg)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <MapPin size={16} color="var(--color-primary)" />
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{dep.location}</div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{dep.city}</div>
-            </div>
-            <ChevronRight size={14} color="var(--text-muted)" />
-          </div>
-        </div>
-
-        {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
-          {[
-            { label: 'Medewerkers', value: dep.employees, Icon: Users,    color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
-            { label: 'Diensten',    value: dep.shifts,    Icon: Layers,   color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
-          ].map(s => (
-            <div key={s.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)',
-              borderRadius: 10, padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ width: 34, height: 34, borderRadius: 8, background: s.bg,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <s.Icon size={15} color={s.color} />
-              </div>
-              <div>
-                <div style={{ fontSize: 20, fontWeight: 700, color: 'var(--text)', lineHeight: 1 }}>{s.value}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{s.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Notities leeg */}
-        <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 10 }}>Notities</div>
-          <div style={{ padding: 20, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13,
-            background: 'var(--hover-bg)', borderRadius: 8, border: '1px dashed var(--border)' }}>
-            Nog geen notities
-          </div>
-        </div>
-      </div>
-
-      <div style={{ padding: '12px 20px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-        <button style={{ width: '100%', padding: 9, fontSize: 13, fontWeight: 500,
-          borderRadius: 8, border: '1px solid var(--color-primary)', background: 'var(--color-primary-bg)',
-          color: 'var(--color-primary)', cursor: 'pointer' }}>
-          Afdeling bewerken
-        </button>
-      </div>
-    </div>
-  )
-}
-
 export default function DepartmentsPage() {
+  const { t } = useTranslation('shiftmanager')
   const [departments, setDepartments] = useState(USE_MOCKS ? DUMMY : [])
   const [search]                      = useState('')
   const [selected,    setSelected]    = useState(null)
@@ -169,6 +46,7 @@ export default function DepartmentsPage() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
+  // Departments derived from /sm_customers (nested locations → departments).
   // Dummy only in mock mode — a failed/empty call shows an empty list in prod.
   useEffect(() => {
     const ctrl = new AbortController()
@@ -204,16 +82,16 @@ export default function DepartmentsPage() {
   const locatieOptions = useMemo(() => [...new Set(departments.map(d => d.location).filter(Boolean))].sort(), [departments])
 
   const filterGroups = useMemo(() => [
-    { key: 'status',  label: 'Status',
+    { key: 'status',  label: t('departmentsPage.filter.status'),
       options: statusOptions.map(s => ({ value: s, label: s })),
       selected: selStatuses,  onToggle: toggle(setSelStatuses) },
-    { key: 'klant',   label: 'Klant',
+    { key: 'klant',   label: t('departmentsPage.filter.customer'),
       options: klantOptions.map(k => ({ value: k, label: k })),
       selected: selKlanten,   onToggle: toggle(setSelKlanten) },
-    { key: 'locatie', label: 'Locatie',
+    { key: 'locatie', label: t('departmentsPage.filter.location'),
       options: locatieOptions.map(l => ({ value: l, label: l })),
       selected: selLocaties,  onToggle: toggle(setSelLocaties) },
-  ], [statusOptions, klantOptions, locatieOptions, selStatuses, selKlanten, selLocaties])
+  ], [t, statusOptions, klantOptions, locatieOptions, selStatuses, selKlanten, selLocaties])
 
   useEffect(() => {
     registerFilters('departments-page', filterGroups)
@@ -239,18 +117,26 @@ export default function DepartmentsPage() {
   const totalPages = Math.ceil(filtered.length / pageSize)
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize)
 
+  // KPI cards — translated labels; values derived from the live list.
+  const kpis = [
+    { label: t('departmentsPage.kpi.total'),           value: departments.length,                                       color: 'var(--color-primary)',   bg: 'var(--color-primary-bg)',   Icon: Layers },
+    { label: t('departmentsPage.kpi.active'),          value: departments.filter(d => d.status === 'Actief').length,    color: 'var(--color-success)',   bg: 'var(--color-success-bg)',   Icon: Layers },
+    { label: t('departmentsPage.kpi.employees'),       value: departments.reduce((s,d) => s + d.employees, 0),          color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)',   Icon: Users },
+    { label: t('departmentsPage.kpi.linkedCustomers'), value: [...new Set(departments.map(d => d.customer))].length,    color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Building2 },
+  ]
+
+  const headers = [
+    t('departmentsPage.cols.department'), t('departmentsPage.cols.customer'), t('departmentsPage.cols.location'),
+    t('departmentsPage.cols.employees'), t('departmentsPage.cols.shifts'), t('departmentsPage.cols.status'),
+  ]
+
   return (
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
 
         {/* KPI strip */}
         <div style={{ padding: '20px 24px 18px', display: 'flex', gap: 20, flexShrink: 0 }}>
-          {[
-            { label: 'Totaal afdelingen',    value: departments.length,                                       color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: Layers },
-            { label: 'Actief',               value: departments.filter(d => d.status === 'Actief').length,   color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Layers },
-            { label: 'Medewerkers',          value: departments.reduce((s,d) => s + d.employees, 0),          color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: Users },
-            { label: 'Gekoppelde klanten',   value: [...new Set(departments.map(d => d.customer))].length,   color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Building2 },
-          ].map(k => (
+          {kpis.map(k => (
             <div key={k.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)',
               borderRadius: 10, padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 12, flex: 1 }}>
               <div style={{ width: 34, height: 34, borderRadius: 8, background: k.bg,
@@ -271,7 +157,7 @@ export default function DepartmentsPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  {['Afdeling','Klant','Locatie','Medewerkers','Diensten','Status'].map(h => (
+                  {headers.map(h => (
                     <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11,
                       fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.04em',
                       textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{h}</th>
@@ -337,7 +223,7 @@ export default function DepartmentsPage() {
                 })}
                 {paged.length === 0 && (
                   <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center',
-                    color: 'var(--text-muted)', fontSize: 13 }}>Geen afdelingen gevonden</td></tr>
+                    color: 'var(--text-muted)', fontSize: 13 }}>{t('departmentsPage.empty')}</td></tr>
                 )}
               </tbody>
             </table>
@@ -345,7 +231,7 @@ export default function DepartmentsPage() {
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             marginTop: 14, fontSize: 13, color: 'var(--text-muted)' }}>
-            <span>{filtered.length} afdelingen</span>
+            <span>{t('departmentsPage.count', { count: filtered.length })}</span>
             {totalPages > 1 && (
               <div style={{ display: 'flex', gap: 4 }}>
                 <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}

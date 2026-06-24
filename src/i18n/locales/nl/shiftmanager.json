@@ -266,5 +266,37 @@
       "phone": "Telefoon",
       "planning": "Planningscontact"
     }
+  },
+  "departmentsPage": {
+    "drawerTitle": "Afdeling",
+    "customer": "Klant",
+    "linkedCustomer": "Gekoppelde klant",
+    "location": "Locatie",
+    "employees": "Medewerkers",
+    "shifts": "Diensten",
+    "notes": "Notities",
+    "noNotes": "Nog geen notities",
+    "edit": "Afdeling bewerken",
+    "empty": "Geen afdelingen gevonden",
+    "count": "{{count}} afdelingen",
+    "kpi": {
+      "total": "Totaal afdelingen",
+      "active": "Actief",
+      "employees": "Medewerkers",
+      "linkedCustomers": "Gekoppelde klanten"
+    },
+    "cols": {
+      "department": "Afdeling",
+      "customer": "Klant",
+      "location": "Locatie",
+      "employees": "Medewerkers",
+      "shifts": "Diensten",
+      "status": "Status"
+    },
+    "filter": {
+      "status": "Status",
+      "customer": "Klant",
+      "location": "Locatie"
+    }
   }
 }

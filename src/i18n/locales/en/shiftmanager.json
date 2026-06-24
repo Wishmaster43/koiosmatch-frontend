@@ -266,5 +266,37 @@
       "phone": "Phone",
       "planning": "Planning contact"
     }
+  },
+  "departmentsPage": {
+    "drawerTitle": "Department",
+    "customer": "Customer",
+    "linkedCustomer": "Linked customer",
+    "location": "Location",
+    "employees": "Employees",
+    "shifts": "Shifts",
+    "notes": "Notes",
+    "noNotes": "No notes yet",
+    "edit": "Edit department",
+    "empty": "No departments found",
+    "count": "{{count}} departments",
+    "kpi": {
+      "total": "Total departments",
+      "active": "Active",
+      "employees": "Employees",
+      "linkedCustomers": "Linked customers"
+    },
+    "cols": {
+      "department": "Department",
+      "customer": "Customer",
+      "location": "Location",
+      "employees": "Employees",
+      "shifts": "Shifts",
+      "status": "Status"
+    },
+    "filter": {
+      "status": "Status",
+      "customer": "Customer",
+      "location": "Location"
+    }
   }
 }

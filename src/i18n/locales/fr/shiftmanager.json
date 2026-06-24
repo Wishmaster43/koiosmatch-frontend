@@ -266,5 +266,37 @@
       "phone": "Téléphone",
       "planning": "Contact planification"
     }
+  },
+  "departmentsPage": {
+    "drawerTitle": "Département",
+    "customer": "Client",
+    "linkedCustomer": "Client lié",
+    "location": "Site",
+    "employees": "Employés",
+    "shifts": "Missions",
+    "notes": "Notes",
+    "noNotes": "Aucune note",
+    "edit": "Modifier le département",
+    "empty": "Aucun département trouvé",
+    "count": "{{count}} départements",
+    "kpi": {
+      "total": "Total départements",
+      "active": "Actifs",
+      "employees": "Employés",
+      "linkedCustomers": "Clients liés"
+    },
+    "cols": {
+      "department": "Département",
+      "customer": "Client",
+      "location": "Site",
+      "employees": "Employés",
+      "shifts": "Missions",
+      "status": "Statut"
+    },
+    "filter": {
+      "status": "Statut",
+      "customer": "Client",
+      "location": "Site"
+    }
   }
 }

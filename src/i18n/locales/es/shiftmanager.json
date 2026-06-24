@@ -266,5 +266,37 @@
       "phone": "Teléfono",
       "planning": "Contacto de planificación"
     }
+  },
+  "departmentsPage": {
+    "drawerTitle": "Departamento",
+    "customer": "Cliente",
+    "linkedCustomer": "Cliente vinculado",
+    "location": "Ubicación",
+    "employees": "Empleados",
+    "shifts": "Turnos",
+    "notes": "Notas",
+    "noNotes": "Sin notas todavía",
+    "edit": "Editar departamento",
+    "empty": "No se encontraron departamentos",
+    "count": "{{count}} departamentos",
+    "kpi": {
+      "total": "Total departamentos",
+      "active": "Activas",
+      "employees": "Empleados",
+      "linkedCustomers": "Clientes vinculados"
+    },
+    "cols": {
+      "department": "Departamento",
+      "customer": "Cliente",
+      "location": "Ubicación",
+      "employees": "Empleados",
+      "shifts": "Turnos",
+      "status": "Estado"
+    },
+    "filter": {
+      "status": "Estado",
+      "customer": "Cliente",
+      "location": "Ubicación"
+    }
   }
 }

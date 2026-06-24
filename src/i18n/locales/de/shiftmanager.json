@@ -266,5 +266,37 @@
       "phone": "Telefon",
       "planning": "Planungskontakt"
     }
+  },
+  "departmentsPage": {
+    "drawerTitle": "Abteilung",
+    "customer": "Kunde",
+    "linkedCustomer": "Verknüpfter Kunde",
+    "location": "Standort",
+    "employees": "Mitarbeiter",
+    "shifts": "Einsätze",
+    "notes": "Notizen",
+    "noNotes": "Noch keine Notizen",
+    "edit": "Abteilung bearbeiten",
+    "empty": "Keine Abteilungen gefunden",
+    "count": "{{count}} Abteilungen",
+    "kpi": {
+      "total": "Abteilungen gesamt",
+      "active": "Aktiv",
+      "employees": "Mitarbeiter",
+      "linkedCustomers": "Verknüpfte Kunden"
+    },
+    "cols": {
+      "department": "Abteilung",
+      "customer": "Kunde",
+      "location": "Standort",
+      "employees": "Mitarbeiter",
+      "shifts": "Einsätze",
+      "status": "Status"
+    },
+    "filter": {
+      "status": "Status",
+      "customer": "Kunde",
+      "location": "Standort"
+    }
   }
 }
