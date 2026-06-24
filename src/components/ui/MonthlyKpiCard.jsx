@@ -4,10 +4,12 @@
  * underlying candidates. statusFilter limits which candidates count.
  */
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import KpiDrillDownDrawer from '../reports/KpiDrillDownDrawer'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 
 export default function MonthlyKpiCard({ candidates = [], loading = false, statusFilter = ['actief'] }) {
+  const { t } = useTranslation('shiftmanager')
   const { new_candidates_target: KPI_TARGET } = useKpiSettings()
   const [drill, setDrill] = useState(null) // { mode, title, candidates }
 
@@ -36,7 +38,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
     ? candidates.filter(c => statusFilter.includes((c.status || 'onbekend').toLowerCase()))
     : candidates
 
-  // Nieuw deze maand
+  // New this month
   const nieuweKandidaten = filtered.filter(c => {
     if (!c.registration_date) return false
     const d = new Date(c.registration_date)
@@ -44,7 +46,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
   })
   const werkelijk = nieuweKandidaten.length
 
-  // Gemiddelde per maand huidig jaar t/m huidige maand
+  // Monthly average for the current year up to this month
   const grouped = {}
   filtered.forEach(c => {
     if (!c.registration_date) return
@@ -58,7 +60,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
     ? Math.round(values.reduce((s, v) => s + v, 0) / values.length)
     : 0
 
-  // Uitgeschreven deze maand
+  // Deregistered this month
   const uitgeschrevenKandidaten = candidates.filter(c => {
     if (!c.end_date_employment) return false
     const d = new Date(c.end_date_employment)
@@ -88,85 +90,85 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
         <div className="flex items-center justify-between">
           <div>
             <div className="font-medium text-gray-800" style={{ fontSize: 13 }}>
-              Kandidaten overzicht
+              {t('monthlyKpi.title')}
             </div>
             <div className="text-xs text-gray-400 mt-0.5 capitalize">{monthLabel}</div>
           </div>
           <div className="rounded-full px-2.5 py-1 text-xs font-semibold"
             style={{ background: color + '18', color }}>
-            {pctVsKpi}% van KPI
+            {t('monthlyKpi.pctOfKpi', { pct: pctVsKpi })}
           </div>
         </div>
 
-        {/* Vier klikbare waarden */}
+        {/* Four clickable values */}
         <div className="flex" style={{ borderTop: '1px solid var(--hover-bg)', paddingTop: 14 }}>
 
-          {/* Nieuw */}
+          {/* New */}
           <div
             style={blockStyle(true)}
-            onClick={() => openDrill('nieuw', `Nieuw in ${now.toLocaleString('nl-NL', { month: 'long' })}`, nieuweKandidaten)}
+            onClick={() => openDrill('nieuw', t('monthlyKpi.newIn', { month: now.toLocaleString('nl-NL', { month: 'long' }) }), nieuweKandidaten)}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            title="Klik voor details"
+            title={t('monthlyKpi.tipDetails')}
           >
             <div className="mb-1 font-semibold leading-none"
               style={{ fontSize: 26, color, letterSpacing: '-0.5px' }}>
               {werkelijk}
             </div>
-            <div className="text-xs text-gray-400">Nieuw</div>
+            <div className="text-xs text-gray-400">{t('monthlyKpi.new')}</div>
           </div>
 
           <div style={{ width: 1, background: 'var(--border)', margin: '0 4px' }} />
 
-          {/* Gemiddelde */}
+          {/* Average */}
           <div
             style={blockStyle(true)}
-            onClick={() => openDrill('average', 'Gemiddelde berekening', candidates)}
+            onClick={() => openDrill('average', t('monthlyKpi.averageCalc'), candidates)}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            title="Klik voor uitleg berekening"
+            title={t('monthlyKpi.tipAverage')}
           >
             <div className="mb-1 font-semibold leading-none"
               style={{ fontSize: 26, color: 'var(--text)', letterSpacing: '-0.5px' }}>
               {gemiddeld}
             </div>
-            <div className="text-xs text-gray-400">Gemiddelde</div>
+            <div className="text-xs text-gray-400">{t('monthlyKpi.average')}</div>
           </div>
 
           <div style={{ width: 1, background: 'var(--border)', margin: '0 4px' }} />
 
-          {/* KPI doel */}
+          {/* KPI target */}
           <div
             style={blockStyle(true)}
-            onClick={() => openDrill('average', 'KPI doel & voortgang', candidates)}
+            onClick={() => openDrill('average', t('monthlyKpi.kpiProgress'), candidates)}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            title="Klik voor KPI voortgang"
+            title={t('monthlyKpi.tipKpi')}
           >
             <div className="mb-1 font-semibold leading-none"
               style={{ fontSize: 26, color: 'var(--text-muted)', letterSpacing: '-0.5px' }}>
               {KPI_TARGET}
             </div>
-            <div className="text-xs text-gray-400">KPI doel</div>
+            <div className="text-xs text-gray-400">{t('monthlyKpi.kpiTarget')}</div>
           </div>
 
           <div style={{ width: 1, background: 'var(--border)', margin: '0 4px' }} />
 
-          {/* Uitgeschreven */}
+          {/* Deregistered */}
           <div
             style={blockStyle(uitgeschreven > 0)}
             onClick={uitgeschreven > 0
-              ? () => openDrill('uitgeschreven', `Uitgeschreven in ${now.toLocaleString('nl-NL', { month: 'long' })}`, uitgeschrevenKandidaten)
+              ? () => openDrill('uitgeschreven', t('monthlyKpi.unsubscribedIn', { month: now.toLocaleString('nl-NL', { month: 'long' }) }), uitgeschrevenKandidaten)
               : undefined}
             onMouseEnter={e => { if (uitgeschreven > 0) e.currentTarget.style.background = 'var(--hover-bg)' }}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            title={uitgeschreven > 0 ? 'Klik voor details' : undefined}
+            title={uitgeschreven > 0 ? t('monthlyKpi.tipDetails') : undefined}
           >
             <div className="mb-1 font-semibold leading-none"
               style={{ fontSize: 26, color: uitgeschreven > 0 ? 'var(--color-danger)' : 'var(--text-muted)', letterSpacing: '-0.5px' }}>
               {uitgeschreven}
             </div>
-            <div className="text-xs text-gray-400">Uitgeschreven</div>
+            <div className="text-xs text-gray-400">{t('monthlyKpi.unsubscribed')}</div>
           </div>
         </div>
 

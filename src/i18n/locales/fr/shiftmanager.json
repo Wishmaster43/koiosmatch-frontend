@@ -298,5 +298,20 @@
       "customer": "Client",
       "location": "Site"
     }
+  },
+  "monthlyKpi": {
+    "title": "Aperçu des candidats",
+    "pctOfKpi": "{{pct}} % du KPI",
+    "new": "Nouveaux",
+    "average": "Moyenne",
+    "kpiTarget": "Objectif KPI",
+    "unsubscribed": "Désinscrits",
+    "newIn": "Nouveaux en {{month}}",
+    "unsubscribedIn": "Désinscrits en {{month}}",
+    "averageCalc": "Calcul de la moyenne",
+    "kpiProgress": "Objectif KPI et progression",
+    "tipDetails": "Cliquez pour les détails",
+    "tipAverage": "Cliquez pour l'explication du calcul",
+    "tipKpi": "Cliquez pour la progression du KPI"
   }
 }

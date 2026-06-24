@@ -298,5 +298,20 @@
       "customer": "Customer",
       "location": "Location"
     }
+  },
+  "monthlyKpi": {
+    "title": "Candidate overview",
+    "pctOfKpi": "{{pct}}% of KPI",
+    "new": "New",
+    "average": "Average",
+    "kpiTarget": "KPI target",
+    "unsubscribed": "Deregistered",
+    "newIn": "New in {{month}}",
+    "unsubscribedIn": "Deregistered in {{month}}",
+    "averageCalc": "Average calculation",
+    "kpiProgress": "KPI target & progress",
+    "tipDetails": "Click for details",
+    "tipAverage": "Click for calculation explanation",
+    "tipKpi": "Click for KPI progress"
   }
 }
