@@ -41,8 +41,8 @@
 4. ☐ **i18n shiftmanager-pagina's** (Locations/Contacts/Departments, ~22 strings, 0×`t()`) → volledig vertalen.
 5. ☐ **CS-7 rest — NL-identifiers** die nog verspreid staan (buiten candidate-drawer al gedaan).
 6. ◐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal.
-   - ✅ **gedaan 2026-06-24:** ProfilePage 421→172 · PlanningPanel 419→79 · ShiftsChartsBlock 468→141.
-   - ☐ **veilig voor mij (mijn domein, buiten hun WIP):** `LocationsPage` 441 · `OrdersTable` 428 (beide shiftmanager).
+   - ✅ **gedaan 2026-06-24:** ProfilePage 421→172 · PlanningPanel 419→79 · ShiftsChartsBlock 468→141 · OrdersTable 428→182.
+   - ☐ **veilig voor mij (mijn domein, buiten hun WIP):** `LocationsPage` 441 (split **+** i18n, want 0×`t()`).
    - ⚠️ **App.jsx** 468 — buiten WIP maar routing/providers; de andere Claude voegt net routes toe → conflictrisico, alleen pakken als hun status schoon blijft.
    - 🤝 **uitgesteld (hun domein/WIP):** `ReportFilterSidebar` 469 · `VacanciesPage` 424 · `MessagesTable` 423 (reports).
 7. ☐ **Editor-i18n-pass (AW-7/AW-8 + AW editor-strings).** Workflow-editor (~60 strings, 0×`t()`) + module-registry labels/categorieën + `CATEGORY_ORDER` → keys. *(groot, ~1–2 dagen, maar solo)*
@@ -225,7 +225,7 @@ WorkflowCanvasEditor-restant 863 (architectuur/hook-keuzes). JS-laag gezond.
 
 **ShiftManager:**
 - [✅] `components/shiftmanager/ShiftsChartsBlock.jsx` — **468 → 141** (2026-06-24): `shiftsChartsConfig` (28) · `shiftsChartsWidgets` (92) · `useShiftsChartData` (146, fetch+transform+bars) · `buildShiftsFilterGroups` (121). Build+lint groen.
-- [ ] `components/shiftmanager/OrdersTable.jsx` — 428
+- [✅] `components/shiftmanager/OrdersTable.jsx` — **428 → 182** (2026-06-24): `ordersTableParts` (79, badge/sort/styles/formatters/Section/cols) · `OrderDetailDrawer` (112) · `useOrdersTable` (99, fetch+paging+enrich/filter/sort). Build+lint groen.
 
 **Candidates drawer · Context:**
 - [✅] `pages/candidates/drawer/PlanningPanel.jsx` — **419 → 79** (2026-06-24): thin router + `PlanningScheduling` (144) · `PlanningOpenShifts` (131) · `PlanningFavorites` (137). State blijft gelift in de container. Build+lint groen.
