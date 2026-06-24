@@ -199,5 +199,43 @@
       "thisMonth": "Deze maand",
       "historicAvg": "gem. {{pct}} historisch"
     }
+  },
+  "locationsPage": {
+    "drawerTitle": "Locatie",
+    "kpi": {
+      "total": "Totaal locaties",
+      "active": "Actief",
+      "departments": "Afdelingen",
+      "linkedCustomers": "Gekoppelde klanten"
+    },
+    "cols": {
+      "location": "Locatie",
+      "customer": "Klant",
+      "city": "Stad",
+      "departments": "Afdelingen",
+      "shifts": "Diensten",
+      "status": "Status"
+    },
+    "filter": {
+      "status": "Status",
+      "customer": "Klant",
+      "city": "Stad"
+    },
+    "empty": "Geen locaties gevonden",
+    "count": "{{count}} locaties",
+    "statusUnknown": "Onbekend",
+    "drawer": {
+      "customer": "Klant",
+      "linkedCustomer": "Gekoppelde klant",
+      "contactDetails": "Contactgegevens",
+      "address": "Adres",
+      "phone": "Telefoon",
+      "email": "E-mail",
+      "departments": "Afdelingen",
+      "add": "Toevoegen",
+      "noDepartments": "Geen afdelingen gekoppeld",
+      "activeShifts": "Actieve diensten",
+      "edit": "Locatie bewerken"
+    }
   }
 }

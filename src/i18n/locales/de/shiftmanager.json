@@ -199,5 +199,43 @@
       "thisMonth": "Diesen Monat",
       "historicAvg": "Ø {{pct}} historisch"
     }
+  },
+  "locationsPage": {
+    "drawerTitle": "Standort",
+    "kpi": {
+      "total": "Standorte gesamt",
+      "active": "Aktiv",
+      "departments": "Abteilungen",
+      "linkedCustomers": "Verknüpfte Kunden"
+    },
+    "cols": {
+      "location": "Standort",
+      "customer": "Kunde",
+      "city": "Stadt",
+      "departments": "Abteilungen",
+      "shifts": "Einsätze",
+      "status": "Status"
+    },
+    "filter": {
+      "status": "Status",
+      "customer": "Kunde",
+      "city": "Stadt"
+    },
+    "empty": "Keine Standorte gefunden",
+    "count": "{{count}} Standorte",
+    "statusUnknown": "Unbekannt",
+    "drawer": {
+      "customer": "Kunde",
+      "linkedCustomer": "Verknüpfter Kunde",
+      "contactDetails": "Kontaktdaten",
+      "address": "Adresse",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "departments": "Abteilungen",
+      "add": "Hinzufügen",
+      "noDepartments": "Keine Abteilungen verknüpft",
+      "activeShifts": "Aktive Einsätze",
+      "edit": "Standort bearbeiten"
+    }
   }
 }

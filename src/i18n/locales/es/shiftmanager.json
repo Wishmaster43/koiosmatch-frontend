@@ -199,5 +199,43 @@
       "thisMonth": "Este mes",
       "historicAvg": "prom. {{pct}} histórico"
     }
+  },
+  "locationsPage": {
+    "drawerTitle": "Ubicación",
+    "kpi": {
+      "total": "Total ubicaciones",
+      "active": "Activas",
+      "departments": "Departamentos",
+      "linkedCustomers": "Clientes vinculados"
+    },
+    "cols": {
+      "location": "Ubicación",
+      "customer": "Cliente",
+      "city": "Ciudad",
+      "departments": "Departamentos",
+      "shifts": "Turnos",
+      "status": "Estado"
+    },
+    "filter": {
+      "status": "Estado",
+      "customer": "Cliente",
+      "city": "Ciudad"
+    },
+    "empty": "No se encontraron ubicaciones",
+    "count": "{{count}} ubicaciones",
+    "statusUnknown": "Desconocido",
+    "drawer": {
+      "customer": "Cliente",
+      "linkedCustomer": "Cliente vinculado",
+      "contactDetails": "Datos de contacto",
+      "address": "Dirección",
+      "phone": "Teléfono",
+      "email": "Correo electrónico",
+      "departments": "Departamentos",
+      "add": "Añadir",
+      "noDepartments": "Sin departamentos vinculados",
+      "activeShifts": "Turnos activos",
+      "edit": "Editar ubicación"
+    }
   }
 }

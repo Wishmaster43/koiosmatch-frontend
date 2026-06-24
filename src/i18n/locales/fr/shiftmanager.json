@@ -199,5 +199,43 @@
       "thisMonth": "Ce mois-ci",
       "historicAvg": "moy. {{pct}} historique"
     }
+  },
+  "locationsPage": {
+    "drawerTitle": "Site",
+    "kpi": {
+      "total": "Total sites",
+      "active": "Actifs",
+      "departments": "Départements",
+      "linkedCustomers": "Clients liés"
+    },
+    "cols": {
+      "location": "Site",
+      "customer": "Client",
+      "city": "Ville",
+      "departments": "Départements",
+      "shifts": "Missions",
+      "status": "Statut"
+    },
+    "filter": {
+      "status": "Statut",
+      "customer": "Client",
+      "city": "Ville"
+    },
+    "empty": "Aucun site trouvé",
+    "count": "{{count}} sites",
+    "statusUnknown": "Inconnu",
+    "drawer": {
+      "customer": "Client",
+      "linkedCustomer": "Client lié",
+      "contactDetails": "Coordonnées",
+      "address": "Adresse",
+      "phone": "Téléphone",
+      "email": "E-mail",
+      "departments": "Départements",
+      "add": "Ajouter",
+      "noDepartments": "Aucun département lié",
+      "activeShifts": "Missions actives",
+      "edit": "Modifier le site"
+    }
   }
 }

@@ -199,5 +199,43 @@
       "thisMonth": "This month",
       "historicAvg": "avg. {{pct}} historic"
     }
+  },
+  "locationsPage": {
+    "drawerTitle": "Location",
+    "kpi": {
+      "total": "Total locations",
+      "active": "Active",
+      "departments": "Departments",
+      "linkedCustomers": "Linked customers"
+    },
+    "cols": {
+      "location": "Location",
+      "customer": "Customer",
+      "city": "City",
+      "departments": "Departments",
+      "shifts": "Shifts",
+      "status": "Status"
+    },
+    "filter": {
+      "status": "Status",
+      "customer": "Customer",
+      "city": "City"
+    },
+    "empty": "No locations found",
+    "count": "{{count}} locations",
+    "statusUnknown": "Unknown",
+    "drawer": {
+      "customer": "Customer",
+      "linkedCustomer": "Linked customer",
+      "contactDetails": "Contact details",
+      "address": "Address",
+      "phone": "Phone",
+      "email": "Email",
+      "departments": "Departments",
+      "add": "Add",
+      "noDepartments": "No departments linked",
+      "activeShifts": "Active shifts",
+      "edit": "Edit location"
+    }
   }
 }
