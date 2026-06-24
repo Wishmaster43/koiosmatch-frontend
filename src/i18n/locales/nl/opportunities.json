@@ -64,5 +64,9 @@
       "expectedClose": "Verwachte sluiting",
       "owner": "Eigenaar"
     }
+  },
+  "view": {
+    "table": "Lijstweergave",
+    "board": "Kanbanbord"
   }
 }

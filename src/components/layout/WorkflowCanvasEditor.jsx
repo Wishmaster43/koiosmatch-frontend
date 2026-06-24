@@ -32,7 +32,7 @@ import { AgentsTab, PromptsTab, FAQTab, KnowledgeTab, ToolsTab } from '../ai/AIM
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow, flowToSteps } from './workflow/serialization'
 import { FieldInput } from './workflow/fields'
 import { ScheduleModal, scheduleLabel } from './workflow/ScheduleModal'
-import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext } from './workflow/contexts'
+import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './workflow/contexts'
 import { EdgeFilterPanel, OutputPanel, NODE_TYPES, EDGE_TYPES } from './workflow/canvas'
 
 // ── Module picker ─────────────────────────────────────────────────────────────
@@ -255,7 +255,19 @@ function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
             </div>
           ))}
           {schema.length === 0 && (
-            <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Geen configuratie vereist.</p>
+            node.data.type === 'router' ? (
+              <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0 }}>Router</p>
+                <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
+                  Verbind de Router naar meerdere modules op het canvas. Klik op het <strong>filter-icoontje</strong> op een verbindingslijn om te bepalen wanneer die route wordt gevolgd.
+                </p>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
+                  Geen overeenkomende route → de flow stopt voor die tak.
+                </p>
+              </div>
+            ) : (
+              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Geen configuratie vereist.</p>
+            )
           )}
         </div>
       ) : !MANAGE_TABS.includes(activeTab) ? (
@@ -437,6 +449,8 @@ function EditorInner({ workflow, onClose, onSave }) {
   const [pickerState,    setPickerState]    = useState(null)
   const [showSchedule,   setShowSchedule]   = useState(false)
   const [widePanelActive, setWidePanelActive] = useState(false)
+  // null = auto (node without incoming edge, leftmost); set via START badge drag
+  const [startNodeId,    setStartNodeId]    = useState(null)
 
   useEffect(() => {
     import('../../lib/api').then(m => {
@@ -613,14 +627,16 @@ function EditorInner({ workflow, onClose, onSave }) {
     setSelectedNodeId(id => id === nodeId ? null : id)
   }, [setEdges, setNodes])
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback((closeAfter = false) => {
     const steps = flowToSteps(nodes, edges)
     let triggerConfig = undefined
     if (trigger === 'Webhook' && webhookId) triggerConfig = { webhook_id: webhookId }
     else if (trigger === 'Scheduled' && scheduleConfig) triggerConfig = { schedule: scheduleConfig }
-    onSave({ ...workflow, name, trigger, trigger_config: triggerConfig, status, steps })
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    onSave({ ...workflow, name, trigger, trigger_config: triggerConfig, status, steps }, closeAfter)
+    if (!closeAfter) {
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    }
   }, [nodes, edges, workflow, name, trigger, scheduleConfig, webhookId, status, onSave])
 
   const handleRun = useCallback(async () => {
@@ -646,9 +662,13 @@ function EditorInner({ workflow, onClose, onSave }) {
 
   const selectedNode = nodes.find(n => n.id === selectedNodeId) ?? null
 
-  const firstNodeId = nodes
+  // Manual start takes precedence; fall back to leftmost node without incoming edge
+  const autoFirstNodeId = nodes
     .filter(n => !edges.some(e => e.target === n.id))
     .sort((a, b) => a.position.x - b.position.x)[0]?.id
+  const firstNodeId = (startNodeId && nodes.some(n => n.id === startNodeId))
+    ? startNodeId
+    : autoFirstNodeId
 
   const nodesWithFirst = nodes.map(n => ({
     ...n,
@@ -656,6 +676,7 @@ function EditorInner({ workflow, onClose, onSave }) {
   }))
 
   return (
+    <StartContext.Provider value={{ startNodeId: firstNodeId, setStartNodeId }}>
     <EdgeAddContext.Provider value={handleEdgeAdd}>
     <EdgeDeleteContext.Provider value={handleEdgeDelete}>
     <EdgeFilterContext.Provider value={handleEdgeFilter}>
@@ -731,20 +752,35 @@ function EditorInner({ workflow, onClose, onSave }) {
             {running ? 'Bezig...' : 'Uitvoeren'}
           </button>
 
-          <button onClick={handleSave}
+          {/* Opslaan — blijft in editor */}
+          <button onClick={() => handleSave(false)}
             style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '6px 16px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-              background: saved ? 'var(--color-success)' : 'var(--color-primary)',
-              color: 'white', border: 'none', cursor: 'pointer', transition: 'background 0.2s',
+              display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
+              background: saved ? 'var(--color-success-bg)' : 'var(--hover-bg)',
+              color: saved ? 'var(--color-success)' : 'var(--text)',
+              border: `1px solid ${saved ? 'var(--color-success)' : 'var(--border)'}`,
+              cursor: 'pointer', transition: 'background 0.2s',
             }}>
             <Save size={13} />
             {saved ? 'Opgeslagen!' : 'Opslaan'}
           </button>
 
+          {/* Opslaan & sluiten — terug naar overzicht */}
+          <button onClick={() => handleSave(true)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 8, fontSize: 12, fontWeight: 500,
+              background: 'var(--color-primary)', color: 'white',
+              border: 'none', cursor: 'pointer',
+            }}>
+            <Save size={13} />
+            Opslaan &amp; sluiten
+          </button>
+
           <button onClick={onClose}
             style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+            onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+            title="Sluiten zonder opslaan">
             <X size={15} />
           </button>
         </div>
@@ -849,6 +885,7 @@ function EditorInner({ workflow, onClose, onSave }) {
     </EdgeFilterContext.Provider>
     </EdgeDeleteContext.Provider>
     </EdgeAddContext.Provider>
+    </StartContext.Provider>
   )
 }
 

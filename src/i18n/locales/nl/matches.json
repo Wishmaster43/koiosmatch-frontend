@@ -11,5 +11,18 @@
     "stage": "Fase",
     "owner": "Eigenaar",
     "date": "Aangemaakt"
-  }
+  },
+  "insights": {
+    "stage": "Fase",
+    "owner": "Eigenaar",
+    "clearFilter": "Filter wissen"
+  },
+  "kpi": {
+    "total": "Totaal",
+    "active": "Actief",
+    "hired": "Aangenomen",
+    "avgScore": "Gem. score"
+  },
+  "add": "Nieuwe match",
+  "addComingSoon": "Matches aanmaken via de kandidaat- of vacaturekaart."
 }

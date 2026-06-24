@@ -1,13 +1,17 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { LayoutList, Kanban } from 'lucide-react'
 import api, { unwrapList } from '../../lib/api'
 import { useUsers } from '../../lib/queries'
+import { useAuth } from '../../context/AuthContext'
 import { useOpportunityStages } from '../../lib/useOpportunityStages'
 import { mapOpportunity } from './data/mapOpportunity'
 import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
 import OpportunitiesTable from './OpportunitiesTable'
+import OpportunitiesBoard from './OpportunitiesBoard'
 import OpportunityDrawer from './OpportunityDrawer'
 import AddOpportunityModal from './AddOpportunityModal'
+import PaginationBar from '../../components/ui/PaginationBar'
 
 // Single-select donut pick: clicking the active segment clears it (mirrors ApplicationsPage).
 const pickOne = (set) => (d) => {
@@ -23,11 +27,15 @@ export default function OpportunitiesPage() {
   const { data: users = [] } = useUsers()
   const { stages, stageMeta } = useOpportunityStages()
 
-  const [rows,    setRows]    = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(false)
-  const [stage,   setStage]   = useState([]) // selected stage keys (0 or 1)
-  const [owner,   setOwner]   = useState([]) // selected owner keys (0 or 1)
+  const { user } = useAuth()
+  const [rows,     setRows]     = useState([])
+  const [loading,  setLoading]  = useState(true)
+  const [error,    setError]    = useState(false)
+  const [view,     setView]     = useState('table')  // 'table' | 'board'
+  const [page,     setPage]     = useState(1)
+  const [pageSize, setPageSize] = useState(() => user?.default_per_page ?? 50)
+  const [stage,    setStage]    = useState([]) // selected stage keys (0 or 1)
+  const [owner,    setOwner]    = useState([]) // selected owner keys (0 or 1)
   const [customers,      setCustomers]      = useState([])
   const [selected,       setSelected]       = useState(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
@@ -53,11 +61,18 @@ export default function OpportunitiesPage() {
   }, [])
 
   // Visible rows = the stage/owner donut selection applied client-side.
-  const filtered = useMemo(() => rows.filter(r => {
-    if (stage.length && !stage.includes(r.stage)) return false
-    if (owner.length && !owner.includes(r.owner)) return false
-    return true
-  }), [rows, stage, owner])
+  const filteredAll = useMemo(() => {
+    setPage(1)
+    return rows.filter(r => {
+      if (stage.length && !stage.includes(r.stage)) return false
+      if (owner.length && !owner.includes(r.owner)) return false
+      return true
+    })
+  }, [rows, stage, owner])
+
+  const totalRows = filteredAll.length
+  const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
+  const filtered  = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
 
   // Drawer: select an opportunity, then refresh from the detail endpoint (ref-guarded).
   const selectedIdRef = useRef(null)
@@ -73,6 +88,14 @@ export default function OpportunitiesPage() {
 
   // A freshly created opportunity: prepend + open its drawer.
   const handleCreated = (o) => { setRows(prev => [o, ...prev]); setAddOpen(false); selectOpportunity(o) }
+
+  // Board drag-and-drop: move to a new stage optimistically, then PATCH.
+  const handleMove = (id, stageValue) => {
+    const m = stageMeta(stageValue)
+    setRows(prev => prev.map(r => r.id === id ? { ...r, stage: m.label, stageValue, stageColor: m.color } : r))
+    const s = stages.find(x => x.value === stageValue)
+    if (s?.id) api.patch(`/opportunities/${id}`, { opportunity_stage_id: s.id }).catch(() => {})
+  }
 
   // Header/picker edits flow back here: optimistic locally, then PATCH (UI keys → API keys).
   const updateOpportunity = (id, patch) => {
@@ -105,20 +128,45 @@ export default function OpportunitiesPage() {
             onPickOwner={pickOne(setOwner)} onClearOwner={() => setOwner([])}
           />
 
-          {/* Toolbar — add button */}
-          <div style={{ padding: '0 20px 12px', display: 'flex', minHeight: 36, flexShrink: 0 }}>
+          {/* Toolbar — alles rechts, borderBottom, zelfde layout als TasksPage */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end',
+            padding: '8px 24px', background: 'var(--bg)', flexShrink: 0 }}>
             <button onClick={() => setAddOpen(true)}
-              style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
-                background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13, fontWeight: 600,
+                borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
               + {t('page.add')}
             </button>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
+                style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
+                  background: view === 'table' ? 'var(--color-primary)' : 'var(--surface)',
+                  color: view === 'table' ? '#fff' : 'var(--text)' }}>
+                <LayoutList size={16} />
+              </button>
+              <button onClick={() => setView('board')} title={t('view.board')} aria-label={t('view.board')}
+                style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
+                  background: view === 'board' ? 'var(--color-primary)' : 'var(--surface)',
+                  color: view === 'board' ? '#fff' : 'var(--text)' }}>
+                <Kanban size={16} />
+              </button>
+            </div>
           </div>
 
-          {/* Table */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
-            <OpportunitiesTable rows={filtered} loading={loading} error={error}
-              selectedId={selected?.id} onRowClick={selectOpportunity} />
-          </div>
+          {/* Content */}
+          {view === 'table' ? (
+            <>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
+                <OpportunitiesTable rows={filtered} loading={loading} error={error}
+                  selectedId={selected?.id} onRowClick={selectOpportunity} stickyHeader />
+              </div>
+              <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
+                pageSize={pageSize} onPageChange={setPage}
+                onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+            </>
+          ) : (
+            <OpportunitiesBoard rows={filteredAll} stages={stages}
+              onMove={handleMove} selectedId={selected?.id} onSelect={selectOpportunity} />
+          )}
         </div>
 
         {/* Drill-down drawer — remounts (key) per opportunity so the tab re-inits */}

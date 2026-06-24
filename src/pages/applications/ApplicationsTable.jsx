@@ -15,7 +15,7 @@ function ScorePill({ value }) {
  * ApplicationsTable — declares columns only; the shared DataTable owns sorting,
  * selection, hover and the loading/empty states. Mirrors MatchesTable.
  */
-export default function ApplicationsTable({ rows, loading, error, selectedId, onSelect }) {
+export default function ApplicationsTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false }) {
   const { t } = useTranslation('applications')
 
   const columns = [
@@ -76,6 +76,7 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       emptyText={error ? t('error') : t('empty')}
       onRowClick={onSelect}
       selectedId={selectedId}
+      stickyHeader={stickyHeader}
     />
   )
 }

@@ -3,7 +3,7 @@
   "loading": "Loading tasks…",
   "empty": "No tasks yet.",
   "error": "Couldn't load tasks.",
-  "add": "Add activity",
+  "add": "New task",
   "bureau": "Agency",
   "overdue": "Overdue",
   "view": {

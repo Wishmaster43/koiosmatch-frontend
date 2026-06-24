@@ -8,12 +8,7 @@ export default {
   Icon:  GitBranch,
   color: '#B45309',
   bg:    'var(--color-warning-bg)',
-  schema: [
-    {
-      key:   'routes',
-      label: 'Routes',
-      type:  'routes',
-      help:  'Elke route heeft een naam, filterconditie en eigen vervolgstappen.',
-    },
-  ],
+  // No form fields — branches are configured via canvas edges.
+  // Draw a connection from this node to each next module and set a filter on the edge.
+  schema: [],
 }

@@ -1,16 +1,17 @@
 /**
- * AuditLog — tenant audit log with a drill-down drawer (before/after diff).
- * (Internal helpers DiffRow/AuditDrawer/LogBadge live in this file.)
- * Colours live in the *_META maps below; all labels are translated via t('audit.*').
+ * AuditLog — tenant audit log with sticky header, pagination, sortable columns,
+ * and date-range filter in the right filter panel.
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, Download } from 'lucide-react'
+import { Download, ChevronUp, ChevronDown as ChevronDn } from 'lucide-react'
 import api from '../../../lib/api'
 import { useRightPanel } from '../../../context/RightPanelContext'
 import { KPI_KEYS, LogBadge } from './auditShared'
 import { AuditDrawer } from './AuditDrawer'
+import PaginationBar from '../../../components/ui/PaginationBar'
 
+const PAGE_SIZE = 25
 
 // Build the compact before/after cells shown in the table row.
 function buildDiffCells(entry, t) {
@@ -21,10 +22,7 @@ function buildDiffCells(entry, t) {
     if (p.before !== undefined && p.after !== undefined) {
       const removed = (p.before ?? []).filter(x => !(p.after ?? []).includes(x))
       const added   = (p.after  ?? []).filter(x => !(p.before ?? []).includes(x))
-      return {
-        beforeCell: removed.length ? removed.join(', ') : '—',
-        afterCell:  added.length   ? added.join(', ')   : '—',
-      }
+      return { beforeCell: removed.length ? removed.join(', ') : '—', afterCell: added.length ? added.join(', ') : '—' }
     }
     if (p.name) return { beforeCell: '—', afterCell: p.name }
   }
@@ -45,9 +43,9 @@ function buildDiffCells(entry, t) {
     return {
       beforeCell: '—',
       afterCell: [
-        p.synced    != null && t('audit.cell.synced', { count: p.synced }),
-        p.errors    != null && p.errors > 0 && t('audit.cell.errors', { count: p.errors }),
-        p.duration  != null && p.duration,
+        p.synced   != null && t('audit.cell.synced',   { count: p.synced }),
+        p.errors   != null && p.errors > 0 && t('audit.cell.errors', { count: p.errors }),
+        p.duration != null && p.duration,
       ].filter(Boolean).join(' · ') || '—',
     }
   }
@@ -55,19 +53,29 @@ function buildDiffCells(entry, t) {
   return { beforeCell: '—', afterCell: '—' }
 }
 
+// Sort chevron indicator for a column header.
+function SortIcon({ col, sortCol, sortDir }) {
+  if (sortCol !== col) return <ChevronDn size={10} style={{ opacity: 0.25, marginLeft: 3 }} />
+  return sortDir === 'asc'
+    ? <ChevronUp  size={10} style={{ color: 'var(--color-primary)', marginLeft: 3 }} />
+    : <ChevronDn  size={10} style={{ color: 'var(--color-primary)', marginLeft: 3 }} />
+}
+
 export default function AuditLog() {
   const { t } = useTranslation('settings')
-  const [logs,           setLogs]           = useState([])
-  const [loading,        setLoading]        = useState(true)
-  const [error,          setError]          = useState(null)
-  const [search,         setSearch]         = useState('')
-  const [selectedTypes,  setSelectedTypes]  = useState([])
-  const [selectedUsers,  setSelectedUsers]  = useState([])
-  const [selectedRoles,  setSelectedRoles]  = useState([])
-  const [dateFrom,       setDateFrom]       = useState('')
-  const [dateTo,         setDateTo]         = useState('')
-  const [drill,          setDrill]          = useState(null)
-  const [visibleCount,   setVisibleCount]   = useState(50)
+  const [logs,          setLogs]          = useState([])
+  const [loading,       setLoading]       = useState(true)
+  const [error,         setError]         = useState(null)
+  const [search,        setSearch]        = useState('')
+  const [selectedTypes, setSelectedTypes] = useState([])
+  const [selectedUsers, setSelectedUsers] = useState([])
+  const [selectedRoles, setSelectedRoles] = useState([])
+  const [dateFrom,      setDateFrom]      = useState('')
+  const [dateTo,        setDateTo]        = useState('')
+  const [drill,         setDrill]         = useState(null)
+  const [sortCol,       setSortCol]       = useState('created_at')
+  const [sortDir,       setSortDir]       = useState('desc')
+  const [page,          setPage]          = useState(1)
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -81,35 +89,66 @@ export default function AuditLog() {
   const typeOptions  = useMemo(() => [...new Set(logs.map(l => l.log_name).filter(Boolean))].sort(), [logs])
   const userOptions  = useMemo(() => [...new Set(logs.map(l => l.causer_name).filter(Boolean))].sort(), [logs])
   const roleOptions  = useMemo(() => [...new Set(
-    logs.filter(l => l.log_name === 'roles')
-        .map(l => l.properties?.role ?? l.properties?.name)
-        .filter(Boolean)
+    logs.filter(l => l.log_name === 'roles').map(l => l.properties?.role ?? l.properties?.name).filter(Boolean)
   )].sort(), [logs])
 
-  const filtered = useMemo(() => {
+  // Apply all filters including date range.
+  const filteredAll = useMemo(() => {
     const q = search.trim().toLowerCase()
     return logs.filter(l => {
-      if (selectedTypes.length  && !selectedTypes.includes(l.log_name))    return false
-      if (selectedUsers.length  && !selectedUsers.includes(l.causer_name)) return false
+      if (selectedTypes.length && !selectedTypes.includes(l.log_name))    return false
+      if (selectedUsers.length && !selectedUsers.includes(l.causer_name)) return false
       if (selectedRoles.length) {
         const role = l.properties?.role ?? l.properties?.name
         if (!role || !selectedRoles.includes(role)) return false
       }
-      if (dateFrom && new Date(l.created_at) < new Date(dateFrom))         return false
-      if (dateTo   && new Date(l.created_at) > new Date(dateTo + 'T23:59:59')) return false
-      if (!q) return true
-      return (
+      if (dateFrom && new Date(l.created_at) < new Date(dateFrom))                    return false
+      if (dateTo   && new Date(l.created_at) > new Date(dateTo + 'T23:59:59'))        return false
+      if (q) return (
         (l.description  ?? '').toLowerCase().includes(q) ||
         (l.causer_name  ?? '').toLowerCase().includes(q) ||
         (l.causer_email ?? '').toLowerCase().includes(q)
       )
+      return true
     })
   }, [logs, search, selectedTypes, selectedUsers, selectedRoles, dateFrom, dateTo])
 
-  // Reset the visible window whenever the filter set changes.
-  useEffect(() => { setVisibleCount(50) }, [search, selectedTypes, selectedUsers, selectedRoles, dateFrom, dateTo])
+  // Sort the filtered list.
+  const sorted = useMemo(() => {
+    const dir = sortDir === 'asc' ? 1 : -1
+    return [...filteredAll].sort((a, b) => {
+      if (sortCol === 'created_at') return dir * (new Date(a.created_at) - new Date(b.created_at))
+      if (sortCol === 'causer_name') return dir * (a.causer_name ?? '').localeCompare(b.causer_name ?? '')
+      if (sortCol === 'log_name')    return dir * (a.log_name    ?? '').localeCompare(b.log_name    ?? '')
+      if (sortCol === 'description') return dir * (a.description ?? '').localeCompare(b.description ?? '')
+      return 0
+    })
+  }, [filteredAll, sortCol, sortDir])
 
+  // Reset page when filters change.
+  useEffect(() => { setPage(1) }, [search, selectedTypes, selectedUsers, selectedRoles, dateFrom, dateTo])
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))
+  const pageRows   = useMemo(() => sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [sorted, page])
+
+  // Toggle sort column — same column flips direction, new column defaults to desc.
+  const handleSort = (col) => {
+    if (sortCol === col) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortCol(col); setSortDir('desc') }
+  }
+
+  // Register filter groups in the right filter panel — search, date-range, type, user, role.
   const filterGroups = useMemo(() => [
+    {
+      key: 'search', label: t('audit.searchPlaceholder'), type: 'global-search',
+      value: search, onChange: setSearch,
+    },
+    {
+      key: 'date', label: t('audit.filterDate'), type: 'date-range',
+      from: dateFrom, to: dateTo,
+      onFromChange: setDateFrom, onToChange: setDateTo,
+      selected: [dateFrom, dateTo].filter(Boolean),
+    },
     {
       key: 'type', label: t('audit.filterType'),
       selected: selectedTypes,
@@ -129,8 +168,7 @@ export default function AuditLog() {
       onToggle: v => setSelectedUsers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     },
     ...(roleOptions.length > 0 ? [{
-      key: 'role', label: t('audit.filterRole'),
-      type: 'search-select',
+      key: 'role', label: t('audit.filterRole'), type: 'search-select',
       selected: selectedRoles,
       options: roleOptions.map(r => ({
         value: r, label: r,
@@ -138,7 +176,7 @@ export default function AuditLog() {
       })),
       onToggle: v => setSelectedRoles(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     }] : []),
-  ], [selectedTypes, selectedUsers, selectedRoles, typeOptions, userOptions, roleOptions, logs, t])
+  ], [selectedTypes, selectedUsers, selectedRoles, typeOptions, userOptions, roleOptions, logs, dateFrom, dateTo, t])
 
   useEffect(() => {
     registerFilters('audit-log', filterGroups)
@@ -151,10 +189,13 @@ export default function AuditLog() {
     const who = (e) => e.causer_email
       ? `${e.causer_name ?? t('audit.system')} (${e.causer_email})`
       : (e.causer_name ?? t('audit.system'))
-    const header = [t('audit.colDateTime'), t('audit.colWho'), t('audit.colType'), t('audit.colAction'), t('audit.colOldValue'), t('audit.colNewValue')]
-    const rows = filtered.map(e => {
+    const header = [t('audit.colDate'), t('audit.colTime'), t('audit.colWho'), t('audit.colType'), t('audit.colAction'), t('audit.colOldValue'), t('audit.colNewValue')]
+    const rows = filteredAll.map(e => {
       const { beforeCell, afterCell } = buildDiffCells(e, t)
-      return [new Date(e.created_at).toLocaleString('nl-NL'), who(e),
+      return [
+        new Date(e.created_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+        new Date(e.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }),
+        who(e),
         t(`audit.logName.${e.log_name}`, { defaultValue: e.log_name }),
         e.description ?? '', beforeCell, afterCell]
     })
@@ -165,49 +206,34 @@ export default function AuditLog() {
     document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
   }
 
-  const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-               color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
-               whiteSpace: 'nowrap' }
-  const TD = { padding: '10px 12px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)',
-               verticalAlign: 'top' }
+  // Sticky TH style — header stays visible while scrolling the table.
+  const TH = (col) => ({
+    padding: '8px 10px', textAlign: 'left', fontSize: 11, fontWeight: 600,
+    color: sortCol === col ? 'var(--color-primary)' : 'var(--text-muted)',
+    background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
+    whiteSpace: 'nowrap', cursor: col ? 'pointer' : 'default',
+    position: 'sticky', top: 0, zIndex: 2,
+    userSelect: 'none',
+  })
+  const TD = { padding: '10px 10px', fontSize: 12, color: 'var(--text)',
+               borderBottom: '1px solid var(--hover-bg)', verticalAlign: 'top' }
 
   return (
-    <div style={{ maxWidth: 900 }}>
-      {/* Header + search bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-        <div>
-          <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('audit.title')}</h2>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-            {loading ? t('audit.loading') : t('audit.countSummary', { shown: filtered.length, total: logs.length })}
-          </p>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Date from */}
-          <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-            style={{ height: 34, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)',
-                     borderRadius: 8, color: 'var(--text)', outline: 'none' }} />
-          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('audit.dateTo')}</span>
-          <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-            style={{ height: 34, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)',
-                     borderRadius: 8, color: 'var(--text)', outline: 'none' }} />
-          {/* Search bar */}
-          <div style={{ position: 'relative' }}>
-            <Search size={13} style={{ position: 'absolute', left: 9, top: '50%',
-                                       transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder={t('audit.searchPlaceholder')}
-              style={{ height: 34, width: 220, paddingLeft: 28, paddingRight: 10, fontSize: 12,
-                       border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
-          </div>
-          {/* Export the filtered log to CSV (AVG accountability). */}
-          <button onClick={exportCsv} disabled={filtered.length === 0}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', fontSize: 12,
-                     fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)',
-                     color: 'var(--text)', cursor: filtered.length ? 'pointer' : 'not-allowed',
-                     opacity: filtered.length ? 1 : 0.5, whiteSpace: 'nowrap' }}>
-            <Download size={13} /> {t('audit.export')}
-          </button>
-        </div>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+
+      {/* Toolbar: count summary + export — search/date/filters are in the right filter panel */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    marginBottom: 12, flexShrink: 0 }}>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+          {loading ? t('audit.loading') : t('audit.countSummary', { shown: filteredAll.length, total: logs.length })}
+        </p>
+        <button onClick={exportCsv} disabled={filteredAll.length === 0}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px', fontSize: 12,
+                   fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)',
+                   color: 'var(--text)', cursor: filteredAll.length ? 'pointer' : 'not-allowed',
+                   opacity: filteredAll.length ? 1 : 0.5, whiteSpace: 'nowrap' }}>
+          <Download size={13} /> {t('audit.export')}
+        </button>
       </div>
 
       {error && (
@@ -217,47 +243,62 @@ export default function AuditLog() {
         </div>
       )}
 
+      {/* Scrollable table container — sticky header works because overflow is here */}
       {!loading && !error && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ overflowY: 'auto', flex: 1 }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', background: 'var(--surface)' }}>
             <thead>
               <tr>
-                <th style={{ ...TH, width: 130 }}>{t('audit.colDateTime')}</th>
-                <th style={{ ...TH, width: 120 }}>{t('audit.colWho')}</th>
-                <th style={{ ...TH, width: 120 }}>{t('audit.colType')}</th>
-                <th style={{ ...TH, width: 180 }}>{t('audit.colAction')}</th>
-                <th style={TH}>{t('audit.colOldValue')}</th>
-                <th style={TH}>{t('audit.colNewValue')}</th>
+                <th style={{ ...TH('created_at'), width: 90 }} onClick={() => handleSort('created_at')}>
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    {t('audit.colDate')}<SortIcon col="created_at" sortCol={sortCol} sortDir={sortDir} />
+                  </span>
+                </th>
+                <th style={{ ...TH(null), width: 60 }}>
+                  {t('audit.colTime')}
+                </th>
+                <th style={{ ...TH('causer_name'), width: 120 }} onClick={() => handleSort('causer_name')}>
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    {t('audit.colWho')}<SortIcon col="causer_name" sortCol={sortCol} sortDir={sortDir} />
+                  </span>
+                </th>
+                <th style={{ ...TH('log_name'), width: 120 }} onClick={() => handleSort('log_name')}>
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    {t('audit.colType')}<SortIcon col="log_name" sortCol={sortCol} sortDir={sortDir} />
+                  </span>
+                </th>
+                <th style={{ ...TH('description'), width: 300 }} onClick={() => handleSort('description')}>
+                  <span style={{ display: 'flex', alignItems: 'center' }}>
+                    {t('audit.colAction')}<SortIcon col="description" sortCol={sortCol} sortDir={sortDir} />
+                  </span>
+                </th>
+                <th style={TH(null)}>{t('audit.colOldValue')}</th>
+                <th style={TH(null)}>{t('audit.colNewValue')}</th>
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {pageRows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>
+                  <td colSpan={7} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>
                     {t('audit.noEntries')}
                   </td>
                 </tr>
-              ) : filtered.slice(0, visibleCount).map((entry, i) => {
+              ) : pageRows.map((entry, i) => {
                 const { beforeCell, afterCell } = buildDiffCells(entry, t)
                 return (
-                  <tr key={entry.id ?? i}
-                    style={{ cursor: 'pointer' }}
+                  <tr key={entry.id ?? i} style={{ cursor: 'pointer' }}
                     onClick={() => setDrill(entry)}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                    <td style={{ ...TD, whiteSpace: 'nowrap', fontSize: 11 }}>
-                      <div style={{ color: 'var(--text)', fontWeight: 500 }}>
-                        {new Date(entry.created_at).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' })}
-                      </div>
-                      <div style={{ color: 'var(--text-muted)', fontSize: 10 }}>
-                        {new Date(entry.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-                      </div>
+                    <td style={{ ...TD, whiteSpace: 'nowrap', fontSize: 11, fontWeight: 500 }}>
+                      {new Date(entry.created_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    </td>
+                    <td style={{ ...TD, whiteSpace: 'nowrap', fontSize: 11, color: 'var(--text-muted)' }}>
+                      {new Date(entry.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td style={TD}>
                       <div style={{ fontWeight: 500, color: 'var(--text)' }}>{entry.causer_name ?? t('audit.system')}</div>
-                      {entry.causer_email && (
-                        <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{entry.causer_email}</div>
-                      )}
                     </td>
                     <td style={TD}><LogBadge logName={entry.log_name} /></td>
                     <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{entry.description}</td>
@@ -268,18 +309,15 @@ export default function AuditLog() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
-      {/* Load-more pagination — reveal the next page of the filtered log. */}
-      {!loading && !error && filtered.length > visibleCount && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 14 }}>
-          <button onClick={() => setVisibleCount(c => c + 50)}
-            style={{ height: 34, padding: '0 16px', fontSize: 12, fontWeight: 500, border: '1px solid var(--border)',
-                     borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
-            {t('audit.loadMore', { count: Math.min(50, filtered.length - visibleCount) })}
-          </button>
-        </div>
+      {/* Pagination bar replaces the old load-more button. */}
+      {!loading && !error && sorted.length > 0 && (
+        <PaginationBar page={page} totalPages={totalPages} totalRows={sorted.length}
+          pageSize={PAGE_SIZE} onPageChange={setPage}
+          onPageSizeChange={null} />
       )}
 
       {drill && <AuditDrawer entry={drill} onClose={() => setDrill(null)} />}

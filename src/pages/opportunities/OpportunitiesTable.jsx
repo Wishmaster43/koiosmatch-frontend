@@ -6,7 +6,7 @@ import Avatar from '../../components/ui/Avatar'
 import StatusPill from '../../components/ui/StatusPill'
 
 // OpportunitiesTable — declares columns only; the shared DataTable owns sorting + states.
-export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId }) {
+export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, stickyHeader = false }) {
   const { t } = useTranslation('opportunities')
   const locale = useLocale()
   const { formatDate } = useDateFormat()
@@ -41,11 +41,11 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
 
   return (
     <>
-      <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 14 }}>{t('title')}</h2>
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
         <DataTable columns={columns} rows={rows} loading={loading}
           onRowClick={onRowClick} selectedId={selectedId}
-          loadingText={t('loading')} emptyText={error ? t('error') : t('empty')} />
+          loadingText={t('loading')} emptyText={error ? t('error') : t('empty')}
+          stickyHeader={stickyHeader} />
       </div>
     </>
   )

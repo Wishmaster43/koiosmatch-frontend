@@ -4,20 +4,25 @@
  * the node output panel. NODE_TYPES/EDGE_TYPES are the stable maps ReactFlow needs.
  * Extracted from WorkflowCanvasEditor.
  */
-import { useState, useContext } from 'react'
+import { useState, useContext, useRef } from 'react'
 import { Handle, Position, BaseEdge, EdgeLabelRenderer, getStraightPath } from '@xyflow/react'
 import { CheckCircle, Filter, Loader2, Play, Plus, Trash2, X } from 'lucide-react'
 import { MODULE_META } from '@/modules/index'
 import { NODE_W, NODE_H } from './serialization'
 import { OPERATORS } from './constants'
-import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext } from './contexts'
+import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './contexts'
 
 // ── Custom node ───────────────────────────────────────────────────────────────
+
+const DRAG_TYPE = 'application/x-wf-start'
 
 function ModuleNode({ id, data, selected }) {
   const meta    = MODULE_META[data.type]
   const onRun   = useContext(NodeRunContext)
+  const startCtx = useContext(StartContext)
   const [busy, setBusy] = useState(false)
+  const [dropOver, setDropOver] = useState(false)
+  const dragRef = useRef(false)
   if (!meta) return null
   const Icon = meta.Icon
 
@@ -28,16 +33,52 @@ function ModuleNode({ id, data, selected }) {
     setBusy(false)
   }
 
+  // Accept the START badge being dropped onto this node
+  const handleDragOver = (e) => {
+    if (!e.dataTransfer.types.includes(DRAG_TYPE)) return
+    e.preventDefault()
+    setDropOver(true)
+  }
+  const handleDragLeave = () => setDropOver(false)
+  const handleDrop = (e) => {
+    if (!e.dataTransfer.types.includes(DRAG_TYPE)) return
+    e.preventDefault()
+    setDropOver(false)
+    startCtx?.setStartNodeId(id)
+  }
+
   return (
-    <div style={{ width: NODE_W, height: NODE_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, userSelect: 'none', position: 'relative' }}>
+    <div
+      style={{ width: NODE_W, height: NODE_H, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8, userSelect: 'none', position: 'relative' }}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Drop indicator ring */}
+      {dropOver && (
+        <div style={{ position: 'absolute', inset: -6, borderRadius: '50%', border: '2.5px dashed var(--color-primary)', pointerEvents: 'none', zIndex: 10 }} />
+      )}
       {data.isFirst && (
-        <div style={{
-          position: 'absolute', top: -10, left: '50%', transform: 'translateX(-50%)',
-          background: 'var(--color-primary)', color: 'white',
-          fontSize: 9, fontWeight: 700, letterSpacing: '0.05em',
-          padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
-        }}>
-          START
+        <div
+          draggable
+          className="nodrag"
+          onMouseDown={e => e.stopPropagation()}
+          onDragStart={(e) => {
+            dragRef.current = true
+            e.dataTransfer.setData(DRAG_TYPE, id)
+            e.dataTransfer.effectAllowed = 'move'
+          }}
+          onDragEnd={() => { dragRef.current = false }}
+          title="Sleep om startpunt te verplaatsen"
+          style={{
+            position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)',
+            background: 'var(--color-primary)', color: 'white',
+            fontSize: 9, fontWeight: 700, letterSpacing: '0.05em',
+            padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
+            cursor: 'grab', zIndex: 5,
+          }}
+        >
+          ▶ START
         </div>
       )}
       {!data.isFirst && (

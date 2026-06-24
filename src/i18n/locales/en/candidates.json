@@ -13,13 +13,13 @@
     "funnelType": "Funnel type",
     "employmentType": "Candidate type",
     "owner": "Owner",
-    "lastContact": "Last contact",
+    "lastContact": "Contacted",
     "city": "City",
     "province": "Province",
     "talentPool": "Talent pool",
     "koios": "Koios",
-    "createdAt": "Created on",
-    "lastContactType": "Contact type"
+    "createdAt": "Added",
+    "lastContactType": "Channel"
   },
   "koios": {
     "actions": {
@@ -146,7 +146,10 @@
       "streetPlaceholder": "e.g. Main Street",
       "houseNumber": "House number",
       "houseNumberSuffix": "Addition",
-      "postalCode": "Postal code"
+      "postalCode": "Postal code",
+      "functionTitle": "Job title",
+      "functionPlaceholder": "e.g. Care worker",
+      "owner": "Owner"
     },
     "gender": {
       "male": "Male",

@@ -224,12 +224,18 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    // Administration: roles, users + the audit log.
+    // Administration: roles and users only.
     key: 'administration', icon: Users,
     items: [
-      { id: 'roles', label: 'Roles & permissions', icon: Shield,        component: RolesSettings },
-      { id: 'users', label: 'Users',               icon: Users,         component: UsersPage },
-      { id: 'audit', label: 'Audit log',           icon: ClipboardList, component: AuditLog },
+      { id: 'roles', label: 'Roles & permissions', icon: Shield, component: RolesSettings },
+      { id: 'users', label: 'Users',               icon: Users,  component: UsersPage },
+    ],
+  },
+  {
+    // Audit log: own top-level settings group so it is easy to find.
+    key: 'audit', icon: ClipboardList,
+    items: [
+      { id: 'audit', label: 'Audit log', icon: ClipboardList, component: AuditLog },
     ],
   },
 ]

@@ -42,6 +42,7 @@ export default function WhatsAppSettings() {
   const [search,     setSearch]     = useState('')
   const [syncing,    setSyncing]    = useState(null) // 'numbers' | 'templates'
   const [syncMsg,    setSyncMsg]    = useState(null)
+  const [tab,        setTab]        = useState('connection') // sub-tab: connection | numbers | templates
 
   const loadDetail = (id) =>
     api.get(`/whatsapp/${id}`).then(r => {
@@ -99,12 +100,50 @@ export default function WhatsAppSettings() {
     </div>
   )
 
+  // Sub-tabs: Connection · Phone numbers (count) · Templates (count).
+  const TABS = [
+    { id: 'connection', label: t('whatsapp.connection') },
+    { id: 'numbers',    label: t('whatsapp.phoneNumbers'), count: phones.length },
+    { id: 'templates',  label: t('whatsapp.templates'),    count: templates.length },
+  ]
+
   return (
     <div style={{ maxWidth: 800 }}>
 
+      {/* ── Sub-tab bar ── */}
+      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
+        {TABS.map(tb => {
+          const active = tab === tb.id
+          return (
+            <button key={tb.id} onClick={() => setTab(tb.id)}
+              style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '8px 14px', background: 'none',
+                       border: 'none', borderBottom: `2px solid ${active ? 'var(--color-primary)' : 'transparent'}`,
+                       marginBottom: -1, cursor: 'pointer', fontSize: 13, fontWeight: active ? 600 : 500,
+                       color: active ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+              {tb.label}
+              {tb.count > 0 && (
+                <span style={{ fontSize: 11, fontWeight: 600, borderRadius: 999, padding: '1px 7px',
+                               color: active ? 'var(--color-primary)' : 'var(--text-muted)', background: 'var(--hover-bg)' }}>
+                  {tb.count}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
+
+      {syncMsg && (
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, fontSize: 12,
+                      background: syncMsg.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
+                      color: syncMsg.ok ? 'var(--color-success)' : 'var(--color-danger)',
+                      border: `1px solid ${syncMsg.ok ? '#86EFAC' : '#FCA5A5'}` }}>
+          {syncMsg.text}
+        </div>
+      )}
+
       {/* ── Connection status ── */}
-      <div style={{ marginBottom: 28 }}>
-        <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>{t('whatsapp.connection')}</h3>
+      {tab === 'connection' && (
+      <div>
         {noConn ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '16px 18px',
                         background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 12 }}>
@@ -144,27 +183,12 @@ export default function WhatsAppSettings() {
           </div>
         )}
       </div>
-
-      {syncMsg && (
-        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 8, fontSize: 12,
-                      background: syncMsg.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
-                      color: syncMsg.ok ? 'var(--color-success)' : 'var(--color-danger)',
-                      border: `1px solid ${syncMsg.ok ? '#86EFAC' : '#FCA5A5'}` }}>
-          {syncMsg.text}
-        </div>
       )}
 
       {/* ── Phone numbers ── */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
-            {t('whatsapp.phoneNumbers')}
-            {phones.length > 0 && (
-              <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 500, color: 'var(--text-muted)' }}>
-                {t('whatsapp.linked', { count: phones.length })}
-              </span>
-            )}
-          </h3>
+      {tab === 'numbers' && (
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 12 }}>
           {connId && (
             <button onClick={syncNumbers} disabled={syncing === 'numbers'}
               style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 12px',
@@ -221,18 +245,12 @@ export default function WhatsAppSettings() {
           </div>
         )}
       </div>
+      )}
 
       {/* ── Templates ── */}
+      {tab === 'templates' && (
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <h3 style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>
-            {t('whatsapp.templates')}
-            {templates.length > 0 && (
-              <span style={{ marginLeft: 8, fontSize: 11, fontWeight: 500, color: 'var(--text-muted)' }}>
-                {t('whatsapp.total', { count: templates.length })}
-              </span>
-            )}
-          </h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 12 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             {connId && (
               <button onClick={syncTemplates} disabled={syncing === 'templates'}
@@ -325,6 +343,7 @@ export default function WhatsAppSettings() {
           </div>
         )}
       </div>
+      )}
     </div>
   )
 }

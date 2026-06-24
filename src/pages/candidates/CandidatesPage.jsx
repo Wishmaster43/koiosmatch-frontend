@@ -48,11 +48,15 @@ const DUMMY_CANDIDATES = [
 ]
 
 export default function CandidatesPage({ intent } = {}) {
+  // Auth/user must come first — pageSize initial value reads user.default_per_page.
+  const { hasPermission, user } = useAuth()
+
   const [candidates,      setCandidates]      = useState([])
   const [loading,         setLoading]         = useState(true)
   const [error,           setError]           = useState(null)
   const [page,            setPage]            = useState(1)
-  const [pageSize,        setPageSize]        = useState(50)
+  // Initialise from the user's profile preference (set in Profile → Records per page).
+  const [pageSize,        setPageSize]        = useState(() => user?.default_per_page ?? 50)
   const [lastPage,        setLastPage]        = useState(1)
   const [total,           setTotal]           = useState(0)
   const [selected,        setSelected]        = useState(null)
@@ -84,7 +88,6 @@ export default function CandidatesPage({ intent } = {}) {
   const { registerFilters, unregisterFilters } = useRightPanel()
   const { t } = useTranslation('candidates')
   const { candidateTypes, funnelTypes, statuses } = useLookups()
-  const { hasPermission } = useAuth()
 
   // Seed filters from a navigation intent (e.g. a dashboard KPI/chart click).
   // Runs once per intent; a cleared intent (plain sidebar nav) seeds nothing.
@@ -625,7 +628,7 @@ export default function CandidatesPage({ intent } = {}) {
           </div>
 
           {/* Table */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+          <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', padding: '0 24px 16px' }}>
             {error && (
               <div className="mb-3 rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">
                 {error}
@@ -640,6 +643,7 @@ export default function CandidatesPage({ intent } = {}) {
               selectedIds={selectedIds}
               onToggleRow={toggleRow}
               onToggleAll={toggleAll}
+              stickyHeader
             />
           </div>
 

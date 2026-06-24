@@ -11,7 +11,7 @@ function ScorePill({ value }) {
 }
 
 // MatchesTable — declares columns only; the shared DataTable owns sorting + states.
-export default function MatchesTable({ rows, loading, error }) {
+export default function MatchesTable({ rows, loading, error, stickyHeader = false }) {
   const { t } = useTranslation('matches')
 
   const columns = [
@@ -34,10 +34,10 @@ export default function MatchesTable({ rows, loading, error }) {
 
   return (
     <>
-      <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 14 }}>{t('title')}</h2>
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
         <DataTable columns={columns} rows={rows} loading={loading}
-          loadingText={t('loading')} emptyText={error ? t('error') : t('empty')} />
+          loadingText={t('loading')} emptyText={error ? t('error') : t('empty')}
+          stickyHeader={stickyHeader} />
       </div>
     </>
   )

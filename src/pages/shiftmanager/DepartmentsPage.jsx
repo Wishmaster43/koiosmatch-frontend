@@ -46,28 +46,25 @@ export default function DepartmentsPage() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  // Departments derived from /sm_customers (nested locations → departments).
-  // Dummy only in mock mode — a failed/empty call shows an empty list in prod.
+  // Load departments directly from /sm_departments. Dummy only in mock mode — a
+  // failed/empty call shows an empty list in prod.
   useEffect(() => {
     const ctrl = new AbortController()
-    api.get('/sm_customers', { signal: ctrl.signal })
+    api.get('/sm_departments', { signal: ctrl.signal })
       .then(res => {
-        const { rows: customers } = unwrapList(res)
-        const flat = customers.flatMap(c =>
-          (c.locations ?? []).flatMap(loc =>
-            (loc.departments ?? []).map(d => ({
-              id:        d.id,
-              name:      d.name,
-              customer:  c.name,
-              location:  loc.name,
-              city:      loc.city ?? '',
-              status:    d.status === 'active' ? 'Actief' : d.status === 'inactive' ? 'Inactief' : (d.status ?? 'Actief'),
-              employees: d.employee_count ?? 0,
-              shifts:    d.shift_count ?? 0,
-            }))
-          )
-        )
-        if (flat.length > 0) setDepartments(flat)
+        const { rows } = unwrapList(res)
+        const mapped = rows.map(d => ({
+          id:         d.id,
+          name:       d.name ?? '',
+          customer:   d.customer?.name ?? d.customer ?? '',
+          location:   d.location?.name ?? d.location ?? '',
+          city:       d.city ?? '',
+          costCenter: d.cost_center ?? '',
+          status:     d.status === 'active' ? 'Actief' : d.status === 'inactive' ? 'Inactief' : (d.status ?? 'Actief'),
+          employees:  d.employee_count ?? 0,
+          shifts:     d.shift_count ?? 0,
+        }))
+        if (mapped.length > 0) setDepartments(mapped)
         else if (!USE_MOCKS) setDepartments([])
       })
       .catch(err => { if (!isAbortError(err) && !USE_MOCKS) setDepartments([]) })

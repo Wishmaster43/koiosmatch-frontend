@@ -26,7 +26,7 @@ const toggleOneValue = (set, value) => set(p => (p.length === 1 && p[0] === valu
 export default function CustomersPage() {
   const { t } = useTranslation('customers')
   const { registerFilters, unregisterFilters } = useRightPanel()
-  const { hasPermission } = useAuth()
+  const { hasPermission, user } = useAuth()
   const { data: users = [] } = useUsers()
   const { statuses, statusMeta } = useCustomerLookups()
 
@@ -34,6 +34,7 @@ export default function CustomersPage() {
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState(null)
   const [page,      setPage]      = useState(1)
+  // TODO C-33: use user.default_per_page once the backend accepts per_page > 100 on this endpoint.
   const [pageSize,  setPageSize]  = useState(50)
   const [lastPage,  setLastPage]  = useState(1)
   const [total,     setTotal]     = useState(0)
@@ -340,7 +341,8 @@ export default function CustomersPage() {
               <div className="mb-3 rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">{error}</div>
             )}
             <CustomersTable rows={customers} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
-              statusMeta={statusMeta} selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
+              statusMeta={statusMeta} selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
+              stickyHeader />
           </div>
 
           <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}

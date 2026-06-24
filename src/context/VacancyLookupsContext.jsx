@@ -28,6 +28,7 @@ import { COOKIE_AUTH } from '../lib/authMode'
 // the page/drawer read these through useVacancyLookups(), never the seed directly.
 const DEFAULT_VACANCY_STATUSES = [
   { value: 'open',    label: 'Open',       color: '#79B58E' },
+  { value: 'online',  label: 'Online',     color: '#6E8FD6' },
   { value: 'concept', label: 'Concept',    color: '#94A3B8' },
   { value: 'paused',  label: 'Gepauzeerd', color: '#C9AC64' },
   { value: 'closed',  label: 'Gesloten',   color: '#8A94A6' },

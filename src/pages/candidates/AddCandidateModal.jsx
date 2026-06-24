@@ -5,13 +5,18 @@ import api from '../../lib/api'
 import { Field, TextField, SelectField } from '../../components/forms/fields'
 import { NL_PROVINCES } from './drawer/constants'
 import { useLookups } from '../../context/LookupsContext'
+import { useUsers } from '../../lib/queries'
+import { useAuth } from '../../context/AuthContext'
 import { mapCandidate } from './data/mapCandidate'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM = {
-  first_name: 'firstName', last_name: 'lastName', email: 'email', phone: 'phone',
-  date_of_birth: 'dateOfBirth', gender: 'gender', city: 'city', province: 'province',
-  street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix', postal_code: 'postalCode',
+  first_name: 'firstName', last_name: 'lastName', middle_name: 'middleName',
+  email: 'email', phone: 'phone', function_title: 'functionTitle',
+  date_of_birth: 'dateOfBirth', gender: 'gender',
+  street: 'street', house_number: 'houseNumber',
+  house_number_suffix: 'houseNumberSuffix', postal_code: 'postalCode',
+  city: 'city', province: 'province', owner_id: 'ownerId',
 }
 
 // Lifecycle states that make sense when CREATING a candidate (not matched/inactive/etc.).
@@ -19,33 +24,37 @@ const CREATE_STATUSES = ['lead', 'candidate']
 
 export default function AddCandidateModal({ onClose, onCreated }) {
   const { t } = useTranslation(['candidates', 'common'])
-  // A new candidate enters on the STATUS axis (lifecycle), not the funnel — the
-  // funnel lives on an application. Default to Lead (decision 14); the funnel is
-  // created later by coupling to a vacancy.
   const { statuses } = useLookups()
-  // Only sensible entry statuses are pickable on create; fall back to all while the
-  // lookup hasn't been reseeded yet (defensive, so the picker is never empty).
+  const { data: users = [] } = useUsers()
+  const { user: me } = useAuth()
+
+  // Only sensible entry statuses on create; fall back to all while lookup loads.
   const entryStatuses = statuses.filter(s => CREATE_STATUSES.includes(s.value))
   const pickStatuses  = entryStatuses.length ? entryStatuses : statuses
   const defaultStatus = () => pickStatuses.find(s => s.value === 'lead')?.value ?? pickStatuses[0]?.value ?? ''
-  const [status,  setStatus]  = useState(defaultStatus)
-  const [errors,  setErrors]  = useState({})
-  const [saving,  setSaving]  = useState(false)
+
+  const [status,    setStatus]    = useState(defaultStatus)
+  const [errors,    setErrors]    = useState({})
+  const [saving,    setSaving]    = useState(false)
+  const [submitErr, setSubmitErr] = useState(null)
   const [form, setForm] = useState({
-    firstName: '', lastName: '', email: '', phone: '',
+    firstName: '', middleName: '', lastName: '',
+    functionTitle: '',
+    email: '', phone: '',
     dateOfBirth: '', gender: '',
     street: '', houseNumber: '', houseNumberSuffix: '', postalCode: '', city: '', province: '',
+    // Owner defaults to the logged-in user; recruiter can change it.
+    ownerId: me?.id ?? '',
   })
 
   // Once the real statuses arrive from the API, default to Lead if nothing chosen.
-  useEffect(() => { if (!status && statuses.length) setStatus(defaultStatus()) }, [statuses]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!status && statuses.length) setStatus(defaultStatus()) }, [statuses]) // eslint-disable-line
 
   const set = (k, v) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
+    setSubmitErr(null)
   }
-
-  const selectStatus = (id) => { setStatus(id); setErrors({}) }
 
   const handleSubmit = async () => {
     const e = {}
@@ -54,34 +63,41 @@ export default function AddCandidateModal({ onClose, onCreated }) {
     if (Object.keys(e).length) { setErrors(e); return }
 
     setSaving(true)
+    setSubmitErr(null)
     try {
-      // No funnel_type on the candidate — the funnel is per application. Contract
-      // type(s) are set later in the drawer; a new candidate starts on its status.
       const body = {
-        first_name:   form.firstName.trim(),
-        last_name:    form.lastName.trim(),
-        email:        form.email || null,
-        phone:        form.phone || null,
-        date_of_birth: form.dateOfBirth || null,
-        gender:       form.gender || null,
+        first_name:          form.firstName.trim(),
+        middle_name:         form.middleName.trim() || null,
+        last_name:           form.lastName.trim(),
+        function_title:      form.functionTitle.trim() || null,
+        email:               form.email || null,
+        phone:               form.phone || null,
+        date_of_birth:       form.dateOfBirth || null,
+        gender:              form.gender || null,
         street:              form.street || null,
         house_number:        form.houseNumber || null,
         house_number_suffix: form.houseNumberSuffix || null,
         postal_code:         form.postalCode || null,
-        city:         form.city || null,
-        province:     form.province || null,
-        status:       status || 'lead',
-        candidate_types: [],
+        city:                form.city || null,
+        province:            form.province || null,
+        owner_id:            form.ownerId || null,
+        status:              status || 'lead',
+        candidate_types:     [],
       }
       const r = await api.post('/candidates', body)
       onCreated?.(mapCandidate(r.data?.data ?? r.data))
       onClose()
     } catch (err) {
+      // Show field-level errors from 422 validation responses.
       const apiErrors = err?.response?.data?.errors
       if (apiErrors) {
         const e2 = {}
         Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
         setErrors(e2)
+      } else {
+        // Fallback: show the server message or a generic error so the user isn't left guessing.
+        const msg = err?.response?.data?.message ?? err?.message ?? t('common:errorGeneric', 'Er is iets misgegaan')
+        setSubmitErr(msg)
       }
     } finally {
       setSaving(false)
@@ -90,7 +106,7 @@ export default function AddCandidateModal({ onClose, onCreated }) {
 
   const selectedStatus = statuses.find(s => s.value === status)
   const canSubmit      = !!status && form.firstName.trim() && form.lastName.trim()
-  const statusLabel    = selectedStatus ? selectedStatus.label : ''
+  const statusLabel    = selectedStatus?.label ?? ''
 
   const genderOptions = [
     { value: 'male',   label: t('modal.gender.male') },
@@ -98,16 +114,19 @@ export default function AddCandidateModal({ onClose, onCreated }) {
     { value: 'other',  label: t('modal.gender.other') },
   ]
 
+  // Build owner dropdown from users list.
+  const ownerOptions = users.map(u => ({ value: String(u.id), label: u.name ?? `${u.firstname} ${u.lastname}`.trim() }))
+
   return (
     <div
       onClick={e => e.target === e.currentTarget && onClose()}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 860,
+      <div style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 900,
         boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', maxHeight: '90vh' }}>
 
         {/* ── Left panel: status (lifecycle) selection ── */}
-        <div style={{ width: 280, flexShrink: 0, borderRight: '1px solid var(--border)',
+        <div style={{ width: 260, flexShrink: 0, borderRight: '1px solid var(--border)',
           background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
 
           <div style={{ padding: '20px 20px 14px' }}>
@@ -119,7 +138,7 @@ export default function AddCandidateModal({ onClose, onCreated }) {
             {pickStatuses.map(s => {
               const active = status === s.value
               return (
-                <button key={s.value} onClick={() => selectStatus(s.value)}
+                <button key={s.value} onClick={() => { setStatus(s.value); setErrors({}) }}
                   style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
                     borderRadius: 10, cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s',
                     border: `1.5px solid ${active ? s.color : 'var(--border)'}`,
@@ -170,16 +189,21 @@ export default function AddCandidateModal({ onClose, onCreated }) {
                   <UserPlus size={22} color="var(--text-muted)" />
                 </div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-muted)' }}>{t('modal.noTypeSelected')}</div>
-                  <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{t('modal.chooseType')}</div>
+                  <div style={{ fontSize: 13, fontWeight: 500 }}>{t('modal.noTypeSelected')}</div>
+                  <div style={{ fontSize: 12, marginTop: 4 }}>{t('modal.chooseType')}</div>
                 </div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+
+                {/* Name row — first / middle / last */}
+                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr', gap: 12 }}>
                   <Field label={t('modal.fields.firstName')} required>
                     <TextField value={form.firstName} onChange={v => set('firstName', v)} placeholder={t('modal.fields.firstName')} error={errors.firstName} />
                     {errors.firstName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
+                  </Field>
+                  <Field label={t('modal.fields.middleName')}>
+                    <TextField value={form.middleName} onChange={v => set('middleName', v)} placeholder="van" />
                   </Field>
                   <Field label={t('modal.fields.lastName')} required>
                     <TextField value={form.lastName} onChange={v => set('lastName', v)} placeholder={t('modal.fields.lastName')} error={errors.lastName} />
@@ -187,6 +211,18 @@ export default function AddCandidateModal({ onClose, onCreated }) {
                   </Field>
                 </div>
 
+                {/* Function + owner */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                  <Field label={t('modal.fields.functionTitle')}>
+                    <TextField value={form.functionTitle} onChange={v => set('functionTitle', v)} placeholder={t('modal.fields.functionPlaceholder')} />
+                  </Field>
+                  <Field label={t('modal.fields.owner')}>
+                    <SelectField value={String(form.ownerId)} onChange={v => set('ownerId', v)}
+                      placeholder={t('common:select')} options={ownerOptions} />
+                  </Field>
+                </div>
+
+                {/* Contact */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <Field label={t('modal.fields.email')}>
                     <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('modal.fields.emailPlaceholder')} />
@@ -196,6 +232,7 @@ export default function AddCandidateModal({ onClose, onCreated }) {
                   </Field>
                 </div>
 
+                {/* Personal */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <Field label={t('modal.fields.dob')}>
                     <TextField type="date" value={form.dateOfBirth} onChange={v => set('dateOfBirth', v)} />
@@ -205,6 +242,7 @@ export default function AddCandidateModal({ onClose, onCreated }) {
                   </Field>
                 </div>
 
+                {/* Address */}
                 <Field label={t('modal.fields.street')}>
                   <TextField value={form.street} onChange={v => set('street', v)} placeholder={t('modal.fields.streetPlaceholder')} />
                 </Field>
@@ -227,9 +265,18 @@ export default function AddCandidateModal({ onClose, onCreated }) {
                 <Field label={t('modal.fields.province')}>
                   <SelectField value={form.province} onChange={v => set('province', v)} placeholder={t('common:select')} options={NL_PROVINCES} />
                 </Field>
+
               </div>
             )}
           </div>
+
+          {/* General submit error (non-422 responses) */}
+          {submitErr && (
+            <div style={{ margin: '0 24px 8px', padding: '10px 14px', borderRadius: 8, fontSize: 12,
+              background: 'var(--color-danger-bg)', color: 'var(--color-danger)', border: '1px solid var(--color-danger)' }}>
+              {submitErr}
+            </div>
+          )}
 
           <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
             display: 'flex', justifyContent: 'flex-end', gap: 8, background: 'var(--bg)' }}>

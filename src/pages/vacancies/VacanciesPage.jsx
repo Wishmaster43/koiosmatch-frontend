@@ -28,7 +28,7 @@ const pickKey = (d) => d?.key ?? d?.payload?.key ?? d?.name
 function VacanciesPageInner() {
   const { t } = useTranslation('vacancies')
   const { registerFilters, unregisterFilters } = useRightPanel()
-  const { hasPermission } = useAuth()
+  const { hasPermission, user } = useAuth()
   const { statuses, phases, statusMeta } = useVacancyLookups()
   const { data: users = [] } = useUsers()
 
@@ -36,6 +36,7 @@ function VacanciesPageInner() {
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState(null)
   const [page,      setPage]      = useState(1)
+  // TODO C-33: use user.default_per_page once the backend accepts per_page > 100 on this endpoint.
   const [pageSize,  setPageSize]  = useState(50)
   const [lastPage,  setLastPage]  = useState(1)
   const [total,     setTotal]     = useState(0)
@@ -330,7 +331,7 @@ function VacanciesPageInner() {
           {/* KPI block: donuts + funnel-phase KPI cards (same row as candidates) */}
           <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
-          {/* Status tab bar */}
+          {/* Status tab bar + add button on the same row */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
             padding: '0 24px 10px', flexShrink: 0 }}>
             {buckets.map(b => (
@@ -342,6 +343,21 @@ function VacanciesPageInner() {
                 {b.label}
               </button>
             ))}
+            <div style={{ marginLeft: 'auto' }}>
+              {selectedIds.size > 0 ? (
+                <VacanciesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
+                  onSetOwner={bulkSetOwner} onSetStatus={bulkSetStatus} onSetClient={bulkSetClient}
+                  onPublish={() => bulkPublish(true)} onUnpublish={() => bulkPublish(false)}
+                  onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
+                  canArchive={hasPermission('vacancies.delete')}
+                  users={users} statuses={statuses} customers={customers} selectedTags={selectedTags} />
+              ) : (
+                <button onClick={() => setAddOpen(true)} style={{ padding: '7px 14px', fontSize: 12, fontWeight: 500,
+                  background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+                  + {t('page.add')}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Transient feedback for bulk mutations (aria-live for screen readers) */}
@@ -360,23 +376,6 @@ function VacanciesPageInner() {
             </div>
           )}
 
-          {/* Toolbar — bulk-bar when there's a selection, otherwise the add button */}
-          <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
-            {selectedIds.size > 0 ? (
-              <VacanciesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
-                onSetOwner={bulkSetOwner} onSetStatus={bulkSetStatus} onSetClient={bulkSetClient}
-                onPublish={() => bulkPublish(true)} onUnpublish={() => bulkPublish(false)}
-                onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
-                canArchive={hasPermission('vacancies.delete')}
-                users={users} statuses={statuses} customers={customers} selectedTags={selectedTags} />
-            ) : (
-              <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
-                background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-                + {t('page.add')}
-              </button>
-            )}
-          </div>
-
           {/* Table */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
             {error && (
@@ -391,6 +390,7 @@ function VacanciesPageInner() {
               selectedIds={selectedIds}
               onToggleRow={toggleRow}
               onToggleAll={toggleAll}
+              stickyHeader
             />
           </div>
 

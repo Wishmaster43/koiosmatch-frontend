@@ -283,6 +283,7 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
     if (g.type === 'period') return sum + (g.value ? 1 : 0)
     if (g.type === 'global-search') return sum + (g.value ? 1 : 0)
     if (g.type === 'location') return sum + (g.city ? 1 : 0)
+    if (g.type === 'date-range') return sum + ((g.from || g.to) ? 1 : 0)
     return sum + (g.selected?.length ?? 0)
   }, 0)
 
@@ -291,6 +292,7 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
       if (g.type === 'period') { g.onChange?.('') }
       else if (g.type === 'global-search') { g.onChange?.('') }
       else if (g.type === 'location') { g.onCityChange?.(''); g.onRadiusChange?.('') }
+      else if (g.type === 'date-range') { g.onFromChange?.(''); g.onToChange?.('') }
       else { g.selected?.forEach(v => g.onToggle?.(v)) }
     })
   }
@@ -406,6 +408,16 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
 
             {group.type === 'period' ? (
               <PeriodGroup group={group} />
+            ) : group.type === 'date-range' ? (
+              // Two date inputs for a from/to range filter (e.g. audit log).
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <input type="date" value={group.from ?? ''} onChange={e => group.onFromChange?.(e.target.value)}
+                  style={{ height: 30, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)',
+                           borderRadius: 6, color: 'var(--text)', outline: 'none', width: '100%' }} />
+                <input type="date" value={group.to ?? ''} onChange={e => group.onToChange?.(e.target.value)}
+                  style={{ height: 30, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)',
+                           borderRadius: 6, color: 'var(--text)', outline: 'none', width: '100%' }} />
+              </div>
             ) : group.type === 'search-select' ? (
               <SearchSelectGroup group={group} />
             ) : group.type === 'radio' ? (

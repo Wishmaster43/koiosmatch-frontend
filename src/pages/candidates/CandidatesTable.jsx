@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Target, Phone, CalendarPlus, Sparkles } from 'lucide-react'
+import { Target, Phone, CalendarPlus, Sparkles, Mail, MessageCircle, PhoneCall, HelpCircle } from 'lucide-react' // HelpCircle = fallback for unknown contact channel
 import DataTable from '../../components/ui/DataTable'
 import Avatar from '../../components/ui/Avatar'
 import KoiosAiMark from '../../components/ui/KoiosAiMark'
@@ -9,6 +9,13 @@ import { useGenders } from '../../lib/useGenders'
 import { useLastContactTypes } from '../../lib/useLastContactTypes'
 
 const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
+
+// Icon per contact channel slug — shown in the last-contact-type column.
+const CONTACT_TYPE_ICON = {
+  email:     Mail,
+  phone:     PhoneCall,
+  whatsapp:  MessageCircle,
+}
 
 // Icon + colour per Koios advice action (hex so `+ alpha` tints work).
 const ADVICE_META = {
@@ -25,7 +32,7 @@ const ADVICE_META = {
  * live in the generic DataTable. Reuse that table for other entity lists with
  * their own column set.
  */
-export default function CandidatesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll }) {
+export default function CandidatesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const { funnelTypes, funnelMeta, statusMeta, typeMeta } = useLookups()
@@ -37,6 +44,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
   const columns = [
     {
       key: 'name', header: t('columns.name'), sortable: true, sortValue: c => c.name,
+      sticky: true, width: 200,
       render: c => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Avatar initials={c.initials} size={26} color={genderColor(c.gender)} />
@@ -45,10 +53,32 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
       ),
     },
     {
+      key: 'title', header: t('columns.function'), nowrap: true, cellStyle: { color: 'var(--text)', fontSize: 12 },
+      sortable: true, sortValue: c => c.title,
+      render: c => c.title || '—',
+    },
+    { key: 'city', header: t('columns.city'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.city, render: c => c.city || '—' },
+    {
       key: 'status', header: t('columns.status'), sortable: true, sortValue: c => statusMeta(c.status).label,
       render: c => { const m = statusMeta(c.status)
         return <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
           background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span> },
+    },
+    { key: 'created', header: t('columns.createdAt'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.createdSort ?? c.created, render: c => formatDate(c.created) },
+    {
+      // Combined last-contact column: date + channel icon. Channel stays filterable via CandidatesPage filters.
+      key: 'lastContact', header: t('columns.lastContact'), nowrap: true, sortable: true, sortValue: c => c.lastContactAt,
+      render: c => {
+        if (!c.lastContactAt) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        const label = lastContactLabel(c.lastContactType)
+        const Icon = c.lastContactType ? (CONTACT_TYPE_ICON[c.lastContactType] ?? HelpCircle) : null
+        return (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text-muted)', fontSize: 12 }}>
+            {formatDate(c.lastContactAt)}
+            {Icon && <Icon size={12} title={label} style={{ flexShrink: 0, opacity: 0.6 }} />}
+          </span>
+        )
+      },
     },
     {
       key: 'funnelType', header: t('columns.funnelType'), nowrap: true,
@@ -62,11 +92,6 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
         return <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
           background: color + '1A', color, border: `1px solid ${color}55` }}>{label}</span>
       },
-    },
-    {
-      key: 'title', header: t('columns.function'), nowrap: true, cellStyle: { color: 'var(--text)', fontSize: 12 },
-      sortable: true, sortValue: c => c.title,
-      render: c => c.title || '—',
     },
     {
       key: 'candidateType', header: t('columns.employmentType'), nowrap: true,
@@ -89,7 +114,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
       },
     },
     {
-      key: 'talentPool', header: t('columns.talentPool'), nowrap: true, sortable: false,
+      key: 'talentPool', header: t('columns.talentPool'), nowrap: true, sortable: true, sortValue: c => (c.pools ?? [])[0]?.name ?? '',
       render: c => {
         const pools = c.pools ?? []
         if (pools.length === 0) return <span style={{ color: 'var(--text-muted)' }}>—</span>
@@ -109,7 +134,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
       },
     },
     {
-      key: 'koios', nowrap: true, sortable: false,
+      key: 'koios', nowrap: true, sortable: true, sortValue: c => c.koiosAdvice?.action ?? '',
       header: (
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <KoiosAiMark size={16} />{t('columns.koios')}
@@ -140,11 +165,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
         </div>
       ),
     },
-    { key: 'lastContact', header: t('columns.lastContact'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.lastContactAt, render: c => formatDate(c.lastContactAt) },
-    { key: 'lastContactType', header: t('columns.lastContactType'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => lastContactLabel(c.lastContactType), render: c => lastContactLabel(c.lastContactType) || '—' },
-    { key: 'city',        header: t('columns.city'),        nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.city,     render: c => c.city || '—' },
-    { key: 'province',    header: t('columns.province'),    nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.province, render: c => c.province || '—' },
-    { key: 'created',     header: t('columns.createdAt'),   nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.createdSort ?? c.created, render: c => formatDate(c.created) },
+    // { key: 'province', header: t('columns.province'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.province, render: c => c.province || '—' },
   ]
 
   return (
@@ -160,6 +181,8 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
       loading={loading}
       loadingText={t('page.loading')}
       emptyText={t('page.empty')}
+      stickyHeader={stickyHeader}
+      defaultSort={{ key: 'created', dir: 'desc' }}
     />
   )
 }

@@ -11,5 +11,18 @@
     "stage": "Stage",
     "owner": "Owner",
     "date": "Created"
-  }
+  },
+  "insights": {
+    "stage": "Stage",
+    "owner": "Owner",
+    "clearFilter": "Clear filter"
+  },
+  "kpi": {
+    "total": "Total",
+    "active": "Active",
+    "hired": "Hired",
+    "avgScore": "Avg score"
+  },
+  "add": "New match",
+  "addComingSoon": "Create matches from the candidate or vacancy card."
 }

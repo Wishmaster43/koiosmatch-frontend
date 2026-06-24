@@ -5,8 +5,10 @@ import api, { unwrapList } from '../../lib/api'
 import { isAbortError } from '../../lib/mocks'
 import { useRightPanel } from '../../context/RightPanelContext'
 import { TaskLookupsProvider, useTaskLookups } from '../../context/TaskLookupsContext'
+import { useAuth } from '../../context/AuthContext'
 import InsightsRow from '../../components/insights/InsightsRow'
 import TasksTable from './TasksTable'
+import PaginationBar from '../../components/ui/PaginationBar'
 import TasksBoard from './TasksBoard'
 import TaskDrawer from './TaskDrawer'
 import AddTaskModal from './AddTaskModal'
@@ -33,6 +35,7 @@ export default function TasksPage() {
 }
 
 function TasksPageInner() {
+  const { user } = useAuth()
   const { t } = useTranslation('tasks')
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Statuses (= board columns), types and priorities come from the tenant lookup.
@@ -42,6 +45,8 @@ function TasksPageInner() {
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState(false)
   const [view,     setView]     = useState('table')   // 'table' | 'board'
+  const [page,     setPage]     = useState(1)
+  const [pageSize, setPageSize] = useState(() => user?.default_per_page ?? 50)
   const [selected, setSelected] = useState(null)
   const [expanded, setExpanded] = useState(false)
   const [addOpen,  setAddOpen]  = useState(false)
@@ -124,13 +129,20 @@ function TasksPageInner() {
   }
 
   // The visible rows: status/priority/type/assignee filters + the active KPI tile.
-  const filtered = useMemo(() => all.filter(x => {
-    if (selectedStatus.length   && !selectedStatus.includes(x.statusKey))       return false
-    if (selectedPriority.length && !selectedPriority.includes(x.priorityKey))   return false
-    if (selectedType.length     && !selectedType.includes(x.typeKey))           return false
-    if (selectedAssignee.length && !selectedAssignee.includes(x.assignee?.name)) return false
-    return matchesKpi(x)
-  }), [all, selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter]) // eslint-disable-line react-hooks/exhaustive-deps
+  const filteredAll = useMemo(() => {
+    setPage(1)
+    return all.filter(x => {
+      if (selectedStatus.length   && !selectedStatus.includes(x.statusKey))       return false
+      if (selectedPriority.length && !selectedPriority.includes(x.priorityKey))   return false
+      if (selectedType.length     && !selectedType.includes(x.typeKey))           return false
+      if (selectedAssignee.length && !selectedAssignee.includes(x.assignee?.name)) return false
+      return matchesKpi(x)
+    })
+  }, [all, selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const totalRows = filteredAll.length
+  const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
+  const filtered  = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
 
   // Open a task: show the light row immediately, then fetch the full detail. The
   // ref guards against out-of-order responses.
@@ -220,7 +232,7 @@ function TasksPageInner() {
 
         {/* Toolbar — add button + view toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end',
-          padding: '8px 24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+          padding: '8px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <button onClick={() => setAddOpen(true)}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13, fontWeight: 600,
               borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
@@ -244,10 +256,15 @@ function TasksPageInner() {
 
         {/* Content */}
         {view === 'table' ? (
-          <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
-            <TasksTable rows={filtered} loading={loading} error={error}
-              selectedId={selected?.id} onSelect={selectTask} />
-          </div>
+          <>
+            <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
+              <TasksTable rows={filtered} loading={loading} error={error}
+                selectedId={selected?.id} onSelect={selectTask} stickyHeader />
+            </div>
+            <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
+              pageSize={pageSize} onPageChange={setPage}
+              onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+          </>
         ) : (
           <TasksBoard rows={filtered} columns={columns} onMove={handleMove}
             selectedId={selected?.id} onSelect={selectTask} />

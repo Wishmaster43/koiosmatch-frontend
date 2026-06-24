@@ -5,11 +5,13 @@ import api, { unwrapList } from '../../lib/api'
 import { USE_MOCKS, isAbortError } from '../../lib/mocks'
 import { useRightPanel } from '../../context/RightPanelContext'
 import { useLookups } from '../../context/LookupsContext'
+import { useAuth } from '../../context/AuthContext'
 import InsightsRow from '../../components/insights/InsightsRow'
 import ApplicationsTable from './ApplicationsTable'
 import ApplicationsBoard from './ApplicationsBoard'
 import ApplicationDrawer from './ApplicationDrawer'
 import AddApplicationModal from './AddApplicationModal'
+import PaginationBar from '../../components/ui/PaginationBar'
 import { mapApplication, mapApplicationDetail } from './data/mapApplication'
 import { MOCK_APPLICATIONS, bucketOfPhase, buildMockDetail } from './data/mocks'
 
@@ -25,6 +27,7 @@ const tog = (set) => (v) => set(p => p.includes(v) ? p.filter(x => x !== v) : [.
 
 export default function ApplicationsPage() {
   const { t } = useTranslation('applications')
+  const { user } = useAuth()
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Funnel phases come from the tenant lookup (Settings → Funnel stages), never hardcoded.
   const { funnelTypes, funnelMeta } = useLookups()
@@ -34,6 +37,8 @@ export default function ApplicationsPage() {
   const [error,        setError]        = useState(false)
   const [view,         setView]         = useState('table')   // 'table' | 'board'
   const [bucket,       setBucket]       = useState('active')
+  const [page,         setPage]         = useState(1)
+  const [pageSize,     setPageSize]     = useState(() => user?.default_per_page ?? 50)
   const [selected,     setSelected]     = useState(null)
   const [expanded,     setExpanded]     = useState(false)
   const [selectedPhase,  setSelectedPhase]  = useState([])
@@ -121,15 +126,23 @@ export default function ApplicationsPage() {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // The visible rows: bucket + phase/owner/source/vacancy filters, decorated with
-  // their phase label/colour from the lookup.
-  const filtered = useMemo(() => applications.filter(a => {
-    if (a.bucket !== bucket) return false
-    if (selectedPhase.length  && !selectedPhase.includes(a.phaseKey))         return false
-    if (selectedOwner.length  && !selectedOwner.includes(a.owner?.name))      return false
-    if (selectedSource.length && !selectedSource.includes(a.source))          return false
-    if (selectedVac.length    && !selectedVac.includes(String(a.vacancyId)))  return false
-    return true
-  }).map(decorate), [applications, bucket, selectedPhase, selectedOwner, selectedSource, selectedVac, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
+  // their phase label/colour from the lookup. Filter changes reset to page 1.
+  const filteredAll = useMemo(() => {
+    setPage(1)
+    return applications.filter(a => {
+      if (a.bucket !== bucket) return false
+      if (selectedPhase.length  && !selectedPhase.includes(a.phaseKey))         return false
+      if (selectedOwner.length  && !selectedOwner.includes(a.owner?.name))      return false
+      if (selectedSource.length && !selectedSource.includes(a.source))          return false
+      if (selectedVac.length    && !selectedVac.includes(String(a.vacancyId)))  return false
+      return true
+    }).map(decorate)
+  }, [applications, bucket, selectedPhase, selectedOwner, selectedSource, selectedVac, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Clientside pagination slice (the endpoint returns all rows at once).
+  const totalRows  = filteredAll.length
+  const lastPage   = Math.max(1, Math.ceil(totalRows / pageSize))
+  const filtered   = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
 
   // Open an application: show the light row immediately, then fetch the full
   // detail (GET /applications/{id}); a 404/missing endpoint falls back to the
@@ -200,7 +213,7 @@ export default function ApplicationsPage() {
 
         {/* Tab bar — add + buckets + view toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between',
-          padding: '8px 24px', background: 'var(--surface)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+          padding: '8px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 5,
             padding: '6px 14px', fontSize: 13, fontWeight: 500, background: 'var(--color-primary)', color: '#fff',
             border: 'none', borderRadius: 8, cursor: 'pointer' }}>
@@ -235,10 +248,15 @@ export default function ApplicationsPage() {
 
         {/* Content */}
         {view === 'table' ? (
-          <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
-            <ApplicationsTable rows={filtered} loading={loading} error={error}
-              selectedId={selected?.id} onSelect={selectApplication} />
-          </div>
+          <>
+            <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
+              <ApplicationsTable rows={filtered} loading={loading} error={error}
+                selectedId={selected?.id} onSelect={selectApplication} stickyHeader />
+            </div>
+            <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
+              pageSize={pageSize} onPageChange={setPage}
+              onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+          </>
         ) : (
           <ApplicationsBoard rows={filtered} phases={phases} onMove={handleMove}
             selectedId={selected?.id} onSelect={selectApplication} />

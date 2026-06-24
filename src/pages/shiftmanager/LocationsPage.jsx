@@ -37,28 +37,24 @@ export default function LocationsPage() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  // Load locations (derived from /sm_customers). Dummy only in mock mode — a
+  // Load locations directly from /sm_locations. Dummy only in mock mode — a
   // failed/empty call shows an empty list in prod, never fabricated rows.
   useEffect(() => {
     const ctrl = new AbortController()
-    api.get('/sm_customers', { signal: ctrl.signal })
+    api.get('/sm_locations', { signal: ctrl.signal })
       .then(res => {
-        const { rows: customers } = unwrapList(res)
-        const flat = customers.flatMap(c =>
-          (c.locations ?? []).map(l => ({
-            id:          l.id,
-            name:        l.name,
-            customer:    c.name,
-            city:        l.city ?? '',
-            address:     l.address ?? '',
-            phone:       l.phone ?? '',
-            email:       l.email ?? '',
-            status:      l.status === 'active' ? 'Actief' : l.status === 'inactive' ? 'Inactief' : (l.status ?? 'Actief'),
-            departments: (l.departments ?? []).map(d => d.name ?? d),
-            shifts:      l.shift_count ?? 0,
-          }))
-        )
-        if (flat.length > 0) setLocations(flat)
+        const { rows } = unwrapList(res)
+        const mapped = rows.map(l => ({
+          id:          l.id,
+          name:        l.name ?? '',
+          customer:    l.customer?.name ?? l.customer ?? '',
+          city:        l.city ?? '',
+          address:     l.address ?? '',
+          status:      l.status === 'active' ? 'Actief' : l.status === 'inactive' ? 'Inactief' : (l.status ?? 'Actief'),
+          departments: (l.departments ?? []).map(d => d.name ?? d),
+          shifts:      l.shift_count ?? 0,
+        }))
+        if (mapped.length > 0) setLocations(mapped)
         else if (!USE_MOCKS) setLocations([])
       })
       .catch(err => { if (!isAbortError(err) && !USE_MOCKS) setLocations([]) })

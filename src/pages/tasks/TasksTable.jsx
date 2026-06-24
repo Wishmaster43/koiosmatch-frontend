@@ -12,7 +12,7 @@ const isOverdue = (r) => r.due && !r.statusIsDone && new Date(r.due) < new Date(
  * hover and the loading/empty states. Rows arrive already decorated (status/type/
  * priority label+colour resolved from the lookup) from TasksPage.
  */
-export default function TasksTable({ rows, loading, error, selectedId, onSelect }) {
+export default function TasksTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false }) {
   const { t } = useTranslation('tasks')
   const { formatDate } = useDateFormat()
 
@@ -64,6 +64,7 @@ export default function TasksTable({ rows, loading, error, selectedId, onSelect 
       emptyText={error ? t('error') : t('empty')}
       onRowClick={onSelect}
       selectedId={selectedId}
+      stickyHeader={stickyHeader}
     />
   )
 }

@@ -9,3 +9,6 @@ export const EdgeAddContext    = createContext(null)
 export const EdgeDeleteContext = createContext(null)
 export const EdgeFilterContext = createContext(null)
 export const NodeRunContext    = createContext(null)
+// Provides { startNodeId, setStartNodeId } so the START badge and nodes can
+// negotiate which node is the workflow entry point via drag-and-drop.
+export const StartContext      = createContext(null)

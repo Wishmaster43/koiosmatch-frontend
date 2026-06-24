@@ -29,7 +29,7 @@ function CountBar({ value = 0, max = 1, color = 'var(--color-primary)' }) {
  * sorting, selection and the loading/empty states live in the shared DataTable.
  * Mirrors CandidatesTable / ApplicationsTable.
  */
-export default function VacanciesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll }) {
+export default function VacanciesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false }) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()
   const { statusMeta } = useVacancyLookups()
@@ -110,6 +110,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
       loading={loading}
       loadingText={t('page.loading')}
       emptyText={t('page.empty')}
+      stickyHeader={stickyHeader}
     />
   )
 }

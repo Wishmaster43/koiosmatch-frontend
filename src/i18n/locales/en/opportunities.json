@@ -64,5 +64,9 @@
       "expectedClose": "Expected close",
       "owner": "Owner"
     }
+  },
+  "view": {
+    "table": "List view",
+    "board": "Board view"
   }
 }

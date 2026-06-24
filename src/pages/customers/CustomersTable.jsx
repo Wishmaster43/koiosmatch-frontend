@@ -13,6 +13,7 @@ const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
 export default function CustomersTable({
   rows, loading, selectedId, onSelect, statusMeta,
   selectable = false, selectedIds, onToggleRow, onToggleAll,
+  stickyHeader = false,
 }) {
   const { t } = useTranslation('customers')
 
@@ -64,6 +65,7 @@ export default function CustomersTable({
       selectedIds={selectedIds}
       onToggleRow={onToggleRow}
       onToggleAll={onToggleAll}
+      stickyHeader={stickyHeader}
     />
   )
 }
