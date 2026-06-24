@@ -33,13 +33,13 @@
 1. ✅ **DUP-3 — geen duplicate (re-scan 2026-06-24).** De twee `LANGUAGES` zijn verschillende concepten:
    `CompanySettings` = bedrijfs-communicatietaal (tenant-setting → hoort bij VOC-2), `ProfilePage` = de
    app-taalschakelaar = de 5 i18n-locales (app-structuur, OK hardcoded). Niets te consolideren.
-2. ☐ **i18n-eilandjes dichten.** `AddShiftModal` (7) · `MonthlyKpiCard` (3) · `LineChartCard` (2) → alles via `t()`.
+2. ◐ **i18n-eilandjes dichten.** ✅ `MonthlyKpiCard` (2026-06-24, `monthlyKpi`×5 locales). `AddShiftModal` = al i18n-clean (resterende `<option>`s = vocab → VOC item 12). ⚠️ `LineChartCard` → **samen** (gedeeld in reports-domein; "kandidaten"-unit vereist prop-API-keuze).
 3. ◐ **DUP-1 — echte duplicate-selects opgeruimd (re-scan 2026-06-24).** `BranchSection` → `SearchSelect` (multi),
    `AddApplicationModal SearchField` → `CreatableSelect` (single). **De "9" was opgeblazen:** de rest is **geen**
    duplicate-select — `SettingsControls`/`UsersPage` = kleur-pickers · `KoiosSteps`/`MatchScoreBlock` = uitklap-toggles ·
    `EntityHeader`/`KoiosModelPicker` = custom meta-pickers (avatars/model-rendering). Niets meer te swappen.
-4. ◐ **i18n shiftmanager-pagina's** (Locations/Contacts/Departments, 0×`t()`) → volledig vertalen.
-   ✅ **LocationsPage gedaan 2026-06-24** (`locationsPage`-sectie in alle 5 locales). Resterend: ContactsPage · DepartmentsPage.
+4. ✅ **i18n shiftmanager-pagina's** (Locations/Contacts/Departments) → **volledig vertaald 2026-06-24**
+   (`locationsPage` · `contactsPage` · `departmentsPage` in alle 5 locales). ContactsPage ook aan `/sm_contacts` gewired.
 5. ☐ **CS-7 rest — NL-identifiers** die nog verspreid staan (buiten candidate-drawer al gedaan).
 6. ◐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal.
    - ✅ **gedaan 2026-06-24:** ProfilePage 421→172 · PlanningPanel 419→79 · ShiftsChartsBlock 468→141 · OrdersTable 428→182 · LocationsPage 441→269 (+ i18n).
@@ -47,8 +47,8 @@
    - ⚠️ **App.jsx** 468 — buiten WIP maar routing/providers; de andere Claude voegt net routes toe → conflictrisico, alleen pakken als hun status schoon blijft.
    - 🤝 **uitgesteld (hun domein/WIP):** `ReportFilterSidebar` 469 · `VacanciesPage` 424 · `MessagesTable` 423 (reports).
 7. ☐ **Editor-i18n-pass (AW-7/AW-8 + AW editor-strings).** Workflow-editor (~60 strings, 0×`t()`) + module-registry labels/categorieën + `CATEGORY_ORDER` → keys. *(groot, ~1–2 dagen, maar solo)*
-8. ☐ **CS-4 rest — chrome-hex** die per-touch meelift (data-kleuren blijven).
-9. ☐ **DUP-2 — select-componenten documenteren** (wanneer `SearchSelect`/`SelectMenu`/`CreatableSelect`/`SelectField`) zodat niemand een 5e bouwt.
+8. ◐ **CS-4 rest — chrome-hex** die per-touch meelift (data-kleuren blijven). ✅ **Mijn sessie-files (shiftmanager-splits) token-clean** — resterende hex = data (avatar-palette · status-kleuren) of soft-accent zonder token. Brede sweep buiten mijn domein = apart/per-touch.
+9. ✅ **DUP-2 — select-componenten gedocumenteerd** (2026-06-24): [`docs/frontend-select-components.md`](frontend-select-components.md) — beslis-tabel `SelectField`/`SelectMenu`/`CreatableSelect`/`SearchSelect` zodat niemand een 5e bouwt.
 
 **Wacht op verificatie/afstemming (jouw input / backend):**
 10. ⚠️ **API-status invullen** (welke endpoints live) → **DS-3: mock-fallbacks eruit** (`DUMMY_CANDIDATES`/`MOCK_WORKFLOWS`/`USE_MOCKS` → lege staat). → **Backend-prompt klaar (2026-06-24):** [`docs/backend-mockdata-to-api-prompt.md`](backend-mockdata-to-api-prompt.md) — volledige mock-inventaris met endpoints/velden/seed; backend bouwt, koppelt per entiteit terug welke live zijn, dan sloop ik de fallback.
