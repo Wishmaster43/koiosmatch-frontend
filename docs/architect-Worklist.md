@@ -31,7 +31,7 @@
    `EntityHeader`/`KoiosModelPicker` = custom meta-pickers (avatars/model-rendering). Niets meer te swappen.
 4. ☐ **i18n shiftmanager-pagina's** (Locations/Contacts/Departments, ~22 strings, 0×`t()`) → volledig vertalen.
 5. ☐ **CS-7 rest — NL-identifiers** die nog verspreid staan (buiten candidate-drawer al gedaan).
-6. ☐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal.
+6. ◐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal. *(✅ ProfilePage 421→172 & PlanningPanel 419→79 gedaan 2026-06-24; resterend: App 463 · ReportFilterSidebar 469 · ShiftsChartsBlock 468 · LocationsPage · OrdersTable · VacanciesPage · MessagesTable)*
 7. ☐ **Editor-i18n-pass (AW-7/AW-8 + AW editor-strings).** Workflow-editor (~60 strings, 0×`t()`) + module-registry labels/categorieën + `CATEGORY_ORDER` → keys. *(groot, ~1–2 dagen, maar solo)*
 8. ☐ **CS-4 rest — chrome-hex** die per-touch meelift (data-kleuren blijven).
 9. ☐ **DUP-2 — select-componenten documenteren** (wanneer `SearchSelect`/`SelectMenu`/`CreatableSelect`/`SelectField`) zodat niemand een 5e bouwt.
@@ -178,7 +178,7 @@ WorkflowCanvasEditor-restant 863 (architectuur/hook-keuzes). JS-laag gezond.
 - [ ] `pages/shiftmanager/LocationsPage.jsx` — 441
 - [ ] `pages/vacancies/VacanciesPage.jsx` — 424  *(B-19 loopt)*
 - [ ] `pages/whatsapp/WhatsAppPage.jsx` — 422
-- [ ] `pages/auth/ProfilePage.jsx` — 421
+- [✅] `pages/auth/ProfilePage.jsx` — **421 → 172** (2026-06-24): `profileParts.jsx` (98, gedeelde blocks) + `ProfileDetailsTab` (95) + `ProfileDisplayTab` (107). Build+lint groen.
 - [ ] `pages/customers/CustomersPage.jsx` — 375
 - [ ] `pages/dashboard/Dashboard.jsx` — 372  *(B-22/B-23)*
 - [ ] `pages/shiftmanager/DepartmentsPage.jsx` — 370
@@ -212,7 +212,7 @@ WorkflowCanvasEditor-restant 863 (architectuur/hook-keuzes). JS-laag gezond.
 - [ ] `components/shiftmanager/OrdersTable.jsx` — 428
 
 **Candidates drawer · Context:**
-- [ ] `pages/candidates/drawer/PlanningPanel.jsx` — 419
+- [✅] `pages/candidates/drawer/PlanningPanel.jsx` — **419 → 79** (2026-06-24): thin router + `PlanningScheduling` (144) · `PlanningOpenShifts` (131) · `PlanningFavorites` (137). State blijft gelift in de container. Build+lint groen.
 - [ ] `context/AuthContext.jsx` — 312
 
 ### 🟡 Tier 2 — 250–300 r (onder de 400-trigger; cohesief = prima, meenemen bij volgende aanraking)
