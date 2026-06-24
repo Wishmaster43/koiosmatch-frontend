@@ -1,64 +1,26 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, ChevronDown, Check } from 'lucide-react'
+import { X } from 'lucide-react'
 import api, { unwrapList } from '../../lib/api'
 import { USE_MOCKS } from '../../lib/mocks'
 import { mapApplication } from './data/mapApplication'
 import { MOCK_APPLICATIONS, VACANCIES } from './data/mocks'
+import CreatableSelect from '../../components/ui/CreatableSelect'
+
+// Field label + shared searchable single-select (CreatableSelect) — replaces the
+// old inline SearchField dropdown (DUP-1). allowCreate off = pick-only.
+function PickField({ label, ...rest }) {
+  return (
+    <div>
+      <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{label}</div>
+      <CreatableSelect allowCreate={false} style={{ width: '100%' }} {...rest} />
+    </div>
+  )
+}
 
 // Two-letter initials from a name.
 const initialsOf = (name = '') => name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
 
-// A searchable single-select field (candidate / vacancy picker).
-function SearchField({ label, placeholder, options, value, onChange, searchLabel }) {
-  const [open, setOpen]   = useState(false)
-  const [query, setQuery] = useState('')
-  const ref = useRef(null)
-
-  useEffect(() => {
-    if (!open) return
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
-    document.addEventListener('mousedown', h)
-    return () => document.removeEventListener('mousedown', h)
-  }, [open])
-
-  const current = options.find(o => o.value === value)
-  const shown = query ? options.filter(o => o.label.toLowerCase().includes(query.toLowerCase())) : options
-
-  return (
-    <div ref={ref} style={{ position: 'relative' }}>
-      <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 5 }}>{label}</div>
-      <button type="button" onClick={() => setOpen(o => !o)}
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', height: 38,
-          padding: '0 12px', fontSize: 13, borderRadius: 8, border: '1px solid #E5E7EB', background: 'white',
-          color: current ? '#111827' : '#9CA3AF', cursor: 'pointer' }}>
-        {current?.label ?? placeholder}
-        <ChevronDown size={14} style={{ color: '#9CA3AF', flexShrink: 0 }} />
-      </button>
-      {open && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 60, marginTop: 4,
-          background: 'white', border: '1px solid var(--border)', borderRadius: 10, boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
-          <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border)' }}>
-            <input value={query} onChange={e => setQuery(e.target.value)} placeholder={searchLabel} autoFocus
-              style={{ width: '100%', border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none' }} />
-          </div>
-          <div style={{ maxHeight: 220, overflowY: 'auto' }}>
-            {shown.length === 0 && <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>}
-            {shown.map(o => (
-              <button key={o.value} type="button" onClick={() => { onChange(o.value); setOpen(false); setQuery('') }}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', padding: '9px 12px',
-                  fontSize: 12, textAlign: 'left', cursor: 'pointer', border: 'none',
-                  background: value === o.value ? 'var(--color-primary-bg)' : 'none', color: 'var(--text)' }}>
-                {o.label}
-                {value === o.value && <Check size={13} style={{ color: 'var(--color-primary)', flexShrink: 0 }} />}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
 
 // Mock fallbacks (USE_MOCKS only): unique candidates from the demo applications + the demo vacancies.
 const mockCandidateOptions = () => {
@@ -123,9 +85,9 @@ export default function AddApplicationModal({ onClose, onCreated }) {
         </div>
 
         <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <SearchField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')} searchLabel={t('add.search')}
+          <PickField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')}
             options={candidates} value={candidateId} onChange={setCandidateId} />
-          <SearchField label={t('add.vacancy')} placeholder={t('add.vacancyPlaceholder')} searchLabel={t('add.search')}
+          <PickField label={t('add.vacancy')} placeholder={t('add.vacancyPlaceholder')}
             options={vacancies} value={vacancyId} onChange={setVacancyId} />
         </div>
 

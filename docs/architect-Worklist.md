@@ -21,9 +21,14 @@
 > Marker: ☐ open · ◐ deels · ⚠️ jouw input · 🔒 backend.
 
 **Solo (samen afwerken — frontend, geen backend/beslissing nodig):**
-1. ☐ **DUP-3 — `LANGUAGES` consolideren.** Twee hardcoded talenlijsten → één bron. *(klein, eerst)*
+1. ✅ **DUP-3 — geen duplicate (re-scan 2026-06-24).** De twee `LANGUAGES` zijn verschillende concepten:
+   `CompanySettings` = bedrijfs-communicatietaal (tenant-setting → hoort bij VOC-2), `ProfilePage` = de
+   app-taalschakelaar = de 5 i18n-locales (app-structuur, OK hardcoded). Niets te consolideren.
 2. ☐ **i18n-eilandjes dichten.** `AddShiftModal` (7) · `MonthlyKpiCard` (3) · `LineChartCard` (2) → alles via `t()`.
-3. ☐ **DUP-1 — 9 inline dropdowns → gedeelde select** (`SelectMenu`/`SearchSelect`): BranchSection · UsersPage · AddApplicationModal · EntityHeader · KoiosModelPicker · MatchScoreBlock · SettingsControls · KoiosSteps · ai/management/shared.
+3. ◐ **DUP-1 — echte duplicate-selects opgeruimd (re-scan 2026-06-24).** `BranchSection` → `SearchSelect` (multi),
+   `AddApplicationModal SearchField` → `CreatableSelect` (single). **De "9" was opgeblazen:** de rest is **geen**
+   duplicate-select — `SettingsControls`/`UsersPage` = kleur-pickers · `KoiosSteps`/`MatchScoreBlock` = uitklap-toggles ·
+   `EntityHeader`/`KoiosModelPicker` = custom meta-pickers (avatars/model-rendering). Niets meer te swappen.
 4. ☐ **i18n shiftmanager-pagina's** (Locations/Contacts/Departments, ~22 strings, 0×`t()`) → volledig vertalen.
 5. ☐ **CS-7 rest — NL-identifiers** die nog verspreid staan (buiten candidate-drawer al gedaan).
 6. ☐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal.
@@ -320,7 +325,10 @@ Per pagina de endpoints die de fallback-mock voedt. **Live → mock eruit + lege
 - [ ] **DS-4 · `MOCK_LOGS`** in `WorkflowCanvasEditor` → echte run-logs-feed (workflow-server, memory `project-workflow-separate-server`).
 
 ### 🔁 DUP — Duplicatie (geen dubbele data/select/iets)
-- [ ] **DUP-1 · 9 inline custom dropdowns** herbouwen open/close/outside-click zelf i.p.v. een gedeelde select:
+- [◐] **DUP-1 · 2 van de "9" waren echte duplicate-selects → opgeruimd** (`BranchSection`→`SearchSelect`,
+  `AddApplicationModal`→`CreatableSelect`); de overige 7 zijn kleur-pickers/uitklap-toggles/custom meta-pickers
+  (geen select). Oorspronkelijke (te brede) bevinding hieronder:
+- [ ] ~~**DUP-1 · 9 inline custom dropdowns** herbouwen open/close/outside-click zelf i.p.v. een gedeelde select:~~
   `BranchSection · UsersPage · AddApplicationModal · EntityHeader · KoiosModelPicker · MatchScoreBlock ·
   SettingsControls · KoiosSteps · ai/management/shared`. → vervangen door `SelectMenu`/`SearchSelect`/`CreatableSelect`.
 - [ ] **DUP-2 · 4 select-componenten** (`SearchSelect` multi · `SelectMenu` single · `CreatableSelect` combobox ·
