@@ -301,3 +301,46 @@ eigen data "zoals ShiftManager maar voor onszelf". Raakt **geo** (radius-filter 
 > verwijder ik de bijbehorende `USE_MOCKS`/`DUMMY_*`/`MOCK_*`-fallback (worklist DS-3) zodat de
 > frontend op 0% mock staat. Lever bij voorkeur **één entiteit tegelijk** zodat we per stuk kunnen
 > verifiëren.
+
+---
+
+## 9. Endpoint-audit (2026-06-24) — aanvullingen die in §1–§8 ontbraken
+
+Een volledige scan van **alle 147 `api.*`-endpoints** in de frontend bracht endpoints aan het
+licht die de frontend al aanroept maar die hierboven niet stonden. Aanvullen/bevestigen:
+
+### 9a · Customers — volledige entiteit (native, was alleen kort genoemd in A5)
+`/customers` is een **volwaardige entiteit zoals vacancies**, niet alleen een vacancy-koppeling:
+- `GET /customers` (+ `/customers/stats`, `/customers/{id}`, `/customers/{id}/stats`)
+- `GET /customers/{id}/notes` · bulk: `POST /customers/bulk/{archive|notes|tags|tags/remove}`
+- Velden (uit `DUMMY_CUSTOMERS` / reports): `id, name, debtor_number, status (actief/prospect/
+  inactief), account_manager_id, city, industry_id, locations[], contacts[], created_at`.
+  Mirror dezelfde surface als candidates/vacancies (stats server-wide, bulk via `bulkMutate`).
+
+### 9b · Customer ↔ planning-integratie (hoort bij de native planning-module C4)
+De klant-drawer toont planning-data per klant:
+- **`GET /customers/{id}/open-shifts`** → open Shifts van die klant (zie C4 `Shift`).
+- **`GET /customers/{id}/planning-summary`** → samenvatting (ingevuld/open/uren) voor de klant.
+Beide leunen op de native `Order`/`Shift`/`ScheduledShift`-tabellen uit C4.
+
+### 9c · Candidate documents (hoort bij A1)
+Documenten-sectie in de kandidaat-drawer:
+- **`GET /candidates/{id}/documents`** · **`POST /candidates/{id}/documents`** (upload, multipart) ·
+  **`DELETE /candidates/{id}/documents/{docId}`**. Velden `{ id, name, size, mime, uploaded_at, url }`.
+  Special-category data → access-gated, nooit in logs, respecteer gewiste staat (§8).
+
+### 9d · Opportunities + Matches — **andere Claude's domein** (aparte dekking nodig)
+Deze full-entiteiten worden door de **andere Claude** gebouwd (OpportunitiesPage/Board, MatchesPage);
+ze staan hier alleen als **vlag** zodat backend ze niet over het hoofd ziet — **niet hier dupliceren**:
+- **Opportunities** (CRM-pijplijn): `/opportunities` (+ `/stats`, `/{id}`), `/opportunity-stages` (lookup).
+- **Matches** (voortzetting application→placement): `/matches`. Koppelt kandidaat↔vacature↔placement;
+  read-only in de kandidaat-drawer (CLAUDE.md §3B), gevuld via funnel **Hired** of directe match.
+
+### 9e · Native `/dashboard` vs `/sm_reports/dashboard`
+Er bestaat een **native** `GET /dashboard` (Koios-KPI's: kandidaten/sollicitaties/matches-tijdreeks)
+**naast** de ShiftManager-`/sm_reports/dashboard` (C5, shift-KPI's). Houd beide gescheiden (native
+schoon, SM-spiegel `sm_`-prefix).
+
+> **Niet in deze prompt (bestaan al / buiten mock-scope):** auth/MFA · settings/* · users/roles/
+> permissions · api-keys/webhooks · tenant-modules/admin · ai/* · profile/* · whatsapp/* — alleen
+> bevestigen dat ze leven; geen mock-data erachter.
