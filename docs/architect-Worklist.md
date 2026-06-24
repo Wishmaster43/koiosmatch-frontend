@@ -31,7 +31,7 @@
    `EntityHeader`/`KoiosModelPicker` = custom meta-pickers (avatars/model-rendering). Niets meer te swappen.
 4. ☐ **i18n shiftmanager-pagina's** (Locations/Contacts/Departments, ~22 strings, 0×`t()`) → volledig vertalen.
 5. ☐ **CS-7 rest — NL-identifiers** die nog verspreid staan (buiten candidate-drawer al gedaan).
-6. ◐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal. *(✅ ProfilePage 421→172 & PlanningPanel 419→79 gedaan 2026-06-24; resterend: App 463 · ReportFilterSidebar 469 · ShiftsChartsBlock 468 · LocationsPage · OrdersTable · VacanciesPage · MessagesTable)*
+6. ◐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal. *(✅ ProfilePage 421→172 · PlanningPanel 419→79 · ShiftsChartsBlock 468→141, gedaan 2026-06-24; resterend: App 463 · ReportFilterSidebar 469 (in WIP andere Claude) · LocationsPage · OrdersTable · VacanciesPage 424 (in WIP) · MessagesTable 423 (reports-domein))*
 7. ☐ **Editor-i18n-pass (AW-7/AW-8 + AW editor-strings).** Workflow-editor (~60 strings, 0×`t()`) + module-registry labels/categorieën + `CATEGORY_ORDER` → keys. *(groot, ~1–2 dagen, maar solo)*
 8. ☐ **CS-4 rest — chrome-hex** die per-touch meelift (data-kleuren blijven).
 9. ☐ **DUP-2 — select-componenten documenteren** (wanneer `SearchSelect`/`SelectMenu`/`CreatableSelect`/`SelectField`) zodat niemand een 5e bouwt.
@@ -208,7 +208,7 @@ WorkflowCanvasEditor-restant 863 (architectuur/hook-keuzes). JS-laag gezond.
 - [ ] `components/reports/CandidateDetailDrawer.jsx` — 305
 
 **ShiftManager:**
-- [ ] `components/shiftmanager/ShiftsChartsBlock.jsx` — 468
+- [✅] `components/shiftmanager/ShiftsChartsBlock.jsx` — **468 → 141** (2026-06-24): `shiftsChartsConfig` (28) · `shiftsChartsWidgets` (92) · `useShiftsChartData` (146, fetch+transform+bars) · `buildShiftsFilterGroups` (121). Build+lint groen.
 - [ ] `components/shiftmanager/OrdersTable.jsx` — 428
 
 **Candidates drawer · Context:**
