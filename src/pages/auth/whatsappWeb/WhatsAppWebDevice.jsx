@@ -74,7 +74,7 @@ export default function WhatsAppWebDevice({ device, busy, onConnect, onDisconnec
             {device.status === 'qr_pending' && device.qr
               ? <QRCodeSVG value={device.qr} size={168} />
               : <div style={{ width: 168, height: 168, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <RefreshCw size={20} className="animate-spin" color="#9CA3AF" />
+                  <RefreshCw size={20} className="animate-spin" color="var(--text-muted)" />
                 </div>}
           </div>
           <div style={{ flex: 1, minWidth: 200 }}>

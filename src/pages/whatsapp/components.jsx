@@ -72,7 +72,7 @@ function StatusDot({ status, direction }) {
     status === 'read'      ? 'var(--color-success)' :
     status === 'delivered' ? '#3B8FD4' :
     status === 'failed'    ? 'var(--color-danger)' :
-    direction === 'inbound' ? 'var(--color-success)' : '#9CA3AF'
+    direction === 'inbound' ? 'var(--color-success)' : 'var(--text-muted)'
   return <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0, display: 'inline-block' }} />
 }
 
@@ -166,7 +166,7 @@ export function EscalationList({ escalations, loading }) {
           </div>
         )}
         {!loading && escalations.map((esc, i) => {
-          const meta = REASON_COLOR[esc.reason] ?? { color: '#6B7280', bg: '#F9FAFB' }
+          const meta = REASON_COLOR[esc.reason] ?? { color: 'var(--text-muted)', bg: 'var(--bg)' }
           const reasonLabel = t(`reasons.${esc.reason}`, { defaultValue: esc.reason })
           return (
             <div key={esc.candidate_id ?? i} style={{

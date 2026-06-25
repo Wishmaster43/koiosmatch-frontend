@@ -94,24 +94,24 @@ export default function WhatsAppPage() {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
         <div style={{ textAlign: 'center', maxWidth: 380 }}>
-          <div style={{ width: 56, height: 56, borderRadius: 16, background: '#F0FDF4',
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--color-success-bg)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         margin: '0 auto 16px' }}>
             <MessageCircle size={26} color="var(--color-success)" />
           </div>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: '#111827', marginBottom: 8 }}>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>
             {t('noConn.title')}
           </h2>
-          <p style={{ fontSize: 13, color: '#6B7280', lineHeight: 1.6, marginBottom: 20 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: 20 }}>
             {t('noConn.desc')}
           </p>
-          <div style={{ background: '#F9FAFB', borderRadius: 10, padding: '12px 16px',
-                        border: '1px solid #F3F4F6', textAlign: 'left' }}>
-            <div style={{ fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase',
+          <div style={{ background: 'var(--bg)', borderRadius: 10, padding: '12px 16px',
+                        border: '1px solid var(--border)', textAlign: 'left' }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
                           letterSpacing: '0.05em', marginBottom: 8 }}>
               {t('noConn.errorLabel')}
             </div>
-            <code style={{ fontSize: 11, color: '#374151', fontFamily: 'monospace' }}>
+            <code style={{ fontSize: 11, color: 'var(--text)', fontFamily: 'monospace' }}>
               No query results for model WhatsappConnection
             </code>
           </div>
