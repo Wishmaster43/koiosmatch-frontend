@@ -40,7 +40,7 @@ export default function PlanningTab({ c }) {
   const tog = (val, set) => set(prev => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val])
   const { t } = useTranslation('candidates')
 
-  const diensttypeOpts = [['Avonddienst', 'eveningShift'], ['Dagdienst', 'dayShift'], ['Nachtdienst', 'nightShift']]
+  const shiftTypeOpts = [['Avonddienst', 'eveningShift'], ['Dagdienst', 'dayShift'], ['Nachtdienst', 'nightShift']]
   return (
     <div style={sectionBlock}>
       <span style={sectionTitle}>{t('planning.rolesPoolsSkills')}</span>
@@ -82,7 +82,7 @@ export default function PlanningTab({ c }) {
       <div style={{ marginBottom: 16 }}>
         <SecLabel>{t('planning.shiftPref')}</SecLabel>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {diensttypeOpts.map(([d, k]) => (
+          {shiftTypeOpts.map(([d, k]) => (
             <Chip key={d} label={t(`planning.${k}`)} selected={shiftType.includes(d)} onToggle={() => tog(d, setShiftType)} />
           ))}
         </div>
