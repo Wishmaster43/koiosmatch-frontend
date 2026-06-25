@@ -1,0 +1,236 @@
+/**
+ * DashboardLayout — main shell after login.
+ * [Left nav] [Topbar + Content] [Right filter panel (optional)]
+ * Owns the active-page + panel state; the page itself comes from renderPage().
+ */
+import { useState, useEffect, Suspense } from 'react'
+import { SlidersHorizontal, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { useAuth } from '../../context/AuthContext'
+import { useRightPanel } from '../../context/RightPanelContext'
+import { canAccessPage, PACKAGE_DEFAULT_PAGE } from '../../lib/access'
+import Sidebar from './Sidebar'
+import KoiosPanel from './KoiosPanel'
+import ReportFilterSidebar from '../reports/ReportFilterSidebar'
+import { renderPage, PAGE_TITLES } from './appPages'
+
+// Fallback while a lazily-loaded page chunk is being fetched.
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <p className="text-sm text-[var(--text-muted)] animate-pulse">Laden…</p>
+    </div>
+  )
+}
+
+// Shown when a user opens a page they are not allowed to access.
+function NoAccessPage() {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <div className="text-center">
+        <p className="text-sm font-medium" style={{ color: 'var(--text)' }}>Geen toegang</p>
+        <p className="mt-1 text-xs text-[var(--text-muted)]">Je hebt geen rechten voor deze pagina.</p>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * useTenantTheme — applies CSS variables based on tenant branding.
+ * Backend returns { primary_color, logo_url } via /api/auth/me.
+ */
+function useTenantTheme(tenant) {
+  useEffect(() => {
+    if (!tenant) return
+    const root = document.documentElement
+    if (tenant.primary_color) {
+      root.style.setProperty('--color-primary',    tenant.primary_color)
+      root.style.setProperty('--color-primary-bg', tenant.primary_color + '18')
+    }
+  }, [tenant])
+}
+
+export default function DashboardLayout() {
+  const [expanded,       setExpanded]       = useState(true)
+  const auth0                               = useAuth()
+  const pkg0                                = auth0?.activeTenant?.package ?? auth0?.user?.tenant?.package
+  const [activePage,     setActivePage]     = useState(PACKAGE_DEFAULT_PAGE[pkg0] ?? 'dashboard')
+  // Navigation intent: a filter the target page should apply when navigated to
+  // (e.g. a dashboard KPI/chart click). Plain navigation (sidebar) clears it.
+  const [navIntent,      setNavIntent]      = useState(null)
+  const goTo = (page, intent = null) => { setNavIntent(intent); setActivePage(page) }
+  const [rightPanelOpen, setRightPanelOpen] = useState(false)
+  const [koiosOpen,      setKoiosOpen]      = useState(false)
+  const auth                                = auth0
+  const { logout, user, activeTenant }      = auth
+  const { filterGroups }                    = useRightPanel()
+
+  // Active tenant drives topbar branding. Super admins see the tenant they switched to;
+  // regular users fall back to their own tenant from /auth/me.
+  const tenant = activeTenant ?? user?.tenant ?? { name: 'KoiosMatch', logo_url: null }
+  useTenantTheme(tenant)
+
+  // Only show the filter button when the current page has registered filter groups.
+  const hasFilters    = filterGroups.length > 0
+  const activeFilters = filterGroups.reduce((sum, g) => sum + (g.selected?.length ?? 0), 0)
+
+  return (
+    <div className="flex h-screen overflow-hidden">
+
+      {/* ── Left navigation ── */}
+      <Sidebar
+        expanded={expanded}
+        setExpanded={setExpanded}
+        activePage={activePage}
+        setActivePage={goTo}
+        onTheme={() => {}}
+        koiosOpen={koiosOpen}
+        onToggleKoios={() => setKoiosOpen(o => !o)}
+      />
+
+      {/* ── Koios AI panel ── */}
+      <KoiosPanel open={koiosOpen} onClose={() => setKoiosOpen(false)} />
+
+      {/* ── Right column: topbar + content + filter panel ── */}
+      <div className="km-main-bg flex flex-col flex-1 overflow-hidden" style={{ background: 'var(--bg)' }}>
+
+        {/* Topbar */}
+        <div
+          className="km-topbar flex items-center flex-shrink-0 gap-3 px-5"
+          style={{ height: 52, background: 'var(--topbar-bg)', borderBottom: '1px solid var(--border)' }}
+        >
+          {/* Sidebar toggle */}
+          <button
+            onClick={() => setExpanded(e => !e)}
+            title={expanded ? 'Sidebar inklappen' : 'Sidebar uitklappen'}
+            className="flex items-center justify-center flex-shrink-0 rounded-lg transition-colors"
+            style={{
+              width: 30, height: 30, border: 'none', cursor: 'pointer',
+              background: 'transparent', color: 'var(--text-muted)',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.color = 'var(--text)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-muted)' }}
+          >
+            {expanded ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
+          </button>
+
+          {/* Tenant logo + naam (de bureau-switcher zelf zit in de Sidebar-kaart) */}
+          <div className="flex items-center flex-shrink-0 gap-2">
+            {tenant?.logo_url
+              ? <img src={tenant.logo_url} alt="" style={{ height: 22, borderRadius: 4 }} />
+              : (
+                <div
+                  className="flex items-center justify-center flex-shrink-0 rounded-md"
+                  style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 11, color: 'white', fontWeight: 700 }}
+                >
+                  {(tenant?.name ?? 'K').charAt(0).toUpperCase()}
+                </div>
+              )
+            }
+            <span className="font-semibold text-[var(--text)]" style={{ fontSize: 13 }}>
+              {tenant?.name ?? 'KoiosMatch'}
+            </span>
+          </div>
+
+          {/* Breadcrumb separator + page title */}
+          <span style={{ color: 'var(--border)', fontSize: 16 }}>›</span>
+          <span className="font-medium truncate" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+            {PAGE_TITLES[activePage] || activePage}
+          </span>
+
+          {/* Right actions */}
+          <div className="flex items-center flex-shrink-0 gap-2 ml-auto">
+            {/* Avatar button — navigates to profile page */}
+            {(() => {
+              const initials = (
+                [user?.firstname, user?.lastname].filter(Boolean).map(n => n[0]).join('').toUpperCase()
+                || (user?.name ?? '').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                || (user?.email ?? '').slice(0, 2).toUpperCase()
+                || '?'
+              )
+              return (
+                <button
+                  onClick={() => goTo('profile')}
+                  title={[user?.firstname, user?.lastname].filter(Boolean).join(' ') || user?.name || 'Profiel'}
+                  style={{
+                    width: 30, height: 30, borderRadius: '50%', flexShrink: 0,
+                    background: activePage === 'profile' ? 'var(--color-primary)' : 'var(--color-primary-bg)',
+                    color: activePage === 'profile' ? 'white' : 'var(--color-primary)',
+                    border: `1.5px solid ${activePage === 'profile' ? 'var(--color-primary)' : 'transparent'}`,
+                    fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {initials}
+                </button>
+              )
+            })()}
+
+            {/* Filter button — only visible when the current page has registered filters */}
+            {hasFilters && (
+              <button
+                onClick={() => setRightPanelOpen(o => !o)}
+                title="Filters tonen/verbergen"
+                className="flex items-center justify-center transition-colors rounded-lg"
+                style={{
+                  position: 'relative',
+                  width: 30, height: 30,
+                  background: rightPanelOpen ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
+                  border:     `1px solid ${rightPanelOpen ? 'var(--color-primary)' : 'var(--border)'}`,
+                  color:      rightPanelOpen ? 'var(--color-primary)' : 'var(--text-muted)',
+                  cursor: 'pointer',
+                }}
+              >
+                <SlidersHorizontal size={14} />
+                {activeFilters > 0 && (
+                  <span style={{
+                    position: 'absolute', top: -5, right: -5,
+                    background: 'var(--color-primary)', color: '#fff',
+                    borderRadius: 999, fontSize: 10, fontWeight: 700,
+                    minWidth: 16, height: 16, display: 'flex',
+                    alignItems: 'center', justifyContent: 'center',
+                    padding: '0 4px', lineHeight: 1,
+                  }}>
+                    {activeFilters}
+                  </span>
+                )}
+              </button>
+            )}
+
+            <button
+              onClick={logout}
+              className="text-xs rounded-md px-3 py-1.5"
+              style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
+            >
+              Uitloggen
+            </button>
+          </div>
+        </div>
+
+        {/* Content row: page + optional right filter panel side by side */}
+        <div className="flex flex-1 overflow-hidden">
+          {/* key on tenant id: switching bureau remounts the page so its data reloads */}
+          <div key={activeTenant?.id ?? 'none'} className="flex-1 overflow-auto">
+            <Suspense fallback={<PageLoader />}>
+              {canAccessPage(activePage, auth) ? renderPage(activePage, { navIntent, goTo }) : <NoAccessPage />}
+            </Suspense>
+          </div>
+
+          {/* Right filter panel — same height as content, slides next to page */}
+          {rightPanelOpen && hasFilters && (
+            <div
+              className="km-right-panel flex-shrink-0 overflow-y-auto"
+              style={{ width: 240, borderLeft: '1px solid var(--border)', background: 'var(--surface)' }}
+            >
+              <ReportFilterSidebar
+                title="Filters"
+                groups={filterGroups}
+                onClose={() => setRightPanelOpen(false)}
+              />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
