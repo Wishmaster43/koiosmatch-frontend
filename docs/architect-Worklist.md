@@ -29,6 +29,17 @@
 > Alle open architect-issues, in volgorde. Detail per item in de secties hieronder (AW/CS/RF/DS/DUP/VOC).
 > Marker: ☐ open · ◐ deels · ⚠️ jouw input · 🔒 backend.
 
+### 🔴 TOP-BLOCKER (boven alles) — audit-JSON breekt het schrijfpad in dev
+> Backend-commit `6f3a94a` (audit-collega) schrijft een **encrypted (niet-JSON)** waarde in een
+> **`json`-kolom** (`activity_log`-diff) → MySQL weigert **élke** create/update **én seed** in dev
+> (`SQLSTATE[22032] Invalid JSON text`). **Gevolg:** geen CRUD · geocode-on-create/`geo:backfill` vuren
+> niet · DB seedt niet → geen data om te lezen → **niets is end-to-end te verifiëren**.
+> **Fix (audit-collega):** kolom `json` → `text`/`binary`, óf payload niet-encrypted in JSON. In de
+> bestaande `create_`-migratie vouwen → `migrate:fresh`/`dev:reset`.
+> **Tot dat gefixt is staat het strategische doel (item 10: app op echte data, 0% mock) stil.**
+
+**Strategisch doel:** **alles op API, 0% mock** (item 10 / DS-3) — hangt onder de blocker hierboven.
+
 **Solo (samen afwerken — frontend, geen backend/beslissing nodig):**
 1. ✅ **DUP-3 — geen duplicate (re-scan 2026-06-24).** De twee `LANGUAGES` zijn verschillende concepten:
    `CompanySettings` = bedrijfs-communicatietaal (tenant-setting → hoort bij VOC-2), `ProfilePage` = de
