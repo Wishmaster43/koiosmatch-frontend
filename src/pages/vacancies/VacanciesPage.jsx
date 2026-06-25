@@ -1,11 +1,17 @@
+/**
+ * VacanciesPage — the vacancy list surface (mirrors the candidate blueprint).
+ * Thin container: owns UI state (filters, selection, drawer), composes the data
+ * hook (customers/list/stats) and the bulk-actions hook, derives the donut data
+ * + filters, and renders the insights row + status tabs + table + drawer. Page-
+ * scoped VacancyLookupsProvider so the table/drawer/modal/bulk share one fetch.
+ */
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 import { useAuth } from '../../context/AuthContext'
-import api, { unwrapList } from '../../lib/api'
 import { useUsers } from '../../lib/queries'
-import { USE_MOCKS, isAbortError } from '../../lib/mocks'
+import api from '../../lib/api'
 import { VacancyLookupsProvider, useVacancyLookups } from '../../context/VacancyLookupsContext'
 import InsightsRow from '../../components/insights/InsightsRow'
 import PaginationBar from '../../components/ui/PaginationBar'
@@ -13,36 +19,20 @@ import VacanciesTable from './VacanciesTable'
 import VacanciesBulkBar from './VacanciesBulkBar'
 import VacancyDrawer from './VacancyDrawer'
 import AddVacancyModal from './AddVacancyModal'
-import { mapVacancy, mapVacancyDetail } from './data/mapVacancy'
-
-// Set exactly one value in a multi-select, or clear when it's already the only one.
-const toggleOneValue = (set, value) =>
-  set(p => (p.length === 1 && p[0] === value) ? [] : [value])
-
-// Two-letter initials from a name, e.g. "Bente de Jong" → "BJ".
-const initialsOf = (name = '') => name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
-
-// Recharts hands the clicked segment back at top level AND under `.payload`.
-const pickKey = (d) => d?.key ?? d?.payload?.key ?? d?.name
+import { mapVacancyDetail } from './data/mapVacancy'
+import { toggleOneValue, initialsOf, pickKey, buildVacancyPatch } from './data/vacanciesShared'
+import { useVacanciesData } from './hooks/useVacanciesData'
+import { useVacancyBulkActions } from './hooks/useVacancyBulkActions'
 
 function VacanciesPageInner() {
   const { t } = useTranslation('vacancies')
   const { registerFilters, unregisterFilters } = useRightPanel()
-  const { hasPermission, user } = useAuth()
+  const { hasPermission } = useAuth()
   const { statuses, phases, statusMeta } = useVacancyLookups()
   const { data: users = [] } = useUsers()
 
-  const [vacancies, setVacancies] = useState([])
-  const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState(null)
   const [page,      setPage]      = useState(1)
-  // TODO C-33: use user.default_per_page once the backend accepts per_page > 100 on this endpoint.
   const [pageSize,  setPageSize]  = useState(50)
-  const [lastPage,  setLastPage]  = useState(1)
-  const [total,     setTotal]     = useState(0)
-  const [stats,     setStats]     = useState(null)
-  const [customers, setCustomers] = useState([])
-
   const [selected,       setSelected]       = useState(null)
   const [detail,         setDetail]         = useState(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
@@ -50,6 +40,7 @@ function VacanciesPageInner() {
   const [selectedIds,    setSelectedIds]    = useState(() => new Set())
   const [actionMsg,      setActionMsg]      = useState(null)
   const msgTimer = useRef(null)
+  const selectedIdRef = useRef(null)
 
   // Server-side filter dimensions. Status is driven by the tab bar (single value).
   const [statusBucket,   setStatusBucket]   = useState('all')
@@ -74,44 +65,16 @@ function VacanciesPageInner() {
   useEffect(() => { setPage(1) }, [filterKey])
   useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize])
 
-  // Load the customers once for the filters/drawer/modal/bulk pickers.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/customers', { signal: ctrl.signal })
-      .then(res => setCustomers(unwrapList(res).rows.map(c => ({ id: c.id, name: c.name ?? c.company_name ?? '—' }))))
-      .catch(() => {})
-    return () => ctrl.abort()
-  }, [])
+  const notify = (type, text) => {
+    setActionMsg({ type, text })
+    if (msgTimer.current) clearTimeout(msgTimer.current)
+    msgTimer.current = setTimeout(() => setActionMsg(null), 4000)
+  }
+  useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
 
-  // ── List (paginated, server-filtered) ──
-  useEffect(() => {
-    const ctrl = new AbortController()
-    setLoading(true); setError(null)
-    api.get('/vacancies', { params: { ...filterParams, page, per_page: pageSize }, signal: ctrl.signal })
-      .then(res => {
-        const { rows, total, lastPage } = unwrapList(res)
-        setVacancies(rows.map(mapVacancy)); setTotal(total); setLastPage(lastPage)
-      })
-      .catch(err => {
-        if (isAbortError(err)) return
-        // A 404 means the endpoint isn't built yet (C-26) → empty, not an error.
-        if (err?.response?.status && err.response.status !== 404 && !USE_MOCKS) {
-          setError(t('page.loadError'))
-        }
-        setVacancies([]); setTotal(0); setLastPage(1)
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [filterParams, page, pageSize, t])
-
-  // ── Stats (server-wide totals; honour the filters) ──
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/vacancies/stats', { params: filterParams, signal: ctrl.signal })
-      .then(res => setStats(res.data?.data ?? res.data ?? null))
-      .catch(err => { if (!isAbortError(err)) setStats(null) })
-    return () => ctrl.abort()
-  }, [filterParams])
+  // ── Data layer ──
+  const { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers } =
+    useVacanciesData({ filterParams, page, pageSize, t })
 
   // ── Donut data (status / owner / client) — stats first, page-derived fallback ──
   const statusData = useMemo(() => {
@@ -131,13 +94,12 @@ function VacanciesPageInner() {
     return Object.values(m)
   }, [stats, vacancies])
 
-  // ── KPI cards = funnel-phase counts across applications (the screenshot KPIs) ──
+  // KPI cards = funnel-phase counts across applications.
   const phaseCounts = useMemo(() => {
     if (stats?.by_phase) {
       if (Array.isArray(stats.by_phase)) return Object.fromEntries(stats.by_phase.map(o => [o.value ?? o.phase, o.count]))
       return stats.by_phase
     }
-    // Fallback: sum the per-vacancy phase breakdown on the loaded page.
     const acc = {}
     vacancies.forEach(v => Object.entries(v.applicationsByPhase ?? {}).forEach(([k, n]) => { acc[k] = (acc[k] ?? 0) + (Number(n) || 0) }))
     return acc
@@ -164,7 +126,6 @@ function VacanciesPageInner() {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // ── Drawer: light row first, then fetch the full detail (ref-guarded) ──
-  const selectedIdRef = useRef(null)
   const selectVacancy = (v) => {
     if (selected?.id === v.id) { closeDrawer(); return }
     selectedIdRef.current = v.id
@@ -189,124 +150,15 @@ function VacanciesPageInner() {
     setSelected(prev => (prev && prev.id === id ? { ...prev, ...local } : prev))
     setDetail(prev   => (prev && prev.id === id ? { ...prev, ...local } : prev))
 
-    const body = {}
-    if ('statusValue'        in patch) body.status              = patch.statusValue
-    if ('ownerId'            in patch) body.owner_id            = patch.ownerId
-    if ('clientId'           in patch) body.customer_id         = patch.clientId
-    if ('tags'               in patch) body.tags                = patch.tags
-    if ('channels'           in patch) body.published_channels  = patch.channels
-    if ('applicationSettings' in patch) body.application_settings = patch.applicationSettings
-    if ('matchWeights'        in patch) body.match_weights        = patch.matchWeights
+    const body = buildVacancyPatch(patch)
     if (Object.keys(body).length) api.patch(`/vacancies/${id}`, body).catch(() => {})
   }
 
-  // ── Bulk selection ──
-  const toggleRow = (id) => setSelectedIds(prev => { const next = new Set(prev); next.has(id) ? next.delete(id) : next.add(id); return next })
-  const toggleAll = (ids, allSelected) => setSelectedIds(prev => { const next = new Set(prev); ids.forEach(id => allSelected ? next.delete(id) : next.add(id)); return next })
+  // ── Bulk actions ──
+  const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags } =
+    useVacancyBulkActions({ vacancies, setVacancies, setTotal, selectedIds, setSelectedIds, notify, t, statusMeta })
 
-  const notify = (type, text) => {
-    setActionMsg({ type, text })
-    if (msgTimer.current) clearTimeout(msgTimer.current)
-    msgTimer.current = setTimeout(() => setActionMsg(null), 4000)
-  }
-  useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
-
-  // Snapshot a subset of fields, for optimistic revert/reconcile.
-  const subsetOf = (obj, keys) => keys.reduce((a, k) => { a[k] = obj[k]; return a }, {})
-
-  // Generic optimistic bulk mutation: apply `patch`, persist, reconcile on the
-  // server's `updated` list, revert on failure. Mirrors the candidate bulkMutate.
-  const bulkMutate = ({ url, body, patch, keys, onSuccess }) => {
-    const ids = [...selectedIds]
-    if (!ids.length) return
-    const snap = new Map(vacancies.filter(v => ids.includes(v.id)).map(v => [v.id, subsetOf(v, keys)]))
-    setVacancies(prev => prev.map(v => ids.includes(v.id) ? { ...v, ...patch } : v))
-    api.post(url, { vacancy_ids: ids, ...body })
-      .then((res) => {
-        const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
-        if (updated) setVacancies(prev => prev.map(v => (ids.includes(v.id) && !updated.has(v.id)) ? { ...v, ...snap.get(v.id) } : v))
-        onSuccess(updated ? updated.size : ids.length)
-      })
-      .catch(() => {
-        setVacancies(prev => prev.map(v => ids.includes(v.id) ? { ...v, ...snap.get(v.id) } : v))
-        notify('error', t('bulk.mutateError'))
-      })
-    setSelectedIds(new Set())
-  }
-  const bulkSetOwner = (user) => bulkMutate({
-    url: '/vacancies/bulk/owner', body: { owner_id: user.id },
-    patch: { owner: { id: user.id, name: user.name, initials: initialsOf(user.name), color: null } }, keys: ['owner'],
-    onSuccess: (n) => notify('success', t('bulk.ownerChanged', { count: n })),
-  })
-  const bulkSetStatus = (statusValue) => { const m = statusMeta(statusValue); bulkMutate({
-    url: '/vacancies/bulk/status', body: { status: statusValue },
-    patch: { statusValue, statusLabel: m.label, statusColor: m.color }, keys: ['statusValue', 'statusLabel', 'statusColor'],
-    onSuccess: (n) => notify('success', t('bulk.statusChanged', { value: m.label, count: n })),
-  }) }
-  const bulkSetClient = (customer) => bulkMutate({
-    url: '/vacancies/bulk/client', body: { customer_id: customer.id },
-    patch: { clientId: customer.id, clientName: customer.name }, keys: ['clientId', 'clientName'],
-    onSuccess: (n) => notify('success', t('bulk.clientChanged', { count: n })),
-  })
-  const bulkPublish = (published) => bulkMutate({
-    url: '/vacancies/bulk/publish', body: { published },
-    patch: { published }, keys: ['published'],
-    onSuccess: (n) => notify('success', t(published ? 'bulk.published' : 'bulk.unpublished', { count: n })),
-  })
-
-  // Remove a tag from every selected vacancy that has it (optimistic + reconcile).
-  const bulkRemoveTag = (tag) => {
-    const ids = [...selectedIds]
-    if (!ids.length || !tag) return
-    const changed = vacancies.filter(v => ids.includes(v.id) && (v.tags ?? []).includes(tag)).map(v => v.id)
-    setVacancies(prev => prev.map(v => changed.includes(v.id) ? { ...v, tags: (v.tags ?? []).filter(x => x !== tag) } : v))
-    api.post('/vacancies/bulk/tags/remove', { vacancy_ids: ids, tag })
-      .then((res) => {
-        const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
-        if (updated) setVacancies(prev => prev.map(v => (changed.includes(v.id) && !updated.has(v.id)) ? { ...v, tags: [...(v.tags ?? []), tag] } : v))
-        notify('success', t('bulk.tagRemoved', { tag, count: updated ? updated.size : changed.length }))
-      })
-      .catch(() => {
-        setVacancies(prev => prev.map(v => changed.includes(v.id) ? { ...v, tags: [...(v.tags ?? []), tag] } : v))
-        notify('error', t('bulk.mutateError'))
-      })
-    setSelectedIds(new Set())
-  }
-  // Add the same note to every selected vacancy (no table column → toast only).
-  const bulkAddNote = (text) => {
-    const ids = [...selectedIds]
-    if (!ids.length || !text.trim()) return
-    api.post('/vacancies/bulk/notes', { vacancy_ids: ids, text: text.trim() })
-      .then((res) => notify('success', t('bulk.noteAdded', { count: Array.isArray(res.data?.updated) ? res.data.updated.length : ids.length })))
-      .catch(() => notify('error', t('bulk.mutateError')))
-    setSelectedIds(new Set())
-  }
-  // Archive (soft-delete) the selection — confirm first; rows drop on server confirm.
-  const bulkArchive = () => {
-    const ids = [...selectedIds]
-    if (!ids.length) return
-    if (!window.confirm(t('bulk.archiveConfirm', { count: ids.length }))) return
-    api.post('/vacancies/bulk/archive', { vacancy_ids: ids })
-      .then((res) => {
-        const archived = Array.isArray(res.data?.archived) ? res.data.archived : ids
-        const set = new Set(archived)
-        setVacancies(prev => prev.filter(v => !set.has(v.id)))
-        setTotal(tt => Math.max(0, tt - archived.length))
-        notify('success', t('bulk.archived', { count: archived.length }))
-      })
-      .catch(() => notify('error', t('bulk.archiveError')))
-    setSelectedIds(new Set())
-  }
-
-  // Union of tags across the selected vacancies — the "remove tag" option list.
-  const selectedTags = useMemo(() => {
-    const set = new Set()
-    vacancies.forEach(v => { if (selectedIds.has(v.id)) (v.tags ?? []).forEach(tg => set.add(tg)) })
-    return [...set]
-  }, [vacancies, selectedIds])
-
-  // ── Insights strip: 3 donuts + funnel-phase KPI cards (the requested KPI block) ──
-  // Status donut click toggles the status tab; owner/client click set a single filter.
+  // ── Insights strip: 3 donuts + funnel-phase KPI cards ──
   const insightDonuts = [
     { key: 'status', title: t('insights.statusTitle'), data: statusData,
       onPick: d => { const k = pickKey(d); setStatusBucket(prev => (prev === k ? 'all' : (k ?? 'all'))) },
@@ -314,7 +166,6 @@ function VacanciesPageInner() {
     { key: 'owner',  title: t('insights.ownerTitle'),  data: ownerData,  onPick: d => pickOne(setSelectedOwner)(pickKey(d)),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
     { key: 'client', title: t('insights.clientTitle'), data: clientData, onPick: d => pickOne(setSelectedClient)(pickKey(d)), active: selectedClient.length > 0, onClear: () => setSelectedClient([]) },
   ]
-  // KPI cards = funnel-phase counts, lookup-driven (label via i18n, colour from the lookup).
   const insightKpis = phases.map(p => ({
     key: p.value, label: t(`kpi.${p.value}`, p.label), value: phaseCounts[p.value] ?? 0, color: p.color,
   }))
@@ -328,7 +179,7 @@ function VacanciesPageInner() {
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          {/* KPI block: donuts + funnel-phase KPI cards (same row as candidates) */}
+          {/* KPI block: donuts + funnel-phase KPI cards */}
           <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
           {/* Status tab bar + add button on the same row */}
