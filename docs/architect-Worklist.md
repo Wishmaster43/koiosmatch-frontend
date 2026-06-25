@@ -33,7 +33,7 @@
 1. ✅ **DUP-3 — geen duplicate (re-scan 2026-06-24).** De twee `LANGUAGES` zijn verschillende concepten:
    `CompanySettings` = bedrijfs-communicatietaal (tenant-setting → hoort bij VOC-2), `ProfilePage` = de
    app-taalschakelaar = de 5 i18n-locales (app-structuur, OK hardcoded). Niets te consolideren.
-2. ◐ **i18n-eilandjes dichten.** ✅ `MonthlyKpiCard` (2026-06-24, `monthlyKpi`×5 locales). `AddShiftModal` = al i18n-clean (resterende `<option>`s = vocab → VOC item 12). ⚠️ `LineChartCard` → **samen** (gedeeld in reports-domein; "kandidaten"-unit vereist prop-API-keuze).
+2. ✅ **i18n-eilandjes dicht (2026-06-25).** `MonthlyKpiCard` (`monthlyKpi`×5 locales) · `LineChartCard` (`unit`-prop + 3 chrome-strings via `common`; callers passen `unit={t('common:units.candidates')}`). `AddShiftModal` = al i18n-clean (resterende `<option>`s = vocab → VOC item 12).
 3. ◐ **DUP-1 — echte duplicate-selects opgeruimd (re-scan 2026-06-24).** `BranchSection` → `SearchSelect` (multi),
    `AddApplicationModal SearchField` → `CreatableSelect` (single). **De "9" was opgeblazen:** de rest is **geen**
    duplicate-select — `SettingsControls`/`UsersPage` = kleur-pickers · `KoiosSteps`/`MatchScoreBlock` = uitklap-toggles ·
@@ -57,9 +57,9 @@
     ContactsPage → **`/sm_contacts`** (SM-spiegel); PlanningPage → **native module Orders · Shifts ·
     Scheduled-Shifts** (volledig, incl. inroosteren, schone endpoints "zoals ShiftManager maar voor
     onszelf"). Specs in [`backend-mockdata-to-api-prompt.md`](backend-mockdata-to-api-prompt.md) §C4. Backend bouwt → dan FE wiren.
-12. 🔒 **VOC-1/2/3 + DUP-4 — vocab → lookups** (`NATIONALITIES` · CompanySettings-lijsten · SM-statussen) — vereist backend-lookups.
+12. ◐ **VOC-1/2/3 + DUP-4 — vocab → lookups.** ✅ **`/nationalities` gebouwd** door backend (2026-06-25) → nog wiren in `ProfileTab` (hun drawer-domein). ✅ statuses/funnel/candidate-types lopen al via `GET /settings/candidate-lookups` (`LookupsContext`). Resterend: CompanySettings-lijsten · SM-statussen.
 13. 🔒 **AW-1/3/4 — graaf-opslag · links-contract · filter-vocabulaire** (backend C-27/C-18).
-14. 🔒 **CS-1 — auth httpOnly-cookie-flip** (gecoördineerd met backend).
+14. ⚠️ **CS-1 — auth.** Backend koos bewust **Bearer-token** (Authorization-header), **géén** SPA-httpOnly-cookieflow (bevestigd 2026-06-25). → CLAUDE.md §7 "httpOnly-cookie" is dus niet de gekozen richting; her-evalueer of token-opslag veilig is (nooit in localStorage zonder XSS-mitigatie) als apart security-traject.
 15. ◐ **CandidatesPage + WorkflowCanvasEditor-restant.** ✅ **CandidatesPage 674→308 gesplitst (2026-06-25)**:
     `hooks/useCandidatesData` (fetch) · `useCandidateOptions` (opties/donuts/counts) · `useCandidateBulkActions`
     (bulk) + `data/candidatesShared` (predicaten/`buildCandidatePatch`) + `data/candidatesMock`. ⚠️ WorkflowCanvasEditor-restant (863) = hun domein.

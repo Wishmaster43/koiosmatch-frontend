@@ -9,7 +9,7 @@
 > ✅ bevestigd (code/beslissing) · ⚠️ beslissing nodig (Danny) · ☐ nog documenteren/verifiëren ·
 > 🔒 hangt op backend. Werk dit bij zodra een punt landt.
 >
-> **Laatst bijgewerkt:** 2026-06-23 · door architect-Claude.
+> **Laatst bijgewerkt:** 2026-06-25 · door architect-Claude.
 
 ---
 
@@ -174,9 +174,11 @@ Single-purpose boven line-count. Backend-mirror (controller ≤150 / Service ~20
 > Detail + locaties in `docs/architect-Worklist.md` (AW/CS/RF). Hier de kop-lijst:
 
 **Beslissingen (Danny) ⚠️**
-- [ ] Auth: httpOnly-cookie-flip plannen (CS-1, met backend).
-- [ ] CandidatesPage hook-structuur (data/filters/stats) afstemmen → dan refactor (RF-4, 670 r).
-- [ ] Workflow-engine aparte server: base-URL-config + async run/logs-UI inplannen.
+- [x] ~~Auth: httpOnly-cookie~~ → backend koos **Bearer-token** (Authorization-header), géén SPA-cookieflow (2026-06-25). CLAUDE.md §7 her-evalueren als security-traject.
+- [x] ~~CandidatesPage hook-structuur~~ → **gesplitst 674→308** (hooks: data/options/bulk + shared) — 2026-06-25.
+- [x] **Geo + planning besloten (2026-06-25):** geo (`lat/lng`+geocoding, PDOK) alleen op **native** candidates+customers; SM heeft al geo. Planning **gefaseerd**: read-only SM (`/sm_orders /sm_shifts /sm_schedule`) nu, native write-module + geo later.
+- [ ] Workflow-engine aparte server: base-URL-config + async run/logs-UI inplannen (backend: runs in-DB, engine lineair/synchroon — aparte server nog niet).
+- [ ] E-mail-koppeling: persoonlijk Profiel vs **Settings per context** (backend zet het op `/settings/email/{context}` — modelmismatch te beslissen).
 - [ ] Terminologie "vacancy" vs "vacature+sollicitatie" (worklist A).
 
 **Backend-geblokkeerd 🔒** — C-27 (graaf + filter-vocabulaire), C-18 (task_links-variant + search-param),
@@ -192,5 +194,5 @@ C-22 (afspraken/intakes), C-23/26/30/31 (detail-shapes/dashboard/charts).
 - [ ] CS-6 inline `api.*` → feature-`api/`-laag (72 files).
 - [ ] CS-7 NL-identifiers → Engels.
 - [ ] CS-9 tests op kritieke paden (nu 11; begin bij funnel-mapping + AW-2).
-- [ ] RF: 13 bestanden > 400 (incl. WorkflowCanvasEditor-restant 863; 419–469-band one-touch).
+- [◐] RF > 400: ✅ ProfilePage · PlanningPanel · ShiftsChartsBlock · OrdersTable · LocationsPage · CandidatesPage (674→308) gesplitst (2026-06-24/25). Open: App.jsx 468 (routing, hun WIP) · ReportFilterSidebar · VacanciesPage · MessagesTable · WorkflowCanvasEditor-restant 863 (hun domein).
 - [ ] §5/§6/§9 in dit doc verder invullen zodra de contracten landen.
