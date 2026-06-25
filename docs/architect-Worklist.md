@@ -74,7 +74,10 @@
 15. ◐ **CandidatesPage + WorkflowCanvasEditor-restant.** ✅ **CandidatesPage 674→308 gesplitst (2026-06-25)**:
     `hooks/useCandidatesData` (fetch) · `useCandidateOptions` (opties/donuts/counts) · `useCandidateBulkActions`
     (bulk) + `data/candidatesShared` (predicaten/`buildCandidatePatch`) + `data/candidatesMock`. ⚠️ WorkflowCanvasEditor-restant (863) = hun domein.
-16. ⚠️ **CS-5/6/9 — PropTypes · inline-api→`api/`-laag · tests** (dagen elk; apart inplannen).
+16. ◐ **CS-5/6/9 — PropTypes · inline-api→`api/`-laag · tests.** ✅ **CS-9 voortgang (2026-06-25):** suite 61→102
+    tests; nieuw: `candidatesShared` (15) · `mapCandidate` (15) · `ordersTableParts`-formatters (6) ·
+    `buildShiftsFilterGroups` (5) — pure helpers, write-pad-onafhankelijk. Resterend: hook-tests (RTL),
+    CS-5 PropTypes (3/277), CS-6 inline-api→`api/`-laag (72 files) — groot, apart inplannen.
 17. 🔒 **DS-4 — `MOCK_LOGS`** → echte run-logs-feed (workflow-server).
 
 ---
