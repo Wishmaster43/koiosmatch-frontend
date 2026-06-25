@@ -29,16 +29,21 @@
 > Alle open architect-issues, in volgorde. Detail per item in de secties hieronder (AW/CS/RF/DS/DUP/VOC).
 > Marker: ☐ open · ◐ deels · ⚠️ jouw input · 🔒 backend.
 
-### 🔴 TOP-BLOCKER (boven alles) — audit-JSON breekt het schrijfpad in dev
-> Backend-commit `6f3a94a` (audit-collega) schrijft een **encrypted (niet-JSON)** waarde in een
-> **`json`-kolom** (`activity_log`-diff) → MySQL weigert **élke** create/update **én seed** in dev
-> (`SQLSTATE[22032] Invalid JSON text`). **Gevolg:** geen CRUD · geocode-on-create/`geo:backfill` vuren
-> niet · DB seedt niet → geen data om te lezen → **niets is end-to-end te verifiëren**.
-> **Fix (audit-collega):** kolom `json` → `text`/`binary`, óf payload niet-encrypted in JSON. In de
-> bestaande `create_`-migratie vouwen → `migrate:fresh`/`dev:reset`.
-> **Tot dat gefixt is staat het strategische doel (item 10: app op echte data, 0% mock) stil.**
+### ✅ ~~TOP-BLOCKER audit-JSON~~ — OPGELOST (2026-06-25, backend `bd65d26`, json→text)
+> Het schrijfpad in dev werkt weer (creates/updates/seeds/geo live-geverifieerd). Daarmee is de
+> strategische lijn vrij. Backend leverde ook het **geo-radius-contract** (`GET /candidates?lat=&lng=&radius=`
+> of `?near_vacancy={id}&radius=`, default 35 km; rijen met `lat/lng/distance_km`) en de **planning-tab
+> SM-shapes** (`/sm_schedule?candidate_id=` rooster · `/sm_shifts?open_shift=1` open · `/sm_schedule?from=&to=`
+> agenda; read-only, `distance=null`).
 
-**Strategisch doel:** **alles op API, 0% mock** (item 10 / DS-3) — hangt onder de blocker hierboven.
+### 🎯 ECHTE PRIO NU (na unblock — uitvoervolgorde)
+> 1. **Mock-strip → app op echte data (item 10 / DS-3)** — nu verifieerbaar; per ✅-entiteit de
+>    `USE_MOCKS`/`DUMMY_*` slopen. Hoogste waarde. Entity-pages = coördineren met andere FE-Claude.
+> 2. **Radius-filter wiren (geo, item DS/§12)** — contract klaar; klein UI-ankerbesluit nodig.
+> 3. **C-27 graaf-rework** (backend bezig) → workflow-editor; **editor-i18n (item 7)** kan daarna.
+> 4. **RF-splits restant** (item 6): ReportFilterSidebar · MessagesTable (App.jsx + VacanciesPage ✅ gedaan).
+> 5. **E-mail naar Settings-per-context** (besloten) zodra backend `…/status`-endpoint levert.
+> 6. **CS-5/CS-6** (PropTypes · api-laag) — groot, apart. **Planning-tab = backlog** (besloten 2026-06-25).
 
 **Solo (samen afwerken — frontend, geen backend/beslissing nodig):**
 1. ✅ **DUP-3 — geen duplicate (re-scan 2026-06-24).** De twee `LANGUAGES` zijn verschillende concepten:
@@ -53,10 +58,8 @@
    (`locationsPage` · `contactsPage` · `departmentsPage` in alle 5 locales). ContactsPage ook aan `/sm_contacts` gewired.
 5. ☐ **CS-7 rest — NL-identifiers** die nog verspreid staan (buiten candidate-drawer al gedaan).
 6. ◐ **RF — 419–469-band** (~9 bestanden net > 400) splitsen, one-touch/marginaal.
-   - ✅ **gedaan 2026-06-24:** ProfilePage 421→172 · PlanningPanel 419→79 · ShiftsChartsBlock 468→141 · OrdersTable 428→182 · LocationsPage 441→269 (+ i18n).
-   - ✅ **Veilige RF-band (mijn domein) leeg.** Resterend zijn hun-WIP/routing (zie onder).
-   - ⚠️ **App.jsx** 468 — buiten WIP maar routing/providers; de andere Claude voegt net routes toe → conflictrisico, alleen pakken als hun status schoon blijft.
-   - 🤝 **uitgesteld (hun domein/WIP):** `ReportFilterSidebar` 469 · `VacanciesPage` 424 · `MessagesTable` 423 (reports).
+   - ✅ **gedaan:** ProfilePage 421→172 · PlanningPanel 419→79 · ShiftsChartsBlock 468→141 · OrdersTable 428→182 · LocationsPage 441→269 · **CandidatesPage 674→308** · **App.jsx 468→71** (registry+shell) · **VacanciesPage 424→275** (2026-06-24/25).
+   - 🤝 **resterend (coördineren):** `ReportFilterSidebar` 469 · `MessagesTable` 423 (reports) · WorkflowCanvasEditor-restant 863 (workflow).
 7. ☐ **Editor-i18n-pass (AW-7/AW-8 + AW editor-strings).** Workflow-editor (~60 strings, 0×`t()`) + module-registry labels/categorieën + `CATEGORY_ORDER` → keys. *(groot, ~1–2 dagen, maar solo)*
 8. ◐ **CS-4 rest — chrome-hex** die per-touch meelift (data-kleuren blijven). ✅ **Mijn sessie-files (shiftmanager-splits) token-clean** — resterende hex = data (avatar-palette · status-kleuren) of soft-accent zonder token. Brede sweep buiten mijn domein = apart/per-touch.
 9. ✅ **DUP-2 — select-componenten gedocumenteerd** (2026-06-24): [`docs/frontend-select-components.md`](frontend-select-components.md) — beslis-tabel `SelectField`/`SelectMenu`/`CreatableSelect`/`SearchSelect` zodat niemand een 5e bouwt.
