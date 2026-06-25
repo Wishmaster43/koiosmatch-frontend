@@ -31,8 +31,8 @@ export default function LocationsPage() {
   const [selected,  setSelected]  = useState(null)
   const [page,      setPage]      = useState(1)
   const [selStatuses,  setSelStatuses]  = useState([])
-  const [selKlanten,   setSelKlanten]   = useState([])
-  const [selSteden,    setSelSteden]    = useState([])
+  const [selCustomers,   setSelCustomers]   = useState([])
+  const [selCities,    setSelCities]    = useState([])
   const pageSize = 10
 
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -65,20 +65,20 @@ export default function LocationsPage() {
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
   const statusOptions = useMemo(() => [...new Set(locations.map(l => l.status).filter(Boolean))].sort(), [locations])
-  const klantOptions  = useMemo(() => [...new Set(locations.map(l => l.customer).filter(Boolean))].sort(), [locations])
-  const stadsOptions  = useMemo(() => [...new Set(locations.map(l => l.city).filter(Boolean))].sort(), [locations])
+  const customerOptions  = useMemo(() => [...new Set(locations.map(l => l.customer).filter(Boolean))].sort(), [locations])
+  const cityOptions  = useMemo(() => [...new Set(locations.map(l => l.city).filter(Boolean))].sort(), [locations])
 
   const filterGroups = useMemo(() => [
     { key: 'status',  label: t('locationsPage.filter.status'),
       options: statusOptions.map(s => ({ value: s, label: s })),
       selected: selStatuses,  onToggle: toggle(setSelStatuses) },
     { key: 'klant',   label: t('locationsPage.filter.customer'),
-      options: klantOptions.map(k => ({ value: k, label: k })),
-      selected: selKlanten,   onToggle: toggle(setSelKlanten) },
+      options: customerOptions.map(k => ({ value: k, label: k })),
+      selected: selCustomers,   onToggle: toggle(setSelCustomers) },
     { key: 'stad',    label: t('locationsPage.filter.city'),
-      options: stadsOptions.map(s => ({ value: s, label: s })),
-      selected: selSteden,    onToggle: toggle(setSelSteden) },
-  ], [t, statusOptions, klantOptions, stadsOptions, selStatuses, selKlanten, selSteden])
+      options: cityOptions.map(s => ({ value: s, label: s })),
+      selected: selCities,    onToggle: toggle(setSelCities) },
+  ], [t, statusOptions, customerOptions, cityOptions, selStatuses, selCustomers, selCities])
 
   useEffect(() => {
     registerFilters('locations-page', filterGroups)
@@ -88,8 +88,8 @@ export default function LocationsPage() {
   const filtered = useMemo(() => {
     let rows = locations
     if (selStatuses.length) rows = rows.filter(l => selStatuses.includes(l.status))
-    if (selKlanten.length)  rows = rows.filter(l => selKlanten.includes(l.customer))
-    if (selSteden.length)   rows = rows.filter(l => selSteden.includes(l.city))
+    if (selCustomers.length)  rows = rows.filter(l => selCustomers.includes(l.customer))
+    if (selCities.length)   rows = rows.filter(l => selCities.includes(l.city))
     if (search.trim()) {
       const q = search.toLowerCase()
       rows = rows.filter(l =>
@@ -99,7 +99,7 @@ export default function LocationsPage() {
       )
     }
     return rows
-  }, [locations, search, selStatuses, selKlanten, selSteden])
+  }, [locations, search, selStatuses, selCustomers, selCities])
 
   const totalPages = Math.ceil(filtered.length / pageSize)
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize)

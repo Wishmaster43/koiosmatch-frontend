@@ -40,8 +40,8 @@ export default function DepartmentsPage() {
   const [selected,    setSelected]    = useState(null)
   const [page,        setPage]        = useState(1)
   const [selStatuses,  setSelStatuses]  = useState([])
-  const [selKlanten,   setSelKlanten]   = useState([])
-  const [selLocaties,  setSelLocaties]  = useState([])
+  const [selCustomers,   setSelCustomers]   = useState([])
+  const [selLocations,  setSelLocations]  = useState([])
   const pageSize = 12
 
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -75,20 +75,20 @@ export default function DepartmentsPage() {
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
   const statusOptions  = useMemo(() => [...new Set(departments.map(d => d.status).filter(Boolean))].sort(), [departments])
-  const klantOptions   = useMemo(() => [...new Set(departments.map(d => d.customer).filter(Boolean))].sort(), [departments])
-  const locatieOptions = useMemo(() => [...new Set(departments.map(d => d.location).filter(Boolean))].sort(), [departments])
+  const customerOptions   = useMemo(() => [...new Set(departments.map(d => d.customer).filter(Boolean))].sort(), [departments])
+  const locationOptions = useMemo(() => [...new Set(departments.map(d => d.location).filter(Boolean))].sort(), [departments])
 
   const filterGroups = useMemo(() => [
     { key: 'status',  label: t('departmentsPage.filter.status'),
       options: statusOptions.map(s => ({ value: s, label: s })),
       selected: selStatuses,  onToggle: toggle(setSelStatuses) },
     { key: 'klant',   label: t('departmentsPage.filter.customer'),
-      options: klantOptions.map(k => ({ value: k, label: k })),
-      selected: selKlanten,   onToggle: toggle(setSelKlanten) },
+      options: customerOptions.map(k => ({ value: k, label: k })),
+      selected: selCustomers,   onToggle: toggle(setSelCustomers) },
     { key: 'locatie', label: t('departmentsPage.filter.location'),
-      options: locatieOptions.map(l => ({ value: l, label: l })),
-      selected: selLocaties,  onToggle: toggle(setSelLocaties) },
-  ], [t, statusOptions, klantOptions, locatieOptions, selStatuses, selKlanten, selLocaties])
+      options: locationOptions.map(l => ({ value: l, label: l })),
+      selected: selLocations,  onToggle: toggle(setSelLocations) },
+  ], [t, statusOptions, customerOptions, locationOptions, selStatuses, selCustomers, selLocations])
 
   useEffect(() => {
     registerFilters('departments-page', filterGroups)
@@ -98,8 +98,8 @@ export default function DepartmentsPage() {
   const filtered = useMemo(() => {
     let rows = departments
     if (selStatuses.length)  rows = rows.filter(d => selStatuses.includes(d.status))
-    if (selKlanten.length)   rows = rows.filter(d => selKlanten.includes(d.customer))
-    if (selLocaties.length)  rows = rows.filter(d => selLocaties.includes(d.location))
+    if (selCustomers.length)   rows = rows.filter(d => selCustomers.includes(d.customer))
+    if (selLocations.length)  rows = rows.filter(d => selLocations.includes(d.location))
     if (search.trim()) {
       const q = search.toLowerCase()
       rows = rows.filter(d =>
@@ -109,7 +109,7 @@ export default function DepartmentsPage() {
       )
     }
     return rows
-  }, [departments, search, selStatuses, selKlanten, selLocaties])
+  }, [departments, search, selStatuses, selCustomers, selLocations])
 
   const totalPages = Math.ceil(filtered.length / pageSize)
   const paged = filtered.slice((page - 1) * pageSize, page * pageSize)

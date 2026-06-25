@@ -39,12 +39,12 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
     : candidates
 
   // New this month
-  const nieuweKandidaten = filtered.filter(c => {
+  const newCandidates = filtered.filter(c => {
     if (!c.registration_date) return false
     const d = new Date(c.registration_date)
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear
   })
-  const werkelijk = nieuweKandidaten.length
+  const actual = newCandidates.length
 
   // Monthly average for the current year up to this month
   const grouped = {}
@@ -56,23 +56,23 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
     grouped[key] = (grouped[key] || 0) + 1
   })
   const values    = Object.values(grouped)
-  const gemiddeld = values.length
+  const average = values.length
     ? Math.round(values.reduce((s, v) => s + v, 0) / values.length)
     : 0
 
   // Deregistered this month
-  const uitgeschrevenKandidaten = candidates.filter(c => {
+  const deregisteredCandidates = candidates.filter(c => {
     if (!c.end_date_employment) return false
     const d = new Date(c.end_date_employment)
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear
   })
-  const uitgeschreven = uitgeschrevenKandidaten.length
+  const deregistered = deregisteredCandidates.length
 
-  const color = werkelijk >= KPI_TARGET ? 'var(--color-success)'
-              : werkelijk >= gemiddeld   ? 'var(--color-warning)'
+  const color = actual >= KPI_TARGET ? 'var(--color-success)'
+              : actual >= average   ? 'var(--color-warning)'
               : 'var(--color-danger)'
 
-  const pctVsKpi = KPI_TARGET > 0 ? Math.round((werkelijk / KPI_TARGET) * 100) : 0
+  const pctVsKpi = KPI_TARGET > 0 ? Math.round((actual / KPI_TARGET) * 100) : 0
 
   const openDrill = (mode, title, list) => setDrill({ mode, title, candidates: list })
 
@@ -106,14 +106,14 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
           {/* New */}
           <div
             style={blockStyle(true)}
-            onClick={() => openDrill('nieuw', t('monthlyKpi.newIn', { month: now.toLocaleString('nl-NL', { month: 'long' }) }), nieuweKandidaten)}
+            onClick={() => openDrill('nieuw', t('monthlyKpi.newIn', { month: now.toLocaleString('nl-NL', { month: 'long' }) }), newCandidates)}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             title={t('monthlyKpi.tipDetails')}
           >
             <div className="mb-1 font-semibold leading-none"
               style={{ fontSize: 26, color, letterSpacing: '-0.5px' }}>
-              {werkelijk}
+              {actual}
             </div>
             <div className="text-xs text-gray-400">{t('monthlyKpi.new')}</div>
           </div>
@@ -130,7 +130,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
           >
             <div className="mb-1 font-semibold leading-none"
               style={{ fontSize: 26, color: 'var(--text)', letterSpacing: '-0.5px' }}>
-              {gemiddeld}
+              {average}
             </div>
             <div className="text-xs text-gray-400">{t('monthlyKpi.average')}</div>
           </div>
@@ -156,17 +156,17 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
 
           {/* Deregistered */}
           <div
-            style={blockStyle(uitgeschreven > 0)}
-            onClick={uitgeschreven > 0
-              ? () => openDrill('uitgeschreven', t('monthlyKpi.unsubscribedIn', { month: now.toLocaleString('nl-NL', { month: 'long' }) }), uitgeschrevenKandidaten)
+            style={blockStyle(deregistered > 0)}
+            onClick={deregistered > 0
+              ? () => openDrill('deregistered', t('monthlyKpi.unsubscribedIn', { month: now.toLocaleString('nl-NL', { month: 'long' }) }), deregisteredCandidates)
               : undefined}
-            onMouseEnter={e => { if (uitgeschreven > 0) e.currentTarget.style.background = 'var(--hover-bg)' }}
+            onMouseEnter={e => { if (deregistered > 0) e.currentTarget.style.background = 'var(--hover-bg)' }}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
-            title={uitgeschreven > 0 ? t('monthlyKpi.tipDetails') : undefined}
+            title={deregistered > 0 ? t('monthlyKpi.tipDetails') : undefined}
           >
             <div className="mb-1 font-semibold leading-none"
-              style={{ fontSize: 26, color: uitgeschreven > 0 ? 'var(--color-danger)' : 'var(--text-muted)', letterSpacing: '-0.5px' }}>
-              {uitgeschreven}
+              style={{ fontSize: 26, color: deregistered > 0 ? 'var(--color-danger)' : 'var(--text-muted)', letterSpacing: '-0.5px' }}>
+              {deregistered}
             </div>
             <div className="text-xs text-gray-400">{t('monthlyKpi.unsubscribed')}</div>
           </div>

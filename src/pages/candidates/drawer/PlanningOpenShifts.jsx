@@ -19,7 +19,7 @@ export default function PlanningOpenShifts({ openFilters, setOpenFilters, schedu
     d.level <= candLevel &&
     (openFilters.shiftTypes.length === 0 || openFilters.shiftTypes.includes(d.shiftType))
   )
-  const toggleDiensttype = (dt) => setOpenFilters(f => {
+  const toggleShiftType = (dt) => setOpenFilters(f => {
     const has = f.shiftTypes.includes(dt)
     return { ...f, shiftTypes: has ? f.shiftTypes.filter(x => x !== dt) : [...f.shiftTypes, dt] }
   })
@@ -38,7 +38,7 @@ export default function PlanningOpenShifts({ openFilters, setOpenFilters, schedu
               {[['Dag', 'day'], ['Avond', 'evening'], ['Nacht', 'night']].map(([dt, key]) => {
                 const active = openFilters.shiftTypes.includes(dt)
                 return (
-                  <button key={dt} onClick={() => toggleDiensttype(dt)}
+                  <button key={dt} onClick={() => toggleShiftType(dt)}
                     style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: active ? 600 : 400,
                       border: `1px solid ${active ? 'var(--color-primary)' : 'var(--border)'}`,
                       background: active ? 'var(--color-primary)' : 'var(--bg)',

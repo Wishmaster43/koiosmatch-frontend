@@ -30,7 +30,7 @@ export default function ContactsPage() {
   const [search]                      = useState('')
   const [selected,    setSelected]    = useState(null)
   const [page,        setPage]        = useState(1)
-  const [selKlanten,  setSelKlanten]  = useState([])
+  const [selCustomers,  setSelCustomers]  = useState([])
   const [selPlanning, setSelPlanning] = useState([])
   const pageSize = 12
 
@@ -64,19 +64,19 @@ export default function ContactsPage() {
   const toggle = setter => val =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
-  const klantOptions = useMemo(() => [...new Set(contacts.map(c => c.customer).filter(Boolean))].sort(), [contacts])
+  const customerOptions = useMemo(() => [...new Set(contacts.map(c => c.customer).filter(Boolean))].sort(), [contacts])
 
   const filterGroups = useMemo(() => [
     { key: 'klant', label: t('contactsPage.cols.customer'),
-      options: klantOptions.map(k => ({ value: k, label: k, count: contacts.filter(c => c.customer === k).length })),
-      selected: selKlanten, onToggle: toggle(setSelKlanten) },
+      options: customerOptions.map(k => ({ value: k, label: k, count: contacts.filter(c => c.customer === k).length })),
+      selected: selCustomers, onToggle: toggle(setSelCustomers) },
     { key: 'planning', label: t('contactsPage.planningContact'),
       options: [
         { value: 'ja',  label: t('contactsPage.planningContact'),   count: contacts.filter(c => c.planning).length },
         { value: 'nee', label: t('contactsPage.noPlanningContact'), count: contacts.filter(c => !c.planning).length },
       ],
       selected: selPlanning, onToggle: toggle(setSelPlanning) },
-  ], [t, klantOptions, contacts, selKlanten, selPlanning])
+  ], [t, customerOptions, contacts, selCustomers, selPlanning])
 
   useEffect(() => {
     registerFilters('klanten-contacts', filterGroups)
@@ -85,7 +85,7 @@ export default function ContactsPage() {
 
   const filtered = useMemo(() => {
     let rows = contacts
-    if (selKlanten.length)  rows = rows.filter(c => selKlanten.includes(c.customer))
+    if (selCustomers.length)  rows = rows.filter(c => selCustomers.includes(c.customer))
     if (selPlanning.length) rows = rows.filter(c => selPlanning.includes(c.planning ? 'ja' : 'nee'))
     if (search.trim()) {
       const q = search.toLowerCase()
@@ -95,7 +95,7 @@ export default function ContactsPage() {
       })
     }
     return rows
-  }, [contacts, search, selKlanten, selPlanning])
+  }, [contacts, search, selCustomers, selPlanning])
 
   const totalPages = Math.ceil(filtered.length / pageSize) || 1
   const paged      = filtered.slice((page - 1) * pageSize, page * pageSize)
@@ -103,7 +103,7 @@ export default function ContactsPage() {
   const kpis = [
     { label: t('contactsPage.kpi.contacts'),         value: contacts.length },
     { label: t('contactsPage.kpi.planningContacts'), value: contacts.filter(c => c.planning).length },
-    { label: t('contactsPage.kpi.customers'),        value: klantOptions.length },
+    { label: t('contactsPage.kpi.customers'),        value: customerOptions.length },
   ]
 
   const headers = [
