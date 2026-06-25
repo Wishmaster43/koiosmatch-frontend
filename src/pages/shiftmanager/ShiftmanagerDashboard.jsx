@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle, CalendarDays, TrendingUp, MessageCircle, Percent } from 'lucide-react'
 import api, { unwrapList } from '../../lib/api'
-import { USE_MOCKS, isAbortError } from '../../lib/mocks'
+import { isAbortError } from '../../lib/mocks'
 import { useKpiSettings } from '../../lib/useKpiSettings'
 import { useAuth } from '../../context/AuthContext'
 import MonthlyKpiCard    from '../../components/ui/MonthlyKpiCard'
@@ -11,21 +11,6 @@ import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
 
 // Packages that unlock the AI/Workflow runs + conversations panels.
 const AI_PACKAGES = ['reporting_sm_ai', 'reporting_hf_ai', 'reporting_sm_hf_ai', 'ats_crm_ai', 'ats_crm_ai_planning', 'ats_crm_aiagents', 'ats_crm_workflows', 'connect']
-
-// ── Mock fallbacks (only rendered under USE_MOCKS, never in production) ────────
-const MOCK_STAT_VALUES = { open_hours: '1.123', hours_this_month: '1.374', occupancy: '87%', messages_sent: '1.847', response_rate: '76%' }
-const MOCK_RUNS = [
-  { name: 'Diensten Aanbod — Yesway', time: '08:00', ok: true,  n: 87  },
-  { name: 'No Response Checker',      time: '09:00', ok: true,  n: 12  },
-  { name: 'Shift Reminder',           time: '10:00', ok: false, err: 'API timeout' },
-  { name: 'Wekelijkse Rapportage',    time: '07:00', ok: true,  n: 441 },
-]
-const MOCK_CONVERSATIONS = [
-  { name: 'Jan de Vries', msg: 'Ik kan morgen om 09:00 starten',  time: '08:45' },
-  { name: 'Sofia Ahmed',  msg: 'Is de planning aangepast?',        time: '08:30' },
-  { name: 'Mark Jansen',  msg: 'Bedankt voor de update!',          time: '07:58' },
-  { name: 'Lisa Wong',    msg: 'Ik ben beschikbaar volgende week', time: '07:40' },
-]
 
 // Locale-aware HH:MM from an ISO timestamp.
 const hhmm = iso => iso ? new Date(iso).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''
@@ -41,8 +26,8 @@ export default function ShiftmanagerDashboard() {
   const [candidates,    setCandidates]    = useState([])
   const [loading,       setLoading]       = useState(true)
   const [stats,         setStats]         = useState(null)
-  const [runs,          setRuns]          = useState(USE_MOCKS ? MOCK_RUNS : [])
-  const [conversations, setConversations] = useState(USE_MOCKS ? MOCK_CONVERSATIONS : [])
+  const [runs,          setRuns]          = useState([])
+  const [conversations, setConversations] = useState([])
 
   // Candidates feed the (real) "new this month" KPI card.
   useEffect(() => {
@@ -54,7 +39,7 @@ export default function ShiftmanagerDashboard() {
     return () => ctrl.abort()
   }, [candidates_per_page])
 
-  // Shift KPIs from the ShiftManager report endpoint (mock values only under USE_MOCKS).
+  // Shift KPIs from the ShiftManager report endpoint.
   useEffect(() => {
     const ctrl = new AbortController()
     api.get('/sm_reports/dashboard', { signal: ctrl.signal })
@@ -70,31 +55,29 @@ export default function ShiftmanagerDashboard() {
     api.get('/workflow-runs', { params: { per_page: 5 }, signal: ctrl.signal })
       .then(res => {
         const { rows } = unwrapList(res)
-        const mapped = rows.map(r => ({ name: r.name, ok: (r.status ?? 'ok') === 'ok', n: r.processed_count, err: r.error, time: hhmm(r.started_at) }))
-        if (mapped.length) setRuns(mapped); else if (!USE_MOCKS) setRuns([])
+        setRuns(rows.map(r => ({ name: r.name, ok: (r.status ?? 'ok') === 'ok', n: r.processed_count, err: r.error, time: hhmm(r.started_at) })))
       })
-      .catch(err => { if (!isAbortError(err) && !USE_MOCKS) setRuns([]) })
+      .catch(err => { if (!isAbortError(err)) setRuns([]) })
     api.get('/whatsapp/messages', { params: { per_page: 4 }, signal: ctrl.signal })
       .then(res => {
         const { rows } = unwrapList(res)
-        const mapped = rows.map(m => ({
+        setConversations(rows.map(m => ({
           name: `${m.candidate?.first_name ?? ''} ${m.candidate?.last_name ?? ''}`.trim() || '—',
           msg:  m.body ?? '', time: hhmm(m.sent_at),
-        }))
-        if (mapped.length) setConversations(mapped); else if (!USE_MOCKS) setConversations([])
+        })))
       })
-      .catch(err => { if (!isAbortError(err) && !USE_MOCKS) setConversations([]) })
+      .catch(err => { if (!isAbortError(err)) setConversations([]) })
     return () => ctrl.abort()
   }, [hasAI])
 
-  // KPI cards — translated labels; values from the report (or mock under USE_MOCKS).
-  const v = (key, mockKey) => USE_MOCKS ? MOCK_STAT_VALUES[mockKey] : fmt(stats?.[key])
+  // KPI cards — translated labels; values from /sm_reports/dashboard (deltas TBD).
+  const v = (key) => fmt(stats?.[key])
   const statCards = [
-    { key: 'open_hours',       label: t('dashboard.stats.openHours'),      value: v('open_hours', 'open_hours'),           sub: USE_MOCKS ? t('dashboard.statSub.urgent',    { n: 5 })      : null, color: 'var(--color-danger)',    bg: 'var(--color-danger-bg)',    icon: CalendarDays },
-    { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'), value: v('hours_this_month', 'hours_this_month'), sub: USE_MOCKS ? t('dashboard.statSub.prevMonth', { pct: '-12%' }) : null, color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)',   icon: TrendingUp },
-    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),      value: USE_MOCKS ? MOCK_STAT_VALUES.occupancy : (stats?.occupancy_pct != null ? `${stats.occupancy_pct}%` : '—'), sub: USE_MOCKS ? t('dashboard.statSub.prevMonth', { pct: '+4%' }) : null, color: 'var(--color-success)', bg: 'var(--color-success-bg)', icon: Percent },
-    { key: 'messages_sent',    label: t('dashboard.stats.messagesSent'),   value: v('messages_sent', 'messages_sent'),     sub: USE_MOCKS ? t('dashboard.statSub.thisMonth')              : null, color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', icon: MessageCircle },
-    { key: 'response_rate',    label: t('dashboard.stats.responseRate'),   value: USE_MOCKS ? MOCK_STAT_VALUES.response_rate : (stats?.response_rate_pct != null ? `${stats.response_rate_pct}%` : '—'), sub: USE_MOCKS ? t('dashboard.statSub.historicAvg', { pct: '72%' }) : null, color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', icon: TrendingUp },
+    { key: 'open_hours',       label: t('dashboard.stats.openHours'),      value: v('open_hours'),       sub: null, color: 'var(--color-danger)',    bg: 'var(--color-danger-bg)',    icon: CalendarDays },
+    { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'), value: v('hours_this_month'), sub: null, color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)',   icon: TrendingUp },
+    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),      value: stats?.occupancy_pct != null ? `${stats.occupancy_pct}%` : '—', sub: null, color: 'var(--color-success)', bg: 'var(--color-success-bg)', icon: Percent },
+    { key: 'messages_sent',    label: t('dashboard.stats.messagesSent'),   value: v('messages_sent'),    sub: null, color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', icon: MessageCircle },
+    { key: 'response_rate',    label: t('dashboard.stats.responseRate'),   value: stats?.response_rate_pct != null ? `${stats.response_rate_pct}%` : '—', sub: null, color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', icon: TrendingUp },
   ]
 
   return (

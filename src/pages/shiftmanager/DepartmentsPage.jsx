@@ -3,39 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { Layers, MapPin, Building2, Users } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api, { unwrapList } from '../../lib/api'
-import { USE_MOCKS, isAbortError } from '../../lib/mocks'
+import { isAbortError } from '../../lib/mocks'
 import { ac, Avatar, StatusBadge } from './departmentParts'
 import DepartmentDrawer from './DepartmentDrawer'
 
-// ── Dummy fallback data (only rendered under USE_MOCKS) ───────────────────────
-const DUMMY = [
-  { id: 1,  name: 'Verpleging',           customer: 'Stichting Rivas Zorggroep', location: 'Rivas Zorggroep — Papendrecht', city: 'Papendrecht', status: 'Actief',   employees: 24, shifts: 18 },
-  { id: 2,  name: 'PG-afdeling',          customer: 'Stichting Rivas Zorggroep', location: 'Rivas Zorggroep — Papendrecht', city: 'Papendrecht', status: 'Actief',   employees: 16, shifts: 12 },
-  { id: 3,  name: 'Revalidatie',          customer: 'Stichting Rivas Zorggroep', location: 'Rivas Zorggroep — Papendrecht', city: 'Papendrecht', status: 'Actief',   employees: 9,  shifts: 7  },
-  { id: 4,  name: 'Dagbesteding',         customer: 'Stichting Rivas Zorggroep', location: 'Rivas Zorggroep — Gorinchem',  city: 'Gorinchem',   status: 'Actief',   employees: 11, shifts: 9  },
-  { id: 5,  name: 'Somatiek',             customer: 'Stichting Rivas Zorggroep', location: 'Rivas Zorggroep — Gorinchem',  city: 'Gorinchem',   status: 'Actief',   employees: 8,  shifts: 6  },
-  { id: 6,  name: 'PG-zorg',              customer: 'Yesway zorg',               location: 'Yesway — Rotterdam Zuid',      city: 'Rotterdam',   status: 'Actief',   employees: 31, shifts: 25 },
-  { id: 7,  name: 'Avond & Nacht',        customer: 'Yesway zorg',               location: 'Yesway — Rotterdam Zuid',      city: 'Rotterdam',   status: 'Actief',   employees: 14, shifts: 11 },
-  { id: 8,  name: 'LVB',                  customer: 'Yesway zorg',               location: 'Yesway — Den Haag Centrum',    city: 'Den Haag',    status: 'Actief',   employees: 19, shifts: 14 },
-  { id: 9,  name: 'Somatiek',             customer: 'Yesway zorg',               location: 'Yesway — Den Haag Centrum',    city: 'Den Haag',    status: 'Actief',   employees: 12, shifts: 9  },
-  { id: 10, name: 'Begeleiding',          customer: 'Yesway zorg',               location: 'Yesway — Den Haag Centrum',    city: 'Den Haag',    status: 'Actief',   employees: 7,  shifts: 5  },
-  { id: 11, name: 'Kleinschalig wonen',   customer: 'Yesway works',              location: 'Yesway — Utrecht',             city: 'Utrecht',     status: 'Actief',   employees: 6,  shifts: 4  },
-  { id: 12, name: 'Verpleging',           customer: 'Stichting WoonzorgGroep Samen', location: 'WoonzorgGroep Samen — Anna Paulowna', city: 'Anna Paulowna', status: 'Actief', employees: 13, shifts: 10 },
-  { id: 13, name: 'Dagopvang',            customer: 'Stichting WoonzorgGroep Samen', location: 'WoonzorgGroep Samen — Anna Paulowna', city: 'Anna Paulowna', status: 'Inactief', employees: 0, shifts: 0 },
-  { id: 14, name: 'Oncologie',            customer: 'UMC Utrecht',               location: 'UMC Utrecht — Oncologie',      city: 'Utrecht',     status: 'Actief',   employees: 8,  shifts: 6  },
-  { id: 15, name: 'Verpleging',           customer: 'UMC Utrecht',               location: 'UMC Utrecht — Oncologie',      city: 'Utrecht',     status: 'Actief',   employees: 5,  shifts: 3  },
-  { id: 16, name: 'Verpleging',           customer: 'Den Haag Zorginstellingen', location: 'Den Haag Zorginstellingen — Centrum', city: 'Den Haag', status: 'Actief', employees: 10, shifts: 8 },
-  { id: 17, name: 'Revalidatie',          customer: 'Den Haag Zorginstellingen', location: 'Den Haag Zorginstellingen — Centrum', city: 'Den Haag', status: 'Actief', employees: 6,  shifts: 4 },
-  { id: 18, name: 'PG-zorg',             customer: 'Yesway zorg',               location: 'Yesway — Dordrecht',           city: 'Dordrecht',   status: 'Actief',   employees: 17, shifts: 13 },
-  { id: 19, name: 'Begeleiding',          customer: 'Yesway zorg',               location: 'Yesway — Dordrecht',           city: 'Dordrecht',   status: 'Actief',   employees: 9,  shifts: 7  },
-  { id: 20, name: 'LVB',                  customer: 'Yesway works',              location: 'Yesway — Amsterdam Noord',     city: 'Amsterdam',   status: 'Actief',   employees: 11, shifts: 9  },
-  { id: 21, name: 'Kleinschalig wonen',   customer: 'Yesway works',              location: 'Yesway — Amsterdam Noord',     city: 'Amsterdam',   status: 'Actief',   employees: 7,  shifts: 5  },
-  { id: 22, name: 'Somatiek',             customer: 'Stichting Rivas Zorggroep', location: 'Rivas Zorggroep — Sliedrecht', city: 'Sliedrecht',  status: 'Actief',   employees: 5,  shifts: 3  },
-]
-
 export default function DepartmentsPage() {
   const { t } = useTranslation('shiftmanager')
-  const [departments, setDepartments] = useState(USE_MOCKS ? DUMMY : [])
+  const [departments, setDepartments] = useState([])
   const [search]                      = useState('')
   const [selected,    setSelected]    = useState(null)
   const [page,        setPage]        = useState(1)
@@ -46,14 +20,14 @@ export default function DepartmentsPage() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  // Load departments directly from /sm_departments. Dummy only in mock mode — a
-  // failed/empty call shows an empty list in prod.
+  // Load departments directly from /sm_departments. A failed/empty call shows an
+  // empty list, never fabricated rows.
   useEffect(() => {
     const ctrl = new AbortController()
     api.get('/sm_departments', { signal: ctrl.signal })
       .then(res => {
         const { rows } = unwrapList(res)
-        const mapped = rows.map(d => ({
+        setDepartments(rows.map(d => ({
           id:         d.id,
           name:       d.name ?? '',
           customer:   d.customer?.name ?? d.customer ?? '',
@@ -63,11 +37,9 @@ export default function DepartmentsPage() {
           status:     d.status === 'active' ? 'Actief' : d.status === 'inactive' ? 'Inactief' : (d.status ?? 'Actief'),
           employees:  d.employee_count ?? 0,
           shifts:     d.shift_count ?? 0,
-        }))
-        if (mapped.length > 0) setDepartments(mapped)
-        else if (!USE_MOCKS) setDepartments([])
+        })))
       })
-      .catch(err => { if (!isAbortError(err) && !USE_MOCKS) setDepartments([]) })
+      .catch(err => { if (!isAbortError(err)) setDepartments([]) })
     return () => ctrl.abort()
   }, [])
 

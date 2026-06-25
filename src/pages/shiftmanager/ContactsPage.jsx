@@ -3,30 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api, { unwrapList } from '../../lib/api'
-import { USE_MOCKS, isAbortError } from '../../lib/mocks'
+import { isAbortError } from '../../lib/mocks'
 import { ac, ContactAvatar } from './contactParts'
 import ContactDrawer from './ContactDrawer'
 
-// ── Dummy fallback data (only rendered under USE_MOCKS) ───────────────────────
-const DUMMY = [
-  { id: 1,  firstname: 'Sophie',  lastname: 'van den Berg',  function_title: 'HR Manager',           customer: 'Stichting Rivas Zorggroep',    location: 'Rivas Zorggroep — Papendrecht',        email: 'sophie.vandenberg@rivas.nl',      mobile: '06-12345678', planning: true  },
-  { id: 2,  firstname: 'Mark',    lastname: 'de Vries',      function_title: 'Hoofd Planning',        customer: 'Stichting Rivas Zorggroep',    location: 'Rivas Zorggroep — Gorinchem',           email: 'mark.devries@rivas.nl',           mobile: '06-23456789', planning: true  },
-  { id: 3,  firstname: 'Lisa',    lastname: 'Jansen',        function_title: 'Recruiter',             customer: 'Stichting Rivas Zorggroep',    location: 'Rivas Zorggroep — Papendrecht',        email: 'lisa.jansen@rivas.nl',            mobile: '06-34567890', planning: false },
-  { id: 4,  firstname: 'Tom',     lastname: 'Bakker',        function_title: 'Vestigingsmanager',     customer: 'Yesway zorg',                  location: 'Yesway — Rotterdam Zuid',              email: 'tom.bakker@yesway.nu',            mobile: '06-45678901', planning: true  },
-  { id: 5,  firstname: 'Nora',    lastname: 'Smits',         function_title: 'HR Adviseur',           customer: 'Yesway zorg',                  location: 'Yesway — Den Haag Centrum',            email: 'nora.smits@yesway.nu',            mobile: '06-56789012', planning: false },
-  { id: 6,  firstname: 'Daan',    lastname: 'Visser',        function_title: 'Planningscoördinator',  customer: 'Yesway zorg',                  location: 'Yesway — Dordrecht',                   email: 'daan.visser@yesway.nu',           mobile: '06-67890123', planning: true  },
-  { id: 7,  firstname: 'Emma',    lastname: 'Hoekstra',      function_title: 'Office Manager',        customer: 'Yesway works',                 location: 'Yesway — Utrecht',                     email: 'emma.hoekstra@yesway.nu',         mobile: '06-78901234', planning: true  },
-  { id: 8,  firstname: 'Lars',    lastname: 'Meijer',        function_title: 'HR Manager',            customer: 'Yesway works',                 location: 'Yesway — Amsterdam Noord',             email: 'lars.meijer@yesway.nu',           mobile: '06-89012345', planning: false },
-  { id: 9,  firstname: 'Ines',    lastname: 'Lanting',       function_title: 'Coördinator',           customer: 'Stichting WoonzorgGroep Samen',location: 'WoonzorgGroep Samen — Anna Paulowna',  email: 'i.lanting@woonzorggroepsamen.nl', mobile: '06-90123456', planning: true  },
-  { id: 10, firstname: 'Pieter',  lastname: 'Kooijman',      function_title: 'Recruiter',             customer: 'UMC Utrecht',                  location: 'UMC Utrecht — Oncologie',              email: 'p.kooijman@umcutrecht.nl',        mobile: '06-01234567', planning: false },
-  { id: 11, firstname: 'Myrthe',  lastname: 'van Dijk',      function_title: 'HR Business Partner',   customer: 'UMC Utrecht',                  location: 'UMC Utrecht — Oncologie',              email: 'm.vandijk@umcutrecht.nl',         mobile: '06-11223344', planning: true  },
-  { id: 12, firstname: 'Joost',   lastname: 'Hendriksen',    function_title: 'Planningsmanager',      customer: 'Den Haag Zorginstellingen',    location: 'Den Haag Zorginstellingen — Centrum',  email: 'j.hendriksen@dhzi.nl',            mobile: '06-22334455', planning: true  },
-  { id: 13, firstname: 'Fleur',   lastname: 'van Amstel',    function_title: 'HR Coördinator',        customer: 'Den Haag Zorginstellingen',    location: 'Den Haag Zorginstellingen — Centrum',  email: 'f.vanamstel@dhzi.nl',             mobile: '06-33445566', planning: false },
-]
-
 export default function ContactsPage() {
   const { t } = useTranslation('shiftmanager')
-  const [contacts,    setContacts]    = useState(USE_MOCKS ? DUMMY : [])
+  const [contacts,    setContacts]    = useState([])
   const [search]                      = useState('')
   const [selected,    setSelected]    = useState(null)
   const [page,        setPage]        = useState(1)
@@ -36,14 +19,14 @@ export default function ContactsPage() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  // Load contacts from the ShiftManager mirror. Dummy only in mock mode — a
-  // failed/empty call shows an empty list in prod, never fabricated rows.
+  // Load contacts from the ShiftManager mirror. A failed/empty call shows an
+  // empty list, never fabricated rows.
   useEffect(() => {
     const ctrl = new AbortController()
     api.get('/sm_contacts', { signal: ctrl.signal })
       .then(res => {
         const { rows } = unwrapList(res)
-        const mapped = rows.map(c => ({
+        setContacts(rows.map(c => ({
           id:             c.id,
           firstname:      c.first_name ?? c.firstname ?? '',
           lastname:       c.last_name ?? c.lastname ?? '',
@@ -53,11 +36,9 @@ export default function ContactsPage() {
           email:          c.email ?? '',
           mobile:         c.mobile ?? '',
           planning:       !!c.planning,
-        }))
-        if (mapped.length > 0) setContacts(mapped)
-        else if (!USE_MOCKS) setContacts([])
+        })))
       })
-      .catch(err => { if (!isAbortError(err) && !USE_MOCKS) setContacts([]) })
+      .catch(err => { if (!isAbortError(err)) setContacts([]) })
     return () => ctrl.abort()
   }, [])
 

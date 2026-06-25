@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api, { unwrapList } from '../../lib/api'
-import { USE_MOCKS, isAbortError } from '../../lib/mocks'
+import { isAbortError } from '../../lib/mocks'
 import CustomersTable from './CustomersTable'
 import CustomersInsightsRow from './CustomersInsightsRow'
 import AddCustomerModal from './AddCustomerModal'
@@ -26,16 +26,6 @@ const mapCustomer = (c) => ({
   contacts:       c.contacts ?? c.contact_persons ?? [],
   created:        c.created_at ?? c.created ?? '',
 })
-
-// Temporary dummy data — replace once the API returns customers.
-const DUMMY_CUSTOMERS = [
-  { id: 1, name: 'Stichting Rivas Zorggroep', debtor_number: '10042', status: 'actief',   account_manager: 'Wiktoria Opalenyk', city: 'Gorinchem',  locations: [{ id: 1, departments: [{}, {}] }, { id: 2, departments: [{}] }], contacts: [{}, {}] },
-  { id: 2, name: 'Zorggroep West',            debtor_number: '10088', status: 'actief',   account_manager: 'Kelly van Vliet',   city: 'Haarlem',    locations: [{ id: 3, departments: [{}, {}, {}] }],                      contacts: [{}] },
-  { id: 3, name: 'Thuiszorg Noord',           debtor_number: '10103', status: 'actief',   account_manager: 'Wiktoria Opalenyk', city: 'Amsterdam',  locations: [{ id: 4, departments: [{}] }, { id: 5, departments: [{}, {}] }], contacts: [{}, {}, {}] },
-  { id: 4, name: 'Zorggroep Oost',            debtor_number: '10120', status: 'prospect', account_manager: 'Bente de Jong',     city: 'Utrecht',    locations: [{ id: 6, departments: [{}] }],                              contacts: [] },
-  { id: 5, name: 'Verpleeghuis De Linde',     debtor_number: '',       status: 'prospect', account_manager: 'Kelly van Vliet',   city: 'Eindhoven',  locations: [],                                                          contacts: [] },
-  { id: 6, name: 'Woonzorg Centrum Zuid',     debtor_number: '10067', status: 'inactief', account_manager: 'Bente de Jong',     city: 'Breda',      locations: [{ id: 7, departments: [{}, {}] }],                          contacts: [{}] },
-]
 
 export default function CustomersPage() {
   const { t } = useTranslation('customers')
@@ -63,20 +53,12 @@ export default function CustomersPage() {
     api.get('/sm_customers', { params: { page, per_page: pageSize }, signal: ctrl.signal })
       .then(res => {
         const { rows, total: rowTotal, lastPage: rowLastPage } = unwrapList(res)
-        if (rows.length === 0 && USE_MOCKS) {
-          setCustomers(DUMMY_CUSTOMERS.map(mapCustomer)); setTotal(DUMMY_CUSTOMERS.length); setLastPage(1)
-        } else {
-          setCustomers(rows.map(mapCustomer)); setTotal(rowTotal); setLastPage(rowLastPage)
-        }
+        setCustomers(rows.map(mapCustomer)); setTotal(rowTotal); setLastPage(rowLastPage)
       })
       .catch(err => {
         if (isAbortError(err)) return
-        if (USE_MOCKS) {
-          setCustomers(DUMMY_CUSTOMERS.map(mapCustomer)); setTotal(DUMMY_CUSTOMERS.length); setLastPage(1)
-        } else {
-          setError(t('page.loadError', { defaultValue: 'Klanten laden is mislukt.' }))
-          setCustomers([]); setTotal(0); setLastPage(1)
-        }
+        setError(t('page.loadError', { defaultValue: 'Klanten laden is mislukt.' }))
+        setCustomers([]); setTotal(0); setLastPage(1)
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()

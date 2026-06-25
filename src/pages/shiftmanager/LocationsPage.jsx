@@ -3,30 +3,14 @@ import { useTranslation } from 'react-i18next'
 import { MapPin, Building2, Layers } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api, { unwrapList } from '../../lib/api'
-import { USE_MOCKS, isAbortError } from '../../lib/mocks'
+import { isAbortError } from '../../lib/mocks'
 import { Avatar, StatusBadge, ac } from './locationParts'
 import LocationDrawer from './LocationDrawer'
-
-// ── Dummy fallback data (only rendered under USE_MOCKS) ───────────────────────
-const DUMMY = [
-  { id: 1, name: 'Rivas Zorggroep — Papendrecht',     customer: 'Stichting Rivas Zorggroep', city: 'Papendrecht', address: 'Burgemeester Keijzerweg 35', phone: '078 644 1234', email: 'papendrecht@rivas.nl', status: 'Actief',   departments: ['Verpleging', 'PG-afdeling', 'Revalidatie'], shifts: 42 },
-  { id: 2, name: 'Rivas Zorggroep — Gorinchem',       customer: 'Stichting Rivas Zorggroep', city: 'Gorinchem',   address: 'Banneweg 30',               phone: '0183 68 1234',  email: 'gorinchem@rivas.nl',   status: 'Actief',   departments: ['Dagbesteding', 'Somatiek'],                  shifts: 28 },
-  { id: 3, name: 'Yesway — Rotterdam Zuid',           customer: 'Yesway zorg',               city: 'Rotterdam',   address: 'Spinozaweg 100',            phone: '010 412 5678',  email: 'rotterdam@yesway.nu',  status: 'Actief',   departments: ['PG-zorg', 'Avond & Nacht'],                 shifts: 67 },
-  { id: 4, name: 'Yesway — Den Haag Centrum',         customer: 'Yesway zorg',               city: 'Den Haag',    address: 'Prinsegracht 45',           phone: '070 361 2345',  email: 'denhaag@yesway.nu',    status: 'Actief',   departments: ['LVB', 'Somatiek', 'Begeleiding'],            shifts: 53 },
-  { id: 5, name: 'Yesway — Utrecht',                  customer: 'Yesway works',              city: 'Utrecht',     address: 'Oudenoord 330',             phone: '030 231 9876',  email: 'utrecht@yesway.nu',    status: 'Actief',   departments: ['Kleinschalig wonen'],                        shifts: 19 },
-  { id: 6, name: 'WoonzorgGroep Samen — Anna Paulowna', customer: 'Stichting WoonzorgGroep Samen', city: 'Anna Paulowna', address: 'Keizersweg 1',     phone: '0224 21 3456',  email: 'info@woonzorggroepsamen.nl', status: 'Actief', departments: ['Verpleging', 'Dagopvang'],                  shifts: 31 },
-  { id: 7, name: 'UMC Utrecht — Oncologie',           customer: 'UMC Utrecht',               city: 'Utrecht',     address: 'Heidelberglaan 100',        phone: '088 755 0000',  email: 'oncologie@umcutrecht.nl',   status: 'Actief', departments: ['Oncologie', 'Verpleging'],                  shifts: 14 },
-  { id: 8, name: 'Den Haag Zorginstellingen — Laak',  customer: 'Den Haag Zorginstellingen', city: 'Den Haag',    address: 'Escamplaan 892',            phone: '070 345 6789',  email: 'laak@dhzi.nl',         status: 'Inactief', departments: [],                                            shifts: 0  },
-  { id: 9, name: 'Rivas Zorggroep — Sliedrecht',      customer: 'Stichting Rivas Zorggroep', city: 'Sliedrecht',  address: 'Rivierweg 12',              phone: '0184 41 2222',  email: 'sliedrecht@rivas.nl',  status: 'Actief',   departments: ['Somatiek'],                                  shifts: 9  },
-  { id: 10, name: 'Yesway — Dordrecht',               customer: 'Yesway zorg',               city: 'Dordrecht',   address: 'Noordendijk 250',           phone: '078 613 4567',  email: 'dordrecht@yesway.nu',  status: 'Actief',   departments: ['PG-zorg', 'Begeleiding'],                    shifts: 38 },
-  { id: 11, name: 'Yesway — Amsterdam Noord',         customer: 'Yesway works',              city: 'Amsterdam',   address: 'Buikslotermeerplein 12',    phone: '020 636 5678',  email: 'amsterdam@yesway.nu',  status: 'Actief',   departments: ['LVB', 'Kleinschalig wonen'],                 shifts: 22 },
-  { id: 12, name: 'Den Haag Zorginstellingen — Centrum', customer: 'Den Haag Zorginstellingen', city: 'Den Haag', address: 'Lutherse Burgwal 10',       phone: '070 356 1234',  email: 'centrum@dhzi.nl',      status: 'Actief',   departments: ['Verpleging', 'Revalidatie'],                 shifts: 17 },
-]
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LocationsPage() {
   const { t } = useTranslation('shiftmanager')
-  const [locations, setLocations] = useState(USE_MOCKS ? DUMMY : [])
+  const [locations, setLocations] = useState([])
   const [search]                  = useState('')
   const [selected,  setSelected]  = useState(null)
   const [page,      setPage]      = useState(1)
@@ -37,14 +21,14 @@ export default function LocationsPage() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  // Load locations directly from /sm_locations. Dummy only in mock mode — a
-  // failed/empty call shows an empty list in prod, never fabricated rows.
+  // Load locations directly from /sm_locations. A failed/empty call shows an
+  // empty list, never fabricated rows.
   useEffect(() => {
     const ctrl = new AbortController()
     api.get('/sm_locations', { signal: ctrl.signal })
       .then(res => {
         const { rows } = unwrapList(res)
-        const mapped = rows.map(l => ({
+        setLocations(rows.map(l => ({
           id:          l.id,
           name:        l.name ?? '',
           customer:    l.customer?.name ?? l.customer ?? '',
@@ -53,11 +37,9 @@ export default function LocationsPage() {
           status:      l.status === 'active' ? 'Actief' : l.status === 'inactive' ? 'Inactief' : (l.status ?? 'Actief'),
           departments: (l.departments ?? []).map(d => d.name ?? d),
           shifts:      l.shift_count ?? 0,
-        }))
-        if (mapped.length > 0) setLocations(mapped)
-        else if (!USE_MOCKS) setLocations([])
+        })))
       })
-      .catch(err => { if (!isAbortError(err) && !USE_MOCKS) setLocations([]) })
+      .catch(err => { if (!isAbortError(err)) setLocations([]) })
     return () => ctrl.abort()
   }, [])
 
