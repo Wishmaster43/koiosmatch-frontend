@@ -1,4 +1,4 @@
-import { bucketOfPhase } from './mocks'
+import { bucketOfPhase } from './applicationsShared'
 
 // Two-letter initials from a name, e.g. "Rosa Tijssen" → "RT".
 const initialsOf = (name = '') =>

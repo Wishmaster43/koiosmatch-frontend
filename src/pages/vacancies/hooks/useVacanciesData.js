@@ -6,7 +6,7 @@
  */
 import { useState, useEffect } from 'react'
 import api, { unwrapList } from '@/lib/api'
-import { USE_MOCKS, isAbortError } from '@/lib/mocks'
+import { isAbortError } from '@/lib/mocks'
 import { mapVacancy } from '../data/mapVacancy'
 
 export function useVacanciesData({ filterParams, page, pageSize, t }) {
@@ -39,7 +39,7 @@ export function useVacanciesData({ filterParams, page, pageSize, t }) {
       .catch(err => {
         if (isAbortError(err)) return
         // A 404 means the endpoint isn't built yet → empty, not an error.
-        if (err?.response?.status && err.response.status !== 404 && !USE_MOCKS) {
+        if (err?.response?.status && err.response.status !== 404) {
           setError(t('page.loadError'))
         }
         setVacancies([]); setTotal(0); setLastPage(1)

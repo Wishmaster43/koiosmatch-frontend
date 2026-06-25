@@ -2,9 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrapList } from '../../lib/api'
-import { USE_MOCKS } from '../../lib/mocks'
 import { mapApplication } from './data/mapApplication'
-import { MOCK_APPLICATIONS, VACANCIES } from './data/mocks'
 import CreatableSelect from '../../components/ui/CreatableSelect'
 
 // Field label + shared searchable single-select (CreatableSelect) — replaces the
@@ -21,20 +19,11 @@ function PickField({ label, ...rest }) {
 // Two-letter initials from a name.
 const initialsOf = (name = '') => name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
 
-
-// Mock fallbacks (USE_MOCKS only): unique candidates from the demo applications + the demo vacancies.
-const mockCandidateOptions = () => {
-  const seen = new Map()
-  MOCK_APPLICATIONS.forEach(a => { if (!seen.has(a.candidateId)) seen.set(a.candidateId, { value: a.candidateId, label: a.candidateName }) })
-  return [...seen.values()]
-}
-const mockVacancyOptions = () => VACANCIES.map(v => ({ value: v.id, label: v.title, client: v.client }))
-
 /**
  * AddApplicationModal — create a new application by linking an existing candidate
- * to a vacancy. Pickers load from /candidates and /vacancies (mock fallback under
- * USE_MOCKS). Persists to POST /applications; on failure it still adds the row
- * locally so the flow works before the endpoint is live.
+ * to a vacancy. Pickers load from /candidates and /vacancies. Persists to
+ * POST /applications; on failure it still adds the row locally so the flow works
+ * before the endpoint is live.
  */
 export default function AddApplicationModal({ onClose, onCreated }) {
   const { t } = useTranslation('applications')
@@ -44,14 +33,14 @@ export default function AddApplicationModal({ onClose, onCreated }) {
   const [vacancyId, setVacancyId]     = useState('')
   const [saving, setSaving]           = useState(false)
 
-  // Load candidate + vacancy options (fail soft to mocks).
+  // Load candidate + vacancy options; an empty list on failure, never demo rows.
   useEffect(() => {
     api.get('/candidates', { params: { per_page: 100 } })
       .then(r => setCandidates(unwrapList(r).rows.map(c => ({ value: c.id, label: c.name ?? [c.first_name, c.last_name].filter(Boolean).join(' ') }))))
-      .catch(() => { if (USE_MOCKS) setCandidates(mockCandidateOptions()) })
+      .catch(() => setCandidates([]))
     api.get('/vacancies', { params: { per_page: 100 } })
       .then(r => setVacancies(unwrapList(r).rows.map(v => ({ value: v.id, label: v.title ?? v.titel, client: v.client_name ?? v.client }))))
-      .catch(() => { if (USE_MOCKS) setVacancies(mockVacancyOptions()) })
+      .catch(() => setVacancies([]))
   }, [])
 
   // Create the application; optimistic local row if the endpoint isn't live yet.

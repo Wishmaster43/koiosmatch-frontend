@@ -104,8 +104,10 @@ api.interceptors.response.use(
 
     // A 403 on /tenants is expected for non-super-admins — don't log it as an error.
     const benignTenants403 = status === 403 && url.includes('/tenants')
+    // Dev-only log of request context. Never log the response body: it can carry
+    // special-category data (names, contact, health) — strip PII from logs (§8).
     if (import.meta.env.DEV && !benignTenants403) {
-      console.error('API Error:', status, error.response?.data)
+      console.error('API Error:', status, method.toUpperCase(), url)
     }
 
     const isAuthCall = url.includes('/auth/login') || url.includes('/auth/me')

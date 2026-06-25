@@ -6,9 +6,8 @@
  */
 import { useState, useEffect } from 'react'
 import api, { unwrapList } from '@/lib/api'
-import { USE_MOCKS, isAbortError } from '@/lib/mocks'
+import { isAbortError } from '@/lib/mocks'
 import { mapCandidate } from '../data/mapCandidate'
-import { DUMMY_CANDIDATES } from '../data/candidatesMock'
 
 export function useCandidatesData({ filterParams, page, pageSize, t, setActionMsg }) {
   const [candidates, setCandidates] = useState([])
@@ -27,11 +26,7 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
     api.get('/candidates', { params: { ...filterParams, page, per_page: pageSize }, signal: ctrl.signal })
       .then(res => {
         const { rows, total, lastPage } = unwrapList(res)
-        if (rows.length === 0 && USE_MOCKS) {
-          setCandidates(DUMMY_CANDIDATES); setTotal(DUMMY_CANDIDATES.length); setLastPage(1)
-        } else {
-          setCandidates(rows.map(mapCandidate)); setTotal(total); setLastPage(lastPage)
-        }
+        setCandidates(rows.map(mapCandidate)); setTotal(total); setLastPage(lastPage)
       })
       .catch(err => {
         if (isAbortError(err)) return
@@ -44,12 +39,9 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
           setActionMsg({ type: 'error', text: t('page.filterUnsupported', { defaultValue: 'Dit filter wordt (nog) niet door de server ondersteund.' }) })
           return
         }
-        if (USE_MOCKS) {
-          setCandidates(DUMMY_CANDIDATES); setTotal(DUMMY_CANDIDATES.length); setLastPage(1)
-        } else {
-          setError(t('page.loadError', { defaultValue: 'Kandidaten laden is mislukt.' }))
-          setCandidates([]); setTotal(0); setLastPage(1)
-        }
+        // Any other failure: empty list + a soft error notice, never fabricated rows.
+        setError(t('page.loadError', { defaultValue: 'Kandidaten laden is mislukt.' }))
+        setCandidates([]); setTotal(0); setLastPage(1)
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()

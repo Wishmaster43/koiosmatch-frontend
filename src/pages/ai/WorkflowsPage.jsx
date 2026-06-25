@@ -18,58 +18,6 @@ import { normalizeWorkflow, denormalizeWorkflow } from './data/workflowMap'
 import WorkflowCard, { WorkflowRow } from './WorkflowCard'
 
 
-const MOCK_WORKFLOWS = [
-  {
-    id: 1,
-    name: 'Diensten Aanbod — Yesway',
-    trigger: 'Dagelijks 08:00',
-    status: 'active',
-    last_run: { time: 'Vandaag 08:00', ok: true, candidates: 87 },
-    steps: [
-      { type: 'candidates', config: { status: 'actief', pools: ['Pool 7', 'Pool 8'], limit: 100 } },
-      { type: 'planning',    config: { connection_id: 'ShiftManager (Yesway)', hours_ahead: 72 } },
-      { type: 'whatsapp_send',    config: { message_type: 'flow', phone_number_id: '085 020 5160' } },
-      { type: 'database_update',  config: { model: 'Conversation', set_status: 'AWAITING_SHIFTS_OFFERED' } },
-    ],
-  },
-  {
-    id: 2,
-    name: 'No Response Checker',
-    trigger: 'Dagelijks 09:00',
-    status: 'active',
-    last_run: { time: 'Vandaag 09:00', ok: true, candidates: 12 },
-    steps: [
-      { type: 'candidates', config: { status: 'actief' } },
-      { type: 'whatsapp_send',    config: { message_type: 'template', template_name: 'geen_reactie' } },
-      { type: 'database_update',  config: { model: 'Conversation' } },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Shift Reminder',
-    trigger: 'Dagelijks 10:00',
-    status: 'active',
-    last_run: { time: 'Vandaag 10:00', ok: false, error: 'API timeout' },
-    steps: [
-      { type: 'candidates', config: {} },
-      { type: 'planning',    config: {} },
-      { type: 'whatsapp_send',    config: { message_type: 'template' } },
-    ],
-  },
-  {
-    id: 4,
-    name: 'Wekelijkse Rapportage',
-    trigger: 'Maandag 07:00',
-    status: 'draft',
-    last_run: null,
-    steps: [
-      { type: 'candidates', config: {} },
-      { type: 'email_send',       config: { to: 'flex@yesway.nu' } },
-    ],
-  },
-]
-
-
 // ── Folder sidebar ────────────────────────────────────────────────────────────
 
 // ── Main page ─────────────────────────────────────────────────────────────────
@@ -113,7 +61,7 @@ export default function WorkflowsPage() {
 
   useEffect(() => {
     Promise.all([
-      api.get('/workflows').then(r => (r.data?.data ?? r.data ?? []).map(normalizeWorkflow)).catch(() => MOCK_WORKFLOWS),
+      api.get('/workflows').then(r => (r.data?.data ?? r.data ?? []).map(normalizeWorkflow)).catch(() => []),
       api.get('/workflow-folders').then(r => r.data?.data ?? r.data ?? []).catch(() => []),
     ]).then(([wfs, flds]) => {
       // Restore graph from localStorage when the backend doesn't store connections yet (C-27).

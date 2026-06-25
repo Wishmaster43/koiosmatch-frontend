@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Plus } from 'lucide-react'
 import api, { unwrapList } from '../../lib/api'
-import { USE_MOCKS, isAbortError } from '../../lib/mocks'
+import { isAbortError } from '../../lib/mocks'
 import { useRightPanel } from '../../context/RightPanelContext'
 import { useLookups } from '../../context/LookupsContext'
 import { useAuth } from '../../context/AuthContext'
@@ -13,7 +13,7 @@ import ApplicationDrawer from './ApplicationDrawer'
 import AddApplicationModal from './AddApplicationModal'
 import PaginationBar from '../../components/ui/PaginationBar'
 import { mapApplication, mapApplicationDetail } from './data/mapApplication'
-import { MOCK_APPLICATIONS, bucketOfPhase, buildMockDetail } from './data/mocks'
+import { bucketOfPhase } from './data/applicationsShared'
 
 const BUCKETS = ['active', 'matched', 'rejected']
 
@@ -55,20 +55,15 @@ export default function ApplicationsPage() {
   const decorate = (a) => { const m = funnelMeta(a.phaseKey); return { ...a, phaseLabel: m.label, phaseColor: m.color } }
 
   // Load applications. A 404 means the endpoint isn't built yet → treat as empty
-  // (not an error); the mock fallback only kicks in with USE_MOCKS.
+  // (not an error); any other failure surfaces the error state, never fake rows.
   useEffect(() => {
     const ctrl = new AbortController()
     setLoading(true); setError(false)
     api.get('/applications', { signal: ctrl.signal })
-      .then(res => {
-        const { rows } = unwrapList(res)
-        if (rows.length === 0 && USE_MOCKS) setApplications(MOCK_APPLICATIONS)
-        else setApplications(rows.map(mapApplication))
-      })
+      .then(res => setApplications(unwrapList(res).rows.map(mapApplication)))
       .catch(err => {
         if (isAbortError(err)) return
-        if (USE_MOCKS) setApplications(MOCK_APPLICATIONS)
-        else if (err?.response?.status && err.response.status !== 404) setError(true)
+        if (err?.response?.status && err.response.status !== 404) setError(true)
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
@@ -125,10 +120,13 @@ export default function ApplicationsPage() {
     return () => unregisterFilters('applications-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
+  // Reset to the first page whenever the bucket or any filter changes (kept out
+  // of the memo below — setting state during render can loop, see React docs).
+  useEffect(() => { setPage(1) }, [bucket, selectedPhase, selectedOwner, selectedSource, selectedVac])
+
   // The visible rows: bucket + phase/owner/source/vacancy filters, decorated with
-  // their phase label/colour from the lookup. Filter changes reset to page 1.
+  // their phase label/colour from the lookup.
   const filteredAll = useMemo(() => {
-    setPage(1)
     return applications.filter(a => {
       if (a.bucket !== bucket) return false
       if (selectedPhase.length  && !selectedPhase.includes(a.phaseKey))         return false
@@ -145,8 +143,8 @@ export default function ApplicationsPage() {
   const filtered   = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
 
   // Open an application: show the light row immediately, then fetch the full
-  // detail (GET /applications/{id}); a 404/missing endpoint falls back to the
-  // mock detail under USE_MOCKS. The ref guards against out-of-order responses.
+  // detail (GET /applications/{id}). On failure we keep the light row already
+  // shown — never fabricate detail. The ref guards against out-of-order responses.
   const selectedIdRef = useRef(null)
   const selectApplication = (a) => {
     if (selected?.id === a.id) { closeDrawer(); return }
@@ -154,7 +152,7 @@ export default function ApplicationsPage() {
     setSelected(decorate(a)); setExpanded(false)
     api.get(`/applications/${a.id}`)
       .then(r => { if (selectedIdRef.current === a.id) setSelected(decorate(mapApplicationDetail(r.data?.data ?? r.data))) })
-      .catch(() => { if (selectedIdRef.current === a.id && USE_MOCKS) setSelected(decorate(buildMockDetail(a))) })
+      .catch(() => {})
   }
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setExpanded(false) }
 

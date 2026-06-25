@@ -23,11 +23,14 @@ import {
 import '@xyflow/react/dist/style.css'
 import {
   X, Save, Play, Loader2, Plus, Trash2,
-  Zap, CheckCircle, AlertCircle, List, Clock,
+  Zap, List, Clock,
   ChevronDown,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
+import api from '@/lib/api'
 import { MODULE_META, MODULE_SCHEMAS, MODULE_APP_MAP } from '@/modules/index'
 import { useApps } from '@/context/AppsContext'
+import { StatusBadge, formatDT, formatDuration } from '@/components/reports/runFormat'
 import { AgentsTab, PromptsTab, FAQTab, KnowledgeTab, ToolsTab } from '../ai/AIManagementTabs'
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow, flowToSteps } from './workflow/serialization'
 import { FieldInput } from './workflow/fields'
@@ -302,50 +305,27 @@ function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
 
 // ── Logs panel ────────────────────────────────────────────────────────────────
 
-const MOCK_LOGS = [
-  {
-    id: 1, ts: 'Vandaag 08:00', ok: true, duration: '3.2s',
-    operations: 12, bundles: 87,
-    steps: [
-      { label: 'Webhook ontvangen',    ok: true,  duration: '0.1s', bundles: 1 },
-      { label: 'Kandidaten Ophalen',   ok: true,  duration: '1.4s', bundles: 87 },
-      { label: 'Filter',               ok: true,  duration: '0.2s', bundles: 64 },
-      { label: 'WhatsApp versturen',   ok: true,  duration: '1.5s', bundles: 64 },
-    ],
-  },
-  {
-    id: 2, ts: 'Gisteren 08:00', ok: true, duration: '2.8s',
-    operations: 9, bundles: 92,
-    steps: [
-      { label: 'Webhook ontvangen',    ok: true,  duration: '0.1s', bundles: 1 },
-      { label: 'Kandidaten Ophalen',   ok: true,  duration: '1.2s', bundles: 92 },
-      { label: 'Filter',               ok: true,  duration: '0.2s', bundles: 71 },
-      { label: 'WhatsApp versturen',   ok: true,  duration: '1.3s', bundles: 71 },
-    ],
-  },
-  {
-    id: 3, ts: '10 jun 08:00', ok: false, duration: '0.9s',
-    operations: 2, bundles: 0,
-    error: 'API timeout bij Diensten Ophalen',
-    steps: [
-      { label: 'Webhook ontvangen',    ok: true,  duration: '0.1s', bundles: 1 },
-      { label: 'Diensten Ophalen',     ok: false, duration: '0.8s', bundles: 0, error: 'Request timeout na 800ms' },
-    ],
-  },
-  {
-    id: 4, ts: '9 jun 08:00', ok: true, duration: '3.5s',
-    operations: 11, bundles: 78,
-    steps: [
-      { label: 'Webhook ontvangen',    ok: true,  duration: '0.1s', bundles: 1 },
-      { label: 'Kandidaten Ophalen',   ok: true,  duration: '1.6s', bundles: 78 },
-      { label: 'Filter',               ok: true,  duration: '0.3s', bundles: 55 },
-      { label: 'WhatsApp versturen',   ok: true,  duration: '1.5s', bundles: 55 },
-    ],
-  },
-]
-
-function LogsPanel({ onClose }) {
+function LogsPanel({ workflowId, onClose }) {
+  const { t } = useTranslation('reports')
+  const [runs,     setRuns]     = useState([])
+  const [loading,  setLoading]  = useState(true)
   const [expanded, setExpanded] = useState(null)
+
+  // Load this workflow's real executions; empty on failure, never fabricated.
+  useEffect(() => {
+    const ctrl = new AbortController()
+    setLoading(true)
+    api.get('/workflow-runs', { signal: ctrl.signal })
+      .then(res => {
+        const rows = res.data?.data ?? res.data ?? []
+        const mine = workflowId == null ? rows : rows.filter(r => (r.workflow_id ?? r.workflowId) === workflowId)
+        mine.sort((a, b) => new Date(b.started_at ?? b.created_at ?? 0) - new Date(a.started_at ?? a.created_at ?? 0))
+        setRuns(mine)
+      })
+      .catch(() => setRuns([]))
+      .finally(() => setLoading(false))
+    return () => ctrl.abort()
+  }, [workflowId])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -353,62 +333,60 @@ function LogsPanel({ onClose }) {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <List size={14} color="var(--color-primary)" />
-          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Uitvoeringen</span>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('runs.title')}</span>
         </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
           <X size={15} />
         </button>
       </div>
 
-      {/* Log list */}
+      {/* Run list — loading / empty / real executions */}
       <div style={{ flex: 1, overflowY: 'auto' }}>
-        {MOCK_LOGS.map(log => {
-          const isOpen = expanded === log.id
+        {loading && (
+          <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('runs.loading')}</div>
+        )}
+        {!loading && runs.length === 0 && (
+          <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('runs.empty')}</div>
+        )}
+        {!loading && runs.map((run, idx) => {
+          const id = run.id ?? idx
+          const isOpen = expanded === id
+          const steps = run.step_results ?? run.steps ?? []
           return (
-            <div key={log.id} style={{ borderBottom: '1px solid var(--border)' }}>
+            <div key={id} style={{ borderBottom: '1px solid var(--border)' }}>
               {/* Row */}
               <button type="button"
-                onClick={() => setExpanded(isOpen ? null : log.id)}
-                style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: 'pointer', gap: 8, textAlign: 'left' }}
+                onClick={() => steps.length && setExpanded(isOpen ? null : id)}
+                style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: steps.length ? 'pointer' : 'default', gap: 8, textAlign: 'left' }}
                 onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-                {log.ok
-                  ? <CheckCircle size={13} color="var(--color-success)" style={{ flexShrink: 0 }} />
-                  : <AlertCircle size={13} color="var(--color-danger)" style={{ flexShrink: 0 }} />
-                }
+                <StatusBadge status={run.status} />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <span style={{ fontSize: 12, fontWeight: 500, color: log.ok ? 'var(--text)' : 'var(--color-danger)' }}>
-                      {log.ok ? 'Geslaagd' : 'Mislukt'}
-                    </span>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{log.duration}</span>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                    {formatDT(run.started_at ?? run.created_at)}
                   </div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                    {log.ts} · {log.operations} operaties · {log.bundles} bundles
+                    {t('runs.drawer.candidates')}: {run.candidates_count ?? run.candidates ?? '—'} · {t('runs.drawer.duration')}: {formatDuration(run.duration_ms ?? run.duration)}
                   </div>
-                  {!log.ok && log.error && (
-                    <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 2 }}>{log.error}</div>
+                  {run.error_message && (
+                    <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 2 }}>{run.error_message}</div>
                   )}
                 </div>
-                <ChevronDown size={12} color="var(--border)"
-                  style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                {steps.length > 0 && (
+                  <ChevronDown size={12} color="var(--border)"
+                    style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                )}
               </button>
 
-              {/* Expanded steps */}
-              {isOpen && (
-                <div style={{ padding: '0 16px 12px 36px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {log.steps.map((step, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
-                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: step.ok ? 'var(--color-success)' : 'var(--color-danger)', marginTop: 5, flexShrink: 0 }} />
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text)' }}>{step.label}</span>
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{step.duration}</span>
-                        </div>
-                        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                          {step.ok ? `${step.bundles} bundles` : step.error}
-                        </div>
-                      </div>
+              {/* Expanded step results — real shape only, nothing fabricated */}
+              {isOpen && steps.length > 0 && (
+                <div style={{ padding: '0 16px 12px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  {steps.map((step, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                      <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text)' }}>
+                        {step.label ?? step.type ?? t('runs.drawer.step', { n: i + 1 })}
+                      </span>
+                      <StatusBadge status={step.status ?? (step.ok ? 'success' : 'failed')} />
                     </div>
                   ))}
                 </div>
@@ -836,7 +814,7 @@ function EditorInner({ workflow, onClose, onSave }) {
           {/* Right panel — widens when management tabs (Agents/Prompts/FAQ/etc.) are active */}
           <div style={{ width: widePanelActive ? 560 : 280, flexShrink: 0, background: 'var(--surface)', borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'width 0.2s ease' }}>
             {showLogs
-              ? <LogsPanel onClose={() => setShowLogs(false)} />
+              ? <LogsPanel workflowId={workflow.id} onClose={() => setShowLogs(false)} />
               : <ConfigPanel node={selectedNode} onUpdate={updateNodeConfig} onDelete={deleteNode}
                   onTabChange={tab => setWidePanelActive(MANAGE_TABS.includes(tab))} />
             }

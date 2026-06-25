@@ -3,8 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { XCircle } from 'lucide-react'
 import api from '../../../lib/api'
 import KoiosAiMark from '../../../components/ui/KoiosAiMark'
-import { USE_MOCKS } from '../../../lib/mocks'
-import { MOCK_REJECTION_REASONS } from '../data/mocks'
 
 // Fill template tokens with the application's values.
 const fillTokens = (tpl, vals) => (tpl ?? '')
@@ -28,11 +26,11 @@ export default function RejectionBlock({ application: a, onReject }) {
   const [channel, setChannel]   = useState('email')
   const [submitting, setSubmitting] = useState(false)
 
-  // Load reasons + rejection config; fall back to mock reasons under USE_MOCKS.
+  // Load reasons + rejection config; empty reasons on failure, never demo data.
   useEffect(() => {
     api.get('/candidate-rejection-reasons')
       .then(r => setReasons(r.data?.data ?? r.data ?? []))
-      .catch(() => { if (USE_MOCKS) setReasons(MOCK_REJECTION_REASONS) })
+      .catch(() => setReasons([]))
     api.get('/settings/rejection')
       .then(r => { const c = r.data?.data ?? r.data; if (c?.default_channel) { setConfig(c); setChannel(c.default_channel) } })
       .catch(() => {})

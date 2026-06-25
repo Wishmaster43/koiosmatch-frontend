@@ -6,46 +6,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X,
-         Zap, CheckCircle, XCircle, Clock, Users, AlertTriangle, RotateCcw } from 'lucide-react'
+         Zap, Clock, Users, AlertTriangle } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api from '../../lib/api'
-
-const PAD = n => String(n).padStart(2, '0')
-
-// Format an ISO datetime into a short readable date + time (or em-dash if empty).
-function formatDT(dt) {
-  if (!dt) return '—'
-  const d = new Date(dt)
-  return `${PAD(d.getDate())}-${PAD(d.getMonth()+1)}-${d.getFullYear()} ${PAD(d.getHours())}:${PAD(d.getMinutes())}`
-}
-
-function formatDuration(ms) {
-  if (ms == null) return '—'
-  if (ms < 1000) return `${ms}ms`
-  if (ms < 60000) return `${(ms/1000).toFixed(1)}s`
-  return `${Math.floor(ms/60000)}m ${Math.floor((ms%60000)/1000)}s`
-}
-
-// Run status → colour + icon. Label = t('runs.status.<key>').
-const STATUS_META = {
-  success:  { bg: 'var(--color-success-bg)', color: 'var(--color-success)', Icon: CheckCircle },
-  failed:   { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)', Icon: XCircle     },
-  running:  { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)', Icon: RotateCcw   },
-  pending:  { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock       },
-}
-
-function StatusBadge({ status }) {
-  const { t } = useTranslation('reports')
-  const m = STATUS_META[status] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock }
-  const Icon = m.Icon
-  return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
-                   fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>
-      <Icon size={10} />
-      {status ? t(`runs.status.${status}`, { defaultValue: status }) : '—'}
-    </span>
-  )
-}
+import { formatDT, formatDuration, StatusBadge } from './runFormat'
 
 function SortIcon({ active, dir }) {
   if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
