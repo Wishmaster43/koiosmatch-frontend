@@ -30,7 +30,8 @@ export const optsFrom = (values, mapLabel = v => v) => {
   return Object.keys(counts).map(v => ({ value: v, label: mapLabel(v), count: counts[v] }))
 }
 
-// Two-letter initials from a name, e.g. "Bente de Jong" → "BJ".
+// Two-letter initials from the first two name parts, e.g. "Bente de Jong" → "BD".
+// (Quirk: tussenvoegsels like "de"/"van" count as a part — preserved from the original.)
 export const initialsOf = (name = '') =>
   name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
 
