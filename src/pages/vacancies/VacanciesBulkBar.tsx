@@ -1,6 +1,29 @@
 import { useTranslation } from 'react-i18next'
 import { ListChecks, UserCog, CircleDot, Building2, Globe, GlobeLock, Tag, StickyNote, Archive, X } from 'lucide-react'
 import ActionMenu from '../../components/ui/ActionMenu'
+import type { MenuNode } from '../../components/ui/ActionMenu'
+import type { Id, LookupOption } from '../../types/common'
+
+interface BulkUser { id: Id; name: string }
+interface BulkCustomer { id: Id; name: string }
+
+interface VacanciesBulkBarProps {
+  count: number
+  onClear: () => void
+  onSetOwner: (u: BulkUser) => void
+  onSetStatus: (v: string | number) => void
+  onSetClient: (c: BulkCustomer) => void
+  onPublish: () => void
+  onUnpublish: () => void
+  onRemoveTag: (tag: string) => void
+  onAddNote: (text: string) => void
+  onArchive: () => void
+  canArchive?: boolean
+  users?: BulkUser[]
+  statuses?: LookupOption[]
+  customers?: BulkCustomer[]
+  selectedTags?: string[]
+}
 
 /**
  * VacanciesBulkBar — selection action bar shown above the table when ≥1 vacancy is
@@ -12,7 +35,7 @@ export default function VacanciesBulkBar({
   count, onClear, onSetOwner, onSetStatus, onSetClient, onPublish, onUnpublish,
   onRemoveTag, onAddNote, onArchive, canArchive = false,
   users = [], statuses = [], customers = [], selectedTags = [],
-}) {
+}: VacanciesBulkBarProps) {
   const { t } = useTranslation('vacancies')
 
   // Build the option lists from props.
@@ -22,11 +45,11 @@ export default function VacanciesBulkBar({
   const tagOptions = selectedTags.map(tg => ({ value: tg, label: tg }))
 
   // Resolve a picked user/customer id back to the full object the parent needs.
-  const pickUser = (handler) => (id) => { const u = users.find(x => x.id === id); if (u) handler(u) }
-  const pickCustomer = (handler) => (id) => { const c = customers.find(x => x.id === id); if (c) handler(c) }
+  const pickUser = (handler: (u: BulkUser) => void) => (id: string | number) => { const u = users.find(x => x.id === id); if (u) handler(u) }
+  const pickCustomer = (handler: (c: BulkCustomer) => void) => (id: string | number) => { const c = customers.find(x => x.id === id); if (c) handler(c) }
 
   // Declarative bulk-action tree; archive is gated (server re-checks).
-  const items = [
+  const items: MenuNode[] = [
     { key: 'owner', label: t('bulk.changeOwner'), icon: UserCog,
       searchPlaceholder: t('bulk.searchOwner'), emptyText: t('bulk.noUsers'), options: userOptions, onPick: pickUser(onSetOwner) },
     { key: 'status', label: t('bulk.changeStatus'), icon: CircleDot,
@@ -38,9 +61,9 @@ export default function VacanciesBulkBar({
       { key: 'unpublish', label: t('bulk.unpublish'), icon: GlobeLock, onSelect: onUnpublish },
     ] },
     { key: 'tag', label: t('bulk.removeTag'), icon: Tag,
-      searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: onRemoveTag },
+      searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: v => onRemoveTag(String(v)) },
     { key: 'note', label: t('bulk.addNote'), icon: StickyNote, input: true,
-      placeholder: t('bulk.notePlaceholder'), submitLabel: t('bulk.noteSubmit'), onSubmit: onAddNote },
+      placeholder: t('bulk.notePlaceholder'), submitLabel: t('bulk.noteSubmit'), onSubmit: v => onAddNote(String(v)) },
     ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
   ]
 

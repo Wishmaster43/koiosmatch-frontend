@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 import EntityDrawer from '../../components/drawer/EntityDrawer'
@@ -13,38 +14,54 @@ import TimelineTab from './drawer/TimelineTab'
 import NotesTab from './drawer/NotesTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import MatchingTab from './drawer/MatchingTab'
+import type { VacancyDetail } from '../../types/vacancy'
+import type { Id } from '../../types/common'
+
+type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
+interface DrawerUser { id: Id; name: string }
+interface DrawerCustomer { id: Id; name: string }
 
 // Tab list — config only; each renders one small component (one per tab/section).
-const TABS = [
-  { id: 'details',    tKey: 'details',    render: (v) => <DetailsTab vacancy={v} /> },
-  { id: 'applicants', tKey: 'applicants', render: (v) => <ApplicantsTab vacancy={v} /> },
+const TABS: { id: string; tKey: string; render: (v: VacancyDetail, onUpdate?: UpdateFn) => ReactNode }[] = [
+  { id: 'details',    tKey: 'details',    render: v => <DetailsTab vacancy={v} /> },
+  { id: 'applicants', tKey: 'applicants', render: v => <ApplicantsTab vacancy={v} /> },
   { id: 'matching',   tKey: 'matching',   render: (v, onUpdate) => <MatchingTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'publishing', tKey: 'publishing', render: (v, onUpdate) => <PublishingTab vacancy={v} onUpdate={onUpdate} /> },
-  { id: 'documents',  tKey: 'documents',  render: (v) => <DocumentsTab vacancy={v} /> },
-  { id: 'timeline',   tKey: 'timeline',   render: (v) => <TimelineTab vacancy={v} /> },
-  { id: 'notes',      tKey: 'notes',      render: (v) => <NotesTab vacancy={v} /> },
-  { id: 'statistics', tKey: 'statistics', render: (v) => <StatisticsTab vacancy={v} /> },
+  { id: 'documents',  tKey: 'documents',  render: v => <DocumentsTab vacancy={v} /> },
+  { id: 'timeline',   tKey: 'timeline',   render: v => <TimelineTab vacancy={v} /> },
+  { id: 'notes',      tKey: 'notes',      render: v => <NotesTab vacancy={v} /> },
+  { id: 'statistics', tKey: 'statistics', render: v => <StatisticsTab vacancy={v} /> },
 ]
+
+interface VacancyDrawerProps {
+  vacancy: VacancyDetail | null
+  onClose: () => void
+  expanded?: boolean
+  onToggleExpand?: () => void
+  onUpdate?: UpdateFn
+  users?: DrawerUser[]
+  customers?: DrawerCustomer[]
+}
 
 /**
  * VacancyDrawer — thin container: wires data (lookups + onUpdate) and declares the
  * header config + tab list. No heavy JSX, no business logic (mirror CandidateDrawer).
  */
-export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, users = [], customers = [] }) {
+export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, users = [], customers = [] }: VacancyDrawerProps) {
   const { t } = useTranslation('vacancies')
   const { statuses } = useVacancyLookups()
   const { formatDate } = useDateFormat()
 
   // Tags are edited inline; seed from the record and reset when a different
   // vacancy is shown (adjust state during render — React's recommended pattern).
-  const [tags, setTags] = useState(null)
-  const [prevId, setPrevId] = useState(v?.id)
+  const [tags, setTags] = useState<string[] | null>(null)
+  const [prevId, setPrevId] = useState<Id | undefined>(v?.id)
   if (v?.id !== prevId) { setPrevId(v?.id); setTags(null) }
 
   if (!v) return null
 
-  const currentTags = tags ?? v.tags ?? []
-  const setTagsAndSave = (next) => { setTags(next); onUpdate?.(v.id, { tags: next }) }
+  const currentTags = tags ?? (v.tags as string[]) ?? []
+  const setTagsAndSave = (next: string[]) => { setTags(next); onUpdate?.(v.id, { tags: next }) }
 
   // Owner picker — include the current owner so it shows even if not in `users`.
   const ownerOptions = [
@@ -70,12 +87,12 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           meta={[
             { key: 'status', label: t('drawer.status'), value: v.statusValue,
               options: statuses.map(s => ({ value: s.value, label: s.label })),
-              onChange: (val) => onUpdate?.(v.id, { statusValue: val }), menuWidth: 160, width: 150 },
+              onChange: val => onUpdate?.(v.id, { statusValue: val }), menuWidth: 160, width: 150 },
             { key: 'owner', label: t('drawer.owner'), value: v.owner?.id,
-              options: ownerOptions, onChange: (val) => onUpdate?.(v.id, { ownerId: val }), menuWidth: 200, width: 180 },
+              options: ownerOptions, onChange: val => onUpdate?.(v.id, { ownerId: val }), menuWidth: 200, width: 180 },
             { key: 'client', label: t('drawer.client'), value: v.clientId,
               options: clientOptions, placeholder: t('drawer.selectClient'),
-              onChange: (val) => onUpdate?.(v.id, { clientId: val }), menuWidth: 220, width: 200 },
+              onChange: val => onUpdate?.(v.id, { clientId: val }), menuWidth: 220, width: 200 },
           ]}
           tags={{ items: currentTags, onAdd: tag => setTagsAndSave([...currentTags, tag]),
             onRemove: tag => setTagsAndSave(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
