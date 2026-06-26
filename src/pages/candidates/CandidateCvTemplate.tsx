@@ -116,7 +116,7 @@ interface CvExperience { title?: string; function?: string; name?: string; compa
 interface CvEducation { title?: string; name?: string; school?: string; institution?: string; start_year?: string | number; startYear?: string | number; year?: string | number; end_year?: string | number; endYear?: string | number }
 interface CvLanguage { language?: string; name?: string; level?: string; spoken?: string }
 interface CvNamed { name?: string }
-interface CvCandidate {
+export interface CvCandidate {
   name?: string; firstName?: string; middleName?: string; lastName?: string
   title?: string; function?: string
   email?: string; phone?: string; address?: string; dob?: string; nationality?: string; summary?: string

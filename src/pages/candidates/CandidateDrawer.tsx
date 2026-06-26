@@ -1,20 +1,22 @@
 import { useState } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { Download, Edit2, Save, X } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { CvDocument } from './CandidateCvTemplate'
-import { useCvSettings } from '../../lib/useCvSettings'
+import type { CvCandidate } from './CandidateCvTemplate'
+import { useCvSettings } from '@/lib/useCvSettings'
 import { useTranslation } from 'react-i18next'
-import { useLocale, useDateFormat } from '../../lib/datetime'
-import EntityDrawer from '../../components/drawer/EntityDrawer'
-import EntityHeader from '../../components/drawer/EntityHeader'
-import CreatableSelect from '../../components/ui/CreatableSelect'
-import { useLookups } from '../../context/LookupsContext'
-import { useGenders } from '../../lib/useGenders'
-import { useLastContactTypes } from '../../lib/useLastContactTypes'
-import { useFunctions } from '../../lib/useFunctions'
-import { useAuth } from '../../context/AuthContext'
+import { useLocale, useDateFormat } from '@/lib/datetime'
+import EntityDrawerJs from '@/components/drawer/EntityDrawer'
+import EntityHeaderJs from '@/components/drawer/EntityHeader'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import { useLookups } from '@/context/LookupsContext'
+import { useGenders } from '@/lib/useGenders'
+import { useLastContactTypes } from '@/lib/useLastContactTypes'
+import { useFunctions } from '@/lib/useFunctions'
+import { useAuth } from '@/context/AuthContext'
 import ProfilePanel from './drawer/ProfilePanel'
-import ApplicationStageChips from './drawer/ApplicationStageChips'
+import ApplicationStageChipsJs from './drawer/ApplicationStageChips'
 import BackgroundTab from './drawer/BackgroundTab'
 import WorkTab from './drawer/WorkTab'
 import PlanningPanel from './drawer/PlanningPanel'
@@ -22,8 +24,26 @@ import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'
 import CommunicationTab from './drawer/CommunicationTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import ChangelogTab from './drawer/ChangelogTab'
+import type { Candidate } from '@/types/candidate'
+import type { Id, LookupOption } from '@/types/common'
 
-// ── Candidate Drawer ──────────────────────────────────────────────────────────
+// Still-untyped JS drawer shells — declare the props this drawer passes (typed boundary).
+const EntityDrawer = EntityDrawerJs as ComponentType<{
+  entity: unknown; expanded?: boolean; onToggleExpand?: () => void; footer?: ReactNode
+  tabs?: Array<{ id: string; label: string; autoExpand?: boolean; render: () => ReactNode }>
+  header?: () => ReactNode
+}>
+const EntityHeader = EntityHeaderJs as ComponentType<{
+  label?: string; expanded?: boolean; onToggleExpand?: () => void; onClose?: () => void
+  avatar?: unknown; onPhotoChange?: (url: string | null) => void; photoLabels?: unknown
+  renderTitle?: () => ReactNode; actions?: ReactNode
+  meta?: unknown; metaExtra?: ReactNode; tags?: unknown; tagsLabel?: string; children?: ReactNode
+}>
+const ApplicationStageChips = ApplicationStageChipsJs as ComponentType<{ applications?: unknown[]; label?: string; compact?: boolean }>
+
+interface AppUser { id: Id; name: string; [k: string]: unknown }
+interface HeaderForm { firstname: string; lastname: string; middleName: string; title: string }
+
 const TABS = [
   { id: 'profile',       tKey: 'profile'       },
   { id: 'background',   tKey: 'background'    },
@@ -36,34 +56,45 @@ const TABS = [
   { id: 'changelog',   tKey: 'changelog'     },
 ]
 
-export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, users = [] }) {
-  const { settings: cvSettings } = useCvSettings()
+interface CandidateDrawerProps {
+  candidate: Candidate | null
+  onClose: () => void
+  expanded: boolean
+  onToggleExpand: () => void
+  onUpdate?: (id: Id, patch: Record<string, unknown>) => void
+  users?: AppUser[]
+}
+
+export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, users = [] }: CandidateDrawerProps) {
+  const { settings: cvSettings } = useCvSettings() as { settings?: unknown }
   const { t } = useTranslation('candidates')
-  const locale = useLocale()
-  const { formatDate } = useDateFormat()
-  const { candidateTypes, statuses, funnelMeta } = useLookups()
-  const { colorOf: genderColor } = useGenders()
-  const { labelOf: lastContactLabel } = useLastContactTypes()
-  const { functions, allowFreeEntry } = useFunctions()
-  const { hasModule } = useAuth()
+  const locale = useLocale() as string
+  const { formatDate } = useDateFormat() as { formatDate: (d?: string | null) => string }
+  const { candidateTypes, statuses, funnelMeta } = useLookups() as unknown as {
+    candidateTypes: LookupOption[]; statuses: LookupOption[]; funnelMeta: (v: string) => { label: string; color: string }
+  }
+  const { colorOf: genderColor } = useGenders() as { colorOf: (g?: string) => string | undefined }
+  const { labelOf: lastContactLabel } = useLastContactTypes() as { labelOf: (v?: string | null) => string }
+  const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
+  const { hasModule } = useAuth() as unknown as { hasModule: (m: string) => boolean }
   // Planning-tab alleen tonen als de tenant de Planning-module heeft (zelfde gate als sidebar).
   const tabs = TABS.filter(tab => tab.id !== 'planning' || hasModule('plan'))
   // Cross-cutting state used by the header; tab-specific state lives in each tab.
   const [cvGenerating,  setCvGenerating]  = useState(false)
-  const [recruiter,     setRecruiter]     = useState(null)
-  const [status,        setStatus]        = useState(null)
-  const [types,         setTypes]         = useState(null)
-  const [tags,          setTags]          = useState(null)
+  const [recruiter,     setRecruiter]     = useState<(AppUser & { initials: string }) | null>(null)
+  const [status,        setStatus]        = useState<string | null>(null)
+  const [types,         setTypes]         = useState<string[] | null>(null)
+  const [tags,          setTags]          = useState<string[] | null>(null)
   // Header (name + function) edit — independent from the Profile-tab fields.
   const [headerEditing, setHeaderEditing] = useState(false)
-  const [profileEdits,  setProfileEdits]  = useState(null)
-  const [photoUrl,      setPhotoUrl]      = useState(null)
+  const [profileEdits,  setProfileEdits]  = useState<Record<string, unknown> | null>(null)
+  const [photoUrl,      setPhotoUrl]      = useState<string | null>(null)
   // Header name + function fields (controlled while editing).
-  const [headerForm,    setHeaderForm]    = useState(null)
+  const [headerForm,    setHeaderForm]    = useState<HeaderForm | null>(null)
 
   // Reset the header overrides when a different candidate is shown — done by
   // adjusting state during render (React's recommended pattern) so there's no effect.
-  const [prevId, setPrevId] = useState(c?.id)
+  const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
   if (c?.id !== prevId) {
     setPrevId(c?.id)
     setRecruiter(null); setStatus(null); setTypes(null)
@@ -80,12 +111,12 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const stageChips = hasApplications
     ? c.applications
     : (c.stage ? [{ id: 'stage', stageLabel: funnelMeta(c.stage).label, stageColor: funnelMeta(c.stage).color }] : [])
-  const toggleType = (v) => {
+  const toggleType = (v: string) => {
     const next = currentTypes.includes(v) ? currentTypes.filter(x => x !== v) : [...currentTypes, v]
     setTypes(next)
     onUpdate?.(c.id, { candidateTypes: next })
   }
-  const changeStatus = (v) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
+  const changeStatus = (v: string) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
   const currentTags    = tags ?? c.tags ?? []
   // Funnel = per-application concern (decided model): strictly it shows only with a
   // running application (hasApplications). TEMPORARY until C-10 sends
@@ -102,7 +133,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     })
     setHeaderEditing(true)
   }
-  const setHF = (k, v) => setHeaderForm(f => ({ ...f, [k]: v }))
+  const setHF = (k: keyof HeaderForm, v: string) => setHeaderForm(f => f ? { ...f, [k]: v } : f)
   const saveHeader = () => {
     if (headerForm) {
       const name = [headerForm.firstname, headerForm.middleName, headerForm.lastname].filter(Boolean).join(' ')
@@ -110,31 +141,31 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     }
     setHeaderEditing(false)
   }
-  const hf = (k) => headerForm?.[k] ?? ''
+  const hf = (k: keyof HeaderForm) => headerForm?.[k] ?? ''
 
-  const renderTabContent = (activeTab) => {
+  const renderTabContent = (activeTab: string) => {
     const mergedC = { ...c, ...(profileEdits ?? {}) }
     switch (activeTab) {
-      case 'profile':       return <ProfilePanel c={mergedC} onEditSave={v => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
+      case 'profile':       return <ProfilePanel c={mergedC} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
       case 'background':   return <BackgroundTab c={c} />
       case 'work':          return <WorkTab c={c} />
       case 'planning':      return <PlanningPanel c={c} />
-      case 'preferences':    return <PreferencesTab c={c} onSave={p => onUpdate?.(c.id, { preferences: p })} />
-      case 'administration': return <ZzpTab c={c} onSave={p => onUpdate?.(c.id, { zzp: p })} />
-      case 'communication':  return <CommunicationTab c={c} onSave={p => onUpdate?.(c.id, { consent: p })} />
+      case 'preferences':    return <PreferencesTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { preferences: p })} />
+      case 'administration': return <ZzpTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { zzp: p })} />
+      case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })} />
       case 'statistics':  return <StatisticsTab c={c} />
       case 'changelog':   return <ChangelogTab c={c} />
       default:              return null
     }
   }
 
-  const ownerInitialsOf = (name) => name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() ?? '??'
+  const ownerInitialsOf = (name?: string) => name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() ?? '??'
   const ownerOptions = [
     ...(recruiter ? [] : [{ value: '__current', label: c.owner || '-', initials: c.ownerInitials }]),
     ...users.map(u => ({ value: u.id, label: u.name, initials: ownerInitialsOf(u.name) })),
   ]
   const ownerValue = recruiter?.id ?? '__current'
-  const onOwnerChange = (id) => {
+  const onOwnerChange = (id: string | number) => {
     if (id === '__current') return
     const u = users.find(x => x.id === id)
     if (u) setRecruiter({ ...u, initials: ownerInitialsOf(u.name) })
@@ -166,7 +197,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         onClick={async () => {
           setCvGenerating(true)
           try {
-            const blob = await pdf(<CvDocument c={c} settings={cvSettings} locale={locale} t={t} />).toBlob()
+            const blob = await pdf(<CvDocument c={c as unknown as CvCandidate} settings={cvSettings as never} locale={locale} t={t} />).toBlob()
             const url = URL.createObjectURL(blob)
             const a = document.createElement('a')
             a.href = url; a.download = `CV - ${c?.name ?? 'candidate'}.pdf`
@@ -222,7 +253,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           metaExtra={showFunnel && (
             <ApplicationStageChips applications={stageChips} label={t(hasApplications ? 'drawer.applications' : 'drawer.stage')} compact />
           )}
-          tags={{ items: currentTags, onAdd: tag => setTags([...currentTags, tag]), onRemove: tag => setTags(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
+          tags={{ items: currentTags, onAdd: (tag: string) => setTags([...currentTags, tag]), onRemove: (tag: string) => setTags(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
           tagsLabel={t('drawer.tags')}
         >
           {/* Candidate type — multi-value contract form, rendered as toggle chips */}

@@ -65,6 +65,9 @@ export interface CandidateMatch {
 export interface Candidate {
   id: string | number
   name: string
+  firstname?: string
+  lastname?: string
+  middleName?: string
   initials: string
   title: string
   candidateTypes: string[]
@@ -98,6 +101,7 @@ export interface Candidate {
   placeOfBirth: string
   linkedin: string
   photoUrl: string | null
+  photo?: string
   summary: string
   tags: string[]
   branches: string[]
