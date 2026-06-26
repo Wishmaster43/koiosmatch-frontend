@@ -5,20 +5,33 @@
  */
 import { QRCodeSVG } from 'qrcode.react'
 import { MessageCircle, RefreshCw, Trash2 } from 'lucide-react'
+import type { CSSProperties } from 'react'
 import { STATUS_META } from './statusMeta'
+import type { WhatsAppDevice } from './statusMeta'
+
+// Minimal translate signature — the card only needs key lookups.
+type Translate = (key: string) => string
+
+interface WhatsAppWebDeviceProps {
+  device: WhatsAppDevice
+  busy: boolean
+  onConnect: (id: WhatsAppDevice['id']) => void
+  onDisconnect: (id: WhatsAppDevice['id']) => void
+  onRemove: (id: WhatsAppDevice['id']) => void
+  t: Translate
+}
 
 // Small coloured status dot.
-const dot = (color) => ({ width: 9, height: 9, borderRadius: '50%', background: color, flexShrink: 0 })
+const dot = (color: string): CSSProperties => ({ width: 9, height: 9, borderRadius: '50%', background: color, flexShrink: 0 })
 
 // Shared secondary-button styling (disconnect / remove).
-const ghostBtn = (busy) => ({
+const ghostBtn = (busy: boolean): CSSProperties => ({
   height: 32, padding: '0 14px', fontSize: 13, fontWeight: 500, borderRadius: 8,
   border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)',
   cursor: busy ? 'default' : 'pointer', flexShrink: 0,
 })
 
-// Props: device { id, status, qr?, phone? } · busy · onConnect/onDisconnect/onRemove(id) · t
-export default function WhatsAppWebDevice({ device, busy, onConnect, onDisconnect, onRemove, t }) {
+export default function WhatsAppWebDevice({ device, busy, onConnect, onDisconnect, onRemove, t }: WhatsAppWebDeviceProps) {
   // Resolve the dot colour + label for this status (fallback: disconnected).
   const meta = STATUS_META[device.status] ?? STATUS_META.disconnected
   const showQrBlock = device.status === 'qr_pending' || device.status === 'connecting'

@@ -31,6 +31,9 @@ export interface User {
   firstname?: string
   lastname?: string
   email?: string
+  phone?: string
+  avatar_url?: string
+  default_per_page?: number
   is_super_admin?: boolean
   roles?: Array<string | { name: string; permissions?: Named[] }>
   permissions?: Named[]

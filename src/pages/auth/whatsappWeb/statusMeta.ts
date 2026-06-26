@@ -5,7 +5,19 @@
  *
  * Backend status ∈ disconnected | connecting | qr_pending | connected.
  */
-export const STATUS_META = {
+
+// The device lifecycle status as returned by the backend.
+export type DeviceStatus = 'disconnected' | 'connecting' | 'qr_pending' | 'connected'
+
+// One linked WhatsApp Web device session for the logged-in user.
+export interface WhatsAppDevice {
+  id: string | number
+  status: DeviceStatus
+  qr?: string
+  phone?: string
+}
+
+export const STATUS_META: Record<DeviceStatus, { dot: string; labelKey: string }> = {
   connected:    { dot: 'var(--color-success)', labelKey: 'connected' },
   qr_pending:   { dot: 'var(--color-warning)', labelKey: 'waiting' },
   connecting:   { dot: 'var(--color-warning)', labelKey: 'connecting' },
@@ -13,4 +25,4 @@ export const STATUS_META = {
 }
 
 // Statuses that are still "in progress" — the list must keep polling for these.
-export const TRANSIENT_STATUSES = ['connecting', 'qr_pending']
+export const TRANSIENT_STATUSES: DeviceStatus[] = ['connecting', 'qr_pending']

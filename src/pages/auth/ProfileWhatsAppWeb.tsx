@@ -8,12 +8,13 @@
  * A 404 degrades to a calm "unavailable" notice instead of an error.
  */
 import { useTranslation } from 'react-i18next'
+import type { CSSProperties } from 'react'
 import { Plus, RefreshCw } from 'lucide-react'
 import { useWhatsAppWeb } from './whatsappWeb/useWhatsAppWeb'
 import WhatsAppWebDevice from './whatsappWeb/WhatsAppWebDevice'
 
 // Shared notice box for the loading / unavailable / error / empty states.
-const noticeBox = {
+const noticeBox: CSSProperties = {
   padding: '14px 16px', background: 'var(--input-bg)', border: '1px solid var(--border)',
   borderRadius: 10, fontSize: 13, color: 'var(--text-muted)',
 }

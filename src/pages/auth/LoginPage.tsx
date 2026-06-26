@@ -8,13 +8,17 @@
  *   3. User enters 6-digit code → POST /auth/mfa/verify → logged in.
  */
 import { useState, useRef, useEffect } from 'react'
+import type { FormEvent, ChangeEvent, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 
+// Read a server-provided error message off an axios-style error, if present.
+const messageOf = (e: unknown) => (e as { response?: { data?: { message?: string } } })?.response?.data?.message
+
 // ── Shared layout wrapper ─────────────────────────────────────────────────────
-function LoginShell({ children }) {
+function LoginShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation('auth')
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -70,9 +74,9 @@ function LoginShell({ children }) {
 }
 
 // ── Step 1: email + password ──────────────────────────────────────────────────
-function CredentialForm({ onMfaRequired }) {
+function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => void }) {
   const { t } = useTranslation('auth')
-  const { login }  = useAuth()
+  const { login }  = useAuth() ?? {}
   const navigate   = useNavigate()
   const [email,    setEmail]   = useState('')
   const [password, setPassword] = useState('')
@@ -83,19 +87,19 @@ function CredentialForm({ onMfaRequired }) {
   const [expired] = useState(() => sessionStorage.getItem('km_session_expired') === '1')
   useEffect(() => { if (expired) sessionStorage.removeItem('km_session_expired') }, [expired])
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
     setLoading(true)
     try {
-      const result = await login(email, password)
-      if (result?.mfaRequired) {
-        onMfaRequired(result.mfaToken)
+      const result = await login?.(email, password)
+      if (result && 'mfaRequired' in result && result.mfaRequired) {
+        onMfaRequired(String(result.mfaToken))
       } else {
         navigate('/')
       }
     } catch (err) {
-      setError(err.response?.data?.message || t('login.failed'))
+      setError(messageOf(err) || t('login.failed'))
     } finally {
       setLoading(false)
     }
@@ -160,11 +164,11 @@ function CredentialForm({ onMfaRequired }) {
 }
 
 // ── Step 2: TOTP verification ─────────────────────────────────────────────────
-function MfaForm({ mfaToken, onBack }) {
+function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void }) {
   const { t } = useTranslation('auth')
-  const { verifyMfa } = useAuth()
+  const { verifyMfa } = useAuth() ?? {}
   const navigate = useNavigate()
-  const inputRef = useRef(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const [code,    setCode]    = useState('')
   const [loading, setLoading] = useState(false)
@@ -172,16 +176,16 @@ function MfaForm({ mfaToken, onBack }) {
 
   useEffect(() => { inputRef.current?.focus() }, [])
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (code.replace(/\s/g, '').length < 6) return
     setError('')
     setLoading(true)
     try {
-      await verifyMfa(mfaToken, code.replace(/\s/g, ''))
+      await verifyMfa?.(mfaToken, code.replace(/\s/g, ''))
       navigate('/')
     } catch (err) {
-      setError(err.response?.data?.message || t('mfa.invalid'))
+      setError(messageOf(err) || t('mfa.invalid'))
       setCode('')
       inputRef.current?.focus()
     } finally {
@@ -190,11 +194,12 @@ function MfaForm({ mfaToken, onBack }) {
   }
 
   // Auto-submit when 6 digits are entered
-  const handleChange = (e) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value.replace(/\D/g, '').slice(0, 6)
     setCode(val)
     if (val.length === 6) {
-      setTimeout(() => e.target.form?.requestSubmit(), 50)
+      const form = e.target.form
+      setTimeout(() => form?.requestSubmit(), 50)
     }
   }
 
@@ -256,7 +261,7 @@ function MfaForm({ mfaToken, onBack }) {
 
 // ── Root: orchestrates the two steps ─────────────────────────────────────────
 export default function LoginPage() {
-  const [mfaToken, setMfaToken] = useState(null) // null = step 1, string = step 2
+  const [mfaToken, setMfaToken] = useState<string | null>(null) // null = step 1, string = step 2
 
   return (
     <LoginShell>

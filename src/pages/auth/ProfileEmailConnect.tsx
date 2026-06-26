@@ -15,9 +15,17 @@
  * A 404 degrades to a calm "unavailable" state.
  */
 import { useEffect, useState } from 'react'
+import type { ChangeEvent, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, RefreshCw, Eye, EyeOff } from 'lucide-react'
 import api from '../../lib/api'
+
+type EmailStatus = 'loading' | 'disconnected' | 'connected' | 'unavailable'
+interface EmailInfo { provider: string | null; email: string | null }
+interface SmtpForm {
+  host: string; port: string; user: string; pass: string
+  secure: string; from_name: string; from_email: string
+}
 
 const PROVIDERS = [
   { id: 'office', label: 'Office 365' },
@@ -25,59 +33,67 @@ const PROVIDERS = [
   { id: 'smtp',   label: 'SMTP' },
 ]
 
-const inputStyle = {
+const inputStyle: CSSProperties = {
   height: 36, width: '100%', padding: '0 12px', fontSize: 13, boxSizing: 'border-box',
   background: 'var(--input-bg)', color: 'var(--text)', border: '1px solid var(--border)',
   borderRadius: 8, outline: 'none',
 }
-const labelStyle = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }
+const labelStyle: CSSProperties = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }
+
+// Pull the HTTP status off an axios-style error without leaking the rest.
+const statusOf = (e: unknown) => (e as { response?: { status?: number } })?.response?.status
 
 export default function ProfileEmailConnect() {
   const { t } = useTranslation('auth')
-  const [status,  setStatus]  = useState('loading') // loading|disconnected|connected|unavailable
-  const [info,    setInfo]    = useState({ provider: null, email: null })
+  const [status,  setStatus]  = useState<EmailStatus>('loading')
+  const [info,    setInfo]    = useState<EmailInfo>({ provider: null, email: null })
   const [choice,  setChoice]  = useState('office')
   const [busy,    setBusy]    = useState(false)
   const [showPass, setShowPass] = useState(false)
-  const [smtp, setSmtp] = useState({ host: '', port: '587', user: '', pass: '', secure: 'tls', from_name: '', from_email: '' })
+  const [smtp, setSmtp] = useState<SmtpForm>({ host: '', port: '587', user: '', pass: '', secure: 'tls', from_name: '', from_email: '' })
 
+  // Load the current personal-mailbox state (404 → feature unavailable).
   const load = async () => {
     try {
       const d = (await api.get('/profile/email')).data
       setStatus(d?.status ?? 'disconnected')
       setInfo({ provider: d?.provider ?? null, email: d?.email ?? null })
     } catch (e) {
-      setStatus(e?.response?.status === 404 ? 'unavailable' : 'disconnected')
+      setStatus(statusOf(e) === 404 ? 'unavailable' : 'disconnected')
     }
   }
   useEffect(() => { load() }, [])
 
-  const connectOauth = async (provider) => {
+  // OAuth providers: fetch a consent URL and redirect the browser to it.
+  const connectOauth = async (provider: string) => {
     setBusy(true)
     try {
       const { url } = (await api.post('/profile/email/connect', { provider })).data ?? {}
       if (url) { window.location.href = url; return }
-    } catch (e) { if (e?.response?.status === 404) setStatus('unavailable') }
+    } catch (e) { if (statusOf(e) === 404) setStatus('unavailable') }
     setBusy(false)
   }
 
+  // SMTP: persist the manual credentials and reflect the connected state.
   const saveSmtp = async () => {
     setBusy(true)
     try {
       const d = (await api.post('/profile/email/smtp', smtp)).data
       setStatus(d?.status ?? 'connected')
       setInfo({ provider: 'smtp', email: d?.email ?? (smtp.from_email || smtp.user) })
-    } catch (e) { if (e?.response?.status === 404) setStatus('unavailable') }
+    } catch (e) { if (statusOf(e) === 404) setStatus('unavailable') }
     setBusy(false)
   }
 
+  // Drop the connection and return to the provider chooser.
   const disconnect = async () => {
     setBusy(true)
     try { await api.post('/profile/email/disconnect') } catch { /* noop */ }
     setStatus('disconnected'); setInfo({ provider: null, email: null }); setBusy(false)
   }
 
-  const setF = (k) => (e) => setSmtp(s => ({ ...s, [k]: e.target.value }))
+  // Build a change handler for a single SMTP field.
+  const setF = (k: keyof SmtpForm) => (e: ChangeEvent<HTMLInputElement>) => setSmtp(s => ({ ...s, [k]: e.target.value }))
 
   return (
     <div>
@@ -137,7 +153,7 @@ export default function ProfileEmailConnect() {
                        fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', color: 'white',
                        background: 'var(--color-primary)', cursor: busy ? 'default' : 'pointer' }}>
               {busy ? <RefreshCw size={14} className="animate-spin" /> : <Mail size={14} />}
-              {t('profile.email.connectWith', { provider: PROVIDERS.find(p => p.id === choice).label })}
+              {t('profile.email.connectWith', { provider: PROVIDERS.find(p => p.id === choice)?.label ?? choice })}
             </button>
           )}
 
