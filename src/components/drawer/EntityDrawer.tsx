@@ -12,17 +12,32 @@
  * and restores the previous width when you leave it.
  */
 import { useState, useRef, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import DrawerTabs from './DrawerTabs'
+
+export interface EntityTab { id: string; label: ReactNode; badge?: string | number; autoExpand?: boolean; render: () => ReactNode }
+type HeaderArg = { activeTab?: string; setActiveTab: (id: string) => void }
+
+interface EntityDrawerProps {
+  entity?: { id?: string | number } | null
+  header?: ReactNode | ((arg: HeaderArg) => ReactNode)
+  tabs?: EntityTab[]
+  footer?: ReactNode
+  expanded?: boolean
+  onToggleExpand?: () => void
+  widthCollapsed?: number
+  widthExpanded?: number
+}
 
 export default function EntityDrawer({
   entity, header, tabs = [], footer,
   expanded, onToggleExpand,
   widthCollapsed = 580, widthExpanded = 880,
-}) {
-  const [activeTab, setActiveTab] = useState(tabs[0]?.id)
+}: EntityDrawerProps) {
+  const [activeTab, setActiveTab] = useState<string | undefined>(tabs[0]?.id)
 
   // Reset to the first tab whenever a different entity is shown (adjust during render).
-  const [prevId, setPrevId] = useState(entity?.id)
+  const [prevId, setPrevId] = useState<string | number | undefined>(entity?.id)
   if (entity?.id !== prevId) { setPrevId(entity?.id); setActiveTab(tabs[0]?.id) }
 
   const active = tabs.find(t => t.id === activeTab) ?? tabs[0]

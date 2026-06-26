@@ -1,10 +1,16 @@
 /**
  * DrawerTabs — the tab bar inside an EntityDrawer. Pure presentational; the
  * drawer owns the active state. Reused by every entity drawer.
- *
- * tabs: Array<{ id, label, badge? }>
  */
-export default function DrawerTabs({ tabs = [], active, onChange }) {
+import type { ReactNode } from 'react'
+
+export interface DrawerTabItem { id: string; label: ReactNode; badge?: string | number }
+
+export default function DrawerTabs({ tabs = [], active, onChange }: {
+  tabs?: DrawerTabItem[]
+  active?: string
+  onChange: (id: string) => void
+}) {
   return (
     <div style={{ display: 'flex', overflowX: 'auto', gap: 0, marginBottom: -1 }}>
       {tabs.map(tab => (
