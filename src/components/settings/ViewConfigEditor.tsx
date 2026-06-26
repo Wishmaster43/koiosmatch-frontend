@@ -10,10 +10,14 @@ import { MODULES } from '../../lib/settings/moduleRegistry'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '../../lib/settings/useAllSettings'
 import { viewConfigKey } from '../../lib/settings/useModuleView'
 
+interface Row { id: string; enabled: boolean }
+interface SavedRow { id: string; enabled?: boolean }
+type SettingsBlob = Record<string, unknown>
+
 // Merge saved config with the registry so newly added blocks always appear.
-function buildRows(moduleId, values) {
+function buildRows(moduleId: string, values: SettingsBlob): Row[] {
   const blocks = MODULES[moduleId]?.blocks ?? []
-  const saved = getJsonSetting(values, viewConfigKey(moduleId), null)
+  const saved = getJsonSetting<SavedRow[] | null>(values, viewConfigKey(moduleId), null)
   if (!Array.isArray(saved)) return blocks.map(b => ({ id: b.id, enabled: true }))
   const known = new Set(saved.map(s => s.id))
   const rows = saved
@@ -23,10 +27,10 @@ function buildRows(moduleId, values) {
   return rows
 }
 
-export default function ViewConfigEditor({ module }) {
+export default function ViewConfigEditor({ module }: { module: string }) {
   const values = useAllSettings()
   const mod = MODULES[module]
-  const [rows, setRows] = useState(() => buildRows(module, values))
+  const [rows, setRows] = useState<Row[]>(() => buildRows(module, values))
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
 
@@ -42,8 +46,8 @@ export default function ViewConfigEditor({ module }) {
   if (!mod) return null
   const blockById = Object.fromEntries(mod.blocks.map(b => [b.id, b]))
 
-  const toggle = (id) => setRows(rs => rs.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r))
-  const move = (i, dir) => setRows(rs => {
+  const toggle = (id: string) => setRows(rs => rs.map(r => r.id === id ? { ...r, enabled: !r.enabled } : r))
+  const move = (i: number, dir: number) => setRows(rs => {
     const j = i + dir
     if (j < 0 || j >= rs.length) return rs
     const next = [...rs];[next[i], next[j]] = [next[j], next[i]]; return next

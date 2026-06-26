@@ -7,10 +7,15 @@
  *
  * Adding/removing/reordering a block is done in Settings → Views, never here.
  */
+import type { ReactNode } from 'react'
 import KpiBlock from '../ui/KpiBlock'
 import { useModuleView } from '../../lib/settings/useModuleView'
 
-export default function ModuleView({ module, data = {}, loading = false }) {
+interface BlockData { value?: ReactNode; sub?: ReactNode; onClick?: () => void }
+
+export default function ModuleView({ module, data = {}, loading = false }: {
+  module: string; data?: Record<string, BlockData>; loading?: boolean
+}) {
   const blocks = useModuleView(module)
   const kpis = blocks.filter(b => b.type === 'kpi')
   if (kpis.length === 0) return null
@@ -18,7 +23,7 @@ export default function ModuleView({ module, data = {}, loading = false }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: `repeat(${kpis.length}, 1fr)`, gap: 12 }}>
       {kpis.map(b => {
-        const d = data[b.id] ?? {}
+        const d: BlockData = data[b.id] ?? {}
         return (
           <KpiBlock
             key={b.id}
