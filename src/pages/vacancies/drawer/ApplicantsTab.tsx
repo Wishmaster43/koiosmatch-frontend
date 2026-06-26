@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import Avatar from '../../../components/ui/Avatar'
 import { useVacancyLookups } from '../../../context/VacancyLookupsContext'
+import type { VacancyDetail } from '../../../types/vacancy'
 
 // Soft phase chip in the funnel-phase colour (shared soft-chip convention).
-function PhaseChip({ label, color }) {
+function PhaseChip({ label, color }: { label: ReactNode; color?: string | null }) {
   const c = color ?? '#9CA3AF'
   return (
     <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99,
@@ -17,11 +19,11 @@ function PhaseChip({ label, color }) {
  * continuation of an application; editing the phase lives on the application, not
  * here (decided model — see CLAUDE.md §3B).
  */
-export default function ApplicantsTab({ vacancy: v }) {
+export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   const { phases, phaseMeta } = useVacancyLookups()
 
-  const byPhase = v.applicationsByPhase ?? {}
+  const byPhase = (v.applicationsByPhase ?? {}) as Record<string, number>
   const applications = v.applications ?? []
 
   return (
@@ -55,7 +57,7 @@ export default function ApplicantsTab({ vacancy: v }) {
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {applications.map(a => {
-            const m = a.phaseLabel ? { label: a.phaseLabel, color: a.phaseColor } : phaseMeta(a.phaseValue)
+            const m = a.phaseLabel ? { label: a.phaseLabel, color: a.phaseColor } : phaseMeta(a.phaseValue != null ? String(a.phaseValue) : null)
             return (
               <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
                 border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}>

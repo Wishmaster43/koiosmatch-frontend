@@ -1,10 +1,18 @@
 import { useState } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import SelectMenu from '../../../components/ui/SelectMenu'
+import SelectMenuJs from '../../../components/ui/SelectMenu'
 import { useVacancyLookups } from '../../../context/VacancyLookupsContext'
+import type { VacancyDetail } from '../../../types/vacancy'
+import type { Id } from '../../../types/common'
+
+type AnyProps = Record<string, unknown>
+const SelectMenu = SelectMenuJs as unknown as ComponentType<AnyProps>
+
+interface ChannelState { value: string; label: string; published: boolean }
 
 // Small accessible on/off toggle (no shared Switch component in the library yet).
-function Toggle({ on, onChange, label }) {
+function Toggle({ on, onChange, label }: { on: boolean; onChange: (next: boolean) => void; label?: string }) {
   return (
     <button role="switch" aria-checked={on} aria-label={label} onClick={() => onChange(!on)}
       style={{ width: 38, height: 22, borderRadius: 99, border: 'none', cursor: 'pointer', flexShrink: 0,
@@ -23,25 +31,25 @@ const APP_FIELDS = ['cv', 'cover_letter', 'photo', 'remarks', 'interview_consent
  * flow back through onUpdate so the table/record stay in sync. Channel list +
  * defaults come from the tenant lookups (never hardcoded).
  */
-export default function PublishingTab({ vacancy: v, onUpdate }) {
+export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void }) {
   const { t } = useTranslation('vacancies')
   const { channels: channelLookup } = useVacancyLookups()
 
   // Merge the configured channels with this vacancy's published state.
-  const publishedMap = Object.fromEntries((v.channels ?? []).map(c => [c.value, c.published]))
-  const [channels, setChannels] = useState(
+  const publishedMap: Record<string, unknown> = Object.fromEntries((v.channels ?? []).map(c => [c.value, c.published]))
+  const [channels, setChannels] = useState<ChannelState[]>(
     channelLookup.map(c => ({ value: c.value, label: c.label, published: Boolean(publishedMap[c.value]) }))
   )
-  const [settings, setSettings] = useState(v.applicationSettings ?? {})
+  const [settings, setSettings] = useState<Record<string, unknown>>((v.applicationSettings ?? {}) as Record<string, unknown>)
 
   // Toggle a channel's published state and persist the full channel set.
-  const toggleChannel = (value, next) => {
+  const toggleChannel = (value: string, next: boolean) => {
     const updated = channels.map(c => c.value === value ? { ...c, published: next } : c)
     setChannels(updated)
     onUpdate?.(v.id, { channels: updated })
   }
   // Set an application-field requirement (required|optional|hidden) and persist.
-  const setField = (field, value) => {
+  const setField = (field: string, value: unknown) => {
     const updated = { ...settings, [field]: value }
     setSettings(updated)
     onUpdate?.(v.id, { applicationSettings: updated })
@@ -62,7 +70,7 @@ export default function PublishingTab({ vacancy: v, onUpdate }) {
           <div key={field} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
             <span style={{ fontSize: 12, color: 'var(--text)' }}>{t(`publishing.fields.${field}`)}</span>
             <div style={{ width: 150 }}>
-              <SelectMenu value={settings[field] ?? 'optional'} options={valueOptions} onChange={v2 => setField(field, v2)} menuWidth={150} />
+              <SelectMenu value={settings[field] ?? 'optional'} options={valueOptions} onChange={(v2: unknown) => setField(field, v2)} menuWidth={150} />
             </div>
           </div>
         ))}
@@ -95,7 +103,7 @@ export default function PublishingTab({ vacancy: v, onUpdate }) {
             <div key={f.id ?? i} style={{ display: 'flex', gap: 16, padding: '9px 12px',
               borderBottom: i < v.customFields.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{f.name}</span>
-              <span style={{ fontSize: 12, color: 'var(--text)' }}>{f.value || '-'}</span>
+              <span style={{ fontSize: 12, color: 'var(--text)' }}>{(f.value as ReactNode) || '-'}</span>
             </div>
           ))}
         </div>

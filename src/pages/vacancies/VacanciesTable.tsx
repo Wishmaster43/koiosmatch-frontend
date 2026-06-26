@@ -2,16 +2,19 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 import DataTable from '../../components/ui/DataTable'
+import type { Column } from '../../components/ui/DataTable'
 import Avatar from '../../components/ui/Avatar'
 import StatusPill from '../../components/ui/StatusPill'
 import { useDateFormat } from '../../lib/datetime'
 import { useVacancyLookups } from '../../context/VacancyLookupsContext'
+import type { Vacancy } from '../../types/vacancy'
+import type { Id } from '../../types/common'
 
 const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
 
 // Soft horizontal count bar (Leads / Applications) — fill is relative to the
 // column max so a busy vacancy reads at a glance. Number stays legible on top.
-function CountBar({ value = 0, max = 1, color = 'var(--color-primary)' }) {
+function CountBar({ value = 0, max = 1, color = 'var(--color-primary)' }: { value?: number; max?: number; color?: string }) {
   const pct = max > 0 ? Math.min(100, Math.round((value / max) * 100)) : 0
   return (
     <div style={{ position: 'relative', minWidth: 84, height: 22, borderRadius: 6,
@@ -24,12 +27,24 @@ function CountBar({ value = 0, max = 1, color = 'var(--color-primary)' }) {
   )
 }
 
+interface VacanciesTableProps {
+  rows: Vacancy[]
+  loading?: boolean
+  selectedId?: Id | null
+  onSelect?: (row: Vacancy) => void
+  selectable?: boolean
+  selectedIds?: Set<Id>
+  onToggleRow?: (id: Id) => void
+  onToggleAll?: (ids: Id[], allSelected: boolean) => void
+  stickyHeader?: boolean
+}
+
 /**
  * VacanciesTable — vacancy list as a loose component. Only declares the columns;
  * sorting, selection and the loading/empty states live in the shared DataTable.
  * Mirrors CandidatesTable / ApplicationsTable.
  */
-export default function VacanciesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false }) {
+export default function VacanciesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false }: VacanciesTableProps) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()
   const { statusMeta } = useVacancyLookups()
@@ -38,7 +53,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
   const maxLeads = useMemo(() => Math.max(1, ...rows.map(r => r.leadsCount || 0)), [rows])
   const maxApps  = useMemo(() => Math.max(1, ...rows.map(r => r.applicationsCount || 0)), [rows])
 
-  const columns = [
+  const columns: Column<Vacancy>[] = [
     {
       key: 'title', header: t('columns.title'), sortable: true, sortValue: r => r.title,
       render: r => <span style={{ fontWeight: 500, color: 'var(--text)' }}>{r.title}</span>,
@@ -49,10 +64,10 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
       render: r => r.code || '—',
     },
     {
-      key: 'status', header: t('columns.status'), sortable: true, sortValue: r => r.statusLabel || r.statusValue,
+      key: 'status', header: t('columns.status'), sortable: true, sortValue: r => r.statusLabel || (r.statusValue ?? ''),
       render: r => {
         // Prefer the resolved label/colour from the row; fall back to the lookup.
-        const m = r.statusLabel ? { label: r.statusLabel, color: r.statusColor } : statusMeta(r.statusValue)
+        const m = r.statusLabel ? { label: r.statusLabel, color: r.statusColor } : statusMeta(r.statusValue != null ? String(r.statusValue) : null)
         return m.label ? <StatusPill label={m.label} color={m.color} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>
       },
     },
@@ -74,7 +89,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
         : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{t('publishedState.no')}</span>,
     },
     {
-      key: 'owner', header: t('columns.owner'), sortable: true, sortValue: r => r.owner?.name,
+      key: 'owner', header: t('columns.owner'), sortable: true, sortValue: r => r.owner?.name ?? '',
       render: r => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {r.owner?.name && <Avatar initials={r.owner.initials} size={22} color={r.owner.color} />}
