@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import api from '../lib/api'
 import { COOKIE_AUTH } from '../lib/authMode'
 
@@ -13,12 +14,32 @@ import { COOKIE_AUTH } from '../lib/authMode'
  * NOTE: this is UI gating only. The backend must reject calls to disabled apps;
  * a user can edit the cached list in localStorage.
  */
-const AppsContext = createContext(null)
+
+// One integration connector shown in the Apps settings.
+export interface AppDef {
+  id: string
+  label: string
+  description: string
+  icon: string
+  color: string
+  bg: string
+  border: string
+  monthly: boolean
+}
+
+interface AppsValue {
+  enabled: string[]
+  setApps: (newEnabled: string[]) => void
+  isAppEnabled: (appId: string) => boolean
+  loading: boolean
+}
+
+const AppsContext = createContext<AppsValue | null>(null)
 
 // Integration connectors (external planning APIs). WhatsApp and AI Agent are
 // NOT here — they are modules managed via the Modules settings tab (accessible_pages).
 // These apps are only available to tenants on package 3 ("Alles").
-export const AVAILABLE_APPS = [
+export const AVAILABLE_APPS: AppDef[] = [
   {
     id:          'shiftmanager',
     label:       'ShiftManager API',
@@ -71,11 +92,11 @@ export const AVAILABLE_APPS = [
   },
 ]
 
-export function AppsProvider({ children }) {
+export function AppsProvider({ children }: { children: ReactNode }) {
   // List of enabled app IDs. Seeded synchronously from the localStorage cache so
   // the UI doesn't flicker on load, then refreshed from the server below.
-  const [enabled, setEnabled] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('enabled_apps') ?? '[]') } catch { return [] }
+  const [enabled, setEnabled] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('enabled_apps') ?? '[]') as string[] } catch { return [] }
   })
   const [loading, setLoading] = useState(true)
 
@@ -98,20 +119,19 @@ export function AppsProvider({ children }) {
   }, [])
 
   // True if the given app ID is currently enabled (used to gate UI/modules).
-  const isAppEnabled = (appId) => enabled.includes(appId)
+  const isAppEnabled = (appId: string) => enabled.includes(appId)
 
   // Replace the enabled list (called by Settings after a successful PUT) and cache it.
-  const setApps = (newEnabled) => {
+  const setApps = (newEnabled: string[]) => {
     setEnabled(newEnabled)
     localStorage.setItem('enabled_apps', JSON.stringify(newEnabled))
   }
 
-  return (
-    <AppsContext.Provider value={{ enabled, setApps, isAppEnabled, loading }}>
-      {children}
-    </AppsContext.Provider>
-  )
+  const value: AppsValue = { enabled, setApps, isAppEnabled, loading }
+  return <AppsContext.Provider value={value}>{children}</AppsContext.Provider>
 }
 
 // Convenience hook for components: useApps() instead of useContext(AppsContext).
-export const useApps = () => useContext(AppsContext)
+export function useApps(): AppsValue | null {
+  return useContext(AppsContext)
+}

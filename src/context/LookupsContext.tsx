@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import api from '../lib/api'
 import { COOKIE_AUTH } from '../lib/authMode'
 
@@ -24,11 +25,29 @@ import { COOKIE_AUTH } from '../lib/authMode'
  *   Item = { value, label, color?, order?, active? }
  */
 
+// One configurable lookup row (statuses also carry is_applicant). The index
+// signature keeps it structurally compatible with the shared LookupOption.
+export interface LookupItem { value: string; label: string; color: string; is_applicant?: boolean; [k: string]: unknown }
+
+interface LookupsValue {
+  candidateTypes: LookupItem[]
+  funnelTypes: LookupItem[]
+  statuses: LookupItem[]
+  availability: LookupItem[]
+  loading: boolean
+  typeMeta: (v?: string | null) => LookupItem
+  funnelMeta: (v?: string | null) => LookupItem
+  statusMeta: (v?: string | null) => LookupItem
+  availabilityMeta: (v?: string | null) => LookupItem
+  isApplicantStatus: (v?: string | null) => boolean
+  hasApplicantStatus: boolean
+}
+
 // ── Seed defaults ───────────────────────────────────────────────────────────
 
-// Slugs zijn Engels/stabiel (matchen de backend); labels/kleuren zijn per tenant
-// instelbaar en komen normaal uit GET /settings/candidate-lookups.
-export const DEFAULT_CANDIDATE_TYPES = [
+// Slugs are English/stable (they match the backend); labels/colours are
+// per-tenant configurable and normally come from GET /settings/candidate-lookups.
+export const DEFAULT_CANDIDATE_TYPES: LookupItem[] = [
   { value: 'on_call',     label: 'Oproepkracht',  color: '#6E8FD6' },
   { value: 'freelance',   label: 'ZZP',           color: '#5FB0AC' },
   { value: 'payroll',     label: 'Payroll',       color: '#A98AD1' },
@@ -39,7 +58,7 @@ export const DEFAULT_CANDIDATE_TYPES = [
 
 // Application pipeline (per application). `invited` is the intake stage that
 // carries `requires_appointment` once configured (see §3B / C-22).
-export const DEFAULT_FUNNEL_TYPES = [
+export const DEFAULT_FUNNEL_TYPES: LookupItem[] = [
   { value: 'applied',  label: 'Gesolliciteerd',     color: '#94A3B8' },
   { value: 'invited',  label: 'Uitgenodigd/Intake', color: '#8C86D9' },
   { value: 'proposal', label: 'Voorgesteld',        color: '#6FA8C4' },
@@ -51,7 +70,7 @@ export const DEFAULT_FUNNEL_TYPES = [
 // by the hired → match automation. Blacklist is a SEPARATE flag (not here); Archived
 // = soft-delete (deleted_at). `unplaceable` carries an "available again" date that
 // drives a re-activation workflow. Sick/Leave live on the availability axis.
-export const DEFAULT_STATUSES = [
+export const DEFAULT_STATUSES: LookupItem[] = [
   { value: 'lead',        label: 'Lead',              color: '#94A3B8' },
   { value: 'candidate',   label: 'Kandidaat',         color: '#79B58E' },
   { value: 'matched',     label: 'Gematched',         color: '#6E8FD6' },
@@ -60,9 +79,8 @@ export const DEFAULT_STATUSES = [
 ]
 
 // Availability is a SEPARATE axis from the lifecycle status (a candidate can be
-// "Sollicitant" and "Ziek" at once). Backed by /availability-options. Not exported
-// (no external consumer) so it doesn't add a react-refresh warning.
-const DEFAULT_AVAILABILITY = [
+// "Sollicitant" and "Ziek" at once). Backed by /availability-options.
+const DEFAULT_AVAILABILITY: LookupItem[] = [
   { value: 'available',   label: 'Beschikbaar',      color: '#79B58E' },
   { value: 'unavailable', label: 'Niet beschikbaar', color: '#8A94A6' },
   { value: 'sick',        label: 'Ziek',             color: '#D98A8A' },
@@ -70,23 +88,23 @@ const DEFAULT_AVAILABILITY = [
 ]
 
 // Normalise a raw API list: keep active items, sort by order, fall back to seed.
-// `is_applicant` is carried through (statuses only — the backend leaves it false
-// elsewhere) so the funnel-revealing status is detectable without label matching.
-function normalize(raw, fallback) {
+// `is_applicant` is carried through (statuses only) so the funnel-revealing status
+// is detectable without label matching.
+function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
   if (!Array.isArray(raw) || raw.length === 0) return fallback
-  return raw
+  return (raw as Record<string, unknown>[])
     .filter(it => it.active !== false)
-    .sort((a, b) => (a.order ?? a.sort_order ?? 0) - (b.order ?? b.sort_order ?? 0))
-    .map(it => ({ value: it.value, label: it.label ?? it.value, color: it.color ?? '#6B7280', is_applicant: it.is_applicant === true }))
+    .sort((a, b) => (Number(a.order ?? a.sort_order ?? 0)) - (Number(b.order ?? b.sort_order ?? 0)))
+    .map(it => ({ value: String(it.value), label: String(it.label ?? it.value), color: (it.color as string) ?? '#6B7280', is_applicant: it.is_applicant === true }))
 }
 
-const LookupsContext = createContext(null)
+const LookupsContext = createContext<LookupsValue | null>(null)
 
-export function LookupsProvider({ children }) {
-  const [candidateTypes, setCandidateTypes] = useState(DEFAULT_CANDIDATE_TYPES)
-  const [funnelTypes,    setFunnelTypes]    = useState(DEFAULT_FUNNEL_TYPES)
-  const [statuses,       setStatuses]       = useState(DEFAULT_STATUSES)
-  const [availability,   setAvailability]   = useState(DEFAULT_AVAILABILITY)
+export function LookupsProvider({ children }: { children: ReactNode }) {
+  const [candidateTypes, setCandidateTypes] = useState<LookupItem[]>(DEFAULT_CANDIDATE_TYPES)
+  const [funnelTypes,    setFunnelTypes]    = useState<LookupItem[]>(DEFAULT_FUNNEL_TYPES)
+  const [statuses,       setStatuses]       = useState<LookupItem[]>(DEFAULT_STATUSES)
+  const [availability,   setAvailability]   = useState<LookupItem[]>(DEFAULT_AVAILABILITY)
   const [loading,        setLoading]        = useState(true)
 
   useEffect(() => {
@@ -108,30 +126,26 @@ export function LookupsProvider({ children }) {
   }, [])
 
   // value → item helpers (with a neutral fallback so the UI never crashes).
-  const find = (list, value) => list.find(i => i.value === value)
-  const typeMeta   = (v) => find(candidateTypes, v) ?? { value: v, label: v, color: '#6B7280' }
-  const funnelMeta = (v) => find(funnelTypes, v)    ?? { value: v, label: v, color: '#6B7280' }
-  const statusMeta = (v) => find(statuses, v)       ?? { value: v, label: v, color: '#9CA3AF', is_applicant: false }
-  const availabilityMeta = (v) => find(availability, v) ?? { value: v, label: v, color: '#9CA3AF' }
+  const find = (list: LookupItem[], value?: string | null) => list.find(i => i.value === value)
+  const typeMeta   = (v?: string | null): LookupItem => find(candidateTypes, v) ?? { value: v ?? '', label: v ?? '', color: '#6B7280' }
+  const funnelMeta = (v?: string | null): LookupItem => find(funnelTypes, v)    ?? { value: v ?? '', label: v ?? '', color: '#6B7280' }
+  const statusMeta = (v?: string | null): LookupItem => find(statuses, v)       ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF', is_applicant: false }
+  const availabilityMeta = (v?: string | null): LookupItem => find(availability, v) ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
 
   // Funnel-reveal helpers: a status flagged `is_applicant` exposes the funnel.
-  // `hasApplicantStatus` lets callers keep the funnel visible until a tenant has
-  // configured one (additive migration — no status is flagged by default).
-  const isApplicantStatus  = (v) => find(statuses, v)?.is_applicant === true
+  const isApplicantStatus  = (v?: string | null) => find(statuses, v)?.is_applicant === true
   const hasApplicantStatus = statuses.some(s => s.is_applicant === true)
 
-  return (
-    <LookupsContext.Provider value={{
-      candidateTypes, funnelTypes, statuses, availability, loading,
-      typeMeta, funnelMeta, statusMeta, availabilityMeta,
-      isApplicantStatus, hasApplicantStatus,
-    }}>
-      {children}
-    </LookupsContext.Provider>
-  )
+  const value: LookupsValue = {
+    candidateTypes, funnelTypes, statuses, availability, loading,
+    typeMeta, funnelMeta, statusMeta, availabilityMeta,
+    isApplicantStatus, hasApplicantStatus,
+  }
+
+  return <LookupsContext.Provider value={value}>{children}</LookupsContext.Provider>
 }
 
-export function useLookups() {
+export function useLookups(): LookupsValue {
   const ctx = useContext(LookupsContext)
   if (!ctx) throw new Error('useLookups must be used within a LookupsProvider')
   return ctx
