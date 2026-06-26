@@ -104,16 +104,12 @@ api.interceptors.response.use(
 
     // A 403 on /tenants is expected for non-super-admins — don't log it as an error.
     const benignTenants403 = status === 403 && url.includes('/tenants')
-    // Dev-only log of request context. Never log the response body: it can carry
-    // special-category data (names, contact, health) — strip PII from logs (§8).
+    // Dev-only log of request CONTEXT only (status + method + url). NEVER log the
+    // response body — a 4xx/5xx body can carry special-category data OR sensitive
+    // backend detail (stack traces, paths). Inspect the body on demand in the
+    // Network → Response tab instead (§8 / no secrets or PII in logs).
     if (import.meta.env.DEV && !benignTenants403) {
       console.error('API Error:', status, method.toUpperCase(), url)
-      // For server errors (5xx) in dev, also surface the backend exception message
-      // (a Laravel error string, not user data) so the cause is visible without
-      // opening the Network tab. Dev-only + 5xx-only to respect §8.
-      if (status && status >= 500 && error.response?.data?.message) {
-        console.error('  ↳ server:', error.response.data.message)
-      }
     }
 
     const isAuthCall = url.includes('/auth/login') || url.includes('/auth/me')
