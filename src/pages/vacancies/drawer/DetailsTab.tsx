@@ -1,8 +1,13 @@
+import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import DetailTable from '../../../components/ui/DetailTable'
+import DetailTableJs from '../../../components/ui/DetailTable'
+import type { VacancyDetail } from '../../../types/vacancy'
+
+type AnyProps = Record<string, unknown>
+const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>
 
 // Titled card wrapper — one per related field group (General / Requirements / …).
-function Card({ title, children }) {
+function Card({ title, children }: { title: ReactNode; children: ReactNode }) {
   return (
     <div style={{ marginBottom: 16 }}>
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{title}</div>
@@ -16,7 +21,7 @@ function Card({ title, children }) {
  * required-skills list and the description. Mirrors the candidate Profile layout
  * (label-above, grouped cards). In-place edit follows in a later round (B-19).
  */
-export default function DetailsTab({ vacancy: v }) {
+export default function DetailsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
 
   const general = [
@@ -49,12 +54,15 @@ export default function DetailsTab({ vacancy: v }) {
           <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('details.noSkills')}</div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {v.skills.map((s, i) => (
-              <div key={i} style={{ fontSize: 12, color: 'var(--text)', padding: '6px 10px',
-                border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)' }}>
-                {typeof s === 'string' ? s : (s.name ?? s.label ?? '')}
-              </div>
-            ))}
+            {v.skills.map((s, i) => {
+              const so = s as { name?: string; label?: string }
+              return (
+                <div key={i} style={{ fontSize: 12, color: 'var(--text)', padding: '6px 10px',
+                  border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)' }}>
+                  {typeof s === 'string' ? s : (so.name ?? so.label ?? '')}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

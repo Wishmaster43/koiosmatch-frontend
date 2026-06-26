@@ -1,7 +1,13 @@
 import { useState } from 'react'
+import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check } from 'lucide-react'
-import Slider from '../../../components/ui/Slider'
+import SliderJs from '../../../components/ui/Slider'
+import type { VacancyDetail } from '../../../types/vacancy'
+import type { Id } from '../../../types/common'
+
+type AnyProps = Record<string, unknown>
+const Slider = SliderJs as unknown as ComponentType<AnyProps>
 
 // The six scoring dimensions (= the backend match_weights keys), each int 1..5.
 const DIMENSIONS = ['qualifications', 'technical_fit', 'soft_skills', 'cultural_alignment', 'career_aspirations', 'location']
@@ -11,16 +17,16 @@ const DIMENSIONS = ['qualifications', 'technical_fit', 'soft_skills', 'cultural_
  * saying how important it is for THIS vacancy. The AI weighs candidates with these
  * (feeds match_criteria[].weight). Saves to PATCH /vacancies/{id} { match_weights }.
  */
-export default function MatchingTab({ vacancy: v, onUpdate }) {
+export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void }) {
   const { t } = useTranslation('vacancies')
   // Local weights, defaulting any missing dimension to 3 (balanced).
-  const [weights, setWeights] = useState(() => {
-    const w = v.matchWeights ?? {}
+  const [weights, setWeights] = useState<Record<string, number>>(() => {
+    const w = (v.matchWeights ?? {}) as Record<string, unknown>
     return Object.fromEntries(DIMENSIONS.map(d => [d, Number(w[d]) || 3]))
   })
   const [saved, setSaved] = useState(false)
 
-  const setW = (d, val) => setWeights(p => ({ ...p, [d]: val }))
+  const setW = (d: string, val: number) => setWeights(p => ({ ...p, [d]: val }))
   const save = () => { onUpdate?.(v.id, { matchWeights: weights }); setSaved(true); setTimeout(() => setSaved(false), 1500) }
 
   return (
@@ -42,7 +48,7 @@ export default function MatchingTab({ vacancy: v, onUpdate }) {
         <div key={d}>
           <div style={{ fontSize: 13, color: 'var(--text)', marginBottom: 6 }}>{t(`matching.dim.${d}`)}</div>
           {/* Slider is 0-based (0..4); stored weight is 1..5. */}
-          <Slider value={(weights[d] ?? 3) - 1} max={4} step={1} onChange={i => setW(d, i + 1)}
+          <Slider value={(weights[d] ?? 3) - 1} max={4} step={1} onChange={(i: number) => setW(d, i + 1)}
             labels={[t('matching.less'), t('matching.balanced'), t('matching.very')]} ariaLabel={t(`matching.dim.${d}`)} />
         </div>
       ))}
