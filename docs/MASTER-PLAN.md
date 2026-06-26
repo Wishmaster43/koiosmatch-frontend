@@ -114,9 +114,10 @@ backend, nooit direct)** · Load balancer (geen sticky-state) · Danny's dashboa
   + `buildMockDetail` + MOCK_REJECTION_REASONS in `data/mocks.js`, ApplicationsPage/AddApplicationModal/
   RejectionBlock) · `useVacanciesData` (USE_MOCKS in catch). Customers-native = al clean. *Done = 0×
   USE_MOCKS/DUMMY_*/MOCK_* op die pagina's; lege/foutieve call → lege staat; mocks-files verwijderd.*
-- ⚠️🔒 **Radius-filter wiren** (geo-contract klaar): voeg de radius-filter terug op CandidatesPage (stond
-  "hidden until geocoding") + toon `distance_km` als kolom. **Beslissing D2: anker** (vacature-picker /
-  plaats-invoer / recruiter-locatie). *Done = server-side `?...&radius=` filter werkt + distance zichtbaar.*
+- 🔒 **Radius-filter wiren** (D2 besloten — geo-contract klaar): radius-filter op CandidatesPage met
+  **anker-keuze: vestiging/plaats (`?lat=&lng=`) óf vacature (`?near_vacancy=`)** + radius-slider (35 km
+  default) + `distance_km`-kolom (sorteerbaar). Picker-ankers hebben server-coords → **geen geocoding**;
+  vrije-tekst-plaats = later (geocode-endpoint). *Done = server-side `?...&radius=` werkt + distance zichtbaar.*
 - ☐ **Mock-restant elders:** WorkflowsPage `MOCK_WORKFLOWS` · WorkflowCanvasEditor `MOCK_LOGS` →
   `/workflows` · `/workflow-runs`. *Done = die fallbacks weg (workflow-editor = afstemmen, §P3).*
 
@@ -178,7 +179,7 @@ backend, nooit direct)** · Load balancer (geen sticky-state) · Danny's dashboa
 | # | Vraag | Opties | Aanrader |
 |---|---|---|---|
 | **D1** | Auth-model | ~~(a) Bearer + harden · (b) httpOnly-cookie-SPA~~ | ✅ **BESLOTEN (b) httpOnly-cookie (Sanctum SPA)** 2026-06-26 → N-2 + BE-8 |
-| **D2** | Radius-anker | (a) vacature-picker `?near_vacancy=` · (b) plaats/adres `?lat=&lng=` · (c) recruiter-locatie | **(a)** voor matching op een concrete vacature; (b) als generieke "rond een plaats" |
+| **D2** | Radius-anker | ~~(a)/(b)/(c)~~ | ✅ **BESLOTEN: beide ankers, elk op zijn eigen scherm** — kandidatenlijst meet vanaf **vestiging/plaats** (`?lat=&lng=`), vacature/match-scherm vanaf **vacature** (`?near_vacancy=`). Picker-ankers = server-coords (geen geocoding) |
 | **D3** | E-mail-UI-plek in Settings | eigen sub-tab "E-mail (per context)" vs onder bestaande sectie | eigen sub-tab |
 | **D4** | TypeScript-migratie | nu starten (shared laag) vs later | **nu** beginnen bij `lib/`+`components/ui/` — grootste hefboom |
 | **D5** | Native planning-module | nu bouwen vs backlog houden (read-only SM nu) | **backlog** (jouw besluit); heropenen na klantportaal+kandidaat-app |
