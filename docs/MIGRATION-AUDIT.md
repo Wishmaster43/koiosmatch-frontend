@@ -18,8 +18,12 @@
 | 0 | Fundament: `tsconfig` (baseUrl weg) · `typecheck`-script · dit logboek · types-strategie | ✅ klaar | 62b2806 |
 | 1a | Dedup `initialsOf` (17 kopieën → `src/lib/initials.ts`) | ✅ klaar | a8e7f1b |
 | 1b | **Alle 6 data-mappers → `.ts` + entiteit-types** (candidate · application · vacancy · customer · opportunity · task) | ✅ klaar | 58af15a/f4a1c9c/… |
-| 2 | `components/ui/` (gedeelde blueprint-props) | ☐ | — |
-| 3+ | Per feature-map: candidates → applications → vacancies → customers → … | ☐ | — |
+| 3c | **Candidate-feature volledig TS** — page · table · bulkbar · modal · cv-template · drawer + **alle 30+ drawer-tabs/secties** (profile · communication · languages · pools · documents · sections · work · preferences/zzp · changelog · statistics · background · matches · **planning** sub-tabs + `planningTypes.ts`) | ✅ klaar | 18daab9 |
+| L | **`lib/` 100% TS** — datetime · queryClient · chartHelpers · queries · usePageSize · colorPresets · mocks · **lookup-hooks** (functions/genders/languages/industries/last-contact/customer/opportunity) + dedup → `lookupUtils.ts` · access · useCv/KpiSettings · `settings/` (moduleRegistry/useAllSettings/useModuleView) | ✅ klaar | 004d272 |
+| C | **`context/` 100% TS** — Auth · RightPanel · Theme · Lookups · TaskLookups · VacancyLookups · Apps (typed providers + value-interfaces; NL-comments → EN) | ✅ klaar | 3cbc008 |
+| 2 | **Gedeelde blueprint-bouwstenen** — `drawer/` (DrawerTabs · EntityDrawer · EntityHeader) · `forms/` (AddableSection · AddForm · fields · EditableFieldTable) → TS (resterend: tabs/NotesTab · tabs/StatsTab · insights/InsightsRow · ui/RichTextEditor) | 🔄 bezig | f18bbc1 |
+| 3+ | Resterende feature-maps: settings/sections (37) · shiftmanager (36) · reports (18) · customers/applications/vacancies/opportunities/tasks-drawers · auth · charts · layout | ☐ | — |
+| M | `src/modules/` workflow-registry (55) — per-entity `makeEntityModule`-config | ☐ | — |
 
 **Types-strategie:** infra-types in [`src/types/api.ts`](../src/types/api.ts) (User/Tenant/ListResult/…).
 Entiteit-types (Candidate, Application, Vacancy, …) komen **per feature-golf** in `src/types/<entity>.ts`,
@@ -39,6 +43,14 @@ getypt tegen de échte API-response, importeerbaar door andere features. Nieuw b
   0×`t()` → hele Settings-nav is Engels island → alle labels via `t()` × 5 locales (worklist **FE-P3-3**).
 
 ### 🟡 MEDIUM
+- [MEDIUM] [FE] **AppsContext app-descriptions hardcoded NL** — `src/context/AppsContext.tsx` `AVAILABLE_APPS[].description`
+  (5× Dutch literal, getoond in Settings → Apps) → via `t('apps.*')` × 5 locales. Niet ter plekke gefixt (zou
+  locale-keys vergen buiten de TS-scope); behouden gedrag, gelogd als i18n-schuld.
+- ✅ **[OPGELOST in Golf 2] EditableFieldTable hardcoded NL-tooltips** — "Bewerken/Opslaan/Annuleren/Selecteer"
+  (0×`t()`) → nu `t('edit'/'save'/'cancel'/'select')` (common-namespace, keys bestonden al). §5 nageleefd bij touch.
+- ✅ **[OPGELOST in Golf L] lookup-parsing 5× gedupliceerd** — `names()`/`normalize()` copy-paste in 7 lookup-hooks
+  + 2 contexts → één bron [`src/lib/lookupUtils.ts`](../src/lib/lookupUtils.ts) (`lookupNames` + `normalizeOptions`,
+  id-behoudend). Candidate/Task/Vacancy-contexts houden hun eigen normalize (dragen is_applicant/is_done mee).
 - ✅ **[OPGELOST in Golf 1a] `initialsOf` gedupliceerd** — bleek **17 kopieën** met 4 fallback-varianten
   ('?'/'T'/'–'/'') → één bron [`src/lib/initials.ts`](../src/lib/initials.ts) met `fallback`-param;
   3 shared-modules re-exporteren, call-sites houden hun fallback. 0 lokale defs over.
