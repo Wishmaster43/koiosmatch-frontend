@@ -56,6 +56,8 @@ export interface CustomerNote {
   title: string
   text: string
   ago: string
+  // Loose backend note shape — keeps it compatible with the shared NotesTab item.
+  [k: string]: unknown
 }
 
 /** The flat customer model rendered by the table/insights/drawer. */

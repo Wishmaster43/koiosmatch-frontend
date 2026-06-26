@@ -1,17 +1,19 @@
 import { useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Building2, ChevronDown } from 'lucide-react'
 import { useIndustries } from '../../lib/useIndustries'
+import type { Id, LookupOption } from '../../types/common'
 
-const iStyle = {
+const iStyle: CSSProperties = {
   width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,
   border: '1px solid var(--border)', background: 'var(--surface)',
   color: 'var(--text)', boxSizing: 'border-box', outline: 'none',
 }
-const selectStyle = { ...iStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer' }
-const chevron = { position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', pointerEvents: 'none' }
+const selectStyle: CSSProperties = { ...iStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer' }
+const chevron: CSSProperties = { position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', pointerEvents: 'none' }
 
-function Label({ children, required }) {
+function Label({ children, required }: { children: ReactNode; required?: boolean }) {
   return (
     <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
       {children}{required && <span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span>}
@@ -19,18 +21,23 @@ function Label({ children, required }) {
   )
 }
 
+interface CustomerForm { name: string; debtorNumber: string; status: string; ownerId: string; industry: string; city: string }
+interface ModalUser { id: Id; name: string }
+
 /**
  * AddCustomerModal — create a customer. Status comes from the tenant lookup,
  * account manager from the user list and industry from /industries — never
  * hardcoded option lists. Returns the raw form via onCreate; the page persists.
  */
-export default function AddCustomerModal({ onClose, onCreate, users = [], statuses = [] }) {
+export default function AddCustomerModal({ onClose, onCreate, users = [], statuses = [] }: {
+  onClose: () => void; onCreate?: (form: CustomerForm) => void; users?: ModalUser[]; statuses?: LookupOption[]
+}) {
   const { t } = useTranslation('customers')
   const { industries } = useIndustries()
-  const [errors, setErrors] = useState({})
-  const [form, setForm] = useState({ name: '', debtorNumber: '', status: statuses[0]?.value ?? '', ownerId: '', industry: '', city: '' })
+  const [errors, setErrors] = useState<Record<string, boolean>>({})
+  const [form, setForm] = useState<CustomerForm>({ name: '', debtorNumber: '', status: statuses[0]?.value ?? '', ownerId: '', industry: '', city: '' })
 
-  const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
+  const set = (k: keyof CustomerForm, v: string) => { setForm(f => ({ ...f, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
 
   const handleSubmit = () => {
     if (!form.name.trim()) { setErrors({ name: true }); return }
@@ -39,7 +46,7 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
   const canSubmit = !!form.name.trim()
 
   return (
-    <div onClick={e => e.target === e.currentTarget && onClose()}
+    <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 520,

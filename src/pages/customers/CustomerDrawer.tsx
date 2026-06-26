@@ -7,12 +7,14 @@
  * Planning tab); the Opportunities tab's flex-shift section is gated inside it.
  */
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import EntityDrawer from '../../components/drawer/EntityDrawer'
 import EntityHeader from '../../components/drawer/EntityHeader'
 import NotesTab from '../../components/drawer/tabs/NotesTab'
 import { useAuth } from '../../context/AuthContext'
 import { useDateFormat } from '../../lib/datetime'
+import { initialsOf } from '@/lib/initials'
 import OverviewTab from './drawer/OverviewTab'
 import LocationsTab from './drawer/LocationsTab'
 import DepartmentsTab from './drawer/DepartmentsTab'
@@ -22,6 +24,8 @@ import OpportunitiesTab from './drawer/OpportunitiesTab'
 import PlanningTab from './drawer/PlanningTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import DocumentsTab from './drawer/DocumentsTab'
+import type { Customer } from '../../types/customer'
+import type { Id, LookupOption } from '../../types/common'
 
 const TABS = [
   { id: 'overview',      tKey: 'overview' },
@@ -36,21 +40,35 @@ const TABS = [
   { id: 'notes',         tKey: 'notes' },
 ]
 
-import { initialsOf } from '@/lib/initials'
+interface DrawerUser { id: Id; name: string; avatar_color?: string }
+type NotePayload = { type: string; title: string; body: string }
+
+interface CustomerDrawerProps {
+  customer: Customer | null
+  onClose: () => void
+  expanded?: boolean
+  onToggleExpand?: () => void
+  onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void
+  onAddSub?: (kind: string, c: Customer) => void
+  onAddNote?: (id: Id | undefined, payload: NotePayload) => void
+  users?: DrawerUser[]
+  statuses?: LookupOption[]
+}
 
 export default function CustomerDrawer({
   customer: c, onClose, expanded, onToggleExpand, onUpdate, onAddSub, onAddNote,
   users = [], statuses = [],
-}) {
+}: CustomerDrawerProps) {
   const { t } = useTranslation('customers')
-  const { hasModule } = useAuth()
+  const auth = useAuth()
+  const hasModule = auth?.hasModule ?? (() => false)
   const { formatDate } = useDateFormat()
 
   // Header overrides — reset when a different customer is shown (during render).
-  const [status, setStatus] = useState(null)
-  const [owner,  setOwner]  = useState(null)
-  const [tags,   setTags]   = useState(null)
-  const [prevId, setPrevId] = useState(c?.id)
+  const [status, setStatus] = useState<string | null>(null)
+  const [owner,  setOwner]  = useState<DrawerUser | null>(null)
+  const [tags,   setTags]   = useState<string[] | null>(null)
+  const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
   if (c?.id !== prevId) { setPrevId(c?.id); setStatus(null); setOwner(null); setTags(null) }
 
   if (!c) return null
@@ -59,22 +77,22 @@ export default function CustomerDrawer({
   const tabs = TABS.filter(tab => tab.id !== 'planning' || hasModule('plan'))
 
   const currentStatus = status ?? c.status
-  const currentTags   = tags ?? c.tags ?? []
-  const changeStatus  = (v) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
+  const currentTags   = tags ?? (c.tags as string[]) ?? []
+  const changeStatus  = (v: string) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
 
   // Owner (account manager) picker — current value first, then the user list.
   const ownerOptions = [
     ...(owner ? [] : [{ value: '__current', label: c.owner || '—', initials: c.ownerInitials }]),
     ...users.map(u => ({ value: u.id, label: u.name, initials: initialsOf(u.name) })),
   ]
-  const ownerValue = owner?.id ?? '__current'
-  const onOwnerChange = (id) => {
+  const ownerValue = String(owner?.id ?? '__current')
+  const onOwnerChange = (id: string) => {
     if (id === '__current') return
-    const u = users.find(x => x.id === id)
+    const u = users.find(x => String(x.id) === id)
     if (u) { setOwner({ ...u }); onUpdate?.(c.id, { ownerId: u.id, owner: u.name, ownerInitials: initialsOf(u.name), ownerColor: u.avatar_color ?? null }) }
   }
 
-  const renderTab = (id) => {
+  const renderTab = (id: string): ReactNode => {
     switch (id) {
       case 'overview':      return <OverviewTab c={c} onSave={v => onUpdate?.(c.id, v)} />
       case 'locations':     return <LocationsTab customerId={c.id} locations={c.locations} onAdd={() => onAddSub?.('locations', c)} />
@@ -82,15 +100,15 @@ export default function CustomerDrawer({
       case 'contacts':      return <ContactsTab contacts={c.contacts} onAdd={() => onAddSub?.('contacts', c)} />
       case 'vacancies':     return <VacanciesTab customerId={c.id} />
       case 'opportunities': return <OpportunitiesTab customerId={c.id} />
-      case 'planning':      return <PlanningTab customerId={c.id} />
+      case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
       case 'statistics':    return <StatisticsTab c={c} />
-      case 'documents':     return <DocumentsTab documents={c.documents} />
+      case 'documents':     return <DocumentsTab documents={(c as { documents?: { id?: Id; name?: string }[] }).documents} />
       case 'notes':         return (
         <NotesTab
           notes={c.notes ?? []}
           noteTypes={[]}
           authorInitials="?" timelineName="" timelineInitials="?"
-          onAddNote={(payload) => onAddNote?.(c.id, payload)}
+          onAddNote={payload => onAddNote?.(c.id, payload)}
           labels={{
             notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
             save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),

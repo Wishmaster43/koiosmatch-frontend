@@ -100,7 +100,8 @@ export interface MetaPicker {
   label?: ReactNode
   value?: unknown
   options?: unknown
-  onChange?: (v: unknown) => void
+  // SelectMenu emits the picked option's value (a string from the <select>).
+  onChange?: (v: string) => void
   placeholder?: string
   width?: number
   menuWidth?: number
