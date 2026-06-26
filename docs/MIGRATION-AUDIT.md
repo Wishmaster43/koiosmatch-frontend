@@ -21,9 +21,15 @@
 | 3c | **Candidate-feature volledig TS** — page · table · bulkbar · modal · cv-template · drawer + **alle 30+ drawer-tabs/secties** (profile · communication · languages · pools · documents · sections · work · preferences/zzp · changelog · statistics · background · matches · **planning** sub-tabs + `planningTypes.ts`) | ✅ klaar | 18daab9 |
 | L | **`lib/` 100% TS** — datetime · queryClient · chartHelpers · queries · usePageSize · colorPresets · mocks · **lookup-hooks** (functions/genders/languages/industries/last-contact/customer/opportunity) + dedup → `lookupUtils.ts` · access · useCv/KpiSettings · `settings/` (moduleRegistry/useAllSettings/useModuleView) | ✅ klaar | 004d272 |
 | C | **`context/` 100% TS** — Auth · RightPanel · Theme · Lookups · TaskLookups · VacancyLookups · Apps (typed providers + value-interfaces; NL-comments → EN) | ✅ klaar | 3cbc008 |
-| 2 | **Gedeelde blueprint-bouwstenen** — `drawer/` (DrawerTabs · EntityDrawer · EntityHeader) · `forms/` (AddableSection · AddForm · fields · EditableFieldTable) → TS (resterend: tabs/NotesTab · tabs/StatsTab · insights/InsightsRow · ui/RichTextEditor) | 🔄 bezig | f18bbc1 |
-| 3+ | Resterende feature-maps: settings/sections (37) · shiftmanager (36) · reports (18) · customers/applications/vacancies/opportunities/tasks-drawers · auth · charts · layout | ☐ | — |
+| 2 | **Gedeelde blueprint-bouwstenen — compleet** — `drawer/` (DrawerTabs · EntityDrawer · EntityHeader · tabs/NotesTab · tabs/StatsTab) · `forms/` (AddableSection · AddForm · fields · EditableFieldTable) · `insights/InsightsRow` | ✅ klaar | a61c859 |
+| 2b | **`components/charts/` compleet** — Mini/Line/Bar/Pie/WeeklyBar + gedeelde `chartTypes.ts` (ChartDatum + recharts TipProps) · `components/settings/` (ModuleView · ViewConfigEditor) | ✅ klaar | d406b8f |
+| 3+ | Resterende feature-maps (geen ripple meer): `pages/` (200) · components/reports (18) · components/layout (18) · components/shiftmanager (10) · components/ai+workflows (5) | ☐ | — |
 | M | `src/modules/` workflow-registry (55) — per-entity `makeEntityModule`-config | ☐ | — |
+
+> **Mijlpaal (golf 2/2b):** de **hele herbruikbare kern is TS** — `lib/` · `context/` · alle gedeelde
+> blueprint-componenten (drawer-shell · forms · insights · charts · settings-views) + de **candidate-feature
+> volledig**. Resterend werk is per-feature/leaf (importeert getypte bouwstenen, geen ripple terug). 108→~135
+> TS-bestanden; ~310 `.jsx/.js` over.
 
 **Types-strategie:** infra-types in [`src/types/api.ts`](../src/types/api.ts) (User/Tenant/ListResult/…).
 Entiteit-types (Candidate, Application, Vacancy, …) komen **per feature-golf** in `src/types/<entity>.ts`,
@@ -43,6 +49,9 @@ getypt tegen de échte API-response, importeerbaar door andere features. Nieuw b
   0×`t()` → hele Settings-nav is Engels island → alle labels via `t()` × 5 locales (worklist **FE-P3-3**).
 
 ### 🟡 MEDIUM
+- [MEDIUM] [FE] **ViewConfigEditor hardcoded EN-strings** — `src/components/settings/ViewConfigEditor.tsx`
+  ("Saved/Saving/Save/Move up/Move down/Hide/Show" + de "Choose which blocks…"-zin, 0×`t()`) → via `t()`
+  × 5 locales. Engels island (geen NL), lager prio dan NL-islands; behouden gedrag, gelogd. Idem `ModuleView`-loze.
 - [MEDIUM] [FE] **AppsContext app-descriptions hardcoded NL** — `src/context/AppsContext.tsx` `AVAILABLE_APPS[].description`
   (5× Dutch literal, getoond in Settings → Apps) → via `t('apps.*')` × 5 locales. Niet ter plekke gefixt (zou
   locale-keys vergen buiten de TS-scope); behouden gedrag, gelogd als i18n-schuld.
