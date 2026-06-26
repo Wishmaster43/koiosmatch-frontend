@@ -1,22 +1,32 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { History, AlertTriangle } from 'lucide-react'
-import api from '../../../lib/api'
-import Avatar from '../../../components/ui/Avatar'
-import SectionCard from '../../../components/ui/SectionCard'
-import { useDateFormat } from '../../../lib/datetime'
-import { isAbortError } from '../../../lib/mocks'
+import api from '@/lib/api'
+import Avatar from '@/components/ui/Avatar'
+import SectionCard from '@/components/ui/SectionCard'
+import { useDateFormat } from '@/lib/datetime'
+import { isAbortError } from '@/lib/mocks'
 import { initialsOf } from '@/lib/initials'
+import type { Candidate } from '@/types/candidate'
+import type { Id } from '@/types/common'
+
+interface ActivityEvent {
+  id?: Id
+  causer_name?: string
+  created_at?: string
+  description?: string
+  log_name?: string
+}
 
 /**
  * ChangelogTab — the candidate's audit trail (who changed what, when). Reads
  * `GET /candidates/{id}/activity` (C-16). Handles the four UI states explicitly;
  * shows a calm empty state until the backend endpoint is live (404 → empty).
  */
-export default function ChangelogTab({ c }) {
+export default function ChangelogTab({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
-  const [items,   setItems]   = useState([])
+  const [items,   setItems]   = useState<ActivityEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
 

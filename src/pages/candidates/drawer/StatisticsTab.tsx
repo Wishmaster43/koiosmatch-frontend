@@ -1,9 +1,14 @@
+import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import StatsTab from '../../../components/drawer/tabs/StatsTab'
-import { useDateFormat } from '../../../lib/datetime'
+import StatsTabJs from '@/components/drawer/tabs/StatsTab'
+import { useDateFormat } from '@/lib/datetime'
+import type { Candidate } from '@/types/candidate'
+
+// StatsTab is still untyped JS — declare the props this tab passes.
+const StatsTab = StatsTabJs as ComponentType<{ kpis?: unknown[]; overview?: unknown; activity?: unknown }>
 
 /** Statistics tab — maps the candidate onto the generic StatsTab. */
-export default function StatisticsTab({ c }) {
+export default function StatisticsTab({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   return (

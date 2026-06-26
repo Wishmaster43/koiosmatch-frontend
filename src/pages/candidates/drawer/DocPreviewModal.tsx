@@ -5,7 +5,15 @@ import { DOC_COLORS, DOC_TYPES } from './constants'
 const isImage = (name = '') => /\.(png|jpe?g|gif|webp|svg)$/i.test(name)
 const isPdf   = (name = '') => /\.pdf$/i.test(name)
 
-export default function DocPreviewModal({ doc, onClose }) {
+interface CandidateDoc {
+  objectUrl?: string
+  url?: string
+  type?: string
+  name?: string
+  file_name?: string
+}
+
+export default function DocPreviewModal({ doc, onClose }: { doc?: CandidateDoc | null; onClose: () => void }) {
   const { t } = useTranslation('candidates')
   if (!doc) return null
   const url = doc.objectUrl ?? doc.url
@@ -17,7 +25,7 @@ export default function DocPreviewModal({ doc, onClose }) {
       <div style={{ background: 'var(--surface)', borderRadius: 12, overflow: 'hidden', maxWidth: 800, width: '100%',
         maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
         <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--border)', gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 6, background: DOC_COLORS[doc.type] ?? '#6B7280',
+          <div style={{ width: 28, height: 28, borderRadius: 6, background: DOC_COLORS[doc.type ?? ''] ?? '#6B7280',
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <FileText size={13} color="white" />
           </div>
