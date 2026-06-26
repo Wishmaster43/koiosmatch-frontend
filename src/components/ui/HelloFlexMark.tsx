@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types'
+import type { SVGProps } from 'react'
 
 /**
  * HelloFlexMark — the teal "diamond" mark used for the HelloFlex (HF) workflow
@@ -13,7 +13,10 @@ import PropTypes from 'prop-types'
  */
 const HF_TEAL = '#3E7C8C'
 
-export default function HelloFlexMark({ size = 24, color = HF_TEAL, cut = '#FFFFFF', title = 'HelloFlex', ...rest }) {
+// Props mirror the lucide icon contract so the mark is interchangeable with one.
+type HelloFlexMarkProps = { size?: number; color?: string; cut?: string; title?: string } & SVGProps<SVGSVGElement>
+
+export default function HelloFlexMark({ size = 24, color = HF_TEAL, cut = '#FFFFFF', title = 'HelloFlex', ...rest }: HelloFlexMarkProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 96 96" fill="none"
       role="img" aria-label={title} xmlns="http://www.w3.org/2000/svg" {...rest}>
@@ -25,12 +28,4 @@ export default function HelloFlexMark({ size = 24, color = HF_TEAL, cut = '#FFFF
         fontFamily="Inter, system-ui, sans-serif" fontWeight="700" fontSize="30" fill={cut}>HF</text>
     </svg>
   )
-}
-
-// Props mirror the lucide icon contract so the mark is interchangeable with one.
-HelloFlexMark.propTypes = {
-  size:  PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  color: PropTypes.string,
-  cut:   PropTypes.string,
-  title: PropTypes.string,
 }

@@ -1,3 +1,5 @@
+import type { ComponentType, ReactNode } from 'react'
+
 /**
  * KpiBlock — small KPI card (icon tile + value + label + optional sub-text).
  *
@@ -5,7 +7,18 @@
  * When onClick is provided the card becomes clickable (hover highlight + pointer cursor).
  * Shows an em-dash while `loading`.
  */
-export default function KpiBlock({ label, value, sub, icon: Icon, color, bg, loading, onClick }) {
+interface KpiBlockProps {
+  label?: ReactNode
+  value?: ReactNode
+  sub?: ReactNode
+  icon: ComponentType<{ size?: number; color?: string }>
+  color?: string
+  bg?: string
+  loading?: boolean
+  onClick?: () => void
+}
+
+export default function KpiBlock({ label, value, sub, icon: Icon, color, bg, loading, onClick }: KpiBlockProps) {
   return (
     <div
       style={{

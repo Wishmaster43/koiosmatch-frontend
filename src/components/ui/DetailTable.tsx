@@ -1,12 +1,18 @@
+import type { ReactNode } from 'react'
+
 /**
  * DetailTable — read-only list of label/value rows.
  *
  * Replaces the repeated `[['Label', value], …].map(...)` blocks in the drawer
  * (plaatsingen, dienst-detail, inplanning, statistieken). Empty values show "-".
- *
- * rows: Array<[label, value]>
  */
-export default function DetailTable({ rows = [], labelWidth = 130, lastBorder = true }) {
+interface DetailTableProps {
+  rows?: Array<[label: string, value: ReactNode]>
+  labelWidth?: number
+  lastBorder?: boolean
+}
+
+export default function DetailTable({ rows = [], labelWidth = 130, lastBorder = true }: DetailTableProps) {
   return (
     <>
       {rows.map(([label, value], i) => (

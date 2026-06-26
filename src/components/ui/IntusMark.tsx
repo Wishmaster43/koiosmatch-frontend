@@ -1,5 +1,3 @@
-import PropTypes from 'prop-types'
-
 /**
  * IntusMark — the Intus brand mark: two interlocking rounded-square links on the
  * diagonal, one navy and one orange. Two-tone, so it ignores the `color` prop the
@@ -12,7 +10,13 @@ import PropTypes from 'prop-types'
 const INTUS_NAVY   = '#0E3A53'
 const INTUS_ORANGE = '#F18A00'
 
-export default function IntusMark({ size = 24, title = 'Intus' }) {
+// Props mirror the lucide icon contract (color is intentionally omitted: two-tone).
+interface IntusMarkProps {
+  size?: number | string
+  title?: string
+}
+
+export default function IntusMark({ size = 24, title = 'Intus' }: IntusMarkProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 96 96" fill="none"
       role="img" aria-label={title} xmlns="http://www.w3.org/2000/svg">
@@ -25,10 +29,4 @@ export default function IntusMark({ size = 24, title = 'Intus' }) {
         stroke={INTUS_ORANGE} strokeWidth="13" transform="rotate(45 56 48)" />
     </svg>
   )
-}
-
-// Props mirror the lucide icon contract (color is intentionally omitted: two-tone).
-IntusMark.propTypes = {
-  size:  PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  title: PropTypes.string,
 }

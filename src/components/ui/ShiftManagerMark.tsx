@@ -1,4 +1,4 @@
-import PropTypes from 'prop-types'
+import type { SVGProps } from 'react'
 
 /**
  * ShiftManagerMark — the red hexagon mark used for the native ShiftManager (SM)
@@ -12,7 +12,10 @@ import PropTypes from 'prop-types'
  */
 const SM_RED = '#E11D2A'
 
-export default function ShiftManagerMark({ size = 24, color = SM_RED, cut = '#FFFFFF', title = 'ShiftManager', ...rest }) {
+// Props mirror the lucide icon contract so the mark is interchangeable with one.
+type ShiftManagerMarkProps = { size?: number; color?: string; cut?: string; title?: string } & SVGProps<SVGSVGElement>
+
+export default function ShiftManagerMark({ size = 24, color = SM_RED, cut = '#FFFFFF', title = 'ShiftManager', ...rest }: ShiftManagerMarkProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 96 96" fill="none"
       role="img" aria-label={title} xmlns="http://www.w3.org/2000/svg" {...rest}>
@@ -27,12 +30,4 @@ export default function ShiftManagerMark({ size = 24, color = SM_RED, cut = '#FF
       </g>
     </svg>
   )
-}
-
-// Props mirror the lucide icon contract so the mark is interchangeable with one.
-ShiftManagerMark.propTypes = {
-  size:  PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  color: PropTypes.string,
-  cut:   PropTypes.string,
-  title: PropTypes.string,
 }

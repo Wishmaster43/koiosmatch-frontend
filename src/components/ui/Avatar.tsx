@@ -10,7 +10,15 @@ const COLORS = [
   'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899',
 ]
 
-export default function Avatar({ initials, size = 28, photo, color, soft = false }) {
+interface AvatarProps {
+  initials?: string
+  size?: number
+  photo?: string | null
+  color?: string | null
+  soft?: boolean
+}
+
+export default function Avatar({ initials, size = 28, photo, color, soft = false }: AvatarProps) {
   const bg = color || COLORS[(initials ?? '?').charCodeAt(0) % COLORS.length]
 
   if (photo) {

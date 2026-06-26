@@ -8,7 +8,13 @@ import { BrainCircuit } from 'lucide-react'
  * tone: 'soft'  = tinted background + primary glyph (calm, for content blocks);
  *       'solid' = primary background + white glyph (for accent buttons).
  */
-export default function KoiosAiMark({ size = 26, tone = 'soft', title = 'Koios AI' }) {
+interface KoiosAiMarkProps {
+  size?: number
+  tone?: 'soft' | 'solid'
+  title?: string
+}
+
+export default function KoiosAiMark({ size = 26, tone = 'soft', title = 'Koios AI' }: KoiosAiMarkProps) {
   const solid = tone === 'solid'
   return (
     <span role="img" aria-label={title} title={title}

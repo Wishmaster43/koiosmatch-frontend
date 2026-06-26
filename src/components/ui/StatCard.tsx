@@ -1,6 +1,18 @@
+import type { ComponentType, ReactNode } from 'react'
+
 // StatCard — a simple stat tile (icon + label + value + optional sub-text).
 // When onClick is provided the card becomes clickable (hover highlight + pointer cursor).
-export default function StatCard({ label, value, sub, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)', icon: Icon, onClick }) {
+interface StatCardProps {
+  label?: ReactNode
+  value?: ReactNode
+  sub?: ReactNode
+  color?: string
+  bg?: string
+  icon?: ComponentType<{ size?: number; color?: string }>
+  onClick?: () => void
+}
+
+export default function StatCard({ label, value, sub, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)', icon: Icon, onClick }: StatCardProps) {
   return (
     <div
       className="flex flex-col gap-3 p-5 bg-[var(--surface)] rounded-xl"

@@ -1,3 +1,6 @@
+import type { CSSProperties } from 'react'
+import DOMPurify from 'dompurify'
+
 /**
  * SafeHtml — render user-authored rich text WITHOUT opening an XSS hole.
  *
@@ -6,9 +9,13 @@
  * tampered API response) inject <script>/onerror/etc. DOMPurify strips anything
  * that is not safe formatting markup before it ever touches the DOM.
  */
-import DOMPurify from 'dompurify'
+interface SafeHtmlProps {
+  html?: string | null
+  style?: CSSProperties
+  className?: string
+}
 
-export default function SafeHtml({ html, style, className }) {
+export default function SafeHtml({ html, style, className }: SafeHtmlProps) {
   const clean = DOMPurify.sanitize(html ?? '', { USE_PROFILES: { html: true } })
   return <div className={className} style={style} dangerouslySetInnerHTML={{ __html: clean }} />
 }

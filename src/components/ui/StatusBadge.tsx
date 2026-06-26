@@ -6,10 +6,17 @@
  * are specific to a screen (e.g. shift statuses); unknown statuses fall back to grey.
  * Default labels come from i18n (common.status.*); a `map` override can supply its own.
  */
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 
+interface StatusStyle {
+  bg?: string
+  color?: string
+  label?: ReactNode
+}
+
 // Common statuses shared across the app (candidates + active/inactive entities).
-const DEFAULT_MAP = {
+const DEFAULT_MAP: Record<string, StatusStyle> = {
   actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
   active:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
   nietactief: { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
@@ -17,13 +24,19 @@ const DEFAULT_MAP = {
   extern:     { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
 }
 
-export default function StatusBadge({ status, map = {}, size = 12 }) {
+interface StatusBadgeProps {
+  status?: string | null
+  map?: Record<string, StatusStyle>
+  size?: number
+}
+
+export default function StatusBadge({ status, map = {}, size = 12 }: StatusBadgeProps) {
   const { t } = useTranslation('common')
   const key = String(status ?? '').toLowerCase()
   const s = { ...DEFAULT_MAP, ...map }[key] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   // Caller-provided label wins; otherwise translate known defaults; else show raw status.
   const label = map[key]?.label
-    ?? (DEFAULT_MAP[key] ? t(`status.${key}`, { defaultValue: status }) : (status ?? '—'))
+    ?? (DEFAULT_MAP[key] ? t(`status.${key}`, { defaultValue: status ?? undefined }) : (status ?? '—'))
   return (
     <span style={{
       display: 'inline-flex', alignItems: 'center', borderRadius: 20,
