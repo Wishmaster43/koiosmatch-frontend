@@ -4,26 +4,40 @@
  * and a schedule toggle. Blocked customers/locations are dimmed and disabled.
  * Filter + scheduled-id state is owned by PlanningPanel and passed in.
  */
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, Ban } from 'lucide-react'
 import { DUMMY_OPEN_SHIFTS } from '../data/mocks'
 import { FUNCTION_LEVELS, sectionBlock } from './constants'
+import type { Id } from '@/types/common'
+import type { FavLists, OpenFilters, OpenShift } from './planningTypes'
 
-export default function PlanningOpenShifts({ openFilters, setOpenFilters, scheduledIds, setScheduledIds, favorites, blacklist }) {
+interface PlanningOpenShiftsProps {
+  openFilters: OpenFilters
+  setOpenFilters: Dispatch<SetStateAction<OpenFilters>>
+  scheduledIds: Set<Id>
+  setScheduledIds: Dispatch<SetStateAction<Set<Id>>>
+  favorites: FavLists
+  blacklist: FavLists
+}
+
+const OPEN_SHIFTS = DUMMY_OPEN_SHIFTS as unknown as OpenShift[]
+
+export default function PlanningOpenShifts({ openFilters, setOpenFilters, scheduledIds, setScheduledIds, favorites, blacklist }: PlanningOpenShiftsProps) {
   const { t } = useTranslation('candidates')
 
   // Filter open shifts by distance, candidate level and selected shift types.
   const candLevel = openFilters.max_level
-  const filtered = DUMMY_OPEN_SHIFTS.filter(d =>
+  const filtered = OPEN_SHIFTS.filter(d =>
     d.distance <= openFilters.distance &&
     d.level <= candLevel &&
     (openFilters.shiftTypes.length === 0 || openFilters.shiftTypes.includes(d.shiftType))
   )
-  const toggleShiftType = (dt) => setOpenFilters(f => {
+  const toggleShiftType = (dt: string) => setOpenFilters(f => {
     const has = f.shiftTypes.includes(dt)
     return { ...f, shiftTypes: has ? f.shiftTypes.filter(x => x !== dt) : [...f.shiftTypes, dt] }
   })
-  const toggleScheduled = (id) => setScheduledIds(prev => {
+  const toggleScheduled = (id: Id) => setScheduledIds(prev => {
     const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n
   })
 
@@ -35,7 +49,7 @@ export default function PlanningOpenShifts({ openFilters, setOpenFilters, schedu
           <div>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5 }}>{t('planning.shiftType')}</div>
             <div style={{ display: 'flex', gap: 4 }}>
-              {[['Dag', 'day'], ['Avond', 'evening'], ['Nacht', 'night']].map(([dt, key]) => {
+              {([['Dag', 'day'], ['Avond', 'evening'], ['Nacht', 'night']] as [string, string][]).map(([dt, key]) => {
                 const active = openFilters.shiftTypes.includes(dt)
                 return (
                   <button key={dt} onClick={() => toggleShiftType(dt)}
@@ -60,12 +74,12 @@ export default function PlanningOpenShifts({ openFilters, setOpenFilters, schedu
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5 }}>{t('planning.maxLevel')}</div>
             <select value={openFilters.max_level} onChange={e => setOpenFilters(f => ({ ...f, max_level: Number(e.target.value) }))}
               style={{ padding: '5px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg)', color: 'var(--text)', cursor: 'pointer' }}>
-              {FUNCTION_LEVELS.map((fn, i) => <option key={fn} value={i + 1}>{fn}</option>)}
+              {FUNCTION_LEVELS.map((fn: string, i: number) => <option key={fn} value={i + 1}>{fn}</option>)}
             </select>
           </div>
           <div style={{ marginLeft: 'auto' }}>
             <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              {filtered.length}/{DUMMY_OPEN_SHIFTS.length} {t('planning.shifts')}
+              {filtered.length}/{OPEN_SHIFTS.length} {t('planning.shifts')}
             </span>
           </div>
         </div>
@@ -85,8 +99,8 @@ export default function PlanningOpenShifts({ openFilters, setOpenFilters, schedu
           const tags = [
             { label: `${d.distance} km`, ok: d.distance <= 35 },
             { label: d.shiftType, ok: openFilters.shiftTypes.includes(d.shiftType) },
-            d.level < 5 && { label: d.function, ok: true },
-          ].filter(Boolean)
+            d.level < 5 ? { label: d.function, ok: true } : null,
+          ].filter(Boolean) as Array<{ label: string; ok: boolean }>
           return (
             <div key={d.id} style={{ padding: '10px 0', borderBottom: i < filtered.length - 1 ? '1px solid var(--border)' : 'none',
               display: 'flex', gap: 10, alignItems: 'flex-start',

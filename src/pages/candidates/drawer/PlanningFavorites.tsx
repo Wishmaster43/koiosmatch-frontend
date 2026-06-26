@@ -4,19 +4,35 @@
  * choices, each with a typeahead to add new entries. Favourite/blacklist state
  * and the add-input state are owned by PlanningPanel and passed in.
  */
+import type { Dispatch, ReactNode, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, X, Ban, Plus } from 'lucide-react'
 import { FAV_SEARCH_DATA } from '../data/mocks'
 import { sectionBlock, sectionTitle } from './constants'
+import type { FavLists } from './planningTypes'
+
+interface PlanningFavoritesProps {
+  favorites: FavLists
+  setFavorites: Dispatch<SetStateAction<FavLists>>
+  blacklist: FavLists
+  setBlacklist: Dispatch<SetStateAction<FavLists>>
+  favAddMode: string | null
+  setFavAddMode: Dispatch<SetStateAction<string | null>>
+  favAddInput: string
+  setFavAddInput: Dispatch<SetStateAction<string>>
+}
+
+type FavKey = keyof FavLists
+const SEARCH_DATA = FAV_SEARCH_DATA as unknown as Array<{ type: FavKey; label: string; items: string[] }>
 
 export default function PlanningFavorites({
   favorites, setFavorites, blacklist, setBlacklist,
   favAddMode, setFavAddMode, favAddInput, setFavAddInput,
-}) {
+}: PlanningFavoritesProps) {
   const { t } = useTranslation('candidates')
 
   // The three entry kinds shown per card; cancel resets the add input.
-  const TYPES = [
+  const TYPES: { key: FavKey; label: string }[] = [
     { key: 'clients',    label: t('planning.client') },
     { key: 'locations',   label: t('planning.locationLabel') },
     { key: 'departments', label: t('planning.department') },
@@ -24,7 +40,7 @@ export default function PlanningFavorites({
   const cancel = () => { setFavAddMode(null); setFavAddInput('') }
 
   // The two cards: preference (favourite) and do-not-schedule (blacklist).
-  const cards = [
+  const cards: { mode: string; icon: ReactNode; title: string; emptyText: string; data: FavLists; setData: Dispatch<SetStateAction<FavLists>> }[] = [
     { mode: 'fav', icon: <Heart size={14} color="var(--color-danger)" fill="var(--color-danger)" />, title: t('planning.preference'),    emptyText: t('planning.noPreferences'),  data: favorites, setData: setFavorites },
     { mode: 'bl',  icon: <Ban   size={14} color="#EF4444" />,                                        title: t('planning.doNotSchedule'), emptyText: t('planning.noRestrictions'), data: blacklist,  setData: setBlacklist  },
   ]
@@ -37,7 +53,7 @@ export default function PlanningFavorites({
 
         // Grouped typeahead results, excluding already-added values.
         const searchResults = isAdding && favAddInput.trim().length > 0
-          ? FAV_SEARCH_DATA.map(({ type, label, items }) => ({
+          ? SEARCH_DATA.map(({ type, label, items }) => ({
               type, label,
               matches: items.filter(v =>
                 v.toLowerCase().includes(favAddInput.toLowerCase()) &&
@@ -46,7 +62,7 @@ export default function PlanningFavorites({
             })).filter(g => g.matches.length > 0)
           : []
 
-        const handleSelect = (type, item) => {
+        const handleSelect = (type: FavKey, item: string) => {
           setData(f => ({ ...f, [type]: [...f[type], item] }))
           setFavAddInput('')
           setFavAddMode(null)

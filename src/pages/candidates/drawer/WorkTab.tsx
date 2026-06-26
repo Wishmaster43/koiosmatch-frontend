@@ -2,11 +2,15 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import MatchesTab from './MatchesTab'
 import { sectionBlock } from './constants'
+import type { Candidate } from '@/types/candidate'
+
+// One application row as nested under the candidate (read defensively).
+interface AppRow { logo_url?: string; vacancy?: { logo_url?: string; title?: string }; vacature?: string; title?: string }
 
 /** Work tab — matches + paginated applications. */
-export default function WorkTab({ c }) {
+export default function WorkTab({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
-  const soll = c.applications ?? []
+  const soll = (c.applications ?? []) as unknown as AppRow[]
   const PER = 5
   const [page, setPage] = useState(1)
   const pages = Math.max(1, Math.ceil(soll.length / PER))

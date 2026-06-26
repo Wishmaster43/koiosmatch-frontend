@@ -1,12 +1,18 @@
 /**
  * Preferences + Freelance (ZZP) tabs — both are schema-driven EditableFieldTables.
  */
+import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import EditableFieldTable from '../../../components/forms/EditableFieldTable'
+import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
+import type { Candidate } from '@/types/candidate'
 
-export function PreferencesTab({ c, onSave }) {
+type AnyProps = Record<string, unknown>
+// EditableFieldTable is still untyped JS — accept any props at the boundary.
+const EditableFieldTable = EditableFieldTableJs as unknown as ComponentType<AnyProps>
+
+export function PreferencesTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string, unknown>) => void }) {
   const { t } = useTranslation('candidates')
-  const pref = c.preferences ?? {}
+  const pref = c.preferences
   const value = {
     beschikbaar_per: pref.available_from ?? '',
     hoursPerWeek:   pref.hours_per_week ?? '',
@@ -35,7 +41,7 @@ export function PreferencesTab({ c, onSave }) {
     { key: 'contract',        label: t('preferences.contract'),      group: t('preferences.groupWork') },
     { key: 'remarks',     label: t('preferences.remarks'),       group: t('preferences.groupOther') },
   ]
-  const toApi = (v) => ({
+  const toApi = (v: Record<string, unknown>) => ({
     available_from:  v.beschikbaar_per,
     hours_per_week:  v.hoursPerWeek,
     preferred_days:  v.dagen,
@@ -49,17 +55,19 @@ export function PreferencesTab({ c, onSave }) {
     contract_pref:   v.contract,
     remarks:         v.remarks,
   })
-  return <EditableFieldTable title={t('preferences.title')} fields={fields} value={value} labelWidth={160} onSave={v => onSave?.(toApi(v))} />
+  return <EditableFieldTable title={t('preferences.title')} fields={fields} value={value} labelWidth={160} onSave={(v: Record<string, unknown>) => onSave?.(toApi(v))} />
 }
 
-export function ZzpTab({ c, onSave }) {
+export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string, unknown>) => void }) {
   const { t } = useTranslation('candidates')
-  const zzp = c.zzp ?? {}
+  const zzp = c.zzp
+  // Legacy fallbacks live on the flat candidate record (not on the typed model).
+  const flat = c as unknown as Record<string, unknown>
   const value = {
-    bedrijfsnaam:      zzp.company_name      ?? c.company_name ?? '',
-    kvk:               zzp.kvk_number        ?? c.kvk          ?? '',
-    btw:               zzp.vat_number        ?? c.btw          ?? '',
-    kor:               zzp.kor               ?? c.kor          ?? false,
+    bedrijfsnaam:      zzp.company_name      ?? flat.company_name ?? '',
+    kvk:               zzp.kvk_number        ?? flat.kvk          ?? '',
+    btw:               zzp.vat_number        ?? flat.btw          ?? '',
+    kor:               zzp.kor               ?? flat.kor          ?? false,
     intracommunautair: zzp.intracommunautair ?? false,
     straat:            zzp.street            ?? '',
     huisnummer:        zzp.house_number      ?? '',
@@ -69,7 +77,7 @@ export function ZzpTab({ c, onSave }) {
     crediteur:         zzp.creditor_number   ?? '',
     email_zakelijk:    zzp.business_email    ?? '',
     email_factuur:     zzp.invoice_email     ?? '',
-    iban:              zzp.iban              ?? c.iban         ?? '',
+    iban:              zzp.iban              ?? flat.iban         ?? '',
     self_billing:      zzp.self_billing      ?? false,
     betalingskorting:  zzp.payment_discount  ?? '0,00',
     bemiddelingskosten:zzp.mediation_costs   ?? '0,00',
@@ -95,7 +103,7 @@ export function ZzpTab({ c, onSave }) {
     { key: 'bemiddelingskosten',label: t('zzp.mediationCosts'), group: t('zzp.groupPayment'), prefix: '€' },
     { key: 'betaaltermijn',     label: t('zzp.paymentTerm'),    group: t('zzp.groupPayment') },
   ]
-  const toApi = (v) => ({
+  const toApi = (v: Record<string, unknown>) => ({
     company_name:      v.bedrijfsnaam,
     kvk_number:        v.kvk,
     vat_number:        v.btw,
@@ -115,5 +123,5 @@ export function ZzpTab({ c, onSave }) {
     mediation_costs:   v.bemiddelingskosten,
     payment_term:      v.betaaltermijn,
   })
-  return <EditableFieldTable title={t('zzp.title')} fields={fields} value={value} labelWidth={180} onSave={v => onSave?.(toApi(v))} />
+  return <EditableFieldTable title={t('zzp.title')} fields={fields} value={value} labelWidth={180} onSave={(v: Record<string, unknown>) => onSave?.(toApi(v))} />
 }

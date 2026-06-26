@@ -5,21 +5,24 @@ import PlanningTab from './PlanningTab'
 import PlanningScheduling from './PlanningScheduling'
 import PlanningOpenShifts from './PlanningOpenShifts'
 import PlanningFavorites from './PlanningFavorites'
+import type { Candidate } from '@/types/candidate'
+import type { Id } from '@/types/common'
+import type { FavLists, OpenFilters, RosterShift, ScheduleFavorites } from './planningTypes'
 
 /** Planning panel — thin container: owns all (dummy) planning state and routes
  * each sub-tab (availability / scheduling / open shifts / roles & pools /
  * favourite & blacklist) to its own component. */
-export default function PlanningPanel({ c }) {
+export default function PlanningPanel({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const [planningSubTab,    setPlanningSubTab]    = useState('availability')
-  const [scheduleSelected,  setScheduleSelected]  = useState(null)
-  const [scheduleFavorites, setScheduleFavorites] = useState({})
-  const [scheduledIds,      setScheduledIds]      = useState(() => new Set())
-  const [unscheduledIdx,    setUnscheduledIdx]    = useState(() => new Set())
-  const [openFilters,       setOpenFilters]       = useState({ shiftTypes: ['Dag', 'Avond'], distance: 35, max_level: 5 })
-  const [favorites,         setFavorites]         = useState({ clients: ['Thuiszorg Noord'], locations: ['Amsterdam'], departments: [] })
-  const [blacklist,         setBlacklist]         = useState({ clients: [], locations: [], departments: [] })
-  const [favAddMode,        setFavAddMode]        = useState(null)
+  const [scheduleSelected,  setScheduleSelected]  = useState<RosterShift | null>(null)
+  const [scheduleFavorites, setScheduleFavorites] = useState<ScheduleFavorites>({})
+  const [scheduledIds,      setScheduledIds]      = useState(() => new Set<Id>())
+  const [unscheduledIdx,    setUnscheduledIdx]    = useState(() => new Set<number>())
+  const [openFilters,       setOpenFilters]       = useState<OpenFilters>({ shiftTypes: ['Dag', 'Avond'], distance: 35, max_level: 5 })
+  const [favorites,         setFavorites]         = useState<FavLists>({ clients: ['Thuiszorg Noord'], locations: ['Amsterdam'], departments: [] })
+  const [blacklist,         setBlacklist]         = useState<FavLists>({ clients: [], locations: [], departments: [] })
+  const [favAddMode,        setFavAddMode]        = useState<string | null>(null)
   const [favAddInput,       setFavAddInput]       = useState('')
 
   return (

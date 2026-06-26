@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
+import type { CSSProperties, Dispatch, ReactNode, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Check } from 'lucide-react'
 import { ALL_FUNCTIONS, ALL_POOLS, DRIVING_LICENCES, sectionBlock, sectionTitle } from './constants'
+import type { Candidate } from '@/types/candidate'
 
-const Chip = ({ label, selected, onToggle }) => (
+const Chip = ({ label, selected, onToggle }: { label: ReactNode; selected: boolean; onToggle: () => void }) => (
   <button onClick={onToggle} style={{
     padding: '4px 11px', fontSize: 11, borderRadius: 99, cursor: 'pointer', transition: 'all 0.1s',
     border: `1px solid ${selected ? 'var(--color-primary)' : 'var(--border)'}`,
@@ -14,7 +16,7 @@ const Chip = ({ label, selected, onToggle }) => (
   </button>
 )
 
-const SecLabel = ({ children, action }) => (
+const SecLabel = ({ children, action }: { children: ReactNode; action?: ReactNode }) => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
     <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{children}</span>
     {action}
@@ -22,25 +24,28 @@ const SecLabel = ({ children, action }) => (
 )
 
 /** Roles, pools, shift-type and driving-licence settings used by the planner. */
-export default function PlanningTab({ c }) {
-  const plan = c.planning_settings ?? {}
-  const [info,         setInfo]        = useState(plan.info ?? '')
-  const [roles,     setRoles]    = useState(plan.roles ?? [])
-  const [pools,        setPools]       = useState(plan.pools ?? [])
-  const [shiftType,   setShiftType]  = useState(plan.shiftType ?? [])
-  const [drivingLicences,  setDrivingLicences] = useState(plan.drivingLicences ?? [])
+export default function PlanningTab({ c }: { c: Candidate }) {
+  const plan = c.planningSettings ?? {}
+  const [info,         setInfo]        = useState<string>((plan.info as string) ?? '')
+  const [roles,     setRoles]    = useState<string[]>((plan.roles as string[]) ?? [])
+  const [pools,        setPools]       = useState<string[]>((plan.pools as string[]) ?? [])
+  const [shiftType,   setShiftType]  = useState<string[]>((plan.shiftType as string[]) ?? [])
+  const [drivingLicences,  setDrivingLicences] = useState<string[]>((plan.drivingLicences as string[]) ?? [])
   const [rowOpen,      setRowOpen]     = useState(false)
-  const rijRef = useRef(null)
+  const rijRef = useRef<HTMLDivElement>(null)
 
+  // Close the licence dropdown on an outside click.
   useEffect(() => {
-    const h = e => { if (rijRef.current && !rijRef.current.contains(e.target)) setRowOpen(false) }
+    const h = (e: MouseEvent) => { if (rijRef.current && !rijRef.current.contains(e.target as Node)) setRowOpen(false) }
     document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h)
   }, [])
 
-  const tog = (val, set) => set(prev => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val])
+  // Toggle one value in a string-list selection.
+  const tog = (val: string, set: Dispatch<SetStateAction<string[]>>) => set(prev => prev.includes(val) ? prev.filter(x => x !== val) : [...prev, val])
   const { t } = useTranslation('candidates')
 
-  const shiftTypeOpts = [['Avonddienst', 'eveningShift'], ['Dagdienst', 'dayShift'], ['Nachtdienst', 'nightShift']]
+  const inputStyle: CSSProperties = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 7, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' }
+  const shiftTypeOpts: [string, string][] = [['Avonddienst', 'eveningShift'], ['Dagdienst', 'dayShift'], ['Nachtdienst', 'nightShift']]
   return (
     <div style={sectionBlock}>
       <span style={sectionTitle}>{t('planning.rolesPoolsSkills')}</span>
@@ -48,8 +53,7 @@ export default function PlanningTab({ c }) {
       {/* Info */}
       <div style={{ marginBottom: 16 }}>
         <SecLabel>{t('planning.planningInfo')}</SecLabel>
-        <input value={info} onChange={e => setInfo(e.target.value)} placeholder={t('planning.planningNote')}
-          style={{ width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 7, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' }} />
+        <input value={info} onChange={e => setInfo(e.target.value)} placeholder={t('planning.planningNote')} style={inputStyle} />
       </div>
 
       {/* Roles */}
@@ -61,7 +65,7 @@ export default function PlanningTab({ c }) {
           </button>
         }>{t('planning.globalFunction')}</SecLabel>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {ALL_FUNCTIONS.map(f => <Chip key={f} label={f} selected={roles.includes(f)} onToggle={() => tog(f, setRoles)} />)}
+          {ALL_FUNCTIONS.map((f: string) => <Chip key={f} label={f} selected={roles.includes(f)} onToggle={() => tog(f, setRoles)} />)}
         </div>
       </div>
 
@@ -74,7 +78,7 @@ export default function PlanningTab({ c }) {
           </button>
         }>{t('planning.pools')}</SecLabel>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {ALL_POOLS.map(p => <Chip key={p} label={p} selected={pools.includes(p)} onToggle={() => tog(p, setPools)} />)}
+          {ALL_POOLS.map((p: string) => <Chip key={p} label={p} selected={pools.includes(p)} onToggle={() => tog(p, setPools)} />)}
         </div>
       </div>
 
@@ -113,7 +117,7 @@ export default function PlanningTab({ c }) {
             <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 200, marginTop: 4,
               background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
               boxShadow: '0 4px 16px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 180 }}>
-              {DRIVING_LICENCES.map(r => {
+              {DRIVING_LICENCES.map((r: string) => {
                 const sel = drivingLicences.includes(r)
                 return (
                   <button key={r} onClick={() => tog(r, setDrivingLicences)}

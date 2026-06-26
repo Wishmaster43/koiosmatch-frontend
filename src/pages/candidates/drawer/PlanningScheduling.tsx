@@ -4,25 +4,44 @@
  * a mail-roster action, and a detail panel per shift (favourite + unschedule).
  * All planning state is owned by PlanningPanel and passed in.
  */
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, Clock, MapPin, Heart, X, Check } from 'lucide-react'
 import { DUMMY_SHIFTS_LIST, DUMMY_OPEN_SHIFTS } from '../data/mocks'
 import { sectionBlock, sectionTitle } from './constants'
+import type { Candidate } from '@/types/candidate'
+import type { Id } from '@/types/common'
+import type { OpenShift, RosterShift, ScheduleFavorites } from './planningTypes'
+
+interface PlanningSchedulingProps {
+  c: Candidate
+  scheduleSelected: RosterShift | null
+  setScheduleSelected: Dispatch<SetStateAction<RosterShift | null>>
+  scheduleFavorites: ScheduleFavorites
+  setScheduleFavorites: Dispatch<SetStateAction<ScheduleFavorites>>
+  scheduledIds: Set<Id>
+  setScheduledIds: Dispatch<SetStateAction<Set<Id>>>
+  unscheduledIdx: Set<number>
+  setUnscheduledIdx: Dispatch<SetStateAction<Set<number>>>
+}
+
+const BASE_SHIFTS = DUMMY_SHIFTS_LIST as unknown as RosterShift[]
+const OPEN_SHIFTS = DUMMY_OPEN_SHIFTS as unknown as OpenShift[]
 
 export default function PlanningScheduling({
   c, scheduleSelected, setScheduleSelected, scheduleFavorites, setScheduleFavorites,
   scheduledIds, setScheduledIds, unscheduledIdx, setUnscheduledIdx,
-}) {
+}: PlanningSchedulingProps) {
   const { t } = useTranslation('candidates')
 
   // Build the roster: base shifts minus unscheduled ones, plus shifts picked from open shifts.
-  const visibleBase  = DUMMY_SHIFTS_LIST.filter((_, i) => !unscheduledIdx.has(i))
-  const extraScheduled = DUMMY_OPEN_SHIFTS.filter(d => scheduledIds.has(d.id)).map(d => ({
+  const visibleBase = BASE_SHIFTS.filter((_, i) => !unscheduledIdx.has(i))
+  const extraScheduled: RosterShift[] = OPEN_SHIFTS.filter(d => scheduledIds.has(d.id)).map(d => ({
     date: d.date, time: d.time, client: d.client, function: d.function,
     location: d.location, color: d.color, workedBefore: 0, favorite: false,
     address: '-', remarks: 'Ingepland via open diensten.', _openId: d.id,
   }))
-  const allShifts = [...visibleBase, ...extraScheduled]
+  const allShifts: RosterShift[] = [...visibleBase, ...extraScheduled]
   const rosterBody  = allShifts.map(d => `${d.date}\t${d.time}\t${d.client}\t${d.location}`).join('%0A')
   const firstName    = c?.name?.split(' ')[0] ?? ''
   const mailHref    = `mailto:${c?.email ?? ''}?subject=Jouw%20rooster&body=Hallo%20${encodeURIComponent(firstName)}%2C%0A%0AHierbij%20je%20rooster%3A%0A%0A${rosterBody}%0A%0AMet%20vriendelijke%20groet`
@@ -79,11 +98,12 @@ export default function PlanningScheduling({
         const d = scheduleSelected
         const fav = scheduleFavorites[d.date + d.client] ?? d.favorite
         const toggleFav = () => setScheduleFavorites(p => ({ ...p, [d.date + d.client]: !fav }))
-        const baseIdx = DUMMY_SHIFTS_LIST.indexOf(d)
+        const baseIdx = BASE_SHIFTS.indexOf(d)
         // Remove this shift from the roster (open-shift pick vs. base shift differ).
         const handleUnschedule = () => {
-          if (d._openId) {
-            setScheduledIds(prev => { const n = new Set(prev); n.delete(d._openId); return n })
+          const openId = d._openId
+          if (openId != null) {
+            setScheduledIds(prev => { const n = new Set(prev); n.delete(openId); return n })
           } else if (baseIdx !== -1) {
             setUnscheduledIdx(prev => { const n = new Set(prev); n.add(baseIdx); return n })
           }

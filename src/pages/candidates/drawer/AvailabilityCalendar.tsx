@@ -1,11 +1,15 @@
 import { useState, useMemo } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, X, Check } from 'lucide-react'
 import { AGENDA_SHIFTS } from '../data/mocks'
 import { sectionBlock } from './constants'
-import { useLocale } from '../../../lib/datetime'
+import { useLocale } from '@/lib/datetime'
+import type { AgendaShift } from './planningTypes'
 
-function ShiftDetail({ s, onClose }) {
+const SHIFTS = AGENDA_SHIFTS as unknown as AgendaShift[]
+
+function ShiftDetail({ s, onClose }: { s: AgendaShift; onClose: () => void }) {
   const { t } = useTranslation('candidates')
   const [fav, setFav] = useState(s.favorite ?? false)
   return (
@@ -24,12 +28,12 @@ function ShiftDetail({ s, onClose }) {
           <X size={14} />
         </button>
       </div>
-      {[
+      {([
         [t('planning.time'),         `${s.start ?? '?'}:00 – ${s.end ?? '?'}:00`],
         [t('planning.location'),     s.location ?? '-'],
         [t('planning.address'),      s.address   ?? '-'],
         [t('planning.workedBefore'), s.workedBefore > 0 ? t('planning.workedBeforeYes', { count: s.workedBefore, client: s.client }) : t('planning.workedBeforeNo', { client: s.client })],
-      ].map(([l, v]) => (
+      ] as [string, string][]).map(([l, v]) => (
         <div key={l} style={{ display: 'flex', padding: '8px 14px', borderBottom: '1px solid var(--border)', gap: 12, background: 'var(--surface)' }}>
           <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 110, flexShrink: 0 }}>{l}</span>
           <span style={{ fontSize: 12, color: 'var(--text)' }}>{v}</span>
@@ -50,7 +54,7 @@ export default function AvailabilityCalendar() {
   const locale = useLocale()
   const [view,     setView]     = useState('month')
   const [base,     setBase]     = useState(new Date(2026, 5, 16))
-  const [selected, setSelected] = useState(null)
+  const [selected, setSelected] = useState<AgendaShift | null>(null)
 
   // Day/month names follow the active locale (2024-01-01 was a Monday → Monday-first).
   const DAY_NAMES    = useMemo(() => { const f = new Intl.DateTimeFormat(locale, { weekday: 'short' }); return Array.from({ length: 7 }, (_, i) => f.format(new Date(2024, 0, 1 + i))) }, [locale])
@@ -58,15 +62,15 @@ export default function AvailabilityCalendar() {
   const MONTH_NAMES  = useMemo(() => { const f = new Intl.DateTimeFormat(locale, { month: 'long' });    return Array.from({ length: 12 }, (_, i) => f.format(new Date(2024, i, 1))) }, [locale])
   const HOURS     = [7,8,9,10,11,12,13,14,15,16,17,18]
 
-  const addDays    = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r }
-  const addMonths_ = (d, n) => { const r = new Date(d); r.setMonth(r.getMonth() + n); return r }
-  const fmtD       = (d)    => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
-  const getMon     = (d)    => { const r = new Date(d); const dw = r.getDay(); r.setDate(r.getDate() - (dw === 0 ? 6 : dw - 1)); r.setHours(0,0,0,0); return r }
-  const getDOW     = (d)    => { const d0 = d.getDay(); return d0 === 0 ? 6 : d0 - 1 }
+  const addDays    = (d: Date, n: number) => { const r = new Date(d); r.setDate(r.getDate() + n); return r }
+  const addMonths_ = (d: Date, n: number) => { const r = new Date(d); r.setMonth(r.getMonth() + n); return r }
+  const fmtD       = (d: Date)    => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  const getMon     = (d: Date)    => { const r = new Date(d); const dw = r.getDay(); r.setDate(r.getDate() - (dw === 0 ? 6 : dw - 1)); r.setHours(0,0,0,0); return r }
+  const getDOW     = (d: Date)    => { const d0 = d.getDay(); return d0 === 0 ? 6 : d0 - 1 }
 
-  const shiftsForDate = (d) => AGENDA_SHIFTS.filter(s => s.date === fmtD(d))
+  const shiftsForDate = (d: Date): AgendaShift[] => SHIFTS.filter(s => s.date === fmtD(d))
 
-  const nav = (n) => {
+  const nav = (n: number) => {
     setSelected(null)
     if (view === 'day')   setBase(b => addDays(b, n))
     if (view === 'week')  setBase(b => addDays(b, n * 7))
@@ -88,7 +92,7 @@ export default function AvailabilityCalendar() {
     const mon  = getMon(base)
     const days = Array.from({ length: 7 }, (_, i) => addDays(mon, i))
     const today = new Date()
-    const isToday = (d) => d.toDateString() === today.toDateString()
+    const isToday = (d: Date) => d.toDateString() === today.toDateString()
     return (
       <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
         <div style={{ display: 'grid', gridTemplateColumns: '44px repeat(7, 1fr)', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
@@ -116,7 +120,7 @@ export default function AvailabilityCalendar() {
                       style={{ flex: 1, minWidth: 0, boxSizing: 'border-box',
                         background: selected === s ? s.color + '40' : s.color + '22',
                         borderLeft: `3px solid ${s.color}`,
-                        // Alleen het startuur toont de naam + bovenrand; vervolg-uren sluiten naadloos aan.
+                        // Only the start hour shows the name + top border; following hours join seamlessly.
                         borderTop: h === s.start ? `1px solid ${s.color}55` : 'none',
                         padding: h === s.start ? '2px 4px' : 0, fontSize: 9, color: s.color,
                         overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', lineHeight: 1.4, cursor: 'pointer' }}>
@@ -136,13 +140,13 @@ export default function AvailabilityCalendar() {
     const year = base.getFullYear(), month = base.getMonth()
     const firstDay = new Date(year, month, 1), lastDay = new Date(year, month + 1, 0)
     const startDow = getDOW(firstDay)
-    const cells = []
+    const cells: (number | null)[] = []
     for (let i = 0; i < startDow; i++) cells.push(null)
     for (let d = 1; d <= lastDay.getDate(); d++) cells.push(d)
     while (cells.length % 7 !== 0) cells.push(null)
-    const rows = []; for (let r = 0; r < cells.length / 7; r++) rows.push(cells.slice(r*7, r*7+7))
+    const rows: (number | null)[][] = []; for (let r = 0; r < cells.length / 7; r++) rows.push(cells.slice(r*7, r*7+7))
     const today = new Date()
-    const isToday = (d) => d && year === today.getFullYear() && month === today.getMonth() && d === today.getDate()
+    const isToday = (d: number | null) => d != null && year === today.getFullYear() && month === today.getMonth() && d === today.getDate()
 
     return (
       <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
@@ -235,7 +239,7 @@ export default function AvailabilityCalendar() {
     )
   }
 
-  const vBtn = (id) => ({
+  const vBtn = (id: string): CSSProperties => ({
     padding: '4px 10px', fontSize: 11, fontWeight: view === id ? 600 : 400, borderRadius: 6, cursor: 'pointer',
     border: '1px solid ' + (view === id ? 'var(--color-primary)' : 'var(--border)'),
     background: view === id ? 'var(--color-primary)' : 'none',
@@ -247,7 +251,7 @@ export default function AvailabilityCalendar() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{t('planning.availability')}</span>
         <div style={{ display: 'flex', gap: 4 }}>
-          {[['day', t('planning.day')],['week', t('planning.week')],['month', t('planning.month')]].map(([id, lbl]) => (
+          {([['day', t('planning.day')],['week', t('planning.week')],['month', t('planning.month')]] as [string, string][]).map(([id, lbl]) => (
             <button key={id} style={vBtn(id)} onClick={() => { setView(id); setSelected(null) }}>{lbl}</button>
           ))}
         </div>
