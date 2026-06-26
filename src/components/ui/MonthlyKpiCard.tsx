@@ -4,14 +4,40 @@
  * underlying candidates. statusFilter limits which candidates count.
  */
 import { useState } from 'react'
+import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import KpiDrillDownDrawer from '../reports/KpiDrillDownDrawer'
+import KpiDrillDownDrawerJs from '../reports/KpiDrillDownDrawer'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 
-export default function MonthlyKpiCard({ candidates = [], loading = false, statusFilter = ['actief'] }) {
+// The raw candidate fields this card reads (from /sm_candidates — not mapped).
+interface MonthlyKpiCandidate {
+  status?: string
+  registration_date?: string
+  end_date_employment?: string
+  [k: string]: unknown
+}
+
+interface DrillState {
+  mode: string
+  title: string
+  candidates: MonthlyKpiCandidate[]
+}
+
+interface MonthlyKpiCardProps {
+  candidates?: MonthlyKpiCandidate[]
+  loading?: boolean
+  statusFilter?: string[]
+}
+
+// KpiDrillDownDrawer is still untyped JS — declare the props this card passes.
+const KpiDrillDownDrawer = KpiDrillDownDrawerJs as ComponentType<{
+  mode: string; title: string; candidates: MonthlyKpiCandidate[]; onClose: () => void
+}>
+
+export default function MonthlyKpiCard({ candidates = [], loading = false, statusFilter = ['actief'] }: MonthlyKpiCardProps) {
   const { t } = useTranslation('shiftmanager')
   const { new_candidates_target: KPI_TARGET } = useKpiSettings()
-  const [drill, setDrill] = useState(null) // { mode, title, candidates }
+  const [drill, setDrill] = useState<DrillState | null>(null)
 
   if (loading) {
     return (
@@ -47,7 +73,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
   const actual = newCandidates.length
 
   // Monthly average for the current year up to this month
-  const grouped = {}
+  const grouped: Record<string, number> = {}
   filtered.forEach(c => {
     if (!c.registration_date) return
     const d = new Date(c.registration_date)
@@ -74,9 +100,9 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
 
   const pctVsKpi = KPI_TARGET > 0 ? Math.round((actual / KPI_TARGET) * 100) : 0
 
-  const openDrill = (mode, title, list) => setDrill({ mode, title, candidates: list })
+  const openDrill = (mode: string, title: string, list: MonthlyKpiCandidate[]) => setDrill({ mode, title, candidates: list })
 
-  const blockStyle = (clickable) => ({
+  const blockStyle = (clickable: boolean): CSSProperties => ({
     flex: 1, textAlign: 'center', cursor: clickable ? 'pointer' : 'default',
     padding: '4px 4px', borderRadius: 6, transition: 'background 0.1s',
   })

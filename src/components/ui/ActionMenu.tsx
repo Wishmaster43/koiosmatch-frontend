@@ -6,43 +6,82 @@
  * "back" header returns one level. Dumb + data-driven — no API or business logic
  * lives here; callers pass an `items` tree and callbacks. Reuse for any table's
  * bulk bar or row menu.
- *
- * Node shapes (kind inferred from which field is present):
- *   action     : { key, label, icon?, danger?, onSelect }
- *   submenu    : { key, label, icon?, items: Node[] }
- *   optionList : { key, label, icon?, searchable?, searchPlaceholder?, emptyText?,
- *                  options: [{ value, label, color?, icon? }], onPick }
- *   multiSelect: { key, label, icon?, multiSelect: true, options, selected?: value[],
- *                  searchPlaceholder?, emptyText?, submitLabel?, onSubmit(values[]) }
- *   input      : { key, label, icon?, input: true, placeholder?, submitLabel?, onSubmit }
  */
 import { useState, useRef, useEffect, useMemo } from 'react'
+import type { CSSProperties, ComponentType, KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react'
 import { ChevronDown, ChevronRight, ArrowLeft, Search, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+// Icon contract shared by the trigger, nodes and options (lucide-compatible).
+type IconComponent = ComponentType<{ size?: number; style?: CSSProperties; color?: string }>
+
+export interface MenuOption {
+  value: string | number
+  label?: string
+  color?: string
+  icon?: IconComponent
+}
+
+/**
+ * A menu node — its kind is inferred from which field is present:
+ *   action     : { onSelect }
+ *   submenu    : { items }
+ *   optionList : { options, onPick }
+ *   multiSelect: { options, multiSelect: true, onSubmit }
+ *   input      : { input: true, onSubmit }
+ */
+export interface MenuNode {
+  key: string
+  label?: string
+  icon?: IconComponent
+  danger?: boolean
+  onSelect?: () => void
+  items?: MenuNode[]
+  options?: MenuOption[]
+  multiSelect?: boolean
+  selected?: Array<string | number>
+  searchable?: boolean
+  searchPlaceholder?: string
+  emptyText?: string
+  submitLabel?: string
+  onSubmit?: (value: string | Array<string | number>) => void
+  onPick?: (value: string | number) => void
+  input?: boolean
+  placeholder?: string
+}
+
 // Shared inline styles (CSS-var tokens only, theme-aware).
-const headerStyle = {
+const headerStyle: CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '9px 12px',
   fontSize: 12, color: 'var(--text)', background: 'var(--color-primary-bg)',
   border: 'none', borderBottom: '1px solid var(--border)', cursor: 'pointer', textAlign: 'left',
 }
-const rowStyle = (danger) => ({
+const rowStyle = (danger?: boolean): CSSProperties => ({
   display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '9px 12px',
   fontSize: 12, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
   color: danger ? 'var(--color-danger)' : 'var(--text)',
 })
-const hoverOn = e => { e.currentTarget.style.background = 'var(--hover-bg)' }
-const hoverOff = e => { e.currentTarget.style.background = 'none' }
+const hoverOn = (e: ReactMouseEvent<HTMLElement>) => { e.currentTarget.style.background = 'var(--hover-bg)' }
+const hoverOff = (e: ReactMouseEvent<HTMLElement>) => { e.currentTarget.style.background = 'none' }
 
-export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 248, align = 'left', disabled = false }) {
+interface ActionMenuProps {
+  label?: string
+  icon?: IconComponent
+  items?: MenuNode[]
+  menuWidth?: number
+  align?: 'left' | 'right'
+  disabled?: boolean
+}
+
+export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 248, align = 'left', disabled = false }: ActionMenuProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
   // Drill-in stack: each entry is the node we descended into (last = current level).
-  const [path, setPath] = useState([])
+  const [path, setPath] = useState<MenuNode[]>([])
   const [query, setQuery] = useState('')
   // Working selection for a multi-select level (applied via its confirm button).
-  const [multiValues, setMultiValues] = useState([])
-  const ref = useRef(null)
+  const [multiValues, setMultiValues] = useState<Array<string | number>>([])
+  const ref = useRef<HTMLDivElement>(null)
 
   // Reset navigation + search whenever the menu closes.
   const close = () => { setOpen(false); setPath([]); setQuery(''); setMultiValues([]) }
@@ -51,7 +90,7 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
   // Close on outside click while open.
   useEffect(() => {
     if (!open) return
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) close() }
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) close() }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [open])
@@ -60,7 +99,8 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
   // otherwise the first menu item, so the menu is keyboard-operable immediately.
   useEffect(() => {
     if (!open) return
-    ref.current?.querySelector('input, textarea, [data-menuitem]')?.focus()
+    const el = ref.current?.querySelector('input, textarea, [data-menuitem]')
+    if (el instanceof HTMLElement) el.focus()
   }, [open, path])
 
   // Current level: root items, or the node we last drilled into.
@@ -72,28 +112,29 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
   const inputNode = current && current.input ? current : null
 
   // Drill into a submenu/option/input node, or fire a leaf action and close.
-  const choose = (node) => {
+  const choose = (node: MenuNode) => {
     if (node.items || node.options || node.input) {
       setPath(p => [...p, node]); setQuery('')
       if (node.multiSelect) setMultiValues(node.selected ?? [])
     } else { node.onSelect?.(); close() }
   }
   // Toggle one value in the multi-select working set.
-  const toggleMulti = (value) => setMultiValues(v => v.includes(value) ? v.filter(x => x !== value) : [...v, value])
+  const toggleMulti = (value: string | number) => setMultiValues(v => v.includes(value) ? v.filter(x => x !== value) : [...v, value])
 
   // Pick an option inside an option-list node, then close.
-  const pick = (value) => { optionNode?.onPick?.(value); close() }
+  const pick = (value: string | number) => { optionNode?.onPick?.(value); close() }
 
   // Esc steps back one level (or closes at root); arrows roam the menu items.
-  const onKeyDown = (e) => {
-    if (e.key === 'Escape') { e.stopPropagation(); path.length ? back() : close(); return }
+  const onKeyDown = (e: ReactKeyboardEvent) => {
+    if (e.key === 'Escape') { e.stopPropagation(); if (path.length) back(); else close(); return }
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
       const nodes = [...(ref.current?.querySelectorAll('[data-menuitem]') ?? [])]
       if (!nodes.length) return
       e.preventDefault()
-      const i = nodes.indexOf(document.activeElement)
+      const i = nodes.indexOf(document.activeElement as Element)
       const n = nodes.length
-      nodes[e.key === 'ArrowDown' ? (i + 1) % n : (i - 1 + n) % n]?.focus()
+      const target = nodes[e.key === 'ArrowDown' ? (i + 1) % n : (i - 1 + n) % n]
+      if (target instanceof HTMLElement) target.focus()
     }
   }
 
@@ -101,7 +142,8 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
   const shownOptions = useMemo(() => {
     if (!listNode) return []
     const q = query.trim().toLowerCase()
-    return q ? listNode.options.filter(o => (o.label ?? '').toLowerCase().includes(q)) : listNode.options
+    const options = listNode.options ?? []
+    return q ? options.filter(o => (o.label ?? '').toLowerCase().includes(q)) : options
   }, [listNode, query])
 
   return (
@@ -119,9 +161,10 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
 
       {open && (
         <div role="menu" aria-label={label}
-          style={{ position: 'absolute', top: '100%', [align]: 0, zIndex: 200, marginTop: 4, width: menuWidth,
+          style={{ position: 'absolute', top: '100%', zIndex: 200, marginTop: 4, width: menuWidth,
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
-            boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
+            boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden',
+            ...(align === 'right' ? { right: 0 } : { left: 0 }) }}>
 
           {/* Back header when drilled into a sub-level */}
           {current && (
