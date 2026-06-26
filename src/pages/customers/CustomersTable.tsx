@@ -14,7 +14,7 @@ interface CustomersTableProps {
   loading?: boolean
   selectedId?: Id | null
   onSelect?: (row: Customer) => void
-  statusMeta: (v: string | number) => { label?: string; color?: string }
+  statusMeta: (v: string) => { label?: string; color?: string }
   selectable?: boolean
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
@@ -48,7 +48,7 @@ export default function CustomersTable({
     {
       key: 'status', header: t('cols.status'), sortable: true, sortValue: c => c.status,
       render: c => {
-        const m = statusMeta(c.status)
+        const m = statusMeta(String(c.status))
         return <StatusPill label={c.statusLabel ?? m.label} color={c.statusColor ?? m.color} />
       },
     },
