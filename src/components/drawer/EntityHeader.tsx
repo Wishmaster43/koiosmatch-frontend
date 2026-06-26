@@ -4,23 +4,29 @@
  * Renders: a small type label + expand/close, an avatar (optional photo upload
  * menu), title/subtitle (or a custom renderTitle), right-side actions, a row of
  * meta pickers (status/owner/type…), optional extra `children`, and a tag editor.
- *
- * meta: Array<{ key, label, value, options, onChange, placeholder? }>
- * tags: { items, onAdd, onRemove, addLabel? }
  */
 import { useState, useRef, useEffect } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { X, Maximize2, Minimize2, Camera } from 'lucide-react'
-import Avatar from '../ui/Avatar'
-import SelectMenu from '../ui/SelectMenu'
+import AvatarJs from '../ui/Avatar'
+import SelectMenuJs from '../ui/SelectMenu'
 
-function PhotoAvatar({ avatar, onChange, labels }) {
+type AnyProps = Record<string, unknown>
+// Still-untyped JS UI — accept any props at the boundary.
+const Avatar = AvatarJs as unknown as ComponentType<AnyProps>
+const SelectMenu = SelectMenuJs as unknown as ComponentType<AnyProps>
+
+interface AvatarConfig { initials?: string; photo?: string | null; color?: string | null; soft?: boolean }
+interface PhotoLabels { upload?: string; remove?: string }
+
+function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onChange?: (url: string) => void; labels?: PhotoLabels }) {
   const [menuOpen, setMenuOpen] = useState(false)
-  const ref = useRef(null)
-  const fileRef = useRef(null)
+  const ref = useRef<HTMLDivElement>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!menuOpen) return
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setMenuOpen(false) }
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setMenuOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [menuOpen])
@@ -34,8 +40,8 @@ function PhotoAvatar({ avatar, onChange, labels }) {
         <Avatar initials={avatar.initials} size={44} photo={avatar.photo} color={avatar.color} soft={avatar.soft} />
         <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'rgba(0,0,0,0.35)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.15s' }}
-          onMouseEnter={e => (e.currentTarget.style.opacity = 1)}
-          onMouseLeave={e => (e.currentTarget.style.opacity = 0)}>
+          onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+          onMouseLeave={e => (e.currentTarget.style.opacity = '0')}>
           <Camera size={14} color="white" />
         </div>
       </button>
@@ -60,10 +66,10 @@ function PhotoAvatar({ avatar, onChange, labels }) {
   )
 }
 
-function TagRow({ items = [], onAdd, onRemove, addLabel }) {
+function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; onAdd: (v: string) => void; onRemove: (tag: string) => void; addLabel?: string }) {
   const [adding, setAdding] = useState(false)
   const [value, setValue] = useState('')
-  const inputRef = useRef(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   useEffect(() => { if (adding) inputRef.current?.focus() }, [adding])
   const commit = () => { if (value.trim()) onAdd(value.trim()); setValue(''); setAdding(false) }
 
@@ -89,10 +95,40 @@ function TagRow({ items = [], onAdd, onRemove, addLabel }) {
   )
 }
 
+export interface MetaPicker {
+  key: string
+  label?: ReactNode
+  value?: unknown
+  options?: unknown
+  onChange?: (v: unknown) => void
+  placeholder?: string
+  width?: number
+  menuWidth?: number
+}
+
+interface EntityHeaderProps {
+  label?: ReactNode
+  avatar?: AvatarConfig
+  onPhotoChange?: (url: string) => void
+  photoLabels?: PhotoLabels
+  title?: ReactNode
+  subtitle?: ReactNode
+  renderTitle?: () => ReactNode
+  actions?: ReactNode
+  meta?: MetaPicker[]
+  metaExtra?: ReactNode
+  tags?: { items?: string[]; onAdd: (v: string) => void; onRemove: (tag: string) => void; addLabel?: string }
+  tagsLabel?: ReactNode
+  children?: ReactNode
+  expanded?: boolean
+  onToggleExpand?: () => void
+  onClose?: () => void
+}
+
 export default function EntityHeader({
   label, avatar, onPhotoChange, photoLabels, title, subtitle, renderTitle,
   actions, meta = [], metaExtra, tags, tagsLabel, children, expanded, onToggleExpand, onClose,
-}) {
+}: EntityHeaderProps) {
   return (
     <>
       {/* Title row */}

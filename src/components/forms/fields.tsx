@@ -11,7 +11,7 @@ import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { useTranslation } from 'react-i18next'
 
-export interface SelectOption { value: string; label: ReactNode }
+export interface SelectOption { value: string; label?: ReactNode }
 
 export const inputStyle: CSSProperties = {
   width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,
