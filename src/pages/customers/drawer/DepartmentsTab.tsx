@@ -3,17 +3,24 @@
  * searchable table; a row drills into detail (info + contacts in the department +
  * a planning summary scoped to that department). Adds via the parent's onAdd.
  */
+import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Building } from 'lucide-react'
 import SubEntityTab from './SubEntityTab'
 import PlanningSummary from './PlanningSummary'
-import DetailTable from '../../../components/ui/DetailTable'
+import type { Column } from '../../../components/ui/DataTable'
+import DetailTableJs from '../../../components/ui/DetailTable'
 import SectionCard from '../../../components/ui/SectionCard'
+import type { Department } from '../../../types/customer'
+import type { Id } from '../../../types/common'
 
-export default function DepartmentsTab({ customerId, departments = [], onAdd }) {
+type AnyProps = Record<string, unknown>
+const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>
+
+export default function DepartmentsTab({ customerId, departments = [], onAdd }: { customerId?: Id; departments?: Department[]; onAdd?: () => void }) {
   const { t } = useTranslation('customers')
 
-  const columns = [
+  const columns: Column<Department>[] = [
     { key: 'name', header: t('departments.col.name'), sortable: true, sortValue: d => d.name,
       render: d => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -25,7 +32,7 @@ export default function DepartmentsTab({ customerId, departments = [], onAdd }) 
     { key: 'contacts', header: t('departments.col.contacts'), align: 'right', cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true, sortValue: d => (d.contacts ?? []).length, render: d => (d.contacts ?? []).length },
   ]
 
-  const renderDetail = (d) => (
+  const renderDetail = (d: Department) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{d.name}</div>
 
@@ -43,9 +50,9 @@ export default function DepartmentsTab({ customerId, departments = [], onAdd }) 
           ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('departments.detail.none')}</div>
           : (
             <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-              {d.contacts.map((p, i) => (
+              {(d.contacts ?? []).map((p, i, arr) => (
                 <div key={p.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', fontSize: 12,
-                  borderBottom: i < d.contacts.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                  borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
                   <span style={{ flex: 1, color: 'var(--text)' }}>{p.name}</span>
                   <span style={{ color: 'var(--text-muted)' }}>{[p.role, p.email].filter(Boolean).join(' · ')}</span>
                 </div>
@@ -55,7 +62,7 @@ export default function DepartmentsTab({ customerId, departments = [], onAdd }) 
       </SectionCard>
 
       <SectionCard title={t('planning.title')}>
-        <PlanningSummary customerId={customerId} params={{ department_id: d.id }} />
+        <PlanningSummary customerId={customerId ?? ''} params={{ department_id: d.id }} />
       </SectionCard>
     </div>
   )

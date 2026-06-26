@@ -3,15 +3,24 @@
  * a rich detail (C-6 address fields + nested departments + contacts + a planning
  * summary scoped to that location). Adds via the parent's onAdd callback.
  */
+import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin } from 'lucide-react'
 import SubEntityTab from './SubEntityTab'
 import PlanningSummary from './PlanningSummary'
-import DetailTable from '../../../components/ui/DetailTable'
+import type { Column } from '../../../components/ui/DataTable'
+import DetailTableJs from '../../../components/ui/DetailTable'
 import SectionCard from '../../../components/ui/SectionCard'
+import type { Location, Department, Contact } from '../../../types/customer'
+import type { Id } from '../../../types/common'
+
+type AnyProps = Record<string, unknown>
+const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>
 
 // A simple "name + meta" row list used for the nested departments/contacts.
-function MiniList({ items, getPrimary, getSecondary, emptyText }) {
+function MiniList<T extends { id?: Id }>({ items, getPrimary, getSecondary, emptyText }: {
+  items?: T[]; getPrimary: (it: T) => ReactNode; getSecondary: (it: T) => ReactNode; emptyText: ReactNode
+}) {
   if (!items?.length) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{emptyText}</div>
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
@@ -26,10 +35,10 @@ function MiniList({ items, getPrimary, getSecondary, emptyText }) {
   )
 }
 
-export default function LocationsTab({ customerId, locations = [], onAdd }) {
+export default function LocationsTab({ customerId, locations = [], onAdd }: { customerId?: Id; locations?: Location[]; onAdd?: () => void }) {
   const { t } = useTranslation('customers')
 
-  const columns = [
+  const columns: Column<Location>[] = [
     { key: 'name', header: t('locations.col.name'), sortable: true, sortValue: l => l.name,
       render: l => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -42,7 +51,7 @@ export default function LocationsTab({ customerId, locations = [], onAdd }) {
     { key: 'contacts', header: t('locations.col.contacts'), align: 'right', cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true, sortValue: l => (l.contacts ?? []).length, render: l => (l.contacts ?? []).length },
   ]
 
-  const renderDetail = (l) => (
+  const renderDetail = (l: Location) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{l.name}</div>
 
@@ -62,15 +71,15 @@ export default function LocationsTab({ customerId, locations = [], onAdd }) {
       </SectionCard>
 
       <SectionCard title={t('locations.detail.departmentsHere')}>
-        <MiniList items={l.departments} getPrimary={d => d.name} getSecondary={() => ''} emptyText={t('locations.detail.none')} />
+        <MiniList<Department> items={l.departments} getPrimary={d => d.name} getSecondary={() => ''} emptyText={t('locations.detail.none')} />
       </SectionCard>
 
       <SectionCard title={t('locations.detail.contactsHere')}>
-        <MiniList items={l.contacts} getPrimary={p => p.name} getSecondary={p => [p.role, p.email].filter(Boolean).join(' · ')} emptyText={t('locations.detail.none')} />
+        <MiniList<Contact> items={l.contacts} getPrimary={p => p.name} getSecondary={p => [p.role, p.email].filter(Boolean).join(' · ')} emptyText={t('locations.detail.none')} />
       </SectionCard>
 
       <SectionCard title={t('planning.title')}>
-        <PlanningSummary customerId={customerId} params={{ location_id: l.id }} />
+        <PlanningSummary customerId={customerId ?? ''} params={{ location_id: l.id }} />
       </SectionCard>
     </div>
   )

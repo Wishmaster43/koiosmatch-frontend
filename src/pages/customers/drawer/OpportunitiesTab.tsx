@@ -6,6 +6,7 @@
  * Both sections handle their own loading/empty state.
  */
 import { useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '../../../lib/api'
 import { isAbortError } from '../../../lib/mocks'
@@ -13,15 +14,19 @@ import { useAuth } from '../../../context/AuthContext'
 import { useDateFormat } from '../../../lib/datetime'
 import SectionCard from '../../../components/ui/SectionCard'
 import VacanciesTab from './VacanciesTab'
+import type { Id } from '../../../types/common'
 
-const Muted = ({ text }) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{text}</div>
+interface ShiftRow { id?: Id; date?: string; shift?: string; department?: string }
+
+const Muted = ({ text }: { text: ReactNode }) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{text}</div>
 
 // Section B — open flex shifts (planning), only when the tenant has the module.
-function OpenShifts({ customerId }) {
+function OpenShifts({ customerId }: { customerId?: Id }) {
   const { t } = useTranslation('customers')
-  const { hasModule } = useAuth()
+  const auth = useAuth()
+  const hasModule = auth?.hasModule ?? (() => false)
   const { formatDate } = useDateFormat()
-  const [rows, setRows]       = useState([])
+  const [rows, setRows]       = useState<ShiftRow[]>([])
   const [loading, setLoading] = useState(true)
   const enabled = hasModule('plan')
 
@@ -30,7 +35,7 @@ function OpenShifts({ customerId }) {
     const ctrl = new AbortController()
     setLoading(true)
     api.get(`/customers/${customerId}/open-shifts`, { signal: ctrl.signal })
-      .then(res => setRows(unwrapList(res).rows))
+      .then(res => setRows(unwrapList<ShiftRow>(res).rows))
       .catch(e => { if (!isAbortError(e)) setRows([]) })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
@@ -53,7 +58,7 @@ function OpenShifts({ customerId }) {
   )
 }
 
-export default function OpportunitiesTab({ customerId }) {
+export default function OpportunitiesTab({ customerId }: { customerId?: Id }) {
   const { t } = useTranslation('customers')
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

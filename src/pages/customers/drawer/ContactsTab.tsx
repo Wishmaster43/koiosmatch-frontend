@@ -3,17 +3,23 @@
  * into the full contact detail. This replaces the old cramped contact rows with a
  * proper table + detail. Adds via the parent's onAdd callback.
  */
+import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Users, Check } from 'lucide-react'
 import SubEntityTab from './SubEntityTab'
-import DetailTable from '../../../components/ui/DetailTable'
+import type { Column } from '../../../components/ui/DataTable'
+import DetailTableJs from '../../../components/ui/DetailTable'
 import SectionCard from '../../../components/ui/SectionCard'
+import type { Contact } from '../../../types/customer'
 
-export default function ContactsTab({ contacts = [], onAdd }) {
+type AnyProps = Record<string, unknown>
+const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>
+
+export default function ContactsTab({ contacts = [], onAdd }: { contacts?: Contact[]; onAdd?: () => void }) {
   const { t } = useTranslation('customers')
 
-  const muted = { color: 'var(--text-muted)', fontSize: 12 }
-  const columns = [
+  const muted: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
+  const columns: Column<Contact>[] = [
     { key: 'name', header: t('contacts.col.name'), sortable: true, sortValue: p => p.name,
       render: p => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -27,7 +33,7 @@ export default function ContactsTab({ contacts = [], onAdd }) {
     { key: 'phone', header: t('contacts.col.phone'), nowrap: true, cellStyle: muted, sortable: true, sortValue: p => p.phone, render: p => p.phone || '—' },
   ]
 
-  const renderDetail = (p) => (
+  const renderDetail = (p: Contact) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{p.name}</div>
       <SectionCard title={t('contacts.detail.infoTitle')}>

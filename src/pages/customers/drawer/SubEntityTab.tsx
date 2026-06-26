@@ -36,7 +36,7 @@ interface SubEntityTabProps<Item> {
   renderDetail: (item: Item) => ReactNode
 }
 
-export default function SubEntityTab<Item extends Record<string, unknown>>({
+export default function SubEntityTab<Item extends object>({
   items = [], columns, addLabel, emptyText, searchPlaceholder, backLabel,
   searchKeys = ['name'], onAdd, renderDetail,
 }: SubEntityTabProps<Item>) {
@@ -55,7 +55,7 @@ export default function SubEntityTab<Item extends Record<string, unknown>>({
 
   // List view — client-side search over the chosen keys.
   const q = search.trim().toLowerCase()
-  const rows = q ? items.filter(it => searchKeys.some(k => String(it[k] ?? '').toLowerCase().includes(q))) : items
+  const rows = q ? items.filter(it => searchKeys.some(k => String((it as Record<string, unknown>)[k] ?? '').toLowerCase().includes(q))) : items
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
