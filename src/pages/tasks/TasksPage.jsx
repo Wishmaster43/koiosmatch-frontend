@@ -128,9 +128,12 @@ function TasksPageInner() {
     return true
   }
 
+  // Reset to the first page whenever a filter or KPI tile changes (kept out of
+  // the memo — setting state during render can loop).
+  useEffect(() => { setPage(1) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter])
+
   // The visible rows: status/priority/type/assignee filters + the active KPI tile.
   const filteredAll = useMemo(() => {
-    setPage(1)
     return all.filter(x => {
       if (selectedStatus.length   && !selectedStatus.includes(x.statusKey))       return false
       if (selectedPriority.length && !selectedPriority.includes(x.priorityKey))   return false

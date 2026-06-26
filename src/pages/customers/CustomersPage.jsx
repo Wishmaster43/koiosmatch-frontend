@@ -26,7 +26,7 @@ const toggleOneValue = (set, value) => set(p => (p.length === 1 && p[0] === valu
 export default function CustomersPage() {
   const { t } = useTranslation('customers')
   const { registerFilters, unregisterFilters } = useRightPanel()
-  const { hasPermission, user } = useAuth()
+  const { hasPermission } = useAuth()
   const { data: users = [] } = useUsers()
   const { statuses, statusMeta } = useCustomerLookups()
 

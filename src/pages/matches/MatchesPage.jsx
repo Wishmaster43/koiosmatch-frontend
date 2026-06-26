@@ -67,9 +67,12 @@ export default function MatchesPage() {
     return Object.values(m)
   }, [rows])
 
-  // Filter the visible rows by donut selection; reset pagination on change.
+  // Reset to the first page whenever a filter changes (kept out of the memo —
+  // setting state during render can loop).
+  useEffect(() => { setPage(1) }, [stageFilter, ownerFilter])
+
+  // Filter the visible rows by donut selection.
   const filteredAll = useMemo(() => {
-    setPage(1)
     return rows.filter(r => {
       if (stageFilter.length && !stageFilter.includes(r.stage)) return false
       if (ownerFilter.length && !ownerFilter.includes(r.owner)) return false

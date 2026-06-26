@@ -60,9 +60,12 @@ export default function OpportunitiesPage() {
     return () => ctrl.abort()
   }, [])
 
+  // Reset to the first page whenever a filter changes (kept out of the memo —
+  // setting state during render can loop).
+  useEffect(() => { setPage(1) }, [stage, owner])
+
   // Visible rows = the stage/owner donut selection applied client-side.
   const filteredAll = useMemo(() => {
-    setPage(1)
     return rows.filter(r => {
       if (stage.length && !stage.includes(r.stage)) return false
       if (owner.length && !owner.includes(r.owner)) return false
