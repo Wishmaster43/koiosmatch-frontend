@@ -8,8 +8,8 @@
  * the precise per-tab shapes get tightened when those tabs migrate to TS.
  */
 
-/** Loose nested record whose exact fields vary by backend version. */
-export type Loose = Record<string, unknown>
+import type { Loose } from './common'
+export type { Loose }
 
 /** Talent-pool chip on a candidate. Accepts a bare slug (normalised to { name }). */
 export interface CandidatePool {

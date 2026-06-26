@@ -1,6 +1,8 @@
 import { bucketOfPhase } from './applicationsShared'
-
 import { initialsOf } from '@/lib/initials'
+import type {
+  ApiApplication, Application, ApplicationDetail, ApiAppCandidate, ApiAppVacancy,
+} from '@/types/application'
 
 /**
  * mapApplication — raw API application → the flat shape the table/board/drawer
@@ -8,13 +10,13 @@ import { initialsOf } from '@/lib/initials'
  * /applications endpoint is not built yet — see docs/worklist.md), so it accepts
  * several spellings and never throws on a missing field.
  */
-export function mapApplication(a = {}) {
-  const cand = a.candidate ?? {}
+export function mapApplication(a: ApiApplication = {}): Application {
+  const cand: ApiAppCandidate = a.candidate ?? {}
   const joined = [cand.first_name, cand.last_name].filter(Boolean).join(' ')
   const candidateName = a.candidate_name ?? cand.name ?? (joined || '—')
 
-  const vacancy = a.vacancy ?? {}
-  const owner = a.owner ?? {}
+  const vacancy: ApiAppVacancy = a.vacancy ?? {}
+  const owner: { name?: string; avatar_color?: string | null } = a.owner ?? {}
 
   // Phase carries its own label + colour from the backend lookup; the bucket is
   // derived from the phase key (falling back to an explicit `bucket` field).
@@ -51,10 +53,10 @@ export function mapApplication(a = {}) {
  * nested objects (candidate, vacancy, interviews, appointments, timeline, match).
  * Defensive: every nested list defaults to [] so a tab never crashes.
  */
-export function mapApplicationDetail(raw = {}) {
+export function mapApplicationDetail(raw: ApiApplication = {}): ApplicationDetail {
   const base = mapApplication(raw)
-  const cand = raw.candidate ?? {}
-  const vac = raw.vacancy ?? {}
+  const cand: ApiAppCandidate = raw.candidate ?? {}
+  const vac: ApiAppVacancy = raw.vacancy ?? {}
 
   return {
     ...base,
