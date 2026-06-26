@@ -55,7 +55,7 @@
 
 ### P4 — Kwaliteit & schaalbaarheid (groot, apart inplannen)
 - ☐ **FE-P4-1** CS-6: inline `api.*` → feature-`api/`-laag (72 files).
-- ☐ **FE-P4-2** CS-5: PropTypes → **TypeScript** op shared laag (start `lib/` + `components/ui/`). *(wacht D4)*
+- ◐ **FE-P4-2** CS-5 → **TypeScript-migratie** (D4 besloten, "nieuw = TS", groen per golf). **Done:** Golf 0 (fundament) · 1a (dedup `initialsOf`) · 1b (6 mappers + `types/`) · 2 (24 `components/ui`) · **3a (candidates data+hooks)**. **Volgende:** 3b (page/table/bulk/modal) · 3c (drawer+tabs) → overige features. Logboek: `MIGRATION-AUDIT.md`.
 - ☐ **FE-P4-3** CS-9: tests op kritieke paden (bulk-mutate optimistic/reconcile, data-mappers, 4 UI-states, auth-gated UI).
 - ☐ **FE-P4-4** a11y-pass WCAG 2.2 AA (focus-trap+restore drawers/modals, aria-labels, kleur≠enig-signaal, contrast ≥4.5:1).
 - ☐ **FE-P4-5** Virtualiseer grote tabellen (kandidaten/shifts, 10k+ rijen).
@@ -83,7 +83,7 @@
 | ☐ | BE-5 | Dashboard-KPI **deltas** (subs zijn nu `null`) | KPI-subs SM-dashboard |
 | ☐ | BE-6 | C-5b webhook-delivery (stap 2) | B-6 webhooks-UI |
 | ☐ | BE-7 | Yesway **PDOK-backfill** samen draaien (AVG-go gegeven) | radius op echte data |
-| ◐ | BE-8 | **Sanctum SPA-cookie** (D1) — **backend-infra GEBOUWD** (`2ef65ff`, staff-only, suite 341 groen): `statefulApi()` + CORS-creds + X-XSRF-TOKEN + **MFA-bypass dichtgezet**. **Flip resteert** (SPA-host nog niet in `SANCTUM_STATEFUL_DOMAINS`) → gecoördineerde deploy-stap | N-2 auth-migratie |
+| ◐ | BE-8 | **Sanctum SPA-cookie** (D1) — **backend-infra GEBOUWD** (`2ef65ff`, staff-only, suite 341 groen): `statefulApi()` + CORS-creds + X-XSRF-TOKEN + **MFA-bypass dichtgezet**. **Flip resteert** (SPA-host nog niet in `SANCTUM_STATEFUL_DOMAINS`) → gecoördineerde deploy-stap. Sessions: **Redis** (besloten, geen DB-migratie) | N-2 auth-migratie |
 
 > Volgorde-advies aan backend: **C-27 eerst** (deblokkeert de workflow-editor het meest).
 
