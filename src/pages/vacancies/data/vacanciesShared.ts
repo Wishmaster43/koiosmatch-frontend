@@ -3,24 +3,29 @@
  * picker, an optimistic-subset snapshot, and the UI-patch → API-body mapping
  * used when saving header/picker edits.
  */
+import type { Dispatch, SetStateAction } from 'react'
 
 // Set exactly one value in a multi-select, or clear when it's already the only one.
-export const toggleOneValue = (set, value) =>
+export const toggleOneValue = (set: Dispatch<SetStateAction<string[]>>, value: string) =>
   set(p => (p.length === 1 && p[0] === value) ? [] : [value])
 
 // Two-letter initials — re-exported from the shared util (single source).
 export { initialsOf } from '@/lib/initials'
 
 // Recharts hands the clicked segment back at top level AND under `.payload`.
-export const pickKey = (d) => d?.key ?? d?.payload?.key ?? d?.name
+export const pickKey = (d: unknown): string | undefined => {
+  const o = d as { key?: string; name?: string; payload?: { key?: string } } | null | undefined
+  return o?.key ?? o?.payload?.key ?? o?.name
+}
 
 // Snapshot a subset of fields, for optimistic revert/reconcile.
-export const subsetOf = (obj, keys) => keys.reduce((a, k) => { a[k] = obj[k]; return a }, {})
+export const subsetOf = (obj: Record<string, unknown>, keys: string[]): Record<string, unknown> =>
+  keys.reduce<Record<string, unknown>>((a, k) => { a[k] = obj[k]; return a }, {})
 
 // Translate a drawer/header UI patch → the API body. The optimistic local fields
 // (statusLabel/owner/clientName) are derived in the container; this is the persist body.
-export const buildVacancyPatch = (patch) => {
-  const body = {}
+export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string, unknown> => {
+  const body: Record<string, unknown> = {}
   if ('statusValue'         in patch) body.status               = patch.statusValue
   if ('ownerId'             in patch) body.owner_id             = patch.ownerId
   if ('clientId'            in patch) body.customer_id          = patch.clientId

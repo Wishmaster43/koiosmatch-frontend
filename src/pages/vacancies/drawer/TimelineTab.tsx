@@ -1,12 +1,13 @@
 import { useTranslation } from 'react-i18next'
 import Avatar from '../../../components/ui/Avatar'
 import KoiosAiMark from '../../../components/ui/KoiosAiMark'
+import type { VacancyDetail } from '../../../types/vacancy'
 
 /**
  * TimelineTab — read-only activity feed for a vacancy (created, status changes,
  * applications received…). AI-generated entries carry the Koios mark.
  */
-export default function TimelineTab({ vacancy: v }) {
+export default function TimelineTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   const items = v.timeline ?? []
 

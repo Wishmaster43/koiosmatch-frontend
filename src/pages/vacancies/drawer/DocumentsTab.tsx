@@ -1,8 +1,9 @@
 import { useTranslation } from 'react-i18next'
 import { FileText } from 'lucide-react'
+import type { VacancyDetail } from '../../../types/vacancy'
 
 // Bytes → a short human size (KB/MB), tolerant of a missing/string size.
-const humanSize = (size) => {
+const humanSize = (size: unknown): string => {
   const n = Number(size)
   if (!n) return ''
   if (n < 1024) return `${n} B`
@@ -14,7 +15,7 @@ const humanSize = (size) => {
  * DocumentsTab — read-only list of documents attached to the vacancy. Upload
  * (multipart) follows the candidate Documents pattern in a later round (B-19).
  */
-export default function DocumentsTab({ vacancy: v }) {
+export default function DocumentsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   const docs = v.documents ?? []
 

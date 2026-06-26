@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next'
 import Avatar from '../../../components/ui/Avatar'
 import { useDateFormat } from '../../../lib/datetime'
+import type { VacancyDetail } from '../../../types/vacancy'
 
 /**
  * NotesTab — read-only list of internal notes on the vacancy. A composer + write
  * path lands with the vacancy detail/notes endpoint (B-19 / C-26); mirrors the
  * applications NotesTab which is read-only until persistence exists.
  */
-export default function NotesTab({ vacancy: v }) {
+export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()
   const notes = v.notes ?? []

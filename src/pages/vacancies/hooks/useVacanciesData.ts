@@ -5,24 +5,44 @@
  * in the container can mutate the list directly.
  */
 import { useState, useEffect } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
+import type { TFunction } from 'i18next'
 import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
 import { mapVacancy } from '../data/mapVacancy'
+import type { Vacancy, ApiVacancy } from '@/types/vacancy'
+import type { Id } from '@/types/common'
 
-export function useVacanciesData({ filterParams, page, pageSize, t }) {
-  const [vacancies, setVacancies] = useState([])
+export interface VacancyCustomer { id: Id | undefined; name: string }
+export type VacancyStats = Record<string, unknown>
+
+interface UseVacanciesDataArgs { filterParams: Record<string, unknown>; page: number; pageSize: number; t: TFunction }
+interface UseVacanciesDataResult {
+  vacancies: Vacancy[]
+  setVacancies: Dispatch<SetStateAction<Vacancy[]>>
+  loading: boolean
+  error: string | null
+  total: number
+  setTotal: Dispatch<SetStateAction<number>>
+  lastPage: number
+  stats: VacancyStats | null
+  customers: VacancyCustomer[]
+}
+
+export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanciesDataArgs): UseVacanciesDataResult {
+  const [vacancies, setVacancies] = useState<Vacancy[]>([])
   const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState(null)
+  const [error,     setError]     = useState<string | null>(null)
   const [total,     setTotal]     = useState(0)
   const [lastPage,  setLastPage]  = useState(1)
-  const [stats,     setStats]     = useState(null)
-  const [customers, setCustomers] = useState([])
+  const [stats,     setStats]     = useState<VacancyStats | null>(null)
+  const [customers, setCustomers] = useState<VacancyCustomer[]>([])
 
   // Load the customers once for the filters/drawer/modal/bulk pickers.
   useEffect(() => {
     const ctrl = new AbortController()
     api.get('/customers', { signal: ctrl.signal })
-      .then(res => setCustomers(unwrapList(res).rows.map(c => ({ id: c.id, name: c.name ?? c.company_name ?? '—' }))))
+      .then(res => setCustomers(unwrapList<{ id?: Id; name?: string; company_name?: string }>(res).rows.map(c => ({ id: c.id, name: c.name ?? c.company_name ?? '—' }))))
       .catch(() => {})
     return () => ctrl.abort()
   }, [])
@@ -33,7 +53,7 @@ export function useVacanciesData({ filterParams, page, pageSize, t }) {
     setLoading(true); setError(null)
     api.get('/vacancies', { params: { ...filterParams, page, per_page: pageSize }, signal: ctrl.signal })
       .then(res => {
-        const { rows, total, lastPage } = unwrapList(res)
+        const { rows, total, lastPage } = unwrapList<ApiVacancy>(res)
         setVacancies(rows.map(mapVacancy)); setTotal(total); setLastPage(lastPage)
       })
       .catch(err => {
