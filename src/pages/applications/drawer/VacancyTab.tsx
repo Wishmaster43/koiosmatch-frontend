@@ -18,7 +18,8 @@ function Pill({ children }: { children: ReactNode }) {
  */
 export default function VacancyTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
-  const v = a.vacancy
+  // Defensive: a lite row (no nested vacancy) may show before the detail loads.
+  const v = a.vacancy ?? ({ title: a.vacancyTitle, client: a.client } as ApplicationDetail['vacancy'])
   const skills = (v.skills ?? []) as string[]
   const tags   = (v.tags ?? []) as string[]
 

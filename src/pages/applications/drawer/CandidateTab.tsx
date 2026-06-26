@@ -22,7 +22,8 @@ function Field({ label, children }: { label: ReactNode; children: ReactNode }) {
  */
 export default function CandidateTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
-  const c = a.candidate
+  // Defensive: the drawer shows a lite row before the full detail loads.
+  const c = a.candidate ?? ({} as ApplicationDetail['candidate'])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
