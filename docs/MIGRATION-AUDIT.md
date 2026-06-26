@@ -27,7 +27,13 @@
 | 3b | **Applications-feature 100% TS** — page · table · board (kanban, dnd) · drawer + 9 tabs (Application/Candidate/Vacancy/Interviews/Appointments/Notes/Timeline/MatchScore/Rejection) · add-modal | ✅ klaar | 40fab37 |
 | 3c | **Vacancies-feature 100% TS** — page · table · bulkbar · drawer + 8 tabs (Details/Applicants/Matching/Publishing/Documents/Timeline/Notes/Statistics) · add-modal · **2 hooks** (useVacanciesData · useVacancyBulkActions) · shared | ✅ klaar | 1382cb3 |
 | 3d | **Tasks-feature 100% TS** — page · table · board (kanban) · drawer + 4 tabs (Details/Links/Comments/Activity) · add-modal · polymorphe links | ✅ klaar | 8793304 |
-| 3+ | Resterende feature-maps: opportunities (mirror) · settings/sections (37) · shiftmanager (36) · reports (18) · layout (18) · `modules/` (55) · auth · ai/workflows | ☐ | — |
+| 3e | **Opportunities-feature 100% TS** — page · table · board (kanban) · insights-row · drawer + DetailsTab · add-modal | ✅ klaar | 34ebd2f |
+| 3+ | **Alle 6 entity-features klaar.** Resterend (niet-entity): settings/sections (37) · shiftmanager (36) · reports (18) · layout (18) · `modules/` (55) · auth · ai/workflows | ☐ | — |
+
+> **Werkverdeling (Danny, 2026-06-26):** de candidate-feature (incl. nieuwe instelbare lookups **Rijbewijs** en
+> **Voorkeurs branche** — zelfde patroon als Kandidaat-type: `LookupsContext` + `useX()` + Settings-CRUD, §3B)
+> is voor de **andere Claude**. Ik (deze Claude) blijf op de TS-migratie in **niet-candidate** mappen en raak
+> hun WIP niet aan.
 
 > **Let op (2 Claudes parallel):** de candidate-feature wordt momenteel live verder bewerkt door de andere Claude
 > (nieuwe `CandidateTypeSection`/`ChangelogPopover`, `onToggleZzp`/`onTypesChange` op de Preferences-tab). Tijdens
