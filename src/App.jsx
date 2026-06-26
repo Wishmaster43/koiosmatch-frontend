@@ -18,8 +18,10 @@ import './index.css'
 
 // Guards authenticated routes — redirects to /login when not logged in.
 function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth()
-  if (loading) {
+  // Defensive: tolerate a null auth context (provider not ready, or an upstream
+  // failure like /auth/me 500'ing) — show the loader instead of crashing the tree.
+  const auth = useAuth()
+  if (!auth || auth.loading) {
     return (
       <div className="flex items-center justify-center h-screen" style={{ background: 'var(--bg)' }}>
         <div className="flex flex-col items-center gap-3">
@@ -32,14 +34,14 @@ function ProtectedRoute({ children }) {
       </div>
     )
   }
-  return user ? children : <Navigate to="/login" replace />
+  return auth.user ? children : <Navigate to="/login" replace />
 }
 
 // Blocks authenticated users from the login page.
 function PublicRoute({ children }) {
-  const { user, loading } = useAuth()
-  if (loading) return null
-  return user ? <Navigate to="/" replace /> : children
+  const auth = useAuth()
+  if (!auth || auth.loading) return null
+  return auth.user ? <Navigate to="/" replace /> : children
 }
 
 export default function App() {
