@@ -4,8 +4,11 @@
  */
 import { useTranslation } from 'react-i18next'
 import { FileText } from 'lucide-react'
+import type { Id } from '../../../types/common'
 
-export default function DocumentsTab({ documents = [] }) {
+interface CustomerDoc { id?: Id; name?: string }
+
+export default function DocumentsTab({ documents = [] }: { documents?: CustomerDoc[] }) {
   const { t } = useTranslation('customers')
 
   if (documents.length === 0) {

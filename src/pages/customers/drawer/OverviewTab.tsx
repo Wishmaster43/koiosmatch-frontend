@@ -6,9 +6,11 @@
  */
 import { useTranslation } from 'react-i18next'
 import EditableFieldTable from '../../../components/forms/EditableFieldTable'
+import type { FieldRow } from '../../../components/forms/EditableFieldTable'
 import { useIndustries } from '../../../lib/useIndustries'
+import type { Customer } from '../../../types/customer'
 
-export default function OverviewTab({ c, onSave }) {
+export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (values: Record<string, unknown>) => void }) {
   const { t } = useTranslation('customers')
   const { industries } = useIndustries()
 
@@ -19,7 +21,7 @@ export default function OverviewTab({ c, onSave }) {
 
   // Field schema → grouped titled cards. Keys match the flat customer shape and
   // are translated to API keys in the page's updateCustomer.
-  const fields = [
+  const fields: FieldRow[] = [
     { key: 'debtorNumber',  label: t('overview.debtorNumber'), group: gGeneral },
     { key: 'city',          label: t('overview.city'),         group: gGeneral },
     { key: 'industry',      label: t('overview.industry'),     type: 'select', options: industries, group: gGeneral },
@@ -38,5 +40,5 @@ export default function OverviewTab({ c, onSave }) {
     { key: 'recruitmentProblems', label: t('overview.recruitmentProblems'), type: 'textarea', group: gTexts },
   ]
 
-  return <EditableFieldTable title={t('drawer.tabs.overview')} fields={fields} value={c} onSave={onSave} />
+  return <EditableFieldTable title={t('drawer.tabs.overview')} fields={fields} value={c as unknown as Record<string, unknown>} onSave={onSave} />
 }

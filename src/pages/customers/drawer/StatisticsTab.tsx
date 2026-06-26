@@ -8,10 +8,13 @@ import { useTranslation } from 'react-i18next'
 import api from '../../../lib/api'
 import { isAbortError } from '../../../lib/mocks'
 import StatsTab from '../../../components/drawer/tabs/StatsTab'
+import type { Customer } from '../../../types/customer'
 
-export default function StatisticsTab({ c }) {
+interface CustomerStats { matches_total?: number; active_matches?: number; open_vacancies?: number; fill_rate?: number }
+
+export default function StatisticsTab({ c }: { c: Customer }) {
   const { t } = useTranslation('customers')
-  const [stats, setStats] = useState(null)
+  const [stats, setStats] = useState<CustomerStats | null>(null)
 
   useEffect(() => {
     if (!c?.id) return
@@ -23,7 +26,7 @@ export default function StatisticsTab({ c }) {
   }, [c?.id])
 
   // Prefer server stats; fall back to the counts already on the record.
-  const matchesTotal  = stats?.matches_total  ?? c.matchesTotal ?? 0
+  const matchesTotal  = stats?.matches_total  ?? (c as { matchesTotal?: number }).matchesTotal ?? 0
   const activeMatches = stats?.active_matches  ?? c.activeMatchesCount ?? 0
   const openVacancies = stats?.open_vacancies  ?? c.openVacanciesCount ?? 0
   const fillRate      = stats?.fill_rate != null ? `${stats.fill_rate}%` : '—'
