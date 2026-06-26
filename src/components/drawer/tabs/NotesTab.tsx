@@ -2,43 +2,64 @@
  * NotesTab — generic communication tab: notes (with a rich-text composer) +
  * timeline + conversations. Entity-agnostic; data + labels via props so it works
  * for candidates, customers, vacancies, tasks alike.
- *
- * noteTypes: [{ value, label }]
- * labels: { notes, newNote, type, save, cancel, notesEmpty, timeline,
- *           timelineEmpty, conversations, conversationsEmpty, notePlaceholder(fn) }
  */
 import { useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { Plus, Edit2, Save, X } from 'lucide-react'
 import Avatar from '../../ui/Avatar'
 import SafeHtml from '../../ui/SafeHtml'
 import RichTextEditor from '../../ui/RichTextEditor'
 import SectionCard, { sectionBlock } from '../../ui/SectionCard'
 
+interface NoteType { value: string; label: string }
+interface NoteItem { type?: string; title?: string; author?: string; text?: string; body?: string; ago?: string; [k: string]: unknown }
+interface TimelineItem { time?: string; created_at?: string; text?: string; description?: string; [k: string]: unknown }
+interface NotesLabels {
+  notes?: ReactNode; newNote?: ReactNode; type?: ReactNode; save?: string; cancel?: string; edit?: string
+  notesEmpty?: ReactNode; timeline?: ReactNode; timelineEmpty?: ReactNode
+  conversations?: ReactNode; conversationsEmpty?: ReactNode
+  notePlaceholder?: (typeLabel: string) => string
+}
+interface NotePayload { type: string; title: string; body: string }
+
+interface NotesTabProps {
+  notes?: NoteItem[]
+  timeline?: TimelineItem[]
+  noteTypes?: NoteType[]
+  labels?: NotesLabels
+  editorLabels?: Record<string, string>
+  authorInitials?: string
+  timelineName?: ReactNode
+  timelineInitials?: string
+  onAddNote?: (payload: NotePayload) => void
+  onEditNote?: (i: number, payload: NotePayload) => void
+}
+
 export default function NotesTab({
   notes = [], timeline = [], noteTypes = [], labels = {}, editorLabels,
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
-}) {
+}: NotesTabProps) {
   const [adding, setAdding]   = useState(false)
-  const [editingIdx, setEditingIdx] = useState(null)   // null = nieuw; index = bewerken
+  const [editingIdx, setEditingIdx] = useState<number | null>(null)   // null = new; index = editing
   const [body, setBody]       = useState('')
   const [title, setTitle]     = useState('')
   const [type, setType]       = useState(noteTypes[0]?.value ?? '')
   const [expanded, setExpanded] = useState(false)
 
   const reset = () => { setAdding(false); setEditingIdx(null); setBody(''); setTitle(''); setType(noteTypes[0]?.value ?? ''); setExpanded(false) }
-  const openEdit = (i) => {
+  const openEdit = (i: number) => {
     const n = notes[i]
     setType(n.type ?? noteTypes[0]?.value ?? ''); setTitle(n.title ?? ''); setBody(n.text ?? n.body ?? '')
     setEditingIdx(i); setAdding(true)
   }
   const save = () => {
-    const payload = { type, title, body }
+    const payload: NotePayload = { type, title, body }
     if (editingIdx == null) onAddNote?.(payload)
     else onEditNote?.(editingIdx, payload)
     reset()
   }
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
-  const iconBtn = { width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer' }
+  const iconBtn: CSSProperties = { width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer' }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -92,7 +113,7 @@ export default function NotesTab({
                     </div>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{n.ago}</span>
                     {onEditNote && (
-                      <button onClick={() => openEdit(i)} title={labels.edit ?? 'Bewerken'}
+                      <button onClick={() => openEdit(i)} title={labels.edit}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
                         <Edit2 size={13} />
                       </button>

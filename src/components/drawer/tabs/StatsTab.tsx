@@ -1,15 +1,21 @@
 /**
  * StatsTab — generic statistics tab: a KPI grid + an optional key/value overview
  * card + an optional recent-activity card. Entity-agnostic; everything via props.
- *
- * kpis: [{ label, value, sub, color }]
- * overview: { title, rows: [[label, value]] }
- * activity: { title, items: [{ text, time }], emptyText }
  */
+import type { ComponentType, ReactNode } from 'react'
 import SectionCard from '../../ui/SectionCard'
-import DetailTable from '../../ui/DetailTable'
+import DetailTableJs from '../../ui/DetailTable'
 
-export default function StatsTab({ kpis = [], overview, activity }) {
+type AnyProps = Record<string, unknown>
+// DetailTable is still untyped JS — accept any props at the boundary.
+const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>
+
+interface Kpi { label: string; value: ReactNode; sub?: ReactNode; color?: string }
+interface Overview { title?: ReactNode; rows?: Array<[ReactNode, ReactNode]> }
+interface ActivityItem { text?: ReactNode; time?: ReactNode }
+interface Activity { title?: ReactNode; items: ActivityItem[]; emptyText?: ReactNode }
+
+export default function StatsTab({ kpis = [], overview, activity }: { kpis?: Kpi[]; overview?: Overview; activity?: Activity }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
