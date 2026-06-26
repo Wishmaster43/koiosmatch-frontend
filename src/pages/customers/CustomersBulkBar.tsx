@@ -1,6 +1,25 @@
 import { useTranslation } from 'react-i18next'
 import { ListChecks, UserCog, CircleDot, Tag, Tags, StickyNote, Archive, X } from 'lucide-react'
 import ActionMenu from '../../components/ui/ActionMenu'
+import type { MenuNode } from '../../components/ui/ActionMenu'
+import type { Id, LookupOption } from '../../types/common'
+
+interface BulkUser { id: Id; name: string }
+
+interface CustomersBulkBarProps {
+  count: number
+  onClear: () => void
+  onSetOwner: (user: BulkUser) => void
+  onSetStatus: (status: string) => void
+  onAddTag: (tag: string) => void
+  onRemoveTag: (tag: string) => void
+  onAddNote: (text: string) => void
+  onArchive: () => void
+  canArchive?: boolean
+  users?: BulkUser[]
+  statuses?: LookupOption[]
+  selectedTags?: string[]
+}
 
 /**
  * CustomersBulkBar — selection action bar shown above the table when ≥1 customer
@@ -11,7 +30,7 @@ import ActionMenu from '../../components/ui/ActionMenu'
 export default function CustomersBulkBar({
   count, onClear, onSetOwner, onSetStatus, onAddTag, onRemoveTag, onAddNote, onArchive,
   canArchive = false, users = [], statuses = [], selectedTags = [],
-}) {
+}: CustomersBulkBarProps) {
   const { t } = useTranslation('customers')
 
   // Option lists built from props.
@@ -20,20 +39,20 @@ export default function CustomersBulkBar({
   const tagOptions    = selectedTags.map(tg => ({ value: tg, label: tg }))
 
   // Resolve a picked user id back to the full object the parent needs.
-  const pickUser = (handler) => (userId) => { const u = users.find(x => x.id === userId); if (u) handler(u) }
+  const pickUser = (handler: (user: BulkUser) => void) => (userId: string | number) => { const u = users.find(x => x.id === userId); if (u) handler(u) }
 
   // Declarative bulk-action tree; archive is gated (server re-checks).
-  const items = [
+  const items: MenuNode[] = [
     { key: 'owner', label: t('bulk.changeOwner'), icon: UserCog,
       searchPlaceholder: t('bulk.searchOwner'), emptyText: t('bulk.noUsers'), options: userOptions, onPick: pickUser(onSetOwner) },
     { key: 'status', label: t('bulk.changeStatus'), icon: CircleDot,
-      searchPlaceholder: t('bulk.searchStatus'), options: statusOptions, onPick: onSetStatus },
+      searchPlaceholder: t('bulk.searchStatus'), options: statusOptions, onPick: v => onSetStatus(String(v)) },
     { key: 'add-tag', label: t('bulk.addTag'), icon: Tag, input: true,
-      placeholder: t('bulk.tagPlaceholder'), submitLabel: t('bulk.tagSubmit'), onSubmit: onAddTag },
+      placeholder: t('bulk.tagPlaceholder'), submitLabel: t('bulk.tagSubmit'), onSubmit: v => onAddTag(String(v)) },
     { key: 'remove-tag', label: t('bulk.removeTag'), icon: Tags,
-      searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: onRemoveTag },
+      searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: v => onRemoveTag(String(v)) },
     { key: 'note', label: t('bulk.addNote'), icon: StickyNote, input: true,
-      placeholder: t('bulk.notePlaceholder'), submitLabel: t('bulk.noteSubmit'), onSubmit: onAddNote },
+      placeholder: t('bulk.notePlaceholder'), submitLabel: t('bulk.noteSubmit'), onSubmit: v => onAddNote(String(v)) },
     ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
   ]
 

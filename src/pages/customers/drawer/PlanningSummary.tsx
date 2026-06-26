@@ -5,20 +5,26 @@
  * Reads GET /customers/{id}/planning-summary (?location_id / ?department_id).
  */
 import { useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Users } from 'lucide-react'
 import api from '../../../lib/api'
 import { isAbortError } from '../../../lib/mocks'
 import { useAuth } from '../../../context/AuthContext'
 import { useDateFormat } from '../../../lib/datetime'
+import type { Id } from '../../../types/common'
 
-const Muted = ({ text }) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{text}</div>
+interface UpcomingShift { id?: Id; date?: string; shift?: string; department?: string; candidate?: { name?: string } | string | null }
+interface PlanningData { active_now?: number; upcoming?: UpcomingShift[] }
 
-export default function PlanningSummary({ customerId, params }) {
+const Muted = ({ text }: { text: ReactNode }) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{text}</div>
+
+export default function PlanningSummary({ customerId, params }: { customerId: Id; params?: Record<string, unknown> }) {
   const { t } = useTranslation('customers')
-  const { hasModule } = useAuth()
+  const auth = useAuth()
+  const hasModule = auth?.hasModule ?? (() => false)
   const { formatDate } = useDateFormat()
-  const [data,    setData]    = useState(null)
+  const [data,    setData]    = useState<PlanningData | null>(null)
   const [loading, setLoading] = useState(true)
   const enabled = hasModule('plan')
   const paramsKey = JSON.stringify(params ?? {})
@@ -60,14 +66,17 @@ export default function PlanningSummary({ customerId, params }) {
         <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{t('planning.upcoming')}</div>
         {upcoming.length === 0 ? <Muted text={t('planning.upcomingEmpty')} /> : (
           <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-            {upcoming.map((s, i) => (
-              <div key={s.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', fontSize: 12,
-                borderBottom: i < upcoming.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                <span style={{ width: 78, flexShrink: 0, color: 'var(--text-muted)' }}>{s.date ? formatDate(s.date) : '—'}</span>
-                <span style={{ flex: 1, color: 'var(--text)' }}>{[s.shift, s.department].filter(Boolean).join(' · ') || '—'}</span>
-                <span style={{ color: s.candidate ? 'var(--text)' : 'var(--color-warning)' }}>{s.candidate?.name ?? s.candidate ?? t('planning.open')}</span>
-              </div>
-            ))}
+            {upcoming.map((s, i) => {
+              const candName = typeof s.candidate === 'object' && s.candidate ? s.candidate.name : s.candidate
+              return (
+                <div key={s.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', fontSize: 12,
+                  borderBottom: i < upcoming.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                  <span style={{ width: 78, flexShrink: 0, color: 'var(--text-muted)' }}>{s.date ? formatDate(s.date) : '—'}</span>
+                  <span style={{ flex: 1, color: 'var(--text)' }}>{[s.shift, s.department].filter(Boolean).join(' · ') || '—'}</span>
+                  <span style={{ color: s.candidate ? 'var(--text)' : 'var(--color-warning)' }}>{candName ?? t('planning.open')}</span>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

@@ -1,9 +1,26 @@
 import { useTranslation } from 'react-i18next'
+import type { CSSProperties } from 'react'
 import DataTable from '../../components/ui/DataTable'
+import type { Column } from '../../components/ui/DataTable'
 import Avatar from '../../components/ui/Avatar'
 import StatusPill from '../../components/ui/StatusPill'
+import type { Customer } from '../../types/customer'
+import type { Id } from '../../types/common'
 
-const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
+const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
+
+interface CustomersTableProps {
+  rows: Customer[]
+  loading?: boolean
+  selectedId?: Id | null
+  onSelect?: (row: Customer) => void
+  statusMeta: (v: string | number) => { label?: string; color?: string }
+  selectable?: boolean
+  selectedIds?: Set<Id>
+  onToggleRow?: (id: Id) => void
+  onToggleAll?: (ids: Id[], allSelected: boolean) => void
+  stickyHeader?: boolean
+}
 
 /**
  * CustomersTable — customer list, mirrors CandidatesTable: only declares columns,
@@ -14,10 +31,10 @@ export default function CustomersTable({
   rows, loading, selectedId, onSelect, statusMeta,
   selectable = false, selectedIds, onToggleRow, onToggleAll,
   stickyHeader = false,
-}) {
+}: CustomersTableProps) {
   const { t } = useTranslation('customers')
 
-  const columns = [
+  const columns: Column<Customer>[] = [
     {
       key: 'name', header: t('cols.name'), sortable: true, sortValue: c => c.name,
       render: c => (
