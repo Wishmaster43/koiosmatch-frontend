@@ -10,32 +10,33 @@
  */
 import { useState, useEffect } from 'react'
 import api from './api'
+import type { LookupOption } from '@/types/common'
 
 // Seed defaults (slugs English/stable; labels per-tenant, normally from the API).
-export const DEFAULT_LAST_CONTACT_TYPES = [
+export const DEFAULT_LAST_CONTACT_TYPES: LookupOption[] = [
   { value: 'email',    label: 'Email' },
   { value: 'phone',    label: 'Telefonisch' },
   { value: 'whatsapp', label: 'WhatsApp' },
 ]
 
-const norm = (s) => (s ?? '').toString().trim().toLowerCase()
+const norm = (s?: unknown) => (s ?? '').toString().trim().toLowerCase()
 
 export function useLastContactTypes() {
-  const [types, setTypes] = useState(DEFAULT_LAST_CONTACT_TYPES)
+  const [types, setTypes] = useState<LookupOption[]>(DEFAULT_LAST_CONTACT_TYPES)
 
   useEffect(() => {
     api.get('/last-contact-types').then(r => {
-      const d = (r?.data?.data ?? r?.data ?? []).filter(Boolean)
+      const d = ((r?.data?.data ?? r?.data ?? []) as LookupOption[]).filter(Boolean)
       if (d.length) setTypes(d)
     }).catch(() => {})
   }, [])
 
   // Resolve a stored value/slug to its label; fall back to the raw value.
-  const labelOf = (value) => {
+  const labelOf = (value?: string | null): string => {
     const v = norm(value)
     if (!v) return ''
     const hit = types.find(x => norm(x.value) === v || norm(x.label) === v)
-    return hit?.label ?? value
+    return hit?.label ?? value ?? ''
   }
 
   return { types, labelOf }

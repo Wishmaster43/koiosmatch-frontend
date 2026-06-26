@@ -7,6 +7,7 @@
  */
 import { useState, useEffect } from 'react'
 import api from './api'
+import { lookupNames } from './lookupUtils'
 
 export const DEFAULT_LANGUAGES = [
   'Nederlands', 'Engels', 'Duits', 'Frans', 'Spaans', 'Pools', 'Turks',
@@ -16,17 +17,13 @@ export const DEFAULT_LANGUAGES = [
 // "slecht → zeer goed" + Moedertaal (sluit aan op bestaande data).
 export const DEFAULT_LANGUAGE_LEVELS = ['Slecht', 'Matig', 'Goed', 'Zeer goed', 'Moedertaal']
 
-const names = (res) => (res?.data?.data ?? res?.data ?? [])
-  .map(x => (typeof x === 'string' ? x : (x.name ?? x.label ?? x.value)))
-  .filter(Boolean)
-
 export function useLanguageLookups() {
-  const [languages, setLanguages] = useState(DEFAULT_LANGUAGES)
-  const [levels,    setLevels]    = useState(DEFAULT_LANGUAGE_LEVELS)
+  const [languages, setLanguages] = useState<string[]>(DEFAULT_LANGUAGES)
+  const [levels,    setLevels]    = useState<string[]>(DEFAULT_LANGUAGE_LEVELS)
 
   useEffect(() => {
-    api.get('/languages').then(r => { const d = names(r); if (d.length) setLanguages(d) }).catch(() => {})
-    api.get('/language-levels').then(r => { const d = names(r); if (d.length) setLevels(d) }).catch(() => {})
+    api.get('/languages').then(r => { const d = lookupNames(r); if (d.length) setLanguages(d) }).catch(() => {})
+    api.get('/language-levels').then(r => { const d = lookupNames(r); if (d.length) setLevels(d) }).catch(() => {})
   }, [])
 
   return { languages, levels }

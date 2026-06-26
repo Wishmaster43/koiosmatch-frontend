@@ -8,9 +8,11 @@
  */
 import { useState, useEffect } from 'react'
 import api from './api'
+import { normalizeOptions } from './lookupUtils'
+import type { LookupOption } from '@/types/common'
 
 // Seed shipped for new tenants + fallback before the backend responds (worklist C-28).
-export const DEFAULT_OPPORTUNITY_STAGES = [
+export const DEFAULT_OPPORTUNITY_STAGES: LookupOption[] = [
   { value: 'lead',        label: 'Lead',           color: '#94A3B8' },
   { value: 'qualified',   label: 'Gekwalificeerd', color: '#6FA8C4' },
   { value: 'proposal',    label: 'Voorstel',       color: '#6E8FD6' },
@@ -19,26 +21,17 @@ export const DEFAULT_OPPORTUNITY_STAGES = [
   { value: 'lost',        label: 'Verloren',       color: '#D98A8A' },
 ]
 
-// Normalise API rows → {id?, value, label, color}; drop inactive, sort by order.
-function normalize(raw) {
-  if (!Array.isArray(raw) || raw.length === 0) return null
-  return raw
-    .filter(it => it.active !== false)
-    .sort((a, b) => (a.sort_order ?? a.order ?? 0) - (b.sort_order ?? b.order ?? 0))
-    .map(it => ({ id: it.id, value: it.value ?? it.id, label: it.label ?? it.name ?? it.value, color: it.color ?? '#9CA3AF' }))
-}
-
 export function useOpportunityStages() {
-  const [stages, setStages] = useState(DEFAULT_OPPORTUNITY_STAGES)
+  const [stages, setStages] = useState<LookupOption[]>(DEFAULT_OPPORTUNITY_STAGES)
 
   // Replace the seed with the tenant lookup once the API responds (404/empty keeps seed).
   useEffect(() => {
     api.get('/opportunity-stages')
-      .then(r => { const list = normalize(r.data?.data ?? r.data); if (list) setStages(list) })
+      .then(r => { const list = normalizeOptions(r.data?.data ?? r.data); if (list) setStages(list) })
       .catch(() => {})
   }, [])
 
   // value(slug) → item, with a neutral fallback so the UI never crashes.
-  const stageMeta = (v) => stages.find(s => s.value === v) ?? { value: v, label: v, color: '#9CA3AF' }
+  const stageMeta = (v?: string | null): LookupOption => stages.find(s => s.value === v) ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
   return { stages, stageMeta }
 }

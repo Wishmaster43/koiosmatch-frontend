@@ -7,23 +7,19 @@
  */
 import { useState, useEffect } from 'react'
 import api from './api'
+import { lookupNames } from './lookupUtils'
 
 export const DEFAULT_INDUSTRIES = [
   'Werving', 'Uitzendbureau', 'Horeca', 'Logistiek', 'Zorg',
   'IT', 'Bouw', 'Onderwijs', 'Financiën', 'Overig',
 ]
 
-// Normalise the API rows (string | {name|label|value}) to plain name strings.
-const names = (res) => (res?.data?.data ?? res?.data ?? [])
-  .map(x => (typeof x === 'string' ? x : (x.name ?? x.label ?? x.value)))
-  .filter(Boolean)
-
 export function useIndustries() {
-  const [industries, setIndustries] = useState(DEFAULT_INDUSTRIES)
+  const [industries, setIndustries] = useState<string[]>(DEFAULT_INDUSTRIES)
 
   // Override the default with the configured list once the API responds.
   useEffect(() => {
-    api.get('/industries').then(r => { const d = names(r); if (d.length) setIndustries(d) }).catch(() => {})
+    api.get('/industries').then(r => { const d = lookupNames(r); if (d.length) setIndustries(d) }).catch(() => {})
   }, [])
 
   return { industries }

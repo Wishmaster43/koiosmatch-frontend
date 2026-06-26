@@ -9,25 +9,21 @@
  */
 import { useState, useEffect } from 'react'
 import api from './api'
+import { lookupNames } from './lookupUtils'
 
 export const DEFAULT_FUNCTIONS = [
   'Helpende', 'Helpende Plus', 'Verzorgende', 'Verzorgende IG', "EVV'er",
   'Verpleegkundige N4', 'Verpleegkundige N5', 'Wijkverpleegkundige', 'Doktersassistent',
 ]
 
-// Normalise API rows (string | {name|label|value}) to plain name strings.
-const names = (res) => (res?.data?.data ?? res?.data ?? [])
-  .map(x => (typeof x === 'string' ? x : (x.name ?? x.label ?? x.value)))
-  .filter(Boolean)
-
 export function useFunctions() {
-  const [functions, setFunctions] = useState(DEFAULT_FUNCTIONS)
+  const [functions, setFunctions] = useState<string[]>(DEFAULT_FUNCTIONS)
   const [allowFreeEntry, setAllowFreeEntry] = useState(true)
 
   // Override the default with the configured list + setting once the API responds.
   useEffect(() => {
     api.get('/functions').then(r => {
-      const d = names(r); if (d.length) setFunctions(d)
+      const d = lookupNames(r); if (d.length) setFunctions(d)
       const free = r?.data?.allow_free_entry
       if (typeof free === 'boolean') setAllowFreeEntry(free)
     }).catch(() => {})
