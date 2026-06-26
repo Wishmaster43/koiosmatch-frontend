@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Check, Sparkles } from 'lucide-react'
-import api from '../../../lib/api'
+import api from '@/lib/api'
 import { sectionBlock } from './constants'
+import type { Candidate, CandidatePool } from '@/types/candidate'
+import type { Id } from '@/types/common'
 
 /**
  * PoolsSection — the talent pools a candidate belongs to (chips), with an add
@@ -11,29 +13,32 @@ import { sectionBlock } from './constants'
  * catches up (empty dropdown until /pools exists). `source: 'koios'` pools get a
  * subtle AI marker so manual vs AI-suggested membership stays distinguishable.
  */
-export default function PoolsSection({ c }) {
+export default function PoolsSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
-  const [pools,    setPools]    = useState(c.pools ?? [])
+  const [pools,    setPools]    = useState<CandidatePool[]>(c.pools ?? [])
   const [open,     setOpen]     = useState(false)
   const [search,   setSearch]   = useState('')
-  const [allPools, setAllPools] = useState([])
-  const ref = useRef(null)
+  const [allPools, setAllPools] = useState<CandidatePool[]>([])
+  const ref = useRef<HTMLDivElement>(null)
 
+  // Load the tenant's pool list (tolerant of both array and { data } envelopes).
   useEffect(() => {
     api.get('/pools').then(r => {
       const d = r.data; setAllPools(Array.isArray(d) ? d : (d?.data ?? []))
     }).catch(() => {})
   }, [])
 
+  // Close the add-dropdown on an outside click.
   useEffect(() => {
     if (!open) return
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h)
   }, [open])
 
-  const has = (id) => pools.some(p => (p.id ?? p.name) === id)
+  const has = (id: Id | undefined) => pools.some(p => (p.id ?? p.name) === id)
 
-  const toggle = (pool) => {
+  // Optimistic add/remove of a pool membership, persisted to the pivot route.
+  const toggle = (pool: CandidatePool) => {
     const id = pool.id ?? pool.name
     if (has(id)) {
       setPools(prev => prev.filter(p => (p.id ?? p.name) !== id))
@@ -50,11 +55,11 @@ export default function PoolsSection({ c }) {
 
       {pools.length > 0 && (
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-          {pools.map(p => {
+          {pools.map((p, i) => {
             const color = p.color || '#6B7280'
             const ai = p.source === 'koios'
             return (
-              <span key={p.id ?? p.name} title={ai ? t('sections.poolKoios') : undefined}
+              <span key={p.id ?? p.name ?? i} title={ai ? t('sections.poolKoios') : undefined}
                 style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, padding: '3px 8px',
                   borderRadius: 99, border: `1px solid ${color}55`, background: color + '1A', color }}>
                 {ai && <Sparkles size={10} />}
@@ -87,12 +92,12 @@ export default function PoolsSection({ c }) {
               )}
               {allPools
                 .filter(p => (p.name ?? '').toLowerCase().includes(search.toLowerCase()))
-                .map(p => {
+                .map((p, i) => {
                   const id = p.id ?? p.name
                   const selected = has(id)
                   const color = p.color || '#6B7280'
                   return (
-                    <button key={id} onClick={() => toggle(p)}
+                    <button key={p.id ?? p.name ?? i} onClick={() => toggle(p)}
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                         width: '100%', padding: '9px 12px', fontSize: 12, background: selected ? 'var(--color-primary-bg)' : 'none',
                         border: 'none', cursor: 'pointer', textAlign: 'left', color: 'var(--text)' }}>

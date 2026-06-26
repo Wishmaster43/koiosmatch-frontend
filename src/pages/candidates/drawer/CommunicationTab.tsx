@@ -1,9 +1,16 @@
 import { useState } from 'react'
+import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useDateFormat } from '../../../lib/datetime'
-import NotesTab from '../../../components/drawer/tabs/NotesTab'
-import EditableFieldTable from '../../../components/forms/EditableFieldTable'
+import { useDateFormat } from '@/lib/datetime'
+import NotesTabJs from '@/components/drawer/tabs/NotesTab'
+import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
 import { NOTE_TYPES } from './constants'
+import type { Candidate } from '@/types/candidate'
+
+type AnyProps = Record<string, unknown>
+// Still-untyped JS components — accept any props at the boundary.
+const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
+const EditableFieldTable = EditableFieldTableJs as unknown as ComponentType<AnyProps>
 
 const EDITOR_LABELS = {
   bold: 'Bold', italic: 'Italic', bulletList: 'Bullet list', orderedList: 'Numbered list',
@@ -12,14 +19,14 @@ const EDITOR_LABELS = {
 }
 
 /** Communication tab — channel consent (AVG opt-in) + the candidate's notes/timeline. */
-export default function CommunicationTab({ c, onSave }) {
+export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
-  const [notes, setNotes] = useState(c.notes ?? [])
+  const [notes, setNotes] = useState<Record<string, unknown>[]>(c.notes ?? [])
 
   // Channel consent (AVG opt-in) — WhatsApp / e-mail / newsletter, default off.
   // Field names match the backend's flat columns (whatsapp_consent, …).
-  const consent = c.consent ?? {}
+  const consent = c.consent
   const consentValue = {
     whatsapp_consent:   consent.whatsapp_consent   ?? false,
     email_consent:      consent.email_consent      ?? false,
@@ -47,7 +54,7 @@ export default function CommunicationTab({ c, onSave }) {
           fields={consentFields}
           value={consentValue}
           labelWidth={220}
-          onSave={v => onSave?.({ ...consent, ...v })}
+          onSave={(v: Record<string, unknown>) => onSave?.({ ...consent, ...v })}
         />
         {consentTimestamps.length > 0 && (
           <div style={{ marginTop: -10, marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -61,8 +68,8 @@ export default function CommunicationTab({ c, onSave }) {
       </div>
       <NotesTab
         notes={notes}
-        onAddNote={n => setNotes(p => [{ ...n, ago: t('common:justNow', { defaultValue: 'zojuist' }) }, ...p])}
-        onEditNote={(i, n) => setNotes(p => p.map((x, idx) => idx === i ? { ...x, ...n } : x))}
+        onAddNote={(n: Record<string, unknown>) => setNotes(p => [{ ...n, ago: t('common:justNow', { defaultValue: 'zojuist' }) }, ...p])}
+        onEditNote={(i: number, n: Record<string, unknown>) => setNotes(p => p.map((x, idx) => idx === i ? { ...x, ...n } : x))}
         timeline={c.timeline ?? []}
         noteTypes={NOTE_TYPES.map(nt => ({ value: nt.value, label: t(`communication.noteTypes.${nt.key}`) }))}
         authorInitials={c.ownerInitials}
@@ -80,7 +87,7 @@ export default function CommunicationTab({ c, onSave }) {
           timelineEmpty: t('sections.timelineEmpty'),
           conversations: t('sections.conversations'),
           conversationsEmpty: t('sections.conversationsEmpty'),
-          notePlaceholder: (typeLabel) => t('communication.notePlaceholder', { type: typeLabel }),
+          notePlaceholder: (typeLabel: string) => t('communication.notePlaceholder', { type: typeLabel }),
         }}
       />
     </div>

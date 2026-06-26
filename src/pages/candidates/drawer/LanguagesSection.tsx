@@ -1,7 +1,13 @@
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Plus, Trash2 } from 'lucide-react'
-import { useLanguageLookups } from '../../../lib/useLanguageLookups'
+import { useLanguageLookups } from '@/lib/useLanguageLookups'
+import type { Candidate } from '@/types/candidate'
+import type { Id } from '@/types/common'
+
+interface LangRow { language: string; spoken: string; written: string }
+interface ApiLanguage { id?: Id; language?: string; name?: string; spoken?: string; written?: string }
 
 /**
  * LanguagesSection — the candidate's languages, fully editable (add / change /
@@ -9,25 +15,26 @@ import { useLanguageLookups } from '../../../lib/useLanguageLookups'
  * from the tenant-configurable lists (Settings → Talen) with a package default.
  * Same in-place pencil ↔ save/cancel pattern as the profile blocks.
  */
-export default function LanguagesSection({ c, onEditSave }) {
+export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEditSave?: (v: { languages: LangRow[] }) => void }) {
   const { t } = useTranslation('candidates')
-  const { languages: langOpts, levels } = useLanguageLookups()
+  const { languages: langOpts, levels } = useLanguageLookups() as { languages: string[]; levels: string[] }
 
-  const initial = () => (c.languages ?? []).map(l => ({
+  const langs = (c.languages ?? []) as ApiLanguage[]
+  const initial = (): LangRow[] => langs.map(l => ({
     language: l.language ?? l.name ?? '', spoken: l.spoken ?? '', written: l.written ?? '',
   }))
   const [editing, setEditing] = useState(false)
-  const [rows,    setRows]    = useState(initial)
+  const [rows,    setRows]    = useState<LangRow[]>(initial)
 
-  const setRow    = (i, k, v) => setRows(r => r.map((row, idx) => idx === i ? { ...row, [k]: v } : row))
+  const setRow    = (i: number, k: keyof LangRow, v: string) => setRows(r => r.map((row, idx) => idx === i ? { ...row, [k]: v } : row))
   const addRow    = ()        => setRows(r => [...r, { language: '', spoken: '', written: '' }])
-  const removeRow = (i)       => setRows(r => r.filter((_, idx) => idx !== i))
+  const removeRow = (i: number) => setRows(r => r.filter((_, idx) => idx !== i))
   const save   = () => { onEditSave?.({ languages: rows.filter(r => r.language) }); setEditing(false) }
   const cancel = () => { setRows(initial()); setEditing(false) }
 
-  const iconBtn = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
-  const selectStyle = { flex: 1, minWidth: 0, padding: '6px 8px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
-  const view = c.languages ?? []
+  const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
+  const selectStyle: CSSProperties = { flex: 1, minWidth: 0, padding: '6px 8px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
+  const view = langs
 
   return (
     <div>
