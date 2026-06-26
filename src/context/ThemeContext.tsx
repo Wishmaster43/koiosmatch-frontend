@@ -4,20 +4,28 @@
  * current theme plus a setter/toggle to the app via useTheme().
  */
 import { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import i18n from '../i18n'
 
-const ThemeContext = createContext()
+interface ThemeValue {
+  theme: string
+  setTheme: (t: string) => void
+  language: string
+  setLanguage: (l: string) => void
+}
 
-export function ThemeProvider({ children }) {
+const ThemeContext = createContext<ThemeValue | undefined>(undefined)
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme,    setThemeState]    = useState(() => localStorage.getItem('km-theme')    || 'light')
   const [language, setLanguageState] = useState(() => localStorage.getItem('km-language') || 'nl')
 
-  const setTheme = (t) => {
+  const setTheme = (t: string) => {
     setThemeState(t)
     localStorage.setItem('km-theme', t)
   }
 
-  const setLanguage = (l) => {
+  const setLanguage = (l: string) => {
     setLanguageState(l)
     localStorage.setItem('km-language', l)
     i18n.changeLanguage(l)
@@ -34,4 +42,8 @@ export function ThemeProvider({ children }) {
   )
 }
 
-export const useTheme = () => useContext(ThemeContext)
+export function useTheme(): ThemeValue {
+  const ctx = useContext(ThemeContext)
+  if (!ctx) throw new Error('useTheme must be used within a ThemeProvider')
+  return ctx
+}

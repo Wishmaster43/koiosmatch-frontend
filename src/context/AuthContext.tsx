@@ -1,8 +1,10 @@
 import { createContext, useContext, useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import api, { primeCsrf } from '../lib/api'
 import { COOKIE_AUTH } from '../lib/authMode'
 import { hasModule as tenantHasModule } from '../lib/modules'
 import { queryClient } from '../lib/queryClient'
+import type { Tenant, User } from '../types/api'
 
 /**
  * AuthContext — global authentication + tenant state.
@@ -14,28 +16,53 @@ import { queryClient } from '../lib/queryClient'
  * NOTE: every helper here only controls the UI. Real authorization MUST be
  * enforced by the backend on each endpoint — these checks are not security.
  */
-const AuthContext = createContext(null)
 
-export function AuthProvider({ children }) {
-  const [user,          setUser]              = useState(null)
+// The auth user, plus the flat tenant_id the backend includes on the profile.
+export type AuthUser = User & { tenant_id?: string | number | null }
+type LoginResult = AuthUser | { mfaRequired: boolean; mfaToken: unknown }
+
+export interface AuthContextValue {
+  user: AuthUser | null
+  loading: boolean
+  accessiblePages: string[]
+  tenants: Tenant[]
+  activeTenant: Tenant | null
+  setActiveTenant: (tenant: Tenant) => Promise<void>
+  login: (email: string, password: string) => Promise<LoginResult>
+  logout: () => Promise<void>
+  refreshUser: () => Promise<AuthUser>
+  verifyMfa: (mfaToken: string, code: string) => Promise<AuthUser>
+  setupMfa: () => Promise<unknown>
+  confirmMfa: (code: string) => Promise<unknown>
+  disableMfa: (code: string) => Promise<unknown>
+  hasRole: (role: string) => boolean
+  hasPermission: (permName: string) => boolean
+  isAdmin: () => boolean
+  isSuperAdmin: () => boolean
+  hasModule: (key: string) => boolean
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null)
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user,          setUser]              = useState<AuthUser | null>(null)
   const [loading,       setLoading]           = useState(true)
-  const [tenants,       setTenants]           = useState([])
-  const [activeTenant,  setActiveTenantState] = useState(null)
+  const [tenants,       setTenants]           = useState<Tenant[]>([])
+  const [activeTenant,  setActiveTenantState] = useState<Tenant | null>(null)
   // Pages the backend says this user may open (single source of truth for
   // gated pages — see lib/access.js). Seeded from cache to avoid flash on boot.
-  const [accessiblePages, setAccessiblePages] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('accessible_pages') ?? '[]') } catch { return [] }
+  const [accessiblePages, setAccessiblePages] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem('accessible_pages') ?? '[]') as string[] } catch { return [] }
   })
 
   /**
    * Applies an /auth/me or login response: stores user + accessible_pages.
-   * Also updates activeTenant when the response includes one (non-super-admin
-   * logins and /auth/me refreshes both carry the tenant with package + modules).
-   * Returns the user object.
+   * Also updates activeTenant when the response includes one. Returns the user.
    */
-  const applyAuthResponse = (data) => {
-    const u     = data?.user ?? data?.data ?? data
-    const pages = data?.accessible_pages ?? u?.accessible_pages ?? []
+  const applyAuthResponse = (data: unknown): AuthUser => {
+    const d = data as { user?: AuthUser; data?: AuthUser; accessible_pages?: string[]; tenant?: Tenant } | null | undefined
+    const u     = (d?.user ?? d?.data ?? data) as AuthUser
+    const pages = d?.accessible_pages ?? u?.accessible_pages ?? []
     setUser(u)
     localStorage.setItem('auth_user', JSON.stringify(u))
     setAccessiblePages(pages)
@@ -43,7 +70,7 @@ export function AuthProvider({ children }) {
 
     // If the response carries a tenant (non-super-admin or /auth/me), keep the
     // active tenant state in sync so tenant.package + tenant.modules stay fresh.
-    const t = data?.tenant ?? u?.tenant
+    const t = d?.tenant ?? u?.tenant
     if (t?.id) {
       setActiveTenantState(prev => {
         // Only update if this response is for the currently active tenant
@@ -64,7 +91,7 @@ export function AuthProvider({ children }) {
    * Persists the choice, then re-fetches /auth/me so roles/permissions/context
    * match the newly selected tenant.
    */
-  const setActiveTenant = async (tenant) => {
+  const setActiveTenant = async (tenant: Tenant): Promise<void> => {
     localStorage.setItem('active_tenant', tenant.id)
     setActiveTenantState(tenant)
     // Drop all cached per-tenant queries (counts, users, …) so they refetch for
@@ -73,18 +100,18 @@ export function AuthProvider({ children }) {
     try {
       const res = await api.get('/auth/me')
       applyAuthResponse(res.data)
-    } catch {}
+    } catch { /* keep optimistic selection on a failed refresh */ }
   }
 
   // Decides whether we may call the super-admin-only /tenants endpoint.
-  const userIsSuperAdmin = (u) => u?.is_super_admin === true
+  const userIsSuperAdmin = (u?: AuthUser | null) => u?.is_super_admin === true
 
   /**
    * Populate the tenant list + active tenant based on the user's role.
    * - super_admin → load ALL tenants and select the saved/first one.
    * - regular user → use only their own tenant from /auth/me (never call /tenants).
    */
-  const setupTenants = (u) => {
+  const setupTenants = (u?: AuthUser | null) => {
     const savedTenant = localStorage.getItem('active_tenant')
     if (userIsSuperAdmin(u)) {
       api.get('/tenants')
@@ -92,7 +119,7 @@ export function AuthProvider({ children }) {
           const list = res.data?.data ?? res.data ?? []
           if (Array.isArray(list) && list.length) {
             setTenants(list)
-            const active = list.find(t => t.id === savedTenant) ?? list[0]
+            const active = list.find((t: Tenant) => t.id === savedTenant) ?? list[0]
             if (active) {
               setActiveTenantState(active)
               localStorage.setItem('active_tenant', active.id)
@@ -100,10 +127,13 @@ export function AuthProvider({ children }) {
           }
         })
         .catch(() => {})
-    } else if (u?.tenant) {
-      setTenants([u.tenant])
-      setActiveTenantState(u.tenant)
-      localStorage.setItem('active_tenant', u.tenant.id)
+    } else {
+      const tenant = u?.tenant
+      if (tenant) {
+        setTenants([tenant])
+        setActiveTenantState(tenant)
+        localStorage.setItem('active_tenant', tenant.id)
+      }
     }
   }
 
@@ -136,7 +166,7 @@ export function AuthProvider({ children }) {
     }
 
     if (saved) {
-      try { setUser(JSON.parse(saved)) } catch { localStorage.removeItem('auth_user') }
+      try { setUser(JSON.parse(saved) as AuthUser) } catch { localStorage.removeItem('auth_user') }
     }
 
     api.get('/auth/me')
@@ -162,7 +192,7 @@ export function AuthProvider({ children }) {
    * code (MFA step-up), so LoginPage can show the code input without logging in.
    * Returns the user object on normal success.
    */
-  const login = async (email, password) => {
+  const login = async (email: string, password: string): Promise<LoginResult> => {
     // Cookie mode: prime the CSRF cookie before the state-changing login POST.
     await primeCsrf()
     const res = await api.post('/auth/login', { email, password })
@@ -206,7 +236,7 @@ export function AuthProvider({ children }) {
    * mfaToken comes from the login response; code is the 6-digit TOTP.
    * On success stores the session and resolves to the user object (same as login).
    */
-  const verifyMfa = async (mfaToken, code) => {
+  const verifyMfa = async (mfaToken: string, code: string): Promise<AuthUser> => {
     const res = await api.post('/auth/mfa/verify', { mfa_token: mfaToken, code })
     const { token, tenant } = res.data
     if (token) localStorage.setItem('auth_token', token)  // cookie mode: no body token
@@ -226,7 +256,7 @@ export function AuthProvider({ children }) {
           localStorage.setItem('active_tenant', first.id)
           setActiveTenantState(first)
         }
-      } catch {}
+      } catch { /* fall through with no tenant list */ }
     }
 
     return u
@@ -234,25 +264,25 @@ export function AuthProvider({ children }) {
 
   // ── MFA management (called from Security settings tab) ───────────────────────
   /** Start MFA setup. Returns { secret, otpauth_url } — render otpauth_url as QR. */
-  const setupMfa    = ()           => api.post('/auth/mfa/setup').then(r => r.data)
+  const setupMfa    = ()              => api.post('/auth/mfa/setup').then(r => r.data)
   /** Confirm MFA with the first TOTP code. Returns { recovery_codes: [...] }. */
-  const confirmMfa  = (code)       => api.post('/auth/mfa/confirm', { code }).then(r => r.data)
+  const confirmMfa  = (code: string)  => api.post('/auth/mfa/confirm', { code }).then(r => r.data)
   /** Disable MFA. Requires the current TOTP code for confirmation. */
-  const disableMfa  = (code)       => api.post('/auth/mfa/disable', { code }).then(r => {
+  const disableMfa  = (code: string)  => api.post('/auth/mfa/disable', { code }).then(r => {
     // Keep mfa_enabled in sync without a full /auth/me reload.
     setUser(prev => prev ? { ...prev, mfa_enabled: false } : prev)
     return r.data
   })
 
   // ── Refresh the profile from the server ──────────────────────────────────────
-  const refreshUser = async () => {
+  const refreshUser = async (): Promise<AuthUser> => {
     const res = await api.get('/auth/me')
     return applyAuthResponse(res.data)
   }
 
   // ── Logout ────────────────────────────────────────────────────────────────────
-  const logout = async () => {
-    try { await api.post('/auth/logout') } catch {}
+  const logout = async (): Promise<void> => {
+    try { await api.post('/auth/logout') } catch { /* clear local state regardless */ }
     localStorage.removeItem('auth_token')
     localStorage.removeItem('auth_user')
     localStorage.removeItem('active_tenant')
@@ -265,17 +295,17 @@ export function AuthProvider({ children }) {
 
   // ── Role / permission helpers (UI gating only — NOT security) ────────────────
 
-  const hasRole  = (role) => user?.roles?.some(r => (typeof r === 'string' ? r : r.name) === role) ?? false
+  const hasRole  = (role: string) => user?.roles?.some(r => (typeof r === 'string' ? r : r.name) === role) ?? false
   const isAdmin  = ()     => hasRole('admin') || hasRole('tenant_admin') || hasRole('super_admin')
   // Super admin = explicit flag, the super_admin role, or a user without a tenant.
   const isSuperAdmin = () => user?.is_super_admin === true || hasRole('super_admin') || (!!user && user.tenant_id == null && !user.tenant)
 
   // Capability check for paid add-on modules ('sm', 'hf', 'ai', 'ats', 'plan').
   // Used to gate SM nav/pages now that /sm/* is hard-gated server-side (403).
-  const hasModule = (key) =>
+  const hasModule = (key: string) =>
     tenantHasModule(key, activeTenant ?? user?.tenant, { isSuperAdmin: isSuperAdmin() })
 
-  const hasPermission = (permName) => {
+  const hasPermission = (permName: string) => {
     if (!user) return false
     if (isSuperAdmin()) return true
 
@@ -296,17 +326,17 @@ export function AuthProvider({ children }) {
     return false
   }
 
-  return (
-    <AuthContext.Provider value={{
-      user, loading, accessiblePages,
-      tenants, activeTenant, setActiveTenant,
-      login, logout, refreshUser,
-      verifyMfa, setupMfa, confirmMfa, disableMfa,
-      hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule,
-    }}>
-      {children}
-    </AuthContext.Provider>
-  )
+  const value: AuthContextValue = {
+    user, loading, accessiblePages,
+    tenants, activeTenant, setActiveTenant,
+    login, logout, refreshUser,
+    verifyMfa, setupMfa, confirmMfa, disableMfa,
+    hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule,
+  }
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
-export const useAuth = () => useContext(AuthContext)
+export function useAuth(): AuthContextValue | null {
+  return useContext(AuthContext)
+}
