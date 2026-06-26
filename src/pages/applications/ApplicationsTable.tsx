@@ -1,24 +1,36 @@
 import { useTranslation } from 'react-i18next'
 import DataTable from '../../components/ui/DataTable'
+import type { Column } from '../../components/ui/DataTable'
 import Avatar from '../../components/ui/Avatar'
 import StatusPill from '../../components/ui/StatusPill'
 import KoiosAiMark from '../../components/ui/KoiosAiMark'
+import type { Application } from '../../types/application'
+import type { Id } from '../../types/common'
 
 // Match score as a soft-coloured percentage (green ≥75, amber ≥50, red below).
-function ScorePill({ value }) {
+function ScorePill({ value }: { value: number | null }) {
   if (value == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
   const c = value >= 75 ? 'var(--color-success)' : value >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
   return <span style={{ fontWeight: 600, color: c }}>{value}%</span>
+}
+
+interface ApplicationsTableProps {
+  rows: Application[]
+  loading?: boolean
+  error?: unknown
+  selectedId?: Id | null
+  onSelect?: (row: Application) => void
+  stickyHeader?: boolean
 }
 
 /**
  * ApplicationsTable — declares columns only; the shared DataTable owns sorting,
  * selection, hover and the loading/empty states. Mirrors MatchesTable.
  */
-export default function ApplicationsTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false }) {
+export default function ApplicationsTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false }: ApplicationsTableProps) {
   const { t } = useTranslation('applications')
 
-  const columns = [
+  const columns: Column<Application>[] = [
     // Candidate — avatar + name.
     { key: 'candidate', header: t('cols.candidate'), sortable: true, sortValue: r => r.candidateName,
       render: r => (
@@ -48,7 +60,7 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
         </span>
       ) : <span style={{ color: 'var(--text-muted)' }}>—</span> },
     // Funnel phase — soft pill in the phase colour.
-    { key: 'phase', header: t('cols.phase'), sortable: true, sortValue: r => r.phaseLabel,
+    { key: 'phase', header: t('cols.phase'), sortable: true, sortValue: r => r.phaseLabel ?? '',
       render: r => <StatusPill label={r.phaseLabel} color={r.phaseColor} /> },
     { key: 'source', header: t('cols.source'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
     // Owner — avatar + name.

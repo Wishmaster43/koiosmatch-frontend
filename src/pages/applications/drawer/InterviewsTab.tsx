@@ -1,9 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, CheckCircle2, FileText } from 'lucide-react'
 import Avatar from '../../../components/ui/Avatar'
+import type { ApplicationDetail } from '../../../types/application'
+
+type TranscriptMsg = ApplicationDetail['interviews'][number]['transcript'][number]
 
 // A single transcript message (recruiter = out, candidate = in).
-function Message({ msg }) {
+function Message({ msg }: { msg: TranscriptMsg }) {
   const isOut = msg.side === 'out'
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4, background: 'var(--bg)',
@@ -22,7 +25,7 @@ function Message({ msg }) {
  * InterviewsTab — the AI/WhatsApp interview(s) for an application: header,
  * summary and the full transcript. Empty state when there are none.
  */
-export default function InterviewsTab({ application: a }) {
+export default function InterviewsTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
   const interviews = a.interviews ?? []
 
@@ -69,7 +72,7 @@ export default function InterviewsTab({ application: a }) {
           )}
 
           {/* Transcript */}
-          {iv.transcript?.length > 0 && (
+          {iv.transcript.length > 0 && (
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('interview.transcript')}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

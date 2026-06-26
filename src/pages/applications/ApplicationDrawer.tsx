@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileText } from 'lucide-react'
 import EntityDrawer from '../../components/drawer/EntityDrawer'
@@ -9,20 +10,33 @@ import InterviewsTab from './drawer/InterviewsTab'
 import AppointmentsTab from './drawer/AppointmentsTab'
 import NotesTab from './drawer/NotesTab'
 import Timeline from './drawer/Timeline'
+import type { ApplicationDetail } from '../../types/application'
+import type { RejectPayload } from './drawer/RejectionBlock'
+import type { Criterion } from './drawer/MatchScoreBlock'
+import type { Id } from '../../types/common'
 
 // The tab order (matches the screenshots).
 const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'timeline', 'notes']
+
+interface ApplicationDrawerProps {
+  application: ApplicationDetail | null
+  onClose: () => void
+  expanded?: boolean
+  onToggleExpand?: () => void
+  onReject?: (id: Id | undefined, payload: RejectPayload) => void
+  onAdjustScore?: (id: Id | undefined, payload: { score: number | null; criteria: Criterion[] }) => void
+}
 
 /**
  * ApplicationDrawer — thin container: declares the header config + tab list and
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
  */
-export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore }) {
+export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   if (!a) return null
 
   // Map a tab id to its content component.
-  const renderTab = (id) => {
+  const renderTab = (id: string): ReactNode => {
     switch (id) {
       case 'application':  return <ApplicationTab application={a} onReject={onReject} onAdjustScore={onAdjustScore} />
       case 'candidate':    return <CandidateTab application={a} />
