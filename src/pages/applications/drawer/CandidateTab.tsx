@@ -1,10 +1,12 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import Avatar from '../../../components/ui/Avatar'
 import StatusPill from '../../../components/ui/StatusPill'
 import Timeline from './Timeline'
+import type { ApplicationDetail } from '../../../types/application'
 
 // A small label-above-value field.
-function Field({ label, children }) {
+function Field({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div style={{ minWidth: 0 }}>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{label}</div>
@@ -18,9 +20,9 @@ function Field({ label, children }) {
  * header + profile fields + the application timeline. The full editable record
  * lives in the Candidates feature.
  */
-export default function CandidateTab({ application: a }) {
+export default function CandidateTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
-  const c = a.candidate ?? {}
+  const c = a.candidate
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>

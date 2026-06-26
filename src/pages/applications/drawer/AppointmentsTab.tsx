@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { Calendar, Plus } from 'lucide-react'
+import type { ApplicationDetail } from '../../../types/application'
 
 /**
  * AppointmentsTab — the application's appointments (= the shared appointments
  * entity, B-17/C-22). List of cards, or a calm empty state with a CTA.
  */
-export default function AppointmentsTab({ application: a }) {
+export default function AppointmentsTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
   const appointments = a.appointments ?? []
 

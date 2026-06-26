@@ -1,11 +1,15 @@
+import type { ReactNode } from 'react'
 import Avatar from '../../../components/ui/Avatar'
 import KoiosAiMark from '../../../components/ui/KoiosAiMark'
+import type { Id } from '../../../types/common'
+
+export interface TimelineItem { id?: Id; initials?: string; author?: string; time?: string; description?: ReactNode; ai?: boolean }
 
 /**
  * Timeline — a vertical activity list (dot + author avatar + description bubble +
  * optional Koios AI mark + time). Shared by the Candidate and Timeline tabs.
  */
-export default function Timeline({ items = [], emptyText }) {
+export default function Timeline({ items = [], emptyText }: { items?: TimelineItem[]; emptyText?: ReactNode }) {
   if (!items.length) return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{emptyText}</div>
 
   return (

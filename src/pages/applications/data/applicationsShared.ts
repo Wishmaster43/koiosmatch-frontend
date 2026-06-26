@@ -5,5 +5,5 @@
 
 // The three list buckets are derived from the phase key: hired = matched,
 // rejected = rejected, everything else = active.
-export const bucketOfPhase = (key) =>
+export const bucketOfPhase = (key: string): string =>
   key === 'rejected' ? 'rejected' : key === 'hired' ? 'matched' : 'active'
