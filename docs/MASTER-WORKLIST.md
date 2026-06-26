@@ -15,7 +15,7 @@
 | ✓ | ID | Track | Taak | Done als |
 |---|----|-------|------|----------|
 | ✅ | N-1 | [FE] P0 | **Security-sweep** gedaan — PII-leak in dev-error-log gedicht; SafeHtml/secrets/links schoon | findings ≤ LOW ✅ |
-| ☐ | N-2 | [FE+BE] P0 | **Auth → Sanctum httpOnly-cookie** (D1 besloten): backend stateful-domains+CORS+CSRF (BE-8), dán FE `VITE_COOKIE_AUTH`+withCredentials. **Niet flippen vóór BE klaar** | login via cookie; geen token in localStorage |
+| ◐ | N-2 | [FE+BE] P0 | **Auth → Sanctum httpOnly-cookie** (D1). BE-infra ✅ (`2ef65ff`). **FE-prep**: `withCredentials` + CSRF-priming op login + Bearer-localStorage uitfaseren — **klaarzetten, niet flippen** tot de gecoördineerde deploy (SPA-host in stateful-domains + prod cookie-env). Deploy/flip-checklist opstellen | login via cookie; geen token in localStorage |
 | ✅ | N-3 | [FE] P1 | **Mock-strip candidates** — `DUMMY_CANDIDATES` + mock-file weg (commit 4063113) | 0× DUMMY/USE_MOCKS ✅ |
 | ✅ | N-4 | [FE] P1 | **Mock-strip applications** — `mocks.js` weg; `bucketOfPhase`→`applicationsShared.js`; lint-fix | 0× MOCK_* ✅ |
 | ✅ | N-5 | [FE] P1 | **Mock-strip vacancies** — `USE_MOCKS` uit catch | 0× USE_MOCKS ✅ |
@@ -83,7 +83,7 @@
 | ☐ | BE-5 | Dashboard-KPI **deltas** (subs zijn nu `null`) | KPI-subs SM-dashboard |
 | ☐ | BE-6 | C-5b webhook-delivery (stap 2) | B-6 webhooks-UI |
 | ☐ | BE-7 | Yesway **PDOK-backfill** samen draaien (AVG-go gegeven) | radius op echte data |
-| ☐ | BE-8 | **Sanctum SPA-cookie** (D1): stateful-domains · CORS `credentials:true` · `/sanctum/csrf-cookie` · Secure+SameSite | N-2 auth-migratie |
+| ◐ | BE-8 | **Sanctum SPA-cookie** (D1) — **backend-infra GEBOUWD** (`2ef65ff`, staff-only, suite 341 groen): `statefulApi()` + CORS-creds + X-XSRF-TOKEN + **MFA-bypass dichtgezet**. **Flip resteert** (SPA-host nog niet in `SANCTUM_STATEFUL_DOMAINS`) → gecoördineerde deploy-stap | N-2 auth-migratie |
 
 > Volgorde-advies aan backend: **C-27 eerst** (deblokkeert de workflow-editor het meest).
 
