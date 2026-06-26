@@ -108,6 +108,12 @@ api.interceptors.response.use(
     // special-category data (names, contact, health) — strip PII from logs (§8).
     if (import.meta.env.DEV && !benignTenants403) {
       console.error('API Error:', status, method.toUpperCase(), url)
+      // For server errors (5xx) in dev, also surface the backend exception message
+      // (a Laravel error string, not user data) so the cause is visible without
+      // opening the Network tab. Dev-only + 5xx-only to respect §8.
+      if (status && status >= 500 && error.response?.data?.message) {
+        console.error('  ↳ server:', error.response.data.message)
+      }
     }
 
     const isAuthCall = url.includes('/auth/login') || url.includes('/auth/me')
