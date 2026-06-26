@@ -1,19 +1,24 @@
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Users } from 'lucide-react'
 
-const iStyle = {
+const iStyle: CSSProperties = {
   width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,
   border: '1px solid var(--border)', background: 'var(--surface)',
   color: 'var(--text)', boxSizing: 'border-box', outline: 'none',
 }
-const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }
+const labelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }
 
-export default function AddContactPersonModal({ onClose, onCreate, customerName }) {
+interface ContactForm { name: string; role: string; email: string }
+
+export default function AddContactPersonModal({ onClose, onCreate, customerName }: {
+  onClose: () => void; onCreate?: (v: ContactForm) => void; customerName?: string
+}) {
   const { t } = useTranslation('customers')
-  const [form, setForm] = useState({ name: '', role: '', email: '' })
+  const [form, setForm] = useState<ContactForm>({ name: '', role: '', email: '' })
   const [error, setError] = useState(false)
-  const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); if (k === 'name') setError(false) }
+  const set = (k: keyof ContactForm, v: string) => { setForm(f => ({ ...f, [k]: v })); if (k === 'name') setError(false) }
 
   const submit = () => {
     if (!form.name.trim()) { setError(true); return }
@@ -22,7 +27,7 @@ export default function AddContactPersonModal({ onClose, onCreate, customerName 
   }
 
   return (
-    <div onClick={e => e.target === e.currentTarget && onClose()}
+    <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 210, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden' }}>
         <div style={{ padding: '18px 22px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>

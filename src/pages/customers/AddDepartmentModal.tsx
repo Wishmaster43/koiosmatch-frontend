@@ -1,18 +1,27 @@
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Building, ChevronDown } from 'lucide-react'
+import type { Id } from '../../types/common'
 
-const iStyle = {
+const iStyle: CSSProperties = {
   width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,
   border: '1px solid var(--border)', background: 'var(--surface)',
   color: 'var(--text)', boxSizing: 'border-box', outline: 'none',
 }
-const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }
+const labelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }
 
-export default function AddDepartmentModal({ onClose, onCreate, locations = [], customerName }) {
+interface LocationOption { id: Id; name: string }
+
+export default function AddDepartmentModal({ onClose, onCreate, locations = [], customerName }: {
+  onClose: () => void
+  onCreate?: (v: { name: string; locationId: Id }) => void
+  locations?: LocationOption[]
+  customerName?: string
+}) {
   const { t } = useTranslation('customers')
   const [name, setName] = useState('')
-  const [locationId, setLocationId] = useState(locations[0]?.id ?? '')
+  const [locationId, setLocationId] = useState<Id | ''>(locations[0]?.id ?? '')
   const [error, setError] = useState(false)
 
   const submit = () => {
@@ -24,7 +33,7 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
   const canSubmit = !!name.trim() && !!locationId
 
   return (
-    <div onClick={e => e.target === e.currentTarget && onClose()}
+    <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 210, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 440, boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden' }}>
         <div style={{ padding: '18px 22px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
