@@ -1,15 +1,16 @@
 import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer'
+import type { ReactNode } from 'react'
 
 // Locale-aware "mmm yyyy". The drawer passes the active language's locale so a
 // generated CV matches the user's language; falls back to Dutch.
-function fmtDate(d, locale = 'nl-NL') {
+function fmtDate(d?: string | number | null, locale = 'nl-NL'): string {
   if (!d) return ''
   const dt = new Date(d)
   if (isNaN(dt.getTime())) return String(d)
   return dt.toLocaleDateString(locale, { month: 'short', year: 'numeric' })
 }
 
-function makeStyles(color, color2) {
+function makeStyles(color: string, color2: string) {
   return StyleSheet.create({
     page: { fontFamily: 'Helvetica', backgroundColor: '#FFFFFF', fontSize: 10, color: '#1F2937' },
 
@@ -73,7 +74,10 @@ function makeStyles(color, color2) {
   })
 }
 
-function SideSection({ label, first, S, children }) {
+type CvStyles = ReturnType<typeof makeStyles>
+type ChildNode = ReactNode
+
+function SideSection({ label, first, S, children }: { label: ChildNode; first?: boolean; S: CvStyles; children?: ChildNode }) {
   return (
     <View style={S.sideBlock}>
       <Text style={first ? S.sideLabelFirst : S.sideLabel}>{label}</Text>
@@ -82,7 +86,7 @@ function SideSection({ label, first, S, children }) {
   )
 }
 
-function MainSection({ label, S, children }) {
+function MainSection({ label, S, children }: { label: ChildNode; S: CvStyles; children?: ChildNode }) {
   return (
     <View style={S.mainBlock}>
       <View style={S.sectionHeader}>
@@ -96,7 +100,7 @@ function MainSection({ label, S, children }) {
 
 // Dutch fallback for the section labels — used when no `t` is supplied (the PDF is
 // rendered outside the React tree, so the caller passes its translate fn in).
-const CV_NL = {
+const CV_NL: Record<string, string> = {
   contact: 'Contact', languages: 'Talen', skills: 'Vaardigheden', certificates: 'Certificaten',
   experience: 'Werkervaring', education: 'Opleiding', preferences: 'Voorkeuren',
   email: 'E-mail', phone: 'Tel.', residence: 'Woonplaats', born: 'Geboren', nationality: 'Nationaliteit',
@@ -104,17 +108,47 @@ const CV_NL = {
 }
 
 // Minimal {{var}} interpolation for the Dutch fallback (i18next handles it when `t` is set).
-const interp = (str, opts = {}) => str.replace(/\{\{(\w+)\}\}/g, (_, k) => opts[k] ?? '')
+const interp = (str: string, opts: Record<string, unknown> = {}) => str.replace(/\{\{(\w+)\}\}/g, (_, k) => String(opts[k] ?? ''))
 
-export function CvDocument({ c, settings = {}, locale = 'nl-NL', t }) {
+// The CV input is a loose candidate (mapped OR raw), with many alternate field
+// names — typed permissively; the PDF reads defensively with `??` fallbacks.
+interface CvExperience { title?: string; function?: string; name?: string; company?: string; employer?: string; start_date?: string; startDate?: string; start?: string; end_date?: string; endDate?: string; end?: string; description?: string; desc?: string }
+interface CvEducation { title?: string; name?: string; school?: string; institution?: string; start_year?: string | number; startYear?: string | number; year?: string | number; end_year?: string | number; endYear?: string | number }
+interface CvLanguage { language?: string; name?: string; level?: string; spoken?: string }
+interface CvNamed { name?: string }
+interface CvCandidate {
+  name?: string; firstName?: string; middleName?: string; lastName?: string
+  title?: string; function?: string
+  email?: string; phone?: string; address?: string; dob?: string; nationality?: string; summary?: string
+  experiences?: CvExperience[]; educations?: CvEducation[]
+  languages?: CvLanguage[]; skills?: CvNamed[]; certs?: CvNamed[]; certifications?: CvNamed[]
+  photoUrl?: string; photo_url?: string; photo?: string
+  preferredFunctions?: string[]; shiftType?: string[]
+  [k: string]: unknown
+}
+interface CvSettings {
+  primaryColor?: string; secondaryColor?: string
+  sections?: Array<{ id: string; enabled?: boolean }>
+  logoUrl?: string | null; companyName?: string
+}
+type TranslateFn = (key: string, opts?: Record<string, unknown>) => string
+
+interface CvDocumentProps {
+  c?: CvCandidate
+  settings?: CvSettings
+  locale?: string
+  t?: TranslateFn
+}
+
+export function CvDocument({ c, settings = {}, locale = 'nl-NL', t }: CvDocumentProps) {
   const color  = settings.primaryColor   ?? '#19A5CA'
   const color2 = settings.secondaryColor ?? '#1B60A9'
   const S = makeStyles(color, color2)
-  const fmt = (d) => fmtDate(d, locale)
-  const L = (k, opts) => (t ? t(`cv.${k}`, opts) : interp(CV_NL[k] ?? k, opts))
+  const fmt = (d?: string | number | null) => fmtDate(d, locale)
+  const L = (k: string, opts?: Record<string, unknown>): string => (t ? t(`cv.${k}`, opts) : interp(CV_NL[k] ?? k, opts))
 
   const secs    = settings.sections ?? []
-  const enabled = (id) => secs.length === 0 || (secs.find(s => s.id === id)?.enabled !== false)
+  const enabled = (id: string) => secs.length === 0 || (secs.find(s => s.id === id)?.enabled !== false)
 
   const name  = c?.name ?? [c?.firstName, c?.middleName, c?.lastName].filter(Boolean).join(' ') ?? L('nameFallback')
   const title = c?.title ?? c?.function ?? ''
@@ -125,7 +159,7 @@ export function CvDocument({ c, settings = {}, locale = 'nl-NL', t }) {
     c?.address     && [L('residence'),   c.address],
     c?.dob         && [L('born'),        fmt(c.dob)],
     c?.nationality && [L('nationality'), c.nationality],
-  ].filter(Boolean)
+  ].filter(Boolean) as Array<[string, string]>
 
   const experiences  = c?.experiences  ?? []
   const educations   = c?.educations   ?? []
@@ -255,18 +289,18 @@ export function CvDocument({ c, settings = {}, locale = 'nl-NL', t }) {
               </MainSection>
             )}
 
-            {enabled('preferences') && (c?.preferredFunctions?.length > 0 || c?.shiftType?.length > 0) && (
+            {enabled('preferences') && ((c?.preferredFunctions?.length ?? 0) > 0 || (c?.shiftType?.length ?? 0) > 0) && (
               <MainSection label={L('preferences')} S={S}>
-                {c?.preferredFunctions?.length > 0 && (
+                {(c?.preferredFunctions?.length ?? 0) > 0 && (
                   <View style={{ marginBottom: 6 }}>
                     <View style={S.tagRow}>
-                      {c.preferredFunctions.map((f, i) => <Text key={i} style={S.tag}>{f}</Text>)}
+                      {(c?.preferredFunctions ?? []).map((f, i) => <Text key={i} style={S.tag}>{f}</Text>)}
                     </View>
                   </View>
                 )}
-                {c?.shiftType?.length > 0 && (
+                {(c?.shiftType?.length ?? 0) > 0 && (
                   <View style={S.tagRow}>
-                    {c.shiftType.map((d, i) => <Text key={i} style={S.tag}>{d}</Text>)}
+                    {(c?.shiftType ?? []).map((d, i) => <Text key={i} style={S.tag}>{d}</Text>)}
                   </View>
                 )}
               </MainSection>
