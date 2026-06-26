@@ -1,6 +1,17 @@
 import { useState } from 'react'
-import api from '../../../lib/api'
-import { ExperienceTab, EducationTab, CertificationsTab, SkillsTab } from './SectionTabs'
+import type { ComponentType, Dispatch, SetStateAction } from 'react'
+import api from '@/lib/api'
+import { ExperienceTab as ExperienceTabJs, EducationTab as EducationTabJs, CertificationsTab as CertificationsTabJs, SkillsTab as SkillsTabJs } from './SectionTabs'
+import type { Candidate } from '@/types/candidate'
+
+type RelItem = Record<string, unknown>
+type RelTabProps = { items?: RelItem[]; onAdd?: (v: RelItem) => void; onEdit?: (i: number, v: RelItem) => void; onRemove?: (i: number) => void }
+
+// SectionTabs is still untyped JS — declare the relation-list props used here.
+const ExperienceTab     = ExperienceTabJs     as ComponentType<RelTabProps>
+const EducationTab      = EducationTabJs      as ComponentType<RelTabProps>
+const CertificationsTab = CertificationsTabJs as ComponentType<RelTabProps>
+const SkillsTab         = SkillsTabJs         as ComponentType<RelTabProps>
 
 /**
  * Background tab — experience, education, certifications, skills.
@@ -8,15 +19,9 @@ import { ExperienceTab, EducationTab, CertificationsTab, SkillsTab } from './Sec
  * Each list is optimistic local state that also persists to the candidate's
  * sub-entity routes (POST/PATCH/DELETE /candidates/{id}/{relation}). New items
  * get a negative temp id until the POST returns the server id; edit/remove only
- * hit the API once a real id exists. All calls fail soft (UI never breaks).
- *
- * Body field names (snake_case) — confirm these match the backend columns:
- *   experiences:    function_title, employer, location, start_date, end_date, current, description
- *   educations:     title, school, start_date, end_date, in_progress, description, issue_date
- *   certifications: name, organisation, issue_date, expiry_date, license_number, description
- *   skills:         name, level
+ * hit the API once a real (positive numeric) id exists. All calls fail soft.
  */
-const TO_API = {
+const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
   experiences: v => ({
     function_title: v.title, employer: v.company, location: v.location,
     start_date: v.start, end_date: v.current ? null : v.end,
@@ -33,31 +38,33 @@ const TO_API = {
   skills: v => ({ name: v.name, level: v.level }),
 }
 
-export default function BackgroundTab({ c }) {
-  const [experiences, setExperiences] = useState(c.experiences ?? [])
-  const [educations,  setEducations]  = useState(c.educations ?? [])
-  const [certs,       setCerts]        = useState(c.certifications ?? [])
-  const [skills,      setSkills]       = useState(c.skills ?? [])
+export default function BackgroundTab({ c }: { c: Candidate }) {
+  const [experiences, setExperiences] = useState<RelItem[]>(c.experiences ?? [])
+  const [educations,  setEducations]  = useState<RelItem[]>(c.educations ?? [])
+  const [certs,       setCerts]        = useState<RelItem[]>(c.certifications ?? [])
+  // Candidate.skills is string[] from the mapper, but the SkillsTab edits them as
+  // { name, level } objects (it renders both) — widen to the relation-item shape.
+  const [skills,      setSkills]       = useState<RelItem[]>((c.skills ?? []) as unknown as RelItem[])
 
   // add / edit-at-index / remove-at-index for a relation, with optimistic persistence.
   // Not-yet-persisted rows get a negative temp id (never collides with server ids).
-  const ops = (rel, list, set) => ({
-    onAdd: (v) => {
+  const ops = (rel: string, list: RelItem[], set: Dispatch<SetStateAction<RelItem[]>>) => ({
+    onAdd: (v: RelItem) => {
       const id = -Date.now()
       set(p => [...p, { ...v, id }])
       api.post(`/candidates/${c.id}/${rel}`, TO_API[rel](v))
         .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) set(p => p.map(x => x.id === id ? { ...v, ...it } : x)) })
         .catch(() => {})
     },
-    onEdit: (i, v) => {
+    onEdit: (i: number, v: RelItem) => {
       const id = list[i]?.id
       set(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))
-      if (id > 0) api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v)).catch(() => {})
+      if (typeof id === 'number' && id > 0) api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v)).catch(() => {})
     },
-    onRemove: (i) => {
+    onRemove: (i: number) => {
       const id = list[i]?.id
       set(p => p.filter((_, idx) => idx !== i))
-      if (id > 0) api.delete(`/candidates/${c.id}/${rel}/${id}`).catch(() => {})
+      if (typeof id === 'number' && id > 0) api.delete(`/candidates/${c.id}/${rel}/${id}`).catch(() => {})
     },
   })
 

@@ -51,6 +51,7 @@ export interface CandidateConsent {
 
 /** A linked match (read-only on the candidate; the contract lives in HelloFlex). */
 export interface CandidateMatch {
+  id?: Id
   vacancyTitle: string
   client: string
   score: number | null

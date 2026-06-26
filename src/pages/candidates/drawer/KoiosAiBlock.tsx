@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
-import { useDateFormat } from '../../../lib/datetime'
-import KoiosAiMark from '../../../components/ui/KoiosAiMark'
+import { useDateFormat } from '@/lib/datetime'
+import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import type { Candidate } from '@/types/candidate'
 
 /** AI advisory block (dummy insights for now — to be wired to the API later).
  *  Calm/neutral styling; profile-level insights only — match score lives in the
  *  application drawer, not here. */
-export default function KoiosAiBlock({ c }) {
+export default function KoiosAiBlock({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const [loading, setLoading] = useState(false)
