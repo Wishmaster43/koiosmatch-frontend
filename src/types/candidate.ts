@@ -20,6 +20,16 @@ export interface CandidateStats {
   [k: string]: unknown
 }
 
+/** Koios AI advice precomputed server-side (background job). */
+export interface CandidateAdvice {
+  action?: string
+  label?: string
+  reason?: string
+  score?: number
+  pool_hint?: string
+  [k: string]: unknown
+}
+
 /** Talent-pool chip on a candidate. Accepts a bare slug (normalised to { name }). */
 export interface CandidatePool {
   id?: string | number
@@ -92,7 +102,7 @@ export interface Candidate {
   tags: string[]
   branches: string[]
   pools: CandidatePool[]
-  koiosAdvice: Loose | null
+  koiosAdvice: CandidateAdvice | null
   experiences: Loose[]
   educations: Loose[]
   languages: Loose[]

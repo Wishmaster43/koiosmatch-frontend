@@ -1,28 +1,46 @@
 import { useTranslation } from 'react-i18next'
+import type { ComponentType, CSSProperties } from 'react'
 import { Target, Phone, CalendarPlus, Sparkles, Mail, MessageCircle, PhoneCall, HelpCircle } from 'lucide-react' // HelpCircle = fallback for unknown contact channel
-import DataTable from '../../components/ui/DataTable'
-import Avatar from '../../components/ui/Avatar'
-import KoiosAiMark from '../../components/ui/KoiosAiMark'
-import { useDateFormat } from '../../lib/datetime'
-import { useLookups } from '../../context/LookupsContext'
-import { useGenders } from '../../lib/useGenders'
-import { useLastContactTypes } from '../../lib/useLastContactTypes'
+import DataTable from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
+import Avatar from '@/components/ui/Avatar'
+import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import { useDateFormat } from '@/lib/datetime'
+import { useLookups } from '@/context/LookupsContext'
+import { useGenders } from '@/lib/useGenders'
+import { useLastContactTypes } from '@/lib/useLastContactTypes'
+import type { Candidate } from '@/types/candidate'
+import type { Id } from '@/types/common'
 
-const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
+const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
+
+type LucideIcon = ComponentType<{ size?: number; title?: string; style?: CSSProperties }>
 
 // Icon per contact channel slug — shown in the last-contact-type column.
-const CONTACT_TYPE_ICON = {
+const CONTACT_TYPE_ICON: Record<string, LucideIcon> = {
   email:     Mail,
   phone:     PhoneCall,
   whatsapp:  MessageCircle,
 }
 
 // Icon + colour per Koios advice action (hex so `+ alpha` tints work).
-const ADVICE_META = {
+const ADVICE_META: Record<string, { icon: LucideIcon; color: string }> = {
   add_to_pool: { icon: Target,       color: '#19A5CA' },
   contact:     { icon: Phone,        color: '#D97706' },
   plan_intake: { icon: CalendarPlus, color: '#2563EB' },
   default:     { icon: Sparkles,     color: '#6B7280' },
+}
+
+interface CandidatesTableProps {
+  rows: Candidate[]
+  loading?: boolean
+  selectedId?: Id | null
+  onSelect?: (row: Candidate) => void
+  selectable?: boolean
+  selectedIds?: Set<Id>
+  onToggleRow?: (id: Id) => void
+  onToggleAll?: (ids: Id[], allSelected: boolean) => void
+  stickyHeader?: boolean
 }
 
 /**
@@ -32,16 +50,22 @@ const ADVICE_META = {
  * live in the generic DataTable. Reuse that table for other entity lists with
  * their own column set.
  */
-export default function CandidatesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false }) {
+export default function CandidatesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false }: CandidatesTableProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
-  const { funnelTypes, funnelMeta, statusMeta, typeMeta } = useLookups()
+  // LookupsContext is still untyped JS — cast its API to the meta shapes used here.
+  const { funnelTypes, funnelMeta, statusMeta, typeMeta } = useLookups() as unknown as {
+    funnelTypes: Array<{ value: string }>
+    funnelMeta: (v: string) => { label: string; color: string }
+    statusMeta: (v: string) => { label: string; color: string }
+    typeMeta: (v: string) => { label: string; color: string }
+  }
   const { colorOf: genderColor } = useGenders()
   const { labelOf: lastContactLabel } = useLastContactTypes()
   // Sort the funnel column by lifecycle order (prospect → alumni), not alphabetically.
-  const funnelOrder = Object.fromEntries(funnelTypes.map((f, i) => [f.value, i]))
+  const funnelOrder: Record<string, number> = Object.fromEntries(funnelTypes.map((f, i) => [f.value, i]))
 
-  const columns = [
+  const columns: Column<Candidate>[] = [
     {
       key: 'name', header: t('columns.name'), sortable: true, sortValue: c => c.name,
       sticky: true, width: 200,
@@ -64,10 +88,10 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
         return <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
           background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span> },
     },
-    { key: 'created', header: t('columns.createdAt'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.createdSort ?? c.created, render: c => formatDate(c.created) },
+    { key: 'created', header: t('columns.createdAt'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.created, render: c => formatDate(c.created) },
     {
       // Combined last-contact column: date + channel icon. Channel stays filterable via CandidatesPage filters.
-      key: 'lastContact', header: t('columns.lastContact'), nowrap: true, sortable: true, sortValue: c => c.lastContactAt,
+      key: 'lastContact', header: t('columns.lastContact'), nowrap: true, sortable: true, sortValue: c => c.lastContactAt ?? '',
       render: c => {
         if (!c.lastContactAt) return <span style={{ color: 'var(--text-muted)' }}>—</span>
         const label = lastContactLabel(c.lastContactType)
@@ -165,7 +189,6 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
         </div>
       ),
     },
-    // { key: 'province', header: t('columns.province'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.province, render: c => c.province || '—' },
   ]
 
   return (

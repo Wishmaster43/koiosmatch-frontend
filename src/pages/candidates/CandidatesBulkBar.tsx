@@ -1,8 +1,31 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, StickyNote, Archive, X } from 'lucide-react'
-import api from '../../lib/api'
-import ActionMenu from '../../components/ui/ActionMenu'
+import api from '@/lib/api'
+import ActionMenu from '@/components/ui/ActionMenu'
+import type { MenuNode } from '@/components/ui/ActionMenu'
+import type { CandidatePool } from '@/types/candidate'
+import type { Id, LookupOption } from '@/types/common'
+
+interface BulkUser { id: Id; name: string }
+
+interface CandidatesBulkBarProps {
+  count: number
+  onClear: () => void
+  onAddToPool: (pool: CandidatePool) => void
+  onRemoveFromPool: (pool: CandidatePool) => void
+  onSetOwner: (user: BulkUser) => void
+  onSetStage: (stage: string) => void
+  onSetTypes: (types: string[]) => void
+  onRemoveTag: (tag: string) => void
+  onAddNote: (text: string) => void
+  onArchive: () => void
+  canArchive?: boolean
+  users?: BulkUser[]
+  funnelTypes?: LookupOption[]
+  candidateTypes?: LookupOption[]
+  selectedTags?: string[]
+}
 
 /**
  * CandidatesBulkBar — the selection action bar shown above the table when ≥1
@@ -14,9 +37,9 @@ export default function CandidatesBulkBar({
   count, onClear, onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes,
   onRemoveTag, onAddNote, onArchive, canArchive = false,
   users = [], funnelTypes = [], candidateTypes = [], selectedTags = [],
-}) {
+}: CandidatesBulkBarProps) {
   const { t } = useTranslation('candidates')
-  const [pools, setPools] = useState([])
+  const [pools, setPools] = useState<CandidatePool[]>([])
 
   // Load the talent pools once for the add/remove option lists.
   useEffect(() => {
@@ -24,19 +47,19 @@ export default function CandidatesBulkBar({
   }, [])
 
   // Build the menu option lists from props/state.
-  const poolOptions = pools.map(p => ({ value: p.id ?? p.name, label: p.name, color: p.color || '#6B7280' }))
+  const poolOptions = pools.map(p => ({ value: p.id ?? p.name ?? '', label: p.name, color: p.color || '#6B7280' }))
   const userOptions = users.map(u => ({ value: u.id, label: u.name }))
   const stageOptions = funnelTypes.map(f => ({ value: f.value, label: f.label, color: f.color }))
   const typeOptions = candidateTypes.map(ct => ({ value: ct.value, label: ct.label, color: ct.color }))
   const tagOptions = selectedTags.map(tg => ({ value: tg, label: tg }))
 
   // Resolve a picked pool/user id back to the full object the parent needs.
-  const pickPool = (handler) => (poolId) => { const p = pools.find(x => (x.id ?? x.name) === poolId); if (p) handler(p) }
-  const pickUser = (handler) => (userId) => { const u = users.find(x => x.id === userId); if (u) handler(u) }
+  const pickPool = (handler: (pool: CandidatePool) => void) => (poolId: string | number) => { const p = pools.find(x => (x.id ?? x.name) === poolId); if (p) handler(p) }
+  const pickUser = (handler: (user: BulkUser) => void) => (userId: string | number) => { const u = users.find(x => x.id === userId); if (u) handler(u) }
 
   // Declarative bulk-action tree; extend with more actions as extra nodes.
   // Archive is gated: only present when the user may delete (server re-checks).
-  const items = [
+  const items: MenuNode[] = [
     { key: 'owner', label: t('bulk.changeOwner'), icon: UserCog,
       searchPlaceholder: t('bulk.searchOwner'), emptyText: t('bulk.noUsers'), options: userOptions, onPick: pickUser(onSetOwner) },
     { key: 'pool', label: t('bulk.pool'), icon: Folder, items: [
@@ -46,14 +69,14 @@ export default function CandidatesBulkBar({
         searchPlaceholder: t('bulk.searchPool'), emptyText: t('bulk.noPools'), options: poolOptions, onPick: pickPool(onRemoveFromPool) },
     ] },
     { key: 'stage', label: t('bulk.changeStage'), icon: Milestone,
-      searchPlaceholder: t('bulk.searchStage'), options: stageOptions, onPick: onSetStage },
+      searchPlaceholder: t('bulk.searchStage'), options: stageOptions, onPick: (v) => onSetStage(String(v)) },
     { key: 'type', label: t('bulk.changeType'), icon: Briefcase, multiSelect: true,
       searchPlaceholder: t('bulk.searchType'), emptyText: t('bulk.noTypes'), options: typeOptions,
-      submitLabel: t('bulk.typeSubmit'), onSubmit: onSetTypes },
+      submitLabel: t('bulk.typeSubmit'), onSubmit: (v) => onSetTypes(Array.isArray(v) ? v.map(String) : []) },
     { key: 'tag', label: t('bulk.removeTag'), icon: Tag,
-      searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: onRemoveTag },
+      searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: (v) => onRemoveTag(String(v)) },
     { key: 'note', label: t('bulk.addNote'), icon: StickyNote, input: true,
-      placeholder: t('bulk.notePlaceholder'), submitLabel: t('bulk.noteSubmit'), onSubmit: onAddNote },
+      placeholder: t('bulk.notePlaceholder'), submitLabel: t('bulk.noteSubmit'), onSubmit: (v) => onAddNote(String(v)) },
     ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
   ]
 
