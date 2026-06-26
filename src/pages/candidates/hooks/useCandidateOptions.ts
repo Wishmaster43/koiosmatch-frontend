@@ -5,10 +5,26 @@
  * page when stats is unavailable. Pure derivation from data + lookups.
  */
 import { useMemo, useState } from 'react'
+import type { TFunction } from 'i18next'
 import { metaOf, optsFrom, isStale, isNeverContacted, isNoFollowup } from '../data/candidatesShared'
 import { NL_PROVINCES } from '../drawer/constants'
+import type { Candidate, CandidateStats } from '@/types/candidate'
+import type { Id, LookupOption } from '@/types/common'
 
-export function useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, t }) {
+interface LocationOption { id?: Id; name?: string }
+interface OwnerOption { value: Id; label: string; count: number }
+
+interface UseCandidateOptionsParams {
+  stats: CandidateStats | null
+  candidates: Candidate[]
+  locations: LocationOption[]
+  statuses: LookupOption[]
+  funnelTypes: LookupOption[]
+  candidateTypes: LookupOption[]
+  t: TFunction
+}
+
+export function useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, t }: UseCandidateOptionsParams) {
   // Status / funnel / owner options come from stats (whole filtered set); fall
   // back to page-based counts when stats is unavailable.
   const statusOptions = useMemo(() =>
@@ -19,7 +35,7 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   const funnelOptions = useMemo(() =>
     stats?.by_funnel
       ? stats.by_funnel.map(o => { const v = o.value ?? o.funnel_type; return { value: v, label: o.label ?? metaOf(funnelTypes, v)?.label ?? v, color: o.color, count: o.count } })
-      : funnelTypes.map(f => ({ value: f.value, label: f.label, count: candidates.filter(c => c.stage === f.value).length })).filter(o => o.count > 0)
+      : funnelTypes.map(f => ({ value: f.value, label: f.label, color: f.color, count: candidates.filter(c => c.stage === f.value).length })).filter(o => o.count > 0)
   , [stats, candidates, funnelTypes])
   const typeOptions = useMemo(() =>
     candidateTypes.map(ct => ({ value: ct.value, label: ct.label, count: candidates.filter(c => (c.candidateTypes ?? []).includes(ct.value)).length })).filter(o => o.count > 0)
@@ -30,7 +46,7 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
       // Accept both shapes (id | owner_id); drop the "no owner" bucket + guard a null name.
       return stats.by_owner.map(o => ({ value: o.id ?? o.owner_id, label: o.name || '—', count: o.count })).filter(o => o.value)
     }
-    const m = {}
+    const m: Record<string, OwnerOption> = {}
     candidates.forEach(c => { if (c.ownerId) (m[c.ownerId] ??= { value: c.ownerId, label: c.owner || '—', count: 0 }).count++ })
     return Object.values(m)
   }, [stats, candidates])
@@ -46,7 +62,7 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   const locationOptions = useMemo(() => (locations ?? []).map(l => ({ value: l.id, label: l.name })).filter(o => o.value != null), [locations])
 
   // Donut-data: reuse the count-options, enriched with the lookup colour per value.
-  const colorFor = (list, v) => list.find(x => x.value === v)?.color
+  const colorFor = (list: LookupOption[], v: unknown) => list.find(x => x.value === v)?.color
   const statusData = useMemo(() =>
     statusOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: colorFor(statuses, o.value) }))
   , [statusOptions, statuses])

@@ -5,18 +5,33 @@
  * optimistic bulk/drawer updates in the container can mutate the list directly.
  */
 import { useState, useEffect } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
+import type { TFunction } from 'i18next'
 import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
 import { mapCandidate } from '../data/mapCandidate'
+import type { ApiCandidate, Candidate, CandidateStats } from '@/types/candidate'
+import type { Id } from '@/types/common'
 
-export function useCandidatesData({ filterParams, page, pageSize, t, setActionMsg }) {
-  const [candidates, setCandidates] = useState([])
+interface ActionMsg { type: string; text: string }
+interface LocationOption { id?: Id; name?: string }
+
+interface UseCandidatesDataParams {
+  filterParams: Record<string, unknown>
+  page: number
+  pageSize: number
+  t: TFunction
+  setActionMsg: (msg: ActionMsg) => void
+}
+
+export function useCandidatesData({ filterParams, page, pageSize, t, setActionMsg }: UseCandidatesDataParams) {
+  const [candidates, setCandidates] = useState<Candidate[]>([])
   const [loading,    setLoading]    = useState(true)
-  const [error,      setError]      = useState(null)
+  const [error,      setError]      = useState<string | null>(null)
   const [total,      setTotal]      = useState(0)
   const [lastPage,   setLastPage]   = useState(1)
-  const [stats,      setStats]      = useState(null)
-  const [locations,  setLocations]  = useState([])
+  const [stats,      setStats]      = useState<CandidateStats | null>(null)
+  const [locations,  setLocations]  = useState<LocationOption[]>([])
 
   // ── List (paginated, server-filtered) ──
   useEffect(() => {
@@ -26,7 +41,7 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
     api.get('/candidates', { params: { ...filterParams, page, per_page: pageSize }, signal: ctrl.signal })
       .then(res => {
         const { rows, total, lastPage } = unwrapList(res)
-        setCandidates(rows.map(mapCandidate)); setTotal(total); setLastPage(lastPage)
+        setCandidates((rows as ApiCandidate[]).map(mapCandidate)); setTotal(total); setLastPage(lastPage)
       })
       .catch(err => {
         if (isAbortError(err)) return
@@ -66,5 +81,15 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
     return () => ctrl.abort()
   }, [])
 
-  return { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, locations }
+  return { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, locations } as {
+    candidates: Candidate[]
+    setCandidates: Dispatch<SetStateAction<Candidate[]>>
+    loading: boolean
+    error: string | null
+    total: number
+    setTotal: Dispatch<SetStateAction<number>>
+    lastPage: number
+    stats: CandidateStats | null
+    locations: LocationOption[]
+  }
 }

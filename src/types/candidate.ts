@@ -8,8 +8,17 @@
  * the precise per-tab shapes get tightened when those tabs migrate to TS.
  */
 
-import type { Loose } from './common'
+import type { Id, Loose } from './common'
 export type { Loose }
+
+/** Server-wide candidate stats (/candidates/stats) — totals across the filtered set. */
+export interface CandidateStats {
+  by_status?: Array<{ value?: string; status?: string; count?: number }>
+  by_funnel?: Array<{ value?: string; funnel_type?: string; label?: string; color?: string; count?: number }>
+  by_owner?: Array<{ id?: Id; owner_id?: Id; name?: string; count?: number }>
+  attention?: { stale_6m?: number; never_contacted?: number; tasks?: number }
+  [k: string]: unknown
+}
 
 /** Talent-pool chip on a candidate. Accepts a bare slug (normalised to { name }). */
 export interface CandidatePool {
