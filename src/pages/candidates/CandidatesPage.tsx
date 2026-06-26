@@ -6,59 +6,79 @@
  * drawer. Heavy logic lives in the hooks under ./hooks and ./data.
  */
 import { useState, useEffect, useMemo, useRef } from 'react'
+import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
-import { useRightPanel } from '../../context/RightPanelContext'
-import { useAuth } from '../../context/AuthContext'
-import { useLookups } from '../../context/LookupsContext'
-import { useUsers } from '../../lib/queries'
-import api from '../../lib/api'
-import CandidateDrawer from './CandidateDrawer'
+import { useRightPanel } from '@/context/RightPanelContext'
+import { useAuth } from '@/context/AuthContext'
+import { useLookups } from '@/context/LookupsContext'
+import { useUsers } from '@/lib/queries'
+import api from '@/lib/api'
+import CandidateDrawerJs from './CandidateDrawer'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesTable from './CandidatesTable'
 import CandidatesBulkBar from './CandidatesBulkBar'
-import InsightsRow from '../../components/insights/InsightsRow'
-import PaginationBar from '../../components/ui/PaginationBar'
+import InsightsRowJs from '@/components/insights/InsightsRow'
+import PaginationBar from '@/components/ui/PaginationBar'
 import { mapCandidate } from './data/mapCandidate'
 import { toggleOneValue, isStale, isNeverContacted, isNoFollowup, buildCandidatePatch } from './data/candidatesShared'
 import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
 import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
+import type { Candidate } from '@/types/candidate'
+import type { Id } from '@/types/common'
 
-export default function CandidatesPage({ intent } = {}) {
+interface CandidateIntent {
+  attention?: string
+  status?: string
+  owner?: string | number
+  funnel?: string
+  location?: string | number
+}
+interface ActionMsg { type: string; text: string }
+interface AppUser { id: Id; name: string; [k: string]: unknown }
+
+// Still-untyped JS components — declare the props this page passes (typed boundary).
+const CandidateDrawer = CandidateDrawerJs as ComponentType<{
+  candidate: Candidate | null; onClose: () => void; expanded: boolean
+  onToggleExpand: () => void; onUpdate: (id: Id, patch: Record<string, unknown>) => void; users: AppUser[]
+}>
+const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: unknown[]; clearTitle?: string }>
+
+export default function CandidatesPage({ intent }: { intent?: CandidateIntent } = {}) {
   // Auth/user must come first — pageSize initial value reads user.default_per_page.
-  const { hasPermission, user } = useAuth()
+  const { hasPermission, user } = useAuth() as unknown as { hasPermission: (p: string) => boolean; user: { default_per_page?: number } | null }
   const { t } = useTranslation('candidates')
   const { candidateTypes, funnelTypes, statuses } = useLookups()
-  const { data: users = [] } = useUsers()
-  const { registerFilters, unregisterFilters } = useRightPanel()
+  const { data: users = [] } = useUsers() as { data?: AppUser[] }
+  const { registerFilters, unregisterFilters } = useRightPanel() as { registerFilters: (id: string, groups: unknown) => void; unregisterFilters: (id: string) => void }
 
   const [page,           setPage]           = useState(1)
   // Initialise from the user's profile preference (Profile → Records per page).
-  const [pageSize,       setPageSize]       = useState(() => user?.default_per_page ?? 50)
-  const [selected,       setSelected]       = useState(null)
+  const [pageSize,       setPageSize]       = useState<number>(() => user?.default_per_page ?? 50)
+  const [selected,       setSelected]       = useState<Candidate | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [addOpen,        setAddOpen]        = useState(false)
-  const [detail,         setDetail]         = useState(null)
-  const selectedIdRef = useRef(null)
+  const [detail,         setDetail]         = useState<Candidate | null>(null)
+  const selectedIdRef = useRef<Id | null>(null)
 
   // Server-side filter dimensions (the API supports these). Owner holds owner_ids.
-  const [selectedStatus,   setSelectedStatus]   = useState([])
-  const [selectedFunnel,   setSelectedFunnel]   = useState([])
-  const [selectedType,     setSelectedType]     = useState([])
-  const [selectedOwner,    setSelectedOwner]    = useState([])
-  const [selectedGeslacht, setSelectedGeslacht] = useState([])
-  const [selectedProvince, setSelectedProvince] = useState([])
-  const [selectedTitle,    setSelectedTitle]    = useState([])
-  const [selectedLocation, setSelectedLocation] = useState([])
+  const [selectedStatus,   setSelectedStatus]   = useState<string[]>([])
+  const [selectedFunnel,   setSelectedFunnel]   = useState<string[]>([])
+  const [selectedType,     setSelectedType]     = useState<string[]>([])
+  const [selectedOwner,    setSelectedOwner]    = useState<Array<string | number>>([])
+  const [selectedGeslacht, setSelectedGeslacht] = useState<string[]>([])
+  const [selectedProvince, setSelectedProvince] = useState<string[]>([])
+  const [selectedTitle,    setSelectedTitle]    = useState<string[]>([])
+  const [selectedLocation, setSelectedLocation] = useState<Array<string | number>>([])
   const [globalSearch,     setGlobalSearch]     = useState('')
   // Aandacht-tile filter: null | 'stale6m' | 'neverContacted' | 'noFollowup' (klik = aan/uit).
-  const [attentionFilter,  setAttentionFilter]  = useState(null)
+  const [attentionFilter,  setAttentionFilter]  = useState<string | null>(null)
   // Bulk-selectie (checkboxes) — id-set; gewist bij filter/pagina-wissel.
-  const [selectedIds,      setSelectedIds]      = useState(() => new Set())
+  const [selectedIds,      setSelectedIds]      = useState<Set<Id>>(() => new Set())
   // Transient feedback for bulk mutations (success/error), auto-dismissed.
-  const [actionMsg,        setActionMsg]        = useState(null) // { type, text }
-  const msgTimer = useRef(null)
+  const [actionMsg,        setActionMsg]        = useState<ActionMsg | null>(null)
+  const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Seed filters from a navigation intent (e.g. a dashboard KPI/chart click).
   useEffect(() => {
@@ -70,12 +90,12 @@ export default function CandidatesPage({ intent } = {}) {
     if (intent.location)      setSelectedLocation([intent.location])
   }, [intent])
 
-  const handlePageSizeChange = (newSize) => { setPageSize(newSize); setPage(1) }
+  const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
 
   // Server-side filter params (axios serialises arrays as `key[]`). Only the
   // dimensions the API supports; the rest of the right panel is hidden for now.
   const filterParams = useMemo(() => {
-    const p = {}
+    const p: Record<string, unknown> = {}
     if (globalSearch.trim())     p.search         = globalSearch.trim()
     if (selectedStatus.length)   p.status         = selectedStatus
     if (selectedFunnel.length)   p.funnel_type    = selectedFunnel
@@ -94,7 +114,7 @@ export default function CandidatesPage({ intent } = {}) {
   useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize])
 
   // Show a transient success/error message; replaces any previous one.
-  const notify = (type, text) => {
+  const notify = (type: string, text: string) => {
     setActionMsg({ type, text })
     if (msgTimer.current) clearTimeout(msgTimer.current)
     msgTimer.current = setTimeout(() => setActionMsg(null), 4000)
@@ -113,13 +133,13 @@ export default function CandidatesPage({ intent } = {}) {
     staleCount, neverContactedCount, noFollowupCount, intakeCount, activeConvCount, tasksCount,
   } = useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, t })
 
-  const tog = (set) => (v) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
+  const tog = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
   // Klik-op-chart → zet precies één waarde, of wis bij nogmaals klikken (toggle).
-  const pickOne = (set) => (v) => { if (v != null) toggleOneValue(set, v) }
+  const pickOne = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T | null | undefined) => { if (v != null) toggleOneValue(set, v) }
   const pickStatus = pickOne(setSelectedStatus)
   const pickFunnel = pickOne(setSelectedFunnel)
   const pickOwner  = pickOne(setSelectedOwner)
-  const toggleAttention = (key) => setAttentionFilter(prev => prev === key ? null : key)
+  const toggleAttention = (key: string) => setAttentionFilter(prev => prev === key ? null : key)
 
   const catLifecycle      = t('filters.categories.lifecycle')
   const catQualifications = t('filters.categories.qualifications')
@@ -156,7 +176,7 @@ export default function CandidatesPage({ intent } = {}) {
   }, [candidates, attentionFilter])
 
   // Open a candidate: hand the light row to the drawer, then fetch the full record.
-  const selectCandidate = (c) => {
+  const selectCandidate = (c: Candidate) => {
     selectedIdRef.current = c.id
     setSelected(c); setDetail(null); setDrawerExpanded(false)
     api.get(`/candidates/${c.id}`)
@@ -166,7 +186,7 @@ export default function CandidatesPage({ intent } = {}) {
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
 
   // A freshly created candidate: prepend to the list and open its drawer.
-  const handleCreated = (c) => {
+  const handleCreated = (c: Candidate) => {
     setCandidates(prev => [c, ...prev])
     setTotal(prev => prev + 1)
     setAddOpen(false)
@@ -174,10 +194,11 @@ export default function CandidatesPage({ intent } = {}) {
   }
 
   // Header/profile edits in the drawer flow back here: optimistic locally, then PATCH.
-  const updateCandidate = (id, patch) => {
-    setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...patch } : x))
-    setSelected(prev => (prev && prev.id === id ? { ...prev, ...patch } : prev))
-    setDetail(prev  => (prev && prev.id === id ? { ...prev, ...patch } : prev))
+  // `patch` is a dynamic UI edit (UI field names, some outside Candidate) → cast on merge.
+  const updateCandidate = (id: Id, patch: Record<string, unknown>) => {
+    setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...patch } as Candidate : x))
+    setSelected(prev => (prev && prev.id === id ? { ...prev, ...patch } as Candidate : prev))
+    setDetail(prev  => (prev && prev.id === id ? { ...prev, ...patch } as Candidate : prev))
     const body = buildCandidatePatch(patch)
     if (Object.keys(body).length) api.patch(`/candidates/${id}`, body).catch(() => {})
   }
@@ -189,15 +210,15 @@ export default function CandidatesPage({ intent } = {}) {
   } = useCandidateBulkActions({ candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes })
 
   // Recharts hands the clicked segment back at top level AND under `.payload`.
-  const pickKey = (d) => d?.key ?? d?.payload?.key ?? d?.name
+  const pickKey = (d: { key?: unknown; name?: unknown; payload?: { key?: unknown } }) => d?.key ?? d?.payload?.key ?? d?.name
 
   // ── One strip: 3 donuts + KPI cards, all equal size ──
   const insightDonuts = [
-    { key: 'status', title: t('analytics.statusTitle'), data: statusData, onPick: d => pickStatus(pickKey(d)),
+    { key: 'status', title: t('analytics.statusTitle'), data: statusData, onPick: (d: { key?: unknown; name?: unknown; payload?: { key?: unknown } }) => pickStatus(pickKey(d) as string),
       active: selectedStatus.length > 0, onClear: () => setSelectedStatus([]) },
-    { key: 'funnel', title: t('analytics.funnelTitle'), data: funnelData, onPick: d => pickFunnel(pickKey(d)),
+    { key: 'funnel', title: t('analytics.funnelTitle'), data: funnelData, onPick: (d: { key?: unknown; name?: unknown; payload?: { key?: unknown } }) => pickFunnel(pickKey(d) as string),
       active: selectedFunnel.length > 0, onClear: () => setSelectedFunnel([]) },
-    { key: 'rc',     title: t('analytics.rcTitle'),     data: rcData,     onPick: d => pickOwner(pickKey(d)),
+    { key: 'rc',     title: t('analytics.rcTitle'),     data: rcData,     onPick: (d: { key?: unknown; name?: unknown; payload?: { key?: unknown } }) => pickOwner(pickKey(d) as string),
       active: selectedOwner.length > 0, onClear: () => setSelectedOwner([]) },
   ]
   const insightKpis = [

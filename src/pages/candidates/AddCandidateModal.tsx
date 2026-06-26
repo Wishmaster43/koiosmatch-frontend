@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react'
+import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, UserPlus } from 'lucide-react'
-import api from '../../lib/api'
-import { Field, TextField, SelectField } from '../../components/forms/fields'
+import api from '@/lib/api'
+import { Field as FieldJs, TextField as TextFieldJs, SelectField as SelectFieldJs } from '@/components/forms/fields'
 import { NL_PROVINCES } from './drawer/constants'
-import { useLookups } from '../../context/LookupsContext'
-import { useUsers } from '../../lib/queries'
-import { useAuth } from '../../context/AuthContext'
+import { useLookups } from '@/context/LookupsContext'
+import { useUsers } from '@/lib/queries'
+import { useAuth } from '@/context/AuthContext'
 import { mapCandidate } from './data/mapCandidate'
+import type { Candidate } from '@/types/candidate'
+import type { Id, LookupOption } from '@/types/common'
+
+// Shared form fields are still untyped JS — declare the props this modal uses (typed boundary).
+const Field = FieldJs as ComponentType<{ label?: ReactNode; required?: boolean; children?: ReactNode }>
+const TextField = TextFieldJs as ComponentType<{ value?: string; onChange?: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties }>
+const SelectField = SelectFieldJs as ComponentType<{ value?: string; onChange?: (v: string) => void; placeholder?: string; options?: Array<{ value: string; label: string } | string> }>
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
-const API_TO_FORM = {
+const API_TO_FORM: Record<string, string> = {
   first_name: 'firstName', last_name: 'lastName', middle_name: 'middleName',
   email: 'email', phone: 'phone', function_title: 'functionTitle',
   date_of_birth: 'dateOfBirth', gender: 'gender',
@@ -22,11 +30,25 @@ const API_TO_FORM = {
 // Lifecycle states that make sense when CREATING a candidate (not matched/inactive/etc.).
 const CREATE_STATUSES = ['lead', 'candidate']
 
-export default function AddCandidateModal({ onClose, onCreated }) {
+interface AppUser { id: Id; name?: string; firstname?: string; lastname?: string; [k: string]: unknown }
+
+interface FormState {
+  firstName: string; middleName: string; lastName: string; functionTitle: string
+  email: string; phone: string; dateOfBirth: string; gender: string
+  street: string; houseNumber: string; houseNumberSuffix: string; postalCode: string; city: string; province: string
+  ownerId: string | number
+}
+
+interface AddCandidateModalProps {
+  onClose: () => void
+  onCreated?: (candidate: Candidate) => void
+}
+
+export default function AddCandidateModal({ onClose, onCreated }: AddCandidateModalProps) {
   const { t } = useTranslation(['candidates', 'common'])
-  const { statuses } = useLookups()
-  const { data: users = [] } = useUsers()
-  const { user: me } = useAuth()
+  const { statuses } = useLookups() as unknown as { statuses: LookupOption[] }
+  const { data: users = [] } = useUsers() as { data?: AppUser[] }
+  const { user: me } = useAuth() as unknown as { user: { id?: Id } | null }
 
   // Only sensible entry statuses on create; fall back to all while lookup loads.
   const entryStatuses = statuses.filter(s => CREATE_STATUSES.includes(s.value))
@@ -34,10 +56,10 @@ export default function AddCandidateModal({ onClose, onCreated }) {
   const defaultStatus = () => pickStatuses.find(s => s.value === 'lead')?.value ?? pickStatuses[0]?.value ?? ''
 
   const [status,    setStatus]    = useState(defaultStatus)
-  const [errors,    setErrors]    = useState({})
+  const [errors,    setErrors]    = useState<Record<string, boolean>>({})
   const [saving,    setSaving]    = useState(false)
-  const [submitErr, setSubmitErr] = useState(null)
-  const [form, setForm] = useState({
+  const [submitErr, setSubmitErr] = useState<string | null>(null)
+  const [form, setForm] = useState<FormState>({
     firstName: '', middleName: '', lastName: '',
     functionTitle: '',
     email: '', phone: '',
@@ -50,14 +72,14 @@ export default function AddCandidateModal({ onClose, onCreated }) {
   // Once the real statuses arrive from the API, default to Lead if nothing chosen.
   useEffect(() => { if (!status && statuses.length) setStatus(defaultStatus()) }, [statuses]) // eslint-disable-line
 
-  const set = (k, v) => {
+  const set = (k: keyof FormState, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
     if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
     setSubmitErr(null)
   }
 
   const handleSubmit = async () => {
-    const e = {}
+    const e: Record<string, boolean> = {}
     if (!form.firstName.trim()) e.firstName = true
     if (!form.lastName.trim())  e.lastName  = true
     if (Object.keys(e).length) { setErrors(e); return }
@@ -89,14 +111,15 @@ export default function AddCandidateModal({ onClose, onCreated }) {
       onClose()
     } catch (err) {
       // Show field-level errors from 422 validation responses.
-      const apiErrors = err?.response?.data?.errors
+      const ex = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } }; message?: string }
+      const apiErrors = ex?.response?.data?.errors
       if (apiErrors) {
-        const e2 = {}
+        const e2: Record<string, boolean> = {}
         Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
         setErrors(e2)
       } else {
         // Fallback: show the server message or a generic error so the user isn't left guessing.
-        const msg = err?.response?.data?.message ?? err?.message ?? t('common:errorGeneric', 'Er is iets misgegaan')
+        const msg = ex?.response?.data?.message ?? ex?.message ?? t('common:errorGeneric', 'Er is iets misgegaan')
         setSubmitErr(msg)
       }
     } finally {
