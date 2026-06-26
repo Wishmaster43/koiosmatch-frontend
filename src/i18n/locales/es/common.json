@@ -12,6 +12,8 @@
   "search": "Buscar…",
   "loading": "Cargando…",
   "noResults": "Sin resultados",
+  "resultsCount": "{{count}} resultados",
+  "shownOf": "{{shown}} de {{total}} mostrados",
   "required": "Campo obligatorio",
   "select": "Seleccionar",
   "optional": "— Opcional —",

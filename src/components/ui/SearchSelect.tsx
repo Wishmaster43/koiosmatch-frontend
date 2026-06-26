@@ -4,24 +4,38 @@
  * Replaces the duplicated open-dropdown-with-search-and-checkmarks blocks in the
  * drawer (link branch, add driving licence). Multi-select by default: clicking an
  * option toggles it in `selected` via `onToggle`. Closes on outside click.
- *
- * options: Array<string | { value, label }>
  */
 import { useState, useRef, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { Plus, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
+interface SearchSelectOption {
+  value: string
+  label: string
+}
+
+interface SearchSelectProps {
+  triggerLabel?: ReactNode
+  options?: Array<string | SearchSelectOption>
+  selected?: Array<string | number>
+  onToggle: (value: string) => void
+  searchable?: boolean
+  width?: number
+  onSearch?: (query: string) => void
+}
+
 export default function SearchSelect({
   triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 240, onSearch,
-}) {
+}: SearchSelectProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const ref = useRef(null)
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!open) return
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [open])
@@ -35,7 +49,7 @@ export default function SearchSelect({
     return () => clearTimeout(id)
   }, [query, onSearch])
 
-  const opts = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
+  const opts: SearchSelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const shown = onSearch ? opts : (query ? opts.filter(o => o.label.toLowerCase().includes(query.toLowerCase())) : opts)
 
   return (

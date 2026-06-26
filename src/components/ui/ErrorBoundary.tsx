@@ -1,4 +1,5 @@
 import { Component } from 'react'
+import type { ReactNode, ErrorInfo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, RotateCcw } from 'lucide-react'
 
@@ -10,16 +11,28 @@ import { AlertTriangle, RotateCcw } from 'lucide-react'
  * Privacy (§8): the raw error is NEVER shown to the user (it may carry server detail
  * or PII) — a generic message is rendered; the technical text is dev-only.
  */
-export default class ErrorBoundary extends Component {
-  state = { error: null }
+interface ErrorBoundaryProps {
+  children?: ReactNode
+  onError?: (error: Error, info: ErrorInfo) => void
+  onReset?: () => void
+  fallback?: (error: Error, reset: () => void) => ReactNode
+  compact?: boolean
+}
+
+interface ErrorBoundaryState {
+  error: Error | null
+}
+
+export default class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  state: ErrorBoundaryState = { error: null }
 
   // Flip into the fallback render on the next paint.
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { error }
   }
 
   // Hook for future telemetry (must stay PII-safe); intentionally no console here.
-  componentDidCatch(error, info) {
+  componentDidCatch(error: Error, info: ErrorInfo) {
     this.props.onError?.(error, info)
   }
 
@@ -38,7 +51,7 @@ export default class ErrorBoundary extends Component {
 }
 
 // Default fallback — calm, token-only styling; hooks live here (class can't use them).
-function ErrorFallback({ error, onReset, compact }) {
+function ErrorFallback({ error, onReset, compact }: { error: Error | null; onReset: () => void; compact?: boolean }) {
   const { t } = useTranslation('common')
   return (
     <div role="alert" style={{

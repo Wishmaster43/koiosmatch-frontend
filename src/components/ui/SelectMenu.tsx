@@ -5,25 +5,39 @@
  * Reusable header-style picker (status, candidate type, owner, …). Options may
  * carry `initials` to render an Avatar (e.g. the owner/recruiter picker), so one
  * component covers plain and avatar pickers alike.
- *
- * options: Array<string | { value, label, initials? }>
  */
 import { useState, useRef, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { ChevronDown, Check } from 'lucide-react'
 import Avatar from './Avatar'
 
-export default function SelectMenu({ value, options = [], onChange, placeholder, leading, menuWidth = 170 }) {
+interface SelectOption {
+  value: string
+  label: ReactNode
+  initials?: string
+}
+
+interface SelectMenuProps {
+  value?: string | null
+  options?: Array<string | SelectOption>
+  onChange: (value: string) => void
+  placeholder?: string
+  leading?: ReactNode
+  menuWidth?: number
+}
+
+export default function SelectMenu({ value, options = [], onChange, placeholder, leading, menuWidth = 170 }: SelectMenuProps) {
   const [open, setOpen] = useState(false)
-  const ref = useRef(null)
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!open) return
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [open])
 
-  const opts = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
+  const opts: SelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const current = opts.find(o => o.value === value)
 
   return (

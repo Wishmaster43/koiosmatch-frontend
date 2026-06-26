@@ -12,6 +12,8 @@
   "search": "Zoeken…",
   "loading": "Laden…",
   "noResults": "Geen resultaten",
+  "resultsCount": "{{count}} resultaten",
+  "shownOf": "{{shown}} van {{total}} getoond",
   "required": "Verplicht veld",
   "select": "Selecteer",
   "optional": "— Optioneel —",

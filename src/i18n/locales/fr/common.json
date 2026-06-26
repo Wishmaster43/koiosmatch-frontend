@@ -12,6 +12,8 @@
   "search": "Rechercher…",
   "loading": "Chargement…",
   "noResults": "Aucun résultat",
+  "resultsCount": "{{count}} résultats",
+  "shownOf": "{{shown}} sur {{total}} affichés",
   "required": "Champ obligatoire",
   "select": "Sélectionner",
   "optional": "— Facultatif —",

@@ -2,10 +2,23 @@
  * KpiCard — a single KPI tile: label, big value, optional delta arrow (up/down),
  * icon, and an optional click handler (e.g. to drill down). Shows a skeleton when loading.
  */
+import type { ComponentType, ReactNode } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
 
-export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconColor, loading = false, onClick, note }) {
-  const isPositive = delta > 0
+interface KpiCardProps {
+  label?: ReactNode
+  value?: ReactNode
+  delta?: number
+  icon?: ComponentType<{ size?: number; color?: string }>
+  iconBg?: string
+  iconColor?: string
+  loading?: boolean
+  onClick?: () => void
+  note?: ReactNode
+}
+
+export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconColor, loading = false, onClick, note }: KpiCardProps) {
+  const isPositive = (delta ?? 0) > 0
   const isNeutral  = delta === 0 || delta === undefined
 
   if (loading) {

@@ -1,12 +1,27 @@
 /**
  * EntityListDrawer — generic slide-in panel that lists the records behind a KPI tile.
- *
- * items: Array<{ primary: string, secondary?: string, badge?: string, badgeColor?: string, badgeBg?: string }>
  */
-import { X, Search } from 'lucide-react'
 import { useState } from 'react'
+import type { ReactNode } from 'react'
+import { X, Search } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
-export default function EntityListDrawer({ title, items, onClose }) {
+interface EntityListItem {
+  primary: string
+  secondary?: string
+  badge?: string
+  badgeColor?: string
+  badgeBg?: string
+}
+
+interface EntityListDrawerProps {
+  title?: ReactNode
+  items: EntityListItem[]
+  onClose: () => void
+}
+
+export default function EntityListDrawer({ title, items, onClose }: EntityListDrawerProps) {
+  const { t } = useTranslation('common')
   const [search, setSearch] = useState('')
 
   const q = search.toLowerCase()
@@ -29,7 +44,7 @@ export default function EntityListDrawer({ title, items, onClose }) {
                       padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div>
             <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{title}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{items.length} resultaten</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('resultsCount', { count: items.length })}</div>
           </div>
           <button onClick={onClose}
             style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -47,7 +62,7 @@ export default function EntityListDrawer({ title, items, onClose }) {
                         background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7 }}>
             <Search size={13} color="var(--text-muted)" />
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Zoeken…"
+              placeholder={t('search')}
               style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none',
                        fontSize: 12, color: 'var(--text)' }} />
           </div>
@@ -58,7 +73,7 @@ export default function EntityListDrawer({ title, items, onClose }) {
           {filtered.length === 0 && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                           height: 120, fontSize: 13, color: 'var(--text-muted)' }}>
-              Geen resultaten
+              {t('noResults')}
             </div>
           )}
           {filtered.map((item, i) => (
@@ -91,12 +106,12 @@ export default function EntityListDrawer({ title, items, onClose }) {
                       padding: '8px 16px', borderTop: '1px solid var(--border)', background: 'var(--hover-bg)',
                       flexShrink: 0 }}>
           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-            {filtered.length} van {items.length} getoond
+            {t('shownOf', { shown: filtered.length, total: items.length })}
           </span>
           <button onClick={onClose}
             style={{ fontSize: 12, borderRadius: 6, padding: '4px 12px',
                      background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}>
-            Sluiten
+            {t('close')}
           </button>
         </div>
       </div>

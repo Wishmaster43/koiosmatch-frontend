@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react'
+import type { ReactNode, PointerEvent as ReactPointerEvent, KeyboardEvent as ReactKeyboardEvent } from 'react'
 
 /**
  * Slider — a calm horizontal slider with a draggable ball (thumb) and three
@@ -7,12 +8,22 @@ import { useRef, useCallback } from 'react'
  *
  * labels: [leftLabel, centerLabel, rightLabel]
  */
-export default function Slider({ value = 50, max = 100, step = 1, onChange, labels = [], color = 'var(--color-primary)', ariaLabel }) {
-  const trackRef = useRef(null)
+interface SliderProps {
+  value?: number
+  max?: number
+  step?: number
+  onChange?: (value: number) => void
+  labels?: ReactNode[]
+  color?: string
+  ariaLabel?: string
+}
+
+export default function Slider({ value = 50, max = 100, step = 1, onChange, labels = [], color = 'var(--color-primary)', ariaLabel }: SliderProps) {
+  const trackRef = useRef<HTMLDivElement>(null)
   const pct = Math.max(0, Math.min(100, (value / max) * 100))
 
   // Translate a pointer x-position into a stepped value within [0, max].
-  const setFromClientX = useCallback((clientX) => {
+  const setFromClientX = useCallback((clientX: number) => {
     const el = trackRef.current
     if (!el) return
     const rect = el.getBoundingClientRect()
@@ -21,11 +32,11 @@ export default function Slider({ value = 50, max = 100, step = 1, onChange, labe
     onChange?.(Math.max(0, Math.min(max, stepped)))
   }, [max, step, onChange])
 
-  const onPointerDown = (e) => { e.currentTarget.setPointerCapture?.(e.pointerId); setFromClientX(e.clientX) }
-  const onPointerMove = (e) => { if (e.buttons === 1) setFromClientX(e.clientX) }
+  const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => { e.currentTarget.setPointerCapture?.(e.pointerId); setFromClientX(e.clientX) }
+  const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => { if (e.buttons === 1) setFromClientX(e.clientX) }
 
   // Keyboard: arrow keys nudge by one step.
-  const onKeyDown = (e) => {
+  const onKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { onChange?.(Math.max(0, value - step)); e.preventDefault() }
     if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { onChange?.(Math.min(max, value + step)); e.preventDefault() }
   }

@@ -12,6 +12,8 @@
   "search": "Search…",
   "loading": "Loading…",
   "noResults": "No results",
+  "resultsCount": "{{count}} results",
+  "shownOf": "{{shown}} of {{total}} shown",
   "required": "Required field",
   "select": "Select",
   "optional": "— Optional —",

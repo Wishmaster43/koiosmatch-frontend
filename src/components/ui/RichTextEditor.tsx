@@ -6,6 +6,7 @@
  * so you can inspect/fix the markup.
  */
 import { useEffect, useState } from 'react'
+import type { CSSProperties } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -19,7 +20,16 @@ const DEFAULT_LABELS = {
   undo: 'Undo', redo: 'Redo', expand: 'Expand', collapse: 'Collapse', html: 'HTML source',
 }
 
-export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false }) {
+interface RichTextEditorProps {
+  value?: string
+  onChange: (html: string) => void
+  expanded?: boolean
+  onToggleExpand?: () => void
+  labels?: Partial<typeof DEFAULT_LABELS>
+  fill?: boolean
+}
+
+export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false }: RichTextEditorProps) {
   // Merge caller overrides over the built-in English defaults.
   const lab = { ...DEFAULT_LABELS, ...labels }
   // Raw-HTML source mode — edit the markup directly to spot/fix errors.
@@ -43,7 +53,7 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
     setHtmlMode(m => !m)
   }
 
-  const btn = (active) => ({
+  const btn = (active: boolean): CSSProperties => ({
     padding: '4px 7px', fontSize: 12, borderRadius: 5, cursor: 'pointer',
     background: active ? 'var(--color-primary)' : 'none', color: active ? 'white' : 'var(--text-muted)',
     border: 'none', display: 'flex', alignItems: 'center',

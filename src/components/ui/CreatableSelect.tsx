@@ -5,30 +5,44 @@
  *
  * One stored value (a string) regardless of mode — no second field. Closes on
  * outside click. Styling matches SelectMenu so pickers look consistent.
- *
- * options: Array<string | { value, label }>
  */
 import { useState, useRef, useEffect } from 'react'
+import type { CSSProperties } from 'react'
 import { ChevronDown, Check, Plus } from 'lucide-react'
+
+interface CreatableOption {
+  value: string
+  label: string
+}
+
+interface CreatableSelectProps {
+  value?: string | null
+  options?: Array<string | CreatableOption>
+  onChange: (value: string) => void
+  placeholder?: string
+  allowCreate?: boolean
+  menuWidth?: number
+  style?: CSSProperties
+}
 
 export default function CreatableSelect({
   value, options = [], onChange, placeholder, allowCreate = true, menuWidth = 220, style,
-}) {
+}: CreatableSelectProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const ref = useRef(null)
-  const inputRef = useRef(null)
+  const ref = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   // Close on outside click; focus the search box when opening.
   useEffect(() => {
     if (!open) return
-    const h = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [open])
   useEffect(() => { if (open) inputRef.current?.focus() }, [open])
 
-  const opts = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
+  const opts: CreatableOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   const current = opts.find(o => o.value === value)
   const q = query.trim()
   const ql = q.toLowerCase()
@@ -36,7 +50,7 @@ export default function CreatableSelect({
   const exists = opts.some(o => o.label.toLowerCase() === ql)
   const canCreate = allowCreate && q.length > 0 && !exists
 
-  const pick = (v) => { onChange(v); setOpen(false); setQuery('') }
+  const pick = (v: string) => { onChange(v); setOpen(false); setQuery('') }
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>

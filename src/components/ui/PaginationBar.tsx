@@ -3,17 +3,27 @@
  * selector, and first/prev/next/last controls. Calls back onPageChange /
  * onPageSizeChange so the parent can refetch. PAGE_SIZE_OPTIONS = selectable sizes.
  */
+import type { ReactNode } from 'react'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
 export const PAGE_SIZE_OPTIONS = [50, 100, 200, 300, 400, 500]
 
-export default function PaginationBar({ page, totalPages, totalRows, pageSize, onPageChange, onPageSizeChange }) {
+interface PaginationBarProps {
+  page: number
+  totalPages: number
+  totalRows: number
+  pageSize: number
+  onPageChange: (page: number) => void
+  onPageSizeChange: (size: number) => void
+}
+
+export default function PaginationBar({ page, totalPages, totalRows, pageSize, onPageChange, onPageSizeChange }: PaginationBarProps) {
   const { t } = useTranslation('common')
   const from = totalRows === 0 ? 0 : (page - 1) * pageSize + 1
   const to   = Math.min(page * pageSize, totalRows)
 
-  const btn = (onClick, disabled, children, title) => (
+  const btn = (onClick: () => void, disabled: boolean, children: ReactNode, title: string) => (
     <button onClick={onClick} disabled={disabled} title={title} style={{
       width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
       border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
