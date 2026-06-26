@@ -24,7 +24,8 @@
 | 2 | **Gedeelde blueprint-bouwstenen — compleet** — `drawer/` (DrawerTabs · EntityDrawer · EntityHeader · tabs/NotesTab · tabs/StatsTab) · `forms/` (AddableSection · AddForm · fields · EditableFieldTable) · `insights/InsightsRow` | ✅ klaar | a61c859 |
 | 2b | **`components/charts/` compleet** — Mini/Line/Bar/Pie/WeeklyBar + gedeelde `chartTypes.ts` (ChartDatum + recharts TipProps) · `components/settings/` (ModuleView · ViewConfigEditor) | ✅ klaar | d406b8f |
 | 3a | **Customers-feature 100% TS** — page (container) · table (`Column<Customer>`) · bulkbar (`MenuNode`) · drawer + 10 drawer-tabs · 4 add-modals · `SubEntityTab<Item>` · PlanningSummary | ✅ klaar | 562180f |
-| 3+ | Resterende feature-maps: applications · vacancies · tasks · opportunities (mirror customers) · settings/sections (37) · shiftmanager (36) · reports (18) · layout (18) · auth · ai/workflows | ☐ | — |
+| 3b | **Applications-feature 100% TS** — page · table · board (kanban, dnd) · drawer + 9 tabs (Application/Candidate/Vacancy/Interviews/Appointments/Notes/Timeline/MatchScore/Rejection) · add-modal | ✅ klaar | 40fab37 |
+| 3+ | Resterende feature-maps: vacancies · tasks · opportunities (mirror customers/applications) · settings/sections (37) · shiftmanager (36) · reports (18) · layout (18) · auth · ai/workflows | ☐ | — |
 | M | `src/modules/` workflow-registry (55) — per-entity `makeEntityModule`-config | ☐ | — |
 
 > **Herbruikbare entity-patronen (vastgelegd via candidates+customers):** `Column<Entity>[]` voor de tabel ·
