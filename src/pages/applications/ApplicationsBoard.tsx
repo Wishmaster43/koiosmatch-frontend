@@ -1,12 +1,19 @@
 import { useRef } from 'react'
+import type { DragEvent } from 'react'
 import Avatar from '../../components/ui/Avatar'
 import KoiosAiMark from '../../components/ui/KoiosAiMark'
+import type { Application } from '../../types/application'
+import type { Id } from '../../types/common'
+
+export interface BoardPhase { key: string; label: string; color: string }
 
 // Score as soft-coloured text (green ≥75, amber ≥50, red below).
-const scoreColor = (v) => (v >= 75 ? 'var(--color-success)' : v >= 50 ? 'var(--color-warning)' : 'var(--color-danger)')
+const scoreColor = (v: number): string => (v >= 75 ? 'var(--color-success)' : v >= 50 ? 'var(--color-warning)' : 'var(--color-danger)')
 
 // A single draggable application card.
-function BoardCard({ app, onDragStart, onClick, selected }) {
+function BoardCard({ app, onDragStart, onClick, selected }: {
+  app: Application; onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void; onClick: (app: Application) => void; selected: boolean
+}) {
   return (
     <div draggable onDragStart={e => onDragStart(e, app.id)} onClick={() => onClick(app)}
       style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
@@ -54,7 +61,14 @@ function BoardCard({ app, onDragStart, onClick, selected }) {
 }
 
 // A single phase column with its cards.
-function BoardColumn({ phase, items, onDragStart, onDrop, onDragOver, onSelect, selectedId }) {
+function BoardColumn({ phase, items, onDragStart, onDrop, onDragOver, onSelect, selectedId }: {
+  phase: BoardPhase; items: Application[]
+  onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void
+  onDrop: (e: DragEvent<HTMLDivElement>, phaseKey: string) => void
+  onDragOver: (e: DragEvent<HTMLDivElement>) => void
+  onSelect: (app: Application) => void
+  selectedId?: Id | null
+}) {
   return (
     <div style={{ width: 260, flexShrink: 0, display: 'flex', flexDirection: 'column' }}
       onDrop={e => onDrop(e, phase.key)} onDragOver={onDragOver}>
@@ -77,12 +91,14 @@ function BoardColumn({ phase, items, onDragStart, onDrop, onDragOver, onSelect, 
  * ApplicationsBoard — kanban view, one column per funnel phase. Presentational:
  * the page owns the data and the phase mutation (onMove).
  */
-export default function ApplicationsBoard({ rows, phases, onMove, onSelect, selectedId }) {
-  const dragId = useRef(null)
+export default function ApplicationsBoard({ rows, phases, onMove, onSelect, selectedId }: {
+  rows: Application[]; phases: BoardPhase[]; onMove: (id: Id, phaseKey: string) => void; onSelect: (app: Application) => void; selectedId?: Id | null
+}) {
+  const dragId = useRef<Id | null>(null)
 
-  const handleDragStart = (e, id) => { dragId.current = id; e.dataTransfer.effectAllowed = 'move' }
-  const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
-  const handleDrop = (e, phaseKey) => {
+  const handleDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => { dragId.current = id ?? null; e.dataTransfer.effectAllowed = 'move' }
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
+  const handleDrop = (e: DragEvent<HTMLDivElement>, phaseKey: string) => {
     e.preventDefault()
     if (dragId.current != null) { onMove(dragId.current, phaseKey); dragId.current = null }
   }

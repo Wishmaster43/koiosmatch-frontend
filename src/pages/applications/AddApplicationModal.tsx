@@ -1,13 +1,22 @@
 import { useState, useEffect } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrapList } from '../../lib/api'
 import { mapApplication } from './data/mapApplication'
-import CreatableSelect from '../../components/ui/CreatableSelect'
+import CreatableSelectJs from '../../components/ui/CreatableSelect'
+import { initialsOf } from '@/lib/initials'
+import type { Application } from '../../types/application'
+import type { Id } from '../../types/common'
+
+type AnyProps = Record<string, unknown>
+const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
+
+interface PickOption { value: Id; label: string; client?: string }
 
 // Field label + shared searchable single-select (CreatableSelect) — replaces the
 // old inline SearchField dropdown (DUP-1). allowCreate off = pick-only.
-function PickField({ label, ...rest }) {
+function PickField({ label, ...rest }: { label: ReactNode } & AnyProps) {
   return (
     <div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{label}</div>
@@ -16,18 +25,16 @@ function PickField({ label, ...rest }) {
   )
 }
 
-import { initialsOf } from '@/lib/initials'
-
 /**
  * AddApplicationModal — create a new application by linking an existing candidate
  * to a vacancy. Pickers load from /candidates and /vacancies. Persists to
  * POST /applications; on failure it still adds the row locally so the flow works
  * before the endpoint is live.
  */
-export default function AddApplicationModal({ onClose, onCreated }) {
+export default function AddApplicationModal({ onClose, onCreated }: { onClose: () => void; onCreated: (app: Application) => void }) {
   const { t } = useTranslation('applications')
-  const [candidates, setCandidates] = useState([])
-  const [vacancies, setVacancies]   = useState([])
+  const [candidates, setCandidates] = useState<PickOption[]>([])
+  const [vacancies, setVacancies]   = useState<PickOption[]>([])
   const [candidateId, setCandidateId] = useState('')
   const [vacancyId, setVacancyId]     = useState('')
   const [saving, setSaving]           = useState(false)
@@ -35,10 +42,10 @@ export default function AddApplicationModal({ onClose, onCreated }) {
   // Load candidate + vacancy options; an empty list on failure, never demo rows.
   useEffect(() => {
     api.get('/candidates', { params: { per_page: 100 } })
-      .then(r => setCandidates(unwrapList(r).rows.map(c => ({ value: c.id, label: c.name ?? [c.first_name, c.last_name].filter(Boolean).join(' ') }))))
+      .then(r => setCandidates(unwrapList<{ id?: Id; name?: string; first_name?: string; last_name?: string }>(r).rows.map(c => ({ value: c.id ?? '', label: c.name ?? [c.first_name, c.last_name].filter(Boolean).join(' ') }))))
       .catch(() => setCandidates([]))
     api.get('/vacancies', { params: { per_page: 100 } })
-      .then(r => setVacancies(unwrapList(r).rows.map(v => ({ value: v.id, label: v.title ?? v.titel, client: v.client_name ?? v.client }))))
+      .then(r => setVacancies(unwrapList<{ id?: Id; title?: string; titel?: string; client_name?: string; client?: string }>(r).rows.map(v => ({ value: v.id ?? '', label: v.title ?? v.titel ?? '', client: v.client_name ?? v.client }))))
       .catch(() => setVacancies([]))
   }, [])
 
@@ -46,8 +53,8 @@ export default function AddApplicationModal({ onClose, onCreated }) {
   const create = async () => {
     if (!candidateId || !vacancyId || saving) return
     setSaving(true)
-    const cand = candidates.find(c => c.value === candidateId)
-    const vac  = vacancies.find(v => v.value === vacancyId)
+    const cand = candidates.find(c => String(c.value) === candidateId)
+    const vac  = vacancies.find(v => String(v.value) === vacancyId)
     try {
       const res = await api.post('/applications', { candidate_id: candidateId, vacancy_id: vacancyId })
       onCreated(mapApplication(res.data?.data ?? res.data))
@@ -56,9 +63,9 @@ export default function AddApplicationModal({ onClose, onCreated }) {
         id: -Date.now(), candidateId, candidateName: cand?.label ?? '—', candidateInitials: initialsOf(cand?.label),
         vacancyId, vacancyTitle: vac?.label ?? '—', client: vac?.client ?? '—',
         score: null, task: '', phaseKey: 'applied', bucket: 'active', source: 'Handmatig',
-        owner: { name: '', initials: '' }, candidateStatusLabel: '', candidateStatusColor: '#9CA3AF',
+        owner: { name: '', initials: '', color: null }, candidateStatusLabel: '', candidateStatusColor: '#9CA3AF',
         created: new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }), isNew: true,
-      })
+      } as Application)
     } finally { setSaving(false) }
   }
 
