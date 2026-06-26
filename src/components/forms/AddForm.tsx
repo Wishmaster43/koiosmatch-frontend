@@ -5,44 +5,68 @@
  * languages, certifications, skills, placements). A field is described once and
  * rendered by type; `half` pairs two fields on one row, `separator` puts a "tot"
  * label between a start/end pair.
- *
- * field: { key, label, type?, date?, textarea?, half?, separator? }
  */
 import { useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, X } from 'lucide-react'
 import { TextField, TextArea, DateField } from './fields'
 
-function FieldInput({ f, value, onChange, values }) {
+export interface FieldDef {
+  key: string
+  label?: ReactNode
+  altLabel?: ReactNode
+  altLabelWhen?: string
+  checkbox?: boolean
+  textarea?: boolean
+  date?: boolean
+  options?: Array<string | { value: string; label?: ReactNode }>
+  type?: string
+  half?: boolean
+  separator?: boolean
+}
+
+type FormValues = Record<string, unknown>
+
+function FieldInput({ f, value, onChange, values }: {
+  f: FieldDef; value: unknown; onChange: (v: string | boolean) => void; values: FormValues
+}) {
   // A field's label can switch based on another field (altLabelWhen) — e.g. an
   // education end date becomes "Verwachte einddatum" when "Nog in opleiding" is on.
   const label = (f.altLabelWhen && values?.[f.altLabelWhen]) ? f.altLabel : f.label
+  const labelText = typeof label === 'string' ? label : undefined
   if (f.checkbox) return (
     <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text)', cursor: 'pointer' }}>
       <input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked)} style={{ cursor: 'pointer' }} />
       {f.label}
     </label>
   )
-  if (f.textarea) return <TextArea placeholder={label} value={value} onChange={onChange} />
-  if (f.date)     return <DateField placeholder={label} value={value} onChange={onChange} />
+  if (f.textarea) return <TextArea placeholder={labelText} value={value as string | undefined} onChange={onChange} />
+  if (f.date)     return <DateField placeholder={labelText} value={value as string | undefined} onChange={onChange} />
   if (f.options)  return (
-    <select value={value ?? ''} onChange={e => onChange(e.target.value)}
+    <select value={(value as string) ?? ''} onChange={e => onChange(e.target.value)}
       style={{ width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }}>
       <option value="">{label}</option>
-      {f.options.map(o => <option key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</option>)}
+      {f.options.map(o => {
+        const val = typeof o === 'string' ? o : o.value
+        const lab = typeof o === 'string' ? o : (o.label ?? o.value)
+        return <option key={val} value={val}>{lab}</option>
+      })}
     </select>
   )
-  return <TextField placeholder={label} value={value} onChange={onChange} type={f.type} />
+  return <TextField placeholder={labelText} value={value as string | undefined} onChange={onChange} type={f.type} />
 }
 
-// `initial` (optioneel) prefilt de velden → zelfde formulier voor toevoegen én bewerken.
-export default function AddForm({ fields, onSave, onCancel, initial }) {
+// `initial` (optional) prefills the fields → same form for adding and editing.
+export default function AddForm({ fields, onSave, onCancel, initial }: {
+  fields: FieldDef[]; onSave: (values: FormValues) => void; onCancel: () => void; initial?: FormValues
+}) {
   const { t } = useTranslation('common')
-  const [values, setValues] = useState(() => ({ ...Object.fromEntries(fields.map(f => [f.key, ''])), ...(initial ?? {}) }))
-  const set = (k, v) => setValues(p => ({ ...p, [k]: v }))
-  const iconBtn = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer' }
+  const [values, setValues] = useState<FormValues>(() => ({ ...Object.fromEntries(fields.map(f => [f.key, ''])), ...(initial ?? {}) }))
+  const set = (k: string, v: string | boolean) => setValues(p => ({ ...p, [k]: v }))
+  const iconBtn: CSSProperties = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer' }
 
-  const rows = []
+  const rows: ReactNode[] = []
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i]
     const next = fields[i + 1]
@@ -53,7 +77,7 @@ export default function AddForm({ fields, onSave, onCancel, initial }) {
           : { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           <FieldInput f={f}    value={values[f.key]}    onChange={v => set(f.key, v)} values={values} />
           {f.separator && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('to')}</span>}
-          <FieldInput f={next} value={values[next.key]} onChange={v => set(next.key, v)} values={values} />
+          {next && <FieldInput f={next} value={values[next.key]} onChange={v => set(next.key, v)} values={values} />}
         </div>
       )
       i++

@@ -5,25 +5,28 @@
  * the candidate drawer tabs and the generic form helpers all share. Previously
  * each file declared its own `iStyle` / `inputStyle` / `dpInputStyle` copy.
  */
+import type { CSSProperties, ReactNode } from 'react'
 import { ChevronDown } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { useTranslation } from 'react-i18next'
 
-export const inputStyle = {
+export interface SelectOption { value: string; label: ReactNode }
+
+export const inputStyle: CSSProperties = {
   width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,
   border: '1px solid var(--border)', background: 'var(--surface)',
   color: 'var(--text)', boxSizing: 'border-box', outline: 'none',
 }
 
 /** Parse any date-ish value into a Date, or null when invalid/empty. */
-export function parseDate(value) {
+export function parseDate(value?: string | number | Date | null): Date | null {
   if (!value) return null
   const d = new Date(value)
   return isNaN(d.getTime()) ? null : d
 }
 
-export function Label({ children, required }) {
+export function Label({ children, required }: { children: ReactNode; required?: boolean }) {
   return (
     <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block',
       marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -32,7 +35,7 @@ export function Label({ children, required }) {
   )
 }
 
-export function Field({ label, required, children }) {
+export function Field({ label, required, children }: { label: ReactNode; required?: boolean; children: ReactNode }) {
   return (
     <div>
       <Label required={required}>{label}</Label>
@@ -41,7 +44,9 @@ export function Field({ label, required, children }) {
   )
 }
 
-export function TextField({ value, onChange, placeholder, type = 'text', error, style }) {
+export function TextField({ value, onChange, placeholder, type = 'text', error, style }: {
+  value?: string; onChange: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties
+}) {
   return (
     <input type={type} value={value ?? ''} placeholder={placeholder}
       onChange={e => onChange(e.target.value)}
@@ -49,7 +54,9 @@ export function TextField({ value, onChange, placeholder, type = 'text', error, 
   )
 }
 
-export function TextArea({ value, onChange, placeholder, rows = 3, style }) {
+export function TextArea({ value, onChange, placeholder, rows = 3, style }: {
+  value?: string; onChange: (v: string) => void; placeholder?: string; rows?: number; style?: CSSProperties
+}) {
   return (
     <textarea value={value ?? ''} placeholder={placeholder} rows={rows}
       onChange={e => onChange(e.target.value)}
@@ -57,8 +64,10 @@ export function TextArea({ value, onChange, placeholder, rows = 3, style }) {
   )
 }
 
-export function SelectField({ value, onChange, options = [], placeholder, style }) {
-  const opts = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
+export function SelectField({ value, onChange, options = [], placeholder, style }: {
+  value?: string; onChange: (v: string) => void; options?: Array<string | SelectOption>; placeholder?: string; style?: CSSProperties
+}) {
+  const opts: SelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   return (
     <div style={{ position: 'relative' }}>
       <select value={value ?? ''} onChange={e => onChange(e.target.value)}
@@ -72,11 +81,13 @@ export function SelectField({ value, onChange, options = [], placeholder, style 
   )
 }
 
-export function DateField({ value, onChange, placeholder, style }) {
+export function DateField({ value, onChange, placeholder, style }: {
+  value?: string | number | Date | null; onChange: (v: string) => void; placeholder?: string; style?: CSSProperties
+}) {
   return (
     <DatePicker
       selected={parseDate(value)}
-      onChange={d => onChange(d ? d.toISOString().slice(0, 10) : '')}
+      onChange={(d: Date | null) => onChange(d ? d.toISOString().slice(0, 10) : '')}
       dateFormat="dd-MM-yyyy"
       showMonthDropdown showYearDropdown dropdownMode="select"
       placeholderText={placeholder}
@@ -87,7 +98,9 @@ export function DateField({ value, onChange, placeholder, style }) {
   )
 }
 
-export function CheckboxField({ checked, onChange, disabled }) {
+export function CheckboxField({ checked, onChange, disabled }: {
+  checked?: boolean; onChange: (v: boolean) => void; disabled?: boolean
+}) {
   return (
     <input type="checkbox" checked={!!checked} disabled={disabled}
       onChange={e => onChange(e.target.checked)}
@@ -96,7 +109,7 @@ export function CheckboxField({ checked, onChange, disabled }) {
 }
 
 /** "+ label" ghost button used at the top of every addable section. */
-export function AddButton({ onClick, label }) {
+export function AddButton({ onClick, label }: { onClick: () => void; label?: ReactNode }) {
   const { t } = useTranslation('common')
   return (
     <button onClick={onClick}
@@ -107,7 +120,9 @@ export function AddButton({ onClick, label }) {
   )
 }
 
-export function SaveCancel({ onSave, onCancel, saveLabel, cancelLabel }) {
+export function SaveCancel({ onSave, onCancel, saveLabel, cancelLabel }: {
+  onSave: () => void; onCancel: () => void; saveLabel?: ReactNode; cancelLabel?: ReactNode
+}) {
   const { t } = useTranslation('common')
   return (
     <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
