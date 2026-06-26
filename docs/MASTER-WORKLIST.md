@@ -33,7 +33,7 @@
 |---|----|-------|----------|-----------|
 | ✅ | D1 | Auth-model | **BESLOTEN 2026-06-26: httpOnly-cookie (Sanctum SPA)** — Bearer-in-localStorage uitfaseren; API-keys blijven token | → N-2 + BE-8 |
 | ✅ | D2 | Radius-anker | **BESLOTEN: beide, elk op eigen scherm** — kandidatenlijst vanaf **vestiging/plaats** (`?lat=&lng=`), vacature/match-scherm vanaf **vacature** (`?near_vacancy=`) | → FE-P5-7 + FE-P5-7b |
-| ☐ | D3 | E-mail-UI-plek in Settings | eigen sub-tab | email-verhuizing (P5) |
+| ✅ | D3 | E-mail-UI-plek | **AL GEBOUWD: per-context sub-tabs in Settings**; Profiel-mailbox = ándere (persoonlijke) feature, blijft — geen verhuizing/duplicatie | rest = FE-P3-3 i18n + BE-2 |
 | ☐ | D4 | TypeScript-migratie nu starten? | ja — `lib/`+`components/ui/` eerst | CS-5 (P4) |
 | ☐ | D5 | Native planning-module nu of backlog | backlog (read-only SM nu) | planning (P5) |
 
@@ -51,6 +51,7 @@
 ### P3 — i18n compleet (geen Dutch islands)
 - ☐ **FE-P3-1** Editor-i18n-pass: workflow-editor (~60 strings, 0×`t()`) + module-registry labels/categorieën + `CATEGORY_ORDER` → keys × 5 locales.
 - ☐ **FE-P3-2** Project-brede i18n-grep op JSX-literals/Dutch islands → 0 findings.
+- ☐ **FE-P3-3** **Settings-registry i18n** (gevonden in convergentie-loop): [registry.jsx](../src/pages/settings/registry.jsx) heeft **66 hardcoded nav-labels, 0×`t()`** → hele Settings-nav is Engels island. Alle labels → `t()` × 5 locales.
 
 ### P4 — Kwaliteit & schaalbaarheid (groot, apart inplannen)
 - ☐ **FE-P4-1** CS-6: inline `api.*` → feature-`api/`-laag (72 files).
@@ -65,7 +66,7 @@
 - ☐ **FE-P5-3** CV-builder: download (tenant-logo) + template-builder in Settings.
 - ☐ **FE-P5-4** Bulk-acties compleet (WhatsApp-broadcast · beschikbaarheid uitvragen · taak/bellijst · shortlist+CV-mail · pool add/remove · kandidaattype multi · status/funnel). *(🔒 C-15)*
 - ☐ **FE-P5-5** Backoffice-koppeling (HelloFlex/SM): manueel/bulk/workflow, queue+rate-limit, GUID-mapping, koppelfout op kandidaat.
-- ☐ **FE-P5-6** E-mail → Settings per context (verhuis `ProfileEmailConnect`, wire `/settings/email/oauth/{context}`). *(wacht D3 + 🔒 status-endpoint)*
+- ◐ **FE-P5-6** E-mail per context **al gebouwd** in Settings (3 sub-tabs `EmailSettings` klanten/kandidaten/planning). `ProfileEmailConnect` = **ándere feature** (persoonlijke mailbox, blijft in Profiel) — geen verhuizing. Rest: wire/verifieer `/settings/email/oauth/{context}` + **BE-2** `…/status` + labels-i18n (→ FE-P3-3).
 - ☐ **FE-P5-7** Radius-filter op **CandidatesPage** (anker = **vestiging/plaats**, `?lat=&lng=&radius=`): branch-picker → server-coords (geen geocoding) + radius-slider (35 km) + `distance_km`-kolom (sorteerbaar). Vrije-tekst-plaats = later (geocode-endpoint). *(D2 besloten)*
 - ☐ **FE-P5-7b** Radius op **vacature/match-scherm** (anker = **vacature**, `?near_vacancy={id}&radius=`): "wie woont dichtbij deze klus?" — geen geocoding. *(D2 besloten)*
 

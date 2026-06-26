@@ -180,7 +180,7 @@ backend, nooit direct)** · Load balancer (geen sticky-state) · Danny's dashboa
 |---|---|---|---|
 | **D1** | Auth-model | ~~(a) Bearer + harden · (b) httpOnly-cookie-SPA~~ | ✅ **BESLOTEN (b) httpOnly-cookie (Sanctum SPA)** 2026-06-26 → N-2 + BE-8 |
 | **D2** | Radius-anker | ~~(a)/(b)/(c)~~ | ✅ **BESLOTEN: beide ankers, elk op zijn eigen scherm** — kandidatenlijst meet vanaf **vestiging/plaats** (`?lat=&lng=`), vacature/match-scherm vanaf **vacature** (`?near_vacancy=`). Picker-ankers = server-coords (geen geocoding) |
-| **D3** | E-mail-UI-plek in Settings | eigen sub-tab "E-mail (per context)" vs onder bestaande sectie | eigen sub-tab |
+| **D3** | E-mail-UI-plek | ~~sub-tab vs sectie~~ | ✅ **AL GEBOUWD: per-context sub-tabs in Settings**; Profiel = aparte persoonlijke mailbox (blijft). Rest = i18n (66 registry-labels, FE-P3-3) + BE-2 `…/status` |
 | **D4** | TypeScript-migratie | nu starten (shared laag) vs later | **nu** beginnen bij `lib/`+`components/ui/` — grootste hefboom |
 | **D5** | Native planning-module | nu bouwen vs backlog houden (read-only SM nu) | **backlog** (jouw besluit); heropenen na klantportaal+kandidaat-app |
 
