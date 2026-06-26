@@ -59,6 +59,7 @@
 - ☐ **FE-P4-3** CS-9: tests op kritieke paden (bulk-mutate optimistic/reconcile, data-mappers, 4 UI-states, auth-gated UI).
 - ☐ **FE-P4-4** a11y-pass WCAG 2.2 AA (focus-trap+restore drawers/modals, aria-labels, kleur≠enig-signaal, contrast ≥4.5:1).
 - ☐ **FE-P4-5** Virtualiseer grote tabellen (kandidaten/shifts, 10k+ rijen).
+- ☐ **FE-P4-6 (DX/debuggability)** Minder zelf debuggen → **betere foutmeldingen**: (a) dev-only on-screen toast/banner bij een mislukte API-call (toont `METHOD url → status`), (b) silent `.catch(() => {})` vervangen door minstens een dev-log, (c) duidelijke user-facing error-states i.p.v. lege schermen, (d) korte React-DevTools/Network-handleiding voor Danny. *(Danny: "voor alles beter dan debuggen wat misgaat".)*
 
 ### P5 — Features die het product nog mist (op klantwaarde)
 - ☐ **FE-P5-1** Changelog-tab per entiteit (`/{entity}/{id}/activity`).
