@@ -14,15 +14,16 @@
 
 | ✓ | ID | Track | Taak | Done als |
 |---|----|-------|------|----------|
-| ☐ | N-1 | [FE] P0 | **Security-sweep**: grep `dangerouslySetInnerHTML` · tokens in localStorage · secrets/`VITE_*` · PII/IDs in URLs/logs/`console.log` · externe `<a>` zonder `rel` | audit Security ✅, findings ≤ LOW |
-| ☐ | N-2 | [D] P0 | **D1 auth-drift** beslissen (Bearer vs httpOnly) → CLAUDE.md §7 bijwerken | doc = code |
-| ☐ | N-3 | [FE] P1 | **Mock-strip candidates**: `useCandidatesData` DUMMY_CANDIDATES + `candidatesMock.js` weg | 0× DUMMY/USE_MOCKS; lege call → lege staat |
-| ☐ | N-4 | [FE] P1 | **Mock-strip applications**: `data/mocks.js` (MOCK_APPLICATIONS/buildMockDetail/MOCK_REJECTION_REASONS) + Page/AddModal/RejectionBlock | 0× MOCK_*; mocks-file verwijderd |
-| ☐ | N-5 | [FE] P1 | **Mock-strip vacancies**: USE_MOCKS in `useVacanciesData` catch | 0× USE_MOCKS |
-| ☐ | N-6 | [FE] P1 | **Mock-restant**: WorkflowsPage `MOCK_WORKFLOWS` · editor `MOCK_LOGS` → `/workflows` + `/workflow-runs` | fallbacks weg |
-| ☐ | N-7 | [FE] P0 | `npm audit` + pin kwetsbare deps | geen HIGH/CRITICAL |
+| ✅ | N-1 | [FE] P0 | **Security-sweep** gedaan — PII-leak in dev-error-log gedicht; SafeHtml/secrets/links schoon | findings ≤ LOW ✅ |
+| ☐ | N-2 | [FE+BE] P0 | **Auth → Sanctum httpOnly-cookie** (D1 besloten): backend stateful-domains+CORS+CSRF (BE-8), dán FE `VITE_COOKIE_AUTH`+withCredentials. **Niet flippen vóór BE klaar** | login via cookie; geen token in localStorage |
+| ✅ | N-3 | [FE] P1 | **Mock-strip candidates** — `DUMMY_CANDIDATES` + mock-file weg (commit 4063113) | 0× DUMMY/USE_MOCKS ✅ |
+| ✅ | N-4 | [FE] P1 | **Mock-strip applications** — `mocks.js` weg; `bucketOfPhase`→`applicationsShared.js`; lint-fix | 0× MOCK_* ✅ |
+| ✅ | N-5 | [FE] P1 | **Mock-strip vacancies** — `USE_MOCKS` uit catch | 0× USE_MOCKS ✅ |
+| ✅ | N-6 | [FE] P1 | **Workflow-mocks weg** — `MOCK_WORKFLOWS`/`MOCK_LOGS` → echte `/workflow-runs`; de-dup via `runFormat.jsx` | fallbacks weg ✅ |
+| ✅ | N-7 | [FE] P0 | **npm audit** — dompurify 3.4.10→3.4.11; dev-toolchain (vitest@4 breaking) uitgesteld | geen prod-HIGH/CRIT ✅ |
 
-> Na NU: radius wiren (wacht op **D2**), dan P2 (RF-splits) → P3 (editor-i18n).
+> **NU-sprint klaar** (commit `4063113`). Volgende: **N-2 auth-migratie** (wacht op BE-8) · radius wiren
+> (wacht op **D2**) · dan P2 (RF-splits) → P3 (editor-i18n). Eerst: **her-audit-ronde** (convergentie-loop).
 
 ---
 
@@ -30,7 +31,7 @@
 
 | ✓ | ID | Vraag | Aanrader | Blokkeert |
 |---|----|-------|----------|-----------|
-| ☐ | D1 | Auth: Bearer (huidig) vs httpOnly-cookie | Bearer + doc + XSS-harden | N-2, security-doc |
+| ✅ | D1 | Auth-model | **BESLOTEN 2026-06-26: httpOnly-cookie (Sanctum SPA)** — Bearer-in-localStorage uitfaseren; API-keys blijven token | → N-2 + BE-8 |
 | ☐ | D2 | Radius-anker: vacature / plaats / recruiter-locatie | vacature `?near_vacancy=` | radius-filter (P1) |
 | ☐ | D3 | E-mail-UI-plek in Settings | eigen sub-tab | email-verhuizing (P5) |
 | ☐ | D4 | TypeScript-migratie nu starten? | ja — `lib/`+`components/ui/` eerst | CS-5 (P4) |
@@ -80,6 +81,7 @@
 | ☐ | BE-5 | Dashboard-KPI **deltas** (subs zijn nu `null`) | KPI-subs SM-dashboard |
 | ☐ | BE-6 | C-5b webhook-delivery (stap 2) | B-6 webhooks-UI |
 | ☐ | BE-7 | Yesway **PDOK-backfill** samen draaien (AVG-go gegeven) | radius op echte data |
+| ☐ | BE-8 | **Sanctum SPA-cookie** (D1): stateful-domains · CORS `credentials:true` · `/sanctum/csrf-cookie` · Secure+SameSite | N-2 auth-migratie |
 
 > Volgorde-advies aan backend: **C-27 eerst** (deblokkeert de workflow-editor het meest).
 

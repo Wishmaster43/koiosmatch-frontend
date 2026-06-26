@@ -57,10 +57,11 @@ backend, nooit direct)** · Load balancer (geen sticky-state) · Danny's dashboa
 5. **Security (de client is vijandig):** geen secrets in client · geen `dangerouslySetInnerHTML` zonder
    DOMPurify + reden · geen PII/IDs/tokens in URLs/logs/analytics · externe links `rel="noopener
    noreferrer"` · autorisatie nooit client-side beslist (backend her-checkt) · CSP-houding · `npm audit`.
-   🔴 **DRIFT om te beslissen (§Open-decisions D1):** `CLAUDE.md §7` + de SPECIALIST-rol zeggen
-   **httpOnly-cookie + CSRF**; **backend koos bewust Bearer-token (Authorization-header)**. Reconcile:
-   óf doc bijwerken naar Bearer (+ hardening: token **nooit** in localStorage/JS-leesbaar, XSS-mitigatie),
-   óf backend alsnog naar SPA-cookieflow. **Dit is een security-beslissing — niet stilletjes laten.**
+   ✅ **D1 BESLOTEN (2026-06-26): Sanctum httpOnly-cookieflow** (= `CLAUDE.md §7`). Het huidige
+   **Bearer-token-in-localStorage** (XSS-exfiltreerbaar) wordt uitgefaseerd; **API-keys blijven token**
+   (externe consumers). Code gaat naar de doc toe — §7 ongewijzigd. Uitvoering = gezamenlijk:
+   backend Sanctum stateful-domains + CORS-credentials + CSRF-cookie (**BE-8**), dan FE-flip (**N-2**).
+   FE-scaffold bestaat (`VITE_COOKIE_AUTH`). **Niet flippen vóór backend klaar** (breekt login).
 6. **AVG/gezondheidsdata:** data-minimalisatie (haal alleen wat het scherm nodig heeft) · nooit PII loggen
    · velden maskeren per rol · respecteer gewiste/geanonimiseerde staat (nooit renderen) · soft-delete met
    actieve-koppeling-check vóór verwijderen.
@@ -176,16 +177,18 @@ backend, nooit direct)** · Load balancer (geen sticky-state) · Danny's dashboa
 ## 5. Open beslissingen (Danny) ⚠️
 | # | Vraag | Opties | Aanrader |
 |---|---|---|---|
-| **D1** | Auth-model | (a) Bearer-token (= huidige backend) + doc bijwerken + XSS-hardening · (b) terug naar httpOnly-cookie-SPA | **(a)** documenteren + harden — backend heeft 't al; geen herbouw |
+| **D1** | Auth-model | ~~(a) Bearer + harden · (b) httpOnly-cookie-SPA~~ | ✅ **BESLOTEN (b) httpOnly-cookie (Sanctum SPA)** 2026-06-26 → N-2 + BE-8 |
 | **D2** | Radius-anker | (a) vacature-picker `?near_vacancy=` · (b) plaats/adres `?lat=&lng=` · (c) recruiter-locatie | **(a)** voor matching op een concrete vacature; (b) als generieke "rond een plaats" |
 | **D3** | E-mail-UI-plek in Settings | eigen sub-tab "E-mail (per context)" vs onder bestaande sectie | eigen sub-tab |
 | **D4** | TypeScript-migratie | nu starten (shared laag) vs later | **nu** beginnen bij `lib/`+`components/ui/` — grootste hefboom |
 | **D5** | Native planning-module | nu bouwen vs backlog houden (read-only SM nu) | **backlog** (jouw besluit); heropenen na klantportaal+kandidaat-app |
 
 ## 6. Backend-coördinatie (wat backend nog levert) 🔒
-- `GET /settings/email/{context}/status` (na D3) · **C-27 graaf-rework** (workflow) · webhook-delivery
-  (C-5b stap 2) · intake/afspraken-endpoints (`/reports/intakes`, appointments) · dashboard-KPI-**deltas**
-  (subs zijn nu `null`) · yesway **PDOK-backfill** samen draaien (AVG-go gegeven). Volgorde-advies: **C-27**.
+- **Sanctum SPA-cookie (BE-8, D1):** stateful-domains, CORS `credentials:true`, `/sanctum/csrf-cookie`,
+  Secure+SameSite — daarna FE-flip (N-2) · `GET /settings/email/{context}/status` (na D3) · **C-27
+  graaf-rework** (workflow) · webhook-delivery (C-5b stap 2) · intake/afspraken-endpoints
+  (`/reports/intakes`, appointments) · dashboard-KPI-**deltas** (subs zijn nu `null`) · yesway
+  **PDOK-backfill** samen draaien (AVG-go gegeven). Volgorde-advies: **C-27** + **BE-8** parallel.
 
 ## 7. Multi-Claude & git-discipline
 - Alles op **main** (geen branches). **Vóór elke edit `git status`**; raak nooit andermans ongecommitte WIP
