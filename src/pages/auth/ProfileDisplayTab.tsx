@@ -4,12 +4,23 @@
  * state; the persisted values live in ProfilePage / ThemeContext.
  */
 import { useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Sun, Moon, Globe, Check } from 'lucide-react'
 import { PAGE_SIZE_OPTIONS } from '../../components/ui/PaginationBar'
 import { Section, Field, inputStyle, LANGUAGES } from './profileParts'
+import type { ProfileFormData } from './profileParts'
 
-export default function ProfileDisplayTab({ form, setForm, theme, setTheme, language, setLanguage }) {
+interface ProfileDisplayTabProps {
+  form: ProfileFormData
+  setForm: Dispatch<SetStateAction<ProfileFormData>>
+  theme: string
+  setTheme: (theme: string) => void
+  language: string
+  setLanguage: (lang: string) => void
+}
+
+export default function ProfileDisplayTab({ form, setForm, theme, setTheme, language, setLanguage }: ProfileDisplayTabProps) {
   const { t } = useTranslation('auth')
   const [langOpen, setLangOpen] = useState(false)
   const currentLang = LANGUAGES.find(l => l.value === language) ?? LANGUAGES[0]
