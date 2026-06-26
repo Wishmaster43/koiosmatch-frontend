@@ -26,7 +26,8 @@
 | 3a | **Customers-feature 100% TS** — page (container) · table (`Column<Customer>`) · bulkbar (`MenuNode`) · drawer + 10 drawer-tabs · 4 add-modals · `SubEntityTab<Item>` · PlanningSummary | ✅ klaar | 562180f |
 | 3b | **Applications-feature 100% TS** — page · table · board (kanban, dnd) · drawer + 9 tabs (Application/Candidate/Vacancy/Interviews/Appointments/Notes/Timeline/MatchScore/Rejection) · add-modal | ✅ klaar | 40fab37 |
 | 3c | **Vacancies-feature 100% TS** — page · table · bulkbar · drawer + 8 tabs (Details/Applicants/Matching/Publishing/Documents/Timeline/Notes/Statistics) · add-modal · **2 hooks** (useVacanciesData · useVacancyBulkActions) · shared | ✅ klaar | 1382cb3 |
-| 3+ | Resterende feature-maps: tasks · opportunities (mirror) · settings/sections (37) · shiftmanager (36) · reports (18) · layout (18) · auth · ai/workflows | ☐ | — |
+| 3d | **Tasks-feature 100% TS** — page · table · board (kanban) · drawer + 4 tabs (Details/Links/Comments/Activity) · add-modal · polymorphe links | ✅ klaar | 8793304 |
+| 3+ | Resterende feature-maps: opportunities (mirror) · settings/sections (37) · shiftmanager (36) · reports (18) · layout (18) · `modules/` (55) · auth · ai/workflows | ☐ | — |
 
 > **Let op (2 Claudes parallel):** de candidate-feature wordt momenteel live verder bewerkt door de andere Claude
 > (nieuwe `CandidateTypeSection`/`ChangelogPopover`, `onToggleZzp`/`onTypesChange` op de Preferences-tab). Tijdens
