@@ -51,6 +51,7 @@ import gateway_mail_hook from './gateway_mail_hook'
 import wait              from './wait'
 import ai_match          from './ai_match'
 import condition         from './condition'
+import type { ModuleDef } from './types'
 
 /**
  * Module registry — the single source of truth for every workflow building block.
@@ -63,7 +64,7 @@ import condition         from './condition'
  *   MAKE_MODULE_MAP — Make.com identifier → internal type (for import/mapping)
  * To add a module: import it and append it here; the maps update automatically.
  */
-const MODULES = [
+const MODULES: ModuleDef[] = [
   webhook,
   sm_candidates,
   sm_customers,
@@ -132,9 +133,9 @@ export const MODULE_APP_MAP = Object.fromEntries(
   MODULES.filter(m => m.app).map(m => [m.type, m.app])
 )
 
-// Maps Make.com module identifiers → internal type
+// Maps Make.com module identifiers → internal type.
 export const MAKE_MODULE_MAP = Object.fromEntries(
-  MODULES.filter(m => m.makeType).map(m => [m.makeType, m.type])
+  MODULES.filter(m => m.makeType).map(m => [String(m.makeType), m.type])
 )
 
 export default MODULES

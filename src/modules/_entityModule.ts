@@ -6,7 +6,22 @@
 // Keep entity files thin: pass the entity's filterable fields + sort keys here.
 // Filter VALUES (status, pool, …) are typed for now; wire them to tenant lookups
 // (useStatuses/usePools/…) next — never hardcode controlled vocabularies.
-export default function makeEntityModule(cfg) {
+import type { ModuleDef, SchemaField } from './types'
+
+interface EntityModuleConfig {
+  type: string
+  label: string
+  category?: string
+  Icon: ModuleDef['Icon']
+  color?: string
+  bg?: string
+  actions?: string[]
+  filterFields?: unknown[]
+  sortOptions?: unknown[]
+  schemaExtra?: SchemaField[]
+}
+
+export default function makeEntityModule(cfg: EntityModuleConfig): ModuleDef {
   const {
     type, label, category, Icon, color, bg,
     actions      = ['Ophalen', 'Aanmaken', 'Bijwerken'],
