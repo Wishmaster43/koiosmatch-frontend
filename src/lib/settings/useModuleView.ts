@@ -8,20 +8,23 @@
  */
 import { useAllSettings, getJsonSetting } from './useAllSettings'
 import { MODULES } from './moduleRegistry'
+import type { ModuleBlock } from './moduleRegistry'
 
-export function viewConfigKey(moduleId) {
+interface SavedBlock { id: string; enabled?: boolean }
+
+export function viewConfigKey(moduleId: string): string {
   return `view.${moduleId}`
 }
 
-export function useModuleView(moduleId) {
+export function useModuleView(moduleId: string): ModuleBlock[] {
   const values = useAllSettings()
   const blocks = MODULES[moduleId]?.blocks ?? []
-  const saved = getJsonSetting(values, viewConfigKey(moduleId), null) // [{ id, enabled }]
+  const saved = getJsonSetting<SavedBlock[] | null>(values, viewConfigKey(moduleId), null) // [{ id, enabled }]
 
   if (!Array.isArray(saved)) return blocks
 
-  const byId = Object.fromEntries(blocks.map(b => [b.id, b]))
-  const ordered = []
+  const byId: Record<string, ModuleBlock> = Object.fromEntries(blocks.map(b => [b.id, b]))
+  const ordered: ModuleBlock[] = []
   saved.forEach(s => { if (s.enabled !== false && byId[s.id]) ordered.push(byId[s.id]) })
   // Append blocks added to the registry after the config was saved.
   const known = new Set(saved.map(s => s.id))

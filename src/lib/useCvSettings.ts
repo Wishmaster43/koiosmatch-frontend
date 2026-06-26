@@ -1,6 +1,17 @@
 import { useState } from 'react'
 
-export const CV_DEFAULT_SECTIONS = [
+// One toggleable section of the generated CV.
+export interface CvSection { id: string; label: string; enabled: boolean }
+// Persisted CV branding + section configuration (localStorage-backed for now).
+export interface CvSettings {
+  primaryColor: string
+  secondaryColor: string
+  logoUrl: string | null
+  companyName: string
+  sections: CvSection[]
+}
+
+export const CV_DEFAULT_SECTIONS: CvSection[] = [
   { id: 'contact',      label: 'Contact details', enabled: true  },
   { id: 'summary',      label: 'About me',        enabled: true  },
   { id: 'experience',   label: 'Work experience', enabled: true  },
@@ -11,7 +22,7 @@ export const CV_DEFAULT_SECTIONS = [
   { id: 'preferences',  label: 'Preferences',     enabled: false },
 ]
 
-const DEFAULTS = {
+const DEFAULTS: CvSettings = {
   primaryColor:   '#19A5CA',
   secondaryColor: '#1B60A9',
   logoUrl:        null,
@@ -22,29 +33,29 @@ const DEFAULTS = {
 const STORAGE_KEY = 'koios_cv_settings'
 
 export function useCvSettings() {
-  const [settings, setSettings] = useState(() => {
+  const [settings, setSettings] = useState<CvSettings>(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) {
-        const parsed = JSON.parse(raw)
+        const parsed = JSON.parse(raw) as Partial<CvSettings>
         return { ...DEFAULTS, ...parsed, sections: parsed.sections ?? CV_DEFAULT_SECTIONS }
       }
-    } catch {}
+    } catch { /* ignore corrupt local settings */ }
     return { ...DEFAULTS, sections: [...CV_DEFAULT_SECTIONS] }
   })
 
-  function save(patch) {
+  function save(patch: Partial<CvSettings>) {
     setSettings(prev => {
       const next = { ...prev, ...patch }
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)) } catch {}
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)) } catch { /* storage full/blocked */ }
       return next
     })
   }
 
   function reset() {
-    const fresh = { ...DEFAULTS, sections: [...CV_DEFAULT_SECTIONS] }
+    const fresh: CvSettings = { ...DEFAULTS, sections: [...CV_DEFAULT_SECTIONS] }
     setSettings(fresh)
-    try { localStorage.removeItem(STORAGE_KEY) } catch {}
+    try { localStorage.removeItem(STORAGE_KEY) } catch { /* storage blocked */ }
   }
 
   return { settings, save, reset }

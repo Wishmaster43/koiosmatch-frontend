@@ -13,42 +13,27 @@
  */
 
 import { hasModule, tenantModules } from './modules'
+import type { ModuleKey, Tenant } from '../types/api'
+
+// What access.js reads off the AuthContext value (kept minimal + defensive).
+interface UserLike { is_super_admin?: boolean; tenant?: Tenant | null; permissions?: unknown; accessible_pages?: string[] }
+interface AuthLike { activeTenant?: Tenant | null; user?: UserLike | null; accessiblePages?: string[] }
+type PermLike = string | { name?: string }
 
 // Pages that require a paid add-on module. These are ALSO hard-gated server-side
 // (e.g. /sm/* → 403 without the 'sm' module), so this is just UI mirroring.
-const PAGE_REQUIRED_MODULE = {
+const PAGE_REQUIRED_MODULE: Record<string, ModuleKey> = {
   shiftmanager: 'sm',
   helloflex:    'hf',
 }
-
-// Canonical page sets per package ID.
-// These IDs must match exactly what the backend stores in tenant.package.
-//
-// Matrix model:
-//   Reporting tier:  SM = Shiftmanager, HF = HelloFlex
-//   Add-ons:         _ai = AI & Workflow (enables app connectors)
-//   ATS tier:        ats_crm base pages
-//   Planning:        add-on on top of ats_crm (never standalone)
-//
-// Pakket  1  reporting_sm            SM
-// Pakket  2  reporting_hf            HF
-// Pakket  3  reporting_sm_hf         SM + HF
-// Pakket  4  reporting_sm_ai         SM + AI & WF
-// Pakket  5  reporting_hf_ai         HF + AI & WF
-// Pakket  6  reporting_sm_hf_ai      SM + HF + AI & WF
-// Pakket  7  ats_crm                 ATS & CRM
-// Pakket  8  ats_crm_ai              ATS & CRM + AI & WF
-// Pakket  9  ats_crm_planning        ATS & CRM + Planning
-// Pakket 10  ats_crm_ai_planning     ATS & CRM + AI & WF + Planning
 
 const ATS_BASE   = ['dashboard', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'customers', 'locations', 'departments', 'contacts', 'details', 'users']
 const AI_PAGES   = ['aiagents', 'whatsapp', 'workflows', 'apps']
 const PLANNING   = ['planning']
 
 // Module key → pages it grants. A tenant's accessible pages are the union over its
-// effective modules (base package + add-ons). This unifies page + module gating and
-// lets add-ons (sm/hf/sm_ai/plan) extend access automatically, with no separate map.
-const MODULE_TO_PAGES = {
+// effective modules (base package + add-ons).
+const MODULE_TO_PAGES: Record<string, string[]> = {
   ats:      ATS_BASE,
   ai:       AI_PAGES,
   plan:     PLANNING,
@@ -59,7 +44,7 @@ const MODULE_TO_PAGES = {
   insights: [],                 // Insights+ within reporting/settings (no separate gate yet)
 }
 
-const PACKAGE_PAGES = {
+const PACKAGE_PAGES: Record<string, string[]> = {
   reporting_sm:          ['shiftmanager'],
   reporting_hf:          ['helloflex'],
   reporting_sm_hf:       ['shiftmanager', 'helloflex'],
@@ -79,7 +64,7 @@ const PACKAGE_PAGES = {
 }
 
 // First page to land on per package (when dashboard is not available)
-export const PACKAGE_DEFAULT_PAGE = {
+export const PACKAGE_DEFAULT_PAGE: Record<string, string> = {
   reporting_sm:           'shiftmanager',
   reporting_hf:           'helloflex',
   reporting_sm_hf:        'shiftmanager',
@@ -103,20 +88,18 @@ const GATED_PAGES = [
 ]
 
 // Sub-page gates: the sub-page is only visible when the named top-level page is accessible.
-const SUB_PAGE_GATES = {
+const SUB_PAGE_GATES: Record<string, string> = {
   'details.runs':     'aiagents',
   'details.messages': 'whatsapp',
 }
 
 // Pages that can additionally be restricted at the user/role level via page.* permissions.
-// Only ATS & CRM pages — module pages (aiagents, whatsapp, workflows, planning, etc.)
-// are purely package-gated and must never be blocked by role permissions.
 const PAGE_RESTRICTABLE = [
   'candidates', 'customers', 'locations', 'departments', 'details',
 ]
 
 // Module pages shown in the "Modules" nav group. Driven by accessible_pages.
-export const MODULE_PAGES = [
+export const MODULE_PAGES: { id: string; label: string; soon?: boolean }[] = [
   { id: 'shiftmanager', label: 'Rapportage Shiftmanager' },
   { id: 'helloflex',    label: 'Rapportage HelloFlex', soon: true },
   { id: 'aiagents',     label: 'AI Agents' },
@@ -124,15 +107,14 @@ export const MODULE_PAGES = [
   { id: 'whatsapp',     label: 'WhatsApp'  },
 ]
 
-function accessiblePages(auth) {
+function accessiblePages(auth?: AuthLike | null): string[] | null {
   const tenant = auth?.activeTenant ?? auth?.user?.tenant ?? null
-  // Derive from the tenant's effective modules (base package + add-ons). The explicit
-  // tenant.modules array (backend: base + add-ons) wins; otherwise modules come from the
-  // package id. This reproduces the legacy PACKAGE_PAGES exactly and makes add-ons extend
-  // the accessible pages without a separate package→pages map.
+  // Derive from the tenant's effective modules (base package + add-ons); explicit
+  // tenant.modules wins, otherwise from the package id. This reproduces the legacy
+  // PACKAGE_PAGES exactly and lets add-ons extend access with no separate map.
   const modules = tenantModules(tenant)
   if (modules.length > 0) {
-    const pages = new Set()
+    const pages = new Set<string>()
     modules.forEach(m => (MODULE_TO_PAGES[m] ?? []).forEach(p => pages.add(p)))
     if (pages.size > 0) return [...pages]
   }
@@ -145,7 +127,7 @@ function accessiblePages(auth) {
   return null
 }
 
-function hasAccess(pageId, auth) {
+function hasAccess(pageId: string, auth?: AuthLike | null): boolean {
   const pages = accessiblePages(auth)
   if (pages === null) return true // no restrictions configured
   return pages.includes(pageId)
@@ -155,7 +137,7 @@ function hasAccess(pageId, auth) {
  * Returns true if the user may open the given page.
  * Checks both: (1) tenant package / accessible_pages, (2) user role page.* permissions.
  */
-export function canAccessPage(pageId, auth) {
+export function canAccessPage(pageId: string, auth?: AuthLike | null): boolean {
   const base = String(pageId ?? '').split('.')[0]
 
   // Super admins always see everything
@@ -174,10 +156,12 @@ export function canAccessPage(pageId, auth) {
   // Layer 2: role-level page whitelist (page.* permissions).
   // Guard with Array.isArray: user.permissions may be absent or non-array on some backends.
   if (PAGE_RESTRICTABLE.includes(base)) {
-    const perms = Array.isArray(auth?.user?.permissions) ? auth.user.permissions : []
-    const pagePerms = perms.filter(p => (typeof p === 'string' ? p : p.name)?.startsWith('page.'))
+    const permsRaw = auth?.user?.permissions
+    const perms: PermLike[] = Array.isArray(permsRaw) ? permsRaw : []
+    const nameOf = (p: PermLike): string => (typeof p === 'string' ? p : (p?.name ?? ''))
+    const pagePerms = perms.filter(p => nameOf(p).startsWith('page.'))
     if (pagePerms.length > 0) {
-      return pagePerms.some(p => (typeof p === 'string' ? p : p.name) === `page.${base}`)
+      return pagePerms.some(p => nameOf(p) === `page.${base}`)
     }
   }
 

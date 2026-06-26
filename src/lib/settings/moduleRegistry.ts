@@ -13,9 +13,14 @@ import {
   Building2, MapPin, Layers, TrendingUp, Calendar, CheckCircle, AlertTriangle,
   Euro, Briefcase, Trophy, Percent, Users, UserCheck, UserPlus, Clock,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+// One configurable block in a module view (KPI card for now; charts/tables later).
+export interface ModuleBlock { id: string; type: 'kpi'; label: string; icon: LucideIcon; color: string; bg: string }
+export interface ModuleDef { label: string; blocks: ModuleBlock[] }
 
 // type: 'kpi' for now (charts/tables can be added later with their own renderers).
-export const MODULES = {
+export const MODULES: Record<string, ModuleDef> = {
   customers: {
     label: 'Customers',
     blocks: [
