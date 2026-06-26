@@ -16,8 +16,8 @@
 | Golf | Scope | Status | Commit |
 |---|---|---|---|
 | 0 | Fundament: `tsconfig` (baseUrl weg) · `typecheck`-script · dit logboek · types-strategie | ✅ klaar | 62b2806 |
-| 1a | Dedup `initialsOf` (17 kopieën → `src/lib/initials.ts`) | ✅ klaar | — |
-| 1b | Data-mappers → `.ts` + entiteit-types (`mapCandidate`/`mapApplication`/…) | ☐ | — |
+| 1a | Dedup `initialsOf` (17 kopieën → `src/lib/initials.ts`) | ✅ klaar | a8e7f1b |
+| 1b | **Alle 6 data-mappers → `.ts` + entiteit-types** (candidate · application · vacancy · customer · opportunity · task) | ✅ klaar | 58af15a/f4a1c9c/… |
 | 2 | `components/ui/` (gedeelde blueprint-props) | ☐ | — |
 | 3+ | Per feature-map: candidates → applications → vacancies → customers → … | ☐ | — |
 
@@ -49,6 +49,10 @@ getypt tegen de échte API-response, importeerbaar door andere features. Nieuw b
 ---
 
 ## Gefixt tijdens de pass
+- **Golf 1b — drift gevangen door de types:** `created_at` ontbrak in `ApiTask` (viel op de
+  index-signature → `unknown ?? '' = {} | string`) → gedeclareerd. **Quirk gefixt:** mapCustomer
+  mapte de fallback-departments dubbel (`locations.flatMap(...).map(mapDepartment)` op al-gemapte
+  data) → nu conditioneel, geen redundante her-mapping. Overige 5 mappers: geen drift (contract klopt).
 - **Golf 0 — `setState-in-useMemo` (4× baseline, React-19 error):** `setPage(1)` ín de filter-`useMemo`
   van MatchesPage:72 · OpportunitiesPage:65 · TasksPage:133 (zelfde copy-paste-drift als de eerder
   gefixte ApplicationsPage) → verplaatst naar een `useEffect` op de filter-deps. + ongebruikte `user` in

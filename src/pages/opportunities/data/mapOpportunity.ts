@@ -1,15 +1,18 @@
 import { initialsOf } from '@/lib/initials'
+import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 
 // Map a raw API opportunity → the flat shape the table/insights/drawer render
 // (snake_case-tolerant). Nested customer/stage/owner arrive as objects (the API
 // shape); the flat *_id / *_name forms are tolerated as a fallback.
-export function mapOpportunity(o) {
+export function mapOpportunity(o: ApiOpportunity): Opportunity {
   const customer = (o.customer && typeof o.customer === 'object') ? o.customer
     : (o.client && typeof o.client === 'object') ? o.client : null
   const client = o.client_name ?? customer?.name ?? '—'
   const title  = o.title ?? o.name ?? '—'
   const stageObj = (o.stage && typeof o.stage === 'object') ? o.stage : null
   const ownerObj = (o.owner && typeof o.owner === 'object') ? o.owner : null
+  // Deal value is only kept when the API actually sends a number (else null).
+  const rawValue = o.value ?? o.amount ?? o.deal_value
   return {
     id:         o.id,
     title,
@@ -19,8 +22,7 @@ export function mapOpportunity(o) {
     stage:      stageObj?.label ?? (typeof o.stage === 'string' ? o.stage : null) ?? o.stage_label ?? o.status ?? '',
     stageValue: stageObj?.value ?? o.stage_value ?? null,
     stageColor: stageObj?.color ?? o.stage_color ?? '#6E8FD6',
-    value:      typeof (o.value ?? o.amount ?? o.deal_value) === 'number'
-      ? (o.value ?? o.amount ?? o.deal_value) : null,
+    value:      typeof rawValue === 'number' ? rawValue : null,
     currency:   o.currency ?? 'EUR',
     owner:      ownerObj?.name ?? o.owner_name ?? '',
     ownerId:    ownerObj?.id ?? o.owner_id ?? null,

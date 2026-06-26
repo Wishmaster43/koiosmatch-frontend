@@ -1,14 +1,19 @@
 import { initialsOf } from '@/lib/initials'
+import type { Id } from '@/types/common'
+import type {
+  ApiContact, ApiDepartment, ApiLocation, ApiCustomer,
+  Contact, Department, Location, Customer,
+} from '@/types/customer'
 
 // Compact one-line address: "Straat 12a, 1234 AB Plaats".
-const addressLine = (l = {}) => {
+const addressLine = (l: ApiLocation = {}): string => {
   const street = [l.street, l.house_number].filter(Boolean).join(' ') + (l.house_number_suffix ? l.house_number_suffix : '')
   const city = [l.postal_code, l.city].filter(Boolean).join(' ')
   return [street.trim(), city.trim()].filter(Boolean).join(', ')
 }
 
 /** mapDepartment — raw API department → flat UI shape (nested under a location). */
-export function mapDepartment(d = {}) {
+export function mapDepartment(d: ApiDepartment = {}): Department {
   return {
     id: d.id,
     name: d.name ?? '—',
@@ -20,7 +25,7 @@ export function mapDepartment(d = {}) {
 }
 
 /** mapContact — raw API contact person → flat UI shape. */
-export function mapContact(p = {}) {
+export function mapContact(p: ApiContact = {}): Contact {
   return {
     id: p.id,
     name: p.name ?? '—',
@@ -36,7 +41,7 @@ export function mapContact(p = {}) {
 }
 
 /** mapLocation — raw API location → flat UI shape with C-6 address fields. */
-export function mapLocation(l = {}) {
+export function mapLocation(l: ApiLocation = {}): Location {
   const departments = (l.departments ?? []).map(mapDepartment)
   const contacts = (l.contacts ?? []).map(mapContact)
   return {
@@ -65,13 +70,16 @@ export function mapLocation(l = {}) {
  * field never throws. Status arrives either as a string (value) or an object
  * { value, label, color }; both are normalised, with the lookup as fallback.
  */
-export function mapCustomer(c = {}) {
-  const owner = c.owner ?? {}
+export function mapCustomer(c: ApiCustomer = {}): Customer {
+  const owner: { id?: Id; name?: string; avatar_color?: string | null } = c.owner ?? {}
   const status = c.status
   const statusValue = (status && typeof status === 'object') ? (status.value ?? '') : (status ?? c.status_id ?? '')
   const locations = (c.locations ?? []).map(mapLocation)
-  // Departments are nested under locations; accept a flat list too (fallback).
-  const departments = (c.departments ?? locations.flatMap(l => l.departments ?? [])).map(mapDepartment)
+  // Departments live under locations; if the API also sends a flat raw list, map
+  // that — otherwise reuse the already-mapped ones (no redundant double-mapping).
+  const departments: Department[] = c.departments
+    ? c.departments.map(mapDepartment)
+    : locations.flatMap(l => l.departments)
   const contacts = (c.contacts ?? c.contact_persons ?? []).map(mapContact)
 
   return {

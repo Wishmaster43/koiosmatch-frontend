@@ -1,7 +1,10 @@
 import { initialsOf } from '@/lib/initials'
+import type { Id, Loose } from '@/types/common'
+import type { ApiVacancy, Vacancy, VacancyDetail } from '@/types/vacancy'
 
 // Sum the per-phase application counts into a single total.
-const sumPhases = (byPhase) => Object.values(byPhase ?? {}).reduce((a, b) => a + (Number(b) || 0), 0)
+const sumPhases = (byPhase: Loose): number =>
+  Object.values(byPhase).reduce<number>((a, b) => a + (Number(b) || 0), 0)
 
 /**
  * mapVacancy — raw API vacancy → the flat shape the list/table renders.
@@ -10,11 +13,12 @@ const sumPhases = (byPhase) => Object.values(byPhase ?? {}).reduce((a, b) => a +
  * not built yet — see docs/worklist.md C-26), so it accepts several spellings and
  * never throws on a missing field. Mirrors mapCandidate / mapApplication.
  */
-export function mapVacancy(v = {}) {
-  const owner = v.owner ?? {}
-  const customer = v.customer ?? v.client ?? {}
-  const status = typeof v.status === 'object' && v.status ? v.status : {}
-  const byPhase = v.applications_by_phase ?? v.applicationsByPhase ?? {}
+export function mapVacancy(v: ApiVacancy = {}): Vacancy {
+  const owner: { id?: Id; name?: string; avatar_color?: string | null; color?: string | null } = v.owner ?? {}
+  const customer: { id?: Id; name?: string } = v.customer ?? v.client ?? {}
+  const status: { value?: string | number; label?: string; color?: string } =
+    (typeof v.status === 'object' && v.status) ? v.status : {}
+  const byPhase: Loose = v.applications_by_phase ?? v.applicationsByPhase ?? {}
 
   return {
     id: v.id,
@@ -44,11 +48,20 @@ export function mapVacancy(v = {}) {
 }
 
 // Build a display string from min/max + a unit, falling back to a preformatted field.
-const range = (preformatted, min, max, suffix = '') => {
-  if (preformatted) return preformatted
+const range = (preformatted: unknown, min: unknown, max: unknown, suffix = ''): string => {
+  if (preformatted) return String(preformatted)
   if (min == null && max == null) return ''
-  const fmt = (n) => (n == null ? '' : n)
+  const fmt = (n: unknown) => (n == null ? '' : String(n))
   return [fmt(min), fmt(max)].filter(v => v !== '').join(' – ') + (suffix ? ` ${suffix}` : '')
+}
+
+// Resolve a lookup value that may arrive as an object {label/name/value} or a scalar.
+const labelOf = (x: unknown): string => {
+  if (x && typeof x === 'object') {
+    const o = x as Loose
+    return String(o.label ?? o.name ?? o.value ?? '')
+  }
+  return x == null ? '' : String(x)
 }
 
 /**
@@ -57,9 +70,8 @@ const range = (preformatted, min, max, suffix = '') => {
  * (employment/seniority/education lookups, applications, custom fields, timeline…).
  * Every nested list defaults to [] so a tab never crashes.
  */
-export function mapVacancyDetail(raw = {}) {
+export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
   const base = mapVacancy(raw)
-  const labelOf = (x) => (typeof x === 'object' && x ? (x.label ?? x.name ?? x.value) : x) ?? ''
 
   return {
     ...base,
@@ -84,9 +96,9 @@ export function mapVacancyDetail(raw = {}) {
     })),
     // Coupled applications (each links a real candidate at a funnel phase).
     applications: (raw.applications ?? []).map(a => {
-      const cand = a.candidate ?? {}
+      const cand: { id?: Id; name?: string; initials?: string } = a.candidate ?? {}
       const name = a.candidate_name ?? cand.name ?? '—'
-      const phase = a.phase ?? {}
+      const phase: { value?: string | number; label?: string; color?: string } = a.phase ?? {}
       return {
         id: a.id,
         candidateId: a.candidate_id ?? cand.id ?? null,
