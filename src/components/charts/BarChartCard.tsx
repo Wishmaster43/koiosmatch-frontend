@@ -1,11 +1,13 @@
 /** BarChartCard — themed bar chart with optional average line + click-through. */
+import type { ReactNode } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { useTranslation } from 'react-i18next'
+import type { ChartDatum, TipProps } from './chartTypes'
 
-function BarTooltip({ active, payload, label, total, showPercent }) {
+function BarTooltip({ active, payload, label, total, showPercent }: TipProps & { total?: number; showPercent?: boolean }) {
   if (!active || !payload?.length) return null
-  const value = payload[0].value
-  const pct   = total ? ((value / total) * 100).toFixed(1) : 0
+  const value = payload[0].value ?? 0
+  const pct   = total ? ((value / total) * 100).toFixed(1) : '0'
   return (
     <div className="px-3 py-2 text-sm bg-white rounded-xl"
       style={{ border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
@@ -17,7 +19,9 @@ function BarTooltip({ active, payload, label, total, showPercent }) {
   )
 }
 
-export default function BarChartCard({ title, data = [], colors = [], showPercent = false, height = 220, onBarClick, showAverage = false }) {
+export default function BarChartCard({ title, data = [], colors = [], showPercent = false, height = 220, onBarClick, showAverage = false }: {
+  title?: ReactNode; data?: ChartDatum[]; colors?: string[]; showPercent?: boolean; height?: number; onBarClick?: (d: ChartDatum) => void; showAverage?: boolean
+}) {
   const { t } = useTranslation('common')
   const rawTotal   = data.reduce((s, d) => s + d.value, 0)
   const rawAverage = data.length ? Math.round(rawTotal / data.length) : 0
@@ -80,7 +84,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
             dataKey="value"
             radius={[4, 4, 0, 0]}
             cursor={onBarClick ? 'pointer' : 'default'}
-            onClick={(_, idx) => onBarClick && onBarClick(data[idx])}
+            onClick={(_: unknown, idx: number) => onBarClick?.(data[idx])}
           >
             {data.map((_, i) => (
               <Cell key={i} fill={colors[i % colors.length] || 'var(--color-primary)'} />

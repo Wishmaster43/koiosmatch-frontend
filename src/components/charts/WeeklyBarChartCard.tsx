@@ -2,21 +2,22 @@
  * WeeklyBarChartCard — grouped bar chart for N series per period (e.g. weekly
  * candidates · applications · matches = the funnel). Config-driven series, theme-
  * token colours, legend, and a multi-series tooltip. Click a bar → onBarClick(row, series).
- *
- *   data:   Array<{ name, [seriesKey]: number, … }>   (one row per bucket)
- *   series: Array<{ key, label, color }>
  */
+import type { ReactNode } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
+import type { ChartDatum, TipProps } from './chartTypes'
+
+export interface BarSeries { key: string; label: string; color: string }
 
 // Tooltip listing every series' value for the hovered bucket.
-function MultiTooltip({ active, payload, label }) {
+function MultiTooltip({ active, payload, label }: TipProps) {
   if (!active || !payload?.length) return null
   return (
     <div style={{ padding: '8px 11px', fontSize: 12, background: 'white', borderRadius: 10,
       border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.10)', minWidth: 130 }}>
       <div style={{ fontWeight: 600, color: 'var(--text)', marginBottom: 5 }}>{label}</div>
       {payload.map(p => (
-        <div key={p.dataKey} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+        <div key={String(p.dataKey)} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color, flexShrink: 0 }} />
           <span style={{ flex: 1, color: 'var(--text-muted)' }}>{p.name}</span>
           <strong style={{ color: 'var(--text)' }}>{p.value}</strong>
@@ -26,7 +27,9 @@ function MultiTooltip({ active, payload, label }) {
   )
 }
 
-export default function WeeklyBarChartCard({ title, data = [], series = [], height = 240, onBarClick }) {
+export default function WeeklyBarChartCard({ title, data = [], series = [], height = 240, onBarClick }: {
+  title?: ReactNode; data?: ChartDatum[]; series?: BarSeries[]; height?: number; onBarClick?: (row: unknown, series: BarSeries) => void
+}) {
   if (!data.length || !series.length) {
     return (
       <div className="flex flex-col flex-1 min-w-0">
@@ -48,7 +51,7 @@ export default function WeeklyBarChartCard({ title, data = [], series = [], heig
           {series.map(s => (
             <Bar key={s.key} dataKey={s.key} name={s.label} fill={s.color} radius={[3, 3, 0, 0]}
               cursor={onBarClick ? 'pointer' : 'default'}
-              onClick={onBarClick ? (row) => onBarClick(row, s) : undefined} />
+              onClick={onBarClick ? (row: unknown) => onBarClick(row, s) : undefined} />
           ))}
         </BarChart>
       </ResponsiveContainer>

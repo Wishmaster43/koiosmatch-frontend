@@ -2,30 +2,32 @@
  * MiniDonut — a compact donut for dashboard strips: just the ring with the total
  * in the centre. No inline legend (keeps it small); segment detail shows on hover
  * via the tooltip. Clicking a segment calls onItemClick with the data point.
- *
- * data: Array<{ name, value, key?, color? }>
  */
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
+import type { ChartDatum, TipProps } from './chartTypes'
 
 const DEFAULT_COLORS = [
   'var(--color-primary)', '#10B981', '#3B8FD4', 'var(--color-warning)',
   'var(--color-danger)', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316', '#EC4899',
 ]
 
-function MiniTooltip({ active, payload, total }) {
+function MiniTooltip({ active, payload, total }: TipProps & { total?: number }) {
   if (!active || !payload?.length) return null
   const item = payload[0]
-  const pct  = total ? Math.round((item.value / total) * 100) : 0
+  const val  = item.value ?? 0
+  const pct  = total ? Math.round((val / total) * 100) : 0
   return (
     <div style={{ padding: '5px 9px', fontSize: 11, background: 'white', borderRadius: 8,
       border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.10)', whiteSpace: 'nowrap' }}>
       <span style={{ fontWeight: 600, color: 'var(--text)' }}>{item.name}</span>
-      <span style={{ color: item.payload.fill, marginLeft: 6 }}>{item.value} · {pct}%</span>
+      <span style={{ color: item.payload?.fill, marginLeft: 6 }}>{val} · {pct}%</span>
     </div>
   )
 }
 
-export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 56, onItemClick }) {
+export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 56, onItemClick }: {
+  data?: ChartDatum[]; colors?: string[]; size?: number; onItemClick?: (d: unknown) => void
+}) {
   const total = data.reduce((s, d) => s + d.value, 0)
   const innerR = Math.round(size * 0.34)
   const outerR = Math.round(size * 0.5)
@@ -36,7 +38,7 @@ export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 5
         <Pie data={data} cx="50%" cy="50%" innerRadius={innerR} outerRadius={outerR}
           paddingAngle={data.length > 1 ? 2 : 0} dataKey="value"
           cursor={onItemClick ? 'pointer' : 'default'}
-          onClick={(d) => onItemClick && onItemClick(d)} stroke="none">
+          onClick={(d: unknown) => onItemClick?.(d)} stroke="none">
           {data.map((d, i) => (
             <Cell key={i} fill={d.color || colors[i % colors.length]} />
           ))}
