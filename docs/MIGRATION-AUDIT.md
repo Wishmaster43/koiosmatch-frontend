@@ -28,7 +28,8 @@
 | 3c | **Vacancies-feature 100% TS** — page · table · bulkbar · drawer + 8 tabs (Details/Applicants/Matching/Publishing/Documents/Timeline/Notes/Statistics) · add-modal · **2 hooks** (useVacanciesData · useVacancyBulkActions) · shared | ✅ klaar | 1382cb3 |
 | 3d | **Tasks-feature 100% TS** — page · table · board (kanban) · drawer + 4 tabs (Details/Links/Comments/Activity) · add-modal · polymorphe links | ✅ klaar | 8793304 |
 | 3e | **Opportunities-feature 100% TS** — page · table · board (kanban) · insights-row · drawer + DetailsTab · add-modal | ✅ klaar | 34ebd2f |
-| 3+ | **Alle 6 entity-features klaar.** Resterend (niet-entity): settings/sections (37) · shiftmanager (36) · reports (18) · layout (18) · `modules/` (55) · auth · ai/workflows | ☐ | — |
+| M | **`src/modules/` workflow-registry 100% TS** — 55 files: gedeelde `types.ts` (ModuleDef + SchemaField) · `makeEntityModule` factory · 53 module-defs · `index.ts` (MODULES + afgeleide maps). Icon spiegelt het lucide-contract (`size`) zodat SM/HF-marks erin passen | ✅ klaar | 55eeb0f |
+| 3+ | **Alle 6 entity-features + modules klaar.** Resterend (niet-entity): settings/sections (37) · shiftmanager (36) · reports (18) · layout (18) · auth · ai/workflows | ☐ | — |
 
 > **Werkverdeling (Danny, 2026-06-26):** de candidate-feature (incl. nieuwe instelbare lookups **Rijbewijs** en
 > **Voorkeurs branche** — zelfde patroon als Kandidaat-type: `LookupsContext` + `useX()` + Settings-CRUD, §3B)
