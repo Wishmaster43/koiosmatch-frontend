@@ -1,11 +1,16 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatusPill from '../../../components/ui/StatusPill'
 import KoiosAiMark from '../../../components/ui/KoiosAiMark'
 import MatchScoreBlock from './MatchScoreBlock'
+import type { Criterion } from './MatchScoreBlock'
 import RejectionBlock from './RejectionBlock'
+import type { RejectPayload } from './RejectionBlock'
+import type { ApplicationDetail } from '../../../types/application'
+import type { Id } from '../../../types/common'
 
 // A small label-above-value field.
-function Field({ label, children }) {
+function Field({ label, children }: { label: ReactNode; children: ReactNode }) {
   return (
     <div style={{ minWidth: 0 }}>
       <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{label}</div>
@@ -14,12 +19,17 @@ function Field({ label, children }) {
   )
 }
 
+interface ApplicationTabProps {
+  application: ApplicationDetail
+  onReject?: (id: Id | undefined, payload: RejectPayload) => void
+  onAdjustScore?: (id: Id | undefined, payload: { score: number | null; criteria: Criterion[] }) => void
+}
+
 /**
  * ApplicationTab — the "Sollicitatie" tab: phase/source, the AI task, the key
- * details and the overall match score. The full criteria breakdown + rejection
- * block land in later steps (MatchScoreBlock / RejectionBlock).
+ * details and the overall match score.
  */
-export default function ApplicationTab({ application: a, onReject, onAdjustScore }) {
+export default function ApplicationTab({ application: a, onReject, onAdjustScore }: ApplicationTabProps) {
   const { t } = useTranslation('applications')
 
   return (
@@ -60,9 +70,9 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
       {/* Match score — overall + configured criteria breakdown. */}
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matchScore.title')}</div>
-        <MatchScoreBlock score={a.score} criteria={a.matchCriteria} summary={a.matchSummary}
+        <MatchScoreBlock score={a.score} criteria={a.matchCriteria as Criterion[]} summary={a.matchSummary}
           source={a.matchSource} aiScore={a.aiScore}
-          onSave={onAdjustScore ? (payload) => onAdjustScore(a.id, payload) : undefined} />
+          onSave={onAdjustScore ? payload => onAdjustScore(a.id, payload) : undefined} />
       </div>
 
       {/* Rejection — hidden once the application is a placement (matched). */}

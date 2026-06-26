@@ -3,12 +3,14 @@ import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronUp, Pencil, Save, X } from 'lucide-react'
 import Slider from '../../../components/ui/Slider'
 
+export interface Criterion { key?: string; label?: string; hard?: boolean; score: number; weight?: number; note?: string }
+
 // Score colour (green ≥75, amber ≥50, red below).
-const scoreColor = (v) => (v >= 75 ? 'var(--color-success)' : v >= 50 ? 'var(--color-warning)' : 'var(--color-danger)')
+const scoreColor = (v?: number | null): string => { const n = v ?? 0; return n >= 75 ? 'var(--color-success)' : n >= 50 ? 'var(--color-warning)' : 'var(--color-danger)' }
 
 // Weighted overall from the criteria (falls back to a plain average, or the
 // explicit overall when there are no criteria).
-const computeOverall = (criteria, fallback) => {
+const computeOverall = (criteria: Criterion[], fallback: number | null): number | null => {
   if (!criteria.length) return fallback
   const wsum = criteria.reduce((s, c) => s + (Number(c.weight) || 0), 0)
   if (!wsum) return Math.round(criteria.reduce((s, c) => s + (Number(c.score) || 0), 0) / criteria.length)
@@ -16,7 +18,7 @@ const computeOverall = (criteria, fallback) => {
 }
 
 // A small circular score ring (read mode).
-function ScoreRing({ value, size = 26 }) {
+function ScoreRing({ value, size = 26 }: { value: number; size?: number }) {
   const c = scoreColor(value)
   const r = size / 2 - 2
   const circ = 2 * Math.PI * r
@@ -30,7 +32,7 @@ function ScoreRing({ value, size = 26 }) {
 }
 
 // One criterion: read = label + ring + % + note; edit = label + slider + %.
-function CriterionCard({ criterion, hardLabel, editing, onScore }) {
+function CriterionCard({ criterion, hardLabel, editing, onScore }: { criterion: Criterion; hardLabel: string; editing: boolean; onScore: (v: number) => void }) {
   const [open, setOpen] = useState(false)
 
   if (editing) {
@@ -74,6 +76,15 @@ function CriterionCard({ criterion, hardLabel, editing, onScore }) {
   )
 }
 
+interface MatchScoreBlockProps {
+  score?: number | null
+  criteria?: Criterion[]
+  summary?: string
+  onSave?: (payload: { score: number | null; criteria: Criterion[] }) => void
+  source?: string
+  aiScore?: number | null
+}
+
 /**
  * MatchScoreBlock — the match SCORE (the fit): summary, overall bar and the
  * per-criterion breakdown. Criteria + weights are configured in Settings (the
@@ -81,19 +92,19 @@ function CriterionCard({ criterion, hardLabel, editing, onScore }) {
  * via sliders (a manual override), saved through onSave → PATCH /applications/{id}.
  * The AI's own score (aiScore) is kept and shown when overridden.
  */
-export default function MatchScoreBlock({ score, criteria = [], summary, onSave, source, aiScore }) {
+export default function MatchScoreBlock({ score, criteria = [], summary, onSave, source, aiScore }: MatchScoreBlockProps) {
   const { t } = useTranslation('applications')
   const [editing, setEditing]   = useState(false)
   const [draftScore, setDraftScore]       = useState(0)
-  const [draftCriteria, setDraftCriteria] = useState([])
+  const [draftCriteria, setDraftCriteria] = useState<Criterion[]>([])
 
   const startEdit = () => { setDraftScore(score ?? 0); setDraftCriteria(criteria.map(c => ({ ...c }))); setEditing(true) }
   const cancel = () => setEditing(false)
-  const setCriterionScore = (i, v) => setDraftCriteria(p => p.map((c, idx) => idx === i ? { ...c, score: Math.max(0, Math.min(100, Number(v) || 0)) } : c))
+  const setCriterionScore = (i: number, v: number) => setDraftCriteria(p => p.map((c, idx) => idx === i ? { ...c, score: Math.max(0, Math.min(100, Number(v) || 0)) } : c))
 
   const overall = editing
     ? computeOverall(draftCriteria, Math.max(0, Math.min(100, Number(draftScore) || 0)))
-    : score
+    : (score ?? null)
 
   const save = () => { onSave?.({ score: overall, criteria: draftCriteria }); setEditing(false) }
 
@@ -143,7 +154,7 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {shownCriteria.map((c, i) => (
             <CriterionCard key={c.key ?? i} criterion={c} hardLabel={t('matchScore.hard')}
-              editing={editing} onScore={(v) => setCriterionScore(i, v)} />
+              editing={editing} onScore={v => setCriterionScore(i, v)} />
           ))}
         </div>
       )}

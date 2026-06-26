@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { ApplicationDetail } from '../../../types/application'
 
 // Neutral pill for skills/tags (no semantic colour — calm, like the screenshots).
-function Pill({ children }) {
+function Pill({ children }: { children: ReactNode }) {
   return (
     <span style={{ fontSize: 11, padding: '3px 10px', borderRadius: 99, whiteSpace: 'nowrap',
       background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}>
@@ -14,12 +16,14 @@ function Pill({ children }) {
  * VacancyTab — read-only vacancy detail inside the application drawer: banner,
  * title/client, the key fields, required skills and tags.
  */
-export default function VacancyTab({ application: a }) {
+export default function VacancyTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
-  const v = a.vacancy ?? { title: a.vacancyTitle, client: a.client }
+  const v = a.vacancy
+  const skills = (v.skills ?? []) as string[]
+  const tags   = (v.tags ?? []) as string[]
 
   // Field rows (label + value); skip empties so the grid stays tidy.
-  const rows = [
+  const rows: [string, string][] = ([
     [t('vacancyDetail.id'), v.vacancyId],
     [t('vacancyDetail.status'), v.status],
     [t('vacancyDetail.employment'), v.employmentType],
@@ -31,7 +35,7 @@ export default function VacancyTab({ application: a }) {
     [t('vacancyDetail.education'), v.education],
     [t('vacancyDetail.branch'), v.branch],
     [t('vacancyDetail.category'), v.category],
-  ].filter(([, value]) => value)
+  ] as [string, string][]).filter(([, value]) => value)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -55,18 +59,18 @@ export default function VacancyTab({ application: a }) {
       </div>
 
       {/* Required skills */}
-      {v.skills?.length > 0 && (
+      {skills.length > 0 && (
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 10 }}>{t('vacancyDetail.skills')}</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{v.skills.map(s => <Pill key={s}>{s}</Pill>)}</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{skills.map(s => <Pill key={s}>{s}</Pill>)}</div>
         </div>
       )}
 
       {/* Tags */}
-      {v.tags?.length > 0 && (
+      {tags.length > 0 && (
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 10 }}>{t('vacancyDetail.tags')}</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{v.tags.map(tg => <Pill key={tg}>{tg}</Pill>)}</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{tags.map(tg => <Pill key={tg}>{tg}</Pill>)}</div>
         </div>
       )}
     </div>

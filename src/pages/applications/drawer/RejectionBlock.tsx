@@ -1,11 +1,19 @@
 import { useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { XCircle } from 'lucide-react'
 import api from '../../../lib/api'
 import KoiosAiMark from '../../../components/ui/KoiosAiMark'
+import type { ApplicationDetail } from '../../../types/application'
+import type { Id } from '../../../types/common'
+
+interface RejectionReason { id?: Id; name?: string; label?: string }
+interface Tpl { email_subject?: string; email_body?: string; whatsapp_body?: string }
+interface RejectionConfig { default_channel: string; templates: Record<string, Tpl> }
+export interface RejectPayload { reason_id: string; note: string; channel: string; message: string; reason_label: string }
 
 // Fill template tokens with the application's values.
-const fillTokens = (tpl, vals) => (tpl ?? '')
+const fillTokens = (tpl: string | undefined, vals: { candidate: string; vacancy: string; reason: string; recruiter: string }) => (tpl ?? '')
   .replaceAll('{candidate}', vals.candidate)
   .replaceAll('{vacancy}', vals.vacancy)
   .replaceAll('{reason}', vals.reason)
@@ -17,10 +25,10 @@ const fillTokens = (tpl, vals) => (tpl ?? '')
  * generated message, then a confirm. Loads reasons + the rejection config
  * (default channel + per-reason templates) defensively.
  */
-export default function RejectionBlock({ application: a, onReject }) {
+export default function RejectionBlock({ application: a, onReject }: { application: ApplicationDetail; onReject?: (id: Id | undefined, payload: RejectPayload) => void }) {
   const { t } = useTranslation('applications')
-  const [reasons, setReasons]   = useState([])
-  const [config, setConfig]     = useState({ default_channel: 'email', templates: {} })
+  const [reasons, setReasons]   = useState<RejectionReason[]>([])
+  const [config, setConfig]     = useState<RejectionConfig>({ default_channel: 'email', templates: {} })
   const [reasonId, setReasonId] = useState('')
   const [note, setNote]         = useState('')
   const [channel, setChannel]   = useState('email')
@@ -66,7 +74,7 @@ export default function RejectionBlock({ application: a, onReject }) {
     onReject?.(a.id, { reason_id: reasonId, note, channel, message, reason_label: reasonLabel })
   }
 
-  const chanBtn = (value, label) => (
+  const chanBtn = (value: string, label: ReactNode) => (
     <button onClick={() => setChannel(value)} style={{ height: 32, padding: '0 14px', fontSize: 12, fontWeight: 500,
       borderRadius: 8, cursor: 'pointer', boxSizing: 'border-box',
       border: `1px solid ${channel === value ? 'var(--color-primary)' : 'var(--border)'}`,

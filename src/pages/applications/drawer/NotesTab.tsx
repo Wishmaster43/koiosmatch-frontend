@@ -2,15 +2,18 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Save, X, FileText } from 'lucide-react'
 import Avatar from '../../../components/ui/Avatar'
+import type { ApplicationDetail } from '../../../types/application'
+
+type AppNote = ApplicationDetail['notes'][number]
 
 /**
  * NotesTab — internal notes for an application. Notes-only (the drawer has a
  * separate Timeline tab), with a lightweight composer. Local optimistic add for
  * now; persistence lands with the applications detail endpoint (C-23).
  */
-export default function NotesTab({ application: a }) {
+export default function NotesTab({ application: a }: { application: ApplicationDetail }) {
   const { t } = useTranslation('applications')
-  const [notes, setNotes] = useState(a.notes ?? [])
+  const [notes, setNotes] = useState<AppNote[]>(a.notes ?? [])
   const [adding, setAdding] = useState(false)
   const [body, setBody] = useState('')
 

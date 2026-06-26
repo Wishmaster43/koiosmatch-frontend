@@ -31,6 +31,9 @@ export interface Application {
   candidateStatusColor: string
   created: string
   isNew: boolean
+  // Phase label/colour the drawer may carry alongside the stable phaseKey.
+  phaseLabel?: string
+  phaseColor?: string
 }
 
 /** The enriched application model rendered by the drawer tabs. */
@@ -58,6 +61,9 @@ export interface ApplicationDetail extends Application {
   matchSummary: string
   matchSource: string
   aiScore: number | null
+  // AI reject advice + the prior rejection summary (present once rejected).
+  ai?: { advice?: string; advice_reason?: string; auto_reject_eligible?: boolean }
+  rejection?: { reason_label?: string; [k: string]: unknown }
 }
 
 /** A raw candidate as the API nests it under an application. */
