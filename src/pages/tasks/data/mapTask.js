@@ -1,6 +1,4 @@
-// Two-letter initials from a name, e.g. "Danny Polak" → "DP".
-const initialsOf = (name = '') =>
-  name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
+import { initialsOf } from '@/lib/initials'
 
 // First label for a polymorphic link list, used as the compact table cell.
 const firstLinkLabel = (links = []) => links[0]?.label ?? ''

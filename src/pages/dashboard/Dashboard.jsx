@@ -18,9 +18,7 @@ import { Users, CheckCircle, AlertCircle, Target, Euro } from 'lucide-react'
 const humanize = (s) =>
   typeof s === 'string' && s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/[_-]/g, ' ') : (s ?? '—')
 
-// Initials from a full name (max 2 letters), with a safe fallback.
-const initialsOf = (name) =>
-  (name || '').split(' ').filter(Boolean).map(w => w[0]).slice(0, 2).join('').toUpperCase() || '–'
+import { initialsOf } from '@/lib/initials'
 
 // Compact "when": today → HH:mm, otherwise a short nl-NL date (e.g. "12 jun").
 const fmtWhen = (iso) => {
@@ -142,7 +140,7 @@ export default function Dashboard({ onNavigate }) {
   // Status/stage labels + colours come from the tenant lookups (never raw slugs).
   const recentCandidates = useMemo(() => (dash?.recent?.candidates ?? []).map(c => {
     const m = statusMeta(c.status_value)
-    return { name: c.name, initials: initialsOf(c.name), role: c.role || '—',
+    return { name: c.name, initials: initialsOf(c.name, '–'), role: c.role || '—',
       status: m.label, statusColor: m.color, time: fmtWhen(c.last_activity_at) }
   }), [dash, statusMeta])
 

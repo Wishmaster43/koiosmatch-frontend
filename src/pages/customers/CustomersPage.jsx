@@ -18,7 +18,7 @@ import AddDepartmentModal from './AddDepartmentModal'
 import AddContactPersonModal from './AddContactPersonModal'
 import { mapCustomer } from './data/mapCustomer'
 
-const initialsOf = (name = '') => name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
+import { initialsOf } from '@/lib/initials'
 // Recharts hands the clicked segment both at top level and under `.payload`.
 const pickKey = (d) => d?.key ?? d?.payload?.key ?? d?.name
 const toggleOneValue = (set, value) => set(p => (p.length === 1 && p[0] === value) ? [] : [value])

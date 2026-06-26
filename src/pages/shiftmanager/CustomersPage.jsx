@@ -8,7 +8,7 @@ import CustomersInsightsRow from './CustomersInsightsRow'
 import AddCustomerModal from './AddCustomerModal'
 import PaginationBar from '../../components/ui/PaginationBar'
 
-const initialsOf = (name) => name ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '?'
+import { initialsOf } from '@/lib/initials'
 const STATUS_COLORS = { actief: '#16A34A', prospect: '#1B60A9', inactief: '#D97706', geblokkeerd: '#DC2626' }
 const deptCount = (c) => (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
 

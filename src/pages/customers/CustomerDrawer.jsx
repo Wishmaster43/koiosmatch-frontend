@@ -36,7 +36,7 @@ const TABS = [
   { id: 'notes',         tKey: 'notes' },
 ]
 
-const initialsOf = (name = '') => name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
+import { initialsOf } from '@/lib/initials'
 
 export default function CustomerDrawer({
   customer: c, onClose, expanded, onToggleExpand, onUpdate, onAddSub, onAddNote,

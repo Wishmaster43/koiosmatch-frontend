@@ -7,8 +7,7 @@
  * responses (GET /candidates/{id}) carry the relations + stats + timeline; the list
  * is intentionally light. The `?? ` fallbacks also keep the dummy data working.
  */
-const initialsOf = (name) =>
-  name ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '?'
+import { initialsOf } from '@/lib/initials'
 
 // Bytes → human size ("44856" → "44 KB"). Backend sends documents.size in bytes.
 const fmtSize = (b) => {

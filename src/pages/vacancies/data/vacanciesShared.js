@@ -8,9 +8,8 @@
 export const toggleOneValue = (set, value) =>
   set(p => (p.length === 1 && p[0] === value) ? [] : [value])
 
-// Two-letter initials from the first two name parts.
-export const initialsOf = (name = '') =>
-  name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
+// Two-letter initials — re-exported from the shared util (single source).
+export { initialsOf } from '@/lib/initials'
 
 // Recharts hands the clicked segment back at top level AND under `.payload`.
 export const pickKey = (d) => d?.key ?? d?.payload?.key ?? d?.name

@@ -1,8 +1,4 @@
-// Two-letter uppercase initials from a free-text label (fallback '?').
-function initialsOf(label) {
-  if (!label || label === '—') return '?'
-  return label.split(' ').filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase()
-}
+import { initialsOf } from '@/lib/initials'
 
 // Map a raw API opportunity → the flat shape the table/insights/drawer render
 // (snake_case-tolerant). Nested customer/stage/owner arrive as objects (the API
@@ -17,7 +13,7 @@ export function mapOpportunity(o) {
   return {
     id:         o.id,
     title,
-    initials:   initialsOf(title !== '—' ? title : client),
+    initials:   initialsOf([title, client].find(v => v && v !== '—')),
     client,
     clientId:   customer?.id ?? o.customer_id ?? o.client_id ?? null,
     stage:      stageObj?.label ?? (typeof o.stage === 'string' ? o.stage : null) ?? o.stage_label ?? o.status ?? '',

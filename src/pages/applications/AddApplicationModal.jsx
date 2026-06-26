@@ -16,8 +16,7 @@ function PickField({ label, ...rest }) {
   )
 }
 
-// Two-letter initials from a name.
-const initialsOf = (name = '') => name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
+import { initialsOf } from '@/lib/initials'
 
 /**
  * AddApplicationModal — create a new application by linking an existing candidate

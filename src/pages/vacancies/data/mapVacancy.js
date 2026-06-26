@@ -1,6 +1,4 @@
-// Two-letter initials from a name, e.g. "Kelly van Vliet" → "KV".
-const initialsOf = (name = '') =>
-  name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
+import { initialsOf } from '@/lib/initials'
 
 // Sum the per-phase application counts into a single total.
 const sumPhases = (byPhase) => Object.values(byPhase ?? {}).reduce((a, b) => a + (Number(b) || 0), 0)

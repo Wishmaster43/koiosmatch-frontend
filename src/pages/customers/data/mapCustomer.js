@@ -1,6 +1,4 @@
-// Two-letter initials from a name, e.g. "Stichting Rivas" → "SR".
-const initialsOf = (name = '') =>
-  name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
+import { initialsOf } from '@/lib/initials'
 
 // Compact one-line address: "Straat 12a, 1234 AB Plaats".
 const addressLine = (l = {}) => {

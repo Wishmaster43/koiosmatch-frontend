@@ -8,8 +8,9 @@ const COLORS = ['var(--color-primary)','var(--color-secondary)','var(--color-suc
 // Deterministic avatar colour from the first character of the label.
 export function ac(s) { return COLORS[(s || '?').charCodeAt(0) % COLORS.length] }
 
-// Two-letter initials from a full name.
-export const initialsOf = name => name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
+// Two-letter initials — shared util (single source), re-exported for the table.
+import { initialsOf } from '@/lib/initials'
+export { initialsOf }
 
 // Round initial-avatar coloured from the name.
 export function ContactAvatar({ name, size = 30 }) {

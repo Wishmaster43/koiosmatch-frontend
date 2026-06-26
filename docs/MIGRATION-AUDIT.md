@@ -15,8 +15,9 @@
 
 | Golf | Scope | Status | Commit |
 |---|---|---|---|
-| 0 | Fundament: `tsconfig` (baseUrl weg) · `typecheck`-script · dit logboek · types-strategie | ✅ klaar | — |
-| 1 | `lib/` + data-mappers (`mapCandidate`/`mapApplication`/…) | ☐ | — |
+| 0 | Fundament: `tsconfig` (baseUrl weg) · `typecheck`-script · dit logboek · types-strategie | ✅ klaar | 62b2806 |
+| 1a | Dedup `initialsOf` (17 kopieën → `src/lib/initials.ts`) | ✅ klaar | — |
+| 1b | Data-mappers → `.ts` + entiteit-types (`mapCandidate`/`mapApplication`/…) | ☐ | — |
 | 2 | `components/ui/` (gedeelde blueprint-props) | ☐ | — |
 | 3+ | Per feature-map: candidates → applications → vacancies → customers → … | ☐ | — |
 
@@ -38,8 +39,9 @@ getypt tegen de échte API-response, importeerbaar door andere features. Nieuw b
   0×`t()` → hele Settings-nav is Engels island → alle labels via `t()` × 5 locales (worklist **FE-P3-3**).
 
 ### 🟡 MEDIUM
-- [MEDIUM] [FE] **`initialsOf` gedupliceerd** — ±8 files (o.a. CustomersPage, AddApplicationModal,
-  candidatesShared) — zelfde helper meermaals gekopieerd → centraliseren in één gedeelde util tijdens de pass.
+- ✅ **[OPGELOST in Golf 1a] `initialsOf` gedupliceerd** — bleek **17 kopieën** met 4 fallback-varianten
+  ('?'/'T'/'–'/'') → één bron [`src/lib/initials.ts`](../src/lib/initials.ts) met `fallback`-param;
+  3 shared-modules re-exporteren, call-sites houden hun fallback. 0 lokale defs over.
 
 ### 🔵 LOW
 - _(geen)_

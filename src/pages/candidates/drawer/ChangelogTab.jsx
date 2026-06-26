@@ -6,6 +6,7 @@ import Avatar from '../../../components/ui/Avatar'
 import SectionCard from '../../../components/ui/SectionCard'
 import { useDateFormat } from '../../../lib/datetime'
 import { isAbortError } from '../../../lib/mocks'
+import { initialsOf } from '@/lib/initials'
 
 /**
  * ChangelogTab — the candidate's audit trail (who changed what, when). Reads
@@ -35,8 +36,6 @@ export default function ChangelogTab({ c }) {
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
   }, [c?.id])
-
-  const initialsOf = (name = '') => name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
 
   return (
     <SectionCard title={t('drawer.tabs.changelog')}>

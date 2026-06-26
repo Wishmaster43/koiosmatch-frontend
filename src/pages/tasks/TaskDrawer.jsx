@@ -7,8 +7,7 @@ import LinksTab from './drawer/LinksTab'
 import CommentsTab from './drawer/CommentsTab'
 import ActivityTab from './drawer/ActivityTab'
 
-// Two-letter initials from the task title, for the header avatar bubble.
-const initialsOf = (s = '') => s.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || 'T'
+import { initialsOf } from '@/lib/initials'
 
 // The tab order (mirrors the candidate/application drawer blueprint — all tabs).
 const TAB_IDS = ['details', 'links', 'comments', 'activity']
@@ -51,7 +50,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
         <EntityHeader
           label={t('drawer.label')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
-          avatar={{ initials: initialsOf(task.title), soft: true, color: task.statusColor }}
+          avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: task.statusColor }}
           title={task.title}
           subtitle={task.typeLabel || ''}
         />

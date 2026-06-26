@@ -10,7 +10,7 @@ import { useDateFormat } from '../../../lib/datetime'
 
 // Display name for a user record (tolerant of the various shapes /users returns).
 const userName = (u) => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
-const initialsOf = (n = '') => n.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
+import { initialsOf } from '@/lib/initials'
 const isOverdue = (task) => task.due && !task.statusIsDone && new Date(task.due) < new Date(new Date().toDateString())
 
 // One read-mode row: muted label left, value right.

@@ -1,8 +1,6 @@
 import { bucketOfPhase } from './applicationsShared'
 
-// Two-letter initials from a name, e.g. "Rosa Tijssen" → "RT".
-const initialsOf = (name = '') =>
-  name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
+import { initialsOf } from '@/lib/initials'
 
 /**
  * mapApplication — raw API application → the flat shape the table/board/drawer

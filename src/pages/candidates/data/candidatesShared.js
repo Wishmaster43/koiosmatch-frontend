@@ -30,10 +30,8 @@ export const optsFrom = (values, mapLabel = v => v) => {
   return Object.keys(counts).map(v => ({ value: v, label: mapLabel(v), count: counts[v] }))
 }
 
-// Two-letter initials from the first two name parts, e.g. "Bente de Jong" → "BD".
-// (Quirk: tussenvoegsels like "de"/"van" count as a part — preserved from the original.)
-export const initialsOf = (name = '') =>
-  name.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?'
+// Initials for avatars — re-exported from the shared util (single source).
+export { initialsOf } from '@/lib/initials'
 
 // Translate a drawer/header UI patch → the API body (3-layer model + profile
 // fields + consent flags). Backend saves what it validates.
