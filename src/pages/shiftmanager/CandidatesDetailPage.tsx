@@ -9,11 +9,12 @@ import { useDefaultPageSize } from '../../lib/usePageSize'
 import { useAuth }            from '../../context/AuthContext'
 import CandidatesTable        from '../../components/reports/CandidatesTable'
 import PaginationBar          from '../../components/ui/PaginationBar'
+import type { ReportCandidate } from '../../types/reports'
 
 export default function CandidatesDetailPage() {
   const defaultPageSize        = useDefaultPageSize()
-  const { refreshUser }        = useAuth()
-  const [candidates, setCandidates] = useState([])
+  const { refreshUser }        = useAuth() ?? {}
+  const [candidates, setCandidates] = useState<ReportCandidate[]>([])
   const [loading,    setLoading]    = useState(true)
   const [page,       setPage]       = useState(1)
   const [pageSize,   setPageSize]   = useState(defaultPageSize)
@@ -35,12 +36,12 @@ export default function CandidatesDetailPage() {
       .finally(() => setLoading(false))
   }, [page, pageSize])
 
-  const handlePageSizeChange = async (newSize) => {
+  const handlePageSizeChange = async (newSize: number) => {
     setPageSize(newSize)
     // Sla op als nieuwe standaard voor de gebruiker
     try {
       await api.put('/auth/me', { default_per_page: newSize })
-      await refreshUser()
+      await refreshUser?.()
     } catch {}
   }
 
