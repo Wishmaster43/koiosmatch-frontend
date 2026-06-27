@@ -6,10 +6,10 @@
 const AVATAR_COLORS = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6']
 
 // Deterministic avatar colour from the first character of the label.
-export function ac(s) { return AVATAR_COLORS[(s || '?').charCodeAt(0) % AVATAR_COLORS.length] }
+export function ac(s?: string) { return AVATAR_COLORS[(s || '?').charCodeAt(0) % AVATAR_COLORS.length] }
 
 // Square initial-avatar.
-export function Avatar({ label, size = 30, radius = 8 }) {
+export function Avatar({ label, size = 30, radius = 8 }: { label?: string; size?: number; radius?: number }) {
   return (
     <div style={{ width: size, height: size, borderRadius: radius, flexShrink: 0,
       background: ac(label), display: 'flex', alignItems: 'center',
@@ -20,7 +20,7 @@ export function Avatar({ label, size = 30, radius = 8 }) {
 }
 
 // Active/inactive pill; the status value itself is tenant data.
-export function StatusBadge({ status }) {
+export function StatusBadge({ status }: { status?: string }) {
   const active = status?.toLowerCase() === 'actief'
   return (
     <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 9px', borderRadius: 999,

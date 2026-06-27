@@ -6,14 +6,14 @@
 const COLORS = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6']
 
 // Deterministic avatar colour from the first character of the label.
-export function ac(s) { return COLORS[(s || '?').charCodeAt(0) % COLORS.length] }
+export function ac(s?: string) { return COLORS[(s || '?').charCodeAt(0) % COLORS.length] }
 
 // Two-letter initials — shared util (single source), re-exported for the table.
 import { initialsOf } from '@/lib/initials'
 export { initialsOf }
 
 // Round initial-avatar coloured from the name.
-export function ContactAvatar({ name, size = 30 }) {
+export function ContactAvatar({ name, size = 30 }: { name?: string; size?: number }) {
   return (
     <div style={{ width: size, height: size, borderRadius: '50%', flexShrink: 0,
       background: ac(name), display: 'flex', alignItems: 'center', justifyContent: 'center',
