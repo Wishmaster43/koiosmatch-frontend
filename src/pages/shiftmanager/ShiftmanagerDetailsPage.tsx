@@ -9,7 +9,7 @@ import RunsDetailPage        from '../ai/RunsDetailPage'
 import MessagesDetailPage    from '../ai/MessagesDetailPage'
 import { useAuth }           from '../../context/AuthContext'
 
-const BASE_TABS = [
+const BASE_TABS: Array<{ id: string; label: string; requires?: string }> = [
   { id: 'candidates',  label: 'Kandidaten' },
   { id: 'customers',   label: 'Klanten' },
   { id: 'locations',   label: 'Locaties' },
@@ -21,7 +21,7 @@ const BASE_TABS = [
 ]
 
 export default function ShiftmanagerDetailsPage() {
-  const { accessiblePages, user } = useAuth()
+  const { accessiblePages, user } = useAuth() ?? {}
   const pages = accessiblePages ?? user?.accessible_pages ?? []
 
   const tabs = BASE_TABS.filter(t => !t.requires || pages.includes(t.requires))
