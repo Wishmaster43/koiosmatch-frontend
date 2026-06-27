@@ -4,7 +4,11 @@
  * cost renders as an em-dash rather than "€0.00". Currency comes from the usage
  * payload (defaults to EUR).
  */
-export default function KoiosUsage({ usage, model, t, locale = 'nl-NL' }) {
+import type { KoiosUsageData, TFn } from '../../../types/koios'
+
+export default function KoiosUsage({ usage, model, t, locale = 'nl-NL' }: {
+  usage?: KoiosUsageData | null; model?: string | null; t: TFn; locale?: string
+}) {
   if (!usage && !model) return null
 
   const currency = usage?.currency ?? 'EUR'

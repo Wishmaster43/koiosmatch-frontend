@@ -6,9 +6,10 @@
  */
 import { useEffect, useState } from 'react'
 import { getKoiosSettings } from './koiosApi'
+import type { KoiosSettings } from '../../../types/koios'
 
-export function useKoiosSettings(enabled) {
-  const [settings, setSettings] = useState(null)
+export function useKoiosSettings(enabled?: boolean) {
+  const [settings, setSettings] = useState<KoiosSettings | null>(null)
   const [loaded, setLoaded]     = useState(false)
 
   useEffect(() => {

@@ -12,7 +12,7 @@
 import api from '../../../lib/api'
 
 // Send one chat turn. `model` is optional (defaults to the tenant's active model).
-export const sendChat = (message, model) =>
+export const sendChat = (message: string, model?: string | null) =>
   api.post('/ai/koios/chat', model ? { message, model } : { message }).then((r) => r.data)
 
 // Load the Koios settings (selectable models + connection/policy status).

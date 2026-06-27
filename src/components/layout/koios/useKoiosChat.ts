@@ -13,17 +13,18 @@
  */
 import { useCallback, useState } from 'react'
 import { sendChat } from './koiosApi'
+import type { KoiosChatMessage } from '../../../types/koios'
 
-const welcomeMessage = () => ({ role: 'assistant', kind: 'welcome' })
+const welcomeMessage = (): KoiosChatMessage => ({ role: 'assistant', kind: 'welcome' })
 
 export function useKoiosChat() {
-  const [messages, setMessages] = useState([welcomeMessage()])
+  const [messages, setMessages] = useState<KoiosChatMessage[]>([welcomeMessage()])
   const [loading, setLoading]   = useState(false)
   // Optional model override picked from settings; null = backend's active model.
-  const [model, setModel]       = useState(null)
+  const [model, setModel]       = useState<string | null>(null)
 
   // Send a turn: optimistic user bubble, then map the reply into an assistant one.
-  const send = useCallback(async (text) => {
+  const send = useCallback(async (text: string) => {
     const trimmed = text.trim()
     if (!trimmed || loading) return
     setMessages((prev) => [...prev, { role: 'user', content: trimmed }])
@@ -40,7 +41,7 @@ export function useKoiosChat() {
       }])
     } catch (e) {
       // 403 = no module/permission → "no access"; anything else → calm retry notice.
-      const kind = e?.response?.status === 403 ? 'forbidden' : 'error'
+      const kind = (e as { response?: { status?: number } })?.response?.status === 403 ? 'forbidden' : 'error'
       setMessages((prev) => [...prev, { role: 'assistant', kind }])
     } finally {
       setLoading(false)

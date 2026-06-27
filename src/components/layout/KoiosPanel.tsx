@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Plus, Bot, Sparkles, AtSign, Paperclip, ArrowUp } from 'lucide-react'
 import { useLocale } from '../../lib/datetime'
@@ -7,6 +8,7 @@ import { useKoiosSettings } from './koios/useKoiosSettings'
 import KoiosSteps from './koios/KoiosSteps'
 import KoiosUsage from './koios/KoiosUsage'
 import KoiosModelPicker from './koios/KoiosModelPicker'
+import type { KoiosChatMessage, TFn } from '../../types/koios'
 
 // ── Mention picker items ──────────────────────────────────────────────────────
 // Mention items; label = t('nav.<navKey>'). desc is illustrative demo data.
@@ -23,7 +25,7 @@ const GRADIENT = 'linear-gradient(135deg,var(--color-primary),#8B5CF6)'
 
 // Resolve a message to its display text + whether it's a calm system notice
 // (notices carry no steps/usage). Keeps the JSX below readable.
-function resolveMessage(msg, t) {
+function resolveMessage(msg: KoiosChatMessage, t: TFn) {
   if (msg.kind === 'welcome')   return { text: t('koios.welcome'),       notice: false }
   if (msg.kind === 'error')     return { text: t('koios.errorReply'),    notice: true }
   if (msg.kind === 'forbidden') return { text: t('koios.forbidden'),     notice: true }
@@ -34,7 +36,7 @@ function resolveMessage(msg, t) {
 }
 
 // ── Chat bubble ───────────────────────────────────────────────────────────────
-function KoiosMessage({ msg, isNew, t, locale }) {
+function KoiosMessage({ msg, isNew, t, locale }: { msg: KoiosChatMessage; isNew?: boolean; t: TFn; locale?: string }) {
   const isKoios = msg.role !== 'user'
   const { text, notice } = resolveMessage(msg, t)
   // Subtle tag under the bubble for a self-refusal or an unfinished (max_steps) run.
@@ -103,7 +105,7 @@ const QUICK = [
 ]
 
 // ── Main panel ────────────────────────────────────────────────────────────────
-export default function KoiosPanel({ open, onClose }) {
+export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?: () => void }) {
   const { t } = useTranslation('common')
   const locale = useLocale()
   // All chat state + the synchronous /ai/koios/chat call live in the hook.
@@ -118,9 +120,9 @@ export default function KoiosPanel({ open, onClose }) {
   const [focused,     setFocused]     = useState(false)
   const [showMention, setShowMention] = useState(false)
   const [mentionQ,    setMentionQ]    = useState('')
-  const textareaRef = useRef(null)
-  const bottomRef   = useRef(null)
-  const mentionRef  = useRef(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const bottomRef   = useRef<HTMLDivElement>(null)
+  const mentionRef  = useRef<HTMLDivElement>(null)
 
   // Keep the latest message in view.
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, loading])
@@ -135,15 +137,15 @@ export default function KoiosPanel({ open, onClose }) {
 
   // Close the mention picker on an outside click.
   useEffect(() => {
-    const handler = (e) => {
-      if (mentionRef.current && !mentionRef.current.contains(e.target)) setShowMention(false)
+    const handler = (e: MouseEvent) => {
+      if (mentionRef.current && !mentionRef.current.contains(e.target as Node)) setShowMention(false)
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
   // Submit the composer: hand the text to the hook, then clear + refocus.
-  const submit = (text) => {
+  const submit = (text?: string) => {
     const trimmed = (text ?? '').trim()
     if (!trimmed || loading) return
     send(trimmed)
@@ -153,7 +155,7 @@ export default function KoiosPanel({ open, onClose }) {
     setTimeout(() => textareaRef.current?.focus(), 50)
   }
 
-  const handleInput = (e) => {
+  const handleInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value
     setInput(val)
     const lastAt = val.lastIndexOf('@')
@@ -162,12 +164,12 @@ export default function KoiosPanel({ open, onClose }) {
     else setShowMention(false)
   }
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(input) }
     if (e.key === 'Escape') setShowMention(false)
   }
 
-  const insertMention = (item) => {
+  const insertMention = (item: { label: string }) => {
     const lastAt = input.lastIndexOf('@')
     const before = lastAt !== -1 ? input.slice(0, lastAt) : input
     setInput(before + '@' + item.label + ' ')
