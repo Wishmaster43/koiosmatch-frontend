@@ -25,5 +25,24 @@
     "reached": "Reached",
     "current": "Currently in stage",
     "avgDays": "avg. {{days}} days"
+  },
+  "recruiters": {
+    "title": "Recruiters",
+    "subtitle": "Productivity per recruiter",
+    "loading": "Loading recruiters…",
+    "error": "Could not load the recruiters",
+    "empty": "No recruiters in this period",
+    "cols": {
+      "recruiter": "Recruiter",
+      "candidates": "Candidates",
+      "applications": "Applications",
+      "intakes": "Intakes",
+      "matches": "Matches",
+      "tasks": "Tasks",
+      "notContacted": "Not contacted"
+    },
+    "intakesValue": "{{planned}} planned · {{done}} done",
+    "tasksValue": "{{open}} open · {{overdue}} overdue",
+    "notContactedHint": "> {{months}} mo"
   }
 }

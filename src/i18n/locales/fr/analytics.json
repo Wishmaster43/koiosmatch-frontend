@@ -25,5 +25,24 @@
     "reached": "Atteint",
     "current": "Actuellement à l'étape",
     "avgDays": "moy. {{days}} jours"
+  },
+  "recruiters": {
+    "title": "Recruteurs",
+    "subtitle": "Productivité par recruteur",
+    "loading": "Chargement des recruteurs…",
+    "error": "Impossible de charger les recruteurs",
+    "empty": "Aucun recruteur sur cette période",
+    "cols": {
+      "recruiter": "Recruteur",
+      "candidates": "Candidats",
+      "applications": "Candidatures",
+      "intakes": "Entretiens",
+      "matches": "Matchs",
+      "tasks": "Tâches",
+      "notContacted": "Non contactés"
+    },
+    "intakesValue": "{{planned}} prévus · {{done}} réalisés",
+    "tasksValue": "{{open}} ouvertes · {{overdue}} en retard",
+    "notContactedHint": "> {{months}} mois"
   }
 }

@@ -25,5 +25,24 @@
     "reached": "Bereikt",
     "current": "Nu in fase",
     "avgDays": "gem. {{days}} dagen"
+  },
+  "recruiters": {
+    "title": "Recruiters",
+    "subtitle": "Productiviteit per recruiter",
+    "loading": "Recruiters laden…",
+    "error": "Kon de recruiters niet laden",
+    "empty": "Geen recruiters in deze periode",
+    "cols": {
+      "recruiter": "Recruiter",
+      "candidates": "Kandidaten",
+      "applications": "Sollicitaties",
+      "intakes": "Intakes",
+      "matches": "Matches",
+      "tasks": "Taken",
+      "notContacted": "Niet gecontacteerd"
+    },
+    "intakesValue": "{{planned}} gepland · {{done}} gedaan",
+    "tasksValue": "{{open}} open · {{overdue}} te laat",
+    "notContactedHint": "> {{months}} mnd"
   }
 }

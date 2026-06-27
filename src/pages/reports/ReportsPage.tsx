@@ -1,25 +1,19 @@
 /**
  * ReportsPage — the analytical reports hub (B-28). A thin shell that owns the
- * sub-tab bar (Flow · Recruiters · later Vacancies) and renders the active report.
- * Each report owns its own data layer + filters; this only switches tabs.
+ * sub-tab bar (Flow · Recruiters · later Vacancies) and the shared period control,
+ * and renders the active report. Each report owns its own data layer; this only
+ * switches tabs and propagates the chosen period.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FlowReport from './FlowReport'
-
-// Placeholder for report tabs that are not built yet.
-function ComingSoon({ label }: { label: string }) {
-  return (
-    <div className="flex items-center justify-center h-64 bg-[var(--surface)] rounded-xl"
-      style={{ border: '1px solid var(--border)' }}>
-      <p className="font-mono text-sm text-[var(--text-muted)]">{label}</p>
-    </div>
-  )
-}
+import RecruitersReport from './RecruitersReport'
+import type { ReportPeriod } from '@/types/analytics'
 
 export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: string }) {
   const { t } = useTranslation('analytics')
-  const [tab, setTab] = useState(initialTab)
+  const [tab,    setTab]    = useState(initialTab)
+  const [period, setPeriod] = useState<ReportPeriod>('month')
 
   // Sub-tabs are config: { id, label }. Add a tab here when its report lands.
   const tabs = [
@@ -29,7 +23,20 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
 
   return (
     <div className="p-6">
-      <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)', marginBottom: 14 }}>{t('title')}</h1>
+      {/* Hub header: title + shared period control */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+        <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{t('title')}</h1>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)' }}>
+          {t('period.label')}
+          <select value={period} onChange={e => setPeriod(e.target.value as ReportPeriod)}
+            style={{ height: 32, padding: '0 8px', fontSize: 13, border: '1px solid var(--border)',
+                     borderRadius: 8, color: 'var(--text)', background: 'var(--surface)', cursor: 'pointer' }}>
+            <option value="day">{t('period.day')}</option>
+            <option value="week">{t('period.week')}</option>
+            <option value="month">{t('period.month')}</option>
+          </select>
+        </label>
+      </div>
 
       {/* Sub-tab bar */}
       <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
@@ -48,8 +55,8 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
       </div>
 
       {tab === 'flow'
-        ? <FlowReport />
-        : <ComingSoon label={t('comingSoon', { label: t('tabs.recruiters') })} />}
+        ? <FlowReport period={period} />
+        : <RecruitersReport period={period} />}
     </div>
   )
 }

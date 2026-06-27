@@ -7,7 +7,7 @@
  * `current_count` pipeline occupancy. Phases come from tenant funnel lookups, so we
  * never hardcode stage names — we key on `key` and render `label`.
  */
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -43,9 +43,8 @@ function PhaseRow({ label, value, max, index, conversion, avgDays }: {
   )
 }
 
-export default function FlowReport() {
+export default function FlowReport({ period }: { period: ReportPeriod }) {
   const { t } = useTranslation('analytics')
-  const [period, setPeriod] = useState<ReportPeriod>('month')
   const { data, loading, error } = useFlowReport(period)
 
   // Cohort is "ready" once any stage has been reached; else show pipeline-now.
@@ -72,22 +71,10 @@ export default function FlowReport() {
 
   return (
     <div>
-      {/* Header + period selector */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 12 }}>
-        <div>
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{t('flow.title')}</h2>
-          <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('flow.subtitle')}</p>
-        </div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)' }}>
-          {t('period.label')}
-          <select value={period} onChange={e => setPeriod(e.target.value as ReportPeriod)}
-            style={{ height: 32, padding: '0 8px', fontSize: 13, border: '1px solid var(--border)',
-                     borderRadius: 8, color: 'var(--text)', background: 'var(--surface)', cursor: 'pointer' }}>
-            <option value="day">{t('period.day')}</option>
-            <option value="week">{t('period.week')}</option>
-            <option value="month">{t('period.month')}</option>
-          </select>
-        </label>
+      {/* Header */}
+      <div style={{ marginBottom: 12 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{t('flow.title')}</h2>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('flow.subtitle')}</p>
       </div>
 
       {/* KPI strip */}
