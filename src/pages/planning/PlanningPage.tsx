@@ -5,12 +5,13 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { monthName, formatDate } from './helpers'
 import AddShiftModal from './AddShiftModal'
 import { MonthView, WeekView, DayView, ListView } from './views'
+import type { Shift, ShiftInput } from '../../types/planning'
 
 // ── Dummy shifts ──────────────────────────────────────────────────────────────
 const today = new Date()
 const y = today.getFullYear(), m = today.getMonth()
 
-const INITIAL_SHIFTS = [
+const INITIAL_SHIFTS: Shift[] = [
   { id: 1, date: new Date(y, m, today.getDate()),     title: 'Nachtdienst', location: 'Rivas Zorggroep',   candidate: 'Ismail Eddahchouri', start: '22:00', end: '06:00', color: 'var(--color-primary)' },
   { id: 2, date: new Date(y, m, today.getDate()),     title: 'Dagdienst',   location: 'Yesway Zorg',       candidate: 'Elif Akagündüz',     start: '07:00', end: '15:00', color: 'var(--color-success)' },
   { id: 3, date: new Date(y, m, today.getDate() + 1), title: 'Avonddienst', location: 'WoonzorgGroep',     candidate: 'Rubina Milan',        start: '15:00', end: '23:00', color: 'var(--color-warning)' },
@@ -28,15 +29,15 @@ export default function PlanningPage() {
   const { t } = useTranslation('planning')
   const [view,       setView]       = useState('month')
   const [current,    setCurrent]    = useState(new Date())
-  const [shifts,     setShifts]     = useState(INITIAL_SHIFTS)
-  const [modal,      setModal]      = useState(null) // date to add shift for
+  const [shifts,     setShifts]     = useState<Shift[]>(INITIAL_SHIFTS)
+  const [modal,      setModal]      = useState<Date | null>(null) // date to add shift for
   const todayDate = useMemo(() => new Date(), [])
 
   // Right-panel filters (shift type + location). Registering them makes the shared
   // topbar filter button appear and feeds the ReportFilterSidebar — same as the
   // candidates/applications pages.
-  const [selectedShift,    setSelectedShift]    = useState([])
-  const [selectedLocation, setSelectedLocation] = useState([])
+  const [selectedShift,    setSelectedShift]    = useState<string[]>([])
+  const [selectedLocation, setSelectedLocation] = useState<string[]>([])
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   const shiftOptions    = useMemo(() => [...new Set(shifts.map(s => s.title))].map(v => ({ value: v, label: v, count: shifts.filter(s => s.title === v).length })), [shifts])
@@ -44,9 +45,9 @@ export default function PlanningPage() {
 
   const filterGroups = useMemo(() => [
     { key: 'shift',    label: t('filters.shift'),    selected: selectedShift,    options: shiftOptions,
-      onToggle: v => setSelectedShift(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+      onToggle: (v: string) => setSelectedShift(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
     { key: 'location', label: t('filters.location'), selected: selectedLocation, options: locationOptions,
-      onToggle: v => setSelectedLocation(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+      onToggle: (v: string) => setSelectedLocation(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
   ], [t, selectedShift, selectedLocation, shiftOptions, locationOptions])
 
   useEffect(() => {
@@ -61,7 +62,7 @@ export default function PlanningPage() {
     return true
   }), [shifts, selectedShift, selectedLocation])
 
-  const navigate = (dir) => {
+  const navigate = (dir: number) => {
     const d = new Date(current)
     if (view === 'month') d.setMonth(d.getMonth() + dir)
     else if (view === 'week') d.setDate(d.getDate() + dir * 7)
@@ -82,9 +83,9 @@ export default function PlanningPage() {
     return formatDate(current)
   }
 
-  const handleDayClick = (date) => setModal(date)
+  const handleDayClick = (date: Date) => setModal(date)
 
-  const handleAdd = (data) => {
+  const handleAdd = (data: ShiftInput) => {
     setShifts(prev => [...prev, { ...data, id: Date.now() }])
   }
 

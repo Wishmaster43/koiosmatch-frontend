@@ -6,9 +6,12 @@
 import { useTranslation } from 'react-i18next'
 import { Clock, MapPin, User } from 'lucide-react'
 import { isSameDay, WEEKDAYS_MON, formatDate } from './helpers'
+import type { Shift } from '../../types/planning'
+
+interface ViewProps { current: Date; shifts: Shift[]; today: Date; onDayClick: (date: Date) => void }
 
 // ── Shift pill ────────────────────────────────────────────────────────────────
-function ShiftPill({ shift, small }) {
+function ShiftPill({ shift, small }: { shift: Shift; small?: boolean }) {
   return (
     <div style={{ background: shift.color + '20', borderLeft: `3px solid ${shift.color}`,
       borderRadius: 4, padding: small ? '2px 5px' : '3px 7px', marginBottom: 2,
@@ -26,7 +29,7 @@ function ShiftPill({ shift, small }) {
 }
 
 // ── Month view ────────────────────────────────────────────────────────────────
-export function MonthView({ current, shifts, today, onDayClick }) {
+export function MonthView({ current, shifts, today, onDayClick }: ViewProps) {
   const { t } = useTranslation('planning')
   const year  = current.getFullYear()
   const month = current.getMonth()
@@ -35,7 +38,7 @@ export function MonthView({ current, shifts, today, onDayClick }) {
 
   // Start grid on Monday
   const startDay = (first.getDay() + 6) % 7
-  const days = []
+  const days: Array<{ date: Date; outside: boolean }> = []
   for (let i = 0; i < startDay; i++) {
     const d = new Date(year, month, 1 - (startDay - i))
     days.push({ date: d, outside: true })
@@ -48,7 +51,7 @@ export function MonthView({ current, shifts, today, onDayClick }) {
     days.push({ date: d, outside: true })
   }
 
-  const weeks = []
+  const weeks: Array<Array<{ date: Date; outside: boolean }>> = []
   for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
   const WEEK_DAYS = WEEKDAYS_MON
 
@@ -101,7 +104,7 @@ export function MonthView({ current, shifts, today, onDayClick }) {
 }
 
 // ── Week view ─────────────────────────────────────────────────────────────────
-export function WeekView({ current, shifts, today, onDayClick }) {
+export function WeekView({ current, shifts, today, onDayClick }: ViewProps) {
   const startOfWeek = new Date(current)
   const dow = (current.getDay() + 6) % 7
   startOfWeek.setDate(current.getDate() - dow)
@@ -144,7 +147,7 @@ export function WeekView({ current, shifts, today, onDayClick }) {
 }
 
 // ── Day view ──────────────────────────────────────────────────────────────────
-export function DayView({ current, shifts, today, onDayClick }) {
+export function DayView({ current, shifts, today, onDayClick }: ViewProps) {
   const { t } = useTranslation('planning')
   const dayShifts = shifts.filter(s => isSameDay(s.date, current))
   const isToday = isSameDay(current, today)
@@ -210,10 +213,10 @@ export function DayView({ current, shifts, today, onDayClick }) {
 }
 
 // ── List view ─────────────────────────────────────────────────────────────────
-export function ListView({ shifts, today, onDayClick }) {
+export function ListView({ shifts, today, onDayClick }: Omit<ViewProps, 'current'>) {
   const { t } = useTranslation('planning')
-  const sorted = [...shifts].sort((a, b) => a.date - b.date)
-  const grouped = {}
+  const sorted = [...shifts].sort((a, b) => a.date.getTime() - b.date.getTime())
+  const grouped: Record<string, { date: Date; shifts: Shift[] }> = {}
   sorted.forEach(s => {
     const key = s.date.toDateString()
     if (!grouped[key]) grouped[key] = { date: s.date, shifts: [] }

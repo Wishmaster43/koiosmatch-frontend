@@ -4,12 +4,14 @@
  * Avatar/KandidaatRij helpers + style consts live here). Extracted from PlanningPage.
  */
 import { useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Save, Star, Search } from 'lucide-react'
 import { formatDate } from './helpers'
+import type { Suggestie, ShiftInput } from '../../types/planning'
 
 // ── Dummy kandidaten voor suggesties ─────────────────────────────────────────
-const SUGGESTIES = [
+const SUGGESTIES: Suggestie[] = [
   { name: 'Ismail Eddahchouri',   initials: 'IE', functie: 'Verzorgende IG',   uren: 8,   km: '3.2km',  color: 'var(--color-primary)', favoriet: true  },
   { name: 'Merel Van Muijlwijk',  initials: 'MV', functie: 'Helpende',         uren: 24,  km: '7.1km',  color: 'var(--color-success)', favoriet: true  },
   { name: 'Elif Akagündüz',       initials: 'EA', functie: 'Gastvrouw',         uren: 16,  km: '5.4km',  color: 'var(--color-warning)', favoriet: false },
@@ -19,25 +21,25 @@ const SUGGESTIES = [
 ]
 
 // ── Field helpers ─────────────────────────────────────────────────────────────
-const INPUT = { padding: '7px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7,
+const INPUT: CSSProperties = { padding: '7px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7,
   outline: 'none', background: 'var(--bg)', color: 'var(--text)', width: '100%', boxSizing: 'border-box' }
-const LABEL = { fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
-const SELECT = { ...INPUT, appearance: 'none', cursor: 'pointer' }
+const LABEL: CSSProperties = { fontSize: 11, fontWeight: 500, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
+const SELECT: CSSProperties = { ...INPUT, appearance: 'none', cursor: 'pointer' }
 
-function Field({ label, children }) {
+function Field({ label, children }: { label?: ReactNode; children: ReactNode }) {
   return <div style={{ marginBottom: 10 }}><label style={LABEL}>{label}</label>{children}</div>
 }
 
-function SectionHead({ children }) {
+function SectionHead({ children, style }: { children: ReactNode; style?: CSSProperties }) {
   return (
     <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.07em',
-      textTransform: 'uppercase', padding: '8px 0 4px', borderBottom: '1px solid var(--border)', marginBottom: 10 }}>
+      textTransform: 'uppercase', padding: '8px 0 4px', borderBottom: '1px solid var(--border)', marginBottom: 10, ...style }}>
       {children}
     </div>
   )
 }
 
-function Avatar({ initials, size = 26 }) {
+function Avatar({ initials, size = 26 }: { initials: string; size?: number }) {
   const colors = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6','#EC4899']
   const color  = colors[initials.charCodeAt(0) % colors.length]
   return (
@@ -50,7 +52,7 @@ function Avatar({ initials, size = 26 }) {
 }
 
 // ── Add Shift Modal ───────────────────────────────────────────────────────────
-export default function AddShiftModal({ date, onClose, onAdd }) {
+export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; onClose: () => void; onAdd: (shift: ShiftInput) => void }) {
   const { t } = useTranslation('planning')
   const [title,      setTitle]      = useState('Dagdienst')
   const [start,      setStart]      = useState('07:00')
@@ -60,7 +62,7 @@ export default function AddShiftModal({ date, onClose, onAdd }) {
   const [afdeling,   setAfdeling]   = useState('Watertorenlocatie')
   const [locatie,    setLocatie]    = useState('Boezemlaan 4, 2771 VP Boskoop')
   const [personen,   setPersonen]   = useState(1)
-  const [kandidaat,  setKandidaat]  = useState(null)
+  const [kandidaat,  setKandidaat]  = useState<Suggestie | null>(null)
   const [zoek,       setZoek]       = useState('')
   const [color,      setColor]      = useState('var(--color-success)')
   const COLORS = ['var(--color-success)','var(--color-primary)','var(--color-warning)','var(--color-danger)','var(--color-secondary)','#8B5CF6']
@@ -295,7 +297,7 @@ export default function AddShiftModal({ date, onClose, onAdd }) {
   )
 }
 
-function KandidaatRij({ s, selected, onClick }) {
+function KandidaatRij({ s, selected, onClick }: { s: Suggestie; selected?: boolean; onClick?: () => void }) {
   const { t } = useTranslation('planning')
   return (
     <div onClick={onClick}
