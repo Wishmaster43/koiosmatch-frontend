@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api, { unwrapList } from '../../lib/api'
@@ -6,14 +7,32 @@ import { isAbortError } from '../../lib/mocks'
 import CustomersTable from './CustomersTable'
 import CustomersInsightsRow from './CustomersInsightsRow'
 import AddCustomerModal from './AddCustomerModal'
+import type { CustomerForm } from './AddCustomerModal'
 import PaginationBar from '../../components/ui/PaginationBar'
+import type { SmCustomerRow } from '../../types/shiftmanager'
+import type { DonutSpec, KpiSpec } from '../../components/insights/InsightsRow'
 
 import { initialsOf } from '@/lib/initials'
-const STATUS_COLORS = { actief: '#16A34A', prospect: '#1B60A9', inactief: '#D97706', geblokkeerd: '#DC2626' }
-const deptCount = (c) => (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
+
+// Raw API/form customer (snake_case + camelCase tolerant) before mapping.
+interface RawCustomer {
+  id?: string | number
+  name?: string
+  debtor_number?: string; debtorNumber?: string
+  status?: string
+  account_manager?: string; accountManager?: string
+  city?: string
+  locations?: Array<{ departments?: unknown[] }>
+  contacts?: unknown[]; contact_persons?: unknown[]
+  created_at?: string; created?: string
+  [k: string]: unknown
+}
+
+const STATUS_COLORS: Record<string, string> = { actief: '#16A34A', prospect: '#1B60A9', inactief: '#D97706', geblokkeerd: '#DC2626' }
+const deptCount = (c: SmCustomerRow) => (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
 
 // Normalise a raw API customer into the shape the table/insights expect.
-const mapCustomer = (c) => ({
+const mapCustomer = (c: RawCustomer): SmCustomerRow => ({
   id:             c.id,
   name:           c.name ?? '—',
   initials:       initialsOf(c.name),
@@ -31,20 +50,20 @@ export default function CustomersPage() {
   const { t } = useTranslation('customers')
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  const [customers, setCustomers] = useState([])
+  const [customers, setCustomers] = useState<SmCustomerRow[]>([])
   const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState(null)
+  const [error,     setError]     = useState<string | null>(null)
   const [lastPage,  setLastPage]  = useState(1)
   const [total,     setTotal]     = useState(0)
-  const [selected,  setSelected]  = useState(null)
+  const [selected,  setSelected]  = useState<SmCustomerRow | null>(null)
   const [addOpen,   setAddOpen]   = useState(false)
   const [page,      setPage]      = useState(1)
   const [pageSize,  setPageSize]  = useState(25)
 
   const [globalSearch,   setGlobalSearch]   = useState('')
-  const [selectedStatus, setSelectedStatus] = useState([])
-  const [selectedAM,     setSelectedAM]     = useState([])
-  const [selectedCity,   setSelectedCity]   = useState([])
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([])
+  const [selectedAM,     setSelectedAM]     = useState<string[]>([])
+  const [selectedCity,   setSelectedCity]   = useState<string[]>([])
 
   useEffect(() => {
     const ctrl = new AbortController()
@@ -52,7 +71,7 @@ export default function CustomersPage() {
     setError(null)
     api.get('/sm_customers', { params: { page, per_page: pageSize }, signal: ctrl.signal })
       .then(res => {
-        const { rows, total: rowTotal, lastPage: rowLastPage } = unwrapList(res)
+        const { rows, total: rowTotal, lastPage: rowLastPage } = unwrapList<RawCustomer>(res)
         setCustomers(rows.map(mapCustomer)); setTotal(rowTotal); setLastPage(rowLastPage)
       })
       .catch(err => {
@@ -65,18 +84,18 @@ export default function CustomersPage() {
   }, [page, pageSize, t])
 
   // ── Filter option lists ──
-  const optsFrom = (values) => {
-    const counts = {}
+  const optsFrom = (values: string[]) => {
+    const counts: Record<string, number> = {}
     values.forEach(v => { counts[v] = (counts[v] ?? 0) + 1 })
     return Object.keys(counts).map(v => ({ value: v, label: v, count: counts[v] }))
   }
   const statusOptions = useMemo(() =>
     Object.keys(STATUS_COLORS).map(s => ({ value: s, label: t(`status.${s}`), count: customers.filter(c => c.status === s).length })).filter(o => o.count > 0)
   , [customers, t])
-  const amOptions   = useMemo(() => optsFrom(customers.map(c => c.accountManager).filter(Boolean)), [customers])
-  const cityOptions = useMemo(() => optsFrom(customers.map(c => c.city).filter(Boolean)), [customers])
+  const amOptions   = useMemo(() => optsFrom(customers.map(c => c.accountManager).filter((x): x is string => Boolean(x))), [customers])
+  const cityOptions = useMemo(() => optsFrom(customers.map(c => c.city).filter((x): x is string => Boolean(x))), [customers])
 
-  const tog = (set) => (v) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
+  const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
   const catGeneral = t('filters.categories.general')
 
@@ -95,17 +114,20 @@ export default function CustomersPage() {
   const filtered = useMemo(() => {
     const q = globalSearch.trim().toLowerCase()
     return customers.filter(c => {
-      if (selectedStatus.length && !selectedStatus.includes(c.status))         return false
-      if (selectedAM.length     && !selectedAM.includes(c.accountManager))     return false
-      if (selectedCity.length   && !selectedCity.includes(c.city))             return false
+      if (selectedStatus.length && !selectedStatus.includes(c.status as string))         return false
+      if (selectedAM.length     && !selectedAM.includes(c.accountManager as string))     return false
+      if (selectedCity.length   && !selectedCity.includes(c.city as string))             return false
       if (q && ![c.name, c.debtorNumber, c.accountManager, c.city].join(' ').toLowerCase().includes(q)) return false
       return true
     })
   }, [customers, globalSearch, selectedStatus, selectedAM, selectedCity])
 
   // ── Insights ──
-  const pickKey = (d) => d?.key ?? d?.payload?.key ?? d?.name
-  const pickOne = (set) => (v) => { if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v]) }
+  const pickKey = (d: unknown): string | undefined => {
+    const x = d as { key?: string; payload?: { key?: string }; name?: string } | null | undefined
+    return x?.key ?? x?.payload?.key ?? x?.name
+  }
+  const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (v?: string) => { if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v]) }
 
   const statusData = useMemo(() =>
     statusOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: STATUS_COLORS[o.value] }))
@@ -117,20 +139,20 @@ export default function CustomersPage() {
   const totalContacts    = useMemo(() => customers.reduce((s, c) => s + (c.contacts ?? []).length, 0), [customers])
   const noContactCount   = useMemo(() => customers.filter(c => (c.contacts ?? []).length === 0).length, [customers])
 
-  const insightDonuts = [
+  const insightDonuts: DonutSpec[] = [
     { key: 'status', title: t('analytics.statusTitle'), data: statusData, onPick: d => pickOne(setSelectedStatus)(pickKey(d)),
       active: selectedStatus.length > 0, onClear: () => setSelectedStatus([]) },
     { key: 'am',     title: t('analytics.amTitle'),     data: amData,     onPick: d => pickOne(setSelectedAM)(pickKey(d)),
       active: selectedAM.length > 0,     onClear: () => setSelectedAM([]) },
   ]
-  const insightKpis = [
+  const insightKpis: KpiSpec[] = [
     { key: 'locations',   label: t('analytics.locations'),   value: totalLocations,   sub: t('analytics.locationsSub'),   color: 'var(--color-secondary)' },
     { key: 'departments', label: t('analytics.departments'), value: totalDepartments, sub: t('analytics.departmentsSub'), color: '#8B5CF6' },
     { key: 'contacts',    label: t('analytics.contacts'),    value: totalContacts,    sub: t('analytics.contactsSub'),    color: 'var(--color-primary)' },
     { key: 'noContact',   label: t('analytics.noContact'),   value: noContactCount,   sub: t('analytics.noContactSub'),   color: 'var(--color-danger)' },
   ]
 
-  const onCreate = (form) => setCustomers(prev => [mapCustomer({ ...form, debtor_number: form.debtorNumber, account_manager: form.accountManager, id: `new-${Date.now()}` }), ...prev])
+  const onCreate = (form: CustomerForm) => setCustomers(prev => [mapCustomer({ ...form, debtor_number: form.debtorNumber, account_manager: form.accountManager, id: `new-${Date.now()}` }), ...prev])
 
   return (
     <>

@@ -4,6 +4,21 @@
  * since they mirror loosely-typed external data.
  */
 
+// A mapped customer row (CustomersPage → CustomersTable/InsightsRow).
+export interface SmCustomerRow {
+  id?: string | number
+  name?: string
+  initials?: string
+  debtorNumber?: string
+  status?: string
+  accountManager?: string
+  amInitials?: string
+  locations?: Array<{ departments?: unknown[] }>
+  contacts?: unknown[]
+  city?: string
+  [k: string]: unknown
+}
+
 // A contact person row (ContactsPage → ContactDrawer).
 export interface SmContactRow {
   id?: string | number

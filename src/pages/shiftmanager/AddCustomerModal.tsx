@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { X, Building2, ChevronDown } from 'lucide-react'
 
 // The new-customer form fields.
-interface CustomerForm { name: string; debtorNumber: string; status: string; accountManager: string; city: string }
+export interface CustomerForm { name: string; debtorNumber: string; status: string; accountManager: string; city: string }
 
 const iStyle: CSSProperties = {
   width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,

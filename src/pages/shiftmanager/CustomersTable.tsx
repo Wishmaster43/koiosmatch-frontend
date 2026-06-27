@@ -4,21 +4,7 @@ import DataTable from '../../components/ui/DataTable'
 import type { Column } from '../../components/ui/DataTable'
 import Avatar from '../../components/ui/Avatar'
 import StatusPill from '../../components/ui/StatusPill'
-
-// Mapped SM customer row (camelCase, ready for the table).
-interface SmCustomerRow {
-  id?: string | number
-  name?: string
-  initials?: string
-  debtorNumber?: string
-  status?: string
-  accountManager?: string
-  amInitials?: string
-  locations?: Array<{ departments?: unknown[] }>
-  contacts?: unknown[]
-  city?: string
-  [k: string]: unknown
-}
+import type { SmCustomerRow } from '../../types/shiftmanager'
 
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
 

@@ -8,13 +8,22 @@ import { useAuth } from '../../context/AuthContext'
 import MonthlyKpiCard    from '../../components/ui/MonthlyKpiCard'
 import StatCard          from '../../components/ui/StatCard'
 import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
+import type { ReportCandidate } from '../../types/reports'
 
 // Packages that unlock the AI/Workflow runs + conversations panels.
 const AI_PACKAGES = ['reporting_sm_ai', 'reporting_hf_ai', 'reporting_sm_hf_ai', 'ats_crm_ai', 'ats_crm_ai_planning', 'ats_crm_aiagents', 'ats_crm_workflows', 'connect']
 
+// Shift KPI stats from /sm_reports/dashboard.
+interface SmDashStats {
+  open_hours?: number; hours_this_month?: number; occupancy_pct?: number
+  messages_sent?: number; response_rate_pct?: number; [k: string]: unknown
+}
+interface RunItem { name?: string; ok: boolean; n?: number; err?: string; time: string }
+interface ConvItem { name: string; msg: string; time: string }
+
 // Locale-aware HH:MM from an ISO timestamp.
-const hhmm = iso => iso ? new Date(iso).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''
-const fmt  = v => v == null ? '—' : (typeof v === 'number' ? v.toLocaleString('nl-NL') : v)
+const hhmm = (iso?: string) => iso ? new Date(iso).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''
+const fmt  = (v?: unknown) => v == null ? '—' : (typeof v === 'number' ? v.toLocaleString('nl-NL') : String(v))
 
 export default function ShiftmanagerDashboard() {
   const { t } = useTranslation('shiftmanager')
@@ -23,11 +32,11 @@ export default function ShiftmanagerDashboard() {
   const pkg  = auth?.activeTenant?.package ?? auth?.user?.tenant?.package ?? ''
   const hasAI = AI_PACKAGES.includes(pkg)
 
-  const [candidates,    setCandidates]    = useState([])
+  const [candidates,    setCandidates]    = useState<ReportCandidate[]>([])
   const [loading,       setLoading]       = useState(true)
-  const [stats,         setStats]         = useState(null)
-  const [runs,          setRuns]          = useState([])
-  const [conversations, setConversations] = useState([])
+  const [stats,         setStats]         = useState<SmDashStats | null>(null)
+  const [runs,          setRuns]          = useState<RunItem[]>([])
+  const [conversations, setConversations] = useState<ConvItem[]>([])
 
   // Candidates feed the (real) "new this month" KPI card.
   useEffect(() => {
@@ -54,13 +63,13 @@ export default function ShiftmanagerDashboard() {
     const ctrl = new AbortController()
     api.get('/workflow-runs', { params: { per_page: 5 }, signal: ctrl.signal })
       .then(res => {
-        const { rows } = unwrapList(res)
+        const { rows } = unwrapList<{ name?: string; status?: string; processed_count?: number; error?: string; started_at?: string }>(res)
         setRuns(rows.map(r => ({ name: r.name, ok: (r.status ?? 'ok') === 'ok', n: r.processed_count, err: r.error, time: hhmm(r.started_at) })))
       })
       .catch(err => { if (!isAbortError(err)) setRuns([]) })
     api.get('/whatsapp/messages', { params: { per_page: 4 }, signal: ctrl.signal })
       .then(res => {
-        const { rows } = unwrapList(res)
+        const { rows } = unwrapList<{ candidate?: { first_name?: string; last_name?: string }; body?: string; sent_at?: string }>(res)
         setConversations(rows.map(m => ({
           name: `${m.candidate?.first_name ?? ''} ${m.candidate?.last_name ?? ''}`.trim() || '—',
           msg:  m.body ?? '', time: hhmm(m.sent_at),
@@ -71,13 +80,13 @@ export default function ShiftmanagerDashboard() {
   }, [hasAI])
 
   // KPI cards — translated labels; values from /sm_reports/dashboard (deltas TBD).
-  const v = (key) => fmt(stats?.[key])
+  const v = (key: string) => fmt(stats?.[key])
   const statCards = [
     { key: 'open_hours',       label: t('dashboard.stats.openHours'),      value: v('open_hours'),       sub: null, color: 'var(--color-danger)',    bg: 'var(--color-danger-bg)',    icon: CalendarDays },
     { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'), value: v('hours_this_month'), sub: null, color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)',   icon: TrendingUp },
-    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),      value: stats?.occupancy_pct != null ? `${stats.occupancy_pct}%` : '—', sub: null, color: 'var(--color-success)', bg: 'var(--color-success-bg)', icon: Percent },
+    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),      value: stats?.occupancy_pct != null ? `${stats?.occupancy_pct}%` : '—', sub: null, color: 'var(--color-success)', bg: 'var(--color-success-bg)', icon: Percent },
     { key: 'messages_sent',    label: t('dashboard.stats.messagesSent'),   value: v('messages_sent'),    sub: null, color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', icon: MessageCircle },
-    { key: 'response_rate',    label: t('dashboard.stats.responseRate'),   value: stats?.response_rate_pct != null ? `${stats.response_rate_pct}%` : '—', sub: null, color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', icon: TrendingUp },
+    { key: 'response_rate',    label: t('dashboard.stats.responseRate'),   value: stats?.response_rate_pct != null ? `${stats?.response_rate_pct}%` : '—', sub: null, color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', icon: TrendingUp },
   ]
 
   return (
@@ -85,7 +94,7 @@ export default function ShiftmanagerDashboard() {
       {/* KPI row */}
       <div className="grid gap-4 mb-4" style={{ gridTemplateColumns: 'repeat(6, 1fr)' }}>
         <MonthlyKpiCard candidates={candidates} loading={loading} />
-        {statCards.map(s => <StatCard key={s.key} {...s} />)}
+        {statCards.map(({ key, ...s }) => <StatCard key={key} {...s} />)}
       </div>
 
       {/* Two charts with shared filters */}
