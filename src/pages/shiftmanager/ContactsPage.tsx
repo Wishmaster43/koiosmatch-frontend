@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
@@ -6,15 +7,28 @@ import api, { unwrapList } from '../../lib/api'
 import { isAbortError } from '../../lib/mocks'
 import { ac, ContactAvatar } from './contactParts'
 import ContactDrawer from './ContactDrawer'
+import type { SmContactRow } from '../../types/shiftmanager'
+
+// Raw contact from /sm_contacts (snake/camel + nested-or-string customer/location).
+interface RawContact {
+  id?: string | number
+  first_name?: string; firstname?: string
+  last_name?: string; lastname?: string
+  function_title?: string
+  customer?: string | { name?: string }
+  location?: string | { name?: string }
+  email?: string; mobile?: string; planning?: unknown
+  [k: string]: unknown
+}
 
 export default function ContactsPage() {
   const { t } = useTranslation('shiftmanager')
-  const [contacts,    setContacts]    = useState([])
+  const [contacts,    setContacts]    = useState<SmContactRow[]>([])
   const [search]                      = useState('')
-  const [selected,    setSelected]    = useState(null)
+  const [selected,    setSelected]    = useState<SmContactRow | null>(null)
   const [page,        setPage]        = useState(1)
-  const [selCustomers,  setSelCustomers]  = useState([])
-  const [selPlanning, setSelPlanning] = useState([])
+  const [selCustomers,  setSelCustomers]  = useState<string[]>([])
+  const [selPlanning, setSelPlanning] = useState<string[]>([])
   const pageSize = 12
 
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -25,14 +39,14 @@ export default function ContactsPage() {
     const ctrl = new AbortController()
     api.get('/sm_contacts', { signal: ctrl.signal })
       .then(res => {
-        const { rows } = unwrapList(res)
+        const { rows } = unwrapList<RawContact>(res)
         setContacts(rows.map(c => ({
           id:             c.id,
           firstname:      c.first_name ?? c.firstname ?? '',
           lastname:       c.last_name ?? c.lastname ?? '',
           function_title: c.function_title ?? '',
-          customer:       c.customer?.name ?? c.customer ?? '',
-          location:       c.location?.name ?? c.location ?? '',
+          customer:       (typeof c.customer === 'object' ? c.customer?.name : c.customer) ?? '',
+          location:       (typeof c.location === 'object' ? c.location?.name : c.location) ?? '',
           email:          c.email ?? '',
           mobile:         c.mobile ?? '',
           planning:       !!c.planning,
@@ -42,10 +56,10 @@ export default function ContactsPage() {
     return () => ctrl.abort()
   }, [])
 
-  const toggle = setter => val =>
+  const toggle = (setter: Dispatch<SetStateAction<string[]>>) => (val: string) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
-  const customerOptions = useMemo(() => [...new Set(contacts.map(c => c.customer).filter(Boolean))].sort(), [contacts])
+  const customerOptions = useMemo(() => [...new Set(contacts.map(c => c.customer).filter((x): x is string => Boolean(x)))].sort(), [contacts])
 
   const filterGroups = useMemo(() => [
     { key: 'klant', label: t('contactsPage.cols.customer'),
@@ -66,13 +80,13 @@ export default function ContactsPage() {
 
   const filtered = useMemo(() => {
     let rows = contacts
-    if (selCustomers.length)  rows = rows.filter(c => selCustomers.includes(c.customer))
+    if (selCustomers.length)  rows = rows.filter(c => selCustomers.includes(c.customer as string))
     if (selPlanning.length) rows = rows.filter(c => selPlanning.includes(c.planning ? 'ja' : 'nee'))
     if (search.trim()) {
       const q = search.toLowerCase()
       rows = rows.filter(c => {
         const n = [c.firstname, c.lastname].join(' ').toLowerCase()
-        return n.includes(q) || c.customer.toLowerCase().includes(q) || c.email.toLowerCase().includes(q)
+        return n.includes(q) || (c.customer ?? '').toLowerCase().includes(q) || (c.email ?? '').toLowerCase().includes(q)
       })
     }
     return rows

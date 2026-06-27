@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Building2, Layers } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
@@ -6,17 +7,31 @@ import api, { unwrapList } from '../../lib/api'
 import { isAbortError } from '../../lib/mocks'
 import { Avatar, StatusBadge, ac } from './locationParts'
 import LocationDrawer from './LocationDrawer'
+import type { SmLocationRow } from '../../types/shiftmanager'
+
+// Raw location from /sm_locations.
+interface RawLocation {
+  id?: string | number
+  name?: string
+  customer?: string | { name?: string }
+  city?: string
+  address?: string
+  status?: string
+  departments?: Array<string | { name?: string }>
+  shift_count?: number
+  [k: string]: unknown
+}
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LocationsPage() {
   const { t } = useTranslation('shiftmanager')
-  const [locations, setLocations] = useState([])
+  const [locations, setLocations] = useState<SmLocationRow[]>([])
   const [search]                  = useState('')
-  const [selected,  setSelected]  = useState(null)
+  const [selected,  setSelected]  = useState<SmLocationRow | null>(null)
   const [page,      setPage]      = useState(1)
-  const [selStatuses,  setSelStatuses]  = useState([])
-  const [selCustomers,   setSelCustomers]   = useState([])
-  const [selCities,    setSelCities]    = useState([])
+  const [selStatuses,  setSelStatuses]  = useState<string[]>([])
+  const [selCustomers,   setSelCustomers]   = useState<string[]>([])
+  const [selCities,    setSelCities]    = useState<string[]>([])
   const pageSize = 10
 
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -27,15 +42,15 @@ export default function LocationsPage() {
     const ctrl = new AbortController()
     api.get('/sm_locations', { signal: ctrl.signal })
       .then(res => {
-        const { rows } = unwrapList(res)
+        const { rows } = unwrapList<RawLocation>(res)
         setLocations(rows.map(l => ({
           id:          l.id,
           name:        l.name ?? '',
-          customer:    l.customer?.name ?? l.customer ?? '',
+          customer:    (typeof l.customer === 'object' ? l.customer?.name : l.customer) ?? '',
           city:        l.city ?? '',
           address:     l.address ?? '',
           status:      l.status === 'active' ? 'Actief' : l.status === 'inactive' ? 'Inactief' : (l.status ?? 'Actief'),
-          departments: (l.departments ?? []).map(d => d.name ?? d),
+          departments: (l.departments ?? []).map(d => (typeof d === 'object' ? d?.name : d) ?? ''),
           shifts:      l.shift_count ?? 0,
         })))
       })
@@ -43,12 +58,12 @@ export default function LocationsPage() {
     return () => ctrl.abort()
   }, [])
 
-  const toggle = setter => val =>
+  const toggle = (setter: Dispatch<SetStateAction<string[]>>) => (val: string) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
-  const statusOptions = useMemo(() => [...new Set(locations.map(l => l.status).filter(Boolean))].sort(), [locations])
-  const customerOptions  = useMemo(() => [...new Set(locations.map(l => l.customer).filter(Boolean))].sort(), [locations])
-  const cityOptions  = useMemo(() => [...new Set(locations.map(l => l.city).filter(Boolean))].sort(), [locations])
+  const statusOptions = useMemo(() => [...new Set(locations.map(l => l.status).filter((x): x is string => Boolean(x)))].sort(), [locations])
+  const customerOptions  = useMemo(() => [...new Set(locations.map(l => l.customer).filter((x): x is string => Boolean(x)))].sort(), [locations])
+  const cityOptions  = useMemo(() => [...new Set(locations.map(l => l.city).filter((x): x is string => Boolean(x)))].sort(), [locations])
 
   const filterGroups = useMemo(() => [
     { key: 'status',  label: t('locationsPage.filter.status'),
@@ -69,15 +84,15 @@ export default function LocationsPage() {
 
   const filtered = useMemo(() => {
     let rows = locations
-    if (selStatuses.length) rows = rows.filter(l => selStatuses.includes(l.status))
-    if (selCustomers.length)  rows = rows.filter(l => selCustomers.includes(l.customer))
-    if (selCities.length)   rows = rows.filter(l => selCities.includes(l.city))
+    if (selStatuses.length) rows = rows.filter(l => selStatuses.includes(l.status as string))
+    if (selCustomers.length)  rows = rows.filter(l => selCustomers.includes(l.customer as string))
+    if (selCities.length)   rows = rows.filter(l => selCities.includes(l.city as string))
     if (search.trim()) {
       const q = search.toLowerCase()
       rows = rows.filter(l =>
-        l.name.toLowerCase().includes(q) ||
-        l.customer.toLowerCase().includes(q) ||
-        l.city.toLowerCase().includes(q)
+        (l.name ?? '').toLowerCase().includes(q) ||
+        (l.customer ?? '').toLowerCase().includes(q) ||
+        (l.city ?? '').toLowerCase().includes(q)
       )
     }
     return rows
@@ -90,7 +105,7 @@ export default function LocationsPage() {
   const kpis = [
     { label: t('locationsPage.kpi.total'),           value: locations.length,                                    color: 'var(--color-primary)',   bg: 'var(--color-primary-bg)',   Icon: MapPin },
     { label: t('locationsPage.kpi.active'),          value: locations.filter(l => l.status === 'Actief').length, color: 'var(--color-success)',   bg: 'var(--color-success-bg)',   Icon: Building2 },
-    { label: t('locationsPage.kpi.departments'),     value: locations.reduce((s,l) => s + l.departments.length, 0), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)',   Icon: Layers },
+    { label: t('locationsPage.kpi.departments'),     value: locations.reduce((s,l) => s + (l.departments ?? []).length, 0), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)',   Icon: Layers },
     { label: t('locationsPage.kpi.linkedCustomers'), value: [...new Set(locations.map(l => l.customer))].length,  color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Building2 },
   ]
 
@@ -136,6 +151,7 @@ export default function LocationsPage() {
               <tbody>
                 {paged.map((loc, i) => {
                   const isSel = selected?.id === loc.id
+                  const deps = loc.departments ?? []
                   return (
                     <tr key={loc.id} onClick={() => setSelected(isSel ? null : loc)}
                       style={{ borderBottom: i < paged.length - 1 ? '1px solid var(--border)' : 'none',
@@ -177,19 +193,19 @@ export default function LocationsPage() {
 
                       {/* Afdelingen */}
                       <td style={{ padding: '12px 14px' }}>
-                        {loc.departments.length > 0 ? (
+                        {deps.length > 0 ? (
                           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{loc.departments.length}</span>
+                            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{deps.length}</span>
                             <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                              {loc.departments.slice(0, 2).map(d => (
+                              {deps.slice(0, 2).map(d => (
                                 <span key={d} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 999,
                                   background: 'var(--hover-bg)', border: '1px solid var(--border)',
                                   color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{d}</span>
                               ))}
-                              {loc.departments.length > 2 && (
+                              {deps.length > 2 && (
                                 <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 999,
                                   background: 'var(--hover-bg)', border: '1px solid var(--border)',
-                                  color: 'var(--text-muted)' }}>+{loc.departments.length - 2}</span>
+                                  color: 'var(--text-muted)' }}>+{deps.length - 2}</span>
                               )}
                             </div>
                           </div>
@@ -200,8 +216,8 @@ export default function LocationsPage() {
 
                       {/* Diensten */}
                       <td style={{ padding: '12px 14px' }}>
-                        <span style={{ fontSize: 13, color: loc.shifts > 0 ? 'var(--text)' : 'var(--text-muted)',
-                          fontWeight: loc.shifts > 0 ? 600 : 400 }}>{loc.shifts}</span>
+                        <span style={{ fontSize: 13, color: (loc.shifts ?? 0) > 0 ? 'var(--text)' : 'var(--text-muted)',
+                          fontWeight: (loc.shifts ?? 0) > 0 ? 600 : 400 }}>{loc.shifts}</span>
                       </td>
 
                       {/* Status */}

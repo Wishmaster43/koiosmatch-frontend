@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Layers, MapPin, Building2, Users } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
@@ -6,16 +7,31 @@ import api, { unwrapList } from '../../lib/api'
 import { isAbortError } from '../../lib/mocks'
 import { ac, Avatar, StatusBadge } from './departmentParts'
 import DepartmentDrawer from './DepartmentDrawer'
+import type { SmDepartmentRow } from '../../types/shiftmanager'
+
+// Raw department from /sm_departments.
+interface RawDepartment {
+  id?: string | number
+  name?: string
+  customer?: string | { name?: string }
+  location?: string | { name?: string }
+  city?: string
+  cost_center?: string
+  status?: string
+  employee_count?: number
+  shift_count?: number
+  [k: string]: unknown
+}
 
 export default function DepartmentsPage() {
   const { t } = useTranslation('shiftmanager')
-  const [departments, setDepartments] = useState([])
+  const [departments, setDepartments] = useState<SmDepartmentRow[]>([])
   const [search]                      = useState('')
-  const [selected,    setSelected]    = useState(null)
+  const [selected,    setSelected]    = useState<SmDepartmentRow | null>(null)
   const [page,        setPage]        = useState(1)
-  const [selStatuses,  setSelStatuses]  = useState([])
-  const [selCustomers,   setSelCustomers]   = useState([])
-  const [selLocations,  setSelLocations]  = useState([])
+  const [selStatuses,  setSelStatuses]  = useState<string[]>([])
+  const [selCustomers,   setSelCustomers]   = useState<string[]>([])
+  const [selLocations,  setSelLocations]  = useState<string[]>([])
   const pageSize = 12
 
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -26,12 +42,12 @@ export default function DepartmentsPage() {
     const ctrl = new AbortController()
     api.get('/sm_departments', { signal: ctrl.signal })
       .then(res => {
-        const { rows } = unwrapList(res)
+        const { rows } = unwrapList<RawDepartment>(res)
         setDepartments(rows.map(d => ({
           id:         d.id,
           name:       d.name ?? '',
-          customer:   d.customer?.name ?? d.customer ?? '',
-          location:   d.location?.name ?? d.location ?? '',
+          customer:   (typeof d.customer === 'object' ? d.customer?.name : d.customer) ?? '',
+          location:   (typeof d.location === 'object' ? d.location?.name : d.location) ?? '',
           city:       d.city ?? '',
           costCenter: d.cost_center ?? '',
           status:     d.status === 'active' ? 'Actief' : d.status === 'inactive' ? 'Inactief' : (d.status ?? 'Actief'),
@@ -43,12 +59,12 @@ export default function DepartmentsPage() {
     return () => ctrl.abort()
   }, [])
 
-  const toggle = setter => val =>
+  const toggle = (setter: Dispatch<SetStateAction<string[]>>) => (val: string) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
-  const statusOptions  = useMemo(() => [...new Set(departments.map(d => d.status).filter(Boolean))].sort(), [departments])
-  const customerOptions   = useMemo(() => [...new Set(departments.map(d => d.customer).filter(Boolean))].sort(), [departments])
-  const locationOptions = useMemo(() => [...new Set(departments.map(d => d.location).filter(Boolean))].sort(), [departments])
+  const statusOptions  = useMemo(() => [...new Set(departments.map(d => d.status).filter((x): x is string => Boolean(x)))].sort(), [departments])
+  const customerOptions   = useMemo(() => [...new Set(departments.map(d => d.customer).filter((x): x is string => Boolean(x)))].sort(), [departments])
+  const locationOptions = useMemo(() => [...new Set(departments.map(d => d.location).filter((x): x is string => Boolean(x)))].sort(), [departments])
 
   const filterGroups = useMemo(() => [
     { key: 'status',  label: t('departmentsPage.filter.status'),
@@ -69,15 +85,15 @@ export default function DepartmentsPage() {
 
   const filtered = useMemo(() => {
     let rows = departments
-    if (selStatuses.length)  rows = rows.filter(d => selStatuses.includes(d.status))
-    if (selCustomers.length)   rows = rows.filter(d => selCustomers.includes(d.customer))
-    if (selLocations.length)  rows = rows.filter(d => selLocations.includes(d.location))
+    if (selStatuses.length)  rows = rows.filter(d => selStatuses.includes(d.status as string))
+    if (selCustomers.length)   rows = rows.filter(d => selCustomers.includes(d.customer as string))
+    if (selLocations.length)  rows = rows.filter(d => selLocations.includes(d.location as string))
     if (search.trim()) {
       const q = search.toLowerCase()
       rows = rows.filter(d =>
-        d.name.toLowerCase().includes(q) ||
-        d.customer.toLowerCase().includes(q) ||
-        d.location.toLowerCase().includes(q)
+        (d.name ?? '').toLowerCase().includes(q) ||
+        (d.customer ?? '').toLowerCase().includes(q) ||
+        (d.location ?? '').toLowerCase().includes(q)
       )
     }
     return rows
@@ -90,7 +106,7 @@ export default function DepartmentsPage() {
   const kpis = [
     { label: t('departmentsPage.kpi.total'),           value: departments.length,                                       color: 'var(--color-primary)',   bg: 'var(--color-primary-bg)',   Icon: Layers },
     { label: t('departmentsPage.kpi.active'),          value: departments.filter(d => d.status === 'Actief').length,    color: 'var(--color-success)',   bg: 'var(--color-success-bg)',   Icon: Layers },
-    { label: t('departmentsPage.kpi.employees'),       value: departments.reduce((s,d) => s + d.employees, 0),          color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)',   Icon: Users },
+    { label: t('departmentsPage.kpi.employees'),       value: departments.reduce((s,d) => s + (d.employees ?? 0), 0),   color: 'var(--color-warning)',   bg: 'var(--color-warning-bg)',   Icon: Users },
     { label: t('departmentsPage.kpi.linkedCustomers'), value: [...new Set(departments.map(d => d.customer))].length,    color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Building2 },
   ]
 
@@ -174,14 +190,14 @@ export default function DepartmentsPage() {
                       <td style={{ padding: '12px 14px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                           <Users size={12} color="var(--text-muted)" />
-                          <span style={{ fontSize: 13, fontWeight: dep.employees > 0 ? 600 : 400,
-                            color: dep.employees > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{dep.employees}</span>
+                          <span style={{ fontSize: 13, fontWeight: (dep.employees ?? 0) > 0 ? 600 : 400,
+                            color: (dep.employees ?? 0) > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{dep.employees}</span>
                         </div>
                       </td>
 
                       <td style={{ padding: '12px 14px' }}>
-                        <span style={{ fontSize: 13, color: dep.shifts > 0 ? 'var(--text)' : 'var(--text-muted)',
-                          fontWeight: dep.shifts > 0 ? 600 : 400 }}>{dep.shifts}</span>
+                        <span style={{ fontSize: 13, color: (dep.shifts ?? 0) > 0 ? 'var(--text)' : 'var(--text-muted)',
+                          fontWeight: (dep.shifts ?? 0) > 0 ? 600 : 400 }}>{dep.shifts}</span>
                       </td>
 
                       <td style={{ padding: '12px 14px' }}>
