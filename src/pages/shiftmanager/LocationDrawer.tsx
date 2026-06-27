@@ -6,10 +6,12 @@
 import { useTranslation } from 'react-i18next'
 import { MapPin, Building2, Layers, X, Phone, Mail, ChevronRight, Plus } from 'lucide-react'
 import { Avatar, StatusBadge, ac } from './locationParts'
+import type { SmLocationRow } from '../../types/shiftmanager'
 
-export default function LocationDrawer({ loc, onClose }) {
+export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | null; onClose: () => void }) {
   const { t } = useTranslation('shiftmanager')
   if (!loc) return null
+  const deps = loc.departments ?? []
 
   return (
     <div style={{ width: 380, flexShrink: 0, borderLeft: '1px solid var(--border)',
@@ -103,7 +105,7 @@ export default function LocationDrawer({ loc, onClose }) {
         {/* Stats */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
           {[
-            { label: t('locationsPage.drawer.departments'),  value: loc.departments.length, icon: Layers, color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
+            { label: t('locationsPage.drawer.departments'),  value: deps.length, icon: Layers, color: 'var(--color-primary)', bg: 'var(--color-primary-bg)' },
             { label: t('locationsPage.drawer.activeShifts'), value: loc.shifts, icon: Building2, color: 'var(--color-success)', bg: 'var(--color-success-bg)' },
           ].map(s => (
             <div key={s.label} style={{ background: 'var(--surface)', border: '1px solid var(--border)',
@@ -126,16 +128,16 @@ export default function LocationDrawer({ loc, onClose }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('locationsPage.drawer.departments')}</span>
               <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--hover-bg)',
-                padding: '1px 7px', borderRadius: 999 }}>{loc.departments.length}</span>
+                padding: '1px 7px', borderRadius: 999 }}>{deps.length}</span>
             </div>
             <button style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--color-primary)',
               background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>
               <Plus size={12} /> {t('locationsPage.drawer.add')}
             </button>
           </div>
-          {loc.departments.length > 0 ? (
+          {deps.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {loc.departments.map((dep, i) => (
+              {deps.map((dep, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px',
                   background: 'var(--hover-bg)', borderRadius: 8, border: '1px solid var(--border)',
                   cursor: 'pointer', transition: 'background 0.1s' }}

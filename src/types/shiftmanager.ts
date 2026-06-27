@@ -32,7 +32,8 @@ export interface SmDepartmentRow {
   [k: string]: unknown
 }
 
-// A location row (LocationsPage → LocationDrawer).
+// A location row (LocationsPage → LocationDrawer). `departments` is the list of
+// department names; `shifts` a count.
 export interface SmLocationRow {
   id?: string | number
   name?: string
@@ -40,7 +41,9 @@ export interface SmLocationRow {
   customer?: string
   address?: string
   city?: string
-  departments?: number
-  employees?: number
+  phone?: string
+  email?: string
+  departments?: string[]
+  shifts?: number
   [k: string]: unknown
 }

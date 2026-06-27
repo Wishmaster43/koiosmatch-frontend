@@ -1,14 +1,18 @@
 import { useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Building2, ChevronDown } from 'lucide-react'
 
-const iStyle = {
+// The new-customer form fields.
+interface CustomerForm { name: string; debtorNumber: string; status: string; accountManager: string; city: string }
+
+const iStyle: CSSProperties = {
   width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,
   border: '1px solid var(--border)', background: 'var(--surface)',
   color: 'var(--text)', boxSizing: 'border-box', outline: 'none',
 }
 
-function Label({ children, required }) {
+function Label({ children, required }: { children: ReactNode; required?: boolean }) {
   return (
     <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
       {children}{required && <span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span>}
@@ -18,12 +22,12 @@ function Label({ children, required }) {
 
 const STATUSES = ['actief', 'prospect', 'inactief', 'geblokkeerd']
 
-export default function AddCustomerModal({ onClose, onCreate }) {
+export default function AddCustomerModal({ onClose, onCreate }: { onClose: () => void; onCreate?: (form: CustomerForm) => void }) {
   const { t } = useTranslation('customers')
-  const [errors, setErrors] = useState({})
-  const [form, setForm] = useState({ name: '', debtorNumber: '', status: 'prospect', accountManager: '', city: '' })
+  const [errors, setErrors] = useState<Record<string, boolean>>({})
+  const [form, setForm] = useState<CustomerForm>({ name: '', debtorNumber: '', status: 'prospect', accountManager: '', city: '' })
 
-  const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
+  const set = <K extends keyof CustomerForm>(k: K, v: CustomerForm[K]) => { setForm(f => ({ ...f, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
 
   const handleSubmit = () => {
     if (!form.name.trim()) { setErrors({ name: true }); return }

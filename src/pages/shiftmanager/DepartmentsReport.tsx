@@ -10,19 +10,20 @@ import api from '../../lib/api'
 import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '../../context/RightPanelContext'
 import KpiBlock from '../../components/ui/KpiBlock'  // shared KPI card
+import type { ReportCustomer, ReportDepartment } from '../../types/reports'
 
 export default function DepartmentsReport() {
   const { t } = useTranslation('shiftmanager')
-  const [departments, setDepartments] = useState([])
+  const [departments, setDepartments] = useState<ReportDepartment[]>([])
   const [loading,     setLoading]     = useState(true)
-  const [selectedCustomers, setSelectedCustomers] = useState([])
+  const [selectedCustomers, setSelectedCustomers] = useState<string[]>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   useEffect(() => {
     api.get('/sm_customers')
       .then(res => {
-        const customers = res.data?.data ?? res.data ?? []
+        const customers = (res.data?.data ?? res.data ?? []) as ReportCustomer[]
         setDepartments(customers.flatMap(c =>
           (c.locations ?? []).flatMap(l =>
             (l.departments ?? []).map(d => ({
@@ -40,9 +41,9 @@ export default function DepartmentsReport() {
   }, [])
 
   const uniqueCustomers = useMemo(() =>
-    [...new Set(departments.map(d => d.customer_name).filter(Boolean))], [departments])
+    [...new Set(departments.map(d => d.customer_name).filter((x): x is string => Boolean(x)))], [departments])
   const uniqueLocations = useMemo(() =>
-    [...new Set(departments.map(d => d.location_name).filter(Boolean))], [departments])
+    [...new Set(departments.map(d => d.location_name).filter((x): x is string => Boolean(x)))], [departments])
 
   const filterGroups = useMemo(() => uniqueCustomers.length === 0 ? [] : [{
     key: 'klant', label: t('departmentsReport.filterCustomer'), type: 'search-select',
@@ -51,7 +52,7 @@ export default function DepartmentsReport() {
       value: c, label: c,
       count: departments.filter(d => d.customer_name === c).length,
     })),
-    onToggle: v => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+    onToggle: (v: string) => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
   }], [t, uniqueCustomers, selectedCustomers, departments])
 
   useEffect(() => {
