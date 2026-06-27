@@ -1,0 +1,60 @@
+/**
+ * Workflow (automation graph) types. The editor works on a normalized UI shape
+ * (steps with id/type/config/position/next); the API exposes a different shape,
+ * so the raw types stay permissive and the mappers (data/workflowMap) translate.
+ */
+
+// One outgoing edge of a step: a target step id + an optional edge filter.
+export interface StepConnection { target?: string | number | null; filters?: unknown }
+
+// A normalized step in the editor graph.
+export interface WorkflowStep {
+  id?: string
+  type?: string
+  config?: Record<string, unknown>
+  position?: unknown
+  next?: StepConnection[]
+  label?: string
+  [k: string]: unknown
+}
+
+// The last-run summary shown on a workflow card.
+export interface WorkflowLastRun { time?: string; ok?: boolean; candidates?: number; error?: string; [k: string]: unknown }
+
+// A normalized workflow (editor/UI shape).
+export interface Workflow {
+  id?: string | number
+  name?: string
+  trigger?: string
+  status?: string
+  steps: WorkflowStep[]
+  last_run?: WorkflowLastRun | null
+  schedule?: unknown
+  [k: string]: unknown
+}
+
+// ── Raw API shapes (pre-normalize / post-denormalize) — deliberately permissive ──
+export interface RawConnection { target?: unknown; filters?: unknown; [k: string]: unknown }
+export interface RawStep {
+  id?: string | number
+  module_type?: string
+  type?: string
+  config?: Record<string, unknown>
+  parameters?: Record<string, unknown>
+  position?: unknown
+  next?: RawConnection[]
+  connections?: RawConnection[]
+  label?: string
+  [k: string]: unknown
+}
+export interface RawWorkflow {
+  trigger?: unknown
+  trigger_type?: string
+  status?: unknown
+  active?: boolean
+  steps?: unknown[]
+  workflow_steps?: unknown[]
+  last_run?: WorkflowLastRun | null
+  latest_run?: { created_at?: string; status?: string }
+  [k: string]: unknown
+}

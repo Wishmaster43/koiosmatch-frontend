@@ -5,21 +5,24 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertCircle, CheckCircle, Loader2, MoreHorizontal, Play, Zap } from 'lucide-react'
-import PropTypes from 'prop-types'
 // Shared module registry — every module type (label/Icon/colours), so no step chip
 // silently disappears (AW-6). The local 6-type map is gone.
 import { MODULE_META } from '@/modules/index'
+import type { Workflow } from '@/types/workflow'
+
+// One workflow card/row's shared props.
+interface WorkflowCardProps { workflow: Workflow; onRun: (id?: string | number) => void | Promise<void>; onEdit: () => void }
 
 // Status badge colours; label = t('status.<key>').
-const STATUS_STYLES = {
+const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
   active:   { bg: 'var(--color-success-bg)', color: 'var(--color-success)', dot: 'var(--color-success)' },
   draft:    { bg: 'var(--hover-bg)', color: 'var(--text-muted)', dot: 'var(--text-muted)' },
   inactive: { bg: 'var(--color-warning-bg)', color: '#C2410C', dot: '#F97316' },
 }
 
-function StepPill({ type }) {
+function StepPill({ type }: { type?: string }) {
   const { t } = useTranslation('workflows')
-  const meta = MODULE_META[type]
+  const meta = type ? MODULE_META[type] : undefined
   if (!meta) return null
   const Icon = meta.Icon
   const label = t(`modules.${type}`, { defaultValue: meta.label ?? type })
@@ -36,10 +39,10 @@ function StepPill({ type }) {
 }
 
 // Compact horizontal row for the list view
-export function WorkflowRow({ workflow, onRun, onEdit }) {
+export function WorkflowRow({ workflow, onRun, onEdit }: WorkflowCardProps) {
   const { t } = useTranslation('workflows')
   const [running, setRunning] = useState(false)
-  const status = STATUS_STYLES[workflow.status] || STATUS_STYLES.draft
+  const status = STATUS_STYLES[workflow.status ?? ''] || STATUS_STYLES.draft
 
   const handleRun = async () => {
     setRunning(true)
@@ -116,12 +119,10 @@ export function WorkflowRow({ workflow, onRun, onEdit }) {
   )
 }
 
-WorkflowRow.propTypes = { workflow: PropTypes.object.isRequired, onRun: PropTypes.func.isRequired, onEdit: PropTypes.func.isRequired }
-
-export default function WorkflowCard({ workflow, onRun, onEdit }) {
+export default function WorkflowCard({ workflow, onRun, onEdit }: WorkflowCardProps) {
   const { t } = useTranslation('workflows')
   const [running, setRunning] = useState(false)
-  const status = STATUS_STYLES[workflow.status] || STATUS_STYLES.draft
+  const status = STATUS_STYLES[workflow.status ?? ''] || STATUS_STYLES.draft
 
   const handleRun = async () => {
     setRunning(true)

@@ -4,7 +4,9 @@
  * denormalize: UI -> API. Extracted from WorkflowsPage; no React, easy to test.
  */
 
-export function normalizeWorkflow(wf) {
+import type { RawWorkflow, RawStep, Workflow, WorkflowStep } from '../../../types/workflow'
+
+export function normalizeWorkflow(wf: RawWorkflow): Workflow {
   // trigger: string samengesteld uit trigger_type + trigger_config, of al een string
   const trigger = typeof wf.trigger === 'string'
     ? wf.trigger
@@ -17,14 +19,14 @@ export function normalizeWorkflow(wf) {
 
   // steps: normaliseren naar { id, type, config, position, next } — next = uitgaande
   // verbindingen (graaf), zodat Router-takken + verbindingsfilters bewaard blijven.
-  const rawSteps = Array.isArray(wf.steps) ? wf.steps : (wf.workflow_steps ?? [])
-  const steps = rawSteps.map(s => ({
+  const rawSteps = (Array.isArray(wf.steps) ? wf.steps : (wf.workflow_steps ?? [])) as RawStep[]
+  const steps: WorkflowStep[] = rawSteps.map(s => ({
     id:       s.id ? String(s.id) : undefined,
     type:     s.module_type ?? s.type,
     config:   s.config ?? s.parameters ?? {},
     position: s.position ?? undefined,
     next:     (s.next ?? s.connections ?? []).map(n => ({
-      target:  n.target != null ? String(n.target) : n.target,
+      target:  n.target != null ? String(n.target) : (n.target as null | undefined),
       filters: n.filters ?? null,
     })),
   }))
@@ -38,7 +40,7 @@ export function normalizeWorkflow(wf) {
 }
 
 // Vertaal frontend trigger string → trigger_type + trigger_config
-function parseTrigger(trigger) {
+function parseTrigger(trigger?: string): { trigger_type: string; trigger_config: Record<string, unknown> } {
   if (!trigger || trigger === 'Handmatig') return { trigger_type: 'manual', trigger_config: {} }
   if (trigger.toLowerCase().includes('webhook')) return { trigger_type: 'webhook', trigger_config: {} }
   // "Dagelijks 08:00", "Elk uur", "Maandag 07:00" → scheduled
@@ -50,7 +52,7 @@ function parseTrigger(trigger) {
 }
 
 // Vertaal frontend formaat → backend formaat voor opslaan
-export function denormalizeWorkflow(wf) {
+export function denormalizeWorkflow(wf: Workflow) {
   const { trigger_type, trigger_config } = parseTrigger(wf.trigger)
   return {
     name:           wf.name,

@@ -7,15 +7,22 @@ import { useTranslation } from 'react-i18next'
 import { Brain, Check, MessageSquare, Send, Trash2 } from 'lucide-react'
 import api from '@/lib/api'
 import { MODELS, STRENGTH_COLORS, inputStyle, Field, Badge, SaveBar } from './shared'
+import type { AiAgent, AiItem, ChatMessage } from '@/types/ai'
+
+// The agent edit-form's local state.
+interface AgentFormState {
+  name: string; model: string; custom_endpoint: string; custom_api_key: string
+  prompt_id: string | number; faq_ids: Array<string | number>; use_knowledge: boolean; max_history: number
+}
 
 // ── Chat test ─────────────────────────────────────────────────────────────────
 
-function ChatTest({ agent, onClose }) {
+function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) {
   const { t } = useTranslation('workflows')
-  const [messages, setMessages] = useState([])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input,    setInput]    = useState('')
   const [loading,  setLoading]  = useState(false)
-  const bottomRef = useRef(null)
+  const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
@@ -100,10 +107,12 @@ function ChatTest({ agent, onClose }) {
 
 // ── Agent form ────────────────────────────────────────────────────────────────
 
-export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }) {
+export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
+  agent: AiAgent | null; prompts: AiItem[]; faqs: AiItem[]; onSaved: (a: AiAgent) => void; onDelete: (a: AiAgent) => void
+}) {
   const { t } = useTranslation('workflows')
   const isNew = !agent?.id
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<AgentFormState>({
     name:            agent?.name            ?? '',
     model:           agent?.model           ?? 'gpt-4o-mini',
     custom_endpoint: agent?.custom_endpoint ?? '',
@@ -117,7 +126,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }) {
   const [saved,    setSaved]    = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
+  const set = <K extends keyof AgentFormState>(k: K, v: AgentFormState[K]) => setForm(f => ({ ...f, [k]: v }))
 
   const save = async () => {
     setSaving(true); setSaved(false)
@@ -131,7 +140,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }) {
     setSaving(false)
   }
 
-  const toggleFaq = id => set('faq_ids', form.faq_ids.includes(id) ? form.faq_ids.filter(x => x !== id) : [...form.faq_ids, id])
+  const toggleFaq = (id: string | number) => set('faq_ids', form.faq_ids.includes(id) ? form.faq_ids.filter(x => x !== id) : [...form.faq_ids, id])
 
   const selectedModel = MODELS.find(m => m.value === form.model)
 
@@ -168,7 +177,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }) {
             </button>
           )}
           {!isNew && (
-            <button onClick={() => onDelete(agent)}
+            <button onClick={() => agent && onDelete(agent)}
               style={{ padding: '5px 8px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--color-danger)', cursor: 'pointer', display: 'flex' }}>
               <Trash2 size={12} />
             </button>
@@ -225,9 +234,10 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 5, maxHeight: 160, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 8, padding: 8 }}>
               {faqs.length === 0 && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('ai.agent.noFaqs')}</p>}
               {faqs.map(f => {
-                const on = form.faq_ids.includes(f.id)
+                const fid = f.id as string | number
+                const on = form.faq_ids.includes(fid)
                 return (
-                  <label key={f.id} onClick={() => toggleFaq(f.id)}
+                  <label key={f.id} onClick={() => toggleFaq(fid)}
                     style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', padding: '4px 6px', borderRadius: 6, background: on ? 'var(--color-primary-bg)' : 'transparent' }}>
                     <div style={{ width: 14, height: 14, borderRadius: 4, border: `2px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`, background: on ? 'var(--color-primary)' : 'transparent', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       {on && <Check size={9} color="white" />}

@@ -4,10 +4,16 @@
  * SideList, ListRow). Extracted from AIManagementTabs so each tab can live on its own.
  */
 import { useState } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, ChevronDown, Clock, Plus, RefreshCw, Save, Trash2 } from 'lucide-react'
 
-export const MODELS = [
+// One selectable AI model.
+export interface Model { value: string; label: string; provider: string; strength: string | null }
+// One saved version of a prompt/agent config.
+export interface Version { version?: number; created_at?: string; body?: string; content?: string; [k: string]: unknown }
+
+export const MODELS: Model[] = [
   { value: 'gpt-4o',            label: 'GPT-4o',            provider: 'OpenAI',    strength: 'high' },
   { value: 'gpt-4o-mini',       label: 'GPT-4o Mini',       provider: 'OpenAI',    strength: 'medium' },
   { value: 'gpt-4-turbo',       label: 'GPT-4 Turbo',       provider: 'OpenAI',    strength: 'high' },
@@ -22,9 +28,9 @@ export const MODELS = [
 ]
 
 // Strength → colour; label = t('ai.strength.<key>').
-export const STRENGTH_COLORS = { high: '#7C3AED', medium: '#0369A1', fast: '#16A34A', reasoning: '#D97706' }
+export const STRENGTH_COLORS: Record<string, string> = { high: '#7C3AED', medium: '#0369A1', fast: '#16A34A', reasoning: '#D97706' }
 
-export const inputStyle = {
+export const inputStyle: CSSProperties = {
   width: '100%', padding: '7px 10px', fontSize: 13, borderRadius: 8,
   border: '1px solid var(--border)', background: 'var(--input-bg)',
   color: 'var(--text)', outline: 'none', boxSizing: 'border-box',
@@ -32,7 +38,7 @@ export const inputStyle = {
 
 // ── shared helpers ────────────────────────────────────────────────────────────
 
-export function Field({ label, children }) {
+export function Field({ label, children }: { label?: ReactNode; children: ReactNode }) {
   return (
     <div style={{ marginBottom: 13 }}>
       <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -43,7 +49,7 @@ export function Field({ label, children }) {
   )
 }
 
-export function Badge({ label, color, bg }) {
+export function Badge({ label, color, bg }: { label?: ReactNode; color?: string; bg?: string }) {
   return (
     <span style={{ fontSize: 10, fontWeight: 600, color, background: bg, borderRadius: 999, padding: '1px 6px', whiteSpace: 'nowrap' }}>
       {label}
@@ -51,7 +57,7 @@ export function Badge({ label, color, bg }) {
   )
 }
 
-export function SaveBar({ saving, saved, onSave }) {
+export function SaveBar({ saving, saved, onSave }: { saving?: boolean; saved?: boolean; onSave?: () => void }) {
   const { t } = useTranslation('workflows')
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -73,7 +79,7 @@ export function SaveBar({ saving, saved, onSave }) {
   )
 }
 
-export function VersionList({ versions, onRestore }) {
+export function VersionList({ versions, onRestore }: { versions?: Version[]; onRestore: (v: Version) => void }) {
   const { t } = useTranslation('workflows')
   const [open, setOpen] = useState(false)
   if (!versions?.length) return null
@@ -105,7 +111,10 @@ export function VersionList({ versions, onRestore }) {
   )
 }
 
-export function TextEditor({ value, onChange, onSave, saving, saved, versions, onRestore, placeholder, height = 220 }) {
+export function TextEditor({ value, onChange, onSave, saving, saved, versions, onRestore, placeholder, height = 220 }: {
+  value?: string; onChange: (v: string) => void; onSave?: () => void; saving?: boolean; saved?: boolean
+  versions?: Version[]; onRestore: (v: Version) => void; placeholder?: string; height?: number
+}) {
   return (
     <div>
       <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
@@ -120,7 +129,12 @@ export function TextEditor({ value, onChange, onSave, saving, saved, versions, o
 
 // ── SideList — reusable left-list + right-detail layout ──────────────────────
 
-export function SideList({ title, items, selected, onNew, loading, renderItem, children }) {
+export function SideList<T extends { id?: string | number }>({ title, items, selected, onNew, loading, renderItem, children }: {
+  title?: ReactNode; items: T[]; selected?: T | null; onNew?: () => void; loading?: boolean
+  // onSelect is accepted for call-site symmetry but selection is wired via renderItem's ListRow.
+  onSelect?: (item: T) => void
+  renderItem: (item: T, active: boolean) => ReactNode; children?: ReactNode
+}) {
   const { t } = useTranslation('workflows')
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr', gap: 12, height: '100%', minHeight: 0 }}>
@@ -148,7 +162,9 @@ export function SideList({ title, items, selected, onNew, loading, renderItem, c
   )
 }
 
-export function ListRow({ item, active, onSelect, label, sublabel, onDelete }) {
+export function ListRow<T>({ item, active, onSelect, label, sublabel, onDelete }: {
+  item: T; active?: boolean; onSelect: (item: T) => void; label?: ReactNode; sublabel?: ReactNode; onDelete?: (item: T) => void
+}) {
   return (
     <div onClick={() => onSelect(item)}
       style={{ padding: '8px 11px', cursor: 'pointer', fontSize: 12,

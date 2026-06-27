@@ -9,6 +9,7 @@
  * data/workflowMap.js.
  */
 import { useState, useEffect, useRef, useMemo } from 'react'
+import type { ReactNode, DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
 import { useRightPanel } from '../../context/RightPanelContext'
@@ -16,42 +17,44 @@ import { Zap, Plus, Loader2, Folder, FolderPlus, Trash2, LayoutGrid, List } from
 import WorkflowCanvasEditor from '../../components/layout/WorkflowCanvasEditor'
 import { normalizeWorkflow, denormalizeWorkflow } from './data/workflowMap'
 import WorkflowCard, { WorkflowRow } from './WorkflowCard'
+import type { Workflow } from '../../types/workflow'
 
-
-// ── Folder sidebar ────────────────────────────────────────────────────────────
+// A workflow folder (left sidebar grouping).
+interface WorkflowFolder { id: string | number; name: string; [k: string]: unknown }
+type FolderId = string | number | null
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function WorkflowsPage() {
   const { t } = useTranslation('workflows')
-  const [workflows,       setWorkflows]       = useState([])
-  const [folders,         setFolders]         = useState([])
+  const [workflows,       setWorkflows]       = useState<Workflow[]>([])
+  const [folders,         setFolders]         = useState<WorkflowFolder[]>([])
   const [loading,         setLoading]         = useState(true)
-  const [selectedFolder,  setSelectedFolder]  = useState(null)   // null = alle, 'unassigned' = geen folder, uuid = folder
-  const [editingWorkflow, setEditingWorkflow] = useState(null)
-  const [dragOverFolder,  setDragOverFolder]  = useState(null)
+  const [selectedFolder,  setSelectedFolder]  = useState<FolderId>(null)   // null = alle, 'unassigned' = geen folder, uuid = folder
+  const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null)
+  const [dragOverFolder,  setDragOverFolder]  = useState<FolderId>(null)
   const [viewMode,        setViewMode]        = useState('grid')  // 'grid' | 'list'
-  const dragWf = useRef(null)
+  const dragWf = useRef<string | number | null>(null)
 
   // Right-panel filters (status + module type) — registering them shows the topbar
   // filter button, just like the candidates/planning pages.
-  const [selectedStatus, setSelectedStatus] = useState([])
-  const [selectedModule, setSelectedModule] = useState([])
+  const [selectedStatus, setSelectedStatus] = useState<string[]>([])
+  const [selectedModule, setSelectedModule] = useState<string[]>([])
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  const statusOptions = useMemo(() => [...new Set(workflows.map(w => w.status))].filter(Boolean)
+  const statusOptions = useMemo(() => [...new Set(workflows.map(w => w.status))].filter((v): v is string => Boolean(v))
     .map(v => ({ value: v, label: t(`status.${v}`, { defaultValue: v }), count: workflows.filter(w => w.status === v).length })), [workflows, t])
   const moduleOptions = useMemo(() => {
-    const counts = {}
-    workflows.forEach(w => new Set((w.steps ?? []).map(s => s.type)).forEach(ty => { counts[ty] = (counts[ty] ?? 0) + 1 }))
+    const counts: Record<string, number> = {}
+    workflows.forEach(w => new Set((w.steps ?? []).map(s => s.type).filter((x): x is string => Boolean(x))).forEach(ty => { counts[ty] = (counts[ty] ?? 0) + 1 }))
     return Object.keys(counts).map(v => ({ value: v, label: t(`modules.${v}`, { defaultValue: v }), count: counts[v] }))
   }, [workflows, t])
 
   const filterGroups = useMemo(() => [
     { key: 'status', label: t('filters.status'), selected: selectedStatus, options: statusOptions,
-      onToggle: v => setSelectedStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+      onToggle: (v: string) => setSelectedStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
     { key: 'module', label: t('filters.module'), selected: selectedModule, options: moduleOptions,
-      onToggle: v => setSelectedModule(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+      onToggle: (v: string) => setSelectedModule(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
   ], [t, selectedStatus, selectedModule, statusOptions, moduleOptions])
 
   useEffect(() => {
@@ -67,7 +70,7 @@ export default function WorkflowsPage() {
       // Restore graph from localStorage when the backend doesn't store connections yet (C-27).
       // The cached steps are self-consistent (node IDs match edge source/target), so use
       // them wholesale rather than merging with server step IDs which would cause mismatches.
-      const merged = wfs.map(wf => {
+      const merged = (wfs as Workflow[]).map((wf: Workflow) => {
         const serverHasGraph = wf.steps.some(s => Array.isArray(s.next) && s.next.length)
         if (serverHasGraph) return wf           // backend already stores the graph → trust it
         const raw = localStorage.getItem(`wf_graph_${wf.id}`)
@@ -82,11 +85,11 @@ export default function WorkflowsPage() {
     }).finally(() => setLoading(false))
   }, [])
 
-  const handleRun = async (id) => {
+  const handleRun = async (id?: string | number) => {
     await api.post(`/workflows/${id}/run`).catch(() => api.post(`/workflows/${id}/execute`)).catch(() => {})
   }
 
-  const handleSave = async (updated, closeAfter = true) => {
+  const handleSave = async (updated: Workflow, closeAfter = true) => {
     if (!updated.steps || updated.steps.length === 0) {
       alert(t('page.addModuleAlert'))
       return
@@ -111,18 +114,19 @@ export default function WorkflowsPage() {
       }
       // else: editor keeps its own state; no prop change needed
     } catch (err) {
-      alert(t('page.saveFailed', { msg: err.response?.data?.message ?? err.message }))
+      const e = err as { response?: { data?: { message?: string } }; message?: string }
+      alert(t('page.saveFailed', { msg: e.response?.data?.message ?? e.message }))
     }
   }
 
-  const createFolder = async (name) => {
+  const createFolder = async (name: string) => {
     try {
       const res = await api.post('/workflow-folders', { name })
       setFolders(prev => [...prev, res.data?.data ?? res.data])
     } catch { /* noop */ }
   }
 
-  const deleteFolder = async (folder) => {
+  const deleteFolder = async (folder: WorkflowFolder) => {
     if (!confirm(t('page.deleteFolderConfirm', { name: folder.name }))) return
     try {
       await api.delete(`/workflow-folders/${folder.id}`)
@@ -132,7 +136,7 @@ export default function WorkflowsPage() {
     } catch { /* noop */ }
   }
 
-  const moveToFolder = async (workflowId, folderId) => {
+  const moveToFolder = async (workflowId: string | number | null, folderId: FolderId) => {
     setWorkflows(prev => prev.map(w => w.id === workflowId ? { ...w, folder_id: folderId } : w))
     const wf = workflows.find(w => w.id === workflowId)
     if (!wf) return
@@ -147,8 +151,8 @@ export default function WorkflowsPage() {
     if (selectedFolder === 'unassigned' && wf.folder_id) return false
     if (selectedFolder && selectedFolder !== 'unassigned' && wf.folder_id !== selectedFolder) return false
     // Right-panel filters
-    if (selectedStatus.length && !selectedStatus.includes(wf.status)) return false
-    if (selectedModule.length && !(wf.steps ?? []).some(s => selectedModule.includes(s.type))) return false
+    if (selectedStatus.length && !selectedStatus.includes(wf.status as string)) return false
+    if (selectedModule.length && !(wf.steps ?? []).some(s => selectedModule.includes(s.type as string))) return false
     return true
   })
 
@@ -233,7 +237,7 @@ export default function WorkflowsPage() {
           <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>
             {visibleWorkflows.map(wf => (
               <div key={wf.id} draggable
-                onDragStart={() => { dragWf.current = wf.id }}
+                onDragStart={() => { dragWf.current = wf.id ?? null }}
                 onDragEnd={() => { dragWf.current = null }}
                 style={{ cursor: 'grab' }}
               >
@@ -260,7 +264,7 @@ export default function WorkflowsPage() {
             </div>
             {visibleWorkflows.map(wf => (
               <div key={wf.id} draggable
-                onDragStart={() => { dragWf.current = wf.id }}
+                onDragStart={() => { dragWf.current = wf.id ?? null }}
                 onDragEnd={() => { dragWf.current = null }}>
                 <WorkflowRow workflow={wf} onRun={handleRun} onEdit={() => setEditingWorkflow(wf)} />
               </div>
@@ -285,7 +289,10 @@ export default function WorkflowsPage() {
   )
 }
 
-function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDragLeave, onDrop, onDelete }) {
+function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDragLeave, onDrop, onDelete }: {
+  label?: ReactNode; icon?: ReactNode; active?: boolean; isDragOver?: boolean
+  onClick?: () => void; onDragOver?: (e: DragEvent) => void; onDragLeave?: () => void; onDrop?: () => void; onDelete?: () => void
+}) {
   const [hover, setHover] = useState(false)
   return (
     <div onClick={onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}

@@ -9,16 +9,18 @@ import { useTranslation } from 'react-i18next'
 import { Check } from 'lucide-react'
 import api from '../../lib/api'
 import { MODELS, inputStyle, Field, TextEditor, SideList, ListRow } from './management/shared'
+import type { Version } from './management/shared'
 import { AgentForm } from './management/AgentForm'
+import type { AiAgent, AiItem } from '../../types/ai'
 
 // ── Agents tab ────────────────────────────────────────────────────────────────
 
 export function AgentsTab() {
   const { t } = useTranslation('workflows')
-  const [agents,   setAgents]   = useState([])
-  const [selected, setSelected] = useState(null)
-  const [prompts,  setPrompts]  = useState([])
-  const [faqs,     setFaqs]     = useState([])
+  const [agents,   setAgents]   = useState<AiAgent[]>([])
+  const [selected, setSelected] = useState<AiAgent | null>(null)
+  const [prompts,  setPrompts]  = useState<AiItem[]>([])
+  const [faqs,     setFaqs]     = useState<AiItem[]>([])
   const [loading,  setLoading]  = useState(true)
 
   useEffect(() => {
@@ -35,7 +37,7 @@ export function AgentsTab() {
     }).catch(() => { /* noop */ }).finally(() => setLoading(false))
   }, [])
 
-  const onSaved = (agent) => {
+  const onSaved = (agent: AiAgent) => {
     setAgents(prev => {
       const exists = prev.find(a => a.id === agent.id)
       return exists ? prev.map(a => a.id === agent.id ? agent : a) : [agent, ...prev]
@@ -43,7 +45,7 @@ export function AgentsTab() {
     setSelected(agent)
   }
 
-  const onDelete = async (agent) => {
+  const onDelete = async (agent: AiAgent) => {
     if (!confirm(t('ai.agent.confirmDelete', { name: agent.name }))) return
     await api.delete(`/ai/agents/${agent.id}`).catch(() => {})
     setAgents(prev => prev.filter(a => a.id !== agent.id))
@@ -76,13 +78,13 @@ export function AgentsTab() {
 
 export function PromptsTab() {
   const { t } = useTranslation('workflows')
-  const [prompts,  setPrompts]  = useState([])
-  const [selected, setSelected] = useState(null)
+  const [prompts,  setPrompts]  = useState<AiItem[]>([])
+  const [selected, setSelected] = useState<AiItem | null>(null)
   const [name,     setName]     = useState('')
   const [body,     setBody]     = useState('')
   const [saving,   setSaving]   = useState(false)
   const [saved,    setSaved]    = useState(false)
-  const [versions, setVersions] = useState([])
+  const [versions, setVersions] = useState<Version[]>([])
   const [loading,  setLoading]  = useState(true)
 
   useEffect(() => {
@@ -93,7 +95,7 @@ export function PromptsTab() {
     }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
-  const select = (p) => {
+  const select = (p: AiItem) => {
     setSelected(p); setName(p.name ?? ''); setBody(p.body ?? p.content ?? '')
     api.get(`/ai/prompts/${p.id}/versions`).then(r => setVersions(r.data?.data ?? r.data ?? [])).catch(() => setVersions([]))
   }
@@ -112,7 +114,7 @@ export function PromptsTab() {
     setSaving(false)
   }
 
-  const del = async (p) => {
+  const del = async (p: AiItem) => {
     if (!confirm(t('ai.prompts.confirmDelete', { name: p.name }))) return
     await api.delete(`/ai/prompts/${p.id}`).catch(() => {})
     setPrompts(prev => prev.filter(x => x.id !== p.id))
@@ -140,13 +142,13 @@ export function PromptsTab() {
 
 export function FAQTab() {
   const { t } = useTranslation('workflows')
-  const [faqs,     setFaqs]     = useState([])
-  const [selected, setSelected] = useState(null)
+  const [faqs,     setFaqs]     = useState<AiItem[]>([])
+  const [selected, setSelected] = useState<AiItem | null>(null)
   const [name,     setName]     = useState('')
   const [body,     setBody]     = useState('')
   const [saving,   setSaving]   = useState(false)
   const [saved,    setSaved]    = useState(false)
-  const [versions, setVersions] = useState([])
+  const [versions, setVersions] = useState<Version[]>([])
   const [loading,  setLoading]  = useState(true)
 
   useEffect(() => {
@@ -157,7 +159,7 @@ export function FAQTab() {
     }).catch(() => {}).finally(() => setLoading(false))
   }, [])
 
-  const select = (f) => {
+  const select = (f: AiItem) => {
     setSelected(f); setName(f.name ?? ''); setBody(f.body ?? f.content ?? '')
     api.get(`/ai/faqs/${f.id}/versions`).then(r => setVersions(r.data?.data ?? r.data ?? [])).catch(() => setVersions([]))
   }
@@ -175,7 +177,7 @@ export function FAQTab() {
     setSaving(false)
   }
 
-  const del = async (f) => {
+  const del = async (f: AiItem) => {
     if (!confirm(t('ai.faqs.confirmDelete', { name: f.name }))) return
     await api.delete(`/ai/faqs/${f.id}`).catch(() => {})
     setFaqs(prev => prev.filter(x => x.id !== f.id))
@@ -203,8 +205,8 @@ export function FAQTab() {
 
 export function KnowledgeTab() {
   const { t } = useTranslation('workflows')
-  const [items,    setItems]    = useState([])
-  const [selected, setSelected] = useState(null)
+  const [items,    setItems]    = useState<AiItem[]>([])
+  const [selected, setSelected] = useState<AiItem | null>(null)
   const [name,     setName]     = useState('')
   const [body,     setBody]     = useState('')
   const [saving,   setSaving]   = useState(false)
@@ -261,10 +263,10 @@ const BUILTIN_TOOLS = ['shift_lookup', 'candidate_status', 'send_whatsapp', 'upd
 
 export function ToolsTab() {
   const { t } = useTranslation('workflows')
-  const [enabled, setEnabled] = useState(() => new Set(['shift_lookup', 'knowledge_search']))
+  const [enabled, setEnabled] = useState<Set<string>>(() => new Set(['shift_lookup', 'knowledge_search']))
 
-  const toggle = id => setEnabled(prev => {
-    const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n
+  const toggle = (id: string) => setEnabled(prev => {
+    const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n
   })
 
   return (
