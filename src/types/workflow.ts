@@ -58,3 +58,23 @@ export interface RawWorkflow {
   latest_run?: { created_at?: string; status?: string }
   [k: string]: unknown
 }
+
+// ── ReactFlow graph shapes (canvas editor) ───────────────────────────────────
+export interface FlowNodeData { type?: string; config?: Record<string, unknown>; isFirst?: boolean; [k: string]: unknown }
+export interface FlowNode {
+  id: string
+  type?: string
+  position: { x: number; y: number }
+  data: FlowNodeData
+  width?: number
+  height?: number
+  [k: string]: unknown
+}
+export interface FlowEdge {
+  id: string
+  source: string
+  target: string
+  type?: string
+  data?: { filters?: unknown }
+  [k: string]: unknown
+}

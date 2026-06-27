@@ -6,11 +6,14 @@
  * separate from the editor so the graph round-trip is easy to test and reason about.
  */
 
+import type { WorkflowStep, FlowNode, FlowEdge } from '../../../types/workflow'
+
 // Stable-ish id for a freshly created node.
 export const uid = () => 'n_' + Math.random().toString(36).slice(2, 8)
 
 // Build a ReactFlow edge between two node ids (our "addable" edge type).
-export const mkEdge = (src, tgt) => ({ id: `e_${src}_${tgt}`, source: src, target: tgt, type: 'addable' })
+export const mkEdge = (src?: string | number | null, tgt?: string | number | null): FlowEdge =>
+  ({ id: `e_${src}_${tgt}`, source: String(src), target: String(tgt), type: 'addable' })
 
 // Canvas node footprint (used for layout + when inserting new nodes).
 export const NODE_W = 90
@@ -18,18 +21,18 @@ export const NODE_H = 110
 
 // steps[] → { nodes, edges }. Prefers explicit `next` connections (keeps Router
 // branches + edge filters); falls back to a linear chain for legacy workflows.
-export function stepsToFlow(steps) {
+export function stepsToFlow(steps: WorkflowStep[]): { nodes: FlowNode[]; edges: FlowEdge[] } {
   const GAP = 220
-  const nodes = steps.map((s, i) => ({
-    id:       s.id,
+  const nodes: FlowNode[] = steps.map((s, i) => ({
+    id:       String(s.id),
     type:     'module',
-    position: s.position ?? { x: 80 + i * GAP, y: 180 },
+    position: (s.position as { x: number; y: number } | undefined) ?? { x: 80 + i * GAP, y: 180 },
     data:     { type: s.type, config: { ...s.config }, isFirst: i === 0 },
     width:    NODE_W,
     height:   NODE_H,
   }))
   const hasGraph = steps.some(s => Array.isArray(s.next) && s.next.length)
-  const edges = hasGraph
+  const edges: FlowEdge[] = hasGraph
     ? steps.flatMap(s => (s.next ?? []).map(n => ({
         ...mkEdge(s.id, n.target),
         data: n.filters ? { filters: n.filters } : undefined,
@@ -41,13 +44,13 @@ export function stepsToFlow(steps) {
 // { nodes, edges } → steps[]. Best-effort linear order for the `order` index; the
 // real structure lives in each node's `next` (target + edge filters) so Router
 // branches and connection filters survive save/reload.
-export function flowToSteps(nodes, edges) {
-  const adj     = {}
+export function flowToSteps(nodes: FlowNode[], edges: FlowEdge[]): WorkflowStep[] {
+  const adj: Record<string, string> = {}
   edges.forEach(e => { if (!(e.source in adj)) adj[e.source] = e.target })
-  const nodeMap = Object.fromEntries(nodes.map(n => [n.id, n]))
+  const nodeMap: Record<string, FlowNode> = Object.fromEntries(nodes.map(n => [n.id, n]))
   const starts  = nodes.filter(n => !edges.some(e => e.target === n.id))
-  const ordered = []
-  let cur = starts[0] ?? nodes[0]
+  const ordered: FlowNode[] = []
+  let cur: FlowNode | null | undefined = starts[0] ?? nodes[0]
   while (cur && !ordered.includes(cur)) {
     ordered.push(cur)
     cur = adj[cur.id] ? nodeMap[adj[cur.id]] : null
