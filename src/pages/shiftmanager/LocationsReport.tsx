@@ -11,20 +11,22 @@ import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '../../context/RightPanelContext'
 import KpiBlock         from '../../components/ui/KpiBlock'
 import EntityListDrawer from '../../components/ui/EntityListDrawer'
+import type { ReportCustomer, ReportLocation } from '../../types/reports'
+import type { SmDrillItem } from '../../types/shiftmanager'
 
 export default function LocationsReport() {
   const { t } = useTranslation('shiftmanager')
-  const [locations, setLocations] = useState([])
+  const [locations, setLocations] = useState<ReportLocation[]>([])
   const [loading,   setLoading]   = useState(true)
-  const [drawer,    setDrawer]    = useState(null) // { title, items }
-  const [selectedStatuses, setSelectedStatuses] = useState([])
+  const [drawer,    setDrawer]    = useState<{ title: string; items: SmDrillItem[] } | null>(null)
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   useEffect(() => {
     api.get('/sm_customers')
       .then(res => {
-        const customers = res.data?.data ?? res.data ?? []
+        const customers = (res.data?.data ?? res.data ?? []) as ReportCustomer[]
         setLocations(customers.flatMap(c =>
           (c.locations ?? []).map(l => ({
             ...l,
@@ -41,22 +43,22 @@ export default function LocationsReport() {
   const inactive = locations.filter(l => l.status?.toLowerCase() !== 'active')
   const totalDep = locations.reduce((s, l) => s + (l.dept_count ?? 0), 0)
   const noDept   = locations.filter(l => !l.dept_count)
-  const uniqueCustomers = [...new Set(locations.map(l => l.customer_name).filter(Boolean))]
+  const uniqueCustomers = [...new Set(locations.map(l => l.customer_name).filter((x): x is string => Boolean(x)))]
 
   // Drill-down datasets
-  const drillActive = active.map(l => ({
-    primary:    l.name,
+  const drillActive: SmDrillItem[] = active.map(l => ({
+    primary:    l.name ?? '',
     secondary:  l.customer_name,
     badge:      t('locationsReport.badge.active'),
     badgeColor: 'var(--color-success)',
     badgeBg:    'var(--color-success-bg)',
   }))
-  const drillDepartments = locations.flatMap(l =>
-    (l.departments ?? []).map(d => ({ primary: d.name, secondary: l.name }))
+  const drillDepartments: SmDrillItem[] = locations.flatMap(l =>
+    (l.departments ?? []).map(d => ({ primary: d.name ?? '', secondary: l.name }))
   )
-  const drillCustomers = uniqueCustomers.map(name => ({ primary: name }))
-  const drillNoDept = noDept.map(l => ({
-    primary:    l.name,
+  const drillCustomers: SmDrillItem[] = uniqueCustomers.map(name => ({ primary: name }))
+  const drillNoDept: SmDrillItem[] = noDept.map(l => ({
+    primary:    l.name ?? '',
     secondary:  l.customer_name,
     badge:      t('locationsReport.badge.noDepartments'),
     badgeColor: 'var(--color-warning)',
@@ -64,7 +66,7 @@ export default function LocationsReport() {
   }))
 
   const statusOptions = useMemo(() =>
-    [...new Set(locations.map(l => l.status).filter(Boolean))].sort(), [locations])
+    [...new Set(locations.map(l => l.status).filter((x): x is string => Boolean(x)))].sort(), [locations])
 
   const filterGroups = useMemo(() => statusOptions.length === 0 ? [] : [{
     key: 'status', label: t('locationsReport.filterStatus'),
@@ -74,7 +76,7 @@ export default function LocationsReport() {
       label: s === 'active' ? t('common:status.active') : s === 'inactive' ? t('common:status.inactive') : s,
       count: locations.filter(l => l.status === s).length,
     })),
-    onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+    onToggle: (v: string) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
   }], [t, statusOptions, selectedStatuses, locations])
 
   useEffect(() => {

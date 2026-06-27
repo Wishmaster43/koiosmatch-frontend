@@ -12,12 +12,14 @@ import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '../../context/RightPanelContext'
 import ModuleView       from '../../components/settings/ModuleView'
 import EntityListDrawer  from '../../components/ui/EntityListDrawer'
+import type { ReportCustomer } from '../../types/reports'
+import type { SmDrillItem } from '../../types/shiftmanager'
 
 export default function CustomersReport() {
   const { t } = useTranslation('shiftmanager')
-  const [customers, setCustomers] = useState([])
+  const [customers, setCustomers] = useState<ReportCustomer[]>([])
   const [loading,   setLoading]   = useState(true)
-  const [drawer,    setDrawer]    = useState(null) // { title, items }
+  const [drawer,    setDrawer]    = useState<{ title: string; items: SmDrillItem[] } | null>(null)
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -40,26 +42,26 @@ export default function CustomersReport() {
   const noLocation = customers.filter(c => !c.locations?.length)
 
   // Drill-down datasets
-  const drillActive = active.map(c => ({
-    primary:     c.name,
+  const drillActive: SmDrillItem[] = active.map(c => ({
+    primary:     c.name ?? '',
     secondary:   t('customersReport.sub.locations', { count: c.locations?.length ?? 0 }),
     badge:       t('customersReport.activeWord'),
     badgeColor:  'var(--color-success)',
     badgeBg:     'var(--color-success-bg)',
   }))
-  const drillLocations = customers.flatMap(c =>
-    (c.locations ?? []).map(l => ({ primary: l.name, secondary: c.name }))
+  const drillLocations: SmDrillItem[] = customers.flatMap(c =>
+    (c.locations ?? []).map(l => ({ primary: l.name ?? '', secondary: c.name }))
   )
-  const drillDepartments = customers.flatMap(c =>
+  const drillDepartments: SmDrillItem[] = customers.flatMap(c =>
     (c.locations ?? []).flatMap(l =>
       (l.departments ?? []).map(d => ({
-        primary:   d.name,
+        primary:   d.name ?? '',
         secondary: `${l.name} — ${c.name}`,
       }))
     )
   )
-  const drillNoLocation = noLocation.map(c => ({
-    primary:   c.name,
+  const drillNoLocation: SmDrillItem[] = noLocation.map(c => ({
+    primary:   c.name ?? '',
     secondary: t('customersReport.sub.noLocationsLinked'),
     badge:     inactive.includes(c) ? t('customersReport.inactiveWord') : t('customersReport.activeWord'),
     badgeColor: inactive.includes(c) ? '#C2410C' : 'var(--color-success)',
@@ -91,9 +93,9 @@ export default function CustomersReport() {
   }
 
   // Right-panel filter
-  const [selectedStatuses, setSelectedStatuses] = useState([])
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
   const statusOptions = useMemo(() =>
-    [...new Set(customers.map(c => c.status).filter(Boolean))].sort(), [customers])
+    [...new Set(customers.map(c => c.status).filter((x): x is string => Boolean(x)))].sort(), [customers])
 
   const filterGroups = useMemo(() => statusOptions.length === 0 ? [] : [{
     key: 'status', label: t('customersReport.filterStatus'),
@@ -103,7 +105,7 @@ export default function CustomersReport() {
       label: s === 'active' ? t('common:status.active') : s === 'inactive' ? t('common:status.inactive') : s,
       count: customers.filter(c => c.status === s).length,
     })),
-    onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+    onToggle: (v: string) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
   }], [t, statusOptions, selectedStatuses, customers])
 
   useEffect(() => {

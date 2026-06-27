@@ -32,6 +32,9 @@ export interface SmDepartmentRow {
   [k: string]: unknown
 }
 
+// One row in a report KPI drill-down drawer (EntityListDrawer-compatible).
+export interface SmDrillItem { primary: string; secondary?: string; badge?: string; badgeColor?: string; badgeBg?: string }
+
 // A location row (LocationsPage → LocationDrawer). `departments` is the list of
 // department names; `shifts` a count.
 export interface SmLocationRow {
