@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
 import api from '../../lib/api'
 import { useKpiSettings } from '../../lib/useKpiSettings'
+import type { ReportCandidate } from '../../types/reports'
+import type { ChartDatum } from '../charts/chartTypes'
 import {
   getLoginGroup, LOGIN_GROUP_ORDER,
   groupAndCount, toChartData,
@@ -30,27 +32,27 @@ const END_COLOR    = 'var(--color-danger)'
 // (must mirror the labels chartHelpers.groupByMonth produces).
 const MONTHS_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
 
-function getWeekNumber(date) {
+function getWeekNumber(date: Date) {
   const d     = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
   const day   = d.getUTCDay() || 7
   d.setUTCDate(d.getUTCDate() + 4 - day)
   const start = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
-  return Math.ceil((((d - start) / 86400000) + 1) / 7)
+  return Math.ceil((((d.getTime() - start.getTime()) / 86400000) + 1) / 7)
 }
 
 export default function CandidatesReport() {
   const { t } = useTranslation('reports')
   const { candidates_per_page, top_cities_n } = useKpiSettings()
   // ── Data & filter state ───────────────────────────────────────────────────
-  const [candidates,          setCandidates]          = useState([])
-  const [selectedStatuses,    setSelectedStatuses]    = useState(['actief'])
-  const [selectedStatusesDEL] = useState(['verwijderd'])
-  const [selectedPositions,   setSelectedPositions]   = useState([])
-  const [selectedYear,        setSelectedYear]        = useState(new Date().getFullYear())
+  const [candidates,          setCandidates]          = useState<ReportCandidate[]>([])
+  const [selectedStatuses,    setSelectedStatuses]    = useState<string[]>(['actief'])
+  const [selectedStatusesDEL] = useState<string[]>(['verwijderd'])
+  const [selectedPositions,   setSelectedPositions]   = useState<string[]>([])
+  const [selectedYear,        setSelectedYear]        = useState<number | null>(new Date().getFullYear())
   const [showPercent,         setShowPercent]         = useState(false)
   const [loading,             setLoading]             = useState(true)
-  const [error,               setError]               = useState(null)
-  const [drillDown,           setDrillDown]           = useState(null)
+  const [error,               setError]               = useState<string | null>(null)
+  const [drillDown,           setDrillDown]           = useState<{ title: string; subtitle: string; candidates: ReportCandidate[] } | null>(null)
 
   // Registers filterGroups in the right sidebar via context
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -89,29 +91,30 @@ export default function CandidatesReport() {
   })
 
   // ── Chart data ────────────────────────────────────────────────────────────
-  const positionData   = toChartData(groupAndCount(filteredGeneral, c => c.position))
-  const loginData      = toChartData(groupAndCount(filteredGeneral, c => getLoginGroup(c.last_login_at)), LOGIN_GROUP_ORDER)
-  const monthData      = groupByMonth(filteredGeneral, selectedYear)
-  const weekData       = groupByWeek(filteredGeneral, selectedYear)
-  const endMonthData   = groupByMonth(filteredDeleted, selectedYear, 'end_date_employment')
-  const endWeekData    = groupByWeek(filteredDeleted, selectedYear, 'end_date_employment')
-  const cityData       = topN(filteredGeneral, c => c.city || 'Onbekend', top_cities_n)
+  // chartHelpers returns its own {name,value} shape; cast to the charts' ChartDatum (adds the recharts index signature).
+  const positionData   = toChartData(groupAndCount(filteredGeneral, c => c.position)) as ChartDatum[]
+  const loginData      = toChartData(groupAndCount(filteredGeneral, c => getLoginGroup(c.last_login_at)), LOGIN_GROUP_ORDER) as ChartDatum[]
+  const monthData      = groupByMonth(filteredGeneral, selectedYear) as ChartDatum[]
+  const weekData       = groupByWeek(filteredGeneral, selectedYear) as ChartDatum[]
+  const endMonthData   = groupByMonth(filteredDeleted, selectedYear, 'end_date_employment') as ChartDatum[]
+  const endWeekData    = groupByWeek(filteredDeleted, selectedYear, 'end_date_employment') as ChartDatum[]
+  const cityData       = topN(filteredGeneral, c => (c.city as string) || 'Onbekend', top_cities_n) as ChartDatum[]
   
   // useMemo prevents a new array reference on every render
   const availableYears = useMemo(() => getAvailableYears(candidates), [candidates])
 
   // ── Drill-down helpers ────────────────────────────────────────────────────
-  const openDrillDown = (title, subtitle, items) =>
+  const openDrillDown = (title: string, subtitle: string, items: ReportCandidate[]) =>
     setDrillDown({ title, subtitle, candidates: items })
 
-  const handlePositionDrillDown  = (data) => openDrillDown(data.name, t('report.sub.position'),
-    filteredGeneral.filter(c => (c.position || 'Onbekend') === data.name))
+  const handlePositionDrillDown  = (data: unknown) => { const name = (data as ChartDatum).name; openDrillDown(name, t('report.sub.position'),
+    filteredGeneral.filter(c => (c.position || 'Onbekend') === name)) }
 
-  const handleLoginDrillDown = (data) => openDrillDown(data.name, t('report.sub.lastLogin'),
-    filteredGeneral.filter(c => getLoginGroup(c.last_login_at) === data.name))
+  const handleLoginDrillDown = (data: unknown) => { const name = (data as ChartDatum).name; openDrillDown(name, t('report.sub.lastLogin'),
+    filteredGeneral.filter(c => getLoginGroup(c.last_login_at) === name)) }
 
-  const handleMonthDrillDown = (data) => {
-    const monthName = data.name || data.payload?.name
+  const handleMonthDrillDown = (data: unknown) => {
+    const monthName = ((data as ChartDatum).name || (data as { payload?: { name?: string } }).payload?.name) ?? ''
     openDrillDown(monthName, t('report.sub.regMonth'), filteredGeneral.filter(c => {
       if (!c.registration_date) return false
       const date = new Date(c.registration_date)
@@ -120,8 +123,8 @@ export default function CandidatesReport() {
     }))
   }
 
-  const handleWeekDrillDown = (data) => {
-    const label = data.name || data.payload?.name
+  const handleWeekDrillDown = (data: unknown) => {
+    const label = ((data as ChartDatum).name || (data as { payload?: { name?: string } }).payload?.name) ?? ''
     openDrillDown(label, t('report.sub.regWeek'), filteredGeneral.filter(c => {
       if (!c.registration_date) return false
       const date = new Date(c.registration_date)
@@ -130,11 +133,11 @@ export default function CandidatesReport() {
     }))
   }
 
-  const handleCityDrillDown = (data) => openDrillDown(data.name, t('report.sub.city'),
-    filteredGeneral.filter(c => (c.city || 'Onbekend') === data.name))
+  const handleCityDrillDown = (data: unknown) => { const name = (data as ChartDatum).name; openDrillDown(name, t('report.sub.city'),
+    filteredGeneral.filter(c => (c.city || 'Onbekend') === name)) }
 
-  const handleEndMonthDrillDown = (data) => {
-    const monthName = data.name || data.payload?.name
+  const handleEndMonthDrillDown = (data: unknown) => {
+    const monthName = ((data as ChartDatum).name || (data as { payload?: { name?: string } }).payload?.name) ?? ''
     openDrillDown(monthName, t('report.sub.endMonth'), filteredDeleted.filter(c => {
       if (!c.end_date_employment) return false
       const date = new Date(c.end_date_employment)
@@ -143,8 +146,8 @@ export default function CandidatesReport() {
     }))
   }
 
-  const handleEndWeekDrillDown = (data) => {
-    const label = data.name || data.payload?.name
+  const handleEndWeekDrillDown = (data: unknown) => {
+    const label = ((data as ChartDatum).name || (data as { payload?: { name?: string } }).payload?.name) ?? ''
     openDrillDown(label, t('report.sub.endWeek'), filteredDeleted.filter(c => {
       if (!c.end_date_employment) return false
       const date = new Date(c.end_date_employment)
@@ -171,12 +174,12 @@ export default function CandidatesReport() {
         { value: 'number',  label: t('report.filters.numbers') },
         { value: 'percent', label: t('report.filters.percentages') },
       ],
-      onToggle: v => setShowPercent(v === 'percent'),
+      onToggle: (v: string) => setShowPercent(v === 'percent'),
     },
     {
       key: 'year', label: t('report.filters.year'),
       selected: selectedYear ? [String(selectedYear)] : [],
-      onToggle: v => setSelectedYear(prev => String(prev) === v ? null : parseInt(v)),
+      onToggle: (v: string) => setSelectedYear(prev => String(prev) === v ? null : parseInt(v)),
       options: availableYears.map(y => ({
         value: String(y), label: String(y),
         count: candidates.filter(c =>
@@ -187,7 +190,7 @@ export default function CandidatesReport() {
     {
       key: 'status', label: t('report.filters.status'),
       selected: selectedStatuses,
-      onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(s => s !== v) : [...p, v]),
+      onToggle: (v: string) => setSelectedStatuses(p => p.includes(v) ? p.filter(s => s !== v) : [...p, v]),
       options: allStatuses.map(s => ({
         value: s, label: t(`candidates.status.${s}`, { defaultValue: s }),
         count: candidates.filter(c => (c.status||'onbekend').toLowerCase() === s).length,
@@ -196,7 +199,7 @@ export default function CandidatesReport() {
     {
       key: 'position', label: t('report.filters.position'),
       selected: selectedPositions,
-      onToggle: v => setSelectedPositions(p => p.includes(v) ? p.filter(s => s !== v) : [...p, v]),
+      onToggle: (v: string) => setSelectedPositions(p => p.includes(v) ? p.filter(s => s !== v) : [...p, v]),
       options: allPositions.map(p => ({
         value: p, label: p,
         count: candidates.filter(c => (c.position||'Onbekend') === p).length,

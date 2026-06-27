@@ -4,13 +4,16 @@
  * StatusBadge below = the colored status pill.
  */
 import { useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Phone, Mail, MapPin, Calendar, Clock, Briefcase, MessageSquare, History } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import type { ReportCandidate, GlobalRate } from '../../types/reports'
 
 // Colored status pill (actief / nietactief / extern / ...) for the candidate.
-function StatusBadge({ status }) {
+function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
-  const styles = {
+  const styles: Record<string, { bg: string; color: string }> = {
     actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
     nietactief: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
     extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
@@ -28,7 +31,7 @@ function StatusBadge({ status }) {
   )
 }
 
-function InfoRow({ icon: Icon, label, value }) {
+function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactNode; value?: ReactNode }) {
   if (!value) return null
   return (
     <div className="flex items-start gap-3"
@@ -45,7 +48,7 @@ function InfoRow({ icon: Icon, label, value }) {
   )
 }
 
-function Section({ title, children }) {
+function Section({ title, children }: { title: ReactNode; children: ReactNode }) {
   return (
     <div style={{ marginBottom: 20 }}>
       <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
@@ -57,7 +60,7 @@ function Section({ title, children }) {
   )
 }
 
-function TagList({ items, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)' }) {
+function TagList({ items, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)' }: { items?: ReactNode[]; color?: string; bg?: string }) {
   if (!items?.length) return <span style={{ fontSize: 12, color: 'var(--border)' }}>—</span>
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -71,14 +74,14 @@ function TagList({ items, color = 'var(--color-primary)', bg = 'var(--color-prim
   )
 }
 
-function fmtDate(v) {
+function fmtDate(v?: string | null) {
   if (!v) return null
   const d = new Date(v)
   if (isNaN(d.getTime())) return null
   return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-function fmtDateTime(v) {
+function fmtDateTime(v?: string | null) {
   if (!v) return null
   const d = new Date(v)
   if (isNaN(d.getTime())) return null
@@ -87,13 +90,13 @@ function fmtDateTime(v) {
 }
 
 /* ── Tabs ── */
-const TABS = [
+const TABS: Array<{ id: string; tKey: string; icon?: LucideIcon }> = [
   { id: 'algemeen',    tKey: 'general' },
   { id: 'conversatie', tKey: 'conversation', icon: MessageSquare },
   { id: 'history',     tKey: 'history',      icon: History },
 ]
 
-function TabBar({ active, onChange }) {
+function TabBar({ active, onChange }: { active: string; onChange: (id: string) => void }) {
   const { t } = useTranslation('reports')
   return (
     <div className="flex flex-shrink-0" style={{ borderBottom: '1px solid var(--border)' }}>
@@ -120,7 +123,7 @@ function TabBar({ active, onChange }) {
   )
 }
 
-function TabAlgemeen({ c, kenmerken, rates }) {
+function TabAlgemeen({ c, kenmerken, rates }: { c: ReportCandidate; kenmerken: ReactNode[]; rates: GlobalRate[] }) {
   const { t } = useTranslation('reports')
   return (
     <div className="flex-1 overflow-auto" style={{ padding: '20px 24px' }}>
@@ -200,7 +203,7 @@ function TabAlgemeen({ c, kenmerken, rates }) {
   )
 }
 
-function TabConversatie({ c }) {
+function TabConversatie({ c }: { c: ReportCandidate }) {
   const { t } = useTranslation('reports')
   return (
     <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center"
@@ -219,7 +222,7 @@ function TabConversatie({ c }) {
   )
 }
 
-function TabHistory({ c }) {
+function TabHistory({ c }: { c: ReportCandidate }) {
   const { t } = useTranslation('reports')
   return (
     <div className="flex flex-col items-center justify-center flex-1 gap-3 text-center"
@@ -239,7 +242,7 @@ function TabHistory({ c }) {
 }
 
 /* ── Main component ── */
-export default function CandidateDetailDrawer({ candidate: c, onClose }) {
+export default function CandidateDetailDrawer({ candidate: c, onClose }: { candidate: ReportCandidate | null; onClose: () => void }) {
   const { t } = useTranslation('reports')
   const [activeTab, setActiveTab] = useState('algemeen')
   if (!c) return null

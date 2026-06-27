@@ -4,6 +4,7 @@
  * come from RightPanelContext, page size from the user's preference.
  */
 import { useState, useEffect, useMemo } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Mail, Phone, MessageCircle, Building2 } from 'lucide-react'
 import api                    from '../../lib/api'
@@ -12,27 +13,28 @@ import { useAuth }            from '../../context/AuthContext'
 import ContactPersonDrawer    from './ContactPersonDrawer'
 import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '../../lib/usePageSize'
+import type { ReportContact, ReportCustomer, ReportFilterGroup } from '../../types/reports'
 
 
 export default function ContactPersonsTable() {
   const { t } = useTranslation('reports')
-  const [contacts, setContacts]   = useState([])
+  const [contacts, setContacts]   = useState<ReportContact[]>([])
   const [loading,  setLoading]    = useState(true)
   const [search,   setSearch]     = useState('')
-  const [drill,    setDrill]      = useState(null)
-  const [selectedCustomers, setSelectedCustomers] = useState([])
-  const [selectedReceives,  setSelectedReceives]  = useState([])
+  const [drill,    setDrill]      = useState<ReportContact | null>(null)
+  const [selectedCustomers, setSelectedCustomers] = useState<Array<string | number>>([])
+  const [selectedReceives,  setSelectedReceives]  = useState<Array<string | number>>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
   const defaultPageSize = useDefaultPageSize()
-  const { refreshUser } = useAuth()
+  const { refreshUser } = useAuth() ?? {}
   const [page,     setPage]     = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
 
   useEffect(() => {
     api.get('/sm_customers')
       .then(res => {
-        const customers = res.data?.data ?? res.data ?? []
+        const customers = (res.data?.data ?? res.data ?? []) as ReportCustomer[]
         const flat = customers.flatMap(customer =>
           (customer.contacts ?? []).map(contact => ({
             ...contact,
@@ -48,14 +50,14 @@ export default function ContactPersonsTable() {
   }, [])
 
   const customerOptions = useMemo(() =>
-    [...new Set(contacts.map(c => c.customer_name).filter(Boolean))].sort(),
+    [...new Set(contacts.map(c => c.customer_name).filter((x): x is string => Boolean(x)))].sort(),
     [contacts]
   )
 
   const filtered = useMemo(() => {
     let rows = contacts
     if (selectedCustomers.length > 0)
-      rows = rows.filter(c => selectedCustomers.includes(c.customer_name))
+      rows = rows.filter(c => selectedCustomers.includes(c.customer_name as string))
     if (selectedReceives.length > 0) {
       rows = rows.filter(c => selectedReceives.includes(c.scheduled_order_contact ? 'ja' : 'nee'))
     }
@@ -78,13 +80,13 @@ export default function ContactPersonsTable() {
   const paged      = useMemo(() => filtered.slice((page-1)*pageSize, page*pageSize), [filtered, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
 
-  const handlePageSizeChange = async (n) => {
+  const handlePageSizeChange = async (n: number) => {
     setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch { /* noop */ }
+    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser?.() } catch { /* noop */ }
   }
 
   const filterGroups = useMemo(() => {
-    const groups = []
+    const groups: ReportFilterGroup[] = []
     if (customerOptions.length > 0) {
       groups.push({
         key: 'klant', label: t('contacts.filters.customer'), type: 'search-select',
@@ -113,10 +115,10 @@ export default function ContactPersonsTable() {
     return () => unregisterFilters('contact-persons')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  const TH = { padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 600,
+  const TH: CSSProperties = { padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 600,
                color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
                whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '0.04em' }
-  const TD = { padding: '10px 14px', borderBottom: '1px solid var(--hover-bg)', verticalAlign: 'middle' }
+  const TD: CSSProperties = { padding: '10px 14px', borderBottom: '1px solid var(--hover-bg)', verticalAlign: 'middle' }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>

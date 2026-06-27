@@ -4,33 +4,39 @@
  * from RightPanelContext. Data is fetched per page from the API.
  */
 import { useState, useEffect, useMemo } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X,
          MessageCircle, Mail, CheckCheck, Clock, XCircle,
          AlertTriangle, User, Phone } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useRightPanel }      from '../../context/RightPanelContext'
 import { useAuth }            from '../../context/AuthContext'
 import api                    from '../../lib/api'
 import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '../../lib/usePageSize'
+import type { MessageRow, ReportFilterGroup, SortState } from '../../types/reports'
 
-const PAD = n => String(n).padStart(2, '0')
+const PAD = (n: number) => String(n).padStart(2, '0')
 
-function formatDT(dt) {
+function formatDT(dt?: string | number | Date | null) {
   if (!dt) return '—'
   const d = new Date(dt)
   return `${PAD(d.getDate())}-${PAD(d.getMonth()+1)}-${d.getFullYear()} ${PAD(d.getHours())}:${PAD(d.getMinutes())}`
 }
 
+// One badge's visual treatment.
+interface BadgeMeta { bg: string; color: string; Icon: LucideIcon }
+
 // Channel → colour + icon. Label = t('messages.channel.<key>').
-const CHANNEL_META = {
+const CHANNEL_META: Record<string, BadgeMeta> = {
   whatsapp: { bg: '#ECFDF5', color: '#059669', Icon: MessageCircle },
   email:    { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)', Icon: Mail },
   sms:      { bg: '#F5F3FF', color: '#6D28D9', Icon: Phone },
 }
 
 // Status → colour + icon. Label = t('messages.status.<key>').
-const STATUS_META = {
+const STATUS_META: Record<string, BadgeMeta> = {
   sent:       { bg: 'var(--color-success-bg)', color: 'var(--color-success)', Icon: CheckCheck  },
   delivered:  { bg: '#ECFDF5', color: '#059669', Icon: CheckCheck  },
   read:       { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)', Icon: CheckCheck  },
@@ -39,10 +45,10 @@ const STATUS_META = {
   bounced:    { bg: 'var(--color-warning-bg)', color: '#C2410C', Icon: AlertTriangle },
 }
 
-function ChannelBadge({ channel }) {
+function ChannelBadge({ channel }: { channel?: string }) {
   const { t } = useTranslation('reports')
   const key = channel?.toLowerCase()
-  const m = CHANNEL_META[key] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: MessageCircle }
+  const m = (key ? CHANNEL_META[key] : undefined) ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: MessageCircle }
   const Icon = m.Icon
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
@@ -53,10 +59,10 @@ function ChannelBadge({ channel }) {
   )
 }
 
-function StatusBadge({ status }) {
+function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
   const key = status?.toLowerCase()
-  const m = STATUS_META[key] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock }
+  const m = (key ? STATUS_META[key] : undefined) ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)', Icon: Clock }
   const Icon = m.Icon
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: m.bg, color: m.color,
@@ -67,7 +73,7 @@ function StatusBadge({ status }) {
   )
 }
 
-function SortIcon({ active, dir }) {
+function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
     ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
@@ -76,9 +82,10 @@ function SortIcon({ active, dir }) {
 
 // ─── Drill-down drawer ────────────────────────────────────────────────────────
 
-function MessageDrawer({ message, onClose }) {
+function MessageDrawer({ message, onClose }: { message: MessageRow; onClose: () => void }) {
   const { t } = useTranslation('reports')
-  const channelMeta = CHANNEL_META[message.channel?.toLowerCase()] ?? { Icon: MessageCircle, color: 'var(--color-primary)' }
+  const channelKey = message.channel?.toLowerCase()
+  const channelMeta = (channelKey ? CHANNEL_META[channelKey] : undefined) ?? { Icon: MessageCircle, color: 'var(--color-primary)' }
   const ChannelIcon = channelMeta.Icon
 
   return (
@@ -190,10 +197,10 @@ function MessageDrawer({ message, onClose }) {
 
 // ─── Tabel ────────────────────────────────────────────────────────────────────
 
-const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
+const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
              color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
              whiteSpace: 'nowrap', userSelect: 'none' }
-const TD = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
+const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 const COL_KEYS = [
   { key: 'sent_at',         tKey: 'sent',      sortable: true },
@@ -207,18 +214,18 @@ const COL_KEYS = [
 export default function MessagesTable() {
   const { t } = useTranslation('reports')
   const COLS = COL_KEYS.map(c => ({ ...c, label: t(`messages.cols.${c.tKey}`) }))
-  const [rows,    setRows]    = useState([])
+  const [rows,    setRows]    = useState<MessageRow[]>([])
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
-  const [drill,   setDrill]   = useState(null)
-  const [sort,    setSort]    = useState({ key: 'sent_at', dir: 'desc' })
-  const [selectedStatuses,  setSelectedStatuses]  = useState([])
-  const [selectedChannels,  setSelectedChannels]  = useState([])
-  const [selectedWorkflows, setSelectedWorkflows] = useState([])
+  const [drill,   setDrill]   = useState<MessageRow | null>(null)
+  const [sort,    setSort]    = useState<SortState>({ key: 'sent_at', dir: 'desc' })
+  const [selectedStatuses,  setSelectedStatuses]  = useState<Array<string | number>>([])
+  const [selectedChannels,  setSelectedChannels]  = useState<Array<string | number>>([])
+  const [selectedWorkflows, setSelectedWorkflows] = useState<Array<string | number>>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
   const defaultPageSize = useDefaultPageSize()
-  const { refreshUser } = useAuth()
+  const { refreshUser } = useAuth() ?? {}
   const [page,     setPage]     = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
 
@@ -229,16 +236,16 @@ export default function MessagesTable() {
       .finally(() => setLoading(false))
   }, [])
 
-  const channelOptions  = useMemo(() => [...new Set(rows.map(r => r.channel).filter(Boolean))].sort(), [rows])
-  const statusOptions   = useMemo(() => [...new Set(rows.map(r => r.status).filter(Boolean))].sort(), [rows])
-  const workflowOptions = useMemo(() => [...new Set(rows.map(r => r.workflow_name).filter(Boolean))].sort(), [rows])
+  const channelOptions  = useMemo(() => [...new Set(rows.map(r => r.channel).filter((x): x is string => Boolean(x)))].sort(), [rows])
+  const statusOptions   = useMemo(() => [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
+  const workflowOptions = useMemo(() => [...new Set(rows.map(r => r.workflow_name).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return rows.filter(r => {
-      if (selectedStatuses.length  && !selectedStatuses.includes(r.status))        return false
-      if (selectedChannels.length  && !selectedChannels.includes(r.channel))       return false
-      if (selectedWorkflows.length && !selectedWorkflows.includes(r.workflow_name)) return false
+      if (selectedStatuses.length  && !selectedStatuses.includes(r.status as string))        return false
+      if (selectedChannels.length  && !selectedChannels.includes(r.channel as string))       return false
+      if (selectedWorkflows.length && !selectedWorkflows.includes(r.workflow_name as string)) return false
       if (!q) return true
       return (
         (r.recipient_name  ?? '').toLowerCase().includes(q) ||
@@ -262,20 +269,20 @@ export default function MessagesTable() {
     })
   }, [filtered, sort])
 
-  const setSort_ = key => setSort(prev =>
+  const setSort_ = (key: string) => setSort(prev =>
     prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' })
 
   useEffect(() => setPage(1), [filtered.length, pageSize])
   const paged      = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
 
-  const handlePageSizeChange = async (n) => {
+  const handlePageSizeChange = async (n: number) => {
     setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch { /* noop */ }
+    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser?.() } catch { /* noop */ }
   }
 
   const filterGroups = useMemo(() => {
-    const groups = []
+    const groups: ReportFilterGroup[] = []
     if (channelOptions.length) {
       groups.push({
         key: 'channel', label: t('messages.filters.channel'),
@@ -377,12 +384,12 @@ export default function MessagesTable() {
                     <td style={{ ...TD, fontSize: 12, whiteSpace: 'nowrap' }}>
                       <div style={{ fontWeight: 500, color: 'var(--text)' }}>
                         {(r.sent_at ?? r.created_at)
-                          ? new Date(r.sent_at ?? r.created_at).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' })
+                          ? new Date((r.sent_at ?? r.created_at) as string).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' })
                           : '—'}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                         {(r.sent_at ?? r.created_at)
-                          ? new Date(r.sent_at ?? r.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+                          ? new Date((r.sent_at ?? r.created_at) as string).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
                           : ''}
                       </div>
                     </td>

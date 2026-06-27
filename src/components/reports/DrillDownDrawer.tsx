@@ -4,13 +4,16 @@
  * StatusBadge below = the colored status pill.
  */
 import { X, Search, Phone, Mail, Calendar, Briefcase, Clock, CalendarCheck } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { ReportCandidate } from '../../types/reports'
 
 // Colored status pill (actief / nietactief / extern / ...) for a record.
-function StatusBadge({ status }) {
+function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
-  const styles = {
+  const styles: Record<string, { bg: string; color: string }> = {
     actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
     nietactief: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
     extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
@@ -28,12 +31,12 @@ function StatusBadge({ status }) {
   )
 }
 
-function formatDate(dateStr) {
+function formatDate(dateStr?: string | null) {
   if (!dateStr) return null
   return new Date(dateStr).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-function InfoRow({ icon: Icon, label, value, highlight }) {
+function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; label: ReactNode; value?: ReactNode; highlight?: boolean }) {
   if (value === null || value === undefined || value === '') return null
   return (
     <div className="flex items-center gap-1.5">
@@ -48,7 +51,7 @@ function InfoRow({ icon: Icon, label, value, highlight }) {
   )
 }
 
-export default function DrillDownDrawer({ title, subtitle, candidates = [], onClose }) {
+export default function DrillDownDrawer({ title, subtitle, candidates = [], onClose }: { title?: ReactNode; subtitle?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void }) {
   const { t } = useTranslation('reports')
   const [search, setSearch] = useState('')
 
@@ -156,7 +159,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
                         />
                         <InfoRow icon={CalendarCheck} label={t('drilldown.fields.lastShift')}    value={formatDate(c.last_worked_shift)} />
                         <InfoRow icon={Clock}         label={t('drilldown.fields.shiftsWorked')} value={c.number_of_times_worked ?? null} />
-                        {c.no_show_count > 0 && (
+                        {(c.no_show_count ?? 0) > 0 && (
                           <InfoRow icon={Clock} label={t('drilldown.fields.noShows')} value={c.no_show_count} highlight />
                         )}
                       </div>

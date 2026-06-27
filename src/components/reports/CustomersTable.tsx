@@ -4,6 +4,7 @@
  * page size from the user's preference; data is fetched per page from the API.
  */
 import { useState, useEffect, useMemo } from 'react'
+import type { CSSProperties, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
 import { useRightPanel }      from '../../context/RightPanelContext'
@@ -14,8 +15,9 @@ import { USE_MOCKS }          from '../../lib/mocks'
 import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '../../lib/usePageSize'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
+import type { ReportCustomer, SortState } from '../../types/reports'
 
-const DUMMY_CUSTOMERS = [
+const DUMMY_CUSTOMERS: ReportCustomer[] = [
   {
     id: 'dummy-1', name: 'Zorgpartners Midden-Holland', debtor_number: 'DEB-1001',
     status: 'active', account_manager: 'Iris de Wit',
@@ -117,31 +119,31 @@ const DUMMY_CUSTOMERS = [
   },
 ]
 
-function SortIcon({ active, dir }) {
+function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
     ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
     : <ChevronDown size={12} style={{ color: 'var(--color-primary)' }} />
 }
 
-const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
+const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
              color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
              whiteSpace: 'nowrap', userSelect: 'none' }
-const TD = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
+const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 export default function CustomersTable() {
   const { t } = useTranslation('reports')
-  const [customers,         setCustomers]         = useState([])
+  const [customers,         setCustomers]         = useState<ReportCustomer[]>([])
   const [loading,           setLoading]           = useState(true)
-  const [error,             setError]             = useState(null)
+  const [error,             setError]             = useState<string | null>(null)
   const [search]                                  = useState('')
-  const [selectedStatuses,  setSelectedStatuses]  = useState(['active'])
-  const [sort,              setSort]              = useState({ key: 'name', dir: 'asc' })
+  const [selectedStatuses,  setSelectedStatuses]  = useState<Array<string | number>>(['active'])
+  const [sort,              setSort]              = useState<SortState>({ key: 'name', dir: 'asc' })
   const defaultPageSize = useDefaultPageSize()
-  const { refreshUser } = useAuth()
+  const { refreshUser } = useAuth() ?? {}
   const [page,     setPage]     = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
-  const [detail,            setDetail]            = useState(null)
+  const [detail,            setDetail]            = useState<ReportCustomer | null>(null)
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -150,7 +152,7 @@ export default function CustomersTable() {
     setError(null)
     api.get('/sm_customers')
       .then(res => {
-        const { rows: real } = unwrapList(res)
+        const { rows: real } = unwrapList<ReportCustomer>(res)
         if (USE_MOCKS) {
           const realIds = new Set(real.map(c => c.id))
           const dummies = DUMMY_CUSTOMERS.filter(d => !realIds.has(d.id))
@@ -166,16 +168,16 @@ export default function CustomersTable() {
   useEffect(() => { load() }, [])
 
   const statusOptions = useMemo(() =>
-    [...new Set(customers.map(c => c.status).filter(Boolean))].sort(),
+    [...new Set(customers.map(c => c.status).filter((x): x is string => Boolean(x)))].sort(),
     [customers])
 
-  const toggle = (setter) => (val) =>
+  const toggle = (setter: Dispatch<SetStateAction<Array<string | number>>>) => (val: string | number) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return customers.filter(c => {
-      if (selectedStatuses.length && !selectedStatuses.includes(c.status)) return false
+      if (selectedStatuses.length && !selectedStatuses.includes(c.status as string)) return false
       if (!q) return true
       return (
         (c.name             ?? '').toLowerCase().includes(q) ||
@@ -189,7 +191,7 @@ export default function CustomersTable() {
   const sorted = useMemo(() => {
     const { key, dir } = sort
     return [...filtered].sort((a, b) => {
-      let av, bv
+      let av: string | number, bv: string | number
       if (key === 'locations')   { av = a.locations?.length ?? 0;  bv = b.locations?.length ?? 0 }
       else if (key === 'departments') {
         av = (a.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
@@ -198,8 +200,8 @@ export default function CustomersTable() {
         av = (a[key] ?? '').toString().toLowerCase()
         bv = (b[key] ?? '').toString().toLowerCase()
       }
-      if (av < bv) return dir === 'asc' ? -1 : 1
-      if (av > bv) return dir === 'asc' ? 1  : -1
+      if ((av as number) < (bv as number)) return dir === 'asc' ? -1 : 1
+      if ((av as number) > (bv as number)) return dir === 'asc' ? 1  : -1
       return 0
     })
   }, [filtered, sort])
@@ -208,12 +210,12 @@ export default function CustomersTable() {
   const paged     = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
 
-  const handlePageSizeChange = async (n) => {
+  const handlePageSizeChange = async (n: number) => {
     setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch { /* noop */ }
+    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser?.() } catch { /* noop */ }
   }
 
-  const setSort_ = (key) => setSort(prev =>
+  const setSort_ = (key: string) => setSort(prev =>
     prev.key === key
       ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
       : { key, dir: 'asc' }

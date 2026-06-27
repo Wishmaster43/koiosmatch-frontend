@@ -2,11 +2,14 @@
  * CustomerDetailDrawer — slide-in panel with one customer's details (locations,
  * departments, contacts). Opened from CustomersTable. StatusBadge = active/inactive pill.
  */
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, MapPin, Building2, Hash, User, Layers } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
+import type { ReportCustomer } from '../../types/reports'
 
-function InfoRow({ icon: Icon, label, value }) {
+function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactNode; value?: ReactNode }) {
   if (!value) return null
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12 }}>
@@ -17,7 +20,7 @@ function InfoRow({ icon: Icon, label, value }) {
   )
 }
 
-export default function CustomerDetailDrawer({ customer, onClose }) {
+export default function CustomerDetailDrawer({ customer, onClose }: { customer: ReportCustomer; onClose: () => void }) {
   const { t } = useTranslation('reports')
   const locations = customer.locations ?? []
   const totalDepts = locations.reduce((s, l) => s + (l.departments?.length ?? 0), 0)
@@ -104,7 +107,7 @@ export default function CustomerDetailDrawer({ customer, onClose }) {
               {/* Departments */}
               {(loc.departments ?? []).length > 0 && (
                 <div style={{ paddingLeft: 36, display: 'flex', flexDirection: 'column', gap: 3 }}>
-                  {loc.departments.map((dept, j) => (
+                  {(loc.departments ?? []).map((dept, j) => (
                     <div key={dept.id ?? j}
                       style={{ display: 'flex', alignItems: 'center', gap: 6,
                                padding: '4px 8px', borderRadius: 6, background: 'var(--hover-bg)' }}>

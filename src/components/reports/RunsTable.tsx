@@ -4,14 +4,16 @@
  * filters come from RightPanelContext. formatDT below formats run timestamps.
  */
 import { useState, useEffect, useMemo } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X,
          Zap, Clock, Users, AlertTriangle } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api from '../../lib/api'
 import { formatDT, formatDuration, StatusBadge } from './runFormat'
+import type { RunRow, ReportFilterGroup, SortState } from '../../types/reports'
 
-function SortIcon({ active, dir }) {
+function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
     ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
@@ -20,7 +22,7 @@ function SortIcon({ active, dir }) {
 
 // ─── Drill-down drawer ────────────────────────────────────────────────────────
 
-function RunDrawer({ run, onClose }) {
+function RunDrawer({ run, onClose }: { run: RunRow; onClose: () => void }) {
   const { t } = useTranslation('reports')
 
   return (
@@ -101,10 +103,10 @@ function RunDrawer({ run, onClose }) {
             <>
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
                             letterSpacing: '0.05em', marginBottom: 10 }}>
-                {t('runs.drawer.stepResults')} ({(run.step_results ?? run.steps).length})
+                {t('runs.drawer.stepResults')} ({(run.step_results ?? run.steps ?? []).length})
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
-                {(run.step_results ?? run.steps).map((step, i) => (
+                {(run.step_results ?? run.steps ?? []).map((step, i) => (
                   <div key={i} style={{ background: 'var(--hover-bg)', borderRadius: 8, padding: '10px 12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                   marginBottom: step.message ? 4 : 0 }}>
@@ -144,10 +146,10 @@ function RunDrawer({ run, onClose }) {
 
 // ─── Tabel ────────────────────────────────────────────────────────────────────
 
-const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
+const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
              color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
              whiteSpace: 'nowrap', userSelect: 'none' }
-const TD = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
+const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 const COL_KEYS = [
   { key: 'started_at',       tKey: 'started',    sortable: true  },
@@ -161,13 +163,13 @@ const COL_KEYS = [
 export default function RunsTable() {
   const { t } = useTranslation('reports')
   const COLS = COL_KEYS.map(c => ({ ...c, label: t(`runs.cols.${c.tKey}`) }))
-  const [rows,    setRows]    = useState([])
+  const [rows,    setRows]    = useState<RunRow[]>([])
   const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
-  const [drill,   setDrill]   = useState(null)
-  const [sort,    setSort]    = useState({ key: 'started_at', dir: 'desc' })
-  const [selectedStatuses,   setSelectedStatuses]   = useState([])
-  const [selectedWorkflows,  setSelectedWorkflows]  = useState([])
+  const [drill,   setDrill]   = useState<RunRow | null>(null)
+  const [sort,    setSort]    = useState<SortState>({ key: 'started_at', dir: 'desc' })
+  const [selectedStatuses,   setSelectedStatuses]   = useState<Array<string | number>>([])
+  const [selectedWorkflows,  setSelectedWorkflows]  = useState<Array<string | number>>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -179,16 +181,16 @@ export default function RunsTable() {
   }, [])
 
   const workflowOptions = useMemo(() =>
-    [...new Set(rows.map(r => r.workflow_name).filter(Boolean))].sort(), [rows])
+    [...new Set(rows.map(r => r.workflow_name).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
   const statusOptions = useMemo(() =>
-    [...new Set(rows.map(r => r.status).filter(Boolean))].sort(), [rows])
+    [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return rows.filter(r => {
-      if (selectedStatuses.length  && !selectedStatuses.includes(r.status))        return false
-      if (selectedWorkflows.length && !selectedWorkflows.includes(r.workflow_name)) return false
+      if (selectedStatuses.length  && !selectedStatuses.includes(r.status as string))        return false
+      if (selectedWorkflows.length && !selectedWorkflows.includes(r.workflow_name as string)) return false
       if (!q) return true
       return (
         (r.workflow_name  ?? '').toLowerCase().includes(q) ||
@@ -208,17 +210,17 @@ export default function RunsTable() {
       const bv = key === 'candidates_count' || key === 'duration_ms'
         ? (b[key] ?? 0)
         : (b[key] ?? '').toString().toLowerCase()
-      if (av < bv) return dir === 'asc' ? -1 : 1
-      if (av > bv) return dir === 'asc' ?  1 : -1
+      if ((av as number) < (bv as number)) return dir === 'asc' ? -1 : 1
+      if ((av as number) > (bv as number)) return dir === 'asc' ?  1 : -1
       return 0
     })
   }, [filtered, sort])
 
-  const setSort_ = key => setSort(prev =>
+  const setSort_ = (key: string) => setSort(prev =>
     prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' })
 
   const filterGroups = useMemo(() => {
-    const groups = []
+    const groups: ReportFilterGroup[] = []
     if (statusOptions.length) {
       groups.push({
         key: 'status', label: t('runs.filters.status'),

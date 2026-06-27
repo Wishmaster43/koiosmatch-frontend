@@ -6,31 +6,32 @@
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, UserCheck, UserX, UserPlus, TrendingUp } from 'lucide-react'
 import KpiCard from '../ui/KpiCard'
+import type { ReportCandidate } from '../../types/reports'
 
 // Count candidates whose status matches the given value (defaults missing to 'onbekend').
-const count = (candidates, status) =>
+const count = (candidates: ReportCandidate[], status: string) =>
   candidates.filter(c => (c.status || 'onbekend').toLowerCase() === status).length
 
 // Compute how many candidates need attention (e.g. stale/expiring), used for the KPI.
-function calcAandacht(candidates) {
+function calcAandacht(candidates: ReportCandidate[]) {
   const now = Date.now()
   return candidates.filter(c => {
     if ((c.status || '').toLowerCase() !== 'actief') return false
     const reg = c.registration_date ? new Date(c.registration_date) : null
-    const isNew = reg && (now - reg) < 30 * 86400000
+    const isNew = reg && (now - reg.getTime()) < 30 * 86400000
     const hasNoPlanned = !c.last_planned_shift || new Date(c.last_planned_shift) < new Date()
     return isNew && hasNoPlanned
   })
 }
 
-function calcGepland(candidates) {
+function calcGepland(candidates: ReportCandidate[]) {
   return candidates.filter(c => {
     if ((c.status || '').toLowerCase() !== 'actief') return false
     return c.last_planned_shift && new Date(c.last_planned_shift) > new Date()
   })
 }
 
-function calcMonthStats(candidates) {
+function calcMonthStats(candidates: ReportCandidate[]) {
   const now          = new Date()
   const currentMonth = now.getMonth()
   const currentYear  = now.getFullYear()
@@ -41,7 +42,7 @@ function calcMonthStats(candidates) {
     return d.getMonth() === currentMonth && d.getFullYear() === currentYear
   }).length
 
-  const grouped = {}
+  const grouped: Record<string, number> = {}
   candidates.forEach(c => {
     if (!c.registration_date) return
     const d   = new Date(c.registration_date)
@@ -55,9 +56,11 @@ function calcMonthStats(candidates) {
   return { currentMonthCount, avg, delta }
 }
 
-export default function CandidatesKpiRow({ candidates = [], loading = false, onDrillDown }) {
+export default function CandidatesKpiRow({ candidates = [], loading = false, onDrillDown }: {
+  candidates?: ReportCandidate[]; loading?: boolean; onDrillDown?: (label: string, items: ReportCandidate[]) => void
+}) {
   const { t } = useTranslation('reports')
-  const drill = (label, filterFn) => {
+  const drill = (label: string, filterFn: (c: ReportCandidate[]) => ReportCandidate[]) => {
     if (!onDrillDown) return undefined
     return () => onDrillDown(label, filterFn(candidates))
   }

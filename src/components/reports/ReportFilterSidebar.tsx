@@ -4,19 +4,23 @@
  * multi-select, plus a reset action. SearchSelectGroup below = one such group.
  */
 import { X, Search, ChevronDown, RotateCcw } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { ReportFilterGroup } from '../../types/reports'
 
 // One collapsible, searchable multi-select group of filter options.
-function SearchSelectGroup({ group }) {
+function SearchSelectGroup({ group }: { group: ReportFilterGroup }) {
   const { t } = useTranslation('common')
   const [open,  setOpen]  = useState(false)
   const [query, setQuery] = useState('')
 
-  const visible = group.options.filter(o =>
+  const options  = group.options  ?? []
+  const selected = group.selected ?? []
+  const visible = options.filter(o =>
     (o.label ?? '').toLowerCase().includes(query.toLowerCase())
   )
-  const hasSelected = group.selected.length > 0
+  const hasSelected = selected.length > 0
 
   return (
     <div>
@@ -33,10 +37,10 @@ function SearchSelectGroup({ group }) {
       >
         <span className="truncate">
           {hasSelected
-            ? group.selected.length === 1
-              ? (group.options.find(o => o.value === group.selected[0])?.label ?? group.selected[0])
-              : t('filters.selectedCount', { count: group.selected.length })
-            : t('filters.choose', { label: group.label.toLowerCase() })}
+            ? selected.length === 1
+              ? (options.find(o => o.value === selected[0])?.label ?? selected[0])
+              : t('filters.selectedCount', { count: selected.length })
+            : t('filters.choose', { label: (group.label ?? '').toLowerCase() })}
         </span>
         <ChevronDown size={12} style={{ flexShrink: 0, marginLeft: 4,
           transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
@@ -68,14 +72,14 @@ function SearchSelectGroup({ group }) {
 
           {/* Options */}
           <div style={{ maxHeight: 160, overflowY: 'auto', padding: '4px 0' }}>
-            {group.options.length === 0 && (
+            {options.length === 0 && (
               <div style={{ padding: '6px 10px', fontSize: 11, color: 'var(--text-muted)' }}>{t('filters.noData')}</div>
             )}
-            {group.options.length > 0 && visible.length === 0 && (
+            {options.length > 0 && visible.length === 0 && (
               <div style={{ padding: '6px 10px', fontSize: 11, color: 'var(--text-muted)' }}>{t('noResults')}</div>
             )}
             {visible.map(opt => {
-              const checked = group.selected.includes(opt.value)
+              const checked = selected.includes(opt.value)
               return (
                 <label key={opt.value}
                   style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '4px 10px',
@@ -84,7 +88,7 @@ function SearchSelectGroup({ group }) {
                   onMouseLeave={e => { if (!checked) e.currentTarget.style.background = 'transparent' }}
                 >
                   <input type="checkbox" checked={checked}
-                    onChange={() => group.onToggle(opt.value)}
+                    onChange={() => group.onToggle?.(opt.value)}
                     style={{ accentColor: 'var(--color-primary)', width: 12, height: 12, flexShrink: 0 }} />
                   <span style={{ fontSize: 12, color: checked ? 'var(--color-primary)' : 'var(--text)',
                                  fontWeight: checked ? 500 : 400, overflow: 'hidden',
@@ -100,8 +104,8 @@ function SearchSelectGroup({ group }) {
           {hasSelected && (
             <div style={{ padding: '5px 8px', borderTop: '1px solid var(--border)',
                           display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-              {group.selected.map(val => {
-                const opt = group.options.find(o => o.value === val)
+              {selected.map(val => {
+                const opt = options.find(o => o.value === val)
                 return (
                   <span key={val} style={{
                     display: 'flex', alignItems: 'center', gap: 3,
@@ -109,7 +113,7 @@ function SearchSelectGroup({ group }) {
                     borderRadius: 999, padding: '2px 7px', fontSize: 10, fontWeight: 500,
                   }}>
                     {opt?.label ?? val}
-                    <button onClick={() => group.onToggle(val)}
+                    <button onClick={() => group.onToggle?.(val)}
                       style={{ background: 'none', border: 'none', cursor: 'pointer',
                                color: 'inherit', padding: 0, lineHeight: 1 }}>
                       <X size={8} />
@@ -131,10 +135,10 @@ function SearchSelectGroup({ group }) {
 // group.onChange: (value: string) => void
 
 // Locale-aware short month name for index 0–11.
-const monthAbbr = (i) => new Date(2000, i, 1).toLocaleString(undefined, { month: 'short' })
+const monthAbbr = (i: number) => new Date(2000, i, 1).toLocaleString(undefined, { month: 'short' })
 const QUARTERS  = ['Q1','Q2','Q3','Q4']
 
-function PeriodGroup({ group }) {
+function PeriodGroup({ group }: { group: ReportFilterGroup }) {
   const { t } = useTranslation('common')
   const val = group.value ?? ''
 
@@ -158,20 +162,20 @@ function PeriodGroup({ group }) {
 
   const years = group.years ?? []
 
-  const setGranularity = (g) => {
-    if (!selectedYear) return group.onChange('')
-    if (g === 'year')    return group.onChange(String(selectedYear))
-    group.onChange('')
+  const setGranularity = (g: string) => {
+    if (!selectedYear) return group.onChange?.('')
+    if (g === 'year')    return group.onChange?.(String(selectedYear))
+    group.onChange?.('')
   }
 
-  const setYear = (y) => {
-    if (granularity === 'year') return group.onChange(String(y))
-    group.onChange('')
+  const setYear = (y: number) => {
+    if (granularity === 'year') return group.onChange?.(String(y))
+    group.onChange?.('')
   }
 
-  const setSub = (sub) => {
+  const setSub = (sub: string) => {
     if (!selectedYear) return
-    group.onChange(`${selectedYear}-${sub}`)
+    group.onChange?.(`${selectedYear}-${sub}`)
   }
 
   const btnBase = {
@@ -264,7 +268,7 @@ function PeriodGroup({ group }) {
 
       {/* Reset period */}
       {val && (
-        <button onClick={() => group.onChange('')}
+        <button onClick={() => group.onChange?.('')}
           style={{ ...btnBase, display: 'flex', alignItems: 'center', justifyContent: 'center',
                    gap: 4, padding: '4px 0', background: 'none',
                    color: 'var(--text-muted)', fontSize: 11, fontWeight: 400 }}>
@@ -277,7 +281,7 @@ function PeriodGroup({ group }) {
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-export default function ReportFilterSidebar({ title = 'Filters', groups = [], onClose }) {
+export default function ReportFilterSidebar({ title = 'Filters', groups = [], onClose }: { title?: ReactNode; groups?: ReportFilterGroup[]; onClose: () => void }) {
   const { t } = useTranslation('common')
   const activeCount = groups.reduce((sum, g) => {
     if (g.type === 'period') return sum + (g.value ? 1 : 0)
@@ -341,11 +345,11 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px',
             borderRadius: 7, border: '1px solid var(--border)', background: 'var(--hover-bg)' }}>
             <Search size={12} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-            <input autoFocus={false} value={g.value ?? ''} onChange={e => g.onChange(e.target.value)}
+            <input autoFocus={false} value={g.value ?? ''} onChange={e => g.onChange?.(e.target.value)}
               placeholder={g.placeholder ?? t('filters.searchAll')}
               style={{ flex: 1, border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'transparent', padding: 0 }} />
             {g.value && (
-              <button onClick={() => g.onChange('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}>
+              <button onClick={() => g.onChange?.('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}>
                 <X size={10} />
               </button>
             )}
@@ -359,13 +363,13 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
           <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
             {t('filters.radius')}
           </div>
-          <input value={g.city ?? ''} onChange={e => g.onCityChange(e.target.value)}
+          <input value={g.city ?? ''} onChange={e => g.onCityChange?.(e.target.value)}
             placeholder={t('filters.cityPlaceholder')}
             style={{ width: '100%', padding: '6px 8px', fontSize: 12, borderRadius: 6,
               border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)',
               outline: 'none', boxSizing: 'border-box', marginBottom: 6 }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <input value={g.radius ?? ''} onChange={e => g.onRadiusChange(e.target.value)}
+            <input value={g.radius ?? ''} onChange={e => g.onRadiusChange?.(e.target.value)}
               placeholder="35"
               type="number" min="1"
               style={{ width: 70, padding: '6px 8px', fontSize: 12, borderRadius: 6,
@@ -396,9 +400,9 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
                             textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {group.label}
               </div>
-              {group.type !== 'period' && group.selected?.length > 0 && (
+              {group.type !== 'period' && (group.selected?.length ?? 0) > 0 && (
                 <button
-                  onClick={() => group.selected.forEach(v => group.onToggle(v))}
+                  onClick={() => group.selected?.forEach(v => group.onToggle?.(v))}
                   style={{ fontSize: 9, color: 'var(--text-muted)', background: 'none', border: 'none',
                            cursor: 'pointer', padding: 0 }}>
                   {t('filters.clear')}
@@ -423,10 +427,10 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
             ) : group.type === 'radio' ? (
               <div style={{ display: 'flex', background: 'var(--border)', borderRadius: 7,
                             padding: 2, gap: 2 }}>
-                {group.options.map(opt => {
-                  const active = group.selected.includes(opt.value)
+                {(group.options ?? []).map(opt => {
+                  const active = (group.selected ?? []).includes(opt.value)
                   return (
-                    <button key={opt.value} onClick={() => group.onToggle(opt.value)}
+                    <button key={opt.value} onClick={() => group.onToggle?.(opt.value)}
                       style={{
                         flex: 1, padding: '4px 0', borderRadius: 5, fontSize: 11,
                         fontWeight: active ? 600 : 400, cursor: 'pointer',
@@ -443,15 +447,15 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                {group.options.map(opt => {
-                  const checked = group.selected.includes(opt.value)
+                {(group.options ?? []).map(opt => {
+                  const checked = (group.selected ?? []).includes(opt.value)
                   return (
                     <label key={opt.value}
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                                gap: 6, cursor: 'pointer' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
                         <input type="checkbox" checked={checked}
-                          onChange={() => group.onToggle(opt.value)}
+                          onChange={() => group.onToggle?.(opt.value)}
                           style={{ accentColor: 'var(--color-primary)', width: 12, height: 12, flexShrink: 0 }} />
                         <span style={{ fontSize: 12, color: checked ? 'var(--text)' : 'var(--text-muted)',
                                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

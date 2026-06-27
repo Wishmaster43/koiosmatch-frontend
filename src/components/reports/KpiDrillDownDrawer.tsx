@@ -4,16 +4,18 @@
  * clicking a KPI card. Month names are derived from the active locale.
  */
 import { X, Search, TrendingUp, Target, Info } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKpiSettings } from '../../lib/useKpiSettings'
+import type { ReportCandidate } from '../../types/reports'
 
 // Locale-aware full month name for index 0–11.
-const monthName = (i) => new Date(2000, i, 1).toLocaleString(undefined, { month: 'long' })
+const monthName = (i: number) => new Date(2000, i, 1).toLocaleString(undefined, { month: 'long' })
 
-function StatusBadge({ status }) {
+function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
-  const styles = {
+  const styles: Record<string, { bg: string; color: string }> = {
     actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
     nietactief: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
     extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
@@ -31,14 +33,14 @@ function StatusBadge({ status }) {
   )
 }
 
-function formatDate(iso) {
+function formatDate(iso?: string | null) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 // ── Candidate list (New / Deregistered) ───────────────────────────────────────
 
-function CandidateList({ candidates, dateField, dateLabel }) {
+function CandidateList({ candidates, dateField, dateLabel }: { candidates: ReportCandidate[]; dateField: string; dateLabel: string }) {
   const { t } = useTranslation('reports')
   const [search, setSearch] = useState('')
 
@@ -72,6 +74,7 @@ function CandidateList({ candidates, dateField, dateLabel }) {
         {filtered.map((c, i) => {
           const name    = `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim() || t('candidateDrawer.unknownName')
           const initials = `${c.firstname?.[0] ?? ''}${c.lastname?.[0] ?? ''}`.toUpperCase()
+          const dateValue = c[dateField] as string | undefined
           return (
             <div key={c.id ?? i}
               style={{ padding: '10px 16px', borderBottom: '1px solid var(--hover-bg)',
@@ -92,8 +95,8 @@ function CandidateList({ candidates, dateField, dateLabel }) {
                 </div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                   {c.position && <span>{c.position}</span>}
-                  {c.position && c[dateField] && <span> · </span>}
-                  {c[dateField] && <span>{dateLabel}: {formatDate(c[dateField])}</span>}
+                  {c.position && dateValue && <span> · </span>}
+                  {dateValue && <span>{dateLabel}: {formatDate(dateValue)}</span>}
                 </div>
               </div>
             </div>
@@ -111,7 +114,7 @@ function CandidateList({ candidates, dateField, dateLabel }) {
 
 // ── Average explanation ───────────────────────────────────────────────────────
 
-function AverageBreakdown({ candidates, KPI_TARGET }) {
+function AverageBreakdown({ candidates, KPI_TARGET }: { candidates: ReportCandidate[]; KPI_TARGET: number }) {
   const { t } = useTranslation('reports')
   const now          = new Date()
   const currentMonth = now.getMonth()
@@ -221,7 +224,7 @@ function AverageBreakdown({ candidates, KPI_TARGET }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClose }) {
+export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClose }: { mode: string; title?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void }) {
   const { t } = useTranslation('reports')
   const { new_candidates_target: KPI_TARGET } = useKpiSettings()
   return (

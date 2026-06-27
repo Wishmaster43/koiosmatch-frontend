@@ -2,11 +2,14 @@
  * DepartmentDrawer — slide-in panel with one department's details (customer,
  * location, codes). Opened from DepartmentsTable. InfoRow = one labeled detail row.
  */
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Building2, MapPin, Hash, Layers } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import type { ReportDepartment } from '../../types/reports'
 
 // One labeled row of department info (hidden when value is empty).
-function InfoRow({ icon: Icon, label, value }) {
+function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactNode; value?: ReactNode }) {
   if (!value) return null
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8,
@@ -18,7 +21,7 @@ function InfoRow({ icon: Icon, label, value }) {
   )
 }
 
-export default function DepartmentDrawer({ department, onClose }) {
+export default function DepartmentDrawer({ department, onClose }: { department: ReportDepartment; onClose: () => void }) {
   const { t } = useTranslation('reports')
   return (
     <>

@@ -4,6 +4,7 @@
  * page size from the user's preference; data is fetched per page from the API.
  */
 import { useState, useEffect, useMemo } from 'react'
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useRightPanel }      from '../../context/RightPanelContext'
@@ -13,31 +14,32 @@ import LocationDrawer         from './LocationDrawer'
 import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '../../lib/usePageSize'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
+import type { ReportCustomer, ReportLocation, SortState } from '../../types/reports'
 
 
-function SortIcon({ active, dir }) {
+function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
     ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
     : <ChevronDown size={12} style={{ color: 'var(--color-primary)' }} />
 }
 
-const TH = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
+const TH: CSSProperties = { padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
              color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
              whiteSpace: 'nowrap', userSelect: 'none' }
-const TD = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
+const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)' }
 
 export default function LocationsTable() {
   const { t } = useTranslation('reports')
-  const [rows,             setRows]             = useState([])
+  const [rows,             setRows]             = useState<ReportLocation[]>([])
   const [loading,          setLoading]          = useState(true)
   const [search,           setSearch]           = useState('')
-  const [drill,            setDrill]            = useState(null)
-  const [selectedStatuses,  setSelectedStatuses]  = useState(['active'])
-  const [selectedCustomers, setSelectedCustomers] = useState([])
-  const [sort,              setSort]              = useState({ key: 'customer_name', dir: 'asc' })
+  const [drill,            setDrill]            = useState<ReportLocation | null>(null)
+  const [selectedStatuses,  setSelectedStatuses]  = useState<Array<string | number>>(['active'])
+  const [selectedCustomers, setSelectedCustomers] = useState<Array<string | number>>([])
+  const [sort,              setSort]              = useState<SortState>({ key: 'customer_name', dir: 'asc' })
   const defaultPageSize = useDefaultPageSize()
-  const { refreshUser } = useAuth()
+  const { refreshUser } = useAuth() ?? {}
   const [page,     setPage]     = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
 
@@ -46,7 +48,7 @@ export default function LocationsTable() {
   useEffect(() => {
     api.get('/sm_customers')
       .then(res => {
-        const customers = res.data?.data ?? res.data ?? []
+        const customers = (res.data?.data ?? res.data ?? []) as ReportCustomer[]
         const flat = customers.flatMap(c =>
           (c.locations ?? []).map(l => ({
             ...l,
@@ -63,19 +65,19 @@ export default function LocationsTable() {
   }, [])
 
   const statusOptions = useMemo(() =>
-    [...new Set(rows.map(r => r.status).filter(Boolean))].sort(), [rows])
+    [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
 
   const customerOptions = useMemo(() =>
-    [...new Map(rows.map(r => [r.customer_id, r.customer_name])).entries()]
+    [...new Map(rows.map(r => [r.customer_id, r.customer_name] as [string | number, string | undefined])).entries()]
       .map(([id, name]) => ({ id, name }))
-      .sort((a, b) => a.name.localeCompare(b.name)),
+      .sort((a, b) => (a.name ?? '').localeCompare(b.name ?? '')),
     [rows])
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return rows.filter(r => {
-      if (selectedStatuses.length  && !selectedStatuses.includes(r.status))      return false
-      if (selectedCustomers.length && !selectedCustomers.includes(r.customer_id)) return false
+      if (selectedStatuses.length  && !selectedStatuses.includes(r.status as string))      return false
+      if (selectedCustomers.length && !selectedCustomers.includes(r.customer_id as string)) return false
       if (!q) return true
       return (
         (r.name          ?? '').toLowerCase().includes(q) ||
@@ -90,8 +92,8 @@ export default function LocationsTable() {
     return [...filtered].sort((a, b) => {
       const av = key === 'dept_count' ? (a[key] ?? 0) : (a[key] ?? '').toString().toLowerCase()
       const bv = key === 'dept_count' ? (b[key] ?? 0) : (b[key] ?? '').toString().toLowerCase()
-      if (av < bv) return dir === 'asc' ? -1 : 1
-      if (av > bv) return dir === 'asc' ?  1 : -1
+      if ((av as number) < (bv as number)) return dir === 'asc' ? -1 : 1
+      if ((av as number) > (bv as number)) return dir === 'asc' ?  1 : -1
       return 0
     })
   }, [filtered, sort])
@@ -100,12 +102,12 @@ export default function LocationsTable() {
   const paged      = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
 
-  const handlePageSizeChange = async (n) => {
+  const handlePageSizeChange = async (n: number) => {
     setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser() } catch { /* noop */ }
+    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser?.() } catch { /* noop */ }
   }
 
-  const setSort_ = key => setSort(prev =>
+  const setSort_ = (key: string) => setSort(prev =>
     prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' })
 
   const filterGroups = useMemo(() => [
@@ -118,7 +120,7 @@ export default function LocationsTable() {
         label: c.name,
         count: rows.filter(r => r.customer_id === c.id).length,
       })),
-      onToggle: v => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+      onToggle: (v: string | number) => setSelectedCustomers(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     },
     {
       key: 'status', label: t('locations.filters.status'),
@@ -128,7 +130,7 @@ export default function LocationsTable() {
         label: s === 'active' ? t('common.statusActive') : s === 'inactive' ? t('common.statusInactive') : s,
         count: rows.filter(r => r.status === s).length,
       })),
-      onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+      onToggle: (v: string | number) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     },
   ], [t, selectedCustomers, selectedStatuses, customerOptions, statusOptions, rows])
 

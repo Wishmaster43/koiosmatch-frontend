@@ -4,15 +4,18 @@
  * Filters come from RightPanelContext. StatusBadge below = the colored status pill.
  */
 import { useState, useEffect, useMemo } from 'react'
+import type { ReactNode, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
 import CandidateDetailDrawer from './CandidateDetailDrawer'
 import { useRightPanel }     from '../../context/RightPanelContext'
+import type { ReportCandidate, ReportColumn, SortState } from '../../types/reports'
 
 // Colored status pill (actief / nietactief / extern / ...) for a candidate row.
-function StatusBadge({ status }) {
+function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
-  const styles = {
+  const styles: Record<string, { bg: string; color: string }> = {
     actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
     nietactief: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
     extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
@@ -30,14 +33,14 @@ function StatusBadge({ status }) {
   )
 }
 
-function fmtDate(v) {
+function fmtDate(v?: string | null) {
   if (!v) return '—'
   const d = new Date(v)
   if (isNaN(d.getTime())) return '—'
   return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-function TagPill({ value, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)' }) {
+function TagPill({ value, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)' }: { value: ReactNode; color?: string; bg?: string }) {
   return (
     <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 6px', borderRadius: 5,
                    background: bg, color, whiteSpace: 'nowrap' }}>
@@ -46,7 +49,7 @@ function TagPill({ value, color = 'var(--color-primary)', bg = 'var(--color-prim
   )
 }
 
-function TagCell({ items, color, bg }) {
+function TagCell({ items, color, bg }: { items?: ReactNode[]; color?: string; bg?: string }) {
   if (!items?.length) return <span style={{ color: 'var(--border)' }}>—</span>
   const visible = items.slice(0, 2)
   const rest    = items.length - 2
@@ -58,7 +61,7 @@ function TagCell({ items, color, bg }) {
   )
 }
 
-function RateCell({ candidate }) {
+function RateCell({ candidate }: { candidate: ReportCandidate }) {
   const { t } = useTranslation('reports')
   const rates = candidate.global_rate_summary
   if (!Array.isArray(rates) || !rates.length) return <span style={{ color: 'var(--border)' }}>—</span>
@@ -80,13 +83,13 @@ function RateCell({ candidate }) {
   )
 }
 
-function parseKenmerken(v) {
+function parseKenmerken(v?: unknown): string[] {
   if (!Array.isArray(v)) return []
-  return v.map(item => item.name ?? String(item)).filter(Boolean)
+  return v.map(item => item?.name ?? String(item)).filter(Boolean)
 }
 
 // Column definitions; labels are resolved from i18n via the `t` passed in.
-function buildColumns(t) {
+function buildColumns(t: TFunction): ReportColumn[] {
   return [
   { key: 'name', label: t('candidates.cols.name'), type: 'string',
     value: c => `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim(),
@@ -131,7 +134,7 @@ function buildColumns(t) {
   ]
 }
 
-function compareValues(a, b, col, dir) {
+function compareValues(a: ReportCandidate, b: ReportCandidate, col: ReportColumn, dir: 'asc' | 'desc') {
   const av = col.value(a)
   const bv = col.value(b)
   const aE = av === null || av === undefined || av === ''
@@ -139,51 +142,52 @@ function compareValues(a, b, col, dir) {
   if (aE && bE) return 0
   if (aE) return 1
   if (bE) return -1
-  let cmp
-  if (col.type === 'number')    cmp = av - bv
-  else if (col.type === 'date') cmp = new Date(av).getTime() - new Date(bv).getTime()
+  let cmp: number
+  if (col.type === 'number')    cmp = Number(av) - Number(bv)
+  else if (col.type === 'date') cmp = new Date(av as string).getTime() - new Date(bv as string).getTime()
   else                          cmp = String(av).localeCompare(String(bv), undefined, { sensitivity: 'base' })
   return dir === 'asc' ? cmp : -cmp
 }
 
-function SortIcon({ active, dir }) {
+function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   if (!active) return <ChevronsUpDown size={11} style={{ color: 'var(--border)' }} />
   return dir === 'asc'
     ? <ChevronUp size={11} style={{ color: 'var(--color-primary)' }} />
     : <ChevronDown size={11} style={{ color: 'var(--color-primary)' }} />
 }
 
-export default function CandidatesTable({ candidates = [], loading = false }) {
+export default function CandidatesTable({ candidates = [], loading = false }: { candidates?: ReportCandidate[]; loading?: boolean }) {
   const { t } = useTranslation('reports')
   const columns = useMemo(() => buildColumns(t), [t])
   const [search, setSearch]                       = useState('')
   const { registerFilters, unregisterFilters }    = useRightPanel()
-  const [selectedYears, setSelectedYears]         = useState([])
-  const [selectedStatuses, setSelectedStatuses]   = useState(['actief'])
-  const [selectedPositions, setSelectedPositions] = useState([])
-  const [selectedKenmerken, setSelectedKenmerken] = useState([])
-  const [sort, setSort]                           = useState({ key: 'name', dir: 'asc' })
-  const [detail, setDetail]                       = useState(null)
+  const [selectedYears, setSelectedYears]         = useState<Array<string | number>>([])
+  const [selectedStatuses, setSelectedStatuses]   = useState<Array<string | number>>(['actief'])
+  const [selectedPositions, setSelectedPositions] = useState<Array<string | number>>([])
+  const [selectedKenmerken, setSelectedKenmerken] = useState<Array<string | number>>([])
+  const [sort, setSort]                           = useState<SortState>({ key: 'name', dir: 'asc' })
+  const [detail, setDetail]                       = useState<ReportCandidate | null>(null)
 
-  const toggle = setter => value =>
+  // Build a toggle handler that adds/removes a value from a selected-set state.
+  const toggle = (setter: Dispatch<SetStateAction<Array<string | number>>>) => (value: string | number) =>
     setter(prev => prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value])
 
   const statusOptions = useMemo(() =>
-    [...new Set(candidates.map(c => c.status).filter(Boolean))].sort(), [candidates])
+    [...new Set(candidates.map(c => c.status).filter((x): x is string => Boolean(x)))].sort(), [candidates])
 
   const positionOptions = useMemo(() =>
-    [...new Set(candidates.map(c => c.position).filter(Boolean))].sort(), [candidates])
+    [...new Set(candidates.map(c => c.position).filter((x): x is string => Boolean(x)))].sort(), [candidates])
 
   const yearOptions = useMemo(() => {
     const ys = candidates
       .map(c => c.registration_date ? new Date(c.registration_date).getFullYear() : null)
-      .filter(y => y && !isNaN(y))
+      .filter((y): y is number => !!y && !isNaN(y))
     return [...new Set(ys)].sort((a, b) => b - a)
   }, [candidates])
 
   const kenmerkOptions = useMemo(() => {
     const all = candidates.flatMap(c =>
-      Array.isArray(c.features) ? c.features.map(f => f.name).filter(Boolean) : []
+      Array.isArray(c.features) ? c.features.map(f => f.name).filter((x): x is string => Boolean(x)) : []
     )
     return [...new Set(all)].sort()
   }, [candidates])
@@ -191,15 +195,15 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return candidates.filter(c => {
-      if (selectedStatuses.length  && !selectedStatuses.includes(c.status))    return false
-      if (selectedPositions.length && !selectedPositions.includes(c.position)) return false
+      if (selectedStatuses.length  && !selectedStatuses.includes(c.status as string))    return false
+      if (selectedPositions.length && !selectedPositions.includes(c.position as string)) return false
       if (selectedYears.length) {
         const y = c.registration_date ? new Date(c.registration_date).getFullYear() : null
-        if (!selectedYears.includes(y)) return false
+        if (!selectedYears.includes(y as number)) return false
       }
       if (selectedKenmerken.length) {
         const cKenmerken = parseKenmerken(c.features)
-        if (!selectedKenmerken.some(k => cKenmerken.includes(k))) return false
+        if (!selectedKenmerken.some(k => cKenmerken.includes(k as string))) return false
       }
       if (q) {
         const hay = [c.firstname, c.lastname, c.email, c.position, c.city, c.mobile, c.phone]
@@ -216,7 +220,7 @@ export default function CandidatesTable({ candidates = [], loading = false }) {
     return [...filtered].sort((a, b) => compareValues(a, b, col, sort.dir))
   }, [filtered, sort, columns])
 
-  const onSort = key =>
+  const onSort = (key: string) =>
     setSort(prev => prev.key === key
       ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' }
       : { key, dir: 'asc' })

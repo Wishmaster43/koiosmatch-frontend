@@ -3,11 +3,14 @@
  * quick mail/call links. Opened from ContactPersonsTable.
  * InfoRow below = one labeled detail row (optionally a clickable mailto/tel link).
  */
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Mail, Phone, Building2, MessageCircle, Briefcase, User } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import type { ReportContact } from '../../types/reports'
 
 // One labeled row of contact info; renders a mailto/tel link when href is given.
-function InfoRow({ icon: Icon, label, value, href }) {
+function InfoRow({ icon: Icon, label, value, href }: { icon: LucideIcon; label: ReactNode; value?: ReactNode; href?: string | null }) {
   if (!value) return null
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8,
@@ -21,7 +24,7 @@ function InfoRow({ icon: Icon, label, value, href }) {
   )
 }
 
-export default function ContactPersonDrawer({ contact, onClose }) {
+export default function ContactPersonDrawer({ contact, onClose }: { contact: ReportContact; onClose: () => void }) {
   const { t } = useTranslation('reports')
   const fullName = [contact.firstname, contact.lastname].filter(Boolean).join(' ') || '—'
   const initials = fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
