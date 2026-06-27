@@ -1,8 +1,9 @@
 /**
- * App.jsx — application root: providers, the auth guard and the top-level routes.
+ * App.tsx — application root: providers, the auth guard and the top-level routes.
  * The post-login shell lives in components/layout/DashboardLayout; the page
  * registry (lazy imports + renderPage + titles) in components/layout/appPages.
  */
+import type { ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClientProvider }                    from '@tanstack/react-query'
 import { queryClient }                            from './lib/queryClient'
@@ -17,7 +18,7 @@ import DashboardLayout                            from './components/layout/Dash
 import './index.css'
 
 // Guards authenticated routes — redirects to /login when not logged in.
-function ProtectedRoute({ children }) {
+function ProtectedRoute({ children }: { children: ReactNode }) {
   // Defensive: tolerate a null auth context (provider not ready, or an upstream
   // failure like /auth/me 500'ing) — show the loader instead of crashing the tree.
   const auth = useAuth()
@@ -34,14 +35,14 @@ function ProtectedRoute({ children }) {
       </div>
     )
   }
-  return auth.user ? children : <Navigate to="/login" replace />
+  return auth.user ? <>{children}</> : <Navigate to="/login" replace />
 }
 
 // Blocks authenticated users from the login page.
-function PublicRoute({ children }) {
+function PublicRoute({ children }: { children: ReactNode }) {
   const auth = useAuth()
   if (!auth || auth.loading) return null
-  return auth.user ? <Navigate to="/" replace /> : children
+  return auth.user ? <Navigate to="/" replace /> : <>{children}</>
 }
 
 export default function App() {

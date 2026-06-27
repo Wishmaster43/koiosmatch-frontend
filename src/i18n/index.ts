@@ -10,18 +10,19 @@
  * setLanguage() calls i18n.changeLanguage() to switch at runtime.
  */
 import i18n from 'i18next'
+import type { Resource } from 'i18next'
 import { initReactI18next } from 'react-i18next'
 
 const modules = import.meta.glob('./locales/*/*.json', { eager: true })
 
-const resources = {}
-const namespaces = new Set()
+const resources: Resource = {}
+const namespaces = new Set<string>()
 for (const path in modules) {
   const match = path.match(/\.\/locales\/([^/]+)\/([^/]+)\.json$/)
   if (!match) continue
   const [, lng, ns] = match
   resources[lng] ??= {}
-  resources[lng][ns] = modules[path].default
+  resources[lng][ns] = (modules[path] as { default: unknown }).default as Resource[string][string]
   namespaces.add(ns)
 }
 
@@ -38,4 +39,4 @@ i18n.use(initReactI18next).init({
 export default i18n
 
 /** Maps the app's language code to a BCP-47 locale for Intl date/number formatting. */
-export const LOCALE_BY_LANG = { nl: 'nl-NL', en: 'en-GB', de: 'de-DE', fr: 'fr-FR', es: 'es-ES' }
+export const LOCALE_BY_LANG: Record<string, string> = { nl: 'nl-NL', en: 'en-GB', de: 'de-DE', fr: 'fr-FR', es: 'es-ES' }
