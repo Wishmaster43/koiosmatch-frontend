@@ -78,3 +78,33 @@ export interface FlowEdge {
   data?: { filters?: unknown }
   [k: string]: unknown
 }
+
+// ── Editor config shapes (schedule · edge filters · config-panel fields) ──────
+export interface FilterCondition { field?: string; operator?: string; value?: string }
+export interface EdgeFilters { logic?: string; conditions?: FilterCondition[] }
+
+export interface ScheduleConfig {
+  schedule_type?: string
+  interval_value?: number
+  interval_unit?: string
+  time?: string
+  times?: string[]
+  days_of_week?: number[]
+  day_of_month?: number
+  month?: number
+  [k: string]: unknown
+}
+
+// One selectable option in a config-panel field.
+export interface FieldOption { value: string; label: string }
+// A module config-panel field (schema entry the FieldInput renders).
+export interface WorkflowField {
+  key: string
+  type?: string
+  label?: string
+  fields?: Array<string | FieldOption>
+  options?: Array<string | FieldOption>
+  default?: unknown
+  placeholder?: string
+  [k: string]: unknown
+}

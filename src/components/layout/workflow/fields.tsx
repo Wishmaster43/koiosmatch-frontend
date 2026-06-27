@@ -7,11 +7,15 @@
 import { useState, useEffect } from 'react'
 import { Loader2, Plus, X, Check, Copy } from 'lucide-react'
 import { OPERATORS } from './constants'
+import type { WorkflowField, EdgeFilters, FilterCondition } from '../../../types/workflow'
+
+// Shared change handler: writes one field's value into the node config.
+type OnChange = (key: string, value: unknown) => void
 
 // ── Agent select field ────────────────────────────────────────────────────────
 
-function AgentSelectField({ value, onChange, fieldKey }) {
-  const [agents,  setAgents]  = useState([])
+function AgentSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
+  const [agents,  setAgents]  = useState<Array<{ id?: string | number; name?: string }>>([])
   const [loading, setLoading] = useState(true)
   useEffect(() => {
     import('@/lib/api').then(m => m.default.get('/ai/agents'))
@@ -20,7 +24,7 @@ function AgentSelectField({ value, onChange, fieldKey }) {
       .finally(() => setLoading(false))
   }, [])
   return (
-    <select value={value || ''} onChange={e => onChange(fieldKey, e.target.value)}
+    <select value={(value as string) || ''} onChange={e => onChange(fieldKey, e.target.value)}
       style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8,
                background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
       <option value="">{loading ? 'Agents ophalen…' : 'Selecteer een agent…'}</option>
@@ -31,10 +35,10 @@ function AgentSelectField({ value, onChange, fieldKey }) {
 
 // ── FAQ multi-select field ─────────────────────────────────────────────────────
 
-function FaqSelectField({ value, onChange, fieldKey }) {
-  const [faqs,    setFaqs]    = useState([])
+function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
+  const [faqs,    setFaqs]    = useState<Array<{ id?: string | number; name?: string; title?: string }>>([])
   const [loading, setLoading] = useState(true)
-  const selected = Array.isArray(value) ? value : []
+  const selected: unknown[] = Array.isArray(value) ? value : []
 
   useEffect(() => {
     import('@/lib/api').then(m => m.default.get('/ai/faqs'))
@@ -43,7 +47,7 @@ function FaqSelectField({ value, onChange, fieldKey }) {
       .finally(() => setLoading(false))
   }, [])
 
-  const toggle = (id) => {
+  const toggle = (id: string | number) => {
     const next = selected.includes(id) ? selected.filter(v => v !== id) : [...selected, id]
     onChange(fieldKey, next)
   }
@@ -60,7 +64,7 @@ function FaqSelectField({ value, onChange, fieldKey }) {
         const active = selected.includes(faq.id)
         return (
           <label key={faq.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-            <input type="checkbox" checked={active} onChange={() => toggle(faq.id)}
+            <input type="checkbox" checked={active} onChange={() => toggle(faq.id as string | number)}
               style={{ accentColor: 'var(--color-primary)', width: 14, height: 14, cursor: 'pointer' }} />
             <span style={{ fontSize: 12, color: 'var(--text)' }}>{faq.name ?? faq.title ?? `FAQ ${faq.id}`}</span>
           </label>
@@ -77,8 +81,8 @@ function FaqSelectField({ value, onChange, fieldKey }) {
 const WEBHOOK_API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
 const WEBHOOK_BASE    = `${WEBHOOK_API_URL}/webhook`
 
-function WebhookSelectField({ value, onChange, fieldKey }) {
-  const [hooks,    setHooks]    = useState([])
+function WebhookSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
+  const [hooks,    setHooks]    = useState<Array<{ id?: string | number; name?: string; token?: string }>>([])
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState(false)
   const [creating, setCreating] = useState(false)
@@ -126,7 +130,7 @@ function WebhookSelectField({ value, onChange, fieldKey }) {
       {error && <div style={{ fontSize: 11, color: 'var(--color-danger)' }}>Webhooks konden niet worden geladen.</div>}
 
       {/* Picker — existing inbound webhooks */}
-      <select value={value || ''} onChange={e => onChange(fieldKey, e.target.value)}
+      <select value={(value as string) || ''} onChange={e => onChange(fieldKey, e.target.value)}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
         <option value="">{hooks.length ? 'Selecteer een webhook…' : 'Nog geen webhooks'}</option>
         {hooks.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
@@ -179,16 +183,16 @@ function WebhookSelectField({ value, onChange, fieldKey }) {
 // entity module so fetch + filter live in one module. Reuses the edge OPERATORS;
 // `field.fields` supplies the selectable field list. The standalone Filter/Router
 // between modules stays untouched (for multi-status branching).
-function FiltersField({ field, value, onChange }) {
+function FiltersField({ field, value, onChange }: { field: WorkflowField; value?: EdgeFilters; onChange: OnChange }) {
   const logic = value?.logic ?? 'AND'
-  const conds = Array.isArray(value?.conditions) ? value.conditions : []
+  const conds: FilterCondition[] = Array.isArray(value?.conditions) ? value!.conditions! : []
   const opts  = field.fields ?? []
 
-  const set      = next        => onChange(field.key, next)
-  const setLogic = l           => set({ logic: l, conditions: conds })
-  const add      = ()          => set({ logic, conditions: [...conds, { field: '', operator: '=', value: '' }] })
-  const del      = i           => set({ logic, conditions: conds.filter((_, j) => j !== i) })
-  const upd      = (i, k, v)   => set({ logic, conditions: conds.map((c, j) => j === i ? { ...c, [k]: v } : c) })
+  const set      = (next: EdgeFilters)        => onChange(field.key, next)
+  const setLogic = (l: string)                => set({ logic: l, conditions: conds })
+  const add      = ()                         => set({ logic, conditions: [...conds, { field: '', operator: '=', value: '' }] })
+  const del      = (i: number)                => set({ logic, conditions: conds.filter((_, j) => j !== i) })
+  const upd      = (i: number, k: keyof FilterCondition, v: string) => set({ logic, conditions: conds.map((c, j) => j === i ? { ...c, [k]: v } : c) })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -204,13 +208,14 @@ function FiltersField({ field, value, onChange }) {
       )}
       {/* Condition rows */}
       {conds.map((c, i) => {
-        const needsValue = !['is leeg', 'is gevuld'].includes(c.operator)
+        const needsValue = !['is leeg', 'is gevuld'].includes(c.operator ?? '')
         return (
           <div key={i} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             <select value={c.field} onChange={e => upd(i, 'field', e.target.value)}
               style={{ flex: 1, minWidth: 0, padding: '5px 6px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
               <option value="">veld…</option>
               {opts.map(o => { const v = typeof o === 'object' ? o.value : o; const l = typeof o === 'object' ? o.label : o; return <option key={v} value={v}>{l}</option> })}
+              {/* (field option list) */}
             </select>
             <select value={c.operator} onChange={e => upd(i, 'operator', e.target.value)}
               style={{ padding: '5px 4px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
@@ -239,12 +244,12 @@ function FiltersField({ field, value, onChange }) {
 
 const RS_TYPES = ['Text', 'Number', 'Boolean', 'Date', 'Array', 'Collection', 'Any']
 
-function ResponseStructureField({ value, onChange, fieldKey }) {
-  const items = Array.isArray(value) ? value : []
+function ResponseStructureField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
+  const items = (Array.isArray(value) ? value : []) as Array<{ name?: string; type?: string }>
 
-  const add    = ()        => onChange(fieldKey, [...items, { name: '', type: 'Text' }])
-  const remove = (i)       => onChange(fieldKey, items.filter((_, j) => j !== i))
-  const update = (i, k, v) => onChange(fieldKey, items.map((item, j) => j === i ? { ...item, [k]: v } : item))
+  const add    = ()                                       => onChange(fieldKey, [...items, { name: '', type: 'Text' }])
+  const remove = (i: number)                              => onChange(fieldKey, items.filter((_, j) => j !== i))
+  const update = (i: number, k: 'name' | 'type', v: string) => onChange(fieldKey, items.map((item, j) => j === i ? { ...item, [k]: v } : item))
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -286,7 +291,7 @@ function ResponseStructureField({ value, onChange, fieldKey }) {
 
 // ── Field renderer ────────────────────────────────────────────────────────────
 
-export function FieldInput({ field, value, onChange }) {
+export function FieldInput({ field, value, onChange }: { field: WorkflowField; value?: unknown; onChange: OnChange }) {
   if (field.type === 'agent_select') {
     return <AgentSelectField value={value} onChange={onChange} fieldKey={field.key} />
   }
@@ -294,7 +299,7 @@ export function FieldInput({ field, value, onChange }) {
     return <WebhookSelectField value={value} onChange={onChange} fieldKey={field.key} />
   }
   if (field.type === 'filters') {
-    return <FiltersField field={field} value={value} onChange={onChange} />
+    return <FiltersField field={field} value={value as EdgeFilters | undefined} onChange={onChange} />
   }
   if (field.type === 'faq_select') {
     return <FaqSelectField value={value} onChange={onChange} fieldKey={field.key} />
@@ -314,10 +319,11 @@ export function FieldInput({ field, value, onChange }) {
     )
   }
   if (field.type === 'multiselect') {
-    const selected = Array.isArray(value) ? value : []
+    const selected: unknown[] = Array.isArray(value) ? value : []
     return (
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-        {field.options.map(opt => {
+        {(field.options ?? []).map(optRaw => {
+          const opt = optRaw as string
           const active = selected.includes(opt)
           return (
             <button key={opt} type="button"
@@ -338,7 +344,7 @@ export function FieldInput({ field, value, onChange }) {
   }
   if (field.type === 'select') {
     return (
-      <select value={value ?? field.default ?? ''} onChange={e => onChange(field.key, e.target.value)}
+      <select value={(value ?? field.default ?? '') as string} onChange={e => onChange(field.key, e.target.value)}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none' }}>
         {field.default == null && <option value="">Selecteer...</option>}
         {(field.options ?? []).map(o => {
@@ -351,7 +357,7 @@ export function FieldInput({ field, value, onChange }) {
   }
   if (field.type === 'textarea') {
     return (
-      <textarea value={value || ''} placeholder={field.placeholder || ''}
+      <textarea value={(value as string) || ''} placeholder={field.placeholder || ''}
         onChange={e => onChange(field.key, e.target.value)}
         rows={4}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace', resize: 'vertical' }}
@@ -360,10 +366,10 @@ export function FieldInput({ field, value, onChange }) {
     )
   }
   if (field.type === 'keyvalue') {
-    const pairs = Array.isArray(value) ? value : []
-    const update = (i, k, v) => onChange(field.key, pairs.map((p, j) => j === i ? { ...p, [k]: v } : p))
+    const pairs = (Array.isArray(value) ? value : []) as Array<{ name?: string; value?: string }>
+    const update = (i: number, k: 'name' | 'value', v: string) => onChange(field.key, pairs.map((p, j) => j === i ? { ...p, [k]: v } : p))
     const add    = () => onChange(field.key, [...pairs, { name: '', value: '' }])
-    const remove = (i) => onChange(field.key, pairs.filter((_, j) => j !== i))
+    const remove = (i: number) => onChange(field.key, pairs.filter((_, j) => j !== i))
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {pairs.map((p, i) => (
@@ -387,7 +393,7 @@ export function FieldInput({ field, value, onChange }) {
   }
   return (
     <input type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
-      value={value || ''}
+      value={(value as string) || ''}
       placeholder={field.placeholder || ''}
       onChange={e => onChange(field.key, field.type === 'number' ? Number(e.target.value) : e.target.value)}
       style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box' }}

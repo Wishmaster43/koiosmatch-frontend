@@ -4,14 +4,17 @@
  * shown on the trigger node + button. Extracted from WorkflowCanvasEditor.
  */
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import { X, CalendarDays, Play, Zap } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import type { ScheduleConfig } from '../../../types/workflow'
 
 // ── Schedule helpers ──────────────────────────────────────────────────────────
 
 const DAYS_NL  = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za']
 const MONTHS_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
 
-export function scheduleLabel(trigger, cfg) {
+export function scheduleLabel(trigger?: string, cfg?: ScheduleConfig | null) {
   if (!trigger || trigger === 'Handmatig') return 'Handmatig'
   if (trigger === 'Direct') return 'Direct'
   if (!cfg) return 'Gepland'
@@ -34,26 +37,29 @@ export function scheduleLabel(trigger, cfg) {
 
 // ── Schedule Modal ────────────────────────────────────────────────────────────
 
-export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
+export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
+  trigger?: string; scheduleConfig?: ScheduleConfig | null
+  onSave: (trigger: string, cfg: ScheduleConfig | null) => void; onClose: () => void
+}) {
   const [type,     setType]     = useState(trigger === 'Handmatig' ? 'manual' : trigger === 'Direct' ? 'instant' : 'scheduled')
   const [sType,    setSType]    = useState(scheduleConfig?.schedule_type ?? 'daily')
-  const [intVal,   setIntVal]   = useState(scheduleConfig?.interval_value ?? 15)
+  const [intVal,   setIntVal]   = useState<number | string>(scheduleConfig?.interval_value ?? 15)
   const [intUnit,  setIntUnit]  = useState(scheduleConfig?.interval_unit  ?? 'minutes')
   const [time,     setTime]     = useState(scheduleConfig?.time ?? '08:00')
-  const [times,    setTimes]    = useState(scheduleConfig?.times ?? ['08:00'])
-  const [dow,      setDow]      = useState(scheduleConfig?.days_of_week ?? [1, 2, 3, 4, 5])
+  const [times,    setTimes]    = useState<string[]>(scheduleConfig?.times ?? ['08:00'])
+  const [dow,      setDow]      = useState<number[]>(scheduleConfig?.days_of_week ?? [1, 2, 3, 4, 5])
   const [dom,      setDom]      = useState(scheduleConfig?.day_of_month ?? 1)
   const [month,    setMonth]    = useState(scheduleConfig?.month ?? 1)
-  const toggleDay = d => setDow(ds => ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d].sort((a,b)=>a-b))
+  const toggleDay = (d: number) => setDow(ds => ds.includes(d) ? ds.filter(x => x !== d) : [...ds, d].sort((a,b)=>a-b))
 
   const addTime    = () => setTimes(ts => [...ts, '08:00'])
-  const removeTime = i  => setTimes(ts => ts.filter((_, j) => j !== i))
-  const updateTime = (i, v) => setTimes(ts => ts.map((t, j) => j === i ? v : t))
+  const removeTime = (i: number)  => setTimes(ts => ts.filter((_, j) => j !== i))
+  const updateTime = (i: number, v: string) => setTimes(ts => ts.map((t, j) => j === i ? v : t))
 
   const handleSave = () => {
     if (type === 'manual')  { onSave('Handmatig', null); return }
     if (type === 'instant') { onSave('Direct', null); return }
-    const cfg = { schedule_type: sType }
+    const cfg: ScheduleConfig = { schedule_type: sType }
     if (sType === 'interval') { cfg.interval_value = +intVal; cfg.interval_unit = intUnit }
     else if (sType === 'daily')     { cfg.times = times }
     else if (sType === 'weekly')    { cfg.days_of_week = dow; cfg.time = time }
@@ -63,8 +69,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
     onSave('Scheduled', cfg)
   }
 
-  const inputStyle = { padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }
-  const selectStyle = { ...inputStyle, cursor: 'pointer' }
+  const inputStyle: CSSProperties = { padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }
+  const selectStyle: CSSProperties = { ...inputStyle, cursor: 'pointer' }
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}
@@ -89,7 +95,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
               { id: 'manual',    label: 'Handmatig', desc: 'Starten via de knop',          Icon: Play },
               { id: 'instant',   label: 'Direct',    desc: 'Zodra data binnenkomt',         Icon: Zap },
               { id: 'scheduled', label: 'Gepland',   desc: 'Automatisch op een schema',     Icon: CalendarDays },
-            ].map(({ id, label, desc, Icon: Ic }) => (
+            ].map(({ id, label, desc, Icon: Ic }: { id: string; label: string; desc: string; Icon: LucideIcon }) => (
               <button key={id} type="button" onClick={() => setType(id)}
                 style={{
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
@@ -257,7 +263,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }) {
                 <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>
                   {scheduleLabel('Scheduled', {
                     schedule_type: sType,
-                    interval_value: intVal, interval_unit: intUnit,
+                    interval_value: +intVal, interval_unit: intUnit,
                     time, times, days_of_week: dow, day_of_month: dom, month,
                   })}
                 </div>

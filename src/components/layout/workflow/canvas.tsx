@@ -5,28 +5,32 @@
  * Extracted from WorkflowCanvasEditor.
  */
 import { useState, useContext, useRef } from 'react'
+import type { MouseEvent, DragEvent } from 'react'
 import { Handle, Position, BaseEdge, EdgeLabelRenderer, getStraightPath } from '@xyflow/react'
 import { CheckCircle, Filter, Loader2, Play, Plus, Trash2, X } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { MODULE_META } from '@/modules/index'
 import { NODE_W, NODE_H } from './serialization'
 import { OPERATORS } from './constants'
 import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './contexts'
+import type { FlowNodeData, EdgeFilters, FilterCondition } from '../../../types/workflow'
 
 // ── Custom node ───────────────────────────────────────────────────────────────
 
 const DRAG_TYPE = 'application/x-wf-start'
 
-function ModuleNode({ id, data, selected }) {
-  const meta    = MODULE_META[data.type]
+function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; selected?: boolean }) {
+  const meta    = data.type ? MODULE_META[data.type] : undefined
   const onRun   = useContext(NodeRunContext)
   const startCtx = useContext(StartContext)
   const [busy, setBusy] = useState(false)
   const [dropOver, setDropOver] = useState(false)
   const dragRef = useRef(false)
   if (!meta) return null
-  const Icon = meta.Icon
+  // The registry types Icon narrowly (size only); lucide icons also take `color`.
+  const Icon = meta.Icon as unknown as LucideIcon
 
-  const handleRun = async (e) => {
+  const handleRun = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
     setBusy(true)
     await onRun?.(id, data)
@@ -34,13 +38,13 @@ function ModuleNode({ id, data, selected }) {
   }
 
   // Accept the START badge being dropped onto this node
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
     if (!e.dataTransfer.types.includes(DRAG_TYPE)) return
     e.preventDefault()
     setDropOver(true)
   }
   const handleDragLeave = () => setDropOver(false)
-  const handleDrop = (e) => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
     if (!e.dataTransfer.types.includes(DRAG_TYPE)) return
     e.preventDefault()
     setDropOver(false)
@@ -117,7 +121,7 @@ function ModuleNode({ id, data, selected }) {
           {busy ? <Loader2 size={10} className="animate-spin" /> : <Play size={10} />}
         </button>
         {/* Output badge */}
-        {data.output && (
+        {!!data.output && (
           <div style={{
             position: 'absolute', top: -4, right: -4,
             width: 16, height: 16, borderRadius: '50%',
@@ -130,7 +134,7 @@ function ModuleNode({ id, data, selected }) {
       </div>
       <div style={{ textAlign: 'center', width: NODE_W }}>
         <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', lineHeight: 1.3 }}>{meta.label}</div>
-        {data.output && (
+        {!!data.output && (
           <div style={{ fontSize: 9, color: 'var(--color-success)', marginTop: 1 }}>
             {Array.isArray(data.output) ? `${data.output.length} records` : 'Klaar'}
           </div>
@@ -144,13 +148,15 @@ function ModuleNode({ id, data, selected }) {
 
 // ── Edge filter panel ─────────────────────────────────────────────────────────
 
-export function EdgeFilterPanel({ filters, onClose, onSave }) {
-  const [conds, setConds] = useState(filters?.conditions ?? [])
+export function EdgeFilterPanel({ filters, onClose, onSave }: {
+  filters?: EdgeFilters | null; onClose: () => void; onSave: (f: EdgeFilters) => void
+}) {
+  const [conds, setConds] = useState<FilterCondition[]>(filters?.conditions ?? [])
   const [logic, setLogic] = useState(filters?.logic ?? 'AND')
 
   const addCond = () => setConds(c => [...c, { field: '', operator: '=', value: '' }])
-  const delCond = (i) => setConds(c => c.filter((_, j) => j !== i))
-  const updCond = (i, key, val) => setConds(c => c.map((row, j) => j === i ? { ...row, [key]: val } : row))
+  const delCond = (i: number) => setConds(c => c.filter((_, j) => j !== i))
+  const updCond = (i: number, key: keyof FilterCondition, val: string) => setConds(c => c.map((row, j) => j === i ? { ...row, [key]: val } : row))
 
   return (
     <div style={{
@@ -195,7 +201,7 @@ export function EdgeFilterPanel({ filters, onClose, onSave }) {
                 style={{ padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)' }}>
                 {OPERATORS.map(op => <option key={op} value={op}>{op}</option>)}
               </select>
-              {!['is leeg', 'is gevuld'].includes(c.operator) && (
+              {!['is leeg', 'is gevuld'].includes(c.operator ?? '') && (
                 <input value={c.value} onChange={e => updCond(i, 'value', e.target.value)}
                   placeholder="waarde"
                   style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
@@ -227,7 +233,7 @@ export function EdgeFilterPanel({ filters, onClose, onSave }) {
 
 // ── JSON output viewer ────────────────────────────────────────────────────────
 
-export function OutputPanel({ output, onClose }) {
+export function OutputPanel({ output, onClose }: { output?: unknown; onClose: () => void }) {
   const [search, setSearch] = useState('')
   const json = JSON.stringify(output, null, 2)
   const lines = json.split('\n')
@@ -264,14 +270,17 @@ export function OutputPanel({ output, onClose }) {
 
 // ── Custom edge ───────────────────────────────────────────────────────────────
 
-function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }) {
+function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }: {
+  id: string; sourceX: number; sourceY: number; targetX: number; targetY: number
+  selected?: boolean; data?: { filters?: EdgeFilters }
+}) {
   const onAdd    = useContext(EdgeAddContext)
   const onDelete = useContext(EdgeDeleteContext)
   const onFilter = useContext(EdgeFilterContext)
   const [path]   = getStraightPath({ sourceX, sourceY, targetX, targetY })
   const midX = (sourceX + targetX) / 2
   const midY = (sourceY + targetY) / 2
-  const hasFilters = data?.filters?.conditions?.length > 0
+  const hasFilters = (data?.filters?.conditions?.length ?? 0) > 0
   const stroke = hasFilters ? '#7C3AED' : (selected ? 'var(--color-primary)' : 'var(--border)')
   return (
     <>
@@ -285,7 +294,7 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data })
         }}>
           {hasFilters && (
             <div style={{ fontSize: 9, background: '#7C3AED', color: 'white', borderRadius: 999, padding: '1px 6px', fontWeight: 700 }}>
-              {data.filters.conditions.length} filter{data.filters.conditions.length > 1 ? 's' : ''}
+              {data?.filters?.conditions?.length ?? 0} filter{(data?.filters?.conditions?.length ?? 0) > 1 ? 's' : ''}
             </div>
           )}
           <button onClick={() => onAdd && onAdd(id)} title="Module invoegen"
