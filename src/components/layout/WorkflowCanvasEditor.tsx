@@ -20,12 +20,14 @@ import {
   addEdge, useNodesState, useEdgesState,
   ReactFlowProvider,
 } from '@xyflow/react'
+import type { Connection, NodeTypes, EdgeTypes } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import {
   X, Save, Play, Loader2, Plus, Trash2,
   Zap, List, Clock,
   ChevronDown,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { MODULE_META, MODULE_SCHEMAS, MODULE_APP_MAP } from '@/modules/index'
@@ -37,22 +39,31 @@ import { FieldInput } from './workflow/fields'
 import { ScheduleModal, scheduleLabel } from './workflow/ScheduleModal'
 import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './workflow/contexts'
 import { EdgeFilterPanel, OutputPanel, NODE_TYPES, EDGE_TYPES } from './workflow/canvas'
+import type { Workflow, FlowNode, FlowEdge, FlowNodeData, WorkflowField, EdgeFilters, ScheduleConfig } from '@/types/workflow'
+import type { RunRow } from '@/types/reports'
+
+// One [type, meta] pair from the module registry (used by the picker rows).
+type ModuleMetaEntry = [string, (typeof MODULE_META)[string]]
 
 // ── Module picker ─────────────────────────────────────────────────────────────
 
 const CATEGORY_ORDER = ['Alle', 'Triggers', 'Kandidaten', 'Sollicitaties', 'Vacatures', 'Matches', 'Kansen', 'Taken', 'Klanten', 'Planning', 'Communicatie', 'AI', 'ShiftManager', 'HelloFlex', 'Intus', 'Flow beheer', 'Tekst & Parsing']
 
-function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
+function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
+  insertAfterEdgeId: string | null
+  onSelect: (type: string, edgeId: string | null) => void
+  onClose: () => void
+}) {
   const [search, setSearch] = useState('')
   const [tab,    setTab]    = useState('Alle')
-  const { isAppEnabled } = useApps()
+  const { isAppEnabled } = useApps() ?? {}
 
   // Filter out modules whose app is not enabled
-  const isModuleEnabled = (type) => {
+  const isModuleEnabled = (type: string) => {
     const req = MODULE_APP_MAP[type]
     if (!req) return true
     const apps = Array.isArray(req) ? req : [req]
-    return apps.some(a => isAppEnabled(a))
+    return apps.some(a => isAppEnabled?.(a))
   }
 
   const allEntries = Object.entries(MODULE_META).filter(([type]) => isModuleEnabled(type))
@@ -64,14 +75,14 @@ function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
   })
 
   // Count per category
-  const counts = {}
+  const counts: Record<string, number> = {}
   allEntries.forEach(([, m]) => {
     const c = m.category ?? 'Overig'
     counts[c] = (counts[c] ?? 0) + 1
   })
 
-  const renderRow = ([type, meta]) => {
-    const Icon = meta.Icon
+  const renderRow = ([type, meta]: ModuleMetaEntry) => {
+    const Icon = meta.Icon as unknown as LucideIcon
     return (
       <button key={type} type="button"
         onClick={() => { onSelect(type, insertAfterEdgeId); onClose() }}
@@ -90,7 +101,7 @@ function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
 
   // In "Alle" tab (or search), render with category dividers
   const renderGrouped = () => {
-    const groups = {}
+    const groups: Record<string, ModuleMetaEntry[]> = {}
     visible.forEach(entry => {
       const cat = entry[1].category ?? 'Overig'
       if (!groups[cat]) groups[cat] = []
@@ -160,10 +171,15 @@ function ModulePicker({ insertAfterEdgeId, onSelect, onClose }) {
 
 const MANAGE_TABS = ['agents', 'prompts', 'faq', 'knowledge', 'tools']
 
-function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
+function ConfigPanel({ node, onUpdate, onDelete, onTabChange }: {
+  node: FlowNode | null
+  onUpdate: (nodeId: string, key: string, val: unknown) => void
+  onDelete: (nodeId: string) => void
+  onTabChange?: (tab: string) => void
+}) {
   const [activeTab, setActiveTab] = useState('instellingen')
 
-  const switchTab = (id) => { setActiveTab(id); onTabChange?.(id) }
+  const switchTab = (id: string) => { setActiveTab(id); onTabChange?.(id) }
 
   // Reset tab when selected node changes
   useEffect(() => { setActiveTab('instellingen'); onTabChange?.('instellingen') }, [node?.id])
@@ -178,9 +194,10 @@ function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
       </div>
     )
   }
-  const meta   = MODULE_META[node.data.type]
-  const schema = MODULE_SCHEMAS[node.data.type] || []
-  const Icon   = meta?.Icon
+  const type   = node.data.type ?? ''
+  const meta   = MODULE_META[type]
+  const schema = MODULE_SCHEMAS[type] || []
+  const Icon   = meta?.Icon as unknown as LucideIcon | undefined
   const output = node.data.output
 
   return (
@@ -241,10 +258,11 @@ function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
         <div style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {schema
             .filter(field => {
-              if (!field.showIf) return true
-              const ctrl = schema.find(f => f.key === field.showIf.key)
-              const cur  = node.data.config[field.showIf.key] ?? ctrl?.default
-              const want = field.showIf.value
+              const showIf = field.showIf as { key: string; value: unknown } | undefined
+              if (!showIf) return true
+              const ctrl = schema.find(f => f.key === showIf.key)
+              const cur  = node.data.config?.[showIf.key] ?? ctrl?.default
+              const want = showIf.value
               return Array.isArray(want) ? want.includes(cur) : cur === want
             })
             .map(field => (
@@ -252,9 +270,9 @@ function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
               <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
                 {field.label}
               </label>
-              <FieldInput field={field} value={node.data.config[field.key]}
+              <FieldInput field={field as WorkflowField} value={node.data.config?.[field.key]}
                 onChange={(key, val) => onUpdate(node.id, key, val)} />
-              {field.hint && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{field.hint}</div>}
+              {field.hint ? <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{field.hint as string}</div> : null}
             </div>
           ))}
           {schema.length === 0 && (
@@ -305,11 +323,11 @@ function ConfigPanel({ node, onUpdate, onDelete, onTabChange }) {
 
 // ── Logs panel ────────────────────────────────────────────────────────────────
 
-function LogsPanel({ workflowId, onClose }) {
+function LogsPanel({ workflowId, onClose }: { workflowId?: string | number; onClose: () => void }) {
   const { t } = useTranslation('reports')
-  const [runs,     setRuns]     = useState([])
+  const [runs,     setRuns]     = useState<RunRow[]>([])
   const [loading,  setLoading]  = useState(true)
-  const [expanded, setExpanded] = useState(null)
+  const [expanded, setExpanded] = useState<string | number | null>(null)
 
   // Load this workflow's real executions; empty on failure, never fabricated.
   useEffect(() => {
@@ -318,8 +336,8 @@ function LogsPanel({ workflowId, onClose }) {
     api.get('/workflow-runs', { signal: ctrl.signal })
       .then(res => {
         const rows = res.data?.data ?? res.data ?? []
-        const mine = workflowId == null ? rows : rows.filter(r => (r.workflow_id ?? r.workflowId) === workflowId)
-        mine.sort((a, b) => new Date(b.started_at ?? b.created_at ?? 0) - new Date(a.started_at ?? a.created_at ?? 0))
+        const mine = workflowId == null ? rows : rows.filter((r: RunRow) => (r.workflow_id ?? r.workflowId) === workflowId)
+        mine.sort((a: RunRow, b: RunRow) => +new Date(b.started_at ?? b.created_at ?? 0) - +new Date(a.started_at ?? a.created_at ?? 0))
         setRuns(mine)
       })
       .catch(() => setRuns([]))
@@ -401,34 +419,42 @@ function LogsPanel({ workflowId, onClose }) {
 
 // ── Inner editor ──────────────────────────────────────────────────────────────
 
-function EditorInner({ workflow, onClose, onSave }) {
+function EditorInner({ workflow, onClose, onSave }: {
+  workflow: Workflow
+  onClose: () => void
+  onSave: (updated: Workflow, closeAfter?: boolean) => void
+}) {
   const initFlow = stepsToFlow(
     (workflow.steps || []).map(s => ({ ...s, id: s.id || uid() }))
   )
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initFlow.nodes)
-  const [edges, setEdges, onEdgesChange] = useEdgesState([])
+  const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode>(initFlow.nodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState<FlowEdge>([])
 
   // Defer edges until after nodes are mounted so handles exist in the DOM
   useEffect(() => {
     setEdges(initFlow.edges)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Trigger config is opaque on the workflow; narrow it to the two shapes we read.
+  const triggerConfig = workflow.trigger_config as { schedule?: ScheduleConfig | null; webhook_id?: string | number | null } | undefined
+
   const [name,           setName]           = useState(workflow.name)
   const [trigger,        setTrigger]        = useState(workflow.trigger)
-  const [scheduleConfig, setScheduleConfig] = useState(workflow.trigger_config?.schedule ?? null)
-  const [webhookId]                         = useState(workflow.trigger_config?.webhook_id ?? null)
-  const [, setWebhooks]                      = useState([])
+  const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig | null>(triggerConfig?.schedule ?? null)
+  const [webhookId]                         = useState<string | number | null>(triggerConfig?.webhook_id ?? null)
+  const [, setWebhooks]                      = useState<unknown[]>([])
   const [status,         setStatus]         = useState(workflow.status || 'draft')
   const [saved,          setSaved]          = useState(false)
   const [running,        setRunning]        = useState(false)
-  const [runningNodeId,  setRunningNodeId]  = useState(null)
-  const [selectedNodeId, setSelectedNodeId] = useState(null)
-  const [pickerState,    setPickerState]    = useState(null)
+  const [runningNodeId,  setRunningNodeId]  = useState<string | null>(null)
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
+  const [pickerState,    setPickerState]    = useState<{ edgeId?: string; append?: boolean } | null>(null)
   const [showSchedule,   setShowSchedule]   = useState(false)
   const [widePanelActive, setWidePanelActive] = useState(false)
   // null = auto (node without incoming edge, leftmost); set via START badge drag
-  const [startNodeId,    setStartNodeId]    = useState(null)
+  const [startNodeId,    setStartNodeId]    = useState<string | null>(null)
 
   useEffect(() => {
     import('../../lib/api').then(m => {
@@ -438,35 +464,35 @@ function EditorInner({ workflow, onClose, onSave }) {
     })
   }, [])
   const [showLogs,       setShowLogs]       = useState(false)
-  const [filterState,    setFilterState]    = useState(null)
-  const [outputState,    setOutputState]    = useState(null)
+  const [filterState,    setFilterState]    = useState<{ edgeId: string } | null>(null)
+  const [outputState,    setOutputState]    = useState<{ nodeId: string; output: unknown } | null>(null)
 
   // Stable callback passed via context — never touches edge objects
-  const handleEdgeAdd = useCallback((edgeId) => {
+  const handleEdgeAdd = useCallback((edgeId: string) => {
     setPickerState({ edgeId })
   }, [])
 
-  const handleEdgeDelete = useCallback((edgeId) => {
+  const handleEdgeDelete = useCallback((edgeId: string) => {
     setEdges(eds => eds.filter(e => e.id !== edgeId))
   }, [setEdges])
 
-  const handleEdgeFilter = useCallback((edgeId) => {
+  const handleEdgeFilter = useCallback((edgeId: string) => {
     setFilterState({ edgeId })
   }, [])
 
-  const saveEdgeFilter = useCallback((edgeId, filters) => {
+  const saveEdgeFilter = useCallback((edgeId: string, filters: EdgeFilters) => {
     setEdges(eds => eds.map(e => e.id === edgeId ? { ...e, data: { ...e.data, filters } } : e))
   }, [setEdges])
 
-  const handleNodeRun = useCallback(async (nodeId, data) => {
+  const handleNodeRun = useCallback(async (nodeId: string, data: FlowNodeData) => {
     const { default: api } = await import('../../lib/api')
-    let output = null
+    let output: unknown = null
 
     try {
       if (data.type === 'candidates') {
         // Entity module: only the "Ophalen" action reads; filters live in cfg.filters.
-        const cfg = data.config ?? {}
-        const params = { per_page: cfg.limit ?? 100 }
+        const cfg = (data.config ?? {}) as { limit?: number; filters?: EdgeFilters }
+        const params: Record<string, unknown> = { per_page: cfg.limit ?? 100 }
         // Translate a status condition into a query param (other filters: backend later).
         const statusCond = (cfg.filters?.conditions ?? []).find(c => c.field === 'status' && c.value)
         if (statusCond) params.status = statusCond.value
@@ -484,14 +510,15 @@ function EditorInner({ workflow, onClose, onSave }) {
         output = res.data?.output ?? res.data
       }
     } catch (err) {
-      output = { error: err.response?.data?.message ?? err.message }
+      const e = err as { response?: { data?: { message?: string } }; message?: string }
+      output = { error: e.response?.data?.message ?? e.message }
     }
 
     setNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, output } } : n))
     setOutputState({ nodeId, output })
   }, [setNodes])
 
-  const onConnect = useCallback((params) => {
+  const onConnect = useCallback((params: Connection) => {
     setEdges(eds => {
       const targetAlreadyHasIncoming = eds.some(e => e.target === params.target)
       if (!targetAlreadyHasIncoming) {
@@ -519,7 +546,7 @@ function EditorInner({ workflow, onClose, onSave }) {
         const sourceNode = nds.find(n => n.id === params.source)
         const x = targetNode ? targetNode.position.x - 220 : (sourceNode?.position.x ?? 300) + 220
         const y = targetNode ? targetNode.position.y : (sourceNode?.position.y ?? 180)
-        const routerNode = {
+        const routerNode: FlowNode = {
           id: routerId, type: 'module',
           position: { x, y },
           data: { type: 'router', config: {} },
@@ -532,7 +559,7 @@ function EditorInner({ workflow, onClose, onSave }) {
     })
   }, [setEdges, setNodes])
 
-  const insertModule = useCallback((type, edgeId) => {
+  const insertModule = useCallback((type: string, edgeId: string | null) => {
     const newId = uid()
     // Read current state snapshots to avoid stale closures
     setNodes(nds => {
@@ -585,13 +612,13 @@ function EditorInner({ workflow, onClose, onSave }) {
     setSelectedNodeId(newId)
   }, [setNodes, setEdges, edges, nodes])
 
-  const updateNodeConfig = useCallback((nodeId, key, val) => {
+  const updateNodeConfig = useCallback((nodeId: string, key: string, val: unknown) => {
     setNodes(nds => nds.map(n =>
       n.id === nodeId ? { ...n, data: { ...n.data, config: { ...n.data.config, [key]: val } } } : n
     ))
   }, [setNodes])
 
-  const deleteNode = useCallback((nodeId) => {
+  const deleteNode = useCallback((nodeId: string) => {
     setEdges(eds => {
       const inEdge  = eds.find(e => e.target === nodeId)
       const outEdge = eds.find(e => e.source === nodeId)
@@ -607,7 +634,7 @@ function EditorInner({ workflow, onClose, onSave }) {
 
   const handleSave = useCallback((closeAfter = false) => {
     const steps = flowToSteps(nodes, edges)
-    let triggerConfig = undefined
+    let triggerConfig: Record<string, unknown> | undefined = undefined
     if (trigger === 'Webhook' && webhookId) triggerConfig = { webhook_id: webhookId }
     else if (trigger === 'Scheduled' && scheduleConfig) triggerConfig = { schedule: scheduleConfig }
     onSave({ ...workflow, name, trigger, trigger_config: triggerConfig, status, steps }, closeAfter)
@@ -620,11 +647,11 @@ function EditorInner({ workflow, onClose, onSave }) {
   const handleRun = useCallback(async () => {
     setRunning(true)
     // Walk nodes in flow order, animate each
-    const orderedNodes = []
-    const visited = new Set()
+    const orderedNodes: string[] = []
+    const visited = new Set<string>()
     const startId = nodes.filter(n => !edges.some(e => e.target === n.id))
                          .sort((a, b) => a.position.x - b.position.x)[0]?.id
-    let current = startId
+    let current: string | undefined = startId
     while (current && !visited.has(current)) {
       orderedNodes.push(current)
       visited.add(current)
@@ -654,7 +681,7 @@ function EditorInner({ workflow, onClose, onSave }) {
   }))
 
   return (
-    <StartContext.Provider value={{ startNodeId: firstNodeId, setStartNodeId }}>
+    <StartContext.Provider value={{ startNodeId: firstNodeId ?? null, setStartNodeId }}>
     <EdgeAddContext.Provider value={handleEdgeAdd}>
     <EdgeDeleteContext.Provider value={handleEdgeDelete}>
     <EdgeFilterContext.Provider value={handleEdgeFilter}>
@@ -774,8 +801,8 @@ function EditorInner({ workflow, onClose, onSave }) {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
-              nodeTypes={NODE_TYPES}
-              edgeTypes={EDGE_TYPES}
+              nodeTypes={NODE_TYPES as unknown as NodeTypes}
+              edgeTypes={EDGE_TYPES as unknown as EdgeTypes}
               onNodeClick={(_, node) => setSelectedNodeId(node.id)}
               onPaneClick={() => setSelectedNodeId(null)}
               deleteKeyCode={['Backspace', 'Delete']}
@@ -788,7 +815,7 @@ function EditorInner({ workflow, onClose, onSave }) {
               <Background color="var(--border)" gap={20} />
               <Controls position="bottom-left" showInteractive={false} />
               <MiniMap
-                nodeColor={n => MODULE_META[n.data?.type]?.color ?? 'var(--border)'}
+                nodeColor={n => MODULE_META[(n.data?.type as string) ?? '']?.color ?? 'var(--border)'}
                 nodeStrokeWidth={0}
                 style={{ borderRadius: 10, border: '1px solid var(--border)' }}
               />
@@ -845,15 +872,13 @@ function EditorInner({ workflow, onClose, onSave }) {
         )}
         {filterState && (
           <EdgeFilterPanel
-            edgeId={filterState.edgeId}
-            filters={edges.find(e => e.id === filterState.edgeId)?.data?.filters}
+            filters={edges.find(e => e.id === filterState.edgeId)?.data?.filters as EdgeFilters | null | undefined}
             onClose={() => setFilterState(null)}
             onSave={(filters) => saveEdgeFilter(filterState.edgeId, filters)}
           />
         )}
         {outputState && (
           <OutputPanel
-            nodeId={outputState.nodeId}
             output={outputState.output}
             onClose={() => setOutputState(null)}
           />
@@ -869,7 +894,11 @@ function EditorInner({ workflow, onClose, onSave }) {
 
 // ── Public export wrapped in ReactFlowProvider ────────────────────────────────
 
-export default function WorkflowCanvasEditor(props) {
+export default function WorkflowCanvasEditor(props: {
+  workflow: Workflow
+  onClose: () => void
+  onSave: (updated: Workflow, closeAfter?: boolean) => void
+}) {
   return (
     <ReactFlowProvider>
       <EditorInner {...props} />
