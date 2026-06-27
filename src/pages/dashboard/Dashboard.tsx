@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../../context/AuthContext'
 import { useCandidateCount } from '../../lib/queries'
@@ -10,18 +11,22 @@ import BarChartCard from '../../components/charts/BarChartCard'
 import LineChartCard from '../../components/charts/LineChartCard'
 import WeeklyBarChartCard from '../../components/charts/WeeklyBarChartCard'
 import { Users, CheckCircle, AlertCircle, Target, Euro } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { initialsOf } from '@/lib/initials'
+import type { ChartDatum } from '../../components/charts/chartTypes'
+import type {
+  DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow,
+} from '../../types/dashboard'
 
 // Recent lists, AI runs and conversations are now live (GET /dashboard, C-30/C-31).
 // The demo placeholder arrays were removed — data is mapped from the endpoint below.
 
 // Turn a backend slug (status/funnel/stage value) into a readable label.
-const humanize = (s) =>
-  typeof s === 'string' && s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/[_-]/g, ' ') : (s ?? '—')
-
-import { initialsOf } from '@/lib/initials'
+const humanize = (s?: unknown): string =>
+  typeof s === 'string' && s ? s.charAt(0).toUpperCase() + s.slice(1).replace(/[_-]/g, ' ') : (s == null ? '—' : String(s))
 
 // Compact "when": today → HH:mm, otherwise a short nl-NL date (e.g. "12 jun").
-const fmtWhen = (iso) => {
+const fmtWhen = (iso?: string) => {
   if (!iso) return ''
   const d = new Date(iso)
   if (isNaN(d.getTime())) return ''
@@ -30,10 +35,12 @@ const fmtWhen = (iso) => {
     : d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })
 }
 
-const eur = (v) =>
+const eur = (v?: unknown) =>
   new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Number(v) || 0)
 
-function KpiCard({ label, value, sub, color, bg, Icon, onClick }) {
+function KpiCard({ label, value, sub, color, bg, Icon, onClick }: {
+  label?: ReactNode; value?: ReactNode; sub?: ReactNode; color?: string; bg?: string; Icon: LucideIcon; onClick?: () => void
+}) {
   return (
     <div onClick={onClick}
       style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
@@ -52,7 +59,7 @@ function KpiCard({ label, value, sub, color, bg, Icon, onClick }) {
 }
 
 // Themed container that hosts a (theme-agnostic) chart card.
-function Panel({ children }) {
+function Panel({ children }: { children: ReactNode }) {
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 16 }}>
       {children}
@@ -60,7 +67,7 @@ function Panel({ children }) {
   )
 }
 
-function Block({ title, action, onAction, children }) {
+function Block({ title, action, onAction, children }: { title?: ReactNode; action?: ReactNode; onAction?: () => void; children?: ReactNode }) {
   return (
     <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -73,7 +80,7 @@ function Block({ title, action, onAction, children }) {
   )
 }
 
-function Avatar({ initials, size = 28 }) {
+function Avatar({ initials, size = 28 }: { initials: string; size?: number }) {
   const colors = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6','#EC4899']
   const color  = colors[initials.charCodeAt(0) % colors.length]
   return (
@@ -85,21 +92,21 @@ function Avatar({ initials, size = 28 }) {
   )
 }
 
-function StatusBadge({ label, color }) {
+function StatusBadge({ label, color }: { label?: ReactNode; color: string }) {
   return <span style={{ fontSize: 10, fontWeight: 500, padding: '2px 7px', borderRadius: 99,
     background: color + '20', color, whiteSpace: 'nowrap' }}>{label}</span>
 }
 
 // Period filter options: backend enum value → Dutch label. Vestiging + status
 // options now come live from GET /dashboard (filters.locations / filters.statuses).
-const PERIODES = [
+const PERIODES: Array<[string, string]> = [
   ['vandaag', 'Vandaag'], ['week', 'Deze week'], ['maand', 'Deze maand'],
   ['kwartaal', 'Dit kwartaal'], ['jaar', 'Dit jaar'],
 ]
 
-export default function Dashboard({ onNavigate }) {
+export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, params?: Record<string, unknown>) => void }) {
   const { t } = useTranslation('dashboard')
-  const { activeTenant } = useAuth()
+  const { activeTenant } = useAuth() ?? {}
 
   // Live total — same source as the Candidates table (/candidates meta.total).
   const { data: candidateTotal, isLoading: countLoading } = useCandidateCount()
@@ -108,11 +115,11 @@ export default function Dashboard({ onNavigate }) {
   // Live distributions/counts. /candidates/stats is live; /opportunities/stats
   // is best-effort (renders only if it returns). Defensive field readers mirror
   // the Candidates page (by_status→status, by_funnel→funnel_type, by_owner→owner_id).
-  const [stats, setStats] = useState(null)
-  const [opp,   setOpp]   = useState(null)
+  const [stats, setStats] = useState<DashStats | null>(null)
+  const [opp,   setOpp]   = useState<DashOpp | null>(null)
   // One call (C-30/C-31) for the extra KPIs, recent lists, the timeseries chart and
   // the module feeds (ai_runs / conversations). Returns the object directly (no wrapper).
-  const [dash,  setDash]  = useState(null)
+  const [dash,  setDash]  = useState<DashData | null>(null)
   useEffect(() => {
     const ctrl = new AbortController()
     api.get('/candidates/stats', { signal: ctrl.signal })
@@ -128,13 +135,13 @@ export default function Dashboard({ onNavigate }) {
 
   // Chart data: [{ name, value, color }] for the shared chart cards.
   const statusData = useMemo(() =>
-    (stats?.by_status ?? []).map(o => { const v = o.value ?? o.status; const m = statusMeta(v); return { name: m.label, value: o.count ?? 0, color: m.color, filterValue: v } }).filter(d => d.value), [stats, statusMeta])
+    (stats?.by_status ?? []).map(o => { const v = o.value ?? o.status; const m = statusMeta(v); return { name: m.label, value: o.count ?? 0, color: m.color, filterValue: v } }).filter(d => d.value) as ChartDatum[], [stats, statusMeta])
   const recruiterData = useMemo(() =>
-    (stats?.by_owner ?? []).map(o => ({ name: o.name || '—', value: o.count ?? 0, filterValue: o.id ?? o.owner_id })).filter(d => d.value), [stats])
+    (stats?.by_owner ?? []).map(o => ({ name: o.name || '—', value: o.count ?? 0, filterValue: o.id ?? o.owner_id })).filter(d => d.value) as ChartDatum[], [stats])
   const funnelData = useMemo(() =>
-    (dash?.charts?.by_funnel ?? []).map(o => ({ name: o.label, value: o.count ?? 0, color: o.color, filterValue: o.value })).filter(d => d.value), [dash])
+    (dash?.charts?.by_funnel ?? []).map(o => ({ name: o.label ?? '', value: o.count ?? 0, color: o.color, filterValue: o.value })).filter(d => d.value) as ChartDatum[], [dash])
   const oppStageData = useMemo(() =>
-    (opp?.by_stage ?? []).map(o => ({ name: o.label ?? humanize(o.key), value: o.value ?? 0, color: o.color, filterValue: o.key })).filter(d => d.value), [opp])
+    (opp?.by_stage ?? []).map(o => ({ name: o.label ?? humanize(o.key), value: Number(o.value ?? 0), color: o.color, filterValue: o.key })).filter(d => d.value) as ChartDatum[], [opp])
 
   // Live feeds from GET /dashboard, mapped to the shapes the lists/charts render.
   // Status/stage labels + colours come from the tenant lookups (never raw slugs).
@@ -171,10 +178,10 @@ export default function Dashboard({ onNavigate }) {
 
   // Weekly trend (C-31): merge the three aligned series (same buckets) into one row
   // per period for the grouped bar chart. Only series that have data are rendered.
-  const trendData = useMemo(() => {
+  const trendData = useMemo<TrendRow[]>(() => {
     const ts = dash?.charts?.timeseries ?? {}
-    const byName = new Map()
-    const add = (arr, key) => (arr ?? []).forEach(p => {
+    const byName = new Map<string, TrendRow>()
+    const add = (arr: TimeseriesPoint[] | undefined, key: string) => (arr ?? []).forEach(p => {
       const row = byName.get(p.name) ?? { name: p.name }
       row[key] = p.value ?? 0
       byName.set(p.name, row)
@@ -185,7 +192,7 @@ export default function Dashboard({ onNavigate }) {
     return [...byName.values()]
   }, [dash])
   const trendSeries = useMemo(() => {
-    const present = new Set()
+    const present = new Set<string>()
     trendData.forEach(r => Object.keys(r).forEach(k => k !== 'name' && r[k] != null && present.add(k)))
     return [
       { key: 'kandidaten',    label: t('chart.series.candidates'),   color: 'var(--color-primary)' },
@@ -194,26 +201,29 @@ export default function Dashboard({ onNavigate }) {
     ].filter(s => present.has(s.key))
   }, [trendData, t])
 
-  const att = stats?.attention ?? {}
-  const num = (v) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
+  const att: Record<string, number | null | undefined> = stats?.attention ?? {}
+  const num = (v?: number | null) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
   // Extract the filter value from a clicked chart datum (sector or legend item).
-  const fv = (d) => (d && (d.filterValue ?? d.payload?.filterValue)) || undefined
+  const fv = (d?: unknown) => {
+    const x = d as { filterValue?: unknown; payload?: { filterValue?: unknown } } | null | undefined
+    return (x && (x.filterValue ?? x.payload?.filterValue)) || undefined
+  }
 
-  const [selPeriode,   setSelPeriode]   = useState([])
-  const [selVestiging, setSelVestiging] = useState([])
-  const [selStatus,    setSelStatus]    = useState([])
+  const [selPeriode,   setSelPeriode]   = useState<string[]>([])
+  const [selVestiging, setSelVestiging] = useState<Array<string | number>>([])
+  const [selStatus,    setSelStatus]    = useState<string[]>([])
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   const filterGroups = useMemo(() => [
     { key: 'periode', label: 'Periode', selected: selPeriode,
       options: PERIODES.map(([value, label]) => ({ value, label })),
-      onToggle: v => setSelPeriode(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+      onToggle: (v: string) => setSelPeriode(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
     { key: 'vestiging', label: 'Vestiging', selected: selVestiging,
       options: (dash?.filters?.locations ?? []).map(l => ({ value: l.id, label: l.name })),
-      onToggle: v => setSelVestiging(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+      onToggle: (v: string | number) => setSelVestiging(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
     { key: 'kandidaatstatus', label: 'Kandidaatstatus', selected: selStatus,
       options: (dash?.filters?.statuses ?? []).map(s => ({ value: s.value, label: s.label })),
-      onToggle: v => setSelStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+      onToggle: (v: string) => setSelStatus(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
   ], [selPeriode, selVestiging, selStatus, dash])
 
   useEffect(() => {
@@ -225,7 +235,7 @@ export default function Dashboard({ onNavigate }) {
   // dimension, so the first selected entry is sent (period enum / status slug / branch id).
   useEffect(() => {
     const ctrl = new AbortController()
-    const params = {}
+    const params: Record<string, unknown> = {}
     if (selPeriode[0])   params.period = selPeriode[0]
     if (selStatus[0])    params.status = selStatus[0]
     if (selVestiging[0]) params.location_id = selVestiging[0]
@@ -256,16 +266,16 @@ export default function Dashboard({ onNavigate }) {
 
       {/* Charts rij 1 — verdelingen uit /candidates/stats */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-        <Panel><PieChartCard title={t('chart.byStatus')} data={statusData} colors={statusData.map(d => d.color)} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { status: fv(d) } : undefined)} /></Panel>
+        <Panel><PieChartCard title={t('chart.byStatus')} data={statusData} colors={statusData.map(d => d.color) as string[]} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { status: fv(d) } : undefined)} /></Panel>
         <Panel><PieChartCard title={t('chart.byRecruiter')} data={recruiterData} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { owner: fv(d) } : undefined)} /></Panel>
       </div>
 
       {/* Charts rij 2 — funnel + (kansen indien beschikbaar) */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-        <Panel><BarChartCard title={t('chart.funnel')} data={funnelData} colors={funnelData.map(d => d.color)} showAverage onBarClick={(d) => onNavigate?.('applications', fv(d) ? { stage: fv(d) } : undefined)} /></Panel>
+        <Panel><BarChartCard title={t('chart.funnel')} data={funnelData} colors={funnelData.map(d => d.color) as string[]} showAverage onBarClick={(d) => onNavigate?.('applications', fv(d) ? { stage: fv(d) } : undefined)} /></Panel>
         <Panel>
           {opp
-            ? <PieChartCard title={t('chart.byStage')} data={oppStageData} colors={oppStageData.map(d => d.color)} onItemClick={(d) => onNavigate?.('opportunities', fv(d) ? { stage: fv(d) } : undefined)} />
+            ? <PieChartCard title={t('chart.byStage')} data={oppStageData} colors={oppStageData.map(d => d.color) as string[]} onItemClick={(d) => onNavigate?.('opportunities', fv(d) ? { stage: fv(d) } : undefined)} />
             : <LineChartCard title={t('chart.intakeOverTime')} data={[]} unit={t('common:units.candidates')} />}
         </Panel>
       </div>
@@ -273,10 +283,11 @@ export default function Dashboard({ onNavigate }) {
       {/* Wekelijkse instroom — gegroepeerde bar: kandidaten · sollicitaties · matches (C-31). */}
       <div style={{ marginBottom: 16 }}>
         <Panel>
-          <WeeklyBarChartCard title={t('chart.intakeWeekly')} data={trendData} series={trendSeries}
+          <WeeklyBarChartCard title={t('chart.intakeWeekly')} data={trendData as unknown as ChartDatum[]} series={trendSeries}
             onBarClick={(row, s) => {
+              const name = (row as TrendRow)?.name
               const page = s.key === 'sollicitaties' ? 'applications' : s.key === 'matches' ? 'matches' : 'candidates'
-              onNavigate?.(page, row?.name ? { period: row.name } : undefined)
+              onNavigate?.(page, name ? { period: name } : undefined)
             }} />
         </Panel>
       </div>

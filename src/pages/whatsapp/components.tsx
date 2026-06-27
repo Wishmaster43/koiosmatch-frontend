@@ -2,27 +2,30 @@
  * WhatsApp dashboard presentational pieces — KPI cards, the activity chart, the
  * message feed and the escalation list (+ date helpers). Extracted from WhatsAppPage.
  */
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Clock, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import type { WaCandidate, WaMessage, WaEscalation, WaActivityDatum } from '../../types/whatsapp'
 
 
-export const PAD  = n => String(n).padStart(2, '0')
-const initials = c => c
+export const PAD  = (n: number) => String(n).padStart(2, '0')
+const initials = (c?: WaCandidate) => c
   ? `${(c.first_name ?? '')[0] ?? ''}${(c.last_name ?? '')[0] ?? ''}`.toUpperCase()
   : '?'
-const fullName  = c => c ? `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() : '—'
-const timeAgo   = iso => {
+const fullName  = (c?: WaCandidate) => c ? `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() : '—'
+const timeAgo   = (iso?: string) => {
   if (!iso) return ''
-  const diff = Math.floor((Date.now() - new Date(iso)) / 1000)
+  const diff = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
   if (diff < 60)   return `${diff}s`
   if (diff < 3600) return `${Math.floor(diff / 60)}m`
   if (diff < 86400) return `${Math.floor(diff / 3600)}u`
   return `${Math.floor(diff / 86400)}d`
 }
-const DIRECTION_COLOR = { inbound: 'var(--color-success)', outbound: '#3B8FD4' }
+const DIRECTION_COLOR: Record<string, string> = { inbound: 'var(--color-success)', outbound: '#3B8FD4' }
 // Escalation reason → colour. Label = t('reasons.<key>').
-const REASON_COLOR = {
+const REASON_COLOR: Record<string, { color: string; bg: string }> = {
   failed_delivery:   { color: 'var(--color-danger)', bg: '#FEF2F2' },
   no_reply:          { color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
   negative_response: { color: '#7C3AED', bg: '#F5F3FF' },
@@ -30,7 +33,9 @@ const REASON_COLOR = {
 
 // ─── sub-components ─────────────────────────────────────────────────────────
 
-export function KpiCard({ icon: Icon, label, value, color, loading }) {
+export function KpiCard({ icon: Icon, label, value, color, loading }: {
+  icon: LucideIcon; label: ReactNode; value?: number; color: string; loading?: boolean
+}) {
   return (
     <div style={{
       background: 'var(--surface)', borderRadius: 14,
@@ -54,7 +59,7 @@ export function KpiCard({ icon: Icon, label, value, color, loading }) {
   )
 }
 
-function Avatar({ candidate, size = 32 }) {
+function Avatar({ candidate, size = 32 }: { candidate?: WaCandidate; size?: number }) {
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0,
@@ -67,7 +72,7 @@ function Avatar({ candidate, size = 32 }) {
   )
 }
 
-function StatusDot({ status, direction }) {
+function StatusDot({ status, direction }: { status?: string; direction?: string }) {
   const color =
     status === 'read'      ? 'var(--color-success)' :
     status === 'delivered' ? '#3B8FD4' :
@@ -76,7 +81,7 @@ function StatusDot({ status, direction }) {
   return <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0, display: 'inline-block' }} />
 }
 
-export function MessageFeed({ messages, loading }) {
+export function MessageFeed({ messages, loading }: { messages: WaMessage[]; loading?: boolean }) {
   const { t } = useTranslation('whatsapp')
   return (
     <div style={{
@@ -114,7 +119,7 @@ export function MessageFeed({ messages, loading }) {
                 <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
                   {fullName(msg.candidate)}
                 </span>
-                <span style={{ fontSize: 10, color: DIRECTION_COLOR[msg.direction] }}>
+                <span style={{ fontSize: 10, color: DIRECTION_COLOR[msg.direction ?? ''] }}>
                   {msg.direction === 'inbound'
                     ? <ArrowDownLeft size={10} />
                     : <ArrowUpRight size={10} />}
@@ -136,7 +141,7 @@ export function MessageFeed({ messages, loading }) {
   )
 }
 
-export function EscalationList({ escalations, loading }) {
+export function EscalationList({ escalations, loading }: { escalations: WaEscalation[]; loading?: boolean }) {
   const { t } = useTranslation('whatsapp')
   return (
     <div style={{
@@ -166,7 +171,7 @@ export function EscalationList({ escalations, loading }) {
           </div>
         )}
         {!loading && escalations.map((esc, i) => {
-          const meta = REASON_COLOR[esc.reason] ?? { color: 'var(--text-muted)', bg: 'var(--bg)' }
+          const meta = REASON_COLOR[esc.reason ?? ''] ?? { color: 'var(--text-muted)', bg: 'var(--bg)' }
           const reasonLabel = t(`reasons.${esc.reason}`, { defaultValue: esc.reason })
           return (
             <div key={esc.candidate_id ?? i} style={{
@@ -199,13 +204,13 @@ export function EscalationList({ escalations, loading }) {
   )
 }
 
-function fmtAxisDate(dateStr) {
+function fmtAxisDate(dateStr: string) {
   const [, m, d] = dateStr.split('-')
   const monthAbbr = new Date(2000, parseInt(m) - 1, 1).toLocaleString(undefined, { month: 'short' })
   return `${parseInt(d)} ${monthAbbr}`
 }
 
-export function ActivityChart({ data, loading }) {
+export function ActivityChart({ data, loading }: { data: WaActivityDatum[]; loading?: boolean }) {
   const { t } = useTranslation('whatsapp')
   return (
     <div style={{
@@ -238,7 +243,7 @@ export function ActivityChart({ data, loading }) {
             <Tooltip
               contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)',
                               borderRadius: 8, fontSize: 12 }}
-              labelFormatter={fmtAxisDate}
+              labelFormatter={(label) => fmtAxisDate(String(label))}
             />
             <Legend iconType="circle" iconSize={7}
               formatter={v => <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
