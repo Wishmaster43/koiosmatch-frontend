@@ -1,7 +1,9 @@
 # Koios Match — Werklijst
 
-> **Eén levende bron.** Alleen open taken. Specs staan in CLAUDE.md §3B of in een C-item hieronder.
-> **Bijgewerkt:** 2026-06-24
+> **DE ene levende bron.** Alleen open taken. Specs staan in CLAUDE.md §3B of in een C-item hieronder.
+> Architectuur-bron = `docs/ARCHITECTURE.md`; regels = `CLAUDE.md`. Verder geen losse worklists meer.
+> **Bijgewerkt:** 2026-06-27 — `MASTER-PLAN` · `MASTER-WORKLIST` · `architect-Worklist` · `MIGRATION-AUDIT`
+> + de backend-handoff-prompts zijn hierin gefold en verwijderd (git-history bewaart ze).
 >
 > **Legenda:** ☐ open · ◐ deels klaar · ✅ klaar · 🔴 blokkerend · [D] Danny · [FE] Frontend · [BE] Backend
 
@@ -218,13 +220,117 @@ JSON-kolom + `GET /auth/me` levert hem + `PATCH /users/{id}` accepteert hem.
 ### C-35 · `dashboard_type` op rollen
 Kolom + seed 7 standaard-rollen + `GET /auth/me` geeft `roles[].dashboard_type`.
 
+### C-36 · Kandidaat-instellingen + voorkeuren — endpoints, opslag, seed (FE klaar · BE: lookups gedicht, opslag open)
+De **frontend is volledig** voor candidaat-instellingen + Voorkeuren-tab; wat nog mist is **uitsluitend
+backend** (resterende opslag). Dagen = vaste Intl-lijst (géén API). Lookups zonder data → drawer valt
+fail-soft terug op de FE-seed.
+
+**(a) ✅ `/driver-licenses`** — live op demo+yesway (tabel + 15 NL-categorieën, zit in `CandidateLookupSeeder`
+→ `dev:reset` vult het). Settings-editor én drawer lezen nu echte data. (BE-Claude, 2026-06-27)
+**(a2) ✅ `/candidate-rejection-reasons`** — 7 standaardredenen live geseed (idempotent). ⚠️ Reproduceer-eindje:
+zit nog in **géén** seeder → BE voegt ze toe aan `CandidateLookupSeeder` zodat `dev:reset` ze ook vult.
+
+**(b) Lookup-CRUD-contract dat élke candidate-settings-editor verwacht** (`StatusListEditor` /
+`CandidateLookupsSettings`): `GET` · `POST` · `PUT /{id}` · `DELETE /{id}` (409 + `in_use`-vlag als
+referenced) · `PUT /{id}/reorder` (of `/reorder` met `{ ids: [] }`). Alle moeten **geseed** zijn,
+anders toont de editor niets en valt de drawer terug op de FE-seed. Endpoints die de candidaat-
+instellingen raken: `/genders` · `/functions` (+`allow_free_entry`) · `/industries` (C-7) ·
+`/driver-licenses` (✅ live) · `/languages` + `/language-levels` · `/availability-options` ·
+`/last-contact-types` + `/note-types` (C-21) · `/pools` · `/settings/candidate-lookups/{statuses,
+candidate-types,funnel-types}` (C-1/C-10).
+
+**(c) Preferences-opslag** — `PATCH /candidates/{id}` met de **`preferences` JSON** (FE stuurt de hele
+blob). Velden: `preferred_days[]` · `function_pref` · `sector_pref[]` · `license_categories[]`
+(**vervangt** `has_license` bool) · `wage_tax` (bool) + `wage_tax_from` (date) · `available_from` ·
+`hours_per_week` · `max_travel_km` · `max_travel_min` · `own_transport` · `remarks` (HTML-rich-text).
+`preferred_days` / `sector_pref` zijn nu **arrays** (waren string).
+
+**(d) `/settings`-keys** (merge-by-key, string-opslag), tenant weergave-voorkeuren kandidatentabel:
+`candidate_table_color_funnel` / `_type` / `_pool` / `_koios` (bool) + `candidate_avatar_colored_by_gender` (bool).
+
+**(e) Migratie:** bestaande `has_license`-data → `license_categories[]`.
+
 ### C-27-workflow · Workflow-modules — graaf-opslag
 Steps opslaan met `position` + `connections[]` (target + filters). Stabiele step-ids.
 
 ---
 
+## E. TypeScript-migratie (FE — lopend)
+
+> Hele repo → TS, **groen per golf** (`typecheck`+`lint`+`build`+`test`), incrementeel op main.
+> Nieuw bestand = altijd `.ts`/`.tsx`. **Candidate-/settings-mappen + `Sidebar.jsx` = andere Claude (afblijven).**
+
+**✅ Klaar (gepusht):** `lib/` · `context/` · gedeelde blueprint (drawer/forms/insights/charts/settings-views) ·
+candidate-feature · alle 6 entity-features (customers/applications/vacancies/tasks/opportunities) +
+modules-registry · auth · reports (18) · matches · whatsapp · dashboard · planning · ai (8) · koios (7) ·
+layout-shell (DashboardLayout/TenantSwitcher/appPages) · workflow-serialization · **shiftmanager 13/26**.
+Types in `src/types/*` (api · candidate · application · vacancy · customer · opportunity · task · reports ·
+match · whatsapp · dashboard · planning · workflow · ai · koios).
+
+**☐ Resterend (2 verweven brokken — bewust voor verse context):**
+- **E-1 · shiftmanager (13)**: CandidatesDetailPage · DepartmentsReport · ContactDrawer · AddCustomerModal ·
+  DepartmentDrawer · ShiftmanagerDashboard · CustomersPage · CustomersReport · LocationDrawer ·
+  LocationsReport · DepartmentsPage · ContactsPage · LocationsPage (~2043 r). Hergebruik `types/reports.ts`
+  (ReportCustomer/Location/Department/Contact).
+- **E-2 · workflow-editor-core (5)**: `contexts` · `ScheduleModal` · `canvas` · `fields` ·
+  **`WorkflowCanvasEditor` (878)** (~1883 r). Gebruik `types/workflow.ts` (Workflow/Step/FlowNode/FlowEdge).
+
+**Patroon-notities:** dynamische-key-sort → `(av as number)`-cast · losse API-payloads → permissieve
+interfaces met index-sig (**geen `any` in datamodellen**) · `useAuth() ?? {}` · JS-boundary-componenten
+`as unknown as ComponentType<…>` · filter(Boolean) → `.filter((x): x is string => Boolean(x))`.
+
+**Na de migratie (besloten volgorde 2026-06-27):** (1) audit-convergentie-loop tot 0 findings → (2) refactor
+de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE.md harden naar master-standaard.
+
+---
+
+## F. Kwaliteit & architectuur (FE — gefold uit MASTER-PLAN P2–P4 + architect-findings)
+
+### Modulariteit
+- ☐ **F-1** Splits > ~400 r: `ReportFilterSidebar` (490) · `MessagesTable` (423) · `WorkflowCanvasEditor` (878) → elk single-purpose < ~400.
+- ☐ **F-2** Blueprint-conformiteit per entiteit (vacancies/customers/applications/matches/opportunities/tasks = zelfde shape als candidate; gedeelde DataTable/InsightsRow/ActionMenu/bulkMutate; geen 2e MODULE_META).
+- ☐ **F-3** DUP: `shiftmanager/CustomersInsightsRow` = near-duplicate van gedeelde `InsightsRow` → samenvouwen. AW-9: editor-datumveld → datepicker (DD-MM-YYYY).
+
+### i18n compleet (geen Dutch islands)
+- ☐ **F-4** Workflow-editor (~60 strings, 0×`t()`) + module-registry labels/categorieën × 5 locales.
+- ☐ **F-5** Settings `registry.jsx` (66 hardcoded nav-labels, 0×`t()`) → `t()` × 5 locales.
+- ☐ **F-6** `AppsContext` NL-descriptions · `ViewConfigEditor` EN-strings → via `t()` × 5 locales.
+- ☐ **F-7** Project-brede i18n-grep op JSX-literals → 0 findings. VOC-restant: CompanySettings-lijsten + SM-statussen → lookups.
+
+### Kwaliteit & schaalbaarheid
+- ☐ **F-8** CS-6: inline `api.*` → feature-`api/`-laag (~72 files).
+- ☐ **F-9** CS-9: tests op kritieke paden (bulk-mutate optimistic/reconcile, mappers, 4 UI-states, auth-gated UI).
+- ☐ **F-10** a11y WCAG 2.2 AA: focus-trap+restore drawers/modals · aria-labels op icon-knoppen · kleur≠enig-signaal · contrast ≥4.5:1.
+- ☐ **F-11** Virtualiseer grote tabellen (kandidaten/shifts, 10k+ rijen).
+- ☐ **F-12** DX: dev-only API-foutmelding (METHOD url→status) · silent `.catch(()=>{})` → min. dev-log · duidelijke user-facing error-states i.p.v. lege schermen.
+
+### Auth-flip (gated op backend)
+- ☐ **F-13** N-2: Sanctum httpOnly-cookieflow aanzetten (`withCredentials` + CSRF-priming, Bearer-localStorage uitfaseren) — **pas flippen ná de gecoördineerde backend-deploy** (BE-8). FE-scaffold (`VITE_COOKIE_AUTH`) bestaat.
+
+---
+
 ## D. Afgerond (archief)
 
+- C-11 consent (FE, 2026-06-27): kanaal-consent omgezet naar het backend-contract — genest
+  `consent.{whatsapp,email,newsletter}_opt_in` (was flat `*_consent`), defaults wa/e-mail aan
+  (opt-out) + nieuwsbrief uit, `_consent_at` server-gestempeld (FE stuurt het nooit mee). Type +
+  mapCandidate + buildCandidatePatch + CommunicationTab + tests bijgewerkt.
+- C-16 changelog-IP (FE, 2026-06-27): `GET /candidates/{id}/activity` levert nu `subject_*` + `ip`;
+  changelog-popover toont "Gewijzigd vanaf IP …" per entry (i18n in 5 locales). T3.3 (access-log
+  filter) optioneel/niet gebouwd; C-23 owner-kleur vereiste geen actie.
+- i18n-audit + parity-aanvulling (2026-06-27): de/fr/es waren ~1833 key-slots incompleet (5 hele
+  namespaces + settings + partiële gaten) → stille NL-fallback in de switcher. Alle 5 locales nu **100%
+  parity** (audit-script op 0). ⚠️ de/fr/es zijn **machine-vertaald** — aanrader: native reviewer laat
+  applications/vacancies/tasks/opportunities/settings nalopen.
+- Kandidaat-drawer herstructurering (sessie 2026-06-26): Documenten = eigen tab · Wijzigingslog =
+  History-popover in de title-row · Taal→Achtergrond · Kandidaat-type→Voorkeuren · Laatste contact→
+  Communicatie · Werk→"Match" (alleen bij match/sollicitatie) · dubbele sollicitatie-chips uit header ·
+  ZZP-tab gekoppeld aan candidate-type `freelance` · Statistiek: Recente activiteit weg · ZZP-velden
+  opgeschoond · Voorkeuren-refactor (één state: dagen/functie/branche/rijbewijs als chips/dropdown +
+  loonheffing). Backend-restpunten → C-36.
+- Tabelweergave instelbaar (Settings → Kandidaten → Tabelweergave): gekleurde labels aan/uit + avatar
+  1-kleur vs. per-geslacht (fixt blauw-bug) · tabel-waarden uniform (alles zoals Functie). Backend → C-36.
+- ShiftManager-pagina's op directe endpoints (`/sm_locations`, `/sm_departments`, `/sm_contacts`)
 - Kandidaat-blueprint (CandidatesPage/Table/BulkBar/Drawer + rust-redesign)
 - Status/funnel-model bevestigd (beslissing 14+16)
 - Match-model (3 lagen: score/match/contract) — beslissing + FE gebouwd

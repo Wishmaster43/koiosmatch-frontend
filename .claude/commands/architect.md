@@ -109,7 +109,7 @@ cite `file:line`.
     tab/section; the candidate feature is the blueprint). A feature is only coherent if
     it is also decomposed so a new status/tab/entity drops in by configuration, not
     rewrite. (Backend mirror: controller ≤ ~150 thin, Service/Action ~200–300, Model/
-    Resource/Request ≤ ~200 — see CLAUDE.md §0.3/§3/§3A and docs/architect-Worklist.md.)
+    Resource/Request ≤ ~200 — see CLAUDE.md §0.3/§3/§3A and docs/worklist.md §F.)
 
 ## Severity
 

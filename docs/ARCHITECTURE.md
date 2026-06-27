@@ -1,8 +1,8 @@
 # Koios Match — ARCHITECTURE (single source of truth)
 
 > **Doel:** dé bron voor entiteiten, relaties, statussen/transities, cross-cutting
-> systemen en het API-contract. `/architect` toetst hieraan; `docs/architect-Worklist.md`
-> bevat de bevindingen; `docs/worklist.md` het uit-te-bouwen werk; `CLAUDE.md` de regels.
+> systemen en het API-contract. `/architect` toetst hieraan; bevindingen + uit-te-bouwen werk
+> staan in `docs/worklist.md` (§F = architectuur/kwaliteit); `CLAUDE.md` de regels.
 > Dit bestand = het **model + contract**.
 >
 > **Punt-voor-punt afronden.** Elke regel heeft een marker:
@@ -171,7 +171,7 @@ Single-purpose boven line-count. Backend-mirror (controller ≤150 / Service ~20
 ---
 
 ## 11. Openstaand — punt voor punt afronden
-> Detail + locaties in `docs/architect-Worklist.md` (AW/CS/RF). Hier de kop-lijst:
+> Detail + locaties in `docs/worklist.md` (§F architectuur/kwaliteit · §A–C feature/backend). Hier de kop-lijst:
 
 **Beslissingen (Danny) ⚠️**
 - [x] ~~Auth: httpOnly-cookie~~ → backend koos **Bearer-token** (Authorization-header), géén SPA-cookieflow (2026-06-25). CLAUDE.md §7 her-evalueren als security-traject.

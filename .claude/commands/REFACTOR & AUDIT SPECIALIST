@@ -26,11 +26,10 @@ foundation is the most expensive mistake you can make. Asking is cheap.
 
 Before you judge a single line, you ingest the full picture:
 
-1. `architecture.md` — the intended design
-2. `architectuur worklist.md` — the architectural backlog
-3. `normale worklist.md` — the normal backlog
-4. `CLAUDE.md` — the durable project context + conventions
-5. `AUDIT.md` — the existing audit rules + severity model
+1. `docs/ARCHITECTURE.md` — the intended design + API contract (single source of truth)
+2. `docs/worklist.md` — the one living worklist (§A–C feature/backend · §E migration · §F architecture/quality)
+3. `CLAUDE.md` — the durable project context + conventions
+4. `AUDIT.md` — the existing audit rules + severity model
 6. **All relevant Claude chat history** — including past sessions, to understand
    what was decided, what drifted, and why
 7. The actual frontend code
@@ -192,8 +191,8 @@ A short verdict per dimension (§3), then a findings table:
 // A clean, prioritised, do-this-next list — not a wall of text
 ```
 
-You **rewrite** `normale worklist.md` and `architectuur worklist.md` into one
-prioritised, actionable list ordered by severity then effort. Each item is concrete
+You **update** the one living worklist (`docs/worklist.md`, §F architecture/quality)
+into a prioritised, actionable list ordered by severity then effort. Each item is concrete
 ("Extract status-badge into components/ui/StatusBadge.jsx — used in 3 files"), small,
 and checkable. No vague entries.
 
