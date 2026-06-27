@@ -35,7 +35,7 @@ export interface User {
   avatar_url?: string
   default_per_page?: number
   is_super_admin?: boolean
-  roles?: Array<string | { name: string; permissions?: Named[] }>
+  roles?: Array<string | { name: string; permissions?: Named[]; dashboard_type?: string }>
   permissions?: Named[]
   mfa_enabled?: boolean
   tenant?: Tenant

@@ -40,6 +40,7 @@ export interface AuthContextValue {
   isAdmin: () => boolean
   isSuperAdmin: () => boolean
   hasModule: (key: string) => boolean
+  dashboardType: () => string
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -305,6 +306,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasModule = (key: string) =>
     tenantHasModule(key, activeTenant ?? user?.tenant, { isSuperAdmin: isSuperAdmin() })
 
+  // Start-dashboard type from the first role that carries one (C-35). Tolerant of
+  // the legacy string[] roles shape → returns 'default' until the backend lands
+  // roles[].dashboard_type, so nothing changes behaviour in the meantime.
+  const dashboardType = (): string => {
+    for (const r of user?.roles ?? []) {
+      if (typeof r === 'object' && r.dashboard_type) return r.dashboard_type
+    }
+    return 'default'
+  }
+
   const hasPermission = (permName: string) => {
     if (!user) return false
     if (isSuperAdmin()) return true
@@ -331,7 +342,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     tenants, activeTenant, setActiveTenant,
     login, logout, refreshUser,
     verifyMfa, setupMfa, confirmMfa, disableMfa,
-    hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule,
+    hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule, dashboardType,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
