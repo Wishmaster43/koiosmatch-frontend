@@ -5,6 +5,7 @@
  * recharts, tiptap) only download when that page is opened.
  */
 import { lazy } from 'react'
+import type { ReactNode } from 'react'
 
 const Dashboard              = lazy(() => import('../../pages/dashboard/Dashboard'))
 const WorkflowsPage          = lazy(() => import('../../pages/ai/WorkflowsPage'))
@@ -41,7 +42,7 @@ const OpportunitiesPage      = lazy(() => import('../../pages/opportunities/Oppo
 const TasksPage              = lazy(() => import('../../pages/tasks/TasksPage'))
 
 // Route key → breadcrumb label.
-export const PAGE_TITLES = {
+export const PAGE_TITLES: Record<string, string> = {
   // Core
   dashboard:                    'Dashboard',
   settings:                     'Settings',
@@ -96,7 +97,7 @@ export const PAGE_TITLES = {
 }
 
 // Temporary placeholder for pages that are not built yet.
-export function PlaceholderPage({ title }) {
+export function PlaceholderPage({ title }: { title?: ReactNode }) {
   return (
     <div className="flex items-center justify-center h-full">
       <p className="font-mono text-sm text-[var(--text-muted)]">{title} — komt eraan</p>
@@ -106,7 +107,10 @@ export function PlaceholderPage({ title }) {
 
 // Map the active route key to its page component. `goTo`/`navIntent` come from
 // the layout (a page can navigate with a filter intent; plain nav clears it).
-export function renderPage(activePage, { navIntent, goTo }) {
+// navIntent is a dynamic payload fanned out to differently-typed page `intent`
+// props, so it's typed loosely here on purpose.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function renderPage(activePage: string, { navIntent, goTo }: { navIntent?: any; goTo: (page: string, intent?: unknown) => void }) {
   switch (activePage) {
 
     // ── Core ──────────────────────────────────────────────────────────────
@@ -117,17 +121,17 @@ export function renderPage(activePage, { navIntent, goTo }) {
 
     // ── ATS & CRM ─────────────────────────────────────────────────────────
     case 'candidates':             return <CandidatesPage intent={navIntent} />
-    case 'applications':           return <ApplicationsPage intent={navIntent} />
+    case 'applications':           return <ApplicationsPage />
     case 'vacancies':              return <VacanciesPage />
-    case 'matches':                return <MatchesPage intent={navIntent} />
-    case 'opportunities':          return <OpportunitiesPage intent={navIntent} />
-    case 'tasks':                  return <TasksPage intent={navIntent} />
+    case 'matches':                return <MatchesPage />
+    case 'opportunities':          return <OpportunitiesPage />
+    case 'tasks':                  return <TasksPage />
     case 'customers':              return <CustomersPage />
     case 'planning':               return <PlanningPage />
 
     // ── Shiftmanager module ───────────────────────────────────────────────
     case 'shiftmanager':
-    case 'shiftmanager.dashboard':   return <ShiftmanagerDashboard onNavigate={goTo} />
+    case 'shiftmanager.dashboard':   return <ShiftmanagerDashboard />
     // Reports
     case 'shiftmanager.candidates':  return <CandidatesReport initialTab="candidates" />
     case 'shiftmanager.customers':   return <CustomerReport />

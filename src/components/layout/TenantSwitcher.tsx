@@ -3,16 +3,18 @@
  * can search and switch tenant. Extracted from Sidebar.
  */
 import { useState, useEffect, useRef } from 'react'
+import type { UIEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import api, { unwrapList } from '@/lib/api'
 import { ChevronDown, Loader2, Search } from 'lucide-react'
+import type { Tenant } from '@/types/api'
 
-const tenantInitials = (name) =>
+const tenantInitials = (name?: string) =>
   name ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '??'
 
 // `domains` can be strings or Laravel-tenancy domain objects {domain, ...}.
-const tenantDomain = (tn) => {
+const tenantDomain = (tn?: Tenant & { domains?: Array<string | { domain?: string }> }) => {
   const d = tn?.domains?.[0]
   return (typeof d === 'string' ? d : d?.domain) ?? null
 }
@@ -30,22 +32,22 @@ const tenantDomain = (tn) => {
  *
  * Regular users get a plain, non-clickable card (backend ignores X-Tenant for them).
  */
-export default function TenantSwitcher({ expanded }) {
+export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
   const { t } = useTranslation('common')
-  const { activeTenant, user, setActiveTenant, isSuperAdmin } = useAuth()
+  const { activeTenant, user, setActiveTenant, isSuperAdmin } = useAuth() ?? {}
 
   const [open,      setOpen]      = useState(false)
   const [query,     setQuery]     = useState('')
   const [debounced, setDebounced] = useState('')
-  const [results,   setResults]   = useState([])
+  const [results,   setResults]   = useState<Tenant[]>([])
   const [page,      setPage]      = useState(1)
   const [lastPage,  setLastPage]  = useState(1)
   const [loading,   setLoading]   = useState(false)
-  const [switching, setSwitching] = useState(null)
-  const ref = useRef(null)
+  const [switching, setSwitching] = useState<string | number | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
 
   const tenant    = activeTenant ?? user?.tenant ?? null
-  const canSwitch = isSuperAdmin()
+  const canSwitch = isSuperAdmin?.() ?? false
   const initials  = tenantInitials(tenant?.name)
 
   // Debounce the search term (±250ms); reset to page 1 on a new term.
@@ -61,11 +63,11 @@ export default function TenantSwitcher({ expanded }) {
     setLoading(true)
     api.get('/tenants', { params: { search: debounced || undefined, per_page: 25, page }, signal: ctrl.signal })
       .then(res => {
-        const { rows, lastPage: lp } = unwrapList(res)
+        const { rows, lastPage: lp } = unwrapList<Tenant>(res)
         setResults(prev => (page === 1 ? rows : [...prev, ...rows]))
         setLastPage(lp)
       })
-      .catch(err => { if (err.code !== 'ERR_CANCELED' && page === 1) setResults([]) })
+      .catch(err => { if ((err as { code?: string }).code !== 'ERR_CANCELED' && page === 1) setResults([]) })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
   }, [open, canSwitch, debounced, page])
@@ -73,24 +75,24 @@ export default function TenantSwitcher({ expanded }) {
   // Close on outside click / Escape; reset state when closing.
   useEffect(() => {
     if (!open) return
-    const onDoc = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
-    const onKey = (e) => { if (e.key === 'Escape') setOpen(false) }
+    const onDoc = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
     document.addEventListener('mousedown', onDoc)
     document.addEventListener('keydown', onKey)
     return () => { document.removeEventListener('mousedown', onDoc); document.removeEventListener('keydown', onKey) }
   }, [open])
 
-  const onScroll = (e) => {
+  const onScroll = (e: UIEvent<HTMLDivElement>) => {
     const el = e.currentTarget
     if (!loading && page < lastPage && el.scrollHeight - el.scrollTop - el.clientHeight < 48) {
       setPage(p => p + 1)
     }
   }
 
-  const pick = async (tn) => {
+  const pick = async (tn: Tenant) => {
     if (tn.id === tenant?.id) { setOpen(false); return }
     setSwitching(tn.id)
-    try { await setActiveTenant(tn) } finally { setSwitching(null); setOpen(false); setQuery('') }
+    try { await setActiveTenant?.(tn) } finally { setSwitching(null); setOpen(false); setQuery('') }
   }
 
   // Collapsed rail: just the badge.

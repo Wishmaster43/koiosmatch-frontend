@@ -4,6 +4,7 @@
  * Owns the active-page + panel state; the page itself comes from renderPage().
  */
 import { useState, useEffect, Suspense } from 'react'
+import type { ComponentType } from 'react'
 import { SlidersHorizontal, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useRightPanel } from '../../context/RightPanelContext'
@@ -12,6 +13,10 @@ import Sidebar from './Sidebar'
 import KoiosPanel from './KoiosPanel'
 import ReportFilterSidebar from '../reports/ReportFilterSidebar'
 import { renderPage, PAGE_TITLES } from './appPages'
+import type { ReportFilterGroup } from '../../types/reports'
+
+// Sidebar is still JS (the other Claude owns it); accept its props loosely at this boundary.
+const SidebarTyped = Sidebar as unknown as ComponentType<Record<string, unknown>>
 
 // Fallback while a lazily-loaded page chunk is being fetched.
 function PageLoader() {
@@ -38,7 +43,7 @@ function NoAccessPage() {
  * useTenantTheme — applies CSS variables based on tenant branding.
  * Backend returns { primary_color, logo_url } via /api/auth/me.
  */
-function useTenantTheme(tenant) {
+function useTenantTheme(tenant?: { primary_color?: string } | null) {
   useEffect(() => {
     if (!tenant) return
     const root = document.documentElement
@@ -53,31 +58,32 @@ export default function DashboardLayout() {
   const [expanded,       setExpanded]       = useState(true)
   const auth0                               = useAuth()
   const pkg0                                = auth0?.activeTenant?.package ?? auth0?.user?.tenant?.package
-  const [activePage,     setActivePage]     = useState(PACKAGE_DEFAULT_PAGE[pkg0] ?? 'dashboard')
+  const [activePage,     setActivePage]     = useState(PACKAGE_DEFAULT_PAGE[pkg0 ?? ''] ?? 'dashboard')
   // Navigation intent: a filter the target page should apply when navigated to
   // (e.g. a dashboard KPI/chart click). Plain navigation (sidebar) clears it.
-  const [navIntent,      setNavIntent]      = useState(null)
-  const goTo = (page, intent = null) => { setNavIntent(intent); setActivePage(page) }
+  const [navIntent,      setNavIntent]      = useState<unknown>(null)
+  const goTo = (page: string, intent: unknown = null) => { setNavIntent(intent); setActivePage(page) }
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
   const [koiosOpen,      setKoiosOpen]      = useState(false)
   const auth                                = auth0
-  const { logout, user, activeTenant }      = auth
+  const { logout, user, activeTenant }      = auth ?? {}
   const { filterGroups }                    = useRightPanel()
 
   // Active tenant drives topbar branding. Super admins see the tenant they switched to;
   // regular users fall back to their own tenant from /auth/me.
-  const tenant = activeTenant ?? user?.tenant ?? { name: 'KoiosMatch', logo_url: null }
+  const tenant: { name?: string; logo_url?: string | null; primary_color?: string } =
+    activeTenant ?? user?.tenant ?? { name: 'KoiosMatch', logo_url: null }
   useTenantTheme(tenant)
 
   // Only show the filter button when the current page has registered filter groups.
   const hasFilters    = filterGroups.length > 0
-  const activeFilters = filterGroups.reduce((sum, g) => sum + (g.selected?.length ?? 0), 0)
+  const activeFilters = filterGroups.reduce((sum, g) => sum + ((g.selected as unknown[] | undefined)?.length ?? 0), 0)
 
   return (
     <div className="flex h-screen overflow-hidden">
 
       {/* ── Left navigation ── */}
-      <Sidebar
+      <SidebarTyped
         expanded={expanded}
         setExpanded={setExpanded}
         activePage={activePage}
@@ -142,7 +148,7 @@ export default function DashboardLayout() {
             {/* Avatar button — navigates to profile page */}
             {(() => {
               const initials = (
-                [user?.firstname, user?.lastname].filter(Boolean).map(n => n[0]).join('').toUpperCase()
+                [user?.firstname, user?.lastname].filter((n): n is string => Boolean(n)).map(n => n[0]).join('').toUpperCase()
                 || (user?.name ?? '').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
                 || (user?.email ?? '').slice(0, 2).toUpperCase()
                 || '?'
@@ -224,7 +230,7 @@ export default function DashboardLayout() {
             >
               <ReportFilterSidebar
                 title="Filters"
-                groups={filterGroups}
+                groups={filterGroups as ReportFilterGroup[]}
                 onClose={() => setRightPanelOpen(false)}
               />
             </div>
