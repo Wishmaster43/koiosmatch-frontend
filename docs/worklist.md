@@ -263,17 +263,15 @@ Steps opslaan met `position` + `connections[]` (target + filters). Stabiele step
 **✅ Klaar (gepusht):** `lib/` · `context/` · gedeelde blueprint (drawer/forms/insights/charts/settings-views) ·
 candidate-feature · alle 6 entity-features (customers/applications/vacancies/tasks/opportunities) +
 modules-registry · auth · reports (18) · matches · whatsapp · dashboard · planning · ai (8) · koios (7) ·
-layout-shell (DashboardLayout/TenantSwitcher/appPages) · workflow-serialization · **shiftmanager 13/26**.
+layout-shell (DashboardLayout/TenantSwitcher/appPages) · workflow-serialization · **shiftmanager 26/26 (E-1 klaar)**.
 Types in `src/types/*` (api · candidate · application · vacancy · customer · opportunity · task · reports ·
-match · whatsapp · dashboard · planning · workflow · ai · koios).
+match · whatsapp · dashboard · planning · workflow · ai · koios · **shiftmanager**).
 
-**☐ Resterend (2 verweven brokken — bewust voor verse context):**
-- **E-1 · shiftmanager (13)**: CandidatesDetailPage · DepartmentsReport · ContactDrawer · AddCustomerModal ·
-  DepartmentDrawer · ShiftmanagerDashboard · CustomersPage · CustomersReport · LocationDrawer ·
-  LocationsReport · DepartmentsPage · ContactsPage · LocationsPage (~2043 r). Hergebruik `types/reports.ts`
-  (ReportCustomer/Location/Department/Contact).
-- **E-2 · workflow-editor-core (5)**: `contexts` · `ScheduleModal` · `canvas` · `fields` ·
-  **`WorkflowCanvasEditor` (878)** (~1883 r). Gebruik `types/workflow.ts` (Workflow/Step/FlowNode/FlowEdge).
+**☐ Resterend (1 verweven brok — bewust voor verse context):**
+- **E-2 · workflow-editor-core (5)**: `components/layout/workflow/{contexts,ScheduleModal,canvas,fields}` +
+  **`components/layout/WorkflowCanvasEditor` (878)** (~1883 r). Gebruik `types/workflow.ts`
+  (Workflow/Step/FlowNode/FlowEdge); `serialization.ts`/`constants.ts` zijn al `.ts`. Het is onderling
+  verweven (de 878-regel-editor + canvas/fields/ScheduleModal + de 4 React-contexts) → in één golf doen.
 
 **Patroon-notities:** dynamische-key-sort → `(av as number)`-cast · losse API-payloads → permissieve
 interfaces met index-sig (**geen `any` in datamodellen**) · `useAuth() ?? {}` · JS-boundary-componenten
