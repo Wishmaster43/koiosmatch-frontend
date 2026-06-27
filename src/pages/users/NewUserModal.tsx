@@ -3,22 +3,28 @@
  * Extracted from UsersPage.
  */
 import { useState } from 'react'
+import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Loader2 } from 'lucide-react'
 import api from '@/lib/api'
+import type { ManagedUser } from '@/types/api'
 
 // Selectable roles in the new-user form; labels = t('users.roles.<value>').
 const ROLES = ['tenant_admin', 'planner', 'user']
 
-export default function NewUserModal({ onClose, onCreated }) {
+export default function NewUserModal({ onClose, onCreated }: {
+  onClose: () => void
+  onCreated: (user: ManagedUser) => void
+}) {
   const { t } = useTranslation('users')
   const [form, setForm]     = useState({ firstname: '', lastname: '', email: '', password: '', role: 'planner' })
   const [saving, setSaving] = useState(false)
-  const [error,  setError]  = useState(null)
+  const [error,  setError]  = useState<string | null>(null)
 
-  const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
+  const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+    setForm(f => ({ ...f, [k]: e.target.value }))
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setSaving(true); setError(null)
     try {
@@ -26,16 +32,17 @@ export default function NewUserModal({ onClose, onCreated }) {
       onCreated(res.data?.data ?? res.data)
       onClose()
     } catch (err) {
-      setError(err?.response?.data?.message ?? t('createFailed'))
+      const e2 = err as { response?: { data?: { message?: string } } }
+      setError(e2.response?.data?.message ?? t('createFailed'))
     } finally {
       setSaving(false)
     }
   }
 
-  const input = { width: '100%', padding: '8px 10px', fontSize: 13, borderRadius: 8,
+  const input: CSSProperties = { width: '100%', padding: '8px 10px', fontSize: 13, borderRadius: 8,
                   border: '1px solid var(--border)', background: 'var(--input-bg)',
                   color: 'var(--text)', outline: 'none' }
-  const label = { display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5 }
+  const label: CSSProperties = { display: 'block', fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5 }
 
   return (
     <>

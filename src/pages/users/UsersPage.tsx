@@ -9,29 +9,41 @@
  *   - (further down)→ the searchable user table + role rendering
  */
 import { useState, useEffect, useMemo, useRef } from 'react'
+import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck, Shield, User, Plus, Loader2, ChevronDown } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import api from '../../lib/api'
 import { useAuth } from '../../context/AuthContext'
 import { useRightPanel } from '../../context/RightPanelContext'
 import { COLOR_PRESETS } from '../../lib/colorPresets'
 import NewUserModal from './NewUserModal'
+import type { ManagedUser } from '@/types/api'
 
+// A role reference as it can appear on a user: a bare name or a role object.
+type RoleRef = string | { name?: string }
+// An available role from /roles (for the inline role-changer).
+interface AvailableRole { id: string | number; name: string }
+// Loose translation function (the i18next TFunction is assignable to this).
+type TFunc = (key: string, opts?: Record<string, unknown>) => string
+
+// Resolve a role reference to its name (a bare-string role is its own name).
+const roleName = (r: RoleRef): string | undefined => typeof r === 'string' ? r : r.name
 
 // Role → colour + icon. Label = t('users.roles.<name>') (default → user).
-const ROLE_META = {
+const ROLE_META: Record<string, { color: string; bg: string; icon: LucideIcon }> = {
   super_admin:   { color: '#7C3AED', bg: '#F5F3FF', icon: ShieldCheck },
   tenant_admin:  { color: '#1D4ED8', bg: 'var(--color-secondary-bg)', icon: Shield },
   planner:       { color: '#065F46', bg: '#ECFDF5', icon: User },
   default:       { color: '#6B7280', bg: '#F9FAFB', icon: User },
 }
-const roleLabel = (t, name) => t(`users.roles.${name === 'default' ? 'user' : name}`, { defaultValue: name })
+const roleLabel = (t: TFunc, name: string) => t(`users.roles.${name === 'default' ? 'user' : name}`, { defaultValue: name })
 
-const hasRole = (u, role) => (u?.roles ?? []).some(r => (typeof r === 'string' ? r : r?.name) === role)
-const isSuperAdminUser = u => hasRole(u, 'super_admin')
+const hasRole = (u: ManagedUser | undefined, role: string) => (u?.roles ?? []).some(r => roleName(r) === role)
+const isSuperAdminUser = (u: ManagedUser) => hasRole(u, 'super_admin')
 
-function RoleBadge({ role }) {
+function RoleBadge({ role }: { role: RoleRef }) {
   const { t } = useTranslation('users')
   const name = typeof role === 'string' ? role : role?.name ?? 'default'
   const meta = ROLE_META[name] ?? ROLE_META.default
@@ -51,12 +63,16 @@ function RoleBadge({ role }) {
 
 // Inline role-changer shown when clicking the role cell of a non-super-admin user.
 // Loads available roles from /roles and sends PUT /users/{id}/roles.
-function RoleSelector({ user: u, availableRoles, onChanged }) {
+function RoleSelector({ user: u, availableRoles, onChanged }: {
+  user: ManagedUser
+  availableRoles: AvailableRole[]
+  onChanged: (updated: ManagedUser) => void
+}) {
   const { t } = useTranslation('users')
   const [open,    setOpen]    = useState(false)
   const [saving,  setSaving]  = useState(false)
-  const [menuPos, setMenuPos] = useState(null)
-  const btnRef = useRef(null)
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null)
+  const btnRef = useRef<HTMLButtonElement>(null)
 
   // Open below the button via a portal so the menu escapes the table's `overflow: hidden`.
   const toggle = () => {
@@ -65,10 +81,10 @@ function RoleSelector({ user: u, availableRoles, onChanged }) {
   }
 
   const currentRoleName = (u.roles ?? [])
-    .map(r => typeof r === 'string' ? r : r?.name)
+    .map(roleName)
     .find(n => n && n !== 'super_admin') ?? null
 
-  const assign = async (roleId) => {
+  const assign = async (roleId: string | number) => {
     setSaving(true)
     setOpen(false)
     try {
@@ -81,9 +97,9 @@ function RoleSelector({ user: u, availableRoles, onChanged }) {
   return (
     <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
       {(u.roles ?? [])
-        .filter(r => (typeof r === 'string' ? r : r?.name) !== 'super_admin')
+        .filter(r => roleName(r) !== 'super_admin')
         .map((r, i) => <RoleBadge key={i} role={r} />)}
-      {(u.roles ?? []).filter(r => (typeof r === 'string' ? r : r?.name) !== 'super_admin').length === 0 && (
+      {(u.roles ?? []).filter(r => roleName(r) !== 'super_admin').length === 0 && (
         <RoleBadge role="default" />
       )}
 
@@ -136,16 +152,17 @@ function RoleSelector({ user: u, availableRoles, onChanged }) {
               )
             })}
           </div>
-        </>
+        </>,
+        document.body
       )}
     </div>
   )
 }
 
 // Derive up-to-2 initials from name parts, falling back to the e-mail.
-function avatarInitials(u) {
+function avatarInitials(u: ManagedUser) {
   return (
-    [u.firstname, u.lastname].filter(Boolean).map(n => n[0]).join('').toUpperCase()
+    [u.firstname, u.lastname].filter((n): n is string => Boolean(n)).map(n => n[0]).join('').toUpperCase()
     || (u.name ?? '').split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
     || (u.email ?? '').slice(0, 2).toUpperCase()
     || '?'
@@ -155,11 +172,11 @@ function avatarInitials(u) {
 // Round initials bubble, soft-tinted with the user's chosen `avatar_color` (neutral
 // primary tint when none). When `onPick` is given it doubles as a colour picker
 // (click → soft palette popup) so recruiter icons get a recognisable, settable colour.
-function EditableAvatar({ user: u, onPick }) {
+function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?: (color: string | null) => void }) {
   const { t } = useTranslation('users')
   const [open, setOpen] = useState(false)
   const c = u.avatar_color || null
-  const bubble = {
+  const bubble: CSSProperties = {
     width: 30, height: 30, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700,
     background: c ? c + '22' : 'var(--color-primary-bg)',
@@ -169,7 +186,7 @@ function EditableAvatar({ user: u, onPick }) {
   if (!onPick) return <div style={bubble}>{avatarInitials(u)}</div>
 
   // Commit a colour (or null = back to the auto/initials colour) and close.
-  const choose = (color) => { setOpen(false); onPick(color) }
+  const choose = (color: string | null) => { setOpen(false); onPick(color) }
   return (
     <div style={{ position: 'relative' }}>
       <button onClick={() => setOpen(o => !o)} title={t('avatarColor')}
@@ -201,22 +218,22 @@ function EditableAvatar({ user: u, onPick }) {
   )
 }
 
-const TH = {
+const TH: CSSProperties = {
   padding: '10px 14px', textAlign: 'left', fontSize: 11, fontWeight: 600,
   color: '#9CA3AF', background: '#FAFAFA', borderBottom: '1px solid #F3F4F6',
   whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '0.04em',
 }
-const TD = { padding: '10px 14px', borderBottom: '1px solid #F9FAFB', verticalAlign: 'middle' }
+const TD: CSSProperties = { padding: '10px 14px', borderBottom: '1px solid #F9FAFB', verticalAlign: 'middle' }
 
 export default function UsersPage() {
   const { t } = useTranslation('users')
-  const { user: me } = useAuth()
-  const [users,        setUsers]        = useState([])
-  const [roles,        setRoles]        = useState([])
+  const { user: me } = useAuth() ?? {}
+  const [users,        setUsers]        = useState<ManagedUser[]>([])
+  const [roles,        setRoles]        = useState<AvailableRole[]>([])
   const [loading,      setLoading]      = useState(true)
-  const [error,        setError]        = useState(null)
+  const [error,        setError]        = useState<string | null>(null)
   const [showCreate,   setShowCreate]   = useState(false)
-  const [selectedRole, setSelectedRole] = useState([])
+  const [selectedRole, setSelectedRole] = useState<string[]>([])
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   useEffect(() => {
@@ -225,16 +242,20 @@ export default function UsersPage() {
         const list = usersRes.data?.data ?? usersRes.data ?? []
         setUsers(Array.isArray(list) ? list : [])
         const roleList = rolesRes.data ?? []
-        setRoles(roleList.filter(r => r.name !== 'super_admin' && r.name !== 'tenant_admin'))
+        setRoles(roleList.filter((r: AvailableRole) => r.name !== 'super_admin' && r.name !== 'tenant_admin'))
       })
       .catch(err => setError(err?.response?.status === 403 ? t('noAccess') : t('loadError')))
       .finally(() => setLoading(false))
   }, [])
 
-  const roleOptions = useMemo(() => [...new Set(users.flatMap(u => (u.roles ?? []).map(r => r.name)))].map(r => ({ value: r, label: r, count: users.filter(u => (u.roles ?? []).some(x => x.name === r)).length })), [users])
+  const roleOptions = useMemo(() =>
+    [...new Set(users.flatMap(u => (u.roles ?? []).map(roleName)))]
+      .filter((r): r is string => Boolean(r))
+      .map(r => ({ value: r, label: r, count: users.filter(u => (u.roles ?? []).some(x => roleName(x) === r)).length }))
+  , [users])
 
   const filterGroups = useMemo(() => [
-    { key: 'role', label: t('filterRole'), selected: selectedRole, options: roleOptions, onToggle: v => setSelectedRole(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
+    { key: 'role', label: t('filterRole'), selected: selectedRole, options: roleOptions, onToggle: (v: string) => setSelectedRole(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]) },
   ], [t, selectedRole, roleOptions])
 
   useEffect(() => {
@@ -244,11 +265,11 @@ export default function UsersPage() {
 
   const filtered = useMemo(() => {
     if (!selectedRole.length) return users
-    return users.filter(u => selectedRole.some(r => (u.roles ?? []).some(x => x.name === r)))
+    return users.filter(u => selectedRole.some(r => (u.roles ?? []).some(x => roleName(x) === r)))
   }, [users, selectedRole])
 
   // Optimistically set a user's icon colour (PATCH /users/{id}); revert on failure.
-  const setColor = async (u, color) => {
+  const setColor = async (u: ManagedUser, color: string | null) => {
     const prev = u.avatar_color ?? null
     setUsers(list => list.map(x => x.id === u.id ? { ...x, avatar_color: color } : x))
     try {

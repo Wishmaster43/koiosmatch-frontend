@@ -42,6 +42,11 @@ export interface User {
   accessible_pages?: string[]
 }
 
+/** A user row in the tenant user-management page (User + its settable icon colour). */
+export interface ManagedUser extends User {
+  avatar_color?: string | null
+}
+
 /** Normalised list shape returned by unwrapList() — see lib/api. */
 export interface ListResult<T = unknown> {
   rows: T[]
