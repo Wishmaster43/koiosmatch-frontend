@@ -245,8 +245,13 @@ blob). Velden: `preferred_days[]` · `function_pref` · `sector_pref[]` · `lice
 `hours_per_week` · `max_travel_km` · `max_travel_min` · `own_transport` · `remarks` (HTML-rich-text).
 `preferred_days` / `sector_pref` zijn nu **arrays** (waren string).
 
-**(d) `/settings`-keys** (merge-by-key, string-opslag), tenant weergave-voorkeuren kandidatentabel:
-`candidate_table_color_funnel` / `_type` / `_pool` / `_koios` (bool) + `candidate_avatar_colored_by_gender` (bool).
+**(d) `/settings`-keys** (merge-by-key, tenant weergave-voorkeuren kandidatentabel):
+`candidate_table_color_funnel` / `_type` / `_pool` / `_koios` (bool, default uit) ·
+`candidate_table_color_status` (bool, **default aan**) · `candidate_table_color_owner` (bool, **default aan**) ·
+`candidate_avatar_colored_by_gender` (bool, default uit).
+⚠️ **Booleans als `true`/`false` opslaan** (string of echte bool) — **niet** `1`/`0`. De FE leest booleans
+strikt als `true`/'true' (consistent met de toggle); een `1` wordt als *uit* gelezen → toggle-uit maar
+tóch gekleurd-bug. Seeder/migratie dus met `true`/`false`.
 
 **(e) Migratie:** bestaande `has_license`-data → `license_categories[]`.
 
@@ -255,7 +260,7 @@ Steps opslaan met `position` + `connections[]` (target + filters). Stabiele step
 
 ---
 
-## E. TypeScript-migratie (FE — lopend)
+## E. TypeScript-migratie (FE — ✅ klaar in eigen domein)
 
 > Hele repo → TS, **groen per golf** (`typecheck`+`lint`+`build`+`test`), incrementeel op main.
 > Nieuw bestand = altijd `.ts`/`.tsx`. **Candidate-/settings-mappen + `Sidebar.jsx` = andere Claude (afblijven).**
@@ -263,19 +268,24 @@ Steps opslaan met `position` + `connections[]` (target + filters). Stabiele step
 **✅ Klaar (gepusht):** `lib/` · `context/` · gedeelde blueprint (drawer/forms/insights/charts/settings-views) ·
 candidate-feature · alle 6 entity-features (customers/applications/vacancies/tasks/opportunities) +
 modules-registry · auth · reports (18) · matches · whatsapp · dashboard · planning · ai (8) · koios (7) ·
-layout-shell (DashboardLayout/TenantSwitcher/appPages) · workflow-serialization · **shiftmanager 26/26 (E-1 klaar)**.
-Types in `src/types/*` (api · candidate · application · vacancy · customer · opportunity · task · reports ·
-match · whatsapp · dashboard · planning · workflow · ai · koios · **shiftmanager**).
+layout-shell (DashboardLayout/TenantSwitcher/appPages) · workflow-serialization · shiftmanager 26/26 ·
+**E-2 workflow-editor-core (WorkflowCanvasEditor + canvas/fields/ScheduleModal/contexts)** ·
+**shiftmanager charts/orders-cluster (10)** · **app-shell (App/main/i18n)** · **users (UsersPage/NewUserModal)** ·
+**C-35-prep (dashboard_type op rol-shape + `dashboardType()`-helper, backward-compatible)**.
+Types in `src/types/*` (api+ManagedUser · candidate · application · vacancy · customer · opportunity · task ·
+reports · match · whatsapp · dashboard · planning · workflow · ai · koios · shiftmanager).
 
-**☐ Resterend (1 verweven brok — bewust voor verse context):**
-- **E-2 · workflow-editor-core (5)**: `components/layout/workflow/{contexts,ScheduleModal,canvas,fields}` +
-  **`components/layout/WorkflowCanvasEditor` (878)** (~1883 r). Gebruik `types/workflow.ts`
-  (Workflow/Step/FlowNode/FlowEdge); `serialization.ts`/`constants.ts` zijn al `.ts`. Het is onderling
-  verweven (de 878-regel-editor + canvas/fields/ScheduleModal + de 4 React-contexts) → in één golf doen.
+**🗑️ Dode code verwijderd:** `components/workflows/{ScheduleSettings,scheduleEditors}.jsx` (vervangen door
+`layout/workflow/ScheduleModal.tsx`) · `theme/BrandTheme.jsx` (huisstijl loopt via CSS-vars, 0 importers).
+
+**☐ Resterend (buiten mijn domein):** `settings/` (~70 files) + `Sidebar.jsx` = andere Claude · `test/setup.js`
+blijft test-infra (`.js`). **In het frontend-domein is de migratie hiermee rond.**
 
 **Patroon-notities:** dynamische-key-sort → `(av as number)`-cast · losse API-payloads → permissieve
 interfaces met index-sig (**geen `any` in datamodellen**) · `useAuth() ?? {}` · JS-boundary-componenten
-`as unknown as ComponentType<…>` · filter(Boolean) → `.filter((x): x is string => Boolean(x))`.
+`as unknown as ComponentType<…>` · filter(Boolean) → `.filter((x): x is string => Boolean(x))` ·
+recharts-props uit publieke types geomit (Legend `payload`) → `@ts-expect-error` met reden ·
+`ShiftFilterGroup` index-sig zodat 'ie naar RightPanel's `Record<string,unknown>` mag.
 
 **Na de migratie (besloten volgorde 2026-06-27):** (1) audit-convergentie-loop tot 0 findings → (2) refactor
 de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE.md harden naar master-standaard.
