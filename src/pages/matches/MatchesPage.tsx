@@ -1,14 +1,17 @@
 import { useState, useEffect, useMemo } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 import api from '../../lib/api'
 import { useAuth } from '../../context/AuthContext'
 import InsightsRow from '../../components/insights/InsightsRow'
+import type { DonutSpec, KpiSpec } from '../../components/insights/InsightsRow'
 import MatchesTable from './MatchesTable'
 import PaginationBar from '../../components/ui/PaginationBar'
+import type { RawMatch, MatchRow } from '../../types/match'
 
 // Map a raw API match → the flat shape the table renders (snake_case-tolerant).
-function mapMatch(m) {
+function mapMatch(m: RawMatch): MatchRow {
   const cand = m.candidate ?? {}
   const joined = [cand.first_name, cand.last_name].filter(Boolean).join(' ')
   const name = m.candidate_name ?? cand.name ?? (joined || '—')
@@ -29,14 +32,14 @@ function mapMatch(m) {
 // MatchesPage — loads matches, shows an insights strip and paginates the table.
 export default function MatchesPage() {
   const { t } = useTranslation('matches')
-  const { user } = useAuth()
-  const [rows,        setRows]        = useState([])
+  const { user } = useAuth() ?? {}
+  const [rows,        setRows]        = useState<MatchRow[]>([])
   const [loading,     setLoading]     = useState(true)
   const [error,       setError]       = useState(false)
   const [page,        setPage]        = useState(1)
   const [pageSize,    setPageSize]    = useState(() => user?.default_per_page ?? 50)
-  const [stageFilter, setStageFilter] = useState([])
-  const [ownerFilter, setOwnerFilter] = useState([])
+  const [stageFilter, setStageFilter] = useState<string[]>([])
+  const [ownerFilter, setOwnerFilter] = useState<string[]>([])
 
   // Load matches; a missing endpoint (404) is an empty list, not an error.
   useEffect(() => {
@@ -49,20 +52,21 @@ export default function MatchesPage() {
   }, [])
 
   // Donut click: toggle one value (second click clears).
-  const pickOne = (set) => (d) => {
-    const v = d?.key ?? d?.payload?.key ?? d?.name
+  const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
+    const dd = d as { key?: string; payload?: { key?: string }; name?: string }
+    const v = dd?.key ?? dd?.payload?.key ?? dd?.name
     if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v])
   }
 
   // Aggregate stage data for the donut.
   const stageData = useMemo(() => {
-    const m = {}
+    const m: Record<string, { name: string; key: string; color: string; value: number }> = {}
     rows.forEach(r => { if (r.stage) (m[r.stage] ??= { name: r.stage, key: r.stage, color: r.stageColor, value: 0 }).value++ })
     return Object.values(m)
   }, [rows])
 
   const ownerData = useMemo(() => {
-    const m = {}
+    const m: Record<string, { name: string; key: string; color: string; value: number }> = {}
     rows.forEach(r => { if (r.owner) (m[r.owner] ??= { name: r.owner, key: r.owner, color: '#6B7280', value: 0 }).value++ })
     return Object.values(m)
   }, [rows])
@@ -89,19 +93,21 @@ export default function MatchesPage() {
   const hiredCount  = rows.filter(r => ['hired', 'aangenomen'].includes(r.stage?.toLowerCase())).length
   const avgScore    = rows.length ? Math.round(rows.reduce((s, r) => s + (r.score ?? 0), 0) / rows.length) : null
 
-  const insightDonuts = [
-    { title: t('insights.stage'), data: stageData, onSegmentClick: pickOne(setStageFilter), activeKeys: stageFilter },
-    { title: t('insights.owner'), data: ownerData, onSegmentClick: pickOne(setOwnerFilter), activeKeys: ownerFilter },
+  // Donuts drive the stage/owner filters; each clears its own selection.
+  const insightDonuts: DonutSpec[] = [
+    { key: 'stage', title: t('insights.stage'), data: stageData, onPick: pickOne(setStageFilter),
+      active: stageFilter.length > 0, onClear: () => setStageFilter([]) },
+    { key: 'owner', title: t('insights.owner'), data: ownerData, onPick: pickOne(setOwnerFilter),
+      active: ownerFilter.length > 0, onClear: () => setOwnerFilter([]) },
   ]
 
-  const insightKpis = [
-    { label: t('kpi.total'),    value: rows.length,                  color: 'var(--color-primary)' },
-    { label: t('kpi.active'),   value: activeCount,                  color: 'var(--color-primary)' },
-    { label: t('kpi.hired'),    value: hiredCount,                   color: 'var(--color-success)' },
-    { label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary)' },
+  const insightKpis: KpiSpec[] = [
+    { key: 'total',    label: t('kpi.total'),    value: rows.length, color: 'var(--color-primary)' },
+    { key: 'active',   label: t('kpi.active'),   value: activeCount, color: 'var(--color-primary)' },
+    { key: 'hired',    label: t('kpi.hired'),    value: hiredCount,  color: 'var(--color-success)' },
+    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary)' },
   ]
 
-  const hasFilter = stageFilter.length > 0 || ownerFilter.length > 0
   const [addTooltip, setAddTooltip] = useState(false)
 
   return (
@@ -111,7 +117,6 @@ export default function MatchesPage() {
         donuts={insightDonuts}
         kpis={insightKpis}
         clearTitle={t('insights.clearFilter')}
-        onClear={hasFilter ? () => { setStageFilter([]); setOwnerFilter([]) } : undefined}
       />
 
       {/* Toolbar — add button right-aligned */}

@@ -1,20 +1,29 @@
 import { useTranslation } from 'react-i18next'
 import DataTable from '../../components/ui/DataTable'
+import type { Column } from '../../components/ui/DataTable'
 import Avatar from '../../components/ui/Avatar'
 import StatusPill from '../../components/ui/StatusPill'
+import type { MatchRow } from '../../types/match'
 
 // Match score as a soft-coloured percentage (green ≥75, amber ≥50, red below).
-function ScorePill({ value }) {
+function ScorePill({ value }: { value: number | null }) {
   if (value == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
   const c = value >= 75 ? 'var(--color-success)' : value >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
   return <span style={{ fontWeight: 600, color: c }}>{value}%</span>
 }
 
+interface MatchesTableProps {
+  rows: MatchRow[]
+  loading?: boolean
+  error?: boolean
+  stickyHeader?: boolean
+}
+
 // MatchesTable — declares columns only; the shared DataTable owns sorting + states.
-export default function MatchesTable({ rows, loading, error, stickyHeader = false }) {
+export default function MatchesTable({ rows, loading, error, stickyHeader = false }: MatchesTableProps) {
   const { t } = useTranslation('matches')
 
-  const columns = [
+  const columns: Column<MatchRow>[] = [
     { key: 'candidate', header: t('cols.candidate'), sortable: true,
       render: r => (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

@@ -16,7 +16,7 @@ const MiniDonut = MiniDonutJs as unknown as ComponentType<AnyProps>
 
 interface DonutChannel { label: string; value: ReactNode; color: string }
 export interface DonutSpec { key: string; title?: ReactNode; data: unknown[]; colors?: string[]; onPick?: (d: unknown) => void; active?: boolean; onClear?: () => void }
-export interface KpiSpec { key: string; label?: ReactNode; value: number; sub?: ReactNode; color?: string; onClick?: () => void; active?: boolean; channels?: DonutChannel[] }
+export interface KpiSpec { key: string; label?: ReactNode; value: number | string; sub?: ReactNode; color?: string; onClick?: () => void; active?: boolean; channels?: DonutChannel[] }
 
 const CARD: CSSProperties = {
   flex: '1 1 0', minWidth: 0, height: 96, boxSizing: 'border-box',
@@ -64,7 +64,7 @@ function KpiCard({ label, value, sub, color, onClick, active, channels }: Omit<K
       <div style={TITLE}>{label}</div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
         <div style={{ fontSize: 24, fontWeight: 700, lineHeight: 1, color: color || 'var(--text)' }}>
-          {value.toLocaleString('nl-NL')}
+          {typeof value === 'number' ? value.toLocaleString('nl-NL') : value}
         </div>
         {channels ? (
           <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
