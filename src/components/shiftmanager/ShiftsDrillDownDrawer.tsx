@@ -4,12 +4,15 @@
  * status badge, searchable. STATUS_META maps a shift status to its label + colors.
  */
 import { X, Search, Clock, MapPin, Briefcase, User, Hash, Building2, CalendarCheck, Timer } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
+import type { ShiftRow, ShiftInvite } from '@/types/shiftmanager'
 
 // Shift status → badge colours. Label = t('shiftsDrawer.status.<key>').
-const STATUS_META = {
+const STATUS_META: Record<string, { bg: string; color: string }> = {
   in_process:         { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
   completed:          { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
   open:               { bg: 'var(--color-warning-bg)', color: '#C2410C' },
@@ -17,9 +20,9 @@ const STATUS_META = {
   niet_factureerbaar: { bg: 'var(--hover-bg)', color: 'var(--text-muted)' },
 }
 
-function Badge({ status }) {
+function Badge({ status }: { status?: string }) {
   const { t } = useTranslation('shiftmanager')
-  const s = STATUS_META[status] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
+  const s = STATUS_META[status ?? ''] ?? { bg: 'var(--hover-bg)', color: 'var(--text-muted)' }
   return (
     <span style={{ background: s.bg, color: s.color, borderRadius: 999,
                    padding: '2px 8px', fontSize: 11, fontWeight: 500, flexShrink: 0 }}>
@@ -28,7 +31,7 @@ function Badge({ status }) {
   )
 }
 
-function Row({ icon: Icon, label, value, mono }) {
+function Row({ icon: Icon, label, value, mono }: { icon: LucideIcon; label: ReactNode; value?: ReactNode; mono?: boolean }) {
   if (value === null || value === undefined || value === '') return null
   return (
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12 }}>
@@ -42,24 +45,24 @@ function Row({ icon: Icon, label, value, mono }) {
   )
 }
 
-function formatDateTime(iso) {
+function formatDateTime(iso?: string | null) {
   if (!iso) return null
   return new Date(iso).toLocaleString(undefined, {
     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
   })
 }
 
-function formatTime(iso) {
+function formatTime(iso?: string | null) {
   if (!iso) return null
   return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
 }
 
-function formatDate(iso) {
+function formatDate(iso?: string | null) {
   if (!iso) return null
   return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-function CandidateBlock({ invite }) {
+function CandidateBlock({ invite }: { invite: ShiftInvite }) {
   const { t } = useTranslation('shiftmanager')
   const c    = invite.candidate
   const name = c ? `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() : null
@@ -90,12 +93,16 @@ function CandidateBlock({ invite }) {
   )
 }
 
-export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
+export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }: {
+  title: ReactNode
+  fetchUrl: string
+  onClose: () => void
+}) {
   const { t } = useTranslation('shiftmanager')
   const [search,  setSearch]  = useState('')
-  const [shifts,  setShifts]  = useState([])
+  const [shifts,  setShifts]  = useState<ShiftRow[]>([])
   const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState(null)
+  const [error,   setError]   = useState<string | null>(null)
 
   useEffect(() => {
     if (!fetchUrl) return
@@ -182,7 +189,7 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
 
           {!loading && !error && filtered.map((shift, i) => {
             const loc     = shift.order?.customer_location
-            const planned = ['in_process', 'completed'].includes(shift.own_status)
+            const planned = ['in_process', 'completed'].includes(shift.own_status ?? '')
             const invites = shift.invites ?? []
             const start   = formatTime(shift.start_time)
             const end     = formatTime(shift.end_time)
@@ -211,7 +218,7 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
                     value={date ? `${date}  ${start ?? ''}${end ? ` – ${end}` : ''}` : null} />
 
                   {/* People */}
-                  {shift.number_persons > 1 &&
+                  {(shift.number_persons ?? 0) > 1 &&
                     <Row icon={User} label={t('shiftsDrawer.fields.persons')} value={`${shift.number_persons}×`} />}
 
                   {/* Customer */}
@@ -225,12 +232,12 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }) {
                   {/* Address */}
                   {shift.order?.location_place &&
                     <Row icon={MapPin} label={t('shiftsDrawer.fields.place')}
-                      value={[shift.order.location_street, shift.order.location_postal_code,
-                              shift.order.location_place].filter(Boolean).join(', ')} />}
+                      value={[shift.order?.location_street, shift.order?.location_postal_code,
+                              shift.order?.location_place].filter(Boolean).join(', ')} />}
 
                   {/* Order info */}
-                  {shift.order?.order_ref  && <Row icon={Hash} label={t('shiftsDrawer.fields.orderRef')}  value={shift.order.order_ref} />}
-                  {shift.order?.subject    && <Row icon={Hash} label={t('shiftsDrawer.fields.subject')}   value={shift.order.subject} />}
+                  {shift.order?.order_ref  && <Row icon={Hash} label={t('shiftsDrawer.fields.orderRef')}  value={shift.order?.order_ref} />}
+                  {shift.order?.subject    && <Row icon={Hash} label={t('shiftsDrawer.fields.subject')}   value={shift.order?.subject} />}
 
                   {/* IDs */}
                   {shift.external_id       && <Row icon={Hash} label={t('shiftsDrawer.fields.shiftIdExt')}  value={shift.external_id} mono />}

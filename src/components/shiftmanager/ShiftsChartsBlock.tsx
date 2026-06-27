@@ -19,6 +19,7 @@ import { SERIES, CURRENT_YEAR } from "./shiftsChartsConfig"
 import { BarChartWidget, YearIndicator, ChartCard } from "./shiftsChartsWidgets"
 import { useShiftsChartData } from "./useShiftsChartData"
 import { buildShiftsFilterGroups } from "./buildShiftsFilterGroups"
+import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 
 export default function ShiftsChartsBlock({
   filterKey         = 'shifts-charts',
@@ -26,10 +27,16 @@ export default function ShiftsChartsBlock({
   fixedLocationIds:  fixedLocationIdsProp = [],
   fixedDepartmentId = null,
   fixedCandidateId  = null,
+}: {
+  filterKey?: string
+  fixedCustomers?: string[]
+  fixedLocationIds?: string[]
+  fixedDepartmentId?: string | null
+  fixedCandidateId?: string | null
 }) {
   const { t } = useTranslation('shiftmanager')
   // Stable series-label resolver (memoised so derived bars don't recompute each render).
-  const seriesLabel = useCallback((key) => t(`charts.series.${key}`, { defaultValue: key }), [t])
+  const seriesLabel = useCallback((key: string) => t(`charts.series.${key}`, { defaultValue: key }), [t])
 
   // Stabilise array props so they keep the same reference across renders
   // (a default [] in props would otherwise cause an infinite re-render loop).
@@ -39,14 +46,14 @@ export default function ShiftsChartsBlock({
     [fixedLocationIdsProp.join(',')]) // eslint-disable-line
 
   // ── Filter state ──────────────────────────────────────────────────────────
-  const [selectedYears,      setSelectedYears]      = useState([CURRENT_YEAR])
-  const [selectedMonths,     setSelectedMonths]     = useState([])
+  const [selectedYears,      setSelectedYears]      = useState<number[]>([CURRENT_YEAR])
+  const [selectedMonths,     setSelectedMonths]     = useState<string[]>([])
   const [period,             setPeriod]             = useState("month")
-  const [visible,            setVisible]            = useState(SERIES.map((s) => s.key))
-  const [selectedJobTypes,   setSelectedJobTypes]   = useState([])
-  const [selectedCustomers,  setSelectedCustomers]  = useState([])
-  const [selectedLocations,  setSelectedLocations]  = useState([])
-  const [drill,              setDrill]              = useState(null)
+  const [visible,            setVisible]            = useState<string[]>(SERIES.map((s) => s.key))
+  const [selectedJobTypes,   setSelectedJobTypes]   = useState<string[]>([])
+  const [selectedCustomers,  setSelectedCustomers]  = useState<string[]>([])
+  const [selectedLocations,  setSelectedLocations]  = useState<string[]>([])
+  const [drill,              setDrill]              = useState<{ title: string; fetchUrl: string } | null>(null)
 
   // ── Data layer ──────────────────────────────────────────────────────────────
   const { loading, error, filterOptions, chartData, shiftBars, hoursBars, multiYear } =
@@ -58,14 +65,14 @@ export default function ShiftsChartsBlock({
     })
 
   // ── Drill-down ────────────────────────────────────────────────────────────
-  const handleBarClick = (datum, barMeta) => {
+  const handleBarClick = (datum: ShiftsChartDatum, barMeta: ShiftBar) => {
     const { year, seriesKey } = barMeta
     const baseMetric = seriesKey.replace("_uren", "")
     const params     = new URLSearchParams()
 
     if (period === "quarter") {
-      params.set("quarter", datum._quarter ?? datum.label)
-      params.set("year", year)
+      params.set("quarter", String(datum._quarter ?? datum.label))
+      params.set("year", String(year))
     } else {
       const mm = String(datum._monthIndex ?? 1).padStart(2, "0")
       params.set("month", `${year}-${mm}`)
@@ -87,7 +94,7 @@ export default function ShiftsChartsBlock({
   }
 
   // Add/remove a year, keeping at least one selected.
-  const toggleYear = (v) =>
+  const toggleYear = (v: string) =>
     setSelectedYears((prev) => {
       const n = Number(v)
       if (prev.includes(n)) return prev.length > 1 ? prev.filter((y) => y !== n) : prev

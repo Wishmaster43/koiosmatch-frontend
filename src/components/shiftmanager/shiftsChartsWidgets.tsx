@@ -4,18 +4,24 @@
  * states). Dumb: they receive data + handlers, no fetching or business logic.
  */
 import { useMemo } from "react"
+import type { ReactNode } from "react"
 import {
   ResponsiveContainer, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts"
 import { useTranslation } from "react-i18next"
 import { YEAR_OPACITY } from "./shiftsChartsConfig"
+import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 
-export function BarChartWidget({ data, bars, onBarClick }) {
+export function BarChartWidget({ data, bars, onBarClick }: {
+  data: ShiftsChartDatum[]
+  bars: ShiftBar[]
+  onBarClick: (datum: ShiftsChartDatum, bar: ShiftBar) => void
+}) {
   // Deduplicate legend: only show the first bar per series name (avoids double
   // legend entries when several years are plotted).
   const legendPayload = useMemo(() => {
-    const seen = new Set()
+    const seen = new Set<string>()
     return bars
       .filter(b => b.legendType !== "none")
       .filter(b => {
@@ -23,7 +29,7 @@ export function BarChartWidget({ data, bars, onBarClick }) {
         seen.add(b.name)
         return true
       })
-      .map(b => ({ value: b.name, type: "square", color: b.color }))
+      .map(b => ({ value: b.name, type: "square" as const, color: b.color }))
   }, [bars])
 
   return (
@@ -33,7 +39,11 @@ export function BarChartWidget({ data, bars, onBarClick }) {
         <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#64748b" }} />
         <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#64748b" }} />
         <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 13 }} />
-        <Legend payload={legendPayload} wrapperStyle={{ fontSize: 12 }} />
+        <Legend
+          // @ts-expect-error recharts omits `payload` from its public prop types but renders it at runtime
+          payload={legendPayload}
+          wrapperStyle={{ fontSize: 12 }}
+        />
         {bars.map((b) => (
           <Bar
             key={b.dataKey}
@@ -44,7 +54,7 @@ export function BarChartWidget({ data, bars, onBarClick }) {
             legendType="none"
             radius={[4, 4, 0, 0]}
             cursor="pointer"
-            onClick={(datum) => onBarClick(datum, b)}
+            onClick={(datum) => onBarClick(datum as unknown as ShiftsChartDatum, b)}
           />
         ))}
       </BarChart>
@@ -53,7 +63,7 @@ export function BarChartWidget({ data, bars, onBarClick }) {
 }
 
 // Small year indicator, only shown when more than one year is selected.
-export function YearIndicator({ years }) {
+export function YearIndicator({ years }: { years: number[] }) {
   if (years.length < 2) return null
   return (
     <div className="flex items-center gap-2 mb-3">
@@ -70,7 +80,13 @@ export function YearIndicator({ years }) {
 }
 
 // Card shell with title/subtitle and the loading/error/content states.
-export function ChartCard({ title, subtitle, loading, error, children }) {
+export function ChartCard({ title, subtitle, loading, error, children }: {
+  title: ReactNode
+  subtitle?: ReactNode
+  loading?: boolean
+  error?: string | null
+  children?: ReactNode
+}) {
   const { t } = useTranslation('shiftmanager')
   return (
     <div className="overflow-hidden bg-[var(--surface)] border shadow-sm rounded-2xl border-slate-200">

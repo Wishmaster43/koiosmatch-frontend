@@ -3,9 +3,10 @@
  * i18n charts.series.<key>), the locale-aware month abbreviation, the selectable
  * years with their per-year opacity, and the quarter → months mapping.
  */
+import type { ShiftSeries } from '@/types/shiftmanager'
 
 // Series key + colour; labels come from i18n via t('charts.series.<key>').
-export const SERIES = [
+export const SERIES: ShiftSeries[] = [
   { key: "totaal",         color: "#1e293b" },
   { key: "niet_ingevuld",  color: "#f59e0b" },
   { key: "geen_kandidaat", color: "#ef4444" },
@@ -14,7 +15,7 @@ export const SERIES = [
 ]
 
 // Locale-aware short month name for index 0–11 (used for chart axis labels).
-export const monthAbbr = (i) => new Date(2000, i, 1).toLocaleString(undefined, { month: "short" })
+export const monthAbbr = (i: number) => new Date(2000, i, 1).toLocaleString(undefined, { month: "short" })
 
 export const CURRENT_YEAR = new Date().getFullYear()
 export const YEAR_OPTIONS = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR]

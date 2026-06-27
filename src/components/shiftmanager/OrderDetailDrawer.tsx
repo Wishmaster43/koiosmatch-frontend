@@ -4,10 +4,12 @@
  * notes. Pure presentation; the row is passed in from OrdersTable.
  */
 import { useTranslation } from 'react-i18next'
+import type { ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { Section, formatDate, formatTime, formatHours } from './ordersTableParts'
+import type { OrderRow } from '@/types/shiftmanager'
 
-export default function OrderDetailDrawer({ row, onClose }) {
+export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | null; onClose: () => void }) {
   const { t } = useTranslation('shiftmanager')
   if (!row) return null
 
@@ -16,7 +18,7 @@ export default function OrderDetailDrawer({ row, onClose }) {
   const invites  = row.invites ?? []
 
   // Labelled value, dash when empty.
-  const Field = ({ label, value }) => (
+  const Field = ({ label, value }: { label: ReactNode; value?: ReactNode }) => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</span>
       <span style={{ fontSize: 13, color: 'var(--text)' }}>{value || '—'}</span>

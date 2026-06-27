@@ -5,6 +5,7 @@
  * Receives the current selection + setters; returns the declarative group tree.
  */
 import { monthAbbr, SERIES, YEAR_OPTIONS } from "./shiftsChartsConfig"
+import type { BuildShiftsFilterGroupsArgs, ShiftFilterGroup } from '@/types/shiftmanager'
 
 export function buildShiftsFilterGroups({
   t, seriesLabel, period, selectedYears, selectedMonths, visible,
@@ -12,8 +13,8 @@ export function buildShiftsFilterGroups({
   fixedCustomers, fixedLocationIds,
   setPeriod, toggleYear, setSelectedMonths, setVisible,
   setSelectedJobTypes, setSelectedCustomers, setSelectedLocations,
-}) {
-  const groups = [
+}: BuildShiftsFilterGroupsArgs): ShiftFilterGroup[] {
+  const groups: ShiftFilterGroup[] = [
     {
       key:      "periode",
       label:    t('charts.filters.period'),
@@ -75,7 +76,7 @@ export function buildShiftsFilterGroups({
   // Customer filter only when no fixed customer/location scope is set.
   if (fixedCustomers.length === 0 && fixedLocationIds.length === 0) {
     const customerOptions = [...new Set(
-      filterOptions.locations.map(l => l.customer).filter(Boolean)
+      filterOptions.locations.map(l => l.customer).filter((c): c is string => Boolean(c))
     )].sort().map(c => ({ value: c, label: c }))
 
     if (customerOptions.length > 0) {
@@ -97,8 +98,8 @@ export function buildShiftsFilterGroups({
   if (fixedLocationIds.length === 0) {
     const locationOptions = filterOptions.locations
       .filter(l => {
-        if (fixedCustomers.length > 0) return fixedCustomers.includes(l.customer)
-        return selectedCustomers.length === 0 || selectedCustomers.includes(l.customer)
+        if (fixedCustomers.length > 0) return fixedCustomers.includes(l.customer ?? '')
+        return selectedCustomers.length === 0 || selectedCustomers.includes(l.customer ?? '')
       })
       .map(l => ({ value: String(l.id), label: l.name }))
 

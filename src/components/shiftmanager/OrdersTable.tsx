@@ -17,6 +17,7 @@ import {
 } from './ordersTableParts'
 import OrderDetailDrawer from './OrderDetailDrawer'
 import { useOrdersTable } from './useOrdersTable'
+import type { EnrichedOrderRow } from '@/types/shiftmanager'
 
 export default function OrdersTable() {
   const { t } = useTranslation('shiftmanager')
@@ -24,10 +25,10 @@ export default function OrdersTable() {
 
   // UI filter state (the data hook owns rows + paging).
   const [search,           setSearch]           = useState('')
-  const [selectedStatuses, setSelectedStatuses] = useState([])
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
   const [selectedMonth,    setSelectedMonth]    = useState('')
-  const [sort,             setSort]             = useState({ key: 'start_date', dir: 'desc' })
-  const [selected,         setSelected]         = useState(null)
+  const [sort,             setSort]             = useState<{ key: string; dir: 'asc' | 'desc' }>({ key: 'start_date', dir: 'desc' })
+  const [selected,         setSelected]         = useState<EnrichedOrderRow | null>(null)
 
   const { rows, loading, total, lastPage, page, setPage, pageSize, handlePageSizeChange, statusOptions, sorted } =
     useOrdersTable({ selectedMonth, search, selectedStatuses, sort })
@@ -35,7 +36,7 @@ export default function OrdersTable() {
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   // Toggle sort direction, or switch the sorted column (default desc).
-  const setSort_ = key => setSort(prev =>
+  const setSort_ = (key: string) => setSort(prev =>
     prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'desc' })
 
   // Status filter group for the right panel.
@@ -47,7 +48,7 @@ export default function OrdersTable() {
       label: t(`orders.status.${s}`, { defaultValue: s }),
       count: rows.filter(r => r.own_status === s).length,
     })),
-    onToggle: v => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+    onToggle: (v: string) => setSelectedStatuses(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
   }], [t, selectedStatuses, statusOptions, rows])
 
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function OrdersTable() {
 
   // Last 24 months as "YYYY-MM" for the month dropdown.
   const monthOptions = useMemo(() => {
-    const opts = []
+    const opts: string[] = []
     for (let i = 0; i < 24; i++) {
       const d = new Date(NOW.getFullYear(), NOW.getMonth() - i, 1)
       opts.push(`${d.getFullYear()}-${PAD(d.getMonth()+1)}`)
@@ -66,7 +67,7 @@ export default function OrdersTable() {
   }, [])
 
   // Locale-aware "mon yyyy" label for the month dropdown.
-  const formatMonth = m => {
+  const formatMonth = (m: string) => {
     const [y, mo] = m.split('-')
     return `${new Date(Number(y), Number(mo) - 1, 1).toLocaleString(undefined, { month: 'short' })} ${y}`
   }

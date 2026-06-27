@@ -8,14 +8,23 @@ import { useState, useEffect, useMemo, useReducer } from 'react'
 import { useAuth }            from '../../context/AuthContext'
 import api                    from '../../lib/api'
 import { useDefaultPageSize } from '../../lib/usePageSize'
+import type { OrderRow, EnrichedOrderRow } from '@/types/shiftmanager'
 
-export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }) {
+// The request lifecycle held by the reducer (replaced wholesale per dispatch).
+interface OrdersState { rows: OrderRow[]; loading: boolean; total: number; lastPage: number }
+
+export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }: {
+  selectedMonth: string
+  search: string
+  selectedStatuses: string[]
+  sort: { key: string; dir: 'asc' | 'desc' }
+}) {
   const defaultPageSize = useDefaultPageSize()
-  const { refreshUser } = useAuth()
+  const { refreshUser } = useAuth() ?? {}
 
   const [{ rows, loading, total, lastPage }, dispatch] = useReducer(
-    (_, a) => a,
-    { rows: [], loading: true, total: 0, lastPage: 1 }
+    (_: OrdersState, a: OrdersState) => a,
+    { rows: [], loading: true, total: 0, lastPage: 1 } as OrdersState
   )
   const [page,     setPage]     = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
@@ -45,19 +54,19 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
   }, [selectedMonth, page, pageSize])
 
   // Persist the chosen page size on the user profile.
-  const handlePageSizeChange = async (newSize) => {
+  const handlePageSizeChange = async (newSize: number) => {
     setPageSize(newSize)
     try {
       await api.put('/auth/me', { default_per_page: newSize })
-      await refreshUser()
+      await refreshUser?.()
     } catch { /* noop */ }
   }
 
   const statusOptions = useMemo(() =>
-    [...new Set(rows.map(r => r.own_status).filter(Boolean))].sort(), [rows])
+    [...new Set(rows.map(r => r.own_status).filter((s): s is string => Boolean(s)))].sort(), [rows])
 
   // Enrich rows with derived display/sort keys.
-  const enriched = useMemo(() => rows.map(r => ({
+  const enriched = useMemo<EnrichedOrderRow[]>(() => rows.map((r): EnrichedOrderRow => ({
     ...r,
     customer_name:          r.order?.customerLocation?.customer?.name ?? r.order?.customer?.name ?? '',
     location_name:          r.order?.customerLocation?.name ?? '',
@@ -72,7 +81,7 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase()
     return enriched.filter(r => {
-      if (selectedStatuses.length && !selectedStatuses.includes(r.own_status)) return false
+      if (selectedStatuses.length && !selectedStatuses.includes(r.own_status ?? '')) return false
       if (!q) return true
       return (
         (r.external_id    ?? '').toString().toLowerCase().includes(q) ||
@@ -87,8 +96,8 @@ export function useOrdersTable({ selectedMonth, search, selectedStatuses, sort }
   const sorted = useMemo(() => {
     const { key, dir } = sort
     return [...filtered].sort((a, b) => {
-      const av = (a[key] ?? '').toString().toLowerCase()
-      const bv = (b[key] ?? '').toString().toLowerCase()
+      const av = String(a[key] ?? '').toLowerCase()
+      const bv = String(b[key] ?? '').toLowerCase()
       if (av < bv) return dir === 'asc' ? -1 : 1
       if (av > bv) return dir === 'asc' ?  1 : -1
       return 0

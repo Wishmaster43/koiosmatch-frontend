@@ -7,19 +7,36 @@
 import { useEffect, useMemo, useReducer, useState } from "react"
 import api from "../../lib/api"
 import { SERIES, monthAbbr, YEAR_OPACITY, QUARTERS } from "./shiftsChartsConfig"
+import type { ShiftFilterOptions, ShiftMonthRow, ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
+
+// The request lifecycle held by the reducer (replaced wholesale per dispatch).
+interface ChartState { rows: ShiftMonthRow[]; loading: boolean; error: string | null }
 
 export function useShiftsChartData({
   selectedYears, selectedMonths, period, visible,
   selectedJobTypes, selectedCustomers, selectedLocations,
   fixedCustomers, fixedLocationIds, fixedDepartmentId, fixedCandidateId,
   seriesLabel,
+}: {
+  selectedYears: number[]
+  selectedMonths: string[]
+  period: string
+  visible: string[]
+  selectedJobTypes: string[]
+  selectedCustomers: string[]
+  selectedLocations: string[]
+  fixedCustomers: string[]
+  fixedLocationIds: string[]
+  fixedDepartmentId: string | null
+  fixedCandidateId: string | null
+  seriesLabel: (key: string) => string
 }) {
   // Single reducer holds the request lifecycle (rows + loading + error).
   const [{ rows, loading, error }, dispatch] = useReducer(
-    (_, action) => action,
-    { rows: [], loading: true, error: null }
+    (_: ChartState, action: ChartState) => action,
+    { rows: [], loading: true, error: null } as ChartState
   )
-  const [filterOptions, setFilterOptions] = useState({ job_types: [], locations: [] })
+  const [filterOptions, setFilterOptions] = useState<ShiftFilterOptions>({ job_types: [], locations: [] })
 
   // Load the available filter options once.
   useEffect(() => {
@@ -34,7 +51,7 @@ export function useShiftsChartData({
     dispatch({ rows: [], loading: true, error: null })
 
     const params = new URLSearchParams()
-    selectedYears.forEach((y) => params.append("years[]", y))
+    selectedYears.forEach((y) => params.append("years[]", String(y)))
     selectedMonths.forEach((m) => params.append("months[]", m))
     selectedJobTypes.forEach((j) => params.append("job_type[]", j))
 
@@ -77,7 +94,7 @@ export function useShiftsChartData({
   )
 
   // Transform rows into chart data, per month or per quarter.
-  const chartData = useMemo(() => {
+  const chartData = useMemo<ShiftsChartDatum[]>(() => {
     const monthIndices =
       selectedMonths.length > 0
         ? selectedMonths.map((m) => parseInt(m, 10) - 1).filter((i) => i >= 0 && i < 12)
@@ -85,10 +102,10 @@ export function useShiftsChartData({
 
     if (period === "quarter") {
       return QUARTERS.map((q) => {
-        const entry = { label: q.label, _quarter: q.key }
+        const entry: ShiftsChartDatum = { label: q.label, _quarter: q.key }
         selectedYears.forEach((year) => {
-          const qRows = q.months.map((m) => byYearMonth.get(`${year}-${m}`) ?? {})
-          const sum   = (key) => qRows.reduce((acc, r) => acc + Number(r[key] ?? 0), 0)
+          const qRows = q.months.map((m) => byYearMonth.get(`${year}-${m}`) ?? ({} as ShiftMonthRow))
+          const sum   = (key: string) => qRows.reduce((acc, r) => acc + Number(r[key] ?? 0), 0)
           SERIES.forEach((s) => {
             entry[`${year}_${s.key}`]      = sum(s.key)
             entry[`${year}_${s.key}_uren`] = sum(`${s.key}_uren`)
@@ -99,10 +116,10 @@ export function useShiftsChartData({
     }
 
     return monthIndices.map((i) => {
-      const entry = { label: monthAbbr(i), _monthIndex: i + 1 }
+      const entry: ShiftsChartDatum = { label: monthAbbr(i), _monthIndex: i + 1 }
       selectedYears.forEach((year) => {
         const key = `${year}-${String(i + 1).padStart(2, "0")}`
-        const row = byYearMonth.get(key) ?? {}
+        const row = byYearMonth.get(key) ?? ({} as ShiftMonthRow)
         SERIES.forEach((s) => {
           entry[`${year}_${s.key}`]      = Number(row[s.key]            ?? 0)
           entry[`${year}_${s.key}_uren`] = Number(row[`${s.key}_uren`] ?? 0)
@@ -116,9 +133,9 @@ export function useShiftsChartData({
   const multiYear    = selectedYears.length > 1
 
   // Bar descriptors for the shifts chart (count) and the hours chart.
-  const shiftBars = useMemo(() =>
+  const shiftBars = useMemo<ShiftBar[]>(() =>
     selectedYears.flatMap((year, yi) =>
-      activeSeries.map((s) => ({
+      activeSeries.map((s): ShiftBar => ({
         dataKey:    `${year}_${s.key}`,
         name:       seriesLabel(s.key),
         color:      s.color,
@@ -129,9 +146,9 @@ export function useShiftsChartData({
       }))
     ), [selectedYears, activeSeries, seriesLabel])
 
-  const hoursBars = useMemo(() =>
+  const hoursBars = useMemo<ShiftBar[]>(() =>
     selectedYears.flatMap((year, yi) =>
-      activeSeries.map((s) => ({
+      activeSeries.map((s): ShiftBar => ({
         dataKey:    `${year}_${s.key}_uren`,
         name:       seriesLabel(s.key),
         color:      s.color,
