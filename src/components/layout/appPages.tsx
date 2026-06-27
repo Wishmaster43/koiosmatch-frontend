@@ -8,6 +8,7 @@ import { lazy } from 'react'
 import type { ReactNode } from 'react'
 
 const Dashboard              = lazy(() => import('../../pages/dashboard/Dashboard'))
+const ReportsPage            = lazy(() => import('../../pages/reports/ReportsPage'))
 const WorkflowsPage          = lazy(() => import('../../pages/ai/WorkflowsPage'))
 const CandidatesReport       = lazy(() => import('../../pages/shiftmanager/CandidatesReport'))
 const CandidatesPage         = lazy(() => import('../../pages/candidates/CandidatesPage'))
@@ -57,6 +58,11 @@ export const PAGE_TITLES: Record<string, string> = {
   opportunities:                'Opportunities',
   tasks:                        'Tasks',
   customers:                    'Customers',
+
+  // Reports hub (analytical)
+  reports:                      'Reports',
+  'reports.flow':               'Reports — Flow',
+  'reports.recruiters':         'Reports — Recruiters',
   'customers.locations':        'Customers — Locations',
   'customers.departments':      'Customers — Departments',
   'customers.contacts':         'Customers — Contacts',
@@ -128,6 +134,11 @@ export function renderPage(activePage: string, { navIntent, goTo }: { navIntent?
     case 'tasks':                  return <TasksPage />
     case 'customers':              return <CustomersPage />
     case 'planning':               return <PlanningPage />
+
+    // ── Reports hub (analytical) ──────────────────────────────────────────
+    case 'reports':
+    case 'reports.flow':           return <ReportsPage initialTab="flow" />
+    case 'reports.recruiters':     return <ReportsPage initialTab="recruiters" />
 
     // ── Shiftmanager module ───────────────────────────────────────────────
     case 'shiftmanager':

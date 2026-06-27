@@ -1,0 +1,29 @@
+{
+  "title": "Informes",
+  "tabs": {
+    "flow": "Flujo",
+    "recruiters": "Reclutadores"
+  },
+  "comingSoon": "{{label}} — próximamente",
+  "period": {
+    "label": "Período",
+    "day": "Día",
+    "week": "Semana",
+    "month": "Mes"
+  },
+  "flow": {
+    "title": "Flujo de candidaturas",
+    "subtitle": "Embudo por fase",
+    "loading": "Cargando flujo…",
+    "error": "No se pudo cargar el flujo",
+    "empty": "No hay candidaturas en este período",
+    "phase": "Fase",
+    "total": "Candidaturas totales",
+    "overallConversion": "Conversión total",
+    "cohortNote": "El cohorte aún se está llenando — se muestra la ocupación del pipeline hasta tener suficiente historial.",
+    "conversion": "Conversión",
+    "reached": "Alcanzado",
+    "current": "Actualmente en fase",
+    "avgDays": "med. {{days}} días"
+  }
+}

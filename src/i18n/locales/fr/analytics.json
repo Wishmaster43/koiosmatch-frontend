@@ -1,0 +1,29 @@
+{
+  "title": "Rapports",
+  "tabs": {
+    "flow": "Flux",
+    "recruiters": "Recruteurs"
+  },
+  "comingSoon": "{{label}} — bientôt disponible",
+  "period": {
+    "label": "Période",
+    "day": "Jour",
+    "week": "Semaine",
+    "month": "Mois"
+  },
+  "flow": {
+    "title": "Flux de candidatures",
+    "subtitle": "Entonnoir par étape",
+    "loading": "Chargement du flux…",
+    "error": "Impossible de charger le flux",
+    "empty": "Aucune candidature sur cette période",
+    "phase": "Étape",
+    "total": "Total des candidatures",
+    "overallConversion": "Conversion globale",
+    "cohortNote": "La cohorte se remplit encore — occupation du pipeline affichée jusqu'à un historique suffisant.",
+    "conversion": "Conversion",
+    "reached": "Atteint",
+    "current": "Actuellement à l'étape",
+    "avgDays": "moy. {{days}} jours"
+  }
+}

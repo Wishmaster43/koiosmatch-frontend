@@ -1,0 +1,29 @@
+{
+  "title": "Berichte",
+  "tabs": {
+    "flow": "Flow",
+    "recruiters": "Recruiter"
+  },
+  "comingSoon": "{{label}} — folgt in Kürze",
+  "period": {
+    "label": "Zeitraum",
+    "day": "Tag",
+    "week": "Woche",
+    "month": "Monat"
+  },
+  "flow": {
+    "title": "Bewerbungs-Flow",
+    "subtitle": "Trichter je Phase",
+    "loading": "Flow wird geladen…",
+    "error": "Flow konnte nicht geladen werden",
+    "empty": "Keine Bewerbungen in diesem Zeitraum",
+    "phase": "Phase",
+    "total": "Bewerbungen gesamt",
+    "overallConversion": "Gesamtkonversion",
+    "cohortNote": "Kohorte füllt sich noch — Pipeline-Belegung wird angezeigt, bis genügend Historie vorhanden ist.",
+    "conversion": "Konversion",
+    "reached": "Erreicht",
+    "current": "Aktuell in Phase",
+    "avgDays": "Ø {{days}} Tage"
+  }
+}

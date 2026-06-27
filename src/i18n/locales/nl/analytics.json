@@ -1,0 +1,29 @@
+{
+  "title": "Rapporten",
+  "tabs": {
+    "flow": "Flow",
+    "recruiters": "Recruiters"
+  },
+  "comingSoon": "{{label}} — komt eraan",
+  "period": {
+    "label": "Periode",
+    "day": "Dag",
+    "week": "Week",
+    "month": "Maand"
+  },
+  "flow": {
+    "title": "Sollicitatie-flow",
+    "subtitle": "Trechter per fase",
+    "loading": "Flow laden…",
+    "error": "Kon de flow niet laden",
+    "empty": "Geen sollicitaties in deze periode",
+    "phase": "Fase",
+    "total": "Totaal sollicitaties",
+    "overallConversion": "Totale conversie",
+    "cohortNote": "Cohort vult zich nog — pipeline-bezetting getoond tot er genoeg historie is.",
+    "conversion": "Conversie",
+    "reached": "Bereikt",
+    "current": "Nu in fase",
+    "avgDays": "gem. {{days}} dagen"
+  }
+}

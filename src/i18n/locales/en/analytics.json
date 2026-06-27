@@ -1,0 +1,29 @@
+{
+  "title": "Reports",
+  "tabs": {
+    "flow": "Flow",
+    "recruiters": "Recruiters"
+  },
+  "comingSoon": "{{label}} — coming soon",
+  "period": {
+    "label": "Period",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month"
+  },
+  "flow": {
+    "title": "Application flow",
+    "subtitle": "Funnel per stage",
+    "loading": "Loading flow…",
+    "error": "Could not load the flow",
+    "empty": "No applications in this period",
+    "phase": "Stage",
+    "total": "Total applications",
+    "overallConversion": "Overall conversion",
+    "cohortNote": "Cohort is still filling — showing pipeline occupancy until there is enough history.",
+    "conversion": "Conversion",
+    "reached": "Reached",
+    "current": "Currently in stage",
+    "avgDays": "avg. {{days}} days"
+  }
+}
