@@ -306,14 +306,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const hasModule = (key: string) =>
     tenantHasModule(key, activeTenant ?? user?.tenant, { isSuperAdmin: isSuperAdmin() })
 
-  // Start-dashboard type from the first role that carries one (C-35). Tolerant of
-  // the legacy string[] roles shape → returns 'default' until the backend lands
-  // roles[].dashboard_type, so nothing changes behaviour in the meantime.
+  // Start-dashboard type from the first role that carries one (C-35). The shape is
+  // live (roles are objects), but the seeded dashboard_type values read null until a
+  // dev:reset — so we default to 'readonly' (least privilege). Still tolerant of the
+  // legacy string[] shape defensively (untrusted client, §7).
   const dashboardType = (): string => {
     for (const r of user?.roles ?? []) {
       if (typeof r === 'object' && r.dashboard_type) return r.dashboard_type
     }
-    return 'default'
+    return 'readonly'
   }
 
   const hasPermission = (permName: string) => {
