@@ -2,8 +2,8 @@
 
 > **DE ene levende bron.** Alleen open taken. Specs staan in CLAUDE.md §3B of in een C-item hieronder.
 > Architectuur-bron = `docs/ARCHITECTURE.md`; regels = `CLAUDE.md`. Verder geen losse worklists meer.
-> **Bijgewerkt:** 2026-06-27 — `MASTER-PLAN` · `MASTER-WORKLIST` · `architect-Worklist` · `MIGRATION-AUDIT`
-> + de backend-handoff-prompts zijn hierin gefold en verwijderd (git-history bewaart ze).
+> **Bijgewerkt:** 2026-06-29 — file-by-file audit gefold in §G; zie ook `docs/AUDIT.md` (bewijslast),
+> `docs/DATA-API.md` (mock + CRUD-matrix), `docs/DECISIONS.md` (keuzes + SaaS-schaalbaarheid 10→1M).
 >
 > **Legenda:** ☐ open · ◐ deels klaar · ✅ klaar · 🔴 blokkerend · [D] Danny · [FE] Frontend · [BE] Backend
 
@@ -314,6 +314,33 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 
 ### Auth-flip (gated op backend)
 - ☐ **F-13** N-2: Sanctum httpOnly-cookieflow aanzetten (`withCredentials` + CSRF-priming, Bearer-localStorage uitfaseren) — **pas flippen ná de gecoördineerde backend-deploy** (BE-8). FE-scaffold (`VITE_COOKIE_AUTH`) bestaat.
+
+---
+
+## G. Audit-findings (file-by-file, 2026-06-29)
+
+> Bewijslast in `docs/AUDIT.md`. Geprioriteerd; **FE** = ik fix in de convergentie-loop · **BE/2e-Claude** =
+> handoff. Volgorde van uitvoeren: **P1-FE-veilig → R-splits (F-1) → her-audit → herhalen → CLAUDE.md harden**.
+
+| ID | Sev | Eff | Eigenaar | Item |
+|---|---|---|---|---|
+| **I18N-1** | P1 | M | FE | `src/modules/*` labels/categorieën door `t('modules.*')` (5 locales) — §5 expliciet |
+| **I18N-2** | P1 | M | FE | `WorkflowCanvasEditor` + `ScheduleModal`/`fields` volledige i18n (Dutch-island) |
+| **MOCK-1** | P1 | M | BE+2e | kandidaat-Planning-tab op `data/mocks.ts` → planning-endpoints + hooks |
+| **F-13** | P1 | M | FE (gated) | `auth_token`/`auth_user` uit `localStorage` → httpOnly-cookieflip (ná backend-deploy) |
+| **D-1** | P1 | M | BE+FE | changelog (`/activity`) op customers/vacancies/applications/tasks/opportunities |
+| **D-2** | P1 | M | BE+FE | soft-delete (archive) op tasks/opportunities/applications |
+| **F-11** | P1 | L | FE | lijst-virtualisatie (kandidaten/shifts, 10k+ rijen) — schaal-blocker |
+| **I18N-3** | P2 | M | FE+2e | 34 files zonder `useTranslation` → per file: dumb=OK / tekst→`t()` |
+| **CFG-1** | P2 | M | BE+FE | NATIONALITIES/LANGUAGES/klant-STATUSES → tenant-lookups + i18n |
+| **D-3** | P2 | M | BE+FE | "gearchiveerd bekijken + herstellen"-UI |
+| **D-4/D-5** | P2 | S | BE+FE | tasks `/stats` + `/tasks/{id}/activity` |
+| **R-SPLIT** | P2 | M | FE | `ReportFilterSidebar`(485)·`MessagesTable`(430)·`WorkflowCanvasEditor`(907)·`fields`(403) splitsen (=F-1) |
+| **DUP-1** | P3 | S | FE | gedupliceerde `AVATAR_COLORS`/`COLORS` (4×) → gedeelde const |
+| **F-12b** | P3 | L | FE | deep-relative-imports (`../../`, ~589 warnings) → `@/`-alias |
+
+> **Positief bevestigd** (geen findings): geen `console.log` in commits · geen ongesanitiseerde dangerous HTML
+> (`SafeHtml` saniteert) · geen hard-delete-call in FE (§8) · types zonder `any` in datamodellen.
 
 ---
 
