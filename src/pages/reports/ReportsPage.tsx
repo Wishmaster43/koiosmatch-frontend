@@ -8,6 +8,8 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import FlowReport from './FlowReport'
 import RecruitersReport from './RecruitersReport'
+import VacanciesReport from './VacanciesReport'
+import MatchesReport from './MatchesReport'
 import type { ReportPeriod } from '@/types/analytics'
 
 export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: string }) {
@@ -19,6 +21,8 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
   const tabs = [
     { id: 'flow',       label: t('tabs.flow') },
     { id: 'recruiters', label: t('tabs.recruiters') },
+    { id: 'vacancies',  label: t('tabs.vacancies') },
+    { id: 'matches',    label: t('tabs.matches') },
   ]
 
   return (
@@ -54,9 +58,10 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
         ))}
       </div>
 
-      {tab === 'flow'
-        ? <FlowReport period={period} />
-        : <RecruitersReport period={period} />}
+      {tab === 'flow'       && <FlowReport period={period} />}
+      {tab === 'recruiters' && <RecruitersReport period={period} />}
+      {tab === 'vacancies'  && <VacanciesReport period={period} />}
+      {tab === 'matches'    && <MatchesReport period={period} />}
     </div>
   )
 }

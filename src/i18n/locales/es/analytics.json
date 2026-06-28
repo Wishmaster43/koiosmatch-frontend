@@ -2,7 +2,9 @@
   "title": "Informes",
   "tabs": {
     "flow": "Flujo",
-    "recruiters": "Reclutadores"
+    "recruiters": "Reclutadores",
+    "vacancies": "Vacantes",
+    "matches": "Matches"
   },
   "comingSoon": "{{label}} — próximamente",
   "period": {
@@ -44,5 +46,51 @@
     "intakesValue": "{{planned}} previstas · {{done}} realizadas",
     "tasksValue": "{{open}} abiertas · {{overdue}} atrasadas",
     "notContactedHint": "> {{months}} meses"
+  },
+  "vacancies": {
+    "title": "Vacantes",
+    "subtitle": "Demanda y cobertura por vacante",
+    "loading": "Cargando vacantes…",
+    "error": "No se pudieron cargar las vacantes",
+    "empty": "No hay vacantes en este período",
+    "daysValue": "{{days}} días",
+    "filledYes": "Cubierta",
+    "filledNo": "Abierta",
+    "summary": {
+      "total": "Total",
+      "open": "Abiertas",
+      "filled": "Cubiertas",
+      "fillRate": "Tasa de cobertura",
+      "avgTimeToFill": "Tiempo medio de cobertura"
+    },
+    "cols": {
+      "vacancy": "Vacante",
+      "customer": "Cliente",
+      "status": "Estado",
+      "applications": "Candidaturas",
+      "matched": "Emparejadas",
+      "filled": "Cubierta",
+      "timeToFill": "Tiempo de cobertura"
+    }
+  },
+  "matches": {
+    "title": "Matches",
+    "subtitle": "Matches y colocaciones",
+    "loading": "Cargando matches…",
+    "error": "No se pudieron cargar los matches",
+    "empty": "No hay matches en este período",
+    "total": "Total de matches",
+    "viaFunnel": "Desde candidatura",
+    "direct": "Directo",
+    "avgDuration": "Duración media de colocación",
+    "daysValue": "{{days}} días",
+    "durationNote": "La duración de colocación se mostrará cuando el acoplamiento HelloFlex proporcione las fechas de inicio/fin.",
+    "placements": {
+      "title": "Colocaciones",
+      "sent": "Enviadas",
+      "active": "Activas",
+      "ended": "Finalizadas",
+      "total": "Total"
+    }
   }
 }

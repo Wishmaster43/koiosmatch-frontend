@@ -2,7 +2,9 @@
   "title": "Rapports",
   "tabs": {
     "flow": "Flux",
-    "recruiters": "Recruteurs"
+    "recruiters": "Recruteurs",
+    "vacancies": "Postes",
+    "matches": "Matchs"
   },
   "comingSoon": "{{label}} — bientôt disponible",
   "period": {
@@ -44,5 +46,51 @@
     "intakesValue": "{{planned}} prévus · {{done}} réalisés",
     "tasksValue": "{{open}} ouvertes · {{overdue}} en retard",
     "notContactedHint": "> {{months}} mois"
+  },
+  "vacancies": {
+    "title": "Postes",
+    "subtitle": "Demande & pourvoi par poste",
+    "loading": "Chargement des postes…",
+    "error": "Impossible de charger les postes",
+    "empty": "Aucun poste sur cette période",
+    "daysValue": "{{days}} jours",
+    "filledYes": "Pourvu",
+    "filledNo": "Ouvert",
+    "summary": {
+      "total": "Total",
+      "open": "Ouverts",
+      "filled": "Pourvus",
+      "fillRate": "Taux de pourvoi",
+      "avgTimeToFill": "Délai moyen de pourvoi"
+    },
+    "cols": {
+      "vacancy": "Poste",
+      "customer": "Client",
+      "status": "Statut",
+      "applications": "Candidatures",
+      "matched": "Matchés",
+      "filled": "Pourvu",
+      "timeToFill": "Délai de pourvoi"
+    }
+  },
+  "matches": {
+    "title": "Matchs",
+    "subtitle": "Matchs & placements",
+    "loading": "Chargement des matchs…",
+    "error": "Impossible de charger les matchs",
+    "empty": "Aucun match sur cette période",
+    "total": "Total des matchs",
+    "viaFunnel": "Depuis une candidature",
+    "direct": "Direct",
+    "avgDuration": "Durée moyenne de placement",
+    "daysValue": "{{days}} jours",
+    "durationNote": "La durée de placement suivra dès que le couplage HelloFlex fournira les dates de début/fin.",
+    "placements": {
+      "title": "Placements",
+      "sent": "Envoyés",
+      "active": "Actifs",
+      "ended": "Terminés",
+      "total": "Total"
+    }
   }
 }

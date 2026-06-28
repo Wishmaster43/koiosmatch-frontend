@@ -2,7 +2,9 @@
   "title": "Berichte",
   "tabs": {
     "flow": "Flow",
-    "recruiters": "Recruiter"
+    "recruiters": "Recruiter",
+    "vacancies": "Stellen",
+    "matches": "Matches"
   },
   "comingSoon": "{{label}} — folgt in Kürze",
   "period": {
@@ -44,5 +46,51 @@
     "intakesValue": "{{planned}} geplant · {{done}} erledigt",
     "tasksValue": "{{open}} offen · {{overdue}} überfällig",
     "notContactedHint": "> {{months}} Mon."
+  },
+  "vacancies": {
+    "title": "Stellen",
+    "subtitle": "Bedarf & Besetzung je Stelle",
+    "loading": "Stellen werden geladen…",
+    "error": "Stellen konnten nicht geladen werden",
+    "empty": "Keine Stellen in diesem Zeitraum",
+    "daysValue": "{{days}} Tage",
+    "filledYes": "Besetzt",
+    "filledNo": "Offen",
+    "summary": {
+      "total": "Gesamt",
+      "open": "Offen",
+      "filled": "Besetzt",
+      "fillRate": "Besetzungsquote",
+      "avgTimeToFill": "Ø Besetzungsdauer"
+    },
+    "cols": {
+      "vacancy": "Stelle",
+      "customer": "Kunde",
+      "status": "Status",
+      "applications": "Bewerbungen",
+      "matched": "Matched",
+      "filled": "Besetzt",
+      "timeToFill": "Besetzungsdauer"
+    }
+  },
+  "matches": {
+    "title": "Matches",
+    "subtitle": "Matches & Einsätze",
+    "loading": "Matches werden geladen…",
+    "error": "Matches konnten nicht geladen werden",
+    "empty": "Keine Matches in diesem Zeitraum",
+    "total": "Matches gesamt",
+    "viaFunnel": "Aus Bewerbung",
+    "direct": "Direkt",
+    "avgDuration": "Ø Einsatzdauer",
+    "daysValue": "{{days}} Tage",
+    "durationNote": "Die Einsatzdauer folgt, sobald die HelloFlex-Anbindung Start/Ende liefert.",
+    "placements": {
+      "title": "Einsätze",
+      "sent": "Gesendet",
+      "active": "Aktiv",
+      "ended": "Beendet",
+      "total": "Gesamt"
+    }
   }
 }

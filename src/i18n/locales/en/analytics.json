@@ -2,7 +2,9 @@
   "title": "Reports",
   "tabs": {
     "flow": "Flow",
-    "recruiters": "Recruiters"
+    "recruiters": "Recruiters",
+    "vacancies": "Vacancies",
+    "matches": "Matches"
   },
   "comingSoon": "{{label}} — coming soon",
   "period": {
@@ -44,5 +46,51 @@
     "intakesValue": "{{planned}} planned · {{done}} done",
     "tasksValue": "{{open}} open · {{overdue}} overdue",
     "notContactedHint": "> {{months}} mo"
+  },
+  "vacancies": {
+    "title": "Vacancies",
+    "subtitle": "Demand & fill per vacancy",
+    "loading": "Loading vacancies…",
+    "error": "Could not load the vacancies",
+    "empty": "No vacancies in this period",
+    "daysValue": "{{days}} days",
+    "filledYes": "Filled",
+    "filledNo": "Open",
+    "summary": {
+      "total": "Total",
+      "open": "Open",
+      "filled": "Filled",
+      "fillRate": "Fill rate",
+      "avgTimeToFill": "Avg. time to fill"
+    },
+    "cols": {
+      "vacancy": "Vacancy",
+      "customer": "Customer",
+      "status": "Status",
+      "applications": "Applications",
+      "matched": "Matched",
+      "filled": "Filled",
+      "timeToFill": "Time to fill"
+    }
+  },
+  "matches": {
+    "title": "Matches",
+    "subtitle": "Matches & placements",
+    "loading": "Loading matches…",
+    "error": "Could not load the matches",
+    "empty": "No matches in this period",
+    "total": "Total matches",
+    "viaFunnel": "From application",
+    "direct": "Direct",
+    "avgDuration": "Avg. placement duration",
+    "daysValue": "{{days}} days",
+    "durationNote": "Placement duration follows once the HelloFlex coupling provides start/end dates.",
+    "placements": {
+      "title": "Placements",
+      "sent": "Sent",
+      "active": "Active",
+      "ended": "Ended",
+      "total": "Total"
+    }
   }
 }

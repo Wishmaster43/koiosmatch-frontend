@@ -2,7 +2,9 @@
   "title": "Rapporten",
   "tabs": {
     "flow": "Flow",
-    "recruiters": "Recruiters"
+    "recruiters": "Recruiters",
+    "vacancies": "Vacatures",
+    "matches": "Matches"
   },
   "comingSoon": "{{label}} — komt eraan",
   "period": {
@@ -44,5 +46,51 @@
     "intakesValue": "{{planned}} gepland · {{done}} gedaan",
     "tasksValue": "{{open}} open · {{overdue}} te laat",
     "notContactedHint": "> {{months}} mnd"
+  },
+  "vacancies": {
+    "title": "Vacatures",
+    "subtitle": "Vraag & vervulling per vacature",
+    "loading": "Vacatures laden…",
+    "error": "Kon de vacatures niet laden",
+    "empty": "Geen vacatures in deze periode",
+    "daysValue": "{{days}} dagen",
+    "filledYes": "Vervuld",
+    "filledNo": "Open",
+    "summary": {
+      "total": "Totaal",
+      "open": "Open",
+      "filled": "Vervuld",
+      "fillRate": "Vervullingsgraad",
+      "avgTimeToFill": "Gem. doorlooptijd"
+    },
+    "cols": {
+      "vacancy": "Vacature",
+      "customer": "Klant",
+      "status": "Status",
+      "applications": "Sollicitaties",
+      "matched": "Matched",
+      "filled": "Vervuld",
+      "timeToFill": "Doorlooptijd"
+    }
+  },
+  "matches": {
+    "title": "Matches",
+    "subtitle": "Matches & plaatsingen",
+    "loading": "Matches laden…",
+    "error": "Kon de matches niet laden",
+    "empty": "Geen matches in deze periode",
+    "total": "Totaal matches",
+    "viaFunnel": "Via sollicitatie",
+    "direct": "Direct",
+    "avgDuration": "Gem. plaatsingsduur",
+    "daysValue": "{{days}} dagen",
+    "durationNote": "Plaatsingsduur volgt zodra de HelloFlex-koppeling de start/einddata levert.",
+    "placements": {
+      "title": "Plaatsingen",
+      "sent": "Verzonden",
+      "active": "Actief",
+      "ended": "Beëindigd",
+      "total": "Totaal"
+    }
   }
 }

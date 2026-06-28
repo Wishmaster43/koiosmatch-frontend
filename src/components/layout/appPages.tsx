@@ -63,6 +63,8 @@ export const PAGE_TITLES: Record<string, string> = {
   reports:                      'Reports',
   'reports.flow':               'Reports — Flow',
   'reports.recruiters':         'Reports — Recruiters',
+  'reports.vacancies':          'Reports — Vacancies',
+  'reports.matches':            'Reports — Matches',
   'customers.locations':        'Customers — Locations',
   'customers.departments':      'Customers — Departments',
   'customers.contacts':         'Customers — Contacts',
