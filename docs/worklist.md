@@ -374,7 +374,7 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 | **CFG-1** | P2 | M | BE+FE | NATIONALITIES/LANGUAGES/klant-STATUSES → tenant-lookups + i18n |
 | **D-3** | P2 | M | BE+FE | "gearchiveerd bekijken + herstellen"-UI |
 | **D-4/D-5** | P2 | S | BE+FE | tasks `/stats` + `/tasks/{id}/activity` |
-| **R-SPLIT** | P2 | M | FE | ✅ `ReportFilterSidebar` 485→216(+2) · ✅ `MessagesTable` 430→250(+2) · ✅ `fields` 403→124+290 · ◐ `WorkflowCanvasEditor` 907→**520** + 3 panels (ModulePicker/ConfigPanel/LogsPanel) ✅; rest = `useWorkflowEditor`-hook (EditorInner-state/handlers → main <400) — fold in workflow-i18n-sessie |
+| **R-SPLIT** | ✅ | — | FE | **VOLLEDIG OPGELOST — nul files >400 in de repo.** `ReportFilterSidebar` 485→216(+2) · `MessagesTable` 430→250(+2) · `fields` 403→124+290 · `WorkflowCanvasEditor` 907→**267** + ModulePicker/ConfigPanel/LogsPanel + `useWorkflowEditor`-hook. |
 | **DUP-1** | P3 | S | FE | ✅ avatar-kleur 3× → `lib/avatarColor` |
 | **A11Y-1** | P2 | M | FE | ~28 modals/drawers zonder focus-trap/`role=dialog`/`aria-modal`+restore (§6) — alleen `ChangelogPopover` heeft 't. Shared `Drawer`/`Modal`-shell met focus-trap. |
 | **A11Y-2** | P2 | M | FE | icon-only buttons missen `aria-label` (34/359) — X-close/sort/chevron/trash. |
@@ -389,7 +389,8 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 
 ### Runbook — workflow-sessie (turnkey, 1 gefocuste pass)
 
-**Stap 1 — split `WorkflowCanvasEditor.tsx` 907 → <400 (pure refactor, 1 groene commit):**
+**Stap 1 — ✅ KLAAR: split `WorkflowCanvasEditor.tsx` 907 → 267 (panels + `useWorkflowEditor`-hook).**
+Resterend van de workflow-sessie: alleen Stap 2 (i18n) + Stap 3 (harden). Originele split-map:
 - `workflow/ModulePicker.tsx` ← `CATEGORY_ORDER` + `ModuleMetaEntry` + `ModulePicker` (~115r). Props: `{ insertAfterEdgeId, onSelect, onClose }`. Deps: `MODULE_META`/`MODULE_APP_MAP`/`useApps`.
 - `workflow/ConfigPanel.tsx` ← `MANAGE_TABS` (export) + `ConfigPanel` (~145r). Deps: `MODULE_META`/`MODULE_SCHEMAS`/`FieldInput`/AI-tabs.
 - `workflow/LogsPanel.tsx` ← `LogsPanel` (~95r). Deps: `api`/`runFormat`/`RunRow`. (Meest zelfstandig → eerst.)
