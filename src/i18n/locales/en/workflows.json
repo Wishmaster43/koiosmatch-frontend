@@ -1,5 +1,15 @@
 {
   "filters": { "status": "Status", "module": "Module" },
+  "editor": {
+    "logs": "Logs",
+    "run": "Run",
+    "running": "Running...",
+    "save": "Save",
+    "saved": "Saved!",
+    "saveClose": "Save & close",
+    "addModule": "Add module",
+    "closeTitle": "Close without saving"
+  },
   "schedule": {
     "header": "Schedule",
     "run": "Run",

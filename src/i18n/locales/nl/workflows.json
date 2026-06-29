@@ -1,5 +1,15 @@
 {
   "filters": { "status": "Status", "module": "Module" },
+  "editor": {
+    "logs": "Logs",
+    "run": "Uitvoeren",
+    "running": "Bezig...",
+    "save": "Opslaan",
+    "saved": "Opgeslagen!",
+    "saveClose": "Opslaan & sluiten",
+    "addModule": "Module toevoegen",
+    "closeTitle": "Sluiten zonder opslaan"
+  },
   "schedule": {
     "header": "Inplannen",
     "run": "Uitvoeren",

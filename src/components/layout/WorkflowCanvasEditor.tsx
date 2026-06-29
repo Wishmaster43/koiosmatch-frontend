@@ -13,6 +13,7 @@ import {
 import type { NodeTypes, EdgeTypes } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import { X, Save, Play, Loader2, Plus, Zap, List, Clock } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { MODULE_META } from '@/modules/index'
 import { ScheduleModal, scheduleLabel } from './workflow/ScheduleModal'
 import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './workflow/contexts'
@@ -39,6 +40,7 @@ function EditorInner({ workflow, onClose, onSave }: {
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
     insertModule, updateNodeConfig, deleteNode, handleSave, handleRun,
   } = useWorkflowEditor({ workflow, onSave })
+  const { t } = useTranslation('workflows')
 
   return (
     <StartContext.Provider value={{ startNodeId: firstNodeId ?? null, setStartNodeId }}>
@@ -89,7 +91,7 @@ function EditorInner({ workflow, onClose, onSave }: {
               cursor: 'pointer', fontSize: 11, fontWeight: 500,
             }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'active' ? 'var(--color-success)' : 'var(--border)' }} />
-            {status === 'active' ? 'Actief' : 'Inactief'}
+            {status === 'active' ? t('status.active') : t('status.inactive')}
           </button>
 
           <div style={{ flex: 1 }} />
@@ -103,7 +105,7 @@ function EditorInner({ workflow, onClose, onSave }: {
               cursor: 'pointer',
             }}>
             <List size={13} />
-            Logs
+            {t('editor.logs')}
           </button>
 
           <button onClick={handleRun} disabled={running}
@@ -114,7 +116,7 @@ function EditorInner({ workflow, onClose, onSave }: {
               border: 'none', cursor: running ? 'not-allowed' : 'pointer',
             }}>
             {running ? <Loader2 size={13} className="animate-spin" /> : <Play size={13} />}
-            {running ? 'Bezig...' : 'Uitvoeren'}
+            {running ? t('editor.running') : t('editor.run')}
           </button>
 
           {/* Opslaan — blijft in editor */}
@@ -127,7 +129,7 @@ function EditorInner({ workflow, onClose, onSave }: {
               cursor: 'pointer', transition: 'background 0.2s',
             }}>
             <Save size={13} />
-            {saved ? 'Opgeslagen!' : 'Opslaan'}
+            {saved ? t('editor.saved') : t('editor.save')}
           </button>
 
           {/* Opslaan & sluiten — terug naar overzicht */}
@@ -138,14 +140,14 @@ function EditorInner({ workflow, onClose, onSave }: {
               border: 'none', cursor: 'pointer',
             }}>
             <Save size={13} />
-            Opslaan &amp; sluiten
+            {t('editor.saveClose')}
           </button>
 
           <button onClick={onClose}
             style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}
-            title="Sluiten zonder opslaan">
+            title={t('editor.closeTitle')}>
             <X size={15} />
           </button>
         </div>
@@ -194,7 +196,7 @@ function EditorInner({ workflow, onClose, onSave }: {
                 zIndex: 10,
               }}>
               <Plus size={15} />
-              Module toevoegen
+              {t('editor.addModule')}
             </button>
           </div>
 

@@ -1,4 +1,14 @@
 {
+  "editor": {
+    "logs": "Logs",
+    "run": "Ausführen",
+    "running": "Läuft...",
+    "save": "Speichern",
+    "saved": "Gespeichert!",
+    "saveClose": "Speichern & schließen",
+    "addModule": "Modul hinzufügen",
+    "closeTitle": "Ohne Speichern schließen"
+  },
   "schedule": {
     "header": "Planen",
     "run": "Ausführen",
@@ -53,7 +63,13 @@
     "whatsapp_send": "WhatsApp senden",
     "database_update": "Datenbank aktualisieren",
     "email_send": "E-Mail senden",
-    "delay": "Wartezeit"
+    "delay": "Wartezeit",
+    "applications": "Bewerbungen",
+    "vacancies": "Stellen",
+    "matches": "Matches",
+    "opportunities": "Opportunities",
+    "tasks": "Aufgaben",
+    "customers": "Kunden"
   },
   "status": {
     "active": "Aktiv",
@@ -171,5 +187,9 @@
         }
       }
     }
+  },
+  "filters": {
+    "status": "Status",
+    "module": "Modul"
   }
 }

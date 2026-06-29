@@ -1,4 +1,14 @@
 {
+  "editor": {
+    "logs": "Journaux",
+    "run": "Exécuter",
+    "running": "En cours...",
+    "save": "Enregistrer",
+    "saved": "Enregistré !",
+    "saveClose": "Enregistrer & fermer",
+    "addModule": "Ajouter un module",
+    "closeTitle": "Fermer sans enregistrer"
+  },
   "schedule": {
     "header": "Planifier",
     "run": "Exécuter",
@@ -53,7 +63,13 @@
     "whatsapp_send": "Envoyer WhatsApp",
     "database_update": "Mettre à jour la base",
     "email_send": "Envoyer un e-mail",
-    "delay": "Délai"
+    "delay": "Délai",
+    "applications": "Candidatures",
+    "vacancies": "Postes",
+    "matches": "Matches",
+    "opportunities": "Opportunités",
+    "tasks": "Tâches",
+    "customers": "Clients"
   },
   "status": {
     "active": "Actif",
@@ -171,5 +187,9 @@
         }
       }
     }
+  },
+  "filters": {
+    "status": "Statut",
+    "module": "Module"
   }
 }

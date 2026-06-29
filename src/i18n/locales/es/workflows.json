@@ -1,4 +1,14 @@
 {
+  "editor": {
+    "logs": "Registros",
+    "run": "Ejecutar",
+    "running": "En curso...",
+    "save": "Guardar",
+    "saved": "¡Guardado!",
+    "saveClose": "Guardar y cerrar",
+    "addModule": "Añadir módulo",
+    "closeTitle": "Cerrar sin guardar"
+  },
   "schedule": {
     "header": "Programar",
     "run": "Ejecutar",
@@ -53,7 +63,13 @@
     "whatsapp_send": "Enviar WhatsApp",
     "database_update": "Actualizar base de datos",
     "email_send": "Enviar correo",
-    "delay": "Espera"
+    "delay": "Espera",
+    "applications": "Candidaturas",
+    "vacancies": "Vacantes",
+    "matches": "Matches",
+    "opportunities": "Oportunidades",
+    "tasks": "Tareas",
+    "customers": "Clientes"
   },
   "status": {
     "active": "Activo",
@@ -171,5 +187,9 @@
         }
       }
     }
+  },
+  "filters": {
+    "status": "Estado",
+    "module": "Módulo"
   }
 }
