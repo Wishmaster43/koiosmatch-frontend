@@ -5,6 +5,9 @@
 > **Bijgewerkt:** 2026-06-29 — file-by-file audit gefold in §G; zie ook `docs/AUDIT.md` (bewijslast),
 > `docs/DATA-API.md` (mock + CRUD-matrix), `docs/DECISIONS.md` (keuzes + SaaS-schaalbaarheid 10→1M).
 >
+> **2026-06-29 [FE]:** kandidaat-lookups nu volledig uit de API — note-types/document-types/cv-template
+> ontkoppeld van hardcode + planning-mock weg; backend moet endpoints + seed leveren → **C-37 / C-38**.
+>
 > **Legenda:** ☐ open · ◐ deels klaar · ✅ klaar · 🔴 blokkerend · [D] Danny · [FE] Frontend · [BE] Backend
 
 ---
@@ -371,7 +374,7 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 | **CFG-1** | P2 | M | BE+FE | NATIONALITIES/LANGUAGES/klant-STATUSES → tenant-lookups + i18n |
 | **D-3** | P2 | M | BE+FE | "gearchiveerd bekijken + herstellen"-UI |
 | **D-4/D-5** | P2 | S | BE+FE | tasks `/stats` + `/tasks/{id}/activity` |
-| **R-SPLIT** | P2 | M | FE | ✅ `ReportFilterSidebar` 485→216(+2) · ✅ `MessagesTable` 430→250(+2) · ☐ `WorkflowCanvasEditor`(907) + `fields`(403) → **fold in workflow-i18n-sessie** (zelfde cluster) |
+| **R-SPLIT** | P2 | M | FE | ✅ `ReportFilterSidebar` 485→216(+2) · ✅ `MessagesTable` 430→250(+2) · ✅ `fields` 403→124+290 · ☐ `WorkflowCanvasEditor`(907) → **fold in workflow-i18n-sessie** (EditorInner ~465r → hook-extractie + i18n samen) |
 | **DUP-1** | P3 | S | FE | ✅ avatar-kleur 3× → `lib/avatarColor` |
 | **F-12b** | P3 | L | FE | deep-relative-imports (`../../`, ~589 warnings) → `@/`-alias |
 
