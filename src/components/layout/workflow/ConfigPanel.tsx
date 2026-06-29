@@ -8,9 +8,11 @@
 import { useState, useEffect } from 'react'
 import { Zap, Trash2, Play } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { MODULE_META, MODULE_SCHEMAS } from '@/modules/index'
 import { AgentsTab, PromptsTab, FAQTab, KnowledgeTab, ToolsTab } from '../../ai/AIManagementTabs'
 import { FieldInput } from './fields'
+import { categorySlug } from './moduleI18n'
 import type { FlowNode, WorkflowField } from '@/types/workflow'
 
 export const MANAGE_TABS = ['agents', 'prompts', 'faq', 'knowledge', 'tools']
@@ -21,6 +23,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange }: {
   onDelete: (nodeId: string) => void
   onTabChange?: (tab: string) => void
 }) {
+  const { t } = useTranslation('workflows')
   const [activeTab, setActiveTab] = useState('instellingen')
 
   const switchTab = (id: string) => { setActiveTab(id); onTabChange?.(id) }
@@ -34,7 +37,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange }: {
         <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <Zap size={20} color="var(--border)" />
         </div>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>Klik op een module<br />om de configuratie te zien</p>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>{t('config.emptyHint')}</p>
       </div>
     )
   }
@@ -52,14 +55,14 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange }: {
           {Icon && <Icon size={16} color={meta?.color} />}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{meta?.label}</div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{meta?.category}</div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t('modules.' + type, { defaultValue: meta?.label ?? type })}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('categories.' + categorySlug(meta?.category), { defaultValue: meta?.category ?? '' })}</div>
         </div>
         <button onClick={() => onDelete(node.id)}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', padding: 4, display: 'flex' }}
           onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
           onMouseLeave={e => (e.currentTarget.style.color = 'var(--border)')}
-          title="Module verwijderen">
+          title={t('config.deleteTitle')}>
           <Trash2 size={14} />
         </button>
       </div>
@@ -67,14 +70,14 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange }: {
       {/* Tabs */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', flexShrink: 0, padding: '8px 16px 0', overflowX: 'auto' }}>
         {[
-          { id: 'instellingen', label: 'Instellingen' },
-          { id: 'uitvoering',   label: output ? `Uitvoering (${Array.isArray(output) ? output.length : 1})` : 'Uitvoering' },
+          { id: 'instellingen', label: t('config.tabSettings') },
+          { id: 'uitvoering',   label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
           ...(node.data.type === 'ai_agent' ? [
-            { id: 'agents',    label: 'Agents' },
-            { id: 'prompts',   label: 'Prompts' },
-            { id: 'faq',       label: "FAQ's" },
-            { id: 'knowledge', label: 'Kennisbank' },
-            { id: 'tools',     label: 'Tools' },
+            { id: 'agents',    label: t('config.tabAgents') },
+            { id: 'prompts',   label: t('config.tabPrompts') },
+            { id: 'faq',       label: t('config.tabFaq') },
+            { id: 'knowledge', label: t('config.tabKnowledge') },
+            { id: 'tools',     label: t('config.tabTools') },
           ] : []),
         ].map(t => (
           <button key={t.id} type="button" onClick={() => switchTab(t.id)}
@@ -122,16 +125,16 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange }: {
           {schema.length === 0 && (
             node.data.type === 'router' ? (
               <div style={{ padding: '12px 0', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0 }}>Router</p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', margin: 0 }}>{t('config.routerTitle')}</p>
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
-                  Verbind de Router naar meerdere modules op het canvas. Klik op het <strong>filter-icoontje</strong> op een verbindingslijn om te bepalen wanneer die route wordt gevolgd.
+                  {t('config.routerDesc')}
                 </p>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
-                  Geen overeenkomende route → de flow stopt voor die tak.
+                  {t('config.routerNote')}
                 </p>
               </div>
             ) : (
-              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Geen configuratie vereist.</p>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('config.noConfig')}</p>
             )
           )}
         </div>
@@ -141,14 +144,14 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange }: {
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 10, padding: 24 }}>
               <Play size={24} color="var(--border)" />
               <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>
-                Nog geen uitvoerdata.<br />Druk op ▶ bij de module om te testen.
+                {t('config.noOutput')}
               </p>
             </div>
           ) : (
             <div style={{ padding: 12 }}>
               {Array.isArray(output) && (
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, fontWeight: 500 }}>
-                  {output.length} {output.length === 1 ? 'item' : 'items'}
+                  {output.length} {output.length === 1 ? t('config.item') : t('config.items')}
                 </div>
               )}
               <pre style={{

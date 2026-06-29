@@ -6,8 +6,10 @@
 import { useState } from 'react'
 import { X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { MODULE_META, MODULE_APP_MAP } from '@/modules/index'
 import { useApps } from '@/context/AppsContext'
+import { categorySlug } from './moduleI18n'
 
 // One [type, meta] pair from the module registry (used by the picker rows).
 type ModuleMetaEntry = [string, (typeof MODULE_META)[string]]
@@ -19,9 +21,14 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   onSelect: (type: string, edgeId: string | null) => void
   onClose: () => void
 }) {
+  const { t } = useTranslation('workflows')
   const [search, setSearch] = useState('')
   const [tab,    setTab]    = useState('Alle')
   const { isAppEnabled } = useApps() ?? {}
+
+  // Translated module label + category (registry value = nl source / defaultValue).
+  const modLabel = (type: string, label: string) => t('modules.' + type, { defaultValue: label })
+  const catLabel = (cat: string) => t('categories.' + categorySlug(cat), { defaultValue: cat })
 
   // Filter out modules whose app is not enabled
   const isModuleEnabled = (type: string) => {
@@ -33,8 +40,8 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
 
   const allEntries = Object.entries(MODULE_META).filter(([type]) => isModuleEnabled(type))
 
-  const visible = allEntries.filter(([, m]) => {
-    const matchSearch = !search || m.label.toLowerCase().includes(search.toLowerCase())
+  const visible = allEntries.filter(([type, m]) => {
+    const matchSearch = !search || modLabel(type, m.label).toLowerCase().includes(search.toLowerCase())
     const matchTab    = tab === 'Alle' || m.category === tab
     return matchSearch && matchTab
   })
@@ -58,7 +65,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
           <Icon size={15} color={meta.color} />
         </div>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{meta.label}</div>
+          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{modLabel(type, meta.label)}</div>
         </div>
       </button>
     )
@@ -77,7 +84,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
     return [...orderedCats, ...remaining].map((cat, i) => (
       <div key={cat}>
         {i > 0 && <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />}
-        <div style={{ padding: '6px 16px 2px', fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{cat}</div>
+        <div style={{ padding: '6px 16px 2px', fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{catLabel(cat)}</div>
         {groups[cat].map(renderRow)}
       </div>
     ))
@@ -92,13 +99,13 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
         {/* Header + zoeken */}
         <div style={{ padding: '14px 16px 0', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>Module kiezen</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('picker.title')}</span>
             <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
               <X size={16} />
             </button>
           </div>
           <input autoFocus value={search} onChange={e => setSearch(e.target.value)}
-            placeholder="Zoeken..."
+            placeholder={t('picker.search')}
             style={{ width: '100%', padding: '7px 10px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--hover-bg)', boxSizing: 'border-box', marginBottom: 12 }} />
         </div>
 
@@ -112,7 +119,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
                 background: 'none', border: 'none', borderBottom: tab === cat ? '2px solid var(--color-primary)' : '2px solid transparent',
                 cursor: 'pointer', whiteSpace: 'nowrap', marginBottom: -1,
               }}>
-              {cat}
+              {catLabel(cat)}
             </button>
           ))}
         </div>
@@ -120,7 +127,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
         {/* Lijst */}
         <div style={{ overflowY: 'auto', flex: 1, paddingBottom: 8 }}>
           {visible.length === 0 && (
-            <p style={{ padding: '32px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>Geen modules gevonden</p>
+            <p style={{ padding: '32px 16px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>{t('picker.empty')}</p>
           )}
           {visible.length > 0 && (tab === 'Alle' || search)
             ? renderGrouped()

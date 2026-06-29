@@ -1,5 +1,8 @@
 {
-  "filters": { "status": "Status", "module": "Module" },
+  "filters": {
+    "status": "Status",
+    "module": "Module"
+  },
   "editor": {
     "logs": "Logs",
     "run": "Uitvoeren",
@@ -91,6 +94,64 @@
     }
   },
   "modules": {
+    "advanced_parser": "Geavanceerde verwerker",
+    "aggregator": "Aggregator",
+    "ai_agent": "AI Agents",
+    "ai_match": "AI-kandidaatvoorstellen",
+    "applicant_event": "Sollicitatie-event",
+    "applicant_message": "Bericht naar sollicitant",
+    "applications": "Sollicitaties",
+    "candidates": "Kandidaten",
+    "condition": "Voorwaarde / vertakking",
+    "customers": "Klanten",
+    "database_update": "Database Updaten",
+    "delay": "Wachttijd",
+    "email_send": "E-mail Sturen",
+    "error_break": "Stoppen (Break)",
+    "error_commit": "Vastleggen (Commit)",
+    "error_ignore": "Negeren",
+    "error_resume": "Hervatten (Resume)",
+    "error_rollback": "Terugdraaien (Rollback)",
+    "feeder": "Data Invoer",
+    "filter": "Filter",
+    "gateway_mail_hook": "Mail Hook",
+    "get_variable": "Variabele ophalen",
+    "get_variables": "Variabelen ophalen",
+    "hf_candidates": "Kandidaten",
+    "hf_customers": "Klanten",
+    "hf_shifts": "Diensten",
+    "html_parser": "HTML Verwerker",
+    "html_table_parser": "HTML-tabel verwerker",
+    "html_to_text": "HTML naar tekst",
+    "intus_candidates": "Kandidaten",
+    "intus_shifts": "Diensten",
+    "iterator": "Iterator",
+    "knowledge_search": "Kennisbank Zoeken",
+    "matches": "Matches",
+    "numeric_aggregator": "Numeriek samenvoegen",
+    "opportunities": "Kansen",
+    "planning": "Diensten",
+    "repeater": "Repeater",
+    "router": "Router",
+    "set_variable": "Variabele instellen",
+    "set_variables": "Variabelen instellen",
+    "shifts_input": "Diensten Plakken",
+    "sleep": "Wachten",
+    "sm_candidates": "Kandidaten",
+    "sm_customers": "Klanten",
+    "sm_shifts": "Diensten",
+    "table_aggregator": "Tabel samenvoegen",
+    "tasks": "Taken",
+    "text_aggregator": "Tekst samenvoegen",
+    "text_parser": "Tekst verwerker",
+    "vacancies": "Vacatures",
+    "wait": "Wachten tot datum",
+    "webhook": "Webhook Trigger",
+    "whatsapp_send": "WhatsApp Sturen"
+  },
+  "categories": {
+    "all": "Alle",
+    "triggers": "Triggers",
     "candidates": "Kandidaten",
     "applications": "Sollicitaties",
     "vacancies": "Vacatures",
@@ -99,10 +160,14 @@
     "tasks": "Taken",
     "customers": "Klanten",
     "planning": "Planning",
-    "whatsapp_send": "WhatsApp Sturen",
-    "database_update": "Database Updaten",
-    "email_send": "E-mail Sturen",
-    "delay": "Wachttijd"
+    "communication": "Communicatie",
+    "ai": "AI",
+    "shiftmanager": "ShiftManager",
+    "helloflex": "HelloFlex",
+    "intus": "Intus",
+    "flow": "Flow beheer",
+    "text": "Tekst & Parsing",
+    "other": "Overig"
   },
   "status": {
     "active": "Actief",
@@ -220,5 +285,28 @@
         }
       }
     }
+  },
+  "picker": {
+    "title": "Module kiezen",
+    "search": "Zoeken...",
+    "empty": "Geen modules gevonden"
+  },
+  "config": {
+    "emptyHint": "Klik op een module om de configuratie te zien",
+    "tabSettings": "Instellingen",
+    "tabExecution": "Uitvoering",
+    "tabAgents": "Agents",
+    "tabPrompts": "Prompts",
+    "tabFaq": "FAQ's",
+    "tabKnowledge": "Kennisbank",
+    "tabTools": "Tools",
+    "deleteTitle": "Module verwijderen",
+    "routerTitle": "Router",
+    "routerDesc": "Verbind de Router naar meerdere modules op het canvas. Klik op het filter-icoontje op een verbindingslijn om te bepalen wanneer die route wordt gevolgd.",
+    "routerNote": "Geen overeenkomende route → de flow stopt voor die tak.",
+    "noConfig": "Geen configuratie vereist.",
+    "noOutput": "Nog geen uitvoerdata. Druk op ▶ bij de module om te testen.",
+    "item": "item",
+    "items": "items"
   }
 }
