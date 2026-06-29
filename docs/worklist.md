@@ -255,6 +255,42 @@ tóch gekleurd-bug. Seeder/migratie dus met `true`/`false`.
 
 **(e) Migratie:** bestaande `has_license`-data → `license_categories[]`.
 
+### C-37 · Kandidaat — laatste hardcoded lijsten ontkoppeld (FE klaar · BE: endpoints + seed)
+De frontend haalt nu **alles** rond kandidaten uit de API; deze drie endpoints/keys moeten
+backend-zijdig nog bestaan + geseed worden. Tot die tijd valt de FE fail-soft terug op een seed.
+
+**(a) `/note-types`** (lookup-CRUD-contract C-36b, **geen kleur** nu — `withColor={false}`). Seed 6
+standaarden in `CandidateLookupSeeder`: `Algemeen · Intake · Feedback · Afspraak · Follow-up ·
+Waarschuwing`. Opgeslagen op de notitie als `type` (value/slug). FE: `useNoteTypes()` +
+`NoteTypesSettings` (bestond al). *(Optioneel later: kleurkolom → dan note-chips gekleurd; FE
+ondersteunt `color` al.)*
+
+**(b) `/document-types`** *(NIEUW)* — lookup-CRUD-contract C-36b **mét kleur** (`color`-kolom, hex of
+`var(--color-*)`). Seed 7 standaarden + kleuren: `CV`(secondary) · `ID-bewijs`(#8B5CF6) ·
+`Diploma`(warning) · `Contract`(#059669) · `VOG`(danger) · `Certificaat`(#EC4899) · `Overig`(#6B7280).
+Opgeslagen op het document als `type` (value/slug). FE: `useDocumentTypes()` (label+kleur) +
+nieuwe `DocumentTypesSettings`-subtab (Personalisatie → Kandidaten).
+
+**(c) `candidate_cv_template` in `/settings`** — CV-template-config verhuisd van browser-`localStorage`
+naar de tenant-`/settings`-blob (was per-device, nu per-tenant; AVG/§7). JSON-waarde:
+`{ primaryColor, secondaryColor, logoUrl, companyName, sections[] }`. Werkt via de generieke
+merge-by-key `/settings` (C-36d) — alleen bevestigen dat de key meekomt in GET/POST.
+
+### C-38 · Overzicht — wat backend nog mist voor de **complete** kandidaat (table · drilldown · settings)
+Geen nieuw werk, een **kaart** zodat BE-Claude de hele kandidaat in één blik ziet (verwijst naar
+bestaande C-items):
+- **Tabel/KPI-row:** `GET /candidates/stats` (server-brede tellingen per status/funnel/recruiter/
+  niet-gecontacteerd/intake-gepland/taken — niet paginabreed) · `last_contact_at`/`_type`-kolommen +
+  `facebook_lead_id` (C-21) · soft-delete-filters (inactief/blacklist/archived standaard uit, C-21).
+- **Drilldown (drawer):** sub-entiteit body-contracten (C-2) · álle kandidaat-velden incl.
+  `place_of_birth` (C-23) · Matches read-only (C-19) · Sollicitaties-funnel (C-23) · Changelog
+  `/candidates/{id}/activity` (C-16) · Afspraken/Intakes + `requires_appointment`-vlag (C-22) ·
+  kanaal-consent `*_opt_in` (C-11) · documenten-upload + `type` via `/document-types` (C-37b) ·
+  note-types (C-37a) · branches (C-4).
+- **Settings:** álle lookup-CRUD-contracten geseed + 409/`in_use` + reorder (C-36b) · `/note-types`
+  (C-37a) · `/document-types` (C-37b) · `candidate_cv_template` (C-37c) · tabel-kleur-`/settings`-keys
+  met booleans als `true`/`false` (C-36d).
+
 ### C-27-workflow · Workflow-modules — graaf-opslag
 Steps opslaan met `position` + `connections[]` (target + filters). Stabiele step-ids.
 
@@ -331,7 +367,7 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 | **D-1** | P1 | M | BE+FE | changelog (`/activity`) op customers/vacancies/applications/tasks/opportunities |
 | **D-2** | P1 | M | BE+FE | soft-delete (archive) op tasks/opportunities/applications |
 | **F-11** | P1 | L | FE | lijst-virtualisatie (kandidaten/shifts, 10k+ rijen) — schaal-blocker |
-| **I18N-3** | P2 | M | FE+2e | 34 files zonder `useTranslation` → per file: dumb=OK / tekst→`t()` |
+| **I18N-3** | ✅/2e | — | 2e | FE-domein geverifieerd clean (dumb/wrappers, tekst via props). Residu = `settings/*` (2e-Claude). |
 | **CFG-1** | P2 | M | BE+FE | NATIONALITIES/LANGUAGES/klant-STATUSES → tenant-lookups + i18n |
 | **D-3** | P2 | M | BE+FE | "gearchiveerd bekijken + herstellen"-UI |
 | **D-4/D-5** | P2 | S | BE+FE | tasks `/stats` + `/tasks/{id}/activity` |
