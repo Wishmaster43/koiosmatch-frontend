@@ -376,7 +376,13 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 | **D-4/D-5** | P2 | S | BE+FE | tasks `/stats` + `/tasks/{id}/activity` |
 | **R-SPLIT** | P2 | M | FE | ✅ `ReportFilterSidebar` 485→216(+2) · ✅ `MessagesTable` 430→250(+2) · ✅ `fields` 403→124+290 · ☐ `WorkflowCanvasEditor`(907) → **fold in workflow-i18n-sessie** (EditorInner ~465r → hook-extractie + i18n samen) |
 | **DUP-1** | P3 | S | FE | ✅ avatar-kleur 3× → `lib/avatarColor` |
+| **A11Y-1** | P2 | M | FE | ~28 modals/drawers zonder focus-trap/`role=dialog`/`aria-modal`+restore (§6) — alleen `ChangelogPopover` heeft 't. Shared `Drawer`/`Modal`-shell met focus-trap. |
+| **A11Y-2** | P2 | M | FE | icon-only buttons missen `aria-label` (34/359) — X-close/sort/chevron/trash. |
+| **ERR-1** | P2 | M | FE | 94× silent `.catch(()=>{})` → min. dev-log + user-facing error-state (= F-12). |
+| **F-8** | P2 | L | FE | 53 componenten fetchen inline (`api.get`+`useEffect`) → naar feature-hooks (§3). |
+| **DUP-2** | P3 | S | FE | herhaalde className-shells (drawer ×10 · table ×7 · card ×6 · error-banner ×6) → extract; error-banner + card gebruiken rauwe Tailwind-kleuren i.p.v. `--color-*`-tokens (§4). |
 | **F-12b** | P3 | L | FE | deep-relative-imports (`../../`, ~589 warnings) → `@/`-alias |
+| ~~USE_MOCKS~~ | ✅ | — | — | DATA-API-zorg opgelost: `USE_MOCKS` is DEV-gated (`import.meta.env.DEV`), shipt nooit in prod. |
 
 > **Positief bevestigd** (geen findings): geen `console.log` in commits · geen ongesanitiseerde dangerous HTML
 > (`SafeHtml` saniteert) · geen hard-delete-call in FE (§8) · types zonder `any` in datamodellen.
