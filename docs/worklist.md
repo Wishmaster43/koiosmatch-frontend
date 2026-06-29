@@ -381,8 +381,8 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 
 | ID | Sev | Eff | Eigenaar | Item |
 |---|---|---|---|---|
-| **I18N-1** | P1 | **L** (was XL) | FE | **Workflow-registry-i18n — INCREMENTEEL (content deels gescaffold).** `workflows`-namespace bestaat al met `status`/`page`/partiële `modules` (12 van 56) + de rijke `schedule`. Dus: **wiren per component** + de `modules.*`-map aanvullen (44 resterende types × 5 locales) + schema-veld-labels. Géén from-scratch sessie meer → component-voor-component, elk §5-compleet. |
-| **I18N-2** | P1 | M | FE | ◐ `WorkflowCanvasEditor` **editor-chrome ✅** (`t('workflows:editor.*')`). Rest: `ModulePicker` (categorieën/"Module kiezen"/zoeken) · `ConfigPanel` (tab-labels/router-tekst) · `fields`/`fieldControls` (control-strings) — elk een kleine §5-complete golf. |
+| **I18N-1** | ✅ | — | FE | **OPGELOST.** Volledige `workflows:modules.*` (53 types) + `categories.*` (18) in nl/en/de/fr/es; `ModulePicker`/`ConfigPanel` renderen via `t('modules.<type>')` + `t('categories.<slug>')` (`moduleI18n`-slugmap, matching blijft op registry-waarde). |
+| **I18N-2** | ✅ | — | FE | **OPGELOST.** Alle 5 workflow-componenten §5-compleet: editor-chrome · `fields` · `fieldControls` · `ModulePicker` · `ConfigPanel` (blokken `editor`/`fields`/`picker`/`config` × 5 locales). **Workflow-editor is geen Dutch-island meer.** |
 | **MOCK-1** | P1 | M | BE+2e | kandidaat-Planning-tab op `data/mocks.ts` → planning-endpoints + hooks |
 | **F-13** | P1 | M | FE (gated) | `auth_token`/`auth_user` uit `localStorage` → httpOnly-cookieflip (ná backend-deploy) |
 | **D-1** | P1 | M | BE+FE | changelog (`/activity`) op customers/vacancies/applications/tasks/opportunities |
