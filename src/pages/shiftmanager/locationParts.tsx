@@ -5,10 +5,9 @@
  */
 import { useTranslation } from 'react-i18next'
 
-const AVATAR_COLORS = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6']
-
-// Deterministic avatar colour from the first character of the label.
-export function ac(s?: string) { return AVATAR_COLORS[(s || '?').charCodeAt(0) % AVATAR_COLORS.length] }
+// Deterministic avatar colour — shared util (single source), imported + re-exported for the table/drawer.
+import { avatarColor as ac } from '@/lib/avatarColor'
+export { ac }
 
 // Square initial-avatar.
 export function Avatar({ label, size = 32 }: { label?: string; size?: number }) {

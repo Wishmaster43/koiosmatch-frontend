@@ -3,10 +3,9 @@
  * initial-avatar for a contact. Dumb presentational pieces shared by the table
  * and the drawer.
  */
-const COLORS = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6']
-
-// Deterministic avatar colour from the first character of the label.
-export function ac(s?: string) { return COLORS[(s || '?').charCodeAt(0) % COLORS.length] }
+// Deterministic avatar colour — shared util (single source), imported + re-exported for the table/drawer.
+import { avatarColor as ac } from '@/lib/avatarColor'
+export { ac }
 
 // Two-letter initials — shared util (single source), re-exported for the table.
 import { initialsOf } from '@/lib/initials'
