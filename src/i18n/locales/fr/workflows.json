@@ -9,6 +9,14 @@
     "addModule": "Ajouter un module",
     "closeTitle": "Fermer sans enregistrer"
   },
+  "fields": {
+    "boolOn": "Activé",
+    "boolOff": "Désactivé",
+    "selectPlaceholder": "Sélectionner...",
+    "keyName": "Nom",
+    "keyValue": "Valeur",
+    "add": "Ajouter"
+  },
   "schedule": {
     "header": "Planifier",
     "run": "Exécuter",

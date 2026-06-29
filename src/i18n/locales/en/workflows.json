@@ -10,6 +10,14 @@
     "addModule": "Add module",
     "closeTitle": "Close without saving"
   },
+  "fields": {
+    "boolOn": "On",
+    "boolOff": "Off",
+    "selectPlaceholder": "Select...",
+    "keyName": "Name",
+    "keyValue": "Value",
+    "add": "Add"
+  },
   "schedule": {
     "header": "Schedule",
     "run": "Run",

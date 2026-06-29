@@ -10,6 +10,14 @@
     "addModule": "Module toevoegen",
     "closeTitle": "Sluiten zonder opslaan"
   },
+  "fields": {
+    "boolOn": "Aan",
+    "boolOff": "Uit",
+    "selectPlaceholder": "Selecteer...",
+    "keyName": "Naam",
+    "keyValue": "Waarde",
+    "add": "Toevoegen"
+  },
   "schedule": {
     "header": "Inplannen",
     "run": "Uitvoeren",

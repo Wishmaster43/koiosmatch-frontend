@@ -9,6 +9,14 @@
     "addModule": "Modul hinzufügen",
     "closeTitle": "Ohne Speichern schließen"
   },
+  "fields": {
+    "boolOn": "An",
+    "boolOff": "Aus",
+    "selectPlaceholder": "Auswählen...",
+    "keyName": "Name",
+    "keyValue": "Wert",
+    "add": "Hinzufügen"
+  },
   "schedule": {
     "header": "Planen",
     "run": "Ausführen",

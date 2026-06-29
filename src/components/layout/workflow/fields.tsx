@@ -6,6 +6,7 @@
  * to `./fieldControls`. Extracted from WorkflowCanvasEditor.
  */
 import { Plus, X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters } from '../../../types/workflow'
 import {
   AgentSelectField, FaqSelectField, WebhookSelectField,
@@ -13,6 +14,7 @@ import {
 } from './fieldControls'
 
 export function FieldInput({ field, value, onChange }: { field: WorkflowField; value?: unknown; onChange: OnChange }) {
+  const { t } = useTranslation('workflows')
   if (field.type === 'agent_select') {
     return <AgentSelectField value={value} onChange={onChange} fieldKey={field.key} />
   }
@@ -35,7 +37,7 @@ export function FieldInput({ field, value, onChange }: { field: WorkflowField; v
         <div style={{ position: 'relative', width: 32, height: 17, borderRadius: 999, background: value ? 'var(--color-primary)' : 'var(--border)', flexShrink: 0, transition: 'background 0.2s' }}>
           <div style={{ position: 'absolute', top: 2, left: value ? 17 : 2, width: 13, height: 13, borderRadius: '50%', background: 'var(--surface)', transition: 'left 0.2s' }} />
         </div>
-        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{value ? 'Aan' : 'Uit'}</span>
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{value ? t('fields.boolOn') : t('fields.boolOff')}</span>
       </button>
     )
   }
@@ -67,7 +69,7 @@ export function FieldInput({ field, value, onChange }: { field: WorkflowField; v
     return (
       <select value={(value ?? field.default ?? '') as string} onChange={e => onChange(field.key, e.target.value)}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none' }}>
-        {field.default == null && <option value="">Selecteer...</option>}
+        {field.default == null && <option value="">{t('fields.selectPlaceholder')}</option>}
         {(field.options ?? []).map(o => {
           const val = typeof o === 'object' ? o.value : o
           const lbl = typeof o === 'object' ? o.label : o
@@ -95,9 +97,9 @@ export function FieldInput({ field, value, onChange }: { field: WorkflowField; v
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {pairs.map((p, i) => (
           <div key={i} style={{ display: 'flex', gap: 4 }}>
-            <input value={p.name} onChange={e => update(i, 'name', e.target.value)} placeholder="Naam"
+            <input value={p.name} onChange={e => update(i, 'name', e.target.value)} placeholder={t('fields.keyName')}
               style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
-            <input value={p.value} onChange={e => update(i, 'value', e.target.value)} placeholder="Waarde"
+            <input value={p.value} onChange={e => update(i, 'value', e.target.value)} placeholder={t('fields.keyValue')}
               style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
             <button type="button" onClick={() => remove(i)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: '0 4px' }}>
@@ -107,7 +109,7 @@ export function FieldInput({ field, value, onChange }: { field: WorkflowField; v
         ))}
         <button type="button" onClick={add}
           style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '4px 8px', cursor: 'pointer' }}>
-          <Plus size={10} /> Toevoegen
+          <Plus size={10} /> {t('fields.add')}
         </button>
       </div>
     )
