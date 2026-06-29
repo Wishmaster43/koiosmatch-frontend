@@ -374,7 +374,7 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 | **CFG-1** | P2 | M | BE+FE | NATIONALITIES/LANGUAGES/klant-STATUSES → tenant-lookups + i18n |
 | **D-3** | P2 | M | BE+FE | "gearchiveerd bekijken + herstellen"-UI |
 | **D-4/D-5** | P2 | S | BE+FE | tasks `/stats` + `/tasks/{id}/activity` |
-| **R-SPLIT** | P2 | M | FE | ✅ `ReportFilterSidebar` 485→216(+2) · ✅ `MessagesTable` 430→250(+2) · ✅ `fields` 403→124+290 · ☐ `WorkflowCanvasEditor`(907) → **fold in workflow-i18n-sessie** (EditorInner ~465r → hook-extractie + i18n samen) |
+| **R-SPLIT** | P2 | M | FE | ✅ `ReportFilterSidebar` 485→216(+2) · ✅ `MessagesTable` 430→250(+2) · ✅ `fields` 403→124+290 · ◐ `WorkflowCanvasEditor` 907→**520** + 3 panels (ModulePicker/ConfigPanel/LogsPanel) ✅; rest = `useWorkflowEditor`-hook (EditorInner-state/handlers → main <400) — fold in workflow-i18n-sessie |
 | **DUP-1** | P3 | S | FE | ✅ avatar-kleur 3× → `lib/avatarColor` |
 | **A11Y-1** | P2 | M | FE | ~28 modals/drawers zonder focus-trap/`role=dialog`/`aria-modal`+restore (§6) — alleen `ChangelogPopover` heeft 't. Shared `Drawer`/`Modal`-shell met focus-trap. |
 | **A11Y-2** | P2 | M | FE | icon-only buttons missen `aria-label` (34/359) — X-close/sort/chevron/trash. |
