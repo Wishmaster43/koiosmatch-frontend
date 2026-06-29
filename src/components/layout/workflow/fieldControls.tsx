@@ -6,6 +6,7 @@
  */
 import { useState, useEffect } from 'react'
 import { Loader2, Plus, X, Check, Copy } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { OPERATORS } from './constants'
 import type { WorkflowField, EdgeFilters, FilterCondition } from '../../../types/workflow'
 
@@ -15,6 +16,7 @@ export type OnChange = (key: string, value: unknown) => void
 // ── Agent select field ────────────────────────────────────────────────────────
 
 export function AgentSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
+  const { t } = useTranslation('workflows')
   const [agents,  setAgents]  = useState<Array<{ id?: string | number; name?: string }>>([])
   const [loading, setLoading] = useState(true)
   useEffect(() => {
@@ -27,7 +29,7 @@ export function AgentSelectField({ value, onChange, fieldKey }: { value?: unknow
     <select value={(value as string) || ''} onChange={e => onChange(fieldKey, e.target.value)}
       style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8,
                background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
-      <option value="">{loading ? 'Agents ophalen…' : 'Selecteer een agent…'}</option>
+      <option value="">{loading ? t('fields.agentLoading') : t('fields.agentSelect')}</option>
       {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
     </select>
   )
@@ -36,6 +38,7 @@ export function AgentSelectField({ value, onChange, fieldKey }: { value?: unknow
 // ── FAQ multi-select field ─────────────────────────────────────────────────────
 
 export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
+  const { t } = useTranslation('workflows')
   const [faqs,    setFaqs]    = useState<Array<{ id?: string | number; name?: string; title?: string }>>([])
   const [loading, setLoading] = useState(true)
   const selected: unknown[] = Array.isArray(value) ? value : []
@@ -52,10 +55,10 @@ export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown;
     onChange(fieldKey, next)
   }
 
-  if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>FAQ's ophalen…</div>
+  if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>{t('fields.faqLoading')}</div>
   if (faqs.length === 0) return (
     <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8 }}>
-      Geen FAQ's gevonden
+      {t('fields.faqEmpty')}
     </div>
   )
   return (
@@ -66,7 +69,7 @@ export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown;
           <label key={faq.id} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
             <input type="checkbox" checked={active} onChange={() => toggle(faq.id as string | number)}
               style={{ accentColor: 'var(--color-primary)', width: 14, height: 14, cursor: 'pointer' }} />
-            <span style={{ fontSize: 12, color: 'var(--text)' }}>{faq.name ?? faq.title ?? `FAQ ${faq.id}`}</span>
+            <span style={{ fontSize: 12, color: 'var(--text)' }}>{faq.name ?? faq.title ?? t('fields.faqFallback', { id: faq.id })}</span>
           </label>
         )
       })}
@@ -82,6 +85,7 @@ const WEBHOOK_API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.t
 const WEBHOOK_BASE    = `${WEBHOOK_API_URL}/webhook`
 
 export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
+  const { t } = useTranslation('workflows')
   const [hooks,    setHooks]    = useState<Array<{ id?: string | number; name?: string; token?: string }>>([])
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState(false)
@@ -123,16 +127,16 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
     setCopied(true); setTimeout(() => setCopied(false), 2000)
   }
 
-  if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>Webhooks ophalen…</div>
+  if (loading) return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '4px 0' }}>{t('fields.webhookLoading')}</div>
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {error && <div style={{ fontSize: 11, color: 'var(--color-danger)' }}>Webhooks konden niet worden geladen.</div>}
+      {error && <div style={{ fontSize: 11, color: 'var(--color-danger)' }}>{t('fields.webhookError')}</div>}
 
       {/* Picker — existing inbound webhooks */}
       <select value={(value as string) || ''} onChange={e => onChange(fieldKey, e.target.value)}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
-        <option value="">{hooks.length ? 'Selecteer een webhook…' : 'Nog geen webhooks'}</option>
+        <option value="">{hooks.length ? t('fields.webhookSelect') : t('fields.webhookEmpty')}</option>
         {hooks.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
       </select>
 
@@ -140,11 +144,11 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
       {showNew ? (
         <div style={{ display: 'flex', gap: 6 }}>
           <input autoFocus value={newName} onChange={e => setNewName(e.target.value)}
-            placeholder="Naam (bv. Facebook Leads)" onKeyDown={e => e.key === 'Enter' && create()}
+            placeholder={t('fields.webhookNamePlaceholder')} onKeyDown={e => e.key === 'Enter' && create()}
             style={{ flex: 1, padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, outline: 'none' }} />
           <button type="button" onClick={create} disabled={!newName.trim() || creating}
             style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 8, cursor: newName.trim() ? 'pointer' : 'not-allowed', opacity: newName.trim() ? 1 : 0.5, display: 'flex', alignItems: 'center', gap: 4 }}>
-            {creating ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />} Aanmaken
+            {creating ? <Loader2 size={11} className="animate-spin" /> : <Plus size={11} />} {t('fields.create')}
           </button>
           <button type="button" onClick={() => { setShowNew(false); setNewName('') }}
             style={{ padding: '6px 8px', background: 'none', border: '1px solid var(--border)', borderRadius: 8, cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
@@ -154,24 +158,24 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
       ) : (
         <button type="button" onClick={() => setShowNew(true)}
           style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer' }}>
-          <Plus size={11} /> Webhook aanmaken
+          <Plus size={11} /> {t('fields.webhookCreate')}
         </button>
       )}
 
       {/* Receiving URL — what you give to the external system */}
       {selected?.token && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ontvangst-URL</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('fields.receivingUrl')}</div>
           <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
             <code style={{ flex: 1, fontSize: 10, fontFamily: "'JetBrains Mono', monospace", background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 6, padding: '6px 8px', color: 'var(--text)', wordBreak: 'break-all' }}>
               {WEBHOOK_BASE}/{selected.token}
             </code>
-            <button type="button" onClick={copy} title="URL kopiëren"
+            <button type="button" onClick={copy} title={t('fields.copyUrl')}
               style={{ padding: '6px 8px', background: copied ? 'var(--color-success-bg)' : 'var(--hover-bg)', color: copied ? 'var(--color-success)' : 'var(--text-muted)', border: '1px solid var(--border)', borderRadius: 6, cursor: 'pointer', display: 'flex' }}>
               {copied ? <Check size={12} /> : <Copy size={12} />}
             </button>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Geef dit adres aan het externe systeem (Facebook, Intus…) om data te ontvangen.</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('fields.webhookHint')}</div>
         </div>
       )}
     </div>
@@ -184,6 +188,7 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
 // `field.fields` supplies the selectable field list. The standalone Filter/Router
 // between modules stays untouched (for multi-status branching).
 export function FiltersField({ field, value, onChange }: { field: WorkflowField; value?: EdgeFilters; onChange: OnChange }) {
+  const { t } = useTranslation('workflows')
   const logic = value?.logic ?? 'AND'
   const conds: FilterCondition[] = Array.isArray(value?.conditions) ? value!.conditions! : []
   const opts  = field.fields ?? []
@@ -199,7 +204,7 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
       {/* AND / OR */}
       {conds.length > 1 && (
         <div style={{ display: 'flex', gap: 6 }}>
-          {[['AND', 'ALLE'], ['OR', 'MINSTENS ÉÉN']].map(([l, lbl]) => (
+          {[['AND', t('fields.logicAll')], ['OR', t('fields.logicAny')]].map(([l, lbl]) => (
             <button key={l} type="button" onClick={() => setLogic(l)}
               style={{ padding: '3px 10px', fontSize: 11, fontWeight: 600, borderRadius: 999, border: 'none', cursor: 'pointer',
                 background: logic === l ? 'var(--color-primary)' : 'var(--border)', color: logic === l ? 'white' : 'var(--text-muted)' }}>{lbl}</button>
@@ -213,7 +218,7 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
           <div key={i} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             <select value={c.field} onChange={e => upd(i, 'field', e.target.value)}
               style={{ flex: 1, minWidth: 0, padding: '5px 6px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
-              <option value="">veld…</option>
+              <option value="">{t('fields.fieldPlaceholder')}</option>
               {opts.map(o => { const v = typeof o === 'object' ? o.value : o; const l = typeof o === 'object' ? o.label : o; return <option key={v} value={v}>{l}</option> })}
               {/* (field option list) */}
             </select>
@@ -222,7 +227,7 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
               {OPERATORS.map(op => <option key={op} value={op}>{op}</option>)}
             </select>
             {needsValue && (
-              <input value={c.value ?? ''} onChange={e => upd(i, 'value', e.target.value)} placeholder="waarde"
+              <input value={c.value ?? ''} onChange={e => upd(i, 'value', e.target.value)} placeholder={t('fields.valuePlaceholder')}
                 style={{ flex: 1, minWidth: 0, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
             )}
             <button type="button" onClick={() => del(i)}
@@ -234,7 +239,7 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
       })}
       <button type="button" onClick={add}
         style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)', background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6, padding: '5px 9px', cursor: 'pointer' }}>
-        <Plus size={10} /> Conditie toevoegen
+        <Plus size={10} /> {t('fields.addCondition')}
       </button>
     </div>
   )
@@ -245,6 +250,7 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
 const RS_TYPES = ['Text', 'Number', 'Boolean', 'Date', 'Array', 'Collection', 'Any']
 
 export function ResponseStructureField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
+  const { t } = useTranslation('workflows')
   const items = (Array.isArray(value) ? value : []) as Array<{ name?: string; type?: string }>
 
   const add    = ()                                       => onChange(fieldKey, [...items, { name: '', type: 'Text' }])
@@ -255,15 +261,15 @@ export function ResponseStructureField({ value, onChange, fieldKey }: { value?: 
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       {items.length > 0 && (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px 22px', gap: 4, padding: '0 2px', marginBottom: 2 }}>
-          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Item naam</div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Type</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('fields.itemName')}</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('fields.typeLabel')}</div>
           <div />
         </div>
       )}
       {items.map((item, i) => (
         <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 90px 22px', gap: 4, alignItems: 'center' }}>
           <input value={item.name} onChange={e => update(i, 'name', e.target.value)}
-            placeholder="item_naam"
+            placeholder={t('fields.itemNamePlaceholder')}
             style={{ padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', minWidth: 0 }}
             onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
             onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
@@ -283,7 +289,7 @@ export function ResponseStructureField({ value, onChange, fieldKey }: { value?: 
         style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)',
           background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 6,
           padding: '5px 9px', cursor: 'pointer', marginTop: 2 }}>
-        <Plus size={10} /> Item toevoegen
+        <Plus size={10} /> {t('fields.addItem')}
       </button>
     </div>
   )
