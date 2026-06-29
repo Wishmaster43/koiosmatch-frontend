@@ -7,6 +7,7 @@ import { NL_PROVINCES } from './constants'
 import { useDateFormat } from '@/lib/datetime'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
+import CustomFieldsSection from './CustomFieldsSection'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
@@ -133,56 +134,80 @@ export default function ProfileTab({ c, onEditSave }: { c: Candidate; onEditSave
     }
     if (key === 'email' && v) return <a href={`mailto:${v}`} style={{ fontSize: 12, color: 'var(--color-primary)', textDecoration: 'none' }}>{v}</a>
     if (key === 'phone' && v) return <a href={`tel:${String(v).replace(/\s/g, '')}`} style={{ fontSize: 12, color: 'var(--color-primary)', textDecoration: 'none' }}>{v}</a>
+    // Gender stores a slug (male/female/other); show the translated label, like the edit dropdown does.
+    if (key === 'gender') {
+      const genderLabels: Record<string, string> = { male: t('modal.gender.male'), female: t('modal.gender.female'), other: t('modal.gender.other') }
+      return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{(v && genderLabels[v]) || v || '-'}</span>
+    }
     return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v || '-'}</span>
   }
 
   // One labelled field (label above value); swaps to an input while editing.
+  // Label-left, value-right on one line (compact, like the preferences table).
   const field = (key: ProfileKey, label: string) => (
-    <div style={{ flex: 1, minWidth: 0 }}>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4, display: 'flex', alignItems: 'center', gap: 5 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
+      <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 120, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
         {key === 'linkedin' && <LinkedinIcon size={12} color="#0A66C2" />}
         {label}
-      </div>
-      {/* Read value reserves the input's height so the row doesn't grow on edit. */}
-      {editing ? renderInput(key) : <div style={{ minHeight: 33, display: 'flex', alignItems: 'center' }}>{renderValue(key)}</div>}
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>{editing ? renderInput(key) : renderValue(key)}</div>
     </div>
   )
 
-  // Two short fields on one row.
-  const pair = (a: ReactNode, b: ReactNode) => <div style={{ display: 'flex', gap: 12 }}>{a}{b}</div>
+  // Address: read = one composed comma line; edit = the structured fields (always
+  // saved structured — no backend change). Province stays its own row below.
+  const addressRow = () => {
+    if (editing) return (
+      <>
+        {field('street', t('profile.street'))}
+        {field('houseNumber', t('profile.houseNumber'))}
+        {field('houseNumberSuffix', t('profile.houseNumberSuffix'))}
+        {field('postalCode', t('profile.postalCode'))}
+        {field('city', t('profile.city'))}
+      </>
+    )
+    const line = [
+      [c.street, [c.houseNumber, c.houseNumberSuffix].filter(Boolean).join('-')].filter(Boolean).join(' '),
+      [c.postalCode, c.city].filter(Boolean).join(' '),
+    ].filter(s => s && s.trim()).join(', ')
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 120, flexShrink: 0 }}>{t('profile.address')}</span>
+        <div style={{ flex: 1, minWidth: 0, fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '-'}</div>
+      </div>
+    )
+  }
 
   // A titled group card holding a column of fields.
   const card = (title: string, children: ReactNode) => (
     <div>
-      <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }}>{title}</div>
-      <div style={{ ...blockStyle, padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 12 }}>{children}</div>
+      <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }}>{title}</div>
+      <div style={{ ...blockStyle, padding: '6px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>{children}</div>
     </div>
   )
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
 
       {/* ── Profile fields, grouped (one edit toggle for all fields) ── */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('drawer.tabs.profile')}</span>
+          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('drawer.tabs.profile')}</span>
           {editControls(editing, saveFields, cancelFields, () => setEditing(true))}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {card(t('profile.groupPersonal'), <>
-            {pair(field('gender', t('profile.gender')), field('nationality', t('profile.nationality')))}
-            {pair(field('dob', t('profile.dob')), field('placeOfBirth', t('profile.placeOfBirth')))}
+            {field('gender', t('profile.gender'))}
+            {field('nationality', t('profile.nationality'))}
+            {field('dob', t('profile.dob'))}
+            {field('placeOfBirth', t('profile.placeOfBirth'))}
+            {addressRow()}
+            {field('province', t('profile.province'))}
           </>)}
           {card(t('profile.groupContact'), <>
             {field('email', t('profile.email'))}
             {field('phone', t('profile.phone'))}
             {field('linkedin', t('profile.linkedin'))}
-          </>)}
-          {card(t('profile.groupAddress'), <>
-            {field('street', t('profile.street'))}
-            {pair(field('houseNumber', t('profile.houseNumber')), field('houseNumberSuffix', t('profile.houseNumberSuffix')))}
-            {pair(field('postalCode', t('profile.postalCode')), field('city', t('profile.city')))}
-            {field('province', t('profile.province'))}
           </>)}
         </div>
       </div>
@@ -190,7 +215,7 @@ export default function ProfileTab({ c, onEditSave }: { c: Candidate; onEditSave
       {/* ── Profile text — same rich editor as Notes (formatting + HTML toggle + expand) ── */}
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('profile.summary')}</span>
+          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('profile.summary')}</span>
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             {/* Clear the profile text (edit mode only). */}
             {summaryEditing && (
@@ -211,6 +236,9 @@ export default function ProfileTab({ c, onEditSave }: { c: Candidate; onEditSave
                 </div>
               : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>-</div>)}
       </div>
+
+      {/* Tenant custom fields — only renders when definitions exist */}
+      <CustomFieldsSection c={c} onEditSave={onEditSave} />
     </div>
   )
 }

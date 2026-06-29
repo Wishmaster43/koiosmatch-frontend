@@ -204,12 +204,12 @@ export default function MessagesTable() {
                     <td style={{ ...TD, fontSize: 12, whiteSpace: 'nowrap' }}>
                       <div style={{ fontWeight: 500, color: 'var(--text)' }}>
                         {(r.sent_at ?? r.created_at)
-                          ? new Date((r.sent_at ?? r.created_at) as string).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' })
+                          ? new Date((r.sent_at ?? r.created_at) as string).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })
                           : '—'}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                         {(r.sent_at ?? r.created_at)
-                          ? new Date((r.sent_at ?? r.created_at) as string).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+                          ? new Date((r.sent_at ?? r.created_at) as string).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
                           : ''}
                       </div>
                     </td>

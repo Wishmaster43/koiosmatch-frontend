@@ -1,0 +1,157 @@
+{
+  "title": "Bewerbungen",
+  "loading": "Bewerbungen werden geladen…",
+  "empty": "Noch keine Bewerbungen.",
+  "error": "Bewerbungen konnten nicht geladen werden.",
+  "buckets": {
+    "active": "Aktiv",
+    "matched": "Gematcht",
+    "rejected": "Abgelehnt"
+  },
+  "view": {
+    "table": "Listenansicht",
+    "board": "Board-Ansicht"
+  },
+  "add": {
+    "button": "Neue Bewerbung",
+    "title": "Neue Bewerbung",
+    "candidate": "Kandidat",
+    "candidatePlaceholder": "Kandidat auswählen",
+    "vacancy": "Stelle",
+    "vacancyPlaceholder": "Stelle auswählen",
+    "search": "Suchen…",
+    "create": "Erstellen",
+    "cancel": "Abbrechen"
+  },
+  "pagination": {
+    "perPage": "Ergebnisse pro Seite",
+    "range": "{{from}}-{{to}} von {{total}}"
+  },
+  "cols": {
+    "candidate": "Name",
+    "vacancy": "Stelle",
+    "score": "Match",
+    "task": "Aufgabe",
+    "phase": "Phase",
+    "source": "Quelle",
+    "owner": "Inhaber",
+    "client": "Kunde",
+    "status": "Kandidatenstatus"
+  },
+  "kpi": {
+    "totalActive": "Aktiv gesamt",
+    "applied": "Beworben",
+    "accepted": "Angenommen",
+    "invited": "Eingeladen",
+    "proposed": "Vorschlag gesendet",
+    "rejected": "Abgelehnt",
+    "matched": "Gematcht",
+    "new": "Neu"
+  },
+  "insights": {
+    "phase": "Phase",
+    "owner": "Recruiter",
+    "source": "Quelle",
+    "clearFilter": "Filter zurücksetzen"
+  },
+  "drawer": {
+    "label": "Bewerbung",
+    "createdAt": "Erstellt am {{date}}",
+    "downloadCv": "Lebenslauf",
+    "tabs": {
+      "application": "Bewerbung",
+      "candidate": "Kandidat",
+      "vacancy": "Stelle",
+      "interviews": "Interviews",
+      "appointments": "Termine",
+      "timeline": "Verlauf",
+      "notes": "Notizen"
+    },
+    "phase": "Phase",
+    "source": "Quelle",
+    "owner": "Recruiter",
+    "task": "Aufgabe",
+    "details": "Details",
+    "vacancy": "Stelle",
+    "client": "Kunde"
+  },
+  "matchScore": {
+    "title": "Match-Score",
+    "overall": "Gesamt",
+    "hard": "Hart",
+    "edit": "Anpassen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "manualNote": "Manuell angepasst · KI: {{score}}%",
+    "detailsSoon": "Die Kriterienaufschlüsselung erscheint hier, sobald das Scoring konfiguriert ist."
+  },
+  "profile": {
+    "function": "Funktion",
+    "gender": "Geschlecht",
+    "nationality": "Nationalität",
+    "dob": "Geburtsdatum",
+    "email": "E-Mail",
+    "phone": "Telefon",
+    "address": "Adresse",
+    "summary": "Zusammenfassung",
+    "timeline": "Verlauf"
+  },
+  "vacancyDetail": {
+    "id": "Stellen-ID",
+    "status": "Status",
+    "employment": "Beschäftigungsart",
+    "location": "Standort",
+    "salary": "Gehalt",
+    "hours": "Wochenstunden",
+    "experience": "Erfahrung",
+    "seniority": "Senioritätslevel",
+    "education": "Ausbildung",
+    "branch": "Branche",
+    "category": "Kategorie",
+    "skills": "Erforderliche Fähigkeiten",
+    "tags": "Tags"
+  },
+  "interview": {
+    "title": "WhatsApp-Interview",
+    "done": "Erledigt",
+    "summary": "Zusammenfassung",
+    "transcript": "Transkript",
+    "empty": "Noch keine Interviews."
+  },
+  "appointments": {
+    "empty": "Keine Termine geplant.",
+    "hint": "Plane ein Interview oder einen Anruf mit diesem Kandidaten.",
+    "new": "Neuer Termin",
+    "with": "Mit",
+    "statusPlanned": "Geplant"
+  },
+  "notes": {
+    "title": "Notizen",
+    "new": "Neue Notiz",
+    "empty": "Noch keine Notizen.",
+    "hint": "Füge interne Notizen hinzu, damit dein Team zu diesem Kandidaten abgestimmt bleibt.",
+    "placeholder": "Notiz schreiben…",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
+  },
+  "timeline": {
+    "empty": "Noch keine Aktivität."
+  },
+  "rejection": {
+    "title": "Ablehnung",
+    "reason": "Grund",
+    "reasonPlaceholder": "Grund auswählen",
+    "note": "Notiz",
+    "notePlaceholder": "Optionale Notiz…",
+    "channel": "Kanal",
+    "channelEmail": "E-Mail",
+    "channelWhatsapp": "WhatsApp",
+    "preview": "Nachrichtenvorschau",
+    "noTemplate": "Noch keine Vorlage für diesen Grund — lege eine in den Einstellungen an.",
+    "confirm": "Ablehnen",
+    "rejected": "Abgelehnt",
+    "aiAdvice": "Koios empfiehlt Ablehnung",
+    "aiAuto": "Harte Kriterien nicht erfüllt — für Auto-Ablehnung geeignet.",
+    "aiConfirm": "Prüfen und bestätigen, bevor eine Nachricht gesendet wird."
+  }
+}

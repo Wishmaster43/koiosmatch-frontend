@@ -32,5 +32,19 @@
     "title": "Keine WhatsApp-Verbindung",
     "desc": "Für diesen Mandanten wurde noch keine WhatsApp-Business-Verbindung eingerichtet. Konfigurieren Sie eine Verbindung über das Backend, um hier Nachrichten und Statistiken zu sehen.",
     "errorLabel": "Backend-Fehler"
+  },
+  "filters": {
+    "status": "Status",
+    "direction": "Richtung"
+  },
+  "msgStatus": {
+    "read": "Gelesen",
+    "delivered": "Zugestellt",
+    "sent": "Gesendet",
+    "failed": "Fehlgeschlagen"
+  },
+  "msgDirection": {
+    "inbound": "Eingehend",
+    "outbound": "Ausgehend"
   }
 }

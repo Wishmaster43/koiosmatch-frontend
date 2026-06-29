@@ -49,16 +49,12 @@ note-types · last-contact-types · candidate-rejection-reasons · opportunity-s
 - **reports**: flow · recruiters · vacancies · matches (GET) · dashboard.
 - **webhooks**: POST. **settings**: GET/POST + candidate-lookups · customer-lookups · rejection · apps.
 
-## 3. Cross-cutting gaps (→ worklist + backend-handoff)
+## 3. Cross-cutting datalaag-gaten
 
-| # | Gap | Impact | Eigenaar |
-|---|---|---|---|
-| D-1 | **Changelog alleen op candidates** | §3A wil changelog als herbruikbaar blok over álle entiteiten; customers/vacancies/applications/tasks/opportunities missen `/activity`. | backend (endpoint) + FE (tab) |
-| D-2 | **Soft-delete (archive) alleen candidates/customers/vacancies** | tasks/opportunities/applications hebben geen archiveer-/deletepad → kunnen niet (soft) verwijderd worden vanuit de UI. | backend + FE (BulkBar) |
-| D-3 | **Geen 'gearchiveerd bekijken + herstellen'-UI** | hard-delete/restore zijn backend-only (correct, §8) maar er is geen UI om gearchiveerde records te zien/herstellen. | FE + backend |
-| D-4 | **tasks: geen `/stats`** | Taken-KPI-rij kan niet server-wide tellen (anders dan andere entiteiten). | backend + FE |
-| D-5 | **tasks: activity-tab zonder endpoint** | `TaskDrawer` heeft `'activity'`-tab maar geen `/tasks/{id}/activity` → leeg/mock. | backend + FE |
-| D-6 | **Hardcoded vocabularies** (nationaliteiten/talen/klantstatussen) | moeten tenant-lookups zijn (configureerbaar + i18n). | backend (lookup) + FE |
+De gaten die uit deze matrix volgen (changelog-dekking, soft-delete-dekking, restore-UI,
+tasks `/stats`+activity, hardcoded vocabularies) worden als **D-1..D-6 in `worklist.md §G`**
+bijgehouden — daar leven actie, prioriteit en status. Bewijslast (`file:line`) staat in
+`AUDIT.md`. Niet hier herhalen; deze matrix (§1-2) is de onderbouwende inventaris.
 
 > **Geen** hard-delete- of force-delete-call in de FE gevonden — conform §8 (hard delete = backend-only).
 > Normalisatie-artefacten in de sweep (`/candidates/{id}/{id}/{id}`) = template-literals met geneste

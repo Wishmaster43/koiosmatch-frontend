@@ -1,0 +1,72 @@
+{
+  "title": "Opportunities",
+  "loading": "Opportunities werden geladen…",
+  "empty": "Noch keine Opportunities.",
+  "error": "Opportunities konnten nicht geladen werden.",
+  "page": {
+    "add": "Opportunity hinzufügen"
+  },
+  "cols": {
+    "title": "Opportunity",
+    "client": "Kunde",
+    "stage": "Phase",
+    "value": "Wert",
+    "owner": "Inhaber",
+    "date": "Erstellt"
+  },
+  "insights": {
+    "stage": "Phase",
+    "owner": "Inhaber",
+    "clearFilter": "Filter zurücksetzen"
+  },
+  "kpi": {
+    "total": "Opportunities",
+    "pipeline": "Pipeline-Wert (€)",
+    "avg": "Ø Wert (€)"
+  },
+  "drawer": {
+    "entityLabel": "Opportunity",
+    "stage": "Phase",
+    "owner": "Inhaber",
+    "client": "Kunde",
+    "selectStage": "Phase wählen",
+    "selectOwner": "Inhaber wählen",
+    "selectClient": "Kunde wählen",
+    "createdAt": "Erstellt am {{date}}",
+    "tabs": {
+      "details": "Details"
+    }
+  },
+  "details": {
+    "stage": "Phase",
+    "value": "Wert",
+    "expectedClose": "Voraussichtlicher Abschluss",
+    "client": "Kunde",
+    "owner": "Inhaber",
+    "created": "Erstellt",
+    "groups": {
+      "deal": "Deal",
+      "organisation": "Organisation"
+    }
+  },
+  "modal": {
+    "title": "Neue Opportunity",
+    "titlePlaceholder": "Z. B. 5 Pflegekräfte — Zorggroep Noord",
+    "required": "Titel ist erforderlich",
+    "create": "Erstellen",
+    "creating": "Wird gespeichert…",
+    "cancel": "Abbrechen",
+    "fields": {
+      "title": "Titel",
+      "client": "Kunde",
+      "stage": "Phase",
+      "value": "Wert (€)",
+      "expectedClose": "Voraussichtlicher Abschluss",
+      "owner": "Inhaber"
+    }
+  },
+  "view": {
+    "table": "Listenansicht",
+    "board": "Board-Ansicht"
+  }
+}

@@ -46,13 +46,13 @@ interface AddCandidateModalProps {
 
 export default function AddCandidateModal({ onClose, onCreated }: AddCandidateModalProps) {
   const { t } = useTranslation(['candidates', 'common'])
-  const { statuses } = useLookups() as unknown as { statuses: LookupOption[] }
+  const { phases } = useLookups() as unknown as { phases: LookupOption[] }
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { user: me } = useAuth() as unknown as { user: { id?: Id } | null }
 
-  // Only sensible entry statuses on create; fall back to all while lookup loads.
-  const entryStatuses = statuses.filter(s => CREATE_STATUSES.includes(s.value))
-  const pickStatuses  = entryStatuses.length ? entryStatuses : statuses
+  // On create you pick the PHASE (Lead/Kandidaat); deployability defaults to available.
+  const entryStatuses = phases.filter(s => CREATE_STATUSES.includes(s.value))
+  const pickStatuses  = entryStatuses.length ? entryStatuses : phases
   const defaultStatus = () => pickStatuses.find(s => s.value === 'lead')?.value ?? pickStatuses[0]?.value ?? ''
 
   const [status,    setStatus]    = useState(defaultStatus)
@@ -70,7 +70,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   })
 
   // Once the real statuses arrive from the API, default to Lead if nothing chosen.
-  useEffect(() => { if (!status && statuses.length) setStatus(defaultStatus()) }, [statuses]) // eslint-disable-line
+  useEffect(() => { if (!status && phases.length) setStatus(defaultStatus()) }, [phases]) // eslint-disable-line
 
   const set = (k: keyof FormState, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -103,7 +103,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         city:                form.city || null,
         province:            form.province || null,
         owner_id:            form.ownerId || null,
-        status:              status || 'lead',
+        phase:               status || 'lead',
+        status:              'available',
         candidate_types:     [],
       }
       const r = await api.post('/candidates', body)
@@ -127,7 +128,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     }
   }
 
-  const selectedStatus = statuses.find(s => s.value === status)
+  const selectedStatus = phases.find(s => s.value === status)
   const canSubmit      = !!status && form.firstName.trim() && form.lastName.trim()
   const statusLabel    = selectedStatus?.label ?? ''
 

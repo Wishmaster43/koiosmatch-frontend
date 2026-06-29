@@ -121,5 +121,7 @@
   "units": {
     "candidates": "candidates",
     "intakes": "intakes"
-  }
+  },
+  "yes": "Yes",
+  "no": "No"
 }

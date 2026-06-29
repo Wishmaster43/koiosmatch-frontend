@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check } from 'lucide-react'
 import api from '../../lib/api'
+import { interactive } from '@/lib/a11y'
 import { MODELS, inputStyle, Field, TextEditor, SideList, ListRow } from './management/shared'
 import type { Version } from './management/shared'
 import { AgentForm } from './management/AgentForm'
@@ -275,7 +276,7 @@ export function ToolsTab() {
       {BUILTIN_TOOLS.map(toolId => {
         const on = enabled.has(toolId)
         return (
-          <div key={toolId} onClick={() => toggle(toolId)}
+          <div key={toolId} {...interactive(() => toggle(toolId))}
             style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 9, cursor: 'pointer',
               background: on ? 'var(--color-primary-bg)' : 'var(--bg)',
               border: `1px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`, transition: 'all 0.12s' }}>

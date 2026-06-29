@@ -5,6 +5,7 @@
  */
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
 import type { ChartDatum, TipProps } from './chartTypes'
+import ErrorBoundary from '../ui/ErrorBoundary'
 
 const DEFAULT_COLORS = [
   'var(--color-primary)', '#10B981', '#3B8FD4', 'var(--color-warning)',
@@ -34,6 +35,7 @@ export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 5
 
   return (
     <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
+      <ErrorBoundary fallback={() => <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>—</span>}>
       <PieChart width={size} height={size}>
         <Pie data={data} cx="50%" cy="50%" innerRadius={innerR} outerRadius={outerR}
           paddingAngle={data.length > 1 ? 2 : 0} dataKey="value"
@@ -45,6 +47,7 @@ export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 5
         </Pie>
         <Tooltip content={<MiniTooltip total={total} />} />
       </PieChart>
+      </ErrorBoundary>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
         justifyContent: 'center', pointerEvents: 'none' }}>
         <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{total}</span>

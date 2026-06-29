@@ -14,16 +14,23 @@ import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import { SelectField, CheckboxField, DateField } from './fields'
-import { useDateFormat } from '../../lib/datetime'
+import { useDateFormat } from '@/lib/datetime'
+import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import type { ChipOption } from '@/components/ui/ChipMultiSelect'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import RichTextEditor from '@/components/ui/RichTextEditor'
+import SafeHtml from '@/components/ui/SafeHtml'
 
 export interface FieldRow {
   key: string
   label?: ReactNode
-  type?: 'text' | 'select' | 'checkbox' | 'date' | 'textarea'
+  type?: 'text' | 'select' | 'checkbox' | 'date' | 'textarea' | 'chips' | 'richtext' | 'creatable'
   options?: Array<string | { value: string; label?: ReactNode }>
+  chipOptions?: ChipOption[]
   prefix?: string
   inputType?: string
   group?: string
+  allowCreate?: boolean
 }
 
 type Values = Record<string, unknown>
@@ -34,7 +41,7 @@ const compact: CSSProperties = {
   boxSizing: 'border-box', outline: 'none',
 }
 const rowStyle: CSSProperties = {
-  display: 'flex', alignItems: 'center', gap: 16, padding: '9px 12px',
+  display: 'flex', alignItems: 'center', gap: 12, padding: '7px 12px',
   borderBottom: '1px solid var(--border)', background: 'var(--surface)',
 }
 
@@ -74,6 +81,8 @@ export default function EditableFieldTable({
   // adjusting state during render (React's recommended pattern, no extra effect).
   const [saved, setSaved] = useState<Values>(value)
   const [form, setForm] = useState<Values>(value)
+  // Per-field expand toggle for richtext editors (key → expanded).
+  const [richExpanded, setRichExpanded] = useState<Record<string, boolean>>({})
   const [wasEditing, setWasEditing] = useState(editing)
   if (editing && !wasEditing) { setForm(saved); setWasEditing(true) }
   else if (!editing && wasEditing) setWasEditing(false)
@@ -95,8 +104,22 @@ export default function EditableFieldTable({
     const v = form[f.key]
     if (f.type === 'checkbox') return <CheckboxField checked={Boolean(v)} onChange={val => setF(f.key, val)} />
     if (f.type === 'select')   return <SelectField value={v as string | undefined} onChange={val => setF(f.key, val)} options={f.options} placeholder={t('select')} style={compact} />
+    if (f.type === 'creatable') {
+      // Lookup combobox that can also add a free-text value (tenant `allowCreate`).
+      const opts = (f.options ?? []).map(o => (typeof o === 'string' ? o : { value: o.value, label: String(o.label ?? o.value) }))
+      return <CreatableSelect value={(v as string) ?? ''} onChange={val => setF(f.key, val)} options={opts} placeholder={t('select')} allowCreate={f.allowCreate !== false} />
+    }
     if (f.type === 'date')     return <DateField value={v as string | undefined} onChange={val => setF(f.key, val)} style={compact} />
     if (f.type === 'textarea') return <textarea value={(v as string) ?? ''} onChange={e => setF(f.key, e.target.value)} rows={3} style={{ ...compact, resize: 'vertical' }} />
+    if (f.type === 'chips') {
+      const arr = (Array.isArray(v) ? v : []).map(String)
+      return <ChipMultiSelect options={f.chipOptions ?? []} selected={arr}
+        onToggle={val => setF(f.key, arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val])} />
+    }
+    if (f.type === 'richtext') {
+      return <RichTextEditor value={(v as string) ?? ''} onChange={val => setF(f.key, val)}
+        expanded={!!richExpanded[f.key]} onToggleExpand={() => setRichExpanded(p => ({ ...p, [f.key]: !p[f.key] }))} />
+    }
     return <input value={(v as string) ?? ''} type={f.inputType} onChange={e => setF(f.key, e.target.value)} style={compact} />
   }
 
@@ -105,12 +128,33 @@ export default function EditableFieldTable({
     if (f.type === 'checkbox') return <CheckboxField checked={Boolean(v)} disabled onChange={() => {}} />
     // Dates render as DD-MM-YYYY in read mode (the edit control already is).
     if (f.type === 'date') return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v ? formatDate(v as string) : '-'}</span>
+    // Chips read as soft accent chips (consistent with the Candidate-type chips),
+    // not plain comma text — so the read view matches the edit view's chip look.
+    if (f.type === 'chips') {
+      const arr = (Array.isArray(v) ? v : []).map(String)
+      if (arr.length === 0) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
+      const labels = arr.map(x => (f.chipOptions ?? []).find(o => o.value === x)?.label ?? x)
+      return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+          {labels.map((lab, i) => (
+            <span key={i} style={{ padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500,
+              background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}>{lab}</span>
+          ))}
+        </div>
+      )
+    }
+    // Richtext reads as sanitised HTML (same as notes / profile text).
+    if (f.type === 'richtext') {
+      return (v as string)
+        ? <SafeHtml html={v as string} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
+        : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
+    }
     return <span style={{ fontSize: 12, color: 'var(--text)' }}>{f.prefix ? `${f.prefix} ` : ''}{(v as ReactNode) || '-'}</span>
   }
 
-  // One row — full-width for textarea, label-left otherwise.
-  const renderRow = (f: FieldRow, last: boolean) => f.type === 'textarea' ? (
-    <div key={f.key} style={{ padding: '9px 12px', background: 'var(--surface)', borderBottom: last ? 'none' : '1px solid var(--border)' }}>
+  // One row — full-width for textarea/chips/richtext (they need the width), label-left otherwise.
+  const renderRow = (f: FieldRow, last: boolean) => (f.type === 'textarea' || f.type === 'chips' || f.type === 'richtext') ? (
+    <div key={f.key} style={{ padding: '7px 12px', background: 'var(--surface)', borderBottom: last ? 'none' : '1px solid var(--border)' }}>
       <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{f.label}</span>
       {editing ? renderControl(f) : renderValue(f)}
     </div>
@@ -118,7 +162,7 @@ export default function EditableFieldTable({
     <div key={f.key} style={{ ...rowStyle, borderBottom: last ? 'none' : '1px solid var(--border)' }}>
       <span style={{ fontSize: 12, color: 'var(--text-muted)', width: labelWidth, flexShrink: 0 }}>{f.label}</span>
       {/* Read value reserves the control's height → no row growth when editing starts. */}
-      {editing ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}</div> : <div style={{ flex: 1, minWidth: 0, minHeight: 33, display: 'flex', alignItems: 'center' }}>{renderValue(f)}</div>}
+      {editing ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}</div> : <div style={{ flex: 1, minWidth: 0, minHeight: 26, display: 'flex', alignItems: 'center' }}>{renderValue(f)}</div>}
     </div>
   )
 
@@ -138,14 +182,14 @@ export default function EditableFieldTable({
   return (
     <div>
       {editButton === 'header' && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{title}</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{title}</span>
           {editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />}
         </div>
       )}
 
       {hasGroups && groups ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginBottom: 16 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
           {groups.map(g => (
             <div key={g.group}>
               {g.group && <div style={groupTitleStyle}>{g.group}</div>}
@@ -154,7 +198,7 @@ export default function EditableFieldTable({
           ))}
         </div>
       ) : (
-        <div style={{ ...cardStyle, marginBottom: 16, position: 'relative' }}>
+        <div style={{ ...cardStyle, marginBottom: 12, position: 'relative' }}>
           {editButton === 'inside' && (
             <div style={{ position: 'absolute', top: 8, right: 8, zIndex: 1 }}>
               {editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />}

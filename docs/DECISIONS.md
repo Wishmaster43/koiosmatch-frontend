@@ -14,7 +14,7 @@
 | K-4 | **3 pakketten (Core/Pro/Enterprise) + losse add-ons/connectors** | Danny | prijs/COGS-model + super-admin-facturatie | module-gating in FE (`AppsContext`/`hasModule`); per-tenant features = config, geen code |
 | K-5 | **WhatsApp Web (persoonlijk) via onofficiële gateway**, QR onder Profiel | Danny | persoonlijk WA zonder Meta-Business | **eigen WhatsApp-privé-server** in topologie; raakt Meta-API → buiten dev:reset houden |
 | K-6 | **Endpoint-naamgeving: source-prefix** (`sm_`/`hf_` extern, schoon native) | Danny | herkomst onmiskenbaar | datalaag-conventie; voorkomt naam-botsing native↔mirror |
-| K-7 | **Status/funnel = 3 assen** (lifecycle-status · sollicitatie-funnel · candidate-type) nooit samenvouwen; Archived = `deleted_at` | Danny | datamodel-integriteit | aparte velden + workflow-koppeling i.p.v. één gekoppeld veld; KPI/filter-gedrag hangt eraan |
+| K-7 | ~~Status/funnel = 3 assen~~ **(herzien door K-18, 2026-06-29)** | Danny | datamodel-integriteit | zie K-18 |
 | K-8 | **Soft-delete only (FE); hard-delete = backend-only** | Danny | AVG special-category health | FE archiveert (`bulk/archive`); restore/force = API-enforced |
 | K-9 | **DB-migratieconventie**: nooit `add_/alter_`, vouw in `create_<table>`; toepassen via `migrate:fresh`/`dev:reset` | Danny | schone, herhaalbare schema-historie | backend-only; pre-release reset-model |
 | K-10 | **Hele FE → TypeScript** (nieuw bestand altijd `.ts/.tsx`) | Danny | grootste schaalbaarheidshefboom | **afgerond** in FE-domein; permissieve interfaces met index-sig, geen `any` in datamodellen |
@@ -25,6 +25,7 @@
 | K-15 | **Rapporten-hub = nieuwe top-level sectie** (sub-tabs Flow/Recruiters/Vacancies/Matches) | Danny | analytische hub (B-28) | nieuwe route `reports`; gedeelde fase-keymap over alle rapporten |
 | K-16 | **Alles op `main`, geen feature-branches; 2 Claudes parallel** | Danny | snelheid + simpele historie | collision-protocol: `git status` vóór edit, alleen eigen files stagen |
 | K-17 | **Kandidaat-feature = blueprint** voor alle entiteiten (Page/Insights/Table/BulkBar/Modal/Drawer) | Danny | consistentie + herbruik | nieuwe entiteit = dunne config, geen nieuwe vorm |
+| K-18 | **Assen-model v2 (2026-06-29)**: oude "status" splitst in **Fase** (Lead/Kandidaat) + **Inzetbaarheid** (Beschikbaar/Geplaatst/Niet beschikbaar/Ziek/Verlof, availability erin gevouwen); **Geplaatst** vereist gekoppelde Match; **Blacklist** = vlag + reden, reden-verplicht instelbaar (`blacklist_reason_required`); **"Kandidaat type" → "Contractvorm"** (alleen label); Funnel ongewijzigd (per sollicitatie) | Danny | "status" mengde kwalificatie + inzetbaarheid → twee schone single-question assen | herziet K-7; **BE: migraties/modellen/seeders/API's (C-10)**, **FE: LookupsContext/drawer-pickers/tabel-kolommen/KPIs/rename (C-39)**; CLAUDE.md §3B v2 + memory bijgewerkt |
 
 ## 2. Doel-topologie (productie-SaaS)
 

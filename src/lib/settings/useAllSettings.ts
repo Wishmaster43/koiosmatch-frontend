@@ -48,6 +48,32 @@ export async function saveSettingsKeys(partial: Record<string, unknown>): Promis
   invalidateKpiCache()
 }
 
+/**
+ * Invalidate the shared cache and refetch, notifying live subscribers. Call this
+ * after a save made through another path (e.g. settingsApi) so already-mounted
+ * readers (dashboards, the candidate table) pick up the change without a reload.
+ */
+export function invalidateAllSettingsCache(): void {
+  cache = null
+  fetchStarted = false
+  if (listeners.size === 0) return
+  fetchStarted = true
+  api.get('/settings')
+    .then(res => { const next = (res.data ?? {}) as SettingsBlob; cache = next; listeners.forEach(l => l(next)) })
+    .catch(() => { fetchStarted = false })
+}
+
+/**
+ * Read a boolean setting EXACTLY like the settings form coerces it (`true`/`'true'`),
+ * so a toggle and the screens that read it never disagree. A stored `1`/`'1'`/other
+ * truthy-but-not-"true" value reads as false here too — matching the toggle's "off".
+ */
+export function getBoolSetting(values: SettingsBlob | null | undefined, key: string, fallback: boolean): boolean {
+  const raw = values?.[key]
+  if (raw == null) return fallback
+  return raw === true || raw === 'true'
+}
+
 /** Read + parse a JSON-encoded setting value, falling back when absent/invalid. */
 export function getJsonSetting<T>(values: SettingsBlob | null | undefined, key: string, fallback: T): T {
   const raw = values?.[key]

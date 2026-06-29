@@ -89,9 +89,9 @@ describe('buildCandidatePatch', () => {
     expect(buildCandidatePatch({ dob: '1990-01-01', postalCode: '1234AB', houseNumber: '5' }))
       .toEqual({ date_of_birth: '1990-01-01', postcode: '1234AB', house_number: '5' })
   })
-  it('flattens consent toggles to flat booleans', () => {
-    expect(buildCandidatePatch({ consent: { whatsapp_consent: true, email_consent: false } }))
-      .toEqual({ whatsapp_consent: true, email_consent: false })
+  it('sends consent nested with only opt-in flags (never the _consent_at timestamps)', () => {
+    expect(buildCandidatePatch({ consent: { whatsapp_opt_in: true, email_opt_in: false, whatsapp_consent_at: '2026-01-01' } }))
+      .toEqual({ consent: { whatsapp_opt_in: true, email_opt_in: false } })
   })
   it('only includes keys present in the patch (empty → {})', () => {
     expect(buildCandidatePatch({})).toEqual({})

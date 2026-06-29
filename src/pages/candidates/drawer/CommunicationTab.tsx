@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
-import { NOTE_TYPES } from './constants'
+import { useNoteTypes } from '@/lib/useNoteTypes'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
@@ -22,20 +22,22 @@ const EDITOR_LABELS = {
 export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?: (consent: Record<string, unknown>) => void }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
+  // Note categories from the tenant lookup (seed fallback until /note-types lands).
+  const { types: noteTypes } = useNoteTypes()
   const [notes, setNotes] = useState<Record<string, unknown>[]>(c.notes ?? [])
 
-  // Channel consent (AVG opt-in) — WhatsApp / e-mail / newsletter, default off.
-  // Field names match the backend's flat columns (whatsapp_consent, …).
+  // Channel consent (AVG) — nested `consent.{channel}_opt_in` (C-11 backend contract).
   const consent = c.consent
+  // C-11: WhatsApp/e-mail default opt-in (operational opt-out), newsletter opt-in.
   const consentValue = {
-    whatsapp_consent:   consent.whatsapp_consent   ?? false,
-    email_consent:      consent.email_consent      ?? false,
-    newsletter_consent: consent.newsletter_consent ?? false,
+    whatsapp_opt_in:   consent.whatsapp_opt_in   ?? true,
+    email_opt_in:      consent.email_opt_in      ?? true,
+    newsletter_opt_in: consent.newsletter_opt_in ?? false,
   }
   const consentFields = [
-    { key: 'whatsapp_consent',   label: t('communication.consentWhatsapp'),   type: 'checkbox' },
-    { key: 'email_consent',      label: t('communication.consentEmail'),      type: 'checkbox' },
-    { key: 'newsletter_consent', label: t('communication.consentNewsletter'), type: 'checkbox' },
+    { key: 'whatsapp_opt_in',   label: t('communication.consentWhatsapp'),   type: 'checkbox' },
+    { key: 'email_opt_in',      label: t('communication.consentEmail'),      type: 'checkbox' },
+    { key: 'newsletter_opt_in', label: t('communication.consentNewsletter'), type: 'checkbox' },
   ]
   // Read-only AVG audit line: when each granted consent was recorded server-side.
   const consentTimestamps = [
@@ -71,7 +73,7 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
         onAddNote={(n: Record<string, unknown>) => setNotes(p => [{ ...n, ago: t('common:justNow', { defaultValue: 'zojuist' }) }, ...p])}
         onEditNote={(i: number, n: Record<string, unknown>) => setNotes(p => p.map((x, idx) => idx === i ? { ...x, ...n } : x))}
         timeline={c.timeline ?? []}
-        noteTypes={NOTE_TYPES.map(nt => ({ value: nt.value, label: t(`communication.noteTypes.${nt.key}`) }))}
+        noteTypes={noteTypes}
         authorInitials={c.ownerInitials}
         timelineName={c.name}
         timelineInitials={c.initials}

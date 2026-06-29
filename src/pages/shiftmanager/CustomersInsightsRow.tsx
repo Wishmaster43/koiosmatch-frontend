@@ -8,6 +8,7 @@
 import { FilterX } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import MiniDonut from '../../components/charts/MiniDonut'
+import { interactive } from '@/lib/a11y'
 // Same contract as the shared InsightsRow — this is a near-duplicate (DUP: fold into it later).
 import type { DonutSpec, KpiSpec } from '../../components/insights/InsightsRow'
 import type { ChartDatum } from '../../components/charts/chartTypes'
@@ -48,7 +49,7 @@ function DonutCard({ title, data, colors, onPick, active, onClear }: Omit<DonutS
 function KpiCard({ label, value, sub, color, onClick, active }: Omit<KpiSpec, 'key'>) {
   const clickable = typeof onClick === 'function'
   return (
-    <div onClick={onClick} title={typeof sub === 'string' ? sub : undefined}
+    <div {...interactive(onClick)} title={typeof sub === 'string' ? sub : undefined}
       style={{ ...CARD,
         background: active ? 'var(--color-primary-bg)' : 'var(--surface)',
         borderColor: active ? 'var(--color-primary)' : 'var(--border)',

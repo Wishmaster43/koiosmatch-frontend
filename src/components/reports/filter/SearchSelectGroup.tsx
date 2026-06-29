@@ -57,7 +57,7 @@ export default function SearchSelectGroup({ group }: { group: ReportFilterGroup 
               autoFocus
               value={query}
               onChange={e => setQuery(e.target.value)}
-              placeholder={t('search')}
+              placeholder={t('search')} aria-label={t('search')}
               style={{ flex: 1, border: 'none', outline: 'none', fontSize: 11,
                        color: 'var(--text)', background: 'transparent', padding: 0 }}
             />

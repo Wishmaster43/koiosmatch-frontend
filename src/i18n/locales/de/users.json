@@ -33,5 +33,11 @@
     "planner": "Planer",
     "user": "Benutzer"
   },
-  "noRoles": "Keine Rollen verfügbar"
+  "noRoles": "Keine Rollen verfügbar",
+  "editUser": "Benutzer bearbeiten",
+  "saveFailed": "Speichern fehlgeschlagen.",
+  "saving": "Speichern…",
+  "phone": "Telefonnummer",
+  "changePassword": "Passwort ändern",
+  "newPassword": "Neues Passwort"
 }

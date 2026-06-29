@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { TFunction } from 'i18next'
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts'
 import type { ChartDatum, TipProps } from './chartTypes'
+import ErrorBoundary from '../ui/ErrorBoundary'
 
 // Tooltip showing the point value + a caller-supplied unit (e.g. "candidates").
 function LineTooltip({ active, payload, label, onItemClick, unit, t }: TipProps & { onItemClick?: (d: unknown) => void; unit?: string; t: TFunction }) {
@@ -43,6 +44,7 @@ export default function LineChartCard({ title, data = [], color = 'var(--color-p
         <div className="text-sm font-medium text-gray-600">{title}</div>
         {onItemClick && <span className="text-xs text-gray-300">{t('clickPoint')}</span>}
       </div>
+      <ErrorBoundary compact>
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 4, right: 16, left: -20, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
@@ -64,6 +66,7 @@ export default function LineChartCard({ title, data = [], color = 'var(--color-p
           />
         </LineChart>
       </ResponsiveContainer>
+      </ErrorBoundary>
     </div>
   )
 }

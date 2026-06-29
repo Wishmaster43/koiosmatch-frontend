@@ -37,7 +37,7 @@ function fmtDate(v?: string | null) {
   if (!v) return '—'
   const d = new Date(v)
   if (isNaN(d.getTime())) return '—'
-  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 function TagPill({ value, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)' }: { value: ReactNode; color?: string; bg?: string }) {

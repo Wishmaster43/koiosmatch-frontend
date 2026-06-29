@@ -118,8 +118,8 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('login.email')}</label>
-          <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+          <label htmlFor="login-email" className="block text-xs font-medium text-gray-700 mb-1.5">{t('login.email')}</label>
+          <input id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
             placeholder={t('login.emailPlaceholder')} required autoFocus
             className="w-full text-sm text-gray-900 bg-white rounded-lg"
             style={{ padding: '10px 12px', border: '1px solid #E5E7EB', outline: 'none' }}
@@ -128,9 +128,9 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('login.password')}</label>
+          <label htmlFor="login-password" className="block text-xs font-medium text-gray-700 mb-1.5">{t('login.password')}</label>
           <div className="relative">
-            <input type={showPw ? 'text' : 'password'} value={password}
+            <input id="login-password" type={showPw ? 'text' : 'password'} value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder={t('login.password')} required
               className="w-full text-sm text-gray-900 bg-white rounded-lg"
@@ -222,8 +222,8 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
-          <label className="block text-xs font-medium text-gray-700 mb-1.5">{t('mfa.codeLabel')}</label>
-          <input ref={inputRef} type="text" inputMode="numeric" pattern="\d{6}"
+          <label htmlFor="mfa-code" className="block text-xs font-medium text-gray-700 mb-1.5">{t('mfa.codeLabel')}</label>
+          <input id="mfa-code" ref={inputRef} type="text" inputMode="numeric" pattern="\d{6}"
             value={code} onChange={handleChange}
             placeholder="123456" maxLength={6} required
             className="w-full text-sm text-gray-900 bg-white rounded-lg"

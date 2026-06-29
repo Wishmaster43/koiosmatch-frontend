@@ -93,6 +93,37 @@
       "unknown": "Unknown"
     }
   },
+  "scheduleModal": {
+    "title": "Set schedule",
+    "trigger": {
+      "manual": "Manual", "manualDesc": "Start via the button",
+      "instant": "Instant", "instantDesc": "As soon as data arrives",
+      "scheduled": "Scheduled", "scheduledDesc": "Automatically on a schedule"
+    },
+    "frequency": "Frequency",
+    "freq": { "interval": "Interval", "daily": "Daily", "weekly": "Weekly", "monthly": "Monthly", "quarterly": "Quarterly", "yearly": "Yearly" },
+    "every": "Every",
+    "unit": { "minutes": "Minutes", "hours": "Hours" },
+    "minInterval": "Min. interval: 1 minute",
+    "times": "Times",
+    "addTime": "+ Add time",
+    "days": "Days",
+    "time": "Time",
+    "dayOfMonth": "Day of the month",
+    "quarterlyHint": "Runs on the first day of each quarter (Jan, Apr, Jul, Oct).",
+    "month": "Month",
+    "day": "Day",
+    "preview": "Preview",
+    "cancel": "Cancel",
+    "save": "Save",
+    "label": {
+      "manual": "Manual", "instant": "Instant", "scheduled": "Scheduled",
+      "everyN": "Every {{n}} {{unit}}", "unitMin": "min", "unitHour": "hr",
+      "dailyAt": "Daily {{time}}", "weeklyAt": "{{days}} {{time}}",
+      "monthlyAt": "Day {{day}} of the month {{time}}",
+      "quarterlyAt": "Every quarter {{time}}", "yearlyAt": "Yearly {{month}} {{day}} {{time}}"
+    }
+  },
   "modules": {
     "advanced_parser": "Advanced parser",
     "aggregator": "Aggregator",

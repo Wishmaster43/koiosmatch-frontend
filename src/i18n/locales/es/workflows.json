@@ -89,6 +89,37 @@
       "unknown": "Desconocido"
     }
   },
+  "scheduleModal": {
+    "title": "Configurar programación",
+    "trigger": {
+      "manual": "Manual", "manualDesc": "Iniciar con el botón",
+      "instant": "Inmediato", "instantDesc": "En cuanto lleguen datos",
+      "scheduled": "Programado", "scheduledDesc": "Automáticamente según un horario"
+    },
+    "frequency": "Frecuencia",
+    "freq": { "interval": "Intervalo", "daily": "Diario", "weekly": "Semanal", "monthly": "Mensual", "quarterly": "Trimestral", "yearly": "Anual" },
+    "every": "Cada",
+    "unit": { "minutes": "Minutos", "hours": "Horas" },
+    "minInterval": "Intervalo mín.: 1 minuto",
+    "times": "Horas",
+    "addTime": "+ Añadir hora",
+    "days": "Días",
+    "time": "Hora",
+    "dayOfMonth": "Día del mes",
+    "quarterlyHint": "Se ejecuta el primer día de cada trimestre (ene, abr, jul, oct).",
+    "month": "Mes",
+    "day": "Día",
+    "preview": "Vista previa",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "label": {
+      "manual": "Manual", "instant": "Inmediato", "scheduled": "Programado",
+      "everyN": "Cada {{n}} {{unit}}", "unitMin": "min", "unitHour": "h",
+      "dailyAt": "Diario {{time}}", "weeklyAt": "{{days}} {{time}}",
+      "monthlyAt": "Día {{day}} del mes {{time}}",
+      "quarterlyAt": "Cada trimestre {{time}}", "yearlyAt": "Anual {{month}} {{day}} {{time}}"
+    }
+  },
   "modules": {
     "advanced_parser": "Analizador avanzado",
     "aggregator": "Agregador",

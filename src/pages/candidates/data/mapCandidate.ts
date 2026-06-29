@@ -45,6 +45,19 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     .filter(Boolean)
     .map((v) => String(v))
 
+  // v2 axes shim (decision 2026-06-29): split the legacy single `status` (lifecycle)
+  // into phase (Lead/Kandidaat) + deployability ("status"), until the backend (C-10)
+  // delivers them directly. Explicit c.phase/c.deployability always win. NEVER invent
+  // a value — only faithful mappings; anything unknown stays EMPTY (no mock data).
+  const rawStatus = String(c.status ?? '')
+  const LEGACY_PHASE: Record<string, string> = { lead: 'lead', candidate: 'candidate', matched: 'candidate', inactive: 'candidate', unplaceable: 'candidate' }
+  const LEGACY_DEPLOY: Record<string, string> = { matched: 'placed', inactive: 'unavailable', unplaceable: 'unavailable' }
+  const isLegacy = rawStatus in LEGACY_PHASE
+  const phase = String(c.phase ?? (isLegacy ? LEGACY_PHASE[rawStatus] : ''))
+  // Real deployability only: explicit field, faithful legacy map, a new (non-legacy)
+  // status slug, or the availability axis — else empty. Lead/Candidate get NO guess.
+  const deployability = String(c.deployability ?? LEGACY_DEPLOY[rawStatus] ?? (isLegacy ? (c.availability ?? '') : (rawStatus || c.availability || '')))
+
   return {
     id:              c.id ?? '',
     name,
@@ -57,9 +70,14 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     stageLabel:      c.funnel_label ?? null,
     stageColor:      c.funnel_color ?? null,
     stageVacancyId:  c.funnel_vacancy_id ?? c.stage_vacancy_id ?? c.vacancy_id ?? '',
-    // Operational status (single slug: active | inactive | …).
-    status:          c.status ?? '',
-    // Availability — separate axis from status (single slug, null until set).
+    // Phase = lifecycle (Lead/Kandidaat); status = deployability (v2 model). Both
+    // come from the shim above so legacy lifecycle data still renders correctly.
+    phase,
+    status:          deployability,
+    // Blacklist = separate flag (orthogonal to phase/status) + optional reason.
+    blacklisted:     c.blacklisted ?? false,
+    blacklistReason: c.blacklist_reason ?? null,
+    // Availability — legacy separate axis (folded into deployability in v2); kept for back-compat.
     availability:    c.availability ?? null,
     owner:           ownerName,
     ownerId:         c.owner?.id ?? c.owner_id ?? null,
@@ -148,16 +166,19 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     preferences:     c.preferences ?? {},
     zzp:             c.zzp ?? {},
     planningSettings: c.planning_settings ?? {},
-    // Channel consent (AVG opt-in): per-channel flag + the moment it was given.
-    // Flags default off; `_at` is set server-side when a flag flips on.
+    // Channel consent (AVG, C-11): nested under `consent`. WhatsApp/e-mail default
+    // true (operational opt-out), newsletter false (opt-in). `_at` is server-stamped.
     consent: {
-      whatsapp_consent:      c.whatsapp_consent      ?? false,
-      email_consent:         c.email_consent         ?? false,
-      newsletter_consent:    c.newsletter_consent    ?? false,
-      whatsapp_consent_at:   c.whatsapp_consent_at   ?? null,
-      email_consent_at:      c.email_consent_at      ?? null,
-      newsletter_consent_at: c.newsletter_consent_at ?? null,
+      whatsapp_opt_in:       c.consent?.whatsapp_opt_in       ?? true,
+      email_opt_in:          c.consent?.email_opt_in          ?? true,
+      newsletter_opt_in:     c.consent?.newsletter_opt_in     ?? false,
+      whatsapp_consent_at:   c.consent?.whatsapp_consent_at   ?? null,
+      email_consent_at:      c.consent?.email_consent_at      ?? null,
+      newsletter_consent_at: c.consent?.newsletter_consent_at ?? null,
     },
+
+    // Tenant-defined custom field values — pass through as-is (key → value map).
+    customFields: (c.custom_fields as Record<string, unknown>) ?? {},
 
     // ── Stats (detail only) — read from data.stats ──
     matchesCount:      c.stats?.matches_count ?? (c.matches ?? []).length,

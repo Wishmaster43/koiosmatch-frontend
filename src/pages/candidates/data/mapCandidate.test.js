@@ -84,9 +84,11 @@ describe('mapCandidate — pools / consent / address', () => {
     expect(mapCandidate({ pools: [{ id: 1, name: 'Zorg' }, 'Flex'] }).pools)
       .toEqual([{ id: 1, name: 'Zorg' }, { name: 'Flex' }])
   })
-  it('consent defaults to false per channel', () => {
-    expect(mapCandidate({}).consent.whatsapp_consent).toBe(false)
-    expect(mapCandidate({ email_consent: true }).consent.email_consent).toBe(true)
+  it('consent: wa/email default opt-in, newsletter opt-out; reads nested consent', () => {
+    expect(mapCandidate({}).consent.whatsapp_opt_in).toBe(true)
+    expect(mapCandidate({}).consent.email_opt_in).toBe(true)
+    expect(mapCandidate({}).consent.newsletter_opt_in).toBe(false)
+    expect(mapCandidate({ consent: { whatsapp_opt_in: false } }).consent.whatsapp_opt_in).toBe(false)
   })
   it('composes address from street+city, else address/city/-', () => {
     expect(mapCandidate({ street: 'Hoofdstraat 1', city: 'Utrecht' }).address).toBe('Hoofdstraat 1, Utrecht')

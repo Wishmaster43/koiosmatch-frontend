@@ -43,9 +43,13 @@
     "candidate": "Kandidat",
     "applications": "Bewerbungen",
     "shared": "Gemeinsam",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "tasks": "Aufgaben"
   },
   "nav": {
+    "candidate_display": "Tabellenansicht",
+    "candidate_custom_fields": "Eigene Felder",
+    "driver_licenses": "Führerscheine",
     "kpis": "KPIs",
     "kpis_leads": "Leads",
     "kpis_candidates": "Kandidaten",
@@ -111,7 +115,25 @@
     "department_statuses": "Abteilungsstatus",
     "contact_statuses": "Kontaktstatus",
     "last_contact_types": "Kontakttyp",
-    "note_types": "Notiztypen"
+    "note_types": "Notiztypen",
+    "pools": "Talentpools",
+    "assessment_criteria": "Bewertungskriterien",
+    "usage": "Verbrauch",
+    "languages": "Sprachen",
+    "genders": "Geschlecht",
+    "candidate_availability": "Verfügbarkeit",
+    "industries": "Branchen",
+    "vacancy_employment": "Beschäftigungsart",
+    "vacancy_seniority": "Senioritätslevel",
+    "vacancy_education": "Ausbildung",
+    "vacancy_channels": "Jobbörsen",
+    "vacancy_matching": "Matching",
+    "task_statuses": "Status",
+    "task_types": "Aktivitätstypen",
+    "task_priorities": "Prioritäten",
+    "document_types": "Dokumenttypen",
+    "candidate_phases": "Phase",
+    "candidate_required_fields": "Pflichtfelder"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -141,6 +163,70 @@
         "label": "Ziel-Antwortrate",
         "description": "Zielwert für Kandidatenantworten auf Nachrichten",
         "unit": "%"
+      }
+    }
+  },
+  "candidateCustomFields": {
+    "title": "Eigene Felder",
+    "subtitle": "Definieren Sie zusätzliche Felder für alle Kandidaten.",
+    "add": "Feld hinzufügen",
+    "label": "Bezeichnung",
+    "labelPlaceholder": "z.B. Kennzeichen",
+    "key": "Schlüssel (Slug)",
+    "keyPlaceholder": "z.B. kennzeichen",
+    "immutable": "nach Erstellung nicht änderbar",
+    "type": "Typ",
+    "options": "Optionen",
+    "optionsPlaceholder": "Option 1, Option 2, Option 3",
+    "optionsHint": "Kommagetrennt.",
+    "hasData": "hat Daten",
+    "delete": "Löschen",
+    "deleteBlocked": "Kann nicht gelöscht werden",
+    "activate": "Aktivieren",
+    "deactivate": "Deaktivieren",
+    "types": {
+      "text": "Text",
+      "textarea": "Langer Text",
+      "number": "Zahl",
+      "date": "Datum",
+      "boolean": "Ja / Nein",
+      "select": "Auswahl"
+    }
+  },
+  "driverLicenseSettings": {
+    "title": "Führerscheine",
+    "subtitle": "Verwalten Sie die Führerscheinklassen, die Kandidaten als Präferenz wählen können.",
+    "add": "Klasse hinzufügen"
+  },
+  "candidateDisplay": {
+    "title": "Tabellenansicht",
+    "subtitle": "Pro Spalte: farbige Labels oder Klartext. Die KPI-Diagramme behalten ihre Farben immer.",
+    "fields": {
+      "candidate_table_color_funnel": {
+        "label": "Funnel-Typ"
+      },
+      "candidate_table_color_type": {
+        "label": "Kandidatentyp"
+      },
+      "candidate_table_color_pool": {
+        "label": "Talentpool"
+      },
+      "candidate_table_color_koios": {
+        "label": "Koios AI"
+      },
+      "candidate_avatar_colored_by_gender": {
+        "label": "Namens-Avatar je Geschlecht",
+        "description": "Ein = der Avatar neben dem Kandidatennamen wird je Geschlecht gefärbt. Aus = ein ruhiges Grau."
+      },
+      "candidate_table_color_status": {
+        "label": "Status"
+      },
+      "candidate_table_color_owner": {
+        "label": "Inhaber-Farbe",
+        "description": "Ein = der Inhaber-Avatar nutzt die Recruiter-Farbe. Aus = neutrales Grau."
+      },
+      "candidate_table_color_phase": {
+        "label": "Phase"
       }
     }
   },
@@ -244,7 +330,10 @@
     "namePlaceholder": "Name",
     "colorLabel": "Farbe",
     "addBtn": "Hinzufügen",
-    "confirmDelete": "„{{name}}\" wirklich löschen?"
+    "confirmDelete": "„{{name}}\" wirklich löschen?",
+    "edit": "Bearbeiten",
+    "editTitle": "Bearbeiten",
+    "inUse": "In Verwendung — kann nicht gelöscht werden"
   },
   "phases": {
     "title": "Phasen",
@@ -265,12 +354,37 @@
     "fieldPlaceholder": "Feldname…",
     "phasesTitle": "Phasen",
     "phasesSubtitle": "Verwalte die Phasen deiner Stellen.",
-    "phasesAdd": "Phase hinzufügen"
+    "phasesAdd": "Phase hinzufügen",
+    "employmentTitle": "Beschäftigungsart",
+    "employmentSubtitle": "Verwalte die Beschäftigungsarten, die deine Stellen verwenden können.",
+    "employmentAdd": "Beschäftigungsart hinzufügen",
+    "seniorityTitle": "Senioritätslevel",
+    "senioritySubtitle": "Verwalte die Senioritätslevel für deine Stellen.",
+    "seniorityAdd": "Level hinzufügen",
+    "educationTitle": "Ausbildung",
+    "educationSubtitle": "Verwalte die Ausbildungsniveaus für deine Stellen.",
+    "educationAdd": "Niveau hinzufügen",
+    "channelsTitle": "Jobbörsen",
+    "channelsSubtitle": "Verwalte die Jobbörsen, auf denen du deine Stellen veröffentlichen kannst.",
+    "channelsAdd": "Jobbörse hinzufügen"
   },
   "rejection": {
     "title": "Ablehnungsgründe",
     "subtitle": "Verwalte die Gründe für die Ablehnung von Bewerbungen.",
-    "add": "Grund hinzufügen"
+    "add": "Grund hinzufügen",
+    "channelTitle": "Kanal & Vorlagen",
+    "channelSubtitle": "Der Standardkanal und die Nachricht, die je Grund gesendet wird.",
+    "defaultChannel": "Standardkanal",
+    "email": "E-Mail",
+    "whatsapp": "WhatsApp",
+    "emailSubject": "E-Mail-Betreff",
+    "emailBody": "E-Mail-Nachricht",
+    "whatsappBody": "WhatsApp-Nachricht",
+    "tokensHint": "Tokens: {candidate}, {vacancy}, {reason}, {recruiter}",
+    "save": "Vorlagen speichern",
+    "saved": "Gespeichert",
+    "loading": "Wird geladen…",
+    "noReasons": "Füge zuerst einen Ablehnungsgrund hinzu."
   },
   "cvTemplate": {
     "title": "Lebenslauf-Vorlage",
@@ -695,7 +809,22 @@
     "emptyTitle": "Noch keine Einstellungen",
     "emptyDesc": "Einstellungen für dieses Modul folgen.",
     "smKpiTitle": "Shiftmanager-KPIs",
-    "smKpiDesc": "Separate KPI-Ziele für das Shiftmanager-Dashboard (getrennt von den Haupt-Dashboard-KPIs). Konfiguration folgt."
+    "smKpiDesc": "Separate KPI-Ziele für das Shiftmanager-Dashboard (getrennt von den Haupt-Dashboard-KPIs). Konfiguration folgt.",
+    "tierHeading": "Paket",
+    "addonsHeading": "Einzelne Module (Add-ons)",
+    "comingSoon": "demnächst",
+    "connectorsHint": "Connectors (ShiftManager, HelloFlex, Elanza…) verwaltest du je Kunde unter Integrationen → Apps. Aktivieren kostet Geld und schaltet die Workflow-Vorlagen frei.",
+    "tierDesc": {
+      "core": "ATS + CRM",
+      "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",
+      "enterprise": "+ REST API + WhatsApp persönlich + Insights+ + Connectors + SLA"
+    },
+    "addon": {
+      "sm": "Reporting Shiftmanager",
+      "hf": "Reporting HelloFlex",
+      "sm_ai": "Shiftmanager AI Planner",
+      "plan": "Planung"
+    }
   },
   "whatsapp": {
     "loading": "WhatsApp-Daten werden geladen…",
@@ -862,7 +991,10 @@
       "role": "Rolle"
     },
     "export": "Exportieren",
-    "loadMore": "Mehr laden ({{count}})"
+    "loadMore": "Mehr laden ({{count}})",
+    "colDate": "Datum",
+    "colTime": "Uhrzeit",
+    "filterDate": "Zeitraum"
   },
   "lookups": {
     "add": "Hinzufügen",
@@ -890,14 +1022,27 @@
     },
     "statuses": {
       "title": "Status",
-      "subtitle": "Operativer Status mit Farbe (Aktiv, Inaktiv, Krank …)."
+      "subtitle": "Jetzt einsetzbar? (Verfügbar, Eingesetzt, Nicht verfügbar, Krank, Urlaub)."
     },
     "requiresAppointment": "Erfordert einen Termin",
     "requiresAppointmentHint": "Diese Phase erwartet einen geplanten Termin (Intake). Fehlt er, wird es beim Kandidaten markiert.",
     "appointmentBadge": "Termin erforderlich",
     "requiresReason": "Begründung erforderlich",
     "requiresReasonHint": "Dieser Status erfordert eine Begründung (z. B. Inaktiv).",
-    "reasonBadge": "Begründung"
+    "reasonBadge": "Begründung",
+    "inUse": "In Verwendung — kann nicht gelöscht werden",
+    "isMatch": "Erzeugt einen Match",
+    "isMatchHint": "Sobald eine Bewerbung diese Phase erreicht, wird sie ein Match (der Matched-Bucket).",
+    "isRejected": "Ist eine Ablehnung",
+    "isRejectedHint": "Bewerbungen in dieser Phase gelten als abgelehnt (der Rejected-Bucket).",
+    "phases": {
+      "title": "Phase",
+      "subtitle": "Beziehungsphase (Lead → Kandidat)."
+    },
+    "requiresMatch": "Erfordert einen Match",
+    "requiresMatchHint": "Dieser Status nur mit verknüpftem Match (z. B. Eingesetzt).",
+    "expectsReturnDate": "Fragt Rückkehrdatum",
+    "expectsReturnDateHint": "Fragt ein \"wieder verfügbar ab\"-Datum (z. B. Nicht verfügbar/Krank)."
   },
   "planning": {
     "shiftTypes": {
@@ -1016,5 +1161,101 @@
     "title": "Notiztypen",
     "subtitle": "Kategorien für Kandidaten-Notizen.",
     "add": "Typ hinzufügen"
+  },
+  "poolsSettings": {
+    "title": "Talentpools",
+    "subtitle": "Verwalte Pools mit Name und Farbe — für Kandidatenlisten.",
+    "add": "Pool hinzufügen",
+    "contextLabel": "Pool-Typ",
+    "contextRecruitment": "Recruitment (Talentpool)",
+    "contextPlanning": "Planung (Einsatzpool)"
+  },
+  "tasks": {
+    "statusTitle": "Status",
+    "statusSubtitle": "Verwalte die Spalten deines Aufgabenboards (Status + Farbe).",
+    "statusAdd": "Status hinzufügen",
+    "typeTitle": "Aktivitätstypen",
+    "typeSubtitle": "Verwalte die Aktivitätsarten (Aufgabe, Anruf, E-Mail…).",
+    "typeAdd": "Typ hinzufügen",
+    "priorityTitle": "Prioritäten",
+    "prioritySubtitle": "Verwalte die Prioritäten deiner Aufgaben (niedrig, normal, hoch).",
+    "priorityAdd": "Priorität hinzufügen"
+  },
+  "assessment": {
+    "title": "Bewertungskriterien",
+    "subtitle": "Wiederverwendbare Kriteriengruppen, die Koios AI zur Bewertung von Kandidaten nutzt. Verknüpfe eine Gruppe mit einer Stelle und passe sie je Stelle an.",
+    "addGroup": "Gruppe hinzufügen",
+    "empty": "Noch keine Kriteriengruppen.",
+    "loading": "Wird geladen…",
+    "groupName": "Gruppenname",
+    "groupNamePlaceholder": "z. B. Pflege — Verzorgende IG",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "Optionale Beschreibung…",
+    "criteria": "Kriterien",
+    "addCriterion": "Kriterium hinzufügen",
+    "criterionPlaceholder": "z. B. Reisedistanz < 30 km",
+    "dimension": "Dimension",
+    "weight": "Gewicht",
+    "hard": "Hart",
+    "hardHint": "Ein hartes Kriterium kann eine KI-Auto-Ablehnung auslösen.",
+    "noCriteria": "Noch keine Kriterien.",
+    "criteriaCount_one": "{{count}} Kriterium",
+    "criteriaCount_other": "{{count}} Kriterien",
+    "inUse": "In Verwendung — mit einer Stelle verknüpft.",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "newGroup": "Neue Gruppe",
+    "editGroup": "Gruppe bearbeiten",
+    "dimensions": {
+      "qualifications": "Qualifikationen",
+      "location": "Standort",
+      "culture": "Kultur",
+      "soft_skills": "Soft Skills",
+      "technical": "Technik",
+      "ambition": "Ambition"
+    }
+  },
+  "matching": {
+    "title": "Matching-Strenge",
+    "subtitle": "Wie kritisch der KI-Matcher Kandidaten gegen deine Stellen bewertet. Strenger ergibt niedrigere, schwerer verdiente Match-Scores.",
+    "lenient": "Nachsichtig",
+    "balanced": "Ausgewogen",
+    "strict": "Streng",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "perVacancyHint": "Was je Stelle wichtig ist (Qualifikationen, Standort, …), stellst du an der Stelle selbst ein."
+  },
+  "languageSettings": {
+    "languagesTitle": "Sprachen",
+    "languagesSubtitle": "Die Sprachen, die du bei Kandidaten auswählen kannst.",
+    "addLanguage": "Sprache hinzufügen",
+    "levelsTitle": "Niveaus",
+    "levelsSubtitle": "Beherrschungsniveaus (z. B. Schlecht → Sehr gut, Muttersprache).",
+    "addLevel": "Niveau hinzufügen"
+  },
+  "availabilitySettings": {
+    "title": "Verfügbarkeit",
+    "subtitle": "Verwalte die Verfügbarkeitsoptionen — eine separate Achse neben dem Status.",
+    "add": "Option hinzufügen"
+  },
+  "industrySettings": {
+    "title": "Branchen",
+    "subtitle": "Verwalte die Branchen, die du im Unternehmensprofil auswählen kannst.",
+    "add": "Branche hinzufügen"
+  },
+  "genderSettings": {
+    "title": "Geschlecht",
+    "subtitle": "Geschlechter mit einer Farbe — bestimmt die Farbe des Kandidaten-Icons.",
+    "add": "Geschlecht hinzufügen"
+  },
+  "documentTypes": {
+    "title": "Dokumenttypen",
+    "subtitle": "Kategorien und Farben für Kandidatendokumente (Lebenslauf, Ausweis, Diplom, …).",
+    "add": "Typ hinzufügen"
+  },
+  "requiredFields": {
+    "title": "Pflichtfelder",
+    "subtitle": "Markieren Sie pro Phase, welche Felder Pflicht sind. Ein Pflichtfeld zeigt einen Stern und blockiert das Speichern, wenn es leer ist.",
+    "field": "Feld"
   }
 }

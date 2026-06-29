@@ -1,0 +1,157 @@
+{
+  "title": "Candidatures",
+  "loading": "Chargement des candidatures…",
+  "empty": "Aucune candidature pour le moment.",
+  "error": "Impossible de charger les candidatures.",
+  "buckets": {
+    "active": "Actives",
+    "matched": "Matchées",
+    "rejected": "Refusées"
+  },
+  "view": {
+    "table": "Vue liste",
+    "board": "Vue tableau"
+  },
+  "add": {
+    "button": "Nouvelle candidature",
+    "title": "Nouvelle candidature",
+    "candidate": "Candidat",
+    "candidatePlaceholder": "Sélectionner un candidat",
+    "vacancy": "Poste",
+    "vacancyPlaceholder": "Sélectionner un poste",
+    "search": "Rechercher…",
+    "create": "Créer",
+    "cancel": "Annuler"
+  },
+  "pagination": {
+    "perPage": "Résultats par page",
+    "range": "{{from}}-{{to}} sur {{total}}"
+  },
+  "cols": {
+    "candidate": "Nom",
+    "vacancy": "Poste",
+    "score": "Match",
+    "task": "Tâche",
+    "phase": "Phase",
+    "source": "Source",
+    "owner": "Responsable",
+    "client": "Client",
+    "status": "Statut du candidat"
+  },
+  "kpi": {
+    "totalActive": "Total actives",
+    "applied": "Postulé",
+    "accepted": "Accepté",
+    "invited": "Invité",
+    "proposed": "Proposition envoyée",
+    "rejected": "Refusé",
+    "matched": "Matché",
+    "new": "Nouveau"
+  },
+  "insights": {
+    "phase": "Phase",
+    "owner": "Recruteur",
+    "source": "Source",
+    "clearFilter": "Effacer le filtre"
+  },
+  "drawer": {
+    "label": "Candidature",
+    "createdAt": "Créé le {{date}}",
+    "downloadCv": "CV",
+    "tabs": {
+      "application": "Candidature",
+      "candidate": "Candidat",
+      "vacancy": "Poste",
+      "interviews": "Entretiens",
+      "appointments": "Rendez-vous",
+      "timeline": "Chronologie",
+      "notes": "Notes"
+    },
+    "phase": "Phase",
+    "source": "Source",
+    "owner": "Recruteur",
+    "task": "Tâche",
+    "details": "Détails",
+    "vacancy": "Poste",
+    "client": "Client"
+  },
+  "matchScore": {
+    "title": "Score de match",
+    "overall": "Global",
+    "hard": "Strict",
+    "edit": "Ajuster",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "manualNote": "Ajusté manuellement · IA : {{score}}%",
+    "detailsSoon": "Le détail des critères apparaît ici une fois le scoring configuré."
+  },
+  "profile": {
+    "function": "Fonction",
+    "gender": "Genre",
+    "nationality": "Nationalité",
+    "dob": "Date de naissance",
+    "email": "E-mail",
+    "phone": "Téléphone",
+    "address": "Adresse",
+    "summary": "Résumé",
+    "timeline": "Chronologie"
+  },
+  "vacancyDetail": {
+    "id": "ID du poste",
+    "status": "Statut",
+    "employment": "Type de contrat",
+    "location": "Site",
+    "salary": "Salaire",
+    "hours": "Heures hebdomadaires",
+    "experience": "Expérience",
+    "seniority": "Niveau d'expérience",
+    "education": "Formation",
+    "branch": "Secteur",
+    "category": "Catégorie",
+    "skills": "Compétences requises",
+    "tags": "Tags"
+  },
+  "interview": {
+    "title": "Entretien WhatsApp",
+    "done": "Terminé",
+    "summary": "Résumé",
+    "transcript": "Transcription",
+    "empty": "Aucun entretien pour le moment."
+  },
+  "appointments": {
+    "empty": "Aucun rendez-vous planifié.",
+    "hint": "Planifiez un entretien ou un appel avec ce candidat.",
+    "new": "Nouveau rendez-vous",
+    "with": "Avec",
+    "statusPlanned": "Planifié"
+  },
+  "notes": {
+    "title": "Notes",
+    "new": "Nouvelle note",
+    "empty": "Aucune note pour le moment.",
+    "hint": "Ajoutez des notes internes pour aligner votre équipe sur ce candidat.",
+    "placeholder": "Écrire une note…",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
+  },
+  "timeline": {
+    "empty": "Aucune activité pour le moment."
+  },
+  "rejection": {
+    "title": "Refus",
+    "reason": "Motif",
+    "reasonPlaceholder": "Sélectionner un motif",
+    "note": "Note",
+    "notePlaceholder": "Note facultative…",
+    "channel": "Canal",
+    "channelEmail": "E-mail",
+    "channelWhatsapp": "WhatsApp",
+    "preview": "Aperçu du message",
+    "noTemplate": "Pas encore de modèle pour ce motif — définissez-en un dans les Paramètres.",
+    "confirm": "Refuser",
+    "rejected": "Refusé",
+    "aiAdvice": "Koios conseille le refus",
+    "aiAuto": "Critères stricts non remplis — éligible au refus automatique.",
+    "aiConfirm": "Vérifiez et confirmez avant l'envoi d'un message."
+  }
+}

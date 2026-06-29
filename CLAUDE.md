@@ -222,10 +222,11 @@ through a `useX()` hook / `LookupsContext` with a seed fallback; never a literal
 
 | Lookup | Endpoint | Drives |
 |---|---|---|
-| Contract forms (multi) | `/settings/candidate-lookups/candidate-types` | `candidate.candidate_types[]` |
+| Contract form (multi, was "candidate type" → **Contractvorm**) | `/settings/candidate-lookups/candidate-types` | `candidate.candidate_types[]` |
 | Funnel stages | `…/funnel-types` | application phase |
-| Statuses (lifecycle) | `…/statuses` | status Lead→Candidate |
-| Availability | `/availability-options` | availability axis (separate) |
+| **Phase (lifecycle)** *(NEW — split from status)* | `…/phases` | Lead → Candidate |
+| **Deployability (status)** *(was "statuses"; absorbs availability)* | `…/statuses` | Available · Placed · Unavailable · Sick · Leave |
+| ~~Availability (separate)~~ | folded into Deployability | — |
 | Talent pools | `/pools` | pool chips |
 | Languages · Levels | `/languages` · `/language-levels` | Languages section |
 | Genders | `/genders` | gender + avatar colour |
@@ -237,46 +238,58 @@ through a `useX()` hook / `LookupsContext` with a seed fallback; never a literal
 | Vacancy statuses/phases/custom fields | `/vacancy-*` | vacancy |
 
 **Settings reorganisation (decided 2026-06-21).** Multi-list editors become real
-sub-tabs: Candidate lookups → **Contract forms · Funnel stages · Statuses**;
+sub-tabs: Candidate lookups → **Contractvorm · Funnel stages · Phase · Deployability**;
 Languages → **Languages · Levels**; Vacancy → **Statuses · Phases · Custom fields**.
 Each is **promoted to its own top-level settings menu** (out of `personalisation`),
 with its own sub-tab bar.
 
-### The axes — confirmed model (never collapse them; memory `project_candidate_status_funnel_model`)
+### The axes — confirmed model v2 (decision 2026-06-29; never collapse them; memory `project_candidate_status_funnel_model`)
 
-Three lookups + availability describe one person; conflating them is the mess we are
-fixing. Each answers a different question:
+**Six axes** describe one person, each answering ONE question; all are tenant lookups maintained in
+Settings → Personalisation → Candidates (CRUD + colour + reorder + in-use 409). Conflating them is the
+mess we fixed: the old single "status" mixed qualification with deployability and is now **split into
+Phase + Deployability**.
 
-- **Candidate type** = contract form, **multi-value** (on-call · freelance/ZZP · payroll ·
-  temp-agency · secondment). *"In which contract form(s) can/will they work?"* Rarely changes.
-- **Status (person lifecycle)** = single value, seed **Lead · Candidate · Matched · Inactive ·
-  Unplaceable**. **Blacklist is a separate flag** (orthogonal — a Candidate can be blacklisted);
-  **Archived = the soft-delete state** (`deleted_at`), not a status. *"Where does this person stand?"*
-  Driven by **workflow automation**, not a stored status↔funnel coupling. **Unplaceable** carries an
-  **"available again" date** that triggers a re-activation workflow. Inactive/Blacklist/Archived are
-  **off by default in filters** (still searchable, so KPI totals drop). Setting **Matched** manually
-  prompts to **link a Match** (Matched without a Match is a data error → flagged).
-- **Funnel stage** = single value **per application**, seed **Applied · Invited/Intake ·
-  Proposed · Hired · Rejected**. *"Where is this person in this one application?"* Editable on
-  the application; on the candidate only read-only chips. "Applicant" is **derived** (≥1 live
-  application). The old candidate-level funnel `prospect/intake/pool/alumni` is **retired** —
-  it split three axes into one; its meanings move to status (lead/inactive), the application
-  funnel (intake), and talent pools (`/pools`).
-- **Availability** (Available/Sick/Leave) is a **separate axis**.
+- **Contract form** (the renamed "candidate type" → **"Contractvorm"**) = **multi-value**
+  (secondment · flex · temp-agency · payroll · on-call · freelance/ZZP · UZK …). *"In which contract
+  form(s) can/will they work?"* Rarely changes. Values/labels are tenant lookups.
+- **Phase (lifecycle)** = single value, seed **Lead · Candidate** (+ later Alumni). *"Where does the
+  relationship stand?"* Lead → Candidate by automation (first application / intake). **NEW** axis,
+  carved out of the old status.
+- **Deployability (status)** = single value, seed **Available · Placed · Unavailable · Sick · Leave**.
+  *"Can I deploy them right now?"* This is what "status" now means; the old separate availability axis
+  **folds in here**. **Placed** may be set manually **but then a Match MUST be linked** (no Placed
+  without a Match) and is also set automatically by funnel Hired → Match. **Unavailable** carries an
+  "available again" date + reason (re-activation workflow).
+- **Blacklist** = a **separate flag** (orthogonal — a Candidate can be blacklisted). Blacklisting
+  requires a **reason**, but whether the reason is mandatory is a **tenant setting**
+  (`blacklist_reason_required`, default on).
+- **Archived** = the soft-delete state (`deleted_at`), not a status. **Off by default in filters**
+  (still searchable, so KPI totals drop).
+- **Funnel stage** = single value **per application**, seed **Applied · Invited/Intake · Proposed ·
+  Hired · Rejected**. *"Where is this person in this one application?"* Editable on the application;
+  on the candidate only read-only chips. "Applicant" is **derived** (≥1 live application). The old
+  candidate-level funnel `prospect/intake/pool/alumni` stays **retired**.
 
-**Status ↔ funnel are linked by automation, not by one field.** Default rules (seeded for all
-tenants, editable in workflows): first application → Lead becomes Candidate; funnel **Hired** →
-create a Match and set status **Matched**; **Rejected** with no other live application → stays
-Candidate. A person can hold one status while having several applications, each with its own funnel.
-**Inactive guard:** Inactive is only allowed when there is **no active Match** and (planning module)
-**no future scheduling** — otherwise block with a reason. Inactive requires a **reason**.
+**Visibility (make these fields show).** Table columns: **Phase · Deployability · Contract form**
+(soft chips) + a blacklist badge; **Funnel** chips only when ≥1 live application. Drawer header: a
+**Phase** picker + a **Deployability** picker + blacklist badge; contract-form chips live in the
+Preferences tab.
 
-**Status & availability changes are dated and reasoned.** Every status/availability transition
-records an **effective date** and (for availability) a **reason** — show e.g. "Inactive since
-31-05-2026" or "Unavailable since … · reason". When a placement/assignment ends and the candidate
-does not work again, automation sets status **Inactive** effective the assignment end date; the
-"actually stopped working" signal also consults the **planning module** once it lands. The backend
-keeps a small change-log (`effective_from` + `reason`), tied to the audit trail (§3B / C-16).
+**Phase ↔ deployability ↔ funnel are linked by automation, not by one field.** Default rules (seeded
+for all tenants, editable in workflows): first application → Phase Lead becomes Candidate; funnel
+**Hired** → create a Match and set deployability **Placed**; **Rejected** with no other live
+application → Phase stays Candidate. A person holds one phase + one deployability while having several
+applications, each with its own funnel. **Guard:** setting **Placed** requires a linked Match; setting
+**Unavailable** is only allowed with **no active Match** and (planning module) **no future scheduling**
+— otherwise block with a reason.
+
+**Phase & deployability changes are dated and reasoned.** Every phase/deployability transition records
+an **effective date** and (for deployability) a **reason** — show e.g. "Candidate since 31-05-2026" or
+"Unavailable since … · reason". When a placement/assignment ends and the candidate does not work again,
+automation sets deployability **Unavailable** effective the assignment end date; the "actually stopped
+working" signal also consults the **planning module** once it lands. The backend keeps a small
+change-log (`effective_from` + `reason`), tied to the audit trail (§3B / C-16).
 
 **Two paths to a placement** (both entry sources — a new **Lead** or an existing **Candidate**):
 1. **Via application (funnel):** couple to a vacancy → application → funnel runs → **Hired**

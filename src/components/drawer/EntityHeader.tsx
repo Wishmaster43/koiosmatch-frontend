@@ -45,7 +45,7 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
           <Camera size={14} color="white" />
         </div>
       </button>
-      <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+      <input ref={fileRef} type="file" accept="image/*" aria-label={labels?.upload ?? 'Upload'} style={{ display: 'none' }}
         onChange={e => { const f = e.target.files?.[0]; if (f) { onChange(URL.createObjectURL(f)); setMenuOpen(false) } }} />
       {menuOpen && (
         <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 200, background: 'white',
@@ -85,7 +85,7 @@ function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; o
       {adding ? (
         <input ref={inputRef} value={value} onChange={e => setValue(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { setValue(''); setAdding(false) } }}
-          onBlur={commit} placeholder={addLabel}
+          onBlur={commit} placeholder={addLabel} aria-label={addLabel}
           style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', width: 110 }} />
       ) : (
         <button onClick={() => setAdding(true)}
@@ -115,6 +115,9 @@ interface EntityHeaderProps {
   title?: ReactNode
   subtitle?: ReactNode
   renderTitle?: () => ReactNode
+  // Record-level meta controls in the top title-row, left of expand/close
+  // (e.g. a changelog popover). Read-only/meta, not primary actions.
+  titleActions?: ReactNode
   actions?: ReactNode
   meta?: MetaPicker[]
   metaExtra?: ReactNode
@@ -128,13 +131,14 @@ interface EntityHeaderProps {
 
 export default function EntityHeader({
   label, avatar, onPhotoChange, photoLabels, title, subtitle, renderTitle,
-  actions, meta = [], metaExtra, tags, tagsLabel, children, expanded, onToggleExpand, onClose,
+  titleActions, actions, meta = [], metaExtra, tags, tagsLabel, children, expanded, onToggleExpand, onClose,
 }: EntityHeaderProps) {
   return (
     <>
       {/* Title row */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', flex: 1 }}>{label}</span>
+        {titleActions}
         <button onClick={onToggleExpand} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
           {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
         </button>

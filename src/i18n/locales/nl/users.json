@@ -33,5 +33,11 @@
     "planner": "Planner",
     "user": "Gebruiker"
   },
-  "noRoles": "Geen rollen beschikbaar"
+  "noRoles": "Geen rollen beschikbaar",
+  "editUser": "Gebruiker bewerken",
+  "saveFailed": "Opslaan mislukt.",
+  "saving": "Opslaan…",
+  "phone": "Telefoonnummer",
+  "changePassword": "Wachtwoord wijzigen",
+  "newPassword": "Nieuw wachtwoord"
 }

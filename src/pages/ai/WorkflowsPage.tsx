@@ -10,6 +10,7 @@
  */
 import { useState, useEffect, useRef, useMemo } from 'react'
 import type { ReactNode, DragEvent } from 'react'
+import { interactive } from '@/lib/a11y'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
 import { useRightPanel } from '../../context/RightPanelContext'
@@ -295,7 +296,7 @@ function SidebarRow({ label, icon, active, isDragOver, onClick, onDragOver, onDr
 }) {
   const [hover, setHover] = useState(false)
   return (
-    <div onClick={onClick} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+    <div {...interactive(onClick)} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
       style={{
         display: 'flex', alignItems: 'center', gap: 8, padding: '7px 12px',

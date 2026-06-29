@@ -1,8 +1,16 @@
-import { useState } from 'react'
+/**
+ * useCvSettings — CV branding + section configuration, tenant-scoped via /settings.
+ *
+ * Stored in the shared settings blob under `candidate_cv_template` (was browser
+ * localStorage — that made it per-device, not per-tenant). Reads through
+ * useAllSettings (live, cached) and writes through saveSettingsKeys, so a change
+ * in the CV template editor reflects everywhere the same session.
+ */
+import { useAllSettings, getJsonSetting, saveSettingsKeys } from './settings/useAllSettings'
 
 // One toggleable section of the generated CV.
 export interface CvSection { id: string; label: string; enabled: boolean }
-// Persisted CV branding + section configuration (localStorage-backed for now).
+// Persisted CV branding + section configuration.
 export interface CvSettings {
   primaryColor: string
   secondaryColor: string
@@ -30,32 +38,23 @@ const DEFAULTS: CvSettings = {
   sections:       CV_DEFAULT_SECTIONS,
 }
 
-const STORAGE_KEY = 'koios_cv_settings'
+// Settings-blob key (tenant-scoped, JSON-encoded).
+const SETTINGS_KEY = 'candidate_cv_template'
 
 export function useCvSettings() {
-  const [settings, setSettings] = useState<CvSettings>(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      if (raw) {
-        const parsed = JSON.parse(raw) as Partial<CvSettings>
-        return { ...DEFAULTS, ...parsed, sections: parsed.sections ?? CV_DEFAULT_SECTIONS }
-      }
-    } catch { /* ignore corrupt local settings */ }
-    return { ...DEFAULTS, sections: [...CV_DEFAULT_SECTIONS] }
-  })
+  const values = useAllSettings()
+  // Merge stored value over defaults so a partial/absent blob still renders fully.
+  const stored = getJsonSetting<Partial<CvSettings>>(values, SETTINGS_KEY, {})
+  const settings: CvSettings = { ...DEFAULTS, ...stored, sections: stored.sections ?? CV_DEFAULT_SECTIONS }
 
+  // Persist a partial update to the tenant settings blob (optimistic via the cache).
   function save(patch: Partial<CvSettings>) {
-    setSettings(prev => {
-      const next = { ...prev, ...patch }
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)) } catch { /* storage full/blocked */ }
-      return next
-    })
+    saveSettingsKeys({ [SETTINGS_KEY]: { ...settings, ...patch } }).catch(() => {})
   }
 
+  // Restore defaults tenant-wide.
   function reset() {
-    const fresh: CvSettings = { ...DEFAULTS, sections: [...CV_DEFAULT_SECTIONS] }
-    setSettings(fresh)
-    try { localStorage.removeItem(STORAGE_KEY) } catch { /* storage blocked */ }
+    saveSettingsKeys({ [SETTINGS_KEY]: { ...DEFAULTS, sections: [...CV_DEFAULT_SECTIONS] } }).catch(() => {})
   }
 
   return { settings, save, reset }

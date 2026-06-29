@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import MatchesTab from './MatchesTab'
+import StatusPill from '@/components/ui/StatusPill'
 import { sectionBlock } from './constants'
 import type { Candidate } from '@/types/candidate'
 
-// One application row as nested under the candidate (read defensively).
-interface AppRow { logo_url?: string; vacancy?: { logo_url?: string; title?: string }; vacature?: string; title?: string }
+// One application row as nested under the candidate (read defensively). The
+// funnel stage (label + colour) used to live in the header chips — shown here now.
+interface AppRow { logo_url?: string; vacancy?: { logo_url?: string; title?: string }; vacature?: string; title?: string; stageLabel?: string; stageColor?: string }
 
 /** Work tab — matches + paginated applications. */
 export default function WorkTab({ c }: { c: Candidate }) {
@@ -17,12 +19,13 @@ export default function WorkTab({ c }: { c: Candidate }) {
   const slice = soll.slice((page - 1) * PER, page * PER)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <MatchesTab c={c} />
-      <div style={sectionBlock}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>
-          {t('sections.applications')} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>{soll.length}</span>
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }}>
+          {t('sections.applications')} <span style={{ fontWeight: 400 }}>{soll.length}</span>
         </div>
+        <div style={sectionBlock}>
         <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
           <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('work.vacancy')}</div>
           {slice.length === 0
@@ -30,7 +33,8 @@ export default function WorkTab({ c }: { c: Candidate }) {
             : slice.map((s, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: i < slice.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 12, color: 'var(--text)' }}>
                 {(s.logo_url ?? s.vacancy?.logo_url) && <img src={s.logo_url ?? s.vacancy?.logo_url} alt="" style={{ width: 24, height: 24, borderRadius: 4, objectFit: 'contain', flexShrink: 0 }} />}
-                <span style={{ fontWeight: 500 }}>{s.vacature ?? s.vacancy?.title ?? s.title ?? '-'}</span>
+                <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.vacature ?? s.vacancy?.title ?? s.title ?? '-'}</span>
+                {s.stageLabel && <StatusPill label={s.stageLabel} color={s.stageColor} />}
               </div>
             ))
           }
@@ -42,6 +46,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
             <button onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page >= pages} style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 5, background: 'var(--bg)', cursor: page >= pages ? 'default' : 'pointer', color: page >= pages ? 'var(--border)' : 'var(--text-muted)' }}>›</button>
           </div>
         )}
+      </div>
       </div>
     </div>
   )

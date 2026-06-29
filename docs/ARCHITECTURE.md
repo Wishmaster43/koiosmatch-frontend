@@ -9,7 +9,7 @@
 > ✅ bevestigd (code/beslissing) · ⚠️ beslissing nodig (Danny) · ☐ nog documenteren/verifiëren ·
 > 🔒 hangt op backend. Werk dit bij zodra een punt landt.
 >
-> **Laatst bijgewerkt:** 2026-06-25 · door architect-Claude.
+> **Laatst bijgewerkt:** 2026-06-29 · auth-regel (§11) gelijkgetrokken met §7.6 — door FE-Claude.
 
 ---
 
@@ -174,7 +174,7 @@ Single-purpose boven line-count. Backend-mirror (controller ≤150 / Service ~20
 > Detail + locaties in `docs/worklist.md` (§F architectuur/kwaliteit · §A–C feature/backend). Hier de kop-lijst:
 
 **Beslissingen (Danny) ⚠️**
-- [x] ~~Auth: httpOnly-cookie~~ → backend koos **Bearer-token** (Authorization-header), géén SPA-cookieflow (2026-06-25). CLAUDE.md §7 her-evalueren als security-traject.
+- [x] **Auth-richting besloten (Danny, 2026-06-26):** doel = **Sanctum httpOnly-cookieflow** (zie §7.6 / DECISIONS K-2). Bearer-token-in-`localStorage` = **interim** tot de gecoördineerde backend-flip (BE-8, F-13); `COOKIE_AUTH`-scaffold staat. CLAUDE.md §7 blijft de standaard.
 - [x] ~~CandidatesPage hook-structuur~~ → **gesplitst 674→308** (hooks: data/options/bulk + shared) — 2026-06-25.
 - [x] **Geo + planning besloten (2026-06-25):** geo (`lat/lng`+geocoding, PDOK) alleen op **native** candidates+customers; SM heeft al geo. Planning **gefaseerd**: read-only SM (`/sm_orders /sm_shifts /sm_schedule`) nu, native write-module + geo later.
 - [ ] Workflow-engine aparte server: base-URL-config + async run/logs-UI inplannen (backend: runs in-DB, engine lineair/synchroon — aparte server nog niet).

@@ -108,8 +108,13 @@ api.interceptors.response.use(
     // response body — a 4xx/5xx body can carry special-category data OR sensitive
     // backend detail (stack traces, paths). Inspect the body on demand in the
     // Network → Response tab instead (§8 / no secrets or PII in logs).
+    // Redact record IDs (UUIDs + numeric path segments) so the dev log never
+    // carries identifiers (§8: no PII/IDs in logs); the route shape stays useful.
+    const safeUrl = url
+      .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, ':id')
+      .replace(/\/\d+(?=\/|$|\?)/g, '/:id')
     if (import.meta.env.DEV && !benignTenants403) {
-      console.error('API Error:', status, method.toUpperCase(), url)
+      console.error('API Error:', status, method.toUpperCase(), safeUrl)
     }
 
     const isAuthCall = url.includes('/auth/login') || url.includes('/auth/me')

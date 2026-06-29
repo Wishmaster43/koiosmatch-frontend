@@ -50,8 +50,9 @@ export default function PoolsSection({ c }: { c: Candidate }) {
   }
 
   return (
-    <div style={sectionBlock}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>{t('sections.pools')}</div>
+    <div>
+      <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }}>{t('sections.pools')}</div>
+      <div style={sectionBlock}>
 
       {pools.length > 0 && (
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
@@ -113,6 +114,7 @@ export default function PoolsSection({ c }: { c: Candidate }) {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   )

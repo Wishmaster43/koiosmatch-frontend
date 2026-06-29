@@ -9,9 +9,12 @@ import type { CSSProperties, ReactNode } from 'react'
  */
 export const sectionBlock: CSSProperties = {
   border: '1px solid var(--border)', borderRadius: 10,
-  padding: '14px 16px', background: 'var(--surface)',
+  padding: '10px 14px', background: 'var(--surface)',
 }
-export const sectionTitle: CSSProperties = { fontSize: 13, fontWeight: 700, color: 'var(--text)' }
+// Uniform section heading: grey, uppercase, sits OUTSIDE the block (above it).
+export const sectionTitle: CSSProperties = {
+  fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)',
+}
 
 interface SectionCardProps {
   title?: ReactNode
@@ -22,14 +25,14 @@ interface SectionCardProps {
 
 export default function SectionCard({ title, action, children, style }: SectionCardProps) {
   return (
-    <div style={{ ...sectionBlock, ...style }}>
+    <div>
       {(title || action) && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
           {title && <span style={sectionTitle}>{title}</span>}
           {action}
         </div>
       )}
-      {children}
+      <div style={{ ...sectionBlock, ...style }}>{children}</div>
     </div>
   )
 }

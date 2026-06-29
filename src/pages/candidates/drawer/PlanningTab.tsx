@@ -2,7 +2,10 @@ import { useState, useEffect, useRef } from 'react'
 import type { CSSProperties, Dispatch, ReactNode, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Check } from 'lucide-react'
-import { ALL_FUNCTIONS, ALL_POOLS, DRIVING_LICENCES, sectionBlock, sectionTitle } from './constants'
+import { sectionBlock, sectionTitle } from './constants'
+import { useFunctions } from '@/lib/useFunctions'
+import { usePools } from '@/lib/usePools'
+import { useDriverLicenses } from '@/lib/useDriverLicenses'
 import type { Candidate } from '@/types/candidate'
 
 const Chip = ({ label, selected, onToggle }: { label: ReactNode; selected: boolean; onToggle: () => void }) => (
@@ -25,6 +28,10 @@ const SecLabel = ({ children, action }: { children: ReactNode; action?: ReactNod
 
 /** Roles, pools, shift-type and driving-licence settings used by the planner. */
 export default function PlanningTab({ c }: { c: Candidate }) {
+  // Vocabularies from the tenant lookups (no hardcoded role/pool/licence lists).
+  const { functions: ALL_FUNCTIONS } = useFunctions() as { functions: string[] }
+  const { pools: ALL_POOLS } = usePools()
+  const { licenses: DRIVING_LICENCES } = useDriverLicenses() as { licenses: string[] }
   const plan = c.planningSettings ?? {}
   const [info,         setInfo]        = useState<string>((plan.info as string) ?? '')
   const [roles,     setRoles]    = useState<string[]>((plan.roles as string[]) ?? [])

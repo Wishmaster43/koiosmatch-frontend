@@ -309,10 +309,10 @@ export default function RunsTable() {
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ ...TD, fontSize: 12, whiteSpace: 'nowrap' }}>
                       <div style={{ fontWeight: 500, color: 'var(--text)' }}>
-                        {r.started_at ? new Date(r.started_at).toLocaleDateString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
+                        {r.started_at ? new Date(r.started_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                        {r.started_at ? new Date(r.started_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }) : ''}
+                        {r.started_at ? new Date(r.started_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''}
                       </div>
                     </td>
                     <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>

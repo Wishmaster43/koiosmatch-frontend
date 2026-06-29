@@ -40,7 +40,7 @@ function EditorInner({ workflow, onClose, onSave }: {
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
     insertModule, updateNodeConfig, deleteNode, handleSave, handleRun,
   } = useWorkflowEditor({ workflow, onSave })
-  const { t } = useTranslation('workflows')
+  const { t, i18n } = useTranslation('workflows')
 
   return (
     <StartContext.Provider value={{ startNodeId: firstNodeId ?? null, setStartNodeId }}>
@@ -77,7 +77,7 @@ function EditorInner({ workflow, onClose, onSave }: {
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'var(--hover-bg)')}>
             <Clock size={13} color="var(--text-muted)" />
-            {scheduleLabel(trigger, scheduleConfig)}
+            {scheduleLabel(t, i18n.language, trigger, scheduleConfig)}
           </button>
 
           <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />

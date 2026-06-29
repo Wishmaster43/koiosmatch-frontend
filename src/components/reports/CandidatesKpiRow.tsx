@@ -69,7 +69,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
   const actiefTotal    = count(candidates, 'actief')
   const geplandItems   = calcGepland(candidates)
   const { currentMonthCount, avg, delta } = calcMonthStats(candidates)
-  const currentMonthLabel = new Date().toLocaleString(undefined, { month: 'long' })
+  const currentMonthLabel = new Date().toLocaleString('nl-NL', { month: 'long' })
 
   return (
     <div className="grid gap-4 mb-6"

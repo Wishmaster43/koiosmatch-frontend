@@ -25,8 +25,9 @@ export default function BranchSection({ c }: { c: Candidate }) {
   const options = allLocations.map(l => { const name = String(l.name ?? l.company_name ?? l.id ?? ''); return { value: name, label: name } })
 
   return (
-    <div style={sectionBlock}>
-      <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>{t('sections.branch')}</div>
+    <div>
+      <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }}>{t('sections.branch')}</div>
+      <div style={sectionBlock}>
       {branches.length > 0 && (
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
           {branches.map(v => (
@@ -41,6 +42,7 @@ export default function BranchSection({ c }: { c: Candidate }) {
       )}
       {/* Shared searchable multi-select — replaces the old inline dropdown (DUP-1). */}
       <SearchSelect triggerLabel={t('sections.branchLink')} options={options} selected={branches} onToggle={toggle} />
+      </div>
     </div>
   )
 }

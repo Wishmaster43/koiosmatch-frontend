@@ -11,7 +11,7 @@ import { useKpiSettings } from '../../lib/useKpiSettings'
 import type { ReportCandidate } from '../../types/reports'
 
 // Locale-aware full month name for index 0–11.
-const monthName = (i: number) => new Date(2000, i, 1).toLocaleString(undefined, { month: 'long' })
+const monthName = (i: number) => new Date(2000, i, 1).toLocaleString('nl-NL', { month: 'long' })
 
 function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
@@ -35,7 +35,7 @@ function StatusBadge({ status }: { status?: string }) {
 
 function formatDate(iso?: string | null) {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 // ── Candidate list (New / Deregistered) ───────────────────────────────────────

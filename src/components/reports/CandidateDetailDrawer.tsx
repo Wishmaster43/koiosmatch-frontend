@@ -78,14 +78,14 @@ function fmtDate(v?: string | null) {
   if (!v) return null
   const d = new Date(v)
   if (isNaN(d.getTime())) return null
-  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 function fmtDateTime(v?: string | null) {
   if (!v) return null
   const d = new Date(v)
   if (isNaN(d.getTime())) return null
-  return d.toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric',
+  return d.toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric',
                                           hour: '2-digit', minute: '2-digit' })
 }
 

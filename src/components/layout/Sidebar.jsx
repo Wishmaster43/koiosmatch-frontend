@@ -13,7 +13,7 @@ import TenantSwitcher from './TenantSwitcher'
 import {
   LayoutDashboard, Users, Building2,
   MessageCircle, Settings, ChevronDown, Brain, BarChart3, TrendingUp, BrainCircuit,
-  FileText, Briefcase, CalendarDays, Handshake, ListChecks, Target,
+  FileText, Briefcase, Handshake, ListChecks, Target,
 } from 'lucide-react'
 
 // Resolve a nav item's label from i18n by id (dots → underscores to stay flat).
@@ -46,7 +46,8 @@ const NAV_ITEMS = [
   { id: 'opportunities',  label: 'Kansen',         icon: Target },
   { id: 'tasks',          label: 'Taken',          icon: ListChecks },
   { id: 'customers',      label: 'Klanten',        icon: Building2 },
-  { id: 'planning',       label: 'Planning',       icon: CalendarDays },
+  // Planning tijdelijk verborgen (2026-06-26) — niet verwijderd, alleen uit. Terugzetten = deze regel + de CalendarDays-import herstellen.
+  // { id: 'planning',       label: 'Planning',       icon: CalendarDays },
   { id: 'aiagents',       label: 'AI & Workflows', icon: Brain },
   { id: 'whatsapp',       label: 'WhatsApp',       icon: MessageCircle },
 ]

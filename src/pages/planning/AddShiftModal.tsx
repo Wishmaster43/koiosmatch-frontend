@@ -8,6 +8,7 @@ import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Save, Star, Search } from 'lucide-react'
 import { formatDate } from './helpers'
+import { interactive } from '@/lib/a11y'
 import type { Suggestie, ShiftInput } from '../../types/planning'
 
 // ── Dummy kandidaten voor suggesties ─────────────────────────────────────────
@@ -300,7 +301,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
 function KandidaatRij({ s, selected, onClick }: { s: Suggestie; selected?: boolean; onClick?: () => void }) {
   const { t } = useTranslation('planning')
   return (
-    <div onClick={onClick}
+    <div {...interactive(onClick)}
       style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px', borderRadius: 8,
         background: selected ? 'var(--color-primary-bg)' : 'transparent',
         border: selected ? `1px solid var(--color-primary)` : '1px solid transparent',

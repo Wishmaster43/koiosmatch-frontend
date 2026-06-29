@@ -6,6 +6,7 @@
 import type { ReactNode } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import type { ChartDatum, TipProps } from './chartTypes'
+import ErrorBoundary from '../ui/ErrorBoundary'
 
 export interface BarSeries { key: string; label: string; color: string }
 
@@ -42,6 +43,7 @@ export default function WeeklyBarChartCard({ title, data = [], series = [], heig
   return (
     <div className="flex flex-col flex-1 min-w-0">
       <div className="mb-4 text-sm font-medium text-gray-600">{title}</div>
+      <ErrorBoundary compact>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
           <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
@@ -55,6 +57,7 @@ export default function WeeklyBarChartCard({ title, data = [], series = [], heig
           ))}
         </BarChart>
       </ResponsiveContainer>
+      </ErrorBoundary>
     </div>
   )
 }

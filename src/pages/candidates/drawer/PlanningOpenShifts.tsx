@@ -8,7 +8,8 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, Ban } from 'lucide-react'
 import { DUMMY_OPEN_SHIFTS } from '../data/mocks'
-import { FUNCTION_LEVELS, sectionBlock } from './constants'
+import { sectionBlock } from './constants'
+import { useFunctions } from '@/lib/useFunctions'
 import type { Id } from '@/types/common'
 import type { FavLists, OpenFilters, OpenShift } from './planningTypes'
 
@@ -25,6 +26,8 @@ const OPEN_SHIFTS = DUMMY_OPEN_SHIFTS as unknown as OpenShift[]
 
 export default function PlanningOpenShifts({ openFilters, setOpenFilters, scheduledIds, setScheduledIds, favorites, blacklist }: PlanningOpenShiftsProps) {
   const { t } = useTranslation('candidates')
+  // Function/level options from the tenant lookup (no hardcoded care-level list).
+  const { functions: FUNCTION_LEVELS } = useFunctions() as { functions: string[] }
 
   // Filter open shifts by distance, candidate level and selected shift types.
   const candLevel = openFilters.max_level

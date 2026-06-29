@@ -1,0 +1,212 @@
+{
+  "page": {
+    "title": "Postes",
+    "subtitle": "Gérez et publiez facilement tous vos postes ouverts.",
+    "add": "Nouveau poste",
+    "searchPlaceholder": "Rechercher des postes",
+    "loading": "Chargement des postes…",
+    "empty": "Aucun poste pour le moment.",
+    "loadError": "Impossible de charger les postes.",
+    "count": "Tous les postes"
+  },
+  "buckets": {
+    "all": "Tous"
+  },
+  "columns": {
+    "title": "Titre",
+    "code": "#",
+    "status": "Statut",
+    "leads": "Leads",
+    "applications": "Candidatures",
+    "published": "Publié",
+    "owner": "Responsable",
+    "client": "Client",
+    "createdAt": "Créé le"
+  },
+  "publishedState": {
+    "yes": "Publié",
+    "no": "Non publié"
+  },
+  "insights": {
+    "statusTitle": "Statut",
+    "ownerTitle": "Recruteur",
+    "clientTitle": "Client",
+    "clearFilter": "Effacer le filtre"
+  },
+  "kpi": {
+    "applied": "Postulé",
+    "accepted": "Accepté",
+    "invited": "Invité",
+    "proposed": "Proposition envoyée",
+    "hired": "Recruté",
+    "rejected": "Refusé"
+  },
+  "filters": {
+    "search": "Rechercher",
+    "status": "Statut",
+    "owner": "Recruteur",
+    "client": "Client",
+    "category": "Catégorie",
+    "industry": "Secteur",
+    "employmentType": "Type de contrat",
+    "categories": {
+      "general": "Général",
+      "organisation": "Organisation"
+    }
+  },
+  "bulk": {
+    "selected": "{{count}} sélectionné(s)",
+    "actions": "Actions groupées",
+    "deselect": "Désélectionner",
+    "changeOwner": "Changer de recruteur",
+    "searchOwner": "Rechercher un recruteur",
+    "noUsers": "Aucun utilisateur",
+    "changeStatus": "Changer le statut",
+    "searchStatus": "Rechercher un statut",
+    "changeClient": "Changer de client",
+    "searchClient": "Rechercher un client",
+    "noClients": "Aucun client",
+    "publishing": "Publication",
+    "publish": "Publier",
+    "unpublish": "Dépublier",
+    "removeTag": "Retirer le tag",
+    "searchTag": "Rechercher un tag",
+    "noTags": "Aucun tag",
+    "addNote": "Ajouter une note",
+    "notePlaceholder": "Écrire une note…",
+    "noteSubmit": "Ajouter",
+    "archive": "Archiver",
+    "archiveConfirm": "Archiver {{count}} postes ?",
+    "ownerChanged": "Recruteur modifié pour {{count}} postes.",
+    "statusChanged": "Statut défini sur {{value}} pour {{count}} postes.",
+    "clientChanged": "Client modifié pour {{count}} postes.",
+    "published_one": "{{count}} poste publié.",
+    "published_other": "{{count}} postes publiés.",
+    "unpublished_one": "{{count}} poste dépublié.",
+    "unpublished_other": "{{count}} postes dépubliés.",
+    "tagRemoved": "Tag « {{tag}} » retiré de {{count}} postes.",
+    "noteAdded": "Note ajoutée à {{count}} postes.",
+    "archived": "{{count}} postes archivés.",
+    "mutateError": "Impossible d'appliquer la modification.",
+    "archiveError": "Impossible d'archiver."
+  },
+  "drawer": {
+    "entityLabel": "Poste",
+    "createdAt": "Créé le {{date}}",
+    "edit": "Modifier",
+    "status": "Statut",
+    "owner": "Recruteur",
+    "client": "Client",
+    "selectClient": "Sélectionner un client",
+    "tags": "Tags",
+    "published": "Publié",
+    "notPublished": "Non publié",
+    "tabs": {
+      "details": "Détails",
+      "applicants": "Candidatures",
+      "matching": "Matching",
+      "publishing": "Publier",
+      "documents": "Documents",
+      "timeline": "Chronologie",
+      "notes": "Notes",
+      "statistics": "Statistiques"
+    }
+  },
+  "matching": {
+    "title": "Pondération du matching IA",
+    "subtitle": "Définissez l'importance de chaque dimension pour ce poste. L'IA évalue les candidats en conséquence.",
+    "less": "Moins important",
+    "balanced": "Équilibré",
+    "very": "Très important",
+    "save": "Enregistrer",
+    "saved": "Enregistré",
+    "dim": {
+      "qualifications": "Qualifications",
+      "technical_fit": "Adéquation technique",
+      "soft_skills": "Compétences relationnelles",
+      "cultural_alignment": "Adéquation culturelle",
+      "career_aspirations": "Aspirations professionnelles",
+      "location": "Localisation"
+    }
+  },
+  "details": {
+    "groups": {
+      "general": "Général",
+      "requirements": "Exigences",
+      "conditions": "Conditions"
+    },
+    "id": "ID du poste",
+    "status": "Statut",
+    "employmentType": "Type de contrat",
+    "location": "Site",
+    "salary": "Salaire",
+    "hours": "Heures hebdomadaires",
+    "experience": "Expérience",
+    "seniority": "Niveau d'expérience",
+    "education": "Formation",
+    "industry": "Secteur",
+    "category": "Catégorie",
+    "skills": "Compétences requises",
+    "addSkill": "Ajouter une compétence",
+    "noSkills": "Aucune compétence pour le moment.",
+    "description": "Description",
+    "descriptionPlaceholder": "Décrivez le poste…"
+  },
+  "publishing": {
+    "channels": "Sites d'emploi",
+    "applicationSettings": "Paramètres de candidature",
+    "fields": {
+      "cv": "CV",
+      "cover_letter": "Lettre de motivation",
+      "photo": "Photo",
+      "remarks": "Remarques",
+      "interview_consent": "Consentement à l'entretien"
+    },
+    "values": {
+      "required": "Requis",
+      "optional": "Optionnel",
+      "hidden": "Masqué"
+    },
+    "customFields": "Champs personnalisés",
+    "noCustomFields": "Aucun champ personnalisé configuré.",
+    "integrate": "Intégrer",
+    "publishedOn": "Publié",
+    "notPublished": "Non publié"
+  },
+  "applicants": {
+    "title": "Candidatures",
+    "empty": "Aucune candidature pour le moment.",
+    "leads": "Leads",
+    "totalLeads": "Total leads",
+    "phase": "Phase",
+    "source": "Source",
+    "byPhase": "Par phase",
+    "candidate": "Candidat"
+  },
+  "statistics": {
+    "title": "Conversion",
+    "conversionRate": "Taux de conversion",
+    "appliedToHired": "Postulé → recruté",
+    "bySource": "Par source",
+    "leadsToApplications": "Leads → candidatures",
+    "empty": "Pas encore assez de données."
+  },
+  "modal": {
+    "title": "Nouveau poste",
+    "fields": {
+      "title": "Titre",
+      "client": "Client",
+      "status": "Statut",
+      "owner": "Recruteur",
+      "employmentType": "Type de contrat",
+      "industry": "Secteur",
+      "category": "Catégorie",
+      "location": "Site"
+    },
+    "titlePlaceholder": "ex. Infirmier | La Haye",
+    "create": "Créer le poste",
+    "cancel": "Annuler",
+    "creating": "Création…",
+    "required": "Le titre est requis."
+  }
+}

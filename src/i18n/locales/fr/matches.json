@@ -1,0 +1,28 @@
+{
+  "title": "Matches",
+  "loading": "Chargement des matches…",
+  "empty": "Aucun match pour le moment.",
+  "error": "Impossible de charger les matches.",
+  "cols": {
+    "candidate": "Candidat",
+    "vacancy": "Poste",
+    "client": "Client",
+    "score": "Match",
+    "stage": "Phase",
+    "owner": "Responsable",
+    "date": "Créé"
+  },
+  "insights": {
+    "stage": "Phase",
+    "owner": "Responsable",
+    "clearFilter": "Effacer le filtre"
+  },
+  "kpi": {
+    "total": "Total",
+    "active": "Actif",
+    "hired": "Recruté",
+    "avgScore": "Score moy."
+  },
+  "add": "Nouveau match",
+  "addComingSoon": "Créez des matches depuis la fiche candidat ou poste."
+}

@@ -17,7 +17,12 @@
     "city": "Ville",
     "province": "Province",
     "createdAt": "Créé le",
-    "lastContactType": "Type de contact"
+    "lastContactType": "Type de contact",
+    "talentPool": "Vivier",
+    "koios": "Koios",
+    "phase": "Phase",
+    "deployability": "Statut",
+    "contractForm": "Forme de contrat"
   },
   "bulk": {
     "selected": "{{count}} sélectionné(s)",
@@ -137,7 +142,10 @@
       "streetPlaceholder": "p. ex. Rue Principale",
       "houseNumber": "Numéro",
       "houseNumberSuffix": "Complément",
-      "postalCode": "Code postal"
+      "postalCode": "Code postal",
+      "functionTitle": "Intitulé du poste",
+      "functionPlaceholder": "ex. Verzorgende IG",
+      "owner": "Responsable"
     },
     "gender": {
       "male": "Homme",
@@ -156,10 +164,12 @@
       "profile": "Profil",
       "background": "Parcours",
       "work": "Travail",
+      "match": "Match",
       "planning": "Planning",
       "preferences": "Préférences",
       "zzp": "Indépendant",
       "communication": "Communication",
+      "documents": "Documents",
       "statistics": "Statistiques",
       "changelog": "Journal"
     },
@@ -172,6 +182,7 @@
     "uploadCv": "Téléverser un CV",
     "downloadCv": "Télécharger le CV",
     "generating": "Génération...",
+    "customFields": "Champs personnalisés",
     "edit": "Modifier",
     "editing": "Modification…",
     "createdAt": "Créé le {{date}}",
@@ -181,7 +192,17 @@
     "stage": "Type de tunnel",
     "candidateType": "Type de candidat",
     "entityLabel": "Candidat",
-    "applications": "Candidatures"
+    "applications": "Candidatures",
+    "phase": "Phase",
+    "deployability": "Statut",
+    "placedNeedsMatchTitle": "Match requis",
+    "placedNeedsMatchBody": "Le statut « Placé » nécessite un Match lié. Associez d abord un Match via l onglet Match.",
+    "blacklist": "Liste noire",
+    "blacklistReasonTitle": "Raison de la liste noire",
+    "blacklistConfirm": "Ajouter",
+    "statusReasonTitle": "Changement de statut",
+    "reasonLabel": "Raison",
+    "returnDateLabel": "De nouveau disponible à partir de"
   },
   "stage": {
     "lead": "Piste",
@@ -210,7 +231,12 @@
     "placeOfBirth": "Lieu de naissance",
     "clear": "Effacer",
     "expand": "Agrandir",
-    "collapse": "Réduire"
+    "collapse": "Réduire",
+    "street": "Rue",
+    "houseNumber": "Numéro",
+    "houseNumberSuffix": "Complément",
+    "postalCode": "Code postal",
+    "city": "Ville"
   },
   "addFields": {
     "functionTitle": "Intitulé du poste",
@@ -230,7 +256,11 @@
     "expiryDate": "Date d'expiration",
     "licenseNumber": "numéro de licence",
     "skill": "Compétence",
-    "skillLevel": "Niveau de compétence"
+    "skillLevel": "Niveau de compétence",
+    "currentJob": "Poste actuel",
+    "inProgress": "En cours de formation",
+    "expectedEnd": "Date de fin prévue",
+    "present": "présent"
   },
   "work": {
     "client": "Client",
@@ -375,7 +405,11 @@
     "timeline": "Chronologie",
     "timelineEmpty": "Aucune activité.",
     "conversations": "Conversations",
-    "conversationsEmpty": "Aucune conversation."
+    "conversationsEmpty": "Aucune conversation.",
+    "pools": "Viviers",
+    "poolAdd": "Ajouter à un vivier",
+    "poolsEmpty": "Aucun vivier configuré pour le moment.",
+    "poolKoios": "Suggéré par Koios"
   },
   "preferences": {
     "title": "Préférences",
@@ -391,6 +425,9 @@
     "minRate": "Taux horaire min. (€)",
     "contract": "Préférence de contrat",
     "remarks": "Remarques",
+    "groupPayroll": "Précompte",
+    "wageTax": "Appliquer le précompte",
+    "wageTaxFrom": "À partir du",
     "groupAvailability": "Disponibilité",
     "groupTravel": "Déplacements",
     "groupWork": "Préférences de travail",
@@ -479,6 +516,7 @@
     "loading": "Chargement…",
     "error": "Impossible de charger le journal.",
     "empty": "Aucune modification enregistrée.",
+    "fromIp": "Modifié depuis l'IP {{ip}}",
     "system": "Système"
   },
   "matchesView": {
@@ -493,6 +531,13 @@
       "pending": "En cours",
       "active": "Actif",
       "ended": "Terminé"
+    }
+  },
+  "koios": {
+    "actions": {
+      "add_to_pool": "Ajouter au vivier",
+      "contact": "Contacter",
+      "plan_intake": "Planifier l'entretien"
     }
   }
 }

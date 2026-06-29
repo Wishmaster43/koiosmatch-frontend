@@ -75,6 +75,7 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
           <div>
             <Label required>{t('modal.fields.name')}</Label>
             <input value={form.name} onChange={e => set('name', e.target.value)} placeholder={t('modal.fields.namePlaceholder')}
+              aria-label={t('modal.fields.name')}
               style={{ ...iStyle, borderColor: errors.name ? 'var(--color-danger)' : undefined }} />
             {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
           </div>
@@ -82,12 +83,12 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <Label>{t('modal.fields.debtorNumber')}</Label>
-              <input value={form.debtorNumber} onChange={e => set('debtorNumber', e.target.value)} placeholder="10042" style={iStyle} />
+              <input value={form.debtorNumber} onChange={e => set('debtorNumber', e.target.value)} placeholder="10042" aria-label={t('modal.fields.debtorNumber')} style={iStyle} />
             </div>
             <div>
               <Label>{t('modal.fields.status')}</Label>
               <div style={{ position: 'relative' }}>
-                <select value={form.status} onChange={e => set('status', e.target.value)} style={selectStyle}>
+                <select value={form.status} onChange={e => set('status', e.target.value)} aria-label={t('modal.fields.status')} style={selectStyle}>
                   {statuses.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
                 </select>
                 <ChevronDown size={13} style={chevron} />
@@ -99,7 +100,7 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
             <div>
               <Label>{t('modal.fields.accountManager')}</Label>
               <div style={{ position: 'relative' }}>
-                <select value={form.ownerId} onChange={e => set('ownerId', e.target.value)} style={selectStyle}>
+                <select value={form.ownerId} onChange={e => set('ownerId', e.target.value)} aria-label={t('modal.fields.accountManager')} style={selectStyle}>
                   <option value="">{t('modal.fields.selectOwner')}</option>
                   {users.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
                 </select>
@@ -109,7 +110,7 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
             <div>
               <Label>{t('modal.fields.industry')}</Label>
               <div style={{ position: 'relative' }}>
-                <select value={form.industry} onChange={e => set('industry', e.target.value)} style={selectStyle}>
+                <select value={form.industry} onChange={e => set('industry', e.target.value)} aria-label={t('modal.fields.industry')} style={selectStyle}>
                   <option value="">{t('modal.fields.selectIndustry')}</option>
                   {industries.map(i => <option key={i} value={i}>{i}</option>)}
                 </select>
@@ -120,7 +121,7 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
 
           <div>
             <Label>{t('modal.fields.city')}</Label>
-            <input value={form.city} onChange={e => set('city', e.target.value)} placeholder={t('modal.fields.cityPlaceholder')} style={iStyle} />
+            <input value={form.city} onChange={e => set('city', e.target.value)} placeholder={t('modal.fields.cityPlaceholder')} aria-label={t('modal.fields.city')} style={iStyle} />
           </div>
         </div>
 

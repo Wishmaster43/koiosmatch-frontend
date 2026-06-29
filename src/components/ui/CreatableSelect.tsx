@@ -72,7 +72,7 @@ export default function CreatableSelect({
           <div style={{ padding: 6, borderBottom: '1px solid var(--border)' }}>
             <input ref={inputRef} value={query} onChange={e => setQuery(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter' && canCreate) pick(q); if (e.key === 'Escape') setOpen(false) }}
-              placeholder={placeholder}
+              placeholder={placeholder} aria-label={placeholder}
               style={{ width: '100%', boxSizing: 'border-box', padding: '6px 8px', fontSize: 12,
                 border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
           </div>

@@ -44,5 +44,9 @@
     "week": "Semana",
     "day": "Día",
     "list": "Lista"
+  },
+  "filters": {
+    "shift": "Turno",
+    "location": "Ubicación"
   }
 }

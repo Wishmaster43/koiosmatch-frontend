@@ -47,19 +47,19 @@ function Row({ icon: Icon, label, value, mono }: { icon: LucideIcon; label: Reac
 
 function formatDateTime(iso?: string | null) {
   if (!iso) return null
-  return new Date(iso).toLocaleString(undefined, {
+  return new Date(iso).toLocaleString('nl-NL', {
     day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
   })
 }
 
 function formatTime(iso?: string | null) {
   if (!iso) return null
-  return new Date(iso).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
 }
 
 function formatDate(iso?: string | null) {
   if (!iso) return null
-  return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(iso).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function CandidateBlock({ invite }: { invite: ShiftInvite }) {

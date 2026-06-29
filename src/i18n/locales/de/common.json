@@ -86,7 +86,10 @@
     "settings": "Einstellungen",
     "modulesGroup": "Module",
     "switchTenant": "Mandant wechseln",
-    "workflows": "Workflows"
+    "workflows": "Workflows",
+    "matches": "Matches",
+    "opportunities": "Opportunities",
+    "tasks": "Aufgaben"
   },
   "koios": {
     "online": "Online",
@@ -118,5 +121,7 @@
   "units": {
     "candidates": "Kandidaten",
     "intakes": "Intakes"
-  }
+  },
+  "yes": "Ja",
+  "no": "Nein"
 }

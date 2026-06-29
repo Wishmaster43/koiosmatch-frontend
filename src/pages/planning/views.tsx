@@ -6,6 +6,7 @@
 import { useTranslation } from 'react-i18next'
 import { Clock, MapPin, User } from 'lucide-react'
 import { isSameDay, WEEKDAYS_MON, formatDate } from './helpers'
+import { interactive } from '@/lib/a11y'
 import type { Shift } from '../../types/planning'
 
 interface ViewProps { current: Date; shifts: Shift[]; today: Date; onDayClick: (date: Date) => void }
@@ -131,7 +132,7 @@ export function WeekView({ current, shifts, today, onDayClick }: ViewProps) {
                   {d.getDate()}
                 </div>
               </div>
-              <div onClick={() => onDayClick(d)} style={{ minHeight: 300, cursor: 'pointer', padding: '2px' }}
+              <div {...interactive(() => onDayClick(d))} style={{ minHeight: 300, cursor: 'pointer', padding: '2px' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'var(--hover-bg)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                 {shifts.filter(s => isSameDay(s.date, d)).map(s => (

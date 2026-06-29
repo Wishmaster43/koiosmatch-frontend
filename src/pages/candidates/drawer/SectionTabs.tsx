@@ -1,10 +1,9 @@
 /**
- * SectionTabs — the candidate's list sections (experience, education, languages,
+ * SectionTabs — the candidate's list sections (experience, education,
  * certifications, skills). Each is a thin config on the shared AddableSection.
  */
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { GripVertical } from 'lucide-react'
 import AddableSectionJs from '@/components/forms/AddableSection'
 import type { Id } from '@/types/common'
 
@@ -38,7 +37,6 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
         const e = raw as { id?: Id; title?: string; function_title?: string; company?: string; employer?: string; location?: string; start?: string; start_date?: string; end?: string; end_date?: string; current?: boolean; period?: string }
         return (
           <div key={e.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <GripVertical size={14} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 2 }} />
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{e.title ?? e.function_title}</div>
@@ -75,7 +73,6 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
         const o = raw as { id?: Id; title?: string; education?: string; school?: string; institution?: string; period?: string; year?: string }
         return (
           <div key={o.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-            <GripVertical size={14} style={{ color: 'var(--text-muted)', flexShrink: 0, marginTop: 2 }} />
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{o.title ?? o.education}</div>
@@ -83,28 +80,6 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{o.period ?? o.year}</div>
             </div>
           </div>
-        )
-      }} />
-  )
-}
-
-export function LanguageTab({ items = [], onAdd, onEdit, onRemove }: RelTabProps) {
-  const { t } = useTranslation('candidates')
-  const fields = [
-    { key: 'language', label: t('addFields.language') },
-    { key: 'spoken',   label: t('addFields.spokenLevel') },
-    { key: 'written',  label: t('addFields.writtenLevel') },
-  ]
-  return (
-    <AddableSection title={t('sections.languages')} emptyText={t('sections.languagesEmpty')}
-      items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove} layout="tags"
-      renderItem={(raw: RelItem, i: number) => {
-        const l = raw as { id?: Id; language?: string; spoken?: string; written?: string }
-        return (
-          <span key={l.id ?? i} style={{ fontSize: 11, padding: '4px 10px', borderRadius: 99,
-            border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
-            {l.language}{l.spoken ? ` · ${l.spoken}` : ''}{l.written ? ` · ${l.written}` : ''}
-          </span>
         )
       }} />
   )

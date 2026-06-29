@@ -63,24 +63,24 @@ export default function NewUserModal({ onClose, onCreated }: {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
             <div>
               <label style={label}>{t('firstName')}</label>
-              <input required value={form.firstname} onChange={set('firstname')} style={input} placeholder="Jan" />
+              <input required value={form.firstname} onChange={set('firstname')} style={input} placeholder="Jan" aria-label={t('firstName')} />
             </div>
             <div>
               <label style={label}>{t('lastName')}</label>
-              <input value={form.lastname} onChange={set('lastname')} style={input} placeholder="Jansen" />
+              <input value={form.lastname} onChange={set('lastname')} style={input} placeholder="Jansen" aria-label={t('lastName')} />
             </div>
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={label}>{t('email')}</label>
-            <input required type="email" value={form.email} onChange={set('email')} style={input} placeholder="jan@bedrijf.nl" />
+            <input required type="email" value={form.email} onChange={set('email')} style={input} placeholder="jan@bedrijf.nl" aria-label={t('email')} />
           </div>
           <div style={{ marginBottom: 12 }}>
             <label style={label}>{t('password')}</label>
-            <input required type="password" value={form.password} onChange={set('password')} style={input} placeholder={t('pwPlaceholder')} />
+            <input required type="password" value={form.password} onChange={set('password')} style={input} placeholder={t('pwPlaceholder')} aria-label={t('password')} />
           </div>
           <div style={{ marginBottom: 20 }}>
             <label style={label}>{t('role')}</label>
-            <select value={form.role} onChange={set('role')} style={{ ...input, cursor: 'pointer' }}>
+            <select value={form.role} onChange={set('role')} aria-label={t('role')} style={{ ...input, cursor: 'pointer' }}>
               {ROLES.map(r => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
             </select>
           </div>

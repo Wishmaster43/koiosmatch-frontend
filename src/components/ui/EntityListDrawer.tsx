@@ -62,7 +62,7 @@ export default function EntityListDrawer({ title, items, onClose }: EntityListDr
                         background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7 }}>
             <Search size={13} color="var(--text-muted)" />
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder={t('search')}
+              placeholder={t('search')} aria-label={t('search')}
               style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none',
                        fontSize: 12, color: 'var(--text)' }} />
           </div>

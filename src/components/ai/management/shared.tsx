@@ -7,6 +7,7 @@ import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, ChevronDown, Clock, Plus, RefreshCw, Save, Trash2 } from 'lucide-react'
+import { interactive } from '@/lib/a11y'
 
 // One selectable AI model.
 export interface Model { value: string; label: string; provider: string; strength: string | null }
@@ -97,7 +98,7 @@ export function VersionList({ versions, onRestore }: { versions?: Version[]; onR
               padding: '6px 10px', borderBottom: i < versions.length - 1 ? '1px solid var(--border)' : 'none',
               background: 'var(--bg)', fontSize: 11 }}>
               <span style={{ color: 'var(--text-muted)' }}>
-                v{v.version ?? i + 1} — {v.created_at ? new Date(v.created_at).toLocaleString() : ''}
+                v{v.version ?? i + 1} — {v.created_at ? new Date(v.created_at).toLocaleString('nl-NL') : ''}
               </span>
               <button onClick={() => onRestore(v)}
                 style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '1px 5px' }}>
@@ -166,7 +167,7 @@ export function ListRow<T>({ item, active, onSelect, label, sublabel, onDelete }
   item: T; active?: boolean; onSelect: (item: T) => void; label?: ReactNode; sublabel?: ReactNode; onDelete?: (item: T) => void
 }) {
   return (
-    <div onClick={() => onSelect(item)}
+    <div {...interactive(() => onSelect(item))}
       style={{ padding: '8px 11px', cursor: 'pointer', fontSize: 12,
         background: active ? 'var(--color-primary-bg)' : 'transparent',
         borderBottom: '1px solid var(--border)',

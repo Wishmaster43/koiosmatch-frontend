@@ -33,9 +33,10 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
   const isStatusBlock = slug === 'statuses'
   const isFunnelBlock = slug === 'funnel-types'
 
-  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', is_applicant: false, requires_appointment: false, requires_reason: false, is_match: false, is_rejected: false })
+  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', is_applicant: false, requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false })
   const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280',
     is_applicant: it.is_applicant === true, requires_appointment: it.requires_appointment === true, requires_reason: it.requires_reason === true,
+    requires_match: it.requires_match === true, expects_return_date: it.expects_return_date === true,
     is_match: it.is_match === true, is_rejected: it.is_rejected === true })
 
   const save = async () => {
@@ -43,7 +44,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
     setBusy(true)
     // Only send the flag that exists on this lookup; the backend guards the rest.
     const flagFields = {
-      ...(isStatusBlock ? { is_applicant: modal.is_applicant, requires_reason: modal.requires_reason } : {}),
+      ...(isStatusBlock ? { is_applicant: modal.is_applicant, requires_reason: modal.requires_reason, requires_match: modal.requires_match, expects_return_date: modal.expects_return_date } : {}),
       ...(isFunnelBlock ? { requires_appointment: modal.requires_appointment, is_match: modal.is_match, is_rejected: modal.is_rejected } : {}),
     }
     try {
@@ -204,6 +205,30 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
               </div>
             )}
 
+            {/* Match-required toggle — statuses only (e.g. Placed needs a linked Match). */}
+            {isStatusBlock && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={modal.requires_match}
+                    onChange={e => setModal(m => ({ ...m, requires_match: e.target.checked }))} />
+                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.requiresMatch')}</span>
+                </label>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.requiresMatchHint')}</div>
+              </div>
+            )}
+
+            {/* Return-date toggle — statuses only (e.g. Unavailable asks "available again on"). */}
+            {isStatusBlock && (
+              <div style={{ marginBottom: 14 }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <input type="checkbox" checked={modal.expects_return_date}
+                    onChange={e => setModal(m => ({ ...m, expects_return_date: e.target.checked }))} />
+                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.expectsReturnDate')}</span>
+                </label>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.expectsReturnDateHint')}</div>
+              </div>
+            )}
+
             {/* Appointment toggle — funnel stages only; flags the intake stage. */}
             {isFunnelBlock && (
               <div style={{ marginBottom: 14 }}>
@@ -287,7 +312,12 @@ export function FunnelStagesSettings() {
   return <CandidateLookupSection typeKey="funnel_types" slug="funnel-types" />
 }
 
-// Candidate statuses (person lifecycle).
+// Candidate phase (relationship lifecycle: Lead → Kandidaat) — model v2 axis.
+export function CandidatePhasesSettings() {
+  return <CandidateLookupSection typeKey="phases" slug="phases" />
+}
+
+// Candidate deployability ("status": Beschikbaar/Geplaatst/… ) — model v2 axis.
 export function CandidateStatusesSettings() {
   return <CandidateLookupSection typeKey="statuses" slug="statuses" />
 }

@@ -86,7 +86,10 @@
     "settings": "Paramètres",
     "modulesGroup": "Modules",
     "switchTenant": "Changer de locataire",
-    "workflows": "Workflows"
+    "workflows": "Workflows",
+    "matches": "Matches",
+    "opportunities": "Opportunités",
+    "tasks": "Tâches"
   },
   "koios": {
     "online": "En ligne",
@@ -118,5 +121,7 @@
   "units": {
     "candidates": "candidats",
     "intakes": "intakes"
-  }
+  },
+  "yes": "Oui",
+  "no": "Non"
 }

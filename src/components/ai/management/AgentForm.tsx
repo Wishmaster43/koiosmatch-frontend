@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Brain, Check, MessageSquare, Send, Trash2 } from 'lucide-react'
 import api from '@/lib/api'
+import { interactive } from '@/lib/a11y'
 import { MODELS, STRENGTH_COLORS, inputStyle, Field, Badge, SaveBar } from './shared'
 import type { AiAgent, AiItem, ChatMessage } from '@/types/ai'
 
@@ -199,7 +200,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
           <Field label={t('ai.agent.model')}>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 6 }}>
               {MODELS.map(m => (
-                <div key={m.value} onClick={() => set('model', m.value)}
+                <div key={m.value} {...interactive(() => set('model', m.value))}
                   style={{ padding: '7px 9px', borderRadius: 8, cursor: 'pointer', transition: 'all 0.12s',
                     border: `1.5px solid ${form.model === m.value ? 'var(--color-primary)' : 'var(--border)'}`,
                     background: form.model === m.value ? 'var(--color-primary-bg)' : 'var(--bg)' }}>
@@ -251,7 +252,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
 
           <Field label={t('ai.agent.knowledge')}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-              <div onClick={() => set('use_knowledge', !form.use_knowledge)}
+              <div {...interactive(() => set('use_knowledge', !form.use_knowledge))}
                 style={{ width: 34, height: 18, borderRadius: 999, position: 'relative', transition: 'background 0.15s', background: form.use_knowledge ? 'var(--color-primary)' : '#D1D5DB', cursor: 'pointer', flexShrink: 0 }}>
                 <div style={{ position: 'absolute', top: 2, left: form.use_knowledge ? 16 : 2, width: 14, height: 14, borderRadius: '50%', background: 'white', transition: 'left 0.15s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
               </div>

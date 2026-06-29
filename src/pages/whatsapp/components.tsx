@@ -206,7 +206,7 @@ export function EscalationList({ escalations, loading }: { escalations: WaEscala
 
 function fmtAxisDate(dateStr: string) {
   const [, m, d] = dateStr.split('-')
-  const monthAbbr = new Date(2000, parseInt(m) - 1, 1).toLocaleString(undefined, { month: 'short' })
+  const monthAbbr = new Date(2000, parseInt(m) - 1, 1).toLocaleString('nl-NL', { month: 'short' })
   return `${parseInt(d)} ${monthAbbr}`
 }
 

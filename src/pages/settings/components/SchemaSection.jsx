@@ -52,11 +52,15 @@ export default function SchemaSection({ schema }) {
   )
   const form = useSettingsForm(defaults)
   const k = schema.i18nKey
+  // i18n runs with returnEmptyString:false, so t() echoes the key back when there is
+  // no translation. Optional text (subtitle/description) must show NOTHING then —
+  // never the raw key. `opt` collapses a missing translation to undefined.
+  const opt = (key) => { const v = t(key); return v === key ? undefined : v }
 
   return (
     <SettingsScaffold
       title={t(schema.titleI18n ?? `${k}.title`)}
-      subtitle={t(`${k}.subtitle`, '')}
+      subtitle={opt(`${k}.subtitle`)}
       maxWidth={schema.maxWidth ?? 720}
       form={form}>
       <SettingCardList>
@@ -65,7 +69,7 @@ export default function SchemaSection({ schema }) {
           return (
             <SettingRow key={field.key}
               label={t(`${base}.label`)}
-              description={t(`${base}.description`, '')}>
+              description={opt(`${base}.description`)}>
               <FieldControl field={field} value={form.values[field.key]}
                 onChange={v => form.set(field.key, v)} t={t} base={base} />
             </SettingRow>

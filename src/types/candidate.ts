@@ -11,6 +11,20 @@
 import type { Id, Loose } from './common'
 export type { Loose }
 
+/** A tenant-defined custom field definition (GET /candidate-custom-fields). */
+export interface CandidateCustomFieldDef {
+  id: string | number
+  key: string
+  label: string
+  label_i18n?: Record<string, string>
+  type: 'text' | 'number' | 'date' | 'select' | 'boolean' | 'textarea'
+  options?: string[]
+  required_for?: string[]
+  sort_order: number
+  active: boolean
+  has_data: boolean
+}
+
 /** Server-wide candidate stats (/candidates/stats) — totals across the filtered set. */
 export interface CandidateStats {
   by_status?: Array<{ value?: string; status?: string; count?: number }>
@@ -39,11 +53,13 @@ export interface CandidatePool {
   [k: string]: unknown
 }
 
-/** Channel consent (AVG opt-in): per-channel flag + the moment it was given. */
+/** Channel consent (AVG): per-channel opt-in flag + the moment it was recorded.
+ * Backend contract (C-11): nested under `consent`; WhatsApp/e-mail default true
+ * (operational opt-out), newsletter false (opt-in). `_consent_at` is server-stamped. */
 export interface CandidateConsent {
-  whatsapp_consent: boolean
-  email_consent: boolean
-  newsletter_consent: boolean
+  whatsapp_opt_in: boolean
+  email_opt_in: boolean
+  newsletter_opt_in: boolean
   whatsapp_consent_at: string | null
   email_consent_at: string | null
   newsletter_consent_at: string | null
@@ -76,7 +92,10 @@ export interface Candidate {
   stageLabel: string | null
   stageColor: string | null
   stageVacancyId: string | number
+  phase: string
   status: string
+  blacklisted: boolean
+  blacklistReason: string | null
   availability: string | null
   owner: string
   ownerId: string | number | null
@@ -122,6 +141,7 @@ export interface Candidate {
   zzp: Loose
   planningSettings: Loose
   consent: CandidateConsent
+  customFields: Record<string, unknown>
   matchesCount: number
   applicationsCount: number
   shiftsCount: number | undefined
@@ -172,7 +192,11 @@ export interface ApiCandidate {
   funnel_vacancy_id?: string | number
   stage_vacancy_id?: string | number
   vacancy_id?: string | number
+  phase?: string
+  deployability?: string
   status?: string
+  blacklisted?: boolean
+  blacklist_reason?: string | null
   availability?: string | null
   owner?: { id?: string | number; name?: string; avatar_color?: string }
   recruiter?: { name?: string; avatar_color?: string }
@@ -229,15 +253,18 @@ export interface ApiCandidate {
   matches?: ApiCandidateMatch[]
   notes?: Loose[]
   timeline?: Loose[]
+  custom_fields?: Record<string, unknown>
   preferences?: Loose
   zzp?: Loose
   planning_settings?: Loose
-  whatsapp_consent?: boolean
-  email_consent?: boolean
-  newsletter_consent?: boolean
-  whatsapp_consent_at?: string | null
-  email_consent_at?: string | null
-  newsletter_consent_at?: string | null
+  consent?: {
+    whatsapp_opt_in?: boolean
+    email_opt_in?: boolean
+    newsletter_opt_in?: boolean
+    whatsapp_consent_at?: string | null
+    email_consent_at?: string | null
+    newsletter_consent_at?: string | null
+  }
   stats?: { matches_count?: number; applications_count?: number; shifts_count?: number; hours_worked?: number }
   [k: string]: unknown
 }

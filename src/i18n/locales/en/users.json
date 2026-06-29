@@ -33,5 +33,11 @@
     "planner": "Planner",
     "user": "User"
   },
-  "noRoles": "No roles available"
+  "noRoles": "No roles available",
+  "editUser": "Edit user",
+  "saveFailed": "Could not save.",
+  "saving": "Saving…",
+  "phone": "Phone number",
+  "changePassword": "Change password",
+  "newPassword": "New password"
 }

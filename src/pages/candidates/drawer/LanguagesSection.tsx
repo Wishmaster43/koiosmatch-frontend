@@ -39,7 +39,7 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('sections.languages')}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('sections.languages')}</span>
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
             <button onClick={save} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>

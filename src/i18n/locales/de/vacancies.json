@@ -1,0 +1,212 @@
+{
+  "page": {
+    "title": "Stellen",
+    "subtitle": "Verwalte und veröffentliche all deine offenen Stellen mühelos.",
+    "add": "Neue Stelle",
+    "searchPlaceholder": "Stellen suchen",
+    "loading": "Stellen werden geladen…",
+    "empty": "Noch keine Stellen.",
+    "loadError": "Stellen konnten nicht geladen werden.",
+    "count": "Alle Stellen"
+  },
+  "buckets": {
+    "all": "Alle"
+  },
+  "columns": {
+    "title": "Titel",
+    "code": "#",
+    "status": "Status",
+    "leads": "Leads",
+    "applications": "Bewerbungen",
+    "published": "Veröffentlicht",
+    "owner": "Inhaber",
+    "client": "Kunde",
+    "createdAt": "Erstellt am"
+  },
+  "publishedState": {
+    "yes": "Veröffentlicht",
+    "no": "Nicht veröffentlicht"
+  },
+  "insights": {
+    "statusTitle": "Status",
+    "ownerTitle": "Recruiter",
+    "clientTitle": "Kunde",
+    "clearFilter": "Filter zurücksetzen"
+  },
+  "kpi": {
+    "applied": "Beworben",
+    "accepted": "Angenommen",
+    "invited": "Eingeladen",
+    "proposed": "Vorschlag gesendet",
+    "hired": "Eingestellt",
+    "rejected": "Abgelehnt"
+  },
+  "filters": {
+    "search": "Suchen",
+    "status": "Status",
+    "owner": "Recruiter",
+    "client": "Kunde",
+    "category": "Kategorie",
+    "industry": "Branche",
+    "employmentType": "Beschäftigungsart",
+    "categories": {
+      "general": "Allgemein",
+      "organisation": "Organisation"
+    }
+  },
+  "bulk": {
+    "selected": "{{count}} ausgewählt",
+    "actions": "Massenaktionen",
+    "deselect": "Abwählen",
+    "changeOwner": "Recruiter ändern",
+    "searchOwner": "Recruiter suchen",
+    "noUsers": "Keine Benutzer",
+    "changeStatus": "Status ändern",
+    "searchStatus": "Status suchen",
+    "changeClient": "Kunde ändern",
+    "searchClient": "Kunde suchen",
+    "noClients": "Keine Kunden",
+    "publishing": "Wird veröffentlicht",
+    "publish": "Veröffentlichen",
+    "unpublish": "Veröffentlichung aufheben",
+    "removeTag": "Tag entfernen",
+    "searchTag": "Tag suchen",
+    "noTags": "Keine Tags",
+    "addNote": "Notiz hinzufügen",
+    "notePlaceholder": "Notiz schreiben…",
+    "noteSubmit": "Hinzufügen",
+    "archive": "Archivieren",
+    "archiveConfirm": "{{count}} Stellen archivieren?",
+    "ownerChanged": "Recruiter für {{count}} Stellen geändert.",
+    "statusChanged": "Status auf {{value}} gesetzt für {{count}} Stellen.",
+    "clientChanged": "Kunde für {{count}} Stellen geändert.",
+    "published_one": "{{count}} Stelle veröffentlicht.",
+    "published_other": "{{count}} Stellen veröffentlicht.",
+    "unpublished_one": "{{count}} Stelle nicht mehr veröffentlicht.",
+    "unpublished_other": "{{count}} Stellen nicht mehr veröffentlicht.",
+    "tagRemoved": "Tag „{{tag}}“ von {{count}} Stellen entfernt.",
+    "noteAdded": "Notiz zu {{count}} Stellen hinzugefügt.",
+    "archived": "{{count}} Stellen archiviert.",
+    "mutateError": "Änderung konnte nicht angewendet werden.",
+    "archiveError": "Archivieren fehlgeschlagen."
+  },
+  "drawer": {
+    "entityLabel": "Stelle",
+    "createdAt": "Erstellt am {{date}}",
+    "edit": "Bearbeiten",
+    "status": "Status",
+    "owner": "Recruiter",
+    "client": "Kunde",
+    "selectClient": "Kunde wählen",
+    "tags": "Tags",
+    "published": "Veröffentlicht",
+    "notPublished": "Nicht veröffentlicht",
+    "tabs": {
+      "details": "Details",
+      "applicants": "Bewerbungen",
+      "matching": "Matching",
+      "publishing": "Veröffentlichen",
+      "documents": "Dokumente",
+      "timeline": "Verlauf",
+      "notes": "Notizen",
+      "statistics": "Statistiken"
+    }
+  },
+  "matching": {
+    "title": "KI-Matching-Gewichtung",
+    "subtitle": "Lege fest, wie wichtig jede Dimension für diese Stelle ist. Die KI gewichtet Kandidaten entsprechend.",
+    "less": "Weniger wichtig",
+    "balanced": "Ausgewogen",
+    "very": "Sehr wichtig",
+    "save": "Speichern",
+    "saved": "Gespeichert",
+    "dim": {
+      "qualifications": "Qualifikationen",
+      "technical_fit": "Technische Eignung",
+      "soft_skills": "Soft Skills",
+      "cultural_alignment": "Kulturelle Passung",
+      "career_aspirations": "Karrierewünsche",
+      "location": "Standort"
+    }
+  },
+  "details": {
+    "groups": {
+      "general": "Allgemein",
+      "requirements": "Anforderungen",
+      "conditions": "Konditionen"
+    },
+    "id": "Stellen-ID",
+    "status": "Status",
+    "employmentType": "Beschäftigungsart",
+    "location": "Standort",
+    "salary": "Gehalt",
+    "hours": "Wochenstunden",
+    "experience": "Erfahrung",
+    "seniority": "Senioritätslevel",
+    "education": "Ausbildung",
+    "industry": "Branche",
+    "category": "Kategorie",
+    "skills": "Erforderliche Fähigkeiten",
+    "addSkill": "Fähigkeit hinzufügen",
+    "noSkills": "Noch keine Fähigkeiten.",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "Beschreibe die Stelle…"
+  },
+  "publishing": {
+    "channels": "Jobbörsen",
+    "applicationSettings": "Bewerbungseinstellungen",
+    "fields": {
+      "cv": "Lebenslauf",
+      "cover_letter": "Anschreiben",
+      "photo": "Foto",
+      "remarks": "Bemerkungen",
+      "interview_consent": "Interview-Einwilligung"
+    },
+    "values": {
+      "required": "Erforderlich",
+      "optional": "Optional",
+      "hidden": "Ausgeblendet"
+    },
+    "customFields": "Benutzerdefinierte Felder",
+    "noCustomFields": "Keine benutzerdefinierten Felder konfiguriert.",
+    "integrate": "Integrieren",
+    "publishedOn": "Veröffentlicht",
+    "notPublished": "Nicht veröffentlicht"
+  },
+  "applicants": {
+    "title": "Bewerbungen",
+    "empty": "Noch keine Bewerbungen.",
+    "leads": "Leads",
+    "totalLeads": "Leads gesamt",
+    "phase": "Phase",
+    "source": "Quelle",
+    "byPhase": "Nach Phase",
+    "candidate": "Kandidat"
+  },
+  "statistics": {
+    "title": "Konversion",
+    "conversionRate": "Konversionsrate",
+    "appliedToHired": "Beworben → eingestellt",
+    "bySource": "Nach Quelle",
+    "leadsToApplications": "Leads → Bewerbungen",
+    "empty": "Noch nicht genügend Daten."
+  },
+  "modal": {
+    "title": "Neue Stelle",
+    "fields": {
+      "title": "Titel",
+      "client": "Kunde",
+      "status": "Status",
+      "owner": "Recruiter",
+      "employmentType": "Beschäftigungsart",
+      "industry": "Branche",
+      "category": "Kategorie",
+      "location": "Standort"
+    },
+    "titlePlaceholder": "z. B. Pflegekraft | Den Haag",
+    "create": "Stelle erstellen",
+    "cancel": "Abbrechen",
+    "creating": "Wird erstellt…",
+    "required": "Titel ist erforderlich."
+  }
+}

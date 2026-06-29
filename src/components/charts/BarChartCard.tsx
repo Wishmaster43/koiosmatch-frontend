@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer, ReferenceLine } from 'recharts'
 import { useTranslation } from 'react-i18next'
 import type { ChartDatum, TipProps } from './chartTypes'
+import ErrorBoundary from '../ui/ErrorBoundary'
 
 function BarTooltip({ active, payload, label, total, showPercent }: TipProps & { total?: number; showPercent?: boolean }) {
   if (!active || !payload?.length) return null
@@ -58,6 +59,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
         {onBarClick && <span className="text-xs text-gray-300">{t('clickBar')}</span>}
       </div>
 
+      <ErrorBoundary compact>
       <ResponsiveContainer width="100%" height={height}>
         <BarChart data={displayData} margin={{ top: 4, right: showAverage ? 50 : 8, left: -20, bottom: 60 }}>
           <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
@@ -92,6 +94,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
           </Bar>
         </BarChart>
       </ResponsiveContainer>
+      </ErrorBoundary>
 
       <div className="flex justify-center mt-2">
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>

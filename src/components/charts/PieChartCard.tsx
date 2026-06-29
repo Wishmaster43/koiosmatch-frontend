@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
 import { useTranslation } from 'react-i18next'
 import type { ChartDatum, TipProps } from './chartTypes'
+import ErrorBoundary from '../ui/ErrorBoundary'
 
 const DEFAULT_COLORS = [
   'var(--color-primary)','#10B981','#3B8FD4','var(--color-warning)',
@@ -53,6 +54,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
 
       {/* Chart on the left, legend on the right */}
       <div className="flex items-center gap-6">
+        <ErrorBoundary compact>
         <div className="flex-shrink-0">
           <PieChart width={size} height={size}>
             <Pie
@@ -70,6 +72,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
             <Tooltip content={<ChartTooltip total={total} showPercent={showPercent} unit={unit} />} />
           </PieChart>
         </div>
+        </ErrorBoundary>
 
         {/* Legend */}
         <div className="flex flex-col flex-1 min-w-0 gap-2">

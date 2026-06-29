@@ -46,17 +46,18 @@ export default function AddContactPersonModal({ onClose, onCreate, customerName 
           <div>
             <label style={labelStyle}>{t('subModal.contactName')}<span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span></label>
             <input value={form.name} onChange={e => set('name', e.target.value)} placeholder={t('subModal.contactPlaceholder')}
+              aria-label={t('subModal.contactName')}
               style={{ ...iStyle, borderColor: error ? 'var(--color-danger)' : undefined }} />
             {error && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <label style={labelStyle}>{t('subModal.role')}</label>
-              <input value={form.role} onChange={e => set('role', e.target.value)} placeholder="—" style={iStyle} />
+              <input value={form.role} onChange={e => set('role', e.target.value)} placeholder="—" aria-label={t('subModal.role')} style={iStyle} />
             </div>
             <div>
               <label style={labelStyle}>{t('subModal.email')}</label>
-              <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="naam@klant.nl" style={iStyle} />
+              <input type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="naam@klant.nl" aria-label={t('subModal.email')} style={iStyle} />
             </div>
           </div>
         </div>

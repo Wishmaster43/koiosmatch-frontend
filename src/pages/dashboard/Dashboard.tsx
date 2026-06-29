@@ -6,6 +6,7 @@ import { useCandidateCount } from '../../lib/queries'
 import { useRightPanel } from '../../context/RightPanelContext'
 import { useLookups } from '../../context/LookupsContext'
 import api from '../../lib/api'
+import { interactive } from '@/lib/a11y'
 import PieChartCard from '../../components/charts/PieChartCard'
 import BarChartCard from '../../components/charts/BarChartCard'
 import LineChartCard from '../../components/charts/LineChartCard'
@@ -42,7 +43,7 @@ function KpiCard({ label, value, sub, color, bg, Icon, onClick }: {
   label?: ReactNode; value?: ReactNode; sub?: ReactNode; color?: string; bg?: string; Icon: LucideIcon; onClick?: () => void
 }) {
   return (
-    <div onClick={onClick}
+    <div {...interactive(onClick)}
       style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
         padding: '16px', cursor: onClick ? 'pointer' : 'default', flex: 1, minWidth: 0 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
@@ -73,7 +74,7 @@ function Block({ title, action, onAction, children }: { title?: ReactNode; actio
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{title}</span>
-        {action && <span style={{ fontSize: 12, color: 'var(--color-primary)', cursor: 'pointer' }} onClick={onAction}>{action} →</span>}
+        {action && <span {...interactive(onAction)} style={{ fontSize: 12, color: 'var(--color-primary)', cursor: 'pointer' }}>{action} →</span>}
       </div>
       {children}
     </div>

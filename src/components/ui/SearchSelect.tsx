@@ -65,7 +65,7 @@ export default function SearchSelect({
           boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
           {searchable && (
             <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border)' }}>
-              <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('search')} autoFocus
+              <input value={query} onChange={e => setQuery(e.target.value)} placeholder={t('search')} aria-label={t('search')} autoFocus
                 style={{ width: '100%', border: 'none', outline: 'none', fontSize: 12, color: 'var(--text)', background: 'none' }} />
             </div>
           )}

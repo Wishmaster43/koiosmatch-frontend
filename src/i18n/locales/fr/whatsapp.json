@@ -32,5 +32,19 @@
     "title": "Aucune connexion WhatsApp",
     "desc": "Aucune connexion WhatsApp Business n'a encore été configurée pour ce locataire. Configurez une connexion via le backend pour voir les messages et les statistiques ici.",
     "errorLabel": "Erreur backend"
+  },
+  "filters": {
+    "status": "Statut",
+    "direction": "Direction"
+  },
+  "msgStatus": {
+    "read": "Lu",
+    "delivered": "Distribué",
+    "sent": "Envoyé",
+    "failed": "Échec"
+  },
+  "msgDirection": {
+    "inbound": "Entrant",
+    "outbound": "Sortant"
   }
 }

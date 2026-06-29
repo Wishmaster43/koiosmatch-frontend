@@ -86,7 +86,10 @@
     "settings": "Ajustes",
     "modulesGroup": "Módulos",
     "switchTenant": "Cambiar de inquilino",
-    "workflows": "Workflows"
+    "workflows": "Workflows",
+    "matches": "Matches",
+    "opportunities": "Oportunidades",
+    "tasks": "Tareas"
   },
   "koios": {
     "online": "En línea",
@@ -118,5 +121,7 @@
   "units": {
     "candidates": "candidatos",
     "intakes": "intakes"
-  }
+  },
+  "yes": "Sí",
+  "no": "No"
 }

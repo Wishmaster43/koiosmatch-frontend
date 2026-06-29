@@ -1,0 +1,109 @@
+{
+  "title": "Tâches",
+  "loading": "Chargement des tâches…",
+  "empty": "Aucune tâche pour le moment.",
+  "error": "Impossible de charger les tâches.",
+  "add": "Nouvelle tâche",
+  "bureau": "Agence",
+  "overdue": "En retard",
+  "view": {
+    "table": "Vue liste",
+    "board": "Vue tableau"
+  },
+  "cols": {
+    "task": "Tâche",
+    "type": "Type",
+    "status": "Statut",
+    "priority": "Priorité",
+    "links": "Lien",
+    "assignee": "Assignée à",
+    "due": "Échéance"
+  },
+  "kpi": {
+    "open": "Ouvertes",
+    "overdue": "En retard",
+    "dueToday": "À échéance aujourd'hui",
+    "completed": "Terminées"
+  },
+  "insights": {
+    "status": "Statut",
+    "priority": "Priorité",
+    "type": "Type",
+    "clearFilter": "Effacer le filtre"
+  },
+  "board": {
+    "empty": "Glissez les tâches ici"
+  },
+  "drawer": {
+    "label": "Activité",
+    "createdAt": "Créé le {{date}}",
+    "tabs": {
+      "details": "Détails",
+      "links": "Liens",
+      "comments": "Commentaires",
+      "activity": "Activité"
+    }
+  },
+  "details": {
+    "title": "Détails de l'activité",
+    "type": "Type d'activité",
+    "status": "Statut",
+    "priority": "Priorité",
+    "due": "Échéance",
+    "assignee": "Assignée à",
+    "owner": "Responsable",
+    "description": "Description"
+  },
+  "comments": {
+    "title": "Commentaires",
+    "empty": "Aucun commentaire pour le moment.",
+    "placeholder": "Écrire un commentaire…",
+    "send": "Publier"
+  },
+  "links": {
+    "title": "Liens",
+    "empty": "Aucun lien pour le moment.",
+    "add": "Ajouter un lien",
+    "selectEntity": "Sélectionner…",
+    "remove": "Supprimer",
+    "candidate": "Candidat",
+    "application": "Candidature",
+    "vacancy": "Poste",
+    "match": "Match",
+    "customer": "Client",
+    "location": "Site",
+    "department": "Service",
+    "contact": "Contact",
+    "workflow": "Workflow"
+  },
+  "activity": {
+    "empty": "Aucune activité pour le moment."
+  },
+  "modal": {
+    "title": "Ajouter une activité",
+    "type": "Type d'activité",
+    "typePlaceholder": "Choisir le type",
+    "titleLabel": "Titre",
+    "titlePlaceholder": "Saisir…",
+    "assignee": "Assigner à",
+    "assigneePlaceholder": "Agence (personne)",
+    "status": "Statut",
+    "due": "Échéance",
+    "priority": "Priorité",
+    "description": "Description",
+    "descriptionPlaceholder": "Saisir…",
+    "charsLeft": "Caractères disponibles : {{count}}",
+    "detailsTitle": "Détails de l'activité",
+    "owner": "Responsable",
+    "candidate": "Candidat",
+    "candidatePlaceholder": "Sélectionner un candidat",
+    "customer": "Client",
+    "customerPlaceholder": "Sélectionner un client",
+    "contact": "Contact",
+    "contactPlaceholder": "Sélectionner un contact",
+    "create": "Créer",
+    "saving": "Enregistrement…",
+    "cancel": "Annuler",
+    "required": "Requis"
+  }
+}

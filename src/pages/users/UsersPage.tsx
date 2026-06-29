@@ -12,13 +12,14 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
-import { ShieldCheck, Shield, User, Plus, Loader2, ChevronDown } from 'lucide-react'
+import { ShieldCheck, Shield, User, Plus, Loader2, ChevronDown, Pencil } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import api from '../../lib/api'
 import { useAuth } from '../../context/AuthContext'
 import { useRightPanel } from '../../context/RightPanelContext'
 import { COLOR_PRESETS } from '../../lib/colorPresets'
 import NewUserModal from './NewUserModal'
+import EditUserModal from './EditUserModal'
 import type { ManagedUser } from '@/types/api'
 
 // A role reference as it can appear on a user: a bare name or a role object.
@@ -203,7 +204,7 @@ function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?: (colo
               {COLOR_PRESETS.map(col => (
                 <button key={col} onClick={() => choose(col)} aria-label={col}
                   style={{ width: 26, height: 26, borderRadius: 6, background: col, cursor: 'pointer',
-                           border: col === c ? '2px solid #111827' : '2px solid transparent' }} />
+                           border: col.toUpperCase() === (c ?? '').toUpperCase() ? '2px solid #111827' : '2px solid transparent' }} />
               ))}
             </div>
             <button onClick={() => choose(null)}
@@ -233,6 +234,7 @@ export default function UsersPage() {
   const [loading,      setLoading]      = useState(true)
   const [error,        setError]        = useState<string | null>(null)
   const [showCreate,   setShowCreate]   = useState(false)
+  const [editingUser,  setEditingUser]  = useState<ManagedUser | null>(null)
   const [selectedRole, setSelectedRole] = useState<string[]>([])
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -348,6 +350,17 @@ export default function UsersPage() {
                       <div>
                         <div style={{ fontWeight: 500, color: 'var(--text)', display: 'flex', alignItems: 'center', gap: 6 }}>
                           {name}
+                          {/* Edit button — not shown for super-admin accounts */}
+                          {!isSA && (
+                            <button onClick={() => setEditingUser(u)} title={t('editUser')}
+                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                       width: 20, height: 20, borderRadius: 5, border: '1px solid #E5E7EB',
+                                       background: 'white', cursor: 'pointer', color: '#9CA3AF', flexShrink: 0 }}
+                              onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-primary)')}
+                              onMouseLeave={e => (e.currentTarget.style.color = '#9CA3AF')}>
+                              <Pencil size={10} />
+                            </button>
+                          )}
                           {isMe && (
                             <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
                                            background: 'var(--color-primary-bg)', borderRadius: 999, padding: '1px 7px' }}>
@@ -388,6 +401,16 @@ export default function UsersPage() {
         <NewUserModal
           onClose={() => setShowCreate(false)}
           onCreated={u => setUsers(prev => [u, ...prev])}
+        />
+      )}
+      {editingUser && (
+        <EditUserModal
+          user={editingUser}
+          onClose={() => setEditingUser(null)}
+          onSaved={updated => {
+            setUsers(prev => prev.map(x => x.id === updated.id ? updated : x))
+            setEditingUser(null)
+          }}
         />
       )}
     </div>

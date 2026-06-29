@@ -11,7 +11,7 @@ import SafeHtml from '../../ui/SafeHtml'
 import RichTextEditor from '../../ui/RichTextEditor'
 import SectionCard, { sectionBlock } from '../../ui/SectionCard'
 
-interface NoteType { value: string; label: string }
+interface NoteType { value: string; label: string; color?: string }
 interface NoteItem { type?: string; title?: string; author?: string; text?: string; body?: string; ago?: string; [k: string]: unknown }
 interface TimelineItem { time?: string; created_at?: string; text?: string; description?: string; [k: string]: unknown }
 interface NotesLabels {
@@ -61,18 +61,29 @@ export default function NotesTab({
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
   const iconBtn: CSSProperties = { width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer' }
 
+  // Note-type chip: resolves value→label and uses the lookup's soft colour when set.
+  const renderTypeChip = (value: string) => {
+    const nt = noteTypes.find(n => n.value === value || n.label === value)
+    const col = nt?.color
+    const soft: CSSProperties = col
+      ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
+      : { background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }
+    return <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99, marginRight: 6, ...soft }}>{nt?.label ?? value}</span>
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Notes */}
-      <div style={sectionBlock}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{labels.notes}</span>
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{labels.notes}</span>
           {!adding && (
             <button onClick={() => setAdding(true)} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
               <Plus size={11} /> {labels.newNote}
             </button>
           )}
         </div>
+        <div style={sectionBlock}>
         {adding && (
           <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 14, marginBottom: 14, background: 'var(--bg)', display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div>
@@ -108,7 +119,7 @@ export default function NotesTab({
                 <div style={{ flex: 1, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
                     <div style={{ flex: 1 }}>
-                      {n.type && <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', marginRight: 6 }}>{n.type}</span>}
+                      {n.type && renderTypeChip(n.type)}
                       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{n.title ?? n.author}</span>
                     </div>
                     <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{n.ago}</span>
@@ -124,6 +135,7 @@ export default function NotesTab({
               </div>
             ))
         }
+      </div>
       </div>
 
       {/* Timeline */}

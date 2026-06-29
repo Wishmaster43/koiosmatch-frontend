@@ -1,0 +1,212 @@
+{
+  "page": {
+    "title": "Vacantes",
+    "subtitle": "Gestiona y publica fácilmente todas tus posiciones abiertas.",
+    "add": "Nueva vacante",
+    "searchPlaceholder": "Buscar vacantes",
+    "loading": "Cargando vacantes…",
+    "empty": "Aún no hay vacantes.",
+    "loadError": "No se pudieron cargar las vacantes.",
+    "count": "Todas las vacantes"
+  },
+  "buckets": {
+    "all": "Todas"
+  },
+  "columns": {
+    "title": "Título",
+    "code": "#",
+    "status": "Estado",
+    "leads": "Leads",
+    "applications": "Candidaturas",
+    "published": "Publicada",
+    "owner": "Responsable",
+    "client": "Cliente",
+    "createdAt": "Creada el"
+  },
+  "publishedState": {
+    "yes": "Publicada",
+    "no": "No publicada"
+  },
+  "insights": {
+    "statusTitle": "Estado",
+    "ownerTitle": "Reclutador",
+    "clientTitle": "Cliente",
+    "clearFilter": "Borrar filtro"
+  },
+  "kpi": {
+    "applied": "Postulado",
+    "accepted": "Aceptado",
+    "invited": "Invitado",
+    "proposed": "Propuesta enviada",
+    "hired": "Contratado",
+    "rejected": "Rechazado"
+  },
+  "filters": {
+    "search": "Buscar",
+    "status": "Estado",
+    "owner": "Reclutador",
+    "client": "Cliente",
+    "category": "Categoría",
+    "industry": "Sector",
+    "employmentType": "Tipo de contrato",
+    "categories": {
+      "general": "General",
+      "organisation": "Organización"
+    }
+  },
+  "bulk": {
+    "selected": "{{count}} seleccionada(s)",
+    "actions": "Acciones masivas",
+    "deselect": "Deseleccionar",
+    "changeOwner": "Cambiar reclutador",
+    "searchOwner": "Buscar reclutador",
+    "noUsers": "Sin usuarios",
+    "changeStatus": "Cambiar estado",
+    "searchStatus": "Buscar estado",
+    "changeClient": "Cambiar cliente",
+    "searchClient": "Buscar cliente",
+    "noClients": "Sin clientes",
+    "publishing": "Publicando",
+    "publish": "Publicar",
+    "unpublish": "Despublicar",
+    "removeTag": "Quitar etiqueta",
+    "searchTag": "Buscar etiqueta",
+    "noTags": "Sin etiquetas",
+    "addNote": "Añadir nota",
+    "notePlaceholder": "Escribe una nota…",
+    "noteSubmit": "Añadir",
+    "archive": "Archivar",
+    "archiveConfirm": "¿Archivar {{count}} vacantes?",
+    "ownerChanged": "Reclutador cambiado para {{count}} vacantes.",
+    "statusChanged": "Estado establecido en {{value}} para {{count}} vacantes.",
+    "clientChanged": "Cliente cambiado para {{count}} vacantes.",
+    "published_one": "{{count}} vacante publicada.",
+    "published_other": "{{count}} vacantes publicadas.",
+    "unpublished_one": "{{count}} vacante despublicada.",
+    "unpublished_other": "{{count}} vacantes despublicadas.",
+    "tagRemoved": "Etiqueta «{{tag}}» quitada de {{count}} vacantes.",
+    "noteAdded": "Nota añadida a {{count}} vacantes.",
+    "archived": "{{count}} vacantes archivadas.",
+    "mutateError": "No se pudo aplicar el cambio.",
+    "archiveError": "No se pudo archivar."
+  },
+  "drawer": {
+    "entityLabel": "Vacante",
+    "createdAt": "Creada el {{date}}",
+    "edit": "Editar",
+    "status": "Estado",
+    "owner": "Reclutador",
+    "client": "Cliente",
+    "selectClient": "Seleccionar un cliente",
+    "tags": "Etiquetas",
+    "published": "Publicada",
+    "notPublished": "No publicada",
+    "tabs": {
+      "details": "Detalles",
+      "applicants": "Candidaturas",
+      "matching": "Matching",
+      "publishing": "Publicar",
+      "documents": "Documentos",
+      "timeline": "Cronología",
+      "notes": "Notas",
+      "statistics": "Estadísticas"
+    }
+  },
+  "matching": {
+    "title": "Ponderación del matching IA",
+    "subtitle": "Define la importancia de cada dimensión para esta vacante. La IA evalúa a los candidatos en consecuencia.",
+    "less": "Menos importante",
+    "balanced": "Equilibrado",
+    "very": "Muy importante",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "dim": {
+      "qualifications": "Cualificaciones",
+      "technical_fit": "Idoneidad técnica",
+      "soft_skills": "Habilidades blandas",
+      "cultural_alignment": "Alineación cultural",
+      "career_aspirations": "Aspiraciones profesionales",
+      "location": "Ubicación"
+    }
+  },
+  "details": {
+    "groups": {
+      "general": "General",
+      "requirements": "Requisitos",
+      "conditions": "Condiciones"
+    },
+    "id": "ID de vacante",
+    "status": "Estado",
+    "employmentType": "Tipo de contrato",
+    "location": "Ubicación",
+    "salary": "Salario",
+    "hours": "Horas semanales",
+    "experience": "Experiencia",
+    "seniority": "Nivel de experiencia",
+    "education": "Formación",
+    "industry": "Sector",
+    "category": "Categoría",
+    "skills": "Habilidades requeridas",
+    "addSkill": "Añadir habilidad",
+    "noSkills": "Aún no hay habilidades.",
+    "description": "Descripción",
+    "descriptionPlaceholder": "Describe la posición…"
+  },
+  "publishing": {
+    "channels": "Portales de empleo",
+    "applicationSettings": "Ajustes de candidatura",
+    "fields": {
+      "cv": "CV",
+      "cover_letter": "Carta de presentación",
+      "photo": "Foto",
+      "remarks": "Observaciones",
+      "interview_consent": "Consentimiento para entrevista"
+    },
+    "values": {
+      "required": "Obligatorio",
+      "optional": "Opcional",
+      "hidden": "Oculto"
+    },
+    "customFields": "Campos personalizados",
+    "noCustomFields": "No hay campos personalizados configurados.",
+    "integrate": "Integrar",
+    "publishedOn": "Publicada",
+    "notPublished": "No publicada"
+  },
+  "applicants": {
+    "title": "Candidaturas",
+    "empty": "Aún no hay candidaturas.",
+    "leads": "Leads",
+    "totalLeads": "Total leads",
+    "phase": "Fase",
+    "source": "Origen",
+    "byPhase": "Por fase",
+    "candidate": "Candidato"
+  },
+  "statistics": {
+    "title": "Conversión",
+    "conversionRate": "Tasa de conversión",
+    "appliedToHired": "Postulado → contratado",
+    "bySource": "Por origen",
+    "leadsToApplications": "Leads → candidaturas",
+    "empty": "Aún no hay suficientes datos."
+  },
+  "modal": {
+    "title": "Nueva vacante",
+    "fields": {
+      "title": "Título",
+      "client": "Cliente",
+      "status": "Estado",
+      "owner": "Reclutador",
+      "employmentType": "Tipo de contrato",
+      "industry": "Sector",
+      "category": "Categoría",
+      "location": "Ubicación"
+    },
+    "titlePlaceholder": "p. ej. Enfermero | La Haya",
+    "create": "Crear vacante",
+    "cancel": "Cancelar",
+    "creating": "Creando…",
+    "required": "El título es obligatorio."
+  }
+}

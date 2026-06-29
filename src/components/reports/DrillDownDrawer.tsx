@@ -33,7 +33,7 @@ function StatusBadge({ status }: { status?: string }) {
 
 function formatDate(dateStr?: string | null) {
   if (!dateStr) return null
-  return new Date(dateStr).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+  return new Date(dateStr).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; label: ReactNode; value?: ReactNode; highlight?: boolean }) {

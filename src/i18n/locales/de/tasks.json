@@ -1,0 +1,109 @@
+{
+  "title": "Aufgaben",
+  "loading": "Aufgaben werden geladen…",
+  "empty": "Noch keine Aufgaben.",
+  "error": "Aufgaben konnten nicht geladen werden.",
+  "add": "Neue Aufgabe",
+  "bureau": "Agentur",
+  "overdue": "Überfällig",
+  "view": {
+    "table": "Listenansicht",
+    "board": "Board-Ansicht"
+  },
+  "cols": {
+    "task": "Aufgabe",
+    "type": "Typ",
+    "status": "Status",
+    "priority": "Priorität",
+    "links": "Verknüpfung",
+    "assignee": "Zugewiesen an",
+    "due": "Fälligkeitsdatum"
+  },
+  "kpi": {
+    "open": "Offen",
+    "overdue": "Überfällig",
+    "dueToday": "Heute fällig",
+    "completed": "Abgeschlossen"
+  },
+  "insights": {
+    "status": "Status",
+    "priority": "Priorität",
+    "type": "Typ",
+    "clearFilter": "Filter zurücksetzen"
+  },
+  "board": {
+    "empty": "Aufgaben hierher ziehen"
+  },
+  "drawer": {
+    "label": "Aktivität",
+    "createdAt": "Erstellt am {{date}}",
+    "tabs": {
+      "details": "Details",
+      "links": "Verknüpfungen",
+      "comments": "Kommentare",
+      "activity": "Aktivität"
+    }
+  },
+  "details": {
+    "title": "Aktivitätsdetails",
+    "type": "Aktivitätstyp",
+    "status": "Status",
+    "priority": "Priorität",
+    "due": "Fälligkeitsdatum",
+    "assignee": "Zugewiesen an",
+    "owner": "Inhaber",
+    "description": "Beschreibung"
+  },
+  "comments": {
+    "title": "Kommentare",
+    "empty": "Noch keine Kommentare.",
+    "placeholder": "Kommentar schreiben…",
+    "send": "Senden"
+  },
+  "links": {
+    "title": "Verknüpfungen",
+    "empty": "Noch keine Verknüpfungen.",
+    "add": "Verknüpfung hinzufügen",
+    "selectEntity": "Auswählen…",
+    "remove": "Entfernen",
+    "candidate": "Kandidat",
+    "application": "Bewerbung",
+    "vacancy": "Stelle",
+    "match": "Match",
+    "customer": "Kunde",
+    "location": "Standort",
+    "department": "Abteilung",
+    "contact": "Kontakt",
+    "workflow": "Workflow"
+  },
+  "activity": {
+    "empty": "Noch keine Aktivität."
+  },
+  "modal": {
+    "title": "Aktivität hinzufügen",
+    "type": "Aktivitätstyp",
+    "typePlaceholder": "Typ wählen",
+    "titleLabel": "Titel",
+    "titlePlaceholder": "Eingeben…",
+    "assignee": "Zuweisen an",
+    "assigneePlaceholder": "Agentur (niemand)",
+    "status": "Status",
+    "due": "Fälligkeitsdatum",
+    "priority": "Priorität",
+    "description": "Beschreibung",
+    "descriptionPlaceholder": "Eingeben…",
+    "charsLeft": "Verfügbare Zeichen: {{count}}",
+    "detailsTitle": "Aktivitätsdetails",
+    "owner": "Inhaber",
+    "candidate": "Kandidat",
+    "candidatePlaceholder": "Kandidat auswählen",
+    "customer": "Kunde",
+    "customerPlaceholder": "Kunde auswählen",
+    "contact": "Kontakt",
+    "contactPlaceholder": "Kontakt auswählen",
+    "create": "Erstellen",
+    "saving": "Wird gespeichert…",
+    "cancel": "Abbrechen",
+    "required": "Erforderlich"
+  }
+}

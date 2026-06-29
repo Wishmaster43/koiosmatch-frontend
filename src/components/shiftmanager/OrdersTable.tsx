@@ -69,7 +69,7 @@ export default function OrdersTable() {
   // Locale-aware "mon yyyy" label for the month dropdown.
   const formatMonth = (m: string) => {
     const [y, mo] = m.split('-')
-    return `${new Date(Number(y), Number(mo) - 1, 1).toLocaleString(undefined, { month: 'short' })} ${y}`
+    return `${new Date(Number(y), Number(mo) - 1, 1).toLocaleString('nl-NL', { month: 'short' })} ${y}`
   }
 
   return (

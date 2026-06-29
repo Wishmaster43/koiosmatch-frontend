@@ -89,6 +89,37 @@
       "unknown": "Unbekannt"
     }
   },
+  "scheduleModal": {
+    "title": "Zeitplan festlegen",
+    "trigger": {
+      "manual": "Manuell", "manualDesc": "Über die Schaltfläche starten",
+      "instant": "Sofort", "instantDesc": "Sobald Daten eintreffen",
+      "scheduled": "Geplant", "scheduledDesc": "Automatisch nach Zeitplan"
+    },
+    "frequency": "Häufigkeit",
+    "freq": { "interval": "Intervall", "daily": "Täglich", "weekly": "Wöchentlich", "monthly": "Monatlich", "quarterly": "Quartal", "yearly": "Jährlich" },
+    "every": "Alle",
+    "unit": { "minutes": "Minuten", "hours": "Stunden" },
+    "minInterval": "Min. Intervall: 1 Minute",
+    "times": "Uhrzeiten",
+    "addTime": "+ Uhrzeit hinzufügen",
+    "days": "Tage",
+    "time": "Uhrzeit",
+    "dayOfMonth": "Tag des Monats",
+    "quarterlyHint": "Wird am ersten Tag jedes Quartals ausgeführt (Jan, Apr, Jul, Okt).",
+    "month": "Monat",
+    "day": "Tag",
+    "preview": "Vorschau",
+    "cancel": "Abbrechen",
+    "save": "Speichern",
+    "label": {
+      "manual": "Manuell", "instant": "Sofort", "scheduled": "Geplant",
+      "everyN": "Alle {{n}} {{unit}}", "unitMin": "Min", "unitHour": "Std",
+      "dailyAt": "Täglich {{time}}", "weeklyAt": "{{days}} {{time}}",
+      "monthlyAt": "Tag {{day}} des Monats {{time}}",
+      "quarterlyAt": "Jedes Quartal {{time}}", "yearlyAt": "Jährlich {{month}} {{day}} {{time}}"
+    }
+  },
   "modules": {
     "advanced_parser": "Erweiterter Parser",
     "aggregator": "Aggregator",

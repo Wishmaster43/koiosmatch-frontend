@@ -44,5 +44,9 @@
     "week": "Semaine",
     "day": "Jour",
     "list": "Liste"
+  },
+  "filters": {
+    "shift": "Service",
+    "location": "Site"
   }
 }

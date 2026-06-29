@@ -1,0 +1,28 @@
+{
+  "title": "Matches",
+  "loading": "Matches werden geladen…",
+  "empty": "Noch keine Matches.",
+  "error": "Matches konnten nicht geladen werden.",
+  "cols": {
+    "candidate": "Kandidat",
+    "vacancy": "Stelle",
+    "client": "Kunde",
+    "score": "Match",
+    "stage": "Phase",
+    "owner": "Inhaber",
+    "date": "Erstellt"
+  },
+  "insights": {
+    "stage": "Phase",
+    "owner": "Inhaber",
+    "clearFilter": "Filter zurücksetzen"
+  },
+  "kpi": {
+    "total": "Gesamt",
+    "active": "Aktiv",
+    "hired": "Eingestellt",
+    "avgScore": "Ø Score"
+  },
+  "add": "Neuer Match",
+  "addComingSoon": "Erstelle Matches über die Kandidaten- oder Stellenkarte."
+}

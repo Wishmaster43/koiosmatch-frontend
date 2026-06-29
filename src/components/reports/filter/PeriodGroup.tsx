@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import type { ReportFilterGroup } from '@/types/reports'
 
 // Locale-aware short month name for index 0–11.
-const monthAbbr = (i: number) => new Date(2000, i, 1).toLocaleString(undefined, { month: 'short' })
+const monthAbbr = (i: number) => new Date(2000, i, 1).toLocaleString('nl-NL', { month: 'short' })
 const QUARTERS  = ['Q1','Q2','Q3','Q4']
 
 export default function PeriodGroup({ group }: { group: ReportFilterGroup }) {

@@ -1,0 +1,72 @@
+{
+  "title": "Opportunités",
+  "loading": "Chargement des opportunités…",
+  "empty": "Aucune opportunité pour le moment.",
+  "error": "Impossible de charger les opportunités.",
+  "page": {
+    "add": "Ajouter une opportunité"
+  },
+  "cols": {
+    "title": "Opportunité",
+    "client": "Client",
+    "stage": "Phase",
+    "value": "Valeur",
+    "owner": "Responsable",
+    "date": "Créé"
+  },
+  "insights": {
+    "stage": "Phase",
+    "owner": "Responsable",
+    "clearFilter": "Effacer le filtre"
+  },
+  "kpi": {
+    "total": "Opportunités",
+    "pipeline": "Valeur du pipeline (€)",
+    "avg": "Valeur moy. (€)"
+  },
+  "drawer": {
+    "entityLabel": "Opportunité",
+    "stage": "Phase",
+    "owner": "Responsable",
+    "client": "Client",
+    "selectStage": "Sélectionner une phase",
+    "selectOwner": "Sélectionner un responsable",
+    "selectClient": "Sélectionner un client",
+    "createdAt": "Créé le {{date}}",
+    "tabs": {
+      "details": "Détails"
+    }
+  },
+  "details": {
+    "stage": "Phase",
+    "value": "Valeur",
+    "expectedClose": "Clôture prévue",
+    "client": "Client",
+    "owner": "Responsable",
+    "created": "Créé",
+    "groups": {
+      "deal": "Affaire",
+      "organisation": "Organisation"
+    }
+  },
+  "modal": {
+    "title": "Nouvelle opportunité",
+    "titlePlaceholder": "Ex. 5 infirmiers — Zorggroep Noord",
+    "required": "Le titre est requis",
+    "create": "Créer",
+    "creating": "Enregistrement…",
+    "cancel": "Annuler",
+    "fields": {
+      "title": "Titre",
+      "client": "Client",
+      "stage": "Phase",
+      "value": "Valeur (€)",
+      "expectedClose": "Clôture prévue",
+      "owner": "Responsable"
+    }
+  },
+  "view": {
+    "table": "Vue liste",
+    "board": "Vue tableau"
+  }
+}

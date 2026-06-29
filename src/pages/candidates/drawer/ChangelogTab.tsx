@@ -16,14 +16,19 @@ interface ActivityEvent {
   created_at?: string
   description?: string
   log_name?: string
+  // C-16: audit entries now carry the subject + originating IP.
+  subject_type?: string
+  subject_id?: Id
+  ip?: string
 }
 
 /**
  * ChangelogTab — the candidate's audit trail (who changed what, when). Reads
  * `GET /candidates/{id}/activity` (C-16). Handles the four UI states explicitly;
  * shows a calm empty state until the backend endpoint is live (404 → empty).
+ * `bare` drops the SectionCard wrapper so a popover can supply its own chrome.
  */
-export default function ChangelogTab({ c }: { c: Candidate }) {
+export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?: boolean }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const [items,   setItems]   = useState<ActivityEvent[]>([])
@@ -47,8 +52,8 @@ export default function ChangelogTab({ c }: { c: Candidate }) {
     return () => ctrl.abort()
   }, [c?.id])
 
-  return (
-    <SectionCard title={t('drawer.tabs.changelog')}>
+  const body = (
+    <>
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('changelog.loading')}</div>}
 
       {!loading && error && (
@@ -74,9 +79,14 @@ export default function ChangelogTab({ c }: { c: Candidate }) {
               <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{formatDate(ev.created_at)}</span>
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ev.description || ev.log_name}</div>
+            {ev.ip && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{t('changelog.fromIp', { ip: ev.ip })}</div>}
           </div>
         </div>
       ))}
-    </SectionCard>
+    </>
   )
+
+  // Bare = caller supplies its own chrome (e.g. the changelog popover header).
+  if (bare) return body
+  return <SectionCard title={t('drawer.tabs.changelog')}>{body}</SectionCard>
 }

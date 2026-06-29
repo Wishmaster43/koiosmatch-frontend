@@ -19,7 +19,10 @@
     "talentPool": "Talentenpool",
     "koios": "Koios",
     "createdAt": "Toegevoegd",
-    "lastContactType": "Kanaal"
+    "lastContactType": "Kanaal",
+    "phase": "Fase",
+    "deployability": "Status",
+    "contractForm": "Contractvorm"
   },
   "koios": {
     "actions": {
@@ -168,10 +171,12 @@
       "profile": "Profiel",
       "background": "Achtergrond",
       "work": "Werk",
+      "match": "Match",
       "planning": "Planning",
       "preferences": "Voorkeuren",
       "zzp": "ZZP",
       "communication": "Communicatie",
+      "documents": "Documenten",
       "statistics": "Statistieken",
       "changelog": "Wijzigingslog"
     },
@@ -184,6 +189,7 @@
     "uploadCv": "CV uploaden",
     "downloadCv": "CV downloaden",
     "generating": "Genereren...",
+    "customFields": "Eigen velden",
     "edit": "Bewerken",
     "editing": "Bewerken…",
     "createdAt": "Aangemaakt op {{date}}",
@@ -193,7 +199,17 @@
     "stage": "Funnel type",
     "candidateType": "Kandidaat type",
     "entityLabel": "Kandidaat",
-    "applications": "Sollicitaties"
+    "applications": "Sollicitaties",
+    "phase": "Fase",
+    "deployability": "Status",
+    "placedNeedsMatchTitle": "Match koppelen vereist",
+    "placedNeedsMatchBody": "Status \"Geplaatst\" vereist een gekoppelde Match. Koppel eerst een Match via de Match-tab; daarna kun je \"Geplaatst\" zetten.",
+    "blacklist": "Blacklist",
+    "blacklistReasonTitle": "Reden voor blacklist",
+    "blacklistConfirm": "Blacklisten",
+    "statusReasonTitle": "Statuswijziging",
+    "reasonLabel": "Reden",
+    "returnDateLabel": "Weer beschikbaar vanaf"
   },
   "stage": {
     "lead": "Lead",
@@ -416,6 +432,9 @@
     "minRate": "Min. uurtarief (€)",
     "contract": "Contract voorkeur",
     "remarks": "Opmerkingen",
+    "groupPayroll": "Loonheffing",
+    "wageTax": "Loonheffing toepassen",
+    "wageTaxFrom": "Per wanneer",
     "groupAvailability": "Beschikbaarheid",
     "groupTravel": "Reizen",
     "groupWork": "Werkvoorkeuren",
@@ -504,6 +523,7 @@
     "loading": "Wijzigingen laden…",
     "error": "Wijzigingslog kon niet geladen worden.",
     "empty": "Nog geen wijzigingen vastgelegd.",
+    "fromIp": "Gewijzigd vanaf IP {{ip}}",
     "system": "Systeem"
   },
   "matchesView": {

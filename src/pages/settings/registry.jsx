@@ -16,8 +16,8 @@
  * (or a line to an existing schema) and skip writing a component entirely.
  */
 import {
-  AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays,
-  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Key, LayoutGrid,
+  AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, Car,
+  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Key,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Shield, Sparkles, Star,
   Store, Tags, Target, Users, Webhook, XCircle,
 } from 'lucide-react'
@@ -29,19 +29,21 @@ import BrandSettings from './sections/BrandSettings'
 import CompanySettings from './sections/CompanySettings'
 import LocationsSettings from './sections/LocationsSettings'
 import MemorySettings from './sections/MemorySettings'
-import { ContractFormsSettings, FunnelStagesSettings, CandidateStatusesSettings } from './sections/CandidateLookupsSettings'
+import { ContractFormsSettings, FunnelStagesSettings, CandidateStatusesSettings, CandidatePhasesSettings } from './sections/CandidateLookupsSettings'
 import { LastContactTypesSettings, NoteTypesSettings } from './sections/CandidateCommSettings'
 import { CustomerStatusesSettings, LocationStatusesSettings, DepartmentStatusesSettings, ContactStatusesSettings } from './sections/CustomerSettings'
 import PoolsSettings from './sections/PoolsSettings'
 import { LanguageListSettings, LanguageLevelSettings } from './sections/LanguageSettings'
 import GenderSettings from './sections/GenderSettings'
 import IndustrySettings from './sections/IndustrySettings'
-import CandidateAvailabilitySettings from './sections/CandidateAvailabilitySettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancyFieldsSettings, VacancyEmploymentTypeSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings } from './sections/VacancySettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
 import RejectionSettings from './sections/RejectionSettings'
+import CandidateCustomFieldsSettings from './sections/CandidateCustomFieldsSettings'
+import CandidateRequiredFieldsSettings from './sections/CandidateRequiredFieldsSettings'
 import CvTemplateSettings from './sections/CvTemplateSettings'
+import DocumentTypesSettings from './sections/DocumentTypesSettings'
 import EmailSettings from './sections/EmailSettings'
 import AuditLog from './sections/AuditLog'
 import RolesSettings from './sections/RolesSettings'
@@ -56,10 +58,12 @@ import ApiKeysSettings from './sections/apikeys'
 import MessagingSettings from './sections/messaging'
 import KoiosSettings from './sections/koios'
 import NotificationsSettings from './sections/NotificationsSettings'
-import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
+// Planning tijdelijk verborgen (2026-06-26): import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
 import { BetaalmethodenSettings, AutoOpwaarderenSettings, GebruikSettings, FacturenSettings } from './sections/BillingSettings'
 
 import { kpisLeads, kpisCandidates, kpisApplications, kpisCustomers } from './schemas/kpis'
+import candidateDisplay from './schemas/candidateDisplay'
+import DriverLicenseSettings from './sections/DriverLicenseSettings'
 
 export const NAV_GROUPS = [
   {
@@ -98,11 +102,16 @@ export const NAV_GROUPS = [
     // Candidate-specific settings (Danny: "Kandidaat").
     key: 'candidate', icon: Users,
     items: [
-      { id: 'candidate_statuses',     label: 'Statuses',          icon: Users,         component: CandidateStatusesSettings },
-      { id: 'contract_forms',         label: 'Contract forms',    icon: Tags,          component: ContractFormsSettings },
-      { id: 'candidate_availability', label: 'Availability',      icon: CalendarCheck, component: CandidateAvailabilitySettings },
+      { id: 'candidate_phases',       label: 'Phase',             icon: Target,        component: CandidatePhasesSettings },
+      { id: 'candidate_statuses',     label: 'Status',            icon: Users,         component: CandidateStatusesSettings },
+      { id: 'contract_forms',         label: 'Contractvorm',      icon: Tags,          component: ContractFormsSettings },
       { id: 'pools',                  label: 'Talent pools',      icon: Star,          component: PoolsSettings },
       { id: 'cv_template',            label: 'CV template',       icon: FileText,      component: CvTemplateSettings },
+      { id: 'document_types',         label: 'Document types',    icon: FileText,      component: DocumentTypesSettings },
+      { id: 'driver_licenses',        label: 'Driving licences',  icon: Car,           component: DriverLicenseSettings },
+      { id: 'candidate_display',      label: 'Table display',     icon: Palette,       schema: candidateDisplay },
+      { id: 'candidate_custom_fields', label: 'Custom fields',    icon: ListChecks,    component: CandidateCustomFieldsSettings },
+      { id: 'candidate_required_fields', label: 'Required fields', icon: Flag,         component: CandidateRequiredFieldsSettings },
     ],
   },
   {
@@ -146,6 +155,9 @@ export const NAV_GROUPS = [
       { id: 'task_priorities', label: 'Priorities',     icon: Flag,       component: TaskPrioritySettings },
     ],
   },
+  // Planning tijdelijk verborgen (2026-06-26) — niet verwijderd, alleen uit. Terugzetten = dit blok +
+  // de PlanningSettings-import + de CalendarDays/LayoutGrid-iconen weer activeren.
+  /*
   {
     key: 'planning', icon: CalendarDays,
     items: [
@@ -155,6 +167,7 @@ export const NAV_GROUPS = [
       { id: 'planning_board',  label: 'Planning board',  icon: LayoutGrid,    component: PlanningBoardSettings },
     ],
   },
+  */
   {
     key: 'views', icon: BarChart2,
     items: [

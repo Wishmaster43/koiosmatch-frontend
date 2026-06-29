@@ -67,6 +67,7 @@ export default function AddCustomerModal({ onClose, onCreate }: { onClose: () =>
           <div>
             <Label required>{t('modal.fields.name')}</Label>
             <input value={form.name} onChange={e => set('name', e.target.value)} placeholder={t('modal.fields.namePlaceholder')}
+              aria-label={t('modal.fields.name')}
               style={{ ...iStyle, borderColor: errors.name ? 'var(--color-danger)' : undefined }} />
             {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('modal.required')}</div>}
           </div>
@@ -74,12 +75,12 @@ export default function AddCustomerModal({ onClose, onCreate }: { onClose: () =>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <Label>{t('modal.fields.debtorNumber')}</Label>
-              <input value={form.debtorNumber} onChange={e => set('debtorNumber', e.target.value)} placeholder="10042" style={iStyle} />
+              <input value={form.debtorNumber} onChange={e => set('debtorNumber', e.target.value)} placeholder="10042" aria-label={t('modal.fields.debtorNumber')} style={iStyle} />
             </div>
             <div>
               <Label>{t('modal.fields.status')}</Label>
               <div style={{ position: 'relative' }}>
-                <select value={form.status} onChange={e => set('status', e.target.value)}
+                <select value={form.status} onChange={e => set('status', e.target.value)} aria-label={t('modal.fields.status')}
                   style={{ ...iStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer' }}>
                   {STATUSES.map(s => <option key={s} value={s}>{t(`status.${s}`)}</option>)}
                 </select>
@@ -91,11 +92,11 @@ export default function AddCustomerModal({ onClose, onCreate }: { onClose: () =>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <Label>{t('modal.fields.accountManager')}</Label>
-              <input value={form.accountManager} onChange={e => set('accountManager', e.target.value)} placeholder="—" style={iStyle} />
+              <input value={form.accountManager} onChange={e => set('accountManager', e.target.value)} placeholder="—" aria-label={t('modal.fields.accountManager')} style={iStyle} />
             </div>
             <div>
               <Label>{t('modal.fields.city')}</Label>
-              <input value={form.city} onChange={e => set('city', e.target.value)} placeholder={t('modal.fields.cityPlaceholder')} style={iStyle} />
+              <input value={form.city} onChange={e => set('city', e.target.value)} placeholder={t('modal.fields.cityPlaceholder')} aria-label={t('modal.fields.city')} style={iStyle} />
             </div>
           </div>
         </div>

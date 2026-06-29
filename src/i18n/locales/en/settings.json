@@ -47,6 +47,9 @@
     "whatsapp": "WhatsApp"
   },
   "nav": {
+    "candidate_display": "Table display",
+    "candidate_custom_fields": "Custom fields",
+    "driver_licenses": "Driving licences",
     "kpis": "KPIs",
     "kpis_leads": "Leads",
     "kpis_candidates": "Candidates",
@@ -108,7 +111,7 @@
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Contract types",
     "funnel_stages": "Funnel stages",
-    "candidate_statuses": "Statuses",
+    "candidate_statuses": "Status",
     "lang_languages": "Languages",
     "lang_levels": "Levels",
     "vacancy_statuses": "Statuses",
@@ -127,7 +130,10 @@
     "department_statuses": "Department statuses",
     "contact_statuses": "Contact statuses",
     "last_contact_types": "Contact type",
-    "note_types": "Note types"
+    "note_types": "Note types",
+    "document_types": "Document types",
+    "candidate_phases": "Phase",
+    "candidate_required_fields": "Required fields"
   },
   "kpis": {
     "title": "KPI settings",
@@ -157,6 +163,70 @@
         "label": "Response rate target",
         "description": "Target value for candidate response to messages",
         "unit": "%"
+      }
+    }
+  },
+  "candidateCustomFields": {
+    "title": "Custom fields",
+    "subtitle": "Define extra fields available on all candidates. Values are stored per candidate.",
+    "add": "Add field",
+    "label": "Label",
+    "labelPlaceholder": "e.g. Licence plate",
+    "key": "Key (slug)",
+    "keyPlaceholder": "e.g. licence_plate",
+    "immutable": "cannot be changed after creation",
+    "type": "Type",
+    "options": "Options",
+    "optionsPlaceholder": "Option 1, Option 2, Option 3",
+    "optionsHint": "Comma-separated. Existing values are preserved when you change the options.",
+    "hasData": "has data",
+    "delete": "Delete",
+    "deleteBlocked": "Cannot delete — field has data",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "types": {
+      "text": "Text",
+      "textarea": "Long text",
+      "number": "Number",
+      "date": "Date",
+      "boolean": "Yes / No",
+      "select": "Choice"
+    }
+  },
+  "driverLicenseSettings": {
+    "title": "Driving licences",
+    "subtitle": "Manage the licence categories candidates can pick as a preference.",
+    "add": "Add category"
+  },
+  "candidateDisplay": {
+    "title": "Table display",
+    "subtitle": "Per column: coloured labels or plain text. The KPI charts always keep their colours.",
+    "fields": {
+      "candidate_table_color_funnel": {
+        "label": "Funnel type"
+      },
+      "candidate_table_color_type": {
+        "label": "Candidate type"
+      },
+      "candidate_table_color_pool": {
+        "label": "Talent pool"
+      },
+      "candidate_table_color_koios": {
+        "label": "Koios AI"
+      },
+      "candidate_avatar_colored_by_gender": {
+        "label": "Name avatar per gender",
+        "description": "On = the avatar next to the candidate name is coloured per gender. Off = one calm grey."
+      },
+      "candidate_table_color_status": {
+        "label": "Status"
+      },
+      "candidate_table_color_owner": {
+        "label": "Owner colour",
+        "description": "On = the owner avatar uses the recruiter's colour. Off = neutral grey."
+      },
+      "candidate_table_color_phase": {
+        "label": "Phase"
       }
     }
   },
@@ -308,8 +378,8 @@
       "subtitle": "One per candidate (Prospect → Intake → Pool → Alumni)."
     },
     "statuses": {
-      "title": "Statuses",
-      "subtitle": "Operational status with a colour (Active, Inactive, Sick …)."
+      "title": "Status",
+      "subtitle": "Can I deploy them now? (Available, Placed, Unavailable, Sick, Leave)."
     },
     "inUse": "In use — cannot delete",
     "requiresAppointment": "Requires an appointment",
@@ -321,7 +391,15 @@
     "appointmentBadge": "Appointment required",
     "requiresReason": "Reason required",
     "requiresReasonHint": "Setting this status requires the user to give a reason (e.g. Inactive).",
-    "reasonBadge": "Reason required"
+    "reasonBadge": "Reason required",
+    "phases": {
+      "title": "Phase",
+      "subtitle": "Relationship phase (Lead → Candidate)."
+    },
+    "requiresMatch": "Requires a Match",
+    "requiresMatchHint": "This status may only be set with a linked Match (e.g. Placed).",
+    "expectsReturnDate": "Asks for a return date",
+    "expectsReturnDateHint": "Asks for an \"available again from\" date (e.g. Unavailable/Sick)."
   },
   "vacancy": {
     "title": "Statuses",
@@ -1169,5 +1247,15 @@
     "title": "Note types",
     "subtitle": "Categories for candidate notes.",
     "add": "Add type"
+  },
+  "documentTypes": {
+    "title": "Document types",
+    "subtitle": "Categories and colours for candidate documents (CV, ID, diploma, …).",
+    "add": "Add type"
+  },
+  "requiredFields": {
+    "title": "Required fields",
+    "subtitle": "Mark which fields are required per phase. A required field shows a star and blocks saving when empty.",
+    "field": "Field"
   }
 }

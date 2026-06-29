@@ -8,6 +8,10 @@
 > **2026-06-29 [FE]:** kandidaat-lookups nu volledig uit de API — note-types/document-types/cv-template
 > ontkoppeld van hardcode + planning-mock weg; backend moet endpoints + seed leveren → **C-37 / C-38**.
 >
+> **2026-06-29 [model]:** assen-model **v2** besloten (CLAUDE.md §3B) — "status" splitst in **Fase**
+> (Lead/Kandidaat) + **Inzetbaarheid** (Beschikbaar/Geplaatst/Niet beschikbaar/Ziek/Verlof; availability
+> erin gevouwen); "Kandidaat type" → **Contractvorm**; blacklist-reden instelbaar. BE → **C-10**, FE → **C-39**.
+>
 > **Legenda:** ☐ open · ◐ deels klaar · ✅ klaar · 🔴 blokkerend · [D] Danny · [FE] Frontend · [BE] Backend
 
 ---
@@ -16,7 +20,7 @@
 
 - [ ] **A-1** [D] Kandidaat drawer hertekenen (plan klaar, sessie 2026-06-24): 6 tabs + subtabs. Goedkeuren?
 - [ ] **A-2** [D] "Kans" = sales-deal (lezing a, huidig) of open vacature/positie (lezing b)? Bepaalt het datamodel.
-- [ ] **A-3** [D] Handmatig status `matched` zetten → prompt om Match te koppelen? Of gewoon toestaan + inconsistentie-vlag?
+- [x] **A-3** [D] ✅ Besloten 2026-06-29: `Geplaatst` mag handmatig, **maar verplicht een Match koppelen** (geen Geplaatst zonder Match). Zie C-10/C-39.
 - [ ] **A-4** [D] Hosting WhatsApp-gateway: Hetzner (EU, goedkoop) vs. strikt NL (premium)?
 - [ ] **A-5** [D] Terminologie definitief: "vacancy" of "vacature"? Consistent doorvoeren.
 - [ ] **A-6** [D] Adres bij locaties: huidige compacte weergave ok, of anders?
@@ -44,23 +48,18 @@ Volledig nieuwe tabstructuur. **Wacht op A-1 (Danny akkoord).**
 ### B-A1.1 · Kandidaat drawer — subtab Persoon
 Bevat: naam, geslacht, geboortedatum, geboorteplaats, nationaliteit, profielfoto.
 
-### B-A1.2 · Kandidaat-drawer — consistentie-polish (evaluatie 2026-06-29)
+### B-A1.2 · Kandidaat-drawer — consistentie-polish (✅ afgerond 2026-06-29)
 Findings uit de volledige drill-down-doorloop. Allemaal FE, geen backend.
-- ☐ **Chips uniform met "Kandidaat type".** `branche` · `rijbewijs` · `voorkeursdagen` tonen in
-  read-modus platte komma-tekst en pas chips ná het tabel-potlood; kandidaat-type toont altijd
-  klikbare soft-chips. Gekozen richting: **chips ook altijd in read-modus** (zachte chips i.p.v.
-  komma-tekst). Te beslissen bij uitvoeren: aparte chip-kaarten per lijst (exact zoals kandidaat-type,
-  toggle-direct opslaan) **vs.** chips binnen de bestaande Voorkeuren-tabel (één Save behouden, potlood
-  blijft). Hergebruik `ChipMultiSelect`; geen nieuwe chip-stijl.
-- ☐ **Planning-koppen grijs uppercase.** `drawer/constants.ts` `sectionTitle` is nog dik-donker
-  (`fontWeight:700`) en wordt door PlanningTab/Scheduling/Favorites gebruikt — gelijktrekken met
-  `ui/SectionCard.sectionTitle` (grijs uppercase) en de duplicaat samenvouwen (één bron).
-- ☐ **Functie-veld → creatable combobox.** Voorkeuren-`function` is nu een platte `select`; naar
-  `CreatableSelect` + dropdown↔vrij-tekst-toggle (§3B), zoals het functieveld elders.
-- ☐ **Dode code:** ongebruikte `LanguageTab`-export uit `SectionTabs.tsx` verwijderen (Achtergrond
-  gebruikt `LanguagesSection`).
-- ☐ **Sleep-handle:** `GripVertical` bij ervaring/opleiding is een loze affordance (reorder niet
-  bedraad) → óf DnD-reorder echt bedraden óf het icoon weghalen.
+- ✅ **Chips uniform met "Kandidaat type".** `EditableFieldTable` toont `branche`/`rijbewijs`/
+  `voorkeursdagen` in read-modus nu als zachte chips (i.p.v. komma-tekst). Gekozen: **chips in de
+  bestaande Voorkeuren-tabel** (één Save behouden, potlood blijft) — de aparte-kaarten-variant is
+  bewust niet gedaan.
+- ✅ **Planning-koppen grijs uppercase.** `drawer/constants.ts` `sectionTitle` hergebruikt nu
+  `ui/SectionCard.sectionTitle` (één bron) + block-marginBottom voor de bare-span-usage.
+- ✅ **Functie-veld → creatable combobox.** Nieuw `creatable`-type in `EditableFieldTable` (wraps
+  `CreatableSelect`); Voorkeuren-`function` gebruikt het met `allowCreate = useFunctions().allowFreeEntry`.
+- ✅ **Dode code:** ongebruikte `LanguageTab`-export uit `SectionTabs.tsx` verwijderd.
+- ✅ **Sleep-handle:** loze `GripVertical` bij ervaring/opleiding verwijderd (reorder was niet bedraad).
 
 ### B-1 · E-mail per context
 Settings-UI: 4 panelen/tabs, provider-keuze, handtekening-editor, default-fallback. Backend klaar.
@@ -123,8 +122,29 @@ Monoliet VacanciesPage.jsx herbouwen. Hangt op: C-26
 ### B-20 · Taken — feature naar candidate-blueprint
 Kanban + drawer + settings-lookups. Hangt op: C-18
 
-### B-21 · Aangepaste velden — generiek over 8 entiteiten
-CustomFieldsEditor + CustomFieldsTab per entiteit. Hangt op: C-29
+### B-21 · Aangepaste velden + verplichte velden + duplicate-check/merge (kandidaat eerst) [FE]
+Uitgebreid plan 2026-06-29 (leunt op v2-assen C-39 voor "verplicht per fase"). Hangt op: C-29.
+- ☐ **Eigen velden — Settings-editor:** `CustomFieldsEditor` (key/label/**type**/options/order/active/
+  `required_for[]`/`label_i18n`). Types: text·number·date·select·boolean·textarea. **Type op slot bij
+  data** (slotje + tooltip). Verwijderen geblokkeerd bij gebruik (409 + `in_use`).
+- ☐ **Extra-tab in de drawer:** alleen tonen bij ≥1 actief eigen veld (zoals conditionele tabs);
+  rendert via `EditableFieldTable` (typen bestaan al). Waarden = `custom_fields {key:value}`-JSON.
+- ☐ **Verplichte velden per fase (Lead vs Kandidaat):** ster (\*) + inline-melding + **opslaan
+  geblokkeerd** bij leeg; fase-afhankelijke set; promotie Lead→Kandidaat preflight ("vul eerst …").
+  Geldt voor ingebouwde én eigen velden.
+- ☐ **Duplicate-check:** live pre-check (`GET /candidates/check-duplicate`, debounced op email/mobile)
+  + 409-afvang op create → melding "Kandidaat of lead bestaat al" + link naar bestaand record.
+  Sleutels instelbaar (`candidate_dedupe_keys`, default email+mobile).
+- ☐ **Merge:** modal met **slimme voorinvulling** (per veld voorstel: niet-lege / nieuwste waarde wint,
+  overrulebaar) → `POST /candidates/{survivor}/merge`; sub-entiteiten omhangen, bron soft-delete/
+  anonimiseer. Trigger vanuit duplicate-melding of bulk-select.
+- ☐ **Kleur-toggles meenemen:** custom-veld-kolommen **opt-in per veld** (`show_in_table`-vlag) met
+  eigen toon-toggle; nieuwe v2-kolommen (Fase·Inzetbaarheid·Contractvorm) krijgen kleur-per-kolom-toggle
+  (candidateDisplay).
+- **Besloten 2026-06-29 (Danny):** (1) labels = **hoofdlabel + optionele vertalingen** per taal
+  (`label_i18n`, leeg = fallback op hoofdlabel); (2) merge = **modal met slimme voorinvulling**
+  (overrulebaar), géén volautomatische merge; (3) eigen velden **opt-in als tabel-kolom**
+  (`show_in_table`-vlag), standaard alleen in de Extra-tab.
 
 ### B-22 · Dashboard de-hardcoden
 Alle hardcoded arrays vervangen door live API-calls. Hangt op: C-30 + C-26 + C-18
@@ -155,10 +175,47 @@ Hangt op: C-35
 ### 🔴 C-0 · Volledige seeder (Yesway + demo)
 Alle lookups + realistische sample-data voor beide tenants. Geen lege schermen meer.
 
-### 🔴 C-10 · Status/funnel-model reseed
-Status herseed naar: `lead · candidate · matched · inactive · unplaceable`.
-Blacklist = aparte vlag. Archived = soft-delete.
-Details + afstemming: zie originele spec in git-history.
+### 🔴 C-10 · Assen-model v2 — reseed + endpoints (HERZIEN 2026-06-29, vervangt oude reseed)
+Besluit 2026-06-29 (CLAUDE.md §3B v2): de overladen "status"-as **splitst** in **Fase** (lifecycle)
++ **Inzetbaarheid** (operationeel). Backend moet hiervoor **migraties (gevouwen in `create_*`),
+modellen, seeders én API's** bijwerken. Waardenmatrix:
+- **Fase** (`phases`, NIEUWE lookup-tabel + endpoint `/settings/candidate-lookups/phases`):
+  seed `lead · candidate` (+ later `alumni`). Lead→candidate-automation (1e sollicitatie/intake).
+- **Inzetbaarheid** (de bestaande `statuses`-lookup **herzien** + de losse `availability` erin vouwen):
+  seed `available · placed · unavailable · sick · leave`. **`placed` vereist een gekoppelde Match**
+  (handmatig zetten → verplicht Match; auto via funnel `hired`→Match). `unavailable` = met
+  weer-beschikbaar-datum + reden. Endpoint `/settings/candidate-lookups/statuses` (of hernoemen).
+- **Blacklist** = aparte vlag + `reason`. **Nieuwe `/settings`-key `blacklist_reason_required`**
+  (bool, default `true`) bepaalt of de reden verplicht is.
+- **Archived** = soft-delete (`deleted_at`), geen status.
+- **Contractvorm** = de bestaande `candidate-types`-lookup; **alleen het FE-label** wijzigt
+  (Kandidaat type → Contractvorm), **waarde-keys ongewijzigd** — backend hoeft niets te hernoemen.
+- **Migratie bestaande data:** `matched`→`placed`; `inactive`/`unplaceable`→`unavailable` (met reden);
+  oude `availability`-waarden → de nieuwe inzetbaarheid-as; `lead`/`candidate` → de nieuwe `phases`-as.
+- **Changelog:** fase- én inzetbaarheid-transities met `effective_from` + reason (sluit op C-16 aan).
+
+### C-39 · Frontend — assen-model v2 doorvoeren (◐ FE-first gebouwd 2026-06-29, seed-fallback)
+**Gebouwd (FE-first, draait op seed tot C-10 backend levert):**
+- ✅ `LookupsContext`: `phases` (Lead/Kandidaat) + `phaseMeta` + `/settings/candidate-lookups`-wiring;
+  `statuses` herzien naar **inzetbaarheid** (Beschikbaar/Geplaatst/Niet beschikbaar/Ziek/Verlof).
+- ✅ `mapCandidate`-**shim**: splitst legacy `status` (lifecycle) in `phase` + deployability zodat
+  bestaande data blijft renderen; expliciete `c.phase`/`c.deployability` winnen.
+- ✅ Drawer-header: **Fase-picker + Inzetbaarheid-picker**; `Geplaatst` zonder Match → **prompt-modal**
+  (informeert + blokkeert; match-creatie zelf is backend).
+- ✅ Tabel: kolommen **Fase · Inzetbaarheid · Contractvorm** + kleur-per-kolom-toggles
+  (`candidate_table_color_phase` toegevoegd).
+- ✅ AddCandidateModal: linkerpaneel kiest nu **Fase** (Lead/Kandidaat); deployability default `available`.
+- ✅ Settings: **Fase**-sub-tab + statuses-tab herlabeld **Inzetbaarheid** + Contractvorm-label; i18n ×5.
+
+**Nog open (FE):**
+- ☐ **Blacklist → reden-popup** + blacklist-vlag/actie in de header (gegate op `blacklist_reason_required`)
+  — vereist een nieuw veld/actie die er nog niet is; bewust gestaged.
+- ☐ **Funnel-chips alleen bij ≥1 lopende sollicitatie** + de oude `is_applicant`-gating opruimen (= B-10).
+- ☐ KPI-row + filters op de nieuwe assen; match-creatie in de Geplaatst-flow (hangt op C-19/C-10).
+- Hangt voor echte data op **C-10** (phases-lookup + statuses-reseed + migratie).
+
+### C-1 · Lookups — "in gebruik"-vlag + 409 ◐
+Verifiëren met ingelogde sessie: vacancy status/fase toevoegen + reorder werkt.
 
 ### C-1 · Lookups — "in gebruik"-vlag + 409 ◐
 Verifiëren met ingelogde sessie: vacancy status/fase toevoegen + reorder werkt.
@@ -217,8 +274,21 @@ API levert alle velden uit `mapCandidate.js`. Seeder vult ze realistisch.
 ### C-27 · Klanten — endpoints + sub-entiteiten + seeder
 Volledige CRUD + locaties/afdelingen/contactpersonen + 15–20 klanten geseed.
 
-### C-29 · Aangepaste velden — 8 entiteiten
-Definitie-endpoints + `custom_fields` JSON per entiteit.
+### C-29 · Aangepaste velden + verplichte-velden-per-fase + duplicate/merge (kandidaat eerst) [BE]
+Uitgebreid 2026-06-29 (migraties gevouwen in `create_*`; modellen; seeders; API's):
+- **`candidate_custom_fields`-tabel** (tenant): `key, label, label_i18n(json, optioneel per taal —
+  leeg = fallback op `label`), type∈{text,number,date,select,boolean,textarea}, options(json),
+  required_for(json:fase-keys), `show_in_table`(bool, default false), order, active, has_data`.
+  CRUD `/candidate-custom-fields` (lookup-contract + 409/`in_use` + reorder). **Type niet wijzigbaar
+  bij `has_data`.**
+- **`custom_fields` JSON-kolom** op candidate; GET/PATCH leveren/accepteren `{key:value}`; **server-
+  validatie per type**.
+- **Verplichte velden:** ingebouwd via `/settings`-key `candidate_required_fields = {lead:[],candidate:[]}`
+  (geseed); custom via `required_for`. **422** bij leeg-verplicht voor de huidige fase + bij fase-promotie.
+- **Duplicate:** `/settings`-key `candidate_dedupe_keys` (default `["email","mobile"]`);
+  `GET /candidates/check-duplicate` → `{exists, match?}`; create met match → **409** `{message, existing}`.
+- **Merge:** `POST /candidates/{survivor}/merge {source_id, field_choices}` — transactioneel sub-entiteiten
+  omhangen, `field_choices` toepassen, bron soft-delete/anonimiseer, audit-log. Hard-delete blijft BE-only.
 
 ### C-30 · `GET /dashboard` summary-endpoint
 KPIs + recents + filterbronnen in één call.
@@ -311,6 +381,46 @@ bestaande C-items):
 - **Settings:** álle lookup-CRUD-contracten geseed + 409/`in_use` + reorder (C-36b) · `/note-types`
   (C-37a) · `/document-types` (C-37b) · `candidate_cv_template` (C-37c) · tabel-kleur-`/settings`-keys
   met booleans als `true`/`false` (C-36d).
+
+### C-40 · Gebruikersbeheer — drie endpoints (FE klaar · BE open)
+
+Frontend (`#administration/users`) is volledig gebouwd; backend mist drie dingen:
+
+**1. `PATCH /api/users/{id}` — profiel bewerken**
+Accepteert (elk veld optioneel):
+```json
+{ "firstname": "Jan", "lastname": "Jansen", "email": "jan@bedrijf.nl", "phone": "+31612345678", "password": "nieuw" }
+```
+- Alleen admin/eigen account mag dit aanroepen.
+- `password` alleen hashen en opslaan als het meegestuurd wordt.
+- Response: `{ "data": { <user-object> } }` met `id, firstname, lastname, name, email, phone, avatar_color, roles[]`.
+- **Let op:** stuur altijd `firstname` + `lastname` **apart** terug (niet alleen `name`), anders kan de FE edit-modal de velden niet pre-fillen.
+
+**2. `PUT /api/users/{id}/roles` — rol wijzigen**
+```json
+{ "roles": [3] }
+```
+- `roles` = array met één role-ID (integer) — het ID dat `GET /api/roles` teruggeeft.
+- Vervangt alle rollen van de gebruiker (behalve super_admin — dat is beschermd).
+- Response: bijgewerkt user-object (zelfde shape als hierboven).
+- **Bug nu:** 500-fout → check of de route bestaat en of `roles` als array van IDs verwacht wordt.
+
+**3. `GET /api/roles` — beschikbare rollen**
+```json
+[{ "id": 2, "name": "tenant_admin" }, { "id": 3, "name": "planner" }, { "id": 4, "name": "user" }]
+```
+- Geeft alle tenant-rollen terug (super_admin mag erin maar FE filtert die eruit).
+- **Nu:** 401 → zorg dat dit endpoint bereikbaar is voor ingelogde tenant_admin.
+
+**Auth-gate voor `/api/users` en `/api/roles`:**
+- `GET /api/users` + `GET /api/roles` → vereist Sanctum-sessie + rol `tenant_admin` (of hoger).
+- **Nu:** beide geven 401 → sessie/CSRF-gate klopt niet of middleware mist.
+
+**Avatar-kleur:**
+- `avatar_color` is nullable string op de `users`-tabel. `null` = reset naar automatisch.
+- Wordt gestuurd via diezelfde `PATCH /api/users/{id}`.
+
+---
 
 ### C-27-workflow · Workflow-modules — graaf-opslag
 Steps opslaan met `position` + `connections[]` (target + filters). Stabiele step-ids.

@@ -17,7 +17,12 @@
     "city": "Wohnort",
     "province": "Provinz",
     "createdAt": "Erstellt am",
-    "lastContactType": "Kontakttyp"
+    "lastContactType": "Kontakttyp",
+    "talentPool": "Talentpool",
+    "koios": "Koios",
+    "phase": "Phase",
+    "deployability": "Status",
+    "contractForm": "Vertragsform"
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
@@ -137,7 +142,10 @@
       "streetPlaceholder": "z. B. Hauptstraße",
       "houseNumber": "Hausnummer",
       "houseNumberSuffix": "Zusatz",
-      "postalCode": "PLZ"
+      "postalCode": "PLZ",
+      "functionTitle": "Funktionstitel",
+      "functionPlaceholder": "z. B. Verzorgende IG",
+      "owner": "Inhaber"
     },
     "gender": {
       "male": "Männlich",
@@ -156,10 +164,12 @@
       "profile": "Profil",
       "background": "Hintergrund",
       "work": "Arbeit",
+      "match": "Match",
       "planning": "Planung",
       "preferences": "Präferenzen",
       "zzp": "Freiberufler",
       "communication": "Kommunikation",
+      "documents": "Dokumente",
       "statistics": "Statistiken",
       "changelog": "Änderungsprotokoll"
     },
@@ -172,6 +182,7 @@
     "uploadCv": "Lebenslauf hochladen",
     "downloadCv": "Lebenslauf herunterladen",
     "generating": "Wird erstellt...",
+    "customFields": "Eigene Felder",
     "edit": "Bearbeiten",
     "editing": "Bearbeiten…",
     "createdAt": "Erstellt am {{date}}",
@@ -181,7 +192,17 @@
     "stage": "Funnel-Typ",
     "candidateType": "Kandidatentyp",
     "entityLabel": "Kandidat",
-    "applications": "Bewerbungen"
+    "applications": "Bewerbungen",
+    "phase": "Phase",
+    "deployability": "Status",
+    "placedNeedsMatchTitle": "Match erforderlich",
+    "placedNeedsMatchBody": "Status \"Eingesetzt\" erfordert einen verknüpften Match. Verknüpfen Sie zuerst einen Match über den Match-Tab.",
+    "blacklist": "Blacklist",
+    "blacklistReasonTitle": "Grund für Blacklist",
+    "blacklistConfirm": "Auf Blacklist",
+    "statusReasonTitle": "Statusänderung",
+    "reasonLabel": "Grund",
+    "returnDateLabel": "Wieder verfügbar ab"
   },
   "stage": {
     "lead": "Lead",
@@ -210,7 +231,12 @@
     "placeOfBirth": "Geburtsort",
     "clear": "Leeren",
     "expand": "Vergrößern",
-    "collapse": "Verkleinern"
+    "collapse": "Verkleinern",
+    "street": "Straße",
+    "houseNumber": "Hausnummer",
+    "houseNumberSuffix": "Zusatz",
+    "postalCode": "Postleitzahl",
+    "city": "Ort"
   },
   "addFields": {
     "functionTitle": "Berufsbezeichnung",
@@ -230,7 +256,11 @@
     "expiryDate": "Ablaufdatum",
     "licenseNumber": "Lizenznummer",
     "skill": "Fähigkeit",
-    "skillLevel": "Kompetenzniveau"
+    "skillLevel": "Kompetenzniveau",
+    "currentJob": "Aktuelle Stelle",
+    "inProgress": "Noch in Ausbildung",
+    "expectedEnd": "Voraussichtliches Enddatum",
+    "present": "heute"
   },
   "work": {
     "client": "Kunde",
@@ -375,7 +405,11 @@
     "timeline": "Zeitleiste",
     "timelineEmpty": "Noch keine Aktivitäten.",
     "conversations": "Gespräche",
-    "conversationsEmpty": "Noch keine Gespräche."
+    "conversationsEmpty": "Noch keine Gespräche.",
+    "pools": "Talentpools",
+    "poolAdd": "Zu Pool hinzufügen",
+    "poolsEmpty": "Noch keine Pools eingerichtet.",
+    "poolKoios": "Von Koios vorgeschlagen"
   },
   "preferences": {
     "title": "Präferenzen",
@@ -391,6 +425,9 @@
     "minRate": "Min. Stundensatz (€)",
     "contract": "Vertragspräferenz",
     "remarks": "Bemerkungen",
+    "groupPayroll": "Lohnsteuer",
+    "wageTax": "Lohnsteuer anwenden",
+    "wageTaxFrom": "Gültig ab",
     "groupAvailability": "Verfügbarkeit",
     "groupTravel": "Reisen",
     "groupWork": "Arbeitspräferenzen",
@@ -479,6 +516,7 @@
     "loading": "Änderungen werden geladen…",
     "error": "Änderungsprotokoll konnte nicht geladen werden.",
     "empty": "Noch keine Änderungen erfasst.",
+    "fromIp": "Geändert von IP {{ip}}",
     "system": "System"
   },
   "matchesView": {
@@ -493,6 +531,13 @@
       "pending": "In Bearbeitung",
       "active": "Aktiv",
       "ended": "Beendet"
+    }
+  },
+  "koios": {
+    "actions": {
+      "add_to_pool": "Zu Pool hinzufügen",
+      "contact": "Kontaktieren",
+      "plan_intake": "Intake planen"
     }
   }
 }

@@ -3,7 +3,7 @@
  * card + an optional recent-activity card. Entity-agnostic; everything via props.
  */
 import type { ComponentType, ReactNode } from 'react'
-import SectionCard from '../../ui/SectionCard'
+import SectionCard, { sectionTitle } from '../../ui/SectionCard'
 import DetailTableJs from '../../ui/DetailTable'
 
 type AnyProps = Record<string, unknown>
@@ -15,10 +15,13 @@ interface Overview { title?: ReactNode; rows?: Array<[ReactNode, ReactNode]> }
 interface ActivityItem { text?: ReactNode; time?: ReactNode }
 interface Activity { title?: ReactNode; items: ActivityItem[]; emptyText?: ReactNode }
 
-export default function StatsTab({ kpis = [], overview, activity }: { kpis?: Kpi[]; overview?: Overview; activity?: Activity }) {
+export default function StatsTab({ kpis = [], kpisTitle, overview, activity }: { kpis?: Kpi[]; kpisTitle?: ReactNode; overview?: Overview; activity?: Activity }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      {/* KPI grid with its own grey section heading (kept outside the cards). */}
+      <div>
+        {kpisTitle && <div style={{ ...sectionTitle, marginBottom: 6 }}>{kpisTitle}</div>}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {kpis.map(k => (
           <div key={k.label} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', background: 'var(--surface)' }}>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{k.label}</div>
@@ -26,6 +29,7 @@ export default function StatsTab({ kpis = [], overview, activity }: { kpis?: Kpi
             <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>{k.sub}</div>
           </div>
         ))}
+        </div>
       </div>
 
       {overview && (

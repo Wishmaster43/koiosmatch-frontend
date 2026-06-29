@@ -1,0 +1,72 @@
+{
+  "title": "Oportunidades",
+  "loading": "Cargando oportunidades…",
+  "empty": "Aún no hay oportunidades.",
+  "error": "No se pudieron cargar las oportunidades.",
+  "page": {
+    "add": "Añadir oportunidad"
+  },
+  "cols": {
+    "title": "Oportunidad",
+    "client": "Cliente",
+    "stage": "Fase",
+    "value": "Valor",
+    "owner": "Responsable",
+    "date": "Creado"
+  },
+  "insights": {
+    "stage": "Fase",
+    "owner": "Responsable",
+    "clearFilter": "Borrar filtro"
+  },
+  "kpi": {
+    "total": "Oportunidades",
+    "pipeline": "Valor del pipeline (€)",
+    "avg": "Valor medio (€)"
+  },
+  "drawer": {
+    "entityLabel": "Oportunidad",
+    "stage": "Fase",
+    "owner": "Responsable",
+    "client": "Cliente",
+    "selectStage": "Seleccionar fase",
+    "selectOwner": "Seleccionar responsable",
+    "selectClient": "Seleccionar cliente",
+    "createdAt": "Creado el {{date}}",
+    "tabs": {
+      "details": "Detalles"
+    }
+  },
+  "details": {
+    "stage": "Fase",
+    "value": "Valor",
+    "expectedClose": "Cierre previsto",
+    "client": "Cliente",
+    "owner": "Responsable",
+    "created": "Creado",
+    "groups": {
+      "deal": "Negocio",
+      "organisation": "Organización"
+    }
+  },
+  "modal": {
+    "title": "Nueva oportunidad",
+    "titlePlaceholder": "Ej. 5 enfermeros — Zorggroep Noord",
+    "required": "El título es obligatorio",
+    "create": "Crear",
+    "creating": "Guardando…",
+    "cancel": "Cancelar",
+    "fields": {
+      "title": "Título",
+      "client": "Cliente",
+      "stage": "Fase",
+      "value": "Valor (€)",
+      "expectedClose": "Cierre previsto",
+      "owner": "Responsable"
+    }
+  },
+  "view": {
+    "table": "Vista de lista",
+    "board": "Vista de tablero"
+  }
+}

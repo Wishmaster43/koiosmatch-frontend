@@ -19,7 +19,10 @@
     "talentPool": "Talent pool",
     "koios": "Koios",
     "createdAt": "Added",
-    "lastContactType": "Channel"
+    "lastContactType": "Channel",
+    "phase": "Phase",
+    "deployability": "Status",
+    "contractForm": "Contract form"
   },
   "koios": {
     "actions": {
@@ -168,10 +171,12 @@
       "profile": "Profile",
       "background": "Background",
       "work": "Work",
+      "match": "Match",
       "planning": "Planning",
       "preferences": "Preferences",
       "zzp": "Freelance",
       "communication": "Communication",
+      "documents": "Documents",
       "statistics": "Statistics",
       "changelog": "Changelog"
     },
@@ -193,7 +198,17 @@
     "stage": "Funnel type",
     "candidateType": "Candidate type",
     "entityLabel": "Candidate",
-    "applications": "Applications"
+    "applications": "Applications",
+    "phase": "Phase",
+    "deployability": "Status",
+    "placedNeedsMatchTitle": "Match required",
+    "placedNeedsMatchBody": "Status \"Placed\" requires a linked Match. Couple a Match first via the Match tab; then you can set \"Placed\".",
+    "blacklist": "Blacklist",
+    "blacklistReasonTitle": "Blacklist reason",
+    "blacklistConfirm": "Blacklist",
+    "statusReasonTitle": "Status change",
+    "reasonLabel": "Reason",
+    "returnDateLabel": "Available again from"
   },
   "stage": {
     "lead": "Lead",
@@ -416,6 +431,9 @@
     "minRate": "Min. hourly rate (€)",
     "contract": "Contract preference",
     "remarks": "Remarks",
+    "groupPayroll": "Payroll tax",
+    "wageTax": "Apply payroll tax",
+    "wageTaxFrom": "Effective from",
     "groupAvailability": "Availability",
     "groupTravel": "Travel",
     "groupWork": "Work preferences",
@@ -504,6 +522,7 @@
     "loading": "Loading changes…",
     "error": "Could not load the changelog.",
     "empty": "No changes recorded yet.",
+    "fromIp": "Changed from IP {{ip}}",
     "system": "System"
   },
   "matchesView": {

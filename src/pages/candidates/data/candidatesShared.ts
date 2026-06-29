@@ -67,12 +67,15 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   if ('languages'         in patch) body.languages         = patch.languages
   if ('preferences'       in patch) body.preferences       = patch.preferences
   if ('zzp'               in patch) body.zzp               = patch.zzp
-  // Consent toggles → flat booleans (the `_at` timestamps are stamped server-side).
+  // Consent (C-11) → nested `consent` with ONLY the changed opt-in flags; never the
+  // `_consent_at` timestamps (server-stamped). Send only the channels that are present.
   if ('consent' in patch) {
     const cs = (patch.consent ?? {}) as Record<string, unknown>
-    if ('whatsapp_consent'   in cs) body.whatsapp_consent   = cs.whatsapp_consent
-    if ('email_consent'      in cs) body.email_consent      = cs.email_consent
-    if ('newsletter_consent' in cs) body.newsletter_consent = cs.newsletter_consent
+    const out: Record<string, unknown> = {}
+    for (const k of ['whatsapp_opt_in', 'email_opt_in', 'newsletter_opt_in']) {
+      if (k in cs) out[k] = cs[k]
+    }
+    if (Object.keys(out).length) body.consent = out
   }
   return body
 }

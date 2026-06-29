@@ -31,11 +31,13 @@ export interface LookupItem { value: string; label: string; color: string; is_ap
 
 interface LookupsValue {
   candidateTypes: LookupItem[]
+  phases: LookupItem[]
   funnelTypes: LookupItem[]
   statuses: LookupItem[]
   availability: LookupItem[]
   loading: boolean
   typeMeta: (v?: string | null) => LookupItem
+  phaseMeta: (v?: string | null) => LookupItem
   funnelMeta: (v?: string | null) => LookupItem
   statusMeta: (v?: string | null) => LookupItem
   availabilityMeta: (v?: string | null) => LookupItem
@@ -56,6 +58,13 @@ export const DEFAULT_CANDIDATE_TYPES: LookupItem[] = [
   { value: 'on_demand',   label: 'Demand',        color: '#C98BBA' },
 ]
 
+// Phase = relationship lifecycle (single value), seed Lead → Candidate. NEW axis
+// (model v2, split out of the old "status"). Lead → Candidate via automation.
+export const DEFAULT_PHASES: LookupItem[] = [
+  { value: 'lead',      label: 'Lead',      color: '#94A3B8' },
+  { value: 'candidate', label: 'Kandidaat', color: '#79B58E' },
+]
+
 // Application pipeline (per application). `invited` is the intake stage that
 // carries `requires_appointment` once configured (see §3B / C-22).
 export const DEFAULT_FUNNEL_TYPES: LookupItem[] = [
@@ -66,16 +75,15 @@ export const DEFAULT_FUNNEL_TYPES: LookupItem[] = [
   { value: 'rejected', label: 'Afgewezen',          color: '#D98A8A' },
 ]
 
-// Person lifecycle (single value), confirmed model (decision 16). `matched` is set
-// by the hired → match automation. Blacklist is a SEPARATE flag (not here); Archived
-// = soft-delete (deleted_at). `unplaceable` carries an "available again" date that
-// drives a re-activation workflow. Sick/Leave live on the availability axis.
+// Deployability / "status" (single value), model v2 (decision 2026-06-29): "can I
+// deploy them now?". Absorbs the old availability axis. `placed` is set by the hired
+// → match automation and requires a linked Match. Lead/Candidate moved to PHASES.
 export const DEFAULT_STATUSES: LookupItem[] = [
-  { value: 'lead',        label: 'Lead',              color: '#94A3B8' },
-  { value: 'candidate',   label: 'Kandidaat',         color: '#79B58E' },
-  { value: 'matched',     label: 'Gematched',         color: '#6E8FD6' },
-  { value: 'inactive',    label: 'Inactief',          color: '#C9AC64' },
-  { value: 'unplaceable', label: 'Niet bemiddelbaar', color: '#D98A8A' },
+  { value: 'available',   label: 'Beschikbaar',      color: '#79B58E' },
+  { value: 'placed',      label: 'Geplaatst',        color: '#6E8FD6', requires_match: true },
+  { value: 'unavailable', label: 'Niet beschikbaar', color: '#C9AC64', requires_reason: true, expects_return_date: true },
+  { value: 'sick',        label: 'Ziek',             color: '#D98A8A', expects_return_date: true },
+  { value: 'leave',       label: 'Verlof',           color: '#6FA8C4', expects_return_date: true },
 ]
 
 // Availability is a SEPARATE axis from the lifecycle status (a candidate can be
@@ -95,13 +103,16 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
   return (raw as Record<string, unknown>[])
     .filter(it => it.active !== false)
     .sort((a, b) => (Number(a.order ?? a.sort_order ?? 0)) - (Number(b.order ?? b.sort_order ?? 0)))
-    .map(it => ({ value: String(it.value), label: String(it.label ?? it.value), color: (it.color as string) ?? '#6B7280', is_applicant: it.is_applicant === true }))
+    .map(it => ({ value: String(it.value), label: String(it.label ?? it.value), color: (it.color as string) ?? '#6B7280',
+      is_applicant: it.is_applicant === true, requires_reason: it.requires_reason === true,
+      requires_match: it.requires_match === true, expects_return_date: it.expects_return_date === true }))
 }
 
 const LookupsContext = createContext<LookupsValue | null>(null)
 
 export function LookupsProvider({ children }: { children: ReactNode }) {
   const [candidateTypes, setCandidateTypes] = useState<LookupItem[]>(DEFAULT_CANDIDATE_TYPES)
+  const [phases,         setPhases]         = useState<LookupItem[]>(DEFAULT_PHASES)
   const [funnelTypes,    setFunnelTypes]    = useState<LookupItem[]>(DEFAULT_FUNNEL_TYPES)
   const [statuses,       setStatuses]       = useState<LookupItem[]>(DEFAULT_STATUSES)
   const [availability,   setAvailability]   = useState<LookupItem[]>(DEFAULT_AVAILABILITY)
@@ -114,6 +125,7 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
       .then(res => {
         const d = res.data ?? {}
         setCandidateTypes(normalize(d.candidate_types, DEFAULT_CANDIDATE_TYPES))
+        setPhases(normalize(d.phases, DEFAULT_PHASES))
         setFunnelTypes(normalize(d.funnel_types, DEFAULT_FUNNEL_TYPES))
         setStatuses(normalize(d.statuses, DEFAULT_STATUSES))
       })
@@ -128,6 +140,7 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
   // value → item helpers (with a neutral fallback so the UI never crashes).
   const find = (list: LookupItem[], value?: string | null) => list.find(i => i.value === value)
   const typeMeta   = (v?: string | null): LookupItem => find(candidateTypes, v) ?? { value: v ?? '', label: v ?? '', color: '#6B7280' }
+  const phaseMeta  = (v?: string | null): LookupItem => find(phases, v)         ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
   const funnelMeta = (v?: string | null): LookupItem => find(funnelTypes, v)    ?? { value: v ?? '', label: v ?? '', color: '#6B7280' }
   const statusMeta = (v?: string | null): LookupItem => find(statuses, v)       ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF', is_applicant: false }
   const availabilityMeta = (v?: string | null): LookupItem => find(availability, v) ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
@@ -137,8 +150,8 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
   const hasApplicantStatus = statuses.some(s => s.is_applicant === true)
 
   const value: LookupsValue = {
-    candidateTypes, funnelTypes, statuses, availability, loading,
-    typeMeta, funnelMeta, statusMeta, availabilityMeta,
+    candidateTypes, phases, funnelTypes, statuses, availability, loading,
+    typeMeta, phaseMeta, funnelMeta, statusMeta, availabilityMeta,
     isApplicantStatus, hasApplicantStatus,
   }
 

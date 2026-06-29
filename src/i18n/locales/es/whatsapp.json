@@ -32,5 +32,19 @@
     "title": "Sin conexión de WhatsApp",
     "desc": "Aún no se ha configurado una conexión de WhatsApp Business para este inquilino. Configura una conexión a través del backend para ver mensajes y estadísticas aquí.",
     "errorLabel": "Error del backend"
+  },
+  "filters": {
+    "status": "Estado",
+    "direction": "Dirección"
+  },
+  "msgStatus": {
+    "read": "Leído",
+    "delivered": "Entregado",
+    "sent": "Enviado",
+    "failed": "Fallido"
+  },
+  "msgDirection": {
+    "inbound": "Entrante",
+    "outbound": "Saliente"
   }
 }

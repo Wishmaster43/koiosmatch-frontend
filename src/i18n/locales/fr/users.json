@@ -33,5 +33,11 @@
     "planner": "Planificateur",
     "user": "Utilisateur"
   },
-  "noRoles": "Aucun rôle disponible"
+  "noRoles": "Aucun rôle disponible",
+  "editUser": "Modifier l'utilisateur",
+  "saveFailed": "Échec de l'enregistrement.",
+  "saving": "Enregistrement…",
+  "phone": "Numéro de téléphone",
+  "changePassword": "Changer le mot de passe",
+  "newPassword": "Nouveau mot de passe"
 }

@@ -44,12 +44,13 @@ export default function AddLocationModal({ onClose, onCreate, customerName }: {
           <div>
             <label style={labelStyle}>{t('subModal.locationName')}<span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span></label>
             <input value={name} onChange={e => { setName(e.target.value); setError(false) }} placeholder={t('subModal.locationPlaceholder')}
+              aria-label={t('subModal.locationName')}
               style={{ ...iStyle, borderColor: error ? 'var(--color-danger)' : undefined }} />
             {error && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
           </div>
           <div>
             <label style={labelStyle}>{t('subModal.city')}</label>
-            <input value={city} onChange={e => setCity(e.target.value)} placeholder="—" style={iStyle} />
+            <input value={city} onChange={e => setCity(e.target.value)} placeholder="—" aria-label={t('subModal.city')} style={iStyle} />
           </div>
         </div>
         <div style={{ padding: '12px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8, background: '#FAFAFA' }}>

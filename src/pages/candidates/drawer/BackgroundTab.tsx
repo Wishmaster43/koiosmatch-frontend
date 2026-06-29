@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import api from '@/lib/api'
 import { ExperienceTab as ExperienceTabJs, EducationTab as EducationTabJs, CertificationsTab as CertificationsTabJs, SkillsTab as SkillsTabJs } from './SectionTabs'
+import LanguagesSection from './LanguagesSection'
 import type { Candidate } from '@/types/candidate'
 
 type RelItem = Record<string, unknown>
@@ -38,7 +39,7 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
   skills: v => ({ name: v.name, level: v.level }),
 }
 
-export default function BackgroundTab({ c }: { c: Candidate }) {
+export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void }) {
   const [experiences, setExperiences] = useState<RelItem[]>(c.experiences ?? [])
   const [educations,  setEducations]  = useState<RelItem[]>(c.educations ?? [])
   const [certs,       setCerts]        = useState<RelItem[]>(c.certifications ?? [])
@@ -69,11 +70,13 @@ export default function BackgroundTab({ c }: { c: Candidate }) {
   })
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <ExperienceTab     items={experiences} {...ops('experiences', experiences, setExperiences)} />
       <EducationTab      items={educations}  {...ops('educations', educations, setEducations)} />
       <CertificationsTab items={certs}       {...ops('certifications', certs, setCerts)} />
       <SkillsTab         items={skills}      {...ops('skills', skills, setSkills)} />
+      {/* Languages moved here from the Profile tab — persists via the drawer's onUpdate. */}
+      <LanguagesSection c={c} onEditSave={onEditSave} />
     </div>
   )
 }

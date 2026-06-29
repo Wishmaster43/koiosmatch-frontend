@@ -3,7 +3,8 @@ import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Plus, X, FileText, Pencil, Eye } from 'lucide-react'
 import api from '@/lib/api'
-import { DOC_TYPES, DOC_COLORS, sectionBlock } from './constants'
+import { sectionBlock } from './constants'
+import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import DocPreviewModal from './DocPreviewModal'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -24,6 +25,8 @@ interface PendingFile { file: File; objectUrl: string; name: string; size: strin
  * New rows keep their local blob preview until the server doc (with url) returns. */
 export default function DocumentsSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
+  // Document types + colours from the tenant lookup (seed fallback until /document-types lands).
+  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor } = useDocumentTypes()
   const [docs,        setDocs]        = useState<DocItem[]>(c.documents ?? [])
   const [pendingFile, setPendingFile] = useState<PendingFile | null>(null)
   const [pendingType, setPendingType] = useState('CV')
@@ -32,9 +35,6 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
   const [docSearch,   setDocSearch]   = useState('')
   const [previewDoc,  setPreviewDoc]  = useState<DocItem | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-
-  // Map a stored doc-type value (e.g. 'ID-bewijs') to its translated label.
-  const docTypeLabel = (val?: string) => { const m = DOC_TYPES.find((x: { value: string }) => x.value === val); return m ? t(`documents.types.${m.key}`) : val }
 
   // Upload the pending file (multipart) and optimistically show it right away.
   const upload = () => {
@@ -63,9 +63,9 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
   }
 
   return (
-    <div style={sectionBlock}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{t('sections.documents')}</span>
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('sections.documents')}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)' }}>
             <Search size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
@@ -79,6 +79,7 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
           </button>
         </div>
       </div>
+      <div style={sectionBlock}>
       {pendingFile && (
         <div style={{ border: '1px solid var(--color-primary)', borderRadius: 10, padding: 12, marginBottom: 10, background: 'var(--color-primary-bg)' }}>
           <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
@@ -86,11 +87,11 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
           </div>
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('documents.docType')}</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-            {DOC_TYPES.map((dt: { value: string; key: string }) => (
+            {docTypes.map(dt => (
               <button key={dt.value} onClick={() => setPendingType(dt.value)}
                 style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: pendingType === dt.value ? 600 : 400,
                   border: `1px solid ${pendingType === dt.value ? 'var(--color-primary)' : 'var(--border)'}`,
-                  background: pendingType === dt.value ? 'var(--color-primary)' : 'var(--surface)', color: pendingType === dt.value ? 'white' : 'var(--text)' }}>{t(`documents.types.${dt.key}`)}</button>
+                  background: pendingType === dt.value ? 'var(--color-primary)' : 'var(--surface)', color: pendingType === dt.value ? 'white' : 'var(--text)' }}>{dt.label}</button>
             ))}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
@@ -114,7 +115,7 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
           return (
             <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 100px', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: DOC_COLORS[d.type ?? ''] ?? '#6B7280', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={13} color="white" /></div>
+                <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={13} color="white" /></div>
                 {renamingDoc === i
                   ? <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
                       onKeyDown={e => { if (e.key === 'Enter') rename(i, renameValue); if (e.key === 'Escape') setRenamingDoc(null) }}
@@ -123,7 +124,7 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
                   : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
                 }
               </div>
-              <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: (DOC_COLORS[d.type ?? ''] ?? '#6B7280') + '18', color: DOC_COLORS[d.type ?? ''] ?? '#6B7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
+              <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: docColor(d.type) + '18', color: docColor(d.type), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{d.size ?? ''}</span>
                 <div style={{ display: 'flex' }}>
@@ -146,6 +147,7 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
           e.target.value = ''
         }} />
       {previewDoc && <DocPreviewModal doc={previewDoc} onClose={() => setPreviewDoc(null)} />}
+      </div>
     </div>
   )
 }

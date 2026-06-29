@@ -14,6 +14,7 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import DrawerTabs from './DrawerTabs'
+import ErrorBoundary from '../ui/ErrorBoundary'
 
 export interface EntityTab { id: string; label: ReactNode; badge?: string | number; autoExpand?: boolean; render: () => ReactNode }
 type HeaderArg = { activeTab?: string; setActiveTab: (id: string) => void }
@@ -64,7 +65,8 @@ export default function EntityDrawer({
 
       {/* Scrollable tab content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
-        <div style={{ marginBottom: 20 }}>{active?.render()}</div>
+        {/* Local boundary so one crashing tab never blanks the whole drawer (§3); keyed per tab so it resets on switch. */}
+        <div style={{ marginBottom: 20 }}><ErrorBoundary key={activeTab} compact>{active?.render()}</ErrorBoundary></div>
       </div>
 
       {/* Footer */}

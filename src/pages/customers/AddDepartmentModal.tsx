@@ -58,6 +58,7 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
             ) : (
               <div style={{ position: 'relative' }}>
                 <select value={locationId} onChange={e => { setLocationId(e.target.value); setError(false) }}
+                  aria-label={t('subModal.selectLocation')}
                   style={{ ...iStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer' }}>
                   {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                 </select>
@@ -68,6 +69,7 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
           <div>
             <label style={labelStyle}>{t('subModal.departmentName')}<span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span></label>
             <input value={name} onChange={e => { setName(e.target.value); setError(false) }} placeholder={t('subModal.departmentPlaceholder')}
+              aria-label={t('subModal.departmentName')}
               style={{ ...iStyle, borderColor: error && !name.trim() ? 'var(--color-danger)' : undefined }} />
           </div>
         </div>

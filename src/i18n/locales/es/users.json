@@ -33,5 +33,11 @@
     "planner": "Planificador",
     "user": "Usuario"
   },
-  "noRoles": "No hay roles disponibles"
+  "noRoles": "No hay roles disponibles",
+  "editUser": "Editar usuario",
+  "saveFailed": "No se pudo guardar.",
+  "saving": "Guardando…",
+  "phone": "Número de teléfono",
+  "changePassword": "Cambiar contraseña",
+  "newPassword": "Nueva contraseña"
 }

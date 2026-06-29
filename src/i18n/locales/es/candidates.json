@@ -17,7 +17,12 @@
     "city": "Ciudad",
     "province": "Provincia",
     "createdAt": "Creado el",
-    "lastContactType": "Tipo de contacto"
+    "lastContactType": "Tipo de contacto",
+    "talentPool": "Grupo de talento",
+    "koios": "Koios",
+    "phase": "Fase",
+    "deployability": "Estado",
+    "contractForm": "Tipo de contrato"
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",
@@ -137,7 +142,10 @@
       "streetPlaceholder": "Ej. Calle Mayor",
       "houseNumber": "Número",
       "houseNumberSuffix": "Adición",
-      "postalCode": "Código postal"
+      "postalCode": "Código postal",
+      "functionTitle": "Título del puesto",
+      "functionPlaceholder": "p. ej. Verzorgende IG",
+      "owner": "Responsable"
     },
     "gender": {
       "male": "Hombre",
@@ -156,10 +164,12 @@
       "profile": "Perfil",
       "background": "Trayectoria",
       "work": "Trabajo",
+      "match": "Match",
       "planning": "Planificación",
       "preferences": "Preferencias",
       "zzp": "Autónomo",
       "communication": "Comunicación",
+      "documents": "Documentos",
       "statistics": "Estadísticas",
       "changelog": "Registro de cambios"
     },
@@ -172,6 +182,7 @@
     "uploadCv": "Subir CV",
     "downloadCv": "Descargar CV",
     "generating": "Generando...",
+    "customFields": "Campos personalizados",
     "edit": "Editar",
     "editing": "Editando…",
     "createdAt": "Creado el {{date}}",
@@ -181,7 +192,17 @@
     "stage": "Tipo de embudo",
     "candidateType": "Tipo de candidato",
     "entityLabel": "Candidato",
-    "applications": "Candidaturas"
+    "applications": "Candidaturas",
+    "phase": "Fase",
+    "deployability": "Estado",
+    "placedNeedsMatchTitle": "Match requerido",
+    "placedNeedsMatchBody": "El estado «Asignado» requiere un Match vinculado. Vincula primero un Match en la pestaña Match.",
+    "blacklist": "Lista negra",
+    "blacklistReasonTitle": "Motivo de la lista negra",
+    "blacklistConfirm": "Añadir",
+    "statusReasonTitle": "Cambio de estado",
+    "reasonLabel": "Motivo",
+    "returnDateLabel": "Disponible de nuevo desde"
   },
   "stage": {
     "lead": "Lead",
@@ -210,7 +231,12 @@
     "placeOfBirth": "Lugar de nacimiento",
     "clear": "Borrar",
     "expand": "Ampliar",
-    "collapse": "Reducir"
+    "collapse": "Reducir",
+    "street": "Calle",
+    "houseNumber": "Número",
+    "houseNumberSuffix": "Complemento",
+    "postalCode": "Código postal",
+    "city": "Ciudad"
   },
   "addFields": {
     "functionTitle": "Puesto",
@@ -230,7 +256,11 @@
     "expiryDate": "Fecha de caducidad",
     "licenseNumber": "número de licencia",
     "skill": "Aptitud",
-    "skillLevel": "Nivel de aptitud"
+    "skillLevel": "Nivel de aptitud",
+    "currentJob": "Puesto actual",
+    "inProgress": "Aún en formación",
+    "expectedEnd": "Fecha de fin prevista",
+    "present": "actualidad"
   },
   "work": {
     "client": "Cliente",
@@ -375,7 +405,11 @@
     "timeline": "Cronología",
     "timelineEmpty": "Aún no hay actividad.",
     "conversations": "Conversaciones",
-    "conversationsEmpty": "Aún no hay conversaciones."
+    "conversationsEmpty": "Aún no hay conversaciones.",
+    "pools": "Grupos de talento",
+    "poolAdd": "Añadir a un grupo",
+    "poolsEmpty": "Aún no hay grupos configurados.",
+    "poolKoios": "Sugerido por Koios"
   },
   "preferences": {
     "title": "Preferencias",
@@ -391,6 +425,9 @@
     "minRate": "Tarifa horaria mín. (€)",
     "contract": "Preferencia de contrato",
     "remarks": "Observaciones",
+    "groupPayroll": "Retención",
+    "wageTax": "Aplicar retención",
+    "wageTaxFrom": "Vigente desde",
     "groupAvailability": "Disponibilidad",
     "groupTravel": "Desplazamientos",
     "groupWork": "Preferencias de trabajo",
@@ -479,6 +516,7 @@
     "loading": "Cargando cambios…",
     "error": "No se pudo cargar el registro.",
     "empty": "Aún no hay cambios registrados.",
+    "fromIp": "Modificado desde la IP {{ip}}",
     "system": "Sistema"
   },
   "matchesView": {
@@ -493,6 +531,13 @@
       "pending": "Pendiente",
       "active": "Activo",
       "ended": "Finalizado"
+    }
+  },
+  "koios": {
+    "actions": {
+      "add_to_pool": "Añadir al grupo",
+      "contact": "Contactar",
+      "plan_intake": "Planificar entrevista"
     }
   }
 }

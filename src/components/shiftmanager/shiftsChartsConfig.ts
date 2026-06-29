@@ -15,7 +15,7 @@ export const SERIES: ShiftSeries[] = [
 ]
 
 // Locale-aware short month name for index 0–11 (used for chart axis labels).
-export const monthAbbr = (i: number) => new Date(2000, i, 1).toLocaleString(undefined, { month: "short" })
+export const monthAbbr = (i: number) => new Date(2000, i, 1).toLocaleString('nl-NL', { month: "short" })
 
 export const CURRENT_YEAR = new Date().getFullYear()
 export const YEAR_OPTIONS = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR]

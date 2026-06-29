@@ -2,37 +2,44 @@
  * ScheduleModal — configures a workflow trigger schedule (interval / daily /
  * weekly / monthly / yearly) plus `scheduleLabel`, the human-readable summary
  * shown on the trigger node + button. Extracted from WorkflowCanvasEditor.
+ *
+ * All visible text runs through i18n (workflows:scheduleModal.*); day/month names
+ * come from Intl (locale-aware) so there are no hardcoded NL arrays.
  */
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { X, CalendarDays, Play, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ScheduleConfig } from '../../../types/workflow'
 
 // ── Schedule helpers ──────────────────────────────────────────────────────────
 
-const DAYS_NL  = ['Zo', 'Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za']
-const MONTHS_NL = ['Jan','Feb','Mrt','Apr','Mei','Jun','Jul','Aug','Sep','Okt','Nov','Dec']
+// Localized short day/month names from Intl (week starts Sunday = index 0).
+const dayName   = (locale: string, i: number) => new Date(Date.UTC(2024, 0, 7 + i)).toLocaleDateString(locale, { weekday: 'short', timeZone: 'UTC' })
+const monthName = (locale: string, m: number) => new Date(Date.UTC(2024, m, 1)).toLocaleDateString(locale, { month: 'short', timeZone: 'UTC' })
 
-export function scheduleLabel(trigger?: string, cfg?: ScheduleConfig | null) {
-  if (!trigger || trigger === 'Handmatig') return 'Handmatig'
-  if (trigger === 'Direct') return 'Direct'
-  if (!cfg) return 'Gepland'
-  const t = cfg.schedule_type
-  if (t === 'interval') {
-    const u = cfg.interval_unit === 'hours' ? 'uur' : 'min'
-    return `Elke ${cfg.interval_value ?? 1} ${u}`
+// Human-readable summary of the trigger/schedule; needs `t` (used on the node too).
+export function scheduleLabel(t: TFunction, locale: string, trigger?: string, cfg?: ScheduleConfig | null) {
+  if (!trigger || trigger === 'Handmatig') return t('scheduleModal.label.manual')
+  if (trigger === 'Direct') return t('scheduleModal.label.instant')
+  if (!cfg) return t('scheduleModal.label.scheduled')
+  const ty = cfg.schedule_type
+  if (ty === 'interval') {
+    const unit = cfg.interval_unit === 'hours' ? t('scheduleModal.label.unitHour') : t('scheduleModal.label.unitMin')
+    return t('scheduleModal.label.everyN', { n: cfg.interval_value ?? 1, unit })
   }
   const time = cfg.time ?? '08:00'
-  if (t === 'daily')   return `Dagelijks ${time}`
-  if (t === 'weekly') {
-    const d = (cfg.days_of_week ?? [1]).map(i => DAYS_NL[i]).join(', ')
-    return `${d} ${time}`
+  if (ty === 'daily')     return t('scheduleModal.label.dailyAt', { time })
+  if (ty === 'weekly') {
+    const days = (cfg.days_of_week ?? [1]).map(i => dayName(locale, i)).join(', ')
+    return t('scheduleModal.label.weeklyAt', { days, time })
   }
-  if (t === 'monthly') return `Dag ${cfg.day_of_month ?? 1} v/d maand ${time}`
-  if (t === 'quarterly') return `Elk kwartaal ${time}`
-  if (t === 'yearly')  return `Jaarlijks ${MONTHS_NL[(cfg.month ?? 1) - 1]} ${cfg.day_of_month ?? 1} ${time}`
-  return 'Gepland'
+  if (ty === 'monthly')   return t('scheduleModal.label.monthlyAt', { day: cfg.day_of_month ?? 1, time })
+  if (ty === 'quarterly') return t('scheduleModal.label.quarterlyAt', { time })
+  if (ty === 'yearly')    return t('scheduleModal.label.yearlyAt', { month: monthName(locale, (cfg.month ?? 1) - 1), day: cfg.day_of_month ?? 1, time })
+  return t('scheduleModal.label.scheduled')
 }
 
 // ── Schedule Modal ────────────────────────────────────────────────────────────
@@ -41,6 +48,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
   trigger?: string; scheduleConfig?: ScheduleConfig | null
   onSave: (trigger: string, cfg: ScheduleConfig | null) => void; onClose: () => void
 }) {
+  const { t, i18n } = useTranslation('workflows')
+  const locale = i18n.language
   const [type,     setType]     = useState(trigger === 'Handmatig' ? 'manual' : trigger === 'Direct' ? 'instant' : 'scheduled')
   const [sType,    setSType]    = useState(scheduleConfig?.schedule_type ?? 'daily')
   const [intVal,   setIntVal]   = useState<number | string>(scheduleConfig?.interval_value ?? 15)
@@ -73,7 +82,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
   const selectStyle: CSSProperties = { ...inputStyle, cursor: 'pointer' }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}
+    <div role="dialog" aria-modal="true" aria-label={t('scheduleModal.title')}
+      style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}
       onClick={onClose}>
       <div style={{ width: 480, background: 'var(--surface)', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}>
@@ -82,9 +92,9 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <CalendarDays size={16} color="var(--color-primary)" />
-            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>Planning instellen</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('scheduleModal.title')}</span>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
+          <button onClick={onClose} aria-label={t('scheduleModal.cancel')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
         </div>
 
         <div style={{ overflowY: 'auto', flex: 1, padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -92,9 +102,9 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
           {/* Trigger type selector */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
             {[
-              { id: 'manual',    label: 'Handmatig', desc: 'Starten via de knop',          Icon: Play },
-              { id: 'instant',   label: 'Direct',    desc: 'Zodra data binnenkomt',         Icon: Zap },
-              { id: 'scheduled', label: 'Gepland',   desc: 'Automatisch op een schema',     Icon: CalendarDays },
+              { id: 'manual',    label: t('scheduleModal.trigger.manual'),    desc: t('scheduleModal.trigger.manualDesc'),    Icon: Play },
+              { id: 'instant',   label: t('scheduleModal.trigger.instant'),   desc: t('scheduleModal.trigger.instantDesc'),   Icon: Zap },
+              { id: 'scheduled', label: t('scheduleModal.trigger.scheduled'), desc: t('scheduleModal.trigger.scheduledDesc'), Icon: CalendarDays },
             ].map(({ id, label, desc, Icon: Ic }: { id: string; label: string; desc: string; Icon: LucideIcon }) => (
               <button key={id} type="button" onClick={() => setType(id)}
                 style={{
@@ -114,15 +124,15 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
           {type === 'scheduled' && (
             <>
               <div>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Frequentie</label>
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{t('scheduleModal.frequency')}</label>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                   {[
-                    { id: 'interval',  label: 'Interval' },
-                    { id: 'daily',     label: 'Dagelijks' },
-                    { id: 'weekly',    label: 'Wekelijks' },
-                    { id: 'monthly',   label: 'Maandelijks' },
-                    { id: 'quarterly', label: 'Kwartaal' },
-                    { id: 'yearly',    label: 'Jaarlijks' },
+                    { id: 'interval',  label: t('scheduleModal.freq.interval') },
+                    { id: 'daily',     label: t('scheduleModal.freq.daily') },
+                    { id: 'weekly',    label: t('scheduleModal.freq.weekly') },
+                    { id: 'monthly',   label: t('scheduleModal.freq.monthly') },
+                    { id: 'quarterly', label: t('scheduleModal.freq.quarterly') },
+                    { id: 'yearly',    label: t('scheduleModal.freq.yearly') },
                   ].map(o => (
                     <button key={o.id} type="button" onClick={() => setSType(o.id)}
                       style={{
@@ -139,16 +149,16 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
               {/* Interval */}
               {sType === 'interval' && (
                 <div>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Elke</label>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{t('scheduleModal.every')}</label>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <input type="number" min={1} max={999} value={intVal} onChange={e => setIntVal(e.target.value)}
-                      style={{ ...inputStyle, width: 80 }} />
-                    <select value={intUnit} onChange={e => setIntUnit(e.target.value)} style={selectStyle}>
-                      <option value="minutes">Minuten</option>
-                      <option value="hours">Uren</option>
+                      aria-label={t('scheduleModal.every')} style={{ ...inputStyle, width: 80 }} />
+                    <select value={intUnit} onChange={e => setIntUnit(e.target.value)} aria-label={t('scheduleModal.every')} style={selectStyle}>
+                      <option value="minutes">{t('scheduleModal.unit.minutes')}</option>
+                      <option value="hours">{t('scheduleModal.unit.hours')}</option>
                     </select>
                   </div>
-                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>Min. interval: 1 minuut</p>
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>{t('scheduleModal.minInterval')}</p>
                 </div>
               )}
 
@@ -156,16 +166,16 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
               {sType === 'daily' && (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Tijdstippen</label>
+                    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t('scheduleModal.times')}</label>
                     <button type="button" onClick={addTime}
-                      style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>+ Tijdstip toevoegen</button>
+                      style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>{t('scheduleModal.addTime')}</button>
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {times.map((t, i) => (
+                    {times.map((tm, i) => (
                       <div key={i} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                        <input type="time" value={t} onChange={e => updateTime(i, e.target.value)} style={{ ...inputStyle, flex: 1 }} />
+                        <input type="time" value={tm} onChange={e => updateTime(i, e.target.value)} aria-label={t('scheduleModal.time')} style={{ ...inputStyle, flex: 1 }} />
                         {times.length > 1 && (
-                          <button type="button" onClick={() => removeTime(i)}
+                          <button type="button" onClick={() => removeTime(i)} aria-label={t('scheduleModal.cancel')}
                             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--border)', display: 'flex', padding: 4 }}
                             onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
                             onMouseLeave={e => (e.currentTarget.style.color = 'var(--border)')}>
@@ -182,22 +192,22 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
               {sType === 'weekly' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Dagen</label>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{t('scheduleModal.days')}</label>
                     <div style={{ display: 'flex', gap: 6 }}>
-                      {DAYS_NL.map((d, i) => (
+                      {[0, 1, 2, 3, 4, 5, 6].map(i => (
                         <button key={i} type="button" onClick={() => toggleDay(i)}
                           style={{
                             width: 38, height: 38, borderRadius: '50%', fontSize: 11, fontWeight: 600, cursor: 'pointer',
                             border: `1.5px solid ${dow.includes(i) ? 'var(--color-primary)' : 'var(--border)'}`,
                             background: dow.includes(i) ? 'var(--color-primary)' : 'var(--surface)',
                             color: dow.includes(i) ? 'white' : 'var(--text)',
-                          }}>{d}</button>
+                          }}>{dayName(locale, i)}</button>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
-                    <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('scheduleModal.time')}</label>
+                    <input type="time" value={time} onChange={e => setTime(e.target.value)} aria-label={t('scheduleModal.time')} style={inputStyle} />
                   </div>
                 </div>
               )}
@@ -206,7 +216,7 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
               {sType === 'monthly' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Dag van de maand</label>
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('scheduleModal.dayOfMonth')}</label>
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                       {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
                         <button key={d} type="button" onClick={() => setDom(d)}
@@ -220,8 +230,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
                     </div>
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
-                    <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
+                    <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('scheduleModal.time')}</label>
+                    <input type="time" value={time} onChange={e => setTime(e.target.value)} aria-label={t('scheduleModal.time')} style={inputStyle} />
                   </div>
                 </div>
               )}
@@ -229,9 +239,9 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
               {/* Quarterly */}
               {sType === 'quarterly' && (
                 <div>
-                  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>Wordt uitgevoerd op de eerste dag van elk kwartaal (jan, apr, jul, okt).</p>
-                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
-                  <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
+                  <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 10 }}>{t('scheduleModal.quarterlyHint')}</p>
+                  <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('scheduleModal.time')}</label>
+                  <input type="time" value={time} onChange={e => setTime(e.target.value)} aria-label={t('scheduleModal.time')} style={inputStyle} />
                 </div>
               )}
 
@@ -240,28 +250,28 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div style={{ display: 'flex', gap: 12 }}>
                     <div style={{ flex: 1 }}>
-                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Maand</label>
-                      <select value={month} onChange={e => setMonth(+e.target.value)} style={{ ...selectStyle, width: '100%' }}>
-                        {MONTHS_NL.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('scheduleModal.month')}</label>
+                      <select value={month} onChange={e => setMonth(+e.target.value)} aria-label={t('scheduleModal.month')} style={{ ...selectStyle, width: '100%' }}>
+                        {Array.from({ length: 12 }, (_, i) => i).map(i => <option key={i} value={i + 1}>{monthName(locale, i)}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Dag</label>
-                      <input type="number" min={1} max={31} value={dom} onChange={e => setDom(+e.target.value)} style={{ ...inputStyle, width: 70 }} />
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('scheduleModal.day')}</label>
+                      <input type="number" min={1} max={31} value={dom} onChange={e => setDom(+e.target.value)} aria-label={t('scheduleModal.day')} style={{ ...inputStyle, width: 70 }} />
                     </div>
                     <div>
-                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>Tijdstip</label>
-                      <input type="time" value={time} onChange={e => setTime(e.target.value)} style={inputStyle} />
+                      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{t('scheduleModal.time')}</label>
+                      <input type="time" value={time} onChange={e => setTime(e.target.value)} aria-label={t('scheduleModal.time')} style={inputStyle} />
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Preview */}
-              <div style={{ background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: 10, padding: '10px 14px' }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Voorbeeld</div>
+              <div style={{ background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 14px' }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>{t('scheduleModal.preview')}</div>
                 <div style={{ fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>
-                  {scheduleLabel('Scheduled', {
+                  {scheduleLabel(t, locale, 'Scheduled', {
                     schedule_type: sType,
                     interval_value: +intVal, interval_unit: intUnit,
                     time, times, days_of_week: dow, day_of_month: dom, month,
@@ -274,8 +284,8 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
 
         {/* Footer */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 20px', borderTop: '1px solid var(--border)' }}>
-          <button onClick={onClose} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>Annuleren</button>
-          <button onClick={handleSave} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>Opslaan</button>
+          <button onClick={onClose} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('scheduleModal.cancel')}</button>
+          <button onClick={handleSave} style={{ padding: '7px 16px', borderRadius: 8, fontSize: 13, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>{t('scheduleModal.save')}</button>
         </div>
       </div>
     </div>

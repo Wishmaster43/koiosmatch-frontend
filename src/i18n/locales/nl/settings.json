@@ -47,6 +47,9 @@
     "whatsapp": "WhatsApp"
   },
   "nav": {
+    "candidate_display": "Tabelweergave",
+    "candidate_custom_fields": "Eigen velden",
+    "driver_licenses": "Rijbewijzen",
     "kpis": "KPI's",
     "kpis_leads": "Leads",
     "kpis_candidates": "Kandidaten",
@@ -108,7 +111,7 @@
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Contractvormen",
     "funnel_stages": "Funnelfasen",
-    "candidate_statuses": "Statussen",
+    "candidate_statuses": "Status",
     "lang_languages": "Talen",
     "lang_levels": "Niveaus",
     "vacancy_statuses": "Statussen",
@@ -127,7 +130,10 @@
     "department_statuses": "Afdeling statussen",
     "contact_statuses": "Contactpersoon statussen",
     "last_contact_types": "Contacttype",
-    "note_types": "Notitietypes"
+    "note_types": "Notitietypes",
+    "document_types": "Documenttypes",
+    "candidate_phases": "Fase",
+    "candidate_required_fields": "Verplichte velden"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -157,6 +163,70 @@
         "label": "Response rate doel",
         "description": "Streefwaarde voor kandidaat response op berichten",
         "unit": "%"
+      }
+    }
+  },
+  "candidateCustomFields": {
+    "title": "Eigen velden",
+    "subtitle": "Definieer extra velden die op alle kandidaten beschikbaar zijn. Waarden worden per kandidaat opgeslagen.",
+    "add": "Veld toevoegen",
+    "label": "Label",
+    "labelPlaceholder": "Bijv. Kenteken",
+    "key": "Sleutel (slug)",
+    "keyPlaceholder": "bijv. kenteken",
+    "immutable": "niet wijzigbaar na aanmaken",
+    "type": "Type",
+    "options": "Opties",
+    "optionsPlaceholder": "Optie 1, Optie 2, Optie 3",
+    "optionsHint": "Kommagescheiden. Bestaande waarden blijven bewaard als je opties wijzigt.",
+    "hasData": "heeft data",
+    "delete": "Verwijderen",
+    "deleteBlocked": "Kan niet verwijderd worden — veld heeft data",
+    "activate": "Activeren",
+    "deactivate": "Deactiveren",
+    "types": {
+      "text": "Tekst",
+      "textarea": "Lange tekst",
+      "number": "Getal",
+      "date": "Datum",
+      "boolean": "Ja / Nee",
+      "select": "Keuze"
+    }
+  },
+  "driverLicenseSettings": {
+    "title": "Rijbewijzen",
+    "subtitle": "Beheer de rijbewijscategorieën die kandidaten als voorkeur kunnen kiezen.",
+    "add": "Categorie toevoegen"
+  },
+  "candidateDisplay": {
+    "title": "Tabelweergave",
+    "subtitle": "Per kolom: gekleurde labels of platte tekst. De KPI-grafieken houden hun kleuren altijd.",
+    "fields": {
+      "candidate_table_color_funnel": {
+        "label": "Funnel type"
+      },
+      "candidate_table_color_type": {
+        "label": "Kandidaat-type"
+      },
+      "candidate_table_color_pool": {
+        "label": "Talentenpool"
+      },
+      "candidate_table_color_koios": {
+        "label": "Koios AI"
+      },
+      "candidate_avatar_colored_by_gender": {
+        "label": "Naam-avatar per geslacht",
+        "description": "Aan = de avatar bij de kandidaatnaam krijgt een kleur per geslacht. Uit = één rustige grijze kleur."
+      },
+      "candidate_table_color_status": {
+        "label": "Status"
+      },
+      "candidate_table_color_owner": {
+        "label": "Eigenaar-kleur",
+        "description": "Aan = de eigenaar-avatar krijgt de recruiterkleur. Uit = neutraal grijs."
+      },
+      "candidate_table_color_phase": {
+        "label": "Fase"
       }
     }
   },
@@ -308,8 +378,8 @@
       "subtitle": "Eén per kandidaat (Prospect → Intake → Pool → Alumni)."
     },
     "statuses": {
-      "title": "Statussen",
-      "subtitle": "Operationele status met kleur (Actief, Niet actief, Ziek …)."
+      "title": "Status",
+      "subtitle": "Kan ik nu inzetten? (Beschikbaar, Geplaatst, Niet beschikbaar, Ziek, Verlof)."
     },
     "inUse": "In gebruik — kan niet verwijderen",
     "requiresAppointment": "Vereist een afspraak",
@@ -321,7 +391,15 @@
     "appointmentBadge": "Afspraak vereist",
     "requiresReason": "Reden verplicht",
     "requiresReasonHint": "Bij deze status moet de gebruiker een reden opgeven (bv. Inactief).",
-    "reasonBadge": "Reden vereist"
+    "reasonBadge": "Reden vereist",
+    "phases": {
+      "title": "Fase",
+      "subtitle": "Relatie-fase (Lead → Kandidaat)."
+    },
+    "requiresMatch": "Vereist een Match",
+    "requiresMatchHint": "Deze status mag alleen met een gekoppelde Match (bv. Geplaatst).",
+    "expectsReturnDate": "Vraagt terugkeerdatum",
+    "expectsReturnDateHint": "Vraagt een \"weer beschikbaar vanaf\"-datum (bv. Niet beschikbaar/Ziek)."
   },
   "vacancy": {
     "title": "Statussen",
@@ -1169,5 +1247,15 @@
     "title": "Notitietypes",
     "subtitle": "Categorieën voor notities bij kandidaten.",
     "add": "Type toevoegen"
+  },
+  "documentTypes": {
+    "title": "Documenttypes",
+    "subtitle": "Categorieën en kleuren voor kandidaatdocumenten (cv, id-bewijs, diploma, …).",
+    "add": "Type toevoegen"
+  },
+  "requiredFields": {
+    "title": "Verplichte velden",
+    "subtitle": "Markeer per fase welke velden verplicht zijn. Een verplicht veld toont een ster en blokkeert opslaan als het leeg is.",
+    "field": "Veld"
   }
 }

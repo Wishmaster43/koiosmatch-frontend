@@ -93,6 +93,37 @@
       "unknown": "Onbekend"
     }
   },
+  "scheduleModal": {
+    "title": "Planning instellen",
+    "trigger": {
+      "manual": "Handmatig", "manualDesc": "Starten via de knop",
+      "instant": "Direct", "instantDesc": "Zodra data binnenkomt",
+      "scheduled": "Gepland", "scheduledDesc": "Automatisch op een schema"
+    },
+    "frequency": "Frequentie",
+    "freq": { "interval": "Interval", "daily": "Dagelijks", "weekly": "Wekelijks", "monthly": "Maandelijks", "quarterly": "Kwartaal", "yearly": "Jaarlijks" },
+    "every": "Elke",
+    "unit": { "minutes": "Minuten", "hours": "Uren" },
+    "minInterval": "Min. interval: 1 minuut",
+    "times": "Tijdstippen",
+    "addTime": "+ Tijdstip toevoegen",
+    "days": "Dagen",
+    "time": "Tijdstip",
+    "dayOfMonth": "Dag van de maand",
+    "quarterlyHint": "Wordt uitgevoerd op de eerste dag van elk kwartaal (jan, apr, jul, okt).",
+    "month": "Maand",
+    "day": "Dag",
+    "preview": "Voorbeeld",
+    "cancel": "Annuleren",
+    "save": "Opslaan",
+    "label": {
+      "manual": "Handmatig", "instant": "Direct", "scheduled": "Gepland",
+      "everyN": "Elke {{n}} {{unit}}", "unitMin": "min", "unitHour": "uur",
+      "dailyAt": "Dagelijks {{time}}", "weeklyAt": "{{days}} {{time}}",
+      "monthlyAt": "Dag {{day}} v/d maand {{time}}",
+      "quarterlyAt": "Elk kwartaal {{time}}", "yearlyAt": "Jaarlijks {{month}} {{day}} {{time}}"
+    }
+  },
   "modules": {
     "advanced_parser": "Geavanceerde verwerker",
     "aggregator": "Aggregator",

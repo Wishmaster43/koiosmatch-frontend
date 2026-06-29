@@ -5,7 +5,8 @@
  * the candidate drawer tabs and the generic form helpers all share. Previously
  * each file declared its own `iStyle` / `inputStyle` / `dpInputStyle` copy.
  */
-import type { CSSProperties, ReactNode } from 'react'
+import { useId, cloneElement, isValidElement } from 'react'
+import type { CSSProperties, ReactNode, ReactElement } from 'react'
 import { ChevronDown } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
@@ -26,51 +27,55 @@ export function parseDate(value?: string | number | Date | null): Date | null {
   return isNaN(d.getTime()) ? null : d
 }
 
-export function Label({ children, required }: { children: ReactNode; required?: boolean }) {
+export function Label({ children, required, htmlFor }: { children: ReactNode; required?: boolean; htmlFor?: string }) {
   return (
-    <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block',
+    <label htmlFor={htmlFor} style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block',
       marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
       {children}{required && <span style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span>}
     </label>
   )
 }
 
+// Associates the label with its single input via a generated id (§6) — works for
+// every Field child that forwards `id` (TextField/SelectField/DateField/…).
 export function Field({ label, required, children }: { label: ReactNode; required?: boolean; children: ReactNode }) {
+  const id = useId()
+  const child = isValidElement(children) ? cloneElement(children as ReactElement<{ id?: string }>, { id }) : children
   return (
     <div>
-      <Label required={required}>{label}</Label>
-      {children}
+      <Label htmlFor={id} required={required}>{label}</Label>
+      {child}
     </div>
   )
 }
 
-export function TextField({ value, onChange, placeholder, type = 'text', error, style }: {
-  value?: string; onChange: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties
+export function TextField({ id, value, onChange, placeholder, type = 'text', error, style }: {
+  id?: string; value?: string; onChange: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties
 }) {
   return (
-    <input type={type} value={value ?? ''} placeholder={placeholder}
+    <input id={id} type={type} value={value ?? ''} placeholder={placeholder} aria-label={placeholder}
       onChange={e => onChange(e.target.value)}
       style={{ ...inputStyle, ...(error ? { borderColor: 'var(--color-danger)' } : {}), ...style }} />
   )
 }
 
-export function TextArea({ value, onChange, placeholder, rows = 3, style }: {
-  value?: string; onChange: (v: string) => void; placeholder?: string; rows?: number; style?: CSSProperties
+export function TextArea({ id, value, onChange, placeholder, rows = 3, style }: {
+  id?: string; value?: string; onChange: (v: string) => void; placeholder?: string; rows?: number; style?: CSSProperties
 }) {
   return (
-    <textarea value={value ?? ''} placeholder={placeholder} rows={rows}
+    <textarea id={id} value={value ?? ''} placeholder={placeholder} aria-label={placeholder} rows={rows}
       onChange={e => onChange(e.target.value)}
       style={{ ...inputStyle, resize: 'vertical', ...style }} />
   )
 }
 
-export function SelectField({ value, onChange, options = [], placeholder, style }: {
-  value?: string; onChange: (v: string) => void; options?: Array<string | SelectOption>; placeholder?: string; style?: CSSProperties
+export function SelectField({ id, value, onChange, options = [], placeholder, style }: {
+  id?: string; value?: string; onChange: (v: string) => void; options?: Array<string | SelectOption>; placeholder?: string; style?: CSSProperties
 }) {
   const opts: SelectOption[] = options.map(o => (typeof o === 'string' ? { value: o, label: o } : o))
   return (
     <div style={{ position: 'relative' }}>
-      <select value={value ?? ''} onChange={e => onChange(e.target.value)}
+      <select id={id} value={value ?? ''} onChange={e => onChange(e.target.value)} aria-label={placeholder}
         style={{ ...inputStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer', ...style }}>
         {placeholder !== undefined && <option value="">{placeholder}</option>}
         {opts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -81,11 +86,12 @@ export function SelectField({ value, onChange, options = [], placeholder, style 
   )
 }
 
-export function DateField({ value, onChange, placeholder, style }: {
-  value?: string | number | Date | null; onChange: (v: string) => void; placeholder?: string; style?: CSSProperties
+export function DateField({ id, value, onChange, placeholder, style }: {
+  id?: string; value?: string | number | Date | null; onChange: (v: string) => void; placeholder?: string; style?: CSSProperties
 }) {
   return (
     <DatePicker
+      id={id}
       selected={parseDate(value)}
       onChange={(d: Date | null) => onChange(d ? d.toISOString().slice(0, 10) : '')}
       dateFormat="dd-MM-yyyy"
@@ -98,11 +104,11 @@ export function DateField({ value, onChange, placeholder, style }: {
   )
 }
 
-export function CheckboxField({ checked, onChange, disabled }: {
-  checked?: boolean; onChange: (v: boolean) => void; disabled?: boolean
+export function CheckboxField({ id, checked, onChange, disabled }: {
+  id?: string; checked?: boolean; onChange: (v: boolean) => void; disabled?: boolean
 }) {
   return (
-    <input type="checkbox" checked={!!checked} disabled={disabled}
+    <input id={id} type="checkbox" checked={!!checked} disabled={disabled}
       onChange={e => onChange(e.target.checked)}
       style={{ width: 14, height: 14, accentColor: 'var(--color-primary)', cursor: disabled ? 'default' : 'pointer' }} />
   )
