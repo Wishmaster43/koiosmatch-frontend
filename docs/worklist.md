@@ -381,6 +381,24 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 > **Positief bevestigd** (geen findings): geen `console.log` in commits · geen ongesanitiseerde dangerous HTML
 > (`SafeHtml` saniteert) · geen hard-delete-call in FE (§8) · types zonder `any` in datamodellen.
 
+### Runbook — workflow-sessie (turnkey, 1 gefocuste pass)
+
+**Stap 1 — split `WorkflowCanvasEditor.tsx` 907 → <400 (pure refactor, 1 groene commit):**
+- `workflow/ModulePicker.tsx` ← `CATEGORY_ORDER` + `ModuleMetaEntry` + `ModulePicker` (~115r). Props: `{ insertAfterEdgeId, onSelect, onClose }`. Deps: `MODULE_META`/`MODULE_APP_MAP`/`useApps`.
+- `workflow/ConfigPanel.tsx` ← `MANAGE_TABS` (export) + `ConfigPanel` (~145r). Deps: `MODULE_META`/`MODULE_SCHEMAS`/`FieldInput`/AI-tabs.
+- `workflow/LogsPanel.tsx` ← `LogsPanel` (~95r). Deps: `api`/`runFormat`/`RunRow`. (Meest zelfstandig → eerst.)
+- `workflow/useWorkflowEditor.ts` ← `EditorInner`-state + alle callbacks (`handleEdgeAdd/Delete/Filter`, `saveEdgeFilter`, `handleNodeRun`, `onConnect`, `insertModule`, `updateNodeConfig`, `deleteNode`, `handleSave`, `handleRun`, `nodesWithFirst`, `firstNodeId`) (~210r). Retourneert state + handlers.
+- `WorkflowCanvasEditor.tsx` ← `EditorInner` JSX die de hook gebruikt + de 5 context-providers + `ReactFlowProvider`-wrapper (~280r).
+
+**Stap 2 — I18N-1/2 (§5-compleet, 1 groene commit):** nieuwe `modules`-namespace (nl-bron + en/de/fr/es):
+`labels.<type>` (~56) · `categories.<key>` (~16, key = slug van CATEGORY_ORDER) · `fields.<key>` (schema-veld-labels) ·
+`actions.<key>` (Ophalen/Aanmaken/…) · `editor.*` (chrome: "Module kiezen"/"Opslaan"/"Laden…"/"Aan"/"Uit"/…).
+Render: `MODULE_META`-bouw in `modules/index.ts` levert `type` als key; resolve labels/categories/fields **at render**
+via `t('modules:…')`; **registry-strings blijven de nl-bron, géén twee-waarheden**. Wire de FieldInput-`field.label`
++ ScheduleModal + ModulePicker/ConfigPanel-chrome.
+
+**Stap 3 — CLAUDE.md harden** naar master-standaard (na 0 FE-findings).
+
 ---
 
 ## D. Afgerond (archief)
