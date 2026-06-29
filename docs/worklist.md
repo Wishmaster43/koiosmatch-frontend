@@ -335,8 +335,8 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 | **CFG-1** | P2 | M | BE+FE | NATIONALITIES/LANGUAGES/klant-STATUSES → tenant-lookups + i18n |
 | **D-3** | P2 | M | BE+FE | "gearchiveerd bekijken + herstellen"-UI |
 | **D-4/D-5** | P2 | S | BE+FE | tasks `/stats` + `/tasks/{id}/activity` |
-| **R-SPLIT** | P2 | M | FE | `ReportFilterSidebar`(485)·`MessagesTable`(430)·`WorkflowCanvasEditor`(907)·`fields`(403) splitsen (=F-1) |
-| **DUP-1** | P3 | S | FE | gedupliceerde `AVATAR_COLORS`/`COLORS` (4×) → gedeelde const |
+| **R-SPLIT** | P2 | M | FE | ✅ `ReportFilterSidebar` 485→216(+2) · ✅ `MessagesTable` 430→250(+2) · ☐ `WorkflowCanvasEditor`(907) + `fields`(403) → **fold in workflow-i18n-sessie** (zelfde cluster) |
+| **DUP-1** | P3 | S | FE | ✅ avatar-kleur 3× → `lib/avatarColor` |
 | **F-12b** | P3 | L | FE | deep-relative-imports (`../../`, ~589 warnings) → `@/`-alias |
 
 > **Positief bevestigd** (geen findings): geen `console.log` in commits · geen ongesanitiseerde dangerous HTML
