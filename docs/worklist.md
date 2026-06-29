@@ -324,8 +324,8 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 
 | ID | Sev | Eff | Eigenaar | Item |
 |---|---|---|---|---|
-| **I18N-1** | P1 | M | FE | `src/modules/*` labels/categorieën door `t('modules.*')` (5 locales) — §5 expliciet |
-| **I18N-2** | P1 | M | FE | `WorkflowCanvasEditor` + `ScheduleModal`/`fields` volledige i18n (Dutch-island) |
+| **I18N-1** | P1 | **XL** | FE | **Workflow-registry-i18n (eigen workstream).** Niet alleen ~56 module-labels + ~16 categorieën, maar **élk** schema-veld-label ('Status'/'Filters'/'Max. resultaten'/'Welke records?'/…) + action-/option-waarden ('Ophalen'/'Aanmaken'/…) — honderden strings × 5 locales. §5 = **compleet of niet** → 1 gefocuste sessie. Bouw `t('modules:labels.<type>')` + `categories.<key>` + `fields.<key>`; registry levert nl-bron, geen twee-waarheden. |
+| **I18N-2** | P1 | L | FE | `WorkflowCanvasEditor` + `ScheduleModal`/`fields` chrome-strings ("Module kiezen"/"Opslaan"/"Laden…"/CATEGORY_ORDER) — samen met I18N-1 in de workflow-i18n-sessie. |
 | **MOCK-1** | P1 | M | BE+2e | kandidaat-Planning-tab op `data/mocks.ts` → planning-endpoints + hooks |
 | **F-13** | P1 | M | FE (gated) | `auth_token`/`auth_user` uit `localStorage` → httpOnly-cookieflip (ná backend-deploy) |
 | **D-1** | P1 | M | BE+FE | changelog (`/activity`) op customers/vacancies/applications/tasks/opportunities |
