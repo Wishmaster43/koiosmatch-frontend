@@ -44,6 +44,24 @@ Volledig nieuwe tabstructuur. **Wacht op A-1 (Danny akkoord).**
 ### B-A1.1 · Kandidaat drawer — subtab Persoon
 Bevat: naam, geslacht, geboortedatum, geboorteplaats, nationaliteit, profielfoto.
 
+### B-A1.2 · Kandidaat-drawer — consistentie-polish (evaluatie 2026-06-29)
+Findings uit de volledige drill-down-doorloop. Allemaal FE, geen backend.
+- ☐ **Chips uniform met "Kandidaat type".** `branche` · `rijbewijs` · `voorkeursdagen` tonen in
+  read-modus platte komma-tekst en pas chips ná het tabel-potlood; kandidaat-type toont altijd
+  klikbare soft-chips. Gekozen richting: **chips ook altijd in read-modus** (zachte chips i.p.v.
+  komma-tekst). Te beslissen bij uitvoeren: aparte chip-kaarten per lijst (exact zoals kandidaat-type,
+  toggle-direct opslaan) **vs.** chips binnen de bestaande Voorkeuren-tabel (één Save behouden, potlood
+  blijft). Hergebruik `ChipMultiSelect`; geen nieuwe chip-stijl.
+- ☐ **Planning-koppen grijs uppercase.** `drawer/constants.ts` `sectionTitle` is nog dik-donker
+  (`fontWeight:700`) en wordt door PlanningTab/Scheduling/Favorites gebruikt — gelijktrekken met
+  `ui/SectionCard.sectionTitle` (grijs uppercase) en de duplicaat samenvouwen (één bron).
+- ☐ **Functie-veld → creatable combobox.** Voorkeuren-`function` is nu een platte `select`; naar
+  `CreatableSelect` + dropdown↔vrij-tekst-toggle (§3B), zoals het functieveld elders.
+- ☐ **Dode code:** ongebruikte `LanguageTab`-export uit `SectionTabs.tsx` verwijderen (Achtergrond
+  gebruikt `LanguagesSection`).
+- ☐ **Sleep-handle:** `GripVertical` bij ervaring/opleiding is een loze affordance (reorder niet
+  bedraad) → óf DnD-reorder echt bedraden óf het icoon weghalen.
+
 ### B-1 · E-mail per context
 Settings-UI: 4 panelen/tabs, provider-keuze, handtekening-editor, default-fallback. Backend klaar.
 
@@ -403,6 +421,40 @@ Resterend van de workflow-sessie: alleen Stap 2 (i18n) + Stap 3 (harden). Origin
 Render: `MODULE_META`-bouw in `modules/index.ts` levert `type` als key; resolve labels/categories/fields **at render**
 via `t('modules:…')`; **registry-strings blijven de nl-bron, géén twee-waarheden**. Wire de FieldInput-`field.label`
 + ScheduleModal + ModulePicker/ConfigPanel-chrome.
+
+**Stap 2-VOORTGANG (i18n):** ✅ editor-chrome · ✅ `fields.tsx` · ✅ `fieldControls.tsx` (alle via
+`t('workflows:editor.*'/'fields.*')`, 5 locales). ☐ rest = **`ModulePicker` + `ConfigPanel`** — die tonen
+module-**labels + categorieën** → vereisen de registry-map hieronder.
+
+**Turnkey module-map (nl-bron uit registry; vertaal en/de/fr/es; flat `modules.<type>` + `categories.<slug>`):**
+```
+type|nl-label|categorie          (53 modules · 16 categorieën)
+advanced_parser|Geavanceerde verwerker|Tekst & Parsing      aggregator|Aggregator|Flow beheer
+ai_agent|AI Agents|AI                                        ai_match|AI-kandidaatvoorstellen|Matches
+applicant_event|Sollicitatie-event|Triggers                 applicant_message|Bericht naar sollicitant|Communicatie
+applications|Sollicitaties|Sollicitaties                    candidates|Kandidaten|Kandidaten
+condition|Voorwaarde / vertakking|Flow beheer               customers|Klanten|Klanten
+delay|Wachttijd|Flow beheer                                 email_send|E-mail Sturen|Communicatie
+error_break|Stoppen (Break)|Flow beheer                     error_commit|Vastleggen (Commit)|Flow beheer
+error_ignore|Negeren|Flow beheer                            error_resume|Hervatten (Resume)|Flow beheer
+error_rollback|Terugdraaien (Rollback)|Flow beheer          feeder|Data Invoer|Flow beheer
+filter|Filter|Flow beheer                                   gateway_mail_hook|Mail Hook|Triggers
+get_variable(s)|Variabele(n) ophalen|Flow beheer            html_parser|HTML Verwerker|Tekst & Parsing
+html_table_parser|HTML-tabel verwerker|Tekst & Parsing      html_to_text|HTML naar tekst|Tekst & Parsing
+hf_/sm_/intus_candidates|Kandidaten|HelloFlex/ShiftManager/Intus   hf_/sm_customers|Klanten|HelloFlex/ShiftManager
+hf_/sm_/intus_shifts|Diensten|HelloFlex/ShiftManager/Intus   iterator|Iterator|Flow beheer
+knowledge_search|Kennisbank Zoeken|AI                       matches|Matches|Matches
+numeric_aggregator|Numeriek samenvoegen|Flow beheer         opportunities|Kansen|Kansen
+planning|Diensten|Planning                                  repeater|Repeater|Flow beheer
+router|Router|Flow beheer                                   set_variable(s)|Variabele(n) instellen|Flow beheer
+shifts_input|Diensten Plakken|Planning                      sleep|Wachten|Flow beheer
+table_aggregator|Tabel samenvoegen|Flow beheer              tasks|Taken|Taken
+text_aggregator|Tekst samenvoegen|Flow beheer               text_parser|Tekst verwerker|Tekst & Parsing
+vacancies|Vacatures|Vacatures                               wait|Wachten tot datum|Flow beheer
+webhook|Webhook Trigger|Triggers                            whatsapp_send|WhatsApp Sturen|Communicatie
+Categorieën: Alle·Triggers·Kandidaten·Sollicitaties·Vacatures·Matches·Kansen·Taken·Klanten·Planning·Communicatie·AI·ShiftManager·HelloFlex·Intus·Flow beheer·Tekst & Parsing
+```
+Wire: `ModulePicker`/`ConfigPanel` → `t('workflows:modules.'+type, meta.label)` + `t('workflows:categories.'+slug(cat), cat)`.
 
 **Stap 3 — CLAUDE.md harden** naar master-standaard (na 0 FE-findings).
 
