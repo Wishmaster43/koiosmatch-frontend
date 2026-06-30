@@ -176,6 +176,16 @@ Hangt op: C-35
 Alle lookups + realistische sample-data voor beide tenants. Geen lege schermen meer.
 
 ### 🔴 C-10 · Assen-model v2 — reseed + endpoints (HERZIEN 2026-06-29, vervangt oude reseed)
+> **Uitvoering in 2 golven (BE-Claude, 2026-06-30 — niet interleaven met live WIP):**
+> **Golf ① (veilig/additief, nu):** `candidate_phases`-tabel + `CandidatePhase`-model + de 3
+> toevoegingen in de bestaande `CandidateLookupController` + seed (`lead`/`candidate`) + additieve
+> `phase`-kolom (default `lead`). Levert FE `phases:[]` + de nieuwe as; **raakt status/availability/
+> guards/TemplateLibrary niet**.
+> **Golf ② (brekend, gecoördineerd window):** status→inzetbaarheid reseed + flags + **availability
+> eruit** + guards/transitions + de hardcoded status-waarden in **TemplateLibrary**. Collega commit
+> TemplateLibrary eerst; daarna landt de flip als **één** wijziging (collega: guards + TemplateLibrary;
+> BE-Claude: schema/lookup/seeder). **FE-availability-refs opruimen hoort in ditzelfde window.**
+
 Besluit 2026-06-29 (CLAUDE.md §3B v2): de overladen "status"-as **splitst** in **Fase** (lifecycle)
 + **Inzetbaarheid** (operationeel). Backend moet hiervoor **migraties (gevouwen in `create_*`),
 modellen, seeders én API's** bijwerken. Waardenmatrix:
@@ -185,8 +195,9 @@ modellen, seeders én API's** bijwerken. Waardenmatrix:
   seed `available · placed · unavailable · sick · leave`. **`placed` vereist een gekoppelde Match**
   (handmatig zetten → verplicht Match; auto via funnel `hired`→Match). `unavailable` = met
   weer-beschikbaar-datum + reden. Endpoint `/settings/candidate-lookups/statuses` (of hernoemen).
-- **Blacklist** = aparte vlag + `reason`. **Nieuwe `/settings`-key `blacklist_reason_required`**
-  (bool, default `true`) bepaalt of de reden verplicht is.
+- **Blacklist** *(herzien 2026-06-30)* = **een status-waarde** in `candidate_statuses` (seed `blacklist`
+  met vlag `requires_reason`), **géén aparte kolom/vlag** meer. Reden loopt via de status-reden
+  (change-log `status_reason`). De `blacklist_reason_required`-key + losse `blacklisted`-kolom vervallen.
 - **Archived** = soft-delete (`deleted_at`), geen status.
 - **Contractvorm** = de bestaande `candidate-types`-lookup; **alleen het FE-label** wijzigt
   (Kandidaat type → Contractvorm), **waarde-keys ongewijzigd** — backend hoeft niets te hernoemen.
@@ -205,14 +216,29 @@ modellen, seeders én API's** bijwerken. Waardenmatrix:
 - ✅ Tabel: kolommen **Fase · Inzetbaarheid · Contractvorm** + kleur-per-kolom-toggles
   (`candidate_table_color_phase` toegevoegd).
 - ✅ AddCandidateModal: linkerpaneel kiest nu **Fase** (Lead/Kandidaat); deployability default `available`.
-- ✅ Settings: **Fase**-sub-tab + statuses-tab herlabeld **Inzetbaarheid** + Contractvorm-label; i18n ×5.
+- ✅ Settings: **Fase**-sub-tab + statuses-tab (label "Status") + Contractvorm-label; i18n ×5.
+- ✅ **Status-editor-vlaggen:** `requires_match` + `expects_return_date` (naast `requires_reason`).
+- ✅ **Verplichte velden**-sub-tab: matrix veld × fase → `candidate_required_fields` (`/settings`).
+- ✅ **Blacklist = status-waarde** (herzien 2026-06-30): geen aparte knop meer; `blacklist` is een
+  status met `requires_reason` → de status-reden-popup vraagt de reden; rode chip. Losse
+  blacklist-knop/modal + `blacklisted`-velden verwijderd.
+- ✅ **Status-popups** (flag-gedreven): Geplaatst→Match vereist; Niet beschikbaar/Ziek/Verlof→**reden +
+  "weer beschikbaar vanaf"-datum** (stuurt `status_reason`/`status_return_date` mee).
+- ✅ **Availability-as opgeruimd (FE-UI):** aparte Availability-settings-tab verwijderd (= Status).
+- ✅ **Mock-fix:** shim verzint geen deployability meer voor Lead/Kandidaat (leeg ipv "Beschikbaar").
+
+- ✅ **Verplichte velden — enforcement in AddCandidateModal:** ster + foutmarkering + opslag-blokkade,
+  fase-afhankelijk uit `candidate_required_fields`.
+- ✅ **B-10 (gating) effectief weg:** `isApplicantStatus`/`hasApplicantStatus` hebben geen consumers
+  meer en `ApplicationStageChips` wordt nergens gerenderd (funnel staat in de Match-tab) — geen
+  status-gebaseerde funnel-gating meer. (Flag uit context/settings strippen = optionele opruiming.)
 
 **Nog open (FE):**
-- ☐ **Blacklist → reden-popup** + blacklist-vlag/actie in de header (gegate op `blacklist_reason_required`)
-  — vereist een nieuw veld/actie die er nog niet is; bewust gestaged.
-- ☐ **Funnel-chips alleen bij ≥1 lopende sollicitatie** + de oude `is_applicant`-gating opruimen (= B-10).
-- ☐ KPI-row + filters op de nieuwe assen; match-creatie in de Geplaatst-flow (hangt op C-19/C-10).
-- Hangt voor echte data op **C-10** (phases-lookup + statuses-reseed + migratie).
+- ☐ Resterende FE-availability-refs opruimen (`/availability-options`-call + `availabilityMeta` +
+  `availability`-kolom in mapCandidate) — **ná backend Golf ①** (schone breuk, geen kapot tussenmoment).
+- ☐ Verplichte velden ook in de **drawer**-edit afdwingen (AddModal is klaar) — leest `candidate_required_fields`.
+- ☐ KPI-row + filters op de nieuwe assen; **match-kiezer** in de Geplaatst-popup (hangt op C-19).
+- Hangt voor echte data op **C-10** (phases-lookup + statuses-reseed/flags + migratie + availability weg).
 
 ### C-1 · Lookups — "in gebruik"-vlag + 409 ◐
 Verifiëren met ingelogde sessie: vacancy status/fase toevoegen + reorder werkt.

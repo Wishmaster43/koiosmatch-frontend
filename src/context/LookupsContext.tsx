@@ -76,14 +76,16 @@ export const DEFAULT_FUNNEL_TYPES: LookupItem[] = [
 ]
 
 // Deployability / "status" (single value), model v2 (decision 2026-06-29): "can I
-// deploy them now?". Absorbs the old availability axis. `placed` is set by the hired
-// → match automation and requires a linked Match. Lead/Candidate moved to PHASES.
+// deploy them now?". Absorbs the old availability axis. `placed` requires a linked
+// Match; `blacklist` is a status value (not a separate flag) that asks for a reason.
+// Lead/Candidate moved to PHASES.
 export const DEFAULT_STATUSES: LookupItem[] = [
   { value: 'available',   label: 'Beschikbaar',      color: '#79B58E' },
   { value: 'placed',      label: 'Geplaatst',        color: '#6E8FD6', requires_match: true },
   { value: 'unavailable', label: 'Niet beschikbaar', color: '#C9AC64', requires_reason: true, expects_return_date: true },
   { value: 'sick',        label: 'Ziek',             color: '#D98A8A', expects_return_date: true },
   { value: 'leave',       label: 'Verlof',           color: '#6FA8C4', expects_return_date: true },
+  { value: 'blacklist',   label: 'Blacklist',        color: '#D14B4B', requires_reason: true },
 ]
 
 // Availability is a SEPARATE axis from the lifecycle status (a candidate can be

@@ -74,9 +74,6 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     // come from the shim above so legacy lifecycle data still renders correctly.
     phase,
     status:          deployability,
-    // Blacklist = separate flag (orthogonal to phase/status) + optional reason.
-    blacklisted:     c.blacklisted ?? false,
-    blacklistReason: c.blacklist_reason ?? null,
     // Availability — legacy separate axis (folded into deployability in v2); kept for back-compat.
     availability:    c.availability ?? null,
     owner:           ownerName,

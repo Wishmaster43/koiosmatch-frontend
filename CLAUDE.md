@@ -225,7 +225,7 @@ through a `useX()` hook / `LookupsContext` with a seed fallback; never a literal
 | Contract form (multi, was "candidate type" → **Contractvorm**) | `/settings/candidate-lookups/candidate-types` | `candidate.candidate_types[]` |
 | Funnel stages | `…/funnel-types` | application phase |
 | **Phase (lifecycle)** *(NEW — split from status)* | `…/phases` | Lead → Candidate |
-| **Deployability (status)** *(was "statuses"; absorbs availability)* | `…/statuses` | Available · Placed · Unavailable · Sick · Leave |
+| **Deployability (status)** *(was "statuses"; absorbs availability)* | `…/statuses` | Available · Placed · Unavailable · Sick · Leave · **Blacklist** |
 | ~~Availability (separate)~~ | folded into Deployability | — |
 | Talent pools | `/pools` | pool chips |
 | Languages · Levels | `/languages` · `/language-levels` | Languages section |
@@ -261,9 +261,9 @@ Phase + Deployability**.
   **folds in here**. **Placed** may be set manually **but then a Match MUST be linked** (no Placed
   without a Match) and is also set automatically by funnel Hired → Match. **Unavailable** carries an
   "available again" date + reason (re-activation workflow).
-- **Blacklist** = a **separate flag** (orthogonal — a Candidate can be blacklisted). Blacklisting
-  requires a **reason**, but whether the reason is mandatory is a **tenant setting**
-  (`blacklist_reason_required`, default on).
+- **Blacklist** = a **Deployability/status value** (decision 2026-06-30; not a separate button/flag).
+  It is one of the status options and is flagged **`requires_reason`** — selecting it opens the same
+  status-reason prompt. Distinct danger colour so it reads as a flag in the chip.
 - **Archived** = the soft-delete state (`deleted_at`), not a status. **Off by default in filters**
   (still searchable, so KPI totals drop).
 - **Funnel stage** = single value **per application**, seed **Applied · Invited/Intake · Proposed ·

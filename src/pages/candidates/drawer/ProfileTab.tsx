@@ -5,6 +5,7 @@ import { Edit2, Save, X, Trash2 } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import { NL_PROVINCES } from './constants'
 import { useDateFormat } from '@/lib/datetime'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import CustomFieldsSection from './CustomFieldsSection'
@@ -49,10 +50,29 @@ export default function ProfileTab({ c, onEditSave }: { c: Candidate; onEditSave
   const [summaryExpanded, setSummaryExpanded] = useState(false)
   const [form,    setForm]    = useState<ProfileForm>(emptyForm)
   const [summary, setSummary] = useState(c.summary ?? '')
-  const setF = (k: ProfileKey, v: string) => setForm(p => ({ ...p, [k]: v }))
+  const [errors,  setErrors]  = useState<Partial<Record<ProfileKey, boolean>>>({})
+  const setF = (k: ProfileKey, v: string) => { setForm(p => ({ ...p, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
 
-  const saveFields   = () => { onEditSave?.(form); setEditing(false) }
-  const cancelFields = () => { setForm(emptyForm()); setEditing(false) }
+  // Required fields for this candidate's phase (Settings → Verplichte velden). Only
+  // the profile-owned fields are enforced here (name/function live in the header).
+  const settings = useAllSettings()
+  const requiredCfg = getJsonSetting<Record<string, string[]>>(settings, 'candidate_required_fields',
+    { lead: ['first_name', 'last_name'], candidate: ['first_name', 'last_name', 'email', 'phone', 'function_title'] })
+  const PROFILE_REQ_MAP: Partial<Record<ProfileKey, string>> = {
+    email: 'email', phone: 'phone', gender: 'gender', dob: 'date_of_birth',
+    street: 'street', postalCode: 'postal_code', city: 'city',
+  }
+  const requiredKeys = (requiredCfg[c.phase] ?? []) as string[]
+  const isReq = (key: ProfileKey) => { const bk = PROFILE_REQ_MAP[key]; return !!bk && requiredKeys.includes(bk) }
+
+  // Block save when a profile-owned required field is empty; flag the offenders.
+  const saveFields   = () => {
+    const e: Partial<Record<ProfileKey, boolean>> = {}
+    ;(Object.keys(PROFILE_REQ_MAP) as ProfileKey[]).forEach(k => { if (isReq(k) && !String(form[k] ?? '').trim()) e[k] = true })
+    if (Object.keys(e).length) { setErrors(e); return }
+    onEditSave?.(form); setEditing(false); setErrors({})
+  }
+  const cancelFields = () => { setForm(emptyForm()); setErrors({}); setEditing(false) }
   const saveSummary   = () => { onEditSave?.({ summary }); setSummaryEditing(false) }
   const cancelSummary = () => { setSummary(c.summary ?? ''); setSummaryEditing(false) }
 
@@ -148,9 +168,12 @@ export default function ProfileTab({ c, onEditSave }: { c: Candidate; onEditSave
     <div style={{ display: 'flex', alignItems: 'center', gap: 12, minHeight: 26 }}>
       <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 120, flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5 }}>
         {key === 'linkedin' && <LinkedinIcon size={12} color="#0A66C2" />}
-        {label}
+        {label}{isReq(key) && <span style={{ color: 'var(--color-danger)' }}> *</span>}
       </span>
-      <div style={{ flex: 1, minWidth: 0 }}>{editing ? renderInput(key) : renderValue(key)}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        {editing ? renderInput(key) : renderValue(key)}
+        {errors[key] && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
+      </div>
     </div>
   )
 

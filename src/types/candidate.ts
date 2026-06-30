@@ -94,8 +94,6 @@ export interface Candidate {
   stageVacancyId: string | number
   phase: string
   status: string
-  blacklisted: boolean
-  blacklistReason: string | null
   availability: string | null
   owner: string
   ownerId: string | number | null
@@ -195,8 +193,6 @@ export interface ApiCandidate {
   phase?: string
   deployability?: string
   status?: string
-  blacklisted?: boolean
-  blacklist_reason?: string | null
   availability?: string | null
   owner?: { id?: string | number; name?: string; avatar_color?: string }
   recruiter?: { name?: string; avatar_color?: string }

@@ -6,6 +6,7 @@ import api from '@/lib/api'
 import { Field as FieldJs, TextField as TextFieldJs, SelectField as SelectFieldJs } from '@/components/forms/fields'
 import { NL_PROVINCES } from './drawer/constants'
 import { useLookups } from '@/context/LookupsContext'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
 import { mapCandidate } from './data/mapCandidate'
@@ -49,6 +50,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const { phases } = useLookups() as unknown as { phases: LookupOption[] }
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { user: me } = useAuth() as unknown as { user: { id?: Id } | null }
+  const settings = useAllSettings()
 
   // On create you pick the PHASE (Lead/Kandidaat); deployability defaults to available.
   const entryStatuses = phases.filter(s => CREATE_STATUSES.includes(s.value))
@@ -78,10 +80,21 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     setSubmitErr(null)
   }
 
+  // Required fields for the chosen phase (Settings → Verplichte velden), with a
+  // sensible fallback. Maps the backend field keys to this form's field names.
+  const REQ_FIELD_MAP: Record<string, keyof FormState> = {
+    first_name: 'firstName', last_name: 'lastName', email: 'email', phone: 'phone',
+    function_title: 'functionTitle', date_of_birth: 'dateOfBirth', gender: 'gender',
+    street: 'street', postal_code: 'postalCode', city: 'city',
+  }
+  const requiredCfg = getJsonSetting<Record<string, string[]>>(settings, 'candidate_required_fields',
+    { lead: ['first_name', 'last_name'], candidate: ['first_name', 'last_name', 'email', 'phone', 'function_title'] })
+  const requiredForm = (requiredCfg[status] ?? requiredCfg.lead ?? []).map(k => REQ_FIELD_MAP[k]).filter(Boolean) as Array<keyof FormState>
+  const isReq = (k: keyof FormState) => requiredForm.includes(k)
+
   const handleSubmit = async () => {
     const e: Record<string, boolean> = {}
-    if (!form.firstName.trim()) e.firstName = true
-    if (!form.lastName.trim())  e.lastName  = true
+    requiredForm.forEach(k => { if (!String(form[k] ?? '').trim()) e[k] = true })
     if (Object.keys(e).length) { setErrors(e); return }
 
     setSaving(true)
@@ -129,7 +142,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   }
 
   const selectedStatus = phases.find(s => s.value === status)
-  const canSubmit      = !!status && form.firstName.trim() && form.lastName.trim()
+  const canSubmit      = !!status && requiredForm.every(k => String(form[k] ?? '').trim())
   const statusLabel    = selectedStatus?.label ?? ''
 
   const genderOptions = [
@@ -222,14 +235,14 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
 
                 {/* Name row — first / middle / last */}
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr', gap: 12 }}>
-                  <Field label={t('modal.fields.firstName')} required>
+                  <Field label={t('modal.fields.firstName')} required={isReq('firstName')}>
                     <TextField value={form.firstName} onChange={v => set('firstName', v)} placeholder={t('modal.fields.firstName')} error={errors.firstName} />
                     {errors.firstName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
                   </Field>
                   <Field label={t('modal.fields.middleName')}>
                     <TextField value={form.middleName} onChange={v => set('middleName', v)} placeholder="van" />
                   </Field>
-                  <Field label={t('modal.fields.lastName')} required>
+                  <Field label={t('modal.fields.lastName')} required={isReq('lastName')}>
                     <TextField value={form.lastName} onChange={v => set('lastName', v)} placeholder={t('modal.fields.lastName')} error={errors.lastName} />
                     {errors.lastName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
                   </Field>
@@ -237,8 +250,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
 
                 {/* Function + owner */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Field label={t('modal.fields.functionTitle')}>
-                    <TextField value={form.functionTitle} onChange={v => set('functionTitle', v)} placeholder={t('modal.fields.functionPlaceholder')} />
+                  <Field label={t('modal.fields.functionTitle')} required={isReq('functionTitle')}>
+                    <TextField value={form.functionTitle} onChange={v => set('functionTitle', v)} placeholder={t('modal.fields.functionPlaceholder')} error={errors.functionTitle} />
                   </Field>
                   <Field label={t('modal.fields.owner')}>
                     <SelectField value={String(form.ownerId)} onChange={v => set('ownerId', v)}
@@ -248,27 +261,27 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
 
                 {/* Contact */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Field label={t('modal.fields.email')}>
-                    <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('modal.fields.emailPlaceholder')} />
+                  <Field label={t('modal.fields.email')} required={isReq('email')}>
+                    <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('modal.fields.emailPlaceholder')} error={errors.email} />
                   </Field>
-                  <Field label={t('modal.fields.phone')}>
-                    <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} />
+                  <Field label={t('modal.fields.phone')} required={isReq('phone')}>
+                    <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} error={errors.phone} />
                   </Field>
                 </div>
 
                 {/* Personal */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Field label={t('modal.fields.dob')}>
-                    <TextField type="date" value={form.dateOfBirth} onChange={v => set('dateOfBirth', v)} />
+                  <Field label={t('modal.fields.dob')} required={isReq('dateOfBirth')}>
+                    <TextField type="date" value={form.dateOfBirth} onChange={v => set('dateOfBirth', v)} error={errors.dateOfBirth} />
                   </Field>
-                  <Field label={t('modal.fields.gender')}>
+                  <Field label={t('modal.fields.gender')} required={isReq('gender')}>
                     <SelectField value={form.gender} onChange={v => set('gender', v)} placeholder={t('common:select')} options={genderOptions} />
                   </Field>
                 </div>
 
                 {/* Address */}
-                <Field label={t('modal.fields.street')}>
-                  <TextField value={form.street} onChange={v => set('street', v)} placeholder={t('modal.fields.streetPlaceholder')} />
+                <Field label={t('modal.fields.street')} required={isReq('street')}>
+                  <TextField value={form.street} onChange={v => set('street', v)} placeholder={t('modal.fields.streetPlaceholder')} error={errors.street} />
                 </Field>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <Field label={t('modal.fields.houseNumber')}>
@@ -279,11 +292,11 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                   </Field>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Field label={t('modal.fields.postalCode')}>
-                    <TextField value={form.postalCode} onChange={v => set('postalCode', v)} />
+                  <Field label={t('modal.fields.postalCode')} required={isReq('postalCode')}>
+                    <TextField value={form.postalCode} onChange={v => set('postalCode', v)} error={errors.postalCode} />
                   </Field>
-                  <Field label={t('modal.fields.city')}>
-                    <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} />
+                  <Field label={t('modal.fields.city')} required={isReq('city')}>
+                    <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} error={errors.city} />
                   </Field>
                 </div>
                 <Field label={t('modal.fields.province')}>

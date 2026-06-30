@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
-import { Ban, Download, Edit2, Save, X } from 'lucide-react'
+import { Download, Edit2, Save, X } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { CvDocument } from './CandidateCvTemplate'
 import type { CvCandidate } from './CandidateCvTemplate'
@@ -106,8 +106,6 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [status,        setStatus]        = useState<string | null>(null)
   // "Geplaatst" requires a linked Match — when none exists, prompt instead of setting it.
   const [matchPrompt,   setMatchPrompt]   = useState(false)
-  const [blacklisted,   setBlacklisted]   = useState<boolean | null>(null)
-  const [blacklistModal, setBlacklistModal] = useState<{ reason: string } | null>(null)
   // Status change that needs a reason and/or a return date (driven by the status lookup flags).
   const [statusModal,   setStatusModal]   = useState<{ target: string; reason: string; date: string; needReason: boolean; needDate: boolean } | null>(null)
   const [tags,          setTags]          = useState<string[] | null>(null)
@@ -123,8 +121,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
   if (c?.id !== prevId) {
     setPrevId(c?.id)
-    setRecruiter(null); setPhase(null); setStatus(null); setMatchPrompt(false)
-    setBlacklisted(null); setBlacklistModal(null); setStatusModal(null)
+    setRecruiter(null); setPhase(null); setStatus(null); setMatchPrompt(false); setStatusModal(null)
     setTags(null); setHeaderEditing(false); setProfileEdits(null); setPhotoUrl(null); setHeaderForm(null)
   }
 
@@ -150,19 +147,6 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     setStatus(statusModal.target)
     onUpdate?.(c.id, { status: statusModal.target, status_reason: statusModal.reason || null, status_return_date: statusModal.date || null })
     setStatusModal(null)
-  }
-  // Blacklist is a separate flag; turning it on asks for a reason when the tenant requires it.
-  const blacklistReasonRequired = getBoolSetting(allSettings, 'blacklist_reason_required', true)
-  const isBlacklisted = blacklisted ?? c.blacklisted
-  const toggleBlacklist = () => {
-    if (isBlacklisted) { setBlacklisted(false); onUpdate?.(c.id, { blacklisted: false, blacklist_reason: null }); return }
-    if (blacklistReasonRequired) { setBlacklistModal({ reason: '' }); return }
-    setBlacklisted(true); onUpdate?.(c.id, { blacklisted: true })
-  }
-  const confirmBlacklist = () => {
-    if (!blacklistModal) return
-    setBlacklisted(true); onUpdate?.(c.id, { blacklisted: true, blacklist_reason: blacklistModal.reason || null })
-    setBlacklistModal(null)
   }
   const currentTags    = tags ?? c.tags ?? []
 
@@ -238,14 +222,6 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
 
   const headerActions = () => (
     <>
-      {/* Blacklist toggle (separate flag) — red when active; reason asked when required. */}
-      <button onClick={toggleBlacklist} title={t('drawer.blacklist')}
-        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', flexShrink: 0,
-          border: `1px solid ${isBlacklisted ? 'var(--color-danger)' : 'var(--border)'}`,
-          background: isBlacklisted ? 'var(--color-danger)' : 'var(--bg)',
-          color: isBlacklisted ? '#fff' : 'var(--text-muted)' }}>
-        <Ban size={11} />{t('drawer.blacklist')}
-      </button>
       <button disabled={cvGenerating}
         onClick={async () => {
           setCvGenerating(true)
@@ -363,22 +339,6 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             <button onClick={() => setStatusModal(null)} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
             <button onClick={confirmStatus} disabled={statusModal.needReason && !statusModal.reason.trim()}
               style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: (statusModal.needReason && !statusModal.reason.trim()) ? 0.5 : 1 }}>{t('common:save')}</button>
-          </div>
-        </div>
-      </div>
-    )}
-    {/* Blacklist reason prompt (when the tenant requires a reason). */}
-    {blacklistModal && (
-      <div onClick={() => setBlacklistModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div onClick={e => e.stopPropagation()} style={{ background: 'var(--surface)', borderRadius: 12, padding: 20, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>{t('drawer.blacklistReasonTitle')}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.reasonLabel')}</div>
-          <textarea value={blacklistModal.reason} onChange={e => setBlacklistModal(m => m && ({ ...m, reason: e.target.value }))} rows={3}
-            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, outline: 'none', resize: 'vertical', marginBottom: 12 }} />
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            <button onClick={() => setBlacklistModal(null)} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
-            <button onClick={confirmBlacklist} disabled={!blacklistModal.reason.trim()}
-              style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-danger)', color: '#fff', border: 'none', cursor: 'pointer', opacity: blacklistModal.reason.trim() ? 1 : 0.5 }}>{t('drawer.blacklistConfirm')}</button>
           </div>
         </div>
       </div>

@@ -16,7 +16,7 @@
  * (or a line to an existing schema) and skip writing a component entirely.
  */
 import {
-  AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, Car,
+  AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, Car,
   ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Key,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Shield, Sparkles, Star,
   Store, Tags, Target, Users, Webhook, XCircle,
