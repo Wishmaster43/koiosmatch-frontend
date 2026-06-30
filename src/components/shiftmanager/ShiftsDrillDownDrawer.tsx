@@ -166,7 +166,7 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }: {
                         background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7 }}>
             <Search size={13} color="var(--text-muted)" />
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder={t('shiftsDrawer.search')}
+              placeholder={t('shiftsDrawer.search')} aria-label={t('shiftsDrawer.search')}
               style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none',
                        fontSize: 12, color: 'var(--text)' }} />
           </div>

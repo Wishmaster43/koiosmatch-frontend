@@ -40,26 +40,26 @@ export default function ProfileDetailsTab({ form, onField, onSave, saving, saved
             <div style={{ position: 'relative' }}>
               <User size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               <input value={form.firstname} onChange={onField('firstname')}
-                style={{ ...inputStyle, paddingLeft: 30 }} placeholder={t('profile.firstName')} />
+                style={{ ...inputStyle, paddingLeft: 30 }} placeholder={t('profile.firstName')} aria-label={t('profile.firstName')} />
             </div>
           </Field>
           <Field label={t('profile.lastName')}>
             <input value={form.lastname} onChange={onField('lastname')}
-              style={inputStyle} placeholder={t('profile.lastName')} />
+              style={inputStyle} placeholder={t('profile.lastName')} aria-label={t('profile.lastName')} />
           </Field>
         </div>
         <Field label={t('profile.email')}>
           <div style={{ position: 'relative' }}>
             <Mail size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input value={form.email} onChange={onField('email')} type="email"
-              style={{ ...inputStyle, paddingLeft: 30 }} placeholder={t('profile.emailPlaceholder')} />
+              style={{ ...inputStyle, paddingLeft: 30 }} placeholder={t('profile.emailPlaceholder')} aria-label={t('profile.email')} />
           </div>
         </Field>
         <Field label={t('profile.phone')}>
           <div style={{ position: 'relative' }}>
             <Phone size={13} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input value={form.phone} onChange={onField('phone')} type="tel"
-              style={{ ...inputStyle, paddingLeft: 30 }} placeholder="+31 6 12345678" />
+              style={{ ...inputStyle, paddingLeft: 30 }} placeholder="+31 6 12345678" aria-label={t('profile.phone')} />
           </div>
         </Field>
 

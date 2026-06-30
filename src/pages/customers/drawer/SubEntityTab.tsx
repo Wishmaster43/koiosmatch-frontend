@@ -62,7 +62,7 @@ export default function SubEntityTab<Item extends object>({
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
         <div style={searchWrap}>
           <Search size={13} color="var(--text-muted)" />
-          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={searchPlaceholder} style={searchInput} />
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder={searchPlaceholder} aria-label={searchPlaceholder} style={searchInput} />
         </div>
         {onAdd && <button onClick={onAdd} style={addBtn}><Plus size={13} /> {addLabel}</button>}
       </div>

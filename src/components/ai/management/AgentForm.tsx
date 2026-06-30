@@ -93,7 +93,7 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
       <div style={{ padding: '8px 10px', borderTop: '1px solid var(--border)', display: 'flex', gap: 6 }}>
         <input value={input} onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
-          placeholder={t('ai.chat.placeholder')}
+          placeholder={t('ai.chat.placeholder')} aria-label={t('ai.chat.placeholder')}
           style={{ ...inputStyle, flex: 1 }} />
         <button onClick={send} disabled={!input.trim() || loading}
           style={{ width: 32, height: 32, borderRadius: 7, border: 'none', background: 'var(--color-primary)', color: 'white',

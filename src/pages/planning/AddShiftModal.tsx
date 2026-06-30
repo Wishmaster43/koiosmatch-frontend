@@ -3,8 +3,8 @@
  * candidate suggestions and notes. Self-contained subtree (its Field/SectionHead/
  * Avatar/KandidaatRij helpers + style consts live here). Extracted from PlanningPage.
  */
-import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import { useState, useId, cloneElement, isValidElement } from 'react'
+import type { CSSProperties, ReactNode, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Save, Star, Search } from 'lucide-react'
 import { formatDate } from './helpers'
@@ -28,7 +28,10 @@ const LABEL: CSSProperties = { fontSize: 11, fontWeight: 500, color: 'var(--text
 const SELECT: CSSProperties = { ...INPUT, appearance: 'none', cursor: 'pointer' }
 
 function Field({ label, children }: { label?: ReactNode; children: ReactNode }) {
-  return <div style={{ marginBottom: 10 }}><label style={LABEL}>{label}</label>{children}</div>
+  // Associate the label with its single input via a generated id (§6).
+  const id = useId()
+  const child = isValidElement(children) ? cloneElement(children as ReactElement<{ id?: string }>, { id }) : children
+  return <div style={{ marginBottom: 10 }}><label htmlFor={id} style={LABEL}>{label}</label>{child}</div>
 }
 
 function SectionHead({ children, style }: { children: ReactNode; style?: CSSProperties }) {
@@ -220,7 +223,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
 
               {/* Notes */}
               <SectionHead>{t('notes')}</SectionHead>
-              <textarea style={{ ...INPUT, height: 70, resize: 'none' }} placeholder={t('notePlaceholder')} />
+              <textarea style={{ ...INPUT, height: 70, resize: 'none' }} placeholder={t('notePlaceholder')} aria-label={t('notePlaceholder')} />
 
               {/* Assignment performance */}
               <SectionHead style={{ marginTop: 16 }}>{t('performance')}</SectionHead>
@@ -260,7 +263,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                 <div style={{ position: 'relative' }}>
                   <Search size={13} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                   <input value={zoek} onChange={e => setZoek(e.target.value)}
-                    placeholder={t('searchCandidate')}
+                    placeholder={t('searchCandidate')} aria-label={t('searchCandidate')}
                     style={{ ...INPUT, paddingLeft: 28, fontSize: 12 }} />
                 </div>
               </div>

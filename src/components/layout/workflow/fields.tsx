@@ -68,6 +68,7 @@ export function FieldInput({ field, value, onChange }: { field: WorkflowField; v
   if (field.type === 'select') {
     return (
       <select value={(value ?? field.default ?? '') as string} onChange={e => onChange(field.key, e.target.value)}
+        aria-label={field.label}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none' }}>
         {field.default == null && <option value="">{t('fields.selectPlaceholder')}</option>}
         {(field.options ?? []).map(o => {
@@ -80,7 +81,7 @@ export function FieldInput({ field, value, onChange }: { field: WorkflowField; v
   }
   if (field.type === 'textarea') {
     return (
-      <textarea value={(value as string) || ''} placeholder={field.placeholder || ''}
+      <textarea value={(value as string) || ''} placeholder={field.placeholder || ''} aria-label={field.label}
         onChange={e => onChange(field.key, e.target.value)}
         rows={4}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace', resize: 'vertical' }}
@@ -97,9 +98,9 @@ export function FieldInput({ field, value, onChange }: { field: WorkflowField; v
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {pairs.map((p, i) => (
           <div key={i} style={{ display: 'flex', gap: 4 }}>
-            <input value={p.name} onChange={e => update(i, 'name', e.target.value)} placeholder={t('fields.keyName')}
+            <input value={p.name} onChange={e => update(i, 'name', e.target.value)} placeholder={t('fields.keyName')} aria-label={t('fields.keyName')}
               style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
-            <input value={p.value} onChange={e => update(i, 'value', e.target.value)} placeholder={t('fields.keyValue')}
+            <input value={p.value} onChange={e => update(i, 'value', e.target.value)} placeholder={t('fields.keyValue')} aria-label={t('fields.keyValue')}
               style={{ flex: 1, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
             <button type="button" onClick={() => remove(i)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: '0 4px' }}>
@@ -117,7 +118,7 @@ export function FieldInput({ field, value, onChange }: { field: WorkflowField; v
   return (
     <input type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
       value={(value as string) || ''}
-      placeholder={field.placeholder || ''}
+      placeholder={field.placeholder || ''} aria-label={field.label}
       onChange={e => onChange(field.key, field.type === 'number' ? Number(e.target.value) : e.target.value)}
       style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box' }}
       onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}

@@ -161,16 +161,17 @@ export default function ProfileEmailConnect() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: 12 }}>
                 <div><label style={labelStyle}>{t('profile.email.smtpHost')}</label>
-                  <input value={smtp.host} onChange={setF('host')} placeholder="smtp.office365.com" style={inputStyle} /></div>
+                  <input value={smtp.host} onChange={setF('host')} placeholder="smtp.office365.com" aria-label={t('profile.email.smtpHost')} style={inputStyle} /></div>
                 <div><label style={labelStyle}>{t('profile.email.port')}</label>
-                  <input type="number" value={smtp.port} onChange={setF('port')} style={inputStyle} /></div>
+                  <input type="number" value={smtp.port} onChange={setF('port')} aria-label={t('profile.email.port')} style={inputStyle} /></div>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div><label style={labelStyle}>{t('profile.email.user')}</label>
-                  <input value={smtp.user} onChange={setF('user')} placeholder="naam@bedrijf.nl" style={inputStyle} /></div>
+                  <input value={smtp.user} onChange={setF('user')} placeholder="naam@bedrijf.nl" aria-label={t('profile.email.user')} style={inputStyle} /></div>
                 <div><label style={labelStyle}>{t('profile.email.pass')}</label>
                   <div style={{ position: 'relative' }}>
                     <input type={showPass ? 'text' : 'password'} value={smtp.pass} onChange={setF('pass')}
+                      aria-label={t('profile.email.pass')}
                       style={{ ...inputStyle, paddingRight: 36 }} />
                     <button onClick={() => setShowPass(s => !s)}
                       style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
@@ -181,9 +182,9 @@ export default function ProfileEmailConnect() {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                 <div><label style={labelStyle}>{t('profile.email.fromName')}</label>
-                  <input value={smtp.from_name} onChange={setF('from_name')} placeholder="Danny Polak" style={inputStyle} /></div>
+                  <input value={smtp.from_name} onChange={setF('from_name')} placeholder="Danny Polak" aria-label={t('profile.email.fromName')} style={inputStyle} /></div>
                 <div><label style={labelStyle}>{t('profile.email.fromEmail')}</label>
-                  <input type="email" value={smtp.from_email} onChange={setF('from_email')} placeholder="danny@bedrijf.nl" style={inputStyle} /></div>
+                  <input type="email" value={smtp.from_email} onChange={setF('from_email')} placeholder="danny@bedrijf.nl" aria-label={t('profile.email.fromEmail')} style={inputStyle} /></div>
               </div>
               <div>
                 <label style={labelStyle}>{t('profile.email.security')}</label>

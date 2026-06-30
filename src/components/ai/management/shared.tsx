@@ -3,8 +3,8 @@
  * the model list + small reusable UI (Field, Badge, SaveBar, VersionList, TextEditor,
  * SideList, ListRow). Extracted from AIManagementTabs so each tab can live on its own.
  */
-import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import { useState, useId, cloneElement, isValidElement } from 'react'
+import type { CSSProperties, ReactNode, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, ChevronDown, Clock, Plus, RefreshCw, Save, Trash2 } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
@@ -40,12 +40,15 @@ export const inputStyle: CSSProperties = {
 // ── shared helpers ────────────────────────────────────────────────────────────
 
 export function Field({ label, children }: { label?: ReactNode; children: ReactNode }) {
+  // Associate the label with its single input via a generated id (§6).
+  const id = useId()
+  const child = isValidElement(children) ? cloneElement(children as ReactElement<{ id?: string }>, { id }) : children
   return (
     <div style={{ marginBottom: 13 }}>
-      <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+      <label htmlFor={id} style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
         {label}
       </label>
-      {children}
+      {child}
     </div>
   )
 }

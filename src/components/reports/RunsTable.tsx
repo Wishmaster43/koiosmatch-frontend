@@ -267,7 +267,7 @@ export default function RunsTable() {
           <Search size={14} style={{ position: 'absolute', left: 10, top: '50%',
                                      transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input value={search} onChange={e => setSearch(e.target.value)}
-            placeholder={t('runs.search')}
+            placeholder={t('runs.search')} aria-label={t('runs.search')}
             style={{ height: 34, width: 260, paddingLeft: 32, paddingRight: 12, fontSize: 13,
                      border: '1px solid var(--border)', borderRadius: 8, outline: 'none', color: 'var(--text)' }} />
         </div>

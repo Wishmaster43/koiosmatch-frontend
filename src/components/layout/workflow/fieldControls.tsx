@@ -27,6 +27,7 @@ export function AgentSelectField({ value, onChange, fieldKey }: { value?: unknow
   }, [])
   return (
     <select value={(value as string) || ''} onChange={e => onChange(fieldKey, e.target.value)}
+      aria-label={t('fields.agentSelect')}
       style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8,
                background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
       <option value="">{loading ? t('fields.agentLoading') : t('fields.agentSelect')}</option>
@@ -135,6 +136,7 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
 
       {/* Picker — existing inbound webhooks */}
       <select value={(value as string) || ''} onChange={e => onChange(fieldKey, e.target.value)}
+        aria-label={t('fields.webhookSelect')}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
         <option value="">{hooks.length ? t('fields.webhookSelect') : t('fields.webhookEmpty')}</option>
         {hooks.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
@@ -144,7 +146,7 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
       {showNew ? (
         <div style={{ display: 'flex', gap: 6 }}>
           <input autoFocus value={newName} onChange={e => setNewName(e.target.value)}
-            placeholder={t('fields.webhookNamePlaceholder')} onKeyDown={e => e.key === 'Enter' && create()}
+            placeholder={t('fields.webhookNamePlaceholder')} aria-label={t('fields.webhookNamePlaceholder')} onKeyDown={e => e.key === 'Enter' && create()}
             style={{ flex: 1, padding: '6px 9px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, outline: 'none' }} />
           <button type="button" onClick={create} disabled={!newName.trim() || creating}
             style={{ padding: '6px 12px', fontSize: 12, fontWeight: 600, background: 'var(--color-primary)', color: 'white', border: 'none', borderRadius: 8, cursor: newName.trim() ? 'pointer' : 'not-allowed', opacity: newName.trim() ? 1 : 0.5, display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -217,17 +219,19 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
         return (
           <div key={i} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             <select value={c.field} onChange={e => upd(i, 'field', e.target.value)}
+              aria-label={t('fields.fieldPlaceholder')}
               style={{ flex: 1, minWidth: 0, padding: '5px 6px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
               <option value="">{t('fields.fieldPlaceholder')}</option>
               {opts.map(o => { const v = typeof o === 'object' ? o.value : o; const l = typeof o === 'object' ? o.label : o; return <option key={v} value={v}>{l}</option> })}
               {/* (field option list) */}
             </select>
             <select value={c.operator} onChange={e => upd(i, 'operator', e.target.value)}
+              aria-label={t('fields.operator', { defaultValue: 'Operator' })}
               style={{ padding: '5px 4px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
               {OPERATORS.map(op => <option key={op} value={op}>{op}</option>)}
             </select>
             {needsValue && (
-              <input value={c.value ?? ''} onChange={e => upd(i, 'value', e.target.value)} placeholder={t('fields.valuePlaceholder')}
+              <input value={c.value ?? ''} onChange={e => upd(i, 'value', e.target.value)} placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}
                 style={{ flex: 1, minWidth: 0, padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
             )}
             <button type="button" onClick={() => del(i)}
@@ -269,11 +273,12 @@ export function ResponseStructureField({ value, onChange, fieldKey }: { value?: 
       {items.map((item, i) => (
         <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 90px 22px', gap: 4, alignItems: 'center' }}>
           <input value={item.name} onChange={e => update(i, 'name', e.target.value)}
-            placeholder={t('fields.itemNamePlaceholder')}
+            placeholder={t('fields.itemNamePlaceholder')} aria-label={t('fields.itemName')}
             style={{ padding: '5px 7px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', minWidth: 0 }}
             onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
             onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
           <select value={item.type} onChange={e => update(i, 'type', e.target.value)}
+            aria-label={t('fields.typeLabel')}
             style={{ padding: '5px 5px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
             {RS_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
