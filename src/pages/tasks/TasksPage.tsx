@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Plus } from 'lucide-react'
 import api, { unwrapList } from '../../lib/api'
+import { notifyError } from '@/lib/notify'
 import { isAbortError } from '../../lib/mocks'
 import { useRightPanel } from '../../context/RightPanelContext'
 import { TaskLookupsProvider, useTaskLookups } from '../../context/TaskLookupsContext'
@@ -176,7 +177,7 @@ function TasksPageInner() {
       due_date: patch.due, description: patch.description, assignee_id: patch.assigneeId,
     }
     Object.keys(body).forEach(k => { if (body[k] === undefined) delete body[k] })
-    api.patch(`/tasks/${id}`, body).catch(() => {})
+    api.patch(`/tasks/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // Kanban move = a status-only update.
@@ -186,7 +187,7 @@ function TasksPageInner() {
   const handleAddComment = (id: Id | undefined, body: string) => {
     const optimistic = { id: `tmp-${Date.now()}`, author: '', authorInitials: '?', body, time: new Date().toISOString() }
     setSelected(prev => (prev && prev.id === id ? ({ ...prev, comments: [...(prev.comments ?? []), optimistic] } as TaskDetail) : prev))
-    api.post(`/tasks/${id}/comments`, { body }).catch(() => {})
+    api.post(`/tasks/${id}/comments`, { body }).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // Apply the authoritative task detail returned by the link endpoints.
@@ -200,7 +201,7 @@ function TasksPageInner() {
   // Add a polymorphic link from the drawer; show it optimistically, then POST and re-sync.
   const handleAddLink = (id: Id | undefined, link: NewLink) => {
     setSelected(prev => (prev && prev.id === id ? ({ ...prev, links: [...(prev.links ?? []), { type: link.type, id: link.id, label: link.label }] } as TaskDetail) : prev))
-    api.post(`/tasks/${id}/links`, { type: link.type, id: link.id }).then(r => applyDetail(id, r)).catch(() => {})
+    api.post(`/tasks/${id}/links`, { type: link.type, id: link.id }).then(r => applyDetail(id, r)).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // Remove a link from the drawer; drop it optimistically, then DELETE and re-sync.
@@ -208,7 +209,7 @@ function TasksPageInner() {
     setSelected(prev => (prev && prev.id === id
       ? ({ ...prev, links: (prev.links ?? []).filter(l => !(l.type === link.type && String(l.id) === String(link.id))) } as TaskDetail)
       : prev))
-    api.delete(`/tasks/${id}/links`, { data: { type: link.type, id: link.id } }).then(r => applyDetail(id, r)).catch(() => {})
+    api.delete(`/tasks/${id}/links`, { data: { type: link.type, id: link.id } }).then(r => applyDetail(id, r)).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // A new task created in the modal — prepend it to the list.

@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban } from 'lucide-react'
 import api, { unwrapList } from '../../lib/api'
+import { notifyError } from '@/lib/notify'
 import { useUsers } from '../../lib/queries'
 import { useAuth } from '../../context/AuthContext'
 import { useOpportunityStages } from '../../lib/useOpportunityStages'
@@ -104,7 +105,7 @@ export default function OpportunitiesPage() {
     const m = stageMeta(String(stageValue))
     setRows(prev => prev.map(r => r.id === id ? ({ ...r, stage: m.label, stageValue, stageColor: m.color } as Opportunity) : r))
     const s = stages.find(x => x.value === stageValue)
-    if (s?.id) api.patch(`/opportunities/${id}`, { opportunity_stage_id: s.id }).catch(() => {})
+    if (s?.id) api.patch(`/opportunities/${id}`, { opportunity_stage_id: s.id }).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // Header/picker edits flow back here: optimistic locally, then PATCH (UI keys → API keys).
@@ -121,7 +122,7 @@ export default function OpportunitiesPage() {
     if ('stageValue' in patch) { const s = stages.find(x => x.value === patch.stageValue); body.opportunity_stage_id = s?.id ?? null }
     if ('ownerId'    in patch) body.owner_id    = patch.ownerId || null
     if ('clientId'   in patch) body.customer_id = patch.clientId || null
-    if (Object.keys(body).length) api.patch(`/opportunities/${id}`, body).catch(() => {})
+    if (Object.keys(body).length) api.patch(`/opportunities/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
   }
 
   return (

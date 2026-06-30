@@ -5,6 +5,7 @@ import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
 import { useRightPanel } from '../../context/RightPanelContext'
 import { useAuth } from '../../context/AuthContext'
 import api, { unwrapList } from '../../lib/api'
+import { notifyError } from '@/lib/notify'
 import { isAbortError } from '../../lib/mocks'
 import { useUsers } from '../../lib/queries'
 import { useCustomerLookups } from '../../lib/useCustomerLookups'
@@ -212,7 +213,7 @@ export default function CustomersPage() {
     }
     const body: Record<string, unknown> = {}
     Object.keys(patch).forEach(k => { if (map[k]) body[map[k]] = patch[k] })
-    if (Object.keys(body).length) api.patch(`/customers/${id}`, body).catch(() => {})
+    if (Object.keys(body).length) api.patch(`/customers/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // ── Create + sub-entity add (optimistic + best-effort POST) ──
@@ -237,7 +238,7 @@ export default function CustomersPage() {
       [type]: [...((cu[type] as unknown[]) ?? []), tmp],
       [`${type}Count`]: ((cu[`${type}Count`] as number) ?? 0) + 1,
     })
-    api.post(`/customers/${cust.id}/${endpoint}`, data).catch(() => {})
+    api.post(`/customers/${cust.id}/${endpoint}`, data).catch(() => notifyError(t('common:actionFailed')))
     setSubAdd(null)
   }
   const onCreateLocation   = (cust: Customer) => (d: { name: string; city: string }) => addSub(cust)('locations',   { name: d.name, city: d.city }, 'locations',   { name: d.name, city: d.city, departments: [], contacts: [] })
@@ -248,7 +249,7 @@ export default function CustomersPage() {
   const addNote = (id: Id | undefined, payload: NotePayload) => {
     const note = { id: `tmp-${Date.now()}`, type: payload.type, title: payload.title, text: payload.body, ago: '' }
     setDetail(prev => (prev && prev.id === id ? ({ ...prev, notes: [note, ...(prev.notes ?? [])] } as Customer) : prev))
-    api.post(`/customers/${id}/notes`, { type: payload.type, title: payload.title, text: payload.body }).catch(() => {})
+    api.post(`/customers/${id}/notes`, { type: payload.type, title: payload.title, text: payload.body }).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // ── Bulk selection + mutations ──

@@ -11,6 +11,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import type { ReactNode, DragEvent } from 'react'
 import { interactive } from '@/lib/a11y'
+import { notifyError } from '@/lib/notify'
 import { useTranslation } from 'react-i18next'
 import api from '../../lib/api'
 import { useRightPanel } from '../../context/RightPanelContext'
@@ -87,7 +88,7 @@ export default function WorkflowsPage() {
   }, [])
 
   const handleRun = async (id?: string | number) => {
-    await api.post(`/workflows/${id}/run`).catch(() => api.post(`/workflows/${id}/execute`)).catch(() => {})
+    await api.post(`/workflows/${id}/run`).catch(() => api.post(`/workflows/${id}/execute`)).catch(() => notifyError(t('common:actionFailed')))
   }
 
   const handleSave = async (updated: Workflow, closeAfter = true) => {

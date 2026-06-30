@@ -13,6 +13,7 @@ import { useRightPanel } from '../../context/RightPanelContext'
 import { useAuth } from '../../context/AuthContext'
 import { useUsers } from '../../lib/queries'
 import api from '../../lib/api'
+import { notifyError } from '@/lib/notify'
 import { VacancyLookupsProvider, useVacancyLookups } from '../../context/VacancyLookupsContext'
 import InsightsRow from '../../components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '../../components/insights/InsightsRow'
@@ -169,7 +170,7 @@ function VacanciesPageInner() {
     setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...local } as VacancyDetail) : prev))
 
     const body = buildVacancyPatch(patch)
-    if (Object.keys(body).length) api.patch(`/vacancies/${id}`, body).catch(() => {})
+    if (Object.keys(body).length) api.patch(`/vacancies/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // ── Bulk actions ──

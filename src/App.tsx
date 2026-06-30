@@ -13,6 +13,7 @@ import { ThemeProvider }                          from './context/ThemeContext'
 import { AppsProvider }                           from './context/AppsContext'
 import { LookupsProvider }                        from './context/LookupsContext'
 import ErrorBoundary                              from '@/components/ui/ErrorBoundary'
+import Toaster                                    from '@/components/ui/Toaster'
 import LoginPage                                  from './pages/auth/LoginPage'
 import DashboardLayout                            from './components/layout/DashboardLayout'
 import './index.css'
@@ -55,6 +56,8 @@ export default function App() {
         <LookupsProvider>
         {/* RightPanelProvider inside AuthProvider so components can use both auth and filter panel context */}
         <RightPanelProvider>
+          {/* App-wide toast host — outside the boundary so it survives a page crash. */}
+          <Toaster />
           {/* Global boundary: a crash in any page shows a recoverable fallback,
               not a blank screen (§3). Heavy widgets get their own local boundaries. */}
           <ErrorBoundary>

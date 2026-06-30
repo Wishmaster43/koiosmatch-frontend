@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Plus } from 'lucide-react'
 import api, { unwrapList } from '../../lib/api'
+import { notifyError } from '@/lib/notify'
 import { isAbortError } from '../../lib/mocks'
 import { useRightPanel } from '../../context/RightPanelContext'
 import { useLookups } from '../../context/LookupsContext'
@@ -165,7 +166,7 @@ export default function ApplicationsPage() {
   // Kanban move: set the new phase + bucket; label/colour re-resolve from the lookup.
   const handleMove = (id: Id, phaseKey: string) => {
     setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey, bucket: bucketOfPhase(phaseKey) } : a))
-    api.patch(`/applications/${id}`, { phase_key: phaseKey }).catch(() => {})
+    api.patch(`/applications/${id}`, { phase_key: phaseKey }).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // Reject an application: move it to the rejected phase/bucket optimistically.
@@ -191,7 +192,7 @@ export default function ApplicationsPage() {
     const patch = { score, matchCriteria: criteria, matchSource: 'manual' }
     setApplications(prev => prev.map(a => a.id === id ? ({ ...a, ...patch } as Application) : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { match_score: score, match_criteria: criteria }).catch(() => {})
+    api.patch(`/applications/${id}`, { match_score: score, match_criteria: criteria }).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // ── Insights strip: 3 donuts (filterable) + 4 KPI cards, equal footprint ──

@@ -1,4 +1,5 @@
 {
+  "actionFailed": "Échec de l'action — veuillez réessayer.",
   "save": "Enregistrer",
   "saveChanges": "Enregistrer les modifications",
   "cancel": "Annuler",

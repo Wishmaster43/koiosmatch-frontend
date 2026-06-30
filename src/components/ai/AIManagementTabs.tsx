@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { Check } from 'lucide-react'
 import api from '../../lib/api'
 import { interactive } from '@/lib/a11y'
+import { notifyError } from '@/lib/notify'
 import { MODELS, inputStyle, Field, TextEditor, SideList, ListRow } from './management/shared'
 import type { Version } from './management/shared'
 import { AgentForm } from './management/AgentForm'
@@ -48,7 +49,7 @@ export function AgentsTab() {
 
   const onDelete = async (agent: AiAgent) => {
     if (!confirm(t('ai.agent.confirmDelete', { name: agent.name }))) return
-    await api.delete(`/ai/agents/${agent.id}`).catch(() => {})
+    await api.delete(`/ai/agents/${agent.id}`).catch(() => notifyError(t('common:actionFailed')))
     setAgents(prev => prev.filter(a => a.id !== agent.id))
     setSelected(agents.find(a => a.id !== agent.id) ?? null)
   }
@@ -117,7 +118,7 @@ export function PromptsTab() {
 
   const del = async (p: AiItem) => {
     if (!confirm(t('ai.prompts.confirmDelete', { name: p.name }))) return
-    await api.delete(`/ai/prompts/${p.id}`).catch(() => {})
+    await api.delete(`/ai/prompts/${p.id}`).catch(() => notifyError(t('common:actionFailed')))
     setPrompts(prev => prev.filter(x => x.id !== p.id))
     if (selected?.id === p.id) { setSelected(null); setName(''); setBody(''); setVersions([]) }
   }
@@ -180,7 +181,7 @@ export function FAQTab() {
 
   const del = async (f: AiItem) => {
     if (!confirm(t('ai.faqs.confirmDelete', { name: f.name }))) return
-    await api.delete(`/ai/faqs/${f.id}`).catch(() => {})
+    await api.delete(`/ai/faqs/${f.id}`).catch(() => notifyError(t('common:actionFailed')))
     setFaqs(prev => prev.filter(x => x.id !== f.id))
     if (selected?.id === f.id) { setSelected(null); setName(''); setBody('') }
   }
