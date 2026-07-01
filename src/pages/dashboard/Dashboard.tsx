@@ -309,18 +309,13 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
         {kpis.map(k => <KpiCard key={k.label} {...k} />)}
       </div>
 
-      {/* Charts rij 1 — verdelingen uit /candidates/stats */}
-      {(vis('chart.status') || vis('chart.recruiter')) && (
+      {/* Verdelings-charts — één auto-flow 2-koloms grid; verborgen charts vallen weg zodat de
+          zichtbare (bv. status + funnel bij recruitment) vanzelf naast elkaar komen. */}
+      {(vis('chart.status') || vis('chart.recruiter') || vis('chart.funnel') || vis('chart.oppStage')) && (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
         {vis('chart.status') && <Panel><PieChartCard title={t('chart.byStatus')} data={statusData} colors={statusData.map(d => d.color) as string[]} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { status: fv(d) } : undefined)} /></Panel>}
-        {vis('chart.recruiter') && <Panel><PieChartCard title={t('chart.byRecruiter')} data={recruiterData} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { owner: fv(d) } : undefined)} /></Panel>}
-      </div>
-      )}
-
-      {/* Charts rij 2 — funnel + (kansen indien beschikbaar) */}
-      {(vis('chart.funnel') || vis('chart.oppStage')) && (
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
         {vis('chart.funnel') && <Panel><BarChartCard title={t('chart.funnel')} data={funnelData} colors={funnelData.map(d => d.color) as string[]} showAverage onBarClick={(d) => onNavigate?.('applications', fv(d) ? { stage: fv(d) } : undefined)} /></Panel>}
+        {vis('chart.recruiter') && <Panel><PieChartCard title={t('chart.byRecruiter')} data={recruiterData} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { owner: fv(d) } : undefined)} /></Panel>}
         {vis('chart.oppStage') && <Panel>
           {opp
             ? <PieChartCard title={t('chart.byStage')} data={oppStageData} colors={oppStageData.map(d => d.color) as string[]} onItemClick={(d) => onNavigate?.('opportunities', fv(d) ? { stage: fv(d) } : undefined)} />
