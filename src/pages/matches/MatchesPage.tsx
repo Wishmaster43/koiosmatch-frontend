@@ -161,20 +161,8 @@ export default function MatchesPage() {
         clearTitle={t('insights.clearFilter')}
       />
 
-      {/* Toolbar — segmented view/archive selector (left) + bulk bar or add (right) */}
+      {/* Toolbar — bulk bar or add button (left) + segmented view/archive selector (right) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 10px', flexShrink: 0, minHeight: 46 }}>
-        {/* Matches | Board | Gearchiveerd — one 3-way segmented control */}
-        <div style={{ display: 'flex', gap: 2, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 2 }}>
-          {([['matches', List], ['board', LayoutGrid], ['archived', Archive]] as const).map(([m, Icon]) => (
-            <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', fontSize: 12.5, fontWeight: 500,
-                borderRadius: 6, border: 'none', cursor: 'pointer',
-                background: mode === m ? 'var(--color-primary)' : 'transparent', color: mode === m ? '#fff' : 'var(--text)' }}>
-              <Icon size={14} aria-hidden="true" /> {t(`view.${m}`)}
-            </button>
-          ))}
-        </div>
-
         <div style={{ flex: 1, display: 'flex' }}>
           {selectedIds.size > 0 ? (
             <MatchesBulkBar
@@ -188,12 +176,24 @@ export default function MatchesPage() {
             // Create a direct match (candidate + vacancy) from the Matches page.
             <button
               onClick={() => setAddOpen(true)}
-              style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13,
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13,
                 fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer',
                 background: 'var(--color-primary)', color: '#fff' }}>
               <Plus size={15} aria-hidden="true" /> {t('add.button')}
             </button>
           )}
+        </div>
+
+        {/* Matches | Board | Gearchiveerd — one 3-way segmented control (right) */}
+        <div style={{ display: 'flex', gap: 2, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 2 }}>
+          {([['matches', List], ['board', LayoutGrid], ['archived', Archive]] as const).map(([m, Icon]) => (
+            <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', fontSize: 12.5, fontWeight: 500,
+                borderRadius: 6, border: 'none', cursor: 'pointer',
+                background: mode === m ? 'var(--color-primary)' : 'transparent', color: mode === m ? '#fff' : 'var(--text)' }}>
+              <Icon size={14} aria-hidden="true" /> {t(`view.${m}`)}
+            </button>
+          ))}
         </div>
       </div>
 

@@ -417,7 +417,18 @@
     "workedBeforeYes": "Yes, {{count}}× at {{client}}",
     "workedBeforeNo": "No, first time at {{client}}",
     "reasonPlaceholder": "Reason (optional)",
-    "prefDuplicate": "This is already in the list."
+    "prefDuplicate": "This is already in the list.",
+    "part_day": "All day",
+    "part_morning": "Morning",
+    "part_afternoon": "Afternoon",
+    "part_evening": "Evening",
+    "statusAvailable": "Available",
+    "statusUnavailable": "Unavailable",
+    "dayPart": "Day part",
+    "addAvailability": "Add availability",
+    "noAvailability": "No exceptions recorded yet.",
+    "availabilityHint": "By default the candidate is available. Record exceptions here (e.g. holiday or illness).",
+    "availDuplicate": "This day-part is already set for this date."
   },
   "statuses": {
     "actief": "Active",

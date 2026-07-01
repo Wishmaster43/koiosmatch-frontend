@@ -409,7 +409,18 @@
     "workedBeforeYes": "Ja, {{count}}× bei {{client}}",
     "workedBeforeNo": "Nein, erstes Mal bei {{client}}",
     "reasonPlaceholder": "Grund (optional)",
-    "prefDuplicate": "Dies ist bereits in der Liste."
+    "prefDuplicate": "Dies ist bereits in der Liste.",
+    "part_day": "Ganztägig",
+    "part_morning": "Morgen",
+    "part_afternoon": "Nachmittag",
+    "part_evening": "Abend",
+    "statusAvailable": "Verfügbar",
+    "statusUnavailable": "Nicht verfügbar",
+    "dayPart": "Tageszeit",
+    "addAvailability": "Verfügbarkeit hinzufügen",
+    "noAvailability": "Noch keine Ausnahmen erfasst.",
+    "availabilityHint": "Standardmäßig ist der Kandidat verfügbar. Erfassen Sie hier Ausnahmen (z. B. Urlaub oder Krankheit).",
+    "availDuplicate": "Diese Tageszeit ist für dieses Datum bereits festgelegt."
   },
   "statuses": {
     "actief": "Aktiv",

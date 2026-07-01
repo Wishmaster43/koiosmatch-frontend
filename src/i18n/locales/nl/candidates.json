@@ -417,7 +417,18 @@
     "workedBeforeYes": "Ja, {{count}}× bij {{client}}",
     "workedBeforeNo": "Nee, eerste keer bij {{client}}",
     "reasonPlaceholder": "Reden (optioneel)",
-    "prefDuplicate": "Deze staat al in de lijst."
+    "prefDuplicate": "Deze staat al in de lijst.",
+    "part_day": "Hele dag",
+    "part_morning": "Ochtend",
+    "part_afternoon": "Middag",
+    "part_evening": "Avond",
+    "statusAvailable": "Beschikbaar",
+    "statusUnavailable": "Niet beschikbaar",
+    "dayPart": "Dagdeel",
+    "addAvailability": "Beschikbaarheid toevoegen",
+    "noAvailability": "Nog geen uitzonderingen vastgelegd.",
+    "availabilityHint": "Standaard is de kandidaat beschikbaar. Leg hier uitzonderingen vast (bv. vakantie of ziekte).",
+    "availDuplicate": "Dit dagdeel is al vastgelegd voor deze datum."
   },
   "statuses": {
     "actief": "Actief",
