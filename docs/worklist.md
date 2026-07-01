@@ -273,10 +273,13 @@ LEVER: consistente chips/knoppen/typografie + lijst toegevoegde i18n-keys + geë
       **Taken** (task-statuses/-types/-priorities-lookups bestaan al, alleen niet ontsloten) · **Bellijsten/Outreach**
       (kanaal- + per-target-status-lookups, nieuwe entiteit K-23/C-18b) · **Matches** (min. tabelweergave-kleurtoggles;
       het match-**profiel** leeft op de vacature (K-26) → verwijs ernaar i.p.v. dupliceren).
-- [ ] **Taal-vlag/emoji** op de `languages`-lookup: optioneel **tenant-configureerbaar emoji-veld** (bv. 🇳🇱),
-      overal getoond **naast** de taalnaam — nooit vlag-only (a11y; **taal≠land**, dus de tenant kiest de emoji
-      i.p.v. een opgelegde landvlag → lost het "welke vlag voor Engels/Arabisch?"-probleem op). Technisch goedkoop
-      (unicode-emoji, geen assets). BE: `emoji`/`flag`-kolom op de languages-lookup (+ seed).
+- [ ] **Optioneel `icon`/`emoji`-veld op de lookup-base** (tenant-configureerbaar, naast de bestaande `color`),
+      overal getoond **naast** het label — nooit icon-only (a11y). Eén mechanisme, geen per-lookup-hack. Waar het loont:
+      - **last-contact-types** ✅ sterk — kanaal-iconen zijn ondubbelzinnig + nuttig (mail/telefoon/WhatsApp).
+      - **languages** — emoji-vlag, maar **taal≠land** → de tenant kiest de emoji (lost "welke vlag voor Engels/Arabisch?" op).
+      - **genders** ⚠️ terughoudend — genders sturen al de **avatar-kleur**; gender-symbolen zijn gevoelig/reductief.
+        Advies: kleur houden, hooguit optioneel/neutraal — **Danny beslist** of we dit willen.
+      BE: `icon`/`emoji`-kolom op de lookup-base + seed (unicode-emoji óf gecureerde lucide-set; geen image-assets).
 
 ---
 
