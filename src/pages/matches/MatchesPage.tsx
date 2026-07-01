@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, List, LayoutGrid, Archive } from 'lucide-react'
+import { Plus, LayoutList, Kanban, Archive } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -142,15 +142,6 @@ export default function MatchesPage() {
     api.patch(`/matches/${id}`, { stage: stageKey }).catch(() => notify('error', t('bulk.mutateError')))
   }
 
-  // Toolbar segmented control merges view + archived into one 3-way selector:
-  // Matches (active table) · Board (kanban) · Gearchiveerd (archived table).
-  const mode = view === 'board' ? 'board' : showArchived ? 'archived' : 'matches'
-  const setMode = (m: 'matches' | 'board' | 'archived') => {
-    if (m === 'board')         { setView('board'); setShowArchived(false) }
-    else if (m === 'archived') { setView('table'); setShowArchived(true) }
-    else                       { setView('table'); setShowArchived(false) }
-  }
-
   return (
     <div style={{ display: 'flex', height: '100%', background: 'var(--bg)', overflow: 'hidden' }}>
 
@@ -186,16 +177,29 @@ export default function MatchesPage() {
           )}
         </div>
 
-        {/* Matches | Board | Gearchiveerd — one 3-way segmented control (right) */}
-        <div style={{ display: 'flex', gap: 2, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 2 }}>
-          {([['matches', List], ['board', LayoutGrid], ['archived', Archive]] as const).map(([m, Icon]) => (
-            <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', fontSize: 12.5, fontWeight: 500,
-                borderRadius: 6, border: 'none', cursor: 'pointer',
-                background: mode === m ? 'var(--color-primary)' : 'transparent', color: mode === m ? '#fff' : 'var(--text)' }}>
-              <Icon size={14} aria-hidden="true" /> {t(`view.${m}`)}
-            </button>
-          ))}
+        {/* Right — archived (separate, with label) + icon-only view toggle (mirror opportunities) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Archived (soft-deleted) view toggle → ?include_archived=1 */}
+          <button onClick={() => setShowArchived(v => !v)} title={t('view.archived')}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12,
+              fontWeight: showArchived ? 600 : 500, borderRadius: 8, cursor: 'pointer',
+              border: `1px solid ${showArchived ? 'var(--color-primary)' : 'var(--border)'}`,
+              background: showArchived ? 'var(--color-primary-bg)' : 'var(--surface)',
+              color: showArchived ? 'var(--color-primary)' : 'var(--text)' }}>
+            <Archive size={14} aria-hidden="true" /> {t('view.archived')}
+          </button>
+
+          {/* View toggle — icon-only (label as aria-label + tooltip, §6) */}
+          <button onClick={() => setView('table')} title={t('view.matches')} aria-label={t('view.matches')}
+            style={{ display: 'flex', padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
+              background: view === 'table' ? 'var(--color-primary)' : 'var(--surface)', color: view === 'table' ? '#fff' : 'var(--text)' }}>
+            <LayoutList size={16} aria-hidden="true" />
+          </button>
+          <button onClick={() => setView('board')} title={t('view.board')} aria-label={t('view.board')}
+            style={{ display: 'flex', padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
+              background: view === 'board' ? 'var(--color-primary)' : 'var(--surface)', color: view === 'board' ? '#fff' : 'var(--text)' }}>
+            <Kanban size={16} aria-hidden="true" />
+          </button>
         </div>
       </div>
 
