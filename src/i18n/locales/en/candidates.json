@@ -165,7 +165,11 @@
       "postalCode": "Postal code",
       "functionTitle": "Job title",
       "functionPlaceholder": "e.g. Care worker",
-      "owner": "Owner"
+      "owner": "Owner",
+      "nationality": "Nationality",
+      "placeOfBirth": "Place of birth",
+      "linkedin": "LinkedIn",
+      "summary": "Summary"
     },
     "gender": {
       "male": "Male",

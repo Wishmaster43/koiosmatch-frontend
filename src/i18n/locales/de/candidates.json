@@ -158,7 +158,11 @@
       "postalCode": "PLZ",
       "functionTitle": "Funktionstitel",
       "functionPlaceholder": "z. B. Verzorgende IG",
-      "owner": "Inhaber"
+      "owner": "Inhaber",
+      "nationality": "Nationalität",
+      "placeOfBirth": "Geburtsort",
+      "linkedin": "LinkedIn",
+      "summary": "Profiltext"
     },
     "gender": {
       "male": "Männlich",

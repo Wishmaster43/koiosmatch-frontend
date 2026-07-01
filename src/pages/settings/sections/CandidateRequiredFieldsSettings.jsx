@@ -12,18 +12,28 @@ import { useLookups } from '@/context/LookupsContext'
  */
 const KEY = 'candidate_required_fields'
 
-// Built-in fields (snake_case = backend key) + their candidates-namespace label key.
+// Built-in candidate fields (snake_case = backend key) + candidates-namespace label
+// key. Covers the full profile set; custom fields set their own required-ness in
+// Settings → Custom fields.
 const FIELDS = [
-  { key: 'first_name',     label: 'firstName' },
-  { key: 'last_name',      label: 'lastName' },
-  { key: 'email',          label: 'email' },
-  { key: 'phone',          label: 'phone' },
-  { key: 'function_title', label: 'functionTitle' },
-  { key: 'date_of_birth',  label: 'dob' },
-  { key: 'gender',         label: 'gender' },
-  { key: 'street',         label: 'street' },
-  { key: 'postal_code',    label: 'postalCode' },
-  { key: 'city',           label: 'city' },
+  { key: 'first_name',          label: 'firstName' },
+  { key: 'middle_name',         label: 'middleName' },
+  { key: 'last_name',           label: 'lastName' },
+  { key: 'email',               label: 'email' },
+  { key: 'phone',               label: 'phone' },
+  { key: 'function_title',      label: 'functionTitle' },
+  { key: 'date_of_birth',       label: 'dob' },
+  { key: 'place_of_birth',      label: 'placeOfBirth' },
+  { key: 'gender',              label: 'gender' },
+  { key: 'nationality',         label: 'nationality' },
+  { key: 'street',              label: 'street' },
+  { key: 'house_number',        label: 'houseNumber' },
+  { key: 'house_number_suffix', label: 'houseNumberSuffix' },
+  { key: 'postal_code',         label: 'postalCode' },
+  { key: 'city',                label: 'city' },
+  { key: 'province',            label: 'province' },
+  { key: 'linkedin',            label: 'linkedin' },
+  { key: 'summary',             label: 'summary' },
 ]
 
 // Sensible defaults: a Lead needs little, a Kandidaat needs the core contact set.

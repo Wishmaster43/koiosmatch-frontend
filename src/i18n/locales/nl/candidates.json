@@ -165,7 +165,11 @@
       "postalCode": "Postcode",
       "functionTitle": "Functietitel",
       "functionPlaceholder": "bijv. Verzorgende IG",
-      "owner": "Eigenaar"
+      "owner": "Eigenaar",
+      "nationality": "Nationaliteit",
+      "placeOfBirth": "Geboorteplaats",
+      "linkedin": "LinkedIn",
+      "summary": "Profieltekst"
     },
     "gender": {
       "male": "Man",

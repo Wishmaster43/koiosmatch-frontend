@@ -158,7 +158,11 @@
       "postalCode": "Código postal",
       "functionTitle": "Título del puesto",
       "functionPlaceholder": "p. ej. Verzorgende IG",
-      "owner": "Responsable"
+      "owner": "Responsable",
+      "nationality": "Nacionalidad",
+      "placeOfBirth": "Lugar de nacimiento",
+      "linkedin": "LinkedIn",
+      "summary": "Resumen"
     },
     "gender": {
       "male": "Hombre",
