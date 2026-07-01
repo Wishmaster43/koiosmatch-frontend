@@ -308,8 +308,9 @@ change-log (`effective_from` + `reason`), tied to the audit trail (§3B / C-16).
 1. **Via application (funnel):** couple to a vacancy → application → funnel runs → **Hired**
    becomes a **Match → placement**.
 2. **Direct match:** create a Match without the funnel → placement.
-Both end in a placement; automation sets status → **Matched**. (A Match auto-adds a **work experience**
-entry at the top via a workflow; experience/education/certs sort newest-first.)
+Both end in a placement; automation sets deployability status → **Placed** (the `requires_match` status —
+never label it "Matched"; "matched" is the *application* bucket, a different axis). (A Match auto-adds a
+**work experience** entry at the top via a workflow; experience/education/certs sort newest-first.)
 
 ### Appointment-gated stages & intake reporting
 
