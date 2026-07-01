@@ -20,7 +20,7 @@ export default function ContactDrawer({ contact, onClose }: { contact: SmContact
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '14px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('contactsPage.drawerTitle')}</span>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer',
+        <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer',
           color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
           <X size={16} />
         </button>

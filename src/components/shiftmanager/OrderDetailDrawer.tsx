@@ -40,7 +40,7 @@ export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | nu
             <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('orders.drawer.title')}</h3>
             <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{row.external_id ?? row.id}</p>
           </div>
-          <button onClick={onClose}
+          <button onClick={onClose} aria-label={t('common:close')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
             <X size={16} />
           </button>

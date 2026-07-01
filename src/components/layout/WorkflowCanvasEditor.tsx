@@ -143,7 +143,7 @@ function EditorInner({ workflow, onClose, onSave }: {
             {t('editor.saveClose')}
           </button>
 
-          <button onClick={onClose}
+          <button onClick={onClose} aria-label={t('common:close')}
             style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}

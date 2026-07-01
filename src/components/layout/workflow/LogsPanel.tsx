@@ -41,7 +41,7 @@ export default function LogsPanel({ workflowId, onClose }: { workflowId?: string
           <List size={14} color="var(--color-primary)" />
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('runs.title')}</span>
         </div>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
+        <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
           <X size={15} />
         </button>
       </div>
