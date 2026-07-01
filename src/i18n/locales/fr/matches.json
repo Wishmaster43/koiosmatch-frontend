@@ -75,5 +75,12 @@
     "owner": "Responsable",
     "visibility": "Visibilité",
     "showArchived": "Afficher les archivés"
+  },
+  "view": {
+    "table": "Tableau",
+    "board": "Kanban"
+  },
+  "board": {
+    "empty": "Aucun match"
   }
 }

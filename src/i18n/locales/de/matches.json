@@ -75,5 +75,12 @@
     "owner": "Inhaber",
     "visibility": "Sichtbarkeit",
     "showArchived": "Archivierte anzeigen"
+  },
+  "view": {
+    "table": "Tabelle",
+    "board": "Board"
+  },
+  "board": {
+    "empty": "Keine Matches"
   }
 }

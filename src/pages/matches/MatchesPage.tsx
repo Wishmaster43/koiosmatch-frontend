@@ -1,12 +1,16 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus } from 'lucide-react'
+import { Plus, List, LayoutGrid } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
+import api from '@/lib/api'
+import { notify } from '@/lib/notify'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import MatchesTable from './MatchesTable'
+import MatchesBoard from './MatchesBoard'
+import type { BoardColumn } from './MatchesBoard'
 import MatchDrawer from './MatchDrawer'
 import MatchesBulkBar from './MatchesBulkBar'
 import AddMatchModal from './AddMatchModal'
@@ -29,7 +33,7 @@ export default function MatchesPage() {
   // stay searchable but out of the default view so KPI totals drop).
   const [showArchived, setShowArchived] = useState(false)
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
-  const { rows, loading, error, addMatch } = useMatches(showArchived)
+  const { rows, loading, error, addMatch, updateMatch } = useMatches(showArchived)
   const { registerFilters, unregisterFilters } = useRightPanel()
   const [page,        setPage]        = useState(1)
   const [pageSize,    setPageSize]    = useState(() => user?.default_per_page ?? 50)
@@ -127,6 +131,18 @@ export default function MatchesPage() {
   const [selected, setSelected] = useState<MatchRow | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
 
+  // View toggle: table ⇄ board (planboard). Board columns = the stages present.
+  const [view, setView] = useState<'table' | 'board'>('table')
+  const stageColumns: BoardColumn[] = useMemo(
+    () => stageData.map(d => ({ key: d.key, label: d.name, color: d.color })), [stageData])
+
+  // Drag a card to another column → change the match's stage (optimistic + persist).
+  const handleMove = (id: Id, stageKey: string) => {
+    const col = stageColumns.find(c => c.key === stageKey)
+    updateMatch(id, { stage: stageKey, stageColor: col?.color ?? '#6E8FD6' })
+    api.patch(`/matches/${id}`, { stage: stageKey }).catch(() => notify('error', t('bulk.mutateError')))
+  }
+
   return (
     <div style={{ display: 'flex', height: '100%', background: 'var(--bg)', overflow: 'hidden' }}>
 
@@ -139,38 +155,61 @@ export default function MatchesPage() {
         clearTitle={t('insights.clearFilter')}
       />
 
-      {/* Toolbar — bulk bar while a selection exists, otherwise the add button */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '0 24px 10px', flexShrink: 0, minHeight: 46 }}>
-        {selectedIds.size > 0 ? (
-          <MatchesBulkBar
-            count={selectedIds.size}
-            onClear={() => setSelectedIds(new Set())}
-            onCoupleHelloFlex={bulkCoupleHelloFlex}
-            onCoupleShiftManager={bulkCoupleShiftManager}
-            canCouple={hasPermission('matches.couple')}
-          />
-        ) : (
-          // Create a direct match (candidate + vacancy) from the Matches page.
-          <button
-            onClick={() => setAddOpen(true)}
-            style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13,
-              fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer',
-              background: 'var(--color-primary)', color: '#fff' }}>
-            <Plus size={15} aria-hidden="true" /> {t('add.button')}
+      {/* Toolbar — view toggle (left) + bulk bar or add button (right) */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 10px', flexShrink: 0, minHeight: 46 }}>
+        {/* Table ⇄ board (planboard) toggle */}
+        <div style={{ display: 'flex', gap: 4, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 2 }}>
+          <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
+            style={{ display: 'flex', padding: '5px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
+              background: view === 'table' ? 'var(--color-primary)' : 'transparent', color: view === 'table' ? '#fff' : 'var(--text)' }}>
+            <List size={15} aria-hidden="true" />
           </button>
-        )}
+          <button onClick={() => setView('board')} title={t('view.board')} aria-label={t('view.board')}
+            style={{ display: 'flex', padding: '5px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
+              background: view === 'board' ? 'var(--color-primary)' : 'transparent', color: view === 'board' ? '#fff' : 'var(--text)' }}>
+            <LayoutGrid size={15} aria-hidden="true" />
+          </button>
+        </div>
+
+        <div style={{ flex: 1, display: 'flex' }}>
+          {selectedIds.size > 0 ? (
+            <MatchesBulkBar
+              count={selectedIds.size}
+              onClear={() => setSelectedIds(new Set())}
+              onCoupleHelloFlex={bulkCoupleHelloFlex}
+              onCoupleShiftManager={bulkCoupleShiftManager}
+              canCouple={hasPermission('matches.couple')}
+            />
+          ) : (
+            // Create a direct match (candidate + vacancy) from the Matches page.
+            <button
+              onClick={() => setAddOpen(true)}
+              style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13,
+                fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer',
+                background: 'var(--color-primary)', color: '#fff' }}>
+              <Plus size={15} aria-hidden="true" /> {t('add.button')}
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Table */}
-      <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
-        <MatchesTable rows={paged} loading={loading} error={error} stickyHeader
-          scrollParentRef={tableScrollRef} onRowClick={setSelected} selectedId={selected?.id}
-          selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
-      </div>
+      {/* Board (planboard) or table + pagination */}
+      {view === 'board' ? (
+        <MatchesBoard rows={filteredAll} columns={stageColumns} onMove={handleMove}
+          onSelect={setSelected} selectedId={selected?.id} />
+      ) : (
+        <>
+          <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
+            <MatchesTable rows={paged} loading={loading} error={error} stickyHeader
+              scrollParentRef={tableScrollRef} onRowClick={setSelected} selectedId={selected?.id}
+              selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
+          </div>
 
-      <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
-        pageSize={pageSize} onPageChange={setPage}
-        onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+          <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
+            pageSize={pageSize} onPageChange={setPage}
+            onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+        </>
+      )}
       </div>
 
       {/* Read-only drill-down drawer */}

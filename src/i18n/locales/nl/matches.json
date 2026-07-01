@@ -75,5 +75,12 @@
     "owner": "Eigenaar",
     "visibility": "Zichtbaarheid",
     "showArchived": "Toon gearchiveerd"
+  },
+  "view": {
+    "table": "Tabel",
+    "board": "Board"
+  },
+  "board": {
+    "empty": "Geen matches"
   }
 }

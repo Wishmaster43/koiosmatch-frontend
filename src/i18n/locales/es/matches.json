@@ -75,5 +75,12 @@
     "owner": "Responsable",
     "visibility": "Visibilidad",
     "showArchived": "Mostrar archivados"
+  },
+  "view": {
+    "table": "Tabla",
+    "board": "Tablero"
+  },
+  "board": {
+    "empty": "Sin matches"
   }
 }

@@ -47,5 +47,9 @@ export function useMatches(includeArchived = false) {
   // Prepend a newly-created match so it shows immediately (optimistic; §3).
   const addMatch = (row: MatchRow) => setRows(prev => [row, ...prev])
 
-  return { rows, loading, error, addMatch }
+  // Patch one match in place (optimistic board drag / stage change).
+  const updateMatch = (id: MatchRow['id'], patch: Partial<MatchRow>) =>
+    setRows(prev => prev.map(r => (r.id === id ? { ...r, ...patch } : r)))
+
+  return { rows, loading, error, addMatch, updateMatch }
 }
