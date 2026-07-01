@@ -3,27 +3,15 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
-import api, { unwrapList } from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
 import { ac, ContactAvatar } from './contactParts'
 import ContactDrawer from './ContactDrawer'
+import { useSmContacts } from './hooks/useSmContacts'
 import type { SmContactRow } from '@/types/shiftmanager'
-
-// Raw contact from /sm_contacts (snake/camel + nested-or-string customer/location).
-interface RawContact {
-  id?: string | number
-  first_name?: string; firstname?: string
-  last_name?: string; lastname?: string
-  function_title?: string
-  customer?: string | { name?: string }
-  location?: string | { name?: string }
-  email?: string; mobile?: string; planning?: unknown
-  [k: string]: unknown
-}
 
 export default function ContactsPage() {
   const { t } = useTranslation('shiftmanager')
-  const [contacts,    setContacts]    = useState<SmContactRow[]>([])
+  // Data (fetch + transform) lives in the shared hook (§3).
+  const { contacts } = useSmContacts()
   const [search]                      = useState('')
   const [selected,    setSelected]    = useState<SmContactRow | null>(null)
   const [page,        setPage]        = useState(1)
@@ -32,29 +20,6 @@ export default function ContactsPage() {
   const pageSize = 12
 
   const { registerFilters, unregisterFilters } = useRightPanel()
-
-  // Load contacts from the ShiftManager mirror. A failed/empty call shows an
-  // empty list, never fabricated rows.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/sm_contacts', { signal: ctrl.signal })
-      .then(res => {
-        const { rows } = unwrapList<RawContact>(res)
-        setContacts(rows.map(c => ({
-          id:             c.id,
-          firstname:      c.first_name ?? c.firstname ?? '',
-          lastname:       c.last_name ?? c.lastname ?? '',
-          function_title: c.function_title ?? '',
-          customer:       (typeof c.customer === 'object' ? c.customer?.name : c.customer) ?? '',
-          location:       (typeof c.location === 'object' ? c.location?.name : c.location) ?? '',
-          email:          c.email ?? '',
-          mobile:         c.mobile ?? '',
-          planning:       !!c.planning,
-        })))
-      })
-      .catch(err => { if (!isAbortError(err)) setContacts([]) })
-    return () => ctrl.abort()
-  }, [])
 
   const toggle = (setter: Dispatch<SetStateAction<string[]>>) => (val: string) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])

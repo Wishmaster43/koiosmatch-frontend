@@ -3,29 +3,15 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Layers, MapPin, Building2, Users } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
-import api, { unwrapList } from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
 import { ac, Avatar, StatusBadge } from './departmentParts'
 import DepartmentDrawer from './DepartmentDrawer'
+import { useSmDepartments } from './hooks/useSmDepartments'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
-
-// Raw department from /sm_departments.
-interface RawDepartment {
-  id?: string | number
-  name?: string
-  customer?: string | { name?: string }
-  location?: string | { name?: string }
-  city?: string
-  cost_center?: string
-  status?: string
-  employee_count?: number
-  shift_count?: number
-  [k: string]: unknown
-}
 
 export default function DepartmentsPage() {
   const { t } = useTranslation('shiftmanager')
-  const [departments, setDepartments] = useState<SmDepartmentRow[]>([])
+  // Data (fetch + transform) lives in the shared hook (§3).
+  const { departments } = useSmDepartments()
   const [search]                      = useState('')
   const [selected,    setSelected]    = useState<SmDepartmentRow | null>(null)
   const [page,        setPage]        = useState(1)
@@ -35,29 +21,6 @@ export default function DepartmentsPage() {
   const pageSize = 12
 
   const { registerFilters, unregisterFilters } = useRightPanel()
-
-  // Load departments directly from /sm_departments. A failed/empty call shows an
-  // empty list, never fabricated rows.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/sm_departments', { signal: ctrl.signal })
-      .then(res => {
-        const { rows } = unwrapList<RawDepartment>(res)
-        setDepartments(rows.map(d => ({
-          id:         d.id,
-          name:       d.name ?? '',
-          customer:   (typeof d.customer === 'object' ? d.customer?.name : d.customer) ?? '',
-          location:   (typeof d.location === 'object' ? d.location?.name : d.location) ?? '',
-          city:       d.city ?? '',
-          costCenter: d.cost_center ?? '',
-          status:     d.status === 'active' ? 'Actief' : d.status === 'inactive' ? 'Inactief' : (d.status ?? 'Actief'),
-          employees:  d.employee_count ?? 0,
-          shifts:     d.shift_count ?? 0,
-        })))
-      })
-      .catch(err => { if (!isAbortError(err)) setDepartments([]) })
-    return () => ctrl.abort()
-  }, [])
 
   const toggle = (setter: Dispatch<SetStateAction<string[]>>) => (val: string) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])

@@ -3,29 +3,16 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Building2, Layers } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
-import api, { unwrapList } from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
 import { Avatar, StatusBadge, ac } from './locationParts'
 import LocationDrawer from './LocationDrawer'
+import { useSmLocations } from './hooks/useSmLocations'
 import type { SmLocationRow } from '@/types/shiftmanager'
-
-// Raw location from /sm_locations.
-interface RawLocation {
-  id?: string | number
-  name?: string
-  customer?: string | { name?: string }
-  city?: string
-  address?: string
-  status?: string
-  departments?: Array<string | { name?: string }>
-  shift_count?: number
-  [k: string]: unknown
-}
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function LocationsPage() {
   const { t } = useTranslation('shiftmanager')
-  const [locations, setLocations] = useState<SmLocationRow[]>([])
+  // Data (fetch + transform) lives in the shared hook (§3).
+  const { locations } = useSmLocations()
   const [search]                  = useState('')
   const [selected,  setSelected]  = useState<SmLocationRow | null>(null)
   const [page,      setPage]      = useState(1)
@@ -35,28 +22,6 @@ export default function LocationsPage() {
   const pageSize = 10
 
   const { registerFilters, unregisterFilters } = useRightPanel()
-
-  // Load locations directly from /sm_locations. A failed/empty call shows an
-  // empty list, never fabricated rows.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/sm_locations', { signal: ctrl.signal })
-      .then(res => {
-        const { rows } = unwrapList<RawLocation>(res)
-        setLocations(rows.map(l => ({
-          id:          l.id,
-          name:        l.name ?? '',
-          customer:    (typeof l.customer === 'object' ? l.customer?.name : l.customer) ?? '',
-          city:        l.city ?? '',
-          address:     l.address ?? '',
-          status:      l.status === 'active' ? 'Actief' : l.status === 'inactive' ? 'Inactief' : (l.status ?? 'Actief'),
-          departments: (l.departments ?? []).map(d => (typeof d === 'object' ? d?.name : d) ?? ''),
-          shifts:      l.shift_count ?? 0,
-        })))
-      })
-      .catch(err => { if (!isAbortError(err)) setLocations([]) })
-    return () => ctrl.abort()
-  }, [])
 
   const toggle = (setter: Dispatch<SetStateAction<string[]>>) => (val: string) =>
     setter(prev => prev.includes(val) ? prev.filter(v => v !== val) : [...prev, val])
