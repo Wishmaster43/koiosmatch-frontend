@@ -16,6 +16,20 @@
 
 ---
 
+## 2026-07-02 · `[FE] → [candidates lane]` · turn ON DataTable virtualization for CandidatesTable (AP-F3)
+
+F3 is done everywhere else — `scrollParentRef` (row virtualization) is already passed on the customers, tasks,
+opportunities, matches and vacancies tables. **`CandidatesTable` is the one big table still missing it** (it uses
+`DataTable` at ~line 230 but passes no `scrollParentRef`). It's the real 10k-row target. **1-line fix in your
+lane:** give the table's scroll container a ref and pass `scrollParentRef={ref}` to `<DataTable>` — mirror exactly
+how `VacanciesTable`/`TasksTable` already do it. I didn't touch it (your active lane / clobber risk).
+
+## 2026-07-02 · `[FE] → [BE]` · H2 status-provenance is prio-1 (ahead of more dashboard work)
+
+Danny set **AP-H2 as prio-1**. Please confirm the candidate **status/phase transition writes an audit entry with
+`effective_from` + reason** (+ the `available_again_date` path), or park it explicitly. The FE display ("Kandidaat
+sinds …" / "Niet beschikbaar sinds … · reden") waits on that dated change-log. Prio over continuing the dashboard items.
+
 ## 2026-07-01 · `[FE] → [DASH]` · ⚠️ your dashboard WIP got committed in `e060330` (index race)
 
 A shared-index race (COORD-1) swept your working-tree dashboard files into my commit **`e060330`**:
