@@ -9,7 +9,6 @@ import { useEffect, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import Underline from '@tiptap/extension-underline'
 import TextAlign from '@tiptap/extension-text-align'
 import { Bold, Italic, List, ListOrdered, Heading2, AlignLeft, AlignCenter, AlignRight, Undo2, Redo2, Maximize2, Minimize2, Code } from 'lucide-react'
 
@@ -36,7 +35,8 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
   const [htmlMode, setHtmlMode] = useState(false)
 
   const editor = useEditor({
-    extensions: [StarterKit, Underline, TextAlign.configure({ types: ['heading', 'paragraph'] })],
+    // StarterKit already includes underline; adding it again triggers a duplicate-extension warning.
+    extensions: [StarterKit, TextAlign.configure({ types: ['heading', 'paragraph'] })],
     content: value || '',
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
   })
