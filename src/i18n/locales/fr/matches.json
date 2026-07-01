@@ -72,13 +72,12 @@
   },
   "filters": {
     "stage": "Phase",
-    "owner": "Responsable",
-    "visibility": "Visibilité",
-    "showArchived": "Afficher les archivés"
+    "owner": "Responsable"
   },
   "view": {
-    "table": "Tableau",
-    "board": "Kanban"
+    "matches": "Matches",
+    "board": "Kanban",
+    "archived": "Archivés"
   },
   "board": {
     "empty": "Aucun match"

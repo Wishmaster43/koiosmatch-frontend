@@ -72,13 +72,12 @@
   },
   "filters": {
     "stage": "Fase",
-    "owner": "Eigenaar",
-    "visibility": "Zichtbaarheid",
-    "showArchived": "Toon gearchiveerd"
+    "owner": "Eigenaar"
   },
   "view": {
-    "table": "Tabel",
-    "board": "Board"
+    "matches": "Matches",
+    "board": "Board",
+    "archived": "Gearchiveerd"
   },
   "board": {
     "empty": "Geen matches"

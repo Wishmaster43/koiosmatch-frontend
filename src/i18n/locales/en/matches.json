@@ -72,13 +72,12 @@
   },
   "filters": {
     "stage": "Stage",
-    "owner": "Owner",
-    "visibility": "Visibility",
-    "showArchived": "Show archived"
+    "owner": "Owner"
   },
   "view": {
-    "table": "Table",
-    "board": "Board"
+    "matches": "Matches",
+    "board": "Board",
+    "archived": "Archived"
   },
   "board": {
     "empty": "No matches"

@@ -72,13 +72,12 @@
   },
   "filters": {
     "stage": "Fase",
-    "owner": "Responsable",
-    "visibility": "Visibilidad",
-    "showArchived": "Mostrar archivados"
+    "owner": "Responsable"
   },
   "view": {
-    "table": "Tabla",
-    "board": "Tablero"
+    "matches": "Matches",
+    "board": "Tablero",
+    "archived": "Archivados"
   },
   "board": {
     "empty": "Sin matches"

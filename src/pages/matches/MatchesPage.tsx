@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, List, LayoutGrid } from 'lucide-react'
+import { Plus, List, LayoutGrid, Archive } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import api from '@/lib/api'
@@ -68,8 +68,8 @@ export default function MatchesPage() {
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string | number) =>
     set(p => p.includes(String(v)) ? p.filter(x => x !== String(v)) : [...p, String(v)])
 
-  // Right-panel filters: status (stage) + owner + a "show archived" toggle. The
-  // same stageFilter/ownerFilter also drive the donuts, so both stay in sync.
+  // Right-panel filters: status (stage) + owner. The same stageFilter/ownerFilter
+  // drive the donuts, so both stay in sync. (Archived lives in the toolbar segment.)
   const filterGroups = useMemo(() => [
     { key: 'stage', label: t('filters.stage'), selected: stageFilter,
       options: stageData.map(d => ({ value: d.key, label: d.name, count: d.value })),
@@ -77,10 +77,7 @@ export default function MatchesPage() {
     { key: 'owner', label: t('filters.owner'), selected: ownerFilter,
       options: ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })),
       onToggle: tog(setOwnerFilter) },
-    { key: 'visibility', label: t('filters.visibility'), selected: showArchived ? ['archived'] : [],
-      options: [{ value: 'archived', label: t('filters.showArchived') }],
-      onToggle: () => setShowArchived(v => !v) },
-  ], [t, stageFilter, ownerFilter, showArchived, stageData, ownerData])
+  ], [t, stageFilter, ownerFilter, stageData, ownerData])
 
   // Register/unregister the filters in the right panel.
   useEffect(() => {
@@ -143,6 +140,15 @@ export default function MatchesPage() {
     api.patch(`/matches/${id}`, { stage: stageKey }).catch(() => notify('error', t('bulk.mutateError')))
   }
 
+  // Toolbar segmented control merges view + archived into one 3-way selector:
+  // Matches (active table) · Board (kanban) · Gearchiveerd (archived table).
+  const mode = view === 'board' ? 'board' : showArchived ? 'archived' : 'matches'
+  const setMode = (m: 'matches' | 'board' | 'archived') => {
+    if (m === 'board')         { setView('board'); setShowArchived(false) }
+    else if (m === 'archived') { setView('table'); setShowArchived(true) }
+    else                       { setView('table'); setShowArchived(false) }
+  }
+
   return (
     <div style={{ display: 'flex', height: '100%', background: 'var(--bg)', overflow: 'hidden' }}>
 
@@ -155,20 +161,18 @@ export default function MatchesPage() {
         clearTitle={t('insights.clearFilter')}
       />
 
-      {/* Toolbar — view toggle (left) + bulk bar or add button (right) */}
+      {/* Toolbar — segmented view/archive selector (left) + bulk bar or add (right) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 10px', flexShrink: 0, minHeight: 46 }}>
-        {/* Table ⇄ board (planboard) toggle */}
-        <div style={{ display: 'flex', gap: 4, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 2 }}>
-          <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
-            style={{ display: 'flex', padding: '5px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-              background: view === 'table' ? 'var(--color-primary)' : 'transparent', color: view === 'table' ? '#fff' : 'var(--text)' }}>
-            <List size={15} aria-hidden="true" />
-          </button>
-          <button onClick={() => setView('board')} title={t('view.board')} aria-label={t('view.board')}
-            style={{ display: 'flex', padding: '5px 8px', borderRadius: 6, border: 'none', cursor: 'pointer',
-              background: view === 'board' ? 'var(--color-primary)' : 'transparent', color: view === 'board' ? '#fff' : 'var(--text)' }}>
-            <LayoutGrid size={15} aria-hidden="true" />
-          </button>
+        {/* Matches | Board | Gearchiveerd — one 3-way segmented control */}
+        <div style={{ display: 'flex', gap: 2, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 2 }}>
+          {([['matches', List], ['board', LayoutGrid], ['archived', Archive]] as const).map(([m, Icon]) => (
+            <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', fontSize: 12.5, fontWeight: 500,
+                borderRadius: 6, border: 'none', cursor: 'pointer',
+                background: mode === m ? 'var(--color-primary)' : 'transparent', color: mode === m ? '#fff' : 'var(--text)' }}>
+              <Icon size={14} aria-hidden="true" /> {t(`view.${m}`)}
+            </button>
+          ))}
         </div>
 
         <div style={{ flex: 1, display: 'flex' }}>

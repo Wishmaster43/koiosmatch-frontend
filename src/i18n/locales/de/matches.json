@@ -72,13 +72,12 @@
   },
   "filters": {
     "stage": "Phase",
-    "owner": "Inhaber",
-    "visibility": "Sichtbarkeit",
-    "showArchived": "Archivierte anzeigen"
+    "owner": "Inhaber"
   },
   "view": {
-    "table": "Tabelle",
-    "board": "Board"
+    "matches": "Matches",
+    "board": "Board",
+    "archived": "Archiviert"
   },
   "board": {
     "empty": "Keine Matches"
