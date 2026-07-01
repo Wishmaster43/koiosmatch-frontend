@@ -4,10 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
-import api, { unwrapList } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
 import ErrorBanner from '@/components/ui/ErrorBanner'
-import { isAbortError } from '@/lib/mocks'
 import { useUsers } from '@/lib/queries'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
 import InsightsRow from '@/components/insights/InsightsRow'
@@ -20,21 +17,13 @@ import AddCustomerModal from './AddCustomerModal'
 import AddLocationModal from './AddLocationModal'
 import AddDepartmentModal from './AddDepartmentModal'
 import AddContactPersonModal from './AddContactPersonModal'
-import { mapCustomer } from './data/mapCustomer'
-import { initialsOf } from '@/lib/initials'
-import type { Customer, ApiCustomer } from '@/types/customer'
+import { useCustomersData } from './hooks/useCustomersData'
+import { useCustomerRecord } from './hooks/useCustomerRecord'
+import { useCustomerBulkActions } from './hooks/useCustomerBulkActions'
 import type { Id } from '@/types/common'
 
 interface AppUser { id: Id; name: string; avatar_color?: string }
 interface Opt { value: Id; label: string; count: number }
-interface PageStats {
-  by_status?: Array<{ value?: string; status?: string; count?: number }>
-  by_owner?: Array<{ id?: Id; owner_id?: Id; name?: string; count?: number }>
-  locations?: number; departments?: number; contacts?: number
-  open_vacancies?: number; active_matches?: number; without_contact?: number
-}
-type NotePayload = { type: string; title: string; body: string }
-interface SubAddState { type: string; customer: Customer }
 
 // Recharts hands the clicked segment both at top level and under `.payload`.
 const pickKey = (d: unknown): string | undefined => {
@@ -51,33 +40,23 @@ export default function CustomersPage() {
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { statuses, statusMeta } = useCustomerLookups()
 
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState<string | null>(null)
+  // ── UI state ──
   const [page,      setPage]      = useState(1)
   // TODO C-33: use user.default_per_page once the backend accepts per_page > 100 on this endpoint.
   const [pageSize,  setPageSize]  = useState(50)
-  const [lastPage,  setLastPage]  = useState(1)
-  const [total,     setTotal]     = useState(0)
-  const [stats,     setStats]     = useState<PageStats | null>(null)
-  const [selected,  setSelected]  = useState<Customer | null>(null)
-  const [detail,    setDetail]    = useState<Customer | null>(null)
-  const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [addOpen,   setAddOpen]   = useState(false)
-  const [subAdd,    setSubAdd]    = useState<SubAddState | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   const [actionMsg, setActionMsg] = useState<{ type: string; text: string } | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tableScrollRef = useRef<HTMLDivElement>(null)
 
-  // Filter dimensions (server-side).
+  // ── Filter dimensions (server-side) ──
   const [globalSearch,     setGlobalSearch]     = useState('')
   const [selectedStatus,   setSelectedStatus]   = useState<string[]>([])
   const [selectedOwner,    setSelectedOwner]    = useState<string[]>([])
   const [selectedCity,     setSelectedCity]     = useState<string[]>([])
   const [selectedIndustry, setSelectedIndustry] = useState<string[]>([])
 
-  // Server-side filter params (axios serialises arrays as `key[]`).
   const filterParams = useMemo(() => {
     const p: Record<string, unknown> = {}
     if (globalSearch.trim())     p.search   = globalSearch.trim()
@@ -92,33 +71,20 @@ export default function CustomersPage() {
   useEffect(() => { setPage(1) }, [filterKey])
   useEffect(() => { setSelectedIds(new Set()) }, [filterKey, page, pageSize])
 
-  // ── List (paginated, server-filtered) ──
-  useEffect(() => {
-    const ctrl = new AbortController()
-    setLoading(true); setError(null)
-    api.get('/customers', { params: { ...filterParams, page, per_page: pageSize }, signal: ctrl.signal })
-      .then(res => {
-        const { rows, total, lastPage } = unwrapList<ApiCustomer>(res)
-        setCustomers(rows.map(mapCustomer)); setTotal(total); setLastPage(lastPage)
-      })
-      .catch(err => {
-        if (isAbortError(err)) return
-        // A 404 means the endpoint isn't built yet → treat as empty, not an error.
-        if (err?.response?.status && err.response.status !== 404) setError(t('page.loadError'))
-        setCustomers([]); setTotal(0); setLastPage(1)
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [filterKey, page, pageSize, t]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Transient feedback for bulk mutations, auto-dismissed.
+  const notify = (type: string, text: string) => { setActionMsg({ type, text }); if (msgTimer.current) clearTimeout(msgTimer.current); msgTimer.current = setTimeout(() => setActionMsg(null), 4000) }
+  useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
 
-  // ── Stats (server-wide totals, honour the filters) ──
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/customers/stats', { params: filterParams, signal: ctrl.signal })
-      .then(res => setStats(res.data?.data ?? res.data ?? null))
-      .catch(err => { if (!isAbortError(err)) setStats(null) })
-    return () => ctrl.abort()
-  }, [filterKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  // ── Data layer (§3): list/stats · record/drawer · bulk actions ──
+  const { customers, setCustomers, loading, error, total, setTotal, lastPage, stats } =
+    useCustomersData({ filterParams, page, pageSize, t })
+  const {
+    selected, detail, drawerExpanded, setDrawerExpanded, subAdd, setSubAdd,
+    closeDrawer, selectCustomer, updateCustomer, handleCreate,
+    onCreateLocation, onCreateDepartment, onCreateContact, addNote,
+  } = useCustomerRecord({ setCustomers, setTotal, users, t })
+  const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags } =
+    useCustomerBulkActions({ customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t })
 
   // ── Option lists (stats first, page-derived as fallback) ──
   const optsFrom = (values: string[]): Opt[] => {
@@ -188,145 +154,9 @@ export default function CustomersPage() {
     { key: 'noContact',   label: t('insights.noContact'),     value: noContactCount,   sub: t('insights.noContactSub'),     color: 'var(--color-danger)' },
   ]
 
-  // ── Drawer open: light row first, then fetch the full detail (ref-guarded) ──
-  const selectedIdRef = useRef<Id | null>(null)
-  const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
-  const selectCustomer = (c: Customer) => {
-    if (selected?.id === c.id) { closeDrawer(); return }
-    selectedIdRef.current = c.id ?? null
-    setSelected(c); setDetail(null); setDrawerExpanded(false)
-    api.get(`/customers/${c.id}`)
-      .then(r => { if (selectedIdRef.current === c.id) setDetail(mapCustomer(r.data?.data ?? r.data)) })
-      .catch(() => {})
-  }
-
-  // Optimistic update of one customer (table + open drawer stay in sync), then PATCH.
-  const updateCustomer = (id: Id | undefined, patch: Record<string, unknown>) => {
-    setCustomers(prev => prev.map(c => c.id === id ? ({ ...c, ...patch } as Customer) : c))
-    setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...patch } as Customer) : prev))
-    setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...patch } as Customer) : prev))
-
-    const map: Record<string, string> = {
-      name: 'name', debtorNumber: 'debtor_number', city: 'city', industry: 'industry',
-      status: 'status', ownerId: 'owner_id', website: 'website', employeeCount: 'employee_count',
-      toneOfVoice: 'tone_of_voice', description: 'description', recruitmentProblems: 'recruitment_problems',
-      privacyPolicyUrl: 'privacy_policy_url', hideCompanyName: 'hide_company_name', hasCareerPage: 'has_career_page',
-      showInVacancies: 'show_in_my_vacancies', excludeFromSourcing: 'exclude_from_sourcing', tags: 'tags',
-    }
-    const body: Record<string, unknown> = {}
-    Object.keys(patch).forEach(k => { if (map[k]) body[map[k]] = patch[k] })
-    if (Object.keys(body).length) api.patch(`/customers/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
-  }
-
-  // ── Create + sub-entity add (optimistic + best-effort POST) ──
-  const handleCreate = (form: { name: string; debtorNumber: string; status: string; ownerId: string; industry: string; city: string }) => {
-    const owner = users.find(u => String(u.id) === form.ownerId)
-    const optimistic = mapCustomer({
-      id: `new-${Date.now()}`, name: form.name, debtor_number: form.debtorNumber, status: form.status,
-      city: form.city, industry: form.industry,
-      owner: owner ? { id: owner.id, name: owner.name } : undefined,
-    } as ApiCustomer)
-    setCustomers(prev => [optimistic, ...prev]); setTotal(tt => tt + 1); setAddOpen(false)
-    api.post('/customers', {
-      name: form.name, debtor_number: form.debtorNumber, status: form.status,
-      city: form.city, industry: form.industry, owner_id: form.ownerId,
-    }).then(r => { const c = mapCustomer(r.data?.data ?? r.data); setCustomers(prev => prev.map(x => x.id === optimistic.id ? c : x)) }).catch(() => {})
-  }
-
-  const addSub = (cust: Customer) => (type: string, data: Record<string, unknown>, endpoint: string, shape: Record<string, unknown>) => {
-    const cu = cust as unknown as Record<string, unknown>
-    const tmp = { id: `tmp-${Date.now()}`, ...shape }
-    updateCustomer(cust.id, {
-      [type]: [...((cu[type] as unknown[]) ?? []), tmp],
-      [`${type}Count`]: ((cu[`${type}Count`] as number) ?? 0) + 1,
-    })
-    api.post(`/customers/${cust.id}/${endpoint}`, data).catch(() => notifyError(t('common:actionFailed')))
-    setSubAdd(null)
-  }
-  const onCreateLocation   = (cust: Customer) => (d: { name: string; city: string }) => addSub(cust)('locations',   { name: d.name, city: d.city }, 'locations',   { name: d.name, city: d.city, departments: [], contacts: [] })
-  const onCreateDepartment = (cust: Customer) => (d: { name: string; locationId: Id }) => addSub(cust)('departments', { name: d.name, location_id: d.locationId }, 'departments', { name: d.name, locationId: d.locationId, locationName: (cust.locations ?? []).find(l => String(l.id) === String(d.locationId))?.name ?? '', contacts: [] })
-  const onCreateContact    = (cust: Customer) => (d: { name: string; role: string; email: string }) => addSub(cust)('contacts',    { name: d.name, function: d.role, email: d.email }, 'contacts', { name: d.name, role: d.role, email: d.email })
-
-  // Add a note to a customer (optimistic + POST).
-  const addNote = (id: Id | undefined, payload: NotePayload) => {
-    const note = { id: `tmp-${Date.now()}`, type: payload.type, title: payload.title, text: payload.body, ago: '' }
-    setDetail(prev => (prev && prev.id === id ? ({ ...prev, notes: [note, ...(prev.notes ?? [])] } as Customer) : prev))
-    api.post(`/customers/${id}/notes`, { type: payload.type, title: payload.title, text: payload.body }).catch(() => notifyError(t('common:actionFailed')))
-  }
-
-  // ── Bulk selection + mutations ──
-  const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const n = new Set(prev); ids.forEach(id => { if (allSelected) n.delete(id); else n.add(id) }); return n })
-  const notify = (type: string, text: string) => { setActionMsg({ type, text }); if (msgTimer.current) clearTimeout(msgTimer.current); msgTimer.current = setTimeout(() => setActionMsg(null), 4000) }
-  useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
-
-  const subsetOf = (obj: Record<string, unknown>, keys: string[]): Record<string, unknown> => keys.reduce<Record<string, unknown>>((a, k) => { a[k] = obj[k]; return a }, {})
-  // Generic optimistic bulk field mutation (apply → reconcile on `updated` → revert).
-  const bulkMutate = ({ url, body, patch, keys, onSuccess }: { url: string; body: Record<string, unknown>; patch: Record<string, unknown>; keys: string[]; onSuccess: (n: number) => void }) => {
-    const ids = [...selectedIds]
-    if (!ids.length) return
-    const snap = new Map(customers.filter(c => c.id != null && ids.includes(c.id)).map(c => [c.id, subsetOf(c as unknown as Record<string, unknown>, keys)]))
-    setCustomers(prev => prev.map(c => ids.includes(c.id!) ? ({ ...c, ...patch } as Customer) : c))
-    api.post(url, { customer_ids: ids, ...body })
-      .then(res => { const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
-        if (updated) setCustomers(prev => prev.map(c => (ids.includes(c.id!) && !updated.has(c.id)) ? ({ ...c, ...snap.get(c.id) } as Customer) : c))
-        onSuccess(updated ? updated.size : ids.length) })
-      .catch(() => { setCustomers(prev => prev.map(c => ids.includes(c.id!) ? ({ ...c, ...snap.get(c.id) } as Customer) : c)); notify('error', t('bulk.mutateError')) })
-    setSelectedIds(new Set())
-  }
-  const bulkSetOwner  = (user: AppUser)   => bulkMutate({ url: '/customers/bulk/owner', body: { owner_id: user.id },
-    patch: { owner: user.name, ownerId: user.id, ownerInitials: initialsOf(user.name), ownerColor: user.avatar_color ?? null },
-    keys: ['owner', 'ownerId', 'ownerInitials', 'ownerColor'], onSuccess: n => notify('success', t('bulk.ownerChanged', { name: user.name, count: n })) })
-  const bulkSetStatus = (status: string) => bulkMutate({ url: '/customers/bulk/status', body: { status },
-    patch: { status, statusLabel: statusMeta(status).label, statusColor: statusMeta(status).color }, keys: ['status', 'statusLabel', 'statusColor'],
-    onSuccess: n => notify('success', t('bulk.statusChanged', { value: statusMeta(status).label, count: n })) })
-
-  const selectedTags = useMemo(() => {
-    const set = new Set<string>()
-    customers.forEach(c => { if (c.id != null && selectedIds.has(c.id)) (c.tags as string[] ?? []).forEach(tg => set.add(tg)) })
-    return [...set]
-  }, [customers, selectedIds])
-
-  const bulkAddTag = (tag: string) => {
-    const t2 = (tag ?? '').trim(); if (!t2) return
-    const ids = [...selectedIds]
-    const changed = customers.filter(c => ids.includes(c.id!) && !(c.tags ?? []).includes(t2)).map(c => c.id)
-    setCustomers(prev => prev.map(c => changed.includes(c.id) ? { ...c, tags: [...(c.tags ?? []), t2] } : c))
-    api.post('/customers/bulk/tags', { customer_ids: ids, tag: t2 })
-      .then(() => notify('success', t('bulk.tagAdded', { tag: t2, count: changed.length })))
-      .catch(() => { setCustomers(prev => prev.map(c => changed.includes(c.id) ? { ...c, tags: (c.tags ?? []).filter(x => x !== t2) } : c)); notify('error', t('bulk.mutateError')) })
-    setSelectedIds(new Set())
-  }
-  const bulkRemoveTag = (tag: string) => {
-    const ids = [...selectedIds]
-    const changed = customers.filter(c => ids.includes(c.id!) && (c.tags ?? []).includes(tag)).map(c => c.id)
-    setCustomers(prev => prev.map(c => changed.includes(c.id) ? { ...c, tags: (c.tags ?? []).filter(x => x !== tag) } : c))
-    api.post('/customers/bulk/tags/remove', { customer_ids: ids, tag })
-      .then(() => notify('success', t('bulk.tagRemoved', { tag, count: changed.length })))
-      .catch(() => { setCustomers(prev => prev.map(c => changed.includes(c.id) ? { ...c, tags: [...(c.tags ?? []), tag] } : c)); notify('error', t('bulk.mutateError')) })
-    setSelectedIds(new Set())
-  }
-  const bulkAddNote = (text: string) => {
-    const ids = [...selectedIds]; if (!ids.length || !text.trim()) return
-    api.post('/customers/bulk/notes', { customer_ids: ids, text: text.trim() })
-      .then(res => notify('success', t('bulk.noteAdded', { count: Array.isArray(res.data?.updated) ? res.data.updated.length : ids.length })))
-      .catch(() => notify('error', t('bulk.mutateError')))
-    setSelectedIds(new Set())
-  }
-  const bulkArchive = () => {
-    const ids = [...selectedIds]; if (!ids.length) return
-    if (!window.confirm(t('bulk.archiveConfirm', { count: ids.length }))) return
-    api.post('/customers/bulk/archive', { customer_ids: ids })
-      .then(res => { const archived: Id[] = Array.isArray(res.data?.archived) ? res.data.archived : ids; const set = new Set(archived)
-        setCustomers(prev => prev.filter(c => !set.has(c.id!))); setTotal(tt => Math.max(0, tt - archived.length))
-        notify('success', t('bulk.archived', { count: archived.length })) })
-      .catch(() => notify('error', t('bulk.archiveError')))
-    setSelectedIds(new Set())
-  }
-
   return (
     <>
-      {addOpen && <AddCustomerModal onClose={() => setAddOpen(false)} onCreate={handleCreate} users={users} statuses={statuses} />}
+      {addOpen && <AddCustomerModal onClose={() => setAddOpen(false)} onCreate={form => { setAddOpen(false); handleCreate(form) }} users={users} statuses={statuses} />}
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
@@ -340,7 +170,7 @@ export default function CustomersPage() {
               border: `1px solid ${actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)'}` }}>
               {actionMsg.type === 'error' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
               <span style={{ flex: 1 }}>{actionMsg.text}</span>
-              <button onClick={() => setActionMsg(null)} style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 2 }}><X size={13} /></button>
+              <button onClick={() => setActionMsg(null)} aria-label={t('common:close')} style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 2 }}><X size={13} /></button>
             </div>
           )}
 
