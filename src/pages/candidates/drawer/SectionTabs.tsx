@@ -41,9 +41,10 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const e = raw as { id?: Id; title?: string; function_title?: string; company?: string; employer?: string; location?: string; start?: string; start_date?: string; end?: string; end_date?: string; current?: boolean; period?: string }
         const start = e.start ?? e.start_date, end = e.end ?? e.end_date
-        // Date range in DD-MM-YYYY; an open (current) job shows "– Heden".
+        // Date range in DD-MM-YYYY; an open (current) job shows "– Heden" — but only
+        // with a start date, so an unknown start never renders a dangling "– Heden".
         const range = e.current
-          ? `${fmt(start)} – ${t('addFields.present')}`
+          ? (fmt(start) ? `${fmt(start)} – ${t('addFields.present')}` : t('addFields.present'))
           : (e.period ?? [fmt(start), fmt(end)].filter(Boolean).join(' – '))
         return (
           <div key={e.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
@@ -82,9 +83,10 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
         const o = raw as { id?: Id; title?: string; education?: string; school?: string; institution?: string; start?: string; start_date?: string; end?: string; end_date?: string; inProgress?: boolean; in_progress?: boolean; issued?: string; issue_date?: string; period?: string; year?: string }
         const start = o.start ?? o.start_date, end = o.end ?? o.end_date
         const inProgress = o.inProgress ?? o.in_progress
-        // "Nog in opleiding" shows "– Heden"; otherwise the start–end range (DD-MM-YYYY).
+        // In progress: "start – Heden" with a start, else just "Nog in opleiding"
+        // (no dangling dash); otherwise the start–end range (DD-MM-YYYY).
         const range = o.period ?? (inProgress
-          ? `${fmt(start)} – ${t('addFields.present')}`
+          ? (fmt(start) ? `${fmt(start)} – ${t('addFields.present')}` : t('addFields.inProgress'))
           : [fmt(start), fmt(end)].filter(Boolean).join(' – '))
         const issued = fmt(o.issued ?? o.issue_date)
         return (

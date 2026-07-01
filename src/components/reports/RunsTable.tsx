@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X,
          Zap, Clock, Users, AlertTriangle } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
-import api from '@/lib/api'
+import { useReportList } from './useReportList'
 import { formatDT, formatDuration, StatusBadge } from './runFormat'
 import type { RunRow, ReportFilterGroup, SortState } from '@/types/reports'
 
@@ -166,8 +166,8 @@ const COL_KEYS = [
 export default function RunsTable() {
   const { t } = useTranslation('reports')
   const COLS = COL_KEYS.map(c => ({ ...c, label: t(`runs.cols.${c.tKey}`) }))
-  const [rows,    setRows]    = useState<RunRow[]>([])
-  const [loading, setLoading] = useState(true)
+  // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
+  const { rows, loading } = useReportList<RunRow>('/workflow-runs')
   const [search,  setSearch]  = useState('')
   const [drill,   setDrill]   = useState<RunRow | null>(null)
   const [sort,    setSort]    = useState<SortState>({ key: 'started_at', dir: 'desc' })
@@ -175,13 +175,6 @@ export default function RunsTable() {
   const [selectedWorkflows,  setSelectedWorkflows]  = useState<Array<string | number>>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
-
-  useEffect(() => {
-    api.get('/workflow-runs')
-      .then(res => setRows(res.data?.data ?? res.data ?? []))
-      .catch(() => setRows([]))
-      .finally(() => setLoading(false))
-  }, [])
 
   const workflowOptions = useMemo(() =>
     [...new Set(rows.map(r => r.workflow_name).filter((x): x is string => Boolean(x)))].sort(), [rows])

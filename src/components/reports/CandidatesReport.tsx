@@ -6,9 +6,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
-import api from '@/lib/api'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import { useKpiSettings } from '@/lib/useKpiSettings'
+import { useReportCandidates } from './useReportCandidates'
 import type { ReportCandidate } from '@/types/reports'
 import type { ChartDatum } from '../charts/chartTypes'
 import {
@@ -45,35 +45,17 @@ export default function CandidatesReport() {
   const { t } = useTranslation('reports')
   const { candidates_per_page, top_cities_n } = useKpiSettings()
   // ── Data & filter state ───────────────────────────────────────────────────
-  const [candidates,          setCandidates]          = useState<ReportCandidate[]>([])
+  // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
+  const { candidates, loading, error } = useReportCandidates(candidates_per_page)
   const [selectedStatuses,    setSelectedStatuses]    = useState<string[]>(['actief'])
   const [selectedStatusesDEL] = useState<string[]>(['verwijderd'])
   const [selectedPositions,   setSelectedPositions]   = useState<string[]>([])
   const [selectedYear,        setSelectedYear]        = useState<number | null>(new Date().getFullYear())
   const [showPercent,         setShowPercent]         = useState(false)
-  const [loading,             setLoading]             = useState(true)
-  const [error,               setError]               = useState<string | null>(null)
   const [drillDown,           setDrillDown]           = useState<{ title: string; subtitle: string; candidates: ReportCandidate[] } | null>(null)
 
   // Registers filterGroups in the right sidebar via context
   const { registerFilters, unregisterFilters } = useRightPanel()
-
-  // ── Fetch data ────────────────────────────────────────────────────────────
-  const fetchCandidates = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const res  = await api.get(`/sm_candidates?per_page=${candidates_per_page}`)
-      const body = res.data
-      setCandidates(Array.isArray(body) ? body : (body?.data ?? []))
-    } catch {
-      setError(t('report.loadError'))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => { fetchCandidates() }, [])
 
   // ── Filtered datasets ─────────────────────────────────────────────────────
   const baseFiltered = candidates.filter(c => {
@@ -253,7 +235,7 @@ export default function CandidatesReport() {
         onDrillDown={(title, items) => openDrillDown(title, t('report.sub.kpi'), items)}
       />
 
-      {error && <ErrorBanner style={{ marginBottom: 24 }}>{error}</ErrorBanner>}
+      {error && <ErrorBanner style={{ marginBottom: 24 }}>{t('report.loadError')}</ErrorBanner>}
 
       {/* Grid layout for the cards */}
       {loading ? (

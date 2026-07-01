@@ -13,6 +13,7 @@ import { useAuth }            from '@/context/AuthContext'
 import api                    from '@/lib/api'
 import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '@/lib/usePageSize'
+import { useReportList }      from './useReportList'
 import type { MessageRow, ReportFilterGroup, SortState } from '@/types/reports'
 import { ChannelBadge, StatusBadge, SortIcon } from './messages/messageParts'
 import MessageDrawer from './messages/MessageDrawer'
@@ -34,8 +35,8 @@ const COL_KEYS = [
 export default function MessagesTable() {
   const { t } = useTranslation('reports')
   const COLS = COL_KEYS.map(c => ({ ...c, label: t(`messages.cols.${c.tKey}`) }))
-  const [rows,    setRows]    = useState<MessageRow[]>([])
-  const [loading, setLoading] = useState(true)
+  // Data (fetch) lives in the shared hook (§3); this component only derives + renders.
+  const { rows, loading } = useReportList<MessageRow>('/messages')
   const [search,  setSearch]  = useState('')
   const [drill,   setDrill]   = useState<MessageRow | null>(null)
   const [sort,    setSort]    = useState<SortState>({ key: 'sent_at', dir: 'desc' })
@@ -48,13 +49,6 @@ export default function MessagesTable() {
   const { refreshUser } = useAuth() ?? {}
   const [page,     setPage]     = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
-
-  useEffect(() => {
-    api.get('/messages')
-      .then(res => setRows(res.data?.data ?? res.data ?? []))
-      .catch(() => setRows([]))
-      .finally(() => setLoading(false))
-  }, [])
 
   const channelOptions  = useMemo(() => [...new Set(rows.map(r => r.channel).filter((x): x is string => Boolean(x)))].sort(), [rows])
   const statusOptions   = useMemo(() => [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
