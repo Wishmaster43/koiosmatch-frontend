@@ -41,11 +41,11 @@ function FieldInput({ f, value, onChange, values }: {
       {f.label}
     </label>
   )
-  if (f.textarea) return <TextArea placeholder={labelText} value={value as string | undefined} onChange={onChange} />
+  if (f.textarea) return <TextArea placeholder={labelText} value={value as string | undefined} onChange={onChange} rows={2} />
   if (f.date)     return <DateField placeholder={labelText} value={value as string | undefined} onChange={onChange} />
   if (f.options)  return (
     <select value={(value as string) ?? ''} onChange={e => onChange(e.target.value)}
-      style={{ width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }}>
+      style={{ width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }}>
       <option value="">{label}</option>
       {f.options.map(o => {
         const val = typeof o === 'string' ? o : o.value

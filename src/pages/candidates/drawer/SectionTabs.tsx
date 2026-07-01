@@ -25,9 +25,10 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
   const { formatDate } = useDateFormat()
   // Format a date to DD-MM-YYYY, or '' when empty (so ranges don't show a stray dash).
   const fmt = (d?: string) => (d ? formatDate(d) : '')
+  // Compact layout: title+company and start+end each pair onto one row.
   const fields = [
-    { key: 'title',    label: t('addFields.functionTitle') },
-    { key: 'company',  label: t('addFields.company') },
+    { key: 'title',    label: t('addFields.functionTitle'), half: true },
+    { key: 'company',  label: t('addFields.company'),        half: true },
     { key: 'location', label: t('addFields.location') },
     { key: 'start',    label: t('addFields.startDate'), half: true, date: true },
     { key: 'end',      label: t('addFields.endDate'),   half: true, date: true },
@@ -63,15 +64,16 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const fmt = (d?: string) => (d ? formatDate(d) : '')
+  // Compact layout: diploma+school and start+end each pair; textarea goes last.
   const fields = [
-    { key: 'title',     label: t('addFields.diploma') },
-    { key: 'school',    label: t('addFields.institution') },
+    { key: 'title',     label: t('addFields.diploma'),     half: true },
+    { key: 'school',    label: t('addFields.institution'), half: true },
     { key: 'start',     label: t('addFields.startDate'), half: true, date: true },
     { key: 'end',       label: t('addFields.endDate'),   half: true, date: true,
       altLabel: t('addFields.expectedEnd'), altLabelWhen: 'inProgress' },
     { key: 'inProgress', label: t('addFields.inProgress'), checkbox: true },
-    { key: 'desc',      label: t('addFields.description'), textarea: true },
     { key: 'issued',    label: t('addFields.issueDate'), date: true },
+    { key: 'desc',      label: t('addFields.description'), textarea: true },
   ]
   return (
     <AddableSection title={t('sections.education')} emptyText={t('sections.educationEmpty')}
@@ -104,9 +106,10 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const fmt = (d?: string) => (d ? formatDate(d) : '')
+  // Compact layout: name+org pair; issued–expires stay a "tot" pair (separator).
   const fields = [
-    { key: 'name',    label: t('addFields.certName') },
-    { key: 'org',     label: t('addFields.organisation') },
+    { key: 'name',    label: t('addFields.certName'),     half: true },
+    { key: 'org',     label: t('addFields.organisation'), half: true },
     { key: 'issued',  label: t('addFields.issueDate'), separator: true, date: true },
     { key: 'expires', label: t('addFields.expiryDate'), date: true },
     { key: 'license', label: t('addFields.licenseNumber') },
