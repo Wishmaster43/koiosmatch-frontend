@@ -20,7 +20,11 @@
     "intakeOverTime": "Inflow over time",
     "intakeWeekly": "Candidate & application inflow (weekly)",
     "comingSoon": "Chart appears once the time-series data is available.",
-    "series": { "candidates": "Candidates", "applications": "Applications", "matches": "Matches" }
+    "series": {
+      "candidates": "Candidates",
+      "applications": "Applications",
+      "matches": "Matches"
+    }
   },
   "block": {
     "recentCandidates": "Recent candidates",
@@ -37,5 +41,14 @@
   },
   "run": {
     "processed": "{{count}} processed"
+  },
+  "switcher": {
+    "label": "Dashboard view"
+  },
+  "types": {
+    "management": "Management",
+    "recruiter": "Recruiter",
+    "planner": "Planner",
+    "readonly": "Read-only"
   }
 }

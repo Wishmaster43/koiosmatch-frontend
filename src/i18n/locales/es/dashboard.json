@@ -20,7 +20,11 @@
     "intakeOverTime": "Entradas a lo largo del tiempo",
     "intakeWeekly": "Entrada de candidatos y candidaturas (semanal)",
     "comingSoon": "El gráfico aparecerá cuando los datos de series temporales estén disponibles.",
-    "series": { "candidates": "Candidatos", "applications": "Candidaturas", "matches": "Matches" }
+    "series": {
+      "candidates": "Candidatos",
+      "applications": "Candidaturas",
+      "matches": "Matches"
+    }
   },
   "block": {
     "recentCandidates": "Candidatos recientes",
@@ -37,5 +41,14 @@
   },
   "run": {
     "processed": "{{count}} procesados"
+  },
+  "switcher": {
+    "label": "Vista del panel"
+  },
+  "types": {
+    "management": "Dirección",
+    "recruiter": "Reclutador",
+    "planner": "Planificador",
+    "readonly": "Solo lectura"
   }
 }

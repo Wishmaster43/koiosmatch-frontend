@@ -20,7 +20,11 @@
     "intakeOverTime": "Zulauf über Zeit",
     "intakeWeekly": "Kandidaten- & Bewerbungszulauf (wöchentlich)",
     "comingSoon": "Diagramm erscheint, sobald die Zeitreihendaten verfügbar sind.",
-    "series": { "candidates": "Kandidaten", "applications": "Bewerbungen", "matches": "Matches" }
+    "series": {
+      "candidates": "Kandidaten",
+      "applications": "Bewerbungen",
+      "matches": "Matches"
+    }
   },
   "block": {
     "recentCandidates": "Neueste Kandidaten",
@@ -37,5 +41,14 @@
   },
   "run": {
     "processed": "{{count}} verarbeitet"
+  },
+  "switcher": {
+    "label": "Dashboard-Ansicht"
+  },
+  "types": {
+    "management": "Management",
+    "recruiter": "Recruiter",
+    "planner": "Planer",
+    "readonly": "Schreibgeschützt"
   }
 }

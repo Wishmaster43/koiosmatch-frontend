@@ -20,7 +20,11 @@
     "intakeOverTime": "Flux dans le temps",
     "intakeWeekly": "Flux de candidats et candidatures (hebdo)",
     "comingSoon": "Le graphique apparaîtra dès que les données de séries temporelles seront disponibles.",
-    "series": { "candidates": "Candidats", "applications": "Candidatures", "matches": "Matchs" }
+    "series": {
+      "candidates": "Candidats",
+      "applications": "Candidatures",
+      "matches": "Matchs"
+    }
   },
   "block": {
     "recentCandidates": "Candidats récents",
@@ -37,5 +41,14 @@
   },
   "run": {
     "processed": "{{count}} traités"
+  },
+  "switcher": {
+    "label": "Vue du tableau de bord"
+  },
+  "types": {
+    "management": "Direction",
+    "recruiter": "Recruteur",
+    "planner": "Planificateur",
+    "readonly": "Lecture seule"
   }
 }

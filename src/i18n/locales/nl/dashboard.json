@@ -20,7 +20,11 @@
     "intakeOverTime": "Instroom over tijd",
     "intakeWeekly": "Instroom kandidaten & sollicitaties (per week)",
     "comingSoon": "Grafiek volgt zodra de tijdreeks-data beschikbaar is.",
-    "series": { "candidates": "Kandidaten", "applications": "Sollicitaties", "matches": "Matches" }
+    "series": {
+      "candidates": "Kandidaten",
+      "applications": "Sollicitaties",
+      "matches": "Matches"
+    }
   },
   "block": {
     "recentCandidates": "Recente kandidaten",
@@ -37,5 +41,14 @@
   },
   "run": {
     "processed": "{{count}} verwerkt"
+  },
+  "switcher": {
+    "label": "Dashboard-weergave"
+  },
+  "types": {
+    "management": "Management",
+    "recruiter": "Recruiter",
+    "planner": "Planner",
+    "readonly": "Alleen-lezen"
   }
 }

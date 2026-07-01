@@ -18,6 +18,9 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 import type {
   DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow,
 } from '@/types/dashboard'
+import DashboardSwitcher from './DashboardSwitcher'
+import { visibleBlock, DASHBOARD_TYPES } from './templates'
+import type { DashboardType } from './templates'
 
 // Recent lists, AI runs and conversations are now live (GET /dashboard, C-30/C-31).
 // The demo placeholder arrays were removed — data is mapped from the endpoint below.
@@ -107,7 +110,17 @@ const PERIODES: Array<[string, string]> = [
 
 export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, params?: Record<string, unknown>) => void }) {
   const { t } = useTranslation('dashboard')
-  const { activeTenant } = useAuth() ?? {}
+  const auth = useAuth()
+  const { activeTenant } = auth ?? {}
+  // Role → dashboard type (C-35/B-27). Super-admin + the management view may switch
+  // between all templates; everyone else is pinned to their own. Blocks are gated
+  // per type below — the management/'*' template is the full (unchanged) dashboard.
+  const myType = (auth?.dashboardType?.() ?? 'readonly') as DashboardType
+  const canSwitch = (auth?.isSuperAdmin?.() ?? false) || myType === 'management'
+  // Switchers default to the full (management) view so nothing is hidden from them.
+  const [activeType, setActiveType] = useState<DashboardType>(canSwitch ? 'management' : myType)
+  const allowedTypes: DashboardType[] = canSwitch ? [...DASHBOARD_TYPES] : [myType]
+  const vis = (id: string) => visibleBlock(activeType, id)
 
   // Live total — same source as the Candidates table (/candidates meta.total).
   const { data: candidateTotal, isLoading: countLoading } = useCandidateCount()
@@ -247,18 +260,25 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, 
 
   // KPI strip — only metrics we have live data for (no faked numbers).
   const kpis = [
-    { label: t('kpi.candidatesTotal'), value: candidateTotalLabel, sub: t('kpi.inAts'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: Users, onClick: () => onNavigate?.('candidates') },
-    { label: t('kpi.notContacted6m'), value: num(att.stale_6m), sub: t('kpi.attentionNeeded'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'stale6m' }) },
-    { label: t('kpi.neverContacted'), value: num(att.never_contacted), sub: t('kpi.attentionNeeded'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'neverContacted' }) },
-    { label: t('kpi.openTasks'), value: num(att.tasks), sub: t('kpi.linkedToCandidates'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: CheckCircle, onClick: () => onNavigate?.('tasks', { status: 'open' }) },
+    { id: 'kpi.candidates', label: t('kpi.candidatesTotal'), value: candidateTotalLabel, sub: t('kpi.inAts'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: Users, onClick: () => onNavigate?.('candidates') },
+    { id: 'kpi.stale', label: t('kpi.notContacted6m'), value: num(att.stale_6m), sub: t('kpi.attentionNeeded'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'stale6m' }) },
+    { id: 'kpi.never', label: t('kpi.neverContacted'), value: num(att.never_contacted), sub: t('kpi.attentionNeeded'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'neverContacted' }) },
+    { id: 'kpi.tasks', label: t('kpi.openTasks'), value: num(att.tasks), sub: t('kpi.linkedToCandidates'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: CheckCircle, onClick: () => onNavigate?.('tasks', { status: 'open' }) },
     ...(opp ? [
-      { label: t('kpi.opportunities'), value: num(opp.total), sub: t('kpi.openOpportunities'), color: '#8B5CF6', bg: '#F3E8FF', Icon: Target, onClick: () => onNavigate?.('opportunities', { stage: 'open' }) },
-      { label: t('kpi.pipelineValue'), value: opp.pipeline_value != null ? eur(opp.pipeline_value) : '—', sub: t('kpi.sumOpenOpps'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Euro, onClick: () => onNavigate?.('opportunities', { stage: 'open' }) },
+      { id: 'kpi.opps', label: t('kpi.opportunities'), value: num(opp.total), sub: t('kpi.openOpportunities'), color: '#8B5CF6', bg: '#F3E8FF', Icon: Target, onClick: () => onNavigate?.('opportunities', { stage: 'open' }) },
+      { id: 'kpi.pipeline', label: t('kpi.pipelineValue'), value: opp.pipeline_value != null ? eur(opp.pipeline_value) : '—', sub: t('kpi.sumOpenOpps'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Euro, onClick: () => onNavigate?.('opportunities', { stage: 'open' }) },
     ] : []),
-  ]
+  ].filter(k => vis(k.id))
 
   return (
     <div style={{ padding: 24, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
+
+      {/* Dashboard switcher — super-admin + management may switch between role views. */}
+      {allowedTypes.length > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
+          <DashboardSwitcher value={activeType} options={allowedTypes} onChange={setActiveType} />
+        </div>
+      )}
 
       {/* KPI-strip — live data */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
@@ -266,22 +286,27 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, 
       </div>
 
       {/* Charts rij 1 — verdelingen uit /candidates/stats */}
+      {(vis('chart.status') || vis('chart.recruiter')) && (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-        <Panel><PieChartCard title={t('chart.byStatus')} data={statusData} colors={statusData.map(d => d.color) as string[]} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { status: fv(d) } : undefined)} /></Panel>
-        <Panel><PieChartCard title={t('chart.byRecruiter')} data={recruiterData} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { owner: fv(d) } : undefined)} /></Panel>
+        {vis('chart.status') && <Panel><PieChartCard title={t('chart.byStatus')} data={statusData} colors={statusData.map(d => d.color) as string[]} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { status: fv(d) } : undefined)} /></Panel>}
+        {vis('chart.recruiter') && <Panel><PieChartCard title={t('chart.byRecruiter')} data={recruiterData} onItemClick={(d) => onNavigate?.('candidates', fv(d) ? { owner: fv(d) } : undefined)} /></Panel>}
       </div>
+      )}
 
       {/* Charts rij 2 — funnel + (kansen indien beschikbaar) */}
+      {(vis('chart.funnel') || vis('chart.oppStage')) && (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-        <Panel><BarChartCard title={t('chart.funnel')} data={funnelData} colors={funnelData.map(d => d.color) as string[]} showAverage onBarClick={(d) => onNavigate?.('applications', fv(d) ? { stage: fv(d) } : undefined)} /></Panel>
-        <Panel>
+        {vis('chart.funnel') && <Panel><BarChartCard title={t('chart.funnel')} data={funnelData} colors={funnelData.map(d => d.color) as string[]} showAverage onBarClick={(d) => onNavigate?.('applications', fv(d) ? { stage: fv(d) } : undefined)} /></Panel>}
+        {vis('chart.oppStage') && <Panel>
           {opp
             ? <PieChartCard title={t('chart.byStage')} data={oppStageData} colors={oppStageData.map(d => d.color) as string[]} onItemClick={(d) => onNavigate?.('opportunities', fv(d) ? { stage: fv(d) } : undefined)} />
             : <LineChartCard title={t('chart.intakeOverTime')} data={[]} unit={t('common:units.candidates')} />}
-        </Panel>
+        </Panel>}
       </div>
+      )}
 
       {/* Wekelijkse instroom — gegroepeerde bar: kandidaten · sollicitaties · matches (C-31). */}
+      {vis('chart.weekly') && (
       <div style={{ marginBottom: 16 }}>
         <Panel>
           <WeeklyBarChartCard title={t('chart.intakeWeekly')} data={trendData as unknown as ChartDatum[]} series={trendSeries}
@@ -292,9 +317,12 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, 
             }} />
         </Panel>
       </div>
+      )}
 
       {/* Recente lijsten — demo-data tot er een feed is (B-22/C-30) */}
+      {(vis('list.candidates') || vis('list.applications')) && (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        {vis('list.candidates') && (
         <Block title={t('block.recentCandidates')} action={t('action.allCandidates')} onAction={() => onNavigate?.('candidates')}>
           {recentCandidates.map((c, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
@@ -309,7 +337,9 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, 
             </div>
           ))}
         </Block>
+        )}
 
+        {vis('list.applications') && (
         <Block title={t('block.recentApplications')} action={t('action.allApplications')} onAction={() => onNavigate?.('applications')}>
           {recentApplications.map((a, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
@@ -323,10 +353,14 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, 
             </div>
           ))}
         </Block>
+        )}
       </div>
+      )}
 
       {/* Leads + (AI-runs / conversaties) — getoond op data-aanwezigheid (backend gate't per module) */}
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${1 + (showRuns ? 1 : 0) + (showConv ? 1 : 0)}, 1fr)`, gap: 16 }}>
+      {(vis('list.leads') || (showRuns && vis('list.runs')) || (showConv && vis('list.conversations'))) && (
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${((vis('list.leads') ? 1 : 0) + (showRuns && vis('list.runs') ? 1 : 0) + (showConv && vis('list.conversations') ? 1 : 0)) || 1}, 1fr)`, gap: 16 }}>
+        {vis('list.leads') && (
         <Block title={t('block.leadsPipeline')} action={t('action.allCustomers')} onAction={() => onNavigate?.('customers')}>
           {recentLeads.map((l, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
@@ -340,8 +374,9 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, 
             </div>
           ))}
         </Block>
+        )}
 
-        {showRuns && (
+        {showRuns && vis('list.runs') && (
           <Block title={t('block.recentRuns')} action={t('action.all')} onAction={() => onNavigate?.('details.runs')}>
             {runs.map((r, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
@@ -361,7 +396,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, 
           </Block>
         )}
 
-        {showConv && (
+        {showConv && vis('list.conversations') && (
           <Block title={t('block.recentConversations')} action={t('action.all')} onAction={() => onNavigate?.('details.messages')}>
             {conversations.map((c, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
@@ -377,6 +412,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, 
           </Block>
         )}
       </div>
+      )}
     </div>
   )
 }
