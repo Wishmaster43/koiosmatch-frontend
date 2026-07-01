@@ -7,13 +7,12 @@ import { useState, useEffect, useMemo } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Pencil } from 'lucide-react'
-import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import NewUserModal from './NewUserModal'
 import EditUserModal from './EditUserModal'
+import { useUsersData } from './hooks/useUsersData'
 import { RoleBadge, RoleSelector, EditableAvatar, isSuperAdminUser, roleName } from './usersParts'
-import type { AvailableRole } from './usersParts'
 import type { ManagedUser } from '@/types/api'
 
 const TH: CSSProperties = {
@@ -26,26 +25,12 @@ const TD: CSSProperties = { padding: '10px 14px', borderBottom: '1px solid #F9FA
 export default function UsersPage() {
   const { t } = useTranslation('users')
   const { user: me } = useAuth() ?? {}
-  const [users,        setUsers]        = useState<ManagedUser[]>([])
-  const [roles,        setRoles]        = useState<AvailableRole[]>([])
-  const [loading,      setLoading]      = useState(true)
-  const [error,        setError]        = useState<string | null>(null)
+  // Data layer (load + optimistic mutations) lives in the hook; the page stays presentational.
+  const { users, roles, loading, error, setColor, addUser, updateUser } = useUsersData()
   const [showCreate,   setShowCreate]   = useState(false)
   const [editingUser,  setEditingUser]  = useState<ManagedUser | null>(null)
   const [selectedRole, setSelectedRole] = useState<string[]>([])
   const { registerFilters, unregisterFilters } = useRightPanel()
-
-  useEffect(() => {
-    Promise.all([api.get('/users'), api.get('/roles')])
-      .then(([usersRes, rolesRes]) => {
-        const list = usersRes.data?.data ?? usersRes.data ?? []
-        setUsers(Array.isArray(list) ? list : [])
-        const roleList = rolesRes.data ?? []
-        setRoles(roleList.filter((r: AvailableRole) => r.name !== 'super_admin' && r.name !== 'tenant_admin'))
-      })
-      .catch(err => setError(err?.response?.status === 403 ? t('noAccess') : t('loadError')))
-      .finally(() => setLoading(false))
-  }, [])
 
   const roleOptions = useMemo(() =>
     [...new Set(users.flatMap(u => (u.roles ?? []).map(roleName)))]
@@ -66,17 +51,6 @@ export default function UsersPage() {
     if (!selectedRole.length) return users
     return users.filter(u => selectedRole.some(r => (u.roles ?? []).some(x => roleName(x) === r)))
   }, [users, selectedRole])
-
-  // Optimistically set a user's icon colour (PATCH /users/{id}); revert on failure.
-  const setColor = async (u: ManagedUser, color: string | null) => {
-    const prev = u.avatar_color ?? null
-    setUsers(list => list.map(x => x.id === u.id ? { ...x, avatar_color: color } : x))
-    try {
-      await api.patch(`/users/${u.id}`, { avatar_color: color })
-    } catch {
-      setUsers(list => list.map(x => x.id === u.id ? { ...x, avatar_color: prev } : x))
-    }
-  }
 
   return (
     <div style={{ padding: 24 }}>
@@ -183,7 +157,7 @@ export default function UsersPage() {
                       <RoleSelector
                         user={u}
                         availableRoles={roles}
-                        onChanged={updated => setUsers(prev => prev.map(x => x.id === updated.id ? updated : x))}
+                        onChanged={updateUser}
                       />
                     )}
                   </td>
@@ -197,17 +171,14 @@ export default function UsersPage() {
       {showCreate && (
         <NewUserModal
           onClose={() => setShowCreate(false)}
-          onCreated={u => setUsers(prev => [u, ...prev])}
+          onCreated={addUser}
         />
       )}
       {editingUser && (
         <EditUserModal
           user={editingUser}
           onClose={() => setEditingUser(null)}
-          onSaved={updated => {
-            setUsers(prev => prev.map(x => x.id === updated.id ? updated : x))
-            setEditingUser(null)
-          }}
+          onSaved={updated => { updateUser(updated); setEditingUser(null) }}
         />
       )}
     </div>
