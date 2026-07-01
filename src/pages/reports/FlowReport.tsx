@@ -7,13 +7,15 @@
  * `current_count` pipeline occupancy. Phases come from tenant funnel lookups, so we
  * never hardcode stage names — we key on `key` and render `label`.
  */
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
+import ReportDrillDrawer from './ReportDrillDrawer'
+import type { DrillSpec } from './ReportDrillDrawer'
 import { useFlowReport } from './useFlowReport'
-import type { ReportPeriod } from '@/types/analytics'
+import type { ReportPeriod, FlowPhase } from '@/types/analytics'
 
 // One funnel row: label, proportional bar, count and (cohort only) conversion + avg days.
 function PhaseRow({ label, value, max, index, conversion, avgDays }: {
@@ -63,11 +65,43 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
     return first > 0 ? last / first : null
   }, [cohortReady, phases])
 
+  // Drill-down: which KPI is being explained (null = closed).
+  const [drill, setDrill] = useState<DrillSpec | null>(null)
+  const pct = (v: number | null) => (v != null ? `${Math.round(v * 100)}%` : undefined)
+
+  // One clickable KPI block per funnel phase; clicking explains the number
+  // (breakdown + the applications behind it + Koios advice).
+  const phaseKpi = (p: FlowPhase): KpiSpec => {
+    const value = cohortReady ? p.reached_count : p.current_count
+    return {
+      key: p.key, label: p.label, value, sub: pct(p.conversion_rate),
+      active: drill?.rowsParams?.phase === p.key,
+      onClick: () => setDrill({
+        title: p.label, value, subtitle: t(`period.${period}`),
+        breakdown: [
+          { label: t('flow.reached'), value: p.reached_count },
+          { label: t('flow.current'), value: p.current_count },
+          ...(p.conversion_rate != null ? [{ label: t('flow.conversion'), value: pct(p.conversion_rate)! }] : []),
+        ],
+        rowsEndpoint: '/reports/flow/drill', rowsParams: { phase: p.key, period },
+        adviceEndpoint: '/reports/flow/advice', adviceParams: { phase: p.key, period },
+      }),
+    }
+  }
+
   const kpis: KpiSpec[] = [
-    { key: 'total', label: t('flow.total'), value: data?.total ?? 0 },
+    { key: 'total', label: t('flow.total'), value: data?.total ?? 0,
+      active: drill != null && drill.rowsParams?.phase == null && drill.rowsEndpoint === '/reports/flow/drill',
+      onClick: () => setDrill({
+        title: t('flow.total'), value: data?.total ?? 0, subtitle: t(`period.${period}`),
+        breakdown: phases.map(p => ({ label: p.label, value: cohortReady ? p.reached_count : p.current_count })),
+        rowsEndpoint: '/reports/flow/drill', rowsParams: { period },
+        adviceEndpoint: '/reports/flow/advice', adviceParams: { period },
+      }) },
     ...(overallConv != null
       ? [{ key: 'conv', label: t('flow.overallConversion'), value: `${Math.round(overallConv * 100)}%` } as KpiSpec]
       : []),
+    ...phases.map(phaseKpi),
   ]
 
   return (
@@ -112,19 +146,24 @@ export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod;
               <span style={{ width: 120, flexShrink: 0 }} />
             </div>
             {phases.map((p, i) => (
-              <PhaseRow
-                key={p.key}
-                label={p.label}
-                value={cohortReady ? p.reached_count : p.current_count}
-                max={max}
-                index={i}
-                conversion={cohortReady && p.conversion_rate != null ? `${Math.round(p.conversion_rate * 100)}%` : null}
-                avgDays={p.avg_days_in_phase != null ? t('flow.avgDays', { days: Math.round(p.avg_days_in_phase) }) : null}
-              />
+              <div key={p.key} onClick={phaseKpi(p).onClick} style={{ cursor: 'pointer' }}
+                   title={t('drill.breakdown')}>
+                <PhaseRow
+                  label={p.label}
+                  value={cohortReady ? p.reached_count : p.current_count}
+                  max={max}
+                  index={i}
+                  conversion={cohortReady && p.conversion_rate != null ? `${Math.round(p.conversion_rate * 100)}%` : null}
+                  avgDays={p.avg_days_in_phase != null ? t('flow.avgDays', { days: Math.round(p.avg_days_in_phase) }) : null}
+                />
+              </div>
             ))}
           </>
         )}
       </div>
+
+      {/* Dynamic drill-down: explains the clicked number + Koios AI advice */}
+      <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />
     </div>
   )
 }

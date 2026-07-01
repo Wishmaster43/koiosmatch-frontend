@@ -1,5 +1,13 @@
 {
   "title": "Informes",
+  "drill": {
+    "breakdown": "Desglose",
+    "records": "Registros subyacentes",
+    "loading": "Cargando…",
+    "noRecords": "Sin registros subyacentes.",
+    "koios": "Consejo de Koios AI",
+    "noAdvice": "Koios aún no tiene consejo para este número."
+  },
   "tabs": {
     "flow": "Flujo",
     "recruiters": "Reclutadores",

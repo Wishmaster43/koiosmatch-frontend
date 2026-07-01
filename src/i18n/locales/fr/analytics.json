@@ -1,5 +1,13 @@
 {
   "title": "Rapports",
+  "drill": {
+    "breakdown": "Répartition",
+    "records": "Enregistrements sous-jacents",
+    "loading": "Chargement…",
+    "noRecords": "Aucun enregistrement sous-jacent.",
+    "koios": "Conseil Koios AI",
+    "noAdvice": "Koios n'a pas encore de conseil pour ce chiffre."
+  },
   "tabs": {
     "flow": "Flux",
     "recruiters": "Recruteurs",

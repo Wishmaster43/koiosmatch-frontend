@@ -1,5 +1,13 @@
 {
   "title": "Rapporten",
+  "drill": {
+    "breakdown": "Opbouw",
+    "records": "Onderliggende records",
+    "loading": "Laden…",
+    "noRecords": "Geen onderliggende records.",
+    "koios": "Koios AI-advies",
+    "noAdvice": "Koios heeft nog geen advies voor dit getal."
+  },
   "tabs": {
     "flow": "Flow",
     "recruiters": "Recruiters",

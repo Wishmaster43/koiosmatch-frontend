@@ -1,5 +1,13 @@
 {
   "title": "Reports",
+  "drill": {
+    "breakdown": "Breakdown",
+    "records": "Underlying records",
+    "loading": "Loading…",
+    "noRecords": "No underlying records.",
+    "koios": "Koios AI advice",
+    "noAdvice": "Koios has no advice for this number yet."
+  },
   "tabs": {
     "flow": "Flow",
     "recruiters": "Recruiters",

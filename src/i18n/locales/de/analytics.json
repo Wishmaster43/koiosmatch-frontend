@@ -1,5 +1,13 @@
 {
   "title": "Berichte",
+  "drill": {
+    "breakdown": "Aufschlüsselung",
+    "records": "Zugrunde liegende Datensätze",
+    "loading": "Laden…",
+    "noRecords": "Keine zugrunde liegenden Datensätze.",
+    "koios": "Koios KI-Rat",
+    "noAdvice": "Koios hat noch keinen Rat zu dieser Zahl."
+  },
   "tabs": {
     "flow": "Flow",
     "recruiters": "Recruiter",
