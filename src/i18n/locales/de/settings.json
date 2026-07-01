@@ -131,10 +131,14 @@
     "task_statuses": "Status",
     "task_types": "Aktivitätstypen",
     "task_priorities": "Prioritäten",
+    "task_display": "Tabellenansicht",
     "document_types": "Dokumenttypen",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Pflichtfelder",
-    "application_display": "Tabellenansicht"
+    "application_display": "Tabellenansicht",
+    "functions": "Funktionen",
+    "customer_display": "Tabellenanzeige",
+    "vacancy_app_defaults": "Bewerbungseinstellungen"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -367,7 +371,9 @@
     "educationAdd": "Niveau hinzufügen",
     "channelsTitle": "Jobbörsen",
     "channelsSubtitle": "Verwalte die Jobbörsen, auf denen du deine Stellen veröffentlichen kannst.",
-    "channelsAdd": "Jobbörse hinzufügen"
+    "channelsAdd": "Jobbörse hinzufügen",
+    "appDefaultsTitle": "Bewerbungseinstellungen",
+    "appDefaultsSubtitle": "Der Standard, den eine neue Stelle übernimmt. Pro Stelle im Drawer anpassbar."
   },
   "rejection": {
     "title": "Ablehnungsgründe",
@@ -1182,6 +1188,21 @@
     "prioritySubtitle": "Verwalte die Prioritäten deiner Aufgaben (niedrig, normal, hoch).",
     "priorityAdd": "Priorität hinzufügen"
   },
+  "taskDisplay": {
+    "title": "Tabellenansicht",
+    "subtitle": "Pro Spalte: farbige Labels oder Klartext. Das Aufgaben-Board behält seine Farben immer.",
+    "fields": {
+      "task_table_color_status": {
+        "label": "Status"
+      },
+      "task_table_color_priority": {
+        "label": "Priorität"
+      },
+      "task_table_color_type": {
+        "label": "Typ"
+      }
+    }
+  },
   "assessment": {
     "title": "Bewertungskriterien",
     "subtitle": "Wiederverwendbare Kriteriengruppen, die Koios AI zur Bewertung von Kandidaten nutzt. Verknüpfe eine Gruppe mit einer Stelle und passe sie je Stelle an.",
@@ -1293,5 +1314,21 @@
     "freeEntry": "Freie Eingabe erlauben",
     "freeEntryHint": "An: Recruiter können eine eigene Funktion eingeben (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
     "confirmFreeEntry": "Bist du sicher? Freie Eingabe erlaubt Funktionen außerhalb der Liste — das kann die Datenqualität senken."
+  },
+  "customerDisplay": {
+    "title": "Tabellenanzeige",
+    "subtitle": "Pro Spalte: farbige Labels oder einfacher Text. Die KPI-Diagramme behalten immer ihre Farben.",
+    "fields": {
+      "customer_table_color_status": {
+        "label": "Status"
+      },
+      "customer_table_color_koios": {
+        "label": "Koios AI"
+      },
+      "customer_table_color_owner": {
+        "label": "Eigentümerfarbe",
+        "description": "An = der Eigentümer-Avatar nutzt die Farbe des Account-Managers. Aus = neutrales Grau."
+      }
+    }
   }
 }

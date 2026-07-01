@@ -84,7 +84,8 @@
     "save": "Enregistrer",
     "cancel": "Annuler",
     "manualNote": "Ajusté manuellement · IA : {{score}}%",
-    "detailsSoon": "Le détail des critères apparaît ici une fois le scoring configuré."
+    "detailsSoon": "Le détail des critères apparaît ici une fois le scoring configuré.",
+    "weightLabel": "Pondération"
   },
   "profile": {
     "function": "Fonction",

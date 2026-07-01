@@ -84,7 +84,8 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "manualNote": "Ajustado manualmente · IA: {{score}}%",
-    "detailsSoon": "El desglose de criterios aparece aquí una vez configurada la puntuación."
+    "detailsSoon": "El desglose de criterios aparece aquí una vez configurada la puntuación.",
+    "weightLabel": "Ponderación"
   },
   "profile": {
     "function": "Función",

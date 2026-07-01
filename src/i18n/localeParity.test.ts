@@ -3,33 +3,41 @@
  * nl is the reference; en/de/fr/es must contain every nl key. This makes an
  * out-of-parity locale a failing test instead of a silent Dutch/English island —
  * "half-translated is worse than untranslated" must never regress again.
+ *
+ * Loads the JSON via Vite's import.meta.glob (no node fs) so tsc and vitest agree.
  */
 import { describe, it, expect } from 'vitest'
-import fs from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const LOCALES_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), 'locales')
-const REF = 'nl'
-const TARGETS = ['en', 'de', 'fr', 'es'] as const
+type Json = { [k: string]: unknown }
 
 // Flatten a nested translation object to dotted key paths (arrays are leaves).
-type Json = { [k: string]: unknown }
 const flat = (o: Json, pre = ''): string[] =>
   Object.entries(o).flatMap(([k, v]) =>
     v && typeof v === 'object' && !Array.isArray(v) ? flat(v as Json, pre + k + '.') : [pre + k])
 
-const load = (loc: string, file: string): Json =>
-  JSON.parse(fs.readFileSync(path.join(LOCALES_DIR, loc, file), 'utf8'))
+// Every locale JSON, keyed by its path './locales/<loc>/<file>.json'.
+const modules = import.meta.glob('./locales/*/*.json', { eager: true, import: 'default' }) as Record<string, Json>
+
+const REF = 'nl'
+const TARGETS = ['en', 'de', 'fr', 'es'] as const
+
+// Group the loaded modules by locale → file.
+const byLoc: Record<string, Record<string, Json>> = {}
+for (const [p, mod] of Object.entries(modules)) {
+  const m = p.match(/\/locales\/([^/]+)\/([^/]+)$/)
+  if (!m) continue
+  ;(byLoc[m[1]] ??= {})[m[2]] = mod
+}
 
 describe('i18n locale parity', () => {
-  const files = fs.readdirSync(path.join(LOCALES_DIR, REF)).filter(f => f.endsWith('.json'))
-
-  for (const file of files) {
-    const refKeys = flat(load(REF, file))
+  const refFiles = byLoc[REF] ?? {}
+  for (const file of Object.keys(refFiles)) {
+    const refKeys = flat(refFiles[file])
     for (const loc of TARGETS) {
       it(`${loc}/${file} contains every ${REF} key`, () => {
-        const keys = new Set(flat(load(loc, file)))
+        const target = byLoc[loc]?.[file]
+        expect(target, `${loc}/${file} is missing entirely`).toBeTruthy()
+        const keys = new Set(flat(target ?? {}))
         const missing = refKeys.filter(k => !keys.has(k))
         expect(missing, `missing in ${loc}/${file}: ${missing.join(', ')}`).toEqual([])
       })

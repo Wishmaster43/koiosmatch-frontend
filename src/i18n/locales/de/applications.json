@@ -84,7 +84,8 @@
     "save": "Speichern",
     "cancel": "Abbrechen",
     "manualNote": "Manuell angepasst · KI: {{score}}%",
-    "detailsSoon": "Die Kriterienaufschlüsselung erscheint hier, sobald das Scoring konfiguriert ist."
+    "detailsSoon": "Die Kriterienaufschlüsselung erscheint hier, sobald das Scoring konfiguriert ist.",
+    "weightLabel": "Gewichtung"
   },
   "profile": {
     "function": "Funktion",

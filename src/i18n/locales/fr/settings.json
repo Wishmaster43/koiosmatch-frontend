@@ -131,10 +131,14 @@
     "task_statuses": "Statuts",
     "task_types": "Types d'activité",
     "task_priorities": "Priorités",
+    "task_display": "Affichage tableau",
     "document_types": "Types de document",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Champs requis",
-    "application_display": "Affichage du tableau"
+    "application_display": "Affichage du tableau",
+    "functions": "Fonctions",
+    "customer_display": "Affichage du tableau",
+    "vacancy_app_defaults": "Paramètres de candidature"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -367,7 +371,9 @@
     "educationAdd": "Ajouter un niveau",
     "channelsTitle": "Sites d'emploi",
     "channelsSubtitle": "Gérez les sites d'emploi où publier vos postes.",
-    "channelsAdd": "Ajouter un site d'emploi"
+    "channelsAdd": "Ajouter un site d'emploi",
+    "appDefaultsTitle": "Paramètres de candidature",
+    "appDefaultsSubtitle": "La valeur par défaut héritée par une nouvelle offre. Ajustable par offre dans le tiroir."
   },
   "rejection": {
     "title": "Motifs de refus",
@@ -1182,6 +1188,21 @@
     "prioritySubtitle": "Gérez les priorités de vos tâches (basse, normale, haute).",
     "priorityAdd": "Ajouter une priorité"
   },
+  "taskDisplay": {
+    "title": "Affichage tableau",
+    "subtitle": "Par colonne : libellés colorés ou texte simple. Le tableau des tâches garde toujours ses couleurs.",
+    "fields": {
+      "task_table_color_status": {
+        "label": "Statut"
+      },
+      "task_table_color_priority": {
+        "label": "Priorité"
+      },
+      "task_table_color_type": {
+        "label": "Type"
+      }
+    }
+  },
   "assessment": {
     "title": "Critères d'évaluation",
     "subtitle": "Groupes de critères réutilisables que Koios AI utilise pour évaluer les candidats. Associez un groupe à un poste et ajustez-le par poste.",
@@ -1293,5 +1314,21 @@
     "freeEntry": "Autoriser la saisie libre",
     "freeEntryHint": "Activé : les recruteurs peuvent saisir leur propre fonction (combobox). Désactivé : choisir uniquement dans la liste.",
     "confirmFreeEntry": "Êtes-vous sûr ? La saisie libre autorise des fonctions hors liste — cela peut réduire la qualité des données."
+  },
+  "customerDisplay": {
+    "title": "Affichage du tableau",
+    "subtitle": "Par colonne : libellés colorés ou texte simple. Les graphiques KPI gardent toujours leurs couleurs.",
+    "fields": {
+      "customer_table_color_status": {
+        "label": "Statut"
+      },
+      "customer_table_color_koios": {
+        "label": "Koios AI"
+      },
+      "customer_table_color_owner": {
+        "label": "Couleur du gestionnaire",
+        "description": "Activé = l'avatar du gestionnaire utilise sa couleur. Désactivé = gris neutre."
+      }
+    }
   }
 }

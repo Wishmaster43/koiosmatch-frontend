@@ -131,10 +131,14 @@
     "task_statuses": "Estados",
     "task_types": "Tipos de actividad",
     "task_priorities": "Prioridades",
+    "task_display": "Vista de tabla",
     "document_types": "Tipos de documento",
     "candidate_phases": "Fase",
     "candidate_required_fields": "Campos obligatorios",
-    "application_display": "Vista de tabla"
+    "application_display": "Vista de tabla",
+    "functions": "Funciones",
+    "customer_display": "Vista de tabla",
+    "vacancy_app_defaults": "Ajustes de candidatura"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -367,7 +371,9 @@
     "educationAdd": "Añadir nivel",
     "channelsTitle": "Portales de empleo",
     "channelsSubtitle": "Gestiona los portales de empleo donde publicar tus vacantes.",
-    "channelsAdd": "Añadir portal de empleo"
+    "channelsAdd": "Añadir portal de empleo",
+    "appDefaultsTitle": "Ajustes de candidatura",
+    "appDefaultsSubtitle": "El valor predeterminado que hereda una nueva vacante. Ajustable por vacante en el panel."
   },
   "rejection": {
     "title": "Motivos de rechazo",
@@ -1182,6 +1188,21 @@
     "prioritySubtitle": "Gestiona las prioridades de tus tareas (baja, normal, alta).",
     "priorityAdd": "Añadir prioridad"
   },
+  "taskDisplay": {
+    "title": "Vista de tabla",
+    "subtitle": "Por columna: etiquetas de color o texto simple. El tablero de tareas mantiene siempre sus colores.",
+    "fields": {
+      "task_table_color_status": {
+        "label": "Estado"
+      },
+      "task_table_color_priority": {
+        "label": "Prioridad"
+      },
+      "task_table_color_type": {
+        "label": "Tipo"
+      }
+    }
+  },
   "assessment": {
     "title": "Criterios de evaluación",
     "subtitle": "Grupos de criterios reutilizables que Koios AI usa para evaluar candidatos. Asocia un grupo a una vacante y ajústalo por vacante.",
@@ -1293,5 +1314,21 @@
     "freeEntry": "Permitir entrada libre",
     "freeEntryHint": "Activado: los reclutadores pueden escribir su propia función (combobox). Desactivado: solo elegir de la lista.",
     "confirmFreeEntry": "¿Seguro? La entrada libre permite funciones fuera de la lista, lo que puede reducir la calidad de los datos."
+  },
+  "customerDisplay": {
+    "title": "Vista de tabla",
+    "subtitle": "Por columna: etiquetas con color o texto simple. Los gráficos KPI siempre mantienen sus colores.",
+    "fields": {
+      "customer_table_color_status": {
+        "label": "Estado"
+      },
+      "customer_table_color_koios": {
+        "label": "Koios AI"
+      },
+      "customer_table_color_owner": {
+        "label": "Color del gestor",
+        "description": "Activado = el avatar del gestor usa su color. Desactivado = gris neutro."
+      }
+    }
   }
 }
