@@ -266,6 +266,18 @@ LEVER: consistente chips/knoppen/typografie + lijst toegevoegde i18n-keys + geë
 **✅ Gedaan in deze review:** tiptap dubbele `underline`-extensie verwijderd (`RichTextEditor.tsx`) — de
 `Duplicate extension names found: ['underline']`-warning is weg.
 
+### B-32 · Settings-personalisatie: opschonen + ontbrekende entiteit-tabs + taal-vlag (review 2026-07-02)
+> Danny's review-doorloop van Settings → Personalisatie. Lane = **settings (2e-Claude)**; `settings/registry.jsx`.
+- [ ] **`billing_pay` verwijderen** (`settings/registry.jsx:236-239`) — geen billing-functionaliteit; "doen we niks mee".
+- [ ] **Ontbrekende personalisatie-sub-tabs** (blueprint-pariteit — elke entiteit dezelfde surface, §3A):
+      **Taken** (task-statuses/-types/-priorities-lookups bestaan al, alleen niet ontsloten) · **Bellijsten/Outreach**
+      (kanaal- + per-target-status-lookups, nieuwe entiteit K-23/C-18b) · **Matches** (min. tabelweergave-kleurtoggles;
+      het match-**profiel** leeft op de vacature (K-26) → verwijs ernaar i.p.v. dupliceren).
+- [ ] **Taal-vlag/emoji** op de `languages`-lookup: optioneel **tenant-configureerbaar emoji-veld** (bv. 🇳🇱),
+      overal getoond **naast** de taalnaam — nooit vlag-only (a11y; **taal≠land**, dus de tenant kiest de emoji
+      i.p.v. een opgelegde landvlag → lost het "welke vlag voor Engels/Arabisch?"-probleem op). Technisch goedkoop
+      (unicode-emoji, geen assets). BE: `emoji`/`flag`-kolom op de languages-lookup (+ seed).
+
 ---
 
 ## C. Backend — open taken
