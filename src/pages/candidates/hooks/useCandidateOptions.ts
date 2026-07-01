@@ -5,7 +5,6 @@
  * page when stats is unavailable. Pure derivation from data + lookups.
  */
 import { useMemo, useState } from 'react'
-import type { TFunction } from 'i18next'
 import { metaOf, optsFrom, isStale, isNeverContacted, isNoFollowup } from '../data/candidatesShared'
 import { NL_PROVINCES } from '../drawer/constants'
 import type { Candidate, CandidateStats } from '@/types/candidate'
@@ -21,10 +20,10 @@ interface UseCandidateOptionsParams {
   statuses: LookupOption[]
   funnelTypes: LookupOption[]
   candidateTypes: LookupOption[]
-  t: TFunction
+  genders: LookupOption[]
 }
 
-export function useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, t }: UseCandidateOptionsParams) {
+export function useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders }: UseCandidateOptionsParams) {
   // Status / funnel / owner options come from stats (whole filtered set); fall
   // back to page-based counts when stats is unavailable.
   const statusOptions = useMemo(() =>
@@ -50,13 +49,9 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
     candidates.forEach(c => { if (c.ownerId) (m[c.ownerId] ??= { value: c.ownerId, label: c.owner || '—', count: 0 }).count++ })
     return Object.values(m)
   }, [stats, candidates])
-  // Server-side filters whose option-lists aren't in stats: gender + province
-  // use fixed lists; title is page-derived until a dedicated options endpoint.
-  const genderOptions   = useMemo(() => [
-    { value: 'male',   label: t('modal.gender.male') },
-    { value: 'female', label: t('modal.gender.female') },
-    { value: 'other',  label: t('modal.gender.other') },
-  ], [t])
+  // Gender options come from the /genders lookup (CFG-1); province is a fixed list;
+  // title is page-derived until a dedicated options endpoint exists.
+  const genderOptions   = useMemo(() => genders.map(g => ({ value: g.value, label: g.label })), [genders])
   const provinceOptions = useMemo(() => NL_PROVINCES.map(p => ({ value: p, label: p })), [])
   const titleOptions    = useMemo(() => optsFrom(candidates.map(c => c.title).filter(Boolean)), [candidates])
   const locationOptions = useMemo(() => (locations ?? []).map(l => ({ value: l.id, label: l.name })).filter(o => o.value != null), [locations])

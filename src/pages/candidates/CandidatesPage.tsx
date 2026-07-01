@@ -12,6 +12,7 @@ import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
+import { useGenders } from '@/lib/useGenders'
 import { useUsers } from '@/lib/queries'
 import CandidateDrawerJs from './CandidateDrawer'
 import AddCandidateModal from './AddCandidateModal'
@@ -49,6 +50,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const { hasPermission, user } = useAuth() as unknown as { hasPermission: (p: string) => boolean; user: { default_per_page?: number } | null }
   const { t } = useTranslation('candidates')
   const { candidateTypes, funnelTypes, statuses, phases } = useLookups()
+  const { genders } = useGenders()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { registerFilters, unregisterFilters } = useRightPanel() as { registerFilters: (id: string, groups: unknown) => void; unregisterFilters: (id: string) => void }
 
@@ -130,7 +132,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     genderOptions, provinceOptions, titleOptions, locationOptions,
     statusData, funnelData, rcData,
     staleCount, neverContactedCount, noFollowupCount, intakeCount, activeConvCount, tasksCount,
-  } = useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, t })
+  } = useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders })
 
   const tog = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
   // Klik-op-chart → zet precies één waarde, of wis bij nogmaals klikken (toggle).
