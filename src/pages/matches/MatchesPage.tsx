@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useRightPanel } from '@/context/RightPanelContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import MatchesTable from './MatchesTable'
@@ -24,8 +25,12 @@ export default function MatchesPage() {
   const user = auth?.user
   // Coupling is authorization-gated in the UI; the backend re-checks (§7).
   const hasPermission = auth?.hasPermission ?? (() => false)
+  // Right-panel filter state: archived is off by default (§3B — archived matches
+  // stay searchable but out of the default view so KPI totals drop).
+  const [showArchived, setShowArchived] = useState(false)
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
-  const { rows, loading, error, addMatch } = useMatches()
+  const { rows, loading, error, addMatch } = useMatches(showArchived)
+  const { registerFilters, unregisterFilters } = useRightPanel()
   const [page,        setPage]        = useState(1)
   const [pageSize,    setPageSize]    = useState(() => user?.default_per_page ?? 50)
   const [stageFilter, setStageFilter] = useState<string[]>([])
@@ -55,9 +60,33 @@ export default function MatchesPage() {
     return Object.values(m)
   }, [rows])
 
+  // Multi-select toggle for the right-panel filter groups (add/remove a value).
+  const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string | number) =>
+    set(p => p.includes(String(v)) ? p.filter(x => x !== String(v)) : [...p, String(v)])
+
+  // Right-panel filters: status (stage) + owner + a "show archived" toggle. The
+  // same stageFilter/ownerFilter also drive the donuts, so both stay in sync.
+  const filterGroups = useMemo(() => [
+    { key: 'stage', label: t('filters.stage'), selected: stageFilter,
+      options: stageData.map(d => ({ value: d.key, label: d.name, count: d.value })),
+      onToggle: tog(setStageFilter) },
+    { key: 'owner', label: t('filters.owner'), selected: ownerFilter,
+      options: ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })),
+      onToggle: tog(setOwnerFilter) },
+    { key: 'visibility', label: t('filters.visibility'), selected: showArchived ? ['archived'] : [],
+      options: [{ value: 'archived', label: t('filters.showArchived') }],
+      onToggle: () => setShowArchived(v => !v) },
+  ], [t, stageFilter, ownerFilter, showArchived, stageData, ownerData])
+
+  // Register/unregister the filters in the right panel.
+  useEffect(() => {
+    registerFilters('matches-page', filterGroups)
+    return () => unregisterFilters('matches-page')
+  }, [filterGroups, registerFilters, unregisterFilters])
+
   // Reset to the first page and clear the selection whenever a filter changes
   // (kept out of the memo — setting state during render can loop).
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter, showArchived])
 
   // Filter the visible rows by donut selection.
   const filteredAll = useMemo(() => {

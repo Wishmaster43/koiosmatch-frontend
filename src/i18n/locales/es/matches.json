@@ -69,5 +69,11 @@
     "coupleQueued": "{{count}} match(es) en cola para vincular con {{target}}.",
     "coupleUnavailable": "La vinculación con el backoffice aún no está disponible.",
     "noPermission": "No tienes permiso para acciones masivas."
+  },
+  "filters": {
+    "stage": "Fase",
+    "owner": "Responsable",
+    "visibility": "Visibilidad",
+    "showArchived": "Mostrar archivados"
   }
 }

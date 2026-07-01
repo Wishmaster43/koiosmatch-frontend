@@ -69,5 +69,11 @@
     "coupleQueued": "{{count}} match(es) queued for coupling with {{target}}.",
     "coupleUnavailable": "Backoffice coupling isn't available yet.",
     "noPermission": "You don't have permission for bulk actions."
+  },
+  "filters": {
+    "stage": "Stage",
+    "owner": "Owner",
+    "visibility": "Visibility",
+    "showArchived": "Show archived"
   }
 }

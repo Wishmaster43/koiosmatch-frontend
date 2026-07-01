@@ -69,5 +69,11 @@
     "coupleQueued": "{{count}} match(es) in wachtrij gezet voor koppeling met {{target}}.",
     "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar.",
     "noPermission": "Je hebt geen rechten voor massa-acties."
+  },
+  "filters": {
+    "stage": "Fase",
+    "owner": "Eigenaar",
+    "visibility": "Zichtbaarheid",
+    "showArchived": "Toon gearchiveerd"
   }
 }

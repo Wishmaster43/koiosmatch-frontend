@@ -69,5 +69,11 @@
     "coupleQueued": "{{count}} Match(es) zur Kopplung mit {{target}} eingereiht.",
     "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar.",
     "noPermission": "Du hast keine Berechtigung für Massenaktionen."
+  },
+  "filters": {
+    "stage": "Phase",
+    "owner": "Inhaber",
+    "visibility": "Sichtbarkeit",
+    "showArchived": "Archivierte anzeigen"
   }
 }

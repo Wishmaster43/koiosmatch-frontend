@@ -27,19 +27,22 @@ function mapMatch(m: RawMatch): MatchRow {
 }
 
 // Match list state: rows (mapped) + loading + error. 404 = empty, not an error.
-export function useMatches() {
+export function useMatches(includeArchived = false) {
   const [rows,    setRows]    = useState<MatchRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
 
+  // Archived view asks the API for soft-deleted matches too (`?include_archived=1`);
+  // off by default so KPI totals drop and erased data stays hidden (§3B, AVG).
   useEffect(() => {
     let alive = true
-    api.get('/matches')
+    setLoading(true)
+    api.get(includeArchived ? '/matches?include_archived=1' : '/matches')
       .then(r => { if (alive) setRows((r.data?.data ?? r.data ?? []).map(mapMatch)) })
       .catch(e => { if (alive && e?.response?.status && e.response.status !== 404) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [])
+  }, [includeArchived])
 
   // Prepend a newly-created match so it shows immediately (optimistic; §3).
   const addMatch = (row: MatchRow) => setRows(prev => [row, ...prev])

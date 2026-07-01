@@ -69,5 +69,11 @@
     "coupleQueued": "{{count}} match(es) mis en file pour le couplage avec {{target}}.",
     "coupleUnavailable": "Le couplage backoffice n'est pas encore disponible.",
     "noPermission": "Vous n'avez pas l'autorisation pour les actions groupées."
+  },
+  "filters": {
+    "stage": "Phase",
+    "owner": "Responsable",
+    "visibility": "Visibilité",
+    "showArchived": "Afficher les archivés"
   }
 }
