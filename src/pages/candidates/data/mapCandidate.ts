@@ -122,10 +122,27 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     koiosAdvice:     c.koios_advice ?? c.koiosAdvice ?? null,
 
     // ── Relations (detail only) — normalise snake_case → camelCase, newest first ──
-    experiences:     byNewest(c.experiences ?? c.work_experience ?? [],
-      e => e.current ? Infinity : Math.max(dateVal(e.end_date ?? e.end), dateVal(e.start_date ?? e.start))),
-    educations:      byNewest(c.educations ?? c.education ?? [],
-      e => e.in_progress ? Infinity : Math.max(dateVal(e.end_date ?? e.end), dateVal(e.issue_date ?? e.issued), dateVal(e.start_date ?? e.start))),
+    // Normalise to the UI camelCase shape (start/end/current/desc) alongside the raw
+    // snake_case, so read-mode AND the edit form (AddForm keys) share one shape.
+    experiences:     byNewest((c.experiences ?? c.work_experience ?? []).map(e => ({
+      ...e,
+      title:   e.title   ?? e.function_title,
+      company: e.company ?? e.employer,
+      start:   e.start   ?? e.start_date,
+      end:     e.end     ?? e.end_date,
+      current: e.current ?? false,
+      desc:    e.desc    ?? e.description,
+    })), e => e.current ? Infinity : Math.max(dateVal(e.end), dateVal(e.start))),
+    educations:      byNewest((c.educations ?? c.education ?? []).map(e => ({
+      ...e,
+      title:      e.title      ?? e.education,
+      school:     e.school     ?? e.institution,
+      start:      e.start      ?? e.start_date,
+      end:        e.end        ?? e.end_date,
+      inProgress: e.inProgress ?? e.in_progress ?? false,
+      issued:     e.issued     ?? e.issue_date,
+      desc:       e.desc       ?? e.description,
+    })), e => e.inProgress ? Infinity : Math.max(dateVal(e.end), dateVal(e.issued), dateVal(e.start))),
     languages:       (c.languages ?? []).map(l => ({
       ...l,
       spoken:  l.spoken  ?? l.spoken_level,
@@ -134,9 +151,12 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     certifications:  byNewest(
       (c.certifications ?? []).map(x => ({
         ...x,
+        name:    x.name    ?? x.title,
         org:     x.org     ?? x.organisation,
         issued:  x.issued  ?? x.issue_date,
         expires: x.expires ?? x.expiry_date,
+        license: x.license ?? x.license_number,
+        desc:    x.desc    ?? x.description,
       })),
       x => Math.max(dateVal(x.issued), dateVal(x.expires)),
     ),

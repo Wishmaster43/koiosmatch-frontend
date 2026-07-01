@@ -5,6 +5,7 @@
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import AddableSectionJs from '@/components/forms/AddableSection'
+import { useDateFormat } from '@/lib/datetime'
 import type { Id } from '@/types/common'
 
 // Relation items vary by backend version — kept loose at the prop boundary and
@@ -21,6 +22,9 @@ const AddableSection = AddableSectionJs as unknown as ComponentType<AnyProps>
 
 export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabProps) {
   const { t } = useTranslation('candidates')
+  const { formatDate } = useDateFormat()
+  // Format a date to DD-MM-YYYY, or '' when empty (so ranges don't show a stray dash).
+  const fmt = (d?: string) => (d ? formatDate(d) : '')
   const fields = [
     { key: 'title',    label: t('addFields.functionTitle') },
     { key: 'company',  label: t('addFields.company') },
@@ -35,6 +39,11 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const e = raw as { id?: Id; title?: string; function_title?: string; company?: string; employer?: string; location?: string; start?: string; start_date?: string; end?: string; end_date?: string; current?: boolean; period?: string }
+        const start = e.start ?? e.start_date, end = e.end ?? e.end_date
+        // Date range in DD-MM-YYYY; an open (current) job shows "– Heden".
+        const range = e.current
+          ? `${fmt(start)} – ${t('addFields.present')}`
+          : (e.period ?? [fmt(start), fmt(end)].filter(Boolean).join(' – '))
         return (
           <div key={e.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
@@ -42,11 +51,7 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{e.title ?? e.function_title}</div>
               {(e.company ?? e.employer) && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{e.company ?? e.employer}</div>}
               {e.location && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{e.location}</div>}
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                {e.current
-                  ? `${e.start ?? e.start_date ?? ''} – ${t('addFields.present')}`
-                  : (e.period ?? [e.start ?? e.start_date, e.end ?? e.end_date].filter(Boolean).join(' – '))}
-              </div>
+              {range && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{range}</div>}
             </div>
           </div>
         )
@@ -56,6 +61,8 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
 
 export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProps) {
   const { t } = useTranslation('candidates')
+  const { formatDate } = useDateFormat()
+  const fmt = (d?: string) => (d ? formatDate(d) : '')
   const fields = [
     { key: 'title',     label: t('addFields.diploma') },
     { key: 'school',    label: t('addFields.institution') },
@@ -70,14 +77,22 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
     <AddableSection title={t('sections.education')} emptyText={t('sections.educationEmpty')}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
-        const o = raw as { id?: Id; title?: string; education?: string; school?: string; institution?: string; period?: string; year?: string }
+        const o = raw as { id?: Id; title?: string; education?: string; school?: string; institution?: string; start?: string; start_date?: string; end?: string; end_date?: string; inProgress?: boolean; in_progress?: boolean; issued?: string; issue_date?: string; period?: string; year?: string }
+        const start = o.start ?? o.start_date, end = o.end ?? o.end_date
+        const inProgress = o.inProgress ?? o.in_progress
+        // "Nog in opleiding" shows "– Heden"; otherwise the start–end range (DD-MM-YYYY).
+        const range = o.period ?? (inProgress
+          ? `${fmt(start)} – ${t('addFields.present')}`
+          : [fmt(start), fmt(end)].filter(Boolean).join(' – '))
+        const issued = fmt(o.issued ?? o.issue_date)
         return (
           <div key={o.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{o.title ?? o.education}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{o.school ?? o.institution}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{o.period ?? o.year}</div>
+              {(o.school ?? o.institution) && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{o.school ?? o.institution}</div>}
+              {range && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{range}</div>}
+              {issued && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('addFields.issueDate')}: {issued}</div>}
             </div>
           </div>
         )
@@ -87,6 +102,8 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
 
 export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTabProps) {
   const { t } = useTranslation('candidates')
+  const { formatDate } = useDateFormat()
+  const fmt = (d?: string) => (d ? formatDate(d) : '')
   const fields = [
     { key: 'name',    label: t('addFields.certName') },
     { key: 'org',     label: t('addFields.organisation') },
@@ -108,7 +125,7 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
               {cert.org && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{cert.org}</div>}
               {(cert.issued || cert.expires) && (
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                  {cert.issued && `${t('certified.issued')}: ${cert.issued}`}{cert.issued && cert.expires && ' · '}{cert.expires && `${t('certified.expires')}: ${cert.expires}`}
+                  {cert.issued && `${t('certified.issued')}: ${fmt(cert.issued)}`}{cert.issued && cert.expires && ' · '}{cert.expires && `${t('certified.expires')}: ${fmt(cert.expires)}`}
                 </div>
               )}
             </div>
