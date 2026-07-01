@@ -1,0 +1,19 @@
+#!/bin/sh
+# PROC-1 gate — no red main. Blocks a commit that breaks typecheck or lint (the
+# exact class of failure that slipped in on 2026-07-01: a file passing vitest but
+# breaking `tsc`). Runs the same checks as CI. Real emergency escape: --no-verify.
+#
+# Shared without husky: package.json's "prepare" points git at .githooks via
+# core.hooksPath, so every clone/install gets this gate.
+
+echo "▶ pre-commit: typecheck…"
+npm run --silent typecheck || {
+  echo "✗ tsc failed — fix the type errors before committing (or, only if you must: git commit --no-verify)"
+  exit 1
+}
+echo "▶ pre-commit: lint…"
+npm run --silent lint || {
+  echo "✗ eslint reported errors — fix them before committing"
+  exit 1
+}
+echo "✓ gate passed (tsc 0, lint 0 errors)"
