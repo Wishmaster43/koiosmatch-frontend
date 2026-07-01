@@ -96,6 +96,8 @@ export interface Customer {
   openVacanciesCount: number
   activeMatchesCount: number
   created: string
+  logo: string | null
+  koiosAdvice: { action?: string; label?: string; reason?: string } | null
 }
 
 /** Raw API contact (read defensively). */
@@ -145,5 +147,8 @@ export interface ApiCustomer {
   open_vacancies_count?: number; openVacanciesCount?: number
   active_matches_count?: number; activeMatchesCount?: number
   created_at?: string; created?: string
+  logo?: string | null; logo_url?: string | null
+  koios_advice?: { action?: string; label?: string; reason?: string } | null
+  koiosAdvice?: { action?: string; label?: string; reason?: string } | null
   [k: string]: unknown
 }

@@ -1,5 +1,6 @@
 import { bucketOfPhase } from './applicationsShared'
 import { initialsOf } from '@/lib/initials'
+import type { Id } from '@/types/common'
 import type {
   ApiApplication, Application, ApplicationDetail, ApiAppCandidate, ApiAppVacancy,
 } from '@/types/application'
@@ -16,7 +17,7 @@ export function mapApplication(a: ApiApplication = {}): Application {
   const candidateName = a.candidate_name ?? cand.name ?? (joined || '—')
 
   const vacancy: ApiAppVacancy = a.vacancy ?? {}
-  const owner: { name?: string; avatar_color?: string | null } = a.owner ?? {}
+  const owner: { id?: Id; name?: string; avatar_color?: string | null } = a.owner ?? {}
 
   // Phase carries its own label + colour from the backend lookup; the bucket is
   // derived from the phase key (falling back to an explicit `bucket` field).
@@ -36,6 +37,7 @@ export function mapApplication(a: ApiApplication = {}): Application {
     bucket: a.bucket ?? bucketOfPhase(phaseKey),
     source: a.source ?? a.source_name ?? '',
     owner: {
+      id: owner.id ?? a.owner_id ?? null,
       name: owner.name ?? a.owner_name ?? '',
       initials: initialsOf(owner.name ?? a.owner_name ?? ''),
       color: owner.avatar_color ?? null,

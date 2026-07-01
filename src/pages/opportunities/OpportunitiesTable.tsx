@@ -5,7 +5,7 @@ import { useLocale, useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
-import StatusPill from '@/components/ui/StatusPill'
+import { initialsOf } from '@/lib/initials'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
 
@@ -15,12 +15,20 @@ interface OpportunitiesTableProps {
   error?: unknown
   onRowClick?: (row: Opportunity) => void
   selectedId?: Id | null
+  selectable?: boolean
+  selectedIds?: Set<Id>
+  onToggleRow?: (id: Id) => void
+  onToggleAll?: (ids: Id[], allSelected: boolean) => void
   stickyHeader?: boolean
   scrollParentRef?: RefObject<HTMLElement | null>
 }
 
+// Calm neutral avatar tint — colour carries no meaning here, so all bubbles match
+// (mirrors the candidate table's default; per-initial colours would be noise).
+const NEUTRAL_AVATAR = '#9CA3AF'
+
 // OpportunitiesTable — declares columns only; the shared DataTable owns sorting + states.
-export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
+export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
   const { t } = useTranslation('opportunities')
   const locale = useLocale()
   const { formatDate } = useDateFormat()
@@ -32,33 +40,46 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
   )
 
   const columns: Column<Opportunity>[] = [
-    { key: 'title', header: t('cols.title'), sortable: true,
+    { key: 'title', header: t('cols.title'), sortable: true, sticky: true, width: 220,
       render: r => (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Avatar initials={r.initials} size={24} />
+          <Avatar initials={r.initials} size={24} color={NEUTRAL_AVATAR} soft />
           <span style={{ fontWeight: 500, color: 'var(--text)' }}>{r.title}</span>
         </span>
       ) },
     { key: 'client', header: t('cols.client'), sortable: true, cellStyle: { color: 'var(--text-muted)' } },
-    { key: 'stage',  header: t('cols.stage'),
+    { key: 'stage',  header: t('cols.stage'), sortable: true, sortValue: r => r.stage,
+      // Soft-chip convention (matches the candidate table): color+1A bg, color text, color+55 border.
       render: r => r.stage
-        ? <StatusPill label={r.stage} color={r.stageColor} />
+        ? <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
+            background: r.stageColor + '1A', color: r.stageColor, border: `1px solid ${r.stageColor}55` }}>{r.stage}</span>
         : <span style={{ color: 'var(--text-muted)' }}>—</span> },
     { key: 'value',  header: t('cols.value'), align: 'right', sortable: true, sortValue: r => r.value ?? -1,
       render: r => r.value == null
         ? <span style={{ color: 'var(--text-muted)' }}>—</span>
         : <span style={{ fontWeight: 600, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{money.format(r.value)}</span> },
-    { key: 'owner',  header: t('cols.owner'), sortable: true, cellStyle: { color: 'var(--text-muted)' } },
+    { key: 'owner',  header: t('cols.owner'), sortable: true, sortValue: r => r.owner,
+      render: r => r.owner
+        ? (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Avatar initials={initialsOf(r.owner)} size={18} color={NEUTRAL_AVATAR} soft />
+            <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.owner}</span>
+          </span>
+        )
+        : <span style={{ color: 'var(--text-muted)' }}>—</span> },
     { key: 'date',   header: t('cols.date'),  sortable: true, sortValue: r => r.date || '',
       render: r => <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDate(r.date)}</span> },
   ]
 
+  // No surface-card wrapper: the DataTable renders directly on the page background
+  // so the transparent rows + the sticky column's var(--bg) match (mirrors the
+  // candidate table). A wrapper with a different bg makes the sticky column mismatch.
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-      <DataTable columns={columns} rows={rows} loading={loading}
-        onRowClick={onRowClick} selectedId={selectedId}
-        loadingText={t('loading')} emptyText={error ? t('error') : t('empty')}
-        stickyHeader={stickyHeader} scrollParentRef={scrollParentRef} />
-    </div>
+    <DataTable columns={columns} rows={rows} loading={loading}
+      onRowClick={onRowClick} selectedId={selectedId}
+      selectable={selectable} selectedIds={selectedIds} onToggleRow={onToggleRow} onToggleAll={onToggleAll}
+      loadingText={t('loading')} emptyText={error ? t('error') : t('empty')}
+      stickyHeader={stickyHeader} scrollParentRef={scrollParentRef}
+      defaultSort={{ key: 'date', dir: 'desc' }} />
   )
 }

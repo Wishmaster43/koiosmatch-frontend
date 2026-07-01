@@ -291,15 +291,32 @@ Volledige taken-feature (kanban, lookups, comments, seeder). **Core = klaar** (i
 detail/update/links/comments/activity/bulk-archive live; e2e getest 2026-07-01).
 
 **Resterend (voedt de blueprint-gelijktrekking van B-20):**
-- ☐ **`GET /contacts` (platte tenant-lijst) — PRIORITEIT.** `CustomerContact` + genest
-  `GET /customers/{id}/contacts` bestaan al, maar geen tenant-brede platte lijst → de Taken-modal
-  contactpersoon-picker + `contact`-koppeling krijgen 404. Voeg `GET /contacts` toe (gepagineerd,
-  `{id, name, customer_id?, customer_name?}`, permissie `customers.view`).
-- ☐ *(optioneel)* **Tags op taken** — `tags` (JSON-array of `task_tags`) in de bestaande
-  `create_tasks`-migratie, `tags[]` in store/update, terug in `TaskListResource` + detail. FE voegt
-  dan een header-tag-editor toe (zoals kandidaat).
-- ☐ *(optioneel)* **Tabel-kleurtoggles** — generieke `Setting`-keys `task_table_color_status|priority|type`
-  (mirror `candidate_table_color_*`) door de settings-write-validatie laten + defaults seeden. Rest = FE.
+- ☐ **`GET /contacts` + `GET /departments` (platte tenant-lijsten) — PRIORITEIT.** `CustomerContact`
+  + genest `GET /customers/{id}/contacts` bestaan al, maar geen tenant-brede platte lijst → de
+  Taken-modal contactpersoon-picker + de `contact`/`department`-koppel-pickers krijgen 404. Voeg
+  `GET /contacts` en `GET /departments` toe (gepagineerd, `{id, name, customer_id?, customer_name?}`,
+  permissie `customers.view`). De overige 7 koppel-types werken al.
+- ✅ **Tags op taken — KLAAR (backend + FE, 2026-07-01).** `Task` had `tags` al (fillable + array-cast,
+  Store/Update valideren `tags[]`, resource geeft ze terug). FE: header-tag-editor in de drawer.
+- ✅ **Tabel-kleurtoggles — KLAAR (FE, 2026-07-01).** Via de generieke `Setting`-store (`POST /settings`),
+  schema `taskDisplay` + Settings → Taken → Tabelweergave; `task_table_color_status|priority|type` (default aan).
+- ℹ️ **Omschrijving = rich text (HTML).** FE slaat de omschrijving nu als HTML op (drawer + modal, zoals
+  candidate-summary); de `description`-tekstkolom houdt dit gewoon. Geen backend-wijziging nodig.
+
+### C-18a · Subtaken op een taak  *(NIEUW — beslissing Danny 2026-07-01: JA)*
+`tasks.parent_id` (nullable, self-FK) **of** een lichte `task_subtasks`-tabel in de bestaande
+`create_tasks`-migratie vouwen. Detail-endpoint geeft `subtasks: [{id,title,status(+is_done),due_date?}]`;
+store/update accepteert child-taken (of hergebruik `POST /tasks` met `parent_id`). FE toont een
+afvinkbare checklist in de drawer (P2, na backend).
+
+### C-18b · Bellijsten / Outreach-campagnes — eigen entiteit  *(NIEUW — beslissing Danny 2026-07-01)*
+Aparte entiteit (géén taak overladen): een **bellijst/campagne** die **meerdere kandidaten** bundelt met
+**per-kandidaat status** (te benaderen · benaderd · overgeslagen · beantwoord) en een **kanaal**
+(bellen · e-mail · WhatsApp). Gegenereerd **uit een talentpool** (`/pools`) of een selectie.
+Voorstel-tabellen: `outreach_campaigns` (`id, tenant_id, name, channel, source_pool_id?, owner_id, status,
+created_by`) + `outreach_targets` (`campaign_id, candidate_id, status, contacted_at?, note?`). Endpoints:
+CRUD `/outreach-campaigns` (+ genereren uit pool), `PATCH /outreach-targets/{id}` (per-kandidaat afvinken),
+stats. FE = nieuwe feature-page (mirror candidate-blueprint) + koppeling naar WhatsApp/e-mail. Groot; apart plannen.
 
 ### C-19 · Matches — tabel + endpoint + seeder
 `/matches` als eigen tabel of view over applications? Bevestigen.
@@ -348,6 +365,13 @@ De FE-`DetailsTab` is herbouwd naar het kandidaat-model; de mapper is leidend. V
 
 ### C-27 · Klanten — endpoints + sub-entiteiten + seeder
 Volledige CRUD + locaties/afdelingen/contactpersonen + 15–20 klanten geseed.
+- **Nog te leveren (frontend consumeert ze al, nette lege staat tot ze live zijn):**
+  `GET /customers/{id}/activity` (audit-trail voor de changelog-popover: `{id, description, author, created_at}`)
+  en `/customers/{id}/documents` (multipart POST + `PATCH {name}` + DELETE; rij `{id, name, type, size, url, created_at}`;
+  document-types via de bestaande `/document-types`-lookup). Spiegelt de kandidaat-endpoints.
+- **Optioneel op de `/customers`-rij:** `koios_advice {action,label,reason}` (voedt de Koios-adviescolom in
+  de klantentabel; kolom toont `—` tot het veld er is). Kleur-per-kolom = tenant-settings
+  `customer_table_color_{status,owner,koios}` (frontend-defaults, geen backend nodig).
 
 ### C-29 · Aangepaste velden + verplichte-velden-per-fase + duplicate/merge (kandidaat eerst) [BE]
 Uitgebreid 2026-06-29 (migraties gevouwen in `create_*`; modellen; seeders; API's):
@@ -529,6 +553,44 @@ op de backend:
 i.p.v. pagina-lokaal afgeleide KPI's — nodig zodra paginatie/scale telt.
 
 Hangt samen met **C-28** (opportunities-basis), **C-15/C-26** (bulk-contract), **C-16** (activity-read).
+
+### C-42 · Opportunities (Kansen) — zorg-detacherings-model (uren, looptijd, dienst/overeenkomst-type, org-hiërarchie, taken)
+**Doel:** de Kans van "€-deal" uitbreiden naar een echte zorg-detacherings-opportunity. Datamodelkeuzes met Danny
+(2026-07-01): **waarde (€) én uren los invoeren**; **looptijd = start- + einddatum** (want "kan verschillen", +
+optioneel snelkeuze-lookup); **dienst/sector** en **overeenkomsttype** als tenant-lookups; **org-koppeling**
+klant→locatie→afdeling→contactpersoon; **taken** zichtbaar op de Kans. FE is FE-first met seed-fallback gebouwd —
+persistentie/roundtrip van de nieuwe velden wacht op dit item.
+
+**1. Velden op `opportunities` (vouw in de bestaande `create_opportunities`-migratie — géén `add_*`):**
+`hours` (decimal, null), `hours_period` (enum/string: `week|month|total`, default `week`), `start_date` (date, null),
+`end_date` (date, null), `service_type_id` (FK `opportunity_service_types`, null), `agreement_type_id`
+(FK `opportunity_agreement_types`, null), `department_id` (FK `departments`, null), `contact_id` (FK `contacts`, null).
+`location_id` bestaat al. (`value`/`currency`/`expected_close_at` blijven.)
+
+**2. Lookups (tenant-scoped, geseed, in-use-protected → 409, reorderable — mirror `VacancyEmploymentType`):**
+- **`/opportunity-service-types`** — seed **Detachering · Zorg · Zorg-detachering**.
+- **`/opportunity-agreement-types`** — seed **Samenwerkingsovereenkomst · Mantelovereenkomst**.
+- (optioneel) **`/opportunity-contract-terms`** — seed **1 jaar · 3 jaar · Onbepaald · Anders** (snelkeuze die
+  start/eind vult; de datums blijven de bron van waarheid).
+
+**3. Org-hiërarchie (afhankelijke koppeling).** Kans → `customer_id`(✓) → `location_id`(✓) → **`department_id`** →
+**`contact_id`**. Lever per klant de sub-lijsten zodat de FE afhankelijke pickers kan tonen: `GET /customers/{id}/
+locations`, `…/departments` (per locatie), `…/contacts` (hangt op **C-27**). Resource geeft geneste
+`location`/`department`/`contact` (`{id,name}`) terug.
+
+**4. Taken op de Kans.** `opportunity_id` (of polymorf `taskable`) op `tasks` + **`GET /opportunities/{id}/tasks`**
+(hangt op **C-18**). FE hangt er een **Taken-tab** aan.
+
+**5. Resource + seeder.** `OpportunityResource` uitbreiden met alle velden + geneste dienst/overeenkomst/afdeling/
+contact + `hours`/`hours_period`/`start_date`/`end_date`. Seeder: zet op de 12 geseede kansen realistische uren,
+looptijd, dienst/overeenkomst-type, een afdeling+contact en 1–3 gekoppelde taken zodat de nieuwe kaarten/tab meteen
+data tonen.
+
+**FE-shape die gelezen wordt** (mapOpportunity, tolereert afwezig): `hours`, `hours_period`, `start_date`,
+`end_date`, `service_type{value,label,color}`/`service_type_id`, `agreement_type{…}`/`agreement_type_id`,
+`location{id,name}`, `department{id,name}`, `contact{id,name}`.
+
+Hangt samen met **C-28** (basis), **C-27** (klant-subentiteiten), **C-18** (taken), **C-41** (bulk/tags/activity).
 
 ---
 

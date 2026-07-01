@@ -29,5 +29,9 @@ export function normalizeOptions(raw: unknown, fallback: LookupOption[] | null =
       value: String(it.value ?? it.id ?? ''),
       label: String(it.label ?? it.name ?? it.value ?? ''),
       color: (it.color as string) ?? defaultColor,
+      // Pass terminal-stage flags through when the lookup carries them (e.g. the
+      // opportunity pipeline's won/lost stages); absent on lookups without them.
+      ...(it.is_won != null ? { isWon: Boolean(it.is_won) } : {}),
+      ...(it.is_lost != null ? { isLost: Boolean(it.is_lost) } : {}),
     }))
 }

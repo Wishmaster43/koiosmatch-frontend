@@ -6,12 +6,18 @@ import StatusPill from '@/components/ui/StatusPill'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useDateFormat } from '@/lib/datetime'
 
-// Match score as a soft-coloured percentage (green ≥75, amber ≥50, red below).
-function ScorePill({ value }: { value: number | null }) {
+// Plain-text cell style (used when a colour toggle is off).
+const plainCell = { color: 'var(--text)', fontSize: 12 }
+
+// Match score as a soft-coloured percentage (green ≥75, amber ≥50, red below);
+// `plain` renders it as neutral text when the colour toggle is off.
+function ScorePill({ value, plain }: { value: number | null; plain?: boolean }) {
   if (value == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-  const c = value >= 75 ? 'var(--color-success)' : value >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
-  return <span style={{ fontWeight: 600, color: c }}>{value}%</span>
+  const c = plain ? 'var(--text)' : value >= 75 ? 'var(--color-success)' : value >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
+  return <span style={{ fontWeight: plain ? 400 : 600, fontSize: plain ? 12 : undefined, color: c }}>{value}%</span>
 }
 
 interface ApplicationsTableProps {
@@ -21,21 +27,36 @@ interface ApplicationsTableProps {
   selectedId?: Id | null
   onSelect?: (row: Application) => void
   stickyHeader?: boolean
+  // Row selection (checkboxes) — driven by the page for the bulk action bar.
+  selectable?: boolean
+  selectedIds?: Set<Id>
+  onToggleRow?: (id: Id) => void
+  onToggleAll?: (ids: Id[], allSelected: boolean) => void
 }
 
 /**
  * ApplicationsTable — declares columns only; the shared DataTable owns sorting,
  * selection, hover and the loading/empty states. Mirrors MatchesTable.
  */
-export default function ApplicationsTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false }: ApplicationsTableProps) {
+export default function ApplicationsTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false,
+  selectable, selectedIds, onToggleRow, onToggleAll }: ApplicationsTableProps) {
   const { t } = useTranslation('applications')
+  const { formatDate } = useDateFormat()
+  // Tenant display settings (Settings → Applications → Table display). Coloured
+  // chips/score vs. plain text — one flag PER meaning-carrying column; all ON by default.
+  const settings = useAllSettings()
+  const colorScore  = getBoolSetting(settings, 'application_table_color_score', true)
+  const colorPhase  = getBoolSetting(settings, 'application_table_color_phase', true)
+  const colorStatus = getBoolSetting(settings, 'application_table_color_status', true)
+  const colorOwner  = getBoolSetting(settings, 'application_table_color_owner', true)
 
   const columns: Column<Application>[] = [
-    // Candidate — avatar + name.
+    // Candidate — avatar + name. Sticky first column (stays on horizontal scroll), like the candidates table.
     { key: 'candidate', header: t('cols.candidate'), sortable: true, sortValue: r => r.candidateName,
+      sticky: true, width: 200,
       render: r => (
         <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Avatar initials={r.candidateInitials} size={24} />
+          <Avatar initials={r.candidateInitials} size={24} soft />
           <span style={{ fontWeight: 500, color: 'var(--text)' }}>{r.candidateName}</span>
         </span>
       ) },
@@ -48,7 +69,7 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       ) },
     // Match score.
     { key: 'score', header: t('cols.score'), align: 'right', sortable: true,
-      sortValue: r => r.score ?? -1, render: r => <ScorePill value={r.score} /> },
+      sortValue: r => r.score ?? -1, render: r => <ScorePill value={r.score} plain={!colorScore} /> },
     // AI task — Koios mark + clamped text.
     { key: 'task', header: t('cols.task'),
       render: r => r.task ? (
@@ -59,24 +80,31 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           </span>
         </span>
       ) : <span style={{ color: 'var(--text-muted)' }}>—</span> },
-    // Funnel phase — soft pill in the phase colour.
+    // Funnel phase — soft pill in the phase colour (or plain text when the toggle is off).
     { key: 'phase', header: t('cols.phase'), sortable: true, sortValue: r => r.phaseLabel ?? '',
-      render: r => <StatusPill label={r.phaseLabel} color={r.phaseColor} /> },
+      render: r => colorPhase
+        ? <StatusPill label={r.phaseLabel} color={r.phaseColor} />
+        : <span style={plainCell}>{r.phaseLabel || '—'}</span> },
     { key: 'source', header: t('cols.source'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
+    // Created date — the table defaults to newest first.
+    { key: 'created', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.created ?? '',
+      cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.created ? formatDate(r.created) : '—' },
     // Owner — avatar + name.
     { key: 'owner', header: t('cols.owner'), sortable: true, sortValue: r => r.owner?.name,
       render: r => (
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Avatar initials={r.owner?.initials} size={22} color={r.owner?.color} />
+          <Avatar initials={r.owner?.initials} size={22} color={colorOwner ? r.owner?.color : '#9CA3AF'} soft />
           <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.owner?.name}</span>
         </span>
       ) },
     { key: 'client', header: t('cols.client'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
-    // Candidate lifecycle status — soft pill.
+    // Candidate lifecycle status — soft pill (or plain text when the toggle is off).
     { key: 'status', header: t('cols.status'), sortable: true, sortValue: r => r.candidateStatusLabel,
-      render: r => r.candidateStatusLabel
-        ? <StatusPill label={r.candidateStatusLabel} color={r.candidateStatusColor} />
-        : <span style={{ color: 'var(--text-muted)' }}>—</span> },
+      render: r => !r.candidateStatusLabel
+        ? <span style={{ color: 'var(--text-muted)' }}>—</span>
+        : colorStatus
+          ? <StatusPill label={r.candidateStatusLabel} color={r.candidateStatusColor} />
+          : <span style={plainCell}>{r.candidateStatusLabel}</span> },
   ]
 
   return (
@@ -89,6 +117,11 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       onRowClick={onSelect}
       selectedId={selectedId}
       stickyHeader={stickyHeader}
+      defaultSort={{ key: 'created', dir: 'desc' }}
+      selectable={selectable}
+      selectedIds={selectedIds}
+      onToggleRow={onToggleRow}
+      onToggleAll={onToggleAll}
     />
   )
 }

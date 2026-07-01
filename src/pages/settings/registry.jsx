@@ -37,7 +37,7 @@ import { LanguageListSettings, LanguageLevelSettings } from './sections/Language
 import GenderSettings from './sections/GenderSettings'
 import IndustrySettings from './sections/IndustrySettings'
 import FunctionsSettings from './sections/FunctionsSettings'
-import { VacancyStatusSettings, VacancyPhaseSettings, VacancyFieldsSettings, VacancyEmploymentTypeSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings } from './sections/VacancySettings'
+import { VacancyStatusSettings, VacancyPhaseSettings, VacancyFieldsSettings, VacancyEmploymentTypeSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
 import RejectionSettings from './sections/RejectionSettings'
@@ -64,6 +64,9 @@ import { BetaalmethodenSettings, AutoOpwaarderenSettings, GebruikSettings, Factu
 
 import { kpisLeads, kpisCandidates, kpisApplications, kpisCustomers } from './schemas/kpis'
 import candidateDisplay from './schemas/candidateDisplay'
+import customerDisplay from './schemas/customerDisplay'
+import taskDisplay from './schemas/taskDisplay'
+import applicationDisplay from './schemas/applicationDisplay'
 import DriverLicenseSettings from './sections/DriverLicenseSettings'
 
 export const NAV_GROUPS = [
@@ -123,6 +126,7 @@ export const NAV_GROUPS = [
     items: [
       { id: 'funnel_stages', icon: Target, component: FunnelStagesSettings },
       { id: 'rejection', icon: XCircle, component: RejectionSettings },
+      { id: 'application_display', icon: Palette, schema: applicationDisplay },
     ],
   },
   {
@@ -133,6 +137,7 @@ export const NAV_GROUPS = [
       { id: 'location_statuses', icon: MapPin, component: LocationStatusesSettings },
       { id: 'department_statuses', icon: Building2, component: DepartmentStatusesSettings },
       { id: 'contact_statuses', icon: Users, component: ContactStatusesSettings },
+      { id: 'customer_display', icon: Palette, schema: customerDisplay },
     ],
   },
   {
@@ -145,6 +150,7 @@ export const NAV_GROUPS = [
       { id: 'vacancy_education', icon: BookOpen, component: VacancyEducationSettings },
       { id: 'vacancy_channels', icon: Store, component: VacancyChannelSettings },
       { id: 'vacancy_fields', icon: FileText, component: VacancyFieldsSettings },
+      { id: 'vacancy_app_defaults', icon: ClipboardList, component: VacancyApplicationDefaultsSettings },
       { id: 'vacancy_matching', icon: Sparkles, component: VacancyMatchingSettings },
     ],
   },
@@ -155,6 +161,7 @@ export const NAV_GROUPS = [
       { id: 'task_statuses', icon: ListChecks, component: TaskStatusSettings },
       { id: 'task_types', icon: Tags, component: TaskTypeSettings },
       { id: 'task_priorities', icon: Flag, component: TaskPrioritySettings },
+      { id: 'task_display', icon: Palette, schema: taskDisplay },
     ],
   },
   // Planning tijdelijk verborgen (2026-06-26) — niet verwijderd, alleen uit. Terugzetten = dit blok +

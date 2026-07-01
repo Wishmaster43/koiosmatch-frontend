@@ -4,7 +4,9 @@
   "empty": "Nog geen kansen.",
   "error": "Kansen konden niet geladen worden.",
   "page": {
-    "add": "Kans toevoegen"
+    "add": "Kans toevoegen",
+    "selected": "{{count}} geselecteerd",
+    "clearSelection": "Selectie wissen"
   },
   "cols": {
     "title": "Kans",
@@ -33,21 +35,46 @@
     "selectOwner": "Kies eigenaar",
     "selectClient": "Kies klant",
     "createdAt": "Aangemaakt op {{date}}",
+    "markWon": "Gewonnen",
+    "markLost": "Verloren",
+    "expectedCloseOn": "Verwacht te sluiten op {{date}}",
     "tabs": {
-      "details": "Details"
+      "details": "Details",
+      "changelog": "Wijzigingen"
     }
   },
   "details": {
     "stage": "Fase",
     "value": "Waarde",
+    "currency": "Valuta",
+    "hours": "Uren",
+    "hoursPeriod": "Uren per",
+    "periods": {
+      "week": "Per week",
+      "month": "Per maand",
+      "total": "Totaal"
+    },
+    "startDate": "Startdatum",
+    "endDate": "Einddatum",
+    "serviceType": "Dienst",
+    "agreementType": "Overeenkomst",
     "expectedClose": "Verwachte sluiting",
     "client": "Klant",
+    "location": "Locatie",
+    "department": "Afdeling",
+    "contact": "Contactpersoon",
     "owner": "Eigenaar",
     "created": "Aangemaakt",
     "groups": {
       "deal": "Deal",
       "organisation": "Organisatie"
     }
+  },
+  "changelog": {
+    "loading": "Laden…",
+    "error": "Wijzigingen konden niet geladen worden.",
+    "empty": "Nog geen wijzigingen.",
+    "system": "Systeem"
   },
   "modal": {
     "title": "Nieuwe kans",
@@ -60,7 +87,12 @@
       "title": "Titel",
       "client": "Klant",
       "stage": "Fase",
+      "serviceType": "Dienst",
+      "agreementType": "Overeenkomst",
       "value": "Waarde (€)",
+      "hours": "Uren",
+      "startDate": "Startdatum",
+      "endDate": "Einddatum",
       "expectedClose": "Verwachte sluiting",
       "owner": "Eigenaar"
     }

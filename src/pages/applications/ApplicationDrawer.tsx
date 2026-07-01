@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileText, Unlink, ArchiveRestore } from 'lucide-react'
+import { useLookups } from '@/context/LookupsContext'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ApplicationTab from './drawer/ApplicationTab'
@@ -25,6 +26,9 @@ interface ApplicationDrawerProps {
   onToggleExpand?: () => void
   onReject?: (id: Id | undefined, payload: RejectPayload) => void
   onAdjustScore?: (id: Id | undefined, payload: { score: number | null; criteria: Criterion[] }) => void
+  onPhaseChange?: (id: Id | undefined, phaseKey: string) => void
+  onOwnerChange?: (id: Id | undefined, ownerId: string) => void
+  users?: Array<{ id: Id; name: string }>
   onDetach?: (id: Id | undefined) => void
   onRestore?: (id: Id | undefined) => void
   canManage?: boolean
@@ -34,9 +38,27 @@ interface ApplicationDrawerProps {
  * ApplicationDrawer — thin container: declares the header config + tab list and
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
  */
-export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onDetach, onRestore, canManage }: ApplicationDrawerProps) {
+export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, users, onDetach, onRestore, canManage }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
+  // Funnel phases (Settings lookup) for the header phase picker; never hardcoded.
+  const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string }> }
   if (!a) return null
+
+  // Header meta pickers — phase (funnel lookup) + recruiter (tenant users). The
+  // owner is matched by id; a fallback option covers an owner not in the list.
+  const ownerInUsers = (users ?? []).some(u => String(u.id) === String(a.owner?.id))
+  const ownerOptions = [
+    ...(a.owner?.id != null && ownerInUsers ? [] : [{ value: '__current', label: a.owner?.name || '—' }]),
+    ...(users ?? []).map(u => ({ value: String(u.id), label: u.name })),
+  ]
+  const ownerValue = a.owner?.id != null && ownerInUsers ? String(a.owner.id) : '__current'
+  const meta = [
+    { key: 'phase', label: t('drawer.phase'), value: a.phaseKey,
+      options: funnelTypes.map(f => ({ value: f.value, label: f.label })),
+      onChange: (v: string) => onPhaseChange?.(a.id, v), menuWidth: 180 },
+    { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions,
+      onChange: (v: string) => { if (v !== '__current') onOwnerChange?.(a.id, String(v)) }, menuWidth: 200 },
+  ]
 
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
@@ -93,6 +115,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
           avatar={{ initials: a.candidateInitials, soft: true }}
           title={a.candidateName}
           subtitle={a.vacancyTitle}
+          meta={meta}
         />
       )}
     />

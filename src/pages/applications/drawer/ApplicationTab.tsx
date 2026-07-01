@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import StatusPill from '@/components/ui/StatusPill'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import MatchScoreBlock from './MatchScoreBlock'
 import type { Criterion } from './MatchScoreBlock'
@@ -26,23 +25,15 @@ interface ApplicationTabProps {
 }
 
 /**
- * ApplicationTab — the "Sollicitatie" tab: phase/source, the AI task, the key
- * details and the overall match score.
+ * ApplicationTab — the "Sollicitatie" tab: the AI task, the key (read-only)
+ * details and the overall match score. Phase + recruiter are edited from the
+ * drawer header (meta pickers), so they no longer live in the tab body.
  */
 export default function ApplicationTab({ application: a, onReject, onAdjustScore }: ApplicationTabProps) {
   const { t } = useTranslation('applications')
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      {/* Phase + source */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 20px' }}>
-        <div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.phase')}</div>
-          <StatusPill label={a.phaseLabel} color={a.phaseColor} />
-        </div>
-        <Field label={t('drawer.source')}>{a.source || '—'}</Field>
-      </div>
-
       {/* AI task */}
       {a.task && (
         <div>
@@ -55,11 +46,11 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
         </div>
       )}
 
-      {/* Details */}
-      <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
+      {/* Details — read-only provenance (phase/recruiter are edited in the header). */}
+      <div>
         <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('drawer.details')}</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 20px' }}>
-          <Field label={t('drawer.owner')}>{a.owner?.name || '—'}</Field>
+          <Field label={t('drawer.source')}>{a.source || '—'}</Field>
           <Field label={t('drawer.client')}>{a.client || '—'}</Field>
           <div style={{ gridColumn: '1 / -1' }}>
             <Field label={t('drawer.vacancy')}>{a.vacancyTitle || '—'}</Field>

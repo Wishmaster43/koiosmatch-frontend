@@ -4,7 +4,9 @@
   "empty": "No opportunities yet.",
   "error": "Opportunities could not be loaded.",
   "page": {
-    "add": "Add opportunity"
+    "add": "Add opportunity",
+    "selected": "{{count}} selected",
+    "clearSelection": "Clear selection"
   },
   "cols": {
     "title": "Opportunity",
@@ -33,21 +35,46 @@
     "selectOwner": "Select owner",
     "selectClient": "Select client",
     "createdAt": "Created on {{date}}",
+    "markWon": "Won",
+    "markLost": "Lost",
+    "expectedCloseOn": "Expected to close on {{date}}",
     "tabs": {
-      "details": "Details"
+      "details": "Details",
+      "changelog": "Changelog"
     }
   },
   "details": {
     "stage": "Stage",
     "value": "Value",
+    "currency": "Currency",
+    "hours": "Hours",
+    "hoursPeriod": "Hours per",
+    "periods": {
+      "week": "Per week",
+      "month": "Per month",
+      "total": "Total"
+    },
+    "startDate": "Start date",
+    "endDate": "End date",
+    "serviceType": "Service",
+    "agreementType": "Agreement",
     "expectedClose": "Expected close",
     "client": "Client",
+    "location": "Location",
+    "department": "Department",
+    "contact": "Contact",
     "owner": "Owner",
     "created": "Created",
     "groups": {
       "deal": "Deal",
       "organisation": "Organisation"
     }
+  },
+  "changelog": {
+    "loading": "Loading…",
+    "error": "Changelog could not be loaded.",
+    "empty": "No changes yet.",
+    "system": "System"
   },
   "modal": {
     "title": "New opportunity",
@@ -60,7 +87,12 @@
       "title": "Title",
       "client": "Client",
       "stage": "Stage",
+      "serviceType": "Service",
+      "agreementType": "Agreement",
       "value": "Value (€)",
+      "hours": "Hours",
+      "startDate": "Start date",
+      "endDate": "End date",
       "expectedClose": "Expected close",
       "owner": "Owner"
     }

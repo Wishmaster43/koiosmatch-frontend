@@ -48,6 +48,7 @@
   },
   "nav": {
     "candidate_display": "Table display",
+    "application_display": "Table display",
     "candidate_custom_fields": "Custom fields",
     "driver_licenses": "Driving licences",
     "kpis": "KPIs",
@@ -121,10 +122,12 @@
     "vacancy_education": "Education",
     "vacancy_channels": "Job boards",
     "vacancy_fields": "Custom fields",
+    "vacancy_app_defaults": "Application settings",
     "vacancy_matching": "Matching",
     "task_statuses": "Statuses",
     "task_types": "Activity types",
     "task_priorities": "Priorities",
+    "task_display": "Table display",
     "customer_statuses": "Customer statuses",
     "location_statuses": "Location statuses",
     "department_statuses": "Department statuses",
@@ -134,7 +137,8 @@
     "document_types": "Document types",
     "candidate_phases": "Phase",
     "candidate_required_fields": "Required fields",
-    "functions": "Functions"
+    "functions": "Functions",
+    "customer_display": "Table display"
   },
   "kpis": {
     "title": "KPI settings",
@@ -228,6 +232,25 @@
       },
       "candidate_table_color_phase": {
         "label": "Phase"
+      }
+    }
+  },
+  "applicationDisplay": {
+    "title": "Table display",
+    "subtitle": "Per column: coloured labels or plain text. The KPI charts always keep their colours.",
+    "fields": {
+      "application_table_color_score": {
+        "label": "Match score"
+      },
+      "application_table_color_phase": {
+        "label": "Phase"
+      },
+      "application_table_color_status": {
+        "label": "Candidate status"
+      },
+      "application_table_color_owner": {
+        "label": "Owner colour",
+        "description": "On = the owner avatar uses the recruiter's colour. Off = neutral grey."
       }
     }
   },
@@ -423,7 +446,9 @@
     "educationAdd": "Add education level",
     "channelsTitle": "Job boards",
     "channelsSubtitle": "Manage the job boards you can publish vacancies on.",
-    "channelsAdd": "Add job board"
+    "channelsAdd": "Add job board",
+    "appDefaultsTitle": "Application settings",
+    "appDefaultsSubtitle": "The default a new vacancy inherits. Override it per vacancy in the drawer."
   },
   "tasks": {
     "statusTitle": "Statuses",
@@ -435,6 +460,21 @@
     "priorityTitle": "Priorities",
     "prioritySubtitle": "Manage the priorities of your tasks (low, normal, high).",
     "priorityAdd": "Add priority"
+  },
+  "taskDisplay": {
+    "title": "Table display",
+    "subtitle": "Per column: coloured labels or plain text. The task board keeps its colours regardless.",
+    "fields": {
+      "task_table_color_status": {
+        "label": "Status"
+      },
+      "task_table_color_priority": {
+        "label": "Priority"
+      },
+      "task_table_color_type": {
+        "label": "Type"
+      }
+    }
   },
   "rejection": {
     "title": "Rejection reasons",
@@ -1274,5 +1314,21 @@
     "freeEntry": "Allow free entry",
     "freeEntryHint": "On: recruiters can type their own function (combobox). Off: pick from the list only (strict dropdown).",
     "confirmFreeEntry": "Are you sure? Free entry lets recruiters type functions that aren’t in the list — this can lower data quality."
+  },
+  "customerDisplay": {
+    "title": "Table display",
+    "subtitle": "Per column: coloured labels or plain text. The KPI charts always keep their colours.",
+    "fields": {
+      "customer_table_color_status": {
+        "label": "Status"
+      },
+      "customer_table_color_koios": {
+        "label": "Koios AI"
+      },
+      "customer_table_color_owner": {
+        "label": "Owner colour",
+        "description": "On = the owner avatar uses the account manager's colour. Off = neutral grey."
+      }
+    }
   }
 }

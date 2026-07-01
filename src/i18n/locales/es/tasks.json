@@ -43,7 +43,8 @@
       "comments": "Comentarios",
       "activity": "Actividad"
     },
-    "markDone": "Marcar como hecho"
+    "markDone": "Marcar como hecho",
+    "tags": "Etiquetas"
   },
   "details": {
     "title": "Detalles de la actividad",

@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import type { DragEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import Avatar from '@/components/ui/Avatar'
-import StatusPill from '@/components/ui/StatusPill'
+import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import type { Task } from '@/types/task'
 import type { Id } from '@/types/common'
@@ -33,8 +33,8 @@ function BoardCard({ task, onDragStart, onClick, selected, formatDate, bureauLab
         )}
       </div>
 
-      {/* Type pill */}
-      {task.typeLabel && <div style={{ marginBottom: 8 }}><StatusPill label={task.typeLabel} color={task.typeColor} /></div>}
+      {/* Type chip */}
+      {task.typeLabel && <div style={{ marginBottom: 8 }}><SoftChip label={task.typeLabel} color={task.typeColor} /></div>}
 
       {/* Linked entity (single-line clamp) */}
       {task.linkLabel && (

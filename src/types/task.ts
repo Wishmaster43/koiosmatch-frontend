@@ -32,6 +32,7 @@ export interface Task {
   owner: { name: string }
   due: string
   completedAt: string
+  tags: string[]
   links: TaskLink[]
   linkLabel: string
   commentCount: number
@@ -73,6 +74,7 @@ export interface ApiTask {
   due_at?: string
   completed_at?: string
   created_at?: string
+  tags?: string[]
   links?: Array<{ type?: string; linkable_type?: string; id?: Id; linkable_id?: Id; label?: string; name?: string }>
   comment_count?: number
   comments?: Array<{ id?: Id; author?: { name?: string }; author_name?: string; body?: string; text?: string; created_at?: string; time?: string }>

@@ -29,6 +29,12 @@ export function useOpportunitiesData() {
   const [customers, setCustomers] = useState<PageCustomer[]>([])
   const [selected,       setSelected]       = useState<Opportunity | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
+  const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
+
+  // Row selection for the checkbox column (drives the future bulk bar, worklist C-41).
+  const toggleRow = (id: Id) => setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next })
+  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const next = new Set(prev); ids.forEach(id => allSelected ? next.delete(id) : next.add(id)); return next })
+  const clearSelection = () => setSelectedIds(new Set())
 
   // Load opportunities; a missing endpoint (404) is an empty list, not an error.
   useEffect(() => {
@@ -86,12 +92,25 @@ export function useOpportunitiesData() {
     if ('stageValue' in patch) { const s = stages.find(x => x.value === patch.stageValue); body.opportunity_stage_id = s?.id ?? null }
     if ('ownerId'    in patch) body.owner_id    = patch.ownerId || null
     if ('clientId'   in patch) body.customer_id = patch.clientId || null
+    if ('title'      in patch) body.title       = patch.title
+    if ('value'      in patch) body.value       = patch.value
+    if ('currency'   in patch) body.currency    = patch.currency
+    if ('expectedCloseAt' in patch) body.expected_close_at = patch.expectedCloseAt || null
+    // Zorg-detachering fields (C-42) — sent through; the backend ignores unknown keys
+    // (validated()) until the columns land, so this is safe FE-first.
+    if ('hours'          in patch) body.hours             = patch.hours
+    if ('hoursPeriod'    in patch) body.hours_period      = patch.hoursPeriod
+    if ('startDate'      in patch) body.start_date        = patch.startDate || null
+    if ('endDate'        in patch) body.end_date          = patch.endDate || null
+    if ('serviceTypeId'   in patch) body.service_type_id   = patch.serviceTypeId ?? null
+    if ('agreementTypeId' in patch) body.agreement_type_id = patch.agreementTypeId ?? null
     if (Object.keys(body).length) api.patch(`/opportunities/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
   }
 
   return {
     rows, loading, error, customers, users, stages, stageMeta,
     selected, drawerExpanded, setDrawerExpanded,
+    selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity,
   }
 }

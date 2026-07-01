@@ -4,6 +4,7 @@ import { X } from 'lucide-react'
 import api from '@/lib/api'
 import { Field, TextField, SelectField, DateField } from '@/components/forms/fields'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
+import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
 import { mapOpportunity } from './data/mapOpportunity'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
@@ -11,27 +12,37 @@ import type { Id } from '@/types/common'
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
   title: 'title', customer_id: 'clientId', opportunity_stage_id: 'stageId',
-  value: 'value', expected_close_at: 'expectedCloseAt', owner_id: 'ownerId',
+  service_type_id: 'serviceTypeId', agreement_type_id: 'agreementTypeId',
+  value: 'value', hours: 'hours', start_date: 'startDate', end_date: 'endDate',
+  expected_close_at: 'expectedCloseAt', owner_id: 'ownerId',
 }
 
-interface OppForm { title: string; clientId: string; stageId: string; value: string; expectedCloseAt: string; ownerId: string }
+interface OppForm {
+  title: string; clientId: string; stageId: string; serviceTypeId: string; agreementTypeId: string
+  value: string; hours: string; startDate: string; endDate: string; expectedCloseAt: string; ownerId: string
+}
 interface ModalUser { id: Id; name: string }
 interface ModalCustomer { id: Id; name: string }
 
 /**
  * AddOpportunityModal — create a Kans. Mirrors AddVacancyModal: shared field
  * components, lookups via hooks (never hardcoded option lists), 422 mapping. The
- * stage select keys on the stage id (the write expects `opportunity_stage_id`).
+ * stage/service/agreement selects key on the lookup id (the writes expect *_id).
  */
 export default function AddOpportunityModal({ onClose, onCreated, users = [], customers = [] }: {
   onClose: () => void; onCreated?: (o: Opportunity) => void; users?: ModalUser[]; customers?: ModalCustomer[]
 }) {
   const { t } = useTranslation(['opportunities', 'common'])
   const { stages } = useOpportunityStages()
+  const { serviceTypes }   = useOpportunityServiceTypes()
+  const { agreementTypes } = useOpportunityAgreementTypes()
 
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState<OppForm>({ title: '', clientId: '', stageId: '', value: '', expectedCloseAt: '', ownerId: '' })
+  const [form, setForm] = useState<OppForm>({
+    title: '', clientId: '', stageId: '', serviceTypeId: '', agreementTypeId: '',
+    value: '', hours: '', startDate: '', endDate: '', expectedCloseAt: '', ownerId: '',
+  })
 
   const set = (k: keyof OppForm, v: string) => {
     setForm(f => ({ ...f, [k]: v }))
@@ -46,7 +57,12 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         title: form.title.trim(),
         customer_id: form.clientId || null,
         opportunity_stage_id: form.stageId || null,
+        service_type_id: form.serviceTypeId || null,
+        agreement_type_id: form.agreementTypeId || null,
         value: form.value === '' ? null : Number(form.value),
+        hours: form.hours === '' ? null : Number(form.hours),
+        start_date: form.startDate || null,
+        end_date: form.endDate || null,
         expected_close_at: form.expectedCloseAt || null,
         owner_id: form.ownerId || null,
       }
@@ -66,9 +82,11 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   }
 
   const canSubmit = !!form.title.trim()
-  const stageOptions    = stages.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
-  const userOptions     = users.map(u => ({ value: String(u.id), label: u.name }))
-  const customerOptions = customers.map(c => ({ value: String(c.id), label: c.name }))
+  const stageOptions     = stages.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
+  const serviceOptions   = serviceTypes.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
+  const agreementOptions = agreementTypes.map(a => ({ value: String(a.id ?? a.value), label: a.label }))
+  const userOptions      = users.map(u => ({ value: String(u.id), label: u.name }))
+  const customerOptions  = customers.map(c => ({ value: String(c.id), label: c.name }))
 
   return (
     <div
@@ -105,17 +123,40 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Field label={t('modal.fields.serviceType')}>
+              <SelectField value={form.serviceTypeId} onChange={v => set('serviceTypeId', v)} placeholder={t('common:select')} options={serviceOptions} />
+            </Field>
+            <Field label={t('modal.fields.agreementType')}>
+              <SelectField value={form.agreementTypeId} onChange={v => set('agreementTypeId', v)} placeholder={t('common:select')} options={agreementOptions} />
+            </Field>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Field label={t('modal.fields.value')}>
               <TextField type="number" value={form.value} onChange={v => set('value', v)} placeholder="0" error={errors.value} />
+            </Field>
+            <Field label={t('modal.fields.hours')}>
+              <TextField type="number" value={form.hours} onChange={v => set('hours', v)} placeholder="0" error={errors.hours} />
+            </Field>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Field label={t('modal.fields.startDate')}>
+              <DateField value={form.startDate} onChange={v => set('startDate', v)} placeholder={t('common:select')} />
+            </Field>
+            <Field label={t('modal.fields.endDate')}>
+              <DateField value={form.endDate} onChange={v => set('endDate', v)} placeholder={t('common:select')} />
+            </Field>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Field label={t('modal.fields.owner')}>
+              <SelectField value={form.ownerId} onChange={v => set('ownerId', v)} placeholder={t('common:select')} options={userOptions} />
             </Field>
             <Field label={t('modal.fields.expectedClose')}>
               <DateField value={form.expectedCloseAt} onChange={v => set('expectedCloseAt', v)} placeholder={t('common:select')} />
             </Field>
           </div>
-
-          <Field label={t('modal.fields.owner')}>
-            <SelectField value={form.ownerId} onChange={v => set('ownerId', v)} placeholder={t('common:select')} options={userOptions} />
-          </Field>
         </div>
 
         {/* Footer */}

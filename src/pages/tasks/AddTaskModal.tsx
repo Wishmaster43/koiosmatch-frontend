@@ -3,13 +3,12 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
-import { Field, TextField, SelectField, DateField, TextArea } from '@/components/forms/fields'
+import { Field, TextField, SelectField, DateField } from '@/components/forms/fields'
+import RichTextEditor from '@/components/ui/RichTextEditor'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
 import type { Id } from '@/types/common'
-
-const MAX_DESC = 5000
 
 interface EntityRow { id?: Id; name?: string; first_name?: string; last_name?: string; title?: string; email?: string }
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string }
@@ -135,9 +134,9 @@ export default function AddTaskModal({ onClose, onCreated }: { onClose: () => vo
             <Field label={t('modal.due')}>
               <DateField value={form.due} onChange={v => set('due', v)} placeholder="dd-mm-jjjj" />
             </Field>
+            {/* Description = note body — same rich editor as the drawer + candidate profile text. */}
             <Field label={t('modal.description')}>
-              <TextArea value={form.description} onChange={v => set('description', v.slice(0, MAX_DESC))} rows={4} placeholder={t('modal.descriptionPlaceholder')} />
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('modal.charsLeft', { count: MAX_DESC - form.description.length })}</div>
+              <RichTextEditor value={form.description} onChange={v => set('description', v)} />
             </Field>
           </div>
 

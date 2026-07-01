@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useRightPanel } from '@/context/RightPanelContext'
 import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
 import OpportunitiesTable from './OpportunitiesTable'
 import OpportunitiesBoard from './OpportunitiesBoard'
@@ -18,6 +19,10 @@ const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
   if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v])
 }
 
+// Right-panel multi-toggle for a filter dimension.
+const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
+  set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
+
 // OpportunitiesPage — thin container: the data layer (load + mutations) lives in
 // useOpportunitiesData; the page only derives the filtered/paged view and renders.
 export default function OpportunitiesPage() {
@@ -26,32 +31,56 @@ export default function OpportunitiesPage() {
   const tableScrollRef = useRef<HTMLDivElement>(null)
   const auth = useAuth()
   const user = auth?.user as { default_per_page?: number } | null | undefined
+  const { registerFilters, unregisterFilters } = useRightPanel()
 
   // Data layer (§3): list + customers + selection + optimistic mutations.
   const {
     rows, loading, error, customers, users, stages,
     selected, drawerExpanded, setDrawerExpanded,
+    selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity,
   } = useOpportunitiesData()
 
   const [view,     setView]     = useState('table')  // 'table' | 'board'
   const [page,     setPage]     = useState(1)
   const [pageSize, setPageSize] = useState(() => user?.default_per_page ?? 50)
-  const [stage,    setStage]    = useState<string[]>([]) // selected stage keys (0 or 1)
-  const [owner,    setOwner]    = useState<string[]>([]) // selected owner keys (0 or 1)
+  const [stage,    setStage]    = useState<string[]>([]) // selected stage labels (donut + panel)
+  const [owner,    setOwner]    = useState<string[]>([]) // selected owner names (donut + panel)
+  const [client,   setClient]   = useState<string[]>([]) // selected client names (panel)
   const [addOpen,  setAddOpen]  = useState(false)
 
-  // Reset to the first page whenever a filter changes.
-  useEffect(() => { setPage(1) }, [stage, owner])
+  // Reset to the first page + drop the selection whenever a filter changes.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { setPage(1); clearSelection() }, [stage, owner, client])
 
-  // Visible rows = the stage/owner donut selection applied client-side.
+  // Right-panel filters (stage · owner · client) — options derived from the loaded rows.
+  const optionsFrom = (key: 'stage' | 'owner' | 'client') => {
+    const m = new Map<string, number>()
+    rows.forEach(r => { const v = r[key]; if (v) m.set(v, (m.get(v) ?? 0) + 1) })
+    return [...m.entries()].map(([value, count]) => ({ value, label: value, count }))
+  }
+  const filterGroups = useMemo(() => [
+    { key: 'stage',  type: 'search-select', label: t('insights.stage'), selected: stage,  options: optionsFrom('stage'),  onToggle: tog(setStage) },
+    { key: 'owner',  type: 'search-select', label: t('insights.owner'), selected: owner,  options: optionsFrom('owner'),  onToggle: tog(setOwner) },
+    { key: 'client', type: 'search-select', label: t('cols.client'),    selected: client, options: optionsFrom('client'), onToggle: tog(setClient) },
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  ], [t, rows, stage, owner, client])
+
+  // Publish/retract the filters for the topbar filter button + right panel.
+  useEffect(() => {
+    registerFilters('opportunities-page', filterGroups)
+    return () => unregisterFilters('opportunities-page')
+  }, [filterGroups, registerFilters, unregisterFilters])
+
+  // Visible rows = the stage/owner/client selection applied client-side.
   const filteredAll = useMemo(() => {
     return rows.filter(r => {
-      if (stage.length && !stage.includes(r.stage)) return false
-      if (owner.length && !owner.includes(r.owner)) return false
+      if (stage.length  && !stage.includes(r.stage))   return false
+      if (owner.length  && !owner.includes(r.owner))   return false
+      if (client.length && !client.includes(r.client)) return false
       return true
     })
-  }, [rows, stage, owner])
+  }, [rows, stage, owner, client])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
@@ -74,6 +103,16 @@ export default function OpportunitiesPage() {
           {/* Toolbar — actions right-aligned (same layout as TasksPage) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end',
             padding: '8px 24px', background: 'var(--bg)', flexShrink: 0 }}>
+            {/* Selection strip — count + clear (bulk actions land with C-41). */}
+            {selectedIds.size > 0 && (
+              <div style={{ marginRight: 'auto', display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--text)' }}>
+                <span>{t('page.selected', { count: selectedIds.size })}</span>
+                <button onClick={clearSelection}
+                  style={{ fontSize: 12, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+                  {t('page.clearSelection')}
+                </button>
+              </div>
+            )}
             <button onClick={() => setAddOpen(true)}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13, fontWeight: 600,
                 borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
@@ -100,7 +139,8 @@ export default function OpportunitiesPage() {
             <>
               <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
                 <OpportunitiesTable rows={filtered} loading={loading} error={error}
-                  selectedId={selected?.id} onRowClick={selectOpportunity} stickyHeader scrollParentRef={tableScrollRef} />
+                  selectedId={selected?.id} onRowClick={selectOpportunity} stickyHeader scrollParentRef={tableScrollRef}
+                  selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
               </div>
               <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
                 pageSize={pageSize} onPageChange={setPage}

@@ -37,12 +37,28 @@
   "drawer": {
     "label": "Activity",
     "createdAt": "Created on {{date}}",
+    "markDone": "Mark done",
+    "tags": "Tags",
     "tabs": {
       "details": "Details",
       "links": "Links",
       "comments": "Comments",
       "activity": "Activity"
     }
+  },
+  "bulk": {
+    "selected": "{{count}} selected",
+    "actions": "Bulk actions",
+    "deselect": "Deselect",
+    "changeStatus": "Change status",
+    "changePriority": "Change priority",
+    "changeAssignee": "Assign to",
+    "searchStatus": "Search status…",
+    "searchPriority": "Search priority…",
+    "searchAssignee": "Search user…",
+    "noUsers": "No users",
+    "archive": "Archive",
+    "done": "{{count}} tasks updated"
   },
   "details": {
     "title": "Activity details",
@@ -51,7 +67,7 @@
     "priority": "Priority",
     "due": "Due date",
     "assignee": "Assigned to",
-    "owner": "Owner",
+    "owner": "Created by",
     "description": "Description"
   },
   "comments": {
@@ -94,7 +110,7 @@
     "descriptionPlaceholder": "Enter…",
     "charsLeft": "Characters available: {{count}}",
     "detailsTitle": "Activity details",
-    "owner": "Owner",
+    "owner": "Created by",
     "candidate": "Candidate",
     "candidatePlaceholder": "Select candidate",
     "customer": "Client",

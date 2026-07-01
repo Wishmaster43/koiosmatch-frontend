@@ -1,29 +1,159 @@
 /**
- * DocumentsTab — the customer's documents. Read-only list with a calm empty state
- * for now; the upload flow follows once the documents endpoint is wired.
+ * DocumentsTab — the customer's documents with upload, type, rename, delete and
+ * preview. Mirrors the candidate DocumentsSection but persists to
+ * /customers/{id}/documents (multipart upload, PATCH rename, DELETE). Document
+ * types come from the tenant /document-types lookup. New rows keep a local blob
+ * preview until the server row (with url) returns.
  */
+import { useState, useRef } from 'react'
+import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FileText } from 'lucide-react'
+import { Search, Plus, X, FileText, Pencil, Eye } from 'lucide-react'
+import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
+import { useDocumentTypes } from '@/lib/useDocumentTypes'
+import { useDateFormat } from '@/lib/datetime'
+import { sectionBlock } from '@/components/ui/SectionCard'
 import type { Id } from '@/types/common'
 
-interface CustomerDoc { id?: Id; name?: string }
+interface DocItem { id?: Id; name?: string; file_name?: string; size?: string | number; type?: string; objectUrl?: string; url?: string; created_at?: string }
+interface PendingFile { file: File; objectUrl: string; name: string; size: string }
 
-export default function DocumentsTab({ documents = [] }: { documents?: CustomerDoc[] }) {
+// Split a filename into base + extension so rename never touches the extension.
+const splitExt = (fn: string) => { const m = fn.match(/\.[^./\\]+$/); return { base: m ? fn.slice(0, -m[0].length) : fn, ext: m ? m[0] : '' } }
+
+export default function DocumentsTab({ customerId, documents = [] }: { customerId: Id | undefined; documents?: DocItem[] }) {
   const { t } = useTranslation('customers')
+  const { formatDate } = useDateFormat()
+  const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor } = useDocumentTypes()
+  const [docs,        setDocs]        = useState<DocItem[]>(documents)
+  const [pendingFile, setPendingFile] = useState<PendingFile | null>(null)
+  const [pendingType, setPendingType] = useState('CV')
+  const [renamingDoc, setRenamingDoc] = useState<number | null>(null)
+  const [renameValue, setRenameValue] = useState('')
+  const [docSearch,   setDocSearch]   = useState('')
+  const fileRef = useRef<HTMLInputElement>(null)
 
-  if (documents.length === 0) {
-    return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.empty')}</div>
+  // Upload the pending file (multipart) and optimistically show it right away.
+  const upload = () => {
+    if (!pendingFile) return
+    const tmpId = -Date.now()
+    const optimistic: DocItem = { id: tmpId, name: pendingFile.name, size: pendingFile.size, type: pendingType, objectUrl: pendingFile.objectUrl }
+    setDocs(d => [...d, optimistic])
+    const fd = new FormData()
+    fd.append('file', pendingFile.file); fd.append('type', pendingType); fd.append('name', pendingFile.name)
+    setPendingFile(null)
+    api.post(`/customers/${customerId}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) setDocs(d => d.map(x => x.id === tmpId ? { ...optimistic, ...it } : x)) })
+      .catch(() => notifyError(t('bulk.mutateError')))
   }
 
+  // Rename / delete persist once the row has a real (positive numeric) id.
+  const rename = (i: number, base: string) => {
+    const id = docs[i]?.id
+    const cur = String(docs[i]?.name ?? docs[i]?.file_name ?? '')
+    const name = base.trim() + splitExt(cur).ext
+    setDocs(docs.map((x, j) => j === i ? { ...x, name } : x)); setRenamingDoc(null)
+    if (typeof id === 'number' && id > 0) api.patch(`/customers/${customerId}/documents/${id}`, { name }).catch(() => notifyError(t('bulk.mutateError')))
+  }
+  const removeDoc = (i: number) => {
+    const id = docs[i]?.id
+    setDocs(docs.filter((_, j) => j !== i))
+    if (typeof id === 'number' && id > 0) api.delete(`/customers/${customerId}/documents/${id}`).catch(() => notifyError(t('bulk.mutateError')))
+  }
+  const preview = (d: DocItem) => { const url = d.url ?? d.objectUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer') }
+
   return (
-    <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-      {documents.map((d, i) => (
-        <div key={d.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', fontSize: 13,
-          borderBottom: i < documents.length - 1 ? '1px solid var(--border)' : 'none' }}>
-          <FileText size={14} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-          <span style={{ flex: 1, color: 'var(--text)' }}>{d.name}</span>
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('drawer.tabs.documents')}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)' }}>
+            <Search size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+            <input value={docSearch} onChange={e => setDocSearch(e.target.value)} placeholder={t('documents.search')}
+              style={{ border: 'none', outline: 'none', fontSize: 11, color: 'var(--text)', background: 'none', width: 110 }} />
+            {docSearch && <button onClick={() => setDocSearch('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={11} /></button>}
+          </div>
+          <button onClick={() => fileRef.current?.click()}
+            style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+            <Plus size={11} /> {t('documents.add')}
+          </button>
         </div>
-      ))}
+      </div>
+      <div style={sectionBlock}>
+        {pendingFile && (
+          <div style={{ border: '1px solid var(--color-primary)', borderRadius: 10, padding: 12, marginBottom: 10, background: 'var(--color-primary-bg)' }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>
+              {pendingFile.name} <span style={{ fontWeight: 400, color: 'var(--text-muted)' }}>({pendingFile.size})</span>
+            </div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{t('documents.docType')}</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+              {docTypes.map(dt => (
+                <button key={dt.value} onClick={() => setPendingType(dt.value)}
+                  style={{ padding: '4px 10px', fontSize: 11, borderRadius: 99, cursor: 'pointer', fontWeight: pendingType === dt.value ? 600 : 400,
+                    border: `1px solid ${pendingType === dt.value ? 'var(--color-primary)' : 'var(--border)'}`,
+                    background: pendingType === dt.value ? 'var(--color-primary)' : 'var(--surface)', color: pendingType === dt.value ? 'white' : 'var(--text)' }}>{dt.label}</button>
+              ))}
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={upload}
+                style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'white', border: 'none', cursor: 'pointer' }}>{t('documents.add')}</button>
+              <button onClick={() => { URL.revokeObjectURL(pendingFile.objectUrl); setPendingFile(null) }}
+                style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'none', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('drawer.cancel')}</button>
+            </div>
+          </div>
+        )}
+        {docs.length === 0 && !pendingFile && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('documents.empty')}</div>}
+        {docs.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 100px', padding: '4px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 4 }}>
+            <span>{t('documents.name')}</span><span>{t('documents.type')}</span><span>{t('documents.size')}</span>
+          </div>
+        )}
+        {docs.map((d, i) => ({ ...d, _i: i }))
+          .filter(d => !docSearch || (d.name ?? d.file_name ?? '').toLowerCase().includes(docSearch.toLowerCase()) || (d.type ?? '').toLowerCase().includes(docSearch.toLowerCase()))
+          .map(d => {
+            const i = d._i
+            return (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 100px', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={13} color="white" /></div>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    {renamingDoc === i
+                      ? <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+                          <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter') rename(i, renameValue); if (e.key === 'Escape') setRenamingDoc(null) }}
+                            onBlur={() => rename(i, renameValue)}
+                            style={{ flex: 1, fontSize: 12, fontWeight: 500, padding: '3px 7px', borderRadius: 6, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', boxSizing: 'border-box', minWidth: 0 }} />
+                          <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{splitExt(String(d.name ?? d.file_name ?? '')).ext}</span>
+                        </div>
+                      : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
+                    }
+                    {d.created_at && <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDate(d.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>}
+                  </div>
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: docColor(d.type) + '18', color: docColor(d.type), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{d.size ?? ''}</span>
+                  <div style={{ display: 'flex' }}>
+                    <button onClick={() => { setRenamingDoc(i); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
+                    <button onClick={() => preview(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
+                    <button onClick={() => removeDoc(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
+                  </div>
+                </div>
+              </div>
+            )
+          })
+        }
+        <input ref={fileRef} type="file" style={{ display: 'none' }}
+          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+            const file = e.target.files?.[0]
+            if (!file) return
+            const objectUrl = URL.createObjectURL(file)
+            setPendingFile({ file, objectUrl, name: file.name, size: Math.round(file.size / 1024) + ' KB' })
+            setPendingType('CV')
+            e.target.value = ''
+          }} />
+      </div>
     </div>
   )
 }

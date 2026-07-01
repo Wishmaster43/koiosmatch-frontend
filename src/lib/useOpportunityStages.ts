@@ -17,8 +17,8 @@ export const DEFAULT_OPPORTUNITY_STAGES: LookupOption[] = [
   { value: 'qualified',   label: 'Gekwalificeerd', color: '#6FA8C4' },
   { value: 'proposal',    label: 'Voorstel',       color: '#6E8FD6' },
   { value: 'negotiation', label: 'Onderhandeling', color: '#DDA071' },
-  { value: 'won',         label: 'Gewonnen',       color: '#79B58E' },
-  { value: 'lost',        label: 'Verloren',       color: '#D98A8A' },
+  { value: 'won',         label: 'Gewonnen',       color: '#79B58E', isWon: true },
+  { value: 'lost',        label: 'Verloren',       color: '#D98A8A', isLost: true },
 ]
 
 export function useOpportunityStages() {

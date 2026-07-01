@@ -50,7 +50,7 @@ export default function CommentsTab({ task, onAdd }: { task: TaskDetail; onAdd: 
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
                   <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{c.author || '—'}</span>
-                  {c.time && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDate(c.time)}</span>}
+                  {c.time && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDate(c.time, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>}
                 </div>
                 <div style={{ fontSize: 13, color: 'var(--text)', whiteSpace: 'pre-wrap', marginTop: 2 }}>{c.body}</div>
               </div>

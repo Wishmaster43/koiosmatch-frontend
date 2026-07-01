@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { XCircle } from 'lucide-react'
 import api from '@/lib/api'
@@ -8,40 +7,24 @@ import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
 
 interface RejectionReason { id?: Id; name?: string; label?: string }
-interface Tpl { email_subject?: string; email_body?: string; whatsapp_body?: string }
-interface RejectionConfig { default_channel: string; templates: Record<string, Tpl> }
-export interface RejectPayload { reason_id: string; note: string; channel: string; message: string; reason_label: string }
-
-// Fill template tokens with the application's values.
-const fillTokens = (tpl: string | undefined, vals: { candidate: string; vacancy: string; reason: string; recruiter: string }) => (tpl ?? '')
-  .replaceAll('{candidate}', vals.candidate)
-  .replaceAll('{vacancy}', vals.vacancy)
-  .replaceAll('{reason}', vals.reason)
-  .replaceAll('{recruiter}', vals.recruiter)
+export interface RejectPayload { reason_id: string; note: string; reason_label: string }
 
 /**
  * RejectionBlock — reject an application: AI advice (a hard-criterion failure is
- * the only auto-reject case), reason + note, channel + a live preview of the
- * generated message, then a confirm. Loads reasons + the rejection config
- * (default channel + per-reason templates) defensively.
+ * the only auto-reject case), a reason + optional note, then a confirm. The
+ * rejection MESSAGE (channel + template) is sent by a workflow that fires on
+ * rejection — so no channel picker / preview here.
  */
 export default function RejectionBlock({ application: a, onReject }: { application: ApplicationDetail; onReject?: (id: Id | undefined, payload: RejectPayload) => void }) {
   const { t } = useTranslation('applications')
   const [reasons, setReasons]   = useState<RejectionReason[]>([])
-  const [config, setConfig]     = useState<RejectionConfig>({ default_channel: 'email', templates: {} })
   const [reasonId, setReasonId] = useState('')
   const [note, setNote]         = useState('')
-  const [channel, setChannel]   = useState('email')
   const [submitting, setSubmitting] = useState(false)
 
-  // Load reasons + rejection config; empty reasons on failure, never demo data.
+  // Load the rejection reasons; empty on failure, never demo data.
   useEffect(() => {
-    api.get('/candidate-rejection-reasons')
-      .then(r => setReasons(r.data?.data ?? r.data ?? []))
-      .catch(() => setReasons([]))
-    api.get('/settings/rejection')
-      .then(r => { const c = r.data?.data ?? r.data; if (c?.default_channel) { setConfig(c); setChannel(c.default_channel) } })
-      .catch(() => {})
+    api.get('/candidate-rejection-reasons').then(r => setReasons(r.data?.data ?? r.data ?? [])).catch(() => setReasons([]))
   }, [])
 
   // Already rejected → compact summary instead of the form.
@@ -61,27 +44,12 @@ export default function RejectionBlock({ application: a, onReject }: { applicati
 
   const reason = reasons.find(r => String(r.id) === String(reasonId))
   const reasonLabel = reason?.name ?? reason?.label ?? ''
-  const tpl = config.templates?.[reasonId] ?? {}
-  const vals = { candidate: a.candidateName, vacancy: a.vacancyTitle, reason: reasonLabel, recruiter: a.owner?.name ?? '' }
-  const previewSubject = channel === 'email' ? fillTokens(tpl.email_subject, vals) : ''
-  const previewBody    = channel === 'email' ? fillTokens(tpl.email_body, vals) : fillTokens(tpl.whatsapp_body, vals)
-  const hasTemplate    = channel === 'email' ? Boolean(tpl.email_subject || tpl.email_body) : Boolean(tpl.whatsapp_body)
 
   const submit = () => {
     if (!reasonId || submitting) return
     setSubmitting(true)
-    const message = channel === 'email' ? `${previewSubject}\n\n${previewBody}`.trim() : previewBody
-    onReject?.(a.id, { reason_id: reasonId, note, channel, message, reason_label: reasonLabel })
+    onReject?.(a.id, { reason_id: reasonId, note, reason_label: reasonLabel })
   }
-
-  const chanBtn = (value: string, label: ReactNode) => (
-    <button onClick={() => setChannel(value)} style={{ height: 32, padding: '0 14px', fontSize: 12, fontWeight: 500,
-      borderRadius: 8, cursor: 'pointer', boxSizing: 'border-box',
-      border: `1px solid ${channel === value ? 'var(--color-primary)' : 'var(--border)'}`,
-      background: channel === value ? 'var(--color-primary)' : 'var(--surface)', color: channel === value ? '#fff' : 'var(--text)' }}>
-      {label}
-    </button>
-  )
 
   return (
     <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -120,30 +88,7 @@ export default function RejectionBlock({ application: a, onReject }: { applicati
             background: 'var(--input-bg, var(--surface))', color: 'var(--text)', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
       </div>
 
-      {/* Channel */}
-      <div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('rejection.channel')}</div>
-        <div style={{ display: 'flex', gap: 6 }}>{chanBtn('email', t('rejection.channelEmail'))}{chanBtn('whatsapp', t('rejection.channelWhatsapp'))}</div>
-      </div>
-
-      {/* Preview */}
-      {reasonId && (
-        <div>
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('rejection.preview')}</div>
-          {hasTemplate ? (
-            <div style={{ border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)', padding: '10px 12px' }}>
-              {channel === 'email' && previewSubject && (
-                <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{previewSubject}</div>
-              )}
-              <div style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5, whiteSpace: 'pre-wrap' }}>{previewBody || '—'}</div>
-            </div>
-          ) : (
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('rejection.noTemplate')}</div>
-          )}
-        </div>
-      )}
-
-      {/* Confirm — same box-model + height as the channel buttons so the left edge lines up. */}
+      {/* Confirm */}
       <button onClick={submit} disabled={!reasonId || submitting}
         style={{ alignSelf: 'flex-start', height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, borderRadius: 8,
           border: '1px solid transparent', boxSizing: 'border-box', background: 'var(--color-danger)', color: '#fff',

@@ -34,11 +34,15 @@ interface NotesTabProps {
   timelineInitials?: string
   onAddNote?: (payload: NotePayload) => void
   onEditNote?: (i: number, payload: NotePayload) => void
+  // Optional section toggles — hosts with their own timeline/chat tabs hide these.
+  showTimeline?: boolean
+  showConversations?: boolean
 }
 
 export default function NotesTab({
   notes = [], timeline = [], noteTypes = [], labels = {}, editorLabels,
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
+  showTimeline = true, showConversations = true,
 }: NotesTabProps) {
   const [adding, setAdding]   = useState(false)
   const [editingIdx, setEditingIdx] = useState<number | null>(null)   // null = new; index = editing
@@ -145,6 +149,7 @@ export default function NotesTab({
       </div>
 
       {/* Timeline */}
+      {showTimeline && (
       <SectionCard title={labels.timeline}>
         {timeline.length > 0
           ? timeline.map((ev, i) => (
@@ -163,11 +168,14 @@ export default function NotesTab({
           : <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.timelineEmpty}</div>
         }
       </SectionCard>
+      )}
 
       {/* Conversations */}
+      {showConversations && (
       <SectionCard title={labels.conversations}>
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.conversationsEmpty}</div>
       </SectionCard>
+      )}
     </div>
   )
 }

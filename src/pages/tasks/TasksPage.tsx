@@ -3,8 +3,10 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Plus } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
+import { notifyError, notifySuccess } from '@/lib/notify'
 import { isAbortError } from '@/lib/mocks'
+import { initialsOf } from '@/lib/initials'
+import { useUsers } from '@/lib/queries'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { TaskLookupsProvider, useTaskLookups } from '@/context/TaskLookupsContext'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
@@ -12,6 +14,7 @@ import { useAuth } from '@/context/AuthContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import TasksTable from './TasksTable'
+import TasksBulkBar from './TasksBulkBar'
 import PaginationBar from '@/components/ui/PaginationBar'
 import TasksBoard from './TasksBoard'
 import type { BoardColumn } from './TasksBoard'
@@ -23,6 +26,7 @@ import type { Id } from '@/types/common'
 
 interface Aggregate { name: string; key: string; color?: string; value: number }
 interface NewLink { type: string; id: string; label: string }
+interface UserLike { id: Id; name: string; avatar_color?: string | null }
 
 // Donut click → set exactly one filter value (or clear when clicking it again).
 const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
@@ -48,6 +52,9 @@ export default function TasksPage() {
 function TasksPageInner() {
   const auth = useAuth()
   const user = auth?.user as { default_per_page?: number } | null | undefined
+  // Bulk archive (soft-delete, reversible → update-class gating; the backend re-checks).
+  const canArchive = (auth as unknown as { hasPermission?: (p: string) => boolean })?.hasPermission?.('tasks.update') ?? false
+  const { data: users = [] } = useUsers() as { data?: UserLike[] }
   const { t } = useTranslation('tasks')
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
   const tableScrollRef = useRef<HTMLDivElement>(null)
@@ -64,6 +71,8 @@ function TasksPageInner() {
   const [selected, setSelected] = useState<TaskDetail | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [addOpen,  setAddOpen]  = useState(false)
+  // Bulk-selection (checkboxes) — id-set, cleared on filter/page change.
+  const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   const [selectedStatus,   setSelectedStatus]   = useState<string[]>([])
   const [selectedPriority, setSelectedPriority] = useState<string[]>([])
   const [selectedType,     setSelectedType]     = useState<string[]>([])
@@ -140,8 +149,8 @@ function TasksPageInner() {
     return true
   }
 
-  // Reset to the first page whenever a filter or KPI tile changes.
-  useEffect(() => { setPage(1) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter])
+  // Reset to the first page + clear the selection whenever a filter/KPI tile changes.
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter])
 
   // The visible rows: status/priority/type/assignee filters + the active KPI tile.
   const filteredAll = useMemo(() => {
@@ -177,6 +186,7 @@ function TasksPageInner() {
     const body: Record<string, unknown> = {
       status: patch.statusKey, priority: patch.priorityKey, type: patch.typeKey,
       due_date: patch.due, description: patch.description, assignee_id: patch.assigneeId,
+      tags: patch.tags,
     }
     Object.keys(body).forEach(k => { if (body[k] === undefined) delete body[k] })
     api.patch(`/tasks/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
@@ -185,9 +195,12 @@ function TasksPageInner() {
   // Kanban move = a status-only update.
   const handleMove = (id: Id, statusKey: string | number) => handleUpdate(id, { statusKey })
 
-  // Add a comment from the drawer; append optimistically, then POST.
+  // Add a comment from the drawer; append optimistically (with the current user as
+  // author, like candidate notes), then POST.
   const handleAddComment = (id: Id | undefined, body: string) => {
-    const optimistic = { id: `tmp-${Date.now()}`, author: '', authorInitials: '?', body, time: new Date().toISOString() }
+    const u = auth?.user as { name?: string; firstname?: string; lastname?: string; email?: string } | null | undefined
+    const authorName = (u?.name || [u?.firstname, u?.lastname].filter(Boolean).join(' ') || u?.email || '').trim()
+    const optimistic = { id: `tmp-${Date.now()}`, author: authorName, authorInitials: initialsOf(authorName || '?'), body, time: new Date().toISOString() }
     setSelected(prev => (prev && prev.id === id ? ({ ...prev, comments: [...(prev.comments ?? []), optimistic] } as TaskDetail) : prev))
     api.post(`/tasks/${id}/comments`, { body }).catch(() => notifyError(t('common:actionFailed')))
   }
@@ -216,6 +229,43 @@ function TasksPageInner() {
 
   // A new task created in the modal — prepend it to the list.
   const handleCreated = (raw: unknown) => { setTasks(prev => [mapTask(raw as ApiTask), ...prev]); setAddOpen(false) }
+
+  // ── Bulk selection + mutations ──
+  const clearSelection = () => setSelectedIds(new Set())
+  const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
+  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => {
+    const n = new Set(prev); ids.forEach(i => { if (allSelected) n.delete(i); else n.add(i) }); return n
+  })
+
+  // Optimistic bulk field-set: apply the local patch + PATCH each; `all` re-derives labels.
+  const runBulkPatch = async (localPatch: Record<string, unknown>, apiBody: Record<string, unknown>) => {
+    const ids = [...selectedIds]; if (ids.length === 0) return
+    const idSet = new Set(ids)
+    setTasks(prev => prev.map(x => idSet.has(x.id as Id) ? ({ ...x, ...localPatch } as Task) : x))
+    setSelected(prev => (prev && idSet.has(prev.id as Id) ? decorate({ ...prev, ...localPatch } as TaskDetail) : prev))
+    clearSelection()
+    const results = await Promise.allSettled(ids.map(id => api.patch(`/tasks/${id}`, apiBody)))
+    if (results.some(r => r.status === 'rejected')) notifyError(t('common:actionFailed'))
+    else notifySuccess(t('bulk.done', { count: ids.length }))
+  }
+  const bulkSetStatus   = (statusKey: string)   => runBulkPatch({ statusKey },   { status: statusKey })
+  const bulkSetPriority = (priorityKey: string) => runBulkPatch({ priorityKey }, { priority: priorityKey })
+  const bulkSetAssignee = (userId: string) => {
+    const sel = users.find(u => String(u.id) === String(userId))
+    const assignee = sel ? { name: sel.name, initials: initialsOf(sel.name), color: sel.avatar_color ?? null } : null
+    runBulkPatch({ assigneeId: userId || null, assignee }, { assignee_id: userId || null })
+  }
+  // Optimistic bulk archive (reversible soft-delete) via the dedicated endpoint;
+  // drop the rows + close the drawer if the open task was archived.
+  const bulkArchive = async () => {
+    const ids = [...selectedIds]; if (ids.length === 0) return
+    const idSet = new Set(ids)
+    setTasks(prev => prev.filter(x => !idSet.has(x.id as Id)))
+    if (selected && idSet.has(selected.id as Id)) closeDrawer()
+    clearSelection()
+    try { await api.post('/tasks/bulk/archive', { task_ids: ids }); notifySuccess(t('bulk.done', { count: ids.length })) }
+    catch { notifyError(t('common:actionFailed')) }
+  }
 
   // ── Insights strip: 3 donuts (filterable) + 4 KPI cards, equal footprint ──
   const insightDonuts: DonutSpec[] = [
@@ -264,15 +314,26 @@ function TasksPageInner() {
           </div>
         </div>
 
+        {/* Bulk action bar — shown above the table when ≥1 row is selected. */}
+        {view === 'table' && selectedIds.size > 0 && (
+          <div style={{ padding: '8px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+            <TasksBulkBar count={selectedIds.size} onClear={clearSelection}
+              onSetStatus={bulkSetStatus} onSetPriority={bulkSetPriority} onSetAssignee={bulkSetAssignee}
+              onArchive={bulkArchive} canArchive={canArchive}
+              statuses={statuses} priorities={priorities} users={users} />
+          </div>
+        )}
+
         {/* Content */}
         {view === 'table' ? (
           <>
             <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
               <TasksTable rows={filtered} loading={loading} error={error}
-                selectedId={selected?.id} onSelect={selectTask} stickyHeader scrollParentRef={tableScrollRef} />
+                selectedId={selected?.id} onSelect={selectTask} stickyHeader scrollParentRef={tableScrollRef}
+                selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
             </div>
             <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
-              pageSize={pageSize} onPageChange={setPage}
+              pageSize={pageSize} onPageChange={p => { setPage(p); setSelectedIds(new Set()) }}
               onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
           </>
         ) : (

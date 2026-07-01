@@ -37,12 +37,28 @@
   "drawer": {
     "label": "Activiteit",
     "createdAt": "Aangemaakt op {{date}}",
+    "markDone": "Markeer afgerond",
+    "tags": "Tags",
     "tabs": {
       "details": "Details",
       "links": "Koppelingen",
       "comments": "Reacties",
       "activity": "Activiteit"
     }
+  },
+  "bulk": {
+    "selected": "{{count}} geselecteerd",
+    "actions": "Massa-acties",
+    "deselect": "Deselecteren",
+    "changeStatus": "Status wijzigen",
+    "changePriority": "Prioriteit wijzigen",
+    "changeAssignee": "Toewijzen aan",
+    "searchStatus": "Zoek status…",
+    "searchPriority": "Zoek prioriteit…",
+    "searchAssignee": "Zoek gebruiker…",
+    "noUsers": "Geen gebruikers",
+    "archive": "Archiveren",
+    "done": "{{count}} taken bijgewerkt"
   },
   "details": {
     "title": "Activiteitdetails",
@@ -51,7 +67,7 @@
     "priority": "Prioriteit",
     "due": "Vervaldatum",
     "assignee": "Toegewezen aan",
-    "owner": "Eigenaar",
+    "owner": "Aangemaakt door",
     "description": "Omschrijving"
   },
   "comments": {
@@ -94,7 +110,7 @@
     "descriptionPlaceholder": "Invullen",
     "charsLeft": "Tekens beschikbaar: {{count}}",
     "detailsTitle": "Activiteit details",
-    "owner": "Eigenaar",
+    "owner": "Aangemaakt door",
     "candidate": "Kandidaat",
     "candidatePlaceholder": "Selecteer kandidaat",
     "customer": "Opdrachtgever",

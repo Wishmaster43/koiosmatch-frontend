@@ -47,6 +47,28 @@ export interface Vacancy {
 /** The enriched vacancy model rendered by the drawer tabs. */
 export interface VacancyDetail extends Vacancy {
   employmentLabel: string
+  // Raw lookup slugs + structured numbers, so the Details tab can edit in-place
+  // (bind a select to the value, resolve the label for read mode). Display labels
+  // (employmentLabel / seniority / education) stay for the read view.
+  employmentValue: string
+  seniorityValue: string
+  educationValue: string
+  // Contract forms this vacancy offers — same lookup as the candidate (multi-value).
+  contractTypes: string[]
+  // Structured address (edited as separate fields, shown as one composed line).
+  street: string
+  houseNumber: string
+  houseNumberSuffix: string
+  postalCode: string
+  city: string
+  province: string
+  // Experience range in years (from–to).
+  experienceMin: string
+  experienceMax: string
+  salaryMin: string
+  salaryMax: string
+  hoursMin: string
+  hoursMax: string
   location: string
   salary: string
   hours: string
@@ -65,6 +87,8 @@ export interface VacancyDetail extends Vacancy {
     phaseValue: string | number | null; phaseLabel: string; phaseColor: string; source: string; created: string
   }>
   customFields: Array<{ id: Id | undefined; name: string; value: unknown }>
+  // Per-vacancy custom-field values keyed by field key (for the Extra tab).
+  customFieldValues: Record<string, unknown>
   documents: Array<{ id: Id | undefined; name: string; size: unknown }>
   timeline: Array<{ id: Id | undefined; author: string; initials: string; description: string; ai: boolean; time: string }>
   notes: Array<{ id: Id | undefined; author: string; text: string; time: string }>
@@ -104,6 +128,16 @@ export interface ApiVacancy {
   // detail
   employment_type?: unknown
   employment_type_label?: string
+  contract_types?: string[]
+  street?: string
+  house_number?: string
+  house_number_suffix?: string
+  postcode?: string
+  postal_code?: string
+  city?: string
+  province?: string
+  experience_min_years?: number | string | null
+  experience_max_years?: number | string | null
   location?: string
   salary?: string
   salary_min?: number | string | null

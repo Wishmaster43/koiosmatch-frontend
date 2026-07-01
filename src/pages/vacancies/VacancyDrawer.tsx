@@ -14,6 +14,8 @@ import TimelineTab from './drawer/TimelineTab'
 import NotesTab from './drawer/NotesTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import MatchingTab from './drawer/MatchingTab'
+import ExtraTab from './drawer/ExtraTab'
+import { useVacancyCustomFields } from '@/lib/useVacancyCustomFields'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -23,10 +25,11 @@ interface DrawerCustomer { id: Id; name: string }
 
 // Tab list — config only; each renders one small component (one per tab/section).
 const TABS: { id: string; tKey: string; render: (v: VacancyDetail, onUpdate?: UpdateFn) => ReactNode }[] = [
-  { id: 'details',    tKey: 'details',    render: v => <DetailsTab vacancy={v} /> },
+  { id: 'details',    tKey: 'details',    render: (v, onUpdate) => <DetailsTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'applicants', tKey: 'applicants', render: v => <ApplicantsTab vacancy={v} /> },
   { id: 'matching',   tKey: 'matching',   render: (v, onUpdate) => <MatchingTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'publishing', tKey: 'publishing', render: (v, onUpdate) => <PublishingTab vacancy={v} onUpdate={onUpdate} /> },
+  { id: 'extra',      tKey: 'extra',      render: (v, onUpdate) => <ExtraTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'documents',  tKey: 'documents',  render: v => <DocumentsTab vacancy={v} /> },
   { id: 'timeline',   tKey: 'timeline',   render: v => <TimelineTab vacancy={v} /> },
   { id: 'notes',      tKey: 'notes',      render: v => <NotesTab vacancy={v} /> },
@@ -51,6 +54,9 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
   const { t } = useTranslation('vacancies')
   const { statuses } = useVacancyLookups()
   const { formatDate } = useDateFormat()
+  // The Extra tab only shows when the tenant has defined vacancy custom fields.
+  const { fields: customFieldDefs } = useVacancyCustomFields()
+  const visibleTabs = TABS.filter(tab => tab.id !== 'extra' || customFieldDefs.length > 0)
 
   // Tags are edited inline; seed from the record and reset when a different
   // vacancy is shown (adjust state during render — React's recommended pattern).
@@ -76,7 +82,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
       expanded={expanded}
       onToggleExpand={onToggleExpand}
       footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDate(v.created) || '—' })}</span>}
-      tabs={TABS.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: () => tab.render(v, onUpdate) }))}
+      tabs={visibleTabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: () => tab.render(v, onUpdate) }))}
       header={() => (
         <EntityHeader
           label={t('drawer.entityLabel')}

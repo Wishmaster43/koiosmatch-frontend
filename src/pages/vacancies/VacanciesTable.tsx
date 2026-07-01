@@ -8,10 +8,13 @@ import Avatar from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import { useDateFormat } from '@/lib/datetime'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
 const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
+const plainCell = { color: 'var(--text)', fontSize: 12 }
+const NEUTRAL_AVATAR = '#9CA3AF'
 
 // Soft horizontal count bar (Leads / Applications) — fill is relative to the
 // column max so a busy vacancy reads at a glance. Number stays legible on top.
@@ -50,6 +53,12 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()
   const { statusMeta } = useVacancyLookups()
+  // Tenant display settings (mirror the candidate table). Coloured chips carry
+  // meaning (status/published/owner), so they default ON; a tenant can flatten them.
+  const settings = useAllSettings()
+  const colorStatus    = getBoolSetting(settings, 'vacancy_table_color_status', true)
+  const colorPublished = getBoolSetting(settings, 'vacancy_table_color_published', true)
+  const colorOwner     = getBoolSetting(settings, 'vacancy_table_color_owner', true)
 
   // Column maxima so the Leads/Applications bars are relative to the page.
   const maxLeads = useMemo(() => Math.max(1, ...rows.map(r => r.leadsCount || 0)), [rows])
@@ -58,7 +67,8 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
   const columns: Column<Vacancy>[] = [
     {
       key: 'title', header: t('columns.title'), sortable: true, sortValue: r => r.title,
-      render: r => <span style={{ fontWeight: 500, color: 'var(--text)' }}>{r.title}</span>,
+      sticky: true, width: 260,
+      render: r => <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.title}</span>,
     },
     {
       key: 'code', header: t('columns.code'), nowrap: true, sortable: true, sortValue: r => r.code,
@@ -70,7 +80,8 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
       render: r => {
         // Prefer the resolved label/colour from the row; fall back to the lookup.
         const m = r.statusLabel ? { label: r.statusLabel, color: r.statusColor } : statusMeta(r.statusValue != null ? String(r.statusValue) : null)
-        return m.label ? <StatusPill label={m.label} color={m.color} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>
+        if (!m.label) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        return colorStatus ? <StatusPill label={m.label} color={m.color} /> : <span style={plainCell}>{m.label}</span>
       },
     },
     {
@@ -83,18 +94,26 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
     },
     {
       key: 'published', header: t('columns.published'), nowrap: true, sortable: true, sortValue: r => (r.published ? 1 : 0),
-      render: r => r.published
-        ? <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
+      render: r => {
+        if (!r.published) return <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{t('publishedState.no')}</span>
+        // Icon + text so the "published" state never relies on colour alone (a11y).
+        return colorPublished ? (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
             padding: '3px 8px', borderRadius: 99, background: 'var(--color-success-bg)', color: 'var(--color-success)' }}>
             <Globe size={12} /> {t('publishedState.yes')}
           </span>
-        : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{t('publishedState.no')}</span>,
+        ) : (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, ...plainCell }}>
+            <Globe size={12} /> {t('publishedState.yes')}
+          </span>
+        )
+      },
     },
     {
       key: 'owner', header: t('columns.owner'), sortable: true, sortValue: r => r.owner?.name ?? '',
       render: r => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {r.owner?.name && <Avatar initials={r.owner.initials} size={22} color={r.owner.color} />}
+          {r.owner?.name && <Avatar initials={r.owner.initials} size={22} color={colorOwner ? r.owner.color : NEUTRAL_AVATAR} soft />}
           <span style={mutedCell}>{r.owner?.name || '—'}</span>
         </div>
       ),
@@ -129,6 +148,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
       emptyText={t('page.empty')}
       stickyHeader={stickyHeader}
       scrollParentRef={scrollParentRef}
+      defaultSort={{ key: 'created', dir: 'desc' }}
     />
   )
 }

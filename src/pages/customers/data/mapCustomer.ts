@@ -117,5 +117,7 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     openVacanciesCount: c.open_vacancies_count ?? c.openVacanciesCount ?? 0,
     activeMatchesCount: c.active_matches_count ?? c.activeMatchesCount ?? 0,
     created: c.created_at ?? c.created ?? '',
+    logo: c.logo ?? c.logo_url ?? null,
+    koiosAdvice: c.koios_advice ?? c.koiosAdvice ?? null,
   }
 }

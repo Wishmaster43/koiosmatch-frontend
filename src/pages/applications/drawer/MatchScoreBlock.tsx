@@ -31,8 +31,20 @@ function ScoreRing({ value, size = 26 }: { value: number; size?: number }) {
   )
 }
 
-// One criterion: read = label + ring + % + note; edit = label + slider + %.
-function CriterionCard({ criterion, hardLabel, editing, onScore }: { criterion: Criterion; hardLabel: string; editing: boolean; onScore: (v: number) => void }) {
+// Weight indicator — filled dots out of 5 (the criterion's configured weight).
+function WeightDots({ weight, title }: { weight: number; title: string }) {
+  const n = Math.max(0, Math.min(5, Math.round(weight)))
+  return (
+    <span title={`${title} ${n}/5`} aria-label={`${title} ${n}/5`} style={{ display: 'inline-flex', gap: 2, alignItems: 'center' }}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <span key={i} style={{ width: 5, height: 5, borderRadius: '50%', background: i < n ? 'var(--text-muted)' : 'var(--border)' }} />
+      ))}
+    </span>
+  )
+}
+
+// One criterion: read = label + weight + ring + % + note; edit = label + weight + slider + %.
+function CriterionCard({ criterion, hardLabel, weightTitle, editing, onScore }: { criterion: Criterion; hardLabel: string; weightTitle: string; editing: boolean; onScore: (v: number) => void }) {
   const [open, setOpen] = useState(false)
 
   if (editing) {
@@ -44,6 +56,7 @@ function CriterionCard({ criterion, hardLabel, editing, onScore }: { criterion: 
             <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
               background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>{hardLabel}</span>
           )}
+          {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
           <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{criterion.score}%</span>
         </div>
         <Slider value={criterion.score} max={100} step={5} onChange={onScore} color={scoreColor(criterion.score)} ariaLabel={criterion.label} />
@@ -62,6 +75,7 @@ function CriterionCard({ criterion, hardLabel, editing, onScore }: { criterion: 
           <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
             background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>{hardLabel}</span>
         )}
+        {criterion.weight != null && <WeightDots weight={criterion.weight} title={weightTitle} />}
         <ScoreRing value={criterion.score} />
         <span style={{ fontSize: 13, fontWeight: 600, color: scoreColor(criterion.score), minWidth: 36, textAlign: 'right' }}>{criterion.score}%</span>
         <button onClick={() => setOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex' }}>
@@ -153,7 +167,7 @@ export default function MatchScoreBlock({ score, criteria = [], summary, onSave,
       {shownCriteria.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {shownCriteria.map((c, i) => (
-            <CriterionCard key={c.key ?? i} criterion={c} hardLabel={t('matchScore.hard')}
+            <CriterionCard key={c.key ?? i} criterion={c} hardLabel={t('matchScore.hard')} weightTitle={t('matchScore.weightLabel')}
               editing={editing} onScore={v => setCriterionScore(i, v)} />
           ))}
         </div>

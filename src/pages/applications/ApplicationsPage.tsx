@@ -8,12 +8,14 @@ import { isAbortError } from '@/lib/mocks'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
+import { useUsers } from '@/lib/queries'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import ApplicationsTable from './ApplicationsTable'
 import ApplicationsBoard from './ApplicationsBoard'
 import type { BoardPhase } from './ApplicationsBoard'
 import ApplicationDrawer from './ApplicationDrawer'
+import ApplicationsBulkBar from './ApplicationsBulkBar'
 import AddApplicationModal from './AddApplicationModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { mapApplication, mapApplicationDetail } from './data/mapApplication'
@@ -46,6 +48,8 @@ export default function ApplicationsPage() {
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Funnel phases come from the tenant lookup (Settings → Funnel stages), never hardcoded.
   const { funnelTypes, funnelMeta } = useLookups()
+  // Tenant users — options for the editable recruiter (owner) picker in the drawer.
+  const { data: users = [] } = useUsers() as { data?: Array<{ id: Id; name: string }> }
 
   const [applications, setApplications] = useState<Application[]>([])
   const [loading,      setLoading]      = useState(true)
@@ -63,6 +67,16 @@ export default function ApplicationsPage() {
   const [addOpen,        setAddOpen]        = useState(false)
   const [stats,          setStats]          = useState<AppStats | null>(null)
   const [showArchived,   setShowArchived]   = useState(false)
+  const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
+
+  // Clear the selection whenever the visible set changes (bucket/filters/paging).
+  useEffect(() => { setSelectedIds(new Set()) },
+    [bucket, showArchived, page, pageSize, selectedPhase, selectedOwner, selectedSource, selectedVac])
+
+  // Row-selection handlers for the table checkboxes + bulk bar.
+  const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
+  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => {
+    const n = new Set(prev); ids.forEach(i => allSelected ? n.delete(i) : n.add(i)); return n })
 
   // Board columns = the funnel lookup, normalised to { key, label, color }.
   const phases = useMemo<BoardPhase[]>(() => funnelTypes.map(f => ({ key: f.value, label: f.label, color: f.color })), [funnelTypes])
@@ -173,18 +187,29 @@ export default function ApplicationsPage() {
   // Kanban move: set the new phase + bucket; label/colour re-resolve from the lookup.
   const handleMove = (id: Id, phaseKey: string) => {
     setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey, bucket: bucketOfPhase(phaseKey) } : a))
+    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, phaseKey, bucket: bucketOfPhase(phaseKey) } as ApplicationDetail) : prev))
     api.patch(`/applications/${id}`, { phase_key: phaseKey }).catch(() => notifyError(t('common:actionFailed')))
+  }
+
+  // Reassign an application's recruiter (owner); optimistic + PATCH owner_id.
+  const handleOwner = (id: Id, ownerId: string) => {
+    const u = users.find(x => String(x.id) === String(ownerId))
+    if (!u) return
+    const initials = u.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+    const owner = { id: ownerId, name: u.name, initials, color: null }
+    setApplications(prev => prev.map(a => a.id === id ? { ...a, owner } : a))
+    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner } as ApplicationDetail) : prev))
+    api.patch(`/applications/${id}`, { owner_id: ownerId }).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // Reject an application: move it to the rejected phase/bucket optimistically.
   const handleReject = (id: Id | undefined, payload: RejectPayload) => {
     const patch = { phaseKey: 'rejected', bucket: 'rejected',
-      rejection: { reason_label: payload.reason_label, note: payload.note, channel: payload.channel } }
+      rejection: { reason_label: payload.reason_label, note: payload.note } }
     setApplications(prev => prev.map(a => a.id === id ? ({ ...a, ...patch } as Application) : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as ApplicationDetail) : prev))
-    api.post(`/applications/${id}/reject`, {
-      reason_id: payload.reason_id, note: payload.note, channel: payload.channel, message: payload.message,
-    }).catch(() => {})
+    // The message (channel + template) is sent by the rejection workflow.
+    api.post(`/applications/${id}/reject`, { reason_id: payload.reason_id, note: payload.note }).catch(() => {})
   }
 
   // A freshly created application: prepend to the list and open its drawer.
@@ -224,6 +249,29 @@ export default function ApplicationsPage() {
     api.post(`/applications/${id}/restore`)
       .then(() => notifySuccess(t('restore.done')))
       .catch(() => { setApplications(snapshot); notifyError(t('common:actionFailed')) })
+  }
+
+  // Bulk: move every selected application to one funnel phase; optimistic + PATCH each.
+  const bulkSetPhase = (phaseKey: string) => {
+    const ids = [...selectedIds]
+    if (!ids.length) return
+    setApplications(prev => prev.map(a => a.id != null && selectedIds.has(a.id as Id) ? { ...a, phaseKey, bucket: bucketOfPhase(phaseKey) } : a))
+    setSelectedIds(new Set())
+    Promise.allSettled(ids.map(id => api.patch(`/applications/${id}`, { phase_key: phaseKey })))
+      .then(() => notifySuccess(t('bulk.done', { count: ids.length })))
+  }
+
+  // Bulk: detach (soft-delete) every selected application; optimistic + revert on any failure.
+  const bulkDetach = () => {
+    const ids = [...selectedIds]
+    if (!ids.length) return
+    const snapshot = applications
+    setApplications(prev => prev.map(a => a.id != null && selectedIds.has(a.id as Id) ? { ...a, archived: true } : a))
+    setSelectedIds(new Set())
+    Promise.allSettled(ids.map(id => api.delete(`/applications/${id}`))).then(rs => {
+      if (rs.some(r => r.status === 'rejected')) { setApplications(snapshot); notifyError(t('common:actionFailed')) }
+      else notifySuccess(t('bulk.done', { count: ids.length }))
+    })
   }
 
   // ── Insights strip: 3 donuts (filterable) + 4 KPI cards, equal footprint ──
@@ -294,9 +342,17 @@ export default function ApplicationsPage() {
         {/* Content */}
         {view === 'table' ? (
           <>
+            {/* Bulk action bar — shown above the table when ≥1 row is selected. */}
+            {selectedIds.size > 0 && (
+              <div style={{ padding: '8px 24px 0' }}>
+                <ApplicationsBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
+                  onSetPhase={bulkSetPhase} onDetach={bulkDetach} canManage={canManage} phases={funnelTypes} />
+              </div>
+            )}
             <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
               <ApplicationsTable rows={filtered} loading={loading} error={error}
-                selectedId={selected?.id} onSelect={selectApplication} stickyHeader />
+                selectedId={selected?.id} onSelect={selectApplication} stickyHeader
+                selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
             </div>
             <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
               pageSize={pageSize} onPageChange={setPage}
@@ -317,6 +373,9 @@ export default function ApplicationsPage() {
         onToggleExpand={() => setExpanded(v => !v)}
         onReject={handleReject}
         onAdjustScore={handleAdjustScore}
+        onPhaseChange={(id, key) => { if (id != null) handleMove(id, key) }}
+        onOwnerChange={(id, ownerId) => { if (id != null) handleOwner(id, ownerId) }}
+        users={users}
         onDetach={handleDetach}
         onRestore={handleRestore}
         canManage={canManage}

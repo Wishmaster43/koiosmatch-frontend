@@ -64,6 +64,18 @@ const labelOf = (x: unknown): string => {
   return x == null ? '' : String(x)
 }
 
+// Resolve the raw slug/value of a lookup (object → value/id, scalar → itself).
+const valueOf = (x: unknown): string => {
+  if (x && typeof x === 'object') {
+    const o = x as Loose
+    return String(o.value ?? o.id ?? '')
+  }
+  return x == null ? '' : String(x)
+}
+
+// Numeric-ish field → string for the form (empty when absent).
+const numStr = (x: unknown): string => (x == null ? '' : String(x))
+
 /**
  * mapVacancyDetail — raw API detail (GET /vacancies/{id}) → the enriched shape the
  * drawer tabs render. Builds on mapVacancy and normalises the nested objects
@@ -76,6 +88,25 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
   return {
     ...base,
     employmentLabel: labelOf(raw.employment_type) || raw.employment_type_label || '',
+    // Raw values for the in-place editor (bind selects to these, show the labels above).
+    employmentValue: valueOf(raw.employment_type),
+    seniorityValue: valueOf(raw.seniority),
+    educationValue: valueOf(raw.education),
+    // Contract forms (multi) — same lookup as the candidate.
+    contractTypes: Array.isArray(raw.contract_types) ? raw.contract_types.map(String) : [],
+    // Structured address for the in-place editor.
+    street: raw.street ?? '',
+    houseNumber: raw.house_number ?? '',
+    houseNumberSuffix: raw.house_number_suffix ?? '',
+    postalCode: raw.postcode ?? raw.postal_code ?? '',
+    city: raw.city ?? '',
+    province: raw.province ?? '',
+    experienceMin: numStr(raw.experience_min_years),
+    experienceMax: numStr(raw.experience_max_years),
+    salaryMin: numStr(raw.salary_min),
+    salaryMax: numStr(raw.salary_max),
+    hoursMin: numStr(raw.hours_min),
+    hoursMax: numStr(raw.hours_max),
     location: raw.location ?? '',
     salary: range(raw.salary, raw.salary_min, raw.salary_max, raw.salary_period ?? ''),
     hours: range(raw.hours, raw.hours_min, raw.hours_max, raw.hours_unit ?? ''),
@@ -89,6 +120,7 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     // Per-vacancy application settings (cv/cover_letter/photo/remarks/interview_consent → required|optional|hidden).
     applicationSettings: raw.application_settings ?? {},
     // Per-vacancy AI matching weights (6 dimensions, int 1..5) for the Matching tab.
+    // (Global matcher strictness lives in /settings/matching, not on the vacancy.)
     matchWeights: raw.match_weights ?? {},
     // Job-board channels with their published state.
     channels: (raw.channels ?? raw.published_channels ?? []).map(c => ({
@@ -111,7 +143,14 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
         created: a.created_at ?? '',
       }
     }),
-    customFields: (raw.custom_fields ?? []).map(f => ({ id: f.id, name: f.name ?? f.label ?? '', value: f.value ?? '' })),
+    customFields: (Array.isArray(raw.custom_fields) ? raw.custom_fields : []).map(f => ({ id: f.id, name: f.name ?? f.label ?? '', value: f.value ?? '' })),
+    // Custom-field values as a map (backend may send custom_fields as an object, or a
+    // separate custom_field_values map) — used by the Extra tab.
+    customFieldValues: (() => {
+      const cf = raw.custom_fields as unknown
+      if (cf && typeof cf === 'object' && !Array.isArray(cf)) return cf as Record<string, unknown>
+      return (raw.custom_field_values ?? {}) as Record<string, unknown>
+    })(),
     documents: (raw.documents ?? []).map(d => ({ id: d.id, name: d.name ?? '', size: d.size ?? '' })),
     timeline: (raw.timeline ?? []).map(ev => ({
       id: ev.id, author: ev.author ?? '', initials: ev.author_initials ?? initialsOf(ev.author ?? ''),

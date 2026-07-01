@@ -13,12 +13,14 @@ const Slider = SliderJs as unknown as ComponentType<AnyProps>
 const DIMENSIONS = ['qualifications', 'technical_fit', 'soft_skills', 'cultural_alignment', 'career_aspirations', 'location']
 
 /**
- * MatchingTab — per-vacancy AI matching weights: one slider per dimension (1..5)
- * saying how important it is for THIS vacancy. The AI weighs candidates with these
- * (feeds match_criteria[].weight). Saves to PATCH /vacancies/{id} { match_weights }.
+ * MatchingTab — the vacancy's per-dimension importance for the AI matcher: one
+ * slider per dimension (1..5). The GLOBAL matcher strictness lives in Settings →
+ * Vacancies → Matching (/settings/matching); this is the per-vacancy weight set.
+ * Saves to PATCH /vacancies/{id} { match_weights }.
  */
 export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void }) {
   const { t } = useTranslation('vacancies')
+
   // Local weights, defaulting any missing dimension to 3 (balanced).
   const [weights, setWeights] = useState<Record<string, number>>(() => {
     const w = (v.matchWeights ?? {}) as Record<string, unknown>

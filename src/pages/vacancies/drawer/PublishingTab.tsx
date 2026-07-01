@@ -1,10 +1,15 @@
 import { useState } from 'react'
-import type { ComponentType, ReactNode } from 'react'
+import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import SelectMenuJs from '@/components/ui/SelectMenu'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
+
+// Tenant default a vacancy inherits when it has no application settings of its own.
+const VACANCY_APP_DEFAULTS_KEY = 'vacancy_default_application_settings'
+const FALLBACK_APP_SETTINGS = { cv: 'required', cover_letter: 'optional', photo: 'optional', remarks: 'optional', interview_consent: 'hidden' }
 
 type AnyProps = Record<string, unknown>
 const SelectMenu = SelectMenuJs as unknown as ComponentType<AnyProps>
@@ -34,13 +39,17 @@ const APP_FIELDS = ['cv', 'cover_letter', 'photo', 'remarks', 'interview_consent
 export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void }) {
   const { t } = useTranslation('vacancies')
   const { channels: channelLookup } = useVacancyLookups()
+  // Tenant default application settings — a new/empty vacancy inherits these.
+  const allSettings = useAllSettings()
+  const tenantDefaults = getJsonSetting<Record<string, unknown>>(allSettings, VACANCY_APP_DEFAULTS_KEY, FALLBACK_APP_SETTINGS)
 
   // Merge the configured channels with this vacancy's published state.
   const publishedMap: Record<string, unknown> = Object.fromEntries((v.channels ?? []).map(c => [c.value, c.published]))
   const [channels, setChannels] = useState<ChannelState[]>(
     channelLookup.map(c => ({ value: c.value, label: c.label, published: Boolean(publishedMap[c.value]) }))
   )
-  const [settings, setSettings] = useState<Record<string, unknown>>((v.applicationSettings ?? {}) as Record<string, unknown>)
+  // Vacancy's own settings win; the tenant default fills any gap.
+  const [settings, setSettings] = useState<Record<string, unknown>>({ ...tenantDefaults, ...((v.applicationSettings ?? {}) as Record<string, unknown>) })
 
   // Toggle a channel's published state and persist the full channel set.
   const toggleChannel = (value: string, next: boolean) => {
@@ -92,22 +101,7 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
           </div>
         ))}
       </div>
-
-      {/* Custom fields */}
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('publishing.customFields')}</div>
-      {(v.customFields?.length ?? 0) === 0 ? (
-        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('publishing.noCustomFields')}</div>
-      ) : (
-        <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-          {v.customFields.map((f, i) => (
-            <div key={f.id ?? i} style={{ display: 'flex', gap: 16, padding: '9px 12px',
-              borderBottom: i < v.customFields.length - 1 ? '1px solid var(--border)' : 'none' }}>
-              <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 130, flexShrink: 0 }}>{f.name}</span>
-              <span style={{ fontSize: 12, color: 'var(--text)' }}>{(f.value as ReactNode) || '-'}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Custom fields moved to their own conditional "Extra" tab (mirror candidate). */}
     </div>
   )
 }

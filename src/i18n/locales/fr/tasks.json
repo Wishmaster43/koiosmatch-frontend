@@ -43,7 +43,8 @@
       "comments": "Commentaires",
       "activity": "Activité"
     },
-    "markDone": "Marquer comme terminé"
+    "markDone": "Marquer comme terminé",
+    "tags": "Tags"
   },
   "details": {
     "title": "Détails de l'activité",

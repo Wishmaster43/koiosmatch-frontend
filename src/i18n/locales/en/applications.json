@@ -36,7 +36,8 @@
     "source": "Source",
     "owner": "Owner",
     "client": "Client",
-    "status": "Candidate status"
+    "status": "Candidate status",
+    "created": "Created"
   },
   "kpi": {
     "totalActive": "Total active",
@@ -79,6 +80,7 @@
     "title": "Match score",
     "overall": "Overall",
     "hard": "Hard",
+    "weightLabel": "Weight",
     "edit": "Adjust",
     "save": "Save",
     "cancel": "Cancel",
@@ -97,19 +99,9 @@
     "timeline": "Timeline"
   },
   "vacancyDetail": {
-    "id": "Vacancy ID",
-    "status": "Status",
-    "employment": "Employment type",
-    "location": "Location",
-    "salary": "Salary",
-    "hours": "Weekly hours",
-    "experience": "Experience",
-    "seniority": "Seniority",
-    "education": "Education",
-    "branch": "Industry",
-    "category": "Category",
-    "skills": "Required skills",
-    "tags": "Tags"
+    "loading": "Loading vacancy…",
+    "error": "Failed to load the vacancy.",
+    "empty": "No vacancy linked."
   },
   "interview": {
     "title": "WhatsApp interview",
@@ -127,6 +119,7 @@
   },
   "notes": {
     "title": "Notes",
+    "type": "Type",
     "new": "New note",
     "empty": "No notes yet.",
     "hint": "Add internal notes to keep your team aligned on this candidate.",
@@ -137,17 +130,21 @@
   "timeline": {
     "empty": "No activity yet."
   },
+  "bulk": {
+    "selected": "{{count}} selected",
+    "actions": "Bulk actions",
+    "deselect": "Deselect",
+    "changePhase": "Change phase",
+    "searchPhase": "Search phase…",
+    "detach": "Detach",
+    "done": "{{count}} updated"
+  },
   "rejection": {
     "title": "Rejection",
     "reason": "Reason",
     "reasonPlaceholder": "Select a reason",
     "note": "Note",
     "notePlaceholder": "Optional note…",
-    "channel": "Channel",
-    "channelEmail": "Email",
-    "channelWhatsapp": "WhatsApp",
-    "preview": "Message preview",
-    "noTemplate": "No template for this reason yet — set one in Settings.",
     "confirm": "Reject",
     "rejected": "Rejected",
     "aiAdvice": "Koios advises rejection",

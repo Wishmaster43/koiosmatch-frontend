@@ -33,5 +33,27 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('channels'            in patch) body.published_channels   = patch.channels
   if ('applicationSettings' in patch) body.application_settings = patch.applicationSettings
   if ('matchWeights'        in patch) body.match_weights        = patch.matchWeights
+  // Details tab fields — contract forms, lookup slugs, structured address/salary/hours.
+  if ('contractTypes'   in patch) body.contract_types     = patch.contractTypes
+  if ('seniorityValue'  in patch) body.seniority          = patch.seniorityValue
+  if ('educationValue'  in patch) body.education          = patch.educationValue
+  if ('industry'        in patch) body.industry           = patch.industry
+  if ('category'        in patch) body.category           = patch.category
+  if ('street'          in patch) body.street             = patch.street
+  if ('houseNumber'     in patch) body.house_number       = patch.houseNumber
+  if ('houseNumberSuffix' in patch) body.house_number_suffix = patch.houseNumberSuffix
+  if ('postalCode'      in patch) body.postcode           = patch.postalCode
+  if ('city'            in patch) body.city               = patch.city
+  if ('province'        in patch) body.province           = patch.province
+  if ('experienceMin'   in patch) body.experience_min_years = patch.experienceMin
+  if ('experienceMax'   in patch) body.experience_max_years = patch.experienceMax
+  if ('salaryMin'       in patch) body.salary_min         = patch.salaryMin
+  if ('salaryMax'       in patch) body.salary_max         = patch.salaryMax
+  if ('hoursMin'        in patch) body.hours_min          = patch.hoursMin
+  if ('hoursMax'        in patch) body.hours_max          = patch.hoursMax
+  if ('description'     in patch) body.description        = patch.description
+  if ('skills'          in patch) body.skills             = patch.skills
+  // Extra tab — per-vacancy custom-field values map.
+  if ('customFieldValues' in patch) body.custom_fields    = patch.customFieldValues
   return body
 }

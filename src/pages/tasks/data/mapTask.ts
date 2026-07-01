@@ -50,6 +50,7 @@ export function mapTask(t: ApiTask = {}): Task {
     owner: { name: owner.name ?? t.owner_name ?? '' },
     due: t.due_date ?? t.due_at ?? '',
     completedAt: t.completed_at ?? '',
+    tags: Array.isArray(t.tags) ? t.tags.filter(Boolean) : [],
     links,
     linkLabel: firstLinkLabel(links),
     commentCount: t.comment_count ?? (t.comments?.length ?? 0),

@@ -36,7 +36,8 @@
     "source": "Bron",
     "owner": "Eigenaar",
     "client": "Klant",
-    "status": "Status van de sollicitant"
+    "status": "Status van de sollicitant",
+    "created": "Aangemaakt"
   },
   "kpi": {
     "totalActive": "Totaal actief",
@@ -79,6 +80,7 @@
     "title": "Match score",
     "overall": "Algemeen",
     "hard": "Hard",
+    "weightLabel": "Weging",
     "edit": "Aanpassen",
     "save": "Opslaan",
     "cancel": "Annuleren",
@@ -97,19 +99,9 @@
     "timeline": "Tijdlijn"
   },
   "vacancyDetail": {
-    "id": "Vacature-ID",
-    "status": "Status",
-    "employment": "Soort dienstverband",
-    "location": "Locatie",
-    "salary": "Salaris",
-    "hours": "Wekelijkse werktijden",
-    "experience": "Ervaring",
-    "seniority": "Senioriteit",
-    "education": "Opleiding",
-    "branch": "Branche",
-    "category": "Categorie",
-    "skills": "Vereiste vaardigheden",
-    "tags": "Tags"
+    "loading": "Vacature laden…",
+    "error": "Vacature laden is mislukt.",
+    "empty": "Geen vacature gekoppeld."
   },
   "interview": {
     "title": "WhatsApp-interview",
@@ -127,6 +119,7 @@
   },
   "notes": {
     "title": "Notities",
+    "type": "Type",
     "new": "Nieuwe notitie",
     "empty": "Nog geen notities.",
     "hint": "Voeg interne notities toe om je team op één lijn te houden over deze kandidaat.",
@@ -137,17 +130,21 @@
   "timeline": {
     "empty": "Nog geen activiteit."
   },
+  "bulk": {
+    "selected": "{{count}} geselecteerd",
+    "actions": "Bulk-acties",
+    "deselect": "Deselecteren",
+    "changePhase": "Fase wijzigen",
+    "searchPhase": "Fase zoeken…",
+    "detach": "Ontkoppelen",
+    "done": "{{count}} bijgewerkt"
+  },
   "rejection": {
     "title": "Afwijzing",
     "reason": "Reden",
     "reasonPlaceholder": "Selecteer reden",
     "note": "Toelichting",
     "notePlaceholder": "Optionele toelichting…",
-    "channel": "Kanaal",
-    "channelEmail": "E-mail",
-    "channelWhatsapp": "WhatsApp",
-    "preview": "Voorvertoning bericht",
-    "noTemplate": "Nog geen template voor deze reden — stel er één in bij Instellingen.",
     "confirm": "Afwijzen",
     "rejected": "Afgewezen",
     "aiAdvice": "Koios adviseert afwijzen",

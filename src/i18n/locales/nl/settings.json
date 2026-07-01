@@ -48,6 +48,7 @@
   },
   "nav": {
     "candidate_display": "Tabelweergave",
+    "application_display": "Tabelweergave",
     "candidate_custom_fields": "Eigen velden",
     "driver_licenses": "Rijbewijzen",
     "kpis": "KPI's",
@@ -121,10 +122,12 @@
     "vacancy_education": "Opleiding",
     "vacancy_channels": "Vacaturesites",
     "vacancy_fields": "Aangepaste velden",
+    "vacancy_app_defaults": "Sollicitatie-instellingen",
     "vacancy_matching": "Matching",
     "task_statuses": "Statussen",
     "task_types": "Activiteit-types",
     "task_priorities": "Prioriteiten",
+    "task_display": "Tabelweergave",
     "customer_statuses": "Klant statussen",
     "location_statuses": "Locatie statussen",
     "department_statuses": "Afdeling statussen",
@@ -134,7 +137,8 @@
     "document_types": "Documenttypes",
     "candidate_phases": "Fase",
     "candidate_required_fields": "Verplichte velden",
-    "functions": "Functies"
+    "functions": "Functies",
+    "customer_display": "Tabelweergave"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -228,6 +232,25 @@
       },
       "candidate_table_color_phase": {
         "label": "Fase"
+      }
+    }
+  },
+  "applicationDisplay": {
+    "title": "Tabelweergave",
+    "subtitle": "Per kolom: gekleurde labels of platte tekst. De KPI-grafieken houden altijd hun kleur.",
+    "fields": {
+      "application_table_color_score": {
+        "label": "Match score"
+      },
+      "application_table_color_phase": {
+        "label": "Fase"
+      },
+      "application_table_color_status": {
+        "label": "Kandidaatstatus"
+      },
+      "application_table_color_owner": {
+        "label": "Eigenaar-kleur",
+        "description": "Aan = het eigenaar-avatar gebruikt de recruiter-kleur. Uit = neutraal grijs."
       }
     }
   },
@@ -423,7 +446,9 @@
     "educationAdd": "Niveau toevoegen",
     "channelsTitle": "Vacaturesites",
     "channelsSubtitle": "Beheer de vacaturesites waarop je vacatures kunt publiceren.",
-    "channelsAdd": "Vacaturesite toevoegen"
+    "channelsAdd": "Vacaturesite toevoegen",
+    "appDefaultsTitle": "Sollicitatie-instellingen",
+    "appDefaultsSubtitle": "De standaard die een nieuwe vacature overneemt. Per vacature aanpasbaar in de drawer."
   },
   "tasks": {
     "statusTitle": "Statussen",
@@ -435,6 +460,21 @@
     "priorityTitle": "Prioriteiten",
     "prioritySubtitle": "Beheer de prioriteiten van je taken (laag, normaal, hoog).",
     "priorityAdd": "Prioriteit toevoegen"
+  },
+  "taskDisplay": {
+    "title": "Tabelweergave",
+    "subtitle": "Per kolom: gekleurde labels of platte tekst. Het takenbord houdt zijn kleuren altijd.",
+    "fields": {
+      "task_table_color_status": {
+        "label": "Status"
+      },
+      "task_table_color_priority": {
+        "label": "Prioriteit"
+      },
+      "task_table_color_type": {
+        "label": "Type"
+      }
+    }
   },
   "rejection": {
     "title": "Afwijsredenen",
@@ -1274,5 +1314,21 @@
     "freeEntry": "Vrije invoer toestaan",
     "freeEntryHint": "Aan: recruiters kunnen een eigen functie typen (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
     "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat recruiters functies typen die niet in de lijst staan — dit kan de datakwaliteit verlagen."
+  },
+  "customerDisplay": {
+    "title": "Tabelweergave",
+    "subtitle": "Per kolom: gekleurde labels of platte tekst. De KPI-grafieken houden altijd hun kleuren.",
+    "fields": {
+      "customer_table_color_status": {
+        "label": "Status"
+      },
+      "customer_table_color_koios": {
+        "label": "Koios AI"
+      },
+      "customer_table_color_owner": {
+        "label": "Eigenaarkleur",
+        "description": "Aan = de eigenaar-avatar gebruikt de kleur van de accountmanager. Uit = neutraal grijs."
+      }
+    }
   }
 }

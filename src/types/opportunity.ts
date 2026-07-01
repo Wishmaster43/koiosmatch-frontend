@@ -21,6 +21,28 @@ export interface Opportunity {
   ownerId: Id | null
   date: string
   expectedCloseAt: string | null
+  // Deal magnitude in hours (staffing) alongside the € value.
+  hours: number | null
+  hoursPeriod: string
+  // Contract term as start/end dates (duration derives from these).
+  startDate: string | null
+  endDate: string | null
+  // Service/sector + agreement type (tenant lookups).
+  serviceType: string
+  serviceTypeValue: string | null
+  serviceTypeColor: string
+  serviceTypeId: Id | null
+  agreementType: string
+  agreementTypeValue: string | null
+  agreementTypeColor: string
+  agreementTypeId: Id | null
+  // Org hierarchy: customer → location → department → contact.
+  location: string
+  locationId: Id | null
+  department: string
+  departmentId: Id | null
+  contact: string
+  contactId: Id | null
 }
 
 /** Raw API opportunity record (read defensively). */
@@ -48,5 +70,20 @@ export interface ApiOpportunity {
   created_at?: string
   expected_close_at?: string | null
   close_date?: string
+  hours?: number | string | null
+  hours_period?: string
+  start_date?: string | null
+  end_date?: string | null
+  service_type?: { id?: Id; value?: string; label?: string; color?: string } | string
+  service_type_id?: Id
+  agreement_type?: { id?: Id; value?: string; label?: string; color?: string } | string
+  agreement_type_id?: Id
+  location?: { id?: Id; name?: string }
+  location_id?: Id
+  location_name?: string
+  department?: { id?: Id; name?: string }
+  department_id?: Id
+  contact?: { id?: Id; name?: string }
+  contact_id?: Id
   [k: string]: unknown
 }

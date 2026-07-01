@@ -17,7 +17,9 @@
     "contacts": "Contacts",
     "openVacancies": "Open vacancies",
     "city": "City",
-    "industry": "Industry"
+    "industry": "Industry",
+    "createdAt": "Created on",
+    "koios": "Koios AI"
   },
   "filters": {
     "search": "Search",
@@ -69,7 +71,10 @@
       "statistics": "Statistics",
       "documents": "Documents",
       "notes": "Notes"
-    }
+    },
+    "changelog": "Changelog",
+    "photoUpload": "Upload logo",
+    "photoRemove": "Remove logo"
   },
   "overview": {
     "general": "General",
@@ -203,7 +208,13 @@
     "overviewTitle": "Overview"
   },
   "documents": {
-    "empty": "No documents yet."
+    "empty": "No documents yet.",
+    "add": "Add",
+    "search": "Search",
+    "docType": "Document type",
+    "name": "Name",
+    "type": "Type",
+    "size": "Size"
   },
   "notes": {
     "notes": "Notes",
@@ -295,5 +306,8 @@
     "create": "Add",
     "cancel": "Cancel",
     "required": "Required field"
+  },
+  "changelog": {
+    "empty": "No changes yet."
   }
 }

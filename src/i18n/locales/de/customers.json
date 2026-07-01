@@ -17,7 +17,9 @@
     "contacts": "Kontakte",
     "openVacancies": "Offene Stellen",
     "city": "Ort",
-    "industry": "Branche"
+    "industry": "Branche",
+    "createdAt": "Erstellt am",
+    "koios": "Koios AI"
   },
   "filters": {
     "search": "Suchen",
@@ -69,7 +71,10 @@
       "statistics": "Statistiken",
       "documents": "Dokumente",
       "notes": "Notizen"
-    }
+    },
+    "changelog": "Änderungen",
+    "photoUpload": "Logo hochladen",
+    "photoRemove": "Logo entfernen"
   },
   "overview": {
     "general": "Allgemein",
@@ -203,7 +208,13 @@
     "overviewTitle": "Übersicht"
   },
   "documents": {
-    "empty": "Noch keine Dokumente."
+    "empty": "Noch keine Dokumente.",
+    "add": "Hinzufügen",
+    "search": "Suchen",
+    "docType": "Dokumenttyp",
+    "name": "Name",
+    "type": "Typ",
+    "size": "Größe"
   },
   "notes": {
     "notes": "Notizen",
@@ -295,5 +306,8 @@
     "create": "Hinzufügen",
     "cancel": "Abbrechen",
     "required": "Pflichtfeld"
+  },
+  "changelog": {
+    "empty": "Noch keine Änderungen."
   }
 }

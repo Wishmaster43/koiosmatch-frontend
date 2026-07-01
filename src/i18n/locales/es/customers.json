@@ -17,7 +17,9 @@
     "contacts": "Contactos",
     "openVacancies": "Vacantes abiertas",
     "city": "Ciudad",
-    "industry": "Sector"
+    "industry": "Sector",
+    "createdAt": "Creado el",
+    "koios": "Koios AI"
   },
   "filters": {
     "search": "Buscar",
@@ -69,7 +71,10 @@
       "statistics": "Estadísticas",
       "documents": "Documentos",
       "notes": "Notas"
-    }
+    },
+    "changelog": "Cambios",
+    "photoUpload": "Subir logo",
+    "photoRemove": "Quitar logo"
   },
   "overview": {
     "general": "General",
@@ -203,7 +208,13 @@
     "overviewTitle": "Resumen"
   },
   "documents": {
-    "empty": "Aún no hay documentos."
+    "empty": "Aún no hay documentos.",
+    "add": "Añadir",
+    "search": "Buscar",
+    "docType": "Tipo de documento",
+    "name": "Nombre",
+    "type": "Tipo",
+    "size": "Tamaño"
   },
   "notes": {
     "notes": "Notas",
@@ -295,5 +306,8 @@
     "create": "Añadir",
     "cancel": "Cancelar",
     "required": "Campo obligatorio"
+  },
+  "changelog": {
+    "empty": "Aún no hay cambios."
   }
 }

@@ -7,6 +7,7 @@ import type { Id, Loose } from './common'
 
 /** Owner/recruiter chip on an application row. */
 export interface ApplicationOwner {
+  id: Id | null
   name: string
   initials: string
   color: string | null
@@ -113,7 +114,8 @@ export interface ApiApplication {
   bucket?: string
   source?: string
   source_name?: string
-  owner?: { name?: string; avatar_color?: string | null }
+  owner?: { id?: Id; name?: string; avatar_color?: string | null }
+  owner_id?: Id
   owner_name?: string
   candidate_status_label?: string
   candidate_status_color?: string

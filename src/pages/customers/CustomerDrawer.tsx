@@ -7,14 +7,17 @@
  * Planning tab); the Opportunities tab's flex-shift section is gated inside it.
  */
 import { useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
+import { Edit2, Save, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import NotesTab from '@/components/drawer/tabs/NotesTab'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
+import { useNoteTypes } from '@/lib/useNoteTypes'
 import { initialsOf } from '@/lib/initials'
+import CustomerChangelog from './drawer/CustomerChangelog'
 import OverviewTab from './drawer/OverviewTab'
 import LocationsTab from './drawer/LocationsTab'
 import DepartmentsTab from './drawer/DepartmentsTab'
@@ -63,15 +66,26 @@ export default function CustomerDrawer({
   const auth = useAuth()
   const hasModule = auth?.hasModule ?? (() => false)
   const { formatDate } = useDateFormat()
+  // Note types from the tenant lookup; author = the signed-in user (both mirror the candidate).
+  const { types: noteTypes } = useNoteTypes()
+  const authorInitials = initialsOf(auth?.user?.name ?? '')
 
   // Header overrides — reset when a different customer is shown (during render).
   const [status, setStatus] = useState<string | null>(null)
   const [owner,  setOwner]  = useState<DrawerUser | null>(null)
   const [tags,   setTags]   = useState<string[] | null>(null)
+  // Header name edit + logo upload — independent from the Overview-tab fields (mirrors the candidate).
+  const [headerEditing, setHeaderEditing] = useState(false)
+  const [headerName,    setHeaderName]    = useState('')
+  const [logoUrl,       setLogoUrl]       = useState<string | null>(null)
   const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
-  if (c?.id !== prevId) { setPrevId(c?.id); setStatus(null); setOwner(null); setTags(null) }
+  if (c?.id !== prevId) { setPrevId(c?.id); setStatus(null); setOwner(null); setTags(null); setHeaderEditing(false); setLogoUrl(null) }
 
   if (!c) return null
+
+  // Enter/save the header name edit; save flows through the optimistic onUpdate.
+  const startHeaderEdit = () => { setHeaderName(c.name ?? ''); setHeaderEditing(true) }
+  const saveHeader = () => { if (headerName.trim()) onUpdate?.(c.id, { name: headerName.trim() }); setHeaderEditing(false) }
 
   // Planning tab only for tenants with the Planning module (same gate as sidebar).
   const tabs = TABS.filter(tab => tab.id !== 'planning' || hasModule('plan'))
@@ -102,12 +116,12 @@ export default function CustomerDrawer({
       case 'opportunities': return <OpportunitiesTab customerId={c.id} />
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
       case 'statistics':    return <StatisticsTab c={c} />
-      case 'documents':     return <DocumentsTab documents={(c as { documents?: { id?: Id; name?: string }[] }).documents} />
+      case 'documents':     return <DocumentsTab customerId={c.id} documents={(c as { documents?: { id?: Id; name?: string }[] }).documents} />
       case 'notes':         return (
         <NotesTab
           notes={c.notes ?? []}
-          noteTypes={[]}
-          authorInitials="?" timelineName="" timelineInitials="?"
+          noteTypes={noteTypes}
+          authorInitials={authorInitials} timelineName="" timelineInitials={authorInitials}
           onAddNote={payload => onAddNote?.(c.id, payload)}
           labels={{
             notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
@@ -122,6 +136,30 @@ export default function CustomerDrawer({
     }
   }
 
+  // Header title: an inline name input while editing, else name + subtitle.
+  const renderTitle = () => headerEditing ? (
+    <input value={headerName} autoFocus placeholder={t('cols.name')}
+      onChange={e => setHeaderName(e.target.value)}
+      onKeyDown={e => { if (e.key === 'Enter') saveHeader(); if (e.key === 'Escape') setHeaderEditing(false) }}
+      style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 14, fontWeight: 600, borderRadius: 6, border: '1px solid var(--border)', outline: 'none' }} />
+  ) : (
+    <>
+      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
+      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{[c.city, c.industry].filter(Boolean).join(' · ') || '—'}</div>
+    </>
+  )
+
+  // Edit-pencil that toggles to save/cancel (same pattern as the candidate header).
+  const iconBtn: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 }
+  const headerActions = headerEditing ? (
+    <>
+      <button onClick={saveHeader} title={t('drawer.save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={14} /></button>
+      <button onClick={() => setHeaderEditing(false)} title={t('drawer.cancel')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={14} /></button>
+    </>
+  ) : (
+    <button onClick={startHeaderEdit} title={t('drawer.edit')} style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
+  )
+
   return (
     <EntityDrawer
       entity={c}
@@ -133,13 +171,12 @@ export default function CustomerDrawer({
         <EntityHeader
           label={t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
-          avatar={{ initials: c.initials, soft: true }}
-          renderTitle={() => (
-            <>
-              <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{[c.city, c.industry].filter(Boolean).join(' · ') || '—'}</div>
-            </>
-          )}
+          avatar={{ initials: c.initials, photo: logoUrl ?? c.logo, soft: true }}
+          onPhotoChange={setLogoUrl}
+          photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
+          renderTitle={renderTitle}
+          titleActions={<CustomerChangelog customerId={c.id} />}
+          actions={headerActions}
           meta={[
             { key: 'status', label: t('drawer.status'), value: currentStatus, width: 160,
               options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 170 },

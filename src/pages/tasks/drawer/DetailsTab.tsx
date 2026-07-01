@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
-import { Field, SelectField, DateField, TextArea } from '@/components/forms/fields'
+import { Field, SelectField, DateField } from '@/components/forms/fields'
 import Avatar from '@/components/ui/Avatar'
-import StatusPill from '@/components/ui/StatusPill'
+import SoftChip from '@/components/ui/SoftChip'
+import RichTextEditor from '@/components/ui/RichTextEditor'
+import SafeHtml from '@/components/ui/SafeHtml'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import { useUsers } from '@/lib/queries'
@@ -42,6 +44,7 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
 
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState<Record<string, unknown>>({})
+  const [descExpanded, setDescExpanded] = useState(false)
 
   // Enter edit mode with a draft seeded from the current values.
   const startEdit = () => {
@@ -92,13 +95,17 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
           <Field label={t('details.priority')}><SelectField value={draft.priorityKey as string} onChange={v => setD('priorityKey', v)} options={opts(priorities)} /></Field>
           <Field label={t('details.due')}><DateField value={draft.due as string} onChange={v => setD('due', v)} /></Field>
           <Field label={t('details.assignee')}><SelectField value={String(draft.assigneeId)} onChange={v => setD('assigneeId', v)} options={assigneeOpts} /></Field>
-          <Field label={t('details.description')}><TextArea value={draft.description as string} onChange={v => setD('description', v)} rows={4} /></Field>
+          {/* Description = the note body — same rich editor as the candidate profile text. */}
+          <Field label={t('details.description')}>
+            <RichTextEditor value={draft.description as string} onChange={v => setD('description', v)}
+              expanded={descExpanded} onToggleExpand={() => setDescExpanded(e => !e)} />
+          </Field>
         </div>
       ) : (
         <div style={{ borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)' }}>
-          <Row label={t('details.type')}>{task.typeLabel ? <StatusPill label={task.typeLabel} color={task.typeColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-          <Row label={t('details.status')}>{task.statusLabel ? <StatusPill label={task.statusLabel} color={task.statusColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
-          <Row label={t('details.priority')}>{task.priorityLabel ? <StatusPill label={task.priorityLabel} color={task.priorityColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+          <Row label={t('details.type')}>{task.typeLabel ? <SoftChip label={task.typeLabel} color={task.typeColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+          <Row label={t('details.status')}>{task.statusLabel ? <SoftChip label={task.statusLabel} color={task.statusColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
+          <Row label={t('details.priority')}>{task.priorityLabel ? <SoftChip label={task.priorityLabel} color={task.priorityColor} dot /> : <span style={{ color: 'var(--text-muted)' }}>—</span>}</Row>
           <Row label={t('details.due')}>
             <span style={{ fontSize: 12, color: task.due ? (isOverdue(task) ? 'var(--color-danger)' : 'var(--text)') : 'var(--text-muted)', fontWeight: isOverdue(task) ? 600 : 400 }}>
               {task.due ? formatDate(task.due) : '—'}
@@ -115,7 +122,9 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
           <Row label={t('details.owner')}><span style={{ fontSize: 12, color: 'var(--text)' }}>{task.owner?.name || '—'}</span></Row>
           <div style={{ padding: '9px 12px' }}>
             <span style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }}>{t('details.description')}</span>
-            <span style={{ fontSize: 12, color: task.description ? 'var(--text)' : 'var(--text-muted)', whiteSpace: 'pre-wrap' }}>{task.description || '—'}</span>
+            {task.description
+              ? <SafeHtml html={task.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
+              : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>}
           </div>
         </div>
       )}
