@@ -20,6 +20,9 @@ interface DocItem {
   objectUrl?: string
   url?: string
   created_at?: string
+  uploaded_at?: string
+  uploaded_by?: string | { name?: string }
+  created_by?: string | { name?: string }
 }
 
 // Split a filename into base + extension so rename never touches the extension.
@@ -138,8 +141,16 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
                       </div>
                     : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
                   }
-                  {/* Added date/time (when the backend provides it). */}
-                  {d.created_at && <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDate(d.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>}
+                  {/* Added by whom + when (shown when the backend provides them). */}
+                  {(() => {
+                    const by = (typeof d.uploaded_by === 'object' ? d.uploaded_by?.name : d.uploaded_by)
+                      ?? (typeof d.created_by === 'object' ? d.created_by?.name : d.created_by) ?? ''
+                    const when = d.uploaded_at ?? d.created_at
+                    if (!by && !when) return null
+                    return <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+                      {by}{by && when ? ' · ' : ''}{when ? formatDate(when, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}
+                    </div>
+                  })()}
                 </div>
               </div>
               <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: docColor(d.type) + '18', color: docColor(d.type), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>

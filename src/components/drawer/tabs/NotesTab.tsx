@@ -11,9 +11,10 @@ import SafeHtml from '@/components/ui/SafeHtml'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import { useDateFormat } from '@/lib/datetime'
+import { initialsOf } from '@/lib/initials'
 
 interface NoteType { value: string; label: string; color?: string }
-interface NoteItem { type?: string; title?: string; author?: string; text?: string; body?: string; ago?: string; [k: string]: unknown }
+interface NoteItem { type?: string; title?: string; author?: string; author_name?: string; created_by?: string | { name?: string }; text?: string; body?: string; ago?: string; created_at?: string; [k: string]: unknown }
 interface TimelineItem { time?: string; created_at?: string; text?: string; description?: string; [k: string]: unknown }
 interface NotesLabels {
   notes?: ReactNode; newNote?: ReactNode; type?: ReactNode; save?: string; cancel?: string; edit?: string
@@ -55,6 +56,9 @@ export default function NotesTab({
   const noteWhen = (n: NoteItem) => n.created_at
     ? formatDate(n.created_at as string, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
     : n.ago
+  // Note author ("by whom"): the note's own author, from any of the API shapes.
+  const noteAuthor = (n: NoteItem) =>
+    (typeof n.created_by === 'object' ? n.created_by?.name : n.created_by) ?? n.author_name ?? n.author ?? ''
 
   const reset = () => { setAdding(false); setEditingIdx(null); setBody(''); setTitle(''); setType(noteTypes[0]?.value ?? ''); setExpanded(false) }
   const openEdit = (i: number) => {
@@ -123,16 +127,21 @@ export default function NotesTab({
         )}
         {notes.length === 0 && !adding
           ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.notesEmpty}</div>
-          : notes.map((n, i) => (
+          : notes.map((n, i) => {
+              const who = noteAuthor(n)
+              return (
               <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-                <Avatar initials={authorInitials} size={26} />
+                <Avatar initials={who ? initialsOf(who) : authorInitials} size={26} />
                 <div style={{ flex: 1, background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
                     <div style={{ flex: 1 }}>
                       {n.type && renderTypeChip(n.type)}
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{n.title ?? n.author}</span>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{n.title ?? who}</span>
                     </div>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{noteWhen(n)}</span>
+                    {/* "By whom · when" — the note's own author + timestamp. */}
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      {who && n.title ? `${who} · ` : ''}{noteWhen(n)}
+                    </span>
                     {onEditNote && (
                       <button onClick={() => openEdit(i)} title={labels.edit}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>
@@ -143,7 +152,7 @@ export default function NotesTab({
                   <SafeHtml style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} html={n.text ?? n.body ?? ''} />
                 </div>
               </div>
-            ))
+            )})
         }
       </div>
       </div>
