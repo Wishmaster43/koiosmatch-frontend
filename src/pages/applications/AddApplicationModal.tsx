@@ -79,7 +79,7 @@ export default function AddApplicationModal({ onClose, onCreated }: { onClose: (
         borderRadius: 12, width: 440, maxWidth: '92vw', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 22px', borderBottom: '1px solid #F3F4F6' }}>
           <span style={{ fontSize: 15, fontWeight: 700 }}>{t('add.title')}</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
+          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
         </div>
 
         <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>

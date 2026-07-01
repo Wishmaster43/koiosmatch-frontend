@@ -258,7 +258,7 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
                 </span>
               </div>
             )}
-            <button onClick={onClose}
+            <button onClick={onClose} aria-label={t('common:close')}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                        background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 6 }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}

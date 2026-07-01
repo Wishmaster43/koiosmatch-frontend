@@ -59,7 +59,7 @@ export default function LocationDrawer({ location, onClose }: { location: Report
                 <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{location.customer_name}</span>
               </div>
             </div>
-            <button onClick={onClose}
+            <button onClick={onClose} aria-label={t('common:close')}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                        background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
                        borderRadius: 6, marginLeft: 10, flexShrink: 0 }}

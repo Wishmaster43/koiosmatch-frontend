@@ -287,7 +287,7 @@ export default function CandidateDetailDrawer({ candidate: c, onClose }: { candi
                 </div>
               </div>
             </div>
-            <button onClick={onClose}
+            <button onClick={onClose} aria-label={t('common:close')}
               className="flex items-center justify-center flex-shrink-0 rounded-lg"
               style={{ width: 30, height: 30, border: '1px solid var(--border)',
                        background: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}

@@ -174,7 +174,7 @@ export function EdgeFilterPanel({ filters, onClose, onSave }: {
       }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('canvas.filterTitle')}</div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
+          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
         </div>
 
         {/* AND / OR toggle */}
@@ -262,7 +262,7 @@ export function OutputPanel({ output, onClose }: { output?: unknown; onClose: ()
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('picker.search')} aria-label={t('picker.search')}
               style={{ padding: '5px 10px', fontSize: 12, background: '#2D2D3F', border: '1px solid #3D3D4F', borderRadius: 6, color: '#E2E8F0', outline: 'none', width: 160 }} />
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
+            <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
           </div>
         </div>
         <pre style={{

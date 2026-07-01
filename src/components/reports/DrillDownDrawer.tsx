@@ -88,7 +88,7 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
               {subtitle && <span className="ml-1 text-[var(--text-muted)]">· {subtitle}</span>}
             </div>
           </div>
-          <button onClick={onClose}
+          <button onClick={onClose} aria-label={t('common:close')}
             className="flex items-center justify-center flex-shrink-0 rounded-lg"
             style={{ width: 30, height: 30, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', marginLeft: 12 }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
