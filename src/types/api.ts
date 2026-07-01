@@ -8,8 +8,8 @@
 
 /** Module keys (base-package modules + paid add-ons). SM endpoints are hard-gated
  *  server-side on 'sm'. 3-package model: core=ats, pro=ats+ai, enterprise=+api/insights;
- *  add-ons = plan/sm/hf/sm_ai layered on top via tenant.modules. */
-export type ModuleKey = 'ats' | 'ai' | 'plan' | 'sm' | 'hf' | 'sm_ai' | 'api' | 'insights'
+ *  add-ons = plan/sm/hf/sm_ai/reports layered on top via tenant.modules. */
+export type ModuleKey = 'ats' | 'ai' | 'plan' | 'sm' | 'hf' | 'sm_ai' | 'api' | 'insights' | 'reports'
 
 /** A role or permission can arrive as a bare string or an object with a name. */
 export type Named = string | { name: string }

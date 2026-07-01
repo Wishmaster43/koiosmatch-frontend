@@ -22,6 +22,7 @@ const TIERS = [
 
 // Add-ons (toggle on top of any tier). Planning is hidden until its module (portal + app) exists.
 const ADDONS = [
+  { id: 'reports', name: 'Rapporten Koios Match' },
   { id: 'sm',    name: 'Rapportage Shiftmanager' },
   { id: 'hf',    name: 'Rapportage HelloFlex' },
   { id: 'sm_ai', name: 'Shiftmanager AI Planner' },

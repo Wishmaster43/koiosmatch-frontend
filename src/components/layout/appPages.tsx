@@ -141,6 +141,8 @@ export function renderPage(activePage: string, { navIntent, goTo }: { navIntent?
     case 'reports':
     case 'reports.flow':           return <ReportsPage initialTab="flow" />
     case 'reports.recruiters':     return <ReportsPage initialTab="recruiters" />
+    case 'reports.vacancies':      return <ReportsPage initialTab="vacancies" />
+    case 'reports.matches':        return <ReportsPage initialTab="matches" />
 
     // ── Shiftmanager module ───────────────────────────────────────────────
     case 'shiftmanager':

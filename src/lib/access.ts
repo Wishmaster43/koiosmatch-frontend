@@ -25,6 +25,7 @@ type PermLike = string | { name?: string }
 const PAGE_REQUIRED_MODULE: Record<string, ModuleKey> = {
   shiftmanager: 'sm',
   helloflex:    'hf',
+  reports:      'reports',
 }
 
 const ATS_BASE   = ['dashboard', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'customers', 'locations', 'departments', 'contacts', 'details', 'users']
