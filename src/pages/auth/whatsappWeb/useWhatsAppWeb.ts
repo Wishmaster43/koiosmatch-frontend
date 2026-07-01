@@ -16,7 +16,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { AxiosResponse } from 'axios'
-import api from '../../../lib/api'
+import api from '@/lib/api'
 import { TRANSIENT_STATUSES } from './statusMeta'
 import type { WhatsAppDevice } from './statusMeta'
 

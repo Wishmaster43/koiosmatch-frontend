@@ -7,8 +7,8 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useAuth } from '../../context/AuthContext'
-import { canAccessPage } from '../../lib/access'
+import { useAuth } from '@/context/AuthContext'
+import { canAccessPage } from '@/lib/access'
 import TenantSwitcher from './TenantSwitcher'
 import {
   LayoutDashboard, Users, Building2,

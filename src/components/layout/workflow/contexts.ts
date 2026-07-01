@@ -1,5 +1,5 @@
 import { createContext } from 'react'
-import type { FlowNodeData } from '../../../types/workflow'
+import type { FlowNodeData } from '@/types/workflow'
 
 /**
  * Canvas ↔ editor context wiring. The providers live in EditorInner; the consumers

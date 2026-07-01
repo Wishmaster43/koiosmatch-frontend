@@ -9,7 +9,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Phone, Mail, MapPin, Calendar, Clock, Briefcase, MessageSquare, History } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import type { ReportCandidate, GlobalRate } from '../../types/reports'
+import type { ReportCandidate, GlobalRate } from '@/types/reports'
 
 // Colored status pill (actief / nietactief / extern / ...) for the candidate.
 function StatusBadge({ status }: { status?: string }) {

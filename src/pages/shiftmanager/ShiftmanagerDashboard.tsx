@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle, CalendarDays, TrendingUp, MessageCircle, Percent } from 'lucide-react'
-import api, { unwrapList } from '../../lib/api'
-import { isAbortError } from '../../lib/mocks'
-import { useKpiSettings } from '../../lib/useKpiSettings'
-import { useAuth } from '../../context/AuthContext'
-import MonthlyKpiCard    from '../../components/ui/MonthlyKpiCard'
-import StatCard          from '../../components/ui/StatCard'
-import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
-import type { ReportCandidate } from '../../types/reports'
+import api, { unwrapList } from '@/lib/api'
+import { isAbortError } from '@/lib/mocks'
+import { useKpiSettings } from '@/lib/useKpiSettings'
+import { useAuth } from '@/context/AuthContext'
+import MonthlyKpiCard    from '@/components/ui/MonthlyKpiCard'
+import StatCard          from '@/components/ui/StatCard'
+import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
+import type { ReportCandidate } from '@/types/reports'
 
 // Packages that unlock the AI/Workflow runs + conversations panels.
 const AI_PACKAGES = ['reporting_sm_ai', 'reporting_hf_ai', 'reporting_sm_hf_ai', 'ats_crm_ai', 'ats_crm_ai_planning', 'ats_crm_aiagents', 'ats_crm_workflows', 'connect']

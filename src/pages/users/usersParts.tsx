@@ -9,8 +9,8 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck, Shield, User, Loader2, ChevronDown } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import api from '../../lib/api'
-import { COLOR_PRESETS } from '../../lib/colorPresets'
+import api from '@/lib/api'
+import { COLOR_PRESETS } from '@/lib/colorPresets'
 import type { ManagedUser } from '@/types/api'
 
 // A role reference as it can appear on a user: a bare name or a role object.

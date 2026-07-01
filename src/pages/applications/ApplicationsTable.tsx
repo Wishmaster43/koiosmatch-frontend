@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import DataTable from '../../components/ui/DataTable'
-import type { Column } from '../../components/ui/DataTable'
-import Avatar from '../../components/ui/Avatar'
-import StatusPill from '../../components/ui/StatusPill'
-import KoiosAiMark from '../../components/ui/KoiosAiMark'
-import type { Application } from '../../types/application'
-import type { Id } from '../../types/common'
+import DataTable from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
+import Avatar from '@/components/ui/Avatar'
+import StatusPill from '@/components/ui/StatusPill'
+import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import type { Application } from '@/types/application'
+import type { Id } from '@/types/common'
 
 // Match score as a soft-coloured percentage (green ≥75, amber ≥50, red below).
 function ScorePill({ value }: { value: number | null }) {

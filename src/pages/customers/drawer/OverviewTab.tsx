@@ -5,10 +5,10 @@
  * hardcoded). Saving flows back through onSave → the page's optimistic PATCH.
  */
 import { useTranslation } from 'react-i18next'
-import EditableFieldTable from '../../../components/forms/EditableFieldTable'
-import type { FieldRow } from '../../../components/forms/EditableFieldTable'
-import { useIndustries } from '../../../lib/useIndustries'
-import type { Customer } from '../../../types/customer'
+import EditableFieldTable from '@/components/forms/EditableFieldTable'
+import type { FieldRow } from '@/components/forms/EditableFieldTable'
+import { useIndustries } from '@/lib/useIndustries'
+import type { Customer } from '@/types/customer'
 
 export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (values: Record<string, unknown>) => void }) {
   const { t } = useTranslation('customers')

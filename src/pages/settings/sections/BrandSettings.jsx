@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save, Upload } from 'lucide-react'
-import api from '../../../lib/api'
+import api from '@/lib/api'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 
 const BRAND_COLOR_PRESETS = [

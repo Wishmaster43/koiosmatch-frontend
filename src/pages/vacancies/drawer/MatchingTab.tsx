@@ -2,9 +2,9 @@ import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check } from 'lucide-react'
-import SliderJs from '../../../components/ui/Slider'
-import type { VacancyDetail } from '../../../types/vacancy'
-import type { Id } from '../../../types/common'
+import SliderJs from '@/components/ui/Slider'
+import type { VacancyDetail } from '@/types/vacancy'
+import type { Id } from '@/types/common'
 
 type AnyProps = Record<string, unknown>
 const Slider = SliderJs as unknown as ComponentType<AnyProps>

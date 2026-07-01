@@ -1,11 +1,11 @@
 import { useState, useMemo, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useRightPanel } from '../../context/RightPanelContext'
+import { useRightPanel } from '@/context/RightPanelContext'
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { monthName, formatDate } from './helpers'
 import AddShiftModal from './AddShiftModal'
 import { MonthView, WeekView, DayView, ListView } from './views'
-import type { Shift, ShiftInput } from '../../types/planning'
+import type { Shift, ShiftInput } from '@/types/planning'
 
 // ── Dummy shifts ──────────────────────────────────────────────────────────────
 const today = new Date()

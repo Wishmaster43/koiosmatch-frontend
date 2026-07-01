@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import api from '../../lib/api'
-import { Field, TextField, SelectField, DateField } from '../../components/forms/fields'
-import { useOpportunityStages } from '../../lib/useOpportunityStages'
+import api from '@/lib/api'
+import { Field, TextField, SelectField, DateField } from '@/components/forms/fields'
+import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { mapOpportunity } from './data/mapOpportunity'
-import type { Opportunity } from '../../types/opportunity'
-import type { Id } from '../../types/common'
+import type { Opportunity } from '@/types/opportunity'
+import type { Id } from '@/types/common'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {

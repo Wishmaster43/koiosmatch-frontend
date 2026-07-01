@@ -2,12 +2,12 @@ import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import api, { unwrapList } from '../../lib/api'
-import { Field, TextField, SelectField, DateField, TextArea } from '../../components/forms/fields'
-import { useTaskLookups } from '../../context/TaskLookupsContext'
-import { useAuth } from '../../context/AuthContext'
-import { useUsers } from '../../lib/queries'
-import type { Id } from '../../types/common'
+import api, { unwrapList } from '@/lib/api'
+import { Field, TextField, SelectField, DateField, TextArea } from '@/components/forms/fields'
+import { useTaskLookups } from '@/context/TaskLookupsContext'
+import { useAuth } from '@/context/AuthContext'
+import { useUsers } from '@/lib/queries'
+import type { Id } from '@/types/common'
 
 const MAX_DESC = 5000
 

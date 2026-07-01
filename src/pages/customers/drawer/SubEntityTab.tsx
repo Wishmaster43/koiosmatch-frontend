@@ -7,8 +7,8 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { Plus, ArrowLeft, Search } from 'lucide-react'
-import DataTable from '../../../components/ui/DataTable'
-import type { Column } from '../../../components/ui/DataTable'
+import DataTable from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
 
 const searchWrap: CSSProperties = {
   display: 'flex', alignItems: 'center', gap: 8, flex: 1, padding: '6px 10px',

@@ -5,8 +5,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Check, Clock, RotateCcw } from 'lucide-react'
-import api from '../../../lib/api'
-import { useAuth } from '../../../context/AuthContext'
+import api from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 
 const COOLDOWN_SECS = 60
 

@@ -7,13 +7,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
-import api from '../../lib/api'
-import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
-import { useRightPanel } from '../../context/RightPanelContext'
-import ModuleView       from '../../components/settings/ModuleView'
-import EntityListDrawer  from '../../components/ui/EntityListDrawer'
-import type { ReportCustomer } from '../../types/reports'
-import type { SmDrillItem } from '../../types/shiftmanager'
+import api from '@/lib/api'
+import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
+import { useRightPanel } from '@/context/RightPanelContext'
+import ModuleView       from '@/components/settings/ModuleView'
+import EntityListDrawer  from '@/components/ui/EntityListDrawer'
+import type { ReportCustomer } from '@/types/reports'
+import type { SmDrillItem } from '@/types/shiftmanager'
 
 export default function CustomersReport() {
   const { t } = useTranslation('shiftmanager')

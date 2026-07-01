@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { X, Building2, MapPin, Layers, Hash } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
-import type { ReportLocation } from '../../types/reports'
+import type { ReportLocation } from '@/types/reports'
 
 function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactNode; value?: ReactNode }) {
   if (!value) return null

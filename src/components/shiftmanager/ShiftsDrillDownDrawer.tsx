@@ -9,7 +9,7 @@ import type { LucideIcon } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '../../lib/api'
+import api from '@/lib/api'
 import type { ShiftRow, ShiftInvite } from '@/types/shiftmanager'
 
 // Shift status → badge colours. Label = t('shiftsDrawer.status.<key>').

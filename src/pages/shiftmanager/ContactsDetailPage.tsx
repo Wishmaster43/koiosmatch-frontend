@@ -1,5 +1,5 @@
 // ContactsDetailPage — page wrapper that renders the ContactPersonsTable.
-import ContactPersonsTable from '../../components/reports/ContactPersonsTable'
+import ContactPersonsTable from '@/components/reports/ContactPersonsTable'
 
 export default function ContactsDetailPage() {
   return (

@@ -8,11 +8,11 @@ import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Users } from 'lucide-react'
-import api from '../../../lib/api'
-import { isAbortError } from '../../../lib/mocks'
-import { useAuth } from '../../../context/AuthContext'
-import { useDateFormat } from '../../../lib/datetime'
-import type { Id } from '../../../types/common'
+import api from '@/lib/api'
+import { isAbortError } from '@/lib/mocks'
+import { useAuth } from '@/context/AuthContext'
+import { useDateFormat } from '@/lib/datetime'
+import type { Id } from '@/types/common'
 
 interface UpcomingShift { id?: Id; date?: string; shift?: string; department?: string; candidate?: { name?: string } | string | null }
 interface PlanningData { active_now?: number; upcoming?: UpcomingShift[] }

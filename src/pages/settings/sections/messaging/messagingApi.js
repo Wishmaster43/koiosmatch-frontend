@@ -8,7 +8,7 @@
  *   GET/PUT /profile/message-retention    — the current user's own retention
  * Effective retention = the lowest of tenant + own (enforced server-side too).
  */
-import api, { unwrap } from '../../../../lib/api'
+import api, { unwrap } from '@/lib/api'
 
 // Messaging limits (tenant): the editable cap + its hard ceiling.
 export const getLimits = () => api.get('/settings/messaging-limits').then(unwrap)

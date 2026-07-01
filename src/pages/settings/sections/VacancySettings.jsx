@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2 } from 'lucide-react'
-import api from '../../../lib/api'
+import api from '@/lib/api'
 import StatusListEditor from './StatusListEditor'
 
 /** Vacancy statuses — backend /vacancy-statuses (name + colour), own sub-tab. */

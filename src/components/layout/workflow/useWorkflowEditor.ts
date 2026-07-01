@@ -48,7 +48,7 @@ export function useWorkflowEditor({ workflow, onSave }: {
   const [startNodeId,    setStartNodeId]    = useState<string | null>(null)
 
   useEffect(() => {
-    import('../../../lib/api').then(m => {
+    import('@/lib/api').then(m => {
       m.default.get('/webhooks')
         .then(res => setWebhooks(res.data?.data ?? res.data ?? []))
         .catch(() => {})
@@ -76,7 +76,7 @@ export function useWorkflowEditor({ workflow, onSave }: {
   }, [setEdges])
 
   const handleNodeRun = useCallback(async (nodeId: string, data: FlowNodeData) => {
-    const { default: api } = await import('../../../lib/api')
+    const { default: api } = await import('@/lib/api')
     let output: unknown = null
 
     try {

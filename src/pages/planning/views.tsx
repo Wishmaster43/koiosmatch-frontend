@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { Clock, MapPin, User } from 'lucide-react'
 import { isSameDay, WEEKDAYS_MON, formatDate } from './helpers'
 import { interactive } from '@/lib/a11y'
-import type { Shift } from '../../types/planning'
+import type { Shift } from '@/types/planning'
 
 interface ViewProps { current: Date; shifts: Shift[]; today: Date; onDayClick: (date: Date) => void }
 

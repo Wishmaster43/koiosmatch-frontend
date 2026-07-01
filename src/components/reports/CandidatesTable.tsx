@@ -9,8 +9,8 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
 import CandidateDetailDrawer from './CandidateDetailDrawer'
-import { useRightPanel }     from '../../context/RightPanelContext'
-import type { ReportCandidate, ReportColumn, SortState } from '../../types/reports'
+import { useRightPanel }     from '@/context/RightPanelContext'
+import type { ReportCandidate, ReportColumn, SortState } from '@/types/reports'
 
 // Colored status pill (actief / nietactief / extern / ...) for a candidate row.
 function StatusBadge({ status }: { status?: string }) {

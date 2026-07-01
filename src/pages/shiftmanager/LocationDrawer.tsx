@@ -6,7 +6,7 @@
 import { useTranslation } from 'react-i18next'
 import { MapPin, Building2, Layers, X, Phone, Mail, ChevronRight, Plus } from 'lucide-react'
 import { Avatar, StatusBadge, ac } from './locationParts'
-import type { SmLocationRow } from '../../types/shiftmanager'
+import type { SmLocationRow } from '@/types/shiftmanager'
 
 export default function LocationDrawer({ loc, onClose }: { loc: SmLocationRow | null; onClose: () => void }) {
   const { t } = useTranslation('shiftmanager')

@@ -6,7 +6,7 @@
  * separate from the editor so the graph round-trip is easy to test and reason about.
  */
 
-import type { WorkflowStep, FlowNode, FlowEdge } from '../../../types/workflow'
+import type { WorkflowStep, FlowNode, FlowEdge } from '@/types/workflow'
 
 // Stable-ish id for a freshly created node.
 export const uid = () => 'n_' + Math.random().toString(36).slice(2, 8)

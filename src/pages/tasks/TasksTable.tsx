@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import DataTable from '../../components/ui/DataTable'
-import type { Column } from '../../components/ui/DataTable'
-import Avatar from '../../components/ui/Avatar'
-import StatusPill from '../../components/ui/StatusPill'
-import { useDateFormat } from '../../lib/datetime'
-import type { Task } from '../../types/task'
-import type { Id } from '../../types/common'
+import DataTable from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
+import Avatar from '@/components/ui/Avatar'
+import StatusPill from '@/components/ui/StatusPill'
+import { useDateFormat } from '@/lib/datetime'
+import type { Task } from '@/types/task'
+import type { Id } from '@/types/common'
 
 // A task is overdue when its due date is in the past and it isn't in a done status.
 const isOverdue = (r: Task): boolean => !!(r.due && !r.statusIsDone && new Date(r.due) < new Date(new Date().toDateString()))

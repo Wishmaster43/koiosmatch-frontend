@@ -7,7 +7,7 @@ import { useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Sun, Moon, Globe, Check } from 'lucide-react'
-import { PAGE_SIZE_OPTIONS } from '../../components/ui/PaginationBar'
+import { PAGE_SIZE_OPTIONS } from '@/components/ui/PaginationBar'
 import { Section, Field, inputStyle, LANGUAGES } from './profileParts'
 import type { ProfileFormData } from './profileParts'
 

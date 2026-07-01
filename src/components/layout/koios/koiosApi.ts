@@ -9,7 +9,7 @@
  * /chat is synchronous (no streaming) and can take a few seconds — the caller
  * shows a loading state.
  */
-import api from '../../../lib/api'
+import api from '@/lib/api'
 
 // Send one chat turn. `model` is optional (defaults to the tenant's active model).
 export const sendChat = (message: string, model?: string | null) =>

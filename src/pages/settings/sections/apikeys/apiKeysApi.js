@@ -5,7 +5,7 @@
  * stored client-side beyond the one-time reveal. Everything else is normalised
  * through the shared unwrap/unwrapList adapters so call sites get a stable shape.
  */
-import api, { unwrap, unwrapList } from '../../../../lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 
 // List all keys for the active tenant (secrets are never included).
 export const listApiKeys = () => api.get('/api-keys').then(unwrapList)

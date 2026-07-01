@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocale, useDateFormat } from '../../lib/datetime'
-import DataTable from '../../components/ui/DataTable'
-import type { Column } from '../../components/ui/DataTable'
-import Avatar from '../../components/ui/Avatar'
-import StatusPill from '../../components/ui/StatusPill'
-import type { Opportunity } from '../../types/opportunity'
-import type { Id } from '../../types/common'
+import { useLocale, useDateFormat } from '@/lib/datetime'
+import DataTable from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
+import Avatar from '@/components/ui/Avatar'
+import StatusPill from '@/components/ui/StatusPill'
+import type { Opportunity } from '@/types/opportunity'
+import type { Id } from '@/types/common'
 
 interface OpportunitiesTableProps {
   rows: Opportunity[]

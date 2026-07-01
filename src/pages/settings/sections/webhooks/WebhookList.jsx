@@ -5,9 +5,9 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Plus, RefreshCw } from 'lucide-react'
-import DataTable from '../../../../components/ui/DataTable'
-import StatusBadge from '../../../../components/ui/StatusBadge'
-import { useDateFormat } from '../../../../lib/datetime'
+import DataTable from '@/components/ui/DataTable'
+import StatusBadge from '@/components/ui/StatusBadge'
+import { useDateFormat } from '@/lib/datetime'
 
 export default function WebhookList({ subs, loading, error, onReload, onOpen, onNew }) {
   const { t } = useTranslation('settings')

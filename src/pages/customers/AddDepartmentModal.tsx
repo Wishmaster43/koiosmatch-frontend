@@ -3,7 +3,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Building, ChevronDown } from 'lucide-react'
-import type { Id } from '../../types/common'
+import type { Id } from '@/types/common'
 
 const iStyle: CSSProperties = {
   width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,

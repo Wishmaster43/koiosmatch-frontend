@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Save, X, FileText } from 'lucide-react'
-import Avatar from '../../../components/ui/Avatar'
-import type { ApplicationDetail } from '../../../types/application'
+import Avatar from '@/components/ui/Avatar'
+import type { ApplicationDetail } from '@/types/application'
 
 type AppNote = ApplicationDetail['notes'][number]
 

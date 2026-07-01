@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ChevronDown, ChevronRight, Plus, RefreshCw, Shield, Trash2 } from 'lucide-react'
-import api from '../../../lib/api'
+import api from '@/lib/api'
 import { PermissionToggle } from '../components/SettingsControls'
 
 function RoleDetail({ role, permissions, onBack, onUpdate }) {

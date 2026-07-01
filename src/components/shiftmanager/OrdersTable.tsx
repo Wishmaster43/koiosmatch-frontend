@@ -9,7 +9,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
-import { useRightPanel } from '../../context/RightPanelContext'
+import { useRightPanel } from '@/context/RightPanelContext'
 import PaginationBar     from '../ui/PaginationBar'
 import {
   NOW, PAD, StatusBadge, SortIcon, TH, TD,

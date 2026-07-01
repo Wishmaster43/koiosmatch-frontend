@@ -8,8 +8,8 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useKpiSettings } from '../../lib/useKpiSettings'
-import type { ReportCandidate } from '../../types/reports'
+import { useKpiSettings } from '@/lib/useKpiSettings'
+import type { ReportCandidate } from '@/types/reports'
 
 // Locale-aware full month name for index 0–11.
 const monthName = (i: number) => new Date(2000, i, 1).toLocaleString('nl-NL', { month: 'long' })

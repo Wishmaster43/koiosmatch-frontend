@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { X, Save, Star, Search } from 'lucide-react'
 import { formatDate } from './helpers'
 import { interactive } from '@/lib/a11y'
-import type { Suggestie, ShiftInput } from '../../types/planning'
+import type { Suggestie, ShiftInput } from '@/types/planning'
 
 // ── Dummy kandidaten voor suggesties ─────────────────────────────────────────
 const SUGGESTIES: Suggestie[] = [

@@ -3,8 +3,8 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Building2, ChevronDown } from 'lucide-react'
-import { useIndustries } from '../../lib/useIndustries'
-import type { Id, LookupOption } from '../../types/common'
+import { useIndustries } from '@/lib/useIndustries'
+import type { Id, LookupOption } from '@/types/common'
 
 const iStyle: CSSProperties = {
   width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8,

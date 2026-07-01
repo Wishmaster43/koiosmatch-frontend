@@ -5,9 +5,9 @@
  * search, statuses, sort) is owned by the component and passed in.
  */
 import { useState, useEffect, useMemo, useReducer } from 'react'
-import { useAuth }            from '../../context/AuthContext'
-import api                    from '../../lib/api'
-import { useDefaultPageSize } from '../../lib/usePageSize'
+import { useAuth }            from '@/context/AuthContext'
+import api                    from '@/lib/api'
+import { useDefaultPageSize } from '@/lib/usePageSize'
 import type { OrderRow, EnrichedOrderRow } from '@/types/shiftmanager'
 
 // The request lifecycle held by the reducer (replaced wholesale per dispatch).

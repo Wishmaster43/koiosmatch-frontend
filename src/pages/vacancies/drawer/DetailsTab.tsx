@@ -1,7 +1,7 @@
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import DetailTableJs from '../../../components/ui/DetailTable'
-import type { VacancyDetail } from '../../../types/vacancy'
+import DetailTableJs from '@/components/ui/DetailTable'
+import type { VacancyDetail } from '@/types/vacancy'
 
 type AnyProps = Record<string, unknown>
 const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>

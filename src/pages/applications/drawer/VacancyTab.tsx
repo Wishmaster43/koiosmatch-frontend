@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { ApplicationDetail } from '../../../types/application'
+import type { ApplicationDetail } from '@/types/application'
 
 // Neutral pill for skills/tags (no semantic colour — calm, like the screenshots).
 function Pill({ children }: { children: ReactNode }) {

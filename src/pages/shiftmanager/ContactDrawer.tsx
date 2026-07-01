@@ -6,7 +6,7 @@
 import { useTranslation } from 'react-i18next'
 import { Mail, Phone, MessageCircle, MapPin, X, ChevronRight } from 'lucide-react'
 import { ac, ContactAvatar } from './contactParts'
-import type { SmContactRow } from '../../types/shiftmanager'
+import type { SmContactRow } from '@/types/shiftmanager'
 
 export default function ContactDrawer({ contact, onClose }: { contact: SmContactRow | null; onClose: () => void }) {
   const { t } = useTranslation('shiftmanager')

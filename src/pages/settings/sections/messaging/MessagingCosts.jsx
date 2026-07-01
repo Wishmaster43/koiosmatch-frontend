@@ -6,7 +6,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocale } from '../../../../lib/datetime'
+import { useLocale } from '@/lib/datetime'
 import { getCosts } from './messagingApi'
 
 export default function MessagingCosts() {

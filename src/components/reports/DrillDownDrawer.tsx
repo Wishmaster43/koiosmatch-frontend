@@ -9,7 +9,7 @@ import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { ReportCandidate } from '../../types/reports'
+import type { ReportCandidate } from '@/types/reports'
 
 // Colored status pill (actief / nietactief / extern / ...) for a record.
 function StatusBadge({ status }: { status?: string }) {

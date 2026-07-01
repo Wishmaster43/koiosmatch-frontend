@@ -7,9 +7,9 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, RotateCcw, ToggleLeft, ToggleRight, ChevronUp, ChevronDown } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
-import { CvDocument } from '../../candidates/CandidateCvTemplate'
-import { useCvSettings } from '../../../lib/useCvSettings'
-import { useLocale } from '../../../lib/datetime'
+import { CvDocument } from '@/pages/candidates/CandidateCvTemplate'
+import { useCvSettings } from '@/lib/useCvSettings'
+import { useLocale } from '@/lib/datetime'
 import { loadSettings } from '../lib/settingsApi'
 
 const PREVIEW_CANDIDATE = {

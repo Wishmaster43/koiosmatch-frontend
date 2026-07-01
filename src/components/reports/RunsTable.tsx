@@ -9,10 +9,10 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X,
          Zap, Clock, Users, AlertTriangle } from 'lucide-react'
-import { useRightPanel } from '../../context/RightPanelContext'
-import api from '../../lib/api'
+import { useRightPanel } from '@/context/RightPanelContext'
+import api from '@/lib/api'
 import { formatDT, formatDuration, StatusBadge } from './runFormat'
-import type { RunRow, ReportFilterGroup, SortState } from '../../types/reports'
+import type { RunRow, ReportFilterGroup, SortState } from '@/types/reports'
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />

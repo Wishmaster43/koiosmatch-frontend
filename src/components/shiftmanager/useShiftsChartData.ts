@@ -5,7 +5,7 @@
  * UI filter state lives in the component and is passed in as arguments.
  */
 import { useEffect, useMemo, useReducer, useState } from "react"
-import api from "../../lib/api"
+import api from "@/lib/api"
 import { SERIES, monthAbbr, YEAR_OPACITY, QUARTERS } from "./shiftsChartsConfig"
 import type { ShiftFilterOptions, ShiftMonthRow, ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 

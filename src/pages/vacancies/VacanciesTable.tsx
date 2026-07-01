@@ -1,14 +1,14 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
-import DataTable from '../../components/ui/DataTable'
-import type { Column } from '../../components/ui/DataTable'
-import Avatar from '../../components/ui/Avatar'
-import StatusPill from '../../components/ui/StatusPill'
-import { useDateFormat } from '../../lib/datetime'
-import { useVacancyLookups } from '../../context/VacancyLookupsContext'
-import type { Vacancy } from '../../types/vacancy'
-import type { Id } from '../../types/common'
+import DataTable from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
+import Avatar from '@/components/ui/Avatar'
+import StatusPill from '@/components/ui/StatusPill'
+import { useDateFormat } from '@/lib/datetime'
+import { useVacancyLookups } from '@/context/VacancyLookupsContext'
+import type { Vacancy } from '@/types/vacancy'
+import type { Id } from '@/types/common'
 
 const mutedCell = { color: 'var(--text-muted)', fontSize: 12 }
 

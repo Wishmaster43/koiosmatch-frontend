@@ -3,8 +3,8 @@
  * card + an optional recent-activity card. Entity-agnostic; everything via props.
  */
 import type { ComponentType, ReactNode } from 'react'
-import SectionCard, { sectionTitle } from '../../ui/SectionCard'
-import DetailTableJs from '../../ui/DetailTable'
+import SectionCard, { sectionTitle } from '@/components/ui/SectionCard'
+import DetailTableJs from '@/components/ui/DetailTable'
 
 type AnyProps = Record<string, unknown>
 // DetailTable is still untyped JS — accept any props at the boundary.

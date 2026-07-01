@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, RefreshCw, Search } from 'lucide-react'
-import api from '../../../lib/api'
+import api from '@/lib/api'
 
 // Phone-number quality ratings → colour. Label = t('whatsapp.quality<KEY>').
 const QUALITY_META = {

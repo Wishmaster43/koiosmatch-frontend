@@ -3,12 +3,12 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import api, { unwrapList } from '../../lib/api'
+import api, { unwrapList } from '@/lib/api'
 import { mapApplication } from './data/mapApplication'
-import CreatableSelectJs from '../../components/ui/CreatableSelect'
+import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import { initialsOf } from '@/lib/initials'
-import type { Application } from '../../types/application'
-import type { Id } from '../../types/common'
+import type { Application } from '@/types/application'
+import type { Id } from '@/types/common'
 
 type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>

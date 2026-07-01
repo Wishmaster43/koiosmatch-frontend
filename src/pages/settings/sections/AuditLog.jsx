@@ -5,11 +5,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, ChevronUp, ChevronDown as ChevronDn } from 'lucide-react'
-import api from '../../../lib/api'
-import { useRightPanel } from '../../../context/RightPanelContext'
+import api from '@/lib/api'
+import { useRightPanel } from '@/context/RightPanelContext'
 import { KPI_KEYS, LogBadge } from './auditShared'
 import { AuditDrawer } from './AuditDrawer'
-import PaginationBar from '../../../components/ui/PaginationBar'
+import PaginationBar from '@/components/ui/PaginationBar'
 
 const PAGE_SIZE = 25
 

@@ -3,7 +3,7 @@
  * between tabs (candidates / coming-soon placeholders) based on initialTab.
  */
 import type { ReactNode } from 'react'
-import CandidatesReport from "../../components/reports/CandidatesReport";
+import CandidatesReport from "@/components/reports/CandidatesReport";
 
 // Placeholder shown for tabs that are not built yet.
 function ComingSoon({ label }: { label?: ReactNode }) {

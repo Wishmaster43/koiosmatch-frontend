@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { ListChecks, UserCog, CircleDot, Building2, Globe, GlobeLock, Tag, StickyNote, Archive, X } from 'lucide-react'
-import ActionMenu from '../../components/ui/ActionMenu'
-import type { MenuNode } from '../../components/ui/ActionMenu'
-import type { Id, LookupOption } from '../../types/common'
+import ActionMenu from '@/components/ui/ActionMenu'
+import type { MenuNode } from '@/components/ui/ActionMenu'
+import type { Id, LookupOption } from '@/types/common'
 
 interface BulkUser { id: Id; name: string }
 interface BulkCustomer { id: Id; name: string }

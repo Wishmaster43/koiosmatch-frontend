@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import InsightsRow from '../../components/insights/InsightsRow'
-import type { DonutSpec, KpiSpec } from '../../components/insights/InsightsRow'
-import type { Opportunity } from '../../types/opportunity'
+import InsightsRow from '@/components/insights/InsightsRow'
+import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
+import type { Opportunity } from '@/types/opportunity'
 
 interface Aggregate { name: string; key: string; value: number; color?: string }
 

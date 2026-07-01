@@ -6,22 +6,22 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
-import api from '../../lib/api'
+import api from '@/lib/api'
 import ErrorBanner from '@/components/ui/ErrorBanner'
-import { useKpiSettings } from '../../lib/useKpiSettings'
-import type { ReportCandidate } from '../../types/reports'
+import { useKpiSettings } from '@/lib/useKpiSettings'
+import type { ReportCandidate } from '@/types/reports'
 import type { ChartDatum } from '../charts/chartTypes'
 import {
   getLoginGroup, LOGIN_GROUP_ORDER,
   groupAndCount, toChartData,
   groupByMonth, groupByWeek, getAvailableYears, topN,
-} from '../../lib/chartHelpers'
+} from '@/lib/chartHelpers'
 import PieChartCard        from '../charts/PieChartCard'
 import BarChartCard        from '../charts/BarChartCard'
 import LineChartCard       from '../charts/LineChartCard'
 import CandidatesKpiRow    from './CandidatesKpiRow'
 import DrillDownDrawer     from './DrillDownDrawer'
-import { useRightPanel }   from '../../context/RightPanelContext'
+import { useRightPanel }   from '@/context/RightPanelContext'
 
 // Chart color configuration
 const LOGIN_COLORS = ['#0064d2','#3b82f6','#93c5fd','#FDE68A','#FCA5A5','var(--color-danger)','#F97316','#D1D5DB']

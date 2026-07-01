@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Copy, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
-import api from '../../../../lib/api'
+import api from '@/lib/api'
 
 // Inbound webhook URLs hang off the API root's /webhook path, not under /api.
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'

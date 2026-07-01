@@ -1,5 +1,5 @@
 // RunsDetailPage — page wrapper that renders the RunsTable (workflow run history).
-import RunsTable from '../../components/reports/RunsTable'
+import RunsTable from '@/components/reports/RunsTable'
 
 export default function RunsDetailPage() {
   return (

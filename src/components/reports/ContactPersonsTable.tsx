@@ -7,13 +7,13 @@ import { useState, useEffect, useMemo } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Mail, Phone, MessageCircle, Building2 } from 'lucide-react'
-import api                    from '../../lib/api'
-import { useRightPanel }      from '../../context/RightPanelContext'
-import { useAuth }            from '../../context/AuthContext'
+import api                    from '@/lib/api'
+import { useRightPanel }      from '@/context/RightPanelContext'
+import { useAuth }            from '@/context/AuthContext'
 import ContactPersonDrawer    from './ContactPersonDrawer'
 import PaginationBar          from '../ui/PaginationBar'
-import { useDefaultPageSize } from '../../lib/usePageSize'
-import type { ReportContact, ReportCustomer, ReportFilterGroup } from '../../types/reports'
+import { useDefaultPageSize } from '@/lib/usePageSize'
+import type { ReportContact, ReportCustomer, ReportFilterGroup } from '@/types/reports'
 
 
 export default function ContactPersonsTable() {

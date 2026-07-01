@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check } from 'lucide-react'
-import api from '../../../lib/api'
-import Slider from '../../../components/ui/Slider'
+import api from '@/lib/api'
+import Slider from '@/components/ui/Slider'
 
 /**
  * VacancyMatchingSettings — the GLOBAL matching strictness (how critical the AI

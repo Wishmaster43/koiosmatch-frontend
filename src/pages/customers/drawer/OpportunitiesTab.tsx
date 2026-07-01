@@ -8,13 +8,13 @@
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrapList } from '../../../lib/api'
-import { isAbortError } from '../../../lib/mocks'
-import { useAuth } from '../../../context/AuthContext'
-import { useDateFormat } from '../../../lib/datetime'
-import SectionCard from '../../../components/ui/SectionCard'
+import api, { unwrapList } from '@/lib/api'
+import { isAbortError } from '@/lib/mocks'
+import { useAuth } from '@/context/AuthContext'
+import { useDateFormat } from '@/lib/datetime'
+import SectionCard from '@/components/ui/SectionCard'
 import VacanciesTab from './VacanciesTab'
-import type { Id } from '../../../types/common'
+import type { Id } from '@/types/common'
 
 interface ShiftRow { id?: Id; date?: string; shift?: string; department?: string }
 

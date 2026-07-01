@@ -6,9 +6,9 @@
  */
 import { useState } from 'react'
 import { GripVertical, ArrowUp, ArrowDown, Check, Save, RefreshCw } from 'lucide-react'
-import { MODULES } from '../../lib/settings/moduleRegistry'
-import { useAllSettings, getJsonSetting, saveSettingsKeys } from '../../lib/settings/useAllSettings'
-import { viewConfigKey } from '../../lib/settings/useModuleView'
+import { MODULES } from '@/lib/settings/moduleRegistry'
+import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+import { viewConfigKey } from '@/lib/settings/useModuleView'
 
 interface Row { id: string; enabled: boolean }
 interface SavedRow { id: string; enabled?: boolean }

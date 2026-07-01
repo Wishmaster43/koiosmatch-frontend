@@ -9,7 +9,7 @@
  */
 import type { ReactNode } from 'react'
 import KpiBlock from '../ui/KpiBlock'
-import { useModuleView } from '../../lib/settings/useModuleView'
+import { useModuleView } from '@/lib/settings/useModuleView'
 
 interface BlockData { value?: ReactNode; sub?: ReactNode; onClick?: () => void }
 

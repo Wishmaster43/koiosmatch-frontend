@@ -7,7 +7,7 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronRight, Check, Ban, ShieldX } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import type { KoiosStep, TFn } from '../../../types/koios'
+import type { KoiosStep, TFn } from '@/types/koios'
 
 // reason → colour + icon + i18n label. Falls back to the organisational style.
 const REFUSAL: Record<string, { color: string; Icon: LucideIcon; labelKey: string }> = {

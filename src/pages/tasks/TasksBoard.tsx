@@ -1,11 +1,11 @@
 import { useRef } from 'react'
 import type { DragEvent, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import Avatar from '../../components/ui/Avatar'
-import StatusPill from '../../components/ui/StatusPill'
-import { useDateFormat } from '../../lib/datetime'
-import type { Task } from '../../types/task'
-import type { Id } from '../../types/common'
+import Avatar from '@/components/ui/Avatar'
+import StatusPill from '@/components/ui/StatusPill'
+import { useDateFormat } from '@/lib/datetime'
+import type { Task } from '@/types/task'
+import type { Id } from '@/types/common'
 
 export interface BoardColumn { key: string | number; label: string; color: string }
 type FormatDate = (v?: string | number | Date | null) => string

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import Toaster from './Toaster'
-import { notifyError } from '../../lib/notify'
+import { notifyError } from '@/lib/notify'
 
 describe('Toaster', () => {
   it('shows a toast (role=alert) when notifyError fires', () => {

@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Save, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
-import api from '../../../lib/api'
+import api from '@/lib/api'
 import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
 
 // extraField (optioneel): { key, label, options: [{value,label}], default } —

@@ -6,11 +6,11 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Layers, MapPin, Building2, Hash, RefreshCw } from 'lucide-react'
-import api from '../../lib/api'
-import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
-import { useRightPanel } from '../../context/RightPanelContext'
-import KpiBlock from '../../components/ui/KpiBlock'  // shared KPI card
-import type { ReportCustomer, ReportDepartment } from '../../types/reports'
+import api from '@/lib/api'
+import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
+import { useRightPanel } from '@/context/RightPanelContext'
+import KpiBlock from '@/components/ui/KpiBlock'  // shared KPI card
+import type { ReportCustomer, ReportDepartment } from '@/types/reports'
 
 export default function DepartmentsReport() {
   const { t } = useTranslation('shiftmanager')

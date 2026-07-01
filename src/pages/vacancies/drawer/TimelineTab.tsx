@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import Avatar from '../../../components/ui/Avatar'
-import KoiosAiMark from '../../../components/ui/KoiosAiMark'
-import type { VacancyDetail } from '../../../types/vacancy'
+import Avatar from '@/components/ui/Avatar'
+import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import type { VacancyDetail } from '@/types/vacancy'
 
 /**
  * TimelineTab — read-only activity feed for a vacancy (created, status changes,

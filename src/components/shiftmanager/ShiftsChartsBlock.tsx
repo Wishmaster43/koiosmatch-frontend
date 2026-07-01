@@ -14,7 +14,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation }     from "react-i18next"
 import ShiftsDrillDownDrawer  from "./ShiftsDrillDownDrawer"
-import { useRightPanel }      from "../../context/RightPanelContext"
+import { useRightPanel }      from "@/context/RightPanelContext"
 import { SERIES, CURRENT_YEAR } from "./shiftsChartsConfig"
 import { BarChartWidget, YearIndicator, ChartCard } from "./shiftsChartsWidgets"
 import { useShiftsChartData } from "./useShiftsChartData"

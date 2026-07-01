@@ -1,5 +1,5 @@
 // LocationsDetailPage — page wrapper that renders the LocationsTable.
-import LocationsTable from '../../components/reports/LocationsTable'
+import LocationsTable from '@/components/reports/LocationsTable'
 
 export default function LocationsDetailPage() {
   return (

@@ -4,10 +4,10 @@ import CustomersDetailPage   from './CustomersDetailPage'
 import LocationsDetailPage   from './LocationsDetailPage'
 import DepartmentsDetailPage from './DepartmentsDetailPage'
 import ContactsDetailPage    from './ContactsDetailPage'
-import OrdersTable           from '../../components/shiftmanager/OrdersTable'
+import OrdersTable           from '@/components/shiftmanager/OrdersTable'
 import RunsDetailPage        from '../ai/RunsDetailPage'
 import MessagesDetailPage    from '../ai/MessagesDetailPage'
-import { useAuth }           from '../../context/AuthContext'
+import { useAuth }           from '@/context/AuthContext'
 
 const BASE_TABS: Array<{ id: string; label: string; requires?: string }> = [
   { id: 'candidates',  label: 'Kandidaten' },

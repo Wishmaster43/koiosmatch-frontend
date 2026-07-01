@@ -1,14 +1,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import api from '../../lib/api'
-import { Field, TextField, SelectField } from '../../components/forms/fields'
-import { useVacancyLookups } from '../../context/VacancyLookupsContext'
-import { useIndustries } from '../../lib/useIndustries'
-import { useFunctions } from '../../lib/useFunctions'
+import api from '@/lib/api'
+import { Field, TextField, SelectField } from '@/components/forms/fields'
+import { useVacancyLookups } from '@/context/VacancyLookupsContext'
+import { useIndustries } from '@/lib/useIndustries'
+import { useFunctions } from '@/lib/useFunctions'
 import { mapVacancy } from './data/mapVacancy'
-import type { Vacancy } from '../../types/vacancy'
-import type { Id } from '../../types/common'
+import type { Vacancy } from '@/types/vacancy'
+import type { Id } from '@/types/common'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {

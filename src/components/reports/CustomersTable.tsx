@@ -7,15 +7,15 @@ import { useState, useEffect, useMemo } from 'react'
 import type { CSSProperties, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
-import { useRightPanel }      from '../../context/RightPanelContext'
-import { useAuth }            from '../../context/AuthContext'
+import { useRightPanel }      from '@/context/RightPanelContext'
+import { useAuth }            from '@/context/AuthContext'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
-import api, { unwrapList }    from '../../lib/api'
-import { USE_MOCKS }          from '../../lib/mocks'
+import api, { unwrapList }    from '@/lib/api'
+import { USE_MOCKS }          from '@/lib/mocks'
 import PaginationBar          from '../ui/PaginationBar'
-import { useDefaultPageSize } from '../../lib/usePageSize'
+import { useDefaultPageSize } from '@/lib/usePageSize'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
-import type { ReportCustomer, SortState } from '../../types/reports'
+import type { ReportCustomer, SortState } from '@/types/reports'
 
 const DUMMY_CUSTOMERS: ReportCustomer[] = [
   {

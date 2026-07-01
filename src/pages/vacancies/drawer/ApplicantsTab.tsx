@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import Avatar from '../../../components/ui/Avatar'
-import { useVacancyLookups } from '../../../context/VacancyLookupsContext'
-import type { VacancyDetail } from '../../../types/vacancy'
+import Avatar from '@/components/ui/Avatar'
+import { useVacancyLookups } from '@/context/VacancyLookupsContext'
+import type { VacancyDetail } from '@/types/vacancy'
 
 // Soft phase chip in the funnel-phase colour (shared soft-chip convention).
 function PhaseChip({ label, color }: { label: ReactNode; color?: string | null }) {

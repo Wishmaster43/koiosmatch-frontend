@@ -12,7 +12,7 @@ import type { FormEvent, ChangeEvent, ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft } from 'lucide-react'
-import { useAuth } from '../../context/AuthContext'
+import { useAuth } from '@/context/AuthContext'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 
 // Read a server-provided error message off an axios-style error, if present.

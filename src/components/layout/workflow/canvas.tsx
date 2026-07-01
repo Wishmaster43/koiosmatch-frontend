@@ -15,7 +15,7 @@ import { MODULE_META } from '@/modules/index'
 import { NODE_W, NODE_H } from './serialization'
 import { OPERATORS } from './constants'
 import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './contexts'
-import type { FlowNodeData, EdgeFilters, FilterCondition } from '../../../types/workflow'
+import type { FlowNodeData, EdgeFilters, FilterCondition } from '@/types/workflow'
 
 // ── Custom node ───────────────────────────────────────────────────────────────
 

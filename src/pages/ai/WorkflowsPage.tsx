@@ -13,13 +13,13 @@ import type { ReactNode, DragEvent } from 'react'
 import { interactive } from '@/lib/a11y'
 import { notifyError } from '@/lib/notify'
 import { useTranslation } from 'react-i18next'
-import api from '../../lib/api'
-import { useRightPanel } from '../../context/RightPanelContext'
+import api from '@/lib/api'
+import { useRightPanel } from '@/context/RightPanelContext'
 import { Zap, Plus, Loader2, Folder, FolderPlus, Trash2, LayoutGrid, List } from 'lucide-react'
-import WorkflowCanvasEditor from '../../components/layout/WorkflowCanvasEditor'
+import WorkflowCanvasEditor from '@/components/layout/WorkflowCanvasEditor'
 import { normalizeWorkflow, denormalizeWorkflow } from './data/workflowMap'
 import WorkflowCard, { WorkflowRow } from './WorkflowCard'
-import type { Workflow } from '../../types/workflow'
+import type { Workflow } from '@/types/workflow'
 
 // A workflow folder (left sidebar grouping).
 interface WorkflowFolder { id: string | number; name: string; [k: string]: unknown }

@@ -4,12 +4,12 @@
  * PaginationBar; page size comes from the user's saved preference.
  */
 import { useState, useEffect } from 'react'
-import api                    from '../../lib/api'
-import { useDefaultPageSize } from '../../lib/usePageSize'
-import { useAuth }            from '../../context/AuthContext'
-import CandidatesTable        from '../../components/reports/CandidatesTable'
-import PaginationBar          from '../../components/ui/PaginationBar'
-import type { ReportCandidate } from '../../types/reports'
+import api                    from '@/lib/api'
+import { useDefaultPageSize } from '@/lib/usePageSize'
+import { useAuth }            from '@/context/AuthContext'
+import CandidatesTable        from '@/components/reports/CandidatesTable'
+import PaginationBar          from '@/components/ui/PaginationBar'
+import type { ReportCandidate } from '@/types/reports'
 
 export default function CandidatesDetailPage() {
   const defaultPageSize        = useDefaultPageSize()

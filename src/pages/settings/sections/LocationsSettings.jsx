@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, X } from 'lucide-react'
-import api from '../../../lib/api'
+import api from '@/lib/api'
 
 // Structured address — kept as separate fields so it can be matched/validated and
 // composed consistently. Falls back to a legacy `address`/`full_address` string.

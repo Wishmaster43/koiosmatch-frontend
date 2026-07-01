@@ -13,7 +13,7 @@
  */
 import { useCallback, useState } from 'react'
 import { sendChat } from './koiosApi'
-import type { KoiosChatMessage } from '../../../types/koios'
+import type { KoiosChatMessage } from '@/types/koios'
 
 const welcomeMessage = (): KoiosChatMessage => ({ role: 'assistant', kind: 'welcome' })
 

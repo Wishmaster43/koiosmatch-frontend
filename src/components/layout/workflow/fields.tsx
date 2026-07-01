@@ -7,7 +7,7 @@
  */
 import { Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { WorkflowField, EdgeFilters } from '../../../types/workflow'
+import type { WorkflowField, EdgeFilters } from '@/types/workflow'
 import {
   AgentSelectField, FaqSelectField, WebhookSelectField,
   FiltersField, ResponseStructureField, type OnChange,

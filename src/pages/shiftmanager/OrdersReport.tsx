@@ -1,5 +1,5 @@
 // OrdersReport — page wrapper that renders the OrdersTable (shifts/orders report).
-import OrdersTable from '../../components/shiftmanager/OrdersTable'
+import OrdersTable from '@/components/shiftmanager/OrdersTable'
 
 export default function OrdersReport() {
   return (

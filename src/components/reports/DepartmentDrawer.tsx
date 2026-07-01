@@ -7,7 +7,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X, Building2, MapPin, Hash, Layers } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import type { ReportDepartment } from '../../types/reports'
+import type { ReportDepartment } from '@/types/reports'
 
 // One labeled row of department info (hidden when value is empty).
 function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactNode; value?: ReactNode }) {

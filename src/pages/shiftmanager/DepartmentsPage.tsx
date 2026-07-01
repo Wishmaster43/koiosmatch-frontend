@@ -2,12 +2,12 @@ import { useState, useMemo, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Layers, MapPin, Building2, Users } from 'lucide-react'
-import { useRightPanel } from '../../context/RightPanelContext'
-import api, { unwrapList } from '../../lib/api'
-import { isAbortError } from '../../lib/mocks'
+import { useRightPanel } from '@/context/RightPanelContext'
+import api, { unwrapList } from '@/lib/api'
+import { isAbortError } from '@/lib/mocks'
 import { ac, Avatar, StatusBadge } from './departmentParts'
 import DepartmentDrawer from './DepartmentDrawer'
-import type { SmDepartmentRow } from '../../types/shiftmanager'
+import type { SmDepartmentRow } from '@/types/shiftmanager'
 
 // Raw department from /sm_departments.
 interface RawDepartment {

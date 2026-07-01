@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useVacancyLookups } from '../../../context/VacancyLookupsContext'
-import type { VacancyDetail } from '../../../types/vacancy'
+import { useVacancyLookups } from '@/context/VacancyLookupsContext'
+import type { VacancyDetail } from '@/types/vacancy'
 
 // A single labelled metric tile.
 function Stat({ label, value, color }: { label: ReactNode; value: ReactNode; color?: string }) {

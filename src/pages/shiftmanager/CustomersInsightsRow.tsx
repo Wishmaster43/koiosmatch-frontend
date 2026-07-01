@@ -7,11 +7,11 @@
  */
 import { FilterX } from 'lucide-react'
 import type { CSSProperties } from 'react'
-import MiniDonut from '../../components/charts/MiniDonut'
+import MiniDonut from '@/components/charts/MiniDonut'
 import { interactive } from '@/lib/a11y'
 // Same contract as the shared InsightsRow — this is a near-duplicate (DUP: fold into it later).
-import type { DonutSpec, KpiSpec } from '../../components/insights/InsightsRow'
-import type { ChartDatum } from '../../components/charts/chartTypes'
+import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
+import type { ChartDatum } from '@/components/charts/chartTypes'
 
 const CARD: CSSProperties = {
   flex: '1 1 0', minWidth: 0, height: 96, boxSizing: 'border-box',

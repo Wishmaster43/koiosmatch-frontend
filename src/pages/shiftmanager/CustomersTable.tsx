@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import type { CSSProperties } from 'react'
-import DataTable from '../../components/ui/DataTable'
-import type { Column } from '../../components/ui/DataTable'
-import Avatar from '../../components/ui/Avatar'
-import StatusPill from '../../components/ui/StatusPill'
-import type { SmCustomerRow } from '../../types/shiftmanager'
+import DataTable from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
+import Avatar from '@/components/ui/Avatar'
+import StatusPill from '@/components/ui/StatusPill'
+import type { SmCustomerRow } from '@/types/shiftmanager'
 
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save } from 'lucide-react'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
-import { useIndustries } from '../../../lib/useIndustries'
+import { useIndustries } from '@/lib/useIndustries'
 
 // Option lists (data — kept as-is; only labels are translated). Industries are
 // now tenant-configurable (Settings → Personalisation → Industries).

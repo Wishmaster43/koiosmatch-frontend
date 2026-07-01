@@ -4,7 +4,7 @@
  * under `/webhook-subscriptions`. The signing secret is returned only by create
  * and regenerate, and is never stored client-side beyond the one-time reveal.
  */
-import api, { unwrap, unwrapList } from '../../../../lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 
 // List all subscriptions for the active tenant (no signing secret).
 export const listSubscriptions = () => api.get('/webhook-subscriptions').then(unwrapList)

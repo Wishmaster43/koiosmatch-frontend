@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileText } from 'lucide-react'
-import EntityDrawer from '../../components/drawer/EntityDrawer'
-import EntityHeader from '../../components/drawer/EntityHeader'
+import EntityDrawer from '@/components/drawer/EntityDrawer'
+import EntityHeader from '@/components/drawer/EntityHeader'
 import ApplicationTab from './drawer/ApplicationTab'
 import CandidateTab from './drawer/CandidateTab'
 import VacancyTab from './drawer/VacancyTab'
@@ -10,10 +10,10 @@ import InterviewsTab from './drawer/InterviewsTab'
 import AppointmentsTab from './drawer/AppointmentsTab'
 import NotesTab from './drawer/NotesTab'
 import Timeline from './drawer/Timeline'
-import type { ApplicationDetail } from '../../types/application'
+import type { ApplicationDetail } from '@/types/application'
 import type { RejectPayload } from './drawer/RejectionBlock'
 import type { Criterion } from './drawer/MatchScoreBlock'
-import type { Id } from '../../types/common'
+import type { Id } from '@/types/common'
 
 // The tab order (matches the screenshots).
 const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'timeline', 'notes']

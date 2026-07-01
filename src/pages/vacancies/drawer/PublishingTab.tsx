@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import SelectMenuJs from '../../../components/ui/SelectMenu'
-import { useVacancyLookups } from '../../../context/VacancyLookupsContext'
-import type { VacancyDetail } from '../../../types/vacancy'
-import type { Id } from '../../../types/common'
+import SelectMenuJs from '@/components/ui/SelectMenu'
+import { useVacancyLookups } from '@/context/VacancyLookupsContext'
+import type { VacancyDetail } from '@/types/vacancy'
+import type { Id } from '@/types/common'
 
 type AnyProps = Record<string, unknown>
 const SelectMenu = SelectMenuJs as unknown as ComponentType<AnyProps>

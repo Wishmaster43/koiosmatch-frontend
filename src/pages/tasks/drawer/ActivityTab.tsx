@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { useDateFormat } from '../../../lib/datetime'
-import type { TaskDetail } from '../../../types/task'
+import { useDateFormat } from '@/lib/datetime'
+import type { TaskDetail } from '@/types/task'
 
 /**
  * ActivityTab — the task changelog (status/field changes with their date + author),

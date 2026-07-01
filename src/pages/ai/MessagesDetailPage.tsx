@@ -1,5 +1,5 @@
 // MessagesDetailPage — page wrapper that renders the MessagesTable (message log).
-import MessagesTable from '../../components/reports/MessagesTable'
+import MessagesTable from '@/components/reports/MessagesTable'
 
 export default function MessagesDetailPage() {
   return (

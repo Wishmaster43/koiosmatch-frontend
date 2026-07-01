@@ -6,13 +6,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Layers, Building2, AlertCircle, RefreshCw } from 'lucide-react'
-import api from '../../lib/api'
-import ShiftsChartsBlock from '../../components/shiftmanager/ShiftsChartsBlock'
-import { useRightPanel } from '../../context/RightPanelContext'
-import KpiBlock         from '../../components/ui/KpiBlock'
-import EntityListDrawer from '../../components/ui/EntityListDrawer'
-import type { ReportCustomer, ReportLocation } from '../../types/reports'
-import type { SmDrillItem } from '../../types/shiftmanager'
+import api from '@/lib/api'
+import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
+import { useRightPanel } from '@/context/RightPanelContext'
+import KpiBlock         from '@/components/ui/KpiBlock'
+import EntityListDrawer from '@/components/ui/EntityListDrawer'
+import type { ReportCustomer, ReportLocation } from '@/types/reports'
+import type { SmDrillItem } from '@/types/shiftmanager'
 
 export default function LocationsReport() {
   const { t } = useTranslation('shiftmanager')

@@ -1,15 +1,15 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import EntityDrawer from '../../components/drawer/EntityDrawer'
-import EntityHeader from '../../components/drawer/EntityHeader'
-import { useDateFormat } from '../../lib/datetime'
+import EntityDrawer from '@/components/drawer/EntityDrawer'
+import EntityHeader from '@/components/drawer/EntityHeader'
+import { useDateFormat } from '@/lib/datetime'
 import DetailsTab from './drawer/DetailsTab'
 import LinksTab from './drawer/LinksTab'
 import CommentsTab from './drawer/CommentsTab'
 import ActivityTab from './drawer/ActivityTab'
 import { initialsOf } from '@/lib/initials'
-import type { TaskDetail } from '../../types/task'
-import type { Id } from '../../types/common'
+import type { TaskDetail } from '@/types/task'
+import type { Id } from '@/types/common'
 
 interface NewLink { type: string; id: string; label: string }
 

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { FileText } from 'lucide-react'
-import type { VacancyDetail } from '../../../types/vacancy'
+import type { VacancyDetail } from '@/types/vacancy'
 
 // Bytes → a short human size (KB/MB), tolerant of a missing/string size.
 const humanSize = (size: unknown): string => {

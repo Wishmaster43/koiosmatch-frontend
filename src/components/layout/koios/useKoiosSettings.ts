@@ -6,7 +6,7 @@
  */
 import { useEffect, useState } from 'react'
 import { getKoiosSettings } from './koiosApi'
-import type { KoiosSettings } from '../../../types/koios'
+import type { KoiosSettings } from '@/types/koios'
 
 export function useKoiosSettings(enabled?: boolean) {
   const [settings, setSettings] = useState<KoiosSettings | null>(null)

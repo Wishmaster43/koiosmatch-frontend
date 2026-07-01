@@ -6,7 +6,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocale } from '../../../../lib/datetime'
+import { useLocale } from '@/lib/datetime'
 import { getKoiosSettings } from './koiosApi'
 import KoiosStatusCard from './KoiosStatusCard'
 import KoiosModelsCard from './KoiosModelsCard'

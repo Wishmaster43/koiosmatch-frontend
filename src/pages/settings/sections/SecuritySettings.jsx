@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck, Copy, ArrowLeft, Lock } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { useAuth } from '../../../context/AuthContext'
+import { useAuth } from '@/context/AuthContext'
 
 export default function SecuritySettings() {
   const { t } = useTranslation('settings')

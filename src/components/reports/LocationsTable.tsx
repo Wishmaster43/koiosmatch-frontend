@@ -7,14 +7,14 @@ import { useState, useEffect, useMemo } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
-import { useRightPanel }      from '../../context/RightPanelContext'
-import { useAuth }            from '../../context/AuthContext'
-import api                    from '../../lib/api'
+import { useRightPanel }      from '@/context/RightPanelContext'
+import { useAuth }            from '@/context/AuthContext'
+import api                    from '@/lib/api'
 import LocationDrawer         from './LocationDrawer'
 import PaginationBar          from '../ui/PaginationBar'
-import { useDefaultPageSize } from '../../lib/usePageSize'
+import { useDefaultPageSize } from '@/lib/usePageSize'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
-import type { ReportCustomer, ReportLocation, SortState } from '../../types/reports'
+import type { ReportCustomer, ReportLocation, SortState } from '@/types/reports'
 
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
-import Avatar from '../../../components/ui/Avatar'
-import KoiosAiMark from '../../../components/ui/KoiosAiMark'
-import type { Id } from '../../../types/common'
+import Avatar from '@/components/ui/Avatar'
+import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import type { Id } from '@/types/common'
 
 export interface TimelineItem { id?: Id; initials?: string; author?: string; time?: string; description?: ReactNode; ai?: boolean }
 

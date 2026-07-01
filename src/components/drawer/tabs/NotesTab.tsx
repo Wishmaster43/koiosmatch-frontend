@@ -6,10 +6,10 @@
 import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { Plus, Edit2, Save, X } from 'lucide-react'
-import Avatar from '../../ui/Avatar'
-import SafeHtml from '../../ui/SafeHtml'
-import RichTextEditor from '../../ui/RichTextEditor'
-import SectionCard, { sectionBlock } from '../../ui/SectionCard'
+import Avatar from '@/components/ui/Avatar'
+import SafeHtml from '@/components/ui/SafeHtml'
+import RichTextEditor from '@/components/ui/RichTextEditor'
+import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import { useDateFormat } from '@/lib/datetime'
 
 interface NoteType { value: string; label: string; color?: string }

@@ -2,13 +2,13 @@ import { useState, useRef, useEffect } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Plus, Bot, Sparkles, AtSign, Paperclip, ArrowUp } from 'lucide-react'
-import { useLocale } from '../../lib/datetime'
+import { useLocale } from '@/lib/datetime'
 import { useKoiosChat } from './koios/useKoiosChat'
 import { useKoiosSettings } from './koios/useKoiosSettings'
 import KoiosSteps from './koios/KoiosSteps'
 import KoiosUsage from './koios/KoiosUsage'
 import KoiosModelPicker from './koios/KoiosModelPicker'
-import type { KoiosChatMessage, TFn } from '../../types/koios'
+import type { KoiosChatMessage, TFn } from '@/types/koios'
 
 // ── Mention picker items ──────────────────────────────────────────────────────
 // Mention items; label = t('nav.<navKey>'). desc is illustrative demo data.

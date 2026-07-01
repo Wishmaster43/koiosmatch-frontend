@@ -5,10 +5,10 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '../../../lib/api'
-import { isAbortError } from '../../../lib/mocks'
-import StatsTab from '../../../components/drawer/tabs/StatsTab'
-import type { Customer } from '../../../types/customer'
+import api from '@/lib/api'
+import { isAbortError } from '@/lib/mocks'
+import StatsTab from '@/components/drawer/tabs/StatsTab'
+import type { Customer } from '@/types/customer'
 
 interface CustomerStats { matches_total?: number; active_matches?: number; open_vacancies?: number; fill_rate?: number }
 

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Calendar, Plus } from 'lucide-react'
-import type { ApplicationDetail } from '../../../types/application'
+import type { ApplicationDetail } from '@/types/application'
 
 /**
  * AppointmentsTab — the application's appointments (= the shared appointments

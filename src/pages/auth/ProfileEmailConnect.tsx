@@ -18,7 +18,7 @@ import { useEffect, useState } from 'react'
 import type { ChangeEvent, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, RefreshCw, Eye, EyeOff } from 'lucide-react'
-import api from '../../lib/api'
+import api from '@/lib/api'
 
 type EmailStatus = 'loading' | 'disconnected' | 'connected' | 'unavailable'
 interface EmailInfo { provider: string | null; email: string | null }

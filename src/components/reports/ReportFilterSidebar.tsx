@@ -8,7 +8,7 @@
 import { X, Search, RotateCcw } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { ReportFilterGroup } from '../../types/reports'
+import type { ReportFilterGroup } from '@/types/reports'
 import SearchSelectGroup from './filter/SearchSelectGroup'
 import PeriodGroup from './filter/PeriodGroup'
 

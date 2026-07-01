@@ -1,9 +1,9 @@
 import { useRef } from 'react'
 import type { DragEvent } from 'react'
-import Avatar from '../../components/ui/Avatar'
-import KoiosAiMark from '../../components/ui/KoiosAiMark'
-import type { Application } from '../../types/application'
-import type { Id } from '../../types/common'
+import Avatar from '@/components/ui/Avatar'
+import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import type { Application } from '@/types/application'
+import type { Id } from '@/types/common'
 
 export interface BoardPhase { key: string; label: string; color: string }
 

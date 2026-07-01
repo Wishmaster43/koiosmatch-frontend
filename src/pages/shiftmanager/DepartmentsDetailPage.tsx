@@ -1,5 +1,5 @@
 // DepartmentsDetailPage — page wrapper that renders the DepartmentsTable.
-import DepartmentsTable from '../../components/reports/DepartmentsTable'
+import DepartmentsTable from '@/components/reports/DepartmentsTable'
 
 export default function DepartmentsDetailPage() {
   return (

@@ -15,10 +15,10 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, Users, CheckSquare, AlertTriangle, RefreshCw } from 'lucide-react'
-import api from '../../lib/api'
-import { useRightPanel } from '../../context/RightPanelContext'
+import api from '@/lib/api'
+import { useRightPanel } from '@/context/RightPanelContext'
 import { PAD, KpiCard, MessageFeed, EscalationList, ActivityChart } from './components'
-import type { WaStats, WaMessage, WaEscalation, WaActivityDatum } from '../../types/whatsapp'
+import type { WaStats, WaMessage, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
 
 // ─── main page ───────────────────────────────────────────────────────────────
 

@@ -5,7 +5,7 @@
  * onChange — the parent decides when/how to persist. Off = entity absent = no access.
  */
 import { useTranslation } from 'react-i18next'
-import { Toggle } from '../../components/SettingsKit'
+import { Toggle } from '@/pages/settings/components/SettingsKit'
 import { SCOPE_ENTITIES, ACCESS_LEVELS } from './constants'
 
 export default function ScopeEditor({ value = {}, onChange }) {

@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import type { CSSProperties, RefObject } from 'react'
-import DataTable from '../../components/ui/DataTable'
-import type { Column } from '../../components/ui/DataTable'
-import Avatar from '../../components/ui/Avatar'
-import StatusPill from '../../components/ui/StatusPill'
-import type { Customer } from '../../types/customer'
-import type { Id } from '../../types/common'
+import DataTable from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
+import Avatar from '@/components/ui/Avatar'
+import StatusPill from '@/components/ui/StatusPill'
+import type { Customer } from '@/types/customer'
+import type { Id } from '@/types/common'
 
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
 

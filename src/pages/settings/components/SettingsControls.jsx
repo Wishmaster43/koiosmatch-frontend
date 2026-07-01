@@ -4,7 +4,7 @@
  */
 import { useState, useEffect, useRef } from 'react'
 import { GripVertical } from 'lucide-react'
-import { COLOR_PRESETS } from '../../../lib/colorPresets'
+import { COLOR_PRESETS } from '@/lib/colorPresets'
 
 function ColorPickerPopup({ color, onChange, onClose }) {
   const [hex, setHex] = useState(color)

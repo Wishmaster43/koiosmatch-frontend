@@ -2,12 +2,12 @@ import { useState, useMemo, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react'
-import { useRightPanel } from '../../context/RightPanelContext'
-import api, { unwrapList } from '../../lib/api'
-import { isAbortError } from '../../lib/mocks'
+import { useRightPanel } from '@/context/RightPanelContext'
+import api, { unwrapList } from '@/lib/api'
+import { isAbortError } from '@/lib/mocks'
 import { ac, ContactAvatar } from './contactParts'
 import ContactDrawer from './ContactDrawer'
-import type { SmContactRow } from '../../types/shiftmanager'
+import type { SmContactRow } from '@/types/shiftmanager'
 
 // Raw contact from /sm_contacts (snake/camel + nested-or-string customer/location).
 interface RawContact {

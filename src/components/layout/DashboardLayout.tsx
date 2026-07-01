@@ -6,14 +6,14 @@
 import { useState, useEffect, Suspense } from 'react'
 import type { ComponentType } from 'react'
 import { SlidersHorizontal, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
-import { useAuth } from '../../context/AuthContext'
-import { useRightPanel } from '../../context/RightPanelContext'
-import { canAccessPage, PACKAGE_DEFAULT_PAGE } from '../../lib/access'
+import { useAuth } from '@/context/AuthContext'
+import { useRightPanel } from '@/context/RightPanelContext'
+import { canAccessPage, PACKAGE_DEFAULT_PAGE } from '@/lib/access'
 import Sidebar from './Sidebar'
 import KoiosPanel from './KoiosPanel'
 import ReportFilterSidebar from '../reports/ReportFilterSidebar'
 import { renderPage, PAGE_TITLES } from './appPages'
-import type { ReportFilterGroup } from '../../types/reports'
+import type { ReportFilterGroup } from '@/types/reports'
 
 // Sidebar is still JS (the other Claude owns it); accept its props loosely at this boundary.
 const SidebarTyped = Sidebar as unknown as ComponentType<Record<string, unknown>>

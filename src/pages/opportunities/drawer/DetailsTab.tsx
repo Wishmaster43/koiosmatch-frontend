@@ -1,9 +1,9 @@
 import { useMemo } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocale, useDateFormat } from '../../../lib/datetime'
-import DetailTableJs from '../../../components/ui/DetailTable'
-import type { Opportunity } from '../../../types/opportunity'
+import { useLocale, useDateFormat } from '@/lib/datetime'
+import DetailTableJs from '@/components/ui/DetailTable'
+import type { Opportunity } from '@/types/opportunity'
 
 type AnyProps = Record<string, unknown>
 const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>

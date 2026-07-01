@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { X, CalendarDays, Play, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import type { ScheduleConfig } from '../../../types/workflow'
+import type { ScheduleConfig } from '@/types/workflow'
 
 // ── Schedule helpers ──────────────────────────────────────────────────────────
 

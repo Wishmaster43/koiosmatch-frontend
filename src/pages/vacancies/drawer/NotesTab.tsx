@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
-import Avatar from '../../../components/ui/Avatar'
-import { useDateFormat } from '../../../lib/datetime'
-import type { VacancyDetail } from '../../../types/vacancy'
+import Avatar from '@/components/ui/Avatar'
+import { useDateFormat } from '@/lib/datetime'
+import type { VacancyDetail } from '@/types/vacancy'
 
 /**
  * NotesTab — read-only list of internal notes on the vacancy. A composer + write

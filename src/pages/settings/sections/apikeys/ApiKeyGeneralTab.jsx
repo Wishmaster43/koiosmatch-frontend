@@ -7,8 +7,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pencil, Plus, RefreshCw, Save, X } from 'lucide-react'
-import DetailTable from '../../../../components/ui/DetailTable'
-import { useDateFormat } from '../../../../lib/datetime'
+import DetailTable from '@/components/ui/DetailTable'
+import { useDateFormat } from '@/lib/datetime'
 import { KEY_TYPES, isValidIpOrCidr } from './constants'
 
 export default function ApiKeyGeneralTab({ apiKey, onSave }) {

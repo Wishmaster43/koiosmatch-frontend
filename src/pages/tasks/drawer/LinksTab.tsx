@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link2, X, Plus } from 'lucide-react'
-import api, { unwrapList } from '../../../lib/api'
-import { SelectField } from '../../../components/forms/fields'
-import SearchSelectJs from '../../../components/ui/SearchSelect'
-import type { TaskDetail, TaskLink } from '../../../types/task'
-import type { Id } from '../../../types/common'
+import api, { unwrapList } from '@/lib/api'
+import { SelectField } from '@/components/forms/fields'
+import SearchSelectJs from '@/components/ui/SearchSelect'
+import type { TaskDetail, TaskLink } from '@/types/task'
+import type { Id } from '@/types/common'
 
 type AnyProps = Record<string, unknown>
 const SearchSelect = SearchSelectJs as unknown as ComponentType<AnyProps>

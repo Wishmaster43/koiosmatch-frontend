@@ -8,7 +8,7 @@ import { useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { EVENT_GROUPS, ALL_EVENTS, actionOf } from './webhookEvents'
-import { PermissionToggle } from '../../components/SettingsControls'
+import { PermissionToggle } from '@/pages/settings/components/SettingsControls'
 
 export default function EventCatalog({ value = [], onChange }) {
   const { t } = useTranslation('settings')

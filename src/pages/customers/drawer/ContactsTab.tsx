@@ -7,10 +7,10 @@ import type { ComponentType, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Users, Check } from 'lucide-react'
 import SubEntityTab from './SubEntityTab'
-import type { Column } from '../../../components/ui/DataTable'
-import DetailTableJs from '../../../components/ui/DetailTable'
-import SectionCard from '../../../components/ui/SectionCard'
-import type { Contact } from '../../../types/customer'
+import type { Column } from '@/components/ui/DataTable'
+import DetailTableJs from '@/components/ui/DetailTable'
+import SectionCard from '@/components/ui/SectionCard'
+import type { Contact } from '@/types/customer'
 
 type AnyProps = Record<string, unknown>
 const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>

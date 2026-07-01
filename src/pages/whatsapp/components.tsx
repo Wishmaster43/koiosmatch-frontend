@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Clock, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import type { WaCandidate, WaMessage, WaEscalation, WaActivityDatum } from '../../types/whatsapp'
+import type { WaCandidate, WaMessage, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
 
 
 export const PAD  = (n: number) => String(n).padStart(2, '0')

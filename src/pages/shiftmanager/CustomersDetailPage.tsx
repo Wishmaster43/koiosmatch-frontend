@@ -1,5 +1,5 @@
 // CustomersDetailPage — page wrapper that renders the CustomersTable.
-import CustomersTable from '../../components/reports/CustomersTable'
+import CustomersTable from '@/components/reports/CustomersTable'
 
 export default function CustomersDetailPage() {
   return (

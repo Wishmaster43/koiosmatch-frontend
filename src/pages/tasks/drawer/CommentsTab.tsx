@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Send } from 'lucide-react'
-import Avatar from '../../../components/ui/Avatar'
-import { TextArea } from '../../../components/forms/fields'
-import { useDateFormat } from '../../../lib/datetime'
-import type { TaskDetail } from '../../../types/task'
+import Avatar from '@/components/ui/Avatar'
+import { TextArea } from '@/components/forms/fields'
+import { useDateFormat } from '@/lib/datetime'
+import type { TaskDetail } from '@/types/task'
 
 /**
  * CommentsTab — the Reacties thread. Presentational: the page owns the data and the

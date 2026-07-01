@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronUp, Pencil, Save, X } from 'lucide-react'
-import Slider from '../../../components/ui/Slider'
+import Slider from '@/components/ui/Slider'
 
 export interface Criterion { key?: string; label?: string; hard?: boolean; score: number; weight?: number; note?: string }
 

@@ -7,13 +7,13 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check } from 'lucide-react'
-import api from '../../lib/api'
+import api from '@/lib/api'
 import { interactive } from '@/lib/a11y'
 import { notifyError } from '@/lib/notify'
 import { MODELS, inputStyle, Field, TextEditor, SideList, ListRow } from './management/shared'
 import type { Version } from './management/shared'
 import { AgentForm } from './management/AgentForm'
-import type { AiAgent, AiItem } from '../../types/ai'
+import type { AiAgent, AiItem } from '@/types/ai'
 
 // ── Agents tab ────────────────────────────────────────────────────────────────
 

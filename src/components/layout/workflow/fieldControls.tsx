@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react'
 import { Loader2, Plus, X, Check, Copy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { OPERATORS } from './constants'
-import type { WorkflowField, EdgeFilters, FilterCondition } from '../../../types/workflow'
+import type { WorkflowField, EdgeFilters, FilterCondition } from '@/types/workflow'
 
 // Shared change handler: writes one field's value into the node config.
 export type OnChange = (key: string, value: unknown) => void

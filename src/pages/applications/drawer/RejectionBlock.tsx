@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { XCircle } from 'lucide-react'
-import api from '../../../lib/api'
-import KoiosAiMark from '../../../components/ui/KoiosAiMark'
-import type { ApplicationDetail } from '../../../types/application'
-import type { Id } from '../../../types/common'
+import api from '@/lib/api'
+import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import type { ApplicationDetail } from '@/types/application'
+import type { Id } from '@/types/common'
 
 interface RejectionReason { id?: Id; name?: string; label?: string }
 interface Tpl { email_subject?: string; email_body?: string; whatsapp_body?: string }

@@ -4,7 +4,7 @@
  * denormalize: UI -> API. Extracted from WorkflowsPage; no React, easy to test.
  */
 
-import type { RawWorkflow, RawStep, Workflow, WorkflowStep } from '../../../types/workflow'
+import type { RawWorkflow, RawStep, Workflow, WorkflowStep } from '@/types/workflow'
 
 export function normalizeWorkflow(wf: RawWorkflow): Workflow {
   // trigger: string samengesteld uit trigger_type + trigger_config, of al een string

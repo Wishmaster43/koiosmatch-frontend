@@ -1,8 +1,8 @@
 import { useRef } from 'react'
 import type { DragEvent } from 'react'
-import Avatar from '../../components/ui/Avatar'
-import type { Opportunity } from '../../types/opportunity'
-import type { Id } from '../../types/common'
+import Avatar from '@/components/ui/Avatar'
+import type { Opportunity } from '@/types/opportunity'
+import type { Id } from '@/types/common'
 
 interface StageCol { value: string | number; label: string; color?: string }
 

@@ -4,7 +4,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { FileText } from 'lucide-react'
-import type { Id } from '../../../types/common'
+import type { Id } from '@/types/common'
 
 interface CustomerDoc { id?: Id; name?: string }
 

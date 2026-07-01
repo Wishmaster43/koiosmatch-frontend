@@ -2,12 +2,12 @@ import { useState, useMemo, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Building2, Layers } from 'lucide-react'
-import { useRightPanel } from '../../context/RightPanelContext'
-import api, { unwrapList } from '../../lib/api'
-import { isAbortError } from '../../lib/mocks'
+import { useRightPanel } from '@/context/RightPanelContext'
+import api, { unwrapList } from '@/lib/api'
+import { isAbortError } from '@/lib/mocks'
 import { Avatar, StatusBadge, ac } from './locationParts'
 import LocationDrawer from './LocationDrawer'
-import type { SmLocationRow } from '../../types/shiftmanager'
+import type { SmLocationRow } from '@/types/shiftmanager'
 
 // Raw location from /sm_locations.
 interface RawLocation {

@@ -5,9 +5,9 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Plus, RefreshCw } from 'lucide-react'
-import DataTable from '../../../../components/ui/DataTable'
-import StatusBadge from '../../../../components/ui/StatusBadge'
-import { useDateFormat } from '../../../../lib/datetime'
+import DataTable from '@/components/ui/DataTable'
+import StatusBadge from '@/components/ui/StatusBadge'
+import { useDateFormat } from '@/lib/datetime'
 import { shortGuid } from './constants'
 
 export default function ApiKeyList({ keys, loading, error, onReload, onOpen, onNew }) {

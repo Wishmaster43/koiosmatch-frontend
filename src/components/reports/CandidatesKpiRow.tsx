@@ -6,7 +6,7 @@
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, UserCheck, UserX, UserPlus, TrendingUp } from 'lucide-react'
 import KpiCard from '../ui/KpiCard'
-import type { ReportCandidate } from '../../types/reports'
+import type { ReportCandidate } from '@/types/reports'
 
 // Count candidates whose status matches the given value (defaults missing to 'onbekend').
 const count = (candidates: ReportCandidate[], status: string) =>

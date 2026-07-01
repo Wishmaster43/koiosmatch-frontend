@@ -8,7 +8,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X, Mail, Phone, Building2, MessageCircle, Briefcase, User } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import type { ReportContact } from '../../types/reports'
+import type { ReportContact } from '@/types/reports'
 
 // One labeled row of contact info; renders a mailto/tel link when href is given.
 function InfoRow({ icon: Icon, label, value, href }: { icon: LucideIcon; label: ReactNode; value?: ReactNode; href?: string | null }) {

@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import EntityDrawer from '../../components/drawer/EntityDrawer'
-import EntityHeader from '../../components/drawer/EntityHeader'
-import { useDateFormat } from '../../lib/datetime'
+import EntityDrawer from '@/components/drawer/EntityDrawer'
+import EntityHeader from '@/components/drawer/EntityHeader'
+import { useDateFormat } from '@/lib/datetime'
 import DetailsTab from './drawer/DetailsTab'
-import type { Opportunity } from '../../types/opportunity'
-import type { Id, LookupOption } from '../../types/common'
+import type { Opportunity } from '@/types/opportunity'
+import type { Id, LookupOption } from '@/types/common'
 
 interface DrawerUser { id: Id; name: string }
 interface DrawerCustomer { id: Id; name: string }

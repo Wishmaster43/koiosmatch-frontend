@@ -5,12 +5,12 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrapList } from '../../../lib/api'
-import { isAbortError } from '../../../lib/mocks'
-import DataTable from '../../../components/ui/DataTable'
-import type { Column } from '../../../components/ui/DataTable'
-import StatusPill from '../../../components/ui/StatusPill'
-import type { Id } from '../../../types/common'
+import api, { unwrapList } from '@/lib/api'
+import { isAbortError } from '@/lib/mocks'
+import DataTable from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
+import StatusPill from '@/components/ui/StatusPill'
+import type { Id } from '@/types/common'
 
 interface VacancyRow { id?: Id; title: string; status: { label?: string; color?: string }; applications: number }
 

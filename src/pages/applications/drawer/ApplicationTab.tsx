@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import StatusPill from '../../../components/ui/StatusPill'
-import KoiosAiMark from '../../../components/ui/KoiosAiMark'
+import StatusPill from '@/components/ui/StatusPill'
+import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import MatchScoreBlock from './MatchScoreBlock'
 import type { Criterion } from './MatchScoreBlock'
 import RejectionBlock from './RejectionBlock'
 import type { RejectPayload } from './RejectionBlock'
-import type { ApplicationDetail } from '../../../types/application'
-import type { Id } from '../../../types/common'
+import type { ApplicationDetail } from '@/types/application'
+import type { Id } from '@/types/common'
 
 // A small label-above-value field.
 function Field({ label, children }: { label: ReactNode; children: ReactNode }) {

@@ -7,8 +7,8 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Check, Copy, MoreHorizontal, Pencil, Power, RefreshCw, Save, Trash2, Webhook, X } from 'lucide-react'
-import StatusBadge from '../../../../components/ui/StatusBadge'
-import ActionMenu from '../../../../components/ui/ActionMenu'
+import StatusBadge from '@/components/ui/StatusBadge'
+import ActionMenu from '@/components/ui/ActionMenu'
 import { getSubscription, updateSubscription, deleteSubscription, regenerateSecret } from './webhooksApi'
 import EventCatalog from './EventCatalog'
 

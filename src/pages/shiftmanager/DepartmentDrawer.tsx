@@ -7,7 +7,7 @@
 import { useTranslation } from 'react-i18next'
 import { Layers, MapPin, Users, X, ChevronRight } from 'lucide-react'
 import { ac, Avatar, StatusBadge } from './departmentParts'
-import type { SmDepartmentRow } from '../../types/shiftmanager'
+import type { SmDepartmentRow } from '@/types/shiftmanager'
 
 export default function DepartmentDrawer({ dep, onClose }: { dep: SmDepartmentRow | null; onClose: () => void }) {
   const { t } = useTranslation('shiftmanager')

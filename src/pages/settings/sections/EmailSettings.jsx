@@ -8,9 +8,9 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, RefreshCw, Check, Mail, AlertTriangle, Eye, EyeOff } from 'lucide-react'
-import api from '../../../lib/api'
+import api from '@/lib/api'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
-import RichTextEditor from '../../../components/ui/RichTextEditor'
+import RichTextEditor from '@/components/ui/RichTextEditor'
 
 export default function EmailSettings({ context = 'klanten' }) {
   const { t } = useTranslation('settings')
