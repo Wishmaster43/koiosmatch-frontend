@@ -124,5 +124,8 @@
     "intakes": "intakes"
   },
   "yes": "Oui",
-  "no": "Non"
+  "no": "Non",
+  "send": "Envoyer",
+  "expand": "Agrandir",
+  "collapse": "Réduire"
 }

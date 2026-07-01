@@ -146,7 +146,7 @@ export function SideList<T extends { id?: string | number }>({ title, items, sel
       <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
         <div style={{ padding: '9px 11px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{title}</span>
-          <button onClick={onNew} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', padding: 2 }}>
+          <button onClick={onNew} aria-label={t('common:add')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', padding: 2 }}>
             <Plus size={13} />
           </button>
         </div>

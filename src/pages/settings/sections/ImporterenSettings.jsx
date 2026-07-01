@@ -107,7 +107,7 @@ export default function ImporterenSettings() {
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px', background: 'var(--color-success-bg)', border: '1px solid #BBF7D0', borderRadius: 8, marginBottom: 16 }}>
                 <Check size={14} style={{ color: 'var(--color-success)' }} />
                 <span style={{ fontSize: 13, color: '#166534', fontWeight: 500 }}>{file?.name}</span>
-                <button onClick={reset} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={13} /></button>
+                <button onClick={reset} aria-label={t('common:close')} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={13} /></button>
               </div>
               <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('import.fileSelected')}</p>
             </div>

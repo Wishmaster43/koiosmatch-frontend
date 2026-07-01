@@ -29,7 +29,7 @@ function RetentionRow({ label, hint, value, onChange, onSave }) {
       <input type="number" min={0} value={value} onChange={(e) => onChange(Number(e.target.value))}
         style={{ width: 90, height: 32, padding: '0 10px', fontSize: 14, fontWeight: 600, textAlign: 'right', border: '1px solid var(--border)', borderRadius: 8, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }} />
       <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 48 }}>{t('messaging.retention.days')}</span>
-      <button onClick={save} disabled={saving}
+      <button onClick={save} disabled={saving} aria-label={t('common:save')}
         style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
         {saved ? <Check size={13} /> : saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
       </button>

@@ -211,7 +211,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                 {status ? t('modal.fillRequired') : t('modal.selectTypeLeft')}
               </div>
             </div>
-            <button onClick={onClose}
+            <button onClick={onClose} aria-label={t('common:close')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
               <X size={18} />
             </button>

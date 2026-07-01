@@ -121,7 +121,7 @@ export function VacancyFieldsSettings() {
       </div>
 
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <button onClick={addField} disabled={addingField}
+        <button onClick={addField} disabled={addingField} aria-label={t('common:add')}
           style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>
           <Plus size={14} />
         </button>

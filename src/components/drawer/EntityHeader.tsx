@@ -7,6 +7,7 @@
  */
 import { useState, useRef, useEffect } from 'react'
 import type { ComponentType, ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { X, Maximize2, Minimize2, Camera } from 'lucide-react'
 import AvatarJs from '../ui/Avatar'
 import SelectMenuJs from '../ui/SelectMenu'
@@ -133,16 +134,17 @@ export default function EntityHeader({
   label, avatar, onPhotoChange, photoLabels, title, subtitle, renderTitle,
   titleActions, actions, meta = [], metaExtra, tags, tagsLabel, children, expanded, onToggleExpand, onClose,
 }: EntityHeaderProps) {
+  const { t } = useTranslation('common')
   return (
     <>
       {/* Title row */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-muted)', flex: 1 }}>{label}</span>
         {titleActions}
-        <button onClick={onToggleExpand} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
+        <button onClick={onToggleExpand} aria-label={expanded ? t('collapse') : t('expand')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
           {expanded ? <Minimize2 size={14} /> : <Maximize2 size={14} />}
         </button>
-        <button onClick={onClose} aria-label="Close" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
+        <button onClick={onClose} aria-label={t('close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
           <X size={15} />
         </button>
       </div>

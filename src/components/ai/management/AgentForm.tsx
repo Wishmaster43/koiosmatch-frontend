@@ -54,7 +54,7 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
           {t('ai.chat.clear')}
         </button>
         {onClose && (
-          <button onClick={onClose}
+          <button onClick={onClose} aria-label={t('common:close')}
             style={{ fontSize: 11, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}>
             ✕
           </button>
@@ -95,7 +95,7 @@ function ChatTest({ agent, onClose }: { agent: AiAgent; onClose?: () => void }) 
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && send()}
           placeholder={t('ai.chat.placeholder')} aria-label={t('ai.chat.placeholder')}
           style={{ ...inputStyle, flex: 1 }} />
-        <button onClick={send} disabled={!input.trim() || loading}
+        <button onClick={send} disabled={!input.trim() || loading} aria-label={t('common:send')}
           style={{ width: 32, height: 32, borderRadius: 7, border: 'none', background: 'var(--color-primary)', color: 'white',
             cursor: input.trim() ? 'pointer' : 'default', opacity: input.trim() ? 1 : 0.4,
             display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>

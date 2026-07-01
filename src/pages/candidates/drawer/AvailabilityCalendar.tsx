@@ -24,7 +24,7 @@ function ShiftDetail({ s, onClose }: { s: AgendaShift; onClose: () => void }) {
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, color: fav ? 'var(--color-danger)' : 'var(--text-muted)', display: 'flex' }}>
           <Heart size={15} fill={fav ? 'var(--color-danger)' : 'none'} />
         </button>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex' }}>
+        <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 3, display: 'flex' }}>
           <X size={14} />
         </button>
       </div>
