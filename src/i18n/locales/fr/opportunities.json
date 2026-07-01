@@ -6,7 +6,9 @@
   "page": {
     "add": "Ajouter une opportunité",
     "selected": "{{count}} sélectionné(e)s",
-    "clearSelection": "Effacer la sélection"
+    "clearSelection": "Effacer la sélection",
+    "archived": "Archivées",
+    "archivedView": "Afficher les opportunités archivées"
   },
   "cols": {
     "title": "Opportunité",
@@ -14,17 +16,25 @@
     "stage": "Phase",
     "value": "Valeur",
     "owner": "Responsable",
-    "date": "Créé"
+    "date": "Créé",
+    "hoursValue": "{{count}} h"
   },
   "insights": {
     "stage": "Phase",
     "owner": "Responsable",
-    "clearFilter": "Effacer le filtre"
+    "clearFilter": "Effacer le filtre",
+    "client": "Client"
   },
   "kpi": {
     "total": "Opportunités",
     "pipeline": "Valeur du pipeline (€)",
-    "avg": "Valeur moy. (€)"
+    "avg": "Valeur moy. (€)",
+    "open": "Ouvertes",
+    "pipelineHours": "Pipeline (heures)",
+    "avgHours": "Heures moy.",
+    "won": "Gagnées",
+    "lost": "Perdues",
+    "winRate": "Taux de réussite (%)"
   },
   "drawer": {
     "entityLabel": "Opportunité",
@@ -37,7 +47,10 @@
     "createdAt": "Créé le {{date}}",
     "tabs": {
       "details": "Détails",
-      "changelog": "Modifications"
+      "changelog": "Modifications",
+      "klant": "Client",
+      "notes": "Notes",
+      "tasks": "Tâches"
     },
     "markWon": "Gagné",
     "markLost": "Perdu",
@@ -100,5 +113,17 @@
     "error": "Impossible de charger les modifications.",
     "empty": "Aucune modification pour l’instant.",
     "system": "Système"
+  },
+  "notes": {
+    "title": "Notes",
+    "new": "Nouvelle note",
+    "type": "Type",
+    "empty": "Aucune note pour l’instant.",
+    "placeholder": "Écrire une note…"
+  },
+  "tasks": {
+    "loading": "Chargement des tâches…",
+    "error": "Impossible de charger les tâches.",
+    "empty": "Aucune tâche liée pour l’instant."
   }
 }

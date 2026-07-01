@@ -44,7 +44,8 @@
     "applications": "Bewerbungen",
     "shared": "Gemeinsam",
     "whatsapp": "WhatsApp",
-    "tasks": "Aufgaben"
+    "tasks": "Aufgaben",
+    "opportunities": "Chancen"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",
@@ -138,7 +139,8 @@
     "application_display": "Tabellenansicht",
     "functions": "Funktionen",
     "customer_display": "Tabellenanzeige",
-    "vacancy_app_defaults": "Bewerbungseinstellungen"
+    "vacancy_app_defaults": "Bewerbungseinstellungen",
+    "opportunity_display": "Tabellenansicht"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1340,6 +1342,16 @@
       "customer_table_color_owner": {
         "label": "Eigentümerfarbe",
         "description": "An = der Eigentümer-Avatar nutzt die Farbe des Account-Managers. Aus = neutrales Grau."
+      }
+    }
+  },
+  "opportunityDisplay": {
+    "title": "Tabellenansicht",
+    "subtitle": "Zeigen Sie die Dealgröße in Euro oder Stunden.",
+    "fields": {
+      "opportunity_value_in_hours": {
+        "label": "Wert in Stunden anzeigen",
+        "description": "Ein = die Chancen-Tabelle und KPIs zeigen Stunden statt Euro."
       }
     }
   }

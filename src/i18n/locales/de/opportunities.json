@@ -6,7 +6,9 @@
   "page": {
     "add": "Opportunity hinzufügen",
     "selected": "{{count}} ausgewählt",
-    "clearSelection": "Auswahl aufheben"
+    "clearSelection": "Auswahl aufheben",
+    "archived": "Archiviert",
+    "archivedView": "Archivierte Chancen anzeigen"
   },
   "cols": {
     "title": "Opportunity",
@@ -14,17 +16,25 @@
     "stage": "Phase",
     "value": "Wert",
     "owner": "Inhaber",
-    "date": "Erstellt"
+    "date": "Erstellt",
+    "hoursValue": "{{count}} Std."
   },
   "insights": {
     "stage": "Phase",
     "owner": "Inhaber",
-    "clearFilter": "Filter zurücksetzen"
+    "clearFilter": "Filter zurücksetzen",
+    "client": "Kunde"
   },
   "kpi": {
     "total": "Opportunities",
     "pipeline": "Pipeline-Wert (€)",
-    "avg": "Ø Wert (€)"
+    "avg": "Ø Wert (€)",
+    "open": "Offen",
+    "pipelineHours": "Pipeline (Stunden)",
+    "avgHours": "Ø Stunden",
+    "won": "Gewonnen",
+    "lost": "Verloren",
+    "winRate": "Gewinnrate (%)"
   },
   "drawer": {
     "entityLabel": "Opportunity",
@@ -37,7 +47,10 @@
     "createdAt": "Erstellt am {{date}}",
     "tabs": {
       "details": "Details",
-      "changelog": "Änderungen"
+      "changelog": "Änderungen",
+      "klant": "Kunde",
+      "notes": "Notizen",
+      "tasks": "Aufgaben"
     },
     "markWon": "Gewonnen",
     "markLost": "Verloren",
@@ -100,5 +113,17 @@
     "error": "Änderungen konnten nicht geladen werden.",
     "empty": "Noch keine Änderungen.",
     "system": "System"
+  },
+  "notes": {
+    "title": "Notizen",
+    "new": "Neue Notiz",
+    "type": "Typ",
+    "empty": "Noch keine Notizen.",
+    "placeholder": "Notiz schreiben…"
+  },
+  "tasks": {
+    "loading": "Aufgaben werden geladen…",
+    "error": "Aufgaben konnten nicht geladen werden.",
+    "empty": "Noch keine verknüpften Aufgaben."
   }
 }

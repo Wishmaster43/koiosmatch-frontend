@@ -44,7 +44,8 @@
     "applications": "Candidatures",
     "shared": "Partagé",
     "whatsapp": "WhatsApp",
-    "tasks": "Tâches"
+    "tasks": "Tâches",
+    "opportunities": "Opportunités"
   },
   "nav": {
     "candidate_display": "Affichage du tableau",
@@ -138,7 +139,8 @@
     "application_display": "Affichage du tableau",
     "functions": "Fonctions",
     "customer_display": "Affichage du tableau",
-    "vacancy_app_defaults": "Paramètres de candidature"
+    "vacancy_app_defaults": "Paramètres de candidature",
+    "opportunity_display": "Affichage du tableau"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -1340,6 +1342,16 @@
       "customer_table_color_owner": {
         "label": "Couleur du gestionnaire",
         "description": "Activé = l'avatar du gestionnaire utilise sa couleur. Désactivé = gris neutre."
+      }
+    }
+  },
+  "opportunityDisplay": {
+    "title": "Affichage du tableau",
+    "subtitle": "Afficher la taille de l’affaire en euros ou en heures.",
+    "fields": {
+      "opportunity_value_in_hours": {
+        "label": "Afficher la valeur en heures",
+        "description": "Activé = le tableau Opportunités et les KPI affichent des heures au lieu d’euros."
       }
     }
   }

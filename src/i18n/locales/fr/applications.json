@@ -47,13 +47,22 @@
     "proposed": "Proposition envoyée",
     "rejected": "Refusé",
     "matched": "Matché",
-    "new": "Nouveau"
+    "new": "Nouveau",
+    "totalActiveSub": "Actives + matchées",
+    "newSub": "Pas encore vues",
+    "matchedSub": "Cliquer pour filtrer",
+    "rejectedSub": "Cliquer pour filtrer",
+    "avgScore": "Score moyen",
+    "avgScoreSub": "Sur les candidatures actives",
+    "aiTasks": "Tâches IA ouvertes",
+    "aiTasksSub": "En attente d’action"
   },
   "insights": {
     "phase": "Phase",
     "owner": "Recruteur",
     "source": "Source",
-    "clearFilter": "Effacer le filtre"
+    "clearFilter": "Effacer le filtre",
+    "noOwner": "Aucun propriétaire"
   },
   "drawer": {
     "label": "Candidature",
@@ -74,7 +83,9 @@
     "task": "Tâche",
     "details": "Détails",
     "vacancy": "Poste",
-    "client": "Client"
+    "client": "Client",
+    "openVacancy": "Ouvrir le poste",
+    "openCandidate": "Ouvrir le candidat"
   },
   "matchScore": {
     "title": "Score de match",
@@ -128,7 +139,14 @@
     "hint": "Planifiez un entretien ou un appel avec ce candidat.",
     "new": "Nouveau rendez-vous",
     "with": "Avec",
-    "statusPlanned": "Planifié"
+    "statusPlanned": "Planifié",
+    "datetime": "Date et heure",
+    "type": "Type",
+    "typePlaceholder": "p. ex. Intake, Entretien…",
+    "title": "Titre",
+    "titlePlaceholder": "Titre facultatif…",
+    "save": "Enregistrer",
+    "cancel": "Annuler"
   },
   "notes": {
     "title": "Notes",

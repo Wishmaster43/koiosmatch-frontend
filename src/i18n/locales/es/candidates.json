@@ -313,7 +313,8 @@
     "scaleStep": "Escala / Tramo",
     "hoursPerWeek": "Horas por semana",
     "vacancy": "Vacante",
-    "of": "de"
+    "of": "de",
+    "openVacancy": "Abrir vacante"
   },
   "communication": {
     "newNote": "Nueva nota",

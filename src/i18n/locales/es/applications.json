@@ -47,13 +47,22 @@
     "proposed": "Propuesta enviada",
     "rejected": "Rechazado",
     "matched": "Emparejado",
-    "new": "Nuevo"
+    "new": "Nuevo",
+    "totalActiveSub": "Activas + emparejadas",
+    "newSub": "Aún no vistas",
+    "matchedSub": "Clic para filtrar",
+    "rejectedSub": "Clic para filtrar",
+    "avgScore": "Puntuación media",
+    "avgScoreSub": "Sobre candidaturas activas",
+    "aiTasks": "Tareas de IA abiertas",
+    "aiTasksSub": "A la espera de acción"
   },
   "insights": {
     "phase": "Fase",
     "owner": "Reclutador",
     "source": "Origen",
-    "clearFilter": "Borrar filtro"
+    "clearFilter": "Borrar filtro",
+    "noOwner": "Sin propietario"
   },
   "drawer": {
     "label": "Candidatura",
@@ -74,7 +83,9 @@
     "task": "Tarea",
     "details": "Detalles",
     "vacancy": "Vacante",
-    "client": "Cliente"
+    "client": "Cliente",
+    "openVacancy": "Abrir vacante",
+    "openCandidate": "Abrir candidato"
   },
   "matchScore": {
     "title": "Puntuación de match",
@@ -128,7 +139,14 @@
     "hint": "Programa una entrevista o llamada con este candidato.",
     "new": "Nueva cita",
     "with": "Con",
-    "statusPlanned": "Programada"
+    "statusPlanned": "Programada",
+    "datetime": "Fecha y hora",
+    "type": "Tipo",
+    "typePlaceholder": "p. ej. Intake, Entrevista…",
+    "title": "Título",
+    "titlePlaceholder": "Título opcional…",
+    "save": "Guardar",
+    "cancel": "Cancelar"
   },
   "notes": {
     "title": "Notas",

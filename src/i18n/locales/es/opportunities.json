@@ -6,7 +6,9 @@
   "page": {
     "add": "Añadir oportunidad",
     "selected": "{{count}} seleccionado(s)",
-    "clearSelection": "Borrar selección"
+    "clearSelection": "Borrar selección",
+    "archived": "Archivadas",
+    "archivedView": "Mostrar oportunidades archivadas"
   },
   "cols": {
     "title": "Oportunidad",
@@ -14,17 +16,25 @@
     "stage": "Fase",
     "value": "Valor",
     "owner": "Responsable",
-    "date": "Creado"
+    "date": "Creado",
+    "hoursValue": "{{count}} h"
   },
   "insights": {
     "stage": "Fase",
     "owner": "Responsable",
-    "clearFilter": "Borrar filtro"
+    "clearFilter": "Borrar filtro",
+    "client": "Cliente"
   },
   "kpi": {
     "total": "Oportunidades",
     "pipeline": "Valor del pipeline (€)",
-    "avg": "Valor medio (€)"
+    "avg": "Valor medio (€)",
+    "open": "Abiertas",
+    "pipelineHours": "Pipeline (horas)",
+    "avgHours": "Horas medias",
+    "won": "Ganadas",
+    "lost": "Perdidas",
+    "winRate": "Tasa de éxito (%)"
   },
   "drawer": {
     "entityLabel": "Oportunidad",
@@ -37,7 +47,10 @@
     "createdAt": "Creado el {{date}}",
     "tabs": {
       "details": "Detalles",
-      "changelog": "Cambios"
+      "changelog": "Cambios",
+      "klant": "Cliente",
+      "notes": "Notas",
+      "tasks": "Tareas"
     },
     "markWon": "Ganado",
     "markLost": "Perdido",
@@ -100,5 +113,17 @@
     "error": "No se pudieron cargar los cambios.",
     "empty": "Aún no hay cambios.",
     "system": "Sistema"
+  },
+  "notes": {
+    "title": "Notas",
+    "new": "Nueva nota",
+    "type": "Tipo",
+    "empty": "Aún no hay notas.",
+    "placeholder": "Escribe una nota…"
+  },
+  "tasks": {
+    "loading": "Cargando tareas…",
+    "error": "No se pudieron cargar las tareas.",
+    "empty": "Aún no hay tareas vinculadas."
   }
 }

@@ -47,13 +47,22 @@
     "proposed": "Vorschlag gesendet",
     "rejected": "Abgelehnt",
     "matched": "Gematcht",
-    "new": "Neu"
+    "new": "Neu",
+    "totalActiveSub": "Aktiv + Matched",
+    "newSub": "Noch nicht angesehen",
+    "matchedSub": "Zum Filtern klicken",
+    "rejectedSub": "Zum Filtern klicken",
+    "avgScore": "Ø Match-Score",
+    "avgScoreSub": "Über aktive Bewerbungen",
+    "aiTasks": "Offene KI-Aufgaben",
+    "aiTasksSub": "Warten auf Aktion"
   },
   "insights": {
     "phase": "Phase",
     "owner": "Recruiter",
     "source": "Quelle",
-    "clearFilter": "Filter zurücksetzen"
+    "clearFilter": "Filter zurücksetzen",
+    "noOwner": "Kein Eigentümer"
   },
   "drawer": {
     "label": "Bewerbung",
@@ -74,7 +83,9 @@
     "task": "Aufgabe",
     "details": "Details",
     "vacancy": "Stelle",
-    "client": "Kunde"
+    "client": "Kunde",
+    "openVacancy": "Stelle öffnen",
+    "openCandidate": "Kandidat öffnen"
   },
   "matchScore": {
     "title": "Match-Score",
@@ -128,7 +139,14 @@
     "hint": "Plane ein Interview oder einen Anruf mit diesem Kandidaten.",
     "new": "Neuer Termin",
     "with": "Mit",
-    "statusPlanned": "Geplant"
+    "statusPlanned": "Geplant",
+    "datetime": "Datum und Uhrzeit",
+    "type": "Typ",
+    "typePlaceholder": "z. B. Intake, Interview…",
+    "title": "Titel",
+    "titlePlaceholder": "Optionaler Titel…",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
   },
   "notes": {
     "title": "Notizen",

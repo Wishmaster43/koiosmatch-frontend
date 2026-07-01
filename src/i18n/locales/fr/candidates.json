@@ -313,7 +313,8 @@
     "scaleStep": "Échelon / Niveau",
     "hoursPerWeek": "Heures par semaine",
     "vacancy": "Offre",
-    "of": "sur"
+    "of": "sur",
+    "openVacancy": "Ouvrir le poste"
   },
   "communication": {
     "newNote": "Nouvelle note",

@@ -313,7 +313,8 @@
     "scaleStep": "Stufe / Schritt",
     "hoursPerWeek": "Stunden pro Woche",
     "vacancy": "Stelle",
-    "of": "von"
+    "of": "von",
+    "openVacancy": "Stelle öffnen"
   },
   "communication": {
     "newNote": "Neue Notiz",

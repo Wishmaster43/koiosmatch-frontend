@@ -44,7 +44,8 @@
     "applications": "Candidaturas",
     "shared": "Compartido",
     "whatsapp": "WhatsApp",
-    "tasks": "Tareas"
+    "tasks": "Tareas",
+    "opportunities": "Oportunidades"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
@@ -138,7 +139,8 @@
     "application_display": "Vista de tabla",
     "functions": "Funciones",
     "customer_display": "Vista de tabla",
-    "vacancy_app_defaults": "Ajustes de candidatura"
+    "vacancy_app_defaults": "Ajustes de candidatura",
+    "opportunity_display": "Vista de tabla"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1340,6 +1342,16 @@
       "customer_table_color_owner": {
         "label": "Color del gestor",
         "description": "Activado = el avatar del gestor usa su color. Desactivado = gris neutro."
+      }
+    }
+  },
+  "opportunityDisplay": {
+    "title": "Vista de tabla",
+    "subtitle": "Muestra el tamaño del trato en euros o en horas.",
+    "fields": {
+      "opportunity_value_in_hours": {
+        "label": "Mostrar valor en horas",
+        "description": "Activado = la tabla de Oportunidades y los KPI muestran horas en lugar de euros."
       }
     }
   }
