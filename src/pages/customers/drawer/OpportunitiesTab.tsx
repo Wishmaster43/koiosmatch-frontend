@@ -1,22 +1,18 @@
 /**
  * OpportunitiesTab — the actionable open demand for this customer:
  *   A) open vacancies to fill (GET /vacancies?customer_id&status=open),
- *   B) open flex shifts from planning (GET /customers/{id}/open-shifts) —
+ *   B) open flex shifts from planning (via useCustomerOpenShifts) —
  *      MODULE-GATED behind the Planning module.
  * Both sections handle their own loading/empty state.
  */
-import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrapList } from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import SectionCard from '@/components/ui/SectionCard'
 import VacanciesTab from './VacanciesTab'
+import { useCustomerOpenShifts } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
-
-interface ShiftRow { id?: Id; date?: string; shift?: string; department?: string }
 
 const Muted = ({ text }: { text: ReactNode }) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{text}</div>
 
@@ -26,20 +22,8 @@ function OpenShifts({ customerId }: { customerId?: Id }) {
   const auth = useAuth()
   const hasModule = auth?.hasModule ?? (() => false)
   const { formatDate } = useDateFormat()
-  const [rows, setRows]       = useState<ShiftRow[]>([])
-  const [loading, setLoading] = useState(true)
   const enabled = hasModule('plan')
-
-  useEffect(() => {
-    if (!enabled || !customerId) { setLoading(false); return }
-    const ctrl = new AbortController()
-    setLoading(true)
-    api.get(`/customers/${customerId}/open-shifts`, { signal: ctrl.signal })
-      .then(res => setRows(unwrapList<ShiftRow>(res).rows))
-      .catch(e => { if (!isAbortError(e)) setRows([]) })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [enabled, customerId])
+  const { rows, loading } = useCustomerOpenShifts(customerId, enabled)
 
   if (!enabled) return <Muted text={t('opportunities.planningOff')} />
   if (loading)  return <Muted text={t('page.loading')} />

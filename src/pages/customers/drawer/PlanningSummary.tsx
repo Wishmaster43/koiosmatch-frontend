@@ -2,20 +2,15 @@
  * PlanningSummary — lightweight "currently at work + upcoming shifts" block for a
  * customer (and, with params, a single location/department). MODULE-GATED: only
  * renders when the tenant has the Planning module; otherwise shows a calm note.
- * Reads GET /customers/{id}/planning-summary (?location_id / ?department_id).
+ * Reads GET /customers/{id}/planning-summary via useCustomerPlanning.
  */
-import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Users } from 'lucide-react'
-import api from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
+import { useCustomerPlanning } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
-
-interface UpcomingShift { id?: Id; date?: string; shift?: string; department?: string; candidate?: { name?: string } | string | null }
-interface PlanningData { active_now?: number; upcoming?: UpcomingShift[] }
 
 const Muted = ({ text }: { text: ReactNode }) => <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{text}</div>
 
@@ -24,22 +19,8 @@ export default function PlanningSummary({ customerId, params }: { customerId: Id
   const auth = useAuth()
   const hasModule = auth?.hasModule ?? (() => false)
   const { formatDate } = useDateFormat()
-  const [data,    setData]    = useState<PlanningData | null>(null)
-  const [loading, setLoading] = useState(true)
   const enabled = hasModule('plan')
-  const paramsKey = JSON.stringify(params ?? {})
-
-  // Fetch the summary once (per scope); a missing endpoint is treated as empty.
-  useEffect(() => {
-    if (!enabled || !customerId) { setLoading(false); return }
-    const ctrl = new AbortController()
-    setLoading(true)
-    api.get(`/customers/${customerId}/planning-summary`, { params, signal: ctrl.signal })
-      .then(r => setData(r.data?.data ?? r.data ?? null))
-      .catch(e => { if (!isAbortError(e)) setData(null) })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [enabled, customerId, paramsKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  const { data, loading } = useCustomerPlanning(customerId, enabled, params)
 
   // Planning module not active for this tenant → calm placeholder.
   if (!enabled) return <Muted text={t('planning.off')} />
