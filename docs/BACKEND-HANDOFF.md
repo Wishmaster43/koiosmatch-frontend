@@ -91,6 +91,15 @@ vanuit één database. Aparte servers: WhatsApp-privé + workflow/AI-runtime.
 - **CFG-1 · Drie hardcoded vocabularies → tenant-lookups.** `/nationalities`, `/languages`
   (bevestig of die al bestaat), en een **customer-status-lookup** — elk als lookup-CRUD-contract
   (CRUD + 409 `in_use` + reorder + seed). De FE leest ze read-only via `useX()`.
+- **F-14 · Audit-metadata "door wie + wanneer" op notities & documenten (FE toont dit al).**
+  De FE rendert nu per **notitie** de auteur (avatar + byline) en per **document** de uploader +
+  tijd; het degradeert netjes zolang de velden ontbreken. Lever (in élke entiteit die notities/
+  documenten heeft — candidate eerst, dan customers/vacancies/applications/tasks/opportunities):
+  - **notities:** `created_by` = `{ id, name }` (of `author` / `author_name`) + `created_at` (ISO).
+  - **documenten:** `uploaded_by` = `{ id, name }` (of `created_by`) + `uploaded_at` (of `created_at`),
+    in `documents[]`.
+  - **`/note-types`** lookup-CRUD (+ seed + 409 `in_use` + reorder) — de FE leest 'm al via
+    `useNoteTypes()` met seed-fallback; alleen het endpoint ontbreekt nog. (Idem `/document-types`, C-37.)
 
 ## P2 — De complete kandidaat + de andere entiteiten
 
