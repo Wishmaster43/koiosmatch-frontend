@@ -18,7 +18,7 @@
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, Car,
   ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Key,
-  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Shield, Sparkles, Star,
+  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Phone, Shield, Sparkles, Star,
   Store, Tags, Target, Users, Webhook, XCircle,
 } from 'lucide-react'
 
@@ -63,7 +63,10 @@ import NotificationsSettings from './sections/NotificationsSettings'
 // Planning tijdelijk verborgen (2026-06-26): import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
 import { BetaalmethodenSettings, AutoOpwaarderenSettings, GebruikSettings, FacturenSettings } from './sections/BillingSettings'
 
-import { kpisLeads, kpisCandidates, kpisApplications, kpisCustomers } from './schemas/kpis'
+import {
+  kpisLeads, kpisCandidates, kpisApplications, kpisCustomers, kpisLocations,
+  kpisDepartments, kpisContacts, kpisTasks, kpisCalllists, kpisMatches,
+} from './schemas/kpis'
 import candidateDisplay from './schemas/candidateDisplay'
 import customerDisplay from './schemas/customerDisplay'
 import taskDisplay from './schemas/taskDisplay'
@@ -80,6 +83,12 @@ export const NAV_GROUPS = [
       { id: 'kpis_candidates', icon: Users, schema: kpisCandidates },
       { id: 'kpis_applications', icon: ClipboardList, schema: kpisApplications },
       { id: 'kpis_customers', icon: Building2, schema: kpisCustomers },
+      { id: 'kpis_locations', icon: MapPin, schema: kpisLocations },
+      { id: 'kpis_departments', icon: Building2, schema: kpisDepartments },
+      { id: 'kpis_contacts', icon: Users, schema: kpisContacts },
+      { id: 'kpis_tasks', icon: ListChecks, schema: kpisTasks },
+      { id: 'kpis_calllists', icon: Phone, schema: kpisCalllists },
+      { id: 'kpis_matches', icon: Sparkles, schema: kpisMatches },
     ],
   },
   {

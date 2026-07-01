@@ -141,7 +141,13 @@
     "customer_display": "Vista de tabla",
     "vacancy_app_defaults": "Ajustes de candidatura",
     "opportunity_display": "Vista de tabla",
-    "dashboards": "Paneles"
+    "dashboards": "Paneles",
+    "kpis_locations": "Ubicaciones",
+    "kpis_departments": "Departamentos",
+    "kpis_contacts": "Contactos",
+    "kpis_tasks": "Tareas",
+    "kpis_calllists": "Listas de llamadas",
+    "kpis_matches": "Coincidencias"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -170,6 +176,46 @@
       "response_rate_target": {
         "label": "Objetivo de tasa de respuesta",
         "description": "Valor objetivo de respuesta de candidatos a mensajes",
+        "unit": "%"
+      },
+      "no_contact_alert_months": {
+        "label": "Alerta: sin contacto ≥ N meses",
+        "description": "Marca un registro sin contacto durante estos meses",
+        "unit": "meses"
+      },
+      "never_contacted_alert": {
+        "label": "Alerta: nunca contactado",
+        "description": "Marca registros que nunca tuvieron contacto",
+        "unit": ""
+      },
+      "open_tasks_target": {
+        "label": "Objetivo de tareas abiertas",
+        "description": "Valor objetivo de tareas abiertas",
+        "unit": "tareas"
+      },
+      "overdue_warning_threshold": {
+        "label": "Umbral de tareas vencidas",
+        "description": "Número de tareas vencidas que activa una alerta",
+        "unit": "tareas"
+      },
+      "daily_calls_target": {
+        "label": "Objetivo de llamadas por día",
+        "description": "Número objetivo de llamadas por reclutador al día",
+        "unit": "llamadas"
+      },
+      "uncalled_warning_threshold": {
+        "label": "Umbral sin llamar",
+        "description": "Número de elementos sin llamar que activa una alerta",
+        "unit": "elementos"
+      },
+      "placements_target": {
+        "label": "Objetivo de colocaciones / mes",
+        "description": "Objetivo mensual de colocaciones",
+        "unit": "colocaciones"
+      },
+      "fill_rate_target": {
+        "label": "Objetivo de tasa de cobertura",
+        "description": "Tasa de cobertura objetivo de turnos",
         "unit": "%"
       }
     }

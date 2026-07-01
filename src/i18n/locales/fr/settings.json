@@ -141,7 +141,13 @@
     "customer_display": "Affichage du tableau",
     "vacancy_app_defaults": "Paramètres de candidature",
     "opportunity_display": "Affichage du tableau",
-    "dashboards": "Tableaux de bord"
+    "dashboards": "Tableaux de bord",
+    "kpis_locations": "Sites",
+    "kpis_departments": "Départements",
+    "kpis_contacts": "Contacts",
+    "kpis_tasks": "Tâches",
+    "kpis_calllists": "Listes d'appels",
+    "kpis_matches": "Correspondances"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -170,6 +176,46 @@
       "response_rate_target": {
         "label": "Objectif de taux de réponse",
         "description": "Valeur cible de réponse des candidats aux messages",
+        "unit": "%"
+      },
+      "no_contact_alert_months": {
+        "label": "Alerte : aucun contact ≥ N mois",
+        "description": "Signale un enregistrement sans contact depuis ce nombre de mois",
+        "unit": "mois"
+      },
+      "never_contacted_alert": {
+        "label": "Alerte : jamais contacté",
+        "description": "Signale les enregistrements sans aucun contact",
+        "unit": ""
+      },
+      "open_tasks_target": {
+        "label": "Objectif tâches ouvertes",
+        "description": "Valeur cible pour les tâches ouvertes",
+        "unit": "tâches"
+      },
+      "overdue_warning_threshold": {
+        "label": "Seuil tâches en retard",
+        "description": "Nombre de tâches en retard déclenchant une alerte",
+        "unit": "tâches"
+      },
+      "daily_calls_target": {
+        "label": "Objectif d'appels par jour",
+        "description": "Nombre cible d'appels par recruteur par jour",
+        "unit": "appels"
+      },
+      "uncalled_warning_threshold": {
+        "label": "Seuil non appelés",
+        "description": "Nombre éléments non appelés déclenchant une alerte",
+        "unit": "éléments"
+      },
+      "placements_target": {
+        "label": "Objectif placements / mois",
+        "description": "Objectif mensuel de placements",
+        "unit": "placements"
+      },
+      "fill_rate_target": {
+        "label": "Objectif taux de remplissage",
+        "description": "Taux de remplissage cible des services",
         "unit": "%"
       }
     }

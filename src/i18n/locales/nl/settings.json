@@ -141,7 +141,13 @@
     "functions": "Functies",
     "customer_display": "Tabelweergave",
     "opportunity_display": "Tabelweergave",
-    "dashboards": "Dashboards"
+    "dashboards": "Dashboards",
+    "kpis_locations": "Locaties",
+    "kpis_departments": "Afdelingen",
+    "kpis_contacts": "Contactpersonen",
+    "kpis_tasks": "Taken",
+    "kpis_calllists": "Bellijsten",
+    "kpis_matches": "Matches"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -170,6 +176,46 @@
       "response_rate_target": {
         "label": "Response rate doel",
         "description": "Streefwaarde voor kandidaat response op berichten",
+        "unit": "%"
+      },
+      "no_contact_alert_months": {
+        "label": "Alert: geen contact ≥ N maanden",
+        "description": "Toon een aandacht-signaal als een record zoveel maanden geen contact had",
+        "unit": "maanden"
+      },
+      "never_contacted_alert": {
+        "label": "Alert: nooit gecontacteerd",
+        "description": "Toon een aandacht-signaal bij records die nog nooit contact hadden",
+        "unit": ""
+      },
+      "open_tasks_target": {
+        "label": "Doel open taken",
+        "description": "Streefwaarde voor het aantal open taken",
+        "unit": "taken"
+      },
+      "overdue_warning_threshold": {
+        "label": "Waarschuwingsgrens taken te laat",
+        "description": "Aantal te-late taken waarbij een waarschuwing verschijnt",
+        "unit": "taken"
+      },
+      "daily_calls_target": {
+        "label": "Doel gesprekken per dag",
+        "description": "Streefwaarde voor het aantal belletjes per recruiter per dag",
+        "unit": "gesprekken"
+      },
+      "uncalled_warning_threshold": {
+        "label": "Waarschuwingsgrens niet-gebeld",
+        "description": "Aantal niet-gebelde items in bellijsten waarbij gewaarschuwd wordt",
+        "unit": "items"
+      },
+      "placements_target": {
+        "label": "Doel plaatsingen / maand",
+        "description": "Maandelijks streefgetal voor plaatsingen",
+        "unit": "plaatsingen"
+      },
+      "fill_rate_target": {
+        "label": "Invulgraad doel",
+        "description": "Streefwaarde voor de invulgraad van diensten",
         "unit": "%"
       }
     }

@@ -141,7 +141,13 @@
     "functions": "Functions",
     "customer_display": "Table display",
     "opportunity_display": "Table display",
-    "dashboards": "Dashboards"
+    "dashboards": "Dashboards",
+    "kpis_locations": "Locations",
+    "kpis_departments": "Departments",
+    "kpis_contacts": "Contacts",
+    "kpis_tasks": "Tasks",
+    "kpis_calllists": "Call lists",
+    "kpis_matches": "Matches"
   },
   "kpis": {
     "title": "KPI settings",
@@ -170,6 +176,46 @@
       "response_rate_target": {
         "label": "Response rate target",
         "description": "Target value for candidate response to messages",
+        "unit": "%"
+      },
+      "no_contact_alert_months": {
+        "label": "Alert: no contact ≥ N months",
+        "description": "Flag a record when it has had no contact for this many months",
+        "unit": "months"
+      },
+      "never_contacted_alert": {
+        "label": "Alert: never contacted",
+        "description": "Flag records that have never had any contact",
+        "unit": ""
+      },
+      "open_tasks_target": {
+        "label": "Open tasks target",
+        "description": "Target for the number of open tasks",
+        "unit": "tasks"
+      },
+      "overdue_warning_threshold": {
+        "label": "Overdue tasks warning threshold",
+        "description": "Number of overdue tasks that triggers a warning",
+        "unit": "tasks"
+      },
+      "daily_calls_target": {
+        "label": "Daily calls target",
+        "description": "Target number of calls per recruiter per day",
+        "unit": "calls"
+      },
+      "uncalled_warning_threshold": {
+        "label": "Uncalled warning threshold",
+        "description": "Number of uncalled call-list items that triggers a warning",
+        "unit": "items"
+      },
+      "placements_target": {
+        "label": "Placements target / month",
+        "description": "Monthly target for placements",
+        "unit": "placements"
+      },
+      "fill_rate_target": {
+        "label": "Fill rate target",
+        "description": "Target fill rate for shifts",
         "unit": "%"
       }
     }

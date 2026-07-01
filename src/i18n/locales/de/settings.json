@@ -141,7 +141,13 @@
     "customer_display": "Tabellenanzeige",
     "vacancy_app_defaults": "Bewerbungseinstellungen",
     "opportunity_display": "Tabellenansicht",
-    "dashboards": "Dashboards"
+    "dashboards": "Dashboards",
+    "kpis_locations": "Standorte",
+    "kpis_departments": "Abteilungen",
+    "kpis_contacts": "Kontakte",
+    "kpis_tasks": "Aufgaben",
+    "kpis_calllists": "Anruflisten",
+    "kpis_matches": "Matches"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -170,6 +176,46 @@
       "response_rate_target": {
         "label": "Ziel-Antwortrate",
         "description": "Zielwert für Kandidatenantworten auf Nachrichten",
+        "unit": "%"
+      },
+      "no_contact_alert_months": {
+        "label": "Warnung: kein Kontakt ≥ N Monate",
+        "description": "Kennzeichnet einen Datensatz nach so vielen Monaten ohne Kontakt",
+        "unit": "Monate"
+      },
+      "never_contacted_alert": {
+        "label": "Warnung: nie kontaktiert",
+        "description": "Kennzeichnet Datensätze ohne jeglichen Kontakt",
+        "unit": ""
+      },
+      "open_tasks_target": {
+        "label": "Ziel offene Aufgaben",
+        "description": "Zielwert für offene Aufgaben",
+        "unit": "Aufgaben"
+      },
+      "overdue_warning_threshold": {
+        "label": "Warngrenze überfällige Aufgaben",
+        "description": "Anzahl überfälliger Aufgaben für eine Warnung",
+        "unit": "Aufgaben"
+      },
+      "daily_calls_target": {
+        "label": "Ziel Anrufe pro Tag",
+        "description": "Zielanzahl Anrufe pro Recruiter pro Tag",
+        "unit": "Anrufe"
+      },
+      "uncalled_warning_threshold": {
+        "label": "Warngrenze nicht angerufen",
+        "description": "Anzahl nicht angerufener Einträge für eine Warnung",
+        "unit": "Einträge"
+      },
+      "placements_target": {
+        "label": "Ziel Platzierungen / Monat",
+        "description": "Monatlicher Zielwert für Platzierungen",
+        "unit": "Platzierungen"
+      },
+      "fill_rate_target": {
+        "label": "Ziel Besetzungsquote",
+        "description": "Zielwert für die Besetzungsquote",
         "unit": "%"
       }
     }
