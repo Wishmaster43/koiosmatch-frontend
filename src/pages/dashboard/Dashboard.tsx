@@ -17,7 +17,7 @@ import ShiftsSummary from './blocks/ShiftsSummary'
 import TouchpointsFeed from './blocks/TouchpointsFeed'
 import AttentionCandidates from './blocks/AttentionCandidates'
 import { useWhatsAppQueue } from '@/pages/whatsapp/hooks/useWhatsAppQueue'
-import { Users, CheckCircle, AlertCircle, Target, Euro, Briefcase, CalendarCheck, TrendingUp, MessageSquare, Zap, FileText, CalendarClock, Link2 } from 'lucide-react'
+import { Users, CheckCircle, AlertCircle, AlertTriangle, Target, Euro, Briefcase, CalendarCheck, TrendingUp, MessageSquare, Zap, FileText, CalendarClock, Link2, PhoneOff } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { initialsOf } from '@/lib/initials'
 import type { ChartDatum } from '@/components/charts/chartTypes'
@@ -291,6 +291,12 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     couplingErrors:    { id: 'couplingErrors', label: t('kpi.couplingErrors'), value: num(att.coupling_errors), sub: t('kpi.couplingErrorsSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: Link2, onClick: () => onNavigate?.('candidates') },
     openShifts:        { id: 'openShifts', label: t('kpi.openShifts'), value: num(att.open_shifts), sub: t('kpi.openShiftsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: () => onNavigate?.('planning') },
     occupancy:         { id: 'occupancy', label: t('kpi.occupancy'), value: att.occupancy != null ? `${att.occupancy}%` : '—', sub: t('kpi.occupancySub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: TrendingUp, onClick: () => onNavigate?.('planning') },
+    // Escalations, failed workflows (real count now from ai_runs), overdue tasks, uncalled call-lists, expiring sales opps.
+    escalations:       { id: 'escalations', label: t('kpi.escalations'), value: num(att.escalations), sub: t('kpi.escalationsSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: AlertTriangle, onClick: () => onNavigate?.('whatsapp', { tab: 'escalations' }) },
+    failedWf:          { id: 'failedWf', label: t('kpi.failedWf'), value: num(att.failed_workflows ?? incompleteRuns), sub: t('kpi.failedWfSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: Zap, onClick: () => onNavigate?.('workflows') },
+    tasksOverdue:      { id: 'tasksOverdue', label: t('kpi.tasksOverdue'), value: num(att.tasks_overdue), sub: t('kpi.tasksOverdueSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('tasks', { kpi: 'overdue' }) },
+    uncalledCallist:   { id: 'uncalledCallist', label: t('kpi.uncalledCallist'), value: num(att.calllist_uncalled), sub: t('kpi.uncalledCallistSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: PhoneOff, onClick: () => onNavigate?.('outreach') },
+    expiringOpps:      { id: 'expiringOpps', label: t('kpi.expiringOpps'), value: num(att.expiring_opps), sub: t('kpi.expiringOppsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: () => onNavigate?.('opportunities') },
   }
   // Every role ALWAYS gets its own full KPI row (never hidden).
   const kpis = kpiRow(activeType).map(id => kpiById[id]).filter(Boolean)

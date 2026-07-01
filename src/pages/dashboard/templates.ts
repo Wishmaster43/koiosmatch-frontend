@@ -20,12 +20,12 @@ export const SUPER_VIEWS: DashboardType[] = ['admin', 'management']
 // shows a full, role-specific row (never hidden). 🟡 metrics render "—" until the
 // backend feed lands (see docs/DASHBOARD-PLAN.md).
 export const KPI_ROWS: Record<DashboardType, string[]> = {
-  admin:       ['candidates', 'opps', 'pipeline', 'placements', 'intakes', 'fillRate'],
-  management:  ['candidates', 'opps', 'pipeline', 'placements', 'intakes', 'fillRate'],
-  recruitment: ['candidates', 'tasks', 'intakes', 'failedWa', 'never', 'activeConv'],
+  admin:       ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'fillRate', 'escalations'],
+  management:  ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'fillRate', 'escalations'],
+  recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWa', 'failedWf', 'uncalledCallist', 'intakes'],
   backoffice:  ['tasks', 'placements', 'missingDocs', 'expiringContracts', 'couplingErrors', 'incompleteRuns'],
-  sales:       ['opps', 'pipeline', 'fillRate', 'placements', 'activeConv', 'tasks'],
-  planning:    ['waQueue', 'failedWa', 'incompleteRuns', 'tasks', 'openShifts', 'occupancy'],
+  sales:       ['opps', 'pipeline', 'expiringOpps', 'fillRate', 'placements', 'activeConv'],
+  planning:    ['waQueue', 'failedWa', 'failedWf', 'incompleteRuns', 'openShifts', 'occupancy'],
   readonly:    ['candidates', 'tasks', 'stale'],
 }
 
@@ -49,6 +49,8 @@ export const KPI_LABEL_KEY: Record<string, string> = {
   failedWa: 'kpi.failedWa', waQueue: 'kpi.waQueue', incompleteRuns: 'kpi.incompleteRuns',
   activeConv: 'kpi.activeConv', missingDocs: 'kpi.missingDocs', expiringContracts: 'kpi.expiringContracts',
   couplingErrors: 'kpi.couplingErrors', openShifts: 'kpi.openShifts', occupancy: 'kpi.occupancy',
+  escalations: 'kpi.escalations', failedWf: 'kpi.failedWf', tasksOverdue: 'kpi.tasksOverdue',
+  uncalledCallist: 'kpi.uncalledCallist', expiringOpps: 'kpi.expiringOpps',
 }
 export const BLOCK_LABEL_KEY: Record<string, string> = {
   'chart.status': 'chart.byStatus', 'chart.funnel': 'chart.funnel', 'chart.funnelConversion': 'chart.funnelConversion',

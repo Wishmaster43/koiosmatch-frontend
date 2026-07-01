@@ -34,7 +34,17 @@
     "openShifts": "Offene Schichten",
     "openShiftsSub": "Unbesetzt",
     "occupancy": "Auslastung",
-    "occupancySub": "Diese Woche"
+    "occupancySub": "Diese Woche",
+    "escalations": "Eskalationen",
+    "escalationsSub": "erfordern Aufmerksamkeit",
+    "failedWf": "Fehlgeschlagene Workflows",
+    "failedWfSub": "Aktion erforderlich",
+    "tasksOverdue": "Überfällige Aufgaben",
+    "tasksOverdueSub": "überfällig",
+    "uncalledCallist": "Nicht angerufen",
+    "uncalledCallistSub": "in Anruflisten",
+    "expiringOpps": "Auslaufende Chancen",
+    "expiringOppsSub": "laufen bald aus"
   },
   "chart": {
     "byStatus": "Kandidaten nach Status",

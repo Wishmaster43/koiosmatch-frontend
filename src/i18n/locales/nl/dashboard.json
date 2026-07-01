@@ -34,7 +34,17 @@
     "openShifts": "Open shifts",
     "openShiftsSub": "Onvervuld",
     "occupancy": "Bezettingsgraad",
-    "occupancySub": "Deze week"
+    "occupancySub": "Deze week",
+    "escalations": "Escalaties",
+    "escalationsSub": "vereisen aandacht",
+    "failedWf": "Mislukte workflows",
+    "failedWfSub": "actie vereist",
+    "tasksOverdue": "Taken te laat",
+    "tasksOverdueSub": "over datum",
+    "uncalledCallist": "Niet gebeld",
+    "uncalledCallistSub": "in bellijsten",
+    "expiringOpps": "Aflopende kansen",
+    "expiringOppsSub": "sluiten binnenkort"
   },
   "chart": {
     "byStatus": "Kandidaten per status",

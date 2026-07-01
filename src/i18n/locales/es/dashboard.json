@@ -34,7 +34,17 @@
     "openShifts": "Turnos abiertos",
     "openShiftsSub": "Sin cubrir",
     "occupancy": "Ocupación",
-    "occupancySub": "Esta semana"
+    "occupancySub": "Esta semana",
+    "escalations": "Escalaciones",
+    "escalationsSub": "requieren atención",
+    "failedWf": "Flujos fallidos",
+    "failedWfSub": "acción requerida",
+    "tasksOverdue": "Tareas vencidas",
+    "tasksOverdueSub": "vencidas",
+    "uncalledCallist": "Sin llamar",
+    "uncalledCallistSub": "en listas de llamadas",
+    "expiringOpps": "Oportunidades por vencer",
+    "expiringOppsSub": "cierran pronto"
   },
   "chart": {
     "byStatus": "Candidatos por estado",
