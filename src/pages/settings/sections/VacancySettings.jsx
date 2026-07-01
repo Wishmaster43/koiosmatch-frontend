@@ -119,7 +119,8 @@ export function VacancyFieldsSettings() {
     setAddingField(true)
     try {
       const res = await api.post('/vacancy-custom-fields', { name: newField.trim() })
-      setCustomFields(p => [...p, res.data])
+      // Unwrap the Resource envelope the same way the load does, else the new row has no id/name.
+      setCustomFields(p => [...p, res.data?.data ?? res.data])
       setNewField('')
     } catch { /* noop */ } finally { setAddingField(false) }
   }
