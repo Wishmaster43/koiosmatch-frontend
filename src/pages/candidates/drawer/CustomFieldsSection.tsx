@@ -63,7 +63,7 @@ function FieldInput({ def, value, onChange }: {
   )
 }
 
-const labelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: '0.04em' }
+const labelStyle: CSSProperties = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }
 const valueStyle: CSSProperties = { fontSize: 13, color: 'var(--text)', marginTop: 2, minHeight: 18 }
 
 export default function CustomFieldsSection({ c, onEditSave }: Props) {
@@ -99,14 +99,14 @@ export default function CustomFieldsSection({ c, onEditSave }: Props) {
             </button>
             <button onClick={cancel} title={t('common:cancel')}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28,
-                       borderRadius: 6, border: '1px solid var(--border)', background: 'white', cursor: 'pointer', color: '#9CA3AF' }}>
+                       borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>
               <X size={12} />
             </button>
           </div>
         ) : (
           <button onClick={startEdit} title={t('common:edit')}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28,
-                     borderRadius: 6, border: '1px solid var(--border)', background: 'white', cursor: 'pointer', color: '#9CA3AF' }}>
+                     borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>
             <Edit2 size={12} />
           </button>
         )}
