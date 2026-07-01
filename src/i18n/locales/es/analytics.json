@@ -12,7 +12,23 @@
     "flow": "Flujo",
     "recruiters": "Reclutadores",
     "vacancies": "Vacantes",
-    "matches": "Matches"
+    "matches": "Matches",
+    "intakes": "Intakes"
+  },
+  "intakes": {
+    "loading": "Cargando intakes…",
+    "error": "No se pudieron cargar los intakes",
+    "empty": "No hay intakes en este período",
+    "total": "Total de intakes",
+    "series": "Intakes a lo largo del tiempo",
+    "groupBy": "Desglose",
+    "by": {
+      "recruiter": "Reclutador",
+      "location": "Ubicación",
+      "source": "Fuente",
+      "function": "Función",
+      "region": "Región"
+    }
   },
   "comingSoon": "{{label}} — próximamente",
   "period": {

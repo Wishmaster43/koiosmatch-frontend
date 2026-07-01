@@ -57,7 +57,15 @@
     "recentApplications": "Recente sollicitaties",
     "leadsPipeline": "Leads in pipeline",
     "recentRuns": "Recente uitvoeringen",
-    "recentConversations": "Recente conversaties"
+    "recentConversations": "Recente conversaties",
+    "waQueue": "WhatsApp-wachtrij",
+    "waQueued": "In wachtrij",
+    "waFailed": "Mislukt",
+    "shifts": "Diensten",
+    "shiftsOpen": "Open",
+    "shiftsFilled": "Ingevuld",
+    "shiftsUnfilled": "Onvervuld",
+    "shiftsOccupancy": "Bezetting"
   },
   "action": {
     "allCandidates": "Alle kandidaten",

@@ -36,7 +36,7 @@ export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   recruitment: ['chart.status', 'chart.funnel', 'chart.funnelConversion', 'list.candidates', 'list.applications', 'list.conversations'],
   backoffice: ['chart.status', 'list.applications', 'list.runs'],
   sales: ['chart.oppStage', 'chart.status', 'list.leads'],
-  planning: ['chart.weekly', 'list.runs', 'list.conversations'],
+  planning: ['block.waQueue', 'block.shifts', 'chart.weekly', 'list.runs', 'list.conversations'],
   readonly: ['chart.status', 'chart.funnel'],
 }
 

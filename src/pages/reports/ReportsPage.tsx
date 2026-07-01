@@ -10,6 +10,7 @@ import FlowReport from './FlowReport'
 import RecruitersReport from './RecruitersReport'
 import VacanciesReport from './VacanciesReport'
 import MatchesReport from './MatchesReport'
+import IntakesReport from './IntakesReport'
 import type { ReportPeriod } from '@/types/analytics'
 
 export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: string }) {
@@ -23,6 +24,7 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
     { id: 'recruiters', label: t('tabs.recruiters') },
     { id: 'vacancies',  label: t('tabs.vacancies') },
     { id: 'matches',    label: t('tabs.matches') },
+    { id: 'intakes',    label: t('tabs.intakes') },
   ]
 
   // Tab bar + shared period control on one row. Passed to each report as `tabsSlot`
@@ -65,6 +67,7 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
       {tab === 'recruiters' && <RecruitersReport period={period} tabsSlot={tabsBar} />}
       {tab === 'vacancies'  && <VacanciesReport  period={period} tabsSlot={tabsBar} />}
       {tab === 'matches'    && <MatchesReport    period={period} tabsSlot={tabsBar} />}
+      {tab === 'intakes'    && <IntakesReport    period={period} tabsSlot={tabsBar} />}
     </div>
   )
 }

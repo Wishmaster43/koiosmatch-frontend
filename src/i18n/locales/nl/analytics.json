@@ -12,7 +12,23 @@
     "flow": "Flow",
     "recruiters": "Recruiters",
     "vacancies": "Vacatures",
-    "matches": "Matches"
+    "matches": "Matches",
+    "intakes": "Intakes"
+  },
+  "intakes": {
+    "loading": "Intakes laden…",
+    "error": "Kon de intakes niet laden",
+    "empty": "Geen intakes in deze periode",
+    "total": "Totaal intakes",
+    "series": "Intakes over tijd",
+    "groupBy": "Verdeling",
+    "by": {
+      "recruiter": "Recruiter",
+      "location": "Locatie",
+      "source": "Bron",
+      "function": "Functie",
+      "region": "Regio"
+    }
   },
   "comingSoon": "{{label}} — komt eraan",
   "period": {

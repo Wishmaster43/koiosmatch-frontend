@@ -16,6 +16,17 @@
 
 ---
 
+## 2026-07-01 · `[Danny → DASH + BE]` · `dashboard_type` enum decision
+
+Danny decided (relayed by FE-Claude — **DASH owns the switcher/mapping, BE owns the role seeding**):
+- **Enum is backend-leading:** `admin · management · recruitment · planning · backoffice · sales · readonly`.
+- **`super_admin` role → `dashboard_type = 'admin'`.**
+- **The `admin` dashboard === the `management` dashboard** (the full view, `'*'` — sees everything, nothing hidden).
+  So render `admin` exactly like `management`; don't build a separate super-admin layout.
+- ⚠️ **FE still uses the wrong slugs** `recruiter`/`planner` in the topbar-switcher + role-mapping → must become
+  **`recruitment`/`planning`** (DASHBOARD-PLAN.md line 62/74). Fix in the switcher + `dashboardType()` helper.
+- **BE:** seed `super_admin.dashboard_type = 'admin'` on `/auth/me`'s `roles[].dashboard_type`.
+
 ## 2026-07-01 · `[FE] → all lanes` · Flag-vocab / v1-binding audit (AP-CO4) — drift-risk map
 
 Grepped `src/` for v1-model bindings. **Good news — the scary ones are clean/false alarms:** no `blacklisted`

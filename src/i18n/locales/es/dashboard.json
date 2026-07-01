@@ -57,7 +57,15 @@
     "recentApplications": "Candidaturas recientes",
     "leadsPipeline": "Leads en el embudo",
     "recentRuns": "Ejecuciones recientes",
-    "recentConversations": "Conversaciones recientes"
+    "recentConversations": "Conversaciones recientes",
+    "waQueue": "Cola de WhatsApp",
+    "waQueued": "En cola",
+    "waFailed": "Fallidos",
+    "shifts": "Turnos",
+    "shiftsOpen": "Abiertos",
+    "shiftsFilled": "Cubiertos",
+    "shiftsUnfilled": "Sin cubrir",
+    "shiftsOccupancy": "Ocupación"
   },
   "action": {
     "allCandidates": "Todos los candidatos",

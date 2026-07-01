@@ -98,5 +98,23 @@ export interface MatchesReportData {
   avg_placement_duration_days: number | null
 }
 
+// ── Intakes report (GET /reports/intakes, C-22) ──────────────────────────────
+
+// One bucket in the intake series or a breakdown dimension. `key` is null/’office’
+// for the unassigned bucket; `count` = number of intake appointments.
+export interface IntakeBucket { key: string | null; label: string; count: number }
+
+// GET /reports/intakes response. `series` = intakes over time (the `bucket`
+// granularity); the `by_*` arrays break the same total down per dimension.
+export interface IntakesReportData {
+  series: IntakeBucket[]
+  by_recruiter: IntakeBucket[]
+  by_location: IntakeBucket[]
+  by_source: IntakeBucket[]
+  by_function: IntakeBucket[]
+  by_region: IntakeBucket[]
+  total: number
+}
+
 // Selectable aggregation period (mirrors the endpoint's ?period=).
 export type ReportPeriod = 'day' | 'week' | 'month'

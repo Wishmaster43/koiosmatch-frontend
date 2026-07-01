@@ -57,7 +57,15 @@
     "recentApplications": "Recent applications",
     "leadsPipeline": "Leads in pipeline",
     "recentRuns": "Recent runs",
-    "recentConversations": "Recent conversations"
+    "recentConversations": "Recent conversations",
+    "waQueue": "WhatsApp queue",
+    "waQueued": "Queued",
+    "waFailed": "Failed",
+    "shifts": "Shifts",
+    "shiftsOpen": "Open",
+    "shiftsFilled": "Filled",
+    "shiftsUnfilled": "Unfilled",
+    "shiftsOccupancy": "Occupancy"
   },
   "action": {
     "allCandidates": "All candidates",

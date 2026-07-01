@@ -12,6 +12,8 @@ import BarChartCard from '@/components/charts/BarChartCard'
 import LineChartCard from '@/components/charts/LineChartCard'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
 import FunnelConversion from './blocks/FunnelConversion'
+import WhatsAppQueue from './blocks/WhatsAppQueue'
+import ShiftsSummary from './blocks/ShiftsSummary'
 import { useWhatsAppQueue } from '@/pages/whatsapp/hooks/useWhatsAppQueue'
 import { Users, CheckCircle, AlertCircle, Target, Euro, Briefcase, CalendarCheck, TrendingUp, MessageSquare, Zap, FileText, CalendarClock, Link2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -329,6 +331,14 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
       {vis('chart.funnelConversion') && (
       <div style={{ marginBottom: 16 }}>
         <FunnelConversion data={funnelData} onStageClick={(fv) => onNavigate?.('applications', fv ? { stage: fv } : undefined)} />
+      </div>
+      )}
+
+      {/* Planning-blokken — WhatsApp-wachtrij (🟢) + diensten-overzicht (🟡 tot de feed). */}
+      {(vis('block.waQueue') || vis('block.shifts')) && (
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+        {vis('block.waQueue') && <WhatsAppQueue inQueue={wa.inQueue} failed={wa.failed} onOpen={() => onNavigate?.('whatsapp')} />}
+        {vis('block.shifts') && <ShiftsSummary open={att.open_shifts} filled={att.filled_shifts} unfilled={att.unfilled_shifts} occupancy={att.occupancy} onOpen={() => onNavigate?.('planning')} />}
       </div>
       )}
 
