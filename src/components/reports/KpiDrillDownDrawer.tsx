@@ -4,6 +4,7 @@
  * clicking a KPI card. Month names are derived from the active locale.
  */
 import { X, Search, TrendingUp, Target, Info } from 'lucide-react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -225,13 +226,15 @@ function AverageBreakdown({ candidates, KPI_TARGET }: { candidates: ReportCandid
 // ── Main component ────────────────────────────────────────────────────────────
 
 export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClose }: { mode: string; title?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void }) {
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   const { new_candidates_target: KPI_TARGET } = useKpiSettings()
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
+        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 520, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}

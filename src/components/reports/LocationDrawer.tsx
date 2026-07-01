@@ -3,6 +3,7 @@
  * department, customer). Opened from LocationsTable. StatusBadge = active/inactive pill.
  */
 import type { ReactNode } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X, Building2, MapPin, Layers, Hash } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -22,6 +23,7 @@ function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactN
 }
 
 export default function LocationDrawer({ location, onClose }: { location: ReportLocation; onClose: () => void }) {
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   const departments = location.departments ?? []
 
@@ -39,7 +41,8 @@ export default function LocationDrawer({ location, onClose }: { location: Report
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={location?.name as string | undefined} tabIndex={-1}
+        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 480, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}

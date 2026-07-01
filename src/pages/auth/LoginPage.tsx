@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Eye, EyeOff, Loader2, ShieldCheck, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 
 // Read a server-provided error message off an axios-style error, if present.
 const messageOf = (e: unknown) => (e as { response?: { data?: { message?: string } } })?.response?.data?.message
@@ -145,11 +146,7 @@ function CredentialForm({ onMfaRequired }: { onMfaRequired: (token: string) => v
           </div>
         </div>
 
-        {error && (
-          <div className="rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">
-            {error}
-          </div>
-        )}
+        {error && <ErrorBanner>{error}</ErrorBanner>}
 
         <button type="submit" disabled={loading}
           className="flex items-center justify-center w-full gap-2 text-sm font-medium text-white transition-opacity rounded-lg"
@@ -233,11 +230,7 @@ function MfaForm({ mfaToken, onBack }: { mfaToken: string; onBack: () => void })
             onBlur={e  => (e.target.style.borderColor = '#E5E7EB')} />
         </div>
 
-        {error && (
-          <div className="rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">
-            {error}
-          </div>
-        )}
+        {error && <ErrorBanner>{error}</ErrorBanner>}
 
         <button type="submit" disabled={loading || code.length < 6}
           className="flex items-center justify-center w-full gap-2 text-sm font-medium text-white transition-opacity rounded-lg"

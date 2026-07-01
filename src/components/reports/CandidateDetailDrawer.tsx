@@ -4,6 +4,7 @@
  * StatusBadge below = the colored status pill.
  */
 import { useState } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Phone, Mail, MapPin, Calendar, Clock, Briefcase, MessageSquare, History } from 'lucide-react'
@@ -243,6 +244,7 @@ function TabHistory({ c }: { c: ReportCandidate }) {
 
 /* ── Main component ── */
 export default function CandidateDetailDrawer({ candidate: c, onClose }: { candidate: ReportCandidate | null; onClose: () => void }) {
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   const [activeTab, setActiveTab] = useState('algemeen')
   if (!c) return null
@@ -260,7 +262,8 @@ export default function CandidateDetailDrawer({ candidate: c, onClose }: { candi
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }}
         onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={c?.name as string | undefined} tabIndex={-1}
+        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 520, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
 
         {/* Header */}

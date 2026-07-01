@@ -6,10 +6,12 @@
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
 import { X } from 'lucide-react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { Section, formatDate, formatTime, formatHours } from './ordersTableParts'
 import type { OrderRow } from '@/types/shiftmanager'
 
 export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | null; onClose: () => void }) {
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('shiftmanager')
   if (!row) return null
 
@@ -28,7 +30,8 @@ export default function OrderDetailDrawer({ row, onClose }: { row: OrderRow | nu
   return (
     <>
       <div className="fixed inset-0 z-30" onClick={onClose} />
-      <div className="fixed right-0 top-0 bottom-0 z-40 overflow-y-auto"
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('orders.drawer.title')} tabIndex={-1}
+        className="fixed right-0 top-0 bottom-0 z-40 overflow-y-auto"
         style={{ width: 400, background: 'var(--surface)', borderLeft: '1px solid var(--border)',
                  boxShadow: '-4px 0 24px rgba(0,0,0,0.08)' }}>
         <div style={{ padding: '20px 20px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between',

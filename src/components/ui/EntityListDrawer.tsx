@@ -5,6 +5,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { X, Search } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 
 interface EntityListItem {
   primary: string
@@ -22,6 +23,7 @@ interface EntityListDrawerProps {
 
 export default function EntityListDrawer({ title, items, onClose }: EntityListDrawerProps) {
   const { t } = useTranslation('common')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const [search, setSearch] = useState('')
 
   const q = search.toLowerCase()
@@ -36,7 +38,8 @@ export default function EntityListDrawer({ title, items, onClose }: EntityListDr
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-white"
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
+           className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-white"
            style={{ width: 480, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}

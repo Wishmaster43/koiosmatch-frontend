@@ -4,6 +4,7 @@
  * InfoRow below = one labeled detail row (optionally a clickable mailto/tel link).
  */
 import type { ReactNode } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X, Mail, Phone, Building2, MessageCircle, Briefcase, User } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -25,6 +26,7 @@ function InfoRow({ icon: Icon, label, value, href }: { icon: LucideIcon; label: 
 }
 
 export default function ContactPersonDrawer({ contact, onClose }: { contact: ReportContact; onClose: () => void }) {
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   const fullName = [contact.firstname, contact.lastname].filter(Boolean).join(' ') || '—'
   const initials = fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
@@ -34,7 +36,8 @@ export default function ContactPersonDrawer({ contact, onClose }: { contact: Rep
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={contact?.name as string | undefined} tabIndex={-1}
+        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 440, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}

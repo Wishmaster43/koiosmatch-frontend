@@ -3,6 +3,7 @@
  * departments, contacts). Opened from CustomersTable. StatusBadge = active/inactive pill.
  */
 import type { ReactNode } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X, MapPin, Building2, Hash, User, Layers } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
@@ -21,6 +22,7 @@ function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: ReactN
 }
 
 export default function CustomerDetailDrawer({ customer, onClose }: { customer: ReportCustomer; onClose: () => void }) {
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   const locations = customer.locations ?? []
   const totalDepts = locations.reduce((s, l) => s + (l.departments?.length ?? 0), 0)
@@ -29,7 +31,8 @@ export default function CustomerDetailDrawer({ customer, onClose }: { customer: 
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={customer?.name as string | undefined} tabIndex={-1}
+        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 560, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}

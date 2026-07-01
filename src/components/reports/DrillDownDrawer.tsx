@@ -4,6 +4,7 @@
  * StatusBadge below = the colored status pill.
  */
 import { X, Search, Phone, Mail, Calendar, Briefcase, Clock, CalendarCheck } from 'lucide-react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
@@ -52,6 +53,7 @@ function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; la
 }
 
 export default function DrillDownDrawer({ title, subtitle, candidates = [], onClose }: { title?: ReactNode; subtitle?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void }) {
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   const [search, setSearch] = useState('')
 
@@ -72,7 +74,8 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
       {/* Drawer */}
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
+        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 560, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}

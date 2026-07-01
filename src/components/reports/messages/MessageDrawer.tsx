@@ -5,11 +5,13 @@
  */
 import { X, MessageCircle, Mail, User, Phone, AlertTriangle } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { MessageRow } from '@/types/reports'
 import { formatDT, CHANNEL_META, ChannelBadge, StatusBadge } from './messageParts'
 
 export default function MessageDrawer({ message, onClose }: { message: MessageRow; onClose: () => void }) {
   const { t } = useTranslation('reports')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const channelKey = message.channel?.toLowerCase()
   const channelMeta = (channelKey ? CHANNEL_META[channelKey] : undefined) ?? { Icon: MessageCircle, color: 'var(--color-primary)' }
   const ChannelIcon = channelMeta.Icon
@@ -18,7 +20,8 @@ export default function MessageDrawer({ message, onClose }: { message: MessageRo
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('messageDetail', { defaultValue: 'Message' })} tabIndex={-1}
+        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 480, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}
