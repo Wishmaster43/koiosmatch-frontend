@@ -133,7 +133,8 @@
     "note_types": "Notitietypes",
     "document_types": "Documenttypes",
     "candidate_phases": "Fase",
-    "candidate_required_fields": "Verplichte velden"
+    "candidate_required_fields": "Verplichte velden",
+    "functions": "Functies"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1265,5 +1266,13 @@
     "moveDown": "Omlaag",
     "hide": "Verbergen",
     "show": "Tonen"
+  },
+  "functionsSettings": {
+    "title": "Functies",
+    "subtitle": "Beheer de functielijst en of recruiters vrije waarden mogen invoeren.",
+    "add": "Functie toevoegen",
+    "freeEntry": "Vrije invoer toestaan",
+    "freeEntryHint": "Aan: recruiters kunnen een eigen functie typen (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
+    "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat recruiters functies typen die niet in de lijst staan — dit kan de datakwaliteit verlagen."
   }
 }

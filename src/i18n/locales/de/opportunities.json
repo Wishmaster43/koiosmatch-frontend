@@ -54,7 +54,21 @@
       "deal": "Deal",
       "organisation": "Organisation"
     },
-    "currency": "Währung"
+    "currency": "Währung",
+    "hours": "Stunden",
+    "hoursPeriod": "Stunden pro",
+    "periods": {
+      "week": "Pro Woche",
+      "month": "Pro Monat",
+      "total": "Gesamt"
+    },
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
+    "serviceType": "Dienst",
+    "agreementType": "Vereinbarung",
+    "location": "Standort",
+    "department": "Abteilung",
+    "contact": "Ansprechpartner"
   },
   "modal": {
     "title": "Neue Opportunity",
@@ -69,7 +83,12 @@
       "stage": "Phase",
       "value": "Wert (€)",
       "expectedClose": "Voraussichtlicher Abschluss",
-      "owner": "Inhaber"
+      "owner": "Inhaber",
+      "serviceType": "Dienst",
+      "agreementType": "Vereinbarung",
+      "hours": "Stunden",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum"
     }
   },
   "view": {

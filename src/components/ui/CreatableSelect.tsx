@@ -57,7 +57,7 @@ export default function CreatableSelect({
       <button type="button" onClick={() => setOpen(o => !o)}
         style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', width: '100%',
           boxSizing: 'border-box', border: '1px solid var(--border)', borderRadius: 6,
-          background: 'white', cursor: 'pointer', ...style }}>
+          background: 'var(--surface)', cursor: 'pointer', ...style }}>
         <span style={{ fontSize: 12, flex: 1, textAlign: 'left', whiteSpace: 'nowrap', overflow: 'hidden',
           textOverflow: 'ellipsis', color: (current || value) ? 'var(--text)' : 'var(--text-muted)' }}>
           {current?.label ?? value ?? placeholder ?? '-'}

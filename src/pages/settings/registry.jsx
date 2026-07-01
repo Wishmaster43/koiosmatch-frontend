@@ -36,6 +36,7 @@ import PoolsSettings from './sections/PoolsSettings'
 import { LanguageListSettings, LanguageLevelSettings } from './sections/LanguageSettings'
 import GenderSettings from './sections/GenderSettings'
 import IndustrySettings from './sections/IndustrySettings'
+import FunctionsSettings from './sections/FunctionsSettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancyFieldsSettings, VacancyEmploymentTypeSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings } from './sections/VacancySettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
@@ -91,6 +92,7 @@ export const NAV_GROUPS = [
     key: 'personalisation', icon: BookOpen,
     items: [
       { id: 'industries', icon: Factory, component: IndustrySettings },
+      { id: 'functions', icon: Briefcase, component: FunctionsSettings },
       { id: 'lang_languages', icon: Languages, component: LanguageListSettings },
       { id: 'lang_levels', icon: BarChart2, component: LanguageLevelSettings },
       { id: 'genders', icon: Users, component: GenderSettings },

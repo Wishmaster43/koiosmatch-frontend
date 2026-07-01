@@ -1285,5 +1285,13 @@
         "description": "Activé = l’avatar du propriétaire utilise la couleur du recruteur. Désactivé = gris neutre."
       }
     }
+  },
+  "functionsSettings": {
+    "title": "Fonctions",
+    "subtitle": "Gérez la liste des fonctions et si les recruteurs peuvent saisir des valeurs libres.",
+    "add": "Ajouter une fonction",
+    "freeEntry": "Autoriser la saisie libre",
+    "freeEntryHint": "Activé : les recruteurs peuvent saisir leur propre fonction (combobox). Désactivé : choisir uniquement dans la liste.",
+    "confirmFreeEntry": "Êtes-vous sûr ? La saisie libre autorise des fonctions hors liste — cela peut réduire la qualité des données."
   }
 }

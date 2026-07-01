@@ -1285,5 +1285,13 @@
         "description": "Ein = das Eigentümer-Avatar nutzt die Recruiter-Farbe. Aus = neutrales Grau."
       }
     }
+  },
+  "functionsSettings": {
+    "title": "Funktionen",
+    "subtitle": "Verwalte die Funktionsliste und ob Recruiter freie Werte eingeben dürfen.",
+    "add": "Funktion hinzufügen",
+    "freeEntry": "Freie Eingabe erlauben",
+    "freeEntryHint": "An: Recruiter können eine eigene Funktion eingeben (Combobox). Aus: nur aus der Liste wählen (strikte Auswahl).",
+    "confirmFreeEntry": "Bist du sicher? Freie Eingabe erlaubt Funktionen außerhalb der Liste — das kann die Datenqualität senken."
   }
 }

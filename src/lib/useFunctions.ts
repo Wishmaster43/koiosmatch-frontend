@@ -3,13 +3,14 @@
  *
  * Fed by the API (GET /functions) with a healthcare default as fallback while the
  * API is empty/unavailable. Managed in Settings → Functies. Items are plain name
- * strings (the candidate/vacancy stores the name). `allowFreeEntry` mirrors the
- * tenant setting: when true the function field is a creatable combobox, when false
- * it is a strict dropdown. Defaults to true until the API says otherwise.
+ * strings (the candidate/vacancy stores the name). `allowFreeEntry` = creatable
+ * combobox (true) vs strict dropdown (false): the tenant toggle (setting
+ * `functions_allow_free_entry`) wins, else the API flag, else true.
  */
 import { useState, useEffect } from 'react'
 import api from './api'
 import { lookupNames } from './lookupUtils'
+import { useAllSettings, getBoolSetting } from './settings/useAllSettings'
 
 export const DEFAULT_FUNCTIONS = [
   'Helpende', 'Helpende Plus', 'Verzorgende', 'Verzorgende IG', "EVV'er",
@@ -17,17 +18,21 @@ export const DEFAULT_FUNCTIONS = [
 ]
 
 export function useFunctions() {
+  const settings = useAllSettings()
   const [functions, setFunctions] = useState<string[]>(DEFAULT_FUNCTIONS)
-  const [allowFreeEntry, setAllowFreeEntry] = useState(true)
+  const [apiFreeEntry, setApiFreeEntry] = useState<boolean | null>(null)
 
-  // Override the default with the configured list + setting once the API responds.
+  // Override the default with the configured list + API flag once it responds.
   useEffect(() => {
     api.get('/functions').then(r => {
       const d = lookupNames(r); if (d.length) setFunctions(d)
       const free = r?.data?.allow_free_entry
-      if (typeof free === 'boolean') setAllowFreeEntry(free)
+      if (typeof free === 'boolean') setApiFreeEntry(free)
     }).catch(() => {})
   }, [])
+
+  // The Settings → Functies toggle is the source of truth; fall back to the API flag, then true.
+  const allowFreeEntry = getBoolSetting(settings, 'functions_allow_free_entry', apiFreeEntry ?? true)
 
   return { functions, allowFreeEntry }
 }

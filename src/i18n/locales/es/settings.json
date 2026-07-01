@@ -1285,5 +1285,13 @@
         "description": "Activado = el avatar del propietario usa el color del reclutador. Desactivado = gris neutro."
       }
     }
+  },
+  "functionsSettings": {
+    "title": "Funciones",
+    "subtitle": "Gestiona la lista de funciones y si los reclutadores pueden introducir valores libres.",
+    "add": "Añadir función",
+    "freeEntry": "Permitir entrada libre",
+    "freeEntryHint": "Activado: los reclutadores pueden escribir su propia función (combobox). Desactivado: solo elegir de la lista.",
+    "confirmFreeEntry": "¿Seguro? La entrada libre permite funciones fuera de la lista, lo que puede reducir la calidad de los datos."
   }
 }

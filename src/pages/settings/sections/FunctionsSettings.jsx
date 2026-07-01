@@ -1,0 +1,47 @@
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import StatusListEditor from './StatusListEditor'
+import { SettingCard, SettingRow, Toggle } from '../components/SettingsKit'
+import { useAllSettings, getBoolSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
+
+/**
+ * FunctionsSettings — the tenant job-function list (/functions) plus the field-mode
+ * toggle (creatable combobox ↔ strict dropdown), stored as the tenant setting
+ * `functions_allow_free_entry`. Turning free-entry ON (strict → free) asks for
+ * confirmation; turning it OFF (free → strict) lets the backend fold every used
+ * function into the list so nothing is lost.
+ */
+export default function FunctionsSettings() {
+  const { t } = useTranslation('settings')
+  const settings = useAllSettings()
+  const freeEntry = getBoolSetting(settings, 'functions_allow_free_entry', true)
+  const [busy, setBusy] = useState(false)
+
+  // Persist the mode; confirm before loosening to free-text (data-quality choice).
+  const onToggle = async (next) => {
+    if (busy) return
+    if (next && !window.confirm(t('functionsSettings.confirmFreeEntry'))) return
+    setBusy(true)
+    try { await saveSettingsKeys({ functions_allow_free_entry: next }) } finally { setBusy(false) }
+  }
+
+  return (
+    <div style={{ maxWidth: 640 }}>
+      <SettingCard>
+        <SettingRow label={t('functionsSettings.freeEntry')} description={t('functionsSettings.freeEntryHint')}>
+          <Toggle checked={freeEntry} onChange={onToggle} />
+        </SettingRow>
+      </SettingCard>
+
+      <div style={{ marginTop: 20 }}>
+        <StatusListEditor
+          title={t('functionsSettings.title')}
+          subtitle={t('functionsSettings.subtitle')}
+          endpoint="/functions"
+          addLabel={t('functionsSettings.add')}
+          withColor={false}
+        />
+      </div>
+    </div>
+  )
+}

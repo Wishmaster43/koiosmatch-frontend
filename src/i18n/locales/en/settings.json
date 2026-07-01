@@ -133,7 +133,8 @@
     "note_types": "Note types",
     "document_types": "Document types",
     "candidate_phases": "Phase",
-    "candidate_required_fields": "Required fields"
+    "candidate_required_fields": "Required fields",
+    "functions": "Functions"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1265,5 +1266,13 @@
     "moveDown": "Move down",
     "hide": "Hide",
     "show": "Show"
+  },
+  "functionsSettings": {
+    "title": "Functions",
+    "subtitle": "Manage the function list and whether recruiters can enter free values.",
+    "add": "Add function",
+    "freeEntry": "Allow free entry",
+    "freeEntryHint": "On: recruiters can type their own function (combobox). Off: pick from the list only (strict dropdown).",
+    "confirmFreeEntry": "Are you sure? Free entry lets recruiters type functions that aren’t in the list — this can lower data quality."
   }
 }

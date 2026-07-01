@@ -54,7 +54,21 @@
       "deal": "Negocio",
       "organisation": "Organización"
     },
-    "currency": "Moneda"
+    "currency": "Moneda",
+    "hours": "Horas",
+    "hoursPeriod": "Horas por",
+    "periods": {
+      "week": "Por semana",
+      "month": "Por mes",
+      "total": "Total"
+    },
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de fin",
+    "serviceType": "Servicio",
+    "agreementType": "Acuerdo",
+    "location": "Ubicación",
+    "department": "Departamento",
+    "contact": "Contacto"
   },
   "modal": {
     "title": "Nueva oportunidad",
@@ -69,7 +83,12 @@
       "stage": "Fase",
       "value": "Valor (€)",
       "expectedClose": "Cierre previsto",
-      "owner": "Responsable"
+      "owner": "Responsable",
+      "serviceType": "Servicio",
+      "agreementType": "Acuerdo",
+      "hours": "Horas",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de fin"
     }
   },
   "view": {
