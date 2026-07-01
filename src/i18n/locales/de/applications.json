@@ -153,5 +153,16 @@
     "aiAdvice": "Koios empfiehlt Ablehnung",
     "aiAuto": "Harte Kriterien nicht erfüllt — für Auto-Ablehnung geeignet.",
     "aiConfirm": "Prüfen und bestätigen, bevor eine Nachricht gesendet wird."
+  },
+  "archived": {
+    "toggle": "Archiviert"
+  },
+  "detach": {
+    "button": "Entkoppeln",
+    "done": "Bewerbung entkoppelt"
+  },
+  "restore": {
+    "button": "Wiederherstellen",
+    "done": "Bewerbung wiederhergestellt"
   }
 }

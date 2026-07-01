@@ -153,5 +153,16 @@
     "aiAdvice": "Koios adviseert afwijzen",
     "aiAuto": "Harde criteria niet gehaald — auto-afwijzen mogelijk.",
     "aiConfirm": "Beoordeel en bevestig voordat er een bericht uitgaat."
+  },
+  "archived": {
+    "toggle": "Gearchiveerd"
+  },
+  "detach": {
+    "button": "Ontkoppelen",
+    "done": "Sollicitatie ontkoppeld"
+  },
+  "restore": {
+    "button": "Herstellen",
+    "done": "Sollicitatie hersteld"
   }
 }

@@ -153,5 +153,16 @@
     "aiAdvice": "Koios advises rejection",
     "aiAuto": "Hard criteria failed — auto-rejection eligible.",
     "aiConfirm": "Review and confirm before a message is sent."
+  },
+  "archived": {
+    "toggle": "Archived"
+  },
+  "detach": {
+    "button": "Detach",
+    "done": "Application detached"
+  },
+  "restore": {
+    "button": "Restore",
+    "done": "Application restored"
   }
 }

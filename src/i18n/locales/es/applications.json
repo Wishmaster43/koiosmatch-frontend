@@ -153,5 +153,16 @@
     "aiAdvice": "Koios aconseja rechazar",
     "aiAuto": "Criterios estrictos no cumplidos — apto para rechazo automático.",
     "aiConfirm": "Revisa y confirma antes de enviar un mensaje."
+  },
+  "archived": {
+    "toggle": "Archivadas"
+  },
+  "detach": {
+    "button": "Desvincular",
+    "done": "Candidatura desvinculada"
+  },
+  "restore": {
+    "button": "Restaurar",
+    "done": "Candidatura restaurada"
   }
 }

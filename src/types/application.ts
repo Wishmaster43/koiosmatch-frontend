@@ -31,6 +31,9 @@ export interface Application {
   candidateStatusColor: string
   created: string
   isNew: boolean
+  // Detached (soft-deleted) — the row is kept server-side but hidden from the
+  // active list; true only when the API is asked for `?include_archived=1`.
+  archived: boolean
   // Phase label/colour the drawer may carry alongside the stable phaseKey.
   phaseLabel?: string
   phaseColor?: string
@@ -117,6 +120,8 @@ export interface ApiApplication {
   created_at?: string
   applied_at?: string
   is_new?: boolean
+  deleted_at?: string | null
+  archived?: boolean
   interviews?: Array<{
     id?: Id; channel?: string; status?: string; created_at?: string; time?: string; summary?: string
     transcript?: Array<{ author?: string; side?: string; time?: string; text?: string }>

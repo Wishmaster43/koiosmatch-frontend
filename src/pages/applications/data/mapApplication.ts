@@ -44,6 +44,8 @@ export function mapApplication(a: ApiApplication = {}): Application {
     candidateStatusColor: a.candidate_status_color ?? cand.status_color ?? '#9CA3AF',
     created: a.created_at ?? a.applied_at ?? '',
     isNew: Boolean(a.is_new ?? false),
+    // Detached rows arrive only with `?include_archived=1`; flag via deleted_at.
+    archived: Boolean(a.deleted_at ?? a.archived ?? false),
   }
 }
 

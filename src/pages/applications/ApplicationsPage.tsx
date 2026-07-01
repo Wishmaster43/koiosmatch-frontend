@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Plus } from 'lucide-react'
+import { LayoutList, Kanban, Plus, Archive } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
+import { notifyError, notifySuccess } from '@/lib/notify'
 import { isAbortError } from '@/lib/mocks'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -41,6 +41,8 @@ export default function ApplicationsPage() {
   const { t } = useTranslation('applications')
   const auth = useAuth()
   const user = auth?.user as { default_per_page?: number } | null | undefined
+  // Detach/restore are destructive → gate in the UI (backend re-checks the perm).
+  const canManage = auth?.hasPermission?.('applications.update') ?? false
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Funnel phases come from the tenant lookup (Settings → Funnel stages), never hardcoded.
   const { funnelTypes, funnelMeta } = useLookups()
@@ -60,6 +62,7 @@ export default function ApplicationsPage() {
   const [selectedVac,    setSelectedVac]    = useState<string[]>([])
   const [addOpen,        setAddOpen]        = useState(false)
   const [stats,          setStats]          = useState<AppStats | null>(null)
+  const [showArchived,   setShowArchived]   = useState(false)
 
   // Board columns = the funnel lookup, normalised to { key, label, color }.
   const phases = useMemo<BoardPhase[]>(() => funnelTypes.map(f => ({ key: f.value, label: f.label, color: f.color })), [funnelTypes])
@@ -68,10 +71,11 @@ export default function ApplicationsPage() {
   const decorate = <T extends Application>(a: T): T => { const m = funnelMeta(a.phaseKey); return { ...a, phaseLabel: m.label, phaseColor: m.color } }
 
   // Load applications. A 404 means the endpoint isn't built yet → treat as empty.
+  // Archived view asks the API for detached rows too (`?include_archived=1`).
   useEffect(() => {
     const ctrl = new AbortController()
     setLoading(true); setError(false)
-    api.get('/applications', { signal: ctrl.signal })
+    api.get(showArchived ? '/applications?include_archived=1' : '/applications', { signal: ctrl.signal })
       .then(res => setApplications(unwrapList<ApiApplication>(res).rows.map(mapApplication)))
       .catch(err => {
         if (isAbortError(err)) return
@@ -79,7 +83,7 @@ export default function ApplicationsPage() {
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [])
+  }, [showArchived])
 
   // KPI totals across the whole set; page-derived fallback when stats aren't live.
   useEffect(() => {
@@ -132,11 +136,14 @@ export default function ApplicationsPage() {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Reset to the first page whenever the bucket or any filter changes.
-  useEffect(() => { setPage(1) }, [bucket, selectedPhase, selectedOwner, selectedSource, selectedVac])
+  useEffect(() => { setPage(1) }, [bucket, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived])
 
   // The visible rows: bucket + phase/owner/source/vacancy filters, decorated.
   const filteredAll = useMemo(() => {
     return applications.filter(a => {
+      // Detached rows only surface in the dedicated archived view (any bucket).
+      if (showArchived) return Boolean(a.archived)
+      if (a.archived) return false
       if (a.bucket !== bucket) return false
       if (selectedPhase.length  && !selectedPhase.includes(a.phaseKey))         return false
       if (selectedOwner.length  && !selectedOwner.includes(a.owner?.name))      return false
@@ -144,7 +151,7 @@ export default function ApplicationsPage() {
       if (selectedVac.length    && !selectedVac.includes(String(a.vacancyId)))  return false
       return true
     }).map(decorate)
-  }, [applications, bucket, selectedPhase, selectedOwner, selectedSource, selectedVac, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [applications, bucket, showArchived, selectedPhase, selectedOwner, selectedSource, selectedVac, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Clientside pagination slice (the endpoint returns all rows at once).
   const totalRows  = filteredAll.length
@@ -195,6 +202,30 @@ export default function ApplicationsPage() {
     api.patch(`/applications/${id}`, { match_score: score, match_criteria: criteria }).catch(() => notifyError(t('common:actionFailed')))
   }
 
+  // Detach (soft-delete) an application: kept server-side, removed from the active
+  // list. Optimistic flag; revert + toast on failure. Gated by applications.update.
+  const handleDetach = (id: Id | undefined) => {
+    if (id == null) return
+    const snapshot = applications
+    setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: true } : a))
+    closeDrawer()
+    api.delete(`/applications/${id}`)
+      .then(() => notifySuccess(t('detach.done')))
+      .catch(() => { setApplications(snapshot); notifyError(t('common:actionFailed')) })
+  }
+
+  // Restore a detached application: back to the active list (backend re-sets the
+  // candidate to the applicant phase). Optimistic; revert + toast on failure.
+  const handleRestore = (id: Id | undefined) => {
+    if (id == null) return
+    const snapshot = applications
+    setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: false } : a))
+    closeDrawer()
+    api.post(`/applications/${id}/restore`)
+      .then(() => notifySuccess(t('restore.done')))
+      .catch(() => { setApplications(snapshot); notifyError(t('common:actionFailed')) })
+  }
+
   // ── Insights strip: 3 donuts (filterable) + 4 KPI cards, equal footprint ──
   const insightDonuts: DonutSpec[] = [
     { key: 'phase',  title: t('insights.phase'),  data: phaseData,  onPick: pickOne(setSelectedPhase),  active: selectedPhase.length > 0,  onClear: () => setSelectedPhase([]) },
@@ -225,14 +256,24 @@ export default function ApplicationsPage() {
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {BUCKETS.map(b => (
-            <button key={b} onClick={() => setBucket(b)} style={{ padding: '5px 14px', fontSize: 13,
-              fontWeight: bucket === b ? 600 : 400, borderRadius: 7, cursor: 'pointer',
-              background: bucket === b ? 'var(--color-primary)' : 'transparent',
-              color: bucket === b ? '#fff' : 'var(--text)',
-              border: bucket === b ? 'none' : '1px solid var(--border)' }}>
+            <button key={b} onClick={() => setBucket(b)} disabled={showArchived} style={{ padding: '5px 14px', fontSize: 13,
+              fontWeight: bucket === b ? 600 : 400, borderRadius: 7, cursor: showArchived ? 'default' : 'pointer',
+              opacity: showArchived ? 0.4 : 1,
+              background: bucket === b && !showArchived ? 'var(--color-primary)' : 'transparent',
+              color: bucket === b && !showArchived ? '#fff' : 'var(--text)',
+              border: bucket === b && !showArchived ? 'none' : '1px solid var(--border)' }}>
               {t(`buckets.${b}`)}
             </button>
           ))}
+          {/* Archived (detached) view toggle — shows soft-deleted applications + restore */}
+          <button onClick={() => setShowArchived(v => !v)} title={t('archived.toggle')}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 13,
+              fontWeight: showArchived ? 600 : 400, borderRadius: 7, cursor: 'pointer',
+              background: showArchived ? 'var(--color-primary)' : 'transparent',
+              color: showArchived ? '#fff' : 'var(--text-muted)',
+              border: showArchived ? 'none' : '1px solid var(--border)' }}>
+            <Archive size={13} /> {t('archived.toggle')}
+          </button>
           <div style={{ display: 'flex', gap: 4 }}>
             <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
               style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
@@ -276,6 +317,9 @@ export default function ApplicationsPage() {
         onToggleExpand={() => setExpanded(v => !v)}
         onReject={handleReject}
         onAdjustScore={handleAdjustScore}
+        onDetach={handleDetach}
+        onRestore={handleRestore}
+        canManage={canManage}
       />
 
       {addOpen && <AddApplicationModal onClose={() => setAddOpen(false)} onCreated={handleCreated} />}

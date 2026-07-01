@@ -532,7 +532,7 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 | **MOCK-1** | P1 | M | BE+2e | kandidaat-Planning-tab op `data/mocks.ts` → planning-endpoints + hooks |
 | **F-13** | P1 | M | FE (gated) | `auth_token`/`auth_user` uit `localStorage` → httpOnly-cookieflip (ná backend-deploy) |
 | **D-1** | P1 | M | BE+FE | changelog (`/activity`) op customers/vacancies/applications/tasks/opportunities |
-| **D-2** | P1 | M | BE+FE | soft-delete (archive) op tasks/opportunities/applications |
+| **D-2** | ◐ | M | FE | soft-delete (archive) op tasks/opportunities/applications. **Applications BE geleverd (2026-07-01):** `DELETE /applications/{id}` = soft-detach (rij blijft, incl. `match_score`/criteria + funnel-historie; standaard verborgen) · `POST /applications/{id}/restore` (perm `applications.update`; zet kandidaat terug op applicant-fase) · `GET /applications?include_archived=1`. **FE:** detach- + restore-actie + "toon gearchiveerd"-toggle → in uitvoering. |
 | **F-11** | P1 | L | FE | lijst-virtualisatie (kandidaten/shifts, 10k+ rijen) — schaal-blocker |
 | **I18N-3** | ✅/2e | — | 2e | FE-domein geverifieerd clean (dumb/wrappers, tekst via props). Residu = `settings/*` (2e-Claude). |
 | **CFG-1** | P2 | M | BE+FE | NATIONALITIES/LANGUAGES/klant-STATUSES → tenant-lookups + i18n |
@@ -542,7 +542,7 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 | **DUP-1** | P3 | S | FE | ✅ avatar-kleur 3× → `lib/avatarColor` |
 | **A11Y-1** | P2 | M | FE | ~28 modals/drawers zonder focus-trap/`role=dialog`/`aria-modal`+restore (§6) — alleen `ChangelogPopover` heeft 't. Shared `Drawer`/`Modal`-shell met focus-trap. |
 | **A11Y-2** | P2 | M | FE | icon-only buttons missen `aria-label` (34/359) — X-close/sort/chevron/trash. |
-| **ERR-1** | P2 | M | FE | 94× silent `.catch(()=>{})` → min. dev-log + user-facing error-state (= F-12). |
+| **ERR-1** | ✅ | — | FE | **OPGELOST.** Alle stille **mutatie**-catches → `notifyError(t('common:actionFailed'))` (customers/tasks/vacancies/opps/apps/ai + candidates: 10× in BackgroundTab/DocumentsSection/PoolsSection/CandidatesPage/CandidateTab). GET-loads blijven bewust soft (degraderen netjes). Gedeelde toast-infra (`lib/notify` + `Toaster`). |
 | **F-8** | P2 | L | FE | 53 componenten fetchen inline (`api.get`+`useEffect`) → naar feature-hooks (§3). |
 | **DUP-2** | P3 | S | FE | herhaalde className-shells (drawer ×10 · table ×7 · card ×6 · error-banner ×6) → extract; error-banner + card gebruiken rauwe Tailwind-kleuren i.p.v. `--color-*`-tokens (§4). |
 | **F-12b** | P3 | L | FE | deep-relative-imports (`../../`, ~589 warnings) → `@/`-alias |
