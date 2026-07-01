@@ -6,11 +6,11 @@
 import { X, Search, Clock, MapPin, Briefcase, User, Hash, Building2, CalendarCheck, Timer } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { LucideIcon } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
-import type { ShiftRow, ShiftInvite } from '@/types/shiftmanager'
+import { useDrillDownShifts } from './hooks/useDrillDownShifts'
+import type { ShiftInvite } from '@/types/shiftmanager'
 
 // Shift status → badge colours. Label = t('shiftsDrawer.status.<key>').
 const STATUS_META: Record<string, { bg: string; color: string }> = {
@@ -101,26 +101,8 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }: {
 }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('shiftmanager')
-  const [search,  setSearch]  = useState('')
-  const [shifts,  setShifts]  = useState<ShiftRow[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error,   setError]   = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!fetchUrl) return
-    let active = true
-    setLoading(true)
-    setError(null)
-    api.get(fetchUrl)
-      .then(res => {
-        if (!active) return
-        const data = res.data?.data ?? res.data ?? []
-        setShifts(Array.isArray(data) ? data : [])
-      })
-      .catch(() => active && setError(t('shiftsDrawer.loadError')))
-      .finally(() => active && setLoading(false))
-    return () => { active = false }
-  }, [fetchUrl])
+  const [search, setSearch] = useState('')
+  const { shifts, loading, error } = useDrillDownShifts(fetchUrl)
 
   const filtered = shifts.filter(s => {
     if (!search) return true
@@ -183,7 +165,7 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }: {
           )}
           {error && !loading && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          height: 120, fontSize: 13, color: 'var(--color-danger)' }}>{error}</div>
+                          height: 120, fontSize: 13, color: 'var(--color-danger)' }}>{t('shiftsDrawer.loadError')}</div>
           )}
           {!loading && !error && filtered.length === 0 && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
