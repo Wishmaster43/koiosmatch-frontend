@@ -1,29 +1,17 @@
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle, CalendarDays, TrendingUp, MessageCircle, Percent } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useAuth } from '@/context/AuthContext'
 import MonthlyKpiCard    from '@/components/ui/MonthlyKpiCard'
 import StatCard          from '@/components/ui/StatCard'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
-import type { ReportCandidate } from '@/types/reports'
+import { useShiftmanagerDashboard } from './hooks/useShiftmanagerDashboard'
 
 // Packages that unlock the AI/Workflow runs + conversations panels.
 const AI_PACKAGES = ['reporting_sm_ai', 'reporting_hf_ai', 'reporting_sm_hf_ai', 'ats_crm_ai', 'ats_crm_ai_planning', 'ats_crm_aiagents', 'ats_crm_workflows', 'connect']
 
-// Shift KPI stats from /sm_reports/dashboard.
-interface SmDashStats {
-  open_hours?: number; hours_this_month?: number; occupancy_pct?: number
-  messages_sent?: number; response_rate_pct?: number; [k: string]: unknown
-}
-interface RunItem { name?: string; ok: boolean; n?: number; err?: string; time: string }
-interface ConvItem { name: string; msg: string; time: string }
-
-// Locale-aware HH:MM from an ISO timestamp.
-const hhmm = (iso?: string) => iso ? new Date(iso).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) : ''
-const fmt  = (v?: unknown) => v == null ? '—' : (typeof v === 'number' ? v.toLocaleString('nl-NL') : String(v))
+// Locale-aware display of a KPI value (nl-NL) with an em-dash fallback.
+const fmt = (v?: unknown) => v == null ? '—' : (typeof v === 'number' ? v.toLocaleString('nl-NL') : String(v))
 
 export default function ShiftmanagerDashboard() {
   const { t } = useTranslation('shiftmanager')
@@ -32,52 +20,8 @@ export default function ShiftmanagerDashboard() {
   const pkg  = auth?.activeTenant?.package ?? auth?.user?.tenant?.package ?? ''
   const hasAI = AI_PACKAGES.includes(pkg)
 
-  const [candidates,    setCandidates]    = useState<ReportCandidate[]>([])
-  const [loading,       setLoading]       = useState(true)
-  const [stats,         setStats]         = useState<SmDashStats | null>(null)
-  const [runs,          setRuns]          = useState<RunItem[]>([])
-  const [conversations, setConversations] = useState<ConvItem[]>([])
-
-  // Candidates feed the (real) "new this month" KPI card.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get(`/sm_candidates?per_page=${candidates_per_page}`, { signal: ctrl.signal })
-      .then(res => { const body = res.data; setCandidates(Array.isArray(body) ? body : (body?.data ?? [])) })
-      .catch(err => { if (!isAbortError(err)) setCandidates([]) })
-      .finally(() => setLoading(false))
-    return () => ctrl.abort()
-  }, [candidates_per_page])
-
-  // Shift KPIs from the ShiftManager report endpoint.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/sm_reports/dashboard', { signal: ctrl.signal })
-      .then(res => setStats(res.data ?? null))
-      .catch(err => { if (!isAbortError(err)) setStats(null) })
-    return () => ctrl.abort()
-  }, [])
-
-  // Recent workflow runs + WhatsApp conversations — only for AI/Workflow packages.
-  useEffect(() => {
-    if (!hasAI) return
-    const ctrl = new AbortController()
-    api.get('/workflow-runs', { params: { per_page: 5 }, signal: ctrl.signal })
-      .then(res => {
-        const { rows } = unwrapList<{ name?: string; status?: string; processed_count?: number; error?: string; started_at?: string }>(res)
-        setRuns(rows.map(r => ({ name: r.name, ok: (r.status ?? 'ok') === 'ok', n: r.processed_count, err: r.error, time: hhmm(r.started_at) })))
-      })
-      .catch(err => { if (!isAbortError(err)) setRuns([]) })
-    api.get('/whatsapp/messages', { params: { per_page: 4 }, signal: ctrl.signal })
-      .then(res => {
-        const { rows } = unwrapList<{ candidate?: { first_name?: string; last_name?: string }; body?: string; sent_at?: string }>(res)
-        setConversations(rows.map(m => ({
-          name: `${m.candidate?.first_name ?? ''} ${m.candidate?.last_name ?? ''}`.trim() || '—',
-          msg:  m.body ?? '', time: hhmm(m.sent_at),
-        })))
-      })
-      .catch(err => { if (!isAbortError(err)) setConversations([]) })
-    return () => ctrl.abort()
-  }, [hasAI])
+  // Data layer: SM candidates, shift KPIs, + (AI packages) recent runs/conversations.
+  const { candidates, loading, stats, runs, conversations } = useShiftmanagerDashboard(candidates_per_page, hasAI)
 
   // KPI cards — translated labels; values from /sm_reports/dashboard (deltas TBD).
   const v = (key: string) => fmt(stats?.[key])
