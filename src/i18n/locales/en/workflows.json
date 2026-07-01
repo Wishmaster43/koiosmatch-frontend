@@ -317,6 +317,17 @@
     "text": "Text & Parsing",
     "other": "Other"
   },
+  "canvas": {
+    "filterTitle": "Set filter",
+    "logicAllHint": "All conditions must match",
+    "logicAnyHint": "At least one condition must match",
+    "outputTitle": "Output",
+    "records": "{{n}} records",
+    "response": "Response",
+    "dragStart": "Drag to move the start point",
+    "runModule": "Run module",
+    "deleteEdge": "Remove connection"
+  },
   "picker": {
     "title": "Choose a module",
     "search": "Search...",

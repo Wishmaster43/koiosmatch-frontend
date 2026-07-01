@@ -317,6 +317,17 @@
     "text": "Texte & Analyse",
     "other": "Autre"
   },
+  "canvas": {
+    "filterTitle": "Définir le filtre",
+    "logicAllHint": "Toutes les conditions doivent correspondre",
+    "logicAnyHint": "Au moins une condition doit correspondre",
+    "outputTitle": "Sortie",
+    "records": "{{n}} enregistrements",
+    "response": "Réponse",
+    "dragStart": "Glisser pour déplacer le point de départ",
+    "runModule": "Exécuter le module",
+    "deleteEdge": "Supprimer la connexion"
+  },
   "picker": {
     "title": "Choisir un module",
     "search": "Rechercher...",

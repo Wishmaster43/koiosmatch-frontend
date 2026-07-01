@@ -317,6 +317,17 @@
       }
     }
   },
+  "canvas": {
+    "filterTitle": "Filter instellen",
+    "logicAllHint": "Alle condities moeten kloppen",
+    "logicAnyHint": "Minimaal één conditie moet kloppen",
+    "outputTitle": "Output",
+    "records": "{{n}} records",
+    "response": "Response",
+    "dragStart": "Sleep om startpunt te verplaatsen",
+    "runModule": "Module uitvoeren",
+    "deleteEdge": "Verbinding verbreken"
+  },
   "picker": {
     "title": "Module kiezen",
     "search": "Zoeken...",

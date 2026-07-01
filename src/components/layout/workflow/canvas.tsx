@@ -5,6 +5,8 @@
  * Extracted from WorkflowCanvasEditor.
  */
 import { useState, useContext, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { MouseEvent, DragEvent } from 'react'
 import { Handle, Position, BaseEdge, EdgeLabelRenderer, getStraightPath } from '@xyflow/react'
 import { CheckCircle, Filter, Loader2, Play, Plus, Trash2, X } from 'lucide-react'
@@ -26,6 +28,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   const [busy, setBusy] = useState(false)
   const [dropOver, setDropOver] = useState(false)
   const dragRef = useRef(false)
+  const { t } = useTranslation('workflows')
   if (!meta) return null
   // The registry types Icon narrowly (size only); lucide icons also take `color`.
   const Icon = meta.Icon as unknown as LucideIcon
@@ -73,7 +76,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
             e.dataTransfer.effectAllowed = 'move'
           }}
           onDragEnd={() => { dragRef.current = false }}
-          title="Sleep om startpunt te verplaatsen"
+          title={t('canvas.dragStart')} aria-label={t('canvas.dragStart')}
           style={{
             position: 'absolute', top: -14, left: '50%', transform: 'translateX(-50%)',
             background: 'var(--color-primary)', color: 'white',
@@ -107,7 +110,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         {/* Run knop rechtsonder op de cirkel */}
         <button
           onClick={handleRun}
-          title="Module uitvoeren"
+          title={t('canvas.runModule')} aria-label={t('canvas.runModule')}
           style={{
             position: 'absolute', bottom: -2, right: -2,
             width: 22, height: 22, borderRadius: '50%',
@@ -153,6 +156,8 @@ export function EdgeFilterPanel({ filters, onClose, onSave }: {
 }) {
   const [conds, setConds] = useState<FilterCondition[]>(filters?.conditions ?? [])
   const [logic, setLogic] = useState(filters?.logic ?? 'AND')
+  const { t } = useTranslation('workflows')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   const addCond = () => setConds(c => [...c, { field: '', operator: '=', value: '' }])
   const delCond = (i: number) => setConds(c => c.filter((_, j) => j !== i))
@@ -163,12 +168,12 @@ export function EdgeFilterPanel({ filters, onClose, onSave }: {
       position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'rgba(0,0,0,0.3)',
     }} onClick={onClose}>
-      <div style={{
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('canvas.filterTitle')} tabIndex={-1} style={{
         background: 'var(--surface)', borderRadius: 14, padding: 24, width: 520, maxHeight: '80vh', overflow: 'auto',
         boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
       }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>Filter instellen</div>
+          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('canvas.filterTitle')}</div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
         </div>
 
@@ -182,7 +187,7 @@ export function EdgeFilterPanel({ filters, onClose, onSave }: {
             }}>{l}</button>
           ))}
           <span style={{ fontSize: 12, color: 'var(--text-muted)', alignSelf: 'center', marginLeft: 4 }}>
-            {logic === 'AND' ? 'Alle condities moeten kloppen' : 'Minimaal één conditie moet kloppen'}
+            {logic === 'AND' ? t('canvas.logicAllHint') : t('canvas.logicAnyHint')}
           </span>
         </div>
 
@@ -195,15 +200,16 @@ export function EdgeFilterPanel({ filters, onClose, onSave }: {
               )}
               {i === 0 && <div style={{ width: 28, flexShrink: 0 }} />}
               <input value={c.field} onChange={e => updCond(i, 'field', e.target.value)}
-                placeholder="veld (bijv. status)"
+                placeholder={t('fields.fieldPlaceholder')} aria-label={t('fields.fieldPlaceholder')}
                 style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
               <select value={c.operator} onChange={e => updCond(i, 'operator', e.target.value)}
+                aria-label={t('fields.operator', { defaultValue: 'Operator' })}
                 style={{ padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)' }}>
                 {OPERATORS.map(op => <option key={op} value={op}>{op}</option>)}
               </select>
               {!['is leeg', 'is gevuld'].includes(c.operator ?? '') && (
                 <input value={c.value} onChange={e => updCond(i, 'value', e.target.value)}
-                  placeholder="waarde"
+                  placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}
                   style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
               )}
               <button onClick={() => delCond(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: 4 }}><Trash2 size={12} /></button>
@@ -216,14 +222,14 @@ export function EdgeFilterPanel({ filters, onClose, onSave }: {
           background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 8,
           padding: '6px 12px', cursor: 'pointer', marginBottom: 20, width: '100%', justifyContent: 'center',
         }}>
-          <Plus size={12} /> Conditie toevoegen
+          <Plus size={12} /> {t('fields.addCondition')}
         </button>
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>Annuleren</button>
+          <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>{t('common:cancel')}</button>
           <button onClick={() => { onSave({ logic, conditions: conds }); onClose() }}
             style={{ padding: '8px 16px', fontSize: 13, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>
-            Opslaan
+            {t('common:save')}
           </button>
         </div>
       </div>
@@ -235,6 +241,8 @@ export function EdgeFilterPanel({ filters, onClose, onSave }: {
 
 export function OutputPanel({ output, onClose }: { output?: unknown; onClose: () => void }) {
   const [search, setSearch] = useState('')
+  const { t } = useTranslation('workflows')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const json = JSON.stringify(output, null, 2)
   const lines = json.split('\n')
   const filtered = search ? lines.filter(l => l.toLowerCase().includes(search.toLowerCase())) : lines
@@ -244,15 +252,15 @@ export function OutputPanel({ output, onClose }: { output?: unknown; onClose: ()
       position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
       background: 'rgba(0,0,0,0.4)',
     }} onClick={onClose}>
-      <div style={{
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('canvas.outputTitle')} tabIndex={-1} style={{
         background: '#1E1E2E', borderRadius: 14, width: 680, maxHeight: '80vh',
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
         boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
       }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid #2D2D3F' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#E2E8F0' }}>Output — {Array.isArray(output) ? `${output.length} records` : 'Response'}</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: '#E2E8F0' }}>{t('canvas.outputTitle')} — {Array.isArray(output) ? t('canvas.records', { n: output.length }) : t('canvas.response')}</div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Zoeken..."
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('picker.search')} aria-label={t('picker.search')}
               style={{ padding: '5px 10px', fontSize: 12, background: '#2D2D3F', border: '1px solid #3D3D4F', borderRadius: 6, color: '#E2E8F0', outline: 'none', width: 160 }} />
             <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
           </div>
@@ -277,6 +285,7 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
   const onAdd    = useContext(EdgeAddContext)
   const onDelete = useContext(EdgeDeleteContext)
   const onFilter = useContext(EdgeFilterContext)
+  const { t }    = useTranslation('workflows')
   const [path]   = getStraightPath({ sourceX, sourceY, targetX, targetY })
   const midX = (sourceX + targetX) / 2
   const midY = (sourceY + targetY) / 2
@@ -297,19 +306,19 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
               {data?.filters?.conditions?.length ?? 0} filter{(data?.filters?.conditions?.length ?? 0) > 1 ? 's' : ''}
             </div>
           )}
-          <button onClick={() => onAdd && onAdd(id)} title="Module invoegen"
+          <button onClick={() => onAdd && onAdd(id)} title={t('editor.addModule')} aria-label={t('editor.addModule')}
             style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--surface)', border: '1.5px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)' }}>
             <Plus size={11} />
           </button>
-          <button onClick={() => onFilter && onFilter(id)} title="Filter instellen"
+          <button onClick={() => onFilter && onFilter(id)} title={t('canvas.filterTitle')} aria-label={t('canvas.filterTitle')}
             style={{ width: 22, height: 22, borderRadius: '50%', background: hasFilters ? '#F3E8FF' : 'var(--surface)', border: `1.5px solid ${hasFilters ? '#7C3AED' : 'var(--border)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: hasFilters ? '#7C3AED' : 'var(--text-muted)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#7C3AED'; e.currentTarget.style.color = '#7C3AED' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = hasFilters ? '#7C3AED' : 'var(--border)'; e.currentTarget.style.color = hasFilters ? '#7C3AED' : 'var(--text-muted)' }}>
             <Filter size={11} />
           </button>
-          <button onClick={() => onDelete && onDelete(id)} title="Verbinding verbreken"
+          <button onClick={() => onDelete && onDelete(id)} title={t('canvas.deleteEdge')} aria-label={t('canvas.deleteEdge')}
             style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--surface)', border: '1.5px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-muted)', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--color-danger)'; e.currentTarget.style.color = 'var(--color-danger)' }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--text-muted)' }}>

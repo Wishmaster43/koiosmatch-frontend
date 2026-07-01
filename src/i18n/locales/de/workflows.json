@@ -317,6 +317,17 @@
     "text": "Text & Parsing",
     "other": "Sonstige"
   },
+  "canvas": {
+    "filterTitle": "Filter festlegen",
+    "logicAllHint": "Alle Bedingungen müssen zutreffen",
+    "logicAnyHint": "Mindestens eine Bedingung muss zutreffen",
+    "outputTitle": "Ausgabe",
+    "records": "{{n}} Datensätze",
+    "response": "Antwort",
+    "dragStart": "Ziehen, um den Startpunkt zu verschieben",
+    "runModule": "Modul ausführen",
+    "deleteEdge": "Verbindung entfernen"
+  },
   "picker": {
     "title": "Modul auswählen",
     "search": "Suchen...",
