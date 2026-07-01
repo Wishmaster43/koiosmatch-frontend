@@ -13,19 +13,17 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useUsers } from '@/lib/queries'
-import api from '@/lib/api'
-import { notifyError } from '@/lib/notify'
 import CandidateDrawerJs from './CandidateDrawer'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesTable from './CandidatesTable'
 import CandidatesBulkBar from './CandidatesBulkBar'
 import InsightsRowJs from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
-import { mapCandidate } from './data/mapCandidate'
-import { toggleOneValue, isStale, isNeverContacted, isNoFollowup, buildCandidatePatch } from './data/candidatesShared'
+import { toggleOneValue, isStale, isNeverContacted, isNoFollowup } from './data/candidatesShared'
 import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
 import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
+import { useCandidateRecord } from './hooks/useCandidateMutations'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -176,13 +174,14 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     return candidates.filter(pred)
   }, [candidates, attentionFilter])
 
+  // Full-record load + edit persistence (fetch/PATCH live in the hook, §3).
+  const { fetchDetail, patchCandidate } = useCandidateRecord()
+
   // Open a candidate: hand the light row to the drawer, then fetch the full record.
   const selectCandidate = (c: Candidate) => {
     selectedIdRef.current = c.id
     setSelected(c); setDetail(null); setDrawerExpanded(false)
-    api.get(`/candidates/${c.id}`)
-      .then(r => { if (selectedIdRef.current === c.id) setDetail(mapCandidate(r.data?.data ?? r.data)) })
-      .catch(() => {})
+    fetchDetail(c.id).then(full => { if (full && selectedIdRef.current === c.id) setDetail(full) })
   }
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
 
@@ -200,8 +199,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     setCandidates(prev => prev.map(x => x.id === id ? { ...x, ...patch } as Candidate : x))
     setSelected(prev => (prev && prev.id === id ? { ...prev, ...patch } as Candidate : prev))
     setDetail(prev  => (prev && prev.id === id ? { ...prev, ...patch } as Candidate : prev))
-    const body = buildCandidatePatch(patch)
-    if (Object.keys(body).length) api.patch(`/candidates/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
+    patchCandidate(id, patch)
   }
 
   // ── Bulk actions ──

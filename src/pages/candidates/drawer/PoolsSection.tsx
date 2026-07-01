@@ -1,33 +1,22 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Check, Sparkles } from 'lucide-react'
-import api from '@/lib/api'
-import { notifyError } from '@/lib/notify'
+import { useCandidatePools } from '../hooks/useCandidatePools'
 import { sectionBlock } from './constants'
-import type { Candidate, CandidatePool } from '@/types/candidate'
-import type { Id } from '@/types/common'
+import type { Candidate } from '@/types/candidate'
 
 /**
  * PoolsSection — the talent pools a candidate belongs to (chips), with an add
- * dropdown sourced from GET /pools. Membership writes go to the candidate_pool
- * pivot via /candidates/{id}/pools; optimistic + tolerant while the backend
- * catches up (empty dropdown until /pools exists). `source: 'koios'` pools get a
+ * dropdown sourced from GET /pools. Presentational: the list fetch + optimistic
+ * membership writes live in useCandidatePools (§3). `source: 'koios'` pools get a
  * subtle AI marker so manual vs AI-suggested membership stays distinguishable.
  */
 export default function PoolsSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
-  const [pools,    setPools]    = useState<CandidatePool[]>(c.pools ?? [])
-  const [open,     setOpen]     = useState(false)
-  const [search,   setSearch]   = useState('')
-  const [allPools, setAllPools] = useState<CandidatePool[]>([])
+  const { pools, allPools, has, toggle } = useCandidatePools(c)
+  const [open,   setOpen]   = useState(false)
+  const [search, setSearch] = useState('')
   const ref = useRef<HTMLDivElement>(null)
-
-  // Load the tenant's pool list (tolerant of both array and { data } envelopes).
-  useEffect(() => {
-    api.get('/pools').then(r => {
-      const d = r.data; setAllPools(Array.isArray(d) ? d : (d?.data ?? []))
-    }).catch(() => {})
-  }, [])
 
   // Close the add-dropdown on an outside click.
   useEffect(() => {
@@ -35,20 +24,6 @@ export default function PoolsSection({ c }: { c: Candidate }) {
     const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
     document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h)
   }, [open])
-
-  const has = (id: Id | undefined) => pools.some(p => (p.id ?? p.name) === id)
-
-  // Optimistic add/remove of a pool membership, persisted to the pivot route.
-  const toggle = (pool: CandidatePool) => {
-    const id = pool.id ?? pool.name
-    if (has(id)) {
-      setPools(prev => prev.filter(p => (p.id ?? p.name) !== id))
-      api.delete(`/candidates/${c.id}/pools/${id}`).catch(() => notifyError(t('common:actionFailed')))
-    } else {
-      setPools(prev => [...prev, pool])
-      api.post(`/candidates/${c.id}/pools`, { pool_id: id }).catch(() => notifyError(t('common:actionFailed')))
-    }
-  }
 
   return (
     <div>

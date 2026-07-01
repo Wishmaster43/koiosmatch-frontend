@@ -1,56 +1,23 @@
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { History, AlertTriangle } from 'lucide-react'
-import api from '@/lib/api'
 import Avatar from '@/components/ui/Avatar'
 import SectionCard from '@/components/ui/SectionCard'
 import { useDateFormat } from '@/lib/datetime'
-import { isAbortError } from '@/lib/mocks'
 import { initialsOf } from '@/lib/initials'
+import { useCandidateActivity } from '../hooks/useCandidateDrawerData'
 import type { Candidate } from '@/types/candidate'
-import type { Id } from '@/types/common'
-
-interface ActivityEvent {
-  id?: Id
-  causer_name?: string
-  created_at?: string
-  description?: string
-  log_name?: string
-  // C-16: audit entries now carry the subject + originating IP.
-  subject_type?: string
-  subject_id?: Id
-  ip?: string
-}
 
 /**
- * ChangelogTab — the candidate's audit trail (who changed what, when). Reads
- * `GET /candidates/{id}/activity` (C-16). Handles the four UI states explicitly;
- * shows a calm empty state until the backend endpoint is live (404 → empty).
- * `bare` drops the SectionCard wrapper so a popover can supply its own chrome.
+ * ChangelogTab — the candidate's audit trail (who changed what, when). Presentational:
+ * the fetch (GET /candidates/{id}/activity, C-16) lives in useCandidateActivity (§3).
+ * Handles the four UI states explicitly; shows a calm empty state until the backend
+ * endpoint is live (404 → empty). `bare` drops the SectionCard so a popover can
+ * supply its own chrome.
  */
 export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?: boolean }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
-  const [items,   setItems]   = useState<ActivityEvent[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(false)
-
-  // Fetch the activity log for this candidate; a missing endpoint = empty, not an error.
-  useEffect(() => {
-    if (!c?.id) { setLoading(false); return }
-    const ctrl = new AbortController()
-    setLoading(true); setError(false)
-    api.get(`/candidates/${c.id}/activity`, { signal: ctrl.signal })
-      .then(res => setItems(res.data?.data ?? res.data ?? []))
-      .catch(err => {
-        if (isAbortError(err)) return
-        // 404 = endpoint not built yet → treat as empty (calm), not a hard error.
-        if (err?.response?.status && err.response.status !== 404) setError(true)
-        setItems([])
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [c?.id])
+  const { items, loading, error } = useCandidateActivity(c?.id)
 
   const body = (
     <>

@@ -2,14 +2,13 @@ import { useState, useEffect } from 'react'
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, UserPlus } from 'lucide-react'
-import api from '@/lib/api'
 import { Field as FieldJs, TextField as TextFieldJs, SelectField as SelectFieldJs } from '@/components/forms/fields'
 import { NL_PROVINCES } from './drawer/constants'
 import { useLookups } from '@/context/LookupsContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
-import { mapCandidate } from './data/mapCandidate'
+import { useCreateCandidate } from './hooks/useCandidateMutations'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -51,6 +50,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { user: me } = useAuth() as unknown as { user: { id?: Id } | null }
   const settings = useAllSettings()
+  const { createCandidate, saving } = useCreateCandidate()
 
   // On create you pick the PHASE (Lead/Kandidaat); deployability defaults to available.
   const entryStatuses = phases.filter(s => CREATE_STATUSES.includes(s.value))
@@ -59,7 +59,6 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
 
   const [status,    setStatus]    = useState(defaultStatus)
   const [errors,    setErrors]    = useState<Record<string, boolean>>({})
-  const [saving,    setSaving]    = useState(false)
   const [submitErr, setSubmitErr] = useState<string | null>(null)
   const [form, setForm] = useState<FormState>({
     firstName: '', middleName: '', lastName: '',
@@ -97,7 +96,6 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     requiredForm.forEach(k => { if (!String(form[k] ?? '').trim()) e[k] = true })
     if (Object.keys(e).length) { setErrors(e); return }
 
-    setSaving(true)
     setSubmitErr(null)
     try {
       const body = {
@@ -120,8 +118,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         status:              'available',
         candidate_types:     [],
       }
-      const r = await api.post('/candidates', body)
-      onCreated?.(mapCandidate(r.data?.data ?? r.data))
+      // Create via the hook; it rethrows so the 422 handling below still runs.
+      onCreated?.(await createCandidate(body))
       onClose()
     } catch (err) {
       // Show field-level errors from 422 validation responses.
@@ -136,8 +134,6 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         const msg = ex?.response?.data?.message ?? ex?.message ?? t('common:errorGeneric', 'Er is iets misgegaan')
         setSubmitErr(msg)
       }
-    } finally {
-      setSaving(false)
     }
   }
 

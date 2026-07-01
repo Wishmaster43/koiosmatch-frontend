@@ -1,9 +1,8 @@
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, X } from 'lucide-react'
-import api from '@/lib/api'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
+import { useTenantPools } from './hooks/useCandidatePools'
 import type { CandidatePool } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -45,12 +44,8 @@ export default function CandidatesBulkBar({
   users = [], funnelTypes = [], candidateTypes = [], phases = [], statuses = [], selectedTags = [],
 }: CandidatesBulkBarProps) {
   const { t } = useTranslation('candidates')
-  const [pools, setPools] = useState<CandidatePool[]>([])
-
-  // Load the talent pools once for the add/remove option lists.
-  useEffect(() => {
-    api.get('/pools').then(r => { const d = r.data; setPools(Array.isArray(d) ? d : (d?.data ?? [])) }).catch(() => {})
-  }, [])
+  // Talent pools for the add/remove option lists (fetch lives in the hook, §3).
+  const pools = useTenantPools()
 
   // Build the menu option lists from props/state.
   const poolOptions = pools.map(p => ({ value: p.id ?? p.name ?? '', label: p.name, color: p.color || '#6B7280' }))

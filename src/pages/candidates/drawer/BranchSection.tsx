@@ -1,28 +1,19 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
 import SearchSelect from '@/components/ui/SearchSelect'
+import { useBranchCustomerOptions } from '../hooks/useCandidateDrawerData'
 import { sectionBlock } from './constants'
 import type { Candidate } from '@/types/candidate'
-import type { Id } from '@/types/common'
-
-interface CustomerLite { name?: string; company_name?: string; id?: Id }
 
 /** Branch section — links the candidate to one or more customer branches. */
 export default function BranchSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
   const [branches, setBranches] = useState<string[]>(c.branches ?? [])
-  const [allLocations, setAllLocations] = useState<CustomerLite[]>([])
-
-  useEffect(() => {
-    api.get('/customers').then(r => {
-      const d = r.data; setAllLocations(Array.isArray(d) ? d : (d?.data ?? []))
-    }).catch(() => {})
-  }, [])
+  // Branch options (GET /customers) come from the drawer-data hook (§3).
+  const options = useBranchCustomerOptions()
 
   // Toggle a branch name in the candidate's branch list.
   const toggle = (name: string) => setBranches(prev => prev.includes(name) ? prev.filter(x => x !== name) : [...prev, name])
-  const options = allLocations.map(l => { const name = String(l.name ?? l.company_name ?? l.id ?? ''); return { value: name, label: name } })
 
   return (
     <div>
