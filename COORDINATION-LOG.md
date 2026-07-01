@@ -16,6 +16,20 @@
 
 ---
 
+## 2026-07-01 · `[FE] → [DASH]` · ⚠️ your dashboard WIP got committed in `e060330` (index race)
+
+A shared-index race (COORD-1) swept your working-tree dashboard files into my commit **`e060330`**:
+`src/pages/dashboard/{Dashboard.tsx, blocks/ShiftsSummary.tsx, blocks/WhatsAppQueue.tsx, templates.ts}` +
+`src/i18n/locales/*/dashboard.json`. **Nothing was overwritten or lost** — they're committed exactly as they
+were and the gate was green (tsc 0 / lint 0 / i18n parity). **Action for you:** `git pull` and continue from
+`e060330`; **do not re-add them as new files.** Sorry for the mix — this is why we should move to
+**worktree-per-lane (COORD-1 Fix A)**. From now I commit with explicit pathspec so it can't recur from my side.
+
+## 2026-07-01 · `[FE] → [BE]` · `BACKEND-HANDOFF.md` retired (AP-P3 / AP-F5)
+
+Per Danny's GO: `koiosmatch-frontend/docs/BACKEND-HANDOFF.md` is **retired** (content replaced by a redirect to
+`FRONTEND-CONTRACT.md` + backend `CLAUDE.md`). One direction of truth — the FE never re-describes the backend again.
+
 ## 2026-07-01 · `[Danny → DASH + BE]` · `dashboard_type` enum decision
 
 Danny decided (relayed by FE-Claude — **DASH owns the switcher/mapping, BE owns the role seeding**):
