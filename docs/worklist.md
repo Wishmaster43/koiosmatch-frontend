@@ -275,10 +275,13 @@ LEVER: consistente chips/knoppen/typografie + lijst toegevoegde i18n-keys + geë
       het match-**profiel** leeft op de vacature (K-26) → verwijs ernaar i.p.v. dupliceren).
 - [ ] **Optioneel `icon`/`emoji`-veld op de lookup-base** (tenant-configureerbaar, naast de bestaande `color`),
       overal getoond **naast** het label — nooit icon-only (a11y). Eén mechanisme, geen per-lookup-hack. Waar het loont:
-      - **last-contact-types** ✅ sterk — kanaal-iconen zijn ondubbelzinnig + nuttig (mail/telefoon/WhatsApp).
+      - **last-contact-types** ✅ · **task-types** ✅ — kanaal-/type-iconen zijn ondubbelzinnig + nuttig
+        (mail/telefoon/WhatsApp; bellen/afspraak/follow-up).
       - **languages** — emoji-vlag, maar **taal≠land** → de tenant kiest de emoji (lost "welke vlag voor Engels/Arabisch?" op).
       - **genders** ⚠️ terughoudend — genders sturen al de **avatar-kleur**; gender-symbolen zijn gevoelig/reductief.
         Advies: kleur houden, hooguit optioneel/neutraal — **Danny beslist** of we dit willen.
+      - **overige type/status-lookups** (note-types, statuses, funnel, opportunity-service-types, …): het
+        mechanisme dekt ze allemaal — de tenant zet per waarde een icoon aan wáár het helpt. **Niet los tracken.**
       BE: `icon`/`emoji`-kolom op de lookup-base + seed (unicode-emoji óf gecureerde lucide-set; geen image-assets).
 
 ---
