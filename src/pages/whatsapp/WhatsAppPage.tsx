@@ -15,51 +15,16 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, Users, CheckSquare, AlertTriangle, RefreshCw } from 'lucide-react'
-import api from '@/lib/api'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { useWhatsAppData } from './hooks/useWhatsAppData'
 import { PAD, KpiCard, MessageFeed, EscalationList, ActivityChart } from './components'
-import type { WaStats, WaMessage, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
 
 // ─── main page ───────────────────────────────────────────────────────────────
 
 export default function WhatsAppPage() {
   const { t } = useTranslation('whatsapp')
-  const [stats,       setStats]       = useState<WaStats | null>(null)
-  const [messages,    setMessages]    = useState<WaMessage[]>([])
-  const [escalations, setEscalations] = useState<WaEscalation[]>([])
-  const [activity,    setActivity]    = useState<WaActivityDatum[]>([])
-  const [loading,     setLoading]     = useState({ stats: true, messages: true, escalations: true, activity: true })
-  const [lastRefresh, setLastRefresh] = useState(new Date())
-  const [noConnection, setNoConnection] = useState(false)
-
-  const load = () => {
-    setLoading({ stats: true, messages: true, escalations: true, activity: true })
-    setNoConnection(false)
-
-    api.get('/whatsapp/stats')
-      .then(r => setStats(r.data))
-      .catch(err => { if (err.response?.status === 404) setNoConnection(true) })
-      .finally(() => setLoading(p => ({ ...p, stats: false })))
-
-    api.get('/whatsapp/messages', { params: { per_page: 50 } })
-      .then(r => setMessages(r.data?.data ?? r.data ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(p => ({ ...p, messages: false })))
-
-    api.get('/whatsapp/escalations')
-      .then(r => setEscalations(r.data?.data ?? r.data ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(p => ({ ...p, escalations: false })))
-
-    api.get('/whatsapp/activity')
-      .then(r => setActivity(r.data?.data ?? r.data ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(p => ({ ...p, activity: false })))
-
-    setLastRefresh(new Date())
-  }
-
-  useEffect(() => { load() }, [])
+  // Data layer (4 parallel loads + refresh) lives in the hook; the page stays presentational.
+  const { stats, messages, escalations, activity, loading, lastRefresh, noConnection, reload } = useWhatsAppData()
 
   // Right-panel filters for the message feed (status + direction). Registering them
   // shows the shared topbar filter button — consistent with the other pages.
@@ -134,7 +99,7 @@ export default function WhatsAppPage() {
             {t('updatedAt', { time: `${PAD(lastRefresh.getHours())}:${PAD(lastRefresh.getMinutes())}` })}
           </p>
         </div>
-        <button onClick={load}
+        <button onClick={reload}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px',
                    fontSize: 12, fontWeight: 500, borderRadius: 8,
                    border: '1px solid var(--border)', background: 'var(--surface)',
