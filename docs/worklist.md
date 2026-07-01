@@ -287,7 +287,19 @@ Shapes bevestigen + `no_followup_planned` + `active_conversation` + outreach-sha
 Subject-velden mee in `/activity-log` + `GET /candidates/{id}/activity`.
 
 ### C-18 · Taken — tabellen + endpoints + seeder
-Volledige taken-feature (kanban, lookups, comments, seeder).
+Volledige taken-feature (kanban, lookups, comments, seeder). **Core = klaar** (index/stats/
+detail/update/links/comments/activity/bulk-archive live; e2e getest 2026-07-01).
+
+**Resterend (voedt de blueprint-gelijktrekking van B-20):**
+- ☐ **`GET /contacts` (platte tenant-lijst) — PRIORITEIT.** `CustomerContact` + genest
+  `GET /customers/{id}/contacts` bestaan al, maar geen tenant-brede platte lijst → de Taken-modal
+  contactpersoon-picker + `contact`-koppeling krijgen 404. Voeg `GET /contacts` toe (gepagineerd,
+  `{id, name, customer_id?, customer_name?}`, permissie `customers.view`).
+- ☐ *(optioneel)* **Tags op taken** — `tags` (JSON-array of `task_tags`) in de bestaande
+  `create_tasks`-migratie, `tags[]` in store/update, terug in `TaskListResource` + detail. FE voegt
+  dan een header-tag-editor toe (zoals kandidaat).
+- ☐ *(optioneel)* **Tabel-kleurtoggles** — generieke `Setting`-keys `task_table_color_status|priority|type`
+  (mirror `candidate_table_color_*`) door de settings-write-validatie laten + defaults seeden. Rest = FE.
 
 ### C-19 · Matches — tabel + endpoint + seeder
 `/matches` als eigen tabel of view over applications? Bevestigen.
@@ -306,6 +318,33 @@ API levert alle velden uit `mapCandidate.js`. Seeder vult ze realistisch.
 
 ### C-26 · Vacatures — tabel + endpoints + bulk + seeder
 30 dummy-vacatures, lookups, bulk, koppeling sollicitaties.
+
+### ☐ C-26.1 · Vacature-detail gelijktrekken met de kandidaat  *(NIEUW — FE draait al op deze shape)*
+De FE-`DetailsTab` is herbouwd naar het kandidaat-model; de mapper is leidend. Voeg op **`vacancies`**
+(vouw in `create_vacancies`) toe + geef terug in `GET /vacancies/{id}` en accepteer in `PATCH`:
+- **`contract_types` (json/array)** — dezelfde lookup als de kandidaat (`candidate_types`, multi). *(Soort dienstverband
+  vervalt; de FE-settings-subtab `/vacancy-employment-types` mag weg.)*
+- **Gestructureerd adres:** `street, house_number, house_number_suffix, postcode, city, province` (+ optioneel
+  afgeleide `location`-string). *(Zoals kandidaat.)*
+- **Ervaring van–tot:** `experience_min_years`, `experience_max_years` (int, null).
+- **`category`** = **functie** uit de bestaande `/functions`-lookup (settings-beheerd); **branche** = `industry`
+  uit `/industries` (voorkeursbranche). **`description`** = HTML/rich text (zoals kandidaat-`summary`; sla veilig op).
+- Bevestig of lookup-velden als **slug** (`seniority`,`education`) of als **`*_id`** verwacht worden — de FE stuurt
+  nu de slug/waarde; graag matchen of laten weten.
+
+### ☐ C-26.2 · Vacature — Extra velden · Documenten · Notities · Matchprofiel  *(NIEUW — blokkeert FE-tabs)*
+- **Eigen velden (Extra-tab):** lever **getypeerde definities** zoals `/candidate-custom-fields`
+  (`key,label,type,options?`) via `/vacancy-custom-fields`, + per-vacature `custom_fields`-map in detail/PATCH.
+  FE toont dan een **Extra-tab alleen als er definities zijn** (mirror kandidaat).
+- **Documenten:** `GET/POST /vacancies/{id}/documents` (multipart) + `DELETE …/{docId}` + `document_types`
+  (zoals kandidaat C-3). Detail geeft `documents[]` met download-URL.
+- **Notities:** `GET/POST /vacancies/{id}/notes` (+ `/note-types`), detail geeft `notes[]`; zoals kandidaat.
+- **Sollicitatie-instellingen — tenant-default:** een **settings-endpoint** voor de standaard
+  `application_settings` (`cv/cover_letter/photo/remarks/interview_consent → required|optional|hidden`); nieuwe
+  vacature erft die default, per-vacature override op de vacature (bestaat al in PATCH).
+- **Matchprofiel (i.p.v. losse gewichten):** entiteit **`match_profiles`** (tenant-scoped: `id,name,weights{6 dims}`,
+  `is_default`). Endpoints CRUD + koppel per vacature (`vacancy.match_profile_id`) met **override** (`match_weights`
+  blijft de per-vacature afwijking). FE-Matching-tab kiest profiel of stelt default in en past nog per vacature aan.
 
 ### C-27 · Klanten — endpoints + sub-entiteiten + seeder
 Volledige CRUD + locaties/afdelingen/contactpersonen + 15–20 klanten geseed.
@@ -463,6 +502,36 @@ Steps opslaan met `position` + `connections[]` (target + filters). Stabiele step
 
 ---
 
+### C-41 · Opportunities (Kansen) — blueprint-pariteit: stage-id, activity, bulk, tags, notities, locatie
+De Kansen-tabel + drawer zijn opgetrokken naar de candidate-blueprint (owner-avatar+naam, sticky/sort, bewerkbare
+Details, inline titel-edit, Gewonnen/Verloren-quickactions, Changelog-tab, rechter-filterpaneel). Deze delen hangen
+op de backend:
+
+1. **Stage-id + vlaggen op de rij (klein, hoge prio).** `OpportunityResource.stage` levert nu enkel
+   `{value,label,color}`. Voeg **`id`** + **`is_won`/`is_lost`** toe (of top-level `opportunity_stage_id`), zodat de
+   FE-picker op id kan keyen en Gewonnen/Verloren robuust is (nu matcht de FE op slug). Expose ook **`location`**
+   (`{id,name}`) op de resource — kolom `location_id` bestaat al.
+2. **Activity read-endpoint.** `GET /opportunities/{id}/activity` (zoals C-16 voor kandidaten). De controller logt
+   al `activity('opportunities')`; alleen de read ontbreekt. Shape `[{ id, causer_name, description, log_name,
+   created_at }]`. De FE-Changelog-tab is 404-tolerant en licht op zodra dit er is.
+3. **Bulk-endpoints** (contract = C-15/C-26, respond met `updated`/`skipped`/`archived`):
+   `POST /opportunities/bulk/{stage,owner,client,archive}` (+ `tags/remove` als tags landen). Body
+   `{ opportunity_ids:[…], stage|owner_id|customer_id }`. Autorisatie server-side (delete-perm voor archive).
+   Zodra dit er is bouwt FE de `OpportunitiesBulkBar` + rij-selectie (mirror `VacanciesBulkBar`).
+4. **Tags.** `tags` (json/relatie) op `opportunities` + op de resource → FE zet de tag-editor in de drawer-header
+   aan (EntityHeader ondersteunt 'm al).
+5. **Notities.** `GET/POST /opportunities/{id}/notes` (+ `note_types`-lookup), sub-entiteit-contract zoals
+   kandidaat/klant → FE hangt de gedeelde `NotesTab` in de drawer.
+6. **Seeder-verrijking.** Zet op de 12 geseede kansen wat activity/notes/tags + een `location_id` zodat de nieuwe
+   tab/kolom meteen data tonen.
+
+**FE-follow-up (geen backend):** `OpportunitiesInsightsRow` overzetten op `GET /opportunities/stats` (bestaat al)
+i.p.v. pagina-lokaal afgeleide KPI's — nodig zodra paginatie/scale telt.
+
+Hangt samen met **C-28** (opportunities-basis), **C-15/C-26** (bulk-contract), **C-16** (activity-read).
+
+---
+
 ## E. TypeScript-migratie (FE — ✅ klaar in eigen domein)
 
 > Hele repo → TS, **groen per golf** (`typecheck`+`lint`+`build`+`test`), incrementeel op main.
@@ -544,7 +613,7 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 | **A11Y-1** | P2 | M | FE | ~28 modals/drawers zonder focus-trap/`role=dialog`/`aria-modal`+restore (§6) — alleen `ChangelogPopover` heeft 't. Shared `Drawer`/`Modal`-shell met focus-trap. |
 | **A11Y-2** | ✅ | — | FE | **OPGELOST.** Alle 10 resterende icon-only buttons kregen `aria-label` via `t('common:*')` (close/send/add/save/expand-collapse); `EntityHeader` kreeg `useTranslation` + hardcoded `aria-label="Close"` → `t('close')`; `common:` send/expand/collapse in 5 locales. Detector-restanten = buttons mét zichtbare tekst (false positives). |
 | **ERR-1** | ✅ | — | FE | **OPGELOST.** Alle stille **mutatie**-catches → `notifyError(t('common:actionFailed'))` (customers/tasks/vacancies/opps/apps/ai + candidates: 10× in BackgroundTab/DocumentsSection/PoolsSection/CandidatesPage/CandidateTab). GET-loads blijven bewust soft (degraderen netjes). Gedeelde toast-infra (`lib/notify` + `Toaster`). |
-| **F-8** | ◐ | L | FE | Inline `api.*`+`useEffect` → feature-hooks (§3). **Voortgang: 49 → 31** (alle lanes). ✅ A1: customer-drawer ×4 · Matches · Opportunities · **VacanciesPage** (`useVacancyRecord`) · A2: UsersPage (`b230e0f`) · **WhatsAppPage** (`b83a188`) · B: candidates ✅ · C: SM-reports (`01066b4`). **Rest: A1 8 · A2 8 · C ~14** — mutatie-containers = volledige container-hook, 1/turn. Teller onderhouden door Instance-X (deze regel) → andere lanes raken dit bestand niet. |
+| **F-8** | ◐ | L | FE | Inline `api.*`+`useEffect` → feature-hooks (§3). **Voortgang: 49 → ±46** (31 `.tsx` + 15 `.jsx`-settings). ✅ A1: customer-drawer ×4 · Matches · Opportunities · VacanciesPage · **CustomersPage** (data/record/bulk-hooks) · A2: UsersPage · WhatsAppPage · B: candidates ✅ · C: SM-reports. **Rest: A1 ~7 (applications/tasks — actief feature-gebouwd door andere instance) · A2 ~8 · C ~14 · B settings-`.jsx` 15.** `.tsx`-teller fluctueert: tasks/vacancies-buildout her-introduceert inline fetches. |
 | **DUP-2** | P3 | S | FE | herhaalde className-shells (drawer ×10 · table ×7 · card ×6 · error-banner ×6) → extract; error-banner + card gebruiken rauwe Tailwind-kleuren i.p.v. `--color-*`-tokens (§4). |
 | **F-12b** | P3 | L | FE | deep-relative-imports (`../../`, ~589 warnings) → `@/`-alias |
 | ~~USE_MOCKS~~ | ✅ | — | — | DATA-API-zorg opgelost: `USE_MOCKS` is DEV-gated (`import.meta.env.DEV`), shipt nooit in prod. |
