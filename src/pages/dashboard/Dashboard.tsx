@@ -156,18 +156,18 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // Status/stage labels + colours come from the tenant lookups (never raw slugs).
   const recentCandidates = useMemo(() => (dash?.recent?.candidates ?? []).map(c => {
     const m = statusMeta(c.status_value)
-    return { name: c.name, initials: initialsOf(c.name, '–'), role: c.role || '—',
+    return { id: c.id, name: c.name, initials: initialsOf(c.name, '–'), role: c.role || '—',
       status: m.label, statusColor: m.color, time: fmtWhen(c.last_activity_at) }
   }), [dash, statusMeta])
 
   const recentApplications = useMemo(() => (dash?.recent?.applications ?? []).map(a => {
     const m = funnelMeta(a.stage_value)
-    return { candidate: a.candidate_name || '—', vacancy: a.vacancy_title || '—',
+    return { id: a.id, candidate: a.candidate_name || '—', vacancy: a.vacancy_title || '—',
       status: m.label, statusColor: m.color, time: fmtWhen(a.created_at) }
   }), [dash, funnelMeta])
 
   const recentLeads = useMemo(() => (dash?.recent?.leads ?? []).map(l => ({
-    name: l.name, contact: l.contact_name || '—',
+    id: l.id, name: l.name, contact: l.contact_name || '—',
     status: humanize(l.status_value), statusColor: 'var(--color-secondary)', time: fmtWhen(l.created_at),
   })), [dash])
 
@@ -258,10 +258,10 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     { id: 'kpi.candidates', label: t('kpi.candidatesTotal'), value: candidateTotalLabel, sub: t('kpi.inAts'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: Users, onClick: () => onNavigate?.('candidates') },
     { id: 'kpi.stale', label: t('kpi.notContacted6m'), value: num(att.stale_6m), sub: t('kpi.attentionNeeded'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'stale6m' }) },
     { id: 'kpi.never', label: t('kpi.neverContacted'), value: num(att.never_contacted), sub: t('kpi.attentionNeeded'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'neverContacted' }) },
-    { id: 'kpi.tasks', label: t('kpi.openTasks'), value: num(att.tasks), sub: t('kpi.linkedToCandidates'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: CheckCircle, onClick: () => onNavigate?.('tasks', { status: 'open' }) },
+    { id: 'kpi.tasks', label: t('kpi.openTasks'), value: num(att.tasks), sub: t('kpi.linkedToCandidates'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: CheckCircle, onClick: () => onNavigate?.('tasks', { kpi: 'open' }) },
     ...(opp ? [
-      { id: 'kpi.opps', label: t('kpi.opportunities'), value: num(opp.total), sub: t('kpi.openOpportunities'), color: '#8B5CF6', bg: '#F3E8FF', Icon: Target, onClick: () => onNavigate?.('opportunities', { stage: 'open' }) },
-      { id: 'kpi.pipeline', label: t('kpi.pipelineValue'), value: opp.pipeline_value != null ? eur(opp.pipeline_value) : '—', sub: t('kpi.sumOpenOpps'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Euro, onClick: () => onNavigate?.('opportunities', { stage: 'open' }) },
+      { id: 'kpi.opps', label: t('kpi.opportunities'), value: num(opp.total), sub: t('kpi.openOpportunities'), color: '#8B5CF6', bg: '#F3E8FF', Icon: Target, onClick: () => onNavigate?.('opportunities') },
+      { id: 'kpi.pipeline', label: t('kpi.pipelineValue'), value: opp.pipeline_value != null ? eur(opp.pipeline_value) : '—', sub: t('kpi.sumOpenOpps'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Euro, onClick: () => onNavigate?.('opportunities') },
     ] : []),
   ].filter(k => vis(k.id))
 
@@ -320,7 +320,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
         {vis('list.candidates') && (
         <Block title={t('block.recentCandidates')} action={t('action.allCandidates')} onAction={() => onNavigate?.('candidates')}>
           {recentCandidates.map((c, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
+            <div key={i} {...interactive(c.id != null ? () => onNavigate?.('candidates', { open: c.id }) : undefined)}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', cursor: c.id != null ? 'pointer' : 'default',
               borderBottom: i < recentCandidates.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <Avatar initials={c.initials} size={28} />
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -337,7 +338,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
         {vis('list.applications') && (
         <Block title={t('block.recentApplications')} action={t('action.allApplications')} onAction={() => onNavigate?.('applications')}>
           {recentApplications.map((a, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
+            <div key={i} {...interactive(a.id != null ? () => onNavigate?.('applications', { open: a.id }) : undefined)}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', cursor: a.id != null ? 'pointer' : 'default',
               borderBottom: i < recentApplications.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{a.candidate}</div>
@@ -358,7 +360,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
         {vis('list.leads') && (
         <Block title={t('block.leadsPipeline')} action={t('action.allCustomers')} onAction={() => onNavigate?.('customers')}>
           {recentLeads.map((l, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
+            <div key={i} {...interactive(l.id != null ? () => onNavigate?.('customers', { open: l.id }) : undefined)}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', cursor: l.id != null ? 'pointer' : 'default',
               borderBottom: i < recentLeads.length - 1 ? '1px solid var(--border)' : 'none' }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{l.name}</div>

@@ -134,8 +134,8 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'applications':           return <ApplicationsPage intent={navIntent} />
     case 'vacancies':              return <VacanciesPage intent={navIntent} />
     case 'matches':                return <MatchesPage />
-    case 'opportunities':          return <OpportunitiesPage />
-    case 'tasks':                  return <TasksPage />
+    case 'opportunities':          return <OpportunitiesPage intent={navIntent} />
+    case 'tasks':                  return <TasksPage intent={navIntent} />
     case 'outreach':               return <OutreachPage />
     case 'customers':              return <CustomersPage intent={navIntent} />
     case 'planning':               return <PlanningPage />

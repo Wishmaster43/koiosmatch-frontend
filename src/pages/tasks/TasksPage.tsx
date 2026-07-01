@@ -41,15 +41,15 @@ const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p =>
 const todayStart = () => new Date(new Date().toDateString())
 
 // Page wrapper: scopes the task lookups (statuses/types/priorities) to this screen.
-export default function TasksPage() {
+export default function TasksPage({ intent }: { intent?: unknown } = {}) {
   return (
     <TaskLookupsProvider>
-      <TasksPageInner />
+      <TasksPageInner intent={intent} />
     </TaskLookupsProvider>
   )
 }
 
-function TasksPageInner() {
+function TasksPageInner({ intent }: { intent?: unknown }) {
   const auth = useAuth()
   const user = auth?.user as { default_per_page?: number } | null | undefined
   // Bulk archive (soft-delete, reversible → update-class gating; the backend re-checks).
@@ -81,6 +81,17 @@ function TasksPageInner() {
   const [selectedAssignee, setSelectedAssignee] = useState<string[]>([])
   // KPI tile filter (one at a time): null | 'open' | 'overdue' | 'dueToday' | 'completed'.
   const [kpiFilter, setKpiFilter] = useState<string | null>(null)
+
+  // Seed filters from a navigation intent (dashboard KPI/chart click).
+  useEffect(() => {
+    if (!intent) return
+    const i = intent as { kpi?: string; status?: string; priority?: string; type?: string; assignee?: string }
+    if (i.kpi)      setKpiFilter(i.kpi)
+    if (i.status)   setSelectedStatus([i.status])
+    if (i.priority) setSelectedPriority([i.priority])
+    if (i.type)     setSelectedType([i.type])
+    if (i.assignee) setSelectedAssignee([i.assignee])
+  }, [intent])
 
   // Board columns = the status lookup, normalised to { key, label, color }.
   const columns = useMemo<BoardColumn[]>(() => statuses.map(s => ({ key: s.value, label: s.label, color: s.color })), [statuses])

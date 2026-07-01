@@ -26,7 +26,7 @@ const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) =>
 
 // OpportunitiesPage — thin container: the data layer (load + mutations) lives in
 // useOpportunitiesData; the page only derives the filtered/paged view and renders.
-export default function OpportunitiesPage() {
+export default function OpportunitiesPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('opportunities')
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
   const tableScrollRef = useRef<HTMLDivElement>(null)
@@ -52,6 +52,17 @@ export default function OpportunitiesPage() {
   const [owner,    setOwner]    = useState<string[]>([]) // selected owner names (donut + panel)
   const [client,   setClient]   = useState<string[]>([]) // selected client names (panel)
   const [addOpen,  setAddOpen]  = useState(false)
+
+  // Seed the stage filter from a navigation intent (dashboard chart click carries the
+  // stage key; the page filters by label, so map key → label via the lookup).
+  useEffect(() => {
+    if (!intent) return
+    const i = intent as { stage?: string }
+    if (i.stage != null) {
+      const s = stages.find(x => String(x.value) === String(i.stage))
+      setStage([s ? s.label : String(i.stage)])
+    }
+  }, [intent, stages])
 
   // Reset to the first page + drop the selection whenever a filter changes.
   // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -25,6 +25,7 @@ import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
 import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
 import { useCandidateRecord } from './hooks/useCandidateMutations'
+import { useOpenFromIntent } from '@/context/NavigationContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -197,6 +198,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     fetchDetail(c.id).then(full => { if (full && selectedIdRef.current === c.id) setDetail(full) })
   }
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
+  // Open a candidate drawer when arriving via a dashboard/cross-entity link ({ open: id }).
+  useOpenFromIntent(intent, (id) => selectCandidate({ id } as Candidate))
 
   // A freshly created candidate: prepend to the list and open its drawer.
   const handleCreated = (c: Candidate) => {
