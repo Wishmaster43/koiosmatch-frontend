@@ -135,6 +135,7 @@ export interface Candidate {
   photo?: string
   summary: string
   tags: string[]
+  archived: boolean
   branches: CandidateBranch[]
   pools: CandidatePool[]
   koiosAdvice: CandidateAdvice | null
@@ -253,6 +254,8 @@ export interface ApiCandidate {
   summary?: string
   bio?: string
   tags?: string[]
+  deleted_at?: string | null
+  archived?: boolean
   branches?: Array<CandidateBranch | string>
   pools?: Array<CandidatePool | string>
   koios_advice?: Loose | null

@@ -7,12 +7,13 @@
  * live in `./workflow/` (ModulePicker · ConfigPanel · LogsPanel · fields · canvas
  * · ScheduleModal). This component stays declarative: hook in, JSX out.
  */
+import { useState } from 'react'
 import {
   ReactFlow, Background, Controls, MiniMap, ReactFlowProvider,
 } from '@xyflow/react'
 import type { NodeTypes, EdgeTypes } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
-import { X, Save, Play, Loader2, Plus, Zap, List, Clock } from 'lucide-react'
+import { X, Save, Play, Loader2, Plus, Zap, List, Clock, Workflow as WorkflowIcon, History } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { MODULE_META } from '@/modules/index'
 import { ScheduleModal, scheduleLabel } from './workflow/ScheduleModal'
@@ -21,6 +22,7 @@ import { EdgeFilterPanel, OutputPanel, NODE_TYPES, EDGE_TYPES } from './workflow
 import ModulePicker from './workflow/ModulePicker'
 import ConfigPanel, { MANAGE_TABS } from './workflow/ConfigPanel'
 import LogsPanel from './workflow/LogsPanel'
+import WorkflowHistoryView from './workflow/WorkflowHistoryView'
 import { useWorkflowEditor } from './workflow/useWorkflowEditor'
 import type { Workflow, EdgeFilters } from '@/types/workflow'
 
@@ -36,11 +38,15 @@ function EditorInner({ workflow, onClose, onSave }: {
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
     saved, running, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
-    firstNodeId, setStartNodeId,
+    firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
     insertModule, updateNodeConfig, deleteNode, handleSave, handleRun,
   } = useWorkflowEditor({ workflow, onSave })
   const { t, i18n } = useTranslation('workflows')
+  // Top-level editor view: the node diagram, or this workflow's run history.
+  const [view, setView] = useState<'diagram' | 'history'>('diagram')
+  // Output fields of upstream modules the selected node may reference as tokens.
+  const upstreamVariables = getUpstreamVariables(selectedNode?.id)
 
   return (
     <StartContext.Provider value={{ startNodeId: firstNodeId ?? null, setStartNodeId }}>
@@ -64,6 +70,29 @@ function EditorInner({ workflow, onClose, onSave }: {
               value={name} onChange={e => setName(e.target.value)}
               style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', border: 'none', background: 'transparent', outline: 'none', minWidth: 60, maxWidth: 240 }}
             />
+          </div>
+
+          <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
+
+          {/* View tabs — node diagram vs. run history (Make-style) */}
+          <div style={{ display: 'flex', gap: 2, background: 'var(--hover-bg)', borderRadius: 8, padding: 2, flexShrink: 0 }}>
+            {([
+              { id: 'diagram', label: t('editor.tabDiagram'), Icon: WorkflowIcon },
+              { id: 'history', label: t('editor.tabHistory'), Icon: History },
+            ] as const).map(v => (
+              <button key={v.id} onClick={() => setView(v.id)}
+                aria-pressed={view === v.id}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5, padding: '5px 11px', borderRadius: 6,
+                  fontSize: 12, fontWeight: 500, border: 'none', cursor: 'pointer',
+                  background: view === v.id ? 'var(--surface)' : 'transparent',
+                  color:      view === v.id ? 'var(--text)'    : 'var(--text-muted)',
+                  boxShadow:  view === v.id ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                }}>
+                <v.Icon size={13} />
+                {v.label}
+              </button>
+            ))}
           </div>
 
           <div style={{ width: 1, height: 20, background: 'var(--border)', flexShrink: 0 }} />
@@ -96,17 +125,19 @@ function EditorInner({ workflow, onClose, onSave }: {
 
           <div style={{ flex: 1 }} />
 
-          <button onClick={() => setShowLogs(s => !s)}
-            style={{
-              display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500,
-              background: showLogs ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
-              color:      showLogs ? 'var(--color-primary)'    : 'var(--text-muted)',
-              border:     `1px solid ${showLogs ? 'var(--color-primary)' : 'var(--border)'}`,
-              cursor: 'pointer',
-            }}>
-            <List size={13} />
-            {t('editor.logs')}
-          </button>
+          {view === 'diagram' && (
+            <button onClick={() => setShowLogs(s => !s)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 8, fontSize: 12, fontWeight: 500,
+                background: showLogs ? 'var(--color-primary-bg)' : 'var(--hover-bg)',
+                color:      showLogs ? 'var(--color-primary)'    : 'var(--text-muted)',
+                border:     `1px solid ${showLogs ? 'var(--color-primary)' : 'var(--border)'}`,
+                cursor: 'pointer',
+              }}>
+              <List size={13} />
+              {t('editor.logs')}
+            </button>
+          )}
 
           <button onClick={handleRun} disabled={running}
             style={{
@@ -153,6 +184,11 @@ function EditorInner({ workflow, onClose, onSave }: {
         </div>
 
         {/* ── Body ── */}
+        {view === 'history' ? (
+          <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            <WorkflowHistoryView workflowId={workflow.id} />
+          </div>
+        ) : (
         <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
 
           {/* Canvas */}
@@ -205,10 +241,12 @@ function EditorInner({ workflow, onClose, onSave }: {
             {showLogs
               ? <LogsPanel workflowId={workflow.id} onClose={() => setShowLogs(false)} />
               : <ConfigPanel node={selectedNode} onUpdate={updateNodeConfig} onDelete={deleteNode}
+                  variables={upstreamVariables}
                   onTabChange={tab => setWidePanelActive(MANAGE_TABS.includes(tab))} />
             }
           </div>
         </div>
+        )}
 
         {/* Schedule modal */}
         {showSchedule && (

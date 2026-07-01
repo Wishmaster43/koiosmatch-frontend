@@ -280,11 +280,24 @@ export default function ApplicationsPage() {
     { key: 'owner',  title: t('insights.owner'),  data: ownerData,  onPick: pickOne(setSelectedOwner),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
     { key: 'source', title: t('insights.source'), data: sourceData, onPick: pickOne(setSelectedSource), active: selectedSource.length > 0, onClear: () => setSelectedSource([]) },
   ]
+  // Average match score across non-rejected applications (KPI, "—" when none scored).
+  const scored = applications.filter(a => a.bucket !== 'rejected' && typeof a.score === 'number')
+  const avgScore = scored.length ? Math.round(scored.reduce((s, a) => s + (a.score as number), 0) / scored.length) + '%' : '—'
+  // Active applications that still carry an AI task (attention KPI).
+  const aiTaskCount = applications.filter(a => a.task && a.bucket === 'active').length
+
+  // KPI cards — mirror the candidate strip: count + sub-line, click-to-filter where it maps.
   const insightKpis: KpiSpec[] = [
-    { key: 'totalActive', label: t('kpi.totalActive'), value: bucketCount('active') + bucketCount('matched'), color: 'var(--color-primary)' },
-    { key: 'matched',     label: t('kpi.matched'),     value: bucketCount('matched'),  color: 'var(--color-success)' },
-    { key: 'rejected',    label: t('kpi.rejected'),    value: bucketCount('rejected'), color: 'var(--color-danger)' },
-    { key: 'new',         label: t('kpi.new'),         value: applications.filter(a => a.isNew && a.bucket === 'active').length, color: 'var(--color-warning)' },
+    { key: 'totalActive', label: t('kpi.totalActive'), value: bucketCount('active') + bucketCount('matched'),
+      sub: t('kpi.totalActiveSub'), color: 'var(--color-primary)' },
+    { key: 'new', label: t('kpi.new'), value: applications.filter(a => a.isNew && a.bucket === 'active').length,
+      sub: t('kpi.newSub'), color: 'var(--color-warning)' },
+    { key: 'matched', label: t('kpi.matched'), value: bucketCount('matched'), sub: t('kpi.matchedSub'),
+      color: 'var(--color-success)', onClick: () => { setShowArchived(false); setBucket('matched') }, active: !showArchived && bucket === 'matched' },
+    { key: 'rejected', label: t('kpi.rejected'), value: bucketCount('rejected'), sub: t('kpi.rejectedSub'),
+      color: 'var(--color-danger)', onClick: () => { setShowArchived(false); setBucket('rejected') }, active: !showArchived && bucket === 'rejected' },
+    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore, sub: t('kpi.avgScoreSub'), color: '#8B5CF6' },
+    { key: 'aiTasks', label: t('kpi.aiTasks'), value: aiTaskCount, sub: t('kpi.aiTasksSub'), color: '#0D9488' },
   ]
 
   return (

@@ -1,4 +1,14 @@
 {
+  "tabs": { "overview": "Aperçu", "messages": "Messages", "queue": "File d'attente", "escalations": "Escalades" },
+  "queue": {
+    "loading": "Chargement de la file…",
+    "error": "Impossible de charger la file.",
+    "emptyTitle": "La file est vide",
+    "emptyDesc": "Aucun message WhatsApp personnel dans la file.",
+    "col": { "candidate": "Candidat", "type": "Type", "priority": "Priorité", "status": "Statut", "scheduled": "Planifié", "attempts": "Tentative", "actions": "Actions" },
+    "status": { "queued": "En file", "sending": "Envoi", "sent": "Envoyé", "failed": "Échoué", "skipped": "Ignoré", "paused": "En pause" },
+    "action": { "sendNow": "Envoyer maintenant", "pause": "Mettre en pause", "retry": "Réessayer", "cancel": "Supprimer" }
+  },
   "title": "WhatsApp",
   "updatedAt": "Mis à jour à {{time}}",
   "refresh": "Actualiser",

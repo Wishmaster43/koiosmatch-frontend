@@ -321,6 +321,10 @@
     "search": "Rechercher par workflow, déclencheur, erreur…",
     "loading": "Chargement des exécutions…",
     "empty": "Aucune exécution trouvée",
+    "editorTitle": "Exécutions",
+    "editorEmpty": "Aucune exécution pour ce workflow",
+    "editorCount_one": "{{count}} exécution",
+    "editorCount_other": "{{count}} exécutions",
     "cols": {
       "started": "Démarré",
       "workflow": "Workflow",
@@ -350,6 +354,9 @@
       "createdBy": "Créé par",
       "stepResults": "Résultats des étapes",
       "step": "Étape {{n}}",
+      "input": "Entrée",
+      "output": "Sortie",
+      "noData": "Aucune donnée",
       "error": "Message d'erreur",
       "workflowFallback": "Workflow #{{id}}"
     }

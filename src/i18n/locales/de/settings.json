@@ -906,7 +906,9 @@
       "sync": "Synchronisieren",
       "refresh": "Aktualisieren",
       "export": "Exportieren"
-    }
+    },
+    "color": "Farbe",
+    "icon": "Symbol"
   },
   "audit": {
     "title": "Audit-Log",
@@ -1075,8 +1077,18 @@
     "loadError": "Daten konnten nicht geladen werden.",
     "tab": {
       "limits": "Limits",
+      "queue": "Warteschlange",
       "costs": "Kosten",
       "retention": "Aufbewahrung"
+    },
+    "queue": {
+      "subtitle": "Warteschlange für persönliche WhatsApp-Nachrichten: Senderate pro Nummer und die Priorität pro Nachrichtentyp.",
+      "rateLabel": "Senderate pro Nummer",
+      "rateHelp": "Schützt die Nummer vor Sperrung. Die Warteschlange sendet nicht schneller als dies.",
+      "rateUnit": "Nachrichten/Std.",
+      "typesTitle": "Nachrichtentypen",
+      "typesSubtitle": "Die Reihenfolge bestimmt die Priorität: Oben wird zuerst gesendet (z. B. Bewerbung vor Geburtstag).",
+      "typesAdd": "Typ hinzufügen"
     },
     "limits": {
       "subtitle": "Legen Sie das Nachrichtenlimit fest. Die Obergrenze ist von uns festgelegt und kann nicht überschritten werden.",

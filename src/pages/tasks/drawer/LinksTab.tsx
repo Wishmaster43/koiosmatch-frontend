@@ -41,7 +41,7 @@ function AddLinkRow({ existing, onAdd, onClose }: { existing: TaskLink[]; onAdd:
     setRows([])
     const cfg = TYPE_ENDPOINTS[type]; if (!cfg) return
     let alive = true
-    api.get(cfg.url, { params: { search: query, per_page: 25 } })
+    api.get(cfg.url, { params: { q: query, search: query, per_page: 25 } })
       .then(r => { if (alive) setRows(unwrapList<LinkRow>(r).rows) }).catch(() => {})
     return () => { alive = false }
   }, [type, query])

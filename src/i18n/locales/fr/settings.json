@@ -906,7 +906,9 @@
       "sync": "Synchroniser",
       "refresh": "Actualiser",
       "export": "Exporter"
-    }
+    },
+    "color": "Couleur",
+    "icon": "Icône"
   },
   "audit": {
     "title": "Journal d'audit",
@@ -1075,8 +1077,18 @@
     "loadError": "Impossible de charger les données.",
     "tab": {
       "limits": "Limites",
+      "queue": "File d'attente",
       "costs": "Coûts",
       "retention": "Conservation"
+    },
+    "queue": {
+      "subtitle": "File d'attente pour les messages WhatsApp personnels : cadence d'envoi par numéro et priorité par type de message.",
+      "rateLabel": "Cadence d'envoi par numéro",
+      "rateHelp": "Protège le numéro contre le blocage. La file n'envoie pas plus vite que cela.",
+      "rateUnit": "messages/heure",
+      "typesTitle": "Types de message",
+      "typesSubtitle": "L'ordre définit la priorité : le haut est envoyé en premier (p. ex. une candidature avant un anniversaire).",
+      "typesAdd": "Ajouter un type"
     },
     "limits": {
       "subtitle": "Définissez la limite de messages. Le plafond est fixé par nos soins et ne peut être dépassé.",

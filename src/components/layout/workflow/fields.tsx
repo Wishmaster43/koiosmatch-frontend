@@ -7,17 +7,17 @@
  */
 import { Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import type { WorkflowField, EdgeFilters } from '@/types/workflow'
+import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
 import {
-  AgentSelectField, FaqSelectField, WebhookSelectField,
+  FaqSelectField, WebhookSelectField,
   FiltersField, ResponseStructureField, type OnChange,
 } from './fieldControls'
+import { TextFieldWithVars } from './VariablePicker'
 
-export function FieldInput({ field, value, onChange }: { field: WorkflowField; value?: unknown; onChange: OnChange }) {
+export function FieldInput({ field, value, onChange, variables }: {
+  field: WorkflowField; value?: unknown; onChange: OnChange; variables?: WorkflowVarGroup[]
+}) {
   const { t } = useTranslation('workflows')
-  if (field.type === 'agent_select') {
-    return <AgentSelectField value={value} onChange={onChange} fieldKey={field.key} />
-  }
   if (field.type === 'webhook_select') {
     return <WebhookSelectField value={value} onChange={onChange} fieldKey={field.key} />
   }
@@ -80,6 +80,10 @@ export function FieldInput({ field, value, onChange }: { field: WorkflowField; v
     )
   }
   if (field.type === 'textarea') {
+    // Attach the variable picker when upstream modules expose fields to reference.
+    if (variables?.length) {
+      return <TextFieldWithVars field={field} value={value} onChange={onChange} variables={variables} multiline />
+    }
     return (
       <textarea value={(value as string) || ''} placeholder={field.placeholder || ''} aria-label={field.label}
         onChange={e => onChange(field.key, e.target.value)}
@@ -114,6 +118,10 @@ export function FieldInput({ field, value, onChange }: { field: WorkflowField; v
         </button>
       </div>
     )
+  }
+  // Plain single-line text gets the variable picker too (numbers/dates never do).
+  if ((field.type === 'text' || field.type == null) && variables?.length) {
+    return <TextFieldWithVars field={field} value={value} onChange={onChange} variables={variables} />
   }
   return (
     <input type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}

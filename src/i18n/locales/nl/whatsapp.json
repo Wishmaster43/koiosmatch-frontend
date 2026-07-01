@@ -1,4 +1,14 @@
 {
+  "tabs": { "overview": "Overzicht", "messages": "Berichten", "queue": "Wachtrij", "escalations": "Escalaties" },
+  "queue": {
+    "loading": "Wachtrij laden…",
+    "error": "Wachtrij laden is mislukt.",
+    "emptyTitle": "Wachtrij is leeg",
+    "emptyDesc": "Er staan geen persoonlijke WhatsApp-berichten in de wachtrij.",
+    "col": { "candidate": "Kandidaat", "type": "Type", "priority": "Prioriteit", "status": "Status", "scheduled": "Gepland", "attempts": "Poging", "actions": "Acties" },
+    "status": { "queued": "In wachtrij", "sending": "Verzenden", "sent": "Verzonden", "failed": "Mislukt", "skipped": "Overgeslagen", "paused": "Gepauzeerd" },
+    "action": { "sendNow": "Nu versturen", "pause": "Pauzeren", "retry": "Opnieuw", "cancel": "Verwijderen" }
+  },
   "filters": {"status":"Status","direction":"Richting"},
   "msgStatus": {"read":"Gelezen","delivered":"Afgeleverd","sent":"Verzonden","failed":"Mislukt"},
   "msgDirection": {"inbound":"Inkomend","outbound":"Uitgaand"},

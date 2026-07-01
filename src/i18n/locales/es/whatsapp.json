@@ -1,4 +1,14 @@
 {
+  "tabs": { "overview": "Resumen", "messages": "Mensajes", "queue": "Cola", "escalations": "Escalaciones" },
+  "queue": {
+    "loading": "Cargando la cola…",
+    "error": "No se pudo cargar la cola.",
+    "emptyTitle": "La cola está vacía",
+    "emptyDesc": "No hay mensajes personales de WhatsApp en la cola.",
+    "col": { "candidate": "Candidato", "type": "Tipo", "priority": "Prioridad", "status": "Estado", "scheduled": "Programado", "attempts": "Intento", "actions": "Acciones" },
+    "status": { "queued": "En cola", "sending": "Enviando", "sent": "Enviado", "failed": "Fallido", "skipped": "Omitido", "paused": "Pausado" },
+    "action": { "sendNow": "Enviar ahora", "pause": "Pausar", "retry": "Reintentar", "cancel": "Eliminar" }
+  },
   "title": "WhatsApp",
   "updatedAt": "Actualizado a las {{time}}",
   "refresh": "Actualizar",

@@ -11,10 +11,12 @@ import { ShieldCheck, Shield, User, Loader2, ChevronDown } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import api from '@/lib/api'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
+import RoleChip from '@/components/ui/RoleChip'
 import type { ManagedUser } from '@/types/api'
 
-// A role reference as it can appear on a user: a bare name or a role object.
-export type RoleRef = string | { name?: string }
+// A role reference as it can appear on a user: a bare name or a role object
+// (the backend now carries colour + icon on the object).
+export type RoleRef = string | { name?: string; color?: string | null; icon?: string | null }
 // An available role from /roles (for the inline role-changer).
 export interface AvailableRole { id: string | number; name: string }
 // Loose translation function (the i18next TFunction is assignable to this).
@@ -32,25 +34,24 @@ const ROLE_META: Record<string, { color: string; bg: string; icon: LucideIcon }>
 }
 const roleLabel = (t: TFunc, name: string) => t(`users.roles.${name === 'default' ? 'user' : name}`, { defaultValue: name })
 
+// Icon-name fallback for the seeded/system roles (before a tenant sets an icon).
+const LEGACY_ICON: Record<string, string> = {
+  super_admin: 'shield-check', tenant_admin: 'shield', planner: 'user', default: 'user',
+}
+
 const hasRole = (u: ManagedUser | undefined, role: string) => (u?.roles ?? []).some(r => roleName(r) === role)
 export const isSuperAdminUser = (u: ManagedUser) => hasRole(u, 'super_admin')
 
+// RoleBadge — the role as a coloured chip with its icon. Colour/icon come from the
+// role object when present (backend); otherwise the seeded ROLE_META fallback.
 export function RoleBadge({ role }: { role: RoleRef }) {
   const { t } = useTranslation('users')
+  const obj = typeof role === 'string' ? {} : (role ?? {})
   const name = typeof role === 'string' ? role : role?.name ?? 'default'
   const meta = ROLE_META[name] ?? ROLE_META.default
-  const Icon = meta.icon
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 4,
-      background: meta.bg, color: meta.color,
-      border: `1px solid ${meta.color}22`,
-      borderRadius: 999, padding: '2px 9px', fontSize: 11, fontWeight: 500,
-    }}>
-      <Icon size={10} />
-      {roleLabel(t, name)}
-    </span>
-  )
+  const color = obj.color ?? meta.color
+  const icon = obj.icon ?? LEGACY_ICON[name] ?? 'user'
+  return <RoleChip name={roleLabel(t, name)} title={name} color={color} icon={icon} size={10} />
 }
 
 // Inline role-changer shown when clicking the role cell of a non-super-admin user.

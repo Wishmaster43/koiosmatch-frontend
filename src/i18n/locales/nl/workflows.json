@@ -1,9 +1,18 @@
 {
+  "vars": {
+    "title": "Variabele invoegen",
+    "search": "Zoek veld…",
+    "noUpstream": "Geen eerdere modules om naar te verwijzen",
+    "wholeOutput": "Volledige output",
+    "notRun": "niet gerund"
+  },
   "filters": {
     "status": "Status",
     "module": "Module"
   },
   "editor": {
+    "tabDiagram": "Diagram",
+    "tabHistory": "Geschiedenis",
     "logs": "Logs",
     "run": "Uitvoeren",
     "running": "Bezig...",
@@ -20,8 +29,6 @@
     "keyName": "Naam",
     "keyValue": "Waarde",
     "add": "Toevoegen",
-    "agentLoading": "Agents ophalen…",
-    "agentSelect": "Selecteer een agent…",
     "faqLoading": "FAQ's ophalen…",
     "faqEmpty": "Geen FAQ's gevonden",
     "faqFallback": "FAQ {{id}}",

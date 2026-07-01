@@ -9,7 +9,27 @@ import { useState, useCallback, useEffect } from 'react'
 import { addEdge, useNodesState, useEdgesState } from '@xyflow/react'
 import type { Connection } from '@xyflow/react'
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow, flowToSteps } from './serialization'
-import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, ScheduleConfig } from '@/types/workflow'
+import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, ScheduleConfig,
+  WorkflowVarField, WorkflowVarGroup } from '@/types/workflow'
+
+// Flatten a test-run sample into dot-paths (max depth 2, capped) for the var
+// picker. An array is represented by the shape of its first element.
+function flattenSample(obj: unknown, prefix = '', depth = 0): Array<{ path: string; sample: string }> {
+  if (obj == null) return []
+  if (typeof obj !== 'object') return prefix ? [{ path: prefix, sample: String(obj) }] : []
+  if (Array.isArray(obj)) return obj.length ? flattenSample(obj[0], prefix, depth) : []
+  const out: Array<{ path: string; sample: string }> = []
+  for (const [k, v] of Object.entries(obj as Record<string, unknown>)) {
+    const path = prefix ? `${prefix}.${k}` : k
+    if (v && typeof v === 'object' && !Array.isArray(v) && depth < 1) {
+      out.push(...flattenSample(v, path, depth + 1))
+    } else {
+      out.push({ path, sample: Array.isArray(v) ? `[${v.length}]` : v == null ? '' : String(v) })
+    }
+    if (out.length > 60) break
+  }
+  return out
+}
 
 export function useWorkflowEditor({ workflow, onSave }: {
   workflow: Workflow
@@ -256,6 +276,45 @@ export function useWorkflowEditor({ workflow, onSave }: {
     setRunning(false)
   }, [nodes, edges])
 
+  // Variables a node may reference: the output fields of every upstream module.
+  // Walks edges backward (BFS), orders ancestors left-to-right, and derives
+  // insertable {{node.field}} tokens from each one's last test-run output.
+  const getUpstreamVariables = useCallback((nodeId?: string | null): WorkflowVarGroup[] => {
+    if (!nodeId) return []
+    const ancestors: string[] = []
+    const seen = new Set<string>([nodeId])
+    let frontier = edges.filter(e => e.target === nodeId).map(e => e.source)
+    while (frontier.length) {
+      const next: string[] = []
+      for (const src of frontier) {
+        if (seen.has(src)) continue
+        seen.add(src)
+        ancestors.push(src)
+        edges.filter(e => e.target === src).forEach(e => next.push(e.source))
+      }
+      frontier = next
+    }
+    return ancestors
+      .map(id => nodes.find(n => n.id === id))
+      .filter((n): n is FlowNode => !!n)
+      .sort((a, b) => a.position.x - b.position.x)
+      .map(n => {
+        const hasRun = n.data.output != null
+        const flat = hasRun ? flattenSample(n.data.output) : []
+        // Real fields when the module ran; otherwise a single whole-output token.
+        const fields: WorkflowVarField[] = hasRun && flat.length
+          ? flat.map(f => ({ token: `{{${n.id}.${f.path}}}`, label: f.path, sample: f.sample }))
+          : [{ token: `{{${n.id}}}`, label: '' }]
+        return {
+          nodeId: n.id,
+          moduleType: n.data.type ?? '',
+          customName: (n.data.config as Record<string, unknown> | undefined)?.naam as string | undefined,
+          hasRun,
+          fields,
+        }
+      })
+  }, [nodes, edges])
+
   const selectedNode = nodes.find(n => n.id === selectedNodeId) ?? null
 
   // Manual start takes precedence; fall back to leftmost node without incoming edge
@@ -276,7 +335,7 @@ export function useWorkflowEditor({ workflow, onSave }: {
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
     saved, running, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
-    firstNodeId, setStartNodeId,
+    firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
     insertModule, updateNodeConfig, deleteNode, handleSave, handleRun,
   }

@@ -1,9 +1,18 @@
 {
+  "vars": {
+    "title": "Insert variable",
+    "search": "Search field…",
+    "noUpstream": "No earlier modules to reference",
+    "wholeOutput": "Whole output",
+    "notRun": "not run"
+  },
   "filters": {
     "status": "Status",
     "module": "Module"
   },
   "editor": {
+    "tabDiagram": "Diagram",
+    "tabHistory": "History",
     "logs": "Logs",
     "run": "Run",
     "running": "Running...",
@@ -20,8 +29,6 @@
     "keyName": "Name",
     "keyValue": "Value",
     "add": "Add",
-    "agentLoading": "Loading agents…",
-    "agentSelect": "Select an agent…",
     "faqLoading": "Loading FAQs…",
     "faqEmpty": "No FAQs found",
     "faqFallback": "FAQ {{id}}",

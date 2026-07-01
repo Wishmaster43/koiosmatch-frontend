@@ -6,6 +6,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import MessagingLimits from './MessagingLimits'
+import QueueSettings from './QueueSettings'
 import MessagingCosts from './MessagingCosts'
 import MessageRetention from './MessageRetention'
 
@@ -15,6 +16,7 @@ export default function MessagingSettings() {
 
   const tabs = [
     ['limits', t('messaging.tab.limits')],
+    ['queue', t('messaging.tab.queue')],
     ['costs', t('messaging.tab.costs')],
     ['retention', t('messaging.tab.retention')],
   ]
@@ -37,7 +39,7 @@ export default function MessagingSettings() {
         })}
       </div>
 
-      {tab === 'limits' ? <MessagingLimits /> : tab === 'costs' ? <MessagingCosts /> : <MessageRetention />}
+      {tab === 'limits' ? <MessagingLimits /> : tab === 'queue' ? <QueueSettings /> : tab === 'costs' ? <MessagingCosts /> : <MessageRetention />}
     </div>
   )
 }

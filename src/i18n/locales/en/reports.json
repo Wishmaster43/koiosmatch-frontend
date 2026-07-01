@@ -321,6 +321,10 @@
     "search": "Search by workflow, trigger, error…",
     "loading": "Loading runs…",
     "empty": "No runs found",
+    "editorTitle": "Runs",
+    "editorEmpty": "No runs yet for this workflow",
+    "editorCount_one": "{{count}} run",
+    "editorCount_other": "{{count}} runs",
     "cols": {
       "started": "Started",
       "workflow": "Workflow",
@@ -350,6 +354,9 @@
       "createdBy": "Created by",
       "stepResults": "Step results",
       "step": "Step {{n}}",
+      "input": "Input",
+      "output": "Output",
+      "noData": "No data",
       "error": "Error message",
       "workflowFallback": "Workflow #{{id}}"
     }

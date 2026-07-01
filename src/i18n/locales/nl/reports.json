@@ -321,6 +321,10 @@
     "search": "Zoek op workflow, trigger, fout…",
     "loading": "Uitvoeringen ophalen…",
     "empty": "Geen uitvoeringen gevonden",
+    "editorTitle": "Uitvoeringen",
+    "editorEmpty": "Nog geen uitvoeringen voor deze workflow",
+    "editorCount_one": "{{count}} uitvoering",
+    "editorCount_other": "{{count}} uitvoeringen",
     "cols": {
       "started": "Gestart",
       "workflow": "Workflow",
@@ -350,6 +354,9 @@
       "createdBy": "Aangemaakt door",
       "stepResults": "Stap-resultaten",
       "step": "Stap {{n}}",
+      "input": "Input",
+      "output": "Output",
+      "noData": "Geen data",
       "error": "Foutmelding",
       "workflowFallback": "Workflow #{{id}}"
     }

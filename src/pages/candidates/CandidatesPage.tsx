@@ -8,7 +8,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, X, Ban, Archive } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -60,6 +60,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const [selected,       setSelected]       = useState<Candidate | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [addOpen,        setAddOpen]        = useState(false)
+  // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
+  const [showArchived,   setShowArchived]   = useState(false)
   const [detail,         setDetail]         = useState<Candidate | null>(null)
   const selectedIdRef = useRef<Id | null>(null)
 
@@ -106,8 +108,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     if (selectedProvince.length) p.province       = selectedProvince
     if (selectedTitle.length)    p.function_title = selectedTitle
     if (selectedLocation.length) p.location_id    = selectedLocation
+    if (showArchived)            p.include_archived = 1
     return p
-  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation])
+  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, showArchived])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1. Visible rows change → drop the bulk selection.
@@ -141,6 +144,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const pickFunnel = pickOne(setSelectedFunnel)
   const pickOwner  = pickOne(setSelectedOwner)
   const toggleAttention = (key: string) => setAttentionFilter(prev => prev === key ? null : key)
+  // Blacklist quick-view: set the status filter to just 'blacklist' (or clear it).
+  const blacklistActive = selectedStatus.length === 1 && selectedStatus[0] === 'blacklist'
+  const toggleBlacklist = () => setSelectedStatus(blacklistActive ? [] : ['blacklist'])
 
   const catLifecycle      = t('filters.categories.lifecycle')
   const catQualifications = t('filters.categories.qualifications')
@@ -169,12 +175,14 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // The only client-side refinement left is the attention tile (no server filter yet).
   const filtered = useMemo(() => {
-    if (!attentionFilter) return candidates
+    // Archived view shows only archived rows; otherwise archived (soft-deleted) hidden.
+    const base = candidates.filter(c => (showArchived ? c.archived : !c.archived))
+    if (!attentionFilter) return base
     const pred = attentionFilter === 'stale6m' ? isStale
                : attentionFilter === 'neverContacted' ? isNeverContacted
                : isNoFollowup
-    return candidates.filter(pred)
-  }, [candidates, attentionFilter])
+    return base.filter(pred)
+  }, [candidates, attentionFilter, showArchived])
 
   // Full-record load + edit persistence (fetch/PATCH live in the hook, §3).
   const { fetchDetail, patchCandidate } = useCandidateRecord()
@@ -278,10 +286,33 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
                 canArchive={hasPermission('candidates.delete')}
                 users={users} funnelTypes={funnelTypes} candidateTypes={candidateTypes} phases={phases} statuses={statuses} selectedTags={selectedTags} />
             ) : (
-              <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
-                background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-                + {t('page.add')}
-              </button>
+              <>
+                {/* Add on the left (like Applications) */}
+                <button onClick={() => setAddOpen(true)} style={{ padding: '7px 14px', fontSize: 12, fontWeight: 500,
+                  background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+                  + {t('page.add')}
+                </button>
+                {/* Quick-view toggles on the right: blacklisted-only + archived-only */}
+                <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
+                  {/* Soft-chip toggles (§3A): tinted when active, never a solid fill. */}
+                  <button onClick={toggleBlacklist} title={t('page.blacklistView')}
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, fontWeight: blacklistActive ? 600 : 500,
+                      borderRadius: 8, cursor: 'pointer',
+                      background: blacklistActive ? 'color-mix(in srgb, var(--color-danger) 12%, transparent)' : 'transparent',
+                      color: blacklistActive ? 'var(--color-danger)' : 'var(--text-muted)',
+                      border: `1px solid ${blacklistActive ? 'color-mix(in srgb, var(--color-danger) 40%, transparent)' : 'var(--border)'}` }}>
+                    <Ban size={13} /> {t('page.blacklistView')}
+                  </button>
+                  <button onClick={() => setShowArchived(v => !v)} title={t('page.archivedView')}
+                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, fontWeight: showArchived ? 600 : 500,
+                      borderRadius: 8, cursor: 'pointer',
+                      background: showArchived ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent',
+                      color: showArchived ? 'var(--color-primary)' : 'var(--text-muted)',
+                      border: `1px solid ${showArchived ? 'color-mix(in srgb, var(--color-primary) 40%, transparent)' : 'var(--border)'}` }}>
+                    <Archive size={13} /> {t('page.archivedView')}
+                  </button>
+                </div>
+              </>
             )}
           </div>
 

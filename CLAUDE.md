@@ -136,6 +136,19 @@ surface, built from the same shared parts** — an `<Entity>Page` composing an
 `<Entity>InsightsRow`, `<Entity>Table`, `<Entity>BulkBar`, `Add<Entity>Modal` and an
 `<Entity>Drawer` (+ its `drawer/` tab components). Mirror it; never invent a new shape.
 
+> **The candidate page — its TABLE and its DRILL-DOWN — is the canonical base for how we
+> want every entity to look and behave.** New/updated entities mirror it 1:1 and only
+> deviate with a written reason. In particular, copy these candidate decisions verbatim:
+> (a) the **KPI/insights row has the same footprint** (equal number of donuts + KPI cards,
+> config-driven, click-to-filter); (b) the **"+ Add" button sits in the same place/style**;
+> (c) the **drawer header stays calm** — a colour-coded read-only phase/outcome **badge**
+> next to the title (not a wall of pickers), plus at most an owner picker; (d) **record
+> history is a changelog *icon* (popover) in the title-row, never a tab**; (e) controlled
+> vocabularies are **multi-value tenant lookups shown as soft chips** (mirror *Contractvorm*
+> / `candidateTypes`); (f) an **"Extra" tab appears only when ≥1 tenant custom field is
+> active** (Settings-driven). If the candidate feature and an entity disagree, the candidate
+> feature wins and the entity is brought in line.
+
 **Table** — `<Entity>Table` only declares **columns** and hands them to the shared
 `components/ui/DataTable` (sorting, selection, loading/empty/row-click live there). Cells
 reuse `Avatar`, `StatusPill` and the soft-chip convention. No table chrome re-implemented.

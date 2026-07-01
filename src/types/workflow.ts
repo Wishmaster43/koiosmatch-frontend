@@ -95,6 +95,21 @@ export interface ScheduleConfig {
   [k: string]: unknown
 }
 
+// One selectable output field of an upstream module, insertable as a token.
+export interface WorkflowVarField {
+  token: string   // the literal to insert, e.g. "{{n_ab12.firstname}}"
+  label: string   // the field path shown in the picker, e.g. "firstname"
+  sample?: string // a short preview of the value from the last test run
+}
+// All variables offered by one upstream module (one group in the picker).
+export interface WorkflowVarGroup {
+  nodeId: string
+  moduleType: string
+  customName?: string      // the node's own name (config.naam), when set
+  hasRun: boolean          // true when the module has a test-run output
+  fields: WorkflowVarField[]
+}
+
 // One selectable option in a config-panel field.
 export interface FieldOption { value: string; label: string }
 // A module config-panel field (schema entry the FieldInput renders).

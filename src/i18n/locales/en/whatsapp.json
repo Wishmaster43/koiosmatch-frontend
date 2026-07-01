@@ -1,4 +1,14 @@
 {
+  "tabs": { "overview": "Overview", "messages": "Messages", "queue": "Queue", "escalations": "Escalations" },
+  "queue": {
+    "loading": "Loading queue…",
+    "error": "Could not load the queue.",
+    "emptyTitle": "Queue is empty",
+    "emptyDesc": "There are no personal WhatsApp messages in the queue.",
+    "col": { "candidate": "Candidate", "type": "Type", "priority": "Priority", "status": "Status", "scheduled": "Scheduled", "attempts": "Attempt", "actions": "Actions" },
+    "status": { "queued": "Queued", "sending": "Sending", "sent": "Sent", "failed": "Failed", "skipped": "Skipped", "paused": "Paused" },
+    "action": { "sendNow": "Send now", "pause": "Pause", "retry": "Retry", "cancel": "Delete" }
+  },
   "filters": {"status":"Status","direction":"Direction"},
   "msgStatus": {"read":"Read","delivered":"Delivered","sent":"Sent","failed":"Failed"},
   "msgDirection": {"inbound":"Inbound","outbound":"Outbound"},

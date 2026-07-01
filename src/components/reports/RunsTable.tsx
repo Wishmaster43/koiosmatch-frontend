@@ -1,17 +1,17 @@
 /**
  * RunsTable — searchable, sortable table of workflow runs (executions).
  * Shows each run's workflow, status, start time, duration and processed count;
- * filters come from RightPanelContext. formatDT below formats run timestamps.
+ * filters come from RightPanelContext. The row drill-down (run meta + per-step
+ * INPUT/OUTPUT) is the shared RunDetailDrawer.
  */
 import { useState, useEffect, useMemo } from 'react'
-import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X,
-         Zap, Clock, Users, AlertTriangle } from 'lucide-react'
+import { Search, ChevronUp, ChevronDown, ChevronsUpDown, Zap } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useReportList } from './useReportList'
-import { formatDT, formatDuration, StatusBadge } from './runFormat'
+import { formatDuration, StatusBadge } from './runFormat'
+import RunDetailDrawer from './RunDetailDrawer'
 import type { RunRow, ReportFilterGroup, SortState } from '@/types/reports'
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
@@ -19,132 +19,6 @@ function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   return dir === 'asc'
     ? <ChevronUp size={12} style={{ color: 'var(--color-primary)' }} />
     : <ChevronDown size={12} style={{ color: 'var(--color-primary)' }} />
-}
-
-// ─── Drill-down drawer ────────────────────────────────────────────────────────
-
-function RunDrawer({ run, onClose }: { run: RunRow; onClose: () => void }) {
-  const { t } = useTranslation('reports')
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-
-  return (
-    <>
-      <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
-
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={run.workflow_name as string | undefined} tabIndex={-1}
-        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        style={{ width: 500, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
-
-        {/* Header */}
-        <div style={{ padding: '18px 20px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <Zap size={15} color="var(--color-primary)" />
-                <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>
-                  {run.workflow_name ?? t('runs.drawer.workflowFallback', { id: run.workflow_id ?? run.id })}
-                </span>
-                <StatusBadge status={run.status} />
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                {t('runs.drawer.startedColon')} {formatDT(run.started_at ?? run.created_at)}
-              </div>
-            </div>
-            <button onClick={onClose} aria-label={t('common:close')}
-              style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                       background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
-                       borderRadius: 6, marginLeft: 10, flexShrink: 0 }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-              <X size={15} />
-            </button>
-          </div>
-        </div>
-
-        {/* Metrics */}
-        <div style={{ display: 'flex', gap: 1, background: 'var(--hover-bg)',
-                      borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          {[
-            { label: t('runs.drawer.candidates'), value: run.candidates_count ?? run.candidates ?? '—', Icon: Users },
-            { label: t('runs.drawer.duration'),   value: formatDuration(run.duration_ms ?? run.duration), Icon: Clock },
-          ].map(b => (
-            <div key={b.label} style={{ flex: 1, padding: '10px 16px', textAlign: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
-                <b.Icon size={12} color="var(--text-muted)" />
-                <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{b.value}</span>
-              </div>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{b.label}</div>
-            </div>
-          ))}
-        </div>
-
-        {/* Body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
-
-          {/* Timeline */}
-          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
-                        letterSpacing: '0.05em', marginBottom: 10 }}>
-            {t('runs.drawer.timeline')}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 20 }}>
-            {[
-              { label: t('runs.drawer.started'),   value: formatDT(run.started_at  ?? run.created_at) },
-              { label: t('runs.drawer.finished'),  value: formatDT(run.finished_at ?? run.completed_at) },
-              { label: t('runs.drawer.trigger'),   value: run.trigger ?? run.trigger_type },
-              { label: t('runs.drawer.createdBy'), value: run.triggered_by ?? run.user_name },
-            ].filter(r => r.value && r.value !== '—').map(r => (
-              <div key={r.label} style={{ display: 'flex', gap: 8, padding: '7px 0',
-                                          borderBottom: '1px solid var(--hover-bg)' }}>
-                <span style={{ fontSize: 12, color: 'var(--text-muted)', width: 140, flexShrink: 0 }}>{r.label}</span>
-                <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.value}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Step results */}
-          {(run.step_results ?? run.steps ?? []).length > 0 && (
-            <>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
-                            letterSpacing: '0.05em', marginBottom: 10 }}>
-                {t('runs.drawer.stepResults')} ({(run.step_results ?? run.steps ?? []).length})
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
-                {(run.step_results ?? run.steps ?? []).map((step, i) => (
-                  <div key={i} style={{ background: 'var(--hover-bg)', borderRadius: 8, padding: '10px 12px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                  marginBottom: step.message ? 4 : 0 }}>
-                      <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>
-                        {step.label ?? step.type ?? t('runs.drawer.step', { n: i + 1 })}
-                      </span>
-                      <StatusBadge status={step.status ?? (step.ok ? 'success' : 'failed')} />
-                    </div>
-                    {step.message && (
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{step.message}</div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Error message */}
-          {run.error_message && (
-            <div style={{ background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 8,
-                          padding: '12px 14px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                <AlertTriangle size={13} color="var(--color-danger)" />
-                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-danger)' }}>{t('runs.drawer.error')}</span>
-              </div>
-              <pre style={{ fontSize: 11, color: 'var(--text)', whiteSpace: 'pre-wrap',
-                            wordBreak: 'break-all', margin: 0, fontFamily: 'monospace' }}>
-                {run.error_message}
-              </pre>
-            </div>
-          )}
-        </div>
-      </div>
-    </>
-  )
 }
 
 // ─── Tabel ────────────────────────────────────────────────────────────────────
@@ -334,7 +208,7 @@ export default function RunsTable() {
         </div>
       </div>
 
-      {drill && <RunDrawer run={drill} onClose={() => setDrill(null)} />}
+      {drill && <RunDetailDrawer run={drill} onClose={() => setDrill(null)} />}
     </div>
   )
 }

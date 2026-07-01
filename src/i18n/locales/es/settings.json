@@ -906,7 +906,9 @@
       "sync": "Sincronizar",
       "refresh": "Actualizar",
       "export": "Exportar"
-    }
+    },
+    "color": "Color",
+    "icon": "Icono"
   },
   "audit": {
     "title": "Registro de auditoría",
@@ -1075,8 +1077,18 @@
     "loadError": "No se pudieron cargar los datos.",
     "tab": {
       "limits": "Límites",
+      "queue": "Cola",
       "costs": "Costes",
       "retention": "Retención"
+    },
+    "queue": {
+      "subtitle": "Cola para mensajes personales de WhatsApp: velocidad de envío por número y la prioridad por tipo de mensaje.",
+      "rateLabel": "Velocidad de envío por número",
+      "rateHelp": "Protege el número frente a bloqueos. La cola no envía más rápido que esto.",
+      "rateUnit": "mensajes/hora",
+      "typesTitle": "Tipos de mensaje",
+      "typesSubtitle": "El orden define la prioridad: lo de arriba se envía primero (p. ej. una candidatura antes que un cumpleaños).",
+      "typesAdd": "Añadir tipo"
     },
     "limits": {
       "subtitle": "Configura el límite de mensajes. El techo lo fijamos nosotros y no se puede superar.",

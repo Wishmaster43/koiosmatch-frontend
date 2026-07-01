@@ -13,29 +13,6 @@ import type { WorkflowField, EdgeFilters, FilterCondition } from '@/types/workfl
 // Shared change handler: writes one field's value into the node config.
 export type OnChange = (key: string, value: unknown) => void
 
-// ── Agent select field ────────────────────────────────────────────────────────
-
-export function AgentSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {
-  const { t } = useTranslation('workflows')
-  const [agents,  setAgents]  = useState<Array<{ id?: string | number; name?: string }>>([])
-  const [loading, setLoading] = useState(true)
-  useEffect(() => {
-    import('@/lib/api').then(m => m.default.get('/ai/agents'))
-      .then(r => setAgents(r.data?.data ?? r.data ?? []))
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
-  return (
-    <select value={(value as string) || ''} onChange={e => onChange(fieldKey, e.target.value)}
-      aria-label={t('fields.agentSelect')}
-      style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8,
-               background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
-      <option value="">{loading ? t('fields.agentLoading') : t('fields.agentSelect')}</option>
-      {agents.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
-    </select>
-  )
-}
-
 // ── FAQ multi-select field ─────────────────────────────────────────────────────
 
 export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown; onChange: OnChange; fieldKey: string }) {

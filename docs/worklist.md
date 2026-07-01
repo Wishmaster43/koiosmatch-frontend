@@ -84,6 +84,24 @@ Live testen zodra `/webhook-subscriptions` + `/webhook-events` bestaan (C-5b).
 ### B-7 · WhatsApp Web (persoonlijk) — live verifiëren
 Frontend gebouwd; endpoints wachten op gateway.
 
+### B-28 · WhatsApp-herstructurering — lijst + Wachtrij + Settings (IA besloten 2026-07-01) — ◐ FE Stap 1+2 KLAAR
+Splits op **intentie** (bedienen / analyseren / instellen), mirror't de blueprint. Besloten met Danny.
+**FE ✅ (2026-07-01):** WhatsApp-pagina = tabs (Overzicht/Berichten/**Wachtrij**/Escalaties) + KPI-InsightsRow bovenaan
+(klik = drill-down) + teller-badge op tab én sidebar; **Settings → Berichten → Wachtrij** (rate-limit per nummer +
+berichttype-lookup via `StatusListEditor`, order = prioriteit) — i18n ×5. Afgestemd op C-43 (stats per-nummer,
+mutaties `messaging.manage`). **Rest:** enqueue-triggers/demo-data om de lijst te vullen; Fase 2 = Rapportage-menu.
+- **WhatsApp-pagina → operationele lijst met tabs:** Berichten · **Wachtrij** (privé-outbox) · Escalaties.
+  Fase 1 blijft het KPI-dashboard een "Overzicht"-tab; Fase 2 verhuist dat naar een Rapportage-subpagina.
+- **Wachtrij-tab** (privé-outbox): kandidaat · berichttype (soft-chip) · prioriteit · status
+  (queued/sending/sent/failed/skipped) · poging · gepland; filters + acties (nu-versturen/pauzeren/
+  verwijderen/retry — authorization-gated) + rate-limit-teller. Hoort bij **WhatsApp** — niet Workflow
+  (dat is ontwerp), niet Rapportage (dat is analytics). Kleine "→ bekijk wachtrij"-link vanaf de
+  `applicant_event (in wachtrij)`-node.
+- **Settings → WhatsApp:** berichttype-lookup (classificatie, CRUD+reorder+kleur; seed sollicitatie/match/
+  herinnering/algemeen/verjaardag/marketing) + prioriteitsvolgorde (= sleepvolgorde) + rate-limit per nummer.
+  Niks hardcoded; seed-fallback bij 404 (mirror `useGenders`/`useFunctions`).
+- Hangt op **C-43** (queue-contract). Fase 1 = tabs + Wachtrij + Settings; Fase 2 = Rapportage-menu.
+
 ### B-8 · Sollicitatie-tab op de kandidaat
 Match-score + AI-afwijsreden + bewerkbare funnel-fase per sollicitatie.
 Hangt op: B-2, C-23 (applicaties detailshape).
@@ -291,11 +309,10 @@ Volledige taken-feature (kanban, lookups, comments, seeder). **Core = klaar** (i
 detail/update/links/comments/activity/bulk-archive live; e2e getest 2026-07-01).
 
 **Resterend (voedt de blueprint-gelijktrekking van B-20):**
-- ☐ **`GET /contacts` + `GET /departments` (platte tenant-lijsten) — PRIORITEIT.** `CustomerContact`
-  + genest `GET /customers/{id}/contacts` bestaan al, maar geen tenant-brede platte lijst → de
-  Taken-modal contactpersoon-picker + de `contact`/`department`-koppel-pickers krijgen 404. Voeg
-  `GET /contacts` en `GET /departments` toe (gepagineerd, `{id, name, customer_id?, customer_name?}`,
-  permissie `customers.view`). De overige 7 koppel-types werken al.
+- ✅ **`GET /contacts` + `GET /departments` — KLAAR (backend + FE, 2026-07-01).** Beide platte
+  tenant-lijsten live (`{id, name, customer_id, customer_name}`, `?q=`+`?per_page=`, `customers.view`).
+  FE: koppel-picker + modal-contactpicker consumeren ze; picker-search stuurt nu `q` (was `search`).
+  E2e geverifieerd (shape + `?q=` filtert). Alle 9 koppel-types werken nu.
 - ✅ **Tags op taken — KLAAR (backend + FE, 2026-07-01).** `Task` had `tags` al (fillable + array-cast,
   Store/Update valideren `tags[]`, resource geeft ze terug). FE: header-tag-editor in de drawer.
 - ✅ **Tabel-kleurtoggles — KLAAR (FE, 2026-07-01).** Via de generieke `Setting`-store (`POST /settings`),
@@ -397,6 +414,17 @@ Tijdreeksen + verdelingen + funnel voor grafieken.
 
 ### C-32a · Afwijzing via workflow — event-trigger + queue
 `application.rejected` event + workflow-trigger + multi-kanaal-bericht + tokens.
+
+### C-43 · WhatsApp-privé wachtrij — outbox + classificatie + prioriteit + rate-limit (contract)
+Dedicated **tenant-scoped outbox** per privé-bericht (`status`/`attempts`/`scheduled_at`/`number_id`/
+`candidate_id`/`message_type_id`/`priority`) — niet de raw `jobs`-tabel. Drain op **(priority DESC,
+scheduled_at ASC)** binnen een **rate-limit per nummer** (instelbaar). Endpoints:
+`GET /whatsapp-web/queue?status=&type=&number_id=` + `send-now`/`pause`/`cancel`/`retry` +
+`GET /whatsapp-web/queue/stats`; lookup `/whatsapp-message-types` (CRUD+reorder, in-use-protected,
+priority+kleur). **BE geleverd 2026-07-01** (`whatsapp_outbox` + `whatsapp_message_types`, drain/minuut per nummer,
+seed application/match/reminder/general/birthday/marketing; **stats per-nummer**; mutaties `messaging.manage`,
+lookup-writes `settings.update`; body encrypted/PII-arm). **FE afgestemd ✅.** Zie ook **C-32a**. FE = **B-28**.
+Open (BE): enqueue-triggers + demo-queue; kanaalfouten → failed/retry (v2); `dev:reset`.
 
 ### C-32b · Pakket-/module-model
 3 pakketten + add-ons + `GET /admin/tenants/{id}/usage`.

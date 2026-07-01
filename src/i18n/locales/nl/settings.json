@@ -1051,7 +1051,9 @@
       "sync": "Synchroniseren",
       "refresh": "Vernieuwen",
       "export": "Exporteren"
-    }
+    },
+    "color": "Kleur",
+    "icon": "Icoon"
   },
   "audit": {
     "title": "Audit log",
@@ -1195,8 +1197,18 @@
     "loadError": "Kon de gegevens niet laden.",
     "tab": {
       "limits": "Limieten",
+      "queue": "Wachtrij",
       "costs": "Kosten",
       "retention": "Bewaartermijn"
+    },
+    "queue": {
+      "subtitle": "Wachtrij voor persoonlijke WhatsApp-berichten: verzendsnelheid per nummer en de prioriteit per berichttype.",
+      "rateLabel": "Verzendsnelheid per nummer",
+      "rateHelp": "Beschermt tegen blokkade van het nummer. De wachtrij verstuurt niet sneller dan dit.",
+      "rateUnit": "berichten/uur",
+      "typesTitle": "Berichttypes",
+      "typesSubtitle": "De volgorde bepaalt de prioriteit: bovenaan wordt eerst verstuurd (bijv. sollicitatie vóór verjaardag).",
+      "typesAdd": "Type toevoegen"
     },
     "limits": {
       "subtitle": "Stel de berichtenlimiet in. Het plafond is door ons bepaald en kan niet worden overschreden.",

@@ -1,5 +1,14 @@
 {
+  "vars": {
+    "title": "Variable einfügen",
+    "search": "Feld suchen…",
+    "noUpstream": "Keine vorherigen Module zum Referenzieren",
+    "wholeOutput": "Gesamte Ausgabe",
+    "notRun": "nicht ausgeführt"
+  },
   "editor": {
+    "tabDiagram": "Diagramm",
+    "tabHistory": "Verlauf",
     "logs": "Logs",
     "run": "Ausführen",
     "running": "Läuft...",
@@ -16,8 +25,6 @@
     "keyName": "Name",
     "keyValue": "Wert",
     "add": "Hinzufügen",
-    "agentLoading": "Agents werden geladen…",
-    "agentSelect": "Agent auswählen…",
     "faqLoading": "FAQs werden geladen…",
     "faqEmpty": "Keine FAQs gefunden",
     "faqFallback": "FAQ {{id}}",

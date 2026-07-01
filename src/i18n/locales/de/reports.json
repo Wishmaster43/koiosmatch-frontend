@@ -321,6 +321,10 @@
     "search": "Nach Workflow, Trigger, Fehler suchen…",
     "loading": "Ausführungen werden geladen…",
     "empty": "Keine Ausführungen gefunden",
+    "editorTitle": "Ausführungen",
+    "editorEmpty": "Noch keine Ausführungen für diesen Workflow",
+    "editorCount_one": "{{count}} Ausführung",
+    "editorCount_other": "{{count}} Ausführungen",
     "cols": {
       "started": "Gestartet",
       "workflow": "Workflow",
@@ -350,6 +354,9 @@
       "createdBy": "Erstellt von",
       "stepResults": "Schritt-Ergebnisse",
       "step": "Schritt {{n}}",
+      "input": "Input",
+      "output": "Output",
+      "noData": "Keine Daten",
       "error": "Fehlermeldung",
       "workflowFallback": "Workflow #{{id}}"
     }

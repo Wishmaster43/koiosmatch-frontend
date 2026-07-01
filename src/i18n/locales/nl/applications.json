@@ -47,7 +47,15 @@
     "proposed": "Voorstel gedaan",
     "rejected": "Afgewezen",
     "matched": "Matched",
-    "new": "Nieuw"
+    "new": "Nieuw",
+    "totalActiveSub": "Actief + matched",
+    "newSub": "Nog niet bekeken",
+    "matchedSub": "Klik om te filteren",
+    "rejectedSub": "Klik om te filteren",
+    "avgScore": "Gem. matchscore",
+    "avgScoreSub": "Over actieve sollicitaties",
+    "aiTasks": "Openstaande AI-taken",
+    "aiTasksSub": "Wachten op actie"
   },
   "insights": {
     "phase": "Fase",
@@ -115,7 +123,14 @@
     "hint": "Plan een interview of gesprek met deze kandidaat.",
     "new": "Nieuwe afspraak",
     "with": "Met",
-    "statusPlanned": "Gepland"
+    "statusPlanned": "Gepland",
+    "datetime": "Datum en tijd",
+    "type": "Type",
+    "typePlaceholder": "Bijv. Intake, Interview…",
+    "title": "Titel",
+    "titlePlaceholder": "Optionele titel…",
+    "save": "Opslaan",
+    "cancel": "Annuleren"
   },
   "notes": {
     "title": "Notities",

@@ -47,7 +47,15 @@
     "proposed": "Proposal sent",
     "rejected": "Rejected",
     "matched": "Matched",
-    "new": "New"
+    "new": "New",
+    "totalActiveSub": "Active + matched",
+    "newSub": "Not yet viewed",
+    "matchedSub": "Click to filter",
+    "rejectedSub": "Click to filter",
+    "avgScore": "Avg. match score",
+    "avgScoreSub": "Across active applications",
+    "aiTasks": "Open AI tasks",
+    "aiTasksSub": "Awaiting action"
   },
   "insights": {
     "phase": "Phase",
@@ -115,7 +123,14 @@
     "hint": "Schedule an interview or call with this candidate.",
     "new": "New appointment",
     "with": "With",
-    "statusPlanned": "Planned"
+    "statusPlanned": "Planned",
+    "datetime": "Date and time",
+    "type": "Type",
+    "typePlaceholder": "e.g. Intake, Interview…",
+    "title": "Title",
+    "titlePlaceholder": "Optional title…",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "notes": {
     "title": "Notes",

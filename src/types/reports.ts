@@ -41,13 +41,18 @@ export interface ReportFilterGroup {
   [key: string]: unknown
 }
 
-// Per-step result inside a workflow run.
+// Per-step result inside a workflow run. `input`/`output` are the raw data
+// bundles the step received and produced (shown expandable in the run drawer).
 export interface RunStep {
   label?: string
   type?: string
   status?: string
   ok?: boolean
   message?: string
+  input?: unknown
+  output?: unknown
+  duration_ms?: number
+  operations?: number
   [key: string]: unknown
 }
 

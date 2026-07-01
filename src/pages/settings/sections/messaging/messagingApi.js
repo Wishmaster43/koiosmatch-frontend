@@ -14,6 +14,10 @@ import api, { unwrap } from '@/lib/api'
 export const getLimits = () => api.get('/settings/messaging-limits').then(unwrap)
 export const putLimits = (body) => api.put('/settings/messaging-limits', body).then(unwrap)
 
+// WhatsApp-privé queue config (tenant): the per-number hourly send rate (C-43).
+export const getQueueConfig = () => api.get('/settings/whatsapp-queue').then(unwrap)
+export const putQueueConfig = (body) => api.put('/settings/whatsapp-queue', body).then(unwrap)
+
 // Messaging costs (tenant): read-only usage + cost breakdown.
 export const getCosts = () => api.get('/settings/messaging-costs').then(unwrap)
 

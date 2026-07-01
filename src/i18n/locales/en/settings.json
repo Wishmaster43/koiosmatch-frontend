@@ -1051,7 +1051,9 @@
       "sync": "Synchronise",
       "refresh": "Refresh",
       "export": "Export"
-    }
+    },
+    "color": "Colour",
+    "icon": "Icon"
   },
   "audit": {
     "title": "Audit log",
@@ -1195,8 +1197,18 @@
     "loadError": "Could not load the data.",
     "tab": {
       "limits": "Limits",
+      "queue": "Queue",
       "costs": "Costs",
       "retention": "Retention"
+    },
+    "queue": {
+      "subtitle": "Queue for personal WhatsApp messages: send rate per number and the priority per message type.",
+      "rateLabel": "Send rate per number",
+      "rateHelp": "Protects the number from being blocked. The queue won't send faster than this.",
+      "rateUnit": "messages/hour",
+      "typesTitle": "Message types",
+      "typesSubtitle": "The order sets the priority: the top is sent first (e.g. an application before a birthday).",
+      "typesAdd": "Add type"
     },
     "limits": {
       "subtitle": "Set the messaging limit. The ceiling is set by us and cannot be exceeded.",

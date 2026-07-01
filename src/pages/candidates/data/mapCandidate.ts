@@ -113,6 +113,9 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     photoUrl:        c.photo_url ?? c.photoUrl ?? null,
     summary:         c.summary ?? c.bio ?? '',
     tags:            c.tags ?? [],
+    // Archived = soft-deleted (deleted_at set). Off by default in the list; the
+    // "Gearchiveerd" view opts in via ?include_archived=1.
+    archived:        !!(c.deleted_at ?? c.archived),
     // Branches (C-4, M2M) — each { id, name }; accepts bare names too (→ { name }).
     branches:        (c.branches ?? []).map((b): CandidateBranch => (typeof b === 'object' ? b : { name: b })),
     // Talent pools the candidate belongs to. Each: { id, name, color, source? }.

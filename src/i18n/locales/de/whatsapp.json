@@ -1,4 +1,14 @@
 {
+  "tabs": { "overview": "Übersicht", "messages": "Nachrichten", "queue": "Warteschlange", "escalations": "Eskalationen" },
+  "queue": {
+    "loading": "Warteschlange wird geladen…",
+    "error": "Warteschlange konnte nicht geladen werden.",
+    "emptyTitle": "Warteschlange ist leer",
+    "emptyDesc": "Es befinden sich keine persönlichen WhatsApp-Nachrichten in der Warteschlange.",
+    "col": { "candidate": "Kandidat", "type": "Typ", "priority": "Priorität", "status": "Status", "scheduled": "Geplant", "attempts": "Versuch", "actions": "Aktionen" },
+    "status": { "queued": "In Warteschlange", "sending": "Wird gesendet", "sent": "Gesendet", "failed": "Fehlgeschlagen", "skipped": "Übersprungen", "paused": "Pausiert" },
+    "action": { "sendNow": "Jetzt senden", "pause": "Pausieren", "retry": "Wiederholen", "cancel": "Löschen" }
+  },
   "title": "WhatsApp",
   "updatedAt": "Aktualisiert um {{time}}",
   "refresh": "Aktualisieren",
