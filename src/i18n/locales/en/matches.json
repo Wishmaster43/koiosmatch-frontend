@@ -47,5 +47,19 @@
     "error": "Couldn't load the changelog.",
     "empty": "No changes recorded yet.",
     "system": "System"
+  },
+  "bulk": {
+    "selected": "{{count}} selected",
+    "actions": "Bulk actions",
+    "deselect": "Deselect",
+    "mutateError": "Couldn't apply the change.",
+    "couple": "Couple to backoffice",
+    "target": {
+      "helloflex": "HelloFlex",
+      "shiftmanager": "ShiftManager"
+    },
+    "coupleQueued": "{{count}} match(es) queued for coupling with {{target}}.",
+    "coupleUnavailable": "Backoffice coupling isn't available yet.",
+    "noPermission": "You don't have permission for bulk actions."
   }
 }

@@ -47,5 +47,19 @@
     "error": "Impossible de charger l'historique.",
     "empty": "Aucune modification enregistrée.",
     "system": "Système"
+  },
+  "bulk": {
+    "selected": "{{count}} sélectionné(s)",
+    "actions": "Actions groupées",
+    "deselect": "Désélectionner",
+    "mutateError": "Impossible d'appliquer la modification.",
+    "couple": "Coupler au backoffice",
+    "target": {
+      "helloflex": "HelloFlex",
+      "shiftmanager": "ShiftManager"
+    },
+    "coupleQueued": "{{count}} match(es) mis en file pour le couplage avec {{target}}.",
+    "coupleUnavailable": "Le couplage backoffice n'est pas encore disponible.",
+    "noPermission": "Vous n'avez pas l'autorisation pour les actions groupées."
   }
 }

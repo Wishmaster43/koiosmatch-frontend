@@ -6,6 +6,7 @@ import Avatar from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
 import ScorePill from './ScorePill'
 import type { MatchRow } from '@/types/match'
+import type { Id } from '@/types/common'
 
 interface MatchesTableProps {
   rows: MatchRow[]
@@ -15,10 +16,20 @@ interface MatchesTableProps {
   scrollParentRef?: RefObject<HTMLElement | null>
   // Row click opens the read-only detail drawer (§3A drill-down).
   onRowClick?: (row: MatchRow) => void
+  // Highlight the row whose drawer is open.
+  selectedId?: Id | null
+  // Bulk selection (checkboxes) — mirrors every other entity table.
+  selectable?: boolean
+  selectedIds?: Set<Id>
+  onToggleRow?: (id: Id) => void
+  onToggleAll?: (ids: Id[], allSelected: boolean) => void
 }
 
 // MatchesTable — declares columns only; the shared DataTable owns sorting + states.
-export default function MatchesTable({ rows, loading, error, stickyHeader = false, scrollParentRef, onRowClick }: MatchesTableProps) {
+export default function MatchesTable({
+  rows, loading, error, stickyHeader = false, scrollParentRef, onRowClick,
+  selectedId, selectable, selectedIds, onToggleRow, onToggleAll,
+}: MatchesTableProps) {
   const { t } = useTranslation('matches')
 
   const columns: Column<MatchRow>[] = [
@@ -44,7 +55,9 @@ export default function MatchesTable({ rows, loading, error, stickyHeader = fals
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
         <DataTable columns={columns} rows={rows} loading={loading}
           loadingText={t('loading')} emptyText={error ? t('error') : t('empty')}
-          stickyHeader={stickyHeader} scrollParentRef={scrollParentRef} onRowClick={onRowClick} />
+          stickyHeader={stickyHeader} scrollParentRef={scrollParentRef} onRowClick={onRowClick}
+          selectedId={selectedId} selectable={selectable} selectedIds={selectedIds}
+          onToggleRow={onToggleRow} onToggleAll={onToggleAll} />
       </div>
     </>
   )

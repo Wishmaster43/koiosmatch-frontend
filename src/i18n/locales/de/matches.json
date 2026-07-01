@@ -47,5 +47,19 @@
     "error": "Änderungsprotokoll konnte nicht geladen werden.",
     "empty": "Noch keine Änderungen erfasst.",
     "system": "System"
+  },
+  "bulk": {
+    "selected": "{{count}} ausgewählt",
+    "actions": "Massenaktionen",
+    "deselect": "Abwählen",
+    "mutateError": "Änderung konnte nicht angewendet werden.",
+    "couple": "Mit Backoffice koppeln",
+    "target": {
+      "helloflex": "HelloFlex",
+      "shiftmanager": "ShiftManager"
+    },
+    "coupleQueued": "{{count}} Match(es) zur Kopplung mit {{target}} eingereiht.",
+    "coupleUnavailable": "Backoffice-Kopplung ist noch nicht verfügbar.",
+    "noPermission": "Du hast keine Berechtigung für Massenaktionen."
   }
 }

@@ -47,5 +47,19 @@
     "error": "Wijzigingslog kon niet geladen worden.",
     "empty": "Nog geen wijzigingen vastgelegd.",
     "system": "Systeem"
+  },
+  "bulk": {
+    "selected": "{{count}} geselecteerd",
+    "actions": "Massa-acties",
+    "deselect": "Deselecteren",
+    "mutateError": "De wijziging kon niet worden toegepast.",
+    "couple": "Koppelen aan backoffice",
+    "target": {
+      "helloflex": "HelloFlex",
+      "shiftmanager": "ShiftManager"
+    },
+    "coupleQueued": "{{count}} match(es) in wachtrij gezet voor koppeling met {{target}}.",
+    "coupleUnavailable": "Backoffice-koppeling is nog niet beschikbaar.",
+    "noPermission": "Je hebt geen rechten voor massa-acties."
   }
 }

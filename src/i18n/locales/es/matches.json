@@ -47,5 +47,19 @@
     "error": "No se pudo cargar el historial.",
     "empty": "Aún no hay cambios registrados.",
     "system": "Sistema"
+  },
+  "bulk": {
+    "selected": "{{count}} seleccionada(s)",
+    "actions": "Acciones masivas",
+    "deselect": "Deseleccionar",
+    "mutateError": "No se pudo aplicar el cambio.",
+    "couple": "Vincular al backoffice",
+    "target": {
+      "helloflex": "HelloFlex",
+      "shiftmanager": "ShiftManager"
+    },
+    "coupleQueued": "{{count}} match(es) en cola para vincular con {{target}}.",
+    "coupleUnavailable": "La vinculación con el backoffice aún no está disponible.",
+    "noPermission": "No tienes permiso para acciones masivas."
   }
 }

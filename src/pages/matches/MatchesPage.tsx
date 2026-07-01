@@ -7,22 +7,32 @@ import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import MatchesTable from './MatchesTable'
 import MatchDrawer from './MatchDrawer'
+import MatchesBulkBar from './MatchesBulkBar'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { useMatches } from './hooks/useMatches'
+import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import type { MatchRow } from '@/types/match'
+import type { Id } from '@/types/common'
 
 // MatchesPage — loads matches, shows an insights strip and paginates the table.
 export default function MatchesPage() {
   const { t } = useTranslation('matches')
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
   const tableScrollRef = useRef<HTMLDivElement>(null)
-  const { user } = useAuth() ?? {}
+  const auth = useAuth()
+  const user = auth?.user
+  // Coupling is authorization-gated in the UI; the backend re-checks (§7).
+  const hasPermission = auth?.hasPermission ?? (() => false)
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
   const { rows, loading, error } = useMatches()
   const [page,        setPage]        = useState(1)
   const [pageSize,    setPageSize]    = useState(() => user?.default_per_page ?? 50)
   const [stageFilter, setStageFilter] = useState<string[]>([])
   const [ownerFilter, setOwnerFilter] = useState<string[]>([])
+  // Bulk selection (checkboxes); accumulates across pages, clears on filter change.
+  const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
+  const { toggleRow, toggleAll, bulkCoupleHelloFlex, bulkCoupleShiftManager } =
+    useMatchesBulkActions({ selectedIds, setSelectedIds, t })
 
   // Donut click: toggle one value (second click clears).
   const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
@@ -44,9 +54,9 @@ export default function MatchesPage() {
     return Object.values(m)
   }, [rows])
 
-  // Reset to the first page whenever a filter changes (kept out of the memo —
-  // setting state during render can loop).
-  useEffect(() => { setPage(1) }, [stageFilter, ownerFilter])
+  // Reset to the first page and clear the selection whenever a filter changes
+  // (kept out of the memo — setting state during render can loop).
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter])
 
   // Filter the visible rows by donut selection.
   const filteredAll = useMemo(() => {
@@ -98,33 +108,44 @@ export default function MatchesPage() {
         clearTitle={t('insights.clearFilter')}
       />
 
-      {/* Toolbar — add button right-aligned */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '0 24px 10px', flexShrink: 0 }}>
-        <div style={{ marginLeft: 'auto', position: 'relative' }}>
-          {/* Match creation flows from the candidate or vacancy drawer; this button hints at that. */}
-          <button
-            onClick={() => setAddTooltip(v => !v)}
-            onBlur={() => setTimeout(() => setAddTooltip(false), 150)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13,
-              fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer',
-              background: 'var(--color-primary)', color: '#fff' }}>
-            <Plus size={15} aria-hidden="true" /> {t('add')}
-          </button>
-          {addTooltip && (
-            <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, zIndex: 20,
-              background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
-              padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}>
-              {t('addComingSoon')}
-            </div>
-          )}
-        </div>
+      {/* Toolbar — bulk bar while a selection exists, otherwise the add button */}
+      <div style={{ display: 'flex', alignItems: 'center', padding: '0 24px 10px', flexShrink: 0, minHeight: 46 }}>
+        {selectedIds.size > 0 ? (
+          <MatchesBulkBar
+            count={selectedIds.size}
+            onClear={() => setSelectedIds(new Set())}
+            onCoupleHelloFlex={bulkCoupleHelloFlex}
+            onCoupleShiftManager={bulkCoupleShiftManager}
+            canCouple={hasPermission('matches.couple')}
+          />
+        ) : (
+          <div style={{ marginLeft: 'auto', position: 'relative' }}>
+            {/* Match creation flows from the candidate or vacancy drawer; this button hints at that. */}
+            <button
+              onClick={() => setAddTooltip(v => !v)}
+              onBlur={() => setTimeout(() => setAddTooltip(false), 150)}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13,
+                fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer',
+                background: 'var(--color-primary)', color: '#fff' }}>
+              <Plus size={15} aria-hidden="true" /> {t('add')}
+            </button>
+            {addTooltip && (
+              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, zIndex: 20,
+                background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
+                padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}>
+                {t('addComingSoon')}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Table */}
       <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
         <MatchesTable rows={paged} loading={loading} error={error} stickyHeader
-          scrollParentRef={tableScrollRef} onRowClick={setSelected} />
+          scrollParentRef={tableScrollRef} onRowClick={setSelected} selectedId={selected?.id}
+          selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
       </div>
 
       <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
