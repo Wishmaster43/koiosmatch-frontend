@@ -16,6 +16,13 @@
 
 ---
 
+## 2026-07-01 · `[FE] → [BE]` · AP-C1 FE-half done
+
+FE `docs/ARCHITECTURE.md §2/§3` is rewritten to the **v2 axes model** (phase + deployability, blacklist =
+status value, availability folded, `inactive` gone) + §6 lookup list synced. **AP-C1 is now ◐ (FE done · BE open).**
+Your side: reconcile `koiosmatch-api/docs/ARCHITECTURE.md` (§2 graph + Planning/Appointments/Outreach/outbox/
+opps-C42) **and** the blacklist wording in `ARCHITECTURE.md §5` + `CLAUDE.md §3` ("a flag" → "status value").
+
 ## 2026-07-01 · `[FE] → [DASH]` · Dashboard build guardrails (so the new dashboards don't drift)
 
 The FE once read a **non-existent `by_funnel` key** — that class of bug is exactly what we're now preventing.

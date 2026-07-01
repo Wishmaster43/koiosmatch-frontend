@@ -9,7 +9,8 @@
 > ✅ bevestigd (code/beslissing) · ⚠️ beslissing nodig (Danny) · ☐ nog documenteren/verifiëren ·
 > 🔒 hangt op backend. Werk dit bij zodra een punt landt.
 >
-> **Laatst bijgewerkt:** 2026-06-29 · auth-regel (§11) gelijkgetrokken met §7.6 — door FE-Claude.
+> **Laatst bijgewerkt:** 2026-07-01 · **§2/§3 → v2-assenmodel** (Fase + Inzetbaarheid, blacklist =
+> status-waarde, availability gevouwen, geen `inactive`; AP-C1) — door FE-Claude.
 
 ---
 
@@ -32,40 +33,45 @@ branches · applications[] · matches[] · notes · timeline`. ✅
 
 ---
 
-## 2. De assen — bevestigd model (decision 14–16) ✅
-Drie lookups + availability beschrijven één persoon; ze nooit samenvouwen.
+## 2. De assen — **v2-model** (K-18 / C-10; code-geverifieerd 2026-07-01) ✅
+**Zes assen** beschrijven één persoon, elk één vraag; nooit samenvouwen. **Bind altijd op de flag, nooit op
+een key/label** (een tenant hernoemt/remapt waarden). Alle waarden = tenant-lookups.
 
-- **Candidate type** = contractvorm, **multi-value** (oproepkracht · ZZP · payroll · uitzend ·
-  detachering · demand). *"In welke contractvorm(en)?"* Verandert zelden. ✅
-- **Status (persoon-lifecycle)** = **single value**, seed (`LookupsContext.DEFAULT_STATUSES`):
-  `lead · candidate · matched · inactive · unplaceable`. ✅
-  - **Blacklist = aparte vlag** (orthogonaal, niet in de status-lijst). ✅
-  - **Archived = soft-delete-staat** (`deleted_at`), geen status. ✅
-  - **unplaceable** draagt een "weer-beschikbaar"-datum → re-activatie-workflow. ✅
-  - **matched** wordt gezet door de hired→match-automatisering; matched zonder Match = data-fout. ✅
-  - inactive/blacklist/archived = **default uit in filters** (wel zoekbaar → KPI-totalen dalen). ✅
-  - inactive vereist een **reden**; alleen toegestaan als **geen actieve Match** + (planning-module)
-    **geen toekomstige inplanning**. ✅
-- **Funnel-fase** = **single value per sollicitatie**, seed (`DEFAULT_FUNNEL_TYPES`):
-  `applied · invited(/intake) · proposal · hired · rejected`. Bewerkbaar op de sollicitatie;
-  op de kandidaat alleen read-only chips. "Sollicitant" = afgeleid (≥1 lopende sollicitatie). ✅
-- **Availability** (Available/Sick/Leave) = **aparte as**, `/availability-options`. ✅
-- **Status- en availability-wissels zijn gedateerd + beredeneerd** (`effective_from` + `reason`;
-  "Inactief sinds …"). Kleine change-log, gekoppeld aan de audit-trail. ✅
+- **Contractvorm** (was "candidate type") = **multi-value** `candidate_types` (detachering · flex · uzk ·
+  zzp · payroll · oproep · freelance). *"In welke contractvorm(en)?"* Verandert zelden. ✅
+- **Fase (lifecycle)** = **single**, `candidate_phases` (kolom `candidates.phase`): `lead → candidate`
+  (+ later `alumni`). De `is_applicant`-fase wordt gezet op de 1e sollicitatie. ✅
+- **Inzetbaarheid (status)** = **single**, `candidate_statuses` (kolom `candidates.status`, default
+  `available`): `available · placed · unavailable · sick · leave · blacklist`. Gedrag is **flag-driven**:
+  `requires_match` (= `placed`, vereist een gekoppelde Match) · `requires_reason` (+ `expects_return_date`
+  → `available_again_date`). De oude losse **availability-as is hierin gevouwen**; er is **geen `inactive`** meer. ✅
+  - **Blacklist = een status-waarde** (`status === 'blacklist'`, kleur `#DC2626`), **geen aparte kolom/vlag**.
+    Reden = kolom **`blacklist_reason`** (uit een `blacklist_reasons`-lookup), gated door de setting
+    `blacklist_reason_required` (default aan) — **niet** `status_reason`. ✅
+  - **Archived = soft-delete** (`deleted_at`), geen status. ✅
+  - **blacklist + archived = default verborgen** in lijsten (`?status[]=blacklist` / `?include_archived=1`
+    tonen ze wél → KPI-totalen dalen). ✅
+  - `placed` alleen met gekoppelde Match; `unavailable` alleen zonder actieve Match + (planning) geen
+    toekomstige inplanning — anders blokkeren met reden. ✅
+- **Funnel-fase** = **single value per sollicitatie**, `application_stages`: `applied · invited(/intake) ·
+  proposal · hired · rejected`. Buckets uit de flags **`is_match`/`is_rejected`** (nooit de key). Op de
+  kandidaat read-only chips; "Sollicitant" = afgeleid (≥1 lopende sollicitatie, `is_applicant`). ✅
+- **Fase- én inzetbaarheid-wissels zijn gedateerd + beredeneerd** (`effective_from` + `reason`;
+  "Kandidaat sinds …" / "Niet beschikbaar sinds … · reden"). Kleine change-log, aan de audit-trail. ✅
 
 ---
 
-## 3. Status ↔ funnel = automatisering, geen veld-koppeling ✅
-Gestuurd door **workflow-automation** (geseed, instelbaar), niet door een opgeslagen status↔funnel-koppeling:
-1. eerste sollicitatie → `lead` wordt `candidate`;
-2. funnel **hired** → maak een **Match** + zet status **matched**;
-3. **rejected** zonder andere lopende sollicitatie → blijft `candidate`.
-Een persoon kan één status hebben met meerdere sollicitaties (elk eigen funnel). ✅
+## 3. Fase ↔ inzetbaarheid ↔ funnel = automatisering, geen veld-koppeling ✅
+Gestuurd door **automation** (geseed, instelbaar); resolve altijd via de **flag**, niet de key:
+1. eerste sollicitatie → **Fase** `lead` wordt `candidate`;
+2. funnel **`is_match`**-fase → maak een **Match** + zet **inzetbaarheid** `placed`;
+3. **`is_rejected`** zonder andere lopende sollicitatie → Fase blijft `candidate`.
+Eén persoon heeft één fase + één inzetbaarheid met meerdere sollicitaties (elk eigen funnel). ✅
 
 **Twee paden naar een plaatsing** (entry = nieuwe Lead óf bestaande Kandidaat): ✅
-- **Via funnel:** vacature → sollicitatie → funnel → hired → Match → plaatsing.
-- **Direct match:** Match zonder funnel → plaatsing.
-Beide → status `matched`. Een Match voegt automatisch een **werkervaring** bovenaan toe.
+- **Via funnel:** vacature → sollicitatie → funnel → `is_match` → Match → plaatsing.
+- **Direct match:** `POST /matches {candidate_id, vacancy_id}` zonder funnel → plaatsing.
+Beide → inzetbaarheid **`placed`**. Een Match voegt automatisch een **werkervaring** bovenaan toe.
 
 ⚠️ **Appointment-gated fasen:** een funnel-fase kan `requires_appointment` vereisen (vlag, geen
 hardcoded slug). Geen geplande afspraak op zo'n fase → inconsistentie-vlag op de kandidaat.
@@ -98,9 +104,11 @@ candidates ✅ blueprint · applications/vacancies/tasks/matches/opportunities �
 ## 6. Configureerbare lookups (Settings → API, nooit hardcoded) ✅
 Elke lookup = tenant-scoped tabel, demo-geseed, CRUD, **in-use-protected** (409 + `in_use`),
 reorderable. Frontend leest via `useX()`/`LookupsContext` met seed-fallback.
-Statuses · funnel-types · candidate-types · availability · pools · languages · language-levels ·
-genders · industries · functions(+`allow_free_entry`) · rejection-reasons · last-contact-types ·
-note-types · vacancy-statuses/-phases/-custom-fields · task-statuses/-types/-priorities.
+Statuses (inzetbaarheid) · **phases** · funnel-types · candidate-types · **blacklist-reasons** · pools ·
+languages · language-levels · genders · industries · functions(+`allow_free_entry`) · rejection-reasons ·
+last-contact-types · note-types · document-types · appointment-types · vacancy-statuses/-phases/-custom-fields ·
+task-statuses/-types/-priorities · opportunity-stages/-service-types/-agreement-types · whatsapp-message-types ·
+planning shift-/order-/assignment-statuses. *(availability is gevouwen in Statuses — geen aparte lookup meer.)*
 ☐ Volledige endpoint-tabel: zie `CLAUDE.md §3B` + worklist C-1.
 
 ---

@@ -23,7 +23,7 @@
 
 | ID | Issue | Sev | Owner | Status |
 |---|---|:-:|:-:|:-:|
-| **AP-C1** | ARCHITECTURE.md lags the code (both repos) | 🔴 | BOTH | ☐ |
+| **AP-C1** | ARCHITECTURE.md lags the code (both repos) | 🔴 | BOTH | ◐ FE done · BE open |
 | **AP-C2** | Native Planning writes without invariants (corruptible schedule on `main`) | 🔴 | BE (FE-aware) | ☐ |
 | **AP-C3** | **Blacklist representation mismatch** (boolean flag vs `status==='blacklist'`) | 🔴 | BOTH | ✅ resolved (residue → AP-C1) |
 | **AP-C4** | FE `BACKEND-HANDOFF.md §1` prescribes the **wrong tenancy model** (single-DB `tenant_id`+global-scope) | 🔴 | FE | ☐ |
@@ -58,7 +58,7 @@
 ### AP-C1 · ARCHITECTURE.md lags the code — BOTH
 The FE aligns to these docs, so an omission drifts silently (BE finding **C1** + FE finding **DR-1**).
 - **BE:** add **Planning · Appointments · Opportunities C-42 · WhatsApp outbox · Outreach** to `koiosmatch-api/docs/ARCHITECTURE.md` (§2 graph + new sections); fix the §11 line counts. **Also fix the blacklist wording** in §5 + `CLAUDE.md §3` (they still say "blacklist = a flag" — the code made it a **status value**; see AP-C3).
-- **FE:** rewrite `koiosmatch-frontend/docs/ARCHITECTURE.md §2/§3` from the **v1** status model to **v2** (phase + deployability, blacklist as a status value, availability folded, `inactive` gone).
+- **FE:** ✅ **DONE (2026-07-01)** — `koiosmatch-frontend/docs/ARCHITECTURE.md §2/§3` rewritten to **v2** (phase + deployability, blacklist as a status value, availability folded, `inactive` gone); header + §6 lookup list synced; no stray v1 terms.
 - **BOTH:** add "reconcile ARCHITECTURE.md" to the per-step Definition of Done so this can't recur.
 
 ### AP-C2 · Native Planning writes without invariants — BE (FE-aware)
