@@ -24,6 +24,7 @@ import {
 
 import UsersPage from '../users/UsersPage'
 import ViewConfigEditor from '@/components/settings/ViewConfigEditor'
+import DashboardsSettings from './sections/DashboardsSettings'
 
 import BrandSettings from './sections/BrandSettings'
 import CompanySettings from './sections/CompanySettings'
@@ -188,6 +189,7 @@ export const NAV_GROUPS = [
   {
     key: 'views', icon: BarChart2,
     items: [
+      { id: 'dashboards', icon: BarChart2, component: DashboardsSettings },
       { id: 'view_customers', icon: Building2, render: () => <ViewConfigEditor module="customers" /> },
       { id: 'view_planning', icon: Clock, render: () => <ViewConfigEditor module="planning" /> },
       { id: 'view_sales', icon: BarChart2, render: () => <ViewConfigEditor module="sales" /> },

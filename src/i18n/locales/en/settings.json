@@ -140,7 +140,8 @@
     "candidate_required_fields": "Required fields",
     "functions": "Functions",
     "customer_display": "Table display",
-    "opportunity_display": "Table display"
+    "opportunity_display": "Table display",
+    "dashboards": "Dashboards"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1354,5 +1355,21 @@
         "description": "On = the owner avatar uses the account manager's colour. Off = neutral grey."
       }
     }
+  },
+  "dashboardsIntro": "Each role has its own dashboard with a fixed KPI row and matching charts and lists.",
+  "dashboardsPreviewHint": "Preview each view live via the dashboard switcher at the top right (management and admin).",
+  "dashboardsRoleHint": "Link a role to a dashboard under Roles & Permissions.",
+  "dashboardsKpis": "KPIs",
+  "dashboardsBlocks": "Charts & lists",
+  "dashboardsAll": "All charts & lists",
+  "dashboardsCanSwitch": "Can switch",
+  "dashboardsDesc": {
+    "admin": "Full overview — all KPIs, charts and lists.",
+    "management": "Steering on inflow, outflow, pipeline and placements.",
+    "recruitment": "Candidate-focused: touchpoints, follow-up, funnel and conversations.",
+    "backoffice": "Documents, contracts, couplings and runs.",
+    "sales": "Opportunities, pipeline value and leads.",
+    "planning": "Shifts, WhatsApp queue and incomplete runs.",
+    "readonly": "Read-only summary."
   }
 }

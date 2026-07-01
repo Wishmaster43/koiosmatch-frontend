@@ -140,7 +140,8 @@
     "functions": "Funktionen",
     "customer_display": "Tabellenanzeige",
     "vacancy_app_defaults": "Bewerbungseinstellungen",
-    "opportunity_display": "Tabellenansicht"
+    "opportunity_display": "Tabellenansicht",
+    "dashboards": "Dashboards"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1354,5 +1355,21 @@
         "description": "Ein = die Chancen-Tabelle und KPIs zeigen Stunden statt Euro."
       }
     }
+  },
+  "dashboardsIntro": "Jede Rolle hat ein eigenes Dashboard mit einer festen KPI-Zeile und passenden Diagrammen und Listen.",
+  "dashboardsPreviewHint": "Sehen Sie jede Ansicht live über den Dashboard-Umschalter oben rechts (Management und Admin).",
+  "dashboardsRoleHint": "Verknüpfen Sie eine Rolle mit einem Dashboard unter Rollen & Rechte.",
+  "dashboardsKpis": "KPIs",
+  "dashboardsBlocks": "Diagramme & Listen",
+  "dashboardsAll": "Alle Diagramme & Listen",
+  "dashboardsCanSwitch": "Kann wechseln",
+  "dashboardsDesc": {
+    "admin": "Vollständige Übersicht — alle KPIs, Diagramme und Listen.",
+    "management": "Steuerung von Zu- und Abgängen, Pipeline und Platzierungen.",
+    "recruitment": "Kandidatenfokus: Touchpoints, Nachverfolgung, Funnel und Gespräche.",
+    "backoffice": "Dokumente, Verträge, Kopplungen und Runs.",
+    "sales": "Chancen, Pipeline-Wert und Leads.",
+    "planning": "Dienste, WhatsApp-Warteschlange und unvollständige Runs.",
+    "readonly": "Schreibgeschützte Zusammenfassung."
   }
 }

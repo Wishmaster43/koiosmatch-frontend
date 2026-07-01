@@ -40,6 +40,25 @@ export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   readonly: ['chart.status', 'chart.funnel'],
 }
 
+// ── Id → i18n label key (namespace `dashboard`). Single source shared by the
+// Settings → Dashboards preview so it never re-hardcodes labels.
+export const KPI_LABEL_KEY: Record<string, string> = {
+  candidates: 'kpi.candidatesTotal', stale: 'kpi.notContacted6m', never: 'kpi.neverContacted',
+  tasks: 'kpi.openTasks', opps: 'kpi.opportunities', pipeline: 'kpi.pipelineValue',
+  placements: 'kpi.placements', intakes: 'kpi.intakes', fillRate: 'kpi.fillRate',
+  failedWa: 'kpi.failedWa', waQueue: 'kpi.waQueue', incompleteRuns: 'kpi.incompleteRuns',
+  activeConv: 'kpi.activeConv', missingDocs: 'kpi.missingDocs', expiringContracts: 'kpi.expiringContracts',
+  couplingErrors: 'kpi.couplingErrors', openShifts: 'kpi.openShifts', occupancy: 'kpi.occupancy',
+}
+export const BLOCK_LABEL_KEY: Record<string, string> = {
+  'chart.status': 'chart.byStatus', 'chart.funnel': 'chart.funnel', 'chart.funnelConversion': 'chart.funnelConversion',
+  'chart.weekly': 'chart.intakeWeekly', 'chart.oppStage': 'chart.byStage',
+  'list.candidates': 'block.recentCandidates', 'list.applications': 'block.recentApplications',
+  'list.conversations': 'block.recentConversations', 'list.runs': 'block.recentRuns', 'list.leads': 'block.leadsPipeline',
+  'block.touchpoints': 'block.touchpoints', 'block.attention': 'block.attentionTitle',
+  'block.waQueue': 'block.waQueue', 'block.shifts': 'block.shifts',
+}
+
 // Is a chart/list block visible for the active dashboard type?
 export const visibleBlock = (type: string, id: string): boolean => {
   const tpl = DASHBOARD_TEMPLATES[type as DashboardType] ?? ['*']

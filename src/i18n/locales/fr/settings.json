@@ -140,7 +140,8 @@
     "functions": "Fonctions",
     "customer_display": "Affichage du tableau",
     "vacancy_app_defaults": "Paramètres de candidature",
-    "opportunity_display": "Affichage du tableau"
+    "opportunity_display": "Affichage du tableau",
+    "dashboards": "Tableaux de bord"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -1354,5 +1355,21 @@
         "description": "Activé = le tableau Opportunités et les KPI affichent des heures au lieu d’euros."
       }
     }
+  },
+  "dashboardsIntro": "Chaque rôle dispose de son propre tableau de bord avec une rangée de KPI fixe et des graphiques et listes correspondants.",
+  "dashboardsPreviewHint": "Prévisualisez chaque vue en direct via le sélecteur de tableau de bord en haut à droite (direction et admin).",
+  "dashboardsRoleHint": "Associez un rôle à un tableau de bord dans Rôles et autorisations.",
+  "dashboardsKpis": "KPI",
+  "dashboardsBlocks": "Graphiques et listes",
+  "dashboardsAll": "Tous les graphiques et listes",
+  "dashboardsCanSwitch": "Peut changer",
+  "dashboardsDesc": {
+    "admin": "Vue complète — tous les KPI, graphiques et listes.",
+    "management": "Pilotage des entrées, sorties, pipeline et placements.",
+    "recruitment": "Axé candidat : points de contact, suivi, entonnoir et conversations.",
+    "backoffice": "Documents, contrats, couplages et exécutions.",
+    "sales": "Opportunités, valeur du pipeline et leads.",
+    "planning": "Services, file d'attente WhatsApp et exécutions incomplètes.",
+    "readonly": "Résumé en lecture seule."
   }
 }

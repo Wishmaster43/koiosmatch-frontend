@@ -140,7 +140,8 @@
     "functions": "Funciones",
     "customer_display": "Vista de tabla",
     "vacancy_app_defaults": "Ajustes de candidatura",
-    "opportunity_display": "Vista de tabla"
+    "opportunity_display": "Vista de tabla",
+    "dashboards": "Paneles"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1354,5 +1355,21 @@
         "description": "Activado = la tabla de Oportunidades y los KPI muestran horas en lugar de euros."
       }
     }
+  },
+  "dashboardsIntro": "Cada rol tiene su propio panel con una fila de KPI fija y gráficos y listas correspondientes.",
+  "dashboardsPreviewHint": "Previsualiza cada vista en vivo con el selector de panel en la parte superior derecha (dirección y admin).",
+  "dashboardsRoleHint": "Vincula un rol a un panel en Roles y permisos.",
+  "dashboardsKpis": "KPI",
+  "dashboardsBlocks": "Gráficos y listas",
+  "dashboardsAll": "Todos los gráficos y listas",
+  "dashboardsCanSwitch": "Puede cambiar",
+  "dashboardsDesc": {
+    "admin": "Visión completa: todos los KPI, gráficos y listas.",
+    "management": "Gestión de entradas, salidas, pipeline y colocaciones.",
+    "recruitment": "Enfocado en candidatos: puntos de contacto, seguimiento, embudo y conversaciones.",
+    "backoffice": "Documentos, contratos, vinculaciones y ejecuciones.",
+    "sales": "Oportunidades, valor del pipeline y leads.",
+    "planning": "Turnos, cola de WhatsApp y ejecuciones incompletas.",
+    "readonly": "Resumen de solo lectura."
   }
 }

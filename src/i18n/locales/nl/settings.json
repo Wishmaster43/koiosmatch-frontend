@@ -140,7 +140,8 @@
     "candidate_required_fields": "Verplichte velden",
     "functions": "Functies",
     "customer_display": "Tabelweergave",
-    "opportunity_display": "Tabelweergave"
+    "opportunity_display": "Tabelweergave",
+    "dashboards": "Dashboards"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1354,5 +1355,21 @@
         "description": "Aan = de eigenaar-avatar gebruikt de kleur van de accountmanager. Uit = neutraal grijs."
       }
     }
+  },
+  "dashboardsIntro": "Elke rol krijgt een eigen dashboard met een vaste KPI-rij en bijpassende grafieken en lijsten.",
+  "dashboardsPreviewHint": "Bekijk elke weergave live via de dashboard-switcher rechtsboven (management en admin).",
+  "dashboardsRoleHint": "Koppel een rol aan een dashboard bij Rollen & Rechten.",
+  "dashboardsKpis": "KPI's",
+  "dashboardsBlocks": "Grafieken & lijsten",
+  "dashboardsAll": "Alle grafieken & lijsten",
+  "dashboardsCanSwitch": "Kan wisselen",
+  "dashboardsDesc": {
+    "admin": "Volledig overzicht — alle KPI's, grafieken en lijsten.",
+    "management": "Sturing op instroom, uitstroom, pijplijn en plaatsingen.",
+    "recruitment": "Kandidaatgericht: touchpoints, opvolging, funnel en gesprekken.",
+    "backoffice": "Documenten, contracten, koppelingen en runs.",
+    "sales": "Kansen, pijplijnwaarde en leads.",
+    "planning": "Diensten, WhatsApp-wachtrij en incomplete runs.",
+    "readonly": "Alleen-lezen samenvatting."
   }
 }
