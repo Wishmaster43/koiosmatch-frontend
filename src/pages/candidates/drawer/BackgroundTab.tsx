@@ -50,6 +50,11 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
   const [skills,      setSkills]       = useState<RelItem[]>((c.skills ?? []) as unknown as RelItem[])
   const { t } = useTranslation('common')
 
+  // A row is persisted (has a server id) once it isn't the negative temp placeholder:
+  // a non-empty UUID string (backend uses UUIDs) or a positive legacy numeric id.
+  const isPersisted = (id: unknown): id is string | number =>
+    (typeof id === 'string' && id.length > 0) || (typeof id === 'number' && id > 0)
+
   // add / edit-at-index / remove-at-index for a relation, with optimistic persistence.
   // Not-yet-persisted rows get a negative temp id (never collides with server ids).
   const ops = (rel: string, list: RelItem[], set: Dispatch<SetStateAction<RelItem[]>>) => ({
@@ -63,12 +68,12 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
     onEdit: (i: number, v: RelItem) => {
       const id = list[i]?.id
       set(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))
-      if (typeof id === 'number' && id > 0) api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v)).catch(() => notifyError(t('actionFailed')))
+      if (isPersisted(id)) api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v)).catch(() => notifyError(t('actionFailed')))
     },
     onRemove: (i: number) => {
       const id = list[i]?.id
       set(p => p.filter((_, idx) => idx !== i))
-      if (typeof id === 'number' && id > 0) api.delete(`/candidates/${c.id}/${rel}/${id}`).catch(() => notifyError(t('actionFailed')))
+      if (isPersisted(id)) api.delete(`/candidates/${c.id}/${rel}/${id}`).catch(() => notifyError(t('actionFailed')))
     },
   })
 
