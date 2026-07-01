@@ -41,11 +41,11 @@
     "noUsers": "Aucun utilisateur trouvé.",
     "changeStage": "Changer l’étape du tunnel",
     "searchStage": "Rechercher une étape…",
-    "changeType": "Changer le type de candidat",
-    "searchType": "Rechercher un type…",
+    "changeType": "Modifier la forme de contrat",
+    "searchType": "Rechercher une forme de contrat…",
     "ownerChanged": "Responsable changé en {{name}} ({{count}})",
     "stageChanged": "Étape du tunnel → {{value}} ({{count}})",
-    "typeChanged": "Type de candidat → {{value}} ({{count}})",
+    "typeChanged": "Forme de contrat → {{value}} ({{count}})",
     "mutateError": "Échec de l’action. Veuillez réessayer.",
     "removeTag": "Supprimer l’étiquette",
     "searchTag": "Rechercher une étiquette…",
@@ -61,7 +61,20 @@
     "archiveError": "Échec de l’archivage. Veuillez réessayer.",
     "typeSubmit": "Appliquer",
     "noTypes": "Aucun type",
-    "noneLabel": "aucun"
+    "noneLabel": "aucun",
+    "consent": "Consentements",
+    "consentOn": "Activer",
+    "consentOff": "Désactiver",
+    "consentChanged": "Consentement {{value}} pour {{count}} candidats",
+    "changePhase": "Modifier la phase",
+    "searchPhase": "Rechercher une phase…",
+    "convertResult": "{{updated}} sur {{total}} réussis",
+    "changeStatus": "Modifier le statut",
+    "searchStatus": "Rechercher un statut…",
+    "statusChanged": "Statut → {{value}} ({{count}})",
+    "addTag": "Ajouter un tag",
+    "addTagPlaceholder": "Tag…",
+    "tagAdded": "Tag «{{tag}}» ajouté ({{count}})"
   },
   "kpi": {
     "total": "Total",
@@ -190,7 +203,7 @@
     "photoUpload": "Téléverser",
     "photoRemove": "Supprimer",
     "stage": "Type de tunnel",
-    "candidateType": "Type de candidat",
+    "candidateType": "Forme de contrat",
     "entityLabel": "Candidat",
     "applications": "Candidatures",
     "phase": "Phase",
@@ -202,7 +215,8 @@
     "blacklistConfirm": "Ajouter",
     "statusReasonTitle": "Changement de statut",
     "reasonLabel": "Raison",
-    "returnDateLabel": "De nouveau disponible à partir de"
+    "returnDateLabel": "De nouveau disponible à partir de",
+    "convertTo": "Convertir en {{phase}}"
   },
   "stage": {
     "lead": "Piste",
@@ -431,7 +445,8 @@
     "groupAvailability": "Disponibilité",
     "groupTravel": "Déplacements",
     "groupWork": "Préférences de travail",
-    "groupOther": "Autre"
+    "groupOther": "Autre",
+    "moreTitle": "Autres préférences"
   },
   "zzp": {
     "title": "Indépendant",

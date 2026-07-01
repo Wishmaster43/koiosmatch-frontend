@@ -3,14 +3,13 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
-import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
+import SectionCard from '@/components/ui/SectionCard'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS components — accept any props at the boundary.
 const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
-const EditableFieldTable = EditableFieldTableJs as unknown as ComponentType<AnyProps>
 
 const EDITOR_LABELS = {
   bold: 'Bold', italic: 'Italic', bulletList: 'Bullet list', orderedList: 'Numbered list',
@@ -26,51 +25,38 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
   const { types: noteTypes } = useNoteTypes()
   const [notes, setNotes] = useState<Record<string, unknown>[]>(c.notes ?? [])
 
-  // Channel consent (AVG) — nested `consent.{channel}_opt_in` (C-11 backend contract).
-  const consent = c.consent
-  // C-11: WhatsApp/e-mail default opt-in (operational opt-out), newsletter opt-in.
-  const consentValue = {
-    whatsapp_opt_in:   consent.whatsapp_opt_in   ?? true,
-    email_opt_in:      consent.email_opt_in      ?? true,
-    newsletter_opt_in: consent.newsletter_opt_in ?? false,
-  }
-  const consentFields = [
-    { key: 'whatsapp_opt_in',   label: t('communication.consentWhatsapp'),   type: 'checkbox' },
-    { key: 'email_opt_in',      label: t('communication.consentEmail'),      type: 'checkbox' },
-    { key: 'newsletter_opt_in', label: t('communication.consentNewsletter'), type: 'checkbox' },
+  // Channel consent (AVG) — nested `consent.{channel}_*` (C-11). Toggling saves the
+  // full consent object; the server stamps `*_consent_at` on a flip (shown inline).
+  const consent = c.consent as unknown as Record<string, unknown>
+  const CONSENT_CH = [
+    { key: 'whatsapp_opt_in',   at: 'whatsapp_consent_at',   label: t('communication.consentWhatsapp'),   dflt: true },
+    { key: 'email_opt_in',      at: 'email_consent_at',      label: t('communication.consentEmail'),      dflt: true },
+    { key: 'newsletter_opt_in', at: 'newsletter_consent_at', label: t('communication.consentNewsletter'), dflt: false },
   ]
-  // Read-only AVG audit line: when each granted consent was recorded server-side.
-  const consentTimestamps = [
-    { label: t('communication.consentWhatsapp'),   at: consent.whatsapp_consent_at },
-    { label: t('communication.consentEmail'),      at: consent.email_consent_at },
-    { label: t('communication.consentNewsletter'), at: consent.newsletter_consent_at },
-  ].filter(x => x.at)
+  const setConsent = (key: string, val: boolean) => onSave?.({ ...consent, [key]: val })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {/* Consent toggles — persisted via the drawer's onUpdate ({ consent }). The
-          existing `_at` timestamps are merged back so they survive the optimistic save. */}
-      <div>
-        <EditableFieldTable
-          title={t('communication.consentTitle')}
-          fields={consentFields}
-          value={consentValue}
-          labelWidth={220}
-          onSave={(v: Record<string, unknown>) => onSave?.({ ...consent, ...v })}
-        />
-        {consentTimestamps.length > 0 && (
-          <div style={{ marginTop: -10, marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {consentTimestamps.map(x => (
-              <div key={x.label} style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                {x.label}: {t('communication.consentGivenAt', { date: formatDate(x.at) })}
+      {/* Consent toggles (AVG) — each channel shows its "given at" date+time inline. */}
+      <SectionCard title={t('communication.consentTitle')}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {CONSENT_CH.map(ch => {
+            const on = (consent[ch.key] as boolean | undefined) ?? ch.dflt
+            const at = consent[ch.at] as string | null | undefined
+            return (
+              <div key={ch.key} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <input type="checkbox" checked={!!on} onChange={e => setConsent(ch.key, e.target.checked)}
+                  style={{ width: 16, height: 16, cursor: 'pointer', flexShrink: 0 }} />
+                <span style={{ fontSize: 13, color: 'var(--text)', flex: 1 }}>{ch.label}</span>
+                {on && at && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('communication.consentGivenAt', { date: formatDate(at) })}</span>}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            )
+          })}
+        </div>
+      </SectionCard>
       <NotesTab
         notes={notes}
-        onAddNote={(n: Record<string, unknown>) => setNotes(p => [{ ...n, ago: t('common:justNow', { defaultValue: 'zojuist' }) }, ...p])}
+        onAddNote={(n: Record<string, unknown>) => setNotes(p => [{ ...n, created_at: new Date().toISOString(), ago: t('common:justNow', { defaultValue: 'zojuist' }) }, ...p])}
         onEditNote={(i: number, n: Record<string, unknown>) => setNotes(p => p.map((x, idx) => idx === i ? { ...x, ...n } : x))}
         timeline={c.timeline ?? []}
         noteTypes={noteTypes}

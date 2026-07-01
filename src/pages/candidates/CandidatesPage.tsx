@@ -49,7 +49,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // Auth/user must come first — pageSize initial value reads user.default_per_page.
   const { hasPermission, user } = useAuth() as unknown as { hasPermission: (p: string) => boolean; user: { default_per_page?: number } | null }
   const { t } = useTranslation('candidates')
-  const { candidateTypes, funnelTypes, statuses } = useLookups()
+  const { candidateTypes, funnelTypes, statuses, phases } = useLookups()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { registerFilters, unregisterFilters } = useRightPanel() as { registerFilters: (id: string, groups: unknown) => void; unregisterFilters: (id: string) => void }
 
@@ -206,7 +206,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // ── Bulk actions ──
   const {
     toggleRow, toggleAll, bulkAddToPool, bulkRemoveFromPool,
-    bulkSetOwner, bulkSetStage, bulkSetTypes, selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
+    bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
+    selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
   } = useCandidateBulkActions({ candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes })
 
   // Recharts hands the clicked segment back at top level AND under `.payload`.
@@ -270,10 +271,11 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
             {selectedIds.size > 0 ? (
               <CandidatesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
                 onAddToPool={bulkAddToPool} onRemoveFromPool={bulkRemoveFromPool}
-                onSetOwner={bulkSetOwner} onSetStage={bulkSetStage} onSetTypes={bulkSetTypes}
+                onSetOwner={bulkSetOwner} onSetStage={bulkSetStage} onSetTypes={bulkSetTypes} onSetConsent={bulkSetConsent}
+                onConvertPhase={bulkConvertPhase} onSetStatus={bulkSetStatus} onAddTag={bulkAddTag}
                 onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
                 canArchive={hasPermission('candidates.delete')}
-                users={users} funnelTypes={funnelTypes} candidateTypes={candidateTypes} selectedTags={selectedTags} />
+                users={users} funnelTypes={funnelTypes} candidateTypes={candidateTypes} phases={phases} statuses={statuses} selectedTags={selectedTags} />
             ) : (
               <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
                 background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>

@@ -41,8 +41,6 @@ interface LookupsValue {
   funnelMeta: (v?: string | null) => LookupItem
   statusMeta: (v?: string | null) => LookupItem
   availabilityMeta: (v?: string | null) => LookupItem
-  isApplicantStatus: (v?: string | null) => boolean
-  hasApplicantStatus: boolean
 }
 
 // ── Seed defaults ───────────────────────────────────────────────────────────
@@ -106,7 +104,7 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
     .filter(it => it.active !== false)
     .sort((a, b) => (Number(a.order ?? a.sort_order ?? 0)) - (Number(b.order ?? b.sort_order ?? 0)))
     .map(it => ({ value: String(it.value), label: String(it.label ?? it.value), color: (it.color as string) ?? '#6B7280',
-      is_applicant: it.is_applicant === true, requires_reason: it.requires_reason === true,
+      requires_reason: it.requires_reason === true,
       requires_match: it.requires_match === true, expects_return_date: it.expects_return_date === true }))
 }
 
@@ -117,7 +115,7 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
   const [phases,         setPhases]         = useState<LookupItem[]>(DEFAULT_PHASES)
   const [funnelTypes,    setFunnelTypes]    = useState<LookupItem[]>(DEFAULT_FUNNEL_TYPES)
   const [statuses,       setStatuses]       = useState<LookupItem[]>(DEFAULT_STATUSES)
-  const [availability,   setAvailability]   = useState<LookupItem[]>(DEFAULT_AVAILABILITY)
+  const [availability] = useState<LookupItem[]>(DEFAULT_AVAILABILITY)
   const [loading,        setLoading]        = useState(true)
 
   useEffect(() => {
@@ -133,10 +131,9 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-    // Availability is its own endpoint (separate axis); load it independently.
-    api.get('/availability-options')
-      .then(res => setAvailability(normalize(res.data?.data ?? res.data, DEFAULT_AVAILABILITY)))
-      .catch(() => {})
+    // C-39: availability was merged into the status axis (v2) and the
+    // /availability-options endpoint was removed backend-side — keep the seed
+    // default and stop fetching (kills the 404). Full removal of the axis is C-39.
   }, [])
 
   // value → item helpers (with a neutral fallback so the UI never crashes).
@@ -144,17 +141,12 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
   const typeMeta   = (v?: string | null): LookupItem => find(candidateTypes, v) ?? { value: v ?? '', label: v ?? '', color: '#6B7280' }
   const phaseMeta  = (v?: string | null): LookupItem => find(phases, v)         ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
   const funnelMeta = (v?: string | null): LookupItem => find(funnelTypes, v)    ?? { value: v ?? '', label: v ?? '', color: '#6B7280' }
-  const statusMeta = (v?: string | null): LookupItem => find(statuses, v)       ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF', is_applicant: false }
+  const statusMeta = (v?: string | null): LookupItem => find(statuses, v)       ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
   const availabilityMeta = (v?: string | null): LookupItem => find(availability, v) ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
-
-  // Funnel-reveal helpers: a status flagged `is_applicant` exposes the funnel.
-  const isApplicantStatus  = (v?: string | null) => find(statuses, v)?.is_applicant === true
-  const hasApplicantStatus = statuses.some(s => s.is_applicant === true)
 
   const value: LookupsValue = {
     candidateTypes, phases, funnelTypes, statuses, availability, loading,
     typeMeta, phaseMeta, funnelMeta, statusMeta, availabilityMeta,
-    isApplicantStatus, hasApplicantStatus,
   }
 
   return <LookupsContext.Provider value={value}>{children}</LookupsContext.Provider>

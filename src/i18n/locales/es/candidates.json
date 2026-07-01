@@ -41,11 +41,11 @@
     "noUsers": "No se encontraron usuarios.",
     "changeStage": "Cambiar etapa del embudo",
     "searchStage": "Buscar una etapa…",
-    "changeType": "Cambiar tipo de candidato",
-    "searchType": "Buscar un tipo…",
+    "changeType": "Cambiar tipo de contrato",
+    "searchType": "Buscar un tipo de contrato…",
     "ownerChanged": "Responsable cambiado a {{name}} ({{count}})",
     "stageChanged": "Etapa del embudo → {{value}} ({{count}})",
-    "typeChanged": "Tipo de candidato → {{value}} ({{count}})",
+    "typeChanged": "Tipo de contrato → {{value}} ({{count}})",
     "mutateError": "La acción falló. Inténtalo de nuevo.",
     "removeTag": "Quitar etiqueta",
     "searchTag": "Buscar una etiqueta…",
@@ -61,7 +61,20 @@
     "archiveError": "Error al archivar. Inténtalo de nuevo.",
     "typeSubmit": "Aplicar",
     "noTypes": "Sin tipos",
-    "noneLabel": "ninguno"
+    "noneLabel": "ninguno",
+    "consent": "Consentimientos",
+    "consentOn": "Activar",
+    "consentOff": "Desactivar",
+    "consentChanged": "Consentimiento {{value}} para {{count}} candidatos",
+    "changePhase": "Cambiar fase",
+    "searchPhase": "Buscar una fase…",
+    "convertResult": "{{updated}} de {{total}} realizados",
+    "changeStatus": "Cambiar estado",
+    "searchStatus": "Buscar un estado…",
+    "statusChanged": "Estado → {{value}} ({{count}})",
+    "addTag": "Añadir etiqueta",
+    "addTagPlaceholder": "Etiqueta…",
+    "tagAdded": "Etiqueta \"{{tag}}\" añadida ({{count}})"
   },
   "kpi": {
     "total": "Total",
@@ -190,7 +203,7 @@
     "photoUpload": "Subir",
     "photoRemove": "Eliminar",
     "stage": "Tipo de embudo",
-    "candidateType": "Tipo de candidato",
+    "candidateType": "Tipo de contrato",
     "entityLabel": "Candidato",
     "applications": "Candidaturas",
     "phase": "Fase",
@@ -202,7 +215,8 @@
     "blacklistConfirm": "Añadir",
     "statusReasonTitle": "Cambio de estado",
     "reasonLabel": "Motivo",
-    "returnDateLabel": "Disponible de nuevo desde"
+    "returnDateLabel": "Disponible de nuevo desde",
+    "convertTo": "Convertir a {{phase}}"
   },
   "stage": {
     "lead": "Lead",
@@ -431,7 +445,8 @@
     "groupAvailability": "Disponibilidad",
     "groupTravel": "Desplazamientos",
     "groupWork": "Preferencias de trabajo",
-    "groupOther": "Otros"
+    "groupOther": "Otros",
+    "moreTitle": "Otras preferencias"
   },
   "zzp": {
     "title": "Autónomo",

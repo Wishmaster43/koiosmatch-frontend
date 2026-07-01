@@ -33,9 +33,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
   const isStatusBlock = slug === 'statuses'
   const isFunnelBlock = slug === 'funnel-types'
 
-  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', is_applicant: false, requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false })
+  const openAdd  = ()   => setModal({ mode: 'add',  value: '', label: '', color: '#3B8FD4', requires_appointment: false, requires_reason: false, requires_match: false, expects_return_date: false, is_match: false, is_rejected: false })
   const openEdit = (it) => setModal({ mode: 'edit', id: it.id, value: it.value, label: it.label, color: it.color ?? '#6B7280',
-    is_applicant: it.is_applicant === true, requires_appointment: it.requires_appointment === true, requires_reason: it.requires_reason === true,
+    requires_appointment: it.requires_appointment === true, requires_reason: it.requires_reason === true,
     requires_match: it.requires_match === true, expects_return_date: it.expects_return_date === true,
     is_match: it.is_match === true, is_rejected: it.is_rejected === true })
 
@@ -44,7 +44,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
     setBusy(true)
     // Only send the flag that exists on this lookup; the backend guards the rest.
     const flagFields = {
-      ...(isStatusBlock ? { is_applicant: modal.is_applicant, requires_reason: modal.requires_reason, requires_match: modal.requires_match, expects_return_date: modal.expects_return_date } : {}),
+      ...(isStatusBlock ? { requires_reason: modal.requires_reason, requires_match: modal.requires_match, expects_return_date: modal.expects_return_date } : {}),
       ...(isFunnelBlock ? { requires_appointment: modal.requires_appointment, is_match: modal.is_match, is_rejected: modal.is_rejected } : {}),
     }
     try {
@@ -107,13 +107,6 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
             <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />
             <ColorBadge label={item.label} color={item.color ?? '#6B7280'} />
             <code style={{ fontSize: 11, color: 'var(--text-muted)' }}>{item.value}</code>
-            {/* Funnel badge: marks the status that reveals the application funnel. */}
-            {isStatusBlock && item.is_applicant && (
-              <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
-                             background: 'var(--color-primary-bg, #EEF2FF)', padding: '2px 7px', borderRadius: 999 }}>
-                {t('lookups.applicantBadge')}
-              </span>
-            )}
             {/* Reason badge: marks a status that requires a reason when set (e.g. Inactive). */}
             {isStatusBlock && item.requires_reason && (
               <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-warning)',
@@ -180,18 +173,6 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('lookups.colorField')}</div>
               <ColorSwatch color={modal.color} onChange={c => setModal(m => ({ ...m, color: c }))} />
             </div>
-
-            {/* Funnel-reveal toggle — statuses only; flags the applicant status. */}
-            {isStatusBlock && (
-              <div style={{ marginBottom: 14 }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <input type="checkbox" checked={modal.is_applicant}
-                    onChange={e => setModal(m => ({ ...m, is_applicant: e.target.checked }))} />
-                  <span style={{ fontSize: 13, color: 'var(--text)' }}>{t('lookups.isApplicant')}</span>
-                </label>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('lookups.isApplicantHint')}</div>
-              </div>
-            )}
 
             {/* Reason-required toggle — statuses only (e.g. Inactive needs a reason). */}
             {isStatusBlock && (

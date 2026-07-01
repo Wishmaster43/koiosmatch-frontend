@@ -133,13 +133,17 @@ export default function EditableFieldTable({
     if (f.type === 'chips') {
       const arr = (Array.isArray(v) ? v : []).map(String)
       if (arr.length === 0) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
-      const labels = arr.map(x => (f.chipOptions ?? []).find(o => o.value === x)?.label ?? x)
       return (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-          {labels.map((lab, i) => (
-            <span key={i} style={{ padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500,
-              background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}>{lab}</span>
-          ))}
+          {arr.map(x => {
+            const o = (f.chipOptions ?? []).find(op => op.value === x)
+            const col = o?.color
+            // Per-value colour when set (e.g. contract forms), else the primary accent.
+            const s = col
+              ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
+              : { background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }
+            return <span key={x} style={{ padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500, ...s }}>{o?.label ?? x}</span>
+          })}
         </div>
       )
     }

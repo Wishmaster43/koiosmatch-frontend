@@ -48,11 +48,11 @@
     "noUsers": "Geen gebruikers gevonden.",
     "changeStage": "Funnel-stage wijzigen",
     "searchStage": "Zoek een stage…",
-    "changeType": "Kandidaattype wijzigen",
-    "searchType": "Zoek een type…",
+    "changeType": "Contractvorm wijzigen",
+    "searchType": "Zoek een contractvorm…",
     "ownerChanged": "Eigenaar gewijzigd naar {{name}} ({{count}})",
     "stageChanged": "Funnel-stage → {{value}} ({{count}})",
-    "typeChanged": "Kandidaattype → {{value}} ({{count}})",
+    "typeChanged": "Contractvorm → {{value}} ({{count}})",
     "mutateError": "Actie mislukt. Probeer het opnieuw.",
     "removeTag": "Tag verwijderen",
     "searchTag": "Zoek een tag…",
@@ -68,7 +68,20 @@
     "archiveError": "Archiveren mislukt. Probeer het opnieuw.",
     "typeSubmit": "Toepassen",
     "noTypes": "Geen typen",
-    "noneLabel": "geen"
+    "noneLabel": "geen",
+    "consent": "Toestemmingen",
+    "consentOn": "Aan",
+    "consentOff": "Uit",
+    "consentChanged": "Toestemming {{value}} voor {{count}} kandidaten",
+    "changePhase": "Fase wijzigen",
+    "searchPhase": "Zoek een fase…",
+    "convertResult": "{{updated}} van de {{total}} gelukt",
+    "changeStatus": "Status wijzigen",
+    "searchStatus": "Zoek een status…",
+    "statusChanged": "Status → {{value}} ({{count}})",
+    "addTag": "Tag toevoegen",
+    "addTagPlaceholder": "Tag…",
+    "tagAdded": "Tag \"{{tag}}\" toegevoegd ({{count}})"
   },
   "kpi": {
     "total": "Totaal",
@@ -197,7 +210,7 @@
     "photoUpload": "Uploaden",
     "photoRemove": "Verwijderen",
     "stage": "Funnel type",
-    "candidateType": "Kandidaat type",
+    "candidateType": "Contractvorm",
     "entityLabel": "Kandidaat",
     "applications": "Sollicitaties",
     "phase": "Fase",
@@ -209,7 +222,8 @@
     "blacklistConfirm": "Blacklisten",
     "statusReasonTitle": "Statuswijziging",
     "reasonLabel": "Reden",
-    "returnDateLabel": "Weer beschikbaar vanaf"
+    "returnDateLabel": "Weer beschikbaar vanaf",
+    "convertTo": "Converteer naar {{phase}}"
   },
   "stage": {
     "lead": "Lead",
@@ -438,7 +452,8 @@
     "groupAvailability": "Beschikbaarheid",
     "groupTravel": "Reizen",
     "groupWork": "Werkvoorkeuren",
-    "groupOther": "Overig"
+    "groupOther": "Overig",
+    "moreTitle": "Overige voorkeuren"
   },
   "zzp": {
     "title": "ZZP'er",

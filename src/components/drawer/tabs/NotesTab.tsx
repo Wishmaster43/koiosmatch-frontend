@@ -10,6 +10,7 @@ import Avatar from '../../ui/Avatar'
 import SafeHtml from '../../ui/SafeHtml'
 import RichTextEditor from '../../ui/RichTextEditor'
 import SectionCard, { sectionBlock } from '../../ui/SectionCard'
+import { useDateFormat } from '@/lib/datetime'
 
 interface NoteType { value: string; label: string; color?: string }
 interface NoteItem { type?: string; title?: string; author?: string; text?: string; body?: string; ago?: string; [k: string]: unknown }
@@ -45,6 +46,11 @@ export default function NotesTab({
   const [title, setTitle]     = useState('')
   const [type, setType]       = useState(noteTypes[0]?.value ?? '')
   const [expanded, setExpanded] = useState(false)
+  const { formatDate } = useDateFormat()
+  // Note timestamp: real date+time when the note carries one, else the relative "ago".
+  const noteWhen = (n: NoteItem) => n.created_at
+    ? formatDate(n.created_at as string, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : n.ago
 
   const reset = () => { setAdding(false); setEditingIdx(null); setBody(''); setTitle(''); setType(noteTypes[0]?.value ?? ''); setExpanded(false) }
   const openEdit = (i: number) => {
@@ -122,7 +128,7 @@ export default function NotesTab({
                       {n.type && renderTypeChip(n.type)}
                       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{n.title ?? n.author}</span>
                     </div>
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{n.ago}</span>
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{noteWhen(n)}</span>
                     {onEditNote && (
                       <button onClick={() => openEdit(i)} title={labels.edit}
                         style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0 0 0 6px', display: 'flex' }}>

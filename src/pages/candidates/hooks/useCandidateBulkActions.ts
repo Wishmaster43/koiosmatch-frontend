@@ -196,8 +196,55 @@ export function useCandidateBulkActions({
     setSelectedIds(new Set())
   }
 
+  // Convert the selection to a phase (e.g. Lead→Kandidaat). The backend validates
+  // each candidate against that phase's required fields; incomplete ones are skipped
+  // (reconciled back via bulkMutate) → "X van Y gelukt" (warning when any skipped).
+  const bulkConvertPhase = (phase: string) => {
+    const total = selectedIds.size
+    bulkMutate({
+      url: '/candidates/bulk/phase', body: { phase },
+      patch: { phase }, keys: ['phase'],
+      onSuccess: (n) => notify(n < total ? 'warning' : 'success', t('bulk.convertResult', { updated: n, total })),
+    })
+  }
+  // Set a (simple) deployability status for the selection. Match/reason-gated statuses
+  // (placed/unavailable/blacklist) are excluded from bulk in the UI.
+  const bulkSetStatus = (status: string, label: string) => bulkMutate({
+    url: '/candidates/bulk/status', body: { status },
+    patch: { status }, keys: ['status'],
+    onSuccess: (n) => notify('success', t('bulk.statusChanged', { value: label, count: n })),
+  })
+  // Add a tag to the selection (mirror of bulkRemoveTag).
+  const bulkAddTag = (tag: string) => {
+    const ids = [...selectedIds]
+    const tg = tag.trim()
+    if (!ids.length || !tg) return
+    const changedIds = candidates.filter(c => ids.includes(c.id) && !(c.tags ?? []).includes(tg)).map(c => c.id)
+    setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, tags: [...(c.tags ?? []), tg] } : c))
+    api.post('/candidates/bulk/tags/add', { candidate_ids: ids, tag: tg })
+      .then((res) => {
+        const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
+        if (updated) setCandidates(prev => prev.map(c => (changedIds.includes(c.id) && !updated.has(c.id)) ? { ...c, tags: (c.tags ?? []).filter(x => x !== tg) } : c))
+        notify('success', t('bulk.tagAdded', { tag: tg, count: updated ? updated.size : changedIds.length }))
+      })
+      .catch(() => {
+        setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, tags: (c.tags ?? []).filter(x => x !== tg) } : c))
+        notify('error', t('bulk.mutateError'))
+      })
+    setSelectedIds(new Set())
+  }
+
+  // Set channel consent (AVG opt-in) for the selection. No optimistic row patch —
+  // consent isn't a list column; the server stamps `*_consent_at` on a flip.
+  const bulkSetConsent = (consent: Record<string, boolean>, label: string) => bulkMutate({
+    url: '/candidates/bulk/consent', body: { consent },
+    patch: {}, keys: [],
+    onSuccess: (n) => notify('success', t('bulk.consentChanged', { value: label, count: n })),
+  })
+
   return {
     toggleRow, toggleAll, bulkAddToPool, bulkRemoveFromPool,
-    bulkSetOwner, bulkSetStage, bulkSetTypes, selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
+    bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
+    selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
   }
 }

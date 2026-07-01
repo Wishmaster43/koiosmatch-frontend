@@ -35,7 +35,7 @@ const NATIONALITIES = ['Nederlands','Belgisch','Duits','Frans','Brits','Pools','
  * with its own in-place edit controls (pencil → save/cancel) above the block.
  * Fields use label-above layout (consistent with the rest of the app) and pair
  * short fields into two columns to keep the panel calm and scannable. */
-export default function ProfileTab({ c, onEditSave }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void }) {
+export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const emptyForm = (): ProfileForm => ({
@@ -46,6 +46,9 @@ export default function ProfileTab({ c, onEditSave }: { c: Candidate; onEditSave
     linkedin: c.linkedin ?? '',
   })
   const [editing,        setEditing]        = useState(false)
+  // Open edit mode when the parent bumps the signal (e.g. right after Lead→Kandidaat convert).
+  const [prevAutoEdit,   setPrevAutoEdit]   = useState(autoEditSignal ?? 0)
+  if ((autoEditSignal ?? 0) !== prevAutoEdit) { setPrevAutoEdit(autoEditSignal ?? 0); setEditing(true) }
   const [summaryEditing, setSummaryEditing] = useState(false)
   const [summaryExpanded, setSummaryExpanded] = useState(false)
   const [form,    setForm]    = useState<ProfileForm>(emptyForm)

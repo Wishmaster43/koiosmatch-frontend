@@ -41,11 +41,11 @@
     "noUsers": "Keine Benutzer gefunden.",
     "changeStage": "Funnel-Phase ändern",
     "searchStage": "Phase suchen…",
-    "changeType": "Kandidatentyp ändern",
-    "searchType": "Typ suchen…",
+    "changeType": "Vertragsform ändern",
+    "searchType": "Vertragsform suchen…",
     "ownerChanged": "Eigentümer geändert zu {{name}} ({{count}})",
     "stageChanged": "Funnel-Phase → {{value}} ({{count}})",
-    "typeChanged": "Kandidatentyp → {{value}} ({{count}})",
+    "typeChanged": "Vertragsform → {{value}} ({{count}})",
     "mutateError": "Aktion fehlgeschlagen. Bitte erneut versuchen.",
     "removeTag": "Tag entfernen",
     "searchTag": "Tag suchen…",
@@ -61,7 +61,20 @@
     "archiveError": "Archivierung fehlgeschlagen. Bitte erneut versuchen.",
     "typeSubmit": "Anwenden",
     "noTypes": "Keine Typen",
-    "noneLabel": "keine"
+    "noneLabel": "keine",
+    "consent": "Zustimmungen",
+    "consentOn": "An",
+    "consentOff": "Aus",
+    "consentChanged": "Zustimmung {{value}} für {{count}} Kandidaten",
+    "changePhase": "Phase ändern",
+    "searchPhase": "Phase suchen…",
+    "convertResult": "{{updated}} von {{total}} erfolgreich",
+    "changeStatus": "Status ändern",
+    "searchStatus": "Status suchen…",
+    "statusChanged": "Status → {{value}} ({{count}})",
+    "addTag": "Tag hinzufügen",
+    "addTagPlaceholder": "Tag…",
+    "tagAdded": "Tag \"{{tag}}\" hinzugefügt ({{count}})"
   },
   "kpi": {
     "total": "Gesamt",
@@ -190,7 +203,7 @@
     "photoUpload": "Hochladen",
     "photoRemove": "Entfernen",
     "stage": "Funnel-Typ",
-    "candidateType": "Kandidatentyp",
+    "candidateType": "Vertragsform",
     "entityLabel": "Kandidat",
     "applications": "Bewerbungen",
     "phase": "Phase",
@@ -202,7 +215,8 @@
     "blacklistConfirm": "Auf Blacklist",
     "statusReasonTitle": "Statusänderung",
     "reasonLabel": "Grund",
-    "returnDateLabel": "Wieder verfügbar ab"
+    "returnDateLabel": "Wieder verfügbar ab",
+    "convertTo": "Zu {{phase}} umwandeln"
   },
   "stage": {
     "lead": "Lead",
@@ -431,7 +445,8 @@
     "groupAvailability": "Verfügbarkeit",
     "groupTravel": "Reisen",
     "groupWork": "Arbeitspräferenzen",
-    "groupOther": "Sonstiges"
+    "groupOther": "Sonstiges",
+    "moreTitle": "Weitere Präferenzen"
   },
   "zzp": {
     "title": "Freiberufler",

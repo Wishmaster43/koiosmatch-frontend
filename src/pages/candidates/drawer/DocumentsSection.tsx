@@ -5,6 +5,7 @@ import { Search, Plus, X, FileText, Pencil, Eye } from 'lucide-react'
 import api from '@/lib/api'
 import { sectionBlock } from './constants'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
+import { useDateFormat } from '@/lib/datetime'
 import DocPreviewModal from './DocPreviewModal'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -17,7 +18,11 @@ interface DocItem {
   type?: string
   objectUrl?: string
   url?: string
+  created_at?: string
 }
+
+// Split a filename into base + extension so rename never touches the extension.
+const splitExt = (fn: string) => { const m = fn.match(/\.[^./\\]+$/); return { base: m ? fn.slice(0, -m[0].length) : fn, ext: m ? m[0] : '' } }
 interface PendingFile { file: File; objectUrl: string; name: string; size: string }
 
 /** Documents section — owns its own docs state, upload, rename, search and preview.
@@ -25,6 +30,7 @@ interface PendingFile { file: File; objectUrl: string; name: string; size: strin
  * New rows keep their local blob preview until the server doc (with url) returns. */
 export default function DocumentsSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
+  const { formatDate } = useDateFormat()
   // Document types + colours from the tenant lookup (seed fallback until /document-types lands).
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor } = useDocumentTypes()
   const [docs,        setDocs]        = useState<DocItem[]>(c.documents ?? [])
@@ -51,8 +57,11 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
   }
 
   // Rename / delete persist once the row has a real (positive numeric) id.
-  const rename = (i: number, name: string) => {
+  const rename = (i: number, base: string) => {
     const id = docs[i]?.id
+    // Re-append the original extension — only the name part is editable.
+    const cur = String(docs[i]?.name ?? docs[i]?.file_name ?? '')
+    const name = base.trim() + splitExt(cur).ext
     setDocs(docs.map((x, j) => j === i ? { ...x, name } : x)); setRenamingDoc(null)
     if (typeof id === 'number' && id > 0) api.patch(`/candidates/${c.id}/documents/${id}`, { name }).catch(() => {})
   }
@@ -116,19 +125,27 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
             <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 100px', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
                 <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={13} color="white" /></div>
-                {renamingDoc === i
-                  ? <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') rename(i, renameValue); if (e.key === 'Escape') setRenamingDoc(null) }}
-                      onBlur={() => rename(i, renameValue)}
-                      style={{ flex: 1, fontSize: 12, fontWeight: 500, padding: '3px 7px', borderRadius: 6, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', boxSizing: 'border-box', minWidth: 0 }} />
-                  : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
-                }
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  {renamingDoc === i
+                    ? <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+                        <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') rename(i, renameValue); if (e.key === 'Escape') setRenamingDoc(null) }}
+                          onBlur={() => rename(i, renameValue)}
+                          style={{ flex: 1, fontSize: 12, fontWeight: 500, padding: '3px 7px', borderRadius: 6, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', boxSizing: 'border-box', minWidth: 0 }} />
+                        {/* Extension shown but not editable. */}
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{splitExt(String(d.name ?? d.file_name ?? '')).ext}</span>
+                      </div>
+                    : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
+                  }
+                  {/* Added date/time (when the backend provides it). */}
+                  {d.created_at && <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDate(d.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>}
+                </div>
               </div>
               <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: docColor(d.type) + '18', color: docColor(d.type), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
               <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{d.size ?? ''}</span>
                 <div style={{ display: 'flex' }}>
-                  <button onClick={() => { setRenamingDoc(i); setRenameValue(d.name ?? d.file_name ?? '') }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
+                  <button onClick={() => { setRenamingDoc(i); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
                   <button onClick={() => setPreviewDoc(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
                   <button onClick={() => removeDoc(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
                 </div>

@@ -1,60 +1,98 @@
-import type { ReactNode } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import Avatar from '../../../components/ui/Avatar'
-import StatusPill from '../../../components/ui/StatusPill'
-import Timeline from './Timeline'
-import type { ApplicationDetail } from '../../../types/application'
+import api from '@/lib/api'
+import DrawerTabs from '@/components/drawer/DrawerTabs'
+import { mapCandidate } from '@/pages/candidates/data/mapCandidate'
+import ProfilePanel from '@/pages/candidates/drawer/ProfilePanel'
+import BackgroundTab from '@/pages/candidates/drawer/BackgroundTab'
+import WorkTab from '@/pages/candidates/drawer/WorkTab'
+import { PreferencesTab, ZzpTab } from '@/pages/candidates/drawer/PreferencesZzpTabs'
+import CommunicationTab from '@/pages/candidates/drawer/CommunicationTab'
+import DocumentsSection from '@/pages/candidates/drawer/DocumentsSection'
+import StatisticsTab from '@/pages/candidates/drawer/StatisticsTab'
+import type { Candidate } from '@/types/candidate'
+import type { ApplicationDetail } from '@/types/application'
 
-// A small label-above-value field.
-function Field({ label, children }: { label: ReactNode; children: ReactNode }) {
-  return (
-    <div style={{ minWidth: 0 }}>
-      <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 3 }}>{label}</div>
-      <div style={{ fontSize: 13, color: 'var(--text)', lineHeight: 1.4, wordBreak: 'break-word' }}>{children}</div>
-    </div>
-  )
-}
+const ZZP_TYPES = ['freelance', 'zzp']
+const muted = { fontSize: 12, color: 'var(--text-muted)', padding: '8px 0' }
 
 /**
- * CandidateTab — read-only candidate summary inside the application drawer:
- * header + profile fields + the application timeline. The full editable record
- * lives in the Candidates feature.
+ * CandidateTab — the FULL candidate drill-down inside the application drawer.
+ * Fetches the complete candidate (GET /candidates/{id}) and reuses the candidate
+ * feature's own tab components + sub-tab bar, so all sub-tabs (Profile / Background
+ * / Match / Preferences / ZZP / Communication / Documents / Statistics) show here.
+ * Edits update locally and best-effort PATCH /candidates/{id}. (A shared
+ * CandidateDetail extraction is the longer-term de-dup; see worklist.)
  */
 export default function CandidateTab({ application: a }: { application: ApplicationDetail }) {
-  const { t } = useTranslation('applications')
-  // Defensive: the drawer shows a lite row before the full detail loads.
-  const c = a.candidate ?? ({} as ApplicationDetail['candidate'])
+  const { t } = useTranslation('candidates')
+  const [cand, setCand]       = useState<Candidate | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState(false)
+  const [edits, setEdits]     = useState<Record<string, unknown>>({})
+  const [tab, setTab]         = useState('profile')
+
+  // Load the full candidate for the linked application.
+  useEffect(() => {
+    const id = a.candidateId
+    if (!id) { setLoading(false); return }
+    let alive = true
+    setLoading(true); setError(false); setEdits({})
+    api.get(`/candidates/${id}`)
+      .then(r => { if (alive) setCand(mapCandidate(r.data?.data ?? r.data)) })
+      .catch(() => { if (alive) setError(true) })
+      .finally(() => { if (alive) setLoading(false) })
+    return () => { alive = false }
+  }, [a.candidateId])
+
+  // Optimistic local edit + best-effort persist (full key-mapping lives in the Candidates page).
+  const onUpdate = (id: string | number, patch: Record<string, unknown>) => {
+    setEdits(e => ({ ...e, ...patch }))
+    api.patch(`/candidates/${id}`, patch).catch(() => {})
+  }
+
+  if (loading) return <div style={muted}>{t('page.loading', { defaultValue: '…' })}</div>
+  if (error || !cand) return <div style={muted}>{t('page.loadError', { defaultValue: '—' })}</div>
+
+  // Merge local edits over the fetched record for the tab components.
+  const c = { ...cand, ...edits } as Candidate
+  const isFreelancer = (c.candidateTypes ?? []).some(v => ZZP_TYPES.includes(v))
+  const hasWork = Boolean(c.matches?.length || c.applications?.length)
+
+  // Sub-tab bar — mirrors the candidate drawer (conditional Match/ZZP; planning hidden).
+  const tabs = [
+    { id: 'profile',       label: t('drawer.tabs.profile') },
+    { id: 'background',    label: t('drawer.tabs.background') },
+    ...(hasWork ? [{ id: 'work', label: t('drawer.tabs.match') }] : []),
+    { id: 'preferences',   label: t('drawer.tabs.preferences') },
+    ...(isFreelancer ? [{ id: 'administration', label: t('drawer.tabs.zzp') }] : []),
+    { id: 'communication', label: t('drawer.tabs.communication') },
+    { id: 'documents',     label: t('drawer.tabs.documents') },
+    { id: 'statistics',    label: t('drawer.tabs.statistics') },
+  ]
+
+  const renderTab = () => {
+    switch (tab) {
+      case 'profile':        return <ProfilePanel c={c} onEditSave={(v: Record<string, unknown>) => onUpdate(c.id, v)} />
+      case 'background':     return <BackgroundTab c={c} onEditSave={(v: Record<string, unknown>) => onUpdate(c.id, v)} />
+      case 'work':           return <WorkTab c={c} />
+      case 'preferences':    return <PreferencesTab c={c}
+        onSave={(p: unknown) => onUpdate(c.id, { preferences: { ...(c.preferences ?? {}), ...(p as Record<string, unknown>) } })}
+        onTypesChange={(types: string[]) => onUpdate(c.id, { candidateTypes: types })} />
+      case 'administration': return <ZzpTab c={c} onSave={(p: unknown) => onUpdate(c.id, { zzp: p })} />
+      case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate(c.id, { consent: p })} />
+      case 'documents':      return <DocumentsSection c={c} />
+      case 'statistics':     return <StatisticsTab c={c} />
+      default:               return null
+    }
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <Avatar initials={c.initials ?? a.candidateInitials} size={44} soft />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name ?? a.candidateName}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.function || t('profile.function')}</div>
-        </div>
-        {c.statusLabel && <StatusPill label={c.statusLabel} color={c.statusColor} />}
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ borderBottom: '1px solid var(--border)', marginBottom: 14 }}>
+        <DrawerTabs tabs={tabs} active={tab} onChange={setTab} />
       </div>
-
-      {/* Profile fields */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 20px' }}>
-        <Field label={t('profile.gender')}>{c.gender || '—'}</Field>
-        <Field label={t('profile.nationality')}>{c.nationality || '—'}</Field>
-        <Field label={t('profile.dob')}>{c.dob || '—'}</Field>
-        <Field label={t('profile.email')}>{c.email || '—'}</Field>
-        <Field label={t('profile.phone')}>{c.phone || '—'}</Field>
-        <Field label={t('profile.address')}>{c.address || '—'}</Field>
-        <div style={{ gridColumn: '1 / -1' }}>
-          <Field label={t('profile.summary')}>{c.summary || '—'}</Field>
-        </div>
-      </div>
-
-      {/* Timeline */}
-      <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('profile.timeline')}</div>
-        <Timeline items={a.timeline ?? []} emptyText={t('timeline.empty')} />
-      </div>
+      {renderTab()}
     </div>
   )
 }

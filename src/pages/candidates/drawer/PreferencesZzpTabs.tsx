@@ -8,7 +8,7 @@
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
-import CandidateTypeSection from './CandidateTypeSection'
+import { useLookups } from '@/context/LookupsContext'
 import { useLocale } from '@/lib/datetime'
 import { useFunctions } from '@/lib/useFunctions'
 import { useIndustries } from '@/lib/useIndustries'
@@ -32,6 +32,8 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
   const { functions, allowFreeEntry } = useFunctions() as { functions: string[]; allowFreeEntry: boolean }
   const { industries } = useIndustries() as { industries: string[] }
   const { licenses } = useDriverLicenses() as { licenses: string[] }
+  // Contract forms (colour per value) for the first chip row.
+  const { candidateTypes } = useLookups() as unknown as { candidateTypes: Array<{ value: string; label: string; color?: string }> }
   const pref = c.preferences
 
   // Chip/dropdown option lists from the tenant lookups (never hardcoded vocab).
@@ -44,8 +46,12 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
   const fnValue = (pref.function_pref as string) ?? ''
   const functionOptions = fnValue && !functions.includes(fnValue) ? [fnValue, ...functions] : functions
 
-  // One grouped table holds everything; chips/dropdown sit in their own group.
+  // One grouped table (one Save). Multi-value chips sit as rows within their group:
+  // Contractvorm/Dagen/Branche under Beschikbaarheid, Rijbewijs under Reizen. Chips
+  // render as coloured soft chips — Contractvorm keeps its per-value colours.
+  const candidateTypeOptions = candidateTypes.map(ct => ({ value: ct.value, label: ct.label, color: ct.color }))
   const value = {
+    contractvorm:    c.candidateTypes ?? [],
     beschikbaar_per: pref.available_from ?? '',
     hoursPerWeek:   pref.hours_per_week ?? '',
     dagen:           toArray(pref.preferred_days),
@@ -60,6 +66,7 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
     remarks:     pref.remarks        ?? '',
   }
   const fields = [
+    { key: 'contractvorm',    label: t('drawer.candidateType'),      group: t('preferences.groupAvailability'), type: 'chips', chipOptions: candidateTypeOptions },
     { key: 'beschikbaar_per', label: t('preferences.availableFrom'), group: t('preferences.groupAvailability'), type: 'date' },
     { key: 'hoursPerWeek',   label: t('preferences.hoursPerWeek'),  group: t('preferences.groupAvailability') },
     { key: 'dagen',           label: t('preferences.days'),          group: t('preferences.groupAvailability'), type: 'chips', chipOptions: dayOptions },
@@ -73,6 +80,7 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
     { key: 'loonheffing_vanaf', label: t('preferences.wageTaxFrom'),  group: t('preferences.groupPayroll'), type: 'date' },
     { key: 'remarks',     label: t('preferences.remarks'),       group: t('preferences.groupOther'), type: 'richtext' },
   ]
+  // Preferences blob — Contractvorm is routed separately (to candidateTypes, not preferences).
   const toApi = (v: Record<string, unknown>) => ({
     available_from:  v.beschikbaar_per,
     hours_per_week:  v.hoursPerWeek,
@@ -89,14 +97,9 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
   })
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Contract form (candidate type) — selecting ZZP also reveals the Freelance tab. */}
-      <CandidateTypeSection c={c} onChange={onTypesChange} />
-      {/* Everything else in one grouped table — days/function/industries under
-          Availability, licences under Travel; no stray section headers. */}
-      <EditableFieldTable key={c.id} title={t('preferences.title')} fields={fields} value={value}
-        labelWidth={160} onSave={(v: Record<string, unknown>) => onSave?.(toApi(v))} />
-    </div>
+    // One grouped table; on Save, Contractvorm → candidateTypes, the rest → preferences.
+    <EditableFieldTable key={c.id} title={t('preferences.title')} fields={fields} value={value} labelWidth={160}
+      onSave={(v: Record<string, unknown>) => { onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApi(v)) }} />
   )
 }
 

@@ -77,8 +77,9 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   // the active filters); fall back to counting the loaded page.
   const staleCount          = stats?.attention?.stale_6m        ?? candidates.filter(isStale).length
   const neverContactedCount = stats?.attention?.never_contacted ?? candidates.filter(isNeverContacted).length
-  // "No follow-up planned" has no server column yet — page-local only.
-  const noFollowupCount = useMemo(() => candidates.filter(isNoFollowup).length, [candidates])
+  // "No follow-up planned": server-wide total (C-13, honours the active filters),
+  // with a page-local fallback while the stats endpoint is unavailable.
+  const noFollowupCount = stats?.attention?.no_followup_planned ?? candidates.filter(isNoFollowup).length
   const intakeCount     = useMemo(() => candidates.filter(c => c.stage === 'invited').length, [candidates])
   // Proxy for "active conversations" until WhatsApp/e-mail threads exist: contacted
   // in the last 14 days. Cutoff captured once (lazy init) so the memo stays pure.

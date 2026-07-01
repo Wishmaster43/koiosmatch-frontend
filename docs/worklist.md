@@ -71,10 +71,12 @@ Settings-UI: 4 panelen/tabs, provider-keuze, handtekening-editor, default-fallba
 - Hangt op: backend veldnamen bevestigen
 
 ### B-3 · Bulk-acties fase 2
-- Tag toevoegen (creatable, nu alleen verwijderen werkt)
-- Koppelen aan vacature (bulk → maakt sollicitatie, geen auto-e-mail)
-- Vestiging/branch koppelen
-- Hangt op: C-15 (array-uitbreiding)
+- ✅ **Tag toevoegen** (FE-node gebouwd 2026-07-01) → backend `POST /candidates/bulk/tags/add` (`{candidate_ids, tag}` → `{updated}`).
+- ✅ **Lead → Kandidaat (Fase, FE-node)** met **X-van-Y-melding** → backend **`POST /candidates/bulk/phase`** (`{candidate_ids, phase}`): valideert per kandidaat tegen `candidate_required_fields[phase]`, **skipt incomplete**, geeft `{updated, skipped}`. FE toont "39 van de 50 gelukt".
+- ✅ **Status/Inzetbaarheid (simpele: Beschikbaar/Ziek/Verlof), FE-node** → backend `POST /candidates/bulk/status` (`{candidate_ids, status}` → `{updated}`). Match/reden-gegate statussen (Geplaatst/Niet beschikbaar/Blacklist) bewust NIET in bulk.
+- ✅ **Bulk-"type" → "Contractvorm"** label (i18n ×5).
+- ☐ Koppelen aan vacature (bulk → maakt sollicitatie, geen auto-e-mail) · Vestiging/branch koppelen — Hangt op C-15.
+- **Backend te leveren:** `bulk/phase` (met per-kandidaat verplicht-veld-validatie + `{updated,skipped}`) · `bulk/status` · `bulk/tags/add`.
 
 ### B-6 · Webhooks filter-UI
 Live testen zodra `/webhook-subscriptions` + `/webhook-events` bestaan (C-5b).
@@ -266,6 +268,14 @@ Relatie/route/resource hernoemen.
 
 ### C-11 · Kandidaat — kanaal-consent (opt-in)
 `PATCH /candidates/{id}` met `consent: { whatsapp_opt_in, email_opt_in, newsletter_opt_in }` + tijdstip/bron bewaren.
+**Uitbreiding 2026-07-01 (FE-wensen):**
+- Lever per kanaal een **`*_consent_at`**-timestamp → FE toont datum+tijd **naast het vinkje** (drawer).
+- **Bulk-consent-endpoint** `POST /candidates/bulk/consent` (opt-ins voor selectie) → FE-node in de bulk-`ActionMenu`.
+- **`document.created_at`** meesturen op documenten (Documenten-tab toont toegevoegd-datum; FE rendert 'm al).
+- **`note.created_at`** op notities (FE toont datum+tijd i.p.v. "zojuist"; valt terug op relatief). Zie C-16.
+> **FE-vervolg (na deze endpoints):** bulk-consent-node bouwen + consent-timestamp inline tonen. De rest van
+> deze batch (notities datum/tijd, documenten rename-alleen-naam + datum-render, convert→profiel-bewerken,
+> voorkeuren-chips-in-tabel) is **FE-klaar** (2026-07-01).
 
 ### C-13 · Messaging-shapes + attention-tiles
 Shapes bevestigen + `no_followup_planned` + `active_conversation` + outreach-shape leveren.

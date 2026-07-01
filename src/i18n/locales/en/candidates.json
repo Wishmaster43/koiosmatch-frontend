@@ -48,11 +48,11 @@
     "noUsers": "No users found.",
     "changeStage": "Change funnel stage",
     "searchStage": "Search a stage…",
-    "changeType": "Change candidate type",
-    "searchType": "Search a type…",
+    "changeType": "Change contract form",
+    "searchType": "Search a contract form…",
     "ownerChanged": "Owner changed to {{name}} ({{count}})",
     "stageChanged": "Funnel stage → {{value}} ({{count}})",
-    "typeChanged": "Candidate type → {{value}} ({{count}})",
+    "typeChanged": "Contract form → {{value}} ({{count}})",
     "mutateError": "Action failed. Please try again.",
     "removeTag": "Remove tag",
     "searchTag": "Search a tag…",
@@ -68,7 +68,20 @@
     "archiveError": "Archiving failed. Please try again.",
     "typeSubmit": "Apply",
     "noTypes": "No types",
-    "noneLabel": "none"
+    "noneLabel": "none",
+    "consent": "Consent",
+    "consentOn": "On",
+    "consentOff": "Off",
+    "consentChanged": "Consent {{value}} for {{count}} candidates",
+    "changePhase": "Change phase",
+    "searchPhase": "Search a phase…",
+    "convertResult": "{{updated}} of {{total}} converted",
+    "changeStatus": "Change status",
+    "searchStatus": "Search a status…",
+    "statusChanged": "Status → {{value}} ({{count}})",
+    "addTag": "Add tag",
+    "addTagPlaceholder": "Tag…",
+    "tagAdded": "Tag \"{{tag}}\" added ({{count}})"
   },
   "kpi": {
     "total": "Total",
@@ -196,7 +209,7 @@
     "photoUpload": "Upload",
     "photoRemove": "Remove",
     "stage": "Funnel type",
-    "candidateType": "Candidate type",
+    "candidateType": "Contract form",
     "entityLabel": "Candidate",
     "applications": "Applications",
     "phase": "Phase",
@@ -208,7 +221,8 @@
     "blacklistConfirm": "Blacklist",
     "statusReasonTitle": "Status change",
     "reasonLabel": "Reason",
-    "returnDateLabel": "Available again from"
+    "returnDateLabel": "Available again from",
+    "convertTo": "Convert to {{phase}}"
   },
   "stage": {
     "lead": "Lead",
@@ -437,7 +451,8 @@
     "groupAvailability": "Availability",
     "groupTravel": "Travel",
     "groupWork": "Work preferences",
-    "groupOther": "Other"
+    "groupOther": "Other",
+    "moreTitle": "Other preferences"
   },
   "zzp": {
     "title": "Freelancer",

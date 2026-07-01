@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
-import { Download, Edit2, Save, X } from 'lucide-react'
+import { Download, Edit2, Save, UserCheck, X } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { CvDocument } from './CandidateCvTemplate'
 import type { CvCandidate } from './CandidateCvTemplate'
@@ -13,7 +13,7 @@ import EntityHeaderJs from '@/components/drawer/EntityHeader'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useLookups } from '@/context/LookupsContext'
 import { useGenders } from '@/lib/useGenders'
-import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getBoolSetting, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useFunctions } from '@/lib/useFunctions'
 import { useAuth } from '@/context/AuthContext'
 import ProfilePanel from './drawer/ProfilePanel'
@@ -32,7 +32,7 @@ import type { Id, LookupOption } from '@/types/common'
 const EntityDrawer = EntityDrawerJs as ComponentType<{
   entity: unknown; expanded?: boolean; onToggleExpand?: () => void; footer?: ReactNode
   tabs?: Array<{ id: string; label: string; autoExpand?: boolean; render: () => ReactNode }>
-  header?: () => ReactNode
+  header?: (arg: { activeTab?: string; setActiveTab: (id: string) => void }) => ReactNode
 }>
 const EntityHeader = EntityHeaderJs as ComponentType<{
   label?: string; expanded?: boolean; onToggleExpand?: () => void; onClose?: () => void
@@ -76,7 +76,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { labelOf: lastContactLabel } = useLastContactTypes()
   // Only the status lookup is needed here now — candidate-type chips moved to the
   // Preferences tab, last-contact to Communication, funnel chips dropped (shown in Match).
-  const { phases, statuses } = useLookups() as unknown as { phases: LookupOption[]; statuses: LookupOption[] }
+  const { phases, statuses, phaseMeta } = useLookups() as unknown as { phases: LookupOption[]; statuses: LookupOption[]; phaseMeta: (v?: string | null) => { label: string; color: string } }
   const { colorOf: genderColor } = useGenders() as { colorOf: (g?: string) => string | undefined }
   // Avatar colour follows the same tenant setting as the table: neutral grey by
   // default, per-gender only when enabled (Settings → Candidate → Table display).
@@ -106,6 +106,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [status,        setStatus]        = useState<string | null>(null)
   // "Geplaatst" requires a linked Match — when none exists, prompt instead of setting it.
   const [matchPrompt,   setMatchPrompt]   = useState(false)
+  // Convert guard (blocks an accidental CV click right after) + a signal that opens Profile edit.
+  const [converting,    setConverting]    = useState(false)
+  const [profileEditSignal, setProfileEditSignal] = useState(0)
   // Status change that needs a reason and/or a return date (driven by the status lookup flags).
   const [statusModal,   setStatusModal]   = useState<{ target: string; reason: string; date: string; needReason: boolean; needDate: boolean } | null>(null)
   const [tags,          setTags]          = useState<string[] | null>(null)
@@ -121,7 +124,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
   if (c?.id !== prevId) {
     setPrevId(c?.id)
-    setRecruiter(null); setPhase(null); setStatus(null); setMatchPrompt(false); setStatusModal(null)
+    setRecruiter(null); setPhase(null); setStatus(null); setMatchPrompt(false); setStatusModal(null); setConverting(false)
     setTags(null); setHeaderEditing(false); setProfileEdits(null); setPhotoUrl(null); setHeaderForm(null)
   }
 
@@ -129,6 +132,29 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
 
   const currentPhase   = phase ?? c.phase
   const changePhase = (v: string) => { setPhase(v); onUpdate?.(c.id, { phase: v }) }
+  // Fase: colour-coded read-only badge (no picker); "convert" advances the entry (first) phase.
+  const phaseInfo    = phaseMeta(currentPhase)
+  const phaseIdx     = phases.findIndex(p => p.value === currentPhase)
+  const nextPhase    = phaseIdx >= 0 ? phases[phaseIdx + 1] : undefined
+  const isEntryPhase = phaseIdx === 0
+  // Required-field completeness for a phase (Settings → Verplichte velden), mapped to candidate fields.
+  const REQ_GET: Record<string, () => unknown> = {
+    first_name: () => c.name, last_name: () => c.name, email: () => c.email, phone: () => c.phone,
+    function_title: () => c.title, date_of_birth: () => c.dob, gender: () => c.gender,
+    street: () => c.street, postal_code: () => c.postalCode, city: () => c.city,
+  }
+  const requiredComplete = (phaseVal: string) => {
+    const cfg = getJsonSetting<Record<string, string[]>>(allSettings, 'candidate_required_fields',
+      { lead: ['first_name', 'last_name'], candidate: ['first_name', 'last_name', 'email', 'phone', 'function_title'] })
+    return (cfg[phaseVal] ?? []).every(k => { const g = REQ_GET[k]; return g ? String(g() ?? '').trim() !== '' : true })
+  }
+  // Convert to the next phase; jump to Profile-edit unless the new phase's required fields are already complete.
+  const doConvert = (setActiveTab?: (id: string) => void) => {
+    if (!nextPhase) return
+    changePhase(nextPhase.value)
+    setConverting(true); setTimeout(() => setConverting(false), 1000)
+    if (!requiredComplete(nextPhase.value)) { setActiveTab?.('profile'); setProfileEditSignal(s => s + 1) }
+  }
   const currentStatus  = status ?? c.status
   // Status (deployability) change, driven by the status lookup flags:
   // requires_match → must link a Match; requires_reason/expects_return_date → ask first.
@@ -173,12 +199,12 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const renderTabContent = (activeTab: string) => {
     const mergedC = { ...c, ...(profileEdits ?? {}) }
     switch (activeTab) {
-      case 'profile':       return <ProfilePanel c={mergedC} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
+      case 'profile':       return <ProfilePanel c={mergedC} autoEditSignal={profileEditSignal} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
       case 'background':   return <BackgroundTab c={mergedC} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
       case 'work':          return <WorkTab c={c} />
       case 'planning':      return <PlanningPanel c={c} />
       case 'preferences':    return <PreferencesTab c={c}
-        onSave={(p: unknown) => onUpdate?.(c.id, { preferences: p })}
+        onSave={(p: unknown) => onUpdate?.(c.id, { preferences: { ...(c.preferences ?? {}), ...(p as Record<string, unknown>) } })}
         onTypesChange={(types: string[]) => onUpdate?.(c.id, { candidateTypes: types })} />
       case 'administration': return <ZzpTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { zzp: p })} />
       case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })} />
@@ -215,27 +241,42 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     </div>
   ) : (
     <>
-      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
+        {/* Fase = colour-coded read-only badge (no picker); convert lives in the header actions. */}
+        {currentPhase && (
+          <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 999,
+            background: phaseInfo.color + '1A', color: phaseInfo.color, border: `1px solid ${phaseInfo.color}55` }}>{phaseInfo.label}</span>
+        )}
+      </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.title || '—'}</div>
     </>
   )
 
-  const headerActions = () => (
+  const headerActions = (setActiveTab?: (id: string) => void) => (
     <>
-      <button disabled={cvGenerating}
-        onClick={async () => {
-          setCvGenerating(true)
-          try {
-            const blob = await pdf(<CvDocument c={c as unknown as CvCandidate} settings={cvSettings as never} locale={locale} t={t} />).toBlob()
-            const url = URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url; a.download = `CV - ${c?.name ?? 'candidate'}.pdf`
-            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
-          } finally { setCvGenerating(false) }
-        }}
-        style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: cvGenerating ? 'not-allowed' : 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white', opacity: cvGenerating ? 0.7 : 1 }}>
-        <Download size={11} />{cvGenerating ? t('drawer.generating') : t('drawer.downloadCv')}
-      </button>
+      {/* Entry phase (Lead) → prominent convert (CV is illogical for a lead); else → download CV. */}
+      {(isEntryPhase && nextPhase) ? (
+        <button onClick={() => doConvert(setActiveTab)}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white' }}>
+          <UserCheck size={11} />{t('drawer.convertTo', { phase: nextPhase.label })}
+        </button>
+      ) : (
+        <button disabled={cvGenerating || converting}
+          onClick={async () => {
+            setCvGenerating(true)
+            try {
+              const blob = await pdf(<CvDocument c={c as unknown as CvCandidate} settings={cvSettings as never} locale={locale} t={t} />).toBlob()
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url; a.download = `CV - ${c?.name ?? 'candidate'}.pdf`
+              document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
+            } finally { setCvGenerating(false) }
+          }}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: (cvGenerating || converting) ? 'not-allowed' : 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white', opacity: (cvGenerating || converting) ? 0.7 : 1 }}>
+          <Download size={11} />{cvGenerating ? t('drawer.generating') : t('drawer.downloadCv')}
+        </button>
+      )}
       {headerEditing ? (
         <>
           <button onClick={saveHeader} title={t('common:save')}
@@ -284,7 +325,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         </div>
       }
       tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.id === 'planning', render: () => renderTabContent(tab.id) }))}
-      header={() => (
+      header={({ setActiveTab }) => (
         <EntityHeader
           label={t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
@@ -293,9 +334,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
           renderTitle={renderTitle}
           titleActions={<ChangelogPopover c={c} />}
-          actions={headerActions()}
+          actions={headerActions(setActiveTab)}
           meta={[
-            { key: 'phase', label: t('drawer.phase'), value: currentPhase, options: phases.map(s => ({ value: s.value, label: s.label })), onChange: changePhase, menuWidth: 150, width: 140 },
             { key: 'status', label: t('drawer.deployability'), value: currentStatus, options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 170, width: 160 },
             { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions, onChange: onOwnerChange, menuWidth: 200, width: 190 },
           ]}

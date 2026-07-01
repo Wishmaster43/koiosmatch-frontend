@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, StickyNote, Archive, X } from 'lucide-react'
+import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, X } from 'lucide-react'
 import api from '@/lib/api'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
@@ -17,6 +17,10 @@ interface CandidatesBulkBarProps {
   onSetOwner: (user: BulkUser) => void
   onSetStage: (stage: string) => void
   onSetTypes: (types: string[]) => void
+  onSetConsent: (consent: Record<string, boolean>, label: string) => void
+  onConvertPhase: (phase: string) => void
+  onSetStatus: (status: string, label: string) => void
+  onAddTag: (tag: string) => void
   onRemoveTag: (tag: string) => void
   onAddNote: (text: string) => void
   onArchive: () => void
@@ -24,6 +28,8 @@ interface CandidatesBulkBarProps {
   users?: BulkUser[]
   funnelTypes?: LookupOption[]
   candidateTypes?: LookupOption[]
+  phases?: LookupOption[]
+  statuses?: LookupOption[]
   selectedTags?: string[]
 }
 
@@ -34,9 +40,9 @@ interface CandidatesBulkBarProps {
  * (users, lookups, tags) comes in via props so this stays a thin assembler.
  */
 export default function CandidatesBulkBar({
-  count, onClear, onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes,
-  onRemoveTag, onAddNote, onArchive, canArchive = false,
-  users = [], funnelTypes = [], candidateTypes = [], selectedTags = [],
+  count, onClear, onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes, onSetConsent,
+  onConvertPhase, onSetStatus, onAddTag, onRemoveTag, onAddNote, onArchive, canArchive = false,
+  users = [], funnelTypes = [], candidateTypes = [], phases = [], statuses = [], selectedTags = [],
 }: CandidatesBulkBarProps) {
   const { t } = useTranslation('candidates')
   const [pools, setPools] = useState<CandidatePool[]>([])
@@ -51,6 +57,9 @@ export default function CandidatesBulkBar({
   const userOptions = users.map(u => ({ value: u.id, label: u.name }))
   const stageOptions = funnelTypes.map(f => ({ value: f.value, label: f.label, color: f.color }))
   const typeOptions = candidateTypes.map(ct => ({ value: ct.value, label: ct.label, color: ct.color }))
+  const phaseOptions = phases.map(p => ({ value: p.value, label: p.label, color: p.color }))
+  // Only "simple" statuses in bulk — exclude Match/reason-gated (placed/unavailable/blacklist).
+  const statusOptions = statuses.filter(s => !s.requires_match && !s.requires_reason).map(s => ({ value: s.value, label: s.label, color: s.color }))
   const tagOptions = selectedTags.map(tg => ({ value: tg, label: tg }))
 
   // Resolve a picked pool/user id back to the full object the parent needs.
@@ -70,13 +79,34 @@ export default function CandidatesBulkBar({
     ] },
     { key: 'stage', label: t('bulk.changeStage'), icon: Milestone,
       searchPlaceholder: t('bulk.searchStage'), options: stageOptions, onPick: (v) => onSetStage(String(v)) },
+    { key: 'phase', label: t('bulk.changePhase'), icon: UserCheck,
+      searchPlaceholder: t('bulk.searchPhase'), options: phaseOptions, onPick: (v) => onConvertPhase(String(v)) },
+    { key: 'status', label: t('bulk.changeStatus'), icon: Activity,
+      searchPlaceholder: t('bulk.searchStatus'), options: statusOptions,
+      onPick: (v) => onSetStatus(String(v), statusOptions.find(o => o.value === v)?.label ?? String(v)) },
     { key: 'type', label: t('bulk.changeType'), icon: Briefcase, multiSelect: true,
       searchPlaceholder: t('bulk.searchType'), emptyText: t('bulk.noTypes'), options: typeOptions,
       submitLabel: t('bulk.typeSubmit'), onSubmit: (v) => onSetTypes(Array.isArray(v) ? v.map(String) : []) },
+    { key: 'add-tag', label: t('bulk.addTag'), icon: Tags, input: true,
+      placeholder: t('bulk.addTagPlaceholder'), submitLabel: t('bulk.typeSubmit'), onSubmit: (v) => onAddTag(String(v)) },
     { key: 'tag', label: t('bulk.removeTag'), icon: Tag,
       searchPlaceholder: t('bulk.searchTag'), emptyText: t('bulk.noTags'), options: tagOptions, onPick: (v) => onRemoveTag(String(v)) },
     { key: 'note', label: t('bulk.addNote'), icon: StickyNote, input: true,
       placeholder: t('bulk.notePlaceholder'), submitLabel: t('bulk.noteSubmit'), onSubmit: (v) => onAddNote(String(v)) },
+    { key: 'consent', label: t('bulk.consent'), icon: ShieldCheck, items: [
+      { key: 'wa', label: t('communication.consentWhatsapp'), items: [
+        { key: 'wa-on',  label: t('bulk.consentOn'),  onSelect: () => onSetConsent({ whatsapp_opt_in: true },  `WhatsApp — ${t('bulk.consentOn')}`) },
+        { key: 'wa-off', label: t('bulk.consentOff'), onSelect: () => onSetConsent({ whatsapp_opt_in: false }, `WhatsApp — ${t('bulk.consentOff')}`) },
+      ] },
+      { key: 'em', label: t('communication.consentEmail'), items: [
+        { key: 'em-on',  label: t('bulk.consentOn'),  onSelect: () => onSetConsent({ email_opt_in: true },  `E-mail — ${t('bulk.consentOn')}`) },
+        { key: 'em-off', label: t('bulk.consentOff'), onSelect: () => onSetConsent({ email_opt_in: false }, `E-mail — ${t('bulk.consentOff')}`) },
+      ] },
+      { key: 'nl', label: t('communication.consentNewsletter'), items: [
+        { key: 'nl-on',  label: t('bulk.consentOn'),  onSelect: () => onSetConsent({ newsletter_opt_in: true },  `${t('communication.consentNewsletter')} — ${t('bulk.consentOn')}`) },
+        { key: 'nl-off', label: t('bulk.consentOff'), onSelect: () => onSetConsent({ newsletter_opt_in: false }, `${t('communication.consentNewsletter')} — ${t('bulk.consentOff')}`) },
+      ] },
+    ] },
     ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
   ]
 
