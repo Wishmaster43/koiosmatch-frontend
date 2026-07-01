@@ -8,11 +8,9 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useRightPanel }      from '@/context/RightPanelContext'
-import { useAuth }            from '@/context/AuthContext'
-import api                    from '@/lib/api'
 import DepartmentDrawer       from './DepartmentDrawer'
 import PaginationBar          from '../ui/PaginationBar'
-import { useDefaultPageSize } from '@/lib/usePageSize'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
 import type { ReportDepartment, SortState } from '@/types/reports'
 
@@ -35,10 +33,8 @@ export default function DepartmentsTable() {
   const [selectedCustomers, setSelectedCustomers] = useState<Array<string | number>>([])
   const [selectedStatuses,  setSelectedStatuses]  = useState<Array<string | number>>(['active'])
   const [sort,    setSort]    = useState<SortState>({ key: 'customer_name', dir: 'asc' })
-  const defaultPageSize = useDefaultPageSize()
-  const { refreshUser } = useAuth() ?? {}
-  const [page,     setPage]     = useState(1)
-  const [pageSize, setPageSize] = useState(defaultPageSize)
+  const [page, setPage] = useState(1)
+  const { pageSize, handlePageSizeChange } = usePersistedPageSize()
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -92,11 +88,6 @@ export default function DepartmentsTable() {
   useEffect(() => setPage(1), [filtered.length, pageSize])
   const paged      = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
-
-  const handlePageSizeChange = async (n: number) => {
-    setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser?.() } catch { /* noop */ }
-  }
 
   const setSort_ = (key: string) => setSort(prev =>
     prev.key === key ? { key, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { key, dir: 'asc' })

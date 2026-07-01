@@ -8,11 +8,9 @@ import type { CSSProperties, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronUp, ChevronDown, ChevronsUpDown, RefreshCw } from 'lucide-react'
 import { useRightPanel }      from '@/context/RightPanelContext'
-import { useAuth }            from '@/context/AuthContext'
 import CustomerDetailDrawer   from './CustomerDetailDrawer'
-import api                    from '@/lib/api'
 import PaginationBar          from '../ui/PaginationBar'
-import { useDefaultPageSize } from '@/lib/usePageSize'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { useReportCustomers } from './useReportCustomers'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
 import type { ReportCustomer, SortState } from '@/types/reports'
@@ -36,10 +34,8 @@ export default function CustomersTable() {
   const [search]                                  = useState('')
   const [selectedStatuses,  setSelectedStatuses]  = useState<Array<string | number>>(['active'])
   const [sort,              setSort]              = useState<SortState>({ key: 'name', dir: 'asc' })
-  const defaultPageSize = useDefaultPageSize()
-  const { refreshUser } = useAuth() ?? {}
-  const [page,     setPage]     = useState(1)
-  const [pageSize, setPageSize] = useState(defaultPageSize)
+  const [page, setPage] = useState(1)
+  const { pageSize, handlePageSizeChange } = usePersistedPageSize()
   const [detail,            setDetail]            = useState<ReportCustomer | null>(null)
 
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -86,11 +82,6 @@ export default function CustomersTable() {
   useEffect(() => setPage(1), [filtered.length, pageSize])
   const paged     = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
-
-  const handlePageSizeChange = async (n: number) => {
-    setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser?.() } catch { /* noop */ }
-  }
 
   const setSort_ = (key: string) => setSort(prev =>
     prev.key === key

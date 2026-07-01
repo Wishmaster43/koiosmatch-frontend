@@ -7,12 +7,10 @@ import { useState, useEffect, useMemo } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Mail, Phone, MessageCircle, Building2 } from 'lucide-react'
-import api                    from '@/lib/api'
 import { useRightPanel }      from '@/context/RightPanelContext'
-import { useAuth }            from '@/context/AuthContext'
 import ContactPersonDrawer    from './ContactPersonDrawer'
 import PaginationBar          from '../ui/PaginationBar'
-import { useDefaultPageSize } from '@/lib/usePageSize'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
 import type { ReportContact, ReportFilterGroup } from '@/types/reports'
 
@@ -25,10 +23,8 @@ export default function ContactPersonsTable() {
   const [selectedReceives,  setSelectedReceives]  = useState<Array<string | number>>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
-  const defaultPageSize = useDefaultPageSize()
-  const { refreshUser } = useAuth() ?? {}
-  const [page,     setPage]     = useState(1)
-  const [pageSize, setPageSize] = useState(defaultPageSize)
+  const [page, setPage] = useState(1)
+  const { pageSize, handlePageSizeChange } = usePersistedPageSize()
 
   // Data lives in the shared hook (§3); derive the flattened contact rows here.
   const { customers, loading } = useSmCustomerTree()
@@ -71,11 +67,6 @@ export default function ContactPersonsTable() {
   useEffect(() => setPage(1), [filtered.length, pageSize])
   const paged      = useMemo(() => filtered.slice((page-1)*pageSize, page*pageSize), [filtered, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
-
-  const handlePageSizeChange = async (n: number) => {
-    setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser?.() } catch { /* noop */ }
-  }
 
   const filterGroups = useMemo(() => {
     const groups: ReportFilterGroup[] = []
