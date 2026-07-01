@@ -922,6 +922,33 @@ Wire: `ModulePicker`/`ConfigPanel` → `t('workflows:modules.'+type, meta.label)
 
 ---
 
+## H. Dashboard & Settings — UI-review (Danny, 2026-07-02)
+
+> Snelle review-sweep. Doorklik-bedrading + nieuwe dashboard-signalen zijn **af** (zie git:
+> B-27-commits). Onderstaande punten zijn de openstaande UI-wensen; ✅ = klaar deze sessie.
+
+### ✅ Klaar deze sessie (B-27)
+- **H-0a** Doorklik: funnel + funnel-conversie → Sollicitaties **gefilterd op fase** (chip, net als kandidaat-status/recruiter). WhatsApp-links → juiste tab (wachtrij/berichten/escalaties). Recente runs → Workflows. Recente conversaties → WhatsApp (berichten). Recente kandidaten → kandidaat-drawer (bewuste keuze: doorspringen + drawer).
+- **H-0b** Nieuwe KPI-signalen (graceful): **escalaties · mislukte workflows** (telt nú al uit `ai_runs`) **· taken te laat · niet-gebelde bellijsten · aflopende sales-kansen**. Rol-composities herzien (management/admin rijker, recruitment kandidaatgericht, planning + mislukte workflows).
+
+### ☐ Openstaand — Settings → KPI's (schema's uitbreiden)
+- **H-1** `kpis_candidates`: configureerbare **alert "≥6 mnd geen contact"** (maanden-drempel) + **"nooit contact"** (aan/uit). Voedt de dashboard-KPI's `stale`/`never` (nu hardcoded 6m).
+- **H-2** `kpis_customers`: opsplitsen/uitbreiden naar **Klant · Locaties · Afdelingen · Contactpersonen**; contactpersonen krijgen dezelfde **6mnd/nooit-contact-alert** (last_contact op contact — BE `RecordsLastContact` bestaat al voor contacten).
+- **H-3** Nieuwe KPI-sub-tabs: **Taken · Bellijsten · Matches** (targets + drempels per gebied).
+
+### ☐ Openstaand — Settings → overig
+- **H-4** `tasks/task_priorities`: **icon-picker** toevoegen (zoals rollen; hergebruik `roleIcons`-patroon → `StatusListEditor` `withIcon`). Idem overwegen voor status/type.
+- **H-5** `vacancies/vacancy_fields`: **eigen velden constant houden** — custom fields blijven niet staan (persistentie-bug). Onderzoeken: opslag-payload / reload-merge.
+- **H-6** `whatsapp/messaging`: dit is **WhatsApp privé** — label/duiding aanscherpen zodat het niet met WhatsApp Business verward wordt.
+
+### ☐ Openstaand — topbar
+- **H-7** **Notification-bell** naast het profiel-icoon: dropdown met de in de **backend ingestelde** notificaties; badge (tot ~6) tot je erop klikt/gezien hebt. (BE: notificatie-feed + gelezen-status endpoint.)
+
+### ☐ Openstaand — architectuur (design-notitie)
+- **H-8** `views/view_candidates`: de **KPI-rows moeten altijd allemaal aanwezig zijn**, alleen **per rol uit te zetten**. D.w.z. de per-rol KPI-compositie wordt **tenant/rol-configureerbaar** (nu hardcoded in `templates.ts`) — een override-laag "verberg KPI X voor rol Y", nooit een rol zonder rij. Groter stuk; ontwerp eerst.
+
+---
+
 ## D. Afgerond (archief)
 
 - Workflow-builder (FE, 2026-07-01): **AI-Agent-module** herontworpen — 4 tabs (Standaard/Geavanceerd/Testen/
