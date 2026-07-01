@@ -153,7 +153,7 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }: {
               {loading ? t('shiftsDrawer.loading') : t('shiftsDrawer.count', { count: shifts.length })}
             </div>
           </div>
-          <button onClick={onClose}
+          <button onClick={onClose} aria-label={t('common:close')}
             style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                      background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
                      borderRadius: 6, marginLeft: 10 }}

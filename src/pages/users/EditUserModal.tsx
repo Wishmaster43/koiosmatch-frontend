@@ -83,7 +83,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
               </span>
             )}
           </h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
+          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
             <X size={16} />
           </button>
         </div>

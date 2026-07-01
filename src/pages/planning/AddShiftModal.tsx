@@ -109,7 +109,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                   border: 'none', borderRadius: 8, cursor: 'pointer' }}>
                 <Save size={13} /> {t('common:save')}
               </button>
-              <button onClick={onClose}
+              <button onClick={onClose} aria-label={t('common:close')}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                   width: 32, height: 32, background: 'none', border: '1px solid var(--sidebar-border)',
                   borderRadius: 8, cursor: 'pointer', color: 'var(--sidebar-muted)' }}>

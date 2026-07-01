@@ -49,7 +49,7 @@ export default function EntityListDrawer({ title, items, onClose }: EntityListDr
             <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{title}</div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('resultsCount', { count: items.length })}</div>
           </div>
-          <button onClick={onClose}
+          <button onClick={onClose} aria-label={t('common:close')}
             style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                      background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
                      borderRadius: 6, marginLeft: 10 }}
