@@ -178,7 +178,7 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     // ── AI & Workflow module ──────────────────────────────────────────────
     case 'aiagents':
     case 'workflows':           return <WorkflowsPage />
-    case 'whatsapp':            return <WhatsAppPage />
+    case 'whatsapp':            return <WhatsAppPage intent={navIntent} />
 
     // AI & Workflow drill-down detail routes
     case 'details.runs':        return <RunsDetailPage />

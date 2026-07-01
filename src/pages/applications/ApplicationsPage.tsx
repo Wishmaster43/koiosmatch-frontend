@@ -196,6 +196,13 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Open an application drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => selectApplication({ id } as Application))
 
+  // Seed the funnel-stage filter from a dashboard chart click (funnel / funnel-conversion).
+  // Mirrors the candidate status/recruiter drill-down: the InsightsRow then shows the active chip.
+  useEffect(() => {
+    const stage = (intent as { stage?: string } | undefined)?.stage
+    if (stage) setSelectedPhase([stage])
+  }, [intent])
+
   // Kanban move: set the new phase + bucket; label/colour re-resolve from the lookup.
   const handleMove = (id: Id, phaseKey: string) => {
     setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey, bucket: bucketOfPhase(phaseKey) } : a))

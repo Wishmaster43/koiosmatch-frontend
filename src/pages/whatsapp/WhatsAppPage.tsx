@@ -27,7 +27,7 @@ import { MessageFeed, EscalationList, ActivityChart } from './components'
 
 // ─── main page ───────────────────────────────────────────────────────────────
 
-export default function WhatsAppPage() {
+export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('whatsapp')
   // Data layer (4 parallel loads + refresh) lives in the hook; the page stays presentational.
   const { stats, messages, escalations, activity, loading, noConnection, reload } = useWhatsAppData()
@@ -66,6 +66,11 @@ export default function WhatsAppPage() {
   // it stays empty (badge 0) until backend C-43 is live.
   const queue = useWhatsAppQueue()
   const [tab, setTab] = useState<'overview' | 'messages' | 'queue' | 'escalations'>('overview')
+  // Open a specific tab when arriving via a dashboard link (queue / messages / escalations).
+  useEffect(() => {
+    const wanted = (intent as { tab?: string } | undefined)?.tab
+    if (wanted && ['overview', 'messages', 'queue', 'escalations'].includes(wanted)) setTab(wanted as typeof tab)
+  }, [intent])
   // Which KPI's right drill-down drawer is open (null = closed).
   const [drill, setDrill] = useState<null | 'today' | 'contacted' | 'filled' | 'escal'>(null)
   // Refresh both data sources; briefly lock the button so it can't be double-clicked.

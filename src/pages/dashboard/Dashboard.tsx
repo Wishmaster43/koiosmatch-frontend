@@ -282,10 +282,10 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     placements:        { id: 'placements', label: t('kpi.placements'), value: num(att.placements), sub: t('kpi.placementsSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: () => onNavigate?.('matches') },
     intakes:           { id: 'intakes', label: t('kpi.intakes'), value: num(att.intake_planned ?? att.intakes), sub: t('kpi.intakesSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: CalendarCheck, onClick: () => onNavigate?.('candidates') },
     fillRate:          { id: 'fillRate', label: t('kpi.fillRate'), value: att.fill_rate != null ? `${att.fill_rate}%` : '—', sub: t('kpi.fillRateSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: TrendingUp, onClick: () => onNavigate?.('vacancies') },
-    failedWa:          { id: 'failedWa', label: t('kpi.failedWa'), value: num(wa.failed), sub: t('kpi.failedWaSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp') },
-    waQueue:           { id: 'waQueue', label: t('kpi.waQueue'), value: num(wa.inQueue), sub: t('kpi.waQueueSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp') },
+    failedWa:          { id: 'failedWa', label: t('kpi.failedWa'), value: num(wa.failed), sub: t('kpi.failedWaSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'queue' }) },
+    waQueue:           { id: 'waQueue', label: t('kpi.waQueue'), value: num(wa.inQueue), sub: t('kpi.waQueueSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'queue' }) },
     incompleteRuns:    { id: 'incompleteRuns', label: t('kpi.incompleteRuns'), value: num(incompleteRuns), sub: t('kpi.incompleteRunsSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: Zap, onClick: () => onNavigate?.('aiagents') },
-    activeConv:        { id: 'activeConv', label: t('kpi.activeConv'), value: num(att.active_conversations ?? conversations.length), sub: t('kpi.activeConvSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp') },
+    activeConv:        { id: 'activeConv', label: t('kpi.activeConv'), value: num(att.active_conversations ?? conversations.length), sub: t('kpi.activeConvSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'messages' }) },
     missingDocs:       { id: 'missingDocs', label: t('kpi.missingDocs'), value: num(att.missing_documents), sub: t('kpi.missingDocsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: FileText, onClick: () => onNavigate?.('candidates') },
     expiringContracts: { id: 'expiringContracts', label: t('kpi.expiringContracts'), value: num(att.expiring_contracts), sub: t('kpi.expiringContractsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: () => onNavigate?.('matches') },
     couplingErrors:    { id: 'couplingErrors', label: t('kpi.couplingErrors'), value: num(att.coupling_errors), sub: t('kpi.couplingErrorsSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: Link2, onClick: () => onNavigate?.('candidates') },
@@ -355,7 +355,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
       {/* Planning-blokken — WhatsApp-wachtrij (🟢) + diensten-overzicht (🟡 tot de feed). */}
       {(vis('block.waQueue') || vis('block.shifts')) && (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-        {vis('block.waQueue') && <WhatsAppQueue inQueue={wa.inQueue} failed={wa.failed} onOpen={() => onNavigate?.('whatsapp')} />}
+        {vis('block.waQueue') && <WhatsAppQueue inQueue={wa.inQueue} failed={wa.failed} onOpen={() => onNavigate?.('whatsapp', { tab: 'queue' })} />}
         {vis('block.shifts') && <ShiftsSummary open={att.open_shifts} filled={att.filled_shifts} unfilled={att.unfilled_shifts} occupancy={att.occupancy} onOpen={() => onNavigate?.('planning')} />}
       </div>
       )}
@@ -421,9 +421,10 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
         )}
 
         {showRuns && vis('list.runs') && (
-          <Block title={t('block.recentRuns')} action={t('action.all')} onAction={() => onNavigate?.('details.runs')}>
+          <Block title={t('block.recentRuns')} action={t('action.all')} onAction={() => onNavigate?.('workflows')}>
             {runs.map((r, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
+              <div key={i} {...interactive(() => onNavigate?.('workflows'))}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', cursor: 'pointer',
                 borderBottom: i < runs.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0,
                   background: r.ok ? 'var(--color-success-bg)' : 'var(--color-danger-bg)',
@@ -441,9 +442,10 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
         )}
 
         {showConv && vis('list.conversations') && (
-          <Block title={t('block.recentConversations')} action={t('action.all')} onAction={() => onNavigate?.('details.messages')}>
+          <Block title={t('block.recentConversations')} action={t('action.all')} onAction={() => onNavigate?.('whatsapp', { tab: 'messages' })}>
             {conversations.map((c, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px',
+              <div key={i} {...interactive(() => onNavigate?.('whatsapp', { tab: 'messages' }))}
+                style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 16px', cursor: 'pointer',
                 borderBottom: i < conversations.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <Avatar initials={c.name.split(' ').map(n=>n[0]).join('')} size={28} />
                 <div style={{ flex: 1, minWidth: 0 }}>
