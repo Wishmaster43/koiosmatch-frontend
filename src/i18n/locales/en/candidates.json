@@ -133,7 +133,8 @@
       "qualifications": "Qualifications",
       "person": "Person",
       "organisation": "Organisation"
-    }
+    },
+    "archived": "Archive status"
   },
   "modal": {
     "title": "Add candidate",
@@ -414,7 +415,9 @@
     "favorite": "Favourite",
     "markFavorite": "Mark as favourite",
     "workedBeforeYes": "Yes, {{count}}× at {{client}}",
-    "workedBeforeNo": "No, first time at {{client}}"
+    "workedBeforeNo": "No, first time at {{client}}",
+    "reasonPlaceholder": "Reason (optional)",
+    "prefDuplicate": "This is already in the list."
   },
   "statuses": {
     "actief": "Active",

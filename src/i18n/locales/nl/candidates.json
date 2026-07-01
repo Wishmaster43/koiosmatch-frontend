@@ -133,7 +133,8 @@
       "qualifications": "Kwalificaties",
       "person": "Persoon",
       "organisation": "Organisatie"
-    }
+    },
+    "archived": "Archiefstatus"
   },
   "modal": {
     "title": "Kandidaat toevoegen",
@@ -414,7 +415,9 @@
     "favorite": "Favoriet",
     "markFavorite": "Markeer als favoriet",
     "workedBeforeYes": "Ja, {{count}}× bij {{client}}",
-    "workedBeforeNo": "Nee, eerste keer bij {{client}}"
+    "workedBeforeNo": "Nee, eerste keer bij {{client}}",
+    "reasonPlaceholder": "Reden (optioneel)",
+    "prefDuplicate": "Deze staat al in de lijst."
   },
   "statuses": {
     "actief": "Actief",

@@ -159,12 +159,15 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     { key: 'status', type: 'search-select', category: catLifecycle, label: t('filters.status'),        selected: selectedStatus, options: statusOptions, onToggle: tog(setSelectedStatus) },
     { key: 'funnel', type: 'search-select', category: catLifecycle, label: t('filters.funnelType'),    selected: selectedFunnel, options: funnelOptions, onToggle: tog(setSelectedFunnel) },
     { key: 'type',   type: 'search-select', category: catLifecycle, label: t('filters.candidateType'), selected: selectedType,   options: typeOptions,   onToggle: tog(setSelectedType) },
+    // Archived (soft-deleted) as a lifecycle filter — checking it opts into ?include_archived=1
+    // (mirrors the quick-view toggle; both share the showArchived state).
+    { key: 'archived', type: 'checkbox', category: catLifecycle, label: t('filters.archived'), selected: showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('page.archivedView') }], onToggle: () => setShowArchived(v => !v) },
     { key: 'title',  type: 'search-select', category: catQualifications, label: t('filters.function'), selected: selectedTitle, options: titleOptions, onToggle: tog(setSelectedTitle) },
     { key: 'gender',   type: 'search-select', category: catPerson, label: t('filters.gender'),   selected: selectedGeslacht, options: genderOptions,   onToggle: tog(setSelectedGeslacht) },
     { key: 'province', type: 'search-select', category: catPerson, label: t('filters.province'), selected: selectedProvince, options: provinceOptions, onToggle: tog(setSelectedProvince) },
     { key: 'owner',    type: 'search-select', category: catOrganisation, label: t('filters.owner'),  selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
     { key: 'location', type: 'search-select', category: catOrganisation, label: t('filters.branch'), selected: selectedLocation, options: locationOptions, onToggle: tog(setSelectedLocation) },
-  ], [t, catLifecycle, catQualifications, catPerson, catOrganisation, globalSearch,
+  ], [t, catLifecycle, catQualifications, catPerson, catOrganisation, globalSearch, showArchived,
       selectedStatus, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner, selectedLocation,
       statusOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
 
@@ -294,21 +297,20 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
                 </button>
                 {/* Quick-view toggles on the right: blacklisted-only + archived-only */}
                 <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-                  {/* Soft-chip toggles (§3A): tinted when active, never a solid fill. */}
+                  {/* Soft-chip toggles (§3A): always tinted in their own colour (danger /
+                      primary), stronger when active. Never a solid fill. */}
                   <button onClick={toggleBlacklist} title={t('page.blacklistView')}
                     style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, fontWeight: blacklistActive ? 600 : 500,
-                      borderRadius: 8, cursor: 'pointer',
-                      background: blacklistActive ? 'color-mix(in srgb, var(--color-danger) 12%, transparent)' : 'transparent',
-                      color: blacklistActive ? 'var(--color-danger)' : 'var(--text-muted)',
-                      border: `1px solid ${blacklistActive ? 'color-mix(in srgb, var(--color-danger) 40%, transparent)' : 'var(--border)'}` }}>
+                      borderRadius: 8, cursor: 'pointer', color: 'var(--color-danger)',
+                      background: `color-mix(in srgb, var(--color-danger) ${blacklistActive ? 16 : 8}%, transparent)`,
+                      border: `1px solid color-mix(in srgb, var(--color-danger) ${blacklistActive ? 50 : 28}%, transparent)` }}>
                     <Ban size={13} /> {t('page.blacklistView')}
                   </button>
                   <button onClick={() => setShowArchived(v => !v)} title={t('page.archivedView')}
                     style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, fontWeight: showArchived ? 600 : 500,
-                      borderRadius: 8, cursor: 'pointer',
-                      background: showArchived ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent',
-                      color: showArchived ? 'var(--color-primary)' : 'var(--text-muted)',
-                      border: `1px solid ${showArchived ? 'color-mix(in srgb, var(--color-primary) 40%, transparent)' : 'var(--border)'}` }}>
+                      borderRadius: 8, cursor: 'pointer', color: 'var(--color-primary)',
+                      background: `color-mix(in srgb, var(--color-primary) ${showArchived ? 16 : 8}%, transparent)`,
+                      border: `1px solid color-mix(in srgb, var(--color-primary) ${showArchived ? 50 : 28}%, transparent)` }}>
                     <Archive size={13} /> {t('page.archivedView')}
                   </button>
                 </div>

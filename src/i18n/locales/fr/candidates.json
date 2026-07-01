@@ -2,6 +2,9 @@
   "title": "Candidats",
   "page": {
     "add": "Ajouter un candidat",
+    "blacklistView": "Blacklist",
+    "archivedView": "Archivées",
+    "filterUnsupported": "Ce filtre n'est pas (encore) pris en charge par le serveur.",
     "searchPlaceholder": "Rechercher un candidat, une note, un document…",
     "empty": "Aucun candidat trouvé.",
     "loading": "Chargement…"
@@ -123,7 +126,8 @@
       "qualifications": "Qualifications",
       "person": "Personne",
       "organisation": "Organisation"
-    }
+    },
+    "archived": "Statut d'archive"
   },
   "modal": {
     "title": "Ajouter un candidat",
@@ -403,7 +407,9 @@
     "favorite": "Favori",
     "markFavorite": "Marquer comme favori",
     "workedBeforeYes": "Oui, {{count}}× chez {{client}}",
-    "workedBeforeNo": "Non, première fois chez {{client}}"
+    "workedBeforeNo": "Non, première fois chez {{client}}",
+    "reasonPlaceholder": "Raison (facultatif)",
+    "prefDuplicate": "Déjà présent dans la liste."
   },
   "statuses": {
     "actief": "Actif",
