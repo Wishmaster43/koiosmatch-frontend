@@ -16,6 +16,25 @@
 
 ---
 
+## 2026-07-01 · `[FE] → all lanes` · Flag-vocab / v1-binding audit (AP-CO4) — drift-risk map
+
+Grepped `src/` for v1-model bindings. **Good news — the scary ones are clean/false alarms:** no `blacklisted`
+boolean left (only a comment); candidate `by_funnel` is valid (contract §4); every `company_name` hit is
+`hide_company_name` (a *different* field — the name field is already `name`, so **AP-CO6 ≈ done**). Residual per lane:
+
+- **`[→ applications / lane A1]`** hardcoded funnel keys `=== 'rejected'/'matched'/'hired'` in
+  `pages/applications/{ApplicationsPage, drawer/RejectionBlock, drawer/ApplicationTab, data/applicationsShared}`
+  + `pages/tasks/TasksPage:271` + `pages/outreach/OutreachPage`. **Verify each is backed by the `is_match`/
+  `is_rejected` flag** and bind on the flag, not the key (§0). The contract ships the flags.
+- **`[→ candidates]`** `CandidateDrawer.tsx:189` correctly uses the `requires_match` flag ✅ but keeps a
+  redundant `|| v === 'placed'` — drop the hardcoded half. And `context/LookupsContext.tsx` still exports
+  `availabilityMeta` + refs the removed `/availability-options` (kept as seed) → the **C-39 "clean up FE
+  availability refs" is now UNBLOCKED** (backend Golf ① done); fold availability into status.
+- **`[→ DASH]`** `types/dashboard.ts` expects `charts.by_funnel` — confirm it matches `FRONTEND-CONTRACT.md §13`
+  before wiring (the once-non-existent key is now documented; verify the exact shape + a `mapDashboard.js` test).
+- **`[me / SM]`** the `=== 'inactive'` hits in `shiftmanager/*` + `reports/*Table` are ShiftManager's own
+  customer/location vocab (read-only mirror) — legit, not the candidate v2 model. No change.
+
 ## 2026-07-01 · `[FE] → [BE]` · AP-C1 FE-half done
 
 FE `docs/ARCHITECTURE.md §2/§3` is rewritten to the **v2 axes model** (phase + deployability, blacklist =
