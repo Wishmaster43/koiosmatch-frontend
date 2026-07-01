@@ -263,7 +263,11 @@
     "placeOfBirth": "Place of birth",
     "clear": "Clear",
     "expand": "Expand",
-    "collapse": "Collapse"
+    "collapse": "Collapse",
+    "age": "{{count}} yrs",
+    "birthdayToday": "Birthday today!",
+    "birthdayTomorrow": "Birthday tomorrow!",
+    "birthdaySoon": "Birthday in {{count}} days"
   },
   "addFields": {
     "functionTitle": "Job title",

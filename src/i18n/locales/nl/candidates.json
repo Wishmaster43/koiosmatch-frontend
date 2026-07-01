@@ -264,7 +264,11 @@
     "placeOfBirth": "Geboorteplaats",
     "clear": "Wissen",
     "expand": "Vergroten",
-    "collapse": "Verkleinen"
+    "collapse": "Verkleinen",
+    "age": "{{count}} jr",
+    "birthdayToday": "Jarig!",
+    "birthdayTomorrow": "Morgen jarig!",
+    "birthdaySoon": "Bijna jarig · over {{count}} dagen"
   },
   "addFields": {
     "functionTitle": "Functietitel",

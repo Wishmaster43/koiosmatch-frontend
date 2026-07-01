@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X, Trash2 } from 'lucide-react'
+import { Edit2, Save, X, Trash2, Cake } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import { NL_PROVINCES } from './constants'
-import { useDateFormat } from '@/lib/datetime'
+import { useDateFormat, calcAge, daysUntilBirthday } from '@/lib/datetime'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
@@ -143,8 +143,32 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
   // The read-only value for one field — contact fields render as actionable links.
   const renderValue = (key: ProfileKey) => {
     const v = c[key]
-    // Birthdate renders as DD-MM-YYYY (a parseable ISO value); dummy strings pass through.
-    if (key === 'dob') return <span style={{ fontSize: 12, color: v && v !== '-' ? 'var(--text)' : 'var(--text-muted)' }}>{v && v !== '-' ? formatDate(v) : '-'}</span>
+    // Birthdate renders as DD-MM-YYYY + age; a soft cake chip flags an imminent
+    // birthday (today / tomorrow / within two weeks) so recruiters can act on it.
+    if (key === 'dob') {
+      if (!v || v === '-') return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
+      const age  = calcAge(v)
+      const days = daysUntilBirthday(v)
+      // days is null for unparseable dates; ≥2 keeps "dagen" plural-correct (0/1 handled apart).
+      const bday = days == null ? null
+        : days === 0 ? t('profile.birthdayToday')
+        : days === 1 ? t('profile.birthdayTomorrow')
+        : days <= 14 ? t('profile.birthdaySoon', { count: days })
+        : null
+      return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, fontSize: 12, color: 'var(--text)' }}>
+          {formatDate(v)}
+          {age != null && <span style={{ color: 'var(--text-muted)' }}>· {t('profile.age', { count: age })}</span>}
+          {bday && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500,
+              padding: '2px 8px', borderRadius: 99, background: 'var(--color-primary-bg)',
+              color: 'var(--color-primary)', border: '1px solid var(--color-primary)' }}>
+              <Cake size={11} /> {bday}
+            </span>
+          )}
+        </span>
+      )
+    }
     if (key === 'linkedin') {
       return v
         ? <a href={v.startsWith('http') ? v : `https://${v}`} target="_blank" rel="noopener noreferrer"

@@ -24,3 +24,28 @@ export function useDateFormat() {
   }
   return { locale, formatDate }
 }
+
+// Age in whole years from a birthdate; accounts for whether the birthday already
+// passed this year. Null for a missing/unparseable/implausible value. `now` is
+// injectable so the calculation is deterministically testable.
+export function calcAge(dob: DateInput, now: Date = new Date()): number | null {
+  if (!dob) return null
+  const d = new Date(dob)
+  if (isNaN(d.getTime())) return null
+  let age = now.getFullYear() - d.getFullYear()
+  const beforeBirthday = now.getMonth() < d.getMonth() || (now.getMonth() === d.getMonth() && now.getDate() < d.getDate())
+  if (beforeBirthday) age--
+  return age >= 0 && age < 150 ? age : null
+}
+
+// Whole days until the next birthday (0 = today). Null for a missing/unparseable
+// value. `now` is injectable for deterministic tests.
+export function daysUntilBirthday(dob: DateInput, now: Date = new Date()): number | null {
+  if (!dob) return null
+  const d = new Date(dob)
+  if (isNaN(d.getTime())) return null
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  let next = new Date(today.getFullYear(), d.getMonth(), d.getDate())
+  if (next < today) next = new Date(today.getFullYear() + 1, d.getMonth(), d.getDate())
+  return Math.round((next.getTime() - today.getTime()) / 86400000)
+}

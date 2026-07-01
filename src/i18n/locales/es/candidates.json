@@ -257,7 +257,11 @@
     "houseNumber": "Número",
     "houseNumberSuffix": "Complemento",
     "postalCode": "Código postal",
-    "city": "Ciudad"
+    "city": "Ciudad",
+    "age": "{{count}} años",
+    "birthdayToday": "¡Cumpleaños!",
+    "birthdayTomorrow": "¡Cumpleaños mañana!",
+    "birthdaySoon": "Cumpleaños en {{count}} días"
   },
   "addFields": {
     "functionTitle": "Puesto",
