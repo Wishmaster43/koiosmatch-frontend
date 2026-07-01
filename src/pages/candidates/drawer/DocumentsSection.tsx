@@ -3,6 +3,7 @@ import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Plus, X, FileText, Pencil, Eye } from 'lucide-react'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { sectionBlock } from './constants'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
@@ -53,7 +54,7 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
     setPendingFile(null)
     api.post(`/candidates/${c.id}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) setDocs(d => d.map(x => x.id === tmpId ? { ...optimistic, ...it } : x)) })
-      .catch(() => {})
+      .catch(() => notifyError(t('common:actionFailed')))
   }
 
   // Rename / delete persist once the row has a real (positive numeric) id.
@@ -63,12 +64,12 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
     const cur = String(docs[i]?.name ?? docs[i]?.file_name ?? '')
     const name = base.trim() + splitExt(cur).ext
     setDocs(docs.map((x, j) => j === i ? { ...x, name } : x)); setRenamingDoc(null)
-    if (typeof id === 'number' && id > 0) api.patch(`/candidates/${c.id}/documents/${id}`, { name }).catch(() => {})
+    if (typeof id === 'number' && id > 0) api.patch(`/candidates/${c.id}/documents/${id}`, { name }).catch(() => notifyError(t('common:actionFailed')))
   }
   const removeDoc = (i: number) => {
     const id = docs[i]?.id
     setDocs(docs.filter((_, j) => j !== i))
-    if (typeof id === 'number' && id > 0) api.delete(`/candidates/${c.id}/documents/${id}`).catch(() => {})
+    if (typeof id === 'number' && id > 0) api.delete(`/candidates/${c.id}/documents/${id}`).catch(() => notifyError(t('common:actionFailed')))
   }
 
   return (

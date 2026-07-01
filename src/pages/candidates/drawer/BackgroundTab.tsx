@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import type { ComponentType, Dispatch, SetStateAction } from 'react'
+import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { ExperienceTab as ExperienceTabJs, EducationTab as EducationTabJs, CertificationsTab as CertificationsTabJs, SkillsTab as SkillsTabJs } from './SectionTabs'
 import LanguagesSection from './LanguagesSection'
 import type { Candidate } from '@/types/candidate'
@@ -46,6 +48,7 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
   // Candidate.skills is string[] from the mapper, but the SkillsTab edits them as
   // { name, level } objects (it renders both) — widen to the relation-item shape.
   const [skills,      setSkills]       = useState<RelItem[]>((c.skills ?? []) as unknown as RelItem[])
+  const { t } = useTranslation('common')
 
   // add / edit-at-index / remove-at-index for a relation, with optimistic persistence.
   // Not-yet-persisted rows get a negative temp id (never collides with server ids).
@@ -55,17 +58,17 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
       set(p => [...p, { ...v, id }])
       api.post(`/candidates/${c.id}/${rel}`, TO_API[rel](v))
         .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) set(p => p.map(x => x.id === id ? { ...v, ...it } : x)) })
-        .catch(() => {})
+        .catch(() => notifyError(t('actionFailed')))
     },
     onEdit: (i: number, v: RelItem) => {
       const id = list[i]?.id
       set(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))
-      if (typeof id === 'number' && id > 0) api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v)).catch(() => {})
+      if (typeof id === 'number' && id > 0) api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v)).catch(() => notifyError(t('actionFailed')))
     },
     onRemove: (i: number) => {
       const id = list[i]?.id
       set(p => p.filter((_, idx) => idx !== i))
-      if (typeof id === 'number' && id > 0) api.delete(`/candidates/${c.id}/${rel}/${id}`).catch(() => {})
+      if (typeof id === 'number' && id > 0) api.delete(`/candidates/${c.id}/${rel}/${id}`).catch(() => notifyError(t('actionFailed')))
     },
   })
 

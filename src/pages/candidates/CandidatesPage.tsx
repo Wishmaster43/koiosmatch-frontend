@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useUsers } from '@/lib/queries'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import CandidateDrawerJs from './CandidateDrawer'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesTable from './CandidatesTable'
@@ -200,7 +201,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     setSelected(prev => (prev && prev.id === id ? { ...prev, ...patch } as Candidate : prev))
     setDetail(prev  => (prev && prev.id === id ? { ...prev, ...patch } as Candidate : prev))
     const body = buildCandidatePatch(patch)
-    if (Object.keys(body).length) api.patch(`/candidates/${id}`, body).catch(() => {})
+    if (Object.keys(body).length) api.patch(`/candidates/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // ── Bulk actions ──

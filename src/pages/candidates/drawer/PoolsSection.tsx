@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Check, Sparkles } from 'lucide-react'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { sectionBlock } from './constants'
 import type { Candidate, CandidatePool } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -42,10 +43,10 @@ export default function PoolsSection({ c }: { c: Candidate }) {
     const id = pool.id ?? pool.name
     if (has(id)) {
       setPools(prev => prev.filter(p => (p.id ?? p.name) !== id))
-      api.delete(`/candidates/${c.id}/pools/${id}`).catch(() => {})
+      api.delete(`/candidates/${c.id}/pools/${id}`).catch(() => notifyError(t('common:actionFailed')))
     } else {
       setPools(prev => [...prev, pool])
-      api.post(`/candidates/${c.id}/pools`, { pool_id: id }).catch(() => {})
+      api.post(`/candidates/${c.id}/pools`, { pool_id: id }).catch(() => notifyError(t('common:actionFailed')))
     }
   }
 

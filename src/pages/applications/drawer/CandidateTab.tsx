@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { mapCandidate } from '@/pages/candidates/data/mapCandidate'
 import ProfilePanel from '@/pages/candidates/drawer/ProfilePanel'
@@ -48,7 +49,7 @@ export default function CandidateTab({ application: a }: { application: Applicat
   // Optimistic local edit + best-effort persist (full key-mapping lives in the Candidates page).
   const onUpdate = (id: string | number, patch: Record<string, unknown>) => {
     setEdits(e => ({ ...e, ...patch }))
-    api.patch(`/candidates/${id}`, patch).catch(() => {})
+    api.patch(`/candidates/${id}`, patch).catch(() => notifyError(t('common:actionFailed')))
   }
 
   if (loading) return <div style={muted}>{t('page.loading', { defaultValue: '…' })}</div>
