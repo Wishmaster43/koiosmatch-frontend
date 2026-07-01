@@ -12,8 +12,6 @@ import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
-import api from '@/lib/api'
-import { notifyError } from '@/lib/notify'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import InsightsRow from '@/components/insights/InsightsRow'
@@ -23,11 +21,11 @@ import VacanciesTable from './VacanciesTable'
 import VacanciesBulkBar from './VacanciesBulkBar'
 import VacancyDrawer from './VacancyDrawer'
 import AddVacancyModal from './AddVacancyModal'
-import { mapVacancyDetail } from './data/mapVacancy'
-import { toggleOneValue, initialsOf, pickKey, buildVacancyPatch } from './data/vacanciesShared'
+import { toggleOneValue, pickKey } from './data/vacanciesShared'
 import { useVacanciesData } from './hooks/useVacanciesData'
+import { useVacancyRecord } from './hooks/useVacancyRecord'
 import { useVacancyBulkActions } from './hooks/useVacancyBulkActions'
-import type { Vacancy, VacancyDetail } from '@/types/vacancy'
+import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
 interface AppUser { id: Id; name: string }
@@ -53,14 +51,10 @@ function VacanciesPageInner() {
 
   const [page,      setPage]      = useState(1)
   const [pageSize,  setPageSize]  = useState(50)
-  const [selected,       setSelected]       = useState<Vacancy | null>(null)
-  const [detail,         setDetail]         = useState<VacancyDetail | null>(null)
-  const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [addOpen,        setAddOpen]        = useState(false)
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
   const [actionMsg,      setActionMsg]      = useState<{ type: string; text: string } | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const selectedIdRef = useRef<Id | null>(null)
 
   // Server-side filter dimensions. Status is driven by the tab bar (single value).
   const [statusBucket,   setStatusBucket]   = useState('all')
@@ -97,6 +91,10 @@ function VacanciesPageInner() {
     useVacanciesData({ filterParams, page, pageSize, t })
   const s = stats as VacancyStatsShape | null
   const customerList = customers as { id: Id; name: string }[]
+
+  // ── Drawer/record data layer (§3): selection + detail fetch + optimistic edits ──
+  const { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy } =
+    useVacancyRecord({ setVacancies, setTotal, statusMeta, users, customers: customerList, t })
 
   // ── Donut data (status / owner / client) — stats first, page-derived fallback ──
   const statusData = useMemo<Aggregate[]>(() => {
@@ -147,35 +145,6 @@ function VacanciesPageInner() {
     return () => unregisterFilters('vacancies-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  // ── Drawer: light row first, then fetch the full detail (ref-guarded) ──
-  const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
-  const selectVacancy = (v: Vacancy) => {
-    if (selected?.id === v.id) { closeDrawer(); return }
-    selectedIdRef.current = v.id ?? null
-    setSelected(v); setDetail(null); setDrawerExpanded(false)
-    api.get(`/vacancies/${v.id}`)
-      .then(r => { if (selectedIdRef.current === v.id) setDetail(mapVacancyDetail(r.data?.data ?? r.data)) })
-      .catch(() => {})
-  }
-
-  // A freshly created vacancy: prepend + open its drawer (which fetches the detail).
-  const handleCreated = (v: Vacancy) => { setVacancies(prev => [v, ...prev]); setTotal(prev => prev + 1); setAddOpen(false); selectVacancy(v) }
-
-  // Header/picker edits flow back here: optimistic locally, then PATCH the API.
-  const updateVacancy = (id: Id | undefined, patch: Record<string, unknown>) => {
-    const local: Record<string, unknown> = { ...patch }
-    if ('statusValue' in patch) { const m = statusMeta(patch.statusValue as string); local.statusLabel = m.label; local.statusColor = m.color }
-    if ('ownerId' in patch) { const u = users.find(x => x.id === patch.ownerId); local.owner = { id: patch.ownerId, name: u?.name ?? '', initials: initialsOf(u?.name ?? ''), color: null } }
-    if ('clientId' in patch) { const c = customers.find(x => x.id === patch.clientId); local.clientName = c?.name ?? '' }
-
-    setVacancies(prev => prev.map(x => x.id === id ? ({ ...x, ...local } as Vacancy) : x))
-    setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...local } as Vacancy) : prev))
-    setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...local } as VacancyDetail) : prev))
-
-    const body = buildVacancyPatch(patch)
-    if (Object.keys(body).length) api.patch(`/vacancies/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
-  }
-
   // ── Bulk actions ──
   const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags } =
     useVacancyBulkActions({ vacancies, setVacancies, setTotal, selectedIds, setSelectedIds, notify, t, statusMeta: statusMetaSafe })
@@ -197,7 +166,7 @@ function VacanciesPageInner() {
 
   return (
     <>
-      {addOpen && <AddVacancyModal onClose={() => setAddOpen(false)} onCreated={handleCreated} users={users} customers={customerList} />}
+      {addOpen && <AddVacancyModal onClose={() => setAddOpen(false)} onCreated={v => { setAddOpen(false); handleCreated(v) }} users={users} customers={customerList} />}
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
