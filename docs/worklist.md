@@ -188,6 +188,84 @@ Hangt op: C-34
 Template-picker + live miniatuur mockup in rol-detail.
 Hangt op: C-35
 
+### B-30 · Design-coherence sweep — chips/toggles/typografie over alle entiteiten
+Standaard staat nu in **CLAUDE.md §4** (soft-chip/toggle-conventie: altijd getint in de eigen
+semantische kleur via `color-mix`, nooit solide fill, subtiel inactief + sterker/vet actief;
+typografie: gewichten 400–500/600–700, bold=nadruk/actief, italic=alleen secundair, kleur alleen
+via tokens). Referentie = de Blacklist/Archived quick-view-knoppen in `CandidatesPage.tsx`.
+**Doel:** trek chips/pills/toggles + typografie consistent over candidates · applications ·
+vacancies · matches · opportunities · tasks · call-lists · customers + SM-rapporttabellen.
+**Incl. i18n-check:** geen ruwe sleutels in de UI (zoals eerder `page.blacklistView`); elke
+knop/label heeft een key in álle 5 locales. Kopieer je dezelfde color-mix-styling >2× → extraheer
+een gedeelde helper. Kopieer-klare prompt hieronder.
+
+```text
+Je bent frontend-Claude voor KOIOS MATCH. Doe een DESIGN-COHERENCE SWEEP: trek de visuele stijl
+van chips/pills/toggle-knoppen én typografie consistent over ALLE entiteiten.
+
+BRON: CLAUDE.md §4 (soft-chip/toggle + typografie) + referentie in CandidatesPage.tsx
+(Blacklist/Archived quick-view-knoppen).
+
+STANDAARD:
+- Chips/pills/quick-view-toggles ALTIJD getint in eigen semantische kleur, NOOIT solide fill.
+  background = color-mix(in srgb, <token> 8–16%, transparent) (lager inactief, hoger actief);
+  tekst + icoon = <token>; border = color-mix(… 28–50%). Inactief houdt z'n kleur (subtiel, niet
+  grijs); actief = sterkere tint + fontWeight 600. color-mix zodat CSS-var-tokens ook werken.
+- Typografie: Inter (UI), JetBrains Mono (getallen/IDs). 400–500 body/labels, 600–700 actief/titels,
+  nooit zwaarder. Bold = nadruk/actief only. Italic = alleen secundair/placeholder/empty-state,
+  NOOIT voor data. Kleur alleen via tokens, geen ad-hoc hex.
+
+ENTITEITEN (elk Page + Drawer + BulkBar + chips/badges): candidates (ref) · applications ·
+vacancies · matches · opportunities · tasks · call-lists · customers + SM-rapporttabellen.
+
+PER ENTITEIT: (1) toggle/quick-view-knoppen → conventie; (2) status/fase/type-chips + badges →
+zelfde tint (geen solide fills, geen grijs); (3) typografie gelijktrekken; (4) i18n-check: geen
+ruwe sleutels, elke key in nl/en/de/fr/es; (5) hergebruik gedeelde componenten, extraheer een
+helper bij >2× dezelfde styling.
+
+REGELS: TypeScript, één EN-comment/blok, lint schoon, geen bestand >1000 regels. Coördineer via
+worktree-per-lane (COORD-1); git status vóór elke edit; raak geen WIP-files van andere lanes aan.
+LEVER: consistente chips/knoppen/typografie + lijst toegevoegde i18n-keys + geëxtraheerde helpers.
+```
+
+### B-31 · Entity-drawer consistentie-sweep (vacature/klant/locatie ↔ kandidaat-blueprint) — review 2026-07-01
+> Danny reviewde de **vacature-drawer** naast de **kandidaat-drawer**. De kandidaat-drawer is de
+> canonieke referentie (§3A/§3B) — elke afwijking hieronder gelijktrekken. Vacatures = lane A1.
+
+**FE — vacature-drawer gelijktrekken aan kandidaat:**
+- [ ] **Locatie-format**: zelfde adres-/locatieweergave als in de kandidaat drill-down (`lib/formatters`,
+      DD-MM-YYYY + adresopmaak). Nu inconsistent.
+- [ ] **Vereiste vaardigheden**: exact de skills-UI van de kandidaat (verticale lijst, edit/remove per rij,
+      lookup — geen inline chips). Hergebruik dezelfde component.
+- [ ] **Titel + omschrijving**: via de gedeelde `RichTextEditor` (de notities-editor), zoals bij de kandidaat.
+- [ ] **Documenten**: read-only + snelle weergave (preview-modal) **zoals kandidaat**; toon **door wie + wanneer**
+      toegevoegd. Zelfde `DocumentsSection`-patroon.
+- [ ] **Notities**: identiek aan de kandidaat (potlood→diskette, nieuw=diskette/✕) **+ notitie-soorten** (lookup)
+      **+ door wie/wanneer**. Zelfde `NotesTab`/composer.
+- [ ] **Changelog-icon** in de title-row bovenin (mist nu in de vacature-drawer; kandidaat heeft `ChangelogPopover`).
+- [ ] **Adres overnemen bij klant/locatie-keuze**: kiest de gebruiker een klant en/of locatie → **prompt**
+      "adres van klant/locatie overnemen of zelf kiezen?" (i.p.v. stil overschrijven).
+- [ ] **Afspraken** (intake-gated stages, §3B): **type instelbaar** (lookup), **datum+tijd van–tot**, **locatie**.
+- [ ] **Statistieken-tab**: documenteer/toon de **bron** van "alle kandidaten" (server-wide `/…/stats` vs. geladen
+      pagina) zodat de teller niet verwarrend is — zelfde bronregel als de kandidaat-KPI's.
+
+**FE — cross-cutting (óók kandidaat + overal, MIJN lane deels):**
+- [ ] **Audit-metadata "door wie + wanneer"** op **notities én documenten** overal tonen (kandidaat eerst).
+      Hangt op backend-velden (zie C-hieronder).
+- [ ] **Klanten + locaties**: adres-weergave nakijken op consistent format (zelfde `lib/formatters`).
+
+**BE — nodig hiervoor:**
+- [ ] Notities: `created_by` (user) + `created_at` in de API-respons; **note-types** lookup (`/note-types`, CRUD +
+      seed + in-use 409) — zie ook C-1.
+- [ ] Documenten: `uploaded_by` + `uploaded_at` in `documents[]` (kandidaat + vacature + overal).
+- [ ] **Afspraak-type** lookup (instelbaar) + afspraak-velden `scheduled_from`/`scheduled_to`/`location`.
+- [ ] **Matching-profiel** (vereiste vaardigheden/criteria): **instelbaar in Settings**, per vacature **overgenomen**
+      en **afwijkbaar** — endpoint + per-vacancy override + seed. (Danny-vraag: waar leeft het profiel → Settings-default
+      + per-vacature override.)
+
+**✅ Gedaan in deze review:** tiptap dubbele `underline`-extensie verwijderd (`RichTextEditor.tsx`) — de
+`Duplicate extension names found: ['underline']`-warning is weg.
+
 ---
 
 ## C. Backend — open taken
@@ -549,8 +627,18 @@ Accepteert (elk veld optioneel):
 
 ---
 
-### C-27-workflow · Workflow-modules — graaf-opslag
-Steps opslaan met `position` + `connections[]` (target + filters). Stabiele step-ids.
+### C-27-workflow · Workflow-modules — graaf-opslag + run-historie + token-substitutie
+1. **Graaf-opslag.** Steps opslaan met `position` + `connections[]` (target + filters). **Stabiele step-ids**
+   (Router-branches collapsen anders naar een rechte lijn bij reload). FE overbrugt nu via localStorage
+   (`wf_graph_<id>`) tot dit persistent is.
+2. **Run-historie (NIEUW — FE gebouwd 2026-07-01, wacht op endpoint).** `GET /workflows/{id}/runs` → lijst runs;
+   elke run met `step_results[]`, per stap `{ label, type, status, message, input, output, duration_ms?,
+   operations? }`. De editor-tab **GESCHIEDENIS** + de gedeelde `RunDetailDrawer` tonen dit (per-stap
+   **INPUT/OUTPUT** uitklapbaar). FE valt terug op `/workflow-runs` (ongefilterd) zolang dit ontbreekt.
+3. **Token-substitutie (NIEUW — FE gebouwd 2026-07-01).** De variabele-picker schrijft `{{<stepId>.<pad>}}` (en
+   `{{<stepId>}}` voor de hele output) in string-configs. De engine moet die **tijdens een run vervangen** door de
+   output van de betreffende stap — de stabiele step-id uit punt 1 is de koppeling. Pad = dot-notatie
+   (`employee.city`); arrays resolven via het eerste element.
 
 ---
 
@@ -619,6 +707,26 @@ data tonen.
 `location{id,name}`, `department{id,name}`, `contact{id,name}`.
 
 Hangt samen met **C-28** (basis), **C-27** (klant-subentiteiten), **C-18** (taken), **C-41** (bulk/tags/activity).
+
+---
+
+### 🔴 C-44 · Planning-module — Orders, Shifts, Inplanning (assignments), Uren (FE wacht · volledig contract in chat 2026-06-21)
+FE-doel (Danny): diensten (**orders**) aanmaken met **shifts**, kandidaten **inplannen**, **uren** invullen — 0% mock.
+Ontbreekt backend-breed. Nieuwe entiteiten (tenant-scoped, UUID-PK, `planning.*`, 409/422, audit, migratie-conventie):
+- `planning_orders` (customer/location/department/function, status-lookup, hasMany shifts; delete-409 bij actief werk)
+- `planning_shifts` (order?/customer/function/shift_type/date/start/end/break/spots/status; **derived** `open_spots`;
+  filters: `open_only`, `candidate_id` → fit-annotatie `{distance_km, function_match, available, blacklisted}`)
+- `planning_assignments` (shift↔candidate, status-lookup; unieke actieve → 409; guards: spots, availability, blacklist)
+- `planning_hours` (per assignment; actual_start/end/break; **derived** total_hours; status draft→submitted→approved)
+Endpoints: `/planning/orders` · `/planning/shifts` · `POST /planning/shifts/{id}/assignments` ·
+`PATCH|DELETE /planning/assignments/{id}` · `POST /planning/assignments/{id}/hours` · `/planning/hours/{id}(/approve)`.
+Lookups (Settings → Planning, **niets hardcoded**): shift-types · order/shift/assignment-statuses (kleur + reorder + in-use-409).
+**Bevestig ook de al geleverde rij-shapes:** `/planning/schedules`, `/planning/shifts`, planning-preferences
+(`linkable_type` = alias customer|location|department? GET zonder `kind` = beide? POST echoot de rij incl. id+naam?),
+availability (`date`, part-enum day|morning|afternoon|evening, `status`, `reason`).
+Hangt samen met **MOCK-1** (kandidaat-Planning-tab) + de Planning-Settings-subtabs.
+**FE-status:** Voorkeur/blacklist ✅ + Beschikbaarheid ✅ gekoppeld; read-tabs (schedules/shifts) wachten op shape-bevestiging;
+orders/inplannen/uren + het losse Planbord (`PlanningPage`, nu mock) wachten op déze backend.
 
 ---
 
@@ -768,6 +876,13 @@ Wire: `ModulePicker`/`ConfigPanel` → `t('workflows:modules.'+type, meta.label)
 
 ## D. Afgerond (archief)
 
+- Workflow-builder (FE, 2026-07-01): **AI-Agent-module** herontworpen — 4 tabs (Standaard/Geavanceerd/Testen/
+  Uitvoering), Claude Sonnet 4 default, **inline agent** (`connection`-picker + dode `agent_select` weg), live
+  test-chat via `POST /ai/agents/test` (backend `AgentChatService` + endpoints klaar). **GESCHIEDENIS-tab** in de
+  editor (DIAGRAM/GESCHIEDENIS-toggle; per-run + per-stap INPUT/OUTPUT via gedeelde `RunStepList`/`RunDetailDrawer`;
+  de globale `RunsTable` hergebruikt nu dezelfde drawer). **Variabele-picker** (`{{module.veld}}` uit upstream
+  test-run output, hybride bron + "hele output"-fallback). Router-persistentie (START-drag, 2 opslaan-knoppen,
+  localStorage-brug). Backend-restpunten → **C-27-workflow** (runs-endpoint + token-substitutie).
 - C-11 consent (FE, 2026-06-27): kanaal-consent omgezet naar het backend-contract — genest
   `consent.{whatsapp,email,newsletter}_opt_in` (was flat `*_consent`), defaults wa/e-mail aan
   (opt-out) + nieuwsbrief uit, `_consent_at` server-gestempeld (FE stuurt het nooit mee). Type +
