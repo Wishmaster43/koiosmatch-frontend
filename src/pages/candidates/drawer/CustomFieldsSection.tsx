@@ -88,7 +88,7 @@ export default function CustomFieldsSection({ c, onEditSave }: Props) {
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden', marginTop: 16 }}>
       {/* Card header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    padding: '10px 14px', background: '#FAFAFA', borderBottom: '1px solid var(--border)' }}>
+                    padding: '10px 14px', background: 'var(--bg)', borderBottom: '1px solid var(--border)' }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('drawer.customFields')}</span>
         {editing ? (
           <div style={{ display: 'flex', gap: 6 }}>
