@@ -14,7 +14,8 @@ import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, ScheduleC
 
 // Flatten a test-run sample into dot-paths (max depth 2, capped) for the var
 // picker. An array is represented by the shape of its first element.
-function flattenSample(obj: unknown, prefix = '', depth = 0): Array<{ path: string; sample: string }> {
+// Exported for unit testing.
+export function flattenSample(obj: unknown, prefix = '', depth = 0): Array<{ path: string; sample: string }> {
   if (obj == null) return []
   if (typeof obj !== 'object') return prefix ? [{ path: prefix, sample: String(obj) }] : []
   if (Array.isArray(obj)) return obj.length ? flattenSample(obj[0], prefix, depth) : []
