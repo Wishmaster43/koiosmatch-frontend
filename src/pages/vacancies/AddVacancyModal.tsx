@@ -13,10 +13,10 @@ import type { Id } from '@/types/common'
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
   title: 'title', status: 'status', owner_id: 'ownerId', customer_id: 'clientId',
-  employment_type: 'employmentType', industry: 'industry', category: 'category', location: 'location',
+  industry: 'industry', category: 'category', location: 'location',
 }
 
-interface VacancyForm { title: string; clientId: string; status: string; ownerId: string; employmentType: string; industry: string; category: string; location: string }
+interface VacancyForm { title: string; clientId: string; status: string; ownerId: string; industry: string; category: string; location: string }
 interface ModalUser { id: Id; name: string }
 interface ModalCustomer { id: Id; name: string }
 
@@ -28,7 +28,7 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
   onClose: () => void; onCreated?: (v: Vacancy) => void; users?: ModalUser[]; customers?: ModalCustomer[]
 }) {
   const { t } = useTranslation(['vacancies', 'common'])
-  const { statuses, employmentTypes } = useVacancyLookups()
+  const { statuses } = useVacancyLookups()
   const { industries } = useIndustries()
   const { functions } = useFunctions()
 
@@ -36,7 +36,7 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<VacancyForm>({
     title: '', clientId: '', status: statuses[0]?.value ?? '', ownerId: '',
-    employmentType: '', industry: '', category: '', location: '',
+    industry: '', category: '', location: '',
   })
 
   const set = (k: keyof VacancyForm, v: string) => {
@@ -53,7 +53,6 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
         status: form.status || null,
         owner_id: form.ownerId || null,
         customer_id: form.clientId || null,
-        employment_type: form.employmentType || null,
         industry: form.industry || null,
         category: form.category || null,
         location: form.location || null,
@@ -75,7 +74,6 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
 
   const canSubmit = !!form.title.trim()
   const statusOptions = statuses.map(s => ({ value: s.value, label: s.label }))
-  const employmentOptions = employmentTypes.map(e => ({ value: e.value, label: e.label }))
   const userOptions = users.map(u => ({ value: String(u.id), label: u.name }))
   const customerOptions = customers.map(c => ({ value: String(c.id), label: c.name }))
 
@@ -117,8 +115,8 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
             <Field label={t('modal.fields.owner')}>
               <SelectField value={form.ownerId} onChange={v => set('ownerId', v)} placeholder={t('common:select')} options={userOptions} />
             </Field>
-            <Field label={t('modal.fields.employmentType')}>
-              <SelectField value={form.employmentType} onChange={v => set('employmentType', v)} placeholder={t('common:select')} options={employmentOptions} />
+            <Field label={t('modal.fields.location')}>
+              <TextField value={form.location} onChange={v => set('location', v)} placeholder={t('modal.fields.location')} />
             </Field>
           </div>
 
@@ -130,10 +128,6 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
               <SelectField value={form.category} onChange={v => set('category', v)} placeholder={t('common:select')} options={functions} />
             </Field>
           </div>
-
-          <Field label={t('modal.fields.location')}>
-            <TextField value={form.location} onChange={v => set('location', v)} placeholder={t('modal.fields.location')} />
-          </Field>
         </div>
 
         {/* Footer */}

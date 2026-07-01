@@ -39,14 +39,14 @@ describe('mapVacancyDetail', () => {
   it('normalises lookups, channels and coupled applications', () => {
     const detail = mapVacancyDetail({
       id: 'v1', title: 'Test',
-      employment_type: { value: 'temporary', label: 'Tijdelijk' },
+      contract_types: ['freelance', 'payroll'],
       seniority: { label: 'Professional' }, education: 'MBO',
       salary_min: 2500, salary_max: 3200, salary_period: 'p/m',
       application_settings: { cv: 'required' },
       channels: [{ value: 'career', label: 'Carrière-pagina', published: true }],
       applications: [{ id: 'a1', candidate: { id: 'c1', name: 'Rosa Tijssen' }, phase: { value: 'hired', label: 'Aangenomen', color: '#79B58E' }, source: 'Werkzoeken' }],
     })
-    expect(detail.employmentLabel).toBe('Tijdelijk')
+    expect(detail.contractTypes).toEqual(['freelance', 'payroll'])
     expect(detail.seniority).toBe('Professional')
     expect(detail.education).toBe('MBO')
     expect(detail.salary).toBe('2500 – 3200 p/m')

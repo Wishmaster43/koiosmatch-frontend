@@ -230,7 +230,10 @@
     "availableAgain": "available again {{date}}",
     "blacklistedBy": "Blacklisted by {{who}}",
     "blacklisted": "Blacklisted",
-    "customFields": "Custom fields"
+    "customFields": "Custom fields",
+    "placedPickPlaceholder": "Choose a match…",
+    "placedOrNew": "Or create a new one",
+    "placedNewPlaceholder": "Vacancy / role name"
   },
   "stage": {
     "lead": "Lead",

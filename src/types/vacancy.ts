@@ -46,11 +46,9 @@ export interface Vacancy {
 
 /** The enriched vacancy model rendered by the drawer tabs. */
 export interface VacancyDetail extends Vacancy {
-  employmentLabel: string
-  // Raw lookup slugs + structured numbers, so the Details tab can edit in-place
-  // (bind a select to the value, resolve the label for read mode). Display labels
-  // (employmentLabel / seniority / education) stay for the read view.
-  employmentValue: string
+  // Raw lookup slugs, so the Details tab can edit in-place (bind a select to the
+  // value, resolve the label for read mode). Display labels (seniority/education)
+  // stay for the read view.
   seniorityValue: string
   educationValue: string
   // Contract forms this vacancy offers — same lookup as the candidate (multi-value).

@@ -37,7 +37,7 @@ import { LanguageListSettings, LanguageLevelSettings } from './sections/Language
 import GenderSettings from './sections/GenderSettings'
 import IndustrySettings from './sections/IndustrySettings'
 import FunctionsSettings from './sections/FunctionsSettings'
-import { VacancyStatusSettings, VacancyPhaseSettings, VacancyFieldsSettings, VacancyEmploymentTypeSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
+import { VacancyStatusSettings, VacancyPhaseSettings, VacancyFieldsSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
 import RejectionSettings from './sections/RejectionSettings'
@@ -145,7 +145,6 @@ export const NAV_GROUPS = [
     items: [
       { id: 'vacancy_statuses', icon: Briefcase, component: VacancyStatusSettings },
       { id: 'vacancy_phases', icon: Target, component: VacancyPhaseSettings },
-      { id: 'vacancy_employment', icon: ClipboardList, component: VacancyEmploymentTypeSettings },
       { id: 'vacancy_seniority', icon: BarChart2, component: VacancySenioritySettings },
       { id: 'vacancy_education', icon: BookOpen, component: VacancyEducationSettings },
       { id: 'vacancy_channels', icon: Store, component: VacancyChannelSettings },

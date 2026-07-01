@@ -230,7 +230,10 @@
     "statusSince": "{{status}} sinds {{date}}",
     "availableAgain": "weer beschikbaar {{date}}",
     "blacklistedBy": "Geblacklist door {{who}}",
-    "blacklisted": "Geblacklist"
+    "blacklisted": "Geblacklist",
+    "placedPickPlaceholder": "Kies een match…",
+    "placedOrNew": "Of maak een nieuwe",
+    "placedNewPlaceholder": "Naam vacature / functie"
   },
   "stage": {
     "lead": "Lead",

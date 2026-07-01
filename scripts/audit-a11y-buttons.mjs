@@ -29,8 +29,9 @@ for (const f of walk(ROOT)) {
   while ((m = re.exec(s))) {
     const [open, inner] = [m[1], m[2]]
     if (/aria-label|aria-labelledby|\btitle=/.test(open)) continue // has an accessible name
-    // strip tags; keep {t(...)} as text; a bare {var} is a *possible* text label
-    const stripped = inner.replace(/<[^>]*>/g, '').replace(/\{[^}]*\}/g, x => /\bt\(/.test(x) ? 'T' : '')
+    // strip tags; a {…t()…} expression renders visible text (accessible name), so
+    // treat it as text; a bare {var} is only a *possible* text label (uncertain).
+    const stripped = inner.replace(/<[^>]*>/g, '').replace(/\{[^}]*\}/g, x => /\bt\(/.test(x) ? 'TEXT' : '')
     if (/[A-Za-z]{2,}/.test(stripped)) continue // has visible text → labelled
     const maybeVarText = /\{[a-zA-Z][\w.]*\}/.test(inner) // {label} etc → flag as uncertain
     const line = s.slice(0, m.index).split('\n').length

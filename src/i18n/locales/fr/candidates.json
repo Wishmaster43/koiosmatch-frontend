@@ -223,7 +223,10 @@
     "statusSince": "{{status}} depuis {{date}}",
     "availableAgain": "de nouveau disponible {{date}}",
     "blacklistedBy": "Sur liste noire par {{who}}",
-    "blacklisted": "Sur liste noire"
+    "blacklisted": "Sur liste noire",
+    "placedPickPlaceholder": "Choisir un match…",
+    "placedOrNew": "Ou en créer un",
+    "placedNewPlaceholder": "Nom du poste / fonction"
   },
   "stage": {
     "lead": "Piste",

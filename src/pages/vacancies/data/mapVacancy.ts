@@ -87,9 +87,7 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
 
   return {
     ...base,
-    employmentLabel: labelOf(raw.employment_type) || raw.employment_type_label || '',
     // Raw values for the in-place editor (bind selects to these, show the labels above).
-    employmentValue: valueOf(raw.employment_type),
     seniorityValue: valueOf(raw.seniority),
     educationValue: valueOf(raw.education),
     // Contract forms (multi) — same lookup as the candidate.

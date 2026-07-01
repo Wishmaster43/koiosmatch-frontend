@@ -73,17 +73,6 @@ export function VacancyPhaseSettings() {
   )
 }
 
-/** Employment types — "soort dienstverband" lookup, backend /vacancy-employment-types. */
-export function VacancyEmploymentTypeSettings() {
-  const { t } = useTranslation('settings')
-  return (
-    <div style={{ maxWidth: 640 }}>
-      <StatusListEditor compact withColor title={t('vacancy.employmentTitle')} subtitle={t('vacancy.employmentSubtitle')}
-        endpoint="/vacancy-employment-types" addLabel={t('vacancy.employmentAdd')} />
-    </div>
-  )
-}
-
 /** Seniority levels — lookup, backend /vacancy-seniority-levels. */
 export function VacancySenioritySettings() {
   const { t } = useTranslation('settings')

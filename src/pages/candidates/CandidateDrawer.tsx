@@ -15,6 +15,7 @@ import { useLookups } from '@/context/LookupsContext'
 import { useGenders } from '@/lib/useGenders'
 import { useAllSettings, getBoolSetting, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useFunctions } from '@/lib/useFunctions'
+import { useCreateMatch } from './hooks/useCreateMatch'
 import { useAuth } from '@/context/AuthContext'
 import ProfilePanel from './drawer/ProfilePanel'
 import BackgroundTab from './drawer/BackgroundTab'
@@ -84,6 +85,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const coloredByGender = getBoolSetting(allSettings, 'candidate_avatar_colored_by_gender', false)
   const avatarColor = coloredByGender ? (genderColor(c?.gender) ?? '#9CA3AF') : '#9CA3AF'
   const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
+  const { createMatch, creating: creatingMatch } = useCreateMatch(c?.id ?? '')
   const { hasModule } = useAuth() as unknown as { hasModule: (m: string) => boolean }
   // Planning-tab tijdelijk verborgen (2026-06-26) — niet verwijderd, alleen uit.
   // Zet PLANNING_TAB_ENABLED weer op true om de tab (achter de module-gate) terug te tonen.
@@ -104,9 +106,11 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [recruiter,     setRecruiter]     = useState<(AppUser & { initials: string }) | null>(null)
   const [phase,         setPhase]         = useState<string | null>(null)
   const [status,        setStatus]        = useState<string | null>(null)
-  // "Geplaatst" requires a linked Match — pick one (or prompt when none exists).
+  // "Geplaatst" requires a linked Match — pick an existing one (dropdown) or create
+  // a new one (title → C-19 POST). `matchChoice` = picked id; `newMatchTitle` = create.
   const [matchPrompt,   setMatchPrompt]   = useState(false)
   const [matchChoice,   setMatchChoice]   = useState<string | null>(null)
+  const [newMatchTitle, setNewMatchTitle] = useState('')
   // Convert guard (blocks an accidental CV click right after) + a signal that opens Profile edit.
   const [converting,    setConverting]    = useState(false)
   const [profileEditSignal, setProfileEditSignal] = useState(0)
@@ -374,41 +378,41 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     {matchPrompt && (
       <div onClick={() => setMatchPrompt(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div onClick={e => e.stopPropagation()} style={{ background: 'var(--surface)', borderRadius: 12, padding: 20, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-          {(c.matches?.length ?? 0) > 0 ? (
-            <>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{t('drawer.placedPickMatch')}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>{t('drawer.placedPickMatchBody')}</div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16, maxHeight: 240, overflowY: 'auto' }}>
-                {(c.matches ?? []).map((m, i) => {
-                  const mid = String((m as { id?: string | number }).id ?? i)
-                  const mm = m as { vacancyTitle?: string; client?: string }
-                  const sel = matchChoice === mid
-                  return (
-                    <button key={mid} onClick={() => setMatchChoice(mid)}
-                      style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start', textAlign: 'left', padding: '8px 10px', borderRadius: 8, cursor: 'pointer',
-                        border: `1px solid ${sel ? 'var(--color-primary)' : 'var(--border)'}`, background: sel ? 'var(--color-primary-bg)' : 'var(--bg)' }}>
-                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{mm.vacancyTitle || mm.client || '—'}</span>
-                      {mm.client && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{mm.client}</span>}
-                    </button>
-                  )
-                })}
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                <button onClick={() => setMatchPrompt(false)} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
-                <button disabled={!matchChoice}
-                  onClick={() => { setStatus('placed'); onUpdate?.(c.id, { status: 'placed', match_id: matchChoice }); setMatchPrompt(false) }}
-                  style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: matchChoice ? 1 : 0.5 }}>{t('drawer.placedConfirm')}</button>
-              </div>
-            </>
-          ) : (
-            <>
-              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>{t('drawer.placedNeedsMatchTitle')}</div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 16 }}>{t('drawer.placedNeedsMatchBody')}</div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button onClick={() => setMatchPrompt(false)} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:close')}</button>
-              </div>
-            </>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{t('drawer.placedPickMatch')}</div>
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>{t('drawer.placedPickMatchBody')}</div>
+
+          {/* Pick one of the candidate's existing matches (dropdown). */}
+          {(c.matches?.length ?? 0) > 0 && (
+            <select value={matchChoice ?? ''} onChange={e => { setMatchChoice(e.target.value || null); if (e.target.value) setNewMatchTitle('') }}
+              style={{ width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none', marginBottom: 12 }}>
+              <option value="">{t('drawer.placedPickPlaceholder')}</option>
+              {(c.matches ?? []).map((m, i) => {
+                const mid = String((m as { id?: string | number }).id ?? i)
+                const mm = m as { vacancyTitle?: string; client?: string }
+                return <option key={mid} value={mid}>{[mm.vacancyTitle || '—', mm.client].filter(Boolean).join(' · ')}</option>
+              })}
+            </select>
           )}
+
+          {/* Or create a new match from a vacancy/role title (C-19 POST). */}
+          <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', margin: '2px 0 6px' }}>{t('drawer.placedOrNew')}</div>
+          <input value={newMatchTitle} onChange={e => { setNewMatchTitle(e.target.value); if (e.target.value) setMatchChoice(null) }}
+            placeholder={t('drawer.placedNewPlaceholder')} aria-label={t('drawer.placedNewPlaceholder')}
+            style={{ width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none', marginBottom: 16 }} />
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            <button onClick={() => setMatchPrompt(false)} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
+            <button disabled={(!matchChoice && !newMatchTitle.trim()) || creatingMatch}
+              onClick={async () => {
+                // Use the picked match, or create one from the typed title first.
+                let mid = matchChoice
+                if (!mid && newMatchTitle.trim()) mid = await createMatch(newMatchTitle.trim())
+                if (!mid) return
+                setStatus('placed'); onUpdate?.(c.id, { status: 'placed', match_id: mid })
+                setMatchPrompt(false); setMatchChoice(null); setNewMatchTitle('')
+              }}
+              style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: ((matchChoice || newMatchTitle.trim()) && !creatingMatch) ? 1 : 0.5 }}>{t('drawer.placedConfirm')}</button>
+          </div>
         </div>
       </div>
     )}
