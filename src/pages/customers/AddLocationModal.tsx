@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, MapPin } from 'lucide-react'
@@ -14,6 +15,7 @@ export default function AddLocationModal({ onClose, onCreate, customerName }: {
   onClose: () => void; onCreate?: (v: { name: string; city: string }) => void; customerName?: string
 }) {
   const { t } = useTranslation('customers')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const [name, setName] = useState('')
   const [city, setCity] = useState('')
   const [error, setError] = useState(false)
@@ -27,7 +29,8 @@ export default function AddLocationModal({ onClose, onCreate, customerName }: {
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 210, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 440, boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden' }}>
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('subModal.addLocation')} tabIndex={-1}
+        style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 440, boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden' }}>
         <div style={{ padding: '18px 22px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-secondary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

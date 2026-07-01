@@ -3,6 +3,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRightPanel } from '../../context/RightPanelContext'
 import api, { unwrapList } from '../../lib/api'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { isAbortError } from '../../lib/mocks'
 import CustomersTable from './CustomersTable'
 import CustomersInsightsRow from './CustomersInsightsRow'
@@ -170,11 +171,7 @@ export default function CustomersPage() {
           </div>
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-            {error && (
-              <div className="mb-3 rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">
-                {error}
-              </div>
-            )}
+            {error && <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>}
             <CustomersTable rows={filtered} loading={loading} selectedId={selected?.id} onSelect={setSelected} />
           </div>
 

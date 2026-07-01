@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrapList } from '../../lib/api'
@@ -29,6 +30,7 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
  */
 export default function AddTaskModal({ onClose, onCreated }: { onClose: () => void; onCreated?: (raw: unknown) => void }) {
   const { t } = useTranslation('tasks')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { types, statuses, priorities, defaultPriority } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   const auth = useAuth()
@@ -94,7 +96,8 @@ export default function AddTaskModal({ onClose, onCreated }: { onClose: () => vo
     <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 880,
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('modal.title')} tabIndex={-1}
+        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 880,
         boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}>
 
         {/* Header */}

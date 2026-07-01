@@ -6,6 +6,7 @@ import { useRightPanel } from '../../context/RightPanelContext'
 import { useAuth } from '../../context/AuthContext'
 import api, { unwrapList } from '../../lib/api'
 import { notifyError } from '@/lib/notify'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { isAbortError } from '../../lib/mocks'
 import { useUsers } from '../../lib/queries'
 import { useCustomerLookups } from '../../lib/useCustomerLookups'
@@ -359,7 +360,7 @@ export default function CustomersPage() {
 
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
             {error && (
-              <div className="mb-3 rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">{error}</div>
+              <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
             )}
             <CustomersTable rows={customers} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
               statusMeta={statusMeta} selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}

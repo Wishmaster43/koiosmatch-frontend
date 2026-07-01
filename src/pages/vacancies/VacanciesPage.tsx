@@ -14,6 +14,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useUsers } from '../../lib/queries'
 import api from '../../lib/api'
 import { notifyError } from '@/lib/notify'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { VacancyLookupsProvider, useVacancyLookups } from '../../context/VacancyLookupsContext'
 import InsightsRow from '../../components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '../../components/insights/InsightsRow'
@@ -249,7 +250,7 @@ function VacanciesPageInner() {
           {/* Table */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
             {error && (
-              <div className="mb-3 rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">{error}</div>
+              <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
             )}
             <VacanciesTable
               rows={vacancies}

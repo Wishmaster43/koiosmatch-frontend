@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Users } from 'lucide-react'
@@ -16,6 +17,7 @@ export default function AddContactPersonModal({ onClose, onCreate, customerName 
   onClose: () => void; onCreate?: (v: ContactForm) => void; customerName?: string
 }) {
   const { t } = useTranslation('customers')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const [form, setForm] = useState<ContactForm>({ name: '', role: '', email: '' })
   const [error, setError] = useState(false)
   const set = (k: keyof ContactForm, v: string) => { setForm(f => ({ ...f, [k]: v })); if (k === 'name') setError(false) }
@@ -29,7 +31,8 @@ export default function AddContactPersonModal({ onClose, onCreate, customerName 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 210, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden' }}>
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('subModal.addContact')} tabIndex={-1}
+        style={{ background: 'white', borderRadius: 16, width: '100%', maxWidth: 460, boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden' }}>
         <div style={{ padding: '18px 22px 12px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

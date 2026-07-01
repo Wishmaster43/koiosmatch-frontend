@@ -7,6 +7,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
 import api from '../../lib/api'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { useKpiSettings } from '../../lib/useKpiSettings'
 import type { ReportCandidate } from '../../types/reports'
 import type { ChartDatum } from '../charts/chartTypes'
@@ -252,11 +253,7 @@ export default function CandidatesReport() {
         onDrillDown={(title, items) => openDrillDown(title, t('report.sub.kpi'), items)}
       />
 
-      {error && (
-        <div className="px-4 py-3 mb-6 text-sm text-red-600 border border-red-200 rounded-xl bg-red-50">
-          {error}
-        </div>
-      )}
+      {error && <ErrorBanner style={{ marginBottom: 24 }}>{error}</ErrorBanner>}
 
       {/* Grid layout for the cards */}
       {loading ? (

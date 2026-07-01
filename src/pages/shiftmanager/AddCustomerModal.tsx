@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Building2, ChevronDown } from 'lucide-react'
@@ -24,6 +25,7 @@ const STATUSES = ['actief', 'prospect', 'inactief', 'geblokkeerd']
 
 export default function AddCustomerModal({ onClose, onCreate }: { onClose: () => void; onCreate?: (form: CustomerForm) => void }) {
   const { t } = useTranslation('customers')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [form, setForm] = useState<CustomerForm>({ name: '', debtorNumber: '', status: 'prospect', accountManager: '', city: '' })
 
@@ -41,7 +43,8 @@ export default function AddCustomerModal({ onClose, onCreate }: { onClose: () =>
     <div onClick={e => e.target === e.currentTarget && onClose()}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 520,
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('modal.title')} tabIndex={-1}
+        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 520,
         boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }}>
 
         {/* Header */}
