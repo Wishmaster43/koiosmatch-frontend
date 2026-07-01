@@ -104,6 +104,13 @@
 8. **Recruitment-feeds** (owner-scoped): `touchpoints[]` (`{ candidate_id, name, type:
    birthday|first_workday|back_available|followup_due, date }`) + `attention_candidates.{stale6m,
    never_contacted,no_followup}[]` (`{ id, name, status_value, last_contact_at }`).
+9. **Notificatie-feed** (topbar-bell staat live, graceful) — `GET /notifications` →
+   `[{ id, title, body, created_at, seen, link? }]` (per user, nieuwste eerst) + `POST /notifications/seen`
+   (markeer alles gelezen). Voedt de in-app bell; welke events notificeren komt uit de bestaande
+   notificatie-instellingen.
+10. **Task-priority (en status/type) `icon`** — icon-kolom op de taken-lookups + toegestane iconen
+    (zoals rollen: `icon` op de rij + een vaste set). Dan zet FE de icon-picker in `StatusListEditor`
+    (`withIcon`). Zonder kolom slaat een gekozen icoon niet op → bewust nog niet gebouwd.
 
 ### ✅ Al bevestigd + door FE gewired
 - `charts.timeseries.out.{candidates_out, applications_rejected, matches_ended}` (instroom↔uitstroom) —
