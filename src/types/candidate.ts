@@ -76,6 +76,7 @@ export interface CandidateConsent {
 export interface CandidateMatch {
   id?: Id
   vacancyTitle: string
+  vacancyUrl?: string | null
   client: string
   score: number | null
   stage: string | null
@@ -163,8 +164,10 @@ export interface Candidate {
 /** A raw match item as the API nests it under candidate.matches. */
 export interface ApiCandidateMatch {
   vacancyTitle?: string
-  vacancy?: { title?: string }
+  vacancy?: { title?: string; url?: string }
   vacancy_title?: string
+  vacancyUrl?: string | null
+  vacancy_url?: string | null
   client?: string
   customer?: { name?: string }
   client_name?: string

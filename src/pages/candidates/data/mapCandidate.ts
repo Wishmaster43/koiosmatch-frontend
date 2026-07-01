@@ -177,6 +177,7 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     matches:         (c.matches ?? []).map((m): CandidateMatch => ({
       ...m,
       vacancyTitle:   m.vacancyTitle ?? m.vacancy?.title ?? m.vacancy_title ?? '',
+      vacancyUrl:     m.vacancyUrl ?? m.vacancy?.url ?? m.vacancy_url ?? null,
       client:         m.client ?? m.customer?.name ?? m.client_name ?? '',
       score:          m.score ?? m.match_score ?? null,
       stage:          m.stageLabel ?? m.stage ?? null,

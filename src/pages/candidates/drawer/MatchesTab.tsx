@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Link2 } from 'lucide-react'
+import { Link2, ExternalLink } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import StatusPill from '@/components/ui/StatusPill'
 import type { ReactNode } from 'react'
@@ -33,6 +33,11 @@ export default function MatchesTab({ c }: { c: Candidate }) {
             <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{m.vacancyTitle || m.client || '—'}</span>
             {m.helloflex_contract_guid ? (
               <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary)' }}><Link2 size={13} /></span>
+            ) : null}
+            {/* Read-only link out to the vacancy when the API exposes a URL. */}
+            {m.vacancyUrl ? (
+              <a href={m.vacancyUrl} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
+                style={{ display: 'flex', color: 'var(--text-muted)' }}><ExternalLink size={12} /></a>
             ) : null}
             <ScorePill value={m.score} />
           </div>

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ExternalLink } from 'lucide-react'
 import MatchesTab from './MatchesTab'
 import StatusPill from '@/components/ui/StatusPill'
 import { sectionBlock } from './constants'
@@ -7,7 +8,10 @@ import type { Candidate } from '@/types/candidate'
 
 // One application row as nested under the candidate (read defensively). The
 // funnel stage (label + colour) used to live in the header chips — shown here now.
-interface AppRow { logo_url?: string; vacancy?: { logo_url?: string; title?: string }; vacature?: string; title?: string; stageLabel?: string; stageColor?: string }
+interface AppRow { logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: string }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageColor?: string }
+
+// The vacancy link, when the API exposes a URL; otherwise falls back to plain text.
+const vacancyUrlOf = (s: AppRow) => s.vacancy?.url ?? s.url ?? null
 
 /** Work tab — matches + paginated applications. */
 export default function WorkTab({ c }: { c: Candidate }) {
@@ -30,13 +34,25 @@ export default function WorkTab({ c }: { c: Candidate }) {
           <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)' }}>{t('work.vacancy')}</div>
           {slice.length === 0
             ? <div style={{ padding: '20px', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('sections.applicationsEmpty')}</div>
-            : slice.map((s, i) => (
+            : slice.map((s, i) => {
+              const label = s.vacature ?? s.vacancy?.title ?? s.title ?? '-'
+              const url = vacancyUrlOf(s)
+              return (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: i < slice.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 12, color: 'var(--text)' }}>
                 {(s.logo_url ?? s.vacancy?.logo_url) && <img src={s.logo_url ?? s.vacancy?.logo_url} alt="" style={{ width: 24, height: 24, borderRadius: 4, objectFit: 'contain', flexShrink: 0 }} />}
-                <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.vacature ?? s.vacancy?.title ?? s.title ?? '-'}</span>
+                {/* Vacancy name links out to the vacancy when the API gives a URL. */}
+                {url
+                  ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--color-primary)', textDecoration: 'none' }}>{label}</a>
+                  : <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>}
                 {s.stageLabel && <StatusPill label={s.stageLabel} color={s.stageColor} />}
+                {url && (
+                  <a href={url} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 5, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', flexShrink: 0 }}>
+                    <ExternalLink size={12} />
+                  </a>
+                )}
               </div>
-            ))
+            )})
           }
         </div>
         {soll.length > 0 && (

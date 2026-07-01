@@ -2,6 +2,9 @@
   "title": "Kandidaten",
   "page": {
     "add": "Kandidaat toevoegen",
+    "blacklistView": "Blacklist",
+    "archivedView": "Gearchiveerd",
+    "filterUnsupported": "Dit filter wordt (nog) niet door de server ondersteund.",
     "searchPlaceholder": "Zoek kandidaat, notitie, document…",
     "empty": "Geen kandidaten gevonden.",
     "loading": "Laden…"
@@ -316,7 +319,8 @@
     "scaleStep": "Schaal / Trede",
     "hoursPerWeek": "Uren per week",
     "vacancy": "Vacature",
-    "of": "van"
+    "of": "van",
+    "openVacancy": "Vacature openen"
   },
   "communication": {
     "newNote": "Nieuwe notitie",
