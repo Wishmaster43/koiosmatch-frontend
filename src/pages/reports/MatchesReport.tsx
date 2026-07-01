@@ -6,10 +6,13 @@
  * is honestly null until the HelloFlex coupling fills placement start/end — we
  * show a note rather than a fabricated number. Data lives in useMatchesReport.
  */
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
+import ReportDrillDrawer from './ReportDrillDrawer'
+import type { DrillSpec } from './ReportDrillDrawer'
 import { useMatchesReport } from './useMatchesReport'
 import type { ReportPeriod } from '@/types/analytics'
 
@@ -30,10 +33,29 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
   const { data, loading, error } = useMatchesReport(period)
   const isEmpty = !loading && !error && (!data || data.total === 0)
 
+  // Drill-down: clicking a matches KPI explains it (breakdown by origin + the
+  // matches behind it + Koios advice). Origin filter goes to the drill endpoint.
+  const [drill, setDrill] = useState<DrillSpec | null>(null)
+  const openMatches = (title: string, value: number, origin?: 'funnel' | 'direct') => setDrill({
+    title, value, subtitle: t(`period.${period}`),
+    breakdown: [
+      { label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0 },
+      { label: t('matches.direct'),    value: data?.by_origin.direct ?? 0 },
+    ],
+    rowsEndpoint: '/reports/matches/drill', rowsParams: { origin, period },
+    adviceEndpoint: '/reports/matches/advice', adviceParams: { origin, period },
+  })
+
   const kpis: KpiSpec[] = [
-    { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0 },
-    { key: 'funnel', label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0 },
-    { key: 'direct', label: t('matches.direct'),    value: data?.by_origin.direct ?? 0 },
+    { key: 'total',  label: t('matches.total'),     value: data?.total ?? 0,
+      active: drill?.rowsParams?.origin == null && drill != null,
+      onClick: () => openMatches(t('matches.total'), data?.total ?? 0) },
+    { key: 'funnel', label: t('matches.viaFunnel'), value: data?.by_origin.funnel ?? 0,
+      active: drill?.rowsParams?.origin === 'funnel',
+      onClick: () => openMatches(t('matches.viaFunnel'), data?.by_origin.funnel ?? 0, 'funnel') },
+    { key: 'direct', label: t('matches.direct'),    value: data?.by_origin.direct ?? 0,
+      active: drill?.rowsParams?.origin === 'direct',
+      onClick: () => openMatches(t('matches.direct'), data?.by_origin.direct ?? 0, 'direct') },
     { key: 'dur',    label: t('matches.avgDuration'),
       value: data?.avg_placement_duration_days != null ? t('matches.daysValue', { days: Math.round(data.avg_placement_duration_days) }) : '—' },
   ]
@@ -86,6 +108,9 @@ export default function MatchesReport({ period, tabsSlot }: { period: ReportPeri
           </div>
         </>
       )}
+
+      {/* Dynamic drill-down: explains the clicked number + Koios AI advice */}
+      <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />
     </div>
   )
 }

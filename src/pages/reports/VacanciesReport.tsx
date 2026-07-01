@@ -6,10 +6,13 @@
  * fill-rate/time-to-fill are server-derived; `time_to_fill_days` is null while
  * open. applications_by_phase shares the funnel key-map. Data lives in the hook.
  */
+import { useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
+import ReportDrillDrawer from './ReportDrillDrawer'
+import type { DrillSpec } from './ReportDrillDrawer'
 import { useVacanciesReport } from './useVacanciesReport'
 import type { ReportPeriod } from '@/types/analytics'
 
@@ -38,10 +41,29 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
   const rows = data?.vacancies ?? []
   const s    = data?.summary
 
+  // Drill-down: clicking a vacancies KPI explains it (open/filled split + the
+  // vacancies behind it + Koios advice). Status filter goes to the drill endpoint.
+  const [drill, setDrill] = useState<DrillSpec | null>(null)
+  const openVacancies = (title: string, value: number | string, status?: string) => setDrill({
+    title, value, subtitle: t(`period.${period}`),
+    breakdown: [
+      { label: t('vacancies.summary.open'),   value: s?.open ?? 0 },
+      { label: t('vacancies.summary.filled'), value: s?.filled ?? 0 },
+    ],
+    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { status, period },
+    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { status, period },
+  })
+
   const kpis: KpiSpec[] = [
-    { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0 },
-    { key: 'open',   label: t('vacancies.summary.open'),   value: s?.open ?? 0 },
-    { key: 'filled', label: t('vacancies.summary.filled'), value: s?.filled ?? 0 },
+    { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
+      active: drill != null && drill.rowsParams?.status == null,
+      onClick: () => openVacancies(t('vacancies.summary.total'), s?.total ?? 0) },
+    { key: 'open',   label: t('vacancies.summary.open'),   value: s?.open ?? 0,
+      active: drill?.rowsParams?.status === 'open',
+      onClick: () => openVacancies(t('vacancies.summary.open'), s?.open ?? 0, 'open') },
+    { key: 'filled', label: t('vacancies.summary.filled'), value: s?.filled ?? 0,
+      active: drill?.rowsParams?.status === 'filled',
+      onClick: () => openVacancies(t('vacancies.summary.filled'), s?.filled ?? 0, 'filled') },
     { key: 'fillRate', label: t('vacancies.summary.fillRate'),
       value: s ? `${Math.round(s.fill_rate * 100)}%` : '—' },
     { key: 'ttf', label: t('vacancies.summary.avgTimeToFill'),
@@ -87,7 +109,16 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
               </thead>
               <tbody>
                 {rows.map((v, i) => (
-                  <tr key={v.key ?? i}
+                  <tr key={v.key ?? i} style={{ cursor: 'pointer' }}
+                    onClick={() => setDrill({
+                      title: v.label, value: v.applications, subtitle: v.customer?.name ?? t(`period.${period}`),
+                      breakdown: [
+                        { label: t('vacancies.cols.applications'), value: v.applications },
+                        { label: t('vacancies.cols.matched'),      value: v.matched },
+                      ],
+                      rowsEndpoint: '/reports/vacancies/drill', rowsParams: { vacancy: v.key, period },
+                      adviceEndpoint: '/reports/vacancies/advice', adviceParams: { vacancy: v.key, period },
+                    })}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                     <td style={{ ...TD, fontWeight: 500 }}>
@@ -113,6 +144,9 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
           </div>
         )}
       </div>
+
+      {/* Dynamic drill-down: explains the clicked number + Koios AI advice */}
+      <ReportDrillDrawer drill={drill} onClose={() => setDrill(null)} />
     </div>
   )
 }
