@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, RefObject } from 'react'
 import DataTable from '../../components/ui/DataTable'
 import type { Column } from '../../components/ui/DataTable'
 import Avatar from '../../components/ui/Avatar'
@@ -20,6 +20,7 @@ interface CustomersTableProps {
   onToggleRow?: (id: Id) => void
   onToggleAll?: (ids: Id[], allSelected: boolean) => void
   stickyHeader?: boolean
+  scrollParentRef?: RefObject<HTMLElement | null>
 }
 
 /**
@@ -30,7 +31,7 @@ interface CustomersTableProps {
 export default function CustomersTable({
   rows, loading, selectedId, onSelect, statusMeta,
   selectable = false, selectedIds, onToggleRow, onToggleAll,
-  stickyHeader = false,
+  stickyHeader = false, scrollParentRef,
 }: CustomersTableProps) {
   const { t } = useTranslation('customers')
 
@@ -83,6 +84,7 @@ export default function CustomersTable({
       onToggleRow={onToggleRow}
       onToggleAll={onToggleAll}
       stickyHeader={stickyHeader}
+      scrollParentRef={scrollParentRef}
     />
   )
 }

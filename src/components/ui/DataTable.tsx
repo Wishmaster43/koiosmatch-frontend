@@ -1,7 +1,8 @@
 import { useState, useMemo } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { CSSProperties, ReactNode, RefObject } from 'react'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useVirtualizer } from '@tanstack/react-virtual'
 
 /**
  * DataTable — generic, themed list table.
@@ -10,6 +11,11 @@ import { useTranslation } from 'react-i18next'
  * vacancies, tasks…). Each column declares how to render its cell; the table
  * itself only handles layout, row selection, hover, sorting and the
  * loading/empty states.
+ *
+ * Optional row virtualization (F-11): pass `scrollParentRef` (the vertical
+ * scroll container the table lives in) and only the visible rows render — the
+ * body stays constant-cost at 10k+ rows. Off by default, so every existing
+ * table renders exactly as before until it opts in.
  */
 export type RowId = string | number
 
@@ -46,6 +52,9 @@ interface DataTableProps<Row> {
   onToggleAll?: (ids: RowId[], allSelected: boolean) => void
   stickyHeader?: boolean
   defaultSort?: SortState | null
+  // Virtualization (opt-in): the vertical scroll container the table sits in.
+  scrollParentRef?: RefObject<HTMLElement | null>
+  estimatedRowHeight?: number
 }
 
 // Read a column's default field off an unknown-shaped row (dynamic accessor).
@@ -80,6 +89,8 @@ export default function DataTable<Row>({
   stickyHeader = false,
   // Optional default sort applied on first render: { key: 'colKey', dir: 'asc' | 'desc' }
   defaultSort = null,
+  scrollParentRef,
+  estimatedRowHeight = 44,
 }: DataTableProps<Row>) {
   const { t } = useTranslation('common')
   const [sort, setSort] = useState<SortState | null>(defaultSort)
@@ -99,6 +110,15 @@ export default function DataTable<Row>({
     const sorted = [...rows].sort((a, b) => compare(valueOf(a), valueOf(b)))
     return sort.dir === 'desc' ? sorted.reverse() : sorted
   }, [rows, sort, columns])
+
+  // Virtualizer: idle (no scroll element) when the caller doesn't opt in.
+  const virtualize = !!scrollParentRef
+  const rowVirtualizer = useVirtualizer({
+    count: sortedRows.length,
+    getScrollElement: () => scrollParentRef?.current ?? null,
+    estimateSize: () => estimatedRowHeight,
+    overscan: 12,
+  })
 
   const pageIds      = sortedRows.map(getRowId)
   const allSelected  = selectable && pageIds.length > 0 && pageIds.every(id => selectedIds?.has(id))
@@ -135,6 +155,53 @@ export default function DataTable<Row>({
     if (left === null) return {}
     return { position: 'sticky', left, zIndex: 1, background: bg }
   }
+
+  const totalCols = columns.length + (selectable ? 1 : 0)
+
+  // One row — reused by the plain and virtualized render paths. When `virtualIndex`
+  // is given, the <tr> is measured so the virtualizer tracks real heights.
+  const renderRow = (row: Row, virtualIndex?: number) => {
+    const id = getRowId(row)
+    const isSelected = selectedId != null && id === selectedId
+    const isChecked  = selectable && selectedIds?.has(id)
+    const highlight  = isSelected || isChecked
+    return (
+      <tr key={id}
+        {...(virtualIndex !== undefined ? { 'data-index': virtualIndex, ref: rowVirtualizer.measureElement } : {})}
+        onClick={onRowClick ? () => onRowClick(row) : undefined}
+        style={{ borderBottom: '1px solid var(--border)', cursor: onRowClick ? 'pointer' : 'default',
+          background: highlight ? 'var(--color-primary-bg)' : 'transparent' }}
+        onMouseEnter={e => { if (!highlight) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--hover-bg)' }) } }}
+        onMouseLeave={e => { if (!highlight) { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--bg)' }) } }}>
+        {selectable && (
+          <td style={checkboxCol} onClick={stop}>
+            <input type="checkbox" checked={!!isChecked} onChange={() => onToggleRow?.(id)}
+              style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }} aria-label={t('selectRow')} />
+          </td>
+        )}
+        {columns.map((col, i) => {
+          // Sticky cells need the same background as the row to cover scrolled content.
+          const rowBg = highlight ? 'var(--color-primary-bg)' : 'var(--bg)'
+          return (
+            <td key={col.key}
+              {...(col.sticky ? { 'data-sticky': true } : {})}
+              style={{ padding: '10px 10px', textAlign: col.align ?? 'left',
+                whiteSpace: col.nowrap ? 'nowrap' : undefined,
+                ...(col.width ? { minWidth: col.width, width: col.width } : {}),
+                ...col.cellStyle, ...stickyColStyle(i, rowBg) }}>
+              {col.render ? col.render(row) : (field(row, col.key) as ReactNode)}
+            </td>
+          )
+        })}
+      </tr>
+    )
+  }
+
+  // Virtualized body: two spacer rows keep the scrollbar height correct while only
+  // the visible window of real <tr>s renders (sticky header/columns keep working).
+  const virtualItems = virtualize ? rowVirtualizer.getVirtualItems() : []
+  const paddingTop    = virtualItems.length ? virtualItems[0].start : 0
+  const paddingBottom = virtualItems.length ? rowVirtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end : 0
 
   return (
     <table style={{ width: 'max-content', minWidth: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -176,44 +243,18 @@ export default function DataTable<Row>({
         </tr>
       </thead>
       <tbody>
-        {sortedRows.map(row => {
-          const id = getRowId(row)
-          const isSelected = selectedId != null && id === selectedId
-          const isChecked  = selectable && selectedIds?.has(id)
-          const highlight  = isSelected || isChecked
-          return (
-            <tr key={id}
-              onClick={onRowClick ? () => onRowClick(row) : undefined}
-              style={{ borderBottom: '1px solid var(--border)', cursor: onRowClick ? 'pointer' : 'default',
-                background: highlight ? 'var(--color-primary-bg)' : 'transparent' }}
-              onMouseEnter={e => { if (!highlight) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--hover-bg)' }) } }}
-              onMouseLeave={e => { if (!highlight) { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--bg)' }) } }}>
-              {selectable && (
-                <td style={checkboxCol} onClick={stop}>
-                  <input type="checkbox" checked={!!isChecked} onChange={() => onToggleRow?.(id)}
-                    style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }} aria-label={t('selectRow')} />
-                </td>
-              )}
-              {columns.map((col, i) => {
-                // Sticky cells need the same background as the row to cover scrolled content.
-                const rowBg = highlight ? 'var(--color-primary-bg)' : 'var(--bg)'
-                return (
-                  <td key={col.key}
-                    {...(col.sticky ? { 'data-sticky': true } : {})}
-                    style={{ padding: '10px 10px', textAlign: col.align ?? 'left',
-                      whiteSpace: col.nowrap ? 'nowrap' : undefined,
-                      ...(col.width ? { minWidth: col.width, width: col.width } : {}),
-                      ...col.cellStyle, ...stickyColStyle(i, rowBg) }}>
-                    {col.render ? col.render(row) : (field(row, col.key) as ReactNode)}
-                  </td>
-                )
-              })}
-            </tr>
-          )
-        })}
+        {virtualize ? (
+          <>
+            {paddingTop > 0 && <tr style={{ height: paddingTop }}><td colSpan={totalCols} style={{ padding: 0, border: 'none' }} /></tr>}
+            {virtualItems.map(vi => renderRow(sortedRows[vi.index], vi.index))}
+            {paddingBottom > 0 && <tr style={{ height: paddingBottom }}><td colSpan={totalCols} style={{ padding: 0, border: 'none' }} /></tr>}
+          </>
+        ) : (
+          sortedRows.map(row => renderRow(row))
+        )}
         {sortedRows.length === 0 && (
           <tr>
-            <td colSpan={columns.length + (selectable ? 1 : 0)} style={{ padding: '40px 10px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
+            <td colSpan={totalCols} style={{ padding: '40px 10px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
               {emptyText ?? t('noResults')}
             </td>
           </tr>

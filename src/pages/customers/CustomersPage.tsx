@@ -68,6 +68,7 @@ export default function CustomersPage() {
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   const [actionMsg, setActionMsg] = useState<{ type: string; text: string } | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const tableScrollRef = useRef<HTMLDivElement>(null)
 
   // Filter dimensions (server-side).
   const [globalSearch,     setGlobalSearch]     = useState('')
@@ -358,13 +359,13 @@ export default function CustomersPage() {
             )}
           </div>
 
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+          <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
             {error && (
               <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
             )}
             <CustomersTable rows={customers} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
               statusMeta={statusMeta} selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
-              stickyHeader />
+              stickyHeader scrollParentRef={tableScrollRef} />
           </div>
 
           <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
