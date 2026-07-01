@@ -14,6 +14,9 @@ import KoiosPanel from './KoiosPanel'
 import ReportFilterSidebar from '../reports/ReportFilterSidebar'
 import { renderPage, PAGE_TITLES } from './appPages'
 import { NavigationProvider } from '@/context/NavigationContext'
+import DashboardSwitcher from '@/pages/dashboard/DashboardSwitcher'
+import { DASHBOARD_TYPES } from '@/pages/dashboard/templates'
+import type { DashboardType } from '@/pages/dashboard/templates'
 import type { ReportFilterGroup } from '@/types/reports'
 
 // Sidebar is still JS (the other Claude owns it); accept its props loosely at this boundary.
@@ -68,6 +71,12 @@ export default function DashboardLayout() {
   const [koiosOpen,      setKoiosOpen]      = useState(false)
   const auth                                = auth0
   const { logout, user, activeTenant }      = auth ?? {}
+  // Dashboard view (B-27) — super-admin + management may switch/preview any role's
+  // dashboard from the topbar; others are pinned to their own. Full = management.
+  const dashMyType = (auth?.dashboardType?.() ?? 'readonly') as DashboardType
+  const dashCanSwitch = (auth?.isSuperAdmin?.() ?? false) || dashMyType === 'management'
+  const [dashView, setDashView] = useState<DashboardType>(dashCanSwitch ? 'management' : dashMyType)
+  const dashAllowed: DashboardType[] = dashCanSwitch ? [...DASHBOARD_TYPES] : [dashMyType]
   const { filterGroups }                    = useRightPanel()
 
   // Active tenant drives topbar branding. Super admins see the tenant they switched to;
@@ -146,6 +155,10 @@ export default function DashboardLayout() {
 
           {/* Right actions */}
           <div className="flex items-center flex-shrink-0 gap-2 ml-auto">
+            {/* Dashboard view switcher — only on the dashboard; hidden for single-view users. */}
+            {activePage === 'dashboard' && (
+              <DashboardSwitcher value={dashView} options={dashAllowed} onChange={setDashView} />
+            )}
             {/* Avatar button — navigates to profile page */}
             {(() => {
               const initials = (
@@ -220,7 +233,7 @@ export default function DashboardLayout() {
           <div key={activeTenant?.id ?? 'none'} className="flex-1 overflow-auto">
             <Suspense fallback={<PageLoader />}>
               <NavigationProvider goTo={goTo}>
-                {canAccessPage(activePage, auth) ? renderPage(activePage, { navIntent, goTo }) : <NoAccessPage />}
+                {canAccessPage(activePage, auth) ? renderPage(activePage, { navIntent, goTo, dashView }) : <NoAccessPage />}
               </NavigationProvider>
             </Suspense>
           </div>

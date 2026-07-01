@@ -120,11 +120,11 @@ export function PlaceholderPage({ title }: { title?: ReactNode }) {
 // navIntent is a dynamic payload fanned out to differently-typed page `intent`
 // props, so it's typed loosely here on purpose.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function renderPage(activePage: string, { navIntent, goTo }: { navIntent?: any; goTo: (page: string, intent?: unknown) => void }) {
+export function renderPage(activePage: string, { navIntent, goTo, dashView }: { navIntent?: any; goTo: (page: string, intent?: unknown) => void; dashView?: string }) {
   switch (activePage) {
 
     // ── Core ──────────────────────────────────────────────────────────────
-    case 'dashboard':   return <Dashboard onNavigate={goTo} />
+    case 'dashboard':   return <Dashboard onNavigate={goTo} viewType={dashView} />
     case 'profile':     return <ProfilePage />
     case 'users':       return <UsersPage />
     case 'settings':    return <SettingsPage />

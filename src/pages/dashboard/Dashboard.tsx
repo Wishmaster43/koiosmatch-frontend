@@ -18,8 +18,7 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 import type {
   DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow,
 } from '@/types/dashboard'
-import DashboardSwitcher from './DashboardSwitcher'
-import { visibleBlock, DASHBOARD_TYPES } from './templates'
+import { visibleBlock } from './templates'
 import type { DashboardType } from './templates'
 
 // Recent lists, AI runs and conversations are now live (GET /dashboard, C-30/C-31).
@@ -108,18 +107,13 @@ const PERIODES: Array<[string, string]> = [
   ['kwartaal', 'Dit kwartaal'], ['jaar', 'Dit jaar'],
 ]
 
-export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, params?: Record<string, unknown>) => void }) {
+export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page: string, params?: Record<string, unknown>) => void; viewType?: string }) {
   const { t } = useTranslation('dashboard')
   const auth = useAuth()
   const { activeTenant } = auth ?? {}
-  // Role → dashboard type (C-35/B-27). Super-admin + the management view may switch
-  // between all templates; everyone else is pinned to their own. Blocks are gated
-  // per type below — the management/'*' template is the full (unchanged) dashboard.
-  const myType = (auth?.dashboardType?.() ?? 'readonly') as DashboardType
-  const canSwitch = (auth?.isSuperAdmin?.() ?? false) || myType === 'management'
-  // Switchers default to the full (management) view so nothing is hidden from them.
-  const [activeType, setActiveType] = useState<DashboardType>(canSwitch ? 'management' : myType)
-  const allowedTypes: DashboardType[] = canSwitch ? [...DASHBOARD_TYPES] : [myType]
+  // The active view/type is chosen in the topbar switcher (DashboardLayout); fall
+  // back to the user's own type if rendered standalone. management/'*' = full view.
+  const activeType = (viewType ?? auth?.dashboardType?.() ?? 'readonly') as DashboardType
   const vis = (id: string) => visibleBlock(activeType, id)
 
   // Live total — same source as the Candidates table (/candidates meta.total).
@@ -272,13 +266,6 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (page: string, 
 
   return (
     <div style={{ padding: 24, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
-
-      {/* Dashboard switcher — super-admin + management may switch between role views. */}
-      {allowedTypes.length > 1 && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 12 }}>
-          <DashboardSwitcher value={activeType} options={allowedTypes} onChange={setActiveType} />
-        </div>
-      )}
 
       {/* KPI-strip — live data */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
