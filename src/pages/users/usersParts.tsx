@@ -3,7 +3,7 @@
  * UsersPage a thin container (§3 size discipline): role badge + inline role
  * changer, the editable colour avatar, and the small role helpers/meta.
  */
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
@@ -169,6 +169,13 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
   const { t } = useTranslation('users')
   const [open, setOpen] = useState(false)
   const c = u.avatar_color || null
+  // Close the colour picker on Escape (non-modal popover; outside-click also closes).
+  useEffect(() => {
+    if (!open) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [open])
   const bubble: CSSProperties = {
     width: 30, height: 30, borderRadius: '50%', flexShrink: 0, boxSizing: 'border-box',
     display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700,
@@ -190,18 +197,18 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div style={{ position: 'absolute', top: 36, left: 0, zIndex: 20, width: 192,
-                         background: 'white', border: '1px solid #E5E7EB', borderRadius: 10,
+                         background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
                          padding: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
               {COLOR_PRESETS.map(col => (
                 <button key={col} onClick={() => choose(col)} aria-label={col}
                   style={{ width: 26, height: 26, borderRadius: 6, background: col, cursor: 'pointer',
-                           border: col.toUpperCase() === (c ?? '').toUpperCase() ? '2px solid #111827' : '2px solid transparent' }} />
+                           border: col.toUpperCase() === (c ?? '').toUpperCase() ? '2px solid var(--text)' : '2px solid transparent' }} />
               ))}
             </div>
             <button onClick={() => choose(null)}
-              style={{ marginTop: 10, width: '100%', fontSize: 12, color: '#6B7280', background: 'none',
-                       border: '1px solid #E5E7EB', borderRadius: 7, padding: '5px 0', cursor: 'pointer' }}>
+              style={{ marginTop: 10, width: '100%', fontSize: 12, color: 'var(--text-muted)', background: 'none',
+                       border: '1px solid var(--border)', borderRadius: 7, padding: '5px 0', cursor: 'pointer' }}>
               {t('avatarColorAuto')}
             </button>
           </div>
