@@ -24,5 +24,21 @@
     "avgScore": "Puntuación media"
   },
   "add": "Nuevo match",
-  "addComingSoon": "Crea matches desde la ficha del candidato o de la vacante."
+  "addComingSoon": "Crea matches desde la ficha del candidato o de la vacante.",
+  "drawer": {
+    "label": "Match",
+    "tabs": {
+      "overview": "Resumen"
+    },
+    "sectionDetails": "Detalles del match",
+    "fields": {
+      "candidate": "Candidato",
+      "vacancy": "Vacante",
+      "client": "Cliente",
+      "owner": "Responsable",
+      "score": "Puntuación",
+      "stage": "Fase",
+      "created": "Creado"
+    }
+  }
 }

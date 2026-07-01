@@ -24,5 +24,21 @@
     "avgScore": "Gem. score"
   },
   "add": "Nieuwe match",
-  "addComingSoon": "Matches aanmaken via de kandidaat- of vacaturekaart."
+  "addComingSoon": "Matches aanmaken via de kandidaat- of vacaturekaart.",
+  "drawer": {
+    "label": "Match",
+    "tabs": {
+      "overview": "Overzicht"
+    },
+    "sectionDetails": "Matchgegevens",
+    "fields": {
+      "candidate": "Kandidaat",
+      "vacancy": "Vacature",
+      "client": "Klant",
+      "owner": "Eigenaar",
+      "score": "Score",
+      "stage": "Fase",
+      "created": "Aangemaakt"
+    }
+  }
 }

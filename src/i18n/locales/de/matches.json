@@ -24,5 +24,21 @@
     "avgScore": "Ø Score"
   },
   "add": "Neuer Match",
-  "addComingSoon": "Erstelle Matches über die Kandidaten- oder Stellenkarte."
+  "addComingSoon": "Erstelle Matches über die Kandidaten- oder Stellenkarte.",
+  "drawer": {
+    "label": "Match",
+    "tabs": {
+      "overview": "Übersicht"
+    },
+    "sectionDetails": "Match-Details",
+    "fields": {
+      "candidate": "Kandidat",
+      "vacancy": "Stelle",
+      "client": "Kunde",
+      "owner": "Inhaber",
+      "score": "Score",
+      "stage": "Phase",
+      "created": "Erstellt"
+    }
+  }
 }

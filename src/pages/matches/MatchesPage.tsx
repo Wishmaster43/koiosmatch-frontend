@@ -6,8 +6,10 @@ import { useAuth } from '@/context/AuthContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import MatchesTable from './MatchesTable'
+import MatchDrawer from './MatchDrawer'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { useMatches } from './hooks/useMatches'
+import type { MatchRow } from '@/types/match'
 
 // MatchesPage — loads matches, shows an insights strip and paginates the table.
 export default function MatchesPage() {
@@ -80,9 +82,15 @@ export default function MatchesPage() {
   ]
 
   const [addTooltip, setAddTooltip] = useState(false)
+  // Read-only drill-down: the clicked row opens the MatchDrawer beside the table.
+  const [selected, setSelected] = useState<MatchRow | null>(null)
+  const [drawerExpanded, setDrawerExpanded] = useState(false)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg)', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100%', background: 'var(--bg)', overflow: 'hidden' }}>
+
+      {/* Table area */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* Insights strip — donuts + KPI cards */}
       <InsightsRow
         donuts={insightDonuts}
@@ -115,12 +123,18 @@ export default function MatchesPage() {
 
       {/* Table */}
       <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
-        <MatchesTable rows={paged} loading={loading} error={error} stickyHeader scrollParentRef={tableScrollRef} />
+        <MatchesTable rows={paged} loading={loading} error={error} stickyHeader
+          scrollParentRef={tableScrollRef} onRowClick={setSelected} />
       </div>
 
       <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
         pageSize={pageSize} onPageChange={setPage}
         onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+      </div>
+
+      {/* Read-only drill-down drawer */}
+      <MatchDrawer match={selected} onClose={() => setSelected(null)}
+        expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(v => !v)} />
     </div>
   )
 }

@@ -24,5 +24,21 @@
     "avgScore": "Score moy."
   },
   "add": "Nouveau match",
-  "addComingSoon": "Créez des matches depuis la fiche candidat ou poste."
+  "addComingSoon": "Créez des matches depuis la fiche candidat ou poste.",
+  "drawer": {
+    "label": "Match",
+    "tabs": {
+      "overview": "Aperçu"
+    },
+    "sectionDetails": "Détails du match",
+    "fields": {
+      "candidate": "Candidat",
+      "vacancy": "Poste",
+      "client": "Client",
+      "owner": "Responsable",
+      "score": "Score",
+      "stage": "Phase",
+      "created": "Créé"
+    }
+  }
 }

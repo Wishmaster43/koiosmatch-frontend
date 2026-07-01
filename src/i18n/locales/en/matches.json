@@ -24,5 +24,21 @@
     "avgScore": "Avg score"
   },
   "add": "New match",
-  "addComingSoon": "Create matches from the candidate or vacancy card."
+  "addComingSoon": "Create matches from the candidate or vacancy card.",
+  "drawer": {
+    "label": "Match",
+    "tabs": {
+      "overview": "Overview"
+    },
+    "sectionDetails": "Match details",
+    "fields": {
+      "candidate": "Candidate",
+      "vacancy": "Vacancy",
+      "client": "Client",
+      "owner": "Owner",
+      "score": "Score",
+      "stage": "Stage",
+      "created": "Created"
+    }
+  }
 }

@@ -4,14 +4,8 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
+import ScorePill from './ScorePill'
 import type { MatchRow } from '@/types/match'
-
-// Match score as a soft-coloured percentage (green ≥75, amber ≥50, red below).
-function ScorePill({ value }: { value: number | null }) {
-  if (value == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-  const c = value >= 75 ? 'var(--color-success)' : value >= 50 ? 'var(--color-warning)' : 'var(--color-danger)'
-  return <span style={{ fontWeight: 600, color: c }}>{value}%</span>
-}
 
 interface MatchesTableProps {
   rows: MatchRow[]
@@ -19,10 +13,12 @@ interface MatchesTableProps {
   error?: boolean
   stickyHeader?: boolean
   scrollParentRef?: RefObject<HTMLElement | null>
+  // Row click opens the read-only detail drawer (§3A drill-down).
+  onRowClick?: (row: MatchRow) => void
 }
 
 // MatchesTable — declares columns only; the shared DataTable owns sorting + states.
-export default function MatchesTable({ rows, loading, error, stickyHeader = false, scrollParentRef }: MatchesTableProps) {
+export default function MatchesTable({ rows, loading, error, stickyHeader = false, scrollParentRef, onRowClick }: MatchesTableProps) {
   const { t } = useTranslation('matches')
 
   const columns: Column<MatchRow>[] = [
@@ -48,7 +44,7 @@ export default function MatchesTable({ rows, loading, error, stickyHeader = fals
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
         <DataTable columns={columns} rows={rows} loading={loading}
           loadingText={t('loading')} emptyText={error ? t('error') : t('empty')}
-          stickyHeader={stickyHeader} scrollParentRef={scrollParentRef} />
+          stickyHeader={stickyHeader} scrollParentRef={scrollParentRef} onRowClick={onRowClick} />
       </div>
     </>
   )
