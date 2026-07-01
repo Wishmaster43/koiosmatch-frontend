@@ -24,6 +24,7 @@ import AddVacancyModal from './AddVacancyModal'
 import { toggleOneValue, pickKey } from './data/vacanciesShared'
 import { useVacanciesData } from './hooks/useVacanciesData'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
+import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useVacancyBulkActions } from './hooks/useVacancyBulkActions'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -37,7 +38,7 @@ interface VacancyStatsShape {
   by_phase?: Array<{ value?: string; phase?: string; count?: number }> | Record<string, number>
 }
 
-function VacanciesPageInner() {
+function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { t } = useTranslation('vacancies')
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
   const tableScrollRef = useRef<HTMLDivElement>(null)
@@ -95,6 +96,9 @@ function VacanciesPageInner() {
   // ── Drawer/record data layer (§3): selection + detail fetch + optimistic edits ──
   const { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy } =
     useVacancyRecord({ setVacancies, setTotal, statusMeta, users, customers: customerList, t })
+
+  // Open a vacancy drawer when arriving via a cross-entity link (intent).
+  useOpenFromIntent(intent, (id) => selectVacancy({ id } as Parameters<typeof selectVacancy>[0]))
 
   // ── Donut data (status / owner / client) — stats first, page-derived fallback ──
   const statusData = useMemo<Aggregate[]>(() => {
@@ -173,19 +177,10 @@ function VacanciesPageInner() {
           {/* KPI block: donuts + funnel-phase KPI cards */}
           <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
-          {/* Status tab bar + add button on the same row */}
+          {/* Add/bulk on the left (like Candidates/Applications); status tabs pushed right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
             padding: '0 24px 10px', flexShrink: 0 }}>
-            {buckets.map(b => (
-              <button key={b.value} onClick={() => setStatusBucket(b.value)}
-                style={{ padding: '5px 14px', fontSize: 13, fontWeight: statusBucket === b.value ? 600 : 400, borderRadius: 7, cursor: 'pointer',
-                  background: statusBucket === b.value ? 'var(--color-primary)' : 'transparent',
-                  color: statusBucket === b.value ? '#fff' : 'var(--text)',
-                  border: statusBucket === b.value ? 'none' : '1px solid var(--border)' }}>
-                {b.label}
-              </button>
-            ))}
-            <div style={{ marginLeft: 'auto' }}>
+            <div>
               {selectedIds.size > 0 ? (
                 <VacanciesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
                   onSetOwner={bulkSetOwner} onSetStatus={bulkSetStatus} onSetClient={bulkSetClient}
@@ -199,6 +194,17 @@ function VacanciesPageInner() {
                   + {t('page.add')}
                 </button>
               )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginLeft: 'auto' }}>
+              {buckets.map(b => (
+                <button key={b.value} onClick={() => setStatusBucket(b.value)}
+                  style={{ padding: '5px 14px', fontSize: 13, fontWeight: statusBucket === b.value ? 600 : 400, borderRadius: 7, cursor: 'pointer',
+                    background: statusBucket === b.value ? 'var(--color-primary)' : 'transparent',
+                    color: statusBucket === b.value ? '#fff' : 'var(--text)',
+                    border: statusBucket === b.value ? 'none' : '1px solid var(--border)' }}>
+                  {b.label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -258,10 +264,10 @@ function VacanciesPageInner() {
 }
 
 // Page-scoped provider so the table/drawer/modal/bulk share one lookups fetch.
-export default function VacanciesPage() {
+export default function VacanciesPage({ intent }: { intent?: unknown } = {}) {
   return (
     <VacancyLookupsProvider>
-      <VacanciesPageInner />
+      <VacanciesPageInner intent={intent} />
     </VacancyLookupsProvider>
   )
 }
