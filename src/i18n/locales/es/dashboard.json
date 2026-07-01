@@ -65,7 +65,9 @@
     "shiftsOpen": "Abiertos",
     "shiftsFilled": "Cubiertos",
     "shiftsUnfilled": "Sin cubrir",
-    "shiftsOccupancy": "Ocupación"
+    "shiftsOccupancy": "Ocupación",
+    "touchpoints": "Hoy",
+    "attentionTitle": "Por atender"
   },
   "action": {
     "allCandidates": "Todos los candidatos",
@@ -84,5 +86,16 @@
     "recruiter": "Reclutador",
     "planner": "Planificador",
     "readonly": "Solo lectura"
+  },
+  "touchpointType": {
+    "birthday": "Cumpleaños",
+    "firstWorkday": "Primer día",
+    "backAvailable": "Disponible de nuevo",
+    "followupDue": "Seguimiento pendiente"
+  },
+  "attentionGroup": {
+    "stale6m": "Sin contacto >6m",
+    "neverContacted": "Nunca contactado",
+    "noFollowup": "Sin seguimiento"
   }
 }

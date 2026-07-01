@@ -65,7 +65,9 @@
     "shiftsOpen": "Ouverts",
     "shiftsFilled": "Pourvus",
     "shiftsUnfilled": "Non pourvus",
-    "shiftsOccupancy": "Occupation"
+    "shiftsOccupancy": "Occupation",
+    "touchpoints": "Aujourd’hui",
+    "attentionTitle": "À traiter"
   },
   "action": {
     "allCandidates": "Tous les candidats",
@@ -84,5 +86,16 @@
     "recruiter": "Recruteur",
     "planner": "Planificateur",
     "readonly": "Lecture seule"
+  },
+  "touchpointType": {
+    "birthday": "Anniversaire",
+    "firstWorkday": "Premier jour",
+    "backAvailable": "À nouveau dispo.",
+    "followupDue": "Relance due"
+  },
+  "attentionGroup": {
+    "stale6m": "Sans contact >6m",
+    "neverContacted": "Jamais contacté",
+    "noFollowup": "Sans relance"
   }
 }

@@ -65,7 +65,9 @@
     "shiftsOpen": "Open",
     "shiftsFilled": "Ingevuld",
     "shiftsUnfilled": "Onvervuld",
-    "shiftsOccupancy": "Bezetting"
+    "shiftsOccupancy": "Bezetting",
+    "touchpoints": "Vandaag",
+    "attentionTitle": "Werk af"
   },
   "action": {
     "allCandidates": "Alle kandidaten",
@@ -84,5 +86,16 @@
     "recruiter": "Recruiter",
     "planner": "Planner",
     "readonly": "Alleen-lezen"
+  },
+  "touchpointType": {
+    "birthday": "Verjaardag",
+    "firstWorkday": "Eerste werkdag",
+    "backAvailable": "Weer beschikbaar",
+    "followupDue": "Opvolging vervalt"
+  },
+  "attentionGroup": {
+    "stale6m": "Niet gecontacteerd >6m",
+    "neverContacted": "Nooit gecontacteerd",
+    "noFollowup": "Geen opvolging"
   }
 }

@@ -65,7 +65,9 @@
     "shiftsOpen": "Open",
     "shiftsFilled": "Filled",
     "shiftsUnfilled": "Unfilled",
-    "shiftsOccupancy": "Occupancy"
+    "shiftsOccupancy": "Occupancy",
+    "touchpoints": "Today",
+    "attentionTitle": "To follow up"
   },
   "action": {
     "allCandidates": "All candidates",
@@ -84,5 +86,16 @@
     "recruiter": "Recruiter",
     "planner": "Planner",
     "readonly": "Read-only"
+  },
+  "touchpointType": {
+    "birthday": "Birthday",
+    "firstWorkday": "First workday",
+    "backAvailable": "Available again",
+    "followupDue": "Follow-up due"
+  },
+  "attentionGroup": {
+    "stale6m": "Not contacted >6m",
+    "neverContacted": "Never contacted",
+    "noFollowup": "No follow-up"
   }
 }
