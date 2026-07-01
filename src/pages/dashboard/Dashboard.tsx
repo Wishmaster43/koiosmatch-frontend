@@ -11,6 +11,7 @@ import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import LineChartCard from '@/components/charts/LineChartCard'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
+import FunnelConversion from './blocks/FunnelConversion'
 import { Users, CheckCircle, AlertCircle, Target, Euro } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { initialsOf } from '@/lib/initials'
@@ -303,6 +304,13 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
               onNavigate?.(page, name ? { period: name } : undefined)
             }} />
         </Panel>
+      </div>
+      )}
+
+      {/* Funnel-conversie — % doorstroom per fase (FE-derived); klik → sollicitaties op fase. */}
+      {vis('chart.funnelConversion') && (
+      <div style={{ marginBottom: 16 }}>
+        <FunnelConversion data={funnelData} onStageClick={(fv) => onNavigate?.('applications', fv ? { stage: fv } : undefined)} />
       </div>
       )}
 

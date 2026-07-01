@@ -24,7 +24,9 @@
       "candidates": "Candidatos",
       "applications": "Candidaturas",
       "matches": "Matches"
-    }
+    },
+    "funnelConversion": "Conversión del embudo",
+    "noData": "Sin datos"
   },
   "block": {
     "recentCandidates": "Candidatos recientes",

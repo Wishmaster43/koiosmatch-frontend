@@ -24,7 +24,9 @@
       "candidates": "Kandidaten",
       "applications": "Sollicitaties",
       "matches": "Matches"
-    }
+    },
+    "funnelConversion": "Funnel-conversie",
+    "noData": "Geen data"
   },
   "block": {
     "recentCandidates": "Recente kandidaten",

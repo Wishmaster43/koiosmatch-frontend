@@ -16,7 +16,7 @@ export const TYPE_PRECEDENCE: DashboardType[] = ['management', 'recruiter', 'pla
 // Block ids used across the dashboard (KPI keys + charts + recent lists).
 export const DASH_BLOCKS = {
   kpi: ['kpi.candidates', 'kpi.stale', 'kpi.never', 'kpi.tasks', 'kpi.opps', 'kpi.pipeline'],
-  chart: ['chart.status', 'chart.recruiter', 'chart.funnel', 'chart.oppStage', 'chart.weekly'],
+  chart: ['chart.status', 'chart.recruiter', 'chart.funnel', 'chart.funnelConversion', 'chart.oppStage', 'chart.weekly'],
   list: ['list.candidates', 'list.applications', 'list.leads', 'list.runs', 'list.conversations'],
 } as const
 
@@ -25,7 +25,7 @@ export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   management: ['*'],
   recruiter: [
     'kpi.candidates', 'kpi.stale', 'kpi.never', 'kpi.tasks',
-    'chart.status', 'chart.funnel',
+    'chart.status', 'chart.funnel', 'chart.funnelConversion',
     'list.candidates', 'list.applications', 'list.conversations',
   ],
   planner: [
