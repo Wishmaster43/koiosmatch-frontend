@@ -12,14 +12,15 @@ import BarChartCard from '@/components/charts/BarChartCard'
 import LineChartCard from '@/components/charts/LineChartCard'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
 import FunnelConversion from './blocks/FunnelConversion'
-import { Users, CheckCircle, AlertCircle, Target, Euro } from 'lucide-react'
+import { useWhatsAppQueue } from '@/pages/whatsapp/hooks/useWhatsAppQueue'
+import { Users, CheckCircle, AlertCircle, Target, Euro, Briefcase, CalendarCheck, TrendingUp, MessageSquare, Zap, FileText, CalendarClock, Link2 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { initialsOf } from '@/lib/initials'
 import type { ChartDatum } from '@/components/charts/chartTypes'
 import type {
   DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow,
 } from '@/types/dashboard'
-import { visibleBlock } from './templates'
+import { visibleBlock, kpiRow } from './templates'
 import type { DashboardType } from './templates'
 
 // Recent lists, AI runs and conversations are now live (GET /dashboard, C-30/C-31).
@@ -253,17 +254,34 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     return () => ctrl.abort()
   }, [activeTenant?.id, selPeriode, selVestiging, selStatus])
 
-  // KPI strip — only metrics we have live data for (no faked numbers).
-  const kpis = [
-    { id: 'kpi.candidates', label: t('kpi.candidatesTotal'), value: candidateTotalLabel, sub: t('kpi.inAts'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: Users, onClick: () => onNavigate?.('candidates') },
-    { id: 'kpi.stale', label: t('kpi.notContacted6m'), value: num(att.stale_6m), sub: t('kpi.attentionNeeded'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'stale6m' }) },
-    { id: 'kpi.never', label: t('kpi.neverContacted'), value: num(att.never_contacted), sub: t('kpi.attentionNeeded'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'neverContacted' }) },
-    { id: 'kpi.tasks', label: t('kpi.openTasks'), value: num(att.tasks), sub: t('kpi.linkedToCandidates'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: CheckCircle, onClick: () => onNavigate?.('tasks', { kpi: 'open' }) },
-    ...(opp ? [
-      { id: 'kpi.opps', label: t('kpi.opportunities'), value: num(opp.total), sub: t('kpi.openOpportunities'), color: '#8B5CF6', bg: '#F3E8FF', Icon: Target, onClick: () => onNavigate?.('opportunities') },
-      { id: 'kpi.pipeline', label: t('kpi.pipelineValue'), value: opp.pipeline_value != null ? eur(opp.pipeline_value) : '—', sub: t('kpi.sumOpenOpps'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Euro, onClick: () => onNavigate?.('opportunities') },
-    ] : []),
-  ].filter(k => vis(k.id))
+  // WhatsApp backlog + failed (planner/recruiter KPIs); fail-soft 0 without access.
+  const wa = useWhatsAppQueue({ enabled: true, statsOnly: true }) as { inQueue?: number; failed?: number }
+  const incompleteRuns = runs.filter(r => !r.ok).length
+
+  // All KPI blocks (live value; 🟡 metrics read "—" until the backend feed lands —
+  // see docs/DASHBOARD-PLAN.md). The active role's KPI_ROWS decides which show.
+  const kpiById: Record<string, { id: string; label: string; value: ReactNode; sub: string; color: string; bg: string; Icon: LucideIcon; onClick?: () => void }> = {
+    candidates:        { id: 'candidates', label: t('kpi.candidatesTotal'), value: candidateTotalLabel, sub: t('kpi.inAts'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: Users, onClick: () => onNavigate?.('candidates') },
+    stale:             { id: 'stale', label: t('kpi.notContacted6m'), value: num(att.stale_6m), sub: t('kpi.attentionNeeded'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'stale6m' }) },
+    never:             { id: 'never', label: t('kpi.neverContacted'), value: num(att.never_contacted), sub: t('kpi.attentionNeeded'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'neverContacted' }) },
+    tasks:             { id: 'tasks', label: t('kpi.openTasks'), value: num(att.tasks), sub: t('kpi.linkedToCandidates'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: CheckCircle, onClick: () => onNavigate?.('tasks', { kpi: 'open' }) },
+    opps:              { id: 'opps', label: t('kpi.opportunities'), value: num(opp?.total), sub: t('kpi.openOpportunities'), color: '#8B5CF6', bg: '#F3E8FF', Icon: Target, onClick: () => onNavigate?.('opportunities') },
+    pipeline:          { id: 'pipeline', label: t('kpi.pipelineValue'), value: opp?.pipeline_value != null ? eur(opp.pipeline_value) : '—', sub: t('kpi.sumOpenOpps'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Euro, onClick: () => onNavigate?.('opportunities') },
+    placements:        { id: 'placements', label: t('kpi.placements'), value: num(att.placements), sub: t('kpi.placementsSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: () => onNavigate?.('matches') },
+    intakes:           { id: 'intakes', label: t('kpi.intakes'), value: num(att.intake_planned ?? att.intakes), sub: t('kpi.intakesSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: CalendarCheck, onClick: () => onNavigate?.('candidates') },
+    fillRate:          { id: 'fillRate', label: t('kpi.fillRate'), value: att.fill_rate != null ? `${att.fill_rate}%` : '—', sub: t('kpi.fillRateSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: TrendingUp, onClick: () => onNavigate?.('vacancies') },
+    failedWa:          { id: 'failedWa', label: t('kpi.failedWa'), value: num(wa.failed), sub: t('kpi.failedWaSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp') },
+    waQueue:           { id: 'waQueue', label: t('kpi.waQueue'), value: num(wa.inQueue), sub: t('kpi.waQueueSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp') },
+    incompleteRuns:    { id: 'incompleteRuns', label: t('kpi.incompleteRuns'), value: num(incompleteRuns), sub: t('kpi.incompleteRunsSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: Zap, onClick: () => onNavigate?.('aiagents') },
+    activeConv:        { id: 'activeConv', label: t('kpi.activeConv'), value: num(att.active_conversations ?? conversations.length), sub: t('kpi.activeConvSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp') },
+    missingDocs:       { id: 'missingDocs', label: t('kpi.missingDocs'), value: num(att.missing_documents), sub: t('kpi.missingDocsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: FileText, onClick: () => onNavigate?.('candidates') },
+    expiringContracts: { id: 'expiringContracts', label: t('kpi.expiringContracts'), value: num(att.expiring_contracts), sub: t('kpi.expiringContractsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: () => onNavigate?.('matches') },
+    couplingErrors:    { id: 'couplingErrors', label: t('kpi.couplingErrors'), value: num(att.coupling_errors), sub: t('kpi.couplingErrorsSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: Link2, onClick: () => onNavigate?.('candidates') },
+    openShifts:        { id: 'openShifts', label: t('kpi.openShifts'), value: num(att.open_shifts), sub: t('kpi.openShiftsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: () => onNavigate?.('planning') },
+    occupancy:         { id: 'occupancy', label: t('kpi.occupancy'), value: att.occupancy != null ? `${att.occupancy}%` : '—', sub: t('kpi.occupancySub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: TrendingUp, onClick: () => onNavigate?.('planning') },
+  }
+  // Every role ALWAYS gets its own full KPI row (never hidden).
+  const kpis = kpiRow(activeType).map(id => kpiById[id]).filter(Boolean)
 
   return (
     <div style={{ padding: 24, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>

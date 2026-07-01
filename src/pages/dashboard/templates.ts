@@ -1,50 +1,57 @@
 /**
- * Dashboard templates (B-27) — which blocks each role's dashboard shows. Block ids
- * are gated in Dashboard.tsx via `visibleBlock`; `['*']` = show everything (so the
- * management/super view stays identical to the full dashboard — nothing is removed).
+ * Dashboard templates (B-27) — per role: which KPI row (KPI_ROWS) and which charts/
+ * lists (DASHBOARD_TEMPLATES, gated via `visibleBlock`). Every role ALWAYS gets a
+ * full, role-specific KPI row; `['*']` = show every chart/list (admin/management).
  *
- * Seed defaults; Settings → Dashboards will later persist per-type overrides
- * (mirrors the ViewConfigEditor pattern). The dashboard_type enum is owned by the
- * backend (C-35) — keep this list in sync, never diverge.
+ * The `dashboard_type` enum is OWNED BY THE BACKEND (C-35) and is leading — these
+ * are the confirmed values (docs/DASHBOARD-PLAN.md): never diverge. `/auth/me`
+ * returns roles[].dashboard_type.
  */
-export const DASHBOARD_TYPES = ['management', 'recruiter', 'planner', 'readonly'] as const
+export const DASHBOARD_TYPES = ['admin', 'management', 'recruitment', 'backoffice', 'sales', 'planning', 'readonly'] as const
 export type DashboardType = typeof DASHBOARD_TYPES[number]
 
 // Multi-role users: the richest dashboard wins.
-export const TYPE_PRECEDENCE: DashboardType[] = ['management', 'recruiter', 'planner', 'readonly']
+export const TYPE_PRECEDENCE: DashboardType[] = ['admin', 'management', 'recruitment', 'backoffice', 'sales', 'planning', 'readonly']
 
-// Block ids used across the dashboard (KPI keys + charts + recent lists).
-export const DASH_BLOCKS = {
-  kpi: ['kpi.candidates', 'kpi.stale', 'kpi.never', 'kpi.tasks', 'kpi.opps', 'kpi.pipeline'],
-  chart: ['chart.status', 'chart.recruiter', 'chart.funnel', 'chart.funnelConversion', 'chart.oppStage', 'chart.weekly'],
-  list: ['list.candidates', 'list.applications', 'list.leads', 'list.runs', 'list.conversations'],
-} as const
+// Types allowed to switch/preview every role's view (see everything).
+export const SUPER_VIEWS: DashboardType[] = ['admin', 'management']
 
-// Per-type block sets. '*' = everything (management/super — full current dashboard).
-export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
-  management: ['*'],
-  recruiter: [
-    'kpi.candidates', 'kpi.stale', 'kpi.never', 'kpi.tasks',
-    'chart.status', 'chart.funnel', 'chart.funnelConversion',
-    'list.candidates', 'list.applications', 'list.conversations',
-  ],
-  planner: [
-    'kpi.tasks',
-    'chart.weekly',
-    'list.runs', 'list.conversations',
-    // TODO (data available): WhatsApp-queue · open shifts · incomplete workflow runs.
-  ],
-  readonly: [
-    'kpi.candidates', 'kpi.tasks',
-    'chart.status', 'chart.funnel',
-  ],
+// ── KPI row per role — bare KPI ids resolved in Dashboard.tsx (kpiById). Every role
+// shows a full, role-specific row (never hidden). 🟡 metrics render "—" until the
+// backend feed lands (see docs/DASHBOARD-PLAN.md).
+export const KPI_ROWS: Record<DashboardType, string[]> = {
+  admin:       ['candidates', 'opps', 'pipeline', 'placements', 'intakes', 'fillRate'],
+  management:  ['candidates', 'opps', 'pipeline', 'placements', 'intakes', 'fillRate'],
+  recruitment: ['candidates', 'tasks', 'intakes', 'failedWa', 'never', 'activeConv'],
+  backoffice:  ['tasks', 'placements', 'missingDocs', 'expiringContracts', 'couplingErrors', 'incompleteRuns'],
+  sales:       ['opps', 'pipeline', 'fillRate', 'placements', 'activeConv', 'tasks'],
+  planning:    ['waQueue', 'failedWa', 'incompleteRuns', 'tasks', 'openShifts', 'occupancy'],
+  readonly:    ['candidates', 'tasks', 'stale'],
 }
 
-// Is a block visible for the active dashboard type?
+// ── Charts/lists per role. '*' = everything (admin/management = full dashboard).
+export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
+  admin: ['*'],
+  management: ['*'],
+  recruitment: ['chart.status', 'chart.funnel', 'chart.funnelConversion', 'list.candidates', 'list.applications', 'list.conversations'],
+  backoffice: ['chart.status', 'list.applications', 'list.runs'],
+  sales: ['chart.oppStage', 'chart.status', 'list.leads'],
+  planning: ['chart.weekly', 'list.runs', 'list.conversations'],
+  readonly: ['chart.status', 'chart.funnel'],
+}
+
+// Is a chart/list block visible for the active dashboard type?
 export const visibleBlock = (type: string, id: string): boolean => {
   const tpl = DASHBOARD_TEMPLATES[type as DashboardType] ?? ['*']
   return tpl.includes('*') || tpl.includes(id)
 }
+
+// KPI ids for the active type (fallback to management's row).
+export const kpiRow = (type: string): string[] =>
+  KPI_ROWS[type as DashboardType] ?? KPI_ROWS.management
+
+// May this type switch/preview every dashboard view?
+export const canSwitchViews = (type: string): boolean => SUPER_VIEWS.includes(type as DashboardType)
 
 // Resolve the effective type from a user's roles (richest wins; readonly fallback).
 export const resolveDashboardType = (types: string[]): DashboardType => {

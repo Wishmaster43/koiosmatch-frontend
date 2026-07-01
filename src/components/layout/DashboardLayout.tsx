@@ -15,7 +15,7 @@ import ReportFilterSidebar from '../reports/ReportFilterSidebar'
 import { renderPage, PAGE_TITLES } from './appPages'
 import { NavigationProvider } from '@/context/NavigationContext'
 import DashboardSwitcher from '@/pages/dashboard/DashboardSwitcher'
-import { DASHBOARD_TYPES } from '@/pages/dashboard/templates'
+import { DASHBOARD_TYPES, canSwitchViews } from '@/pages/dashboard/templates'
 import type { DashboardType } from '@/pages/dashboard/templates'
 import type { ReportFilterGroup } from '@/types/reports'
 
@@ -74,7 +74,7 @@ export default function DashboardLayout() {
   // Dashboard view (B-27) — super-admin + management may switch/preview any role's
   // dashboard from the topbar; others are pinned to their own. Full = management.
   const dashMyType = (auth?.dashboardType?.() ?? 'readonly') as DashboardType
-  const dashCanSwitch = (auth?.isSuperAdmin?.() ?? false) || dashMyType === 'management'
+  const dashCanSwitch = (auth?.isSuperAdmin?.() ?? false) || canSwitchViews(dashMyType)
   const [dashView, setDashView] = useState<DashboardType>(dashCanSwitch ? 'management' : dashMyType)
   const dashAllowed: DashboardType[] = dashCanSwitch ? [...DASHBOARD_TYPES] : [dashMyType]
   const { filterGroups }                    = useRightPanel()
