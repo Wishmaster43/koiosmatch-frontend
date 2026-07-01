@@ -284,6 +284,26 @@ LEVER: consistente chips/knoppen/typografie + lijst toegevoegde i18n-keys + geë
         mechanisme dekt ze allemaal — de tenant zet per waarde een icoon aan wáár het helpt. **Niet los tracken.**
       BE: `icon`/`emoji`-kolom op de lookup-base + seed (unicode-emoji óf gecureerde lucide-set; geen image-assets).
 
+### B-33 · Workflow — lijst/tabel-weergave + autorisatie op alle acties (review 2026-07-02)
+> Danny's review van de Workflow-module. Lane = workflow (2e-Claude); FE `pages/ai/WorkflowsPage` + folders-UI.
+- [ ] **Tabel-weergave** naast de kaarten: view-toggle (kaarten ⇄ tabel), **sticky header** + **sorteeropties**
+      (mirror de gedeelde `DataTable` / de Matches/Tasks board-toggle). Kolommen: naam · status · map · laatste run · #runs.
+- [ ] **Autorisatie op álle workflow-acties** (FE gate + BE re-check, FRONTEND-CONTRACT §15: reads `settings.view`,
+      writes/run `settings.update`): map **aanmaken/hernoemen/verwijderen** · workflow **aanmaken/wijzigen/runnen** ·
+      **logs bekijken**. Verberg/disable wat de gebruiker niet mag (nooit alleen client-side vertrouwen). Haakt op **AP-H1**.
+- [ ] **Verwijder-guard (dependency-check):** een **map of workflow verwijderen mag alleen als er géén actieve
+      workflow** in zit → **409 + reden** (BE-guard), FE toont "kan niet verwijderen: nog actieve workflow(s)".
+      Sluit aan op de soft-delete/dependency-conventie (§8).
+
+### B-34 · Pijplijnwaarde-eenheid instelbaar (€ vs uren) — management-dashboard (review 2026-07-02)
+> De management-KPI "pijplijnwaarde" moet tenant-instelbaar zijn: **in geld (€) óf in uren**. Lane = dashboard/backend.
+- [ ] **BE:** tenant-setting `pipeline_value_unit` (`money|hours`, default `money`). De pipeline-aggregatie
+      (`/opportunities/stats.pipeline_value`, dashboard/reports) sommeert **`value`** (€) óf **`hours`**
+      (kansen dragen beide, C-42/K-24) op basis van de setting. Velden + resource **daarop afstemmen**
+      (unit + waarde meegeven, niet alleen een kaal getal).
+- [ ] **FE (Dash):** toont de pijplijnwaarde in de ingestelde eenheid (€ of uren) met het juiste label/format;
+      Settings → Dashboards krijgt de toggle. Bind op de door de API meegegeven `unit`, hardcode geen €.
+
 ---
 
 ## C. Backend — open taken
