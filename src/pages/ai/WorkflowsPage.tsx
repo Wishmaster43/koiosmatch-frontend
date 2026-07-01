@@ -15,7 +15,7 @@ import { notifyError } from '@/lib/notify'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { Zap, Plus, Loader2, Folder, FolderPlus, Trash2, LayoutGrid, List } from 'lucide-react'
+import { Zap, Plus, Loader2, Folder, FolderPlus, Trash2, LayoutGrid, List, Archive } from 'lucide-react'
 import WorkflowCanvasEditor from '@/components/layout/WorkflowCanvasEditor'
 import { normalizeWorkflow, denormalizeWorkflow } from './data/workflowMap'
 import WorkflowCard, { WorkflowRow } from './WorkflowCard'
@@ -36,6 +36,7 @@ export default function WorkflowsPage() {
   const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null)
   const [dragOverFolder,  setDragOverFolder]  = useState<FolderId>(null)
   const [viewMode,        setViewMode]        = useState('grid')  // 'grid' | 'list'
+  const [showArchived,    setShowArchived]    = useState(false)   // archived (soft-deleted) off by default
   const dragWf = useRef<string | number | null>(null)
 
   // Right-panel filters (status + module type) — registering them shows the topbar
@@ -65,8 +66,10 @@ export default function WorkflowsPage() {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   useEffect(() => {
+    // Archived view asks the backend for soft-deleted rows too (C-27-workflow).
+    setLoading(true)
     Promise.all([
-      api.get('/workflows').then(r => (r.data?.data ?? r.data ?? []).map(normalizeWorkflow)).catch(() => []),
+      api.get('/workflows', { params: showArchived ? { include_archived: 1 } : {} }).then(r => (r.data?.data ?? r.data ?? []).map(normalizeWorkflow)).catch(() => []),
       api.get('/workflow-folders').then(r => r.data?.data ?? r.data ?? []).catch(() => []),
     ]).then(([wfs, flds]) => {
       // Restore graph from localStorage when the backend doesn't store connections yet (C-27).
@@ -85,7 +88,7 @@ export default function WorkflowsPage() {
       setWorkflows(merged)
       setFolders(flds)
     }).finally(() => setLoading(false))
-  }, [])
+  }, [showArchived])
 
   const handleRun = async (id?: string | number) => {
     await api.post(`/workflows/${id}/run`).catch(() => api.post(`/workflows/${id}/execute`)).catch(() => notifyError(t('common:actionFailed')))
@@ -149,6 +152,8 @@ export default function WorkflowsPage() {
   }
 
   const visibleWorkflows = workflows.filter(wf => {
+    // Archived (soft-deleted) hidden by default; the archived view shows only those.
+    if (showArchived ? !wf.archived : wf.archived) return false
     // Folder filter (left list)
     if (selectedFolder === 'unassigned' && wf.folder_id) return false
     if (selectedFolder && selectedFolder !== 'unassigned' && wf.folder_id !== selectedFolder) return false
@@ -203,31 +208,38 @@ export default function WorkflowsPage() {
 
       {/* Content */}
       <div style={{ flex: 1, padding: 24, overflowY: 'auto' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-          <div>
-            <h2 style={{ fontSize: 18, fontWeight: 600, color: 'var(--text)' }}>
-              {selectedFolder === null ? t('page.allWorkflows')
-               : selectedFolder === 'unassigned' ? t('page.unassigned')
-               : (folders.find(f => f.id === selectedFolder)?.name ?? t('page.workflowsTitle'))}
-            </h2>
-            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 2 }}>{t('page.countWorkflows', { n: visibleWorkflows.length })}</p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        {/* Toolbar — add on the LEFT, count + archived + view toggle on the RIGHT (mirror Kansen). */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+          <button
+            onClick={() => setEditingWorkflow({ name: t('page.newWorkflow'), trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: 'white', background: 'var(--color-primary)', border: 'none', borderRadius: 8, cursor: 'pointer' }}
+          >
+            <Plus size={14} /> {t('page.newWorkflow')}
+          </button>
+
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* Visible count */}
+            <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('page.countWorkflows', { n: visibleWorkflows.length })}</span>
+
+            {/* Archived (soft-deleted) view toggle */}
+            <button onClick={() => setShowArchived(v => !v)} title={t('page.archivedView')}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, fontWeight: showArchived ? 600 : 500,
+                borderRadius: 8, cursor: 'pointer',
+                border: `1px solid ${showArchived ? 'var(--color-primary)' : 'var(--border)'}`,
+                background: showArchived ? 'var(--color-primary-bg)' : 'var(--surface)',
+                color: showArchived ? 'var(--color-primary)' : 'var(--text)' }}>
+              <Archive size={14} /> {t('page.archived')}
+            </button>
+
             {/* View mode toggle */}
             <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-              {[{ mode: 'grid', Icon: LayoutGrid }, { mode: 'list', Icon: List }].map(({ mode, Icon }) => (
-                <button key={mode} onClick={() => setViewMode(mode)} title={mode === 'grid' ? 'Kaarten' : 'Lijst'}
+              {[{ mode: 'grid', Icon: LayoutGrid, label: t('page.viewGrid') }, { mode: 'list', Icon: List, label: t('page.viewList') }].map(({ mode, Icon, label }) => (
+                <button key={mode} onClick={() => setViewMode(mode)} title={label} aria-label={label}
                   style={{ padding: '6px 10px', background: viewMode === mode ? 'var(--color-primary-bg)' : 'var(--surface)', color: viewMode === mode ? 'var(--color-primary)' : 'var(--text-muted)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                   <Icon size={14} />
                 </button>
               ))}
             </div>
-            <button
-              onClick={() => setEditingWorkflow({ name: t('page.newWorkflow'), trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13, fontWeight: 500, color: 'white', background: 'var(--color-primary)', border: 'none', borderRadius: 8, cursor: 'pointer' }}
-            >
-              <Plus size={14} /> {t('page.newWorkflow')}
-            </button>
           </div>
         </div>
 
@@ -258,10 +270,10 @@ export default function WorkflowsPage() {
             {/* Column header */}
             <div className="flex items-center gap-3 px-4 py-2" style={{ background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }}>
               <div style={{ width: 30, flexShrink: 0 }} />
-              <div style={{ width: 220, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Naam</div>
-              <div style={{ width: 80, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Status</div>
-              <div style={{ flex: 1, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Modules</div>
-              <div style={{ width: 220, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Laatste run</div>
+              <div style={{ width: 220, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t('page.colName')}</div>
+              <div style={{ width: 80, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t('page.colStatus')}</div>
+              <div style={{ flex: 1, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t('page.colModules')}</div>
+              <div style={{ width: 220, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t('page.colLastRun')}</div>
               <div style={{ width: 100, flexShrink: 0 }} />
             </div>
             {visibleWorkflows.map(wf => (

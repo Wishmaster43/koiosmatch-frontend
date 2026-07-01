@@ -8,7 +8,8 @@
   "overdue": "Vencida",
   "view": {
     "table": "Vista de lista",
-    "board": "Vista de tablero"
+    "board": "Vista de tablero",
+    "archived": "Archivado"
   },
   "cols": {
     "task": "Tarea",

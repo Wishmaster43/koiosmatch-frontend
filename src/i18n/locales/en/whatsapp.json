@@ -1,5 +1,7 @@
 {
   "tabs": { "overview": "Overview", "messages": "Messages", "queue": "Queue", "escalations": "Escalations" },
+  "drill": { "noDetail": "No detail data for this KPI yet — the backend will provide it soon." },
+  "overview": { "statusTitle": "Message status", "reasonsTitle": "Escalation reasons" },
   "queue": {
     "loading": "Loading queue…",
     "error": "Could not load the queue.",

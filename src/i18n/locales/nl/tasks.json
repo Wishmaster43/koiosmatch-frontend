@@ -8,7 +8,8 @@
   "overdue": "Te laat",
   "view": {
     "table": "Lijstweergave",
-    "board": "Takenbord"
+    "board": "Takenbord",
+    "archived": "Gearchiveerd"
   },
   "cols": {
     "task": "Taak",

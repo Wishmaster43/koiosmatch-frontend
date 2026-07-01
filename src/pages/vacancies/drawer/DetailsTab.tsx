@@ -8,6 +8,7 @@ import { useIndustries } from '@/lib/useIndustries'
 import { useFunctions } from '@/lib/useFunctions'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
+import EntityLink from '@/components/ui/EntityLink'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -150,6 +151,9 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
 
       {card(t('details.groups.general'), <>
         {row(t('details.id'), <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>, <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>)}
+        {row(t('drawer.client'),
+          <EntityLink page="customers" id={v.clientId}>{v.clientName || '—'}</EntityLink>,
+          <EntityLink page="customers" id={v.clientId}>{v.clientName || '—'}</EntityLink>)}
         {row(t('details.function'), v.category || dash, select('category', fnOptions))}
         {row(t('details.preferredIndustry'), v.industry || dash, select('industry', industries.map(i => ({ value: i, label: i }))))}
       </>)}

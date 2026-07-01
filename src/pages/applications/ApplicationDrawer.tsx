@@ -48,7 +48,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   // owner is matched by id; a fallback option covers an owner not in the list.
   const ownerInUsers = (users ?? []).some(u => String(u.id) === String(a.owner?.id))
   const ownerOptions = [
-    ...(a.owner?.id != null && ownerInUsers ? [] : [{ value: '__current', label: a.owner?.name || '—' }]),
+    ...(a.owner?.id != null && ownerInUsers ? [] : [{ value: '__current', label: a.owner?.name || t('insights.noOwner') }]),
     ...(users ?? []).map(u => ({ value: String(u.id), label: u.name })),
   ]
   const ownerValue = a.owner?.id != null && ownerInUsers ? String(a.owner.id) : '__current'

@@ -1,0 +1,73 @@
+{
+  "title": "Anruflisten",
+  "new": "Anrufliste",
+  "empty": "Noch keine Anruflisten.",
+  "loadError": "Anruflisten konnten nicht geladen werden.",
+  "retry": "Erneut",
+  "count_one": "{{count}} Anrufliste",
+  "count_other": "{{count}} Anruflisten",
+  "col": {
+    "name": "Name",
+    "channel": "Kanal",
+    "status": "Status",
+    "targets": "Ziele",
+    "owner": "Eigentümer",
+    "created": "Erstellt"
+  },
+  "channel": {
+    "call": "Anrufen",
+    "email": "E-Mail",
+    "whatsapp": "WhatsApp"
+  },
+  "status": {
+    "draft": "Entwurf",
+    "active": "Aktiv",
+    "done": "Abgeschlossen"
+  },
+  "view": {
+    "table": "Tabelle",
+    "board": "Board",
+    "archived": "Archiviert"
+  },
+  "board": {
+    "empty": "Leer"
+  },
+  "archivedEmpty": "Keine archivierten Anruflisten.",
+  "moveError": "Verschieben fehlgeschlagen.",
+  "insights": {
+    "status": "Status",
+    "channel": "Kanal",
+    "clearFilter": "Filter zurücksetzen"
+  },
+  "kpi": {
+    "total": "Gesamt",
+    "totalSub": "alle Anruflisten",
+    "active": "Aktiv",
+    "activeSub": "laufende Anruflisten",
+    "targets": "Ziele",
+    "targetsSub": "Kandidaten gesamt"
+  },
+  "bulk": {
+    "selected": "{{count}} ausgewählt",
+    "actions": "Massenaktionen",
+    "deselect": "Auswahl aufheben",
+    "changeStatus": "Status ändern",
+    "searchStatus": "Status suchen…",
+    "archive": "Archivieren",
+    "done": "{{count}} aktualisiert",
+    "mutateError": "Aktion fehlgeschlagen. Bitte erneut versuchen.",
+    "archiveError": "Archivierung fehlgeschlagen."
+  },
+  "create": {
+    "title": "Neue Anrufliste",
+    "name": "Name",
+    "namePlaceholder": "z. B. Anrufliste verfügbare Pflegekräfte",
+    "channel": "Kanal",
+    "pool": "Quell-Pool (optional)",
+    "poolNone": "Keiner — später füllen",
+    "poolHint": "Wählen Sie einen Talentpool, um die Anrufliste sofort mit Kandidaten zu füllen.",
+    "submit": "Anrufliste erstellen",
+    "saving": "Wird erstellt…",
+    "error": "Erstellung fehlgeschlagen. Bitte erneut versuchen."
+  }
+}

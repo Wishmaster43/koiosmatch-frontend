@@ -273,7 +273,15 @@ LEVER: consistente chips/knoppen/typografie + lijst toegevoegde i18n-keys + geë
 ### 🔴 C-0 · Volledige seeder (Yesway + demo)
 Alle lookups + realistische sample-data voor beide tenants. Geen lege schermen meer.
 
-### 🔴 C-10 · Assen-model v2 — reseed + endpoints (HERZIEN 2026-06-29, vervangt oude reseed)
+### ✅ C-10 · Assen-model v2 — reseed + endpoints (Golf ② AFGEROND 2026-07-01)
+> **✅ Golf ② klaar (BE):** `blacklist` = inzetbaarheid-status in `candidate_statuses`
+> (#DC2626, `requires_reason`); volledige set available·placed·unavailable·sick·leave·blacklist.
+> Oude `blacklisted`-boolean + `where blacklisted`-logica weg (gevouwen in `create_candidates`).
+> `?status[]=blacklist` → **200** (422 opgelost). `dev:reset` op alle 4 tenants (Yesway 300/44 bl,
+> Demo 100/14 bl). **FE uitgelijnd (2026-07-01):** stale `blacklistedBy`/`blacklistedAt` verwijderd
+> (mapCandidate + CandidateDrawer + types); blacklist-info leunt nu op `blacklist_reason` +
+> change-log-datum `statusChangedAt`. Blacklist-quick-view werkt.
+### (historie) C-10 · Assen-model v2 — reseed + endpoints (HERZIEN 2026-06-29, vervangt oude reseed)
 > **Uitvoering in 2 golven (BE-Claude, 2026-06-30 — niet interleaven met live WIP):**
 > **Golf ① (veilig/additief, nu):** `candidate_phases`-tabel + `CandidatePhase`-model + de 3
 > toevoegingen in de bestaande `CandidateLookupController` + seed (`lead`/`candidate`) + additieve
@@ -639,6 +647,31 @@ Accepteert (elk veld optioneel):
    `{{<stepId>}}` voor de hele output) in string-configs. De engine moet die **tijdens een run vervangen** door de
    output van de betreffende stap — de stabiele step-id uit punt 1 is de koppeling. Pad = dot-notatie
    (`employee.city`); arrays resolven via het eerste element.
+
+**Run-operationeel (onderzoek 2026-07-01 met Danny — nog te bouwen; engine draait op de aparte
+workflow-server, zie [[project_workflow_separate_server]]):**
+
+4. **Run-samenvatting op kaart/rij** (FE + backend). De `/workflows`-lijst levert een klein **`run_stats`** mee:
+   `{ last: [status…] (≤10), success_24h, failed_24h, avg_duration_ms }`. FE toont een **mini-strip** (gekleurde
+   bolletjes = laatste runs) + failure-teller op `WorkflowCard`/`WorkflowRow`; klik → editor op Geschiedenis-tab.
+   Vermijdt N+1 per kaart. **Overlap opruimen:** rechter-`LogsPanel` uitfaseren t.g.v. de Geschiedenis-tab (nu
+   twee run-history surfaces = onderhoudslast).
+5. **Retentie (AVG — §8; run-I/O bevat kandidaat-/gezondheidsdata).** **Split:** run-**metadata**
+   (status/duur/tijd/trigger) lang bewaren (bv. 90–365 d, voor KPI/rapportage); run-**I/O-payloads** kort
+   (bv. 7–30 d) → daarna **payload purgen, metadata-rij behouden**. Tenant-instelbaar + harde bovengrens.
+   **FE** = paneel Settings → Workflows → Run-retentie (kopie van `MessageRetention`: tenant-beleid + evt. hard cap).
+   **Engine** = purge-job op de aparte server.
+6. **Max runtime** (engine-afgedwongen, pakket-configureerbaar — haakt op [[project_pricing_model]]). Twee niveaus:
+   **per-stap timeout** (generaliseer `step_timeout` van ai_agent naar álle modules → stap-status `timeout`) +
+   **workflow-brede wall-clock cap** (default bv. 300s; Core < Enterprise) → run-status `timeout`/`aborted`.
+   **FE** = veld in ScheduleModal/instellingen + tenant-default.
+7. **Stuck / timeout / afgebroken monitoring** ("Incomplete executions", Make-stijl). (a) **Nieuwe run-statussen**
+   `timeout` · `aborted`/`canceled` + afgeleid `stuck` (= `running` > max-runtime) → toevoegen aan `STATUS_META`
+   (kleur+icoon, i18n × 5). (b) **Status-filter** in de Geschiedenis-tab (Alles/Bezig/Mislukt/Timeout/Afgebroken)
+   + **stuck-badge** + **"Afbreken"-knop** (authorization-gated → engine cancelt → `aborted`). (c) **Globale
+   onvolledige-view** = bestaande `RunsTable` (`/workflow-runs`) uitbreiden met status-filter → triage over álle
+   workflows in één scherm. (d) **Queue-aware**: `pending`/queued apart van `running` tonen + **pollen** voor
+   status (géén synchroon resultaat aannemen). (e) optioneel: N× mislukt/timeout → notificatie (webhook/e-mail).
 
 ---
 

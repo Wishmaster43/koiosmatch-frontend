@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
+import EntityLink from '@/components/ui/EntityLink'
 import { useCustomerVacancies } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
@@ -16,7 +17,7 @@ export default function VacanciesTab({ customerId, params }: { customerId?: Id; 
   const { rows, loading } = useCustomerVacancies(customerId, params)
 
   const columns: Column<VacancyRow>[] = [
-    { key: 'title', header: t('vacancies.col.title'), sortable: true, sortValue: v => v.title, render: v => <span style={{ color: 'var(--text)' }}>{v.title}</span> },
+    { key: 'title', header: t('vacancies.col.title'), sortable: true, sortValue: v => v.title, render: v => <EntityLink page="vacancies" id={v.id}>{v.title}</EntityLink> },
     { key: 'status', header: t('vacancies.col.status'), render: v => <StatusPill label={v.status.label} color={v.status.color || '#9CA3AF'} /> },
     { key: 'applications', header: t('vacancies.col.applications'), align: 'right', cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true, sortValue: v => v.applications, render: v => v.applications },
   ]

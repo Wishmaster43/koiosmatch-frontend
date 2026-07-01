@@ -27,6 +27,7 @@ export function useOpportunitiesData() {
   const [loading,   setLoading]   = useState(true)
   const [error,     setError]     = useState(false)
   const [customers, setCustomers] = useState<PageCustomer[]>([])
+  const [showArchived, setShowArchived] = useState(false)
   const [selected,       setSelected]       = useState<Opportunity | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
@@ -36,15 +37,17 @@ export function useOpportunitiesData() {
   const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const next = new Set(prev); ids.forEach(id => allSelected ? next.delete(id) : next.add(id)); return next })
   const clearSelection = () => setSelectedIds(new Set())
 
-  // Load opportunities; a missing endpoint (404) is an empty list, not an error.
+  // Load opportunities; the archived view opts into ?include_archived=1 (mirrors
+  // candidates). A missing endpoint (404) is an empty list, not an error.
   useEffect(() => {
     let alive = true
-    api.get('/opportunities')
+    setLoading(true)
+    api.get('/opportunities', { params: showArchived ? { include_archived: 1 } : undefined })
       .then(r => { if (alive) setRows(((r.data?.data ?? r.data ?? []) as ApiOpportunity[]).map(mapOpportunity)) })
       .catch(e => { if (alive && e?.response?.status && e.response.status !== 404) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [])
+  }, [showArchived])
 
   // Load customers once for the drawer/modal pickers.
   useEffect(() => {
@@ -109,6 +112,7 @@ export function useOpportunitiesData() {
 
   return {
     rows, loading, error, customers, users, stages, stageMeta,
+    showArchived, setShowArchived,
     selected, drawerExpanded, setDrawerExpanded,
     selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity,

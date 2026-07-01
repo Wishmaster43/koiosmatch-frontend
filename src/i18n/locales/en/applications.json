@@ -61,6 +61,7 @@
     "phase": "Phase",
     "owner": "Recruiter",
     "source": "Source",
+    "noOwner": "No owner",
     "clearFilter": "Clear filter"
   },
   "drawer": {
@@ -82,7 +83,9 @@
     "task": "Task",
     "details": "Details",
     "vacancy": "Vacancy",
-    "client": "Client"
+    "client": "Client",
+    "openVacancy": "Open vacancy",
+    "openCandidate": "Open candidate"
   },
   "matchScore": {
     "title": "Match score",

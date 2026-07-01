@@ -80,8 +80,6 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     statusReturnDate: c.status_return_date ?? null,
     statusChangedAt:  c.status_changed_at ?? c.status_effective_from ?? null,
     blacklistReason:  c.blacklist_reason ?? null,
-    blacklistedBy:    (typeof c.blacklisted_by === 'object' ? c.blacklisted_by?.name : c.blacklisted_by) ?? null,
-    blacklistedAt:    c.blacklisted_at ?? null,
     // Availability — legacy separate axis (folded into deployability in v2); kept for back-compat.
     availability:    c.availability ?? null,
     owner:           ownerName,
@@ -116,6 +114,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     // Archived = soft-deleted (deleted_at set). Off by default in the list; the
     // "Gearchiveerd" view opts in via ?include_archived=1.
     archived:        !!(c.deleted_at ?? c.archived),
+    // Inconsistency flag (§3B): requires_appointment stage with no planned appointment.
+    missingAppointment: !!c.missing_appointment,
     // Branches (C-4, M2M) — each { id, name }; accepts bare names too (→ { name }).
     branches:        (c.branches ?? []).map((b): CandidateBranch => (typeof b === 'object' ? b : { name: b })),
     // Talent pools the candidate belongs to. Each: { id, name, color, source? }.
@@ -176,6 +176,7 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     // HelloFlex — we only surface its status + the link GUID. No placements/contract fields.
     matches:         (c.matches ?? []).map((m): CandidateMatch => ({
       ...m,
+      vacancyId:      m.vacancy?.id ?? m.vacancy_id ?? null,
       vacancyTitle:   m.vacancyTitle ?? m.vacancy?.title ?? m.vacancy_title ?? '',
       vacancyUrl:     m.vacancyUrl ?? m.vacancy?.url ?? m.vacancy_url ?? null,
       client:         m.client ?? m.customer?.name ?? m.client_name ?? '',

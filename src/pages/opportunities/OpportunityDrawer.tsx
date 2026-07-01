@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X, Trophy, Ban } from 'lucide-react'
+import { Edit2, Save, X } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import { useDateFormat } from '@/lib/datetime'
 import DetailsTab from './drawer/DetailsTab'
-import ChangelogTab from './drawer/ChangelogTab'
+import KlantTab from './drawer/KlantTab'
+import NotesTab from './drawer/NotesTab'
+import TasksTab from './drawer/TasksTab'
+import OpportunityChangelogPopover from './drawer/OpportunityChangelogPopover'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -30,14 +33,14 @@ const hdrGhost: CSSProperties = { ...hdrBtn, background: 'var(--bg)', color: 'va
 const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }
 
 /**
- * OpportunityDrawer — thin container (mirror VacancyDrawer/CandidateDrawer): wires
- * lookups + onUpdate and declares the header config + tab list. Stage/owner/customer
- * edit through the header pickers; the title edits inline; Won/Lost are quick actions
- * (the sales equivalent of the candidate "convert"). onUpdate(id, patch) uses UI keys
- * that the data hook maps to API keys.
+ * OpportunityDrawer — thin container mirroring the candidate drawer: a calm header
+ * (colour-coded phase BADGE next to the title, a changelog ICON, one owner + one
+ * phase picker — no wall of pickers), and config tabs (Details · Klant · Notities ·
+ * Taken). The customer lives in its own tab; record history is the changelog icon,
+ * not a tab. Outcome (Gewonnen/Verloren) is read from the phase, not a separate button.
  */
 export default function OpportunityDrawer({
-  opportunity: o, onClose, expanded, onToggleExpand, onUpdate, stages = [], users = [], customers = [],
+  opportunity: o, onClose, expanded, onToggleExpand, onUpdate, stages = [], users = [],
 }: OpportunityDrawerProps) {
   const { t } = useTranslation('opportunities')
   const { formatDate } = useDateFormat()
@@ -50,26 +53,20 @@ export default function OpportunityDrawer({
 
   if (!o) return null
 
-  // Owner picker — include the current owner so it shows even if not in `users`.
   const ownerOptions = [
     ...(users.some(u => u.id === o.ownerId) || !o.owner ? [] : [{ value: o.ownerId, label: o.owner }]),
     ...users.map(u => ({ value: u.id, label: u.name })),
   ]
-  const clientOptions = customers.map(c => ({ value: c.id, label: c.name }))
-  const stageOptions  = stages.map(s => ({ value: s.value, label: s.label }))
-
-  // Terminal-stage quick actions (Won/Lost) — driven by the lookup flags, never hardcoded.
-  const wonStage  = stages.find(s => s.isWon)
-  const lostStage = stages.find(s => s.isLost)
-  const isWon  = !!wonStage  && o.stageValue === wonStage.value
-  const isLost = !!lostStage && o.stageValue === lostStage.value
+  const stageOptions = stages.map(s => ({ value: s.value, label: s.label }))
 
   const startEdit = () => { setTitleDraft(o.title); setEditing(true) }
   const saveEdit  = () => { const v = titleDraft.trim(); if (v && v !== o.title) onUpdate?.(o.id, { title: v }); setEditing(false) }
 
   const tabs = [
-    { id: 'details',   label: t('drawer.tabs.details'),   render: () => <DetailsTab opportunity={o} onUpdate={onUpdate} /> },
-    { id: 'changelog', label: t('drawer.tabs.changelog'), render: () => <ChangelogTab opportunity={o} /> },
+    { id: 'details', label: t('drawer.tabs.details'), render: () => <DetailsTab opportunity={o} onUpdate={onUpdate} /> },
+    { id: 'klant',   label: t('drawer.tabs.klant'),   render: () => <KlantTab opportunity={o} /> },
+    { id: 'notes',   label: t('drawer.tabs.notes'),   render: () => <NotesTab opportunity={o} /> },
+    { id: 'tasks',   label: t('drawer.tabs.tasks'),   render: () => <TasksTab opportunity={o} /> },
   ]
 
   const renderTitle = () => editing ? (
@@ -79,40 +76,29 @@ export default function OpportunityDrawer({
         borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />
   ) : (
     <>
-      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{o.title}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{o.title}</div>
+        {/* Phase = colour-coded read-only badge (shows Gewonnen/Verloren at a glance). */}
+        {o.stage && (
+          <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 999,
+            background: o.stageColor + '1A', color: o.stageColor, border: `1px solid ${o.stageColor}55` }}>{o.stage}</span>
+        )}
+      </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{o.client || '—'}</div>
-      {o.expectedCloseAt && !isWon && !isLost && (
+      {o.expectedCloseAt && (
         <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{t('drawer.expectedCloseOn', { date: formatDate(o.expectedCloseAt) })}</div>
       )}
     </>
   )
 
-  const actions = (
+  // Header actions = just inline title edit (no Won/Lost buttons — outcome is the phase).
+  const actions = editing ? (
     <>
-      {/* Won/Lost quick actions — only when a terminal stage is configured + not already there. */}
-      {wonStage && !isWon && (
-        <button onClick={() => onUpdate?.(o.id, { stageValue: wonStage.value })} title={t('drawer.markWon')}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer',
-            border: '1px solid var(--color-success)', background: 'var(--color-success)', color: '#fff' }}>
-          <Trophy size={11} /> {t('drawer.markWon')}
-        </button>
-      )}
-      {lostStage && !isLost && (
-        <button onClick={() => onUpdate?.(o.id, { stageValue: lostStage.value })} title={t('drawer.markLost')}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer',
-            border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)' }}>
-          <Ban size={11} /> {t('drawer.markLost')}
-        </button>
-      )}
-      {editing ? (
-        <>
-          <button onClick={saveEdit} title={t('common:save')} style={hdrPrimary}><Save size={14} /></button>
-          <button onClick={() => setEditing(false)} title={t('common:cancel')} style={hdrGhost}><X size={14} /></button>
-        </>
-      ) : (
-        <button onClick={startEdit} title={t('common:edit')} style={hdrGhost}><Edit2 size={13} /></button>
-      )}
+      <button onClick={saveEdit} title={t('common:save')} style={hdrPrimary}><Save size={14} /></button>
+      <button onClick={() => setEditing(false)} title={t('common:cancel')} style={hdrGhost}><X size={14} /></button>
     </>
+  ) : (
+    <button onClick={startEdit} title={t('common:edit')} style={hdrGhost}><Edit2 size={13} /></button>
   )
 
   return (
@@ -126,19 +112,17 @@ export default function OpportunityDrawer({
         <EntityHeader
           label={t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
-          avatar={{ initials: o.initials, soft: true }}
+          avatar={{ initials: o.initials, soft: true, color: '#9CA3AF' }}
           renderTitle={renderTitle}
+          titleActions={<OpportunityChangelogPopover opportunity={o} />}
           actions={actions}
           meta={[
             { key: 'stage', label: t('drawer.stage'), value: o.stageValue,
               options: stageOptions, placeholder: t('drawer.selectStage'),
-              onChange: (val: string) => onUpdate?.(o.id, { stageValue: val }), menuWidth: 180, width: 170 },
+              onChange: (val: string) => onUpdate?.(o.id, { stageValue: val }), menuWidth: 190, width: 190 },
             { key: 'owner', label: t('drawer.owner'), value: o.ownerId,
               options: ownerOptions, placeholder: t('drawer.selectOwner'),
-              onChange: (val: string) => onUpdate?.(o.id, { ownerId: val }), menuWidth: 200, width: 180 },
-            { key: 'client', label: t('drawer.client'), value: o.clientId,
-              options: clientOptions, placeholder: t('drawer.selectClient'),
-              onChange: (val: string) => onUpdate?.(o.id, { clientId: val }), menuWidth: 220, width: 200 },
+              onChange: (val: string) => onUpdate?.(o.id, { ownerId: val }), menuWidth: 200, width: 190 },
           ]}
         />
       )}

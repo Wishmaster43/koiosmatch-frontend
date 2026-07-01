@@ -1,0 +1,73 @@
+{
+  "title": "Call lists",
+  "new": "Call list",
+  "empty": "No call lists yet.",
+  "loadError": "Failed to load call lists.",
+  "retry": "Retry",
+  "count_one": "{{count}} call list",
+  "count_other": "{{count}} call lists",
+  "col": {
+    "name": "Name",
+    "channel": "Channel",
+    "status": "Status",
+    "targets": "Targets",
+    "owner": "Owner",
+    "created": "Created"
+  },
+  "channel": {
+    "call": "Call",
+    "email": "Email",
+    "whatsapp": "WhatsApp"
+  },
+  "status": {
+    "draft": "Draft",
+    "active": "Active",
+    "done": "Done"
+  },
+  "view": {
+    "table": "Table",
+    "board": "Board",
+    "archived": "Archived"
+  },
+  "board": {
+    "empty": "Empty"
+  },
+  "archivedEmpty": "No archived call lists.",
+  "moveError": "Move failed.",
+  "insights": {
+    "status": "Status",
+    "channel": "Channel",
+    "clearFilter": "Clear filter"
+  },
+  "kpi": {
+    "total": "Total",
+    "totalSub": "all call lists",
+    "active": "Active",
+    "activeSub": "ongoing call lists",
+    "targets": "Targets",
+    "targetsSub": "total candidates"
+  },
+  "bulk": {
+    "selected": "{{count}} selected",
+    "actions": "Bulk actions",
+    "deselect": "Deselect",
+    "changeStatus": "Change status",
+    "searchStatus": "Search a status…",
+    "archive": "Archive",
+    "done": "{{count}} updated",
+    "mutateError": "Action failed. Please try again.",
+    "archiveError": "Archiving failed."
+  },
+  "create": {
+    "title": "New call list",
+    "name": "Name",
+    "namePlaceholder": "e.g. Call list available care workers",
+    "channel": "Channel",
+    "pool": "Source pool (optional)",
+    "poolNone": "None — fill later",
+    "poolHint": "Pick a talent pool to seed the call list with candidates right away.",
+    "submit": "Create call list",
+    "saving": "Creating…",
+    "error": "Creating failed. Please try again."
+  }
+}

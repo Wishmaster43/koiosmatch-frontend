@@ -13,6 +13,7 @@ import Sidebar from './Sidebar'
 import KoiosPanel from './KoiosPanel'
 import ReportFilterSidebar from '../reports/ReportFilterSidebar'
 import { renderPage, PAGE_TITLES } from './appPages'
+import { NavigationProvider } from '@/context/NavigationContext'
 import type { ReportFilterGroup } from '@/types/reports'
 
 // Sidebar is still JS (the other Claude owns it); accept its props loosely at this boundary.
@@ -218,7 +219,9 @@ export default function DashboardLayout() {
           {/* key on tenant id: switching bureau remounts the page so its data reloads */}
           <div key={activeTenant?.id ?? 'none'} className="flex-1 overflow-auto">
             <Suspense fallback={<PageLoader />}>
-              {canAccessPage(activePage, auth) ? renderPage(activePage, { navIntent, goTo }) : <NoAccessPage />}
+              <NavigationProvider goTo={goTo}>
+                {canAccessPage(activePage, auth) ? renderPage(activePage, { navIntent, goTo }) : <NoAccessPage />}
+              </NavigationProvider>
             </Suspense>
           </div>
 

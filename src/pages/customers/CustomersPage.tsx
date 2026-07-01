@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
+import { useOpenFromIntent } from '@/context/NavigationContext'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import { useUsers } from '@/lib/queries'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
@@ -32,7 +33,7 @@ const pickKey = (d: unknown): string | undefined => {
 }
 const toggleOneValue = (set: Dispatch<SetStateAction<string[]>>, value: string) => set(p => (p.length === 1 && p[0] === value) ? [] : [value])
 
-export default function CustomersPage() {
+export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('customers')
   const { registerFilters, unregisterFilters } = useRightPanel()
   const auth = useAuth()
@@ -88,6 +89,9 @@ export default function CustomersPage() {
   } = useCustomerRecord({ setCustomers, setTotal, users, t })
   const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags } =
     useCustomerBulkActions({ customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t })
+
+  // Open a customer drawer when arriving via a cross-entity link (intent).
+  useOpenFromIntent(intent, (id) => selectCustomer({ id } as Parameters<typeof selectCustomer>[0]))
 
   // ── Option lists (stats first, page-derived as fallback) ──
   const optsFrom = (values: string[]): Opt[] => {

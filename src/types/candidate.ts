@@ -75,6 +75,7 @@ export interface CandidateConsent {
 /** A linked match (read-only on the candidate; the contract lives in HelloFlex). */
 export interface CandidateMatch {
   id?: Id
+  vacancyId?: Id | null
   vacancyTitle: string
   vacancyUrl?: string | null
   client: string
@@ -106,8 +107,6 @@ export interface Candidate {
   statusReturnDate: string | null
   statusChangedAt: string | null
   blacklistReason: string | null
-  blacklistedBy: string | null
-  blacklistedAt: string | null
   availability: string | null
   owner: string
   ownerId: string | number | null
@@ -137,6 +136,8 @@ export interface Candidate {
   summary: string
   tags: string[]
   archived: boolean
+  // Inconsistency flag (§3B): at a requires_appointment stage but none planned.
+  missingAppointment: boolean
   branches: CandidateBranch[]
   pools: CandidatePool[]
   koiosAdvice: CandidateAdvice | null
@@ -164,7 +165,8 @@ export interface Candidate {
 /** A raw match item as the API nests it under candidate.matches. */
 export interface ApiCandidateMatch {
   vacancyTitle?: string
-  vacancy?: { title?: string; url?: string }
+  vacancy?: { id?: Id; title?: string; url?: string }
+  vacancy_id?: Id
   vacancy_title?: string
   vacancyUrl?: string | null
   vacancy_url?: string | null
@@ -259,6 +261,7 @@ export interface ApiCandidate {
   tags?: string[]
   deleted_at?: string | null
   archived?: boolean
+  missing_appointment?: boolean | null
   branches?: Array<CandidateBranch | string>
   pools?: Array<CandidatePool | string>
   koios_advice?: Loose | null

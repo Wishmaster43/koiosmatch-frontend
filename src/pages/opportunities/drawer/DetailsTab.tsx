@@ -89,14 +89,11 @@ export default function DetailsTab({ opportunity: o, onUpdate }: DetailsTabProps
     })
   }
 
+  // Customer hierarchy (klant/locatie/afdeling/contact) lives in the Klant tab now.
   const organisation = [
-    [t('details.stage'),      o.stage || '—'],
-    [t('details.client'),     o.client],
-    [t('details.location'),   o.location || '—'],
-    [t('details.department'), o.department || '—'],
-    [t('details.contact'),    o.contact || '—'],
-    [t('details.owner'),      o.owner || '—'],
-    [t('details.created'),    formatDate(o.date)],
+    [t('details.stage'),   o.stage || '—'],
+    [t('details.owner'),   o.owner || '—'],
+    [t('details.created'), formatDate(o.date)],
   ]
 
   return (

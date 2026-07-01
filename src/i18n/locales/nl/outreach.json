@@ -1,0 +1,73 @@
+{
+  "title": "Bellijsten",
+  "new": "Bellijst",
+  "empty": "Nog geen bellijsten.",
+  "loadError": "Bellijsten laden is mislukt.",
+  "retry": "Opnieuw",
+  "count_one": "{{count}} bellijst",
+  "count_other": "{{count}} bellijsten",
+  "col": {
+    "name": "Naam",
+    "channel": "Kanaal",
+    "status": "Status",
+    "targets": "Doelen",
+    "owner": "Eigenaar",
+    "created": "Aangemaakt"
+  },
+  "channel": {
+    "call": "Bellen",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp"
+  },
+  "status": {
+    "draft": "Concept",
+    "active": "Actief",
+    "done": "Afgerond"
+  },
+  "view": {
+    "table": "Tabel",
+    "board": "Board",
+    "archived": "Gearchiveerd"
+  },
+  "board": {
+    "empty": "Leeg"
+  },
+  "archivedEmpty": "Geen gearchiveerde bellijsten.",
+  "moveError": "Verplaatsen mislukt.",
+  "insights": {
+    "status": "Status",
+    "channel": "Kanaal",
+    "clearFilter": "Filter wissen"
+  },
+  "kpi": {
+    "total": "Totaal",
+    "totalSub": "alle bellijsten",
+    "active": "Actief",
+    "activeSub": "lopende bellijsten",
+    "targets": "Doelen",
+    "targetsSub": "totaal kandidaten"
+  },
+  "bulk": {
+    "selected": "{{count}} geselecteerd",
+    "actions": "Massa-acties",
+    "deselect": "Deselecteren",
+    "changeStatus": "Status wijzigen",
+    "searchStatus": "Zoek een status…",
+    "archive": "Archiveren",
+    "done": "{{count}} bijgewerkt",
+    "mutateError": "Actie mislukt. Probeer het opnieuw.",
+    "archiveError": "Archiveren mislukt."
+  },
+  "create": {
+    "title": "Nieuwe bellijst",
+    "name": "Naam",
+    "namePlaceholder": "Bijv. Bellijst beschikbare verzorgenden",
+    "channel": "Kanaal",
+    "pool": "Bron-pool (optioneel)",
+    "poolNone": "Geen — later vullen",
+    "poolHint": "Kies een talentenpool om de bellijst meteen met kandidaten te vullen.",
+    "submit": "Bellijst aanmaken",
+    "saving": "Aanmaken…",
+    "error": "Aanmaken is mislukt. Probeer het opnieuw."
+  }
+}

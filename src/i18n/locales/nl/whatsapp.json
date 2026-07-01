@@ -1,5 +1,7 @@
 {
   "tabs": { "overview": "Overzicht", "messages": "Berichten", "queue": "Wachtrij", "escalations": "Escalaties" },
+  "drill": { "noDetail": "Nog geen detailgegevens voor deze KPI — backend levert dit binnenkort." },
+  "overview": { "statusTitle": "Berichtstatus", "reasonsTitle": "Escalatieredenen" },
   "queue": {
     "loading": "Wachtrij laden…",
     "error": "Wachtrij laden is mislukt.",

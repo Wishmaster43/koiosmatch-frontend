@@ -27,6 +27,7 @@ export interface Workflow {
   name?: string
   trigger?: string
   status?: string
+  archived?: boolean          // soft-deleted; hidden unless the Archived view is on
   steps: WorkflowStep[]
   last_run?: WorkflowLastRun | null
   schedule?: unknown

@@ -8,7 +8,8 @@
   "overdue": "Overdue",
   "view": {
     "table": "List view",
-    "board": "Board view"
+    "board": "Board view",
+    "archived": "Archived"
   },
   "cols": {
     "task": "Task",

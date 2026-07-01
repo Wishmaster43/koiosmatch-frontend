@@ -41,6 +41,7 @@
     "vacancies": "Vacatures",
     "tasks": "Taken",
     "customers": "Klanten",
+    "opportunities": "Kansen",
     "candidate": "Kandidaat",
     "applications": "Sollicitaties",
     "shared": "Gedeeld",
@@ -138,7 +139,8 @@
     "candidate_phases": "Fase",
     "candidate_required_fields": "Verplichte velden",
     "functions": "Functies",
-    "customer_display": "Tabelweergave"
+    "customer_display": "Tabelweergave",
+    "opportunity_display": "Tabelweergave"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1326,6 +1328,16 @@
     "freeEntry": "Vrije invoer toestaan",
     "freeEntryHint": "Aan: recruiters kunnen een eigen functie typen (combobox). Uit: alleen kiezen uit de lijst (strikte dropdown).",
     "confirmFreeEntry": "Weet je het zeker? Vrije invoer laat recruiters functies typen die niet in de lijst staan — dit kan de datakwaliteit verlagen."
+  },
+  "opportunityDisplay": {
+    "title": "Tabelweergave",
+    "subtitle": "Toon de dealgrootte in euro's of in uren.",
+    "fields": {
+      "opportunity_value_in_hours": {
+        "label": "Waarde in uren tonen",
+        "description": "Aan = de Kansen-tabel en KPI's tonen uren i.p.v. euro's."
+      }
+    }
   },
   "customerDisplay": {
     "title": "Tabelweergave",

@@ -1,0 +1,73 @@
+{
+  "title": "Listas de llamadas",
+  "new": "Lista de llamadas",
+  "empty": "Aún no hay listas de llamadas.",
+  "loadError": "Error al cargar las listas de llamadas.",
+  "retry": "Reintentar",
+  "count_one": "{{count}} lista de llamadas",
+  "count_other": "{{count}} listas de llamadas",
+  "col": {
+    "name": "Nombre",
+    "channel": "Canal",
+    "status": "Estado",
+    "targets": "Objetivos",
+    "owner": "Responsable",
+    "created": "Creado"
+  },
+  "channel": {
+    "call": "Llamar",
+    "email": "Correo",
+    "whatsapp": "WhatsApp"
+  },
+  "status": {
+    "draft": "Borrador",
+    "active": "Activo",
+    "done": "Finalizado"
+  },
+  "view": {
+    "table": "Tabla",
+    "board": "Tablero",
+    "archived": "Archivado"
+  },
+  "board": {
+    "empty": "Vacío"
+  },
+  "archivedEmpty": "No hay listas de llamadas archivadas.",
+  "moveError": "Error al mover.",
+  "insights": {
+    "status": "Estado",
+    "channel": "Canal",
+    "clearFilter": "Borrar filtro"
+  },
+  "kpi": {
+    "total": "Total",
+    "totalSub": "todas las listas",
+    "active": "Activo",
+    "activeSub": "listas en curso",
+    "targets": "Objetivos",
+    "targetsSub": "total candidatos"
+  },
+  "bulk": {
+    "selected": "{{count}} seleccionado(s)",
+    "actions": "Acciones masivas",
+    "deselect": "Anular selección",
+    "changeStatus": "Cambiar estado",
+    "searchStatus": "Buscar un estado…",
+    "archive": "Archivar",
+    "done": "{{count}} actualizado(s)",
+    "mutateError": "La acción falló. Inténtalo de nuevo.",
+    "archiveError": "Error al archivar."
+  },
+  "create": {
+    "title": "Nueva lista de llamadas",
+    "name": "Nombre",
+    "namePlaceholder": "p. ej. Lista de llamadas cuidadores disponibles",
+    "channel": "Canal",
+    "pool": "Bolsa de origen (opcional)",
+    "poolNone": "Ninguna — rellenar más tarde",
+    "poolHint": "Elige una bolsa de talento para llenar la lista con candidatos de inmediato.",
+    "submit": "Crear lista",
+    "saving": "Creando…",
+    "error": "Error al crear. Inténtalo de nuevo."
+  }
+}

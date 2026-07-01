@@ -67,6 +67,7 @@ import candidateDisplay from './schemas/candidateDisplay'
 import customerDisplay from './schemas/customerDisplay'
 import taskDisplay from './schemas/taskDisplay'
 import applicationDisplay from './schemas/applicationDisplay'
+import opportunityDisplay from './schemas/opportunityDisplay'
 import DriverLicenseSettings from './sections/DriverLicenseSettings'
 
 export const NAV_GROUPS = [
@@ -138,6 +139,14 @@ export const NAV_GROUPS = [
       { id: 'department_statuses', icon: Building2, component: DepartmentStatusesSettings },
       { id: 'contact_statuses', icon: Users, component: ContactStatusesSettings },
       { id: 'customer_display', icon: Palette, schema: customerDisplay },
+    ],
+  },
+  {
+    // Opportunity (Kans) settings — display preferences (euro vs hours). The stage /
+    // service / agreement lookup editors move here in a later round.
+    key: 'opportunities', icon: Target,
+    items: [
+      { id: 'opportunity_display', icon: Palette, schema: opportunityDisplay },
     ],
   },
   {

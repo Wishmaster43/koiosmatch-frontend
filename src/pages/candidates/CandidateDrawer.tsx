@@ -87,16 +87,13 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
   const { createMatch, creating: creatingMatch } = useCreateMatch(c?.id ?? '')
   const { hasModule } = useAuth() as unknown as { hasModule: (m: string) => boolean }
-  // Planning-tab tijdelijk verborgen (2026-06-26) — niet verwijderd, alleen uit.
-  // Zet PLANNING_TAB_ENABLED weer op true om de tab (achter de module-gate) terug te tonen.
-  const PLANNING_TAB_ENABLED = false
   // Conditional tabs: Match only when the candidate has (had) a match or
   // application; Freelance (zzp) only when flagged ZZP; Planning behind its module.
   const hasMatchOrApplication = !!(c?.matches?.length || c?.applications?.length)
   // Freelance (ZZP) tab shows when the candidate holds the freelance/ZZP type.
   const isFreelancer = (c?.candidateTypes ?? []).some(v => ZZP_TYPE_SLUGS.includes(v))
   const tabs = TABS.filter(tab => {
-    if (tab.id === 'planning')       return PLANNING_TAB_ENABLED && hasModule('plan')
+    if (tab.id === 'planning')       return hasModule('plan')
     if (tab.id === 'work')           return hasMatchOrApplication
     if (tab.id === 'administration') return isFreelancer
     return true
@@ -165,13 +162,14 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   // deployable yet. So hide the Status picker in the entry (Lead) phase.
   const showStatus = !!currentPhase && !isEntryPhase
   // Human-readable status detail line — shows once the backend returns the audit
-  // fields (reason / "available again" date / blacklist by+at). Empty until then.
+  // fields (reason + the change-log date `statusChangedAt`). Empty until then.
   const statusInfoLine: string | null = (() => {
     const st = currentStatus
-    if (st === 'blacklist' && (c.blacklistReason || c.blacklistedBy || c.blacklistedAt)) {
+    // Blacklist = a status value; "who/when" comes from the status change-log
+    // (statusChangedAt), the reason from the lookup-validated blacklist_reason.
+    if (st === 'blacklist' && (c.blacklistReason || c.statusChangedAt)) {
       return [
-        c.blacklistedBy ? t('drawer.blacklistedBy', { who: c.blacklistedBy }) : t('drawer.blacklisted'),
-        c.blacklistedAt ? formatDate(c.blacklistedAt) : null,
+        c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(st).label, date: formatDate(c.statusChangedAt) }) : t('drawer.blacklisted'),
         c.blacklistReason,
       ].filter(Boolean).join(' · ')
     }

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import Avatar from '@/components/ui/Avatar'
+import EntityLink from '@/components/ui/EntityLink'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import type { VacancyDetail } from '@/types/vacancy'
 
@@ -63,8 +64,8 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
                 border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}>
                 <Avatar initials={a.candidateInitials} size={26} soft />
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {a.candidateName}
+                  <div style={{ fontSize: 13, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <EntityLink page="candidates" id={a.candidateId} title={a.candidateName}>{a.candidateName}</EntityLink>
                   </div>
                   {a.source && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.source}</div>}
                 </div>

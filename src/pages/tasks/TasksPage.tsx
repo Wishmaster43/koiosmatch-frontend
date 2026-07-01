@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Plus } from 'lucide-react'
+import { LayoutList, Kanban, Archive, Plus } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { isAbortError } from '@/lib/mocks'
@@ -66,6 +66,8 @@ function TasksPageInner() {
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState(false)
   const [view,     setView]     = useState('table')   // 'table' | 'board'
+  const [showArchived, setShowArchived] = useState(false)
+  const [archivedTasks, setArchivedTasks] = useState<Task[]>([])
   const [page,     setPage]     = useState(1)
   const [pageSize, setPageSize] = useState(() => user?.default_per_page ?? 50)
   const [selected, setSelected] = useState<TaskDetail | null>(null)
@@ -107,7 +109,17 @@ function TasksPageInner() {
   }, [])
 
   // All tasks decorated with their lookup labels/colours — the basis for KPIs/donuts/view.
-  const all = useMemo(() => tasks.map(decorate), [tasks, statuses, priorities, types]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Archived (soft-deleted) tasks, fetched lazily while the archived toggle is on.
+  useEffect(() => {
+    if (!showArchived) return
+    const ctrl = new AbortController()
+    api.get('/tasks', { params: { archived: 1 }, signal: ctrl.signal })
+      .then(res => setArchivedTasks(unwrapList<ApiTask>(res).rows.map(mapTask)))
+      .catch(err => { if (!isAbortError(err)) setArchivedTasks([]) })
+    return () => ctrl.abort()
+  }, [showArchived])
+
+  const all = useMemo(() => (showArchived ? archivedTasks : tasks).map(decorate), [tasks, archivedTasks, showArchived, statuses, priorities, types]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Donut data (status / priority / type), each with counts ──
   const donutBy = (list: TaskLookupItem[], keyOf: (x: Task) => string | number): Aggregate[] => list
@@ -150,7 +162,7 @@ function TasksPageInner() {
   }
 
   // Reset to the first page + clear the selection whenever a filter/KPI tile changes.
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter, showArchived])
 
   // The visible rows: status/priority/type/assignee filters + the active KPI tile.
   const filteredAll = useMemo(() => {
@@ -290,27 +302,37 @@ function TasksPageInner() {
         {/* Insights strip (donuts + KPIs) */}
         <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
-        {/* Toolbar — add button + view toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'flex-end',
+        {/* Toolbar — add on the LEFT, archived toggle + view toggle on the RIGHT (mirror Opportunities) */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8,
           padding: '8px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <button onClick={() => setAddOpen(true)}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13, fontWeight: 600,
               borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
             <Plus size={15} /> {t('add')}
           </button>
-          <div style={{ display: 'flex', gap: 4 }}>
-            <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
-              style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
-                background: view === 'table' ? 'var(--color-primary)' : 'var(--surface)',
-                color: view === 'table' ? '#fff' : 'var(--text)' }}>
-              <LayoutList size={16} />
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Archived (soft-deleted) toggle */}
+            <button onClick={() => setShowArchived(v => !v)} title={t('view.archived')}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, fontWeight: showArchived ? 600 : 500, borderRadius: 8, cursor: 'pointer',
+                border: `1px solid ${showArchived ? 'var(--color-primary)' : 'var(--border)'}`,
+                background: showArchived ? 'var(--color-primary-bg)' : 'var(--surface)',
+                color: showArchived ? 'var(--color-primary)' : 'var(--text)' }}>
+              <Archive size={14} /> {t('view.archived')}
             </button>
-            <button onClick={() => setView('board')} title={t('view.board')} aria-label={t('view.board')}
-              style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
-                background: view === 'board' ? 'var(--color-primary)' : 'var(--surface)',
-                color: view === 'board' ? '#fff' : 'var(--text)' }}>
-              <Kanban size={16} />
-            </button>
+            <div style={{ display: 'flex', gap: 4 }}>
+              <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
+                style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
+                  background: view === 'table' ? 'var(--color-primary)' : 'var(--surface)',
+                  color: view === 'table' ? '#fff' : 'var(--text)' }}>
+                <LayoutList size={16} />
+              </button>
+              <button onClick={() => setView('board')} title={t('view.board')} aria-label={t('view.board')}
+                style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
+                  background: view === 'board' ? 'var(--color-primary)' : 'var(--surface)',
+                  color: view === 'board' ? '#fff' : 'var(--text)' }}>
+                <Kanban size={16} />
+              </button>
+            </div>
           </div>
         </div>
 

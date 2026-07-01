@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ExternalLink } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError } from '@/lib/notify'
+import EntityLink from '@/components/ui/EntityLink'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { mapCandidate } from '@/pages/candidates/data/mapCandidate'
 import ProfilePanel from '@/pages/candidates/drawer/ProfilePanel'
@@ -90,6 +92,14 @@ export default function CandidateTab({ application: a }: { application: Applicat
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* Jump to the full candidate record (page + drawer). */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+        <EntityLink page="candidates" id={a.candidateId} title={t('applications:drawer.openCandidate')}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+            <ExternalLink size={13} /> {t('applications:drawer.openCandidate')}
+          </span>
+        </EntityLink>
+      </div>
       <div style={{ borderBottom: '1px solid var(--border)', marginBottom: 14 }}>
         <DrawerTabs tabs={tabs} active={tab} onChange={setTab} />
       </div>

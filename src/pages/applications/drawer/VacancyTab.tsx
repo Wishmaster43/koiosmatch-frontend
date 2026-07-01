@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ExternalLink } from 'lucide-react'
 import api from '@/lib/api'
+import EntityLink from '@/components/ui/EntityLink'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DetailsTab from '@/pages/vacancies/drawer/DetailsTab'
 import { mapVacancyDetail } from '@/pages/vacancies/data/mapVacancy'
@@ -38,9 +40,19 @@ export default function VacancyTab({ application: a }: { application: Applicatio
   if (state === 'empty' || !vac) return <div style={muted}>{t('vacancyDetail.empty')}</div>
 
   // Read-only reuse: DetailsTab needs the vacancy lookups it renders labels from.
+  // A link jumps to the full vacancy record (page + drawer) for edits.
   return (
-    <VacancyLookupsProvider>
-      <DetailsTab vacancy={vac} />
-    </VacancyLookupsProvider>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+            <ExternalLink size={13} /> {t('drawer.openVacancy')}
+          </span>
+        </EntityLink>
+      </div>
+      <VacancyLookupsProvider>
+        <DetailsTab vacancy={vac} />
+      </VacancyLookupsProvider>
+    </div>
   )
 }

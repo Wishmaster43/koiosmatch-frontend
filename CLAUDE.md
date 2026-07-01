@@ -384,6 +384,21 @@ entry at the top via a workflow; experience/education/certs sort newest-first.)
   duplicate.
 - Tailwind discipline: extract repeated class strings into a component or a
   shared constant; don't copy-paste 15-class strings across files.
+- **Soft-chip / toggle-button convention (one look on every entity).** Coloured chips,
+  status pills and quick-view toggles (Blacklist / Archived / status / phase / …) are
+  **always tinted in their own semantic colour, never a solid fill.** Background =
+  `color-mix(in srgb, <token> 8–16%, transparent)` (lower % inactive, higher active);
+  text **and** icon = the `<token>`; border = `color-mix(in srgb, <token> 28–50%,
+  transparent)`. **Inactive still carries its colour** (subtle tint — not grey), **active**
+  is a stronger tint **+ `fontWeight: 600`**. Use `color-mix` so it works for CSS-var
+  tokens, not just hex. Identical treatment across candidates · applications · vacancies ·
+  matches · opportunities · tasks · call-lists · customers — never a per-screen restyle.
+- **Typography consistency (one scale, everywhere).** Inter for UI, JetBrains Mono for
+  numbers/IDs. Weights: body/labels **400–500**, active/selected + section titles
+  **600–700**, never heavier. **Bold = emphasis or active state only** (not decoration).
+  **Italic** only for secondary/placeholder/empty-state text (e.g. "not registered yet") —
+  **never for data**. Colour only via tokens (`--text`, `--text-muted`, `--color-*`); no
+  ad-hoc hex, no per-screen font sizes/weights. Header/meta labels ~11px, body ~12–13px.
 
 ---
 

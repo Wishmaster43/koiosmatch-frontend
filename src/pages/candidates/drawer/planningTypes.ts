@@ -11,13 +11,6 @@ export interface FavLists { clients: string[]; locations: string[]; departments:
 // Open-shift filter bar state.
 export interface OpenFilters { shiftTypes: string[]; distance: number; max_level: number }
 
-// A shift as rendered in the availability calendar (hour-based).
-export interface AgendaShift {
-  date: string; client: string; function?: string; color: string
-  start: number; end: number; location?: string; address?: string
-  workedBefore: number; favorite?: boolean
-}
-
 // An open shift offered to the candidate.
 export interface OpenShift {
   id: Id; date: string; time: string; client: string; function: string

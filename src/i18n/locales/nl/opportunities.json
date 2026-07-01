@@ -6,7 +6,9 @@
   "page": {
     "add": "Kans toevoegen",
     "selected": "{{count}} geselecteerd",
-    "clearSelection": "Selectie wissen"
+    "clearSelection": "Selectie wissen",
+    "archived": "Gearchiveerd",
+    "archivedView": "Gearchiveerde kansen tonen"
   },
   "cols": {
     "title": "Kans",
@@ -14,17 +16,25 @@
     "stage": "Fase",
     "value": "Waarde",
     "owner": "Eigenaar",
-    "date": "Aangemaakt"
+    "date": "Aangemaakt",
+    "hoursValue": "{{count}} u"
   },
   "insights": {
     "stage": "Fase",
     "owner": "Eigenaar",
+    "client": "Klant",
     "clearFilter": "Filter wissen"
   },
   "kpi": {
     "total": "Kansen",
+    "open": "Open",
     "pipeline": "Pijplijnwaarde (€)",
-    "avg": "Gem. waarde (€)"
+    "pipelineHours": "Pijplijn (uren)",
+    "avg": "Gem. waarde (€)",
+    "avgHours": "Gem. uren",
+    "won": "Gewonnen",
+    "lost": "Verloren",
+    "winRate": "Winratio (%)"
   },
   "drawer": {
     "entityLabel": "Kans",
@@ -40,8 +50,23 @@
     "expectedCloseOn": "Verwacht te sluiten op {{date}}",
     "tabs": {
       "details": "Details",
+      "klant": "Klant",
+      "notes": "Notities",
+      "tasks": "Taken",
       "changelog": "Wijzigingen"
     }
+  },
+  "notes": {
+    "title": "Notities",
+    "new": "Nieuwe notitie",
+    "type": "Type",
+    "empty": "Nog geen notities.",
+    "placeholder": "Schrijf een notitie…"
+  },
+  "tasks": {
+    "loading": "Taken laden…",
+    "error": "Taken konden niet geladen worden.",
+    "empty": "Nog geen gekoppelde taken."
   },
   "details": {
     "stage": "Fase",

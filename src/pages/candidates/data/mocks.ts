@@ -2,16 +2,6 @@
  * mocks — dummy datasets for the candidate drawer's planning tab. Kept separate so
  * production component files stay clean; swap these for API calls later.
  */
-export const AGENDA_SHIFTS = [
-  { date: '2026-06-16', start: 7,  end: 15, client: 'Thuiszorg Noord',  function: 'Verzorgende IG', color: '#1B60A9', location: 'Amsterdam', workedBefore: 4, address: 'Amstelveenseweg 220' },
-  { date: '2026-06-18', start: 13, end: 17, client: 'Zorggroep West',   function: 'Helpende Plus',  color: '#8B5CF6', location: 'Haarlem',   workedBefore: 0, address: 'Kennemerplein 10'    },
-  { date: '2026-06-19', start: 8,  end: 12, client: 'Thuiszorg Noord',  function: 'Verzorgende IG', color: '#1B60A9', location: 'Amsterdam', workedBefore: 4, address: 'Amstelveenseweg 220' },
-  { date: '2026-06-20', start: 10, end: 13, client: 'Zorggroep Oost',   function: 'Helpende',       color: '#16A34A', location: 'Utrecht',   workedBefore: 1, address: 'Maliebaan 50'        },
-  { date: '2026-06-23', start: 7,  end: 15, client: 'Thuiszorg Noord',  function: 'Verzorgende IG', color: '#1B60A9', location: 'Amsterdam', workedBefore: 4, address: 'Amstelveenseweg 220' },
-  { date: '2026-06-25', start: 14, end: 18, client: 'Zorggroep West',   function: 'Helpende Plus',  color: '#8B5CF6', location: 'Haarlem',   workedBefore: 0, address: 'Kennemerplein 10'    },
-  { date: '2026-06-26', start: 7,  end: 11, client: 'Thuiszorg Noord',  function: 'Verzorgende IG', color: '#1B60A9', location: 'Amsterdam', workedBefore: 4, address: 'Amstelveenseweg 220' },
-]
-
 export const DUMMY_SHIFTS_LIST = [
   { date: 'ma 16 jun', time: '07:00–15:00', client: 'Thuiszorg Noord',  function: 'Verzorgende IG', location: 'Amsterdam', color: '#1B60A9', workedBefore: 4, favorite: true,  address: 'Amstelveenseweg 220', remarks: 'Vaste begeleider voor mevrouw De Vries.' },
   { date: 'wo 18 jun', time: '13:00–17:00', client: 'Zorggroep West',   function: 'Helpende Plus',  location: 'Haarlem',   color: '#8B5CF6', workedBefore: 0, favorite: false, address: 'Kennemerplein 10',    remarks: 'Eerste dienst bij deze client.'          },
@@ -20,12 +10,6 @@ export const DUMMY_SHIFTS_LIST = [
   { date: 'ma 23 jun', time: '07:00–15:00', client: 'Thuiszorg Noord',  function: 'Verzorgende IG', location: 'Amsterdam', color: '#1B60A9', workedBefore: 4, favorite: true,  address: 'Amstelveenseweg 220', remarks: 'Vaste begeleider voor mevrouw De Vries.' },
   { date: 'do 25 jun', time: '14:00–18:00', client: 'Zorggroep West',   function: 'Helpende Plus',  location: 'Haarlem',   color: '#8B5CF6', workedBefore: 0, favorite: false, address: 'Kennemerplein 10',    remarks: ''                                        },
   { date: 'vr 26 jun', time: '07:00–11:00', client: 'Thuiszorg Noord',  function: 'Verzorgende IG', location: 'Amsterdam', color: '#1B60A9', workedBefore: 4, favorite: true,  address: 'Amstelveenseweg 220', remarks: 'Ochtendrondes department 3.'               },
-]
-
-export const FAV_SEARCH_DATA = [
-  { type: 'clients',    label: 'Klant',    items: ['Thuiszorg Noord','Zorggroep West','Zorggroep Oost','Woonzorg Centrum','Revalidatiekliniek Zuid','Verpleeghuis De Linde','GGZ Amsterdam','Sophia Ziekenhuis','Thuiszorg Rotterdam','Zorgcentrum De Bron'] },
-  { type: 'locations',   label: 'Locatie',  items: ['Amsterdam','Amsterdam Noord','Amsterdam ZO','Amsterdam West','Haarlem','Utrecht','Rotterdam','Den Haag','Amstelveen','Zaandam'] },
-  { type: 'departments', label: 'Afdeling', items: ['Afdeling 1','Afdeling 2','Afdeling 3','Afdeling 4','Nachtdienst','Dementiezorg','Revalidatie','Dagzorg','Spoedeisende Hulp','Oncologie','Geriatrie'] },
 ]
 
 export const DUMMY_OPEN_SHIFTS = [

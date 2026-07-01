@@ -1,0 +1,73 @@
+{
+  "title": "Listes d'appels",
+  "new": "Liste d'appels",
+  "empty": "Aucune liste d'appels.",
+  "loadError": "Échec du chargement des listes d'appels.",
+  "retry": "Réessayer",
+  "count_one": "{{count}} liste d'appels",
+  "count_other": "{{count}} listes d'appels",
+  "col": {
+    "name": "Nom",
+    "channel": "Canal",
+    "status": "Statut",
+    "targets": "Cibles",
+    "owner": "Responsable",
+    "created": "Créé"
+  },
+  "channel": {
+    "call": "Appeler",
+    "email": "E-mail",
+    "whatsapp": "WhatsApp"
+  },
+  "status": {
+    "draft": "Brouillon",
+    "active": "Actif",
+    "done": "Terminé"
+  },
+  "view": {
+    "table": "Tableau",
+    "board": "Kanban",
+    "archived": "Archivé"
+  },
+  "board": {
+    "empty": "Vide"
+  },
+  "archivedEmpty": "Aucune liste d'appels archivée.",
+  "moveError": "Échec du déplacement.",
+  "insights": {
+    "status": "Statut",
+    "channel": "Canal",
+    "clearFilter": "Effacer le filtre"
+  },
+  "kpi": {
+    "total": "Total",
+    "totalSub": "toutes les listes",
+    "active": "Actif",
+    "activeSub": "listes en cours",
+    "targets": "Cibles",
+    "targetsSub": "total candidats"
+  },
+  "bulk": {
+    "selected": "{{count}} sélectionné(s)",
+    "actions": "Actions groupées",
+    "deselect": "Désélectionner",
+    "changeStatus": "Changer le statut",
+    "searchStatus": "Rechercher un statut…",
+    "archive": "Archiver",
+    "done": "{{count}} mis à jour",
+    "mutateError": "Échec de l'action. Veuillez réessayer.",
+    "archiveError": "Échec de l'archivage."
+  },
+  "create": {
+    "title": "Nouvelle liste d'appels",
+    "name": "Nom",
+    "namePlaceholder": "p. ex. Liste d'appels soignants disponibles",
+    "channel": "Canal",
+    "pool": "Vivier source (facultatif)",
+    "poolNone": "Aucun — remplir plus tard",
+    "poolHint": "Choisissez un vivier de talents pour remplir la liste avec des candidats immédiatement.",
+    "submit": "Créer la liste",
+    "saving": "Création…",
+    "error": "Échec de la création. Veuillez réessayer."
+  }
+}

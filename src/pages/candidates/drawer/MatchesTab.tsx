@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link2, ExternalLink } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import StatusPill from '@/components/ui/StatusPill'
+import EntityLink from '@/components/ui/EntityLink'
 import type { ReactNode } from 'react'
 import type { Candidate } from '@/types/candidate'
 
@@ -30,7 +31,9 @@ export default function MatchesTab({ c }: { c: Candidate }) {
         <div key={m.id ?? i} style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', marginBottom: 8 }}>
           {/* Header: vacancy + score + (subtle) backoffice-link icon when coupled */}
           <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ flex: 1, fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{m.vacancyTitle || m.client || '—'}</span>
+            <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
+              <EntityLink page="vacancies" id={m.vacancyId} title={m.vacancyTitle || m.client || '—'}>{m.vacancyTitle || m.client || '—'}</EntityLink>
+            </span>
             {m.helloflex_contract_guid ? (
               <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary)' }}><Link2 size={13} /></span>
             ) : null}

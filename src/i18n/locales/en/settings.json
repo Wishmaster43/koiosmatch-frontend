@@ -41,6 +41,7 @@
     "vacancies": "Vacancies",
     "tasks": "Tasks",
     "customers": "Customers",
+    "opportunities": "Opportunities",
     "candidate": "Candidate",
     "applications": "Applications",
     "shared": "Shared",
@@ -138,7 +139,8 @@
     "candidate_phases": "Phase",
     "candidate_required_fields": "Required fields",
     "functions": "Functions",
-    "customer_display": "Table display"
+    "customer_display": "Table display",
+    "opportunity_display": "Table display"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1326,6 +1328,16 @@
     "freeEntry": "Allow free entry",
     "freeEntryHint": "On: recruiters can type their own function (combobox). Off: pick from the list only (strict dropdown).",
     "confirmFreeEntry": "Are you sure? Free entry lets recruiters type functions that aren’t in the list — this can lower data quality."
+  },
+  "opportunityDisplay": {
+    "title": "Table display",
+    "subtitle": "Show the deal magnitude in euros or in hours.",
+    "fields": {
+      "opportunity_value_in_hours": {
+        "label": "Show value in hours",
+        "description": "On = the Kansen table and KPIs show hours instead of euros."
+      }
+    }
   },
   "customerDisplay": {
     "title": "Table display",

@@ -1,5 +1,7 @@
 {
   "tabs": { "overview": "Übersicht", "messages": "Nachrichten", "queue": "Warteschlange", "escalations": "Eskalationen" },
+  "drill": { "noDetail": "Noch keine Detaildaten für diese Kennzahl — folgt in Kürze vom Backend." },
+  "overview": { "statusTitle": "Nachrichtenstatus", "reasonsTitle": "Eskalationsgründe" },
   "queue": {
     "loading": "Warteschlange wird geladen…",
     "error": "Warteschlange konnte nicht geladen werden.",

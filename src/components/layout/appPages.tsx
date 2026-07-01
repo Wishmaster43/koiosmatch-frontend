@@ -41,6 +41,7 @@ const VacanciesPage          = lazy(() => import('@/pages/vacancies/VacanciesPag
 const MatchesPage            = lazy(() => import('@/pages/matches/MatchesPage'))
 const OpportunitiesPage      = lazy(() => import('@/pages/opportunities/OpportunitiesPage'))
 const TasksPage              = lazy(() => import('@/pages/tasks/TasksPage'))
+const OutreachPage           = lazy(() => import('@/pages/outreach/OutreachPage'))
 
 // Route key → breadcrumb label.
 export const PAGE_TITLES: Record<string, string> = {
@@ -57,6 +58,7 @@ export const PAGE_TITLES: Record<string, string> = {
   matches:                      'Matches',
   opportunities:                'Opportunities',
   tasks:                        'Tasks',
+  outreach:                     'Call lists',
   customers:                    'Customers',
 
   // Reports hub (analytical)
@@ -129,12 +131,13 @@ export function renderPage(activePage: string, { navIntent, goTo }: { navIntent?
 
     // ── ATS & CRM ─────────────────────────────────────────────────────────
     case 'candidates':             return <CandidatesPage intent={navIntent} />
-    case 'applications':           return <ApplicationsPage />
-    case 'vacancies':              return <VacanciesPage />
+    case 'applications':           return <ApplicationsPage intent={navIntent} />
+    case 'vacancies':              return <VacanciesPage intent={navIntent} />
     case 'matches':                return <MatchesPage />
     case 'opportunities':          return <OpportunitiesPage />
     case 'tasks':                  return <TasksPage />
-    case 'customers':              return <CustomersPage />
+    case 'outreach':               return <OutreachPage />
+    case 'customers':              return <CustomersPage intent={navIntent} />
     case 'planning':               return <PlanningPage />
 
     // ── Reports hub (analytical) ──────────────────────────────────────────

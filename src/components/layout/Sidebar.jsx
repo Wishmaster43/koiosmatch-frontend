@@ -9,12 +9,11 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/context/AuthContext'
 import { canAccessPage } from '@/lib/access'
-import { useWhatsAppQueue } from '@/pages/whatsapp/hooks/useWhatsAppQueue'
 import TenantSwitcher from './TenantSwitcher'
 import {
   LayoutDashboard, Users, Building2,
   MessageCircle, Settings, ChevronDown, Brain, BarChart3, TrendingUp, BrainCircuit,
-  FileText, Briefcase, Handshake, ListChecks, Target, PieChart,
+  FileText, Briefcase, Handshake, ListChecks, Target, PieChart, PhoneCall, CalendarDays,
 } from 'lucide-react'
 
 // Resolve a nav item's label from i18n by id (dots → underscores to stay flat).
@@ -46,6 +45,7 @@ const NAV_ITEMS = [
   { id: 'matches',        label: 'Matches',        icon: Handshake },
   { id: 'opportunities',  label: 'Kansen',         icon: Target },
   { id: 'tasks',          label: 'Taken',          icon: ListChecks },
+  { id: 'outreach',       label: 'Bellijsten',     icon: PhoneCall },
   { id: 'customers',      label: 'Klanten',        icon: Building2 },
   // Reports hub — gated on the "Rapporten Koios Match" add-on (access.ts). Children
   // map to ReportsPage tabs; labels resolve via common.nav.* (navLabel).
@@ -58,8 +58,7 @@ const NAV_ITEMS = [
       { id: 'reports.matches',    label: 'Matches' },
     ],
   },
-  // Planning tijdelijk verborgen (2026-06-26) — niet verwijderd, alleen uit. Terugzetten = deze regel + de CalendarDays-import herstellen.
-  // { id: 'planning',       label: 'Planning',       icon: CalendarDays },
+  { id: 'planning',       label: 'Planning',       icon: CalendarDays },
   { id: 'aiagents',       label: 'AI & Workflows', icon: Brain },
   { id: 'whatsapp',       label: 'WhatsApp',       icon: MessageCircle },
 ]
@@ -151,13 +150,6 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
             <span style={{ fontSize: 13, fontWeight: isActive ? 500 : 400, flex: 1, textAlign: 'left' }}>
               {item.label}
             </span>
-            {item.badge > 0 && (
-              <span style={{ fontSize: 10, fontWeight: 700, minWidth: 16, height: 16, padding: '0 5px', borderRadius: 99,
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-                background: 'var(--color-primary)', color: '#fff', flexShrink: 0 }}>
-                {item.badge}
-              </span>
-            )}
             {item.soon && (
               <span style={{
                 fontSize: 9, fontWeight: 600, letterSpacing: '0.04em', padding: '2px 5px',
@@ -199,9 +191,6 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
   const [openItems, setOpenItems] = useState([])
   const auth = useAuth()
   const koiosEntitled = canUseKoios(auth)
-  // WhatsApp-privé queue badge — count of items waiting/failed (gated to whatsapp users; fail-soft 0).
-  const canWhatsApp = canAccessPage('whatsapp', auth)
-  const { count: waQueue } = useWhatsAppQueue({ enabled: canWhatsApp, statsOnly: true })
 
   const toggleOpen = (id) =>
     setOpenItems(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])
@@ -212,7 +201,7 @@ export default function Sidebar({ expanded, activePage, setActivePage, koiosOpen
   const visibleNavItems = NAV_ITEMS
     .filter(item => canAccessPage(item.id, auth))
     .map(item => {
-      if (!item.children) return { ...item, label: navLabel(t, item.id), badge: item.id === 'whatsapp' ? waQueue : undefined }
+      if (!item.children) return { ...item, label: navLabel(t, item.id) }
       return { ...item, label: navLabel(t, item.id),
         children: item.children.filter(child => canAccessPage(child.id, auth)).map(c => ({ ...c, label: navLabel(t, c.id) })) }
     })

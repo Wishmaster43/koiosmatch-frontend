@@ -21,6 +21,7 @@ export interface Opportunity {
   ownerId: Id | null
   date: string
   expectedCloseAt: string | null
+  archived: boolean
   // Deal magnitude in hours (staffing) alongside the € value.
   hours: number | null
   hoursPeriod: string
@@ -70,6 +71,8 @@ export interface ApiOpportunity {
   created_at?: string
   expected_close_at?: string | null
   close_date?: string
+  archived?: boolean
+  deleted_at?: string | null
   hours?: number | string | null
   hours_period?: string
   start_date?: string | null

@@ -28,7 +28,7 @@ const PAGE_REQUIRED_MODULE: Record<string, ModuleKey> = {
   reports:      'reports',
 }
 
-const ATS_BASE   = ['dashboard', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'customers', 'locations', 'departments', 'contacts', 'details', 'users']
+const ATS_BASE   = ['dashboard', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'outreach', 'customers', 'locations', 'departments', 'contacts', 'details', 'users']
 const AI_PAGES   = ['aiagents', 'whatsapp', 'workflows', 'apps']
 const PLANNING   = ['planning']
 
@@ -80,7 +80,7 @@ export const PACKAGE_DEFAULT_PAGE: Record<string, string> = {
 // All pages that require an explicit package grant.
 const GATED_PAGES = [
   'dashboard',
-  'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks',
+  'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'outreach',
   'customers', 'locations', 'departments', 'contacts',
   'planning', 'details',
   'shiftmanager', 'helloflex',

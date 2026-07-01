@@ -15,6 +15,7 @@ interface OpportunitiesTableProps {
   error?: unknown
   onRowClick?: (row: Opportunity) => void
   selectedId?: Id | null
+  valueInHours?: boolean
   selectable?: boolean
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
@@ -28,7 +29,7 @@ interface OpportunitiesTableProps {
 const NEUTRAL_AVATAR = '#9CA3AF'
 
 // OpportunitiesTable — declares columns only; the shared DataTable owns sorting + states.
-export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
+export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, valueInHours = false, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
   const { t } = useTranslation('opportunities')
   const locale = useLocale()
   const { formatDate } = useDateFormat()
@@ -54,10 +55,16 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
         ? <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
             background: r.stageColor + '1A', color: r.stageColor, border: `1px solid ${r.stageColor}55` }}>{r.stage}</span>
         : <span style={{ color: 'var(--text-muted)' }}>—</span> },
-    { key: 'value',  header: t('cols.value'), align: 'right', sortable: true, sortValue: r => r.value ?? -1,
-      render: r => r.value == null
-        ? <span style={{ color: 'var(--text-muted)' }}>—</span>
-        : <span style={{ fontWeight: 600, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>{money.format(r.value)}</span> },
+    // Value column follows the tenant setting: euro amount or hours.
+    { key: 'value',  header: t('cols.value'), align: 'right', sortable: true,
+      sortValue: r => (valueInHours ? r.hours : r.value) ?? -1,
+      render: r => {
+        const v = valueInHours ? r.hours : r.value
+        if (v == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        return <span style={{ fontWeight: 600, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
+          {valueInHours ? t('cols.hoursValue', { count: v }) : money.format(v)}
+        </span>
+      } },
     { key: 'owner',  header: t('cols.owner'), sortable: true, sortValue: r => r.owner,
       render: r => r.owner
         ? (

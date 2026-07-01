@@ -6,7 +6,9 @@
   "page": {
     "add": "Add opportunity",
     "selected": "{{count}} selected",
-    "clearSelection": "Clear selection"
+    "clearSelection": "Clear selection",
+    "archived": "Archived",
+    "archivedView": "Show archived opportunities"
   },
   "cols": {
     "title": "Opportunity",
@@ -14,17 +16,25 @@
     "stage": "Stage",
     "value": "Value",
     "owner": "Owner",
-    "date": "Created"
+    "date": "Created",
+    "hoursValue": "{{count}} h"
   },
   "insights": {
     "stage": "Stage",
     "owner": "Owner",
+    "client": "Client",
     "clearFilter": "Clear filter"
   },
   "kpi": {
     "total": "Opportunities",
+    "open": "Open",
     "pipeline": "Pipeline value (€)",
-    "avg": "Avg. value (€)"
+    "pipelineHours": "Pipeline (hours)",
+    "avg": "Avg. value (€)",
+    "avgHours": "Avg. hours",
+    "won": "Won",
+    "lost": "Lost",
+    "winRate": "Win rate (%)"
   },
   "drawer": {
     "entityLabel": "Opportunity",
@@ -40,8 +50,23 @@
     "expectedCloseOn": "Expected to close on {{date}}",
     "tabs": {
       "details": "Details",
+      "klant": "Client",
+      "notes": "Notes",
+      "tasks": "Tasks",
       "changelog": "Changelog"
     }
+  },
+  "notes": {
+    "title": "Notes",
+    "new": "New note",
+    "type": "Type",
+    "empty": "No notes yet.",
+    "placeholder": "Write a note…"
+  },
+  "tasks": {
+    "loading": "Loading tasks…",
+    "error": "Tasks could not be loaded.",
+    "empty": "No linked tasks yet."
   },
   "details": {
     "stage": "Stage",

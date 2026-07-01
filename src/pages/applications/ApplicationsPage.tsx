@@ -9,6 +9,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
+import { useOpenFromIntent } from '@/context/NavigationContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import ApplicationsTable from './ApplicationsTable'
@@ -29,6 +30,8 @@ interface AppStats { by_phase?: Array<{ phase_key?: string; key?: string; value?
 interface Aggregate { name: string; key: string; color?: string; value: number }
 
 const BUCKETS = ['active', 'matched', 'rejected']
+// Sentinel filter key for rows without an owner (owner_id is nullable).
+const OWNER_NONE = '__none'
 
 // Donut click → set exactly one filter value (or clear when clicking it again).
 const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
@@ -39,7 +42,7 @@ const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
-export default function ApplicationsPage() {
+export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
   const user = auth?.user as { default_per_page?: number } | null | undefined
@@ -118,10 +121,16 @@ export default function ApplicationsPage() {
     .filter(d => d.value > 0)
   , [phases, applications, stats]) // eslint-disable-line react-hooks/exhaustive-deps
   const ownerData = useMemo<Aggregate[]>(() => {
+    // owner_id is legitimately nullable (imports, API-created, pre-assignment):
+    // unowned rows form an explicit "No owner" slice instead of being dropped.
     const m: Record<string, Aggregate> = {}
-    applications.forEach(a => { const n = a.owner?.name; if (n) (m[n] ??= { name: n, key: n, color: a.owner?.color ?? undefined, value: 0 }).value++ })
+    applications.forEach(a => {
+      const n = a.owner?.name
+      const key = n || OWNER_NONE
+      ;(m[key] ??= { name: n || t('insights.noOwner'), key, color: n ? (a.owner?.color ?? undefined) : '#9CA3AF', value: 0 }).value++
+    })
     return Object.values(m)
-  }, [applications])
+  }, [applications, t])
   const sourceData = useMemo<Aggregate[]>(() => {
     const m: Record<string, Aggregate> = {}
     applications.forEach(a => { const s = a.source; if (s) (m[s] ??= { name: s, key: s, value: 0 }).value++ })
@@ -160,7 +169,7 @@ export default function ApplicationsPage() {
       if (a.archived) return false
       if (a.bucket !== bucket) return false
       if (selectedPhase.length  && !selectedPhase.includes(a.phaseKey))         return false
-      if (selectedOwner.length  && !selectedOwner.includes(a.owner?.name))      return false
+      if (selectedOwner.length  && !selectedOwner.includes(a.owner?.name || OWNER_NONE)) return false
       if (selectedSource.length && !selectedSource.includes(a.source))          return false
       if (selectedVac.length    && !selectedVac.includes(String(a.vacancyId)))  return false
       return true
@@ -183,6 +192,9 @@ export default function ApplicationsPage() {
       .then(r => { if (selectedIdRef.current === a.id) setSelected(decorate(mapApplicationDetail(r.data?.data ?? r.data))) })
       .catch(() => {})
   }
+
+  // Open an application drawer when arriving via a cross-entity link (intent).
+  useOpenFromIntent(intent, (id) => selectApplication({ id } as Application))
 
   // Kanban move: set the new phase + bucket; label/colour re-resolve from the lookup.
   const handleMove = (id: Id, phaseKey: string) => {
@@ -316,23 +328,26 @@ export default function ApplicationsPage() {
             <Plus size={14} /> {t('add.button')}
           </button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {BUCKETS.map(b => (
-            <button key={b} onClick={() => setBucket(b)} disabled={showArchived} style={{ padding: '5px 14px', fontSize: 13,
-              fontWeight: bucket === b ? 600 : 400, borderRadius: 7, cursor: showArchived ? 'default' : 'pointer',
-              opacity: showArchived ? 0.4 : 1,
-              background: bucket === b && !showArchived ? 'var(--color-primary)' : 'transparent',
-              color: bucket === b && !showArchived ? '#fff' : 'var(--text)',
-              border: bucket === b && !showArchived ? 'none' : '1px solid var(--border)' }}>
+          {/* Bucket tabs — soft-tinted active (§4: never a solid fill). */}
+          {BUCKETS.map(b => {
+            const on = bucket === b && !showArchived
+            return (
+            <button key={b} onClick={() => { setShowArchived(false); setBucket(b) }} style={{ padding: '5px 14px', fontSize: 13,
+              fontWeight: on ? 600 : 400, borderRadius: 7, cursor: 'pointer',
+              background: on ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent',
+              color: on ? 'var(--color-primary)' : 'var(--text)',
+              border: `1px solid ${on ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}` }}>
               {t(`buckets.${b}`)}
             </button>
-          ))}
-          {/* Archived (detached) view toggle — shows soft-deleted applications + restore */}
+            )
+          })}
+          {/* Archived (detached) view toggle — soft-tinted active; shows soft-deleted + restore. */}
           <button onClick={() => setShowArchived(v => !v)} title={t('archived.toggle')}
             style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 13,
               fontWeight: showArchived ? 600 : 400, borderRadius: 7, cursor: 'pointer',
-              background: showArchived ? 'var(--color-primary)' : 'transparent',
-              color: showArchived ? '#fff' : 'var(--text-muted)',
-              border: showArchived ? 'none' : '1px solid var(--border)' }}>
+              color: showArchived ? 'var(--color-primary)' : 'var(--text-muted)',
+              background: showArchived ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent',
+              border: `1px solid ${showArchived ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}` }}>
             <Archive size={13} /> {t('archived.toggle')}
           </button>
           <div style={{ display: 'flex', gap: 4 }}>

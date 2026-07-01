@@ -1,5 +1,7 @@
 {
   "tabs": { "overview": "Aperçu", "messages": "Messages", "queue": "File d'attente", "escalations": "Escalades" },
+  "drill": { "noDetail": "Pas encore de données détaillées pour ce KPI — le backend les fournira bientôt." },
+  "overview": { "statusTitle": "Statut des messages", "reasonsTitle": "Motifs d'escalade" },
   "queue": {
     "loading": "Chargement de la file…",
     "error": "Impossible de charger la file.",

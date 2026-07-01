@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import AvailabilityCalendar from './AvailabilityCalendar'
+import AvailabilityEditor from './AvailabilityEditor'
 import PlanningTab from './PlanningTab'
 import PlanningScheduling from './PlanningScheduling'
 import PlanningOpenShifts from './PlanningOpenShifts'
 import PlanningFavorites from './PlanningFavorites'
+import { useCandidatePlanningPreferences, usePlanningPreferenceTargets, namesByType } from '../hooks/useCandidatePlanning'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
-import type { FavLists, OpenFilters, RosterShift, ScheduleFavorites } from './planningTypes'
+import type { OpenFilters, RosterShift, ScheduleFavorites } from './planningTypes'
 
 /** Planning panel — thin container: owns all (dummy) planning state and routes
  * each sub-tab (availability / scheduling / open shifts / roles & pools /
@@ -20,10 +21,13 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
   const [scheduledIds,      setScheduledIds]      = useState(() => new Set<Id>())
   const [unscheduledIdx,    setUnscheduledIdx]    = useState(() => new Set<number>())
   const [openFilters,       setOpenFilters]       = useState<OpenFilters>({ shiftTypes: ['Dag', 'Avond'], distance: 35, max_level: 5 })
-  const [favorites,         setFavorites]         = useState<FavLists>({ clients: ['Thuiszorg Noord'], locations: ['Amsterdam'], departments: [] })
-  const [blacklist,         setBlacklist]         = useState<FavLists>({ clients: [], locations: [], departments: [] })
-  const [favAddMode,        setFavAddMode]        = useState<string | null>(null)
-  const [favAddInput,       setFavAddInput]       = useState('')
+
+  // Real planning preferences (favourite + blacklist) for this candidate. The open-shifts
+  // tab only needs the grouped NAME lists to dim/flag rows, so derive those via namesByType.
+  const prefs = useCandidatePlanningPreferences(c.id)
+  const { groups: prefTargets } = usePlanningPreferenceTargets()
+  const favoriteNames  = namesByType(prefs.favorites)
+  const blacklistNames = namesByType(prefs.blacklist)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
@@ -47,7 +51,7 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
       </div>
 
       {/* Each sub-tab routes to its own component; state stays here. */}
-      {planningSubTab === 'availability' && <AvailabilityCalendar />}
+      {planningSubTab === 'availability' && <AvailabilityEditor candidateId={c.id} />}
 
       {planningSubTab === 'scheduling' && (
         <PlanningScheduling c={c}
@@ -61,7 +65,7 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
         <PlanningOpenShifts
           openFilters={openFilters} setOpenFilters={setOpenFilters}
           scheduledIds={scheduledIds} setScheduledIds={setScheduledIds}
-          favorites={favorites} blacklist={blacklist} />
+          favorites={favoriteNames} blacklist={blacklistNames} />
       )}
 
       {planningSubTab === 'roles' && (
@@ -72,10 +76,9 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
 
       {planningSubTab === 'favorites' && (
         <PlanningFavorites
-          favorites={favorites} setFavorites={setFavorites}
-          blacklist={blacklist} setBlacklist={setBlacklist}
-          favAddMode={favAddMode} setFavAddMode={setFavAddMode}
-          favAddInput={favAddInput} setFavAddInput={setFavAddInput} />
+          favorites={prefs.favorites} blacklist={prefs.blacklist}
+          targets={prefTargets} loading={prefs.loading}
+          onAdd={prefs.add} onRemove={prefs.remove} />
       )}
     </div>
   )

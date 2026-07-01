@@ -1,5 +1,7 @@
 {
   "tabs": { "overview": "Resumen", "messages": "Mensajes", "queue": "Cola", "escalations": "Escalaciones" },
+  "drill": { "noDetail": "Aún no hay datos de detalle para este KPI — el backend los proporcionará pronto." },
+  "overview": { "statusTitle": "Estado de mensajes", "reasonsTitle": "Motivos de escalación" },
   "queue": {
     "loading": "Cargando la cola…",
     "error": "No se pudo cargar la cola.",

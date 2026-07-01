@@ -61,6 +61,7 @@
     "phase": "Fase",
     "owner": "Recruiter",
     "source": "Bron",
+    "noOwner": "Geen eigenaar",
     "clearFilter": "Filter wissen"
   },
   "drawer": {
@@ -82,7 +83,9 @@
     "task": "Taak",
     "details": "Details",
     "vacancy": "Vacature",
-    "client": "Klant"
+    "client": "Klant",
+    "openVacancy": "Open vacature",
+    "openCandidate": "Open kandidaat"
   },
   "matchScore": {
     "title": "Match score",
