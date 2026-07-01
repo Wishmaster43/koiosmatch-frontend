@@ -5,9 +5,8 @@
  * fetched from `rowsEndpoint`, degrades to an empty list), and a Koios AI advice
  * block. Uses the shared RightDrawer shell so drawer chrome isn't re-implemented.
  */
-import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import { useReportDrill } from './useReportDrill'
 import RightDrawer from '@/components/ui/RightDrawer'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 
@@ -35,34 +34,8 @@ const rowSub   = (r: DrillRow) => {
 
 export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec | null; onClose: () => void }) {
   const { t } = useTranslation('analytics')
-  const [rows,   setRows]   = useState<DrillRow[]>([])
-  const [rowsLoading, setRowsLoading] = useState(false)
-  const [advice, setAdvice] = useState<string | null>(null)
-  const [adviceLoading, setAdviceLoading] = useState(false)
-
-  // Load the underlying records + Koios advice when a drill opens. Both degrade
-  // gracefully: a missing endpoint just leaves an empty list / no advice.
-  useEffect(() => {
-    if (!drill) return
-    const ctrl = new AbortController()
-
-    setRows([]); setAdvice(null)
-    if (drill.rowsEndpoint) {
-      setRowsLoading(true)
-      api.get(drill.rowsEndpoint, { params: drill.rowsParams, signal: ctrl.signal })
-        .then(r => setRows(r.data?.data ?? r.data ?? []))
-        .catch(() => {})
-        .finally(() => setRowsLoading(false))
-    }
-    if (drill.adviceEndpoint) {
-      setAdviceLoading(true)
-      api.get(drill.adviceEndpoint, { params: drill.adviceParams, signal: ctrl.signal })
-        .then(r => setAdvice(r.data?.advice ?? r.data?.data?.advice ?? (typeof r.data === 'string' ? r.data : null)))
-        .catch(() => {})
-        .finally(() => setAdviceLoading(false))
-    }
-    return () => ctrl.abort()
-  }, [drill])
+  // Data layer: the underlying records + Koios advice for the open drill (§3).
+  const { rows, rowsLoading, advice, adviceLoading } = useReportDrill(drill)
 
   if (!drill) return null
 

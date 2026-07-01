@@ -9,10 +9,8 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { useRightPanel }      from '@/context/RightPanelContext'
-import { useAuth }            from '@/context/AuthContext'
-import api                    from '@/lib/api'
 import PaginationBar          from '../ui/PaginationBar'
-import { useDefaultPageSize } from '@/lib/usePageSize'
+import { usePersistedPageSize } from '@/hooks/usePersistedPageSize'
 import { useReportList }      from './useReportList'
 import type { MessageRow, ReportFilterGroup, SortState } from '@/types/reports'
 import { ChannelBadge, StatusBadge, SortIcon } from './messages/messageParts'
@@ -45,10 +43,8 @@ export default function MessagesTable() {
   const [selectedWorkflows, setSelectedWorkflows] = useState<Array<string | number>>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
-  const defaultPageSize = useDefaultPageSize()
-  const { refreshUser } = useAuth() ?? {}
-  const [page,     setPage]     = useState(1)
-  const [pageSize, setPageSize] = useState(defaultPageSize)
+  const [page, setPage] = useState(1)
+  const { pageSize, handlePageSizeChange } = usePersistedPageSize()
 
   const channelOptions  = useMemo(() => [...new Set(rows.map(r => r.channel).filter((x): x is string => Boolean(x)))].sort(), [rows])
   const statusOptions   = useMemo(() => [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
@@ -89,11 +85,6 @@ export default function MessagesTable() {
   useEffect(() => setPage(1), [filtered.length, pageSize])
   const paged      = useMemo(() => sorted.slice((page-1)*pageSize, page*pageSize), [sorted, page, pageSize])
   const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
-
-  const handlePageSizeChange = async (n: number) => {
-    setPageSize(n)
-    try { await api.put('/auth/me', { default_per_page: n }); await refreshUser?.() } catch { /* noop */ }
-  }
 
   const filterGroups = useMemo(() => {
     const groups: ReportFilterGroup[] = []
