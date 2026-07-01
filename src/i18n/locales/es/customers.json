@@ -5,7 +5,8 @@
     "searchPlaceholder": "Buscar cliente, n.º deudor, gestor…",
     "empty": "No se encontraron clientes.",
     "loading": "Cargando…",
-    "loadError": "No se pudieron cargar los clientes."
+    "loadError": "No se pudieron cargar los clientes.",
+    "archivedView": "Archivados"
   },
   "cols": {
     "name": "Nombre",

@@ -86,6 +86,7 @@ export interface Customer {
   showInVacancies: boolean
   excludeFromSourcing: boolean
   tags: unknown[]
+  archived: boolean
   locations: Location[]
   departments: Department[]
   contacts: Contact[]

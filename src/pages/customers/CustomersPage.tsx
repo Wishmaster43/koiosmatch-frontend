@@ -45,6 +45,8 @@ export default function CustomersPage() {
   // TODO C-33: use user.default_per_page once the backend accepts per_page > 100 on this endpoint.
   const [pageSize,  setPageSize]  = useState(50)
   const [addOpen,   setAddOpen]   = useState(false)
+  // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
+  const [showArchived, setShowArchived] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   const [actionMsg, setActionMsg] = useState<{ type: string; text: string } | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -64,8 +66,9 @@ export default function CustomersPage() {
     if (selectedOwner.length)    p.owner_id = selectedOwner
     if (selectedCity.length)     p.city     = selectedCity
     if (selectedIndustry.length) p.industry = selectedIndustry
+    if (showArchived)            p.include_archived = 1
     return p
-  }, [globalSearch, selectedStatus, selectedOwner, selectedCity, selectedIndustry])
+  }, [globalSearch, selectedStatus, selectedOwner, selectedCity, selectedIndustry, showArchived])
   const filterKey = JSON.stringify(filterParams)
 
   useEffect(() => { setPage(1) }, [filterKey])
@@ -182,10 +185,20 @@ export default function CustomersPage() {
                 canArchive={hasPermission('customers.delete')}
                 users={users} statuses={statuses} selectedTags={selectedTags} />
             ) : (
-              <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
-                background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-                + {t('page.add')}
-              </button>
+              <>
+                {/* Add on the left (like Applications/Candidates) */}
+                <button onClick={() => setAddOpen(true)} style={{ padding: '7px 14px', fontSize: 12, fontWeight: 500,
+                  background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+                  + {t('page.add')}
+                </button>
+                {/* Archived (soft-deleted) quick-view on the right */}
+                <button onClick={() => setShowArchived(v => !v)} title={t('page.archivedView')}
+                  style={{ marginLeft: 'auto', padding: '6px 12px', fontSize: 12, fontWeight: showArchived ? 600 : 400,
+                    borderRadius: 8, cursor: 'pointer', background: showArchived ? 'var(--color-primary)' : 'transparent',
+                    color: showArchived ? '#fff' : 'var(--text-muted)', border: showArchived ? 'none' : '1px solid var(--border)' }}>
+                  {t('page.archivedView')}
+                </button>
+              </>
             )}
           </div>
 
@@ -193,7 +206,7 @@ export default function CustomersPage() {
             {error && (
               <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
             )}
-            <CustomersTable rows={customers} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
+            <CustomersTable rows={customers.filter(c => (showArchived ? c.archived : !c.archived))} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
               statusMeta={statusMeta} selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
               stickyHeader scrollParentRef={tableScrollRef} />
           </div>

@@ -5,7 +5,8 @@
     "searchPlaceholder": "Search customer, debtor no., account manager…",
     "empty": "No customers found.",
     "loading": "Loading…",
-    "loadError": "Failed to load customers."
+    "loadError": "Failed to load customers.",
+    "archivedView": "Archived"
   },
   "cols": {
     "name": "Name",

@@ -5,7 +5,8 @@
     "searchPlaceholder": "Kunde, Debitorennr., Account-Manager suchen…",
     "empty": "Keine Kunden gefunden.",
     "loading": "Lädt…",
-    "loadError": "Kunden konnten nicht geladen werden."
+    "loadError": "Kunden konnten nicht geladen werden.",
+    "archivedView": "Archiviert"
   },
   "cols": {
     "name": "Name",

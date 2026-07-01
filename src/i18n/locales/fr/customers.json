@@ -5,7 +5,8 @@
     "searchPlaceholder": "Rechercher client, n° débiteur, gestionnaire…",
     "empty": "Aucun client trouvé.",
     "loading": "Chargement…",
-    "loadError": "Échec du chargement des clients."
+    "loadError": "Échec du chargement des clients.",
+    "archivedView": "Archivés"
   },
   "cols": {
     "name": "Nom",

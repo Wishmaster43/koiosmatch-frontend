@@ -107,6 +107,9 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     showInVacancies: Boolean(c.show_in_my_vacancies),
     excludeFromSourcing: Boolean(c.exclude_from_sourcing),
     tags: c.tags ?? [],
+    // Archived = soft-deleted (deleted_at). Off by default in the list; the
+    // "Gearchiveerd" view opts in via ?include_archived=1.
+    archived: !!(c.deleted_at ?? c.archived),
     locations,
     departments,
     contacts,

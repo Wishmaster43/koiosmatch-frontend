@@ -5,7 +5,8 @@
     "searchPlaceholder": "Zoek klant, debiteurnr, accountmanager…",
     "empty": "Geen klanten gevonden.",
     "loading": "Laden…",
-    "loadError": "Klanten laden is mislukt."
+    "loadError": "Klanten laden is mislukt.",
+    "archivedView": "Gearchiveerd"
   },
   "cols": {
     "name": "Naam",
