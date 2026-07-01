@@ -134,5 +134,9 @@
   "send": "Send",
   "expand": "Expand",
   "collapse": "Collapse",
-  "remove": "Remove"
+  "remove": "Remove",
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No notifications"
+  }
 }

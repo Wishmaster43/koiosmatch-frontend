@@ -134,5 +134,9 @@
   "send": "Senden",
   "expand": "Vergrößern",
   "collapse": "Verkleinern",
-  "remove": "Entfernen"
+  "remove": "Entfernen",
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "empty": "Keine Benachrichtigungen"
+  }
 }

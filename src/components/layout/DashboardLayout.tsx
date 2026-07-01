@@ -15,6 +15,7 @@ import ReportFilterSidebar from '../reports/ReportFilterSidebar'
 import { renderPage, PAGE_TITLES } from './appPages'
 import { NavigationProvider } from '@/context/NavigationContext'
 import DashboardSwitcher from '@/pages/dashboard/DashboardSwitcher'
+import NotificationBell from '@/components/layout/NotificationBell'
 import { DASHBOARD_TYPES, canSwitchViews } from '@/pages/dashboard/templates'
 import type { DashboardType } from '@/pages/dashboard/templates'
 import type { ReportFilterGroup } from '@/types/reports'
@@ -159,6 +160,8 @@ export default function DashboardLayout() {
             {activePage === 'dashboard' && (
               <DashboardSwitcher value={dashView} options={dashAllowed} onChange={setDashView} />
             )}
+            {/* Notifications bell — backend-driven, graceful until the feed exists */}
+            <NotificationBell />
             {/* Avatar button — navigates to profile page */}
             {(() => {
               const initials = (

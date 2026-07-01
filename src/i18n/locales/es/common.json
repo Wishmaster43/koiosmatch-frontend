@@ -134,5 +134,9 @@
   "send": "Enviar",
   "expand": "Ampliar",
   "collapse": "Contraer",
-  "remove": "Quitar"
+  "remove": "Quitar",
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Sin notificaciones"
+  }
 }
