@@ -47,7 +47,10 @@
     "series": {
       "candidates": "Candidates",
       "applications": "Applications",
-      "matches": "Matches"
+      "matches": "Matches",
+      "candidatesOut": "Outflow",
+      "applicationsRejected": "Rejected",
+      "matchesEnded": "Ended"
     },
     "funnelConversion": "Funnel conversion",
     "noData": "No data"

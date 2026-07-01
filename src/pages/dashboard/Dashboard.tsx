@@ -203,6 +203,11 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     add(ts.candidates_in, 'kandidaten')
     add(ts.applications,  'sollicitaties')
     add(ts.matches,       'matches')
+    // Outflow (backend charts.timeseries.out.* — confirmed shape). Graceful: renders only once delivered.
+    const out = (ts as { out?: Record<string, TimeseriesPoint[]> }).out ?? {}
+    add(out.candidates_out,        'uitKandidaten')
+    add(out.applications_rejected, 'uitAfgewezen')
+    add(out.matches_ended,         'uitBeeindigd')
     return [...byName.values()]
   }, [dash])
   const trendSeries = useMemo(() => {
@@ -212,6 +217,9 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
       { key: 'kandidaten',    label: t('chart.series.candidates'),   color: 'var(--color-primary)' },
       { key: 'sollicitaties', label: t('chart.series.applications'), color: 'var(--color-secondary)' },
       { key: 'matches',       label: t('chart.series.matches'),      color: 'var(--color-accent)' },
+      { key: 'uitKandidaten', label: t('chart.series.candidatesOut'),       color: 'var(--color-danger)' },
+      { key: 'uitAfgewezen',  label: t('chart.series.applicationsRejected'), color: 'var(--color-warning)' },
+      { key: 'uitBeeindigd',  label: t('chart.series.matchesEnded'),         color: '#9CA3AF' },
     ].filter(s => present.has(s.key))
   }, [trendData, t])
 

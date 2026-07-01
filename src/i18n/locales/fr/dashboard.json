@@ -47,7 +47,10 @@
     "series": {
       "candidates": "Candidats",
       "applications": "Candidatures",
-      "matches": "Matchs"
+      "matches": "Matchs",
+      "candidatesOut": "Sorties",
+      "applicationsRejected": "Rejetées",
+      "matchesEnded": "Terminées"
     },
     "funnelConversion": "Conversion du tunnel",
     "noData": "Aucune donnée"

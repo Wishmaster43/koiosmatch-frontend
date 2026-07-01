@@ -47,7 +47,10 @@
     "series": {
       "candidates": "Kandidaten",
       "applications": "Bewerbungen",
-      "matches": "Matches"
+      "matches": "Matches",
+      "candidatesOut": "Abgänge",
+      "applicationsRejected": "Abgelehnt",
+      "matchesEnded": "Beendet"
     },
     "funnelConversion": "Funnel-Konversion",
     "noData": "Keine Daten"

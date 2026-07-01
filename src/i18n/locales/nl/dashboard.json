@@ -47,7 +47,10 @@
     "series": {
       "candidates": "Kandidaten",
       "applications": "Sollicitaties",
-      "matches": "Matches"
+      "matches": "Matches",
+      "candidatesOut": "Uitstroom",
+      "applicationsRejected": "Afgewezen",
+      "matchesEnded": "Beëindigd"
     },
     "funnelConversion": "Funnel-conversie",
     "noData": "Geen data"

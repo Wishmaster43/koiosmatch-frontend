@@ -47,7 +47,10 @@
     "series": {
       "candidates": "Candidatos",
       "applications": "Candidaturas",
-      "matches": "Matches"
+      "matches": "Matches",
+      "candidatesOut": "Salidas",
+      "applicationsRejected": "Rechazadas",
+      "matchesEnded": "Finalizadas"
     },
     "funnelConversion": "Conversión del embudo",
     "noData": "Sin datos"
