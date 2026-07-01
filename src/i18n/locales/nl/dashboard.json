@@ -82,9 +82,12 @@
     "label": "Dashboard-weergave"
   },
   "types": {
+    "admin": "Admin",
     "management": "Management",
-    "recruiter": "Recruiter",
-    "planner": "Planner",
+    "recruitment": "Recruitment",
+    "backoffice": "Back office",
+    "sales": "Sales",
+    "planning": "Planning",
     "readonly": "Alleen-lezen"
   },
   "touchpointType": {

@@ -82,9 +82,12 @@
     "label": "Vue du tableau de bord"
   },
   "types": {
+    "admin": "Admin",
     "management": "Direction",
-    "recruiter": "Recruteur",
-    "planner": "Planificateur",
+    "recruitment": "Recrutement",
+    "backoffice": "Back-office",
+    "sales": "Ventes",
+    "planning": "Planification",
     "readonly": "Lecture seule"
   },
   "touchpointType": {

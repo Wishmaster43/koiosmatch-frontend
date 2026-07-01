@@ -82,9 +82,12 @@
     "label": "Vista del panel"
   },
   "types": {
+    "admin": "Admin",
     "management": "Dirección",
-    "recruiter": "Reclutador",
-    "planner": "Planificador",
+    "recruitment": "Reclutamiento",
+    "backoffice": "Back office",
+    "sales": "Ventas",
+    "planning": "Planificación",
     "readonly": "Solo lectura"
   },
   "touchpointType": {
