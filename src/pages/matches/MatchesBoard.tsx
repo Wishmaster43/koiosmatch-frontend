@@ -87,6 +87,10 @@ export default function MatchesBoard({ rows, columns, onMove, onSelect, selected
   const { t } = useTranslation('matches')
   const dragId = useRef<Id | null>(null)
 
+  // A match's stage may arrive as the funnel value or its label — match either.
+  const norm = (s?: string) => String(s ?? '').trim().toLowerCase()
+  const inColumn = (r: MatchRow, c: BoardColumn) => norm(r.stage) === norm(c.key) || norm(r.stage) === norm(c.label)
+
   const handleDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => { dragId.current = id ?? null; e.dataTransfer.effectAllowed = 'move' }
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
   const handleDrop = (e: DragEvent<HTMLDivElement>, stageKey: string) => {
@@ -99,7 +103,7 @@ export default function MatchesBoard({ rows, columns, onMove, onSelect, selected
       <div style={{ display: 'flex', gap: 16, minWidth: 'max-content', paddingBottom: 8 }}>
         {columns.map(column => (
           <BoardColumnView key={column.key} column={column}
-            items={rows.filter(r => r.stage === column.key)}
+            items={rows.filter(r => inColumn(r, column))}
             onDragStart={handleDragStart} onDrop={handleDrop} onDragOver={handleDragOver}
             onSelect={onSelect} selectedId={selectedId} emptyText={t('board.empty')} />
         ))}

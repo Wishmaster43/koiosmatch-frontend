@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, List, LayoutGrid, Archive } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { useLookups } from '@/context/LookupsContext'
 import api from '@/lib/api'
 import { notify } from '@/lib/notify'
 import InsightsRow from '@/components/insights/InsightsRow'
@@ -23,8 +24,6 @@ import type { Id } from '@/types/common'
 // MatchesPage — loads matches, shows an insights strip and paginates the table.
 export default function MatchesPage() {
   const { t } = useTranslation('matches')
-  // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
-  const tableScrollRef = useRef<HTMLDivElement>(null)
   const auth = useAuth()
   const user = auth?.user
   // Coupling is authorization-gated in the UI; the backend re-checks (§7).
@@ -35,6 +34,8 @@ export default function MatchesPage() {
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
   const { rows, loading, error, addMatch, updateMatch } = useMatches(showArchived)
   const { registerFilters, unregisterFilters } = useRightPanel()
+  // Funnel stages drive the board columns (tenant lookup + seed fallback; §3B).
+  const { funnelTypes } = useLookups()
   const [page,        setPage]        = useState(1)
   const [pageSize,    setPageSize]    = useState(() => user?.default_per_page ?? 50)
   const [stageFilter, setStageFilter] = useState<string[]>([])
@@ -128,10 +129,11 @@ export default function MatchesPage() {
   const [selected, setSelected] = useState<MatchRow | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
 
-  // View toggle: table ⇄ board (planboard). Board columns = the stages present.
+  // View toggle: table ⇄ board (planboard). Board columns = the tenant funnel
+  // stages (seed fallback) so there are always columns to drag between (§3B).
   const [view, setView] = useState<'table' | 'board'>('table')
   const stageColumns: BoardColumn[] = useMemo(
-    () => stageData.map(d => ({ key: d.key, label: d.name, color: d.color })), [stageData])
+    () => funnelTypes.map(f => ({ key: f.value, label: f.label, color: f.color })), [funnelTypes])
 
   // Drag a card to another column → change the match's stage (optimistic + persist).
   const handleMove = (id: Id, stageKey: string) => {
@@ -203,9 +205,11 @@ export default function MatchesPage() {
           onSelect={setSelected} selectedId={selected?.id} />
       ) : (
         <>
-          <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
+          {/* No row virtualization here: the table unmounts in board view, and a
+              remounted virtualizer renders an empty body. Matches lists are small. */}
+          <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
             <MatchesTable rows={paged} loading={loading} error={error} stickyHeader
-              scrollParentRef={tableScrollRef} onRowClick={setSelected} selectedId={selected?.id}
+              onRowClick={setSelected} selectedId={selected?.id}
               selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
           </div>
 
