@@ -110,8 +110,14 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     if (selectedTitle.length)    p.function_title = selectedTitle
     if (selectedLocation.length) p.location_id    = selectedLocation
     if (showArchived)            p.include_archived = 1
+    // ">6 months no contact" now filters server-wide via the delivered last_contact_between
+    // (positional [from, to]); never/no-followup stay client-side until a null-contact param exists.
+    if (attentionFilter === 'stale6m') {
+      const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - 6)
+      p.last_contact_between = ['1900-01-01', cutoff.toISOString().slice(0, 10)]
+    }
     return p
-  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, showArchived])
+  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, showArchived, attentionFilter])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1. Visible rows change → drop the bulk selection.
