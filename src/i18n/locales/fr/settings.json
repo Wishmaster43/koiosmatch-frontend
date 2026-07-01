@@ -1257,5 +1257,13 @@
     "title": "Champs requis",
     "subtitle": "Indiquez par phase quels champs sont requis. Un champ requis affiche une étoile et bloque l enregistrement s il est vide.",
     "field": "Champ"
+  },
+  "viewConfig": {
+    "title": "Vue {{label}}",
+    "description": "Choisissez quels blocs apparaissent sur le tableau de bord {{label}} et dans quel ordre.",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "hide": "Masquer",
+    "show": "Afficher"
   }
 }

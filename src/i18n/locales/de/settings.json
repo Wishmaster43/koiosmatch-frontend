@@ -1257,5 +1257,13 @@
     "title": "Pflichtfelder",
     "subtitle": "Markieren Sie pro Phase, welche Felder Pflicht sind. Ein Pflichtfeld zeigt einen Stern und blockiert das Speichern, wenn es leer ist.",
     "field": "Feld"
+  },
+  "viewConfig": {
+    "title": "{{label}}-Ansicht",
+    "description": "Wählen Sie, welche Blöcke im {{label}}-Dashboard erscheinen und in welcher Reihenfolge.",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "hide": "Ausblenden",
+    "show": "Anzeigen"
   }
 }

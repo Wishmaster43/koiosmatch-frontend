@@ -1257,5 +1257,13 @@
     "title": "Campos obligatorios",
     "subtitle": "Marque por fase qué campos son obligatorios. Un campo obligatorio muestra un asterisco y bloquea el guardado si está vacío.",
     "field": "Campo"
+  },
+  "viewConfig": {
+    "title": "Vista {{label}}",
+    "description": "Elige qué bloques aparecen en el panel {{label}} y en qué orden.",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "hide": "Ocultar",
+    "show": "Mostrar"
   }
 }

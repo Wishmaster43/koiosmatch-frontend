@@ -1257,5 +1257,13 @@
     "title": "Verplichte velden",
     "subtitle": "Markeer per fase welke velden verplicht zijn. Een verplicht veld toont een ster en blokkeert opslaan als het leeg is.",
     "field": "Veld"
+  },
+  "viewConfig": {
+    "title": "{{label}} weergave",
+    "description": "Kies welke blokken op het {{label}}-dashboard verschijnen en in welke volgorde.",
+    "moveUp": "Omhoog",
+    "moveDown": "Omlaag",
+    "hide": "Verbergen",
+    "show": "Tonen"
   }
 }

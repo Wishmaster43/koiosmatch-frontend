@@ -1257,5 +1257,13 @@
     "title": "Required fields",
     "subtitle": "Mark which fields are required per phase. A required field shows a star and blocks saving when empty.",
     "field": "Field"
+  },
+  "viewConfig": {
+    "title": "{{label}} view",
+    "description": "Choose which blocks appear on the {{label}} dashboard and in what order.",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "hide": "Hide",
+    "show": "Show"
   }
 }
