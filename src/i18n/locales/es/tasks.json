@@ -42,7 +42,8 @@
       "links": "Vínculos",
       "comments": "Comentarios",
       "activity": "Actividad"
-    }
+    },
+    "markDone": "Marcar como hecho"
   },
   "details": {
     "title": "Detalles de la actividad",
@@ -105,5 +106,19 @@
     "saving": "Guardando…",
     "cancel": "Cancelar",
     "required": "Obligatorio"
+  },
+  "bulk": {
+    "selected": "{{count}} seleccionado(s)",
+    "actions": "Acciones masivas",
+    "deselect": "Deseleccionar",
+    "changeStatus": "Cambiar estado",
+    "changePriority": "Cambiar prioridad",
+    "changeAssignee": "Asignar a",
+    "searchStatus": "Buscar estado…",
+    "searchPriority": "Buscar prioridad…",
+    "searchAssignee": "Buscar usuario…",
+    "noUsers": "Sin usuarios",
+    "archive": "Archivar",
+    "done": "{{count}} tareas actualizadas"
   }
 }

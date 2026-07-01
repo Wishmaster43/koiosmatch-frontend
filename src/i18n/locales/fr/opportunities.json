@@ -4,7 +4,9 @@
   "empty": "Aucune opportunité pour le moment.",
   "error": "Impossible de charger les opportunités.",
   "page": {
-    "add": "Ajouter une opportunité"
+    "add": "Ajouter une opportunité",
+    "selected": "{{count}} sélectionné(e)s",
+    "clearSelection": "Effacer la sélection"
   },
   "cols": {
     "title": "Opportunité",
@@ -34,8 +36,12 @@
     "selectClient": "Sélectionner un client",
     "createdAt": "Créé le {{date}}",
     "tabs": {
-      "details": "Détails"
-    }
+      "details": "Détails",
+      "changelog": "Modifications"
+    },
+    "markWon": "Gagné",
+    "markLost": "Perdu",
+    "expectedCloseOn": "Clôture prévue le {{date}}"
   },
   "details": {
     "stage": "Phase",
@@ -47,7 +53,8 @@
     "groups": {
       "deal": "Affaire",
       "organisation": "Organisation"
-    }
+    },
+    "currency": "Devise"
   },
   "modal": {
     "title": "Nouvelle opportunité",
@@ -68,5 +75,11 @@
   "view": {
     "table": "Vue liste",
     "board": "Vue tableau"
+  },
+  "changelog": {
+    "loading": "Chargement…",
+    "error": "Impossible de charger les modifications.",
+    "empty": "Aucune modification pour l’instant.",
+    "system": "Système"
   }
 }

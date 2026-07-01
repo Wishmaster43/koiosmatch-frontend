@@ -4,7 +4,9 @@
   "empty": "Noch keine Opportunities.",
   "error": "Opportunities konnten nicht geladen werden.",
   "page": {
-    "add": "Opportunity hinzufügen"
+    "add": "Opportunity hinzufügen",
+    "selected": "{{count}} ausgewählt",
+    "clearSelection": "Auswahl aufheben"
   },
   "cols": {
     "title": "Opportunity",
@@ -34,8 +36,12 @@
     "selectClient": "Kunde wählen",
     "createdAt": "Erstellt am {{date}}",
     "tabs": {
-      "details": "Details"
-    }
+      "details": "Details",
+      "changelog": "Änderungen"
+    },
+    "markWon": "Gewonnen",
+    "markLost": "Verloren",
+    "expectedCloseOn": "Voraussichtlicher Abschluss am {{date}}"
   },
   "details": {
     "stage": "Phase",
@@ -47,7 +53,8 @@
     "groups": {
       "deal": "Deal",
       "organisation": "Organisation"
-    }
+    },
+    "currency": "Währung"
   },
   "modal": {
     "title": "Neue Opportunity",
@@ -68,5 +75,11 @@
   "view": {
     "table": "Listenansicht",
     "board": "Board-Ansicht"
+  },
+  "changelog": {
+    "loading": "Laden…",
+    "error": "Änderungen konnten nicht geladen werden.",
+    "empty": "Noch keine Änderungen.",
+    "system": "System"
   }
 }

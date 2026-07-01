@@ -133,7 +133,8 @@
     "task_priorities": "Prioritäten",
     "document_types": "Dokumenttypen",
     "candidate_phases": "Phase",
-    "candidate_required_fields": "Pflichtfelder"
+    "candidate_required_fields": "Pflichtfelder",
+    "application_display": "Tabellenansicht"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1265,5 +1266,24 @@
     "moveDown": "Nach unten",
     "hide": "Ausblenden",
     "show": "Anzeigen"
+  },
+  "applicationDisplay": {
+    "title": "Tabellenansicht",
+    "subtitle": "Pro Spalte: farbige Labels oder Klartext. Die KPI-Diagramme behalten immer ihre Farben.",
+    "fields": {
+      "application_table_color_score": {
+        "label": "Match-Score"
+      },
+      "application_table_color_phase": {
+        "label": "Phase"
+      },
+      "application_table_color_status": {
+        "label": "Kandidatenstatus"
+      },
+      "application_table_color_owner": {
+        "label": "Eigentümer-Farbe",
+        "description": "Ein = das Eigentümer-Avatar nutzt die Recruiter-Farbe. Aus = neutrales Grau."
+      }
+    }
   }
 }

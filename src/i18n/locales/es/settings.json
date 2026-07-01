@@ -133,7 +133,8 @@
     "task_priorities": "Prioridades",
     "document_types": "Tipos de documento",
     "candidate_phases": "Fase",
-    "candidate_required_fields": "Campos obligatorios"
+    "candidate_required_fields": "Campos obligatorios",
+    "application_display": "Vista de tabla"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1265,5 +1266,24 @@
     "moveDown": "Bajar",
     "hide": "Ocultar",
     "show": "Mostrar"
+  },
+  "applicationDisplay": {
+    "title": "Vista de tabla",
+    "subtitle": "Por columna: etiquetas de color o texto plano. Los gráficos KPI siempre conservan sus colores.",
+    "fields": {
+      "application_table_color_score": {
+        "label": "Puntuación de match"
+      },
+      "application_table_color_phase": {
+        "label": "Fase"
+      },
+      "application_table_color_status": {
+        "label": "Estado del candidato"
+      },
+      "application_table_color_owner": {
+        "label": "Color del propietario",
+        "description": "Activado = el avatar del propietario usa el color del reclutador. Desactivado = gris neutro."
+      }
+    }
   }
 }

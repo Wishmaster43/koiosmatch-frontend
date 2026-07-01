@@ -133,7 +133,8 @@
     "task_priorities": "Priorités",
     "document_types": "Types de document",
     "candidate_phases": "Phase",
-    "candidate_required_fields": "Champs requis"
+    "candidate_required_fields": "Champs requis",
+    "application_display": "Affichage du tableau"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -1265,5 +1266,24 @@
     "moveDown": "Descendre",
     "hide": "Masquer",
     "show": "Afficher"
+  },
+  "applicationDisplay": {
+    "title": "Affichage du tableau",
+    "subtitle": "Par colonne : étiquettes colorées ou texte brut. Les graphiques KPI conservent toujours leurs couleurs.",
+    "fields": {
+      "application_table_color_score": {
+        "label": "Score de correspondance"
+      },
+      "application_table_color_phase": {
+        "label": "Phase"
+      },
+      "application_table_color_status": {
+        "label": "Statut du candidat"
+      },
+      "application_table_color_owner": {
+        "label": "Couleur du propriétaire",
+        "description": "Activé = l’avatar du propriétaire utilise la couleur du recruteur. Désactivé = gris neutre."
+      }
+    }
   }
 }

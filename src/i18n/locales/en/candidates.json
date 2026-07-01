@@ -229,7 +229,8 @@
     "statusSince": "{{status}} since {{date}}",
     "availableAgain": "available again {{date}}",
     "blacklistedBy": "Blacklisted by {{who}}",
-    "blacklisted": "Blacklisted"
+    "blacklisted": "Blacklisted",
+    "customFields": "Custom fields"
   },
   "stage": {
     "lead": "Lead",

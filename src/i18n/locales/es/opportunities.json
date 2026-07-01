@@ -4,7 +4,9 @@
   "empty": "Aún no hay oportunidades.",
   "error": "No se pudieron cargar las oportunidades.",
   "page": {
-    "add": "Añadir oportunidad"
+    "add": "Añadir oportunidad",
+    "selected": "{{count}} seleccionado(s)",
+    "clearSelection": "Borrar selección"
   },
   "cols": {
     "title": "Oportunidad",
@@ -34,8 +36,12 @@
     "selectClient": "Seleccionar cliente",
     "createdAt": "Creado el {{date}}",
     "tabs": {
-      "details": "Detalles"
-    }
+      "details": "Detalles",
+      "changelog": "Cambios"
+    },
+    "markWon": "Ganado",
+    "markLost": "Perdido",
+    "expectedCloseOn": "Cierre previsto el {{date}}"
   },
   "details": {
     "stage": "Fase",
@@ -47,7 +53,8 @@
     "groups": {
       "deal": "Negocio",
       "organisation": "Organización"
-    }
+    },
+    "currency": "Moneda"
   },
   "modal": {
     "title": "Nueva oportunidad",
@@ -68,5 +75,11 @@
   "view": {
     "table": "Vista de lista",
     "board": "Vista de tablero"
+  },
+  "changelog": {
+    "loading": "Cargando…",
+    "error": "No se pudieron cargar los cambios.",
+    "empty": "Aún no hay cambios.",
+    "system": "Sistema"
   }
 }
