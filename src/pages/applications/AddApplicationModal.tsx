@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
@@ -32,6 +33,7 @@ function PickField({ label, ...rest }: { label: ReactNode } & AnyProps) {
  * before the endpoint is live.
  */
 export default function AddApplicationModal({ onClose, onCreated }: { onClose: () => void; onCreated: (app: Application) => void }) {
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('applications')
   const [candidates, setCandidates] = useState<PickOption[]>([])
   const [vacancies, setVacancies]   = useState<PickOption[]>([])
@@ -72,7 +74,8 @@ export default function AddApplicationModal({ onClose, onCreated }: { onClose: (
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
-      <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'white',
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('add.title')} tabIndex={-1}
+        className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'white',
         borderRadius: 12, width: 440, maxWidth: '92vw', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 22px', borderBottom: '1px solid #F3F4F6' }}>
           <span style={{ fontSize: 15, fontWeight: 700 }}>{t('add.title')}</span>

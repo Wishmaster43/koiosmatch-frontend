@@ -4,6 +4,7 @@
  * filters come from RightPanelContext. formatDT below formats run timestamps.
  */
 import { useState, useEffect, useMemo } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown, X,
@@ -24,12 +25,14 @@ function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
 
 function RunDrawer({ run, onClose }: { run: RunRow; onClose: () => void }) {
   const { t } = useTranslation('reports')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={run.workflow_name as string | undefined} tabIndex={-1}
+        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 500, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}

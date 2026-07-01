@@ -3,6 +3,7 @@
  * Extracted from UsersPage.
  */
 import { useState } from 'react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Loader2 } from 'lucide-react'
@@ -17,6 +18,7 @@ export default function NewUserModal({ onClose, onCreated }: {
   onCreated: (user: ManagedUser) => void
 }) {
   const { t } = useTranslation('users')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const [form, setForm]     = useState({ firstname: '', lastname: '', email: '', password: '', role: 'planner' })
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState<string | null>(null)
@@ -47,7 +49,8 @@ export default function NewUserModal({ onClose, onCreated }: {
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
-      <div className="fixed z-50" style={{
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('newUser')} tabIndex={-1}
+        className="fixed z-50" style={{
         top: '50%', left: '50%', transform: 'translate(-50%,-50%)',
         background: 'var(--surface)', borderRadius: 14, boxShadow: '0 20px 60px rgba(0,0,0,0.18)',
         width: 420, padding: 24,
