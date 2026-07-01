@@ -207,3 +207,16 @@ snapshot + a doc line.
 - **Outreach = own entity** (not an overloaded task). ✅
 - **Appointments · WhatsApp outbox · Opportunities C-42 · Tasks subtasks** = built and shape-verified. ✅
 - **Source-prefix endpoints · soft-delete-only · migration-in-`create_` · watertight tenant-isolation (multi-DB, no `tenant_id`)** — agree. ✅
+
+---
+
+## I. Review backlog (Danny walkthrough 2026-07-02) — routed to lanes
+
+> Findings from Danny clicking through the app. FE-repo detail lives in `worklist.md §B-32..B-35`; the
+> cross-lane / backend-relevant parts are surfaced here so **both sides see them** in the shared plan.
+
+- **AP-R1 · [settings-lane]** Remove `billing_pay`; add missing personalisation sub-tabs (**tasks · outreach · matches**) — blueprint parity. (B-32)
+- **AP-R2 · [BE + lookup base]** Optional **`icon`/`emoji` field on the lookup base** (tenant-set, shown next to the label — never icon-only). Strong for `last-contact-types` + `task-types`; **genders = cautious** (colour already carries it). One mechanism, covers all type/status lookups. (B-32)
+- **AP-R3 · [workflow-lane + BE]** Workflow list gets a **table view** (sticky header + sort); **authz on every action** (create/rename/delete folder · create/edit/run workflow · view logs → `settings.update`, ties to **AP-H1**); **delete-guard**: no delete of a folder/workflow with an **active workflow** → **409 + reason**. (B-33)
+- **AP-R4 · [BE + Dash]** **Pipeline value unit configurable** — tenant setting `pipeline_value_unit` (`money|hours`), aggregate `value` € vs `hours` (opps carry both, C-42); the resource returns the **unit** so the FE never hardcodes €. (B-34)
+- **AP-R5 · [FE all pages + BE]** **Super-search above the table** (by the title, not tucked in the right panel) + **true full coverage** server-side `?q=` across all fields + sub-entities (name/phone/email/function/work-experience/notes). Ties to `/architect` §6. (B-35)

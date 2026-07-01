@@ -304,6 +304,16 @@ LEVER: consistente chips/knoppen/typografie + lijst toegevoegde i18n-keys + geë
 - [ ] **FE (Dash):** toont de pijplijnwaarde in de ingestelde eenheid (€ of uren) met het juiste label/format;
       Settings → Dashboards krijgt de toggle. Bind op de door de API meegegeven `unit`, hardcode geen €.
 
+### B-35 · Super-search — boven de tabel + volledige dekking (review 2026-07-02)
+> Danny: de search hoort **boven de tabel** (bij de titel — links ernaast of centraal), niet weggestopt in
+> het rechter filterpaneel. En het moet een échte super-search zijn: **doorzoekt alles** en filtert daarop.
+- [ ] **Plaatsing (FE, alle entiteitpagina's):** één gedeelde search in de page-header (bij de titel), consistent
+      over candidates · applications · vacancies · matches · opportunities · tasks · customers · SM-rapporten.
+      Uit het rechter filterpaneel halen (of daar spiegelen), niet per pagina apart geregeld.
+- [ ] **Dekking (BE, server-side `?q=`):** doorzoekt **alle relevante velden + sub-entiteiten** (naam · telefoon ·
+      e-mail · functie · werkervaring · notities · …) — client-side zoekt alleen geladen rijen, dus dit MOET
+      server-side (full-text index, debounced). Consistent `?q=`-contract over alle resources. Haakt op /architect §6.
+
 ---
 
 ## C. Backend — open taken
