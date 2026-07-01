@@ -25,44 +25,46 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
     { id: 'matches',    label: t('tabs.matches') },
   ]
 
+  // Tab bar + shared period control on one row. Passed to each report as `tabsSlot`
+  // so the report renders its KPI row ABOVE the tabs — same order as the candidate
+  // page (KPIs first, then navigation), consistent across every report.
+  const tabsBar = (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  gap: 12, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
+      <div style={{ display: 'flex', gap: 4 }}>
+        {tabs.map(tb => (
+          <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
+            style={{
+              padding: '8px 14px', fontSize: 13, fontWeight: tab === tb.id ? 600 : 400,
+              color: tab === tb.id ? 'var(--color-primary)' : 'var(--text-muted)',
+              background: 'none', border: 'none', cursor: 'pointer',
+              borderBottom: tab === tb.id ? '2px solid var(--color-primary)' : '2px solid transparent',
+              marginBottom: -1,
+            }}>
+            {tb.label}
+          </button>
+        ))}
+      </div>
+      <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12,
+                      color: 'var(--text-muted)', flexShrink: 0, paddingBottom: 6 }}>
+        {t('period.label')}
+        <select value={period} onChange={e => setPeriod(e.target.value as ReportPeriod)}
+          style={{ height: 30, padding: '0 8px', fontSize: 13, border: '1px solid var(--border)',
+                   borderRadius: 8, color: 'var(--text)', background: 'var(--surface)', cursor: 'pointer' }}>
+          <option value="day">{t('period.day')}</option>
+          <option value="week">{t('period.week')}</option>
+          <option value="month">{t('period.month')}</option>
+        </select>
+      </label>
+    </div>
+  )
+
   return (
     <div className="p-6">
-      {/* Sub-tab bar + shared period control on one row — no page title (the sidebar
-          already names the page), so the report's KPI row sits straight at the top,
-          consistent with the candidate/entity pages. */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                    gap: 12, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
-        <div style={{ display: 'flex', gap: 4 }}>
-          {tabs.map(tb => (
-            <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
-              style={{
-                padding: '8px 14px', fontSize: 13, fontWeight: tab === tb.id ? 600 : 400,
-                color: tab === tb.id ? 'var(--color-primary)' : 'var(--text-muted)',
-                background: 'none', border: 'none', cursor: 'pointer',
-                borderBottom: tab === tb.id ? '2px solid var(--color-primary)' : '2px solid transparent',
-                marginBottom: -1,
-              }}>
-              {tb.label}
-            </button>
-          ))}
-        </div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12,
-                        color: 'var(--text-muted)', flexShrink: 0, paddingBottom: 6 }}>
-          {t('period.label')}
-          <select value={period} onChange={e => setPeriod(e.target.value as ReportPeriod)}
-            style={{ height: 30, padding: '0 8px', fontSize: 13, border: '1px solid var(--border)',
-                     borderRadius: 8, color: 'var(--text)', background: 'var(--surface)', cursor: 'pointer' }}>
-            <option value="day">{t('period.day')}</option>
-            <option value="week">{t('period.week')}</option>
-            <option value="month">{t('period.month')}</option>
-          </select>
-        </label>
-      </div>
-
-      {tab === 'flow'       && <FlowReport period={period} />}
-      {tab === 'recruiters' && <RecruitersReport period={period} />}
-      {tab === 'vacancies'  && <VacanciesReport period={period} />}
-      {tab === 'matches'    && <MatchesReport period={period} />}
+      {tab === 'flow'       && <FlowReport       period={period} tabsSlot={tabsBar} />}
+      {tab === 'recruiters' && <RecruitersReport period={period} tabsSlot={tabsBar} />}
+      {tab === 'vacancies'  && <VacanciesReport  period={period} tabsSlot={tabsBar} />}
+      {tab === 'matches'    && <MatchesReport    period={period} tabsSlot={tabsBar} />}
     </div>
   )
 }

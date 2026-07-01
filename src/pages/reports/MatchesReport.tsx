@@ -6,6 +6,7 @@
  * is honestly null until the HelloFlex coupling fills placement start/end — we
  * show a note rather than a fabricated number. Data lives in useMatchesReport.
  */
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -24,7 +25,7 @@ function StatTile({ label, value, accent }: { label: string; value: number; acce
   )
 }
 
-export default function MatchesReport({ period }: { period: ReportPeriod }) {
+export default function MatchesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
   const { data, loading, error } = useMatchesReport(period)
   const isEmpty = !loading && !error && (!data || data.total === 0)
@@ -39,10 +40,15 @@ export default function MatchesReport({ period }: { period: ReportPeriod }) {
 
   return (
     <div>
-      <div style={{ marginBottom: 12 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{t('matches.title')}</h2>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matches.subtitle')}</p>
-      </div>
+      {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
+      {!loading && !error && !isEmpty && data && (
+        <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 16 }}>
+          <InsightsRow kpis={kpis} padding="14px 20px" />
+        </div>
+      )}
+
+      {/* Tab bar + period control (from the hub) */}
+      {tabsSlot}
 
       {loading && (
         <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--text-muted)',
@@ -65,12 +71,7 @@ export default function MatchesReport({ period }: { period: ReportPeriod }) {
 
       {!loading && !error && !isEmpty && data && (
         <>
-          {/* Origin KPIs */}
-          <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 16 }}>
-            <InsightsRow kpis={kpis} padding="14px 20px" />
-          </div>
-
-          {/* Placements breakdown */}
+          {/* Placements breakdown (KPI strip is rendered above the tabs) */}
           <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', padding: 20 }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>{t('matches.placements.title')}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>

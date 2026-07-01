@@ -8,6 +8,7 @@
  * never hardcode stage names — we key on `key` and render `label`.
  */
 import { useMemo } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -43,7 +44,7 @@ function PhaseRow({ label, value, max, index, conversion, avgDays }: {
   )
 }
 
-export default function FlowReport({ period }: { period: ReportPeriod }) {
+export default function FlowReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
   const { data, loading, error } = useFlowReport(period)
 
@@ -71,18 +72,15 @@ export default function FlowReport({ period }: { period: ReportPeriod }) {
 
   return (
     <div>
-      {/* Header */}
-      <div style={{ marginBottom: 12 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{t('flow.title')}</h2>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('flow.subtitle')}</p>
-      </div>
-
-      {/* KPI strip */}
+      {/* KPI strip — sits above the tabs (candidate-page order: KPIs first) */}
       {!loading && !error && phases.length > 0 && (
         <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 16 }}>
           <InsightsRow kpis={kpis} padding="14px 20px" />
         </div>
       )}
+
+      {/* Tab bar + period control (from the hub) */}
+      {tabsSlot}
 
       {/* Cohort-filling note (pipeline fallback) */}
       {!loading && !error && phases.length > 0 && !cohortReady && (

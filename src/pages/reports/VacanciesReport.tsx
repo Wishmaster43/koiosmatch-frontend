@@ -6,7 +6,7 @@
  * fill-rate/time-to-fill are server-derived; `time_to_fill_days` is null while
  * open. applications_by_phase shares the funnel key-map. Data lives in the hook.
  */
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
@@ -32,7 +32,7 @@ function Chip({ label, tone }: { label: string; tone: 'success' | 'muted' }) {
   )
 }
 
-export default function VacanciesReport({ period }: { period: ReportPeriod }) {
+export default function VacanciesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
   const { data, loading, error } = useVacanciesReport(period)
   const rows = data?.vacancies ?? []
@@ -50,17 +50,15 @@ export default function VacanciesReport({ period }: { period: ReportPeriod }) {
 
   return (
     <div>
-      <div style={{ marginBottom: 12 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{t('vacancies.title')}</h2>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('vacancies.subtitle')}</p>
-      </div>
-
-      {/* Summary tiles */}
+      {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
       {!loading && !error && rows.length > 0 && (
         <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', marginBottom: 16 }}>
           <InsightsRow kpis={kpis} padding="14px 20px" />
         </div>
       )}
+
+      {/* Tab bar + period control (from the hub) */}
+      {tabsSlot}
 
       {/* Table — four UI states */}
       <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>

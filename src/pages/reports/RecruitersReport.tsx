@@ -6,7 +6,7 @@
  * (planned/done), matches, tasks (open/overdue) and the contact-compliance count
  * (> compliance_months). Pure table; data lives in useRecruitersReport.
  */
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useRecruitersReport } from './useRecruitersReport'
 import type { ReportPeriod, RecruiterRow } from '@/types/analytics'
@@ -23,7 +23,7 @@ const NUM: CSSProperties = { ...TD, textAlign: 'right', fontVariantNumeric: 'tab
 // Total applications = sum of the per-stage counts.
 const sumPhases = (r: RecruiterRow) => r.applications_by_phase.reduce((acc, p) => acc + p.count, 0)
 
-export default function RecruitersReport({ period }: { period: ReportPeriod }) {
+export default function RecruitersReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
   const { data, loading, error } = useRecruitersReport(period)
   const rows   = data?.recruiters ?? []
@@ -31,10 +31,8 @@ export default function RecruitersReport({ period }: { period: ReportPeriod }) {
 
   return (
     <div>
-      <div style={{ marginBottom: 12 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{t('recruiters.title')}</h2>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('recruiters.subtitle')}</p>
-      </div>
+      {/* Tab bar + period control (from the hub) — this report has no KPI strip */}
+      {tabsSlot}
 
       <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>
         {loading && (
