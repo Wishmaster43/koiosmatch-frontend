@@ -128,7 +128,9 @@
       "cultural_alignment": "Adéquation culturelle",
       "career_aspirations": "Aspirations professionnelles",
       "location": "Localisation"
-    }
+    },
+    "profile": "Profil",
+    "custom": "Personnalisé"
   },
   "details": {
     "groups": {
