@@ -14,18 +14,12 @@
  *   POST /profile/email/disconnect      -> { status:'disconnected' }
  * A 404 degrades to a calm "unavailable" state.
  */
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import type { ChangeEvent, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, RefreshCw, Eye, EyeOff } from 'lucide-react'
-import api from '@/lib/api'
-
-type EmailStatus = 'loading' | 'disconnected' | 'connected' | 'unavailable'
-interface EmailInfo { provider: string | null; email: string | null }
-interface SmtpForm {
-  host: string; port: string; user: string; pass: string
-  secure: string; from_name: string; from_email: string
-}
+import { useEmailConnection } from './useEmailConnection'
+import type { SmtpForm } from './useEmailConnection'
 
 const PROVIDERS = [
   { id: 'office', label: 'Office 365' },
@@ -40,57 +34,13 @@ const inputStyle: CSSProperties = {
 }
 const labelStyle: CSSProperties = { fontSize: 12, fontWeight: 500, color: 'var(--text-muted)', marginBottom: 5, display: 'block' }
 
-// Pull the HTTP status off an axios-style error without leaking the rest.
-const statusOf = (e: unknown) => (e as { response?: { status?: number } })?.response?.status
-
 export default function ProfileEmailConnect() {
   const { t } = useTranslation('auth')
-  const [status,  setStatus]  = useState<EmailStatus>('loading')
-  const [info,    setInfo]    = useState<EmailInfo>({ provider: null, email: null })
-  const [choice,  setChoice]  = useState('office')
-  const [busy,    setBusy]    = useState(false)
+  // Data layer: connection state + the OAuth/SMTP connect flows and disconnect (§3).
+  const { status, info, busy, connectOauth, saveSmtp, disconnect } = useEmailConnection()
+  const [choice,   setChoice]   = useState('office')
   const [showPass, setShowPass] = useState(false)
   const [smtp, setSmtp] = useState<SmtpForm>({ host: '', port: '587', user: '', pass: '', secure: 'tls', from_name: '', from_email: '' })
-
-  // Load the current personal-mailbox state (404 → feature unavailable).
-  const load = async () => {
-    try {
-      const d = (await api.get('/profile/email')).data
-      setStatus(d?.status ?? 'disconnected')
-      setInfo({ provider: d?.provider ?? null, email: d?.email ?? null })
-    } catch (e) {
-      setStatus(statusOf(e) === 404 ? 'unavailable' : 'disconnected')
-    }
-  }
-  useEffect(() => { load() }, [])
-
-  // OAuth providers: fetch a consent URL and redirect the browser to it.
-  const connectOauth = async (provider: string) => {
-    setBusy(true)
-    try {
-      const { url } = (await api.post('/profile/email/connect', { provider })).data ?? {}
-      if (url) { window.location.href = url; return }
-    } catch (e) { if (statusOf(e) === 404) setStatus('unavailable') }
-    setBusy(false)
-  }
-
-  // SMTP: persist the manual credentials and reflect the connected state.
-  const saveSmtp = async () => {
-    setBusy(true)
-    try {
-      const d = (await api.post('/profile/email/smtp', smtp)).data
-      setStatus(d?.status ?? 'connected')
-      setInfo({ provider: 'smtp', email: d?.email ?? (smtp.from_email || smtp.user) })
-    } catch (e) { if (statusOf(e) === 404) setStatus('unavailable') }
-    setBusy(false)
-  }
-
-  // Drop the connection and return to the provider chooser.
-  const disconnect = async () => {
-    setBusy(true)
-    try { await api.post('/profile/email/disconnect') } catch { /* noop */ }
-    setStatus('disconnected'); setInfo({ provider: null, email: null }); setBusy(false)
-  }
 
   // Build a change handler for a single SMTP field.
   const setF = (k: keyof SmtpForm) => (e: ChangeEvent<HTMLInputElement>) => setSmtp(s => ({ ...s, [k]: e.target.value }))
@@ -200,7 +150,7 @@ export default function ProfileEmailConnect() {
                   ))}
                 </div>
               </div>
-              <button onClick={saveSmtp} disabled={busy || !smtp.host.trim()}
+              <button onClick={() => saveSmtp(smtp)} disabled={busy || !smtp.host.trim()}
                 style={{ alignSelf: 'flex-start', display: 'flex', alignItems: 'center', gap: 8, height: 38, padding: '0 18px',
                          fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', color: 'white',
                          background: 'var(--color-primary)', cursor: busy ? 'default' : 'pointer',
