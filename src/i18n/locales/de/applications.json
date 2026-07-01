@@ -36,7 +36,8 @@
     "source": "Quelle",
     "owner": "Inhaber",
     "client": "Kunde",
-    "status": "Kandidatenstatus"
+    "status": "Kandidatenstatus",
+    "created": "Erstellt"
   },
   "kpi": {
     "totalActive": "Aktiv gesamt",
@@ -109,7 +110,10 @@
     "branch": "Branche",
     "category": "Kategorie",
     "skills": "Erforderliche Fähigkeiten",
-    "tags": "Tags"
+    "tags": "Tags",
+    "loading": "Stelle wird geladen…",
+    "error": "Laden der Stelle fehlgeschlagen.",
+    "empty": "Keine Stelle verknüpft."
   },
   "interview": {
     "title": "WhatsApp-Interview",
@@ -132,7 +136,8 @@
     "hint": "Füge interne Notizen hinzu, damit dein Team zu diesem Kandidaten abgestimmt bleibt.",
     "placeholder": "Notiz schreiben…",
     "save": "Speichern",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "type": "Typ"
   },
   "timeline": {
     "empty": "Noch keine Aktivität."
@@ -164,5 +169,14 @@
   "restore": {
     "button": "Wiederherstellen",
     "done": "Bewerbung wiederhergestellt"
+  },
+  "bulk": {
+    "selected": "{{count}} ausgewählt",
+    "actions": "Massenaktionen",
+    "deselect": "Abwählen",
+    "changePhase": "Phase ändern",
+    "searchPhase": "Phase suchen…",
+    "detach": "Entkoppeln",
+    "done": "{{count}} aktualisiert"
   }
 }

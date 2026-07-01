@@ -109,7 +109,8 @@
       "documents": "Documentos",
       "timeline": "Cronología",
       "notes": "Notas",
-      "statistics": "Estadísticas"
+      "statistics": "Estadísticas",
+      "extra": "Extra"
     }
   },
   "matching": {
@@ -133,7 +134,8 @@
     "groups": {
       "general": "General",
       "requirements": "Requisitos",
-      "conditions": "Condiciones"
+      "conditions": "Condiciones",
+      "location": "Ubicación"
     },
     "id": "ID de vacante",
     "status": "Estado",
@@ -150,7 +152,20 @@
     "addSkill": "Añadir habilidad",
     "noSkills": "Aún no hay habilidades.",
     "description": "Descripción",
-    "descriptionPlaceholder": "Describe la posición…"
+    "descriptionPlaceholder": "Describe la posición…",
+    "contractType": "Tipo de contrato",
+    "experienceFrom": "Desde (años)",
+    "experienceTo": "Hasta (años)",
+    "years": "años",
+    "preferredIndustry": "Sector preferido",
+    "function": "Función",
+    "address": "Dirección",
+    "street": "Calle",
+    "houseNumber": "Número",
+    "houseNumberSuffix": "Complemento",
+    "postalCode": "Código postal",
+    "city": "Ciudad",
+    "province": "Provincia"
   },
   "publishing": {
     "channels": "Portales de empleo",

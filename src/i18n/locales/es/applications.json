@@ -36,7 +36,8 @@
     "source": "Origen",
     "owner": "Responsable",
     "client": "Cliente",
-    "status": "Estado del candidato"
+    "status": "Estado del candidato",
+    "created": "Creado"
   },
   "kpi": {
     "totalActive": "Total activas",
@@ -109,7 +110,10 @@
     "branch": "Sector",
     "category": "Categoría",
     "skills": "Habilidades requeridas",
-    "tags": "Etiquetas"
+    "tags": "Etiquetas",
+    "loading": "Cargando vacante…",
+    "error": "Error al cargar la vacante.",
+    "empty": "Sin vacante vinculada."
   },
   "interview": {
     "title": "Entrevista de WhatsApp",
@@ -132,7 +136,8 @@
     "hint": "Añade notas internas para mantener a tu equipo alineado sobre este candidato.",
     "placeholder": "Escribe una nota…",
     "save": "Guardar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "type": "Tipo"
   },
   "timeline": {
     "empty": "Aún no hay actividad."
@@ -164,5 +169,14 @@
   "restore": {
     "button": "Restaurar",
     "done": "Candidatura restaurada"
+  },
+  "bulk": {
+    "selected": "{{count}} seleccionado(s)",
+    "actions": "Acciones masivas",
+    "deselect": "Deseleccionar",
+    "changePhase": "Cambiar fase",
+    "searchPhase": "Buscar fase…",
+    "detach": "Desvincular",
+    "done": "{{count}} actualizado(s)"
   }
 }

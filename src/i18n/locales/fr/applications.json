@@ -36,7 +36,8 @@
     "source": "Source",
     "owner": "Responsable",
     "client": "Client",
-    "status": "Statut du candidat"
+    "status": "Statut du candidat",
+    "created": "Créé le"
   },
   "kpi": {
     "totalActive": "Total actives",
@@ -109,7 +110,10 @@
     "branch": "Secteur",
     "category": "Catégorie",
     "skills": "Compétences requises",
-    "tags": "Tags"
+    "tags": "Tags",
+    "loading": "Chargement du poste…",
+    "error": "Échec du chargement du poste.",
+    "empty": "Aucun poste lié."
   },
   "interview": {
     "title": "Entretien WhatsApp",
@@ -132,7 +136,8 @@
     "hint": "Ajoutez des notes internes pour aligner votre équipe sur ce candidat.",
     "placeholder": "Écrire une note…",
     "save": "Enregistrer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "type": "Type"
   },
   "timeline": {
     "empty": "Aucune activité pour le moment."
@@ -164,5 +169,14 @@
   "restore": {
     "button": "Restaurer",
     "done": "Candidature restaurée"
+  },
+  "bulk": {
+    "selected": "{{count}} sélectionné(e)s",
+    "actions": "Actions groupées",
+    "deselect": "Désélectionner",
+    "changePhase": "Changer la phase",
+    "searchPhase": "Rechercher une phase…",
+    "detach": "Dissocier",
+    "done": "{{count}} mis(es) à jour"
   }
 }

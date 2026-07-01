@@ -109,7 +109,8 @@
       "documents": "Documents",
       "timeline": "Chronologie",
       "notes": "Notes",
-      "statistics": "Statistiques"
+      "statistics": "Statistiques",
+      "extra": "Extra"
     }
   },
   "matching": {
@@ -133,7 +134,8 @@
     "groups": {
       "general": "Général",
       "requirements": "Exigences",
-      "conditions": "Conditions"
+      "conditions": "Conditions",
+      "location": "Lieu"
     },
     "id": "ID du poste",
     "status": "Statut",
@@ -150,7 +152,20 @@
     "addSkill": "Ajouter une compétence",
     "noSkills": "Aucune compétence pour le moment.",
     "description": "Description",
-    "descriptionPlaceholder": "Décrivez le poste…"
+    "descriptionPlaceholder": "Décrivez le poste…",
+    "contractType": "Type de contrat",
+    "experienceFrom": "De (années)",
+    "experienceTo": "À (années)",
+    "years": "ans",
+    "preferredIndustry": "Secteur préféré",
+    "function": "Fonction",
+    "address": "Adresse",
+    "street": "Rue",
+    "houseNumber": "Numéro",
+    "houseNumberSuffix": "Complément",
+    "postalCode": "Code postal",
+    "city": "Ville",
+    "province": "Province"
   },
   "publishing": {
     "channels": "Sites d'emploi",

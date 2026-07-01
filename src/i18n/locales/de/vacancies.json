@@ -109,7 +109,8 @@
       "documents": "Dokumente",
       "timeline": "Verlauf",
       "notes": "Notizen",
-      "statistics": "Statistiken"
+      "statistics": "Statistiken",
+      "extra": "Extra"
     }
   },
   "matching": {
@@ -133,7 +134,8 @@
     "groups": {
       "general": "Allgemein",
       "requirements": "Anforderungen",
-      "conditions": "Konditionen"
+      "conditions": "Konditionen",
+      "location": "Standort"
     },
     "id": "Stellen-ID",
     "status": "Status",
@@ -150,7 +152,20 @@
     "addSkill": "Fähigkeit hinzufügen",
     "noSkills": "Noch keine Fähigkeiten.",
     "description": "Beschreibung",
-    "descriptionPlaceholder": "Beschreibe die Stelle…"
+    "descriptionPlaceholder": "Beschreibe die Stelle…",
+    "contractType": "Vertragsart",
+    "experienceFrom": "Von (Jahre)",
+    "experienceTo": "Bis (Jahre)",
+    "years": "Jahre",
+    "preferredIndustry": "Bevorzugte Branche",
+    "function": "Funktion",
+    "address": "Adresse",
+    "street": "Straße",
+    "houseNumber": "Hausnummer",
+    "houseNumberSuffix": "Zusatz",
+    "postalCode": "PLZ",
+    "city": "Ort",
+    "province": "Provinz"
   },
   "publishing": {
     "channels": "Jobbörsen",
