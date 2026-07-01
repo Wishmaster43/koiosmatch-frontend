@@ -33,7 +33,7 @@ export const KPI_ROWS: Record<DashboardType, string[]> = {
 export const DASHBOARD_TEMPLATES: Record<DashboardType, string[]> = {
   admin: ['*'],
   management: ['*'],
-  recruitment: ['block.touchpoints', 'block.attention', 'chart.status', 'chart.funnel', 'chart.funnelConversion', 'list.candidates', 'list.applications', 'list.conversations'],
+  recruitment: ['block.touchpoints', 'block.attention', 'chart.status', 'chart.funnel', 'chart.funnelConversion', 'chart.weekly', 'list.candidates', 'list.applications', 'list.conversations', 'list.runs'],
   backoffice: ['chart.status', 'list.applications', 'list.runs'],
   sales: ['chart.oppStage', 'chart.status', 'list.leads'],
   planning: ['block.waQueue', 'block.shifts', 'chart.weekly', 'list.runs', 'list.conversations'],
