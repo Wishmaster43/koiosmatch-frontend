@@ -13,13 +13,12 @@ import { useAuth }            from '@/context/AuthContext'
 import ContactPersonDrawer    from './ContactPersonDrawer'
 import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '@/lib/usePageSize'
-import type { ReportContact, ReportCustomer, ReportFilterGroup } from '@/types/reports'
+import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
+import type { ReportContact, ReportFilterGroup } from '@/types/reports'
 
 
 export default function ContactPersonsTable() {
   const { t } = useTranslation('reports')
-  const [contacts, setContacts]   = useState<ReportContact[]>([])
-  const [loading,  setLoading]    = useState(true)
   const [search,   setSearch]     = useState('')
   const [drill,    setDrill]      = useState<ReportContact | null>(null)
   const [selectedCustomers, setSelectedCustomers] = useState<Array<string | number>>([])
@@ -31,23 +30,16 @@ export default function ContactPersonsTable() {
   const [page,     setPage]     = useState(1)
   const [pageSize, setPageSize] = useState(defaultPageSize)
 
-  useEffect(() => {
-    api.get('/sm_customers')
-      .then(res => {
-        const customers = (res.data?.data ?? res.data ?? []) as ReportCustomer[]
-        const flat = customers.flatMap(customer =>
-          (customer.contacts ?? []).map(contact => ({
-            ...contact,
-            customer_name:  customer.name,
-            customer_id:    customer.id,
-            location_count: customer.locations?.length ?? 0,
-          }))
-        )
-        setContacts(flat)
-      })
-      .catch(() => setContacts([]))
-      .finally(() => setLoading(false))
-  }, [])
+  // Data lives in the shared hook (§3); derive the flattened contact rows here.
+  const { customers, loading } = useSmCustomerTree()
+  const contacts = useMemo<ReportContact[]>(() => customers.flatMap(customer =>
+    (customer.contacts ?? []).map(contact => ({
+      ...contact,
+      customer_name:  customer.name,
+      customer_id:    customer.id,
+      location_count: customer.locations?.length ?? 0,
+    }))
+  ), [customers])
 
   const customerOptions = useMemo(() =>
     [...new Set(contacts.map(c => c.customer_name).filter((x): x is string => Boolean(x)))].sort(),

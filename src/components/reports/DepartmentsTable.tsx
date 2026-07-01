@@ -13,7 +13,8 @@ import api                    from '@/lib/api'
 import DepartmentDrawer       from './DepartmentDrawer'
 import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '@/lib/usePageSize'
-import type { ReportCustomer, ReportDepartment, SortState } from '@/types/reports'
+import { useSmCustomerTree }  from '@/hooks/useSmCustomerTree'
+import type { ReportDepartment, SortState } from '@/types/reports'
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
   if (!active) return <ChevronsUpDown size={12} style={{ color: 'var(--border)' }} />
@@ -29,8 +30,6 @@ const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--te
 
 export default function DepartmentsTable() {
   const { t } = useTranslation('reports')
-  const [rows,    setRows]    = useState<ReportDepartment[]>([])
-  const [loading, setLoading] = useState(true)
   const [search,  setSearch]  = useState('')
   const [drill,   setDrill]   = useState<ReportDepartment | null>(null)
   const [selectedCustomers, setSelectedCustomers] = useState<Array<string | number>>([])
@@ -43,27 +42,20 @@ export default function DepartmentsTable() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  useEffect(() => {
-    api.get('/sm_customers')
-      .then(res => {
-        const customers = (res.data?.data ?? res.data ?? []) as ReportCustomer[]
-        const flat = customers.flatMap(c =>
-          (c.locations ?? []).flatMap(l =>
-            (l.departments ?? []).map(d => ({
-              ...d,
-              location_name:   l.name,
-              location_id:     l.id,
-              location_status: l.status,
-              customer_name:   c.name,
-              customer_id:     c.id,
-            }))
-          )
-        )
-        setRows(flat)
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
+  // Data lives in the shared hook (§3); derive the flattened department rows here.
+  const { customers, loading } = useSmCustomerTree()
+  const rows = useMemo<ReportDepartment[]>(() => customers.flatMap(c =>
+    (c.locations ?? []).flatMap(l =>
+      (l.departments ?? []).map(d => ({
+        ...d,
+        location_name:   l.name,
+        location_id:     l.id,
+        location_status: l.status,
+        customer_name:   c.name,
+        customer_id:     c.id,
+      }))
+    )
+  ), [customers])
 
   const customerOptions = useMemo(() =>
     [...new Map(rows.map(r => [r.customer_id, r.customer_name] as [string | number, string | undefined])).entries()]

@@ -9,11 +9,11 @@ import { Layers, MapPin, Building2, Hash, RefreshCw } from 'lucide-react'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '@/context/RightPanelContext'
 import KpiBlock from '@/components/ui/KpiBlock'  // shared KPI card
-import { useSmCustomers } from './hooks/useSmCustomers'
+import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 
 export default function DepartmentsReport() {
   const { t } = useTranslation('shiftmanager')
-  const { customers, loading } = useSmCustomers()
+  const { customers, loading } = useSmCustomerTree()
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()

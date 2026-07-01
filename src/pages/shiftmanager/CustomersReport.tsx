@@ -8,7 +8,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
-import { useSmCustomers } from './hooks/useSmCustomers'
+import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import { useRightPanel } from '@/context/RightPanelContext'
 import ModuleView       from '@/components/settings/ModuleView'
 import EntityListDrawer  from '@/components/ui/EntityListDrawer'
@@ -16,7 +16,7 @@ import type { SmDrillItem } from '@/types/shiftmanager'
 
 export default function CustomersReport() {
   const { t } = useTranslation('shiftmanager')
-  const { customers, loading } = useSmCustomers()
+  const { customers, loading } = useSmCustomerTree()
   const [drawer, setDrawer] = useState<{ title: string; items: SmDrillItem[] } | null>(null)
 
   const { registerFilters, unregisterFilters } = useRightPanel()

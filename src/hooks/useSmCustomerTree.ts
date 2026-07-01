@@ -1,14 +1,16 @@
 /**
- * useSmCustomers — shared data layer for the ShiftManager Customers/Locations/
- * Departments reports. Fetches the customer→location→department tree from
- * /sm_customers once; each report derives its own view (customers / flattened
- * locations / flattened departments) via useMemo. Cancels on unmount.
+ * useSmCustomerTree — shared data layer for every screen that reads the
+ * ShiftManager customer → location → department → contact tree: the SM report
+ * pages (Customers/Locations/Departments) and the reports tables. Fetches
+ * /sm_customers once; each screen derives its own flattened view via useMemo.
+ * Cancels on unmount. A missing endpoint is an empty tree, not an error — the
+ * consumer renders the four UI states (§3).
  */
 import { useState, useEffect } from 'react'
 import api from '@/lib/api'
 import type { ReportCustomer } from '@/types/reports'
 
-export function useSmCustomers() {
+export function useSmCustomerTree() {
   const [customers, setCustomers] = useState<ReportCustomer[]>([])
   const [loading,   setLoading]   = useState(true)
 

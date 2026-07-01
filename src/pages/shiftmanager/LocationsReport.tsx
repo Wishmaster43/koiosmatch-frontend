@@ -10,12 +10,12 @@ import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '@/context/RightPanelContext'
 import KpiBlock         from '@/components/ui/KpiBlock'
 import EntityListDrawer from '@/components/ui/EntityListDrawer'
-import { useSmCustomers } from './hooks/useSmCustomers'
+import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
 import type { SmDrillItem } from '@/types/shiftmanager'
 
 export default function LocationsReport() {
   const { t } = useTranslation('shiftmanager')
-  const { customers, loading } = useSmCustomers()
+  const { customers, loading } = useSmCustomerTree()
   const [drawer,    setDrawer]    = useState<{ title: string; items: SmDrillItem[] } | null>(null)
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
 

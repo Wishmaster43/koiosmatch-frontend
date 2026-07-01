@@ -14,7 +14,8 @@ import LocationDrawer         from './LocationDrawer'
 import PaginationBar          from '../ui/PaginationBar'
 import { useDefaultPageSize } from '@/lib/usePageSize'
 import StatusBadge from '../ui/StatusBadge'  // shared active/inactive status pill
-import type { ReportCustomer, ReportLocation, SortState } from '@/types/reports'
+import { useSmCustomerTree } from '@/hooks/useSmCustomerTree'
+import type { ReportLocation, SortState } from '@/types/reports'
 
 
 function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
@@ -31,8 +32,6 @@ const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--te
 
 export default function LocationsTable() {
   const { t } = useTranslation('reports')
-  const [rows,             setRows]             = useState<ReportLocation[]>([])
-  const [loading,          setLoading]          = useState(true)
   const [search,           setSearch]           = useState('')
   const [drill,            setDrill]            = useState<ReportLocation | null>(null)
   const [selectedStatuses,  setSelectedStatuses]  = useState<Array<string | number>>(['active'])
@@ -45,24 +44,17 @@ export default function LocationsTable() {
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  useEffect(() => {
-    api.get('/sm_customers')
-      .then(res => {
-        const customers = (res.data?.data ?? res.data ?? []) as ReportCustomer[]
-        const flat = customers.flatMap(c =>
-          (c.locations ?? []).map(l => ({
-            ...l,
-            customer_name: c.name,
-            customer_id:   c.id,
-            dept_count:    l.departments?.length ?? 0,
-            address: [l.street, l.house_number, l.postal_code, l.city].filter(Boolean).join(' '),
-          }))
-        )
-        setRows(flat)
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
+  // Data lives in the shared hook (§3); derive the flattened location rows here.
+  const { customers, loading } = useSmCustomerTree()
+  const rows = useMemo<ReportLocation[]>(() => customers.flatMap(c =>
+    (c.locations ?? []).map(l => ({
+      ...l,
+      customer_name: c.name,
+      customer_id:   c.id,
+      dept_count:    l.departments?.length ?? 0,
+      address: [l.street, l.house_number, l.postal_code, l.city].filter(Boolean).join(' '),
+    }))
+  ), [customers])
 
   const statusOptions = useMemo(() =>
     [...new Set(rows.map(r => r.status).filter((x): x is string => Boolean(x)))].sort(), [rows])
