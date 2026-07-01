@@ -5,6 +5,8 @@ import { Edit2, Save, X, Trash2, Cake } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import { NL_PROVINCES } from './constants'
 import { useDateFormat, calcAge, daysUntilBirthday } from '@/lib/datetime'
+import { useGenders } from '@/lib/useGenders'
+import { useNationalities } from '@/lib/useNationalities'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
@@ -29,8 +31,6 @@ function LinkedinIcon({ size = 12, color = '#0A66C2' }: { size?: number; color?:
   )
 }
 
-const NATIONALITIES = ['Nederlands','Belgisch','Duits','Frans','Brits','Pools','Turks','Marokkaans','Surinaams','Antilliaans','Overig']
-
 /** Profile fields (grouped: personal / contact / address) + profile text, each
  * with its own in-place edit controls (pencil → save/cancel) above the block.
  * Fields use label-above layout (consistent with the rest of the app) and pair
@@ -38,6 +38,9 @@ const NATIONALITIES = ['Nederlands','Belgisch','Duits','Frans','Brits','Pools','
 export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
+  // Gender + nationality come from tenant lookups (CFG-1), not hardcoded lists.
+  const { genders } = useGenders()
+  const { nationalities } = useNationalities()
   const emptyForm = (): ProfileForm => ({
     gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '', placeOfBirth: c.placeOfBirth ?? '',
     email: c.email ?? '', phone: c.phone ?? '',
@@ -105,15 +108,13 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
     if (key === 'gender') return (
       <select value={form.gender} onChange={e => setF('gender', e.target.value)} style={inputStyle}>
         <option value="">{t('common:select')}</option>
-        <option value="male">{t('modal.gender.male')}</option>
-        <option value="female">{t('modal.gender.female')}</option>
-        <option value="other">{t('modal.gender.other')}</option>
+        {genders.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
       </select>
     )
     if (key === 'nationality') return (
       <select value={form.nationality} onChange={e => setF('nationality', e.target.value)} style={inputStyle}>
         <option value="">{t('common:select')}</option>
-        {NATIONALITIES.map(n => <option key={n} value={n}>{n}</option>)}
+        {nationalities.map(n => <option key={n} value={n}>{n}</option>)}
       </select>
     )
     if (key === 'province') return (
@@ -181,10 +182,10 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
     }
     if (key === 'email' && v) return <a href={`mailto:${v}`} style={{ fontSize: 12, color: 'var(--color-primary)', textDecoration: 'none' }}>{v}</a>
     if (key === 'phone' && v) return <a href={`tel:${String(v).replace(/\s/g, '')}`} style={{ fontSize: 12, color: 'var(--color-primary)', textDecoration: 'none' }}>{v}</a>
-    // Gender stores a slug (male/female/other); show the translated label, like the edit dropdown does.
+    // Gender stores a slug/label; resolve the display label from the /genders lookup.
     if (key === 'gender') {
-      const genderLabels: Record<string, string> = { male: t('modal.gender.male'), female: t('modal.gender.female'), other: t('modal.gender.other') }
-      return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{(v && genderLabels[v]) || v || '-'}</span>
+      const label = genders.find(g => g.value === v || g.label === v)?.label ?? v
+      return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{label || '-'}</span>
     }
     return <span style={{ fontSize: 12, color: v ? 'var(--text)' : 'var(--text-muted)' }}>{v || '-'}</span>
   }

@@ -7,6 +7,7 @@ import { NL_PROVINCES } from './drawer/constants'
 import { useLookups } from '@/context/LookupsContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useUsers } from '@/lib/queries'
+import { useGenders } from '@/lib/useGenders'
 import { useAuth } from '@/context/AuthContext'
 import { useCreateCandidate } from './hooks/useCandidateMutations'
 import type { Candidate } from '@/types/candidate'
@@ -50,6 +51,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { user: me } = useAuth() as unknown as { user: { id?: Id } | null }
   const settings = useAllSettings()
+  const { genders } = useGenders()
   const { createCandidate, saving } = useCreateCandidate()
 
   // On create you pick the PHASE (Lead/Kandidaat); deployability defaults to available.
@@ -141,11 +143,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const canSubmit      = !!status && requiredForm.every(k => String(form[k] ?? '').trim())
   const statusLabel    = selectedStatus?.label ?? ''
 
-  const genderOptions = [
-    { value: 'male',   label: t('modal.gender.male') },
-    { value: 'female', label: t('modal.gender.female') },
-    { value: 'other',  label: t('modal.gender.other') },
-  ]
+  // Gender options come from the /genders tenant lookup (CFG-1), not hardcoded.
+  const genderOptions = genders.map(g => ({ value: g.value, label: g.label }))
 
   // Build owner dropdown from users list.
   const ownerOptions = users.map(u => ({ value: String(u.id), label: u.name ?? `${u.firstname} ${u.lastname}`.trim() }))
