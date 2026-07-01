@@ -6,39 +6,30 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Layers, MapPin, Building2, Hash, RefreshCw } from 'lucide-react'
-import api from '@/lib/api'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '@/context/RightPanelContext'
 import KpiBlock from '@/components/ui/KpiBlock'  // shared KPI card
-import type { ReportCustomer, ReportDepartment } from '@/types/reports'
+import { useSmCustomers } from './hooks/useSmCustomers'
 
 export default function DepartmentsReport() {
   const { t } = useTranslation('shiftmanager')
-  const [departments, setDepartments] = useState<ReportDepartment[]>([])
-  const [loading,     setLoading]     = useState(true)
+  const { customers, loading } = useSmCustomers()
   const [selectedCustomers, setSelectedCustomers] = useState<string[]>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  useEffect(() => {
-    api.get('/sm_customers')
-      .then(res => {
-        const customers = (res.data?.data ?? res.data ?? []) as ReportCustomer[]
-        setDepartments(customers.flatMap(c =>
-          (c.locations ?? []).flatMap(l =>
-            (l.departments ?? []).map(d => ({
-              ...d,
-              location_name:  l.name,
-              location_status: l.status,
-              customer_name:  c.name,
-              customer_id:    c.id,
-            }))
-          )
-        ))
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
+  // Flatten the customer tree to departments (+ location/customer context).
+  const departments = useMemo(() => customers.flatMap(c =>
+    (c.locations ?? []).flatMap(l =>
+      (l.departments ?? []).map(d => ({
+        ...d,
+        location_name:  l.name,
+        location_status: l.status,
+        customer_name:  c.name,
+        customer_id:    c.id,
+      }))
+    )
+  ), [customers])
 
   const uniqueCustomers = useMemo(() =>
     [...new Set(departments.map(d => d.customer_name).filter((x): x is string => Boolean(x)))], [departments])

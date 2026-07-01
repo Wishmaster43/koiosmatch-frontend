@@ -6,38 +6,29 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Layers, Building2, AlertCircle, RefreshCw } from 'lucide-react'
-import api from '@/lib/api'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useRightPanel } from '@/context/RightPanelContext'
 import KpiBlock         from '@/components/ui/KpiBlock'
 import EntityListDrawer from '@/components/ui/EntityListDrawer'
-import type { ReportCustomer, ReportLocation } from '@/types/reports'
+import { useSmCustomers } from './hooks/useSmCustomers'
 import type { SmDrillItem } from '@/types/shiftmanager'
 
 export default function LocationsReport() {
   const { t } = useTranslation('shiftmanager')
-  const [locations, setLocations] = useState<ReportLocation[]>([])
-  const [loading,   setLoading]   = useState(true)
+  const { customers, loading } = useSmCustomers()
   const [drawer,    setDrawer]    = useState<{ title: string; items: SmDrillItem[] } | null>(null)
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([])
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
-  useEffect(() => {
-    api.get('/sm_customers')
-      .then(res => {
-        const customers = (res.data?.data ?? res.data ?? []) as ReportCustomer[]
-        setLocations(customers.flatMap(c =>
-          (c.locations ?? []).map(l => ({
-            ...l,
-            customer_name: c.name,
-            dept_count: l.departments?.length ?? 0,
-          }))
-        ))
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
+  // Flatten the customer tree to locations (+ customer name + dept count).
+  const locations = useMemo(() => customers.flatMap(c =>
+    (c.locations ?? []).map(l => ({
+      ...l,
+      customer_name: c.name,
+      dept_count: l.departments?.length ?? 0,
+    }))
+  ), [customers])
 
   const active   = locations.filter(l => l.status?.toLowerCase() === 'active')
   const inactive = locations.filter(l => l.status?.toLowerCase() !== 'active')

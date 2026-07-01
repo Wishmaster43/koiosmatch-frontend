@@ -7,31 +7,19 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { RefreshCw } from 'lucide-react'
-import api from '@/lib/api'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
+import { useSmCustomers } from './hooks/useSmCustomers'
 import { useRightPanel } from '@/context/RightPanelContext'
 import ModuleView       from '@/components/settings/ModuleView'
 import EntityListDrawer  from '@/components/ui/EntityListDrawer'
-import type { ReportCustomer } from '@/types/reports'
 import type { SmDrillItem } from '@/types/shiftmanager'
 
 export default function CustomersReport() {
   const { t } = useTranslation('shiftmanager')
-  const [customers, setCustomers] = useState<ReportCustomer[]>([])
-  const [loading,   setLoading]   = useState(true)
-  const [drawer,    setDrawer]    = useState<{ title: string; items: SmDrillItem[] } | null>(null)
+  const { customers, loading } = useSmCustomers()
+  const [drawer, setDrawer] = useState<{ title: string; items: SmDrillItem[] } | null>(null)
 
   const { registerFilters, unregisterFilters } = useRightPanel()
-
-  useEffect(() => {
-    api.get('/sm_customers')
-      .then(res => {
-        const data = res.data
-        setCustomers(Array.isArray(data) ? data : (data?.data ?? []))
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
 
   // Derived KPI values
   const active   = customers.filter(c => c.status?.toLowerCase() === 'active')
