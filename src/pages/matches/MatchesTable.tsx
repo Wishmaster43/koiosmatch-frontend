@@ -1,3 +1,4 @@
+import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -17,10 +18,11 @@ interface MatchesTableProps {
   loading?: boolean
   error?: boolean
   stickyHeader?: boolean
+  scrollParentRef?: RefObject<HTMLElement | null>
 }
 
 // MatchesTable — declares columns only; the shared DataTable owns sorting + states.
-export default function MatchesTable({ rows, loading, error, stickyHeader = false }: MatchesTableProps) {
+export default function MatchesTable({ rows, loading, error, stickyHeader = false, scrollParentRef }: MatchesTableProps) {
   const { t } = useTranslation('matches')
 
   const columns: Column<MatchRow>[] = [
@@ -46,7 +48,7 @@ export default function MatchesTable({ rows, loading, error, stickyHeader = fals
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
         <DataTable columns={columns} rows={rows} loading={loading}
           loadingText={t('loading')} emptyText={error ? t('error') : t('empty')}
-          stickyHeader={stickyHeader} />
+          stickyHeader={stickyHeader} scrollParentRef={scrollParentRef} />
       </div>
     </>
   )

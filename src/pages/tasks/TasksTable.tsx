@@ -1,3 +1,4 @@
+import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -17,6 +18,7 @@ interface TasksTableProps {
   selectedId?: Id | null
   onSelect?: (row: Task) => void
   stickyHeader?: boolean
+  scrollParentRef?: RefObject<HTMLElement | null>
 }
 
 /**
@@ -24,7 +26,7 @@ interface TasksTableProps {
  * hover and the loading/empty states. Rows arrive already decorated (status/type/
  * priority label+colour resolved from the lookup) from TasksPage.
  */
-export default function TasksTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false }: TasksTableProps) {
+export default function TasksTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false, scrollParentRef }: TasksTableProps) {
   const { t } = useTranslation('tasks')
   const { formatDate } = useDateFormat()
 
@@ -77,6 +79,7 @@ export default function TasksTable({ rows, loading, error, selectedId, onSelect,
       onRowClick={onSelect}
       selectedId={selectedId}
       stickyHeader={stickyHeader}
+      scrollParentRef={scrollParentRef}
     />
   )
 }

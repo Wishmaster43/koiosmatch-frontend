@@ -41,6 +41,8 @@ interface VacancyStatsShape {
 
 function VacanciesPageInner() {
   const { t } = useTranslation('vacancies')
+  // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
+  const tableScrollRef = useRef<HTMLDivElement>(null)
   const { registerFilters, unregisterFilters } = useRightPanel()
   const auth = useAuth()
   const hasPermission = auth?.hasPermission ?? (() => false)
@@ -248,7 +250,7 @@ function VacanciesPageInner() {
           )}
 
           {/* Table */}
-          <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+          <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
             {error && (
               <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
             )}
@@ -262,6 +264,7 @@ function VacanciesPageInner() {
               onToggleRow={toggleRow}
               onToggleAll={toggleAll}
               stickyHeader
+              scrollParentRef={tableScrollRef}
             />
           </div>
 

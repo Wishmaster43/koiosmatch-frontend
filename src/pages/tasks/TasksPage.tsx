@@ -49,6 +49,8 @@ function TasksPageInner() {
   const auth = useAuth()
   const user = auth?.user as { default_per_page?: number } | null | undefined
   const { t } = useTranslation('tasks')
+  // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
+  const tableScrollRef = useRef<HTMLDivElement>(null)
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Statuses (= board columns), types and priorities come from the tenant lookup.
   const { statuses, types, priorities, statusMeta, typeMeta, priorityMeta, doneStatusValues } = useTaskLookups()
@@ -265,9 +267,9 @@ function TasksPageInner() {
         {/* Content */}
         {view === 'table' ? (
           <>
-            <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
+            <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
               <TasksTable rows={filtered} loading={loading} error={error}
-                selectedId={selected?.id} onSelect={selectTask} stickyHeader />
+                selectedId={selected?.id} onSelect={selectTask} stickyHeader scrollParentRef={tableScrollRef} />
             </div>
             <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
               pageSize={pageSize} onPageChange={setPage}

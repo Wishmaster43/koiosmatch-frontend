@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocale, useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
@@ -15,10 +16,11 @@ interface OpportunitiesTableProps {
   onRowClick?: (row: Opportunity) => void
   selectedId?: Id | null
   stickyHeader?: boolean
+  scrollParentRef?: RefObject<HTMLElement | null>
 }
 
 // OpportunitiesTable — declares columns only; the shared DataTable owns sorting + states.
-export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, stickyHeader = false }: OpportunitiesTableProps) {
+export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
   const { t } = useTranslation('opportunities')
   const locale = useLocale()
   const { formatDate } = useDateFormat()
@@ -56,7 +58,7 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
       <DataTable columns={columns} rows={rows} loading={loading}
         onRowClick={onRowClick} selectedId={selectedId}
         loadingText={t('loading')} emptyText={error ? t('error') : t('empty')}
-        stickyHeader={stickyHeader} />
+        stickyHeader={stickyHeader} scrollParentRef={scrollParentRef} />
     </div>
   )
 }

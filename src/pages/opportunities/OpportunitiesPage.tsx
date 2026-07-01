@@ -32,6 +32,8 @@ const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
 // drill-down drawer (header pickers patch stage/owner/customer optimistically).
 export default function OpportunitiesPage() {
   const { t } = useTranslation('opportunities')
+  // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
+  const tableScrollRef = useRef<HTMLDivElement>(null)
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { stages, stageMeta } = useOpportunityStages()
 
@@ -166,9 +168,9 @@ export default function OpportunitiesPage() {
           {/* Content */}
           {view === 'table' ? (
             <>
-              <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
+              <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
                 <OpportunitiesTable rows={filtered} loading={loading} error={error}
-                  selectedId={selected?.id} onRowClick={selectOpportunity} stickyHeader />
+                  selectedId={selected?.id} onRowClick={selectOpportunity} stickyHeader scrollParentRef={tableScrollRef} />
               </div>
               <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
                 pageSize={pageSize} onPageChange={setPage}

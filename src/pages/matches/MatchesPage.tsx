@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
@@ -32,6 +32,8 @@ function mapMatch(m: RawMatch): MatchRow {
 // MatchesPage — loads matches, shows an insights strip and paginates the table.
 export default function MatchesPage() {
   const { t } = useTranslation('matches')
+  // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
+  const tableScrollRef = useRef<HTMLDivElement>(null)
   const { user } = useAuth() ?? {}
   const [rows,        setRows]        = useState<MatchRow[]>([])
   const [loading,     setLoading]     = useState(true)
@@ -143,8 +145,8 @@ export default function MatchesPage() {
       </div>
 
       {/* Table */}
-      <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
-        <MatchesTable rows={paged} loading={loading} error={error} stickyHeader />
+      <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
+        <MatchesTable rows={paged} loading={loading} error={error} stickyHeader scrollParentRef={tableScrollRef} />
       </div>
 
       <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}

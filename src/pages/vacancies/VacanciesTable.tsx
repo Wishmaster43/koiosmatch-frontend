@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
@@ -37,6 +38,7 @@ interface VacanciesTableProps {
   onToggleRow?: (id: Id) => void
   onToggleAll?: (ids: Id[], allSelected: boolean) => void
   stickyHeader?: boolean
+  scrollParentRef?: RefObject<HTMLElement | null>
 }
 
 /**
@@ -44,7 +46,7 @@ interface VacanciesTableProps {
  * sorting, selection and the loading/empty states live in the shared DataTable.
  * Mirrors CandidatesTable / ApplicationsTable.
  */
-export default function VacanciesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false }: VacanciesTableProps) {
+export default function VacanciesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: VacanciesTableProps) {
   const { t } = useTranslation('vacancies')
   const { formatDate } = useDateFormat()
   const { statusMeta } = useVacancyLookups()
@@ -126,6 +128,7 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
       loadingText={t('page.loading')}
       emptyText={t('page.empty')}
       stickyHeader={stickyHeader}
+      scrollParentRef={scrollParentRef}
     />
   )
 }
