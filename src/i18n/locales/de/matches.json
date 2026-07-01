@@ -23,8 +23,16 @@
     "hired": "Eingestellt",
     "avgScore": "Ø Score"
   },
-  "add": "Neuer Match",
-  "addComingSoon": "Erstelle Matches über die Kandidaten- oder Stellenkarte.",
+  "add": {
+    "button": "Neuer Match",
+    "title": "Neuer Match",
+    "candidate": "Kandidat",
+    "candidatePlaceholder": "Kandidat wählen…",
+    "vacancy": "Stelle",
+    "vacancyPlaceholder": "Stelle wählen…",
+    "cancel": "Abbrechen",
+    "create": "Match erstellen"
+  },
   "drawer": {
     "label": "Match",
     "tabs": {

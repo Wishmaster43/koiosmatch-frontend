@@ -23,8 +23,16 @@
     "hired": "Aangenomen",
     "avgScore": "Gem. score"
   },
-  "add": "Nieuwe match",
-  "addComingSoon": "Matches aanmaken via de kandidaat- of vacaturekaart.",
+  "add": {
+    "button": "Nieuwe match",
+    "title": "Nieuwe match",
+    "candidate": "Kandidaat",
+    "candidatePlaceholder": "Kies een kandidaat…",
+    "vacancy": "Vacature",
+    "vacancyPlaceholder": "Kies een vacature…",
+    "cancel": "Annuleren",
+    "create": "Match aanmaken"
+  },
   "drawer": {
     "label": "Match",
     "tabs": {

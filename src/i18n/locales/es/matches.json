@@ -23,8 +23,16 @@
     "hired": "Contratado",
     "avgScore": "Puntuación media"
   },
-  "add": "Nuevo match",
-  "addComingSoon": "Crea matches desde la ficha del candidato o de la vacante.",
+  "add": {
+    "button": "Nuevo match",
+    "title": "Nuevo match",
+    "candidate": "Candidato",
+    "candidatePlaceholder": "Elegir un candidato…",
+    "vacancy": "Vacante",
+    "vacancyPlaceholder": "Elegir una vacante…",
+    "cancel": "Cancelar",
+    "create": "Crear match"
+  },
   "drawer": {
     "label": "Match",
     "tabs": {

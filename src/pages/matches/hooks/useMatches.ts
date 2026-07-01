@@ -41,5 +41,8 @@ export function useMatches() {
     return () => { alive = false }
   }, [])
 
-  return { rows, loading, error }
+  // Prepend a newly-created match so it shows immediately (optimistic; §3).
+  const addMatch = (row: MatchRow) => setRows(prev => [row, ...prev])
+
+  return { rows, loading, error, addMatch }
 }

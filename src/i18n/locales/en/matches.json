@@ -23,8 +23,16 @@
     "hired": "Hired",
     "avgScore": "Avg score"
   },
-  "add": "New match",
-  "addComingSoon": "Create matches from the candidate or vacancy card.",
+  "add": {
+    "button": "New match",
+    "title": "New match",
+    "candidate": "Candidate",
+    "candidatePlaceholder": "Select a candidate…",
+    "vacancy": "Vacancy",
+    "vacancyPlaceholder": "Select a vacancy…",
+    "cancel": "Cancel",
+    "create": "Create match"
+  },
   "drawer": {
     "label": "Match",
     "tabs": {

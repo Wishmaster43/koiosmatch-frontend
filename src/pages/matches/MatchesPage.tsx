@@ -8,6 +8,7 @@ import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import MatchesTable from './MatchesTable'
 import MatchDrawer from './MatchDrawer'
 import MatchesBulkBar from './MatchesBulkBar'
+import AddMatchModal from './AddMatchModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { useMatches } from './hooks/useMatches'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
@@ -24,7 +25,7 @@ export default function MatchesPage() {
   // Coupling is authorization-gated in the UI; the backend re-checks (§7).
   const hasPermission = auth?.hasPermission ?? (() => false)
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
-  const { rows, loading, error } = useMatches()
+  const { rows, loading, error, addMatch } = useMatches()
   const [page,        setPage]        = useState(1)
   const [pageSize,    setPageSize]    = useState(() => user?.default_per_page ?? 50)
   const [stageFilter, setStageFilter] = useState<string[]>([])
@@ -91,7 +92,8 @@ export default function MatchesPage() {
     { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary)' },
   ]
 
-  const [addTooltip, setAddTooltip] = useState(false)
+  // Direct-match creation modal (§3B "direct match" path).
+  const [addOpen, setAddOpen] = useState(false)
   // Read-only drill-down: the clicked row opens the MatchDrawer beside the table.
   const [selected, setSelected] = useState<MatchRow | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
@@ -119,25 +121,14 @@ export default function MatchesPage() {
             canCouple={hasPermission('matches.couple')}
           />
         ) : (
-          <div style={{ marginLeft: 'auto', position: 'relative' }}>
-            {/* Match creation flows from the candidate or vacancy drawer; this button hints at that. */}
-            <button
-              onClick={() => setAddTooltip(v => !v)}
-              onBlur={() => setTimeout(() => setAddTooltip(false), 150)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13,
-                fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer',
-                background: 'var(--color-primary)', color: '#fff' }}>
-              <Plus size={15} aria-hidden="true" /> {t('add')}
-            </button>
-            {addTooltip && (
-              <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, zIndex: 20,
-                background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8,
-                padding: '10px 14px', fontSize: 12, color: 'var(--text-muted)', whiteSpace: 'nowrap',
-                boxShadow: '0 4px 16px rgba(0,0,0,0.1)' }}>
-                {t('addComingSoon')}
-              </div>
-            )}
-          </div>
+          // Create a direct match (candidate + vacancy) from the Matches page.
+          <button
+            onClick={() => setAddOpen(true)}
+            style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13,
+              fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer',
+              background: 'var(--color-primary)', color: '#fff' }}>
+            <Plus size={15} aria-hidden="true" /> {t('add.button')}
+          </button>
         )}
       </div>
 
@@ -156,6 +147,9 @@ export default function MatchesPage() {
       {/* Read-only drill-down drawer */}
       <MatchDrawer match={selected} onClose={() => setSelected(null)}
         expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(v => !v)} />
+
+      {/* Direct-match creation modal */}
+      {addOpen && <AddMatchModal onClose={() => setAddOpen(false)} onCreated={addMatch} />}
     </div>
   )
 }

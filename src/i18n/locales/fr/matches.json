@@ -23,8 +23,16 @@
     "hired": "Recruté",
     "avgScore": "Score moy."
   },
-  "add": "Nouveau match",
-  "addComingSoon": "Créez des matches depuis la fiche candidat ou poste.",
+  "add": {
+    "button": "Nouveau match",
+    "title": "Nouveau match",
+    "candidate": "Candidat",
+    "candidatePlaceholder": "Choisir un candidat…",
+    "vacancy": "Poste",
+    "vacancyPlaceholder": "Choisir un poste…",
+    "cancel": "Annuler",
+    "create": "Créer le match"
+  },
   "drawer": {
     "label": "Match",
     "tabs": {
