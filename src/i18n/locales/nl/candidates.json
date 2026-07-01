@@ -223,7 +223,14 @@
     "statusReasonTitle": "Statuswijziging",
     "reasonLabel": "Reden",
     "returnDateLabel": "Weer beschikbaar vanaf",
-    "convertTo": "Converteer naar {{phase}}"
+    "convertTo": "Converteer naar {{phase}}",
+    "placedPickMatch": "Koppel een Match",
+    "placedPickMatchBody": "Kies de Match waaraan je deze kandidaat als Geplaatst koppelt.",
+    "placedConfirm": "Koppel & markeer Geplaatst",
+    "statusSince": "{{status}} sinds {{date}}",
+    "availableAgain": "weer beschikbaar {{date}}",
+    "blacklistedBy": "Geblacklist door {{who}}",
+    "blacklisted": "Geblacklist"
   },
   "stage": {
     "lead": "Lead",

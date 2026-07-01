@@ -74,6 +74,14 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     // come from the shim above so legacy lifecycle data still renders correctly.
     phase,
     status:          deployability,
+    // Status audit (Golf ②): reason + "available again" date + when/who it changed;
+    // blacklist reason + by/at. Shown in the drawer once the backend returns them.
+    statusReason:     c.status_reason ?? null,
+    statusReturnDate: c.status_return_date ?? null,
+    statusChangedAt:  c.status_changed_at ?? c.status_effective_from ?? null,
+    blacklistReason:  c.blacklist_reason ?? null,
+    blacklistedBy:    (typeof c.blacklisted_by === 'object' ? c.blacklisted_by?.name : c.blacklisted_by) ?? null,
+    blacklistedAt:    c.blacklisted_at ?? null,
     // Availability — legacy separate axis (folded into deployability in v2); kept for back-compat.
     availability:    c.availability ?? null,
     owner:           ownerName,

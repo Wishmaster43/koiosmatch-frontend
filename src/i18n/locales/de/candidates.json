@@ -216,7 +216,14 @@
     "statusReasonTitle": "Statusänderung",
     "reasonLabel": "Grund",
     "returnDateLabel": "Wieder verfügbar ab",
-    "convertTo": "Zu {{phase}} umwandeln"
+    "convertTo": "Zu {{phase}} umwandeln",
+    "placedPickMatch": "Match verknüpfen",
+    "placedPickMatchBody": "Wählen Sie den Match, mit dem dieser Kandidat als Eingesetzt verknüpft wird.",
+    "placedConfirm": "Verknüpfen & Eingesetzt",
+    "statusSince": "{{status}} seit {{date}}",
+    "availableAgain": "wieder verfügbar {{date}}",
+    "blacklistedBy": "Auf Blacklist von {{who}}",
+    "blacklisted": "Auf Blacklist"
   },
   "stage": {
     "lead": "Lead",

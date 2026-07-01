@@ -94,6 +94,12 @@ export interface Candidate {
   stageVacancyId: string | number
   phase: string
   status: string
+  statusReason: string | null
+  statusReturnDate: string | null
+  statusChangedAt: string | null
+  blacklistReason: string | null
+  blacklistedBy: string | null
+  blacklistedAt: string | null
   availability: string | null
   owner: string
   ownerId: string | number | null
@@ -193,6 +199,13 @@ export interface ApiCandidate {
   phase?: string
   deployability?: string
   status?: string
+  status_reason?: string | null
+  status_return_date?: string | null
+  status_changed_at?: string | null
+  status_effective_from?: string | null
+  blacklist_reason?: string | null
+  blacklisted_by?: string | { name?: string } | null
+  blacklisted_at?: string | null
   availability?: string | null
   owner?: { id?: string | number; name?: string; avatar_color?: string }
   recruiter?: { name?: string; avatar_color?: string }

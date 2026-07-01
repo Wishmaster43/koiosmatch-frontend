@@ -76,7 +76,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { labelOf: lastContactLabel } = useLastContactTypes()
   // Only the status lookup is needed here now — candidate-type chips moved to the
   // Preferences tab, last-contact to Communication, funnel chips dropped (shown in Match).
-  const { phases, statuses, phaseMeta } = useLookups() as unknown as { phases: LookupOption[]; statuses: LookupOption[]; phaseMeta: (v?: string | null) => { label: string; color: string } }
+  const { phases, statuses, phaseMeta, statusMeta } = useLookups() as unknown as { phases: LookupOption[]; statuses: LookupOption[]; phaseMeta: (v?: string | null) => { label: string; color: string }; statusMeta: (v?: string | null) => { label: string; color: string } }
   const { colorOf: genderColor } = useGenders() as { colorOf: (g?: string) => string | undefined }
   // Avatar colour follows the same tenant setting as the table: neutral grey by
   // default, per-gender only when enabled (Settings → Candidate → Table display).
@@ -104,8 +104,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [recruiter,     setRecruiter]     = useState<(AppUser & { initials: string }) | null>(null)
   const [phase,         setPhase]         = useState<string | null>(null)
   const [status,        setStatus]        = useState<string | null>(null)
-  // "Geplaatst" requires a linked Match — when none exists, prompt instead of setting it.
+  // "Geplaatst" requires a linked Match — pick one (or prompt when none exists).
   const [matchPrompt,   setMatchPrompt]   = useState(false)
+  const [matchChoice,   setMatchChoice]   = useState<string | null>(null)
   // Convert guard (blocks an accidental CV click right after) + a signal that opens Profile edit.
   const [converting,    setConverting]    = useState(false)
   const [profileEditSignal, setProfileEditSignal] = useState(0)
@@ -124,7 +125,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
   if (c?.id !== prevId) {
     setPrevId(c?.id)
-    setRecruiter(null); setPhase(null); setStatus(null); setMatchPrompt(false); setStatusModal(null); setConverting(false)
+    setRecruiter(null); setPhase(null); setStatus(null); setMatchPrompt(false); setMatchChoice(null); setStatusModal(null); setConverting(false)
     setTags(null); setHeaderEditing(false); setProfileEdits(null); setPhotoUrl(null); setHeaderForm(null)
   }
 
@@ -156,11 +157,34 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     if (!requiredComplete(nextPhase.value)) { setActiveTab?.('profile'); setProfileEditSignal(s => s + 1) }
   }
   const currentStatus  = status ?? c.status
+  // Deployability (status) only applies once someone is a Kandidaat — a Lead isn't
+  // deployable yet. So hide the Status picker in the entry (Lead) phase.
+  const showStatus = !!currentPhase && !isEntryPhase
+  // Human-readable status detail line — shows once the backend returns the audit
+  // fields (reason / "available again" date / blacklist by+at). Empty until then.
+  const statusInfoLine: string | null = (() => {
+    const st = currentStatus
+    if (st === 'blacklist' && (c.blacklistReason || c.blacklistedBy || c.blacklistedAt)) {
+      return [
+        c.blacklistedBy ? t('drawer.blacklistedBy', { who: c.blacklistedBy }) : t('drawer.blacklisted'),
+        c.blacklistedAt ? formatDate(c.blacklistedAt) : null,
+        c.blacklistReason,
+      ].filter(Boolean).join(' · ')
+    }
+    if ((st === 'unavailable' || st === 'sick' || st === 'leave') && (c.statusReason || c.statusReturnDate || c.statusChangedAt)) {
+      return [
+        c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(st).label, date: formatDate(c.statusChangedAt) }) : statusMeta(st).label,
+        c.statusReason,
+        c.statusReturnDate ? t('drawer.availableAgain', { date: formatDate(c.statusReturnDate) }) : null,
+      ].filter(Boolean).join(' · ')
+    }
+    return null
+  })()
   // Status (deployability) change, driven by the status lookup flags:
   // requires_match → must link a Match; requires_reason/expects_return_date → ask first.
   const changeStatus = (v: string) => {
     const it = statuses.find(s => s.value === v) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown }) | undefined
-    if (Boolean(it?.requires_match) && !(c.matches?.length)) { setMatchPrompt(true); return }
+    if (Boolean(it?.requires_match) || v === 'placed') { setMatchChoice(null); setMatchPrompt(true); return }
     if (Boolean(it?.requires_reason) || Boolean(it?.expects_return_date)) {
       setStatusModal({ target: v, reason: '', date: '', needReason: Boolean(it?.requires_reason), needDate: Boolean(it?.expects_return_date) })
       return
@@ -250,6 +274,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         )}
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.title || '—'}</div>
+      {statusInfoLine && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{statusInfoLine}</div>}
     </>
   )
 
@@ -336,7 +361,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           titleActions={<ChangelogPopover c={c} />}
           actions={headerActions(setActiveTab)}
           meta={[
-            { key: 'status', label: t('drawer.deployability'), value: currentStatus, options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 170, width: 160 },
+            // Status only for a Kandidaat (not a Lead) — a Lead isn't deployable yet.
+            ...(showStatus ? [{ key: 'status', label: t('drawer.deployability'), value: currentStatus, options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 170, width: 160 }] : []),
             { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions, onChange: onOwnerChange, menuWidth: 200, width: 190 },
           ]}
           tags={{ items: currentTags, onAdd: (tag: string) => setTags([...currentTags, tag]), onRemove: (tag: string) => setTags(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
@@ -344,15 +370,45 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         />
       )}
     />
-    {/* "Geplaatst" requires a linked Match — inform + block until one is coupled (backend match-flow). */}
+    {/* "Geplaatst" → pick one of the candidate's matches to link; if none, prompt to create one first. */}
     {matchPrompt && (
       <div onClick={() => setMatchPrompt(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 400, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div onClick={e => e.stopPropagation()} style={{ background: 'var(--surface)', borderRadius: 12, padding: 20, width: 380, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>{t('drawer.placedNeedsMatchTitle')}</div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 16 }}>{t('drawer.placedNeedsMatchBody')}</div>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <button onClick={() => setMatchPrompt(false)} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:close')}</button>
-          </div>
+        <div onClick={e => e.stopPropagation()} style={{ background: 'var(--surface)', borderRadius: 12, padding: 20, width: 400, boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+          {(c.matches?.length ?? 0) > 0 ? (
+            <>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 4 }}>{t('drawer.placedPickMatch')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 12 }}>{t('drawer.placedPickMatchBody')}</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 16, maxHeight: 240, overflowY: 'auto' }}>
+                {(c.matches ?? []).map((m, i) => {
+                  const mid = String((m as { id?: string | number }).id ?? i)
+                  const mm = m as { vacancyTitle?: string; client?: string }
+                  const sel = matchChoice === mid
+                  return (
+                    <button key={mid} onClick={() => setMatchChoice(mid)}
+                      style={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'flex-start', textAlign: 'left', padding: '8px 10px', borderRadius: 8, cursor: 'pointer',
+                        border: `1px solid ${sel ? 'var(--color-primary)' : 'var(--border)'}`, background: sel ? 'var(--color-primary-bg)' : 'var(--bg)' }}>
+                      <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{mm.vacancyTitle || mm.client || '—'}</span>
+                      {mm.client && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{mm.client}</span>}
+                    </button>
+                  )
+                })}
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                <button onClick={() => setMatchPrompt(false)} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
+                <button disabled={!matchChoice}
+                  onClick={() => { setStatus('placed'); onUpdate?.(c.id, { status: 'placed', match_id: matchChoice }); setMatchPrompt(false) }}
+                  style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: matchChoice ? 1 : 0.5 }}>{t('drawer.placedConfirm')}</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 8 }}>{t('drawer.placedNeedsMatchTitle')}</div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 16 }}>{t('drawer.placedNeedsMatchBody')}</div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <button onClick={() => setMatchPrompt(false)} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:close')}</button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     )}

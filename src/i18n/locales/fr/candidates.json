@@ -216,7 +216,14 @@
     "statusReasonTitle": "Changement de statut",
     "reasonLabel": "Raison",
     "returnDateLabel": "De nouveau disponible à partir de",
-    "convertTo": "Convertir en {{phase}}"
+    "convertTo": "Convertir en {{phase}}",
+    "placedPickMatch": "Lier un Match",
+    "placedPickMatchBody": "Choisissez le Match auquel lier ce candidat comme Placé.",
+    "placedConfirm": "Lier & marquer Placé",
+    "statusSince": "{{status}} depuis {{date}}",
+    "availableAgain": "de nouveau disponible {{date}}",
+    "blacklistedBy": "Sur liste noire par {{who}}",
+    "blacklisted": "Sur liste noire"
   },
   "stage": {
     "lead": "Piste",

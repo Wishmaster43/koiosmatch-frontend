@@ -216,7 +216,14 @@
     "statusReasonTitle": "Cambio de estado",
     "reasonLabel": "Motivo",
     "returnDateLabel": "Disponible de nuevo desde",
-    "convertTo": "Convertir a {{phase}}"
+    "convertTo": "Convertir a {{phase}}",
+    "placedPickMatch": "Vincular un Match",
+    "placedPickMatchBody": "Elige el Match al que vincular este candidato como Asignado.",
+    "placedConfirm": "Vincular y marcar Asignado",
+    "statusSince": "{{status}} desde {{date}}",
+    "availableAgain": "disponible de nuevo {{date}}",
+    "blacklistedBy": "En lista negra por {{who}}",
+    "blacklisted": "En lista negra"
   },
   "stage": {
     "lead": "Lead",

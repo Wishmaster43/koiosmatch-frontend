@@ -222,7 +222,14 @@
     "statusReasonTitle": "Status change",
     "reasonLabel": "Reason",
     "returnDateLabel": "Available again from",
-    "convertTo": "Convert to {{phase}}"
+    "convertTo": "Convert to {{phase}}",
+    "placedPickMatch": "Link a Match",
+    "placedPickMatchBody": "Pick the Match to link this candidate as Placed.",
+    "placedConfirm": "Link & mark Placed",
+    "statusSince": "{{status}} since {{date}}",
+    "availableAgain": "available again {{date}}",
+    "blacklistedBy": "Blacklisted by {{who}}",
+    "blacklisted": "Blacklisted"
   },
   "stage": {
     "lead": "Lead",
