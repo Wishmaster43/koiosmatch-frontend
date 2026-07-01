@@ -70,48 +70,48 @@ export const NAV_GROUPS = [
     key: 'kpis', icon: Target,
     items: [
       // Sub-tabs per KPI area; labels via nav.<id>, fields share the `kpis.*` i18n.
-      { id: 'kpis_leads',        label: 'Leads KPIs',       icon: Target,        schema: kpisLeads },
-      { id: 'kpis_candidates',   label: 'Candidate KPIs',   icon: Users,         schema: kpisCandidates },
-      { id: 'kpis_applications', label: 'Application KPIs', icon: ClipboardList, schema: kpisApplications },
-      { id: 'kpis_customers',    label: 'Customer KPIs',    icon: Building2,      schema: kpisCustomers },
+      { id: 'kpis_leads', icon: Target, schema: kpisLeads },
+      { id: 'kpis_candidates', icon: Users, schema: kpisCandidates },
+      { id: 'kpis_applications', icon: ClipboardList, schema: kpisApplications },
+      { id: 'kpis_customers', icon: Building2, schema: kpisCustomers },
     ],
   },
   {
     // Company / organisation: profile, locations, brand + per-module view config.
     key: 'company', icon: Building2,
     items: [
-      { id: 'company',   label: 'General',   icon: Building2, component: CompanySettings },
-      { id: 'memory',    label: 'Memory',    icon: BookOpen,  component: MemorySettings },
-      { id: 'locations', label: 'Locations', icon: MapPin,    component: LocationsSettings },
-      { id: 'branding',  label: 'Brand',     icon: Palette,   component: BrandSettings },
+      { id: 'company', icon: Building2, component: CompanySettings },
+      { id: 'memory', icon: BookOpen, component: MemorySettings },
+      { id: 'locations', icon: MapPin, component: LocationsSettings },
+      { id: 'branding', icon: Palette, component: BrandSettings },
     ],
   },
   {
     // Personalisation = shared/general tenant lookups (used across candidates, customers, contacts, …).
     key: 'personalisation', icon: BookOpen,
     items: [
-      { id: 'industries',         label: 'Industries',   icon: Factory,       component: IndustrySettings },
-      { id: 'lang_languages',     label: 'Languages',    icon: Languages,     component: LanguageListSettings },
-      { id: 'lang_levels',        label: 'Levels',       icon: BarChart2,     component: LanguageLevelSettings },
-      { id: 'genders',            label: 'Gender',       icon: Users,         component: GenderSettings },
-      { id: 'last_contact_types', label: 'Contact type', icon: MessageCircle, component: LastContactTypesSettings },
-      { id: 'note_types',         label: 'Note types',   icon: MessageSquare, component: NoteTypesSettings },
+      { id: 'industries', icon: Factory, component: IndustrySettings },
+      { id: 'lang_languages', icon: Languages, component: LanguageListSettings },
+      { id: 'lang_levels', icon: BarChart2, component: LanguageLevelSettings },
+      { id: 'genders', icon: Users, component: GenderSettings },
+      { id: 'last_contact_types', icon: MessageCircle, component: LastContactTypesSettings },
+      { id: 'note_types', icon: MessageSquare, component: NoteTypesSettings },
     ],
   },
   {
     // Candidate-specific settings (Danny: "Kandidaat").
     key: 'candidate', icon: Users,
     items: [
-      { id: 'candidate_phases',       label: 'Phase',             icon: Target,        component: CandidatePhasesSettings },
-      { id: 'candidate_statuses',     label: 'Status',            icon: Users,         component: CandidateStatusesSettings },
-      { id: 'contract_forms',         label: 'Contractvorm',      icon: Tags,          component: ContractFormsSettings },
-      { id: 'pools',                  label: 'Talent pools',      icon: Star,          component: PoolsSettings },
-      { id: 'cv_template',            label: 'CV template',       icon: FileText,      component: CvTemplateSettings },
-      { id: 'document_types',         label: 'Document types',    icon: FileText,      component: DocumentTypesSettings },
-      { id: 'driver_licenses',        label: 'Driving licences',  icon: Car,           component: DriverLicenseSettings },
-      { id: 'candidate_display',      label: 'Table display',     icon: Palette,       schema: candidateDisplay },
-      { id: 'candidate_custom_fields', label: 'Custom fields',    icon: ListChecks,    component: CandidateCustomFieldsSettings },
-      { id: 'candidate_required_fields', label: 'Required fields', icon: Flag,         component: CandidateRequiredFieldsSettings },
+      { id: 'candidate_phases', icon: Target, component: CandidatePhasesSettings },
+      { id: 'candidate_statuses', icon: Users, component: CandidateStatusesSettings },
+      { id: 'contract_forms', icon: Tags, component: ContractFormsSettings },
+      { id: 'pools', icon: Star, component: PoolsSettings },
+      { id: 'cv_template', icon: FileText, component: CvTemplateSettings },
+      { id: 'document_types', icon: FileText, component: DocumentTypesSettings },
+      { id: 'driver_licenses', icon: Car, component: DriverLicenseSettings },
+      { id: 'candidate_display', icon: Palette, schema: candidateDisplay },
+      { id: 'candidate_custom_fields', icon: ListChecks, component: CandidateCustomFieldsSettings },
+      { id: 'candidate_required_fields', icon: Flag, component: CandidateRequiredFieldsSettings },
     ],
   },
   {
@@ -119,40 +119,40 @@ export const NAV_GROUPS = [
     // application, not the candidate (Danny). Rejection messaging is handled by workflows.
     key: 'applications', icon: ClipboardList,
     items: [
-      { id: 'funnel_stages', label: 'Funnel stages',     icon: Target,  component: FunnelStagesSettings },
-      { id: 'rejection',     label: 'Rejection reasons', icon: XCircle, component: RejectionSettings },
+      { id: 'funnel_stages', icon: Target, component: FunnelStagesSettings },
+      { id: 'rejection', icon: XCircle, component: RejectionSettings },
     ],
   },
   {
     // Customer-domain lookups — statuses for the customer and its sub-entities.
     key: 'customers', icon: Building2,
     items: [
-      { id: 'customer_statuses',   label: 'Statuses',          icon: Tags,      component: CustomerStatusesSettings },
-      { id: 'location_statuses',   label: 'Location statuses',  icon: MapPin,    component: LocationStatusesSettings },
-      { id: 'department_statuses', label: 'Department statuses', icon: Building2, component: DepartmentStatusesSettings },
-      { id: 'contact_statuses',    label: 'Contact statuses',   icon: Users,     component: ContactStatusesSettings },
+      { id: 'customer_statuses', icon: Tags, component: CustomerStatusesSettings },
+      { id: 'location_statuses', icon: MapPin, component: LocationStatusesSettings },
+      { id: 'department_statuses', icon: Building2, component: DepartmentStatusesSettings },
+      { id: 'contact_statuses', icon: Users, component: ContactStatusesSettings },
     ],
   },
   {
     key: 'vacancies', icon: Briefcase,
     items: [
-      { id: 'vacancy_statuses',    label: 'Statuses',         icon: Briefcase,      component: VacancyStatusSettings },
-      { id: 'vacancy_phases',      label: 'Phases',           icon: Target,         component: VacancyPhaseSettings },
-      { id: 'vacancy_employment',  label: 'Employment types', icon: ClipboardList,  component: VacancyEmploymentTypeSettings },
-      { id: 'vacancy_seniority',   label: 'Seniority',        icon: BarChart2,      component: VacancySenioritySettings },
-      { id: 'vacancy_education',   label: 'Education',        icon: BookOpen,       component: VacancyEducationSettings },
-      { id: 'vacancy_channels',    label: 'Job boards',       icon: Store,          component: VacancyChannelSettings },
-      { id: 'vacancy_fields',      label: 'Custom fields',    icon: FileText,       component: VacancyFieldsSettings },
-      { id: 'vacancy_matching',    label: 'Matching',         icon: Sparkles,       component: VacancyMatchingSettings },
+      { id: 'vacancy_statuses', icon: Briefcase, component: VacancyStatusSettings },
+      { id: 'vacancy_phases', icon: Target, component: VacancyPhaseSettings },
+      { id: 'vacancy_employment', icon: ClipboardList, component: VacancyEmploymentTypeSettings },
+      { id: 'vacancy_seniority', icon: BarChart2, component: VacancySenioritySettings },
+      { id: 'vacancy_education', icon: BookOpen, component: VacancyEducationSettings },
+      { id: 'vacancy_channels', icon: Store, component: VacancyChannelSettings },
+      { id: 'vacancy_fields', icon: FileText, component: VacancyFieldsSettings },
+      { id: 'vacancy_matching', icon: Sparkles, component: VacancyMatchingSettings },
     ],
   },
   {
     // Task (activity) lookups — own top-level menu, one sub-tab per list (decision §3B).
     key: 'tasks', icon: ListChecks,
     items: [
-      { id: 'task_statuses',   label: 'Statuses',       icon: ListChecks, component: TaskStatusSettings },
-      { id: 'task_types',      label: 'Activity types', icon: Tags,       component: TaskTypeSettings },
-      { id: 'task_priorities', label: 'Priorities',     icon: Flag,       component: TaskPrioritySettings },
+      { id: 'task_statuses', icon: ListChecks, component: TaskStatusSettings },
+      { id: 'task_types', icon: Tags, component: TaskTypeSettings },
+      { id: 'task_priorities', icon: Flag, component: TaskPrioritySettings },
     ],
   },
   // Planning tijdelijk verborgen (2026-06-26) — niet verwijderd, alleen uit. Terugzetten = dit blok +
@@ -161,94 +161,94 @@ export const NAV_GROUPS = [
   {
     key: 'planning', icon: CalendarDays,
     items: [
-      { id: 'shift_types',     label: 'Shift types',     icon: Clock,         component: ShiftTypesSettings },
-      { id: 'availability',    label: 'Availability',    icon: CalendarCheck, component: AvailabilitySettings },
-      { id: 'automatch',       label: 'Auto-match rules', icon: Sparkles,     component: AutoMatchSettings },
-      { id: 'planning_board',  label: 'Planning board',  icon: LayoutGrid,    component: PlanningBoardSettings },
+      { id: 'shift_types', icon: Clock, component: ShiftTypesSettings },
+      { id: 'availability', icon: CalendarCheck, component: AvailabilitySettings },
+      { id: 'automatch', icon: Sparkles, component: AutoMatchSettings },
+      { id: 'planning_board', icon: LayoutGrid, component: PlanningBoardSettings },
     ],
   },
   */
   {
     key: 'views', icon: BarChart2,
     items: [
-      { id: 'view_customers',  label: 'Customers',  icon: Building2, render: () => <ViewConfigEditor module="customers" /> },
-      { id: 'view_planning',   label: 'Planning',   icon: Clock,     render: () => <ViewConfigEditor module="planning" /> },
-      { id: 'view_sales',      label: 'Sales',      icon: BarChart2, render: () => <ViewConfigEditor module="sales" /> },
-      { id: 'view_candidates', label: 'Candidates', icon: Users,     render: () => <ViewConfigEditor module="candidates" /> },
+      { id: 'view_customers', icon: Building2, render: () => <ViewConfigEditor module="customers" /> },
+      { id: 'view_planning', icon: Clock, render: () => <ViewConfigEditor module="planning" /> },
+      { id: 'view_sales', icon: BarChart2, render: () => <ViewConfigEditor module="sales" /> },
+      { id: 'view_candidates', icon: Users, render: () => <ViewConfigEditor module="candidates" /> },
     ],
   },
   {
     // Communication = e-mail per context (clients / candidates / planning).
     key: 'communication', icon: Mail,
     items: [
-      { id: 'email_klanten',    label: 'Email — clients',    icon: Mail, render: () => <EmailSettings context="klanten" /> },
-      { id: 'email_kandidaten', label: 'Email — candidates', icon: Mail, render: () => <EmailSettings context="kandidaten" /> },
-      { id: 'email_planning',   label: 'Email — planning',   icon: Mail, render: () => <EmailSettings context="planning" /> },
+      { id: 'email_klanten', icon: Mail, render: () => <EmailSettings context="klanten" /> },
+      { id: 'email_kandidaten', icon: Mail, render: () => <EmailSettings context="kandidaten" /> },
+      { id: 'email_planning', icon: Mail, render: () => <EmailSettings context="planning" /> },
     ],
   },
   {
     // WhatsApp — connection + messaging (WhatsApp Business).
     key: 'whatsapp', icon: MessageCircle,
     items: [
-      { id: 'whatsapp',  label: 'WhatsApp',  icon: MessageCircle, component: WhatsAppSettings, requiresPage: 'whatsapp' },
-      { id: 'messaging', label: 'Messages',  icon: MessageSquare, component: MessagingSettings },
+      { id: 'whatsapp', icon: MessageCircle, component: WhatsAppSettings, requiresPage: 'whatsapp' },
+      { id: 'messaging', icon: MessageSquare, component: MessagingSettings },
     ],
   },
   {
     // Notifications — its own menu (per context).
     key: 'notifications', icon: Bell,
     items: [
-      { id: 'notif_sollicitaties', label: 'Applications', icon: Bell, render: () => <NotificationsSettings context="sollicitaties" /> },
-      { id: 'notif_vacatures',     label: 'Vacancies',    icon: Bell, render: () => <NotificationsSettings context="vacatures" /> },
-      { id: 'notif_facturering',   label: 'Billing',      icon: Bell, render: () => <NotificationsSettings context="facturering" /> },
+      { id: 'notif_sollicitaties', icon: Bell, render: () => <NotificationsSettings context="sollicitaties" /> },
+      { id: 'notif_vacatures', icon: Bell, render: () => <NotificationsSettings context="vacatures" /> },
+      { id: 'notif_facturering', icon: Bell, render: () => <NotificationsSettings context="facturering" /> },
     ],
   },
   {
     key: 'integrations', icon: Store,
     items: [
-      { id: 'mod_shiftmanager', label: 'Shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresPage: 'shiftmanager' },
-      { id: 'apikeys',    label: 'API keys',  icon: Key,      component: ApiKeysSettings },
-      { id: 'webhooks',   label: 'Webhooks',  icon: Webhook,  component: WebhooksSettings },
-      { id: 'importeren', label: 'Import',    icon: Download, component: ImporterenSettings },
-      { id: 'koios',      label: 'Koios AI',  icon: Sparkles, component: KoiosSettings },
+      { id: 'mod_shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresPage: 'shiftmanager' },
+      { id: 'apikeys', icon: Key, component: ApiKeysSettings },
+      { id: 'webhooks', icon: Webhook, component: WebhooksSettings },
+      { id: 'importeren', icon: Download, component: ImporterenSettings },
+      { id: 'koios', icon: Sparkles, component: KoiosSettings },
     ],
   },
   {
     key: 'billing', icon: CreditCard,
     items: [
       // Payment methods + auto top-up merged into one tab; the standalone Plan tab dropped (Danny).
-      { id: 'billing_pay', label: 'Payment', icon: CreditCard, render: () => (
+      { id: 'billing_pay', icon: CreditCard, render: () => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
           <BetaalmethodenSettings />
           <AutoOpwaarderenSettings />
         </div>
       ) },
-      { id: 'billing_usage',    label: 'Usage',    icon: BarChart2, component: GebruikSettings },
-      { id: 'billing_invoices', label: 'Invoices', icon: FileText,  component: FacturenSettings },
+      { id: 'billing_usage', icon: BarChart2, component: GebruikSettings },
+      { id: 'billing_invoices', icon: FileText, component: FacturenSettings },
     ],
   },
   {
     // Super Admin (super-admin-only): per-tenant package + add-ons, connectors, and usage.
     key: 'superadmin', icon: Shield,
     items: [
-      { id: 'modules', label: 'Package',           icon: Package,   component: ModulesSettings,    superAdminOnly: true },
-      { id: 'apps',    label: 'Apps (connectors)', icon: AppWindow, component: AppsSettings,        superAdminOnly: true },
-      { id: 'usage',   label: 'Usage',             icon: BarChart2, component: TenantUsageSettings, superAdminOnly: true },
+      { id: 'modules', icon: Package, component: ModulesSettings, superAdminOnly: true },
+      { id: 'apps', icon: AppWindow, component: AppsSettings, superAdminOnly: true },
+      { id: 'usage', icon: BarChart2, component: TenantUsageSettings, superAdminOnly: true },
     ],
   },
   {
     // Administration: roles and users only.
     key: 'administration', icon: Users,
     items: [
-      { id: 'roles', label: 'Roles & permissions', icon: Shield, component: RolesSettings },
-      { id: 'users', label: 'Users',               icon: Users,  component: UsersPage },
+      { id: 'roles', icon: Shield, component: RolesSettings },
+      { id: 'users', icon: Users, component: UsersPage },
     ],
   },
   {
     // Audit log: own top-level settings group so it is easy to find.
     key: 'audit', icon: ClipboardList,
     items: [
-      { id: 'audit', label: 'Audit log', icon: ClipboardList, component: AuditLog },
+      { id: 'audit', icon: ClipboardList, component: AuditLog },
     ],
   },
 ]
