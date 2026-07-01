@@ -212,7 +212,7 @@ snapshot + a doc line.
 
 ## I. Review backlog (Danny walkthrough 2026-07-02) — routed to lanes
 
-> Findings from Danny clicking through the app. FE-repo detail lives in `worklist.md §B-32..B-35`; the
+> Findings from Danny clicking through the app. FE-repo detail lives in `worklist.md §B-32..B-38`; the
 > cross-lane / backend-relevant parts are surfaced here so **both sides see them** in the shared plan.
 
 - **AP-R1 · [settings-lane]** Remove `billing_pay`; add missing personalisation sub-tabs (**tasks · outreach · matches**) — blueprint parity. (B-32)
@@ -220,3 +220,4 @@ snapshot + a doc line.
 - **AP-R3 · [workflow-lane + BE]** Workflow list gets a **table view** (sticky header + sort); **authz on every action** (create/rename/delete folder · create/edit/run workflow · view logs → `settings.update`, ties to **AP-H1**); **delete-guard**: no delete of a folder/workflow with an **active workflow** → **409 + reason**. (B-33)
 - **AP-R4 · [BE + Dash]** **Pipeline value unit configurable** — tenant setting `pipeline_value_unit` (`money|hours`), aggregate `value` € vs `hours` (opps carry both, C-42); the resource returns the **unit** so the FE never hardcodes €. (B-34)
 - **AP-R5 · [FE all pages + BE]** **Super-search above the table** (by the title, not tucked in the right panel) + **true full coverage** server-side `?q=` across all fields + sub-entities (name/phone/email/function/work-experience/notes). Ties to `/architect` §6. (B-35)
+- **AP-R6 · [FE + BE]** **Propose candidate to the customer** from the application: a prominent "Mail opdrachtgever / Propose" action (above the CV/unlink), pick the customer **contact**, send an **anonymized CV** (GDPR — no BSN/contact/sensitive fields) + a **tenant email template**, log it + optionally set funnel `proposal`. ⚠️ `mailto:` **can't attach** a file → either **backend-send** (via the existing tenant email link — recommended, trackable/logged) or mailto + a CV download-link. `POST /applications/{id}/propose`. (B-36)

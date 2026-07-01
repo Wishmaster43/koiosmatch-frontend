@@ -314,6 +314,30 @@ LEVER: consistente chips/knoppen/typografie + lijst toegevoegde i18n-keys + geë
       e-mail · functie · werkervaring · notities · …) — client-side zoekt alleen geladen rijen, dus dit MOET
       server-side (full-text index, debounced). Consistent `?q=`-contract over alle resources. Haakt op /architect §6.
 
+### B-36 · Kandidaat voorstellen aan de klant (vanuit de sollicitatie) — FE + BE (review 2026-07-02)
+> Vanuit de sollicitatie de kandidaat **voorstellen aan de opdrachtgever**, met een **geanonimiseerde CV**
+> (AVG — zonder BSN/contactgegevens/gevoelige velden). Sluit aan op de funnel-fase **`proposal`/Voorstel**.
+- [ ] **Actie prominent** in de sollicitatie-drawer: knop **"Voorstellen / Mail opdrachtgever"** bovenaan
+      (CV staat nu onderaan naast Ontkoppelen — logischer om deze actie bovenaan te zetten).
+- [ ] **Flow:** kies de **contactpersoon van de klant** (uit `/customers/{id}/contacts`) → e-mail met de
+      **geanonimiseerde CV** + een **templated tekst** (tenant-instelbaar). Logt het voorstel (AVG-accountability)
+      + zet evt. de funnel op `proposal`.
+- ⚠️ **Belangrijk (FE-advies):** `mailto:` kan **géén bijlage** meesturen — "Outlook openen mét CV als bijlage"
+      kan niet via mailto. Twee opties: **(a) backend verstuurt de mail** (via de tenant-e-mailkoppeling die er al is,
+      `/profile/email` / settings) mét bijlage + template — **aanbevolen** (trackbaar, AVG-gelogd); of **(b) mailto**
+      met body + een **download-link** naar de CV (geen echte bijlage). Danny beslist a/b.
+- [ ] **BE:** geanonimiseerde-CV-generatie (velden-whitelist), e-mailtemplate-lookup (tenant), verzend-endpoint
+      `POST /applications/{id}/propose` (contact_id + template) → mail + log + funnel-update.
+
+### B-37 · Vacature-drawer → tab Kandidaten: sub-tabs sticky (review 2026-07-02)
+- [ ] In de vacature-drawer, tab **Kandidaten**, moeten de **sub-tabs sticky** blijven (blijven staan bij scrollen) —
+      een sticky sub-header. Lane = vacancies (A1). Mirror waar de kandidaat-drawer dit al doet.
+
+### B-38 · Vacature-drawer: "Details"-tab overbodig? (review 2026-07-02)
+- [ ] Danny: de **Details-tab** op de vacature-drawer lijkt **onzin/redundant**. Check overlap met de header +
+      andere tabs; waarschijnlijk **de kern-vacaturevelden in de primaire tab vouwen** (mirror kandidaat "Profiel")
+      of de tab verwijderen als 'ie het kopje dupliceert. Lane = vacancies (A1).
+
 ---
 
 ## C. Backend — open taken
