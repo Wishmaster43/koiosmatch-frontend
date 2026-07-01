@@ -349,9 +349,6 @@ modellen, seeders én API's** bijwerken. Waardenmatrix:
 ### C-1 · Lookups — "in gebruik"-vlag + 409 ◐
 Verifiëren met ingelogde sessie: vacancy status/fase toevoegen + reorder werkt.
 
-### C-1 · Lookups — "in gebruik"-vlag + 409 ◐
-Verifiëren met ingelogde sessie: vacancy status/fase toevoegen + reorder werkt.
-
 ### C-2 · Kandidaat sub-entiteiten — body-contracten
 Sub-entiteit CRUD (experiences/educations/certifications/skills/matches/languages/preferences/zzp).
 
@@ -798,12 +795,12 @@ de >400-splits (§F-1) → (3) `/architect` tegen ARCHITECTURE.md → (4) CLAUDE
 ## F. Kwaliteit & architectuur (FE — gefold uit MASTER-PLAN P2–P4 + architect-findings)
 
 ### Modulariteit
-- ☐ **F-1** Splits > ~400 r: `ReportFilterSidebar` (490) · `MessagesTable` (423) · `WorkflowCanvasEditor` (878) → elk single-purpose < ~400.
+- ✅ **F-1** Splits > ~400 r — **OPGELOST** (§G R-SPLIT: nul files >400 in de repo; ReportFilterSidebar/MessagesTable/WorkflowCanvasEditor gesplitst).
 - ☐ **F-2** Blueprint-conformiteit per entiteit (vacancies/customers/applications/matches/opportunities/tasks = zelfde shape als candidate; gedeelde DataTable/InsightsRow/ActionMenu/bulkMutate; geen 2e MODULE_META).
 - ☐ **F-3** DUP: `shiftmanager/CustomersInsightsRow` = near-duplicate van gedeelde `InsightsRow` → samenvouwen. AW-9: editor-datumveld → datepicker (DD-MM-YYYY).
 
 ### i18n compleet (geen Dutch islands)
-- ☐ **F-4** Workflow-editor (~60 strings, 0×`t()`) + module-registry labels/categorieën × 5 locales.
+- ✅ **F-4** Workflow-editor i18n — **OPGELOST** (§G I18N-1/2: `modules.*`/`categories.*` × 5 locales; geen Dutch-island meer).
 - ☐ **F-5** Settings `registry.jsx` (66 hardcoded nav-labels, 0×`t()`) → `t()` × 5 locales.
 - ☐ **F-6** `AppsContext` NL-descriptions · `ViewConfigEditor` EN-strings → via `t()` × 5 locales.
 - ☐ **F-7** Project-brede i18n-grep op JSX-literals → 0 findings. VOC-restant: CompanySettings-lijsten + SM-statussen → lookups.

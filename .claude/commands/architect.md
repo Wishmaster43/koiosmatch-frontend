@@ -49,11 +49,12 @@ cite `file:line`.
    vacancy: can you see candidates who already worked for that customer and their
    current status? Is the right information in the right tab?
 
-4. **Configurability surfaced.** Statuses, status-transition side-effects, filter
-   defaults (inactief/blacklist/archived off-by-default but still searchable),
-   radius, thresholds, rejection templates, the "this status creates a Match"
-   flag — all settings-driven, _nothing hardcoded_. Flag every hardcoded value
-   the product says must be instelbaar.
+4. **Configurability surfaced.** Phase + deployability statuses, status-transition side-effects, filter
+   defaults (blacklist/archived off-by-default but still searchable),
+   radius, thresholds, rejection templates, the `requires_match` flag (placed needs
+   a Match) — all settings-driven, _nothing hardcoded_. Bind derived signals to the
+   flag, never a hardcoded status/stage key. Flag every hardcoded value the product
+   says must be instelbaar.
    **i18n is part of this — all-or-nothing per area, never again:** every user-facing
    string goes through `t()` (incl. the module registry labels/categories, not just pages).
    A component with visible text but **no `useTranslation`/`t()` is a finding**; a
@@ -63,17 +64,20 @@ cite `file:line`.
 
 5. **Filter / KPI / chart consistency.** Do KPI rows, charts, and tables all
    react to the same global filter context (RightPanelContext)? Do totals exclude
-   exactly what the filters exclude (inactief/blacklist → lower counts)? Does the
+   exactly what the filters exclude (blacklist/archived → lower counts)? Does the
    sidebar filter menu match the _current_ status model?
 
 6. **Global search coverage.** Does search hit _everything_ — name, phone, email,
    function, work experience — and is it consistent across all pages?
 
-7. **Status model & UI side-effects.** Is each transition's UI behavior defined?
-   Geplaatst → **Gematched** (not "Gemachtigd"): address + vacancy choice + create
-   match? Inactief: only with no active Match, with a reason, and — if the tenant
-   has the planning module — not still scheduled. "Niet bemiddelbaar/beschikbaar"
-   (same thing): requires a date + a way to reactivate.
+7. **Axes model & UI side-effects (v2).** Two candidate axes — **Phase** (Lead→Kandidaat)
+   + **deployability/inzetbaarheid** (Beschikbaar·Geplaatst·Niet beschikbaar·Ziek·Verlof·Blacklist),
+   never one collapsed "status". Is each transition's UI behavior defined? **Geplaatst**
+   (`requires_match`): requires linking a Match (address + vacancy choice + create match).
+   **Niet beschikbaar/Ziek/Verlof** (`requires_reason`): only with no active Match, a reason,
+   and — if the tenant has the planning module — not still scheduled; needs an "available again"
+   date + a way to reactivate. **Blacklist** = a status value (`blacklist_reason`), not a boolean;
+   **Archived** = soft-delete. There is **no `inactive`/`unplaceable`**.
 
 8. **Reusable cross-entity building blocks.** Are notes, the rich-text editor
    (with HTML toggle + expand/pop-out and collapse), change log, and tabs the
