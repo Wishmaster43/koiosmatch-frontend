@@ -26,7 +26,7 @@ function harness() {
     return { vacancies, setSelectedIds, actions }
   })
 }
-const status = (r: { current: { vacancies: Array<Record<string, unknown>> } }, id: number) =>
+const status = (r: { result: { current: { vacancies: Array<Record<string, unknown>> } } }, id: number) =>
   r.result.current.vacancies.find(v => v.id === id)?.statusValue
 
 beforeEach(() => { notify.mockClear(); post.mockReset() })
