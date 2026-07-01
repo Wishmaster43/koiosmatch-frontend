@@ -57,7 +57,7 @@
 
 > **BE = `koiosmatch-api` (deze lane), FE = `koiosmatch-frontend`.** Backend levert feed/velden; frontend wired de blokken. Sectie bijgehouden door **BE-Claude** — hou 'm in sync (identieke kopie in `koiosmatch-api/docs/DASHBOARD-PLAN.md`).
 
-### ✅ Klaar (backend geleverd — live + groen op main, t/m `3041c72`)
+### ✅ Klaar (backend geleverd — live + groen op main, t/m `8328f53`)
 - **Contact-recorder (item 1)** — gedeelde `RecordsLastContact`-trait op **kandidaten én klant-contactpersonen**, gestempeld via **model-events** (elk schrijfpad, monotoon, geen updated_at-bump):
   - Kandidaat: **notitie** → `note`, **afspraak** → `appointment` / `call` (belafspraak) / `meet` (Google Meet).
   - Contactpersoon: **klant-notitie** → de **primaire contactpersoon** (kanaal `note`).
@@ -65,11 +65,13 @@
 - **Datumveld-filter (item 5)** — `created_between` + `last_contact_between` op de **kandidatenlijst** (`/candidates`), positioneel én keyed shape → "periode-klik → datumveld-filter" kan nu.
 - **Drill-down-ids** — `recent.applications[]` draagt `candidate_id` + `vacancy_id` (naast `id`); `recent.candidates[].id` = kandidaat, `recent.leads[].id` = klant.
 - **`dashboard_type`-enum (item 6) — backend is leidend.** Echte waarden: **`admin · management · recruitment · planning · backoffice · sales · readonly`**. ⚠️ **NIET** `recruiter`/`planner` → FE gebruikt **`recruitment`** en **`planning`**. `/auth/me` geeft `roles[].dashboard_type`.
+- **Item 2 — Uitstroom-timeseries** — `GET /dashboard/charts` → `timeseries.out.{candidates_out, applications_rejected, matches_ended}` + `net` (instroom − uitstroom, `[{name,value}]`). `candidates_out` = gearchiveerd (deleted_at) **OF** naar een `requires_reason`-status (via de flag). Stamps: `matches.ended_at` + `candidates.status_changed_at`.
+- **Item 4 — Metrics (deel 1/2)** — nieuwe KPI's op `GET /dashboard`: `placements` · `intakes` (permissie-gated) · `wa_queue` (whatsapp-module) · `incomplete_runs` (workflows-module).
 
 ### ⏳ Eerstvolgend (backend — deblokkeert de management-grafieken)
-- **Item 2 — Uitstroom-timeseries** — `charts.timeseries.out.{candidates_out, applications_rejected, matches_ended}` + netto. Scope **"volledig"** (gearchiveerd + niet-beschikbaar) → vraagt `matches.ended_at` + `candidates.status_changed_at`, dus een `migrate:fresh` (bewust met Danny gepland).
 - **Item 3 — Rol-gescopte feed** — `?type=<dashboard_type>` → `owner_id=me` vs tenant-breed; backend enforce't op de caller-rol (§5).
-- **Item 4 — Nieuwe metrics** — fill-rate · plaatsingen · intakes · time-to-fill · source→hires · WA-queue · incomplete-runs · bezettingsgraad.
+- **Item 4 — Metrics (deel 2/2)** — fill-rate · time-to-fill · source→hires (definitie-keuze nodig) · bezettingsgraad (Dash's planning-data).
+- **Dashboard-attention-feeds (FE-review)** — `attention.failed_workflows`/`tasks_overdue`/`expiring_opps` + `expiring_opportunities[]`; `escalations[]` (bron-definitie nodig); `role.dashboard_type` schrijfbaar. *(BE-Claude pakt deze; Dash: task-overdue-filter + icon-kolom + opps won/lost + notifications-feed.)*
 - **Item 1 rest** — overige contact-bronnen: WhatsApp (zakelijk+privé) + e-mail; per-persoon-precisie (`customer_contact_id` op notitie/afspraak); opportunity-contact.
 - **Item 5 uitbreiden** — datumfilters naar de overige lijst-endpoints.
 
@@ -117,3 +119,23 @@
   staat klaar in de weekly-chart, licht op zodra geleverd.
 - Behouden top-signalen (recruitment "was juist top"): **niet-gecontacteerd >6m** (`attention.stale_6m`)
   + **nooit gecontacteerd** (`attention.never_contacted`) — al gewired als KPI's.
+
+---
+
+## 📣 FE-status voor Dash (2026-07-02) — FE is bij, wachten op backend
+
+> **Alle FE-kant is klaar, gecommit en groen op main** (tsc 0 · lint 0 · i18n parity · build ✓).
+> Elk blok/KPI hierboven is **gewired + graceful** — verbergt zich of toont "—" en **licht vanzelf op**
+> zodra jouw feed er is. Niks breekt tot dan; jij kunt in je eigen tempo leveren.
+
+**Wat FE al met je laatste levering deed (t/m `8328f53`):**
+- `last_contact_between` → de **">6m niet gecontacteerd"-drilldown filtert nu server-breed** (was client-side).
+  *(`never`/`no-followup` blijven client-side tot er een null-contact-param is — graag `has_last_contact=0` of
+  vergelijkbaar als je 't makkelijk kunt meenemen.)*
+- Enum (`recruitment`/`planning`), drill-down-ids, `last_contact_at` render — allemaal geconsumeerd ✓.
+
+**Waar FE nu op wacht (jouw "nog te leveren"-lijst 1–10 hierboven):** `attention.*`-tellingen ·
+`charts.timeseries.out.*` · escalaties/feeds · notificatie-feed (`/notifications` + `/seen`) ·
+sales `won/lost` · `role.dashboard_type` write · icon-kolom op taken-lookups.
+
+**Geen actie van jou vereist behalve leveren** — ik verifieer per levering en meld terug via Danny.
