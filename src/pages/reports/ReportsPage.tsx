@@ -27,35 +27,36 @@ export default function ReportsPage({ initialTab = 'flow' }: { initialTab?: stri
 
   return (
     <div className="p-6">
-      {/* Hub header: title + shared period control */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-        <h1 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{t('title')}</h1>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--text-muted)' }}>
+      {/* Sub-tab bar + shared period control on one row — no page title (the sidebar
+          already names the page), so the report's KPI row sits straight at the top,
+          consistent with the candidate/entity pages. */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    gap: 12, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
+        <div style={{ display: 'flex', gap: 4 }}>
+          {tabs.map(tb => (
+            <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
+              style={{
+                padding: '8px 14px', fontSize: 13, fontWeight: tab === tb.id ? 600 : 400,
+                color: tab === tb.id ? 'var(--color-primary)' : 'var(--text-muted)',
+                background: 'none', border: 'none', cursor: 'pointer',
+                borderBottom: tab === tb.id ? '2px solid var(--color-primary)' : '2px solid transparent',
+                marginBottom: -1,
+              }}>
+              {tb.label}
+            </button>
+          ))}
+        </div>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12,
+                        color: 'var(--text-muted)', flexShrink: 0, paddingBottom: 6 }}>
           {t('period.label')}
           <select value={period} onChange={e => setPeriod(e.target.value as ReportPeriod)}
-            style={{ height: 32, padding: '0 8px', fontSize: 13, border: '1px solid var(--border)',
+            style={{ height: 30, padding: '0 8px', fontSize: 13, border: '1px solid var(--border)',
                      borderRadius: 8, color: 'var(--text)', background: 'var(--surface)', cursor: 'pointer' }}>
             <option value="day">{t('period.day')}</option>
             <option value="week">{t('period.week')}</option>
             <option value="month">{t('period.month')}</option>
           </select>
         </label>
-      </div>
-
-      {/* Sub-tab bar */}
-      <div style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
-        {tabs.map(tb => (
-          <button key={tb.id} type="button" onClick={() => setTab(tb.id)}
-            style={{
-              padding: '8px 14px', fontSize: 13, fontWeight: tab === tb.id ? 600 : 400,
-              color: tab === tb.id ? 'var(--color-primary)' : 'var(--text-muted)',
-              background: 'none', border: 'none', cursor: 'pointer',
-              borderBottom: tab === tb.id ? '2px solid var(--color-primary)' : '2px solid transparent',
-              marginBottom: -1,
-            }}>
-            {tb.label}
-          </button>
-        ))}
       </div>
 
       {tab === 'flow'       && <FlowReport period={period} />}
