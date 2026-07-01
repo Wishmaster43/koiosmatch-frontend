@@ -8,7 +8,7 @@
  * is intentionally light. The `?? ` fallbacks also keep the dummy data working.
  */
 import { initialsOf } from '@/lib/initials'
-import type { ApiCandidate, Candidate, CandidatePool, CandidateMatch, Loose } from '@/types/candidate'
+import type { ApiCandidate, Candidate, CandidatePool, CandidateBranch, CandidateMatch, Loose } from '@/types/candidate'
 
 // Bytes → human size ("44856" → "44 KB"). Backend sends documents.size in bytes.
 const fmtSize = (b: unknown): string => {
@@ -113,7 +113,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     photoUrl:        c.photo_url ?? c.photoUrl ?? null,
     summary:         c.summary ?? c.bio ?? '',
     tags:            c.tags ?? [],
-    branches:        c.branches ?? [],
+    // Branches (C-4, M2M) — each { id, name }; accepts bare names too (→ { name }).
+    branches:        (c.branches ?? []).map((b): CandidateBranch => (typeof b === 'object' ? b : { name: b })),
     // Talent pools the candidate belongs to. Each: { id, name, color, source? }.
     // Accepts bare slugs/strings too (normalised to { name }).
     pools:           (c.pools ?? []).map((p): CandidatePool => (typeof p === 'object' ? p : { name: p })),

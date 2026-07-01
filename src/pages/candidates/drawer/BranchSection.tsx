@@ -1,19 +1,18 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SearchSelect from '@/components/ui/SearchSelect'
-import { useBranchCustomerOptions } from '../hooks/useCandidateDrawerData'
+import { useCandidateBranches } from '../hooks/useCandidateDrawerData'
 import { sectionBlock } from './constants'
 import type { Candidate } from '@/types/candidate'
 
-/** Branch section — links the candidate to one or more customer branches. */
+/**
+ * BranchSection — links the candidate to one or more branches (C-4, M2M).
+ * Presentational: the option fetch + optimistic add/remove persistence live in
+ * useCandidateBranches (§3). Chips carry { id, name }; the shared SearchSelect
+ * drives the multi-select by branch id.
+ */
 export default function BranchSection({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
-  const [branches, setBranches] = useState<string[]>(c.branches ?? [])
-  // Branch options (GET /customers) come from the drawer-data hook (§3).
-  const options = useBranchCustomerOptions()
-
-  // Toggle a branch name in the candidate's branch list.
-  const toggle = (name: string) => setBranches(prev => prev.includes(name) ? prev.filter(x => x !== name) : [...prev, name])
+  const { branches, options, selectedIds, toggle } = useCandidateBranches(c)
 
   return (
     <div>
@@ -21,18 +20,21 @@ export default function BranchSection({ c }: { c: Candidate }) {
       <div style={sectionBlock}>
       {branches.length > 0 && (
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
-          {branches.map(v => (
-            <span key={v} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
-              borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
-              {v}
-              <button onClick={() => toggle(v)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
-            </span>
-          ))}
+          {branches.map((b, i) => {
+            const id = String(b.id ?? b.name ?? i)
+            return (
+              <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
+                borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
+                {b.name}
+                <button onClick={() => toggle(id)} aria-label={t('common:remove')}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+              </span>
+            )
+          })}
         </div>
       )}
-      {/* Shared searchable multi-select — replaces the old inline dropdown (DUP-1). */}
-      <SearchSelect triggerLabel={t('sections.branchLink')} options={options} selected={branches} onToggle={toggle} />
+      {/* Shared searchable multi-select — toggles branch membership by id (DUP-1). */}
+      <SearchSelect triggerLabel={t('sections.branchLink')} options={options} selected={selectedIds} onToggle={toggle} />
       </div>
     </div>
   )

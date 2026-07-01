@@ -53,6 +53,13 @@ export interface CandidatePool {
   [k: string]: unknown
 }
 
+/** A branch the candidate is linked to (C-4, M2M). Accepts a bare name (→ { name }). */
+export interface CandidateBranch {
+  id?: string | number
+  name?: string
+  [k: string]: unknown
+}
+
 /** Channel consent (AVG): per-channel opt-in flag + the moment it was recorded.
  * Backend contract (C-11): nested under `consent`; WhatsApp/e-mail default true
  * (operational opt-out), newsletter false (opt-in). `_consent_at` is server-stamped. */
@@ -128,7 +135,7 @@ export interface Candidate {
   photo?: string
   summary: string
   tags: string[]
-  branches: string[]
+  branches: CandidateBranch[]
   pools: CandidatePool[]
   koiosAdvice: CandidateAdvice | null
   experiences: Loose[]
@@ -246,7 +253,7 @@ export interface ApiCandidate {
   summary?: string
   bio?: string
   tags?: string[]
-  branches?: string[]
+  branches?: Array<CandidateBranch | string>
   pools?: Array<CandidatePool | string>
   koios_advice?: Loose | null
   koiosAdvice?: Loose | null

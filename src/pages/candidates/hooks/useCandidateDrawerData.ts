@@ -5,8 +5,11 @@
  * hard error) and abort on unmount.
  */
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
+import { notifyError } from '@/lib/notify'
+import type { Candidate, CandidateBranch } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
 /** One entry in the candidate audit trail (GET /candidates/{id}/activity, C-16). */
@@ -52,7 +55,8 @@ export interface BranchOption { value: string; label: string }
 
 interface CustomerLite { name?: string; company_name?: string; id?: Id }
 
-// Customer branches as {value,label} options (GET /customers) for the branch link.
+// Customer branches as id-keyed {value,label} options (GET /customers) for the
+// branch link — value is the branch id so membership can persist by id (C-4).
 export function useBranchCustomerOptions(): BranchOption[] {
   const [options, setOptions] = useState<BranchOption[]>([])
   useEffect(() => {
@@ -61,11 +65,38 @@ export function useBranchCustomerOptions(): BranchOption[] {
       .then(r => {
         const rows = unwrapList<CustomerLite>(r).rows
         setOptions(rows
-          .map(l => { const name = String(l.name ?? l.company_name ?? l.id ?? ''); return { value: name, label: name } })
-          .filter(o => o.value))
+          .map(l => { const name = String(l.name ?? l.company_name ?? l.id ?? ''); return { value: String(l.id ?? name), label: name } })
+          .filter(o => o.value && o.label))
       })
       .catch(() => {})
     return () => ctrl.abort()
   }, [])
   return options
+}
+
+// A candidate's branch membership (C-4, M2M): local optimistic chips + persisted
+// add/remove via /candidates/{id}/branches; notifyError on failure (ERR-1). Tolerant
+// while the backend endpoint is being (re)built — the options GET soft-fails too.
+export function useCandidateBranches(candidate: Candidate) {
+  const { t } = useTranslation('candidates')
+  const options = useBranchCustomerOptions()
+  const [branches, setBranches] = useState<CandidateBranch[]>(candidate.branches ?? [])
+
+  // Membership key: prefer the id, fall back to the name for bare-slug branches.
+  const keyOf = (b: CandidateBranch) => String(b.id ?? b.name)
+  const selectedIds = branches.map(keyOf)
+
+  // Optimistic add/remove, persisted to the pivot route (body: { branch_id }).
+  const toggle = (id: string) => {
+    if (selectedIds.includes(id)) {
+      setBranches(prev => prev.filter(b => keyOf(b) !== id))
+      api.delete(`/candidates/${candidate.id}/branches/${id}`).catch(() => notifyError(t('common:actionFailed')))
+    } else {
+      const name = options.find(o => o.value === id)?.label ?? id
+      setBranches(prev => [...prev, { id, name }])
+      api.post(`/candidates/${candidate.id}/branches`, { branch_id: id }).catch(() => notifyError(t('common:actionFailed')))
+    }
+  }
+
+  return { branches, options, selectedIds, toggle }
 }

@@ -28,7 +28,7 @@ export default function StatisticsTab({ c }: { c: Candidate }) {
           [t('statistics.lastContact'), c.lastContactDate ? formatDate(c.lastContactDate) : '-'],
           [t('statistics.contactType'), c.lastContactType ?? '-'],
           [t('statistics.memberSince'), c.created ? formatDate(c.created) : '-'],
-          [t('statistics.branch'),      (c.branches ?? []).join(', ') || '-'],
+          [t('statistics.branch'),      (c.branches ?? []).map(b => b.name).filter(Boolean).join(', ') || '-'],
         ],
       }}
     />
