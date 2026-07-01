@@ -13,8 +13,10 @@ import { COOKIE_AUTH, CSRF_COOKIE_URL } from './authMode'
  * auth + tenant headers, timeouts, 401 handling and rate-limit backoff all live
  * in ONE place (the interceptors below).
  *
- * baseURL comes from the VITE_API_URL env var (see .env). Always use https in
- * production — over http the token + data travel unencrypted.
+ * baseURL comes from the VITE_API_URL env var (see .env) — it points at the API's
+ * `/api` (== `/api/v1`, the same surface per the contract; a breaking change would
+ * become `/api/v2`). Always use https in production — over http the token + data
+ * travel unencrypted.
  *
  * timeout is a safety net against the backend's synchronous, occasionally
  * long-running operations (sync/workflows): a hung request becomes a catchable
@@ -104,6 +106,9 @@ api.interceptors.response.use(
 
     // A 403 on /tenants is expected for non-super-admins — don't log it as an error.
     const benignTenants403 = status === 403 && url.includes('/tenants')
+    // A 503 means an external integration isn't configured yet (HelloFlex, AI key):
+    // an expected "not available yet", not a real error — keep it out of the dev log (CO7).
+    const benignUnavailable = status === 503
     // Dev-only log of request CONTEXT only (status + method + url). NEVER log the
     // response body — a 4xx/5xx body can carry special-category data OR sensitive
     // backend detail (stack traces, paths). Inspect the body on demand in the
@@ -113,7 +118,7 @@ api.interceptors.response.use(
     const safeUrl = url
       .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, ':id')
       .replace(/\/\d+(?=\/|$|\?)/g, '/:id')
-    if (import.meta.env.DEV && !benignTenants403) {
+    if (import.meta.env.DEV && !benignTenants403 && !benignUnavailable) {
       console.error('API Error:', status, method.toUpperCase(), safeUrl)
     }
 
@@ -133,6 +138,15 @@ api.interceptors.response.use(
 )
 
 export default api
+
+/**
+ * isServiceUnavailable — true when an external integration isn't configured yet
+ * (HelloFlex, AI key, …): the backend replies 503. Components should treat this as a
+ * calm "not available yet" empty state, not a hard error (CO7 / FRONTEND-CONTRACT §1, §5).
+ */
+export function isServiceUnavailable(error: unknown): boolean {
+  return (error as { response?: { status?: number } })?.response?.status === 503
+}
 
 // ── Response adapters ────────────────────────────────────────────────────────
 // The API speaks three dialects; these helpers normalise all of them so call
