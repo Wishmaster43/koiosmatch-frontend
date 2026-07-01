@@ -28,7 +28,8 @@
   "drawer": {
     "label": "Match",
     "tabs": {
-      "overview": "Overzicht"
+      "overview": "Overzicht",
+      "changelog": "Wijzigingen"
     },
     "sectionDetails": "Matchgegevens",
     "fields": {
@@ -40,5 +41,11 @@
       "stage": "Fase",
       "created": "Aangemaakt"
     }
+  },
+  "changelog": {
+    "loading": "Geschiedenis laden…",
+    "error": "Wijzigingslog kon niet geladen worden.",
+    "empty": "Nog geen wijzigingen vastgelegd.",
+    "system": "Systeem"
   }
 }

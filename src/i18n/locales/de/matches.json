@@ -28,7 +28,8 @@
   "drawer": {
     "label": "Match",
     "tabs": {
-      "overview": "Übersicht"
+      "overview": "Übersicht",
+      "changelog": "Änderungen"
     },
     "sectionDetails": "Match-Details",
     "fields": {
@@ -40,5 +41,11 @@
       "stage": "Phase",
       "created": "Erstellt"
     }
+  },
+  "changelog": {
+    "loading": "Verlauf wird geladen…",
+    "error": "Änderungsprotokoll konnte nicht geladen werden.",
+    "empty": "Noch keine Änderungen erfasst.",
+    "system": "System"
   }
 }

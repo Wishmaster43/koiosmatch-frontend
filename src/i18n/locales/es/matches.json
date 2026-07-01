@@ -28,7 +28,8 @@
   "drawer": {
     "label": "Match",
     "tabs": {
-      "overview": "Resumen"
+      "overview": "Resumen",
+      "changelog": "Historial"
     },
     "sectionDetails": "Detalles del match",
     "fields": {
@@ -40,5 +41,11 @@
       "stage": "Fase",
       "created": "Creado"
     }
+  },
+  "changelog": {
+    "loading": "Cargando historial…",
+    "error": "No se pudo cargar el historial.",
+    "empty": "Aún no hay cambios registrados.",
+    "system": "Sistema"
   }
 }

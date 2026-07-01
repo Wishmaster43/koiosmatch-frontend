@@ -28,7 +28,8 @@
   "drawer": {
     "label": "Match",
     "tabs": {
-      "overview": "Aperçu"
+      "overview": "Aperçu",
+      "changelog": "Historique"
     },
     "sectionDetails": "Détails du match",
     "fields": {
@@ -40,5 +41,11 @@
       "stage": "Phase",
       "created": "Créé"
     }
+  },
+  "changelog": {
+    "loading": "Chargement de l'historique…",
+    "error": "Impossible de charger l'historique.",
+    "empty": "Aucune modification enregistrée.",
+    "system": "Système"
   }
 }

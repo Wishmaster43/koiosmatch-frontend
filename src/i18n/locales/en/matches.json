@@ -28,7 +28,8 @@
   "drawer": {
     "label": "Match",
     "tabs": {
-      "overview": "Overview"
+      "overview": "Overview",
+      "changelog": "Changelog"
     },
     "sectionDetails": "Match details",
     "fields": {
@@ -40,5 +41,11 @@
       "stage": "Stage",
       "created": "Created"
     }
+  },
+  "changelog": {
+    "loading": "Loading history…",
+    "error": "Couldn't load the changelog.",
+    "empty": "No changes recorded yet.",
+    "system": "System"
   }
 }
