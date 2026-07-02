@@ -237,7 +237,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
       { key: 'uitKandidaten', label: t('chart.series.candidatesOut'),       color: 'var(--color-danger)' },
       { key: 'uitAfgewezen',  label: t('chart.series.applicationsRejected'), color: 'var(--color-warning)' },
       { key: 'uitBeeindigd',  label: t('chart.series.matchesEnded'),         color: '#9CA3AF' },
-      { key: 'netto',         label: t('chart.series.net'),                  color: 'var(--color-primary)' },
+      { key: 'netto',         label: t('chart.series.net'),                  color: 'var(--text)', line: true },
     ].filter(s => present.has(s.key))
   }, [trendData, t])
 
