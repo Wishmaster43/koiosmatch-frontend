@@ -26,6 +26,7 @@ const PAGE_REQUIRED_MODULE: Record<string, ModuleKey> = {
   shiftmanager: 'sm',
   helloflex:    'hf',
   reports:      'reports',
+  planning:     'plan',
 }
 
 const ATS_BASE   = ['dashboard', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'outreach', 'customers', 'locations', 'departments', 'contacts', 'details', 'users']
@@ -141,12 +142,13 @@ function hasAccess(pageId: string, auth?: AuthLike | null): boolean {
 export function canAccessPage(pageId: string, auth?: AuthLike | null): boolean {
   const base = String(pageId ?? '').split('.')[0]
 
-  // Super admins always see everything
-  if (auth?.user?.is_super_admin === true) return true
-
-  // Module gate: SM/HF pages require the matching paid add-on module.
+  // Module gate applies to EVERYONE — including super admins: an off module isn't provisioned
+  // for the tenant, so its pages stay hidden everywhere (Danny 2026-07-02). Server 403s too.
   const reqModule = PAGE_REQUIRED_MODULE[base]
   if (reqModule && !hasModule(reqModule, auth?.activeTenant ?? auth?.user?.tenant)) return false
+
+  // Super admins bypass the role/access-page gates below (but not the module gate above).
+  if (auth?.user?.is_super_admin === true) return true
 
   // Sub-page gates (e.g. details.runs needs aiagents, details.messages needs whatsapp)
   if (SUB_PAGE_GATES[pageId] && !hasAccess(SUB_PAGE_GATES[pageId], auth)) return false
