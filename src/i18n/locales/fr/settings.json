@@ -957,7 +957,9 @@
       "export": "Exporter"
     },
     "color": "Couleur",
-    "icon": "Icône"
+    "icon": "Icône",
+    "startDashboard": "Tableau de bord initial",
+    "startDashboardNone": "Par défaut"
   },
   "audit": {
     "title": "Journal d'audit",

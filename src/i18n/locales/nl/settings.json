@@ -1102,7 +1102,9 @@
       "export": "Exporteren"
     },
     "color": "Kleur",
-    "icon": "Icoon"
+    "icon": "Icoon",
+    "startDashboard": "Startdashboard",
+    "startDashboardNone": "Standaard"
   },
   "audit": {
     "title": "Audit log",

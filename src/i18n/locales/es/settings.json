@@ -957,7 +957,9 @@
       "export": "Exportar"
     },
     "color": "Color",
-    "icon": "Icono"
+    "icon": "Icono",
+    "startDashboard": "Panel inicial",
+    "startDashboardNone": "Predeterminado"
   },
   "audit": {
     "title": "Registro de auditoría",

@@ -11,6 +11,7 @@ import api from '@/lib/api'
 import { PermissionToggle, ColorSwatch } from '../components/SettingsControls'
 import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
 import RoleChip from '@/components/ui/RoleChip'
+import { DASHBOARD_TYPES } from '@/pages/dashboard/templates'
 
 // Small popover grid to pick a role icon from the allowed set.
 function IconPicker({ value, color, options, onPick }) {
@@ -49,6 +50,8 @@ function IconPicker({ value, color, options, onPick }) {
 
 function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }) {
   const { t } = useTranslation('settings')
+  // Dashboard-namespace translator so the "start dashboard" options use the same labels as the switcher.
+  const { t: td } = useTranslation('dashboard')
   const [localRole, setLocalRole]   = useState(role)
   const [editName,  setEditName]    = useState(false)
   const [draftName, setDraftName]   = useState(role.name)
@@ -85,13 +88,13 @@ function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }) {
     setSaving(false); setEditName(false)
   }
 
-  // Appearance (colour + icon) persist optimistically via PUT /roles/{id}.
+  // Appearance (colour + icon) + start dashboard persist optimistically via PUT /roles/{id}.
   const saveAppearance = async (patch) => {
-    const next = { color, icon: iconName, ...patch }
-    const r = { ...localRole, color: next.color, icon: next.icon }
+    const next = { color, icon: iconName, dashboard_type: localRole.dashboard_type ?? null, ...patch }
+    const r = { ...localRole, color: next.color, icon: next.icon, dashboard_type: next.dashboard_type }
     setLocalRole(r); onUpdate(r)
     setSaving(true)
-    try { await api.put(`/roles/${localRole.id}`, { color: next.color, icon: next.icon }) } catch { /* noop */ }
+    try { await api.put(`/roles/${localRole.id}`, { color: next.color, icon: next.icon, dashboard_type: next.dashboard_type }) } catch { /* noop */ }
     setSaving(false)
   }
 
@@ -134,6 +137,17 @@ function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('roles.icon')}</span>
           <IconPicker value={iconName} color={color} options={iconOptions} onPick={name => saveAppearance({ icon: name })} />
+        </div>
+        {/* Start dashboard — couples this role to a dashboard type (same labels as the switcher). */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('roles.startDashboard')}</span>
+          <select value={localRole.dashboard_type ?? ''} onChange={e => saveAppearance({ dashboard_type: e.target.value || null })}
+            aria-label={t('roles.startDashboard')}
+            style={{ height: 30, padding: '0 8px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 7,
+                     background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+            <option value="">{t('roles.startDashboardNone')}</option>
+            {DASHBOARD_TYPES.map(dt => <option key={dt} value={dt}>{td(`types.${dt}`)}</option>)}
+          </select>
         </div>
         <div style={{ marginLeft: 'auto' }}>
           <RoleChip name={localRole.name} color={color} icon={iconName} />

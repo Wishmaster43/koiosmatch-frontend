@@ -957,7 +957,9 @@
       "export": "Exportieren"
     },
     "color": "Farbe",
-    "icon": "Symbol"
+    "icon": "Symbol",
+    "startDashboard": "Start-Dashboard",
+    "startDashboardNone": "Standard"
   },
   "audit": {
     "title": "Audit-Log",

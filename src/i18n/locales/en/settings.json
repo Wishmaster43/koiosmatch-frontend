@@ -1102,7 +1102,9 @@
       "export": "Export"
     },
     "color": "Colour",
-    "icon": "Icon"
+    "icon": "Icon",
+    "startDashboard": "Start dashboard",
+    "startDashboardNone": "Default"
   },
   "audit": {
     "title": "Audit log",
