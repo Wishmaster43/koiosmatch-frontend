@@ -213,7 +213,8 @@
     "empty": "No hay workflows en esta carpeta. Arrastra uno aquí o crea uno nuevo.",
     "addModuleAlert": "Añade al menos un módulo al workflow antes de guardar.",
     "saveFailed": "Error al guardar: {{msg}}",
-    "deleteFolderConfirm": "¿Eliminar la carpeta «{{name}}»? Los workflows permanecerán en «Sin asignar»."
+    "deleteFolderConfirm": "¿Eliminar la carpeta «{{name}}»? Los workflows permanecerán en «Sin asignar».",
+    "deleteFolderInUse": "Esta carpeta todavía tiene workflows activos y no se puede eliminar."
   },
   "ai": {
     "saved": "Guardado",

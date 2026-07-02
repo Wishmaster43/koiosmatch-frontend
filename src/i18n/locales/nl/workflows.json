@@ -237,7 +237,8 @@
     "empty": "Geen workflows in deze map. Sleep er een naartoe of maak een nieuwe aan.",
     "addModuleAlert": "Voeg minimaal één module toe aan de workflow voordat je opslaat.",
     "saveFailed": "Opslaan mislukt: {{msg}}",
-    "deleteFolderConfirm": "Map \"{{name}}\" verwijderen? De workflows blijven bestaan onder \"Niet toegewezen\"."
+    "deleteFolderConfirm": "Map \"{{name}}\" verwijderen? De workflows blijven bestaan onder \"Niet toegewezen\".",
+    "deleteFolderInUse": "Deze map heeft nog actieve workflows en kan niet worden verwijderd."
   },
   "ai": {
     "saved": "Opgeslagen",

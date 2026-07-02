@@ -213,7 +213,8 @@
     "empty": "Keine Workflows in diesem Ordner. Ziehen Sie einen hierher oder erstellen Sie einen neuen.",
     "addModuleAlert": "Fügen Sie mindestens ein Modul zum Workflow hinzu, bevor Sie speichern.",
     "saveFailed": "Speichern fehlgeschlagen: {{msg}}",
-    "deleteFolderConfirm": "Ordner „{{name}}\" löschen? Die Workflows bleiben unter „Nicht zugewiesen\" bestehen."
+    "deleteFolderConfirm": "Ordner „{{name}}\" löschen? Die Workflows bleiben unter „Nicht zugewiesen\" bestehen.",
+    "deleteFolderInUse": "Dieser Ordner hat noch aktive Workflows und kann nicht gelöscht werden."
   },
   "ai": {
     "saved": "Gespeichert",

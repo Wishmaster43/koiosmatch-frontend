@@ -217,7 +217,8 @@
     "empty": "No workflows in this folder. Drag one here or create a new one.",
     "addModuleAlert": "Add at least one module to the workflow before saving.",
     "saveFailed": "Saving failed: {{msg}}",
-    "deleteFolderConfirm": "Delete folder \"{{name}}\"? The workflows will remain under \"Unassigned\"."
+    "deleteFolderConfirm": "Delete folder \"{{name}}\"? The workflows will remain under \"Unassigned\".",
+    "deleteFolderInUse": "This folder still has active workflows and can't be deleted."
   },
   "ai": {
     "saved": "Saved",

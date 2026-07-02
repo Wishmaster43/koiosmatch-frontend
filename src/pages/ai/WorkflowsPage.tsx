@@ -15,6 +15,7 @@ import { notifyError } from '@/lib/notify'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { useRightPanel } from '@/context/RightPanelContext'
+import { useAuth } from '@/context/AuthContext'
 import { Zap, Plus, Loader2, Folder, FolderPlus, Trash2, LayoutGrid, List, Archive } from 'lucide-react'
 import WorkflowCanvasEditor from '@/components/layout/WorkflowCanvasEditor'
 import { normalizeWorkflow, denormalizeWorkflow } from './data/workflowMap'
@@ -29,6 +30,8 @@ type FolderId = string | number | null
 
 export default function WorkflowsPage() {
   const { t } = useTranslation('workflows')
+  // Folder create/delete is settings.update-gated on the backend (R-3); mirror it in the UI.
+  const canManageFolders = useAuth()?.hasPermission('settings.update') ?? false
   const [workflows,       setWorkflows]       = useState<Workflow[]>([])
   const [folders,         setFolders]         = useState<WorkflowFolder[]>([])
   const [loading,         setLoading]         = useState(true)
@@ -132,13 +135,18 @@ export default function WorkflowsPage() {
   }
 
   const deleteFolder = async (folder: WorkflowFolder) => {
+    if (!canManageFolders) return
     if (!confirm(t('page.deleteFolderConfirm', { name: folder.name }))) return
     try {
       await api.delete(`/workflow-folders/${folder.id}`)
       setFolders(prev => prev.filter(f => f.id !== folder.id))
       setWorkflows(prev => prev.map(w => w.folder_id === folder.id ? { ...w, folder_id: null } : w))
       if (selectedFolder === folder.id) setSelectedFolder(null)
-    } catch { /* noop */ }
+    } catch (e) {
+      // 409 = the folder still holds active workflows → backend blocks the delete (R-3).
+      const status = (e as { response?: { status?: number } })?.response?.status
+      notifyError(t(status === 409 ? 'page.deleteFolderInUse' : 'common:actionFailed'))
+    }
   }
 
   const moveToFolder = async (workflowId: string | number | null, folderId: FolderId) => {
@@ -169,13 +177,15 @@ export default function WorkflowsPage() {
       <div style={{ width: 220, flexShrink: 0, borderRight: '1px solid var(--border)', display: 'flex', flexDirection: 'column', background: 'var(--surface)' }}>
         <div style={{ padding: '16px 16px 8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>{t('page.folders')}</span>
-          <button onClick={() => {
-            const name = prompt(t('page.folderNamePrompt'))
-            if (name?.trim()) createFolder(name.trim())
-          }} title={t('page.newFolder')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
-            <FolderPlus size={15} />
-          </button>
+          {canManageFolders && (
+            <button onClick={() => {
+              const name = prompt(t('page.folderNamePrompt'))
+              if (name?.trim()) createFolder(name.trim())
+            }} title={t('page.newFolder')}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+              <FolderPlus size={15} />
+            </button>
+          )}
         </div>
         <div style={{ flex: 1, overflowY: 'auto' }}>
           {[
@@ -200,7 +210,7 @@ export default function WorkflowsPage() {
               onDragOver={e => { e.preventDefault(); setDragOverFolder(f.id) }}
               onDragLeave={() => setDragOverFolder(null)}
               onDrop={() => { moveToFolder(dragWf.current, f.id); setDragOverFolder(null) }}
-              onDelete={() => deleteFolder(f)}
+              onDelete={canManageFolders ? () => deleteFolder(f) : undefined}
             />
           ))}
         </div>
