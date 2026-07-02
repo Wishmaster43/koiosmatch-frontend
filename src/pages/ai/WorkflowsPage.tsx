@@ -275,10 +275,10 @@ export default function WorkflowsPage() {
             )}
           </div>
         ) : (
-          /* List view — single column, compact rows with header */
-          <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-            {/* Column header */}
-            <div className="flex items-center gap-3 px-4 py-2" style={{ background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }}>
+          /* List/table view — column table with a header that stays put while rows scroll (R-3). */
+          <div style={{ border: '1px solid var(--border)', borderRadius: 12 }}>
+            {/* Column header — sticky so it never scrolls out of view (no overflow:hidden ancestor). */}
+            <div className="flex items-center gap-3 px-4 py-2" style={{ background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 1, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
               <div style={{ width: 30, flexShrink: 0 }} />
               <div style={{ width: 220, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t('page.colName')}</div>
               <div style={{ width: 80, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t('page.colStatus')}</div>
