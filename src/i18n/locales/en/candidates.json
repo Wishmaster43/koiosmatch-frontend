@@ -134,7 +134,9 @@
       "person": "Person",
       "organisation": "Organisation"
     },
-    "archived": "Archive status"
+    "archived": "Archive status",
+    "periodCreated": "Created",
+    "periodLastContact": "Last contact"
   },
   "modal": {
     "title": "Add candidate",

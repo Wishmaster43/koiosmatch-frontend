@@ -20,6 +20,7 @@ import CandidatesTable from './CandidatesTable'
 import CandidatesBulkBar from './CandidatesBulkBar'
 import InsightsRowJs from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
+import HeaderSearch from '@/components/ui/HeaderSearch'
 import { toggleOneValue, isStale, isNeverContacted, isNoFollowup } from './data/candidatesShared'
 import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
@@ -29,12 +30,17 @@ import { useOpenFromIntent } from '@/context/NavigationContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
+// DD-MM-YYYY (nl) for the period-chip label; echoes the input if unparseable.
+const fmtD = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? s : d.toLocaleDateString('nl-NL') }
+
 interface CandidateIntent {
   attention?: string
   status?: string
   owner?: string | number
   funnel?: string
   location?: string | number
+  created_between?: [string, string]
+  last_contact_between?: [string, string]
 }
 interface ActionMsg { type: string; text: string }
 interface AppUser { id: Id; name: string; [k: string]: unknown }
@@ -78,6 +84,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const [globalSearch,     setGlobalSearch]     = useState('')
   // Aandacht-tile filter: null | 'stale6m' | 'neverContacted' | 'noFollowup' (klik = aan/uit).
   const [attentionFilter,  setAttentionFilter]  = useState<string | null>(null)
+  // Date-range filter from a dashboard period click (created or last-contact between two dates).
+  const [dateRange, setDateRange] = useState<{ param: 'created_between' | 'last_contact_between'; from: string; to: string } | null>(null)
   // Bulk-selectie (checkboxes) — id-set; gewist bij filter/pagina-wissel.
   const [selectedIds,      setSelectedIds]      = useState<Set<Id>>(() => new Set())
   // Transient feedback for bulk mutations (success/error), auto-dismissed.
@@ -92,6 +100,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     if (intent.owner != null) setSelectedOwner([intent.owner])
     if (intent.funnel)        setSelectedFunnel([intent.funnel])
     if (intent.location)      setSelectedLocation([intent.location])
+    if (intent.created_between)           setDateRange({ param: 'created_between', from: intent.created_between[0], to: intent.created_between[1] })
+    else if (intent.last_contact_between) setDateRange({ param: 'last_contact_between', from: intent.last_contact_between[0], to: intent.last_contact_between[1] })
   }, [intent])
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
@@ -116,8 +126,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - 6)
       p.last_contact_between = ['1900-01-01', cutoff.toISOString().slice(0, 10)]
     }
+    // Period-click date range (created / last-contact); set last so it wins over stale6m if both target last_contact.
+    if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     return p
-  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, showArchived, attentionFilter])
+  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, showArchived, attentionFilter, dateRange])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1. Visible rows change → drop the bulk selection.
@@ -162,7 +174,6 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // Only the dimensions the API filters server-side.
   const filterGroups = useMemo(() => [
-    { key: 'global-search', type: 'global-search', label: t('filters.search'), placeholder: t('page.searchPlaceholder'), value: globalSearch, onChange: setGlobalSearch },
     { key: 'status', type: 'search-select', category: catLifecycle, label: t('filters.status'),        selected: selectedStatus, options: statusOptions, onToggle: tog(setSelectedStatus) },
     { key: 'funnel', type: 'search-select', category: catLifecycle, label: t('filters.funnelType'),    selected: selectedFunnel, options: funnelOptions, onToggle: tog(setSelectedFunnel) },
     { key: 'type',   type: 'search-select', category: catLifecycle, label: t('filters.candidateType'), selected: selectedType,   options: typeOptions,   onToggle: tog(setSelectedType) },
@@ -174,7 +185,15 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     { key: 'province', type: 'search-select', category: catPerson, label: t('filters.province'), selected: selectedProvince, options: provinceOptions, onToggle: tog(setSelectedProvince) },
     { key: 'owner',    type: 'search-select', category: catOrganisation, label: t('filters.owner'),  selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
     { key: 'location', type: 'search-select', category: catOrganisation, label: t('filters.branch'), selected: selectedLocation, options: locationOptions, onToggle: tog(setSelectedLocation) },
-  ], [t, catLifecycle, catQualifications, catPerson, catOrganisation, globalSearch, showArchived,
+    // Period (date range) from a dashboard bar click — a single removable value so it shows in the chip bar + panel.
+    ...(dateRange ? [{
+      key: 'period', type: 'search-select', category: catLifecycle,
+      label: t(dateRange.param === 'created_between' ? 'filters.periodCreated' : 'filters.periodLastContact'),
+      selected: [`${dateRange.from}|${dateRange.to}`],
+      options: [{ value: `${dateRange.from}|${dateRange.to}`, label: `${fmtD(dateRange.from)} – ${fmtD(dateRange.to)}` }],
+      onToggle: () => setDateRange(null),
+    }] : []),
+  ], [t, catLifecycle, catQualifications, catPerson, catOrganisation, showArchived, dateRange,
       selectedStatus, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner, selectedLocation,
       statusOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
 
@@ -304,6 +323,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
                   background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
                   + {t('page.add')}
                 </button>
+                {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
+                <HeaderSearch onSearch={setGlobalSearch} defaultValue={globalSearch}
+                  placeholder={t('page.searchPlaceholder')} width={300} />
                 {/* Quick-view toggles on the right: blacklisted-only + archived-only */}
                 <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
                   {/* Soft-chip toggles (§3A): always tinted in their own colour (danger /

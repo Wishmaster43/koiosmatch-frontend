@@ -127,7 +127,9 @@
       "person": "Persona",
       "organisation": "Organización"
     },
-    "archived": "Estado de archivo"
+    "archived": "Estado de archivo",
+    "periodCreated": "Creado",
+    "periodLastContact": "Último contacto"
   },
   "modal": {
     "title": "Añadir candidato",

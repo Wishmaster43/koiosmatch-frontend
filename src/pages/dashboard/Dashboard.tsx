@@ -208,6 +208,11 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     const add = (arr: TimeseriesPoint[] | undefined, key: string) => (arr ?? []).forEach(p => {
       const row = byName.get(p.name) ?? { name: p.name }
       row[key] = p.value ?? 0
+      // Preserve bucket date boundaries (if the backend provides them) for period-click filtering.
+      const pf = p as { from?: unknown; to?: unknown; date?: unknown }
+      if (pf.from != null && row.__from == null) row.__from = String(pf.from)
+      if (pf.to != null && row.__to == null) row.__to = String(pf.to)
+      if (pf.date != null && row.__date == null) row.__date = String(pf.date)
       byName.set(p.name, row)
     })
     add(ts.candidates_in, 'kandidaten')
@@ -354,8 +359,16 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
         <Panel>
           <WeeklyBarChartCard title={t('chart.intakeWeekly')} data={trendData as unknown as ChartDatum[]} series={trendSeries}
             onBarClick={(row, s) => {
-              const name = (row as TrendRow)?.name
-              const page = s.key === 'sollicitaties' ? 'applications' : s.key === 'matches' ? 'matches' : 'candidates'
+              const r = row as TrendRow & { __from?: string; __to?: string; __date?: string }
+              const name = r?.name
+              const page = s.key === 'sollicitaties' ? 'applications' : (s.key === 'matches' || s.key === 'uitBeeindigd') ? 'matches' : 'candidates'
+              // Turn the clicked bucket into a created-date range when it carries boundaries
+              // (explicit from/to, or an ISO-date name treated as a 7-day week).
+              const iso = typeof name === 'string' && /^\d{4}-\d{2}-\d{2}/.test(name) ? name.slice(0, 10) : undefined
+              const from = r?.__from ?? r?.__date ?? iso
+              let to = r?.__to
+              if (!to && from) { const d = new Date(from); d.setDate(d.getDate() + 6); to = d.toISOString().slice(0, 10) }
+              if (page === 'candidates' && from && to) { onNavigate?.('candidates', { created_between: [from, to] }); return }
               onNavigate?.(page, name ? { period: name } : undefined)
             }} />
         </Panel>

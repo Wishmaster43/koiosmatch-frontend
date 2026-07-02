@@ -134,7 +134,9 @@
       "person": "Persoon",
       "organisation": "Organisatie"
     },
-    "archived": "Archiefstatus"
+    "archived": "Archiefstatus",
+    "periodCreated": "Aangemaakt",
+    "periodLastContact": "Laatste contact"
   },
   "modal": {
     "title": "Kandidaat toevoegen",
