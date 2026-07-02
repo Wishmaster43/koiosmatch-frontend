@@ -60,7 +60,8 @@
       "matches": "Matches",
       "candidatesOut": "Abgänge",
       "applicationsRejected": "Abgelehnt",
-      "matchesEnded": "Beendet"
+      "matchesEnded": "Beendet",
+      "net": "Netto"
     },
     "funnelConversion": "Funnel-Konversion",
     "noData": "Keine Daten"

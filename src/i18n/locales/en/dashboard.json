@@ -60,7 +60,8 @@
       "matches": "Matches",
       "candidatesOut": "Outflow",
       "applicationsRejected": "Rejected",
-      "matchesEnded": "Ended"
+      "matchesEnded": "Ended",
+      "net": "Net"
     },
     "funnelConversion": "Funnel conversion",
     "noData": "No data"

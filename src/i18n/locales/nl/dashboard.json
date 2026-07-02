@@ -60,7 +60,8 @@
       "matches": "Matches",
       "candidatesOut": "Uitstroom",
       "applicationsRejected": "Afgewezen",
-      "matchesEnded": "Beëindigd"
+      "matchesEnded": "Beëindigd",
+      "net": "Netto"
     },
     "funnelConversion": "Funnel-conversie",
     "noData": "Geen data"

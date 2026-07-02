@@ -60,7 +60,8 @@
       "matches": "Matchs",
       "candidatesOut": "Sorties",
       "applicationsRejected": "Rejetées",
-      "matchesEnded": "Terminées"
+      "matchesEnded": "Terminées",
+      "net": "Net"
     },
     "funnelConversion": "Conversion du tunnel",
     "noData": "Aucune donnée"

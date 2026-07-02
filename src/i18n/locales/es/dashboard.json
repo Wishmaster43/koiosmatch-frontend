@@ -60,7 +60,8 @@
       "matches": "Matches",
       "candidatesOut": "Salidas",
       "applicationsRejected": "Rechazadas",
-      "matchesEnded": "Finalizadas"
+      "matchesEnded": "Finalizadas",
+      "net": "Neto"
     },
     "funnelConversion": "Conversión del embudo",
     "noData": "Sin datos"

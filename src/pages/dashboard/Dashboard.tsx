@@ -141,6 +141,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // One call (C-30/C-31) for the extra KPIs, recent lists, the timeseries chart and
   // the module feeds (ai_runs / conversations). Returns the object directly (no wrapper).
   const [dash,  setDash]  = useState<DashData | null>(null)
+  // Charts may be served on a dedicated endpoint (out-timeseries + net); merged when present.
+  const [dashCharts, setDashCharts] = useState<{ timeseries?: Record<string, unknown>; net?: unknown } | null>(null)
   useEffect(() => {
     const ctrl = new AbortController()
     api.get('/candidates/stats', { signal: ctrl.signal })
@@ -200,7 +202,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // Weekly trend (C-31): merge the three aligned series (same buckets) into one row
   // per period for the grouped bar chart. Only series that have data are rendered.
   const trendData = useMemo<TrendRow[]>(() => {
-    const ts = dash?.charts?.timeseries ?? {}
+    // Timeseries from /dashboard AND the dedicated /dashboard/charts endpoint (merged).
+    const ts = { ...(dash?.charts?.timeseries ?? {}), ...(dashCharts?.timeseries ?? {}) } as Record<string, TimeseriesPoint[] | undefined> & { out?: Record<string, TimeseriesPoint[]> }
     const byName = new Map<string, TrendRow>()
     const add = (arr: TimeseriesPoint[] | undefined, key: string) => (arr ?? []).forEach(p => {
       const row = byName.get(p.name) ?? { name: p.name }
@@ -210,13 +213,15 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     add(ts.candidates_in, 'kandidaten')
     add(ts.applications,  'sollicitaties')
     add(ts.matches,       'matches')
-    // Outflow (backend charts.timeseries.out.* — confirmed shape). Graceful: renders only once delivered.
-    const out = (ts as { out?: Record<string, TimeseriesPoint[]> }).out ?? {}
+    // Outflow (backend charts.timeseries.out.*). Graceful: renders only once delivered.
+    const out = ts.out ?? {}
     add(out.candidates_out,        'uitKandidaten')
     add(out.applications_rejected, 'uitAfgewezen')
     add(out.matches_ended,         'uitBeeindigd')
+    // Net = inflow − outflow (sibling of timeseries under charts).
+    add((dashCharts?.net ?? (dash?.charts as { net?: TimeseriesPoint[] } | undefined)?.net) as TimeseriesPoint[] | undefined, 'netto')
     return [...byName.values()]
-  }, [dash])
+  }, [dash, dashCharts])
   const trendSeries = useMemo(() => {
     const present = new Set<string>()
     trendData.forEach(r => Object.keys(r).forEach(k => k !== 'name' && r[k] != null && present.add(k)))
@@ -227,10 +232,19 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
       { key: 'uitKandidaten', label: t('chart.series.candidatesOut'),       color: 'var(--color-danger)' },
       { key: 'uitAfgewezen',  label: t('chart.series.applicationsRejected'), color: 'var(--color-warning)' },
       { key: 'uitBeeindigd',  label: t('chart.series.matchesEnded'),         color: '#9CA3AF' },
+      { key: 'netto',         label: t('chart.series.net'),                  color: 'var(--color-primary)' },
     ].filter(s => present.has(s.key))
   }, [trendData, t])
 
-  const att: Record<string, number | null | undefined> = stats?.attention ?? {}
+  // Attention/metrics merged from every source the backend may use: /candidates/stats
+  // `attention`, plus the /dashboard payload (nested `attention` or numeric top-level fields
+  // like placements/intakes/wa_queue/incomplete_runs). So delivered metrics light up
+  // regardless of exact nesting — no waiting on a path confirmation.
+  const att: Record<string, number | null | undefined> = {
+    ...(stats?.attention ?? {}),
+    ...((dash?.attention as Record<string, number | null | undefined>) ?? {}),
+    ...Object.fromEntries(Object.entries(dash ?? {}).filter(([, v]) => typeof v === 'number')) as Record<string, number>,
+  }
   const num = (v?: number | null) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
   // Extract the filter value from a clicked chart datum (sector or legend item).
   const fv = (d?: unknown) => {
@@ -270,6 +284,9 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     if (selVestiging[0]) params.location_id = selVestiging[0]
     api.get('/dashboard', { params, signal: ctrl.signal })
       .then(r => setDash(r.data ?? null)).catch(() => {})
+    // Dedicated charts endpoint (out-timeseries + net); fail-soft so nothing breaks if absent.
+    api.get('/dashboard/charts', { params, signal: ctrl.signal })
+      .then(r => setDashCharts((r.data?.data ?? r.data) ?? null)).catch(() => setDashCharts(null))
     return () => ctrl.abort()
   }, [activeTenant?.id, selPeriode, selVestiging, selStatus])
 
@@ -290,8 +307,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     intakes:           { id: 'intakes', label: t('kpi.intakes'), value: num(att.intake_planned ?? att.intakes), sub: t('kpi.intakesSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: CalendarCheck, onClick: () => onNavigate?.('candidates') },
     fillRate:          { id: 'fillRate', label: t('kpi.fillRate'), value: att.fill_rate != null ? `${att.fill_rate}%` : '—', sub: t('kpi.fillRateSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: TrendingUp, onClick: () => onNavigate?.('vacancies') },
     failedWa:          { id: 'failedWa', label: t('kpi.failedWa'), value: num(wa.failed), sub: t('kpi.failedWaSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'queue' }) },
-    waQueue:           { id: 'waQueue', label: t('kpi.waQueue'), value: num(wa.inQueue), sub: t('kpi.waQueueSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'queue' }) },
-    incompleteRuns:    { id: 'incompleteRuns', label: t('kpi.incompleteRuns'), value: num(incompleteRuns), sub: t('kpi.incompleteRunsSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: Zap, onClick: () => onNavigate?.('aiagents') },
+    waQueue:           { id: 'waQueue', label: t('kpi.waQueue'), value: num(att.wa_queue ?? wa.inQueue), sub: t('kpi.waQueueSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'queue' }) },
+    incompleteRuns:    { id: 'incompleteRuns', label: t('kpi.incompleteRuns'), value: num(att.incomplete_runs ?? incompleteRuns), sub: t('kpi.incompleteRunsSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: Zap, onClick: () => onNavigate?.('aiagents') },
     activeConv:        { id: 'activeConv', label: t('kpi.activeConv'), value: num(att.active_conversations ?? conversations.length), sub: t('kpi.activeConvSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'messages' }) },
     missingDocs:       { id: 'missingDocs', label: t('kpi.missingDocs'), value: num(att.missing_documents), sub: t('kpi.missingDocsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: FileText, onClick: () => onNavigate?.('candidates') },
     expiringContracts: { id: 'expiringContracts', label: t('kpi.expiringContracts'), value: num(att.expiring_contracts), sub: t('kpi.expiringContractsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: () => onNavigate?.('matches') },
