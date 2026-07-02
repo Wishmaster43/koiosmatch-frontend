@@ -106,21 +106,29 @@ export function VacancyChannelSettings() {
   )
 }
 
+// Slug + active-language label helpers for the unified /custom-fields payload (G-13).
+const vfSlug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
+const vfLabel = (l, lang, key) => l ? (l[lang] ?? l[lang.split('-')[0]] ?? l.en ?? l.nl ?? Object.values(l)[0] ?? key) : key
+
 /** Vacancy custom fields — free-form extra fields, in-use protected, own sub-tab. */
 export function VacancyFieldsSettings() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const [customFields, setCustomFields] = useState([])
   const [newField,     setNewField]     = useState('')
   const [addingField,  setAddingField]  = useState(false)
 
   // Add a custom field; the backend returns the created record.
   const addField = async () => {
-    if (!newField.trim()) return
+    const name = newField.trim()
+    if (!name) return
     setAddingField(true)
     try {
-      const res = await api.post('/vacancy-custom-fields', { name: newField.trim() })
-      // Unwrap the Resource envelope the same way the load does, else the new row has no id/name.
-      setCustomFields(p => [...p, res.data?.data ?? res.data])
+      const res = await api.post('/custom-fields', {
+        entity_type: 'vacancy', key: vfSlug(name), label_i18n: { en: name, [i18n.language]: name }, type: 'text',
+      })
+      // Normalise back to the name-only shape this list renders (label_i18n → name).
+      const d = res.data?.data ?? res.data
+      setCustomFields(p => [...p, { ...d, name: vfLabel(d.label_i18n, i18n.language, d.key) }])
       setNewField('')
     } catch { /* noop */ } finally { setAddingField(false) }
   }
@@ -131,13 +139,15 @@ export function VacancyFieldsSettings() {
   // Delete a custom field unless it is still in use; 409 = backend rejects + flags it.
   const removeField = async (f) => {
     if (inUse(f)) return
-    try { await api.delete(`/vacancy-custom-fields/${f.id}`); setCustomFields(p => p.filter(x => x.id !== f.id)) }
+    try { await api.delete(`/custom-fields/${f.id}`); setCustomFields(p => p.filter(x => x.id !== f.id)) }
     catch (e) { if (e?.response?.status === 409) setCustomFields(p => p.map(x => x.id === f.id ? { ...x, in_use: true } : x)) }
   }
 
   useEffect(() => {
-    api.get('/vacancy-custom-fields').then(r => setCustomFields(r.data?.data ?? r.data ?? [])).catch(() => {})
-  }, [])
+    api.get('/custom-fields', { params: { entity_type: 'vacancy' } })
+      .then(r => setCustomFields((r.data?.data ?? r.data ?? []).map(d => ({ ...d, name: vfLabel(d.label_i18n, i18n.language, d.key) }))))
+      .catch(() => {})
+  }, [i18n.language])
 
   return (
     <div style={{ maxWidth: 640 }}>

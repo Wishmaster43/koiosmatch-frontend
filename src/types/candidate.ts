@@ -11,7 +11,7 @@
 import type { Id, Loose } from './common'
 export type { Loose }
 
-/** A tenant-defined custom field definition (GET /candidate-custom-fields). */
+/** A tenant-defined custom field definition (GET /custom-fields?entity_type=candidate). */
 export interface CandidateCustomFieldDef {
   id: string | number
   key: string

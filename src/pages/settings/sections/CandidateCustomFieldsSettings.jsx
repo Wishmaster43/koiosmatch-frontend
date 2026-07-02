@@ -1,6 +1,6 @@
 /**
  * CandidateCustomFieldsSettings — CRUD + reorder for tenant-defined candidate
- * fields. Definitions come from /candidate-custom-fields. Type is immutable once
+ * fields. Definitions come from /custom-fields?entity_type=candidate. Type is immutable once
  * a field has data (has_data → type selector disabled). Key (slug) is immutable
  * after create. Delete with data → 409 (in_use).
  */
@@ -15,6 +15,11 @@ const FIELD_TYPES = ['text', 'textarea', 'number', 'date', 'boolean', 'select']
 // Generate a slug from a label (lowercase, letters/numbers/underscores only).
 const toSlug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
 
+// Pick a label for the active language (fallback lang-base → en → nl → any → key).
+const pickLabel = (l, lang, key) => l ? (l[lang] ?? l[lang.split('-')[0]] ?? l.en ?? l.nl ?? Object.values(l)[0] ?? key) : key
+// Map a generic /custom-fields def to the shape this editor renders (label + has_data).
+const toField = (d, lang) => ({ ...d, label: pickLabel(d.label_i18n, lang, d.key), has_data: !!d.in_use })
+
 const cardStyle = {
   background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '14px 16px', marginBottom: 8,
 }
@@ -25,7 +30,7 @@ const inputStyle = {
 const labelStyle = { fontSize: 11, fontWeight: 600, color: '#9CA3AF', display: 'block', marginBottom: 4 }
 
 export default function CandidateCustomFieldsSettings() {
-  const { t } = useTranslation('settings')
+  const { t, i18n } = useTranslation('settings')
   const [fields,   setFields]   = useState([])
   const [loading,  setLoading]  = useState(true)
   const [expanded, setExpanded] = useState(null)
@@ -34,46 +39,49 @@ export default function CandidateCustomFieldsSettings() {
   const [newForm,  setNewForm]  = useState({ label: '', key: '', type: 'text', options: '', required_for: '' })
   const [editForms, setEditForms] = useState({})
 
-  // Load definitions on mount.
+  // Load definitions on mount (unified /custom-fields; normalise to this editor's shape).
   useEffect(() => {
-    api.get('/candidate-custom-fields')
-      .then(r => setFields(r.data?.data ?? r.data ?? []))
+    api.get('/custom-fields', { params: { entity_type: 'candidate' } })
+      .then(r => setFields((r.data?.data ?? r.data ?? []).map(d => toField(d, i18n.language))))
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
+  }, [i18n.language])
 
-  // Move a field one position up or down via PUT /reorder.
+  // Move a field one position up or down via POST /custom-fields/reorder.
   const reorder = async (id, dir) => {
     const idx = fields.findIndex(f => f.id === id)
     if ((dir === -1 && idx === 0) || (dir === 1 && idx === fields.length - 1)) return
     const next = [...fields]
     ;[next[idx], next[idx + dir]] = [next[idx + dir], next[idx]]
     setFields(next)
-    await api.put('/candidate-custom-fields/reorder', { ids: next.map(f => f.id) }).catch(() => {})
+    await api.post('/custom-fields/reorder', { ids: next.map(f => f.id) }).catch(() => {})
   }
 
   // Toggle active without opening the full edit card.
   const toggleActive = async (field) => {
     const patched = { ...field, active: !field.active }
     setFields(p => p.map(f => f.id === field.id ? patched : f))
-    await api.put(`/candidate-custom-fields/${field.id}`, { active: patched.active }).catch(() => {
+    await api.patch(`/custom-fields/${field.id}`, { active: patched.active }).catch(() => {
       setFields(p => p.map(f => f.id === field.id ? field : f))
     })
   }
 
   // Create a new field.
   const handleCreate = async () => {
-    if (!newForm.label.trim()) return
+    const label = newForm.label.trim()
+    if (!label) return
     setSaving('new')
     try {
       const payload = {
-        label: newForm.label.trim(),
-        key:   newForm.key.trim() || toSlug(newForm.label),
+        entity_type: 'candidate',
+        key:   newForm.key.trim() || toSlug(label),
+        label_i18n: { en: label, [i18n.language]: label },
         type:  newForm.type,
         options: newForm.type === 'select' ? newForm.options.split(',').map(s => s.trim()).filter(Boolean) : [],
       }
-      const res = await api.post('/candidate-custom-fields', payload)
-      setFields(p => [...p, res.data?.data ?? res.data])
+      const res = await api.post('/custom-fields', payload)
+      const d = res.data?.data ?? res.data
+      setFields(p => [...p, toField(d, i18n.language)])
       setNewForm({ label: '', key: '', type: 'text', options: '', required_for: '' })
       setAdding(false)
     } catch { /* noop */ } finally { setSaving(null) }
@@ -84,16 +92,18 @@ export default function CandidateCustomFieldsSettings() {
     const form = editForms[field.id] ?? {}
     setSaving(field.id)
     try {
+      const newLabel = form.label ?? field.label
       const payload = {
-        label:   form.label ?? field.label,
+        label_i18n: { ...(field.label_i18n ?? {}), [i18n.language]: newLabel },
         active:  form.active ?? field.active,
         options: (form.type ?? field.type) === 'select'
           ? (form.options ?? (field.options ?? []).join(', ')).split(',').map(s => s.trim()).filter(Boolean)
           : field.options,
       }
       if (!field.has_data) payload.type = form.type ?? field.type
-      const res = await api.put(`/candidate-custom-fields/${field.id}`, payload)
-      setFields(p => p.map(f => f.id === field.id ? (res.data?.data ?? res.data) : f))
+      const res = await api.patch(`/custom-fields/${field.id}`, payload)
+      const d = res.data?.data ?? res.data
+      setFields(p => p.map(f => f.id === field.id ? toField(d, i18n.language) : f))
       setExpanded(null)
     } catch { /* noop */ } finally { setSaving(null) }
   }
@@ -103,7 +113,7 @@ export default function CandidateCustomFieldsSettings() {
     if (field.has_data) return
     setSaving(field.id)
     try {
-      await api.delete(`/candidate-custom-fields/${field.id}`)
+      await api.delete(`/custom-fields/${field.id}`)
       setFields(p => p.filter(f => f.id !== field.id))
       if (expanded === field.id) setExpanded(null)
     } catch (e) {
