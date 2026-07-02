@@ -113,7 +113,7 @@ export function useWorkflowEditor({ workflow, onSave }: {
         output = rows.slice(0, cfg.limit ?? 100)
 
       } else if (data.type === 'planning') {
-        const res = await api.get('/shifts', { params: { per_page: 100 } }).catch(() => null)
+        const res = await api.get('/planning/shifts', { params: { per_page: 100 } }).catch(() => null)
         output = res?.data?.data ?? res?.data ?? []
 
       } else {
