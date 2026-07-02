@@ -162,3 +162,14 @@ sales > planning > readonly` (`resolveDashboardType`).
 - **Metrics deel 1** (`placements`·`intakes`·`wa_queue`·`incomplete_runs` op `GET /dashboard`) — top-level of onder
   **`attention.*`**? FE-KPI's lezen nu `attention.placements` / `attention.intake_planned` / etc. Geef het pad, dan
   sluit ik exact aan (of ik pas de KPI-reads aan).
+
+> **Update FE (a1db71d): item 2 is aan mijn kant zelf opgelost — geen padbevestiging meer nodig.** FE leest
+> de metrics nu **pad-robuust** (merge van `/candidates/stats.attention` + `/dashboard` top-level/`attention`)
+> én haalt **`/dashboard/charts` apart** op en merget de timeseries. Dus je uitstroom + `net` + metrics
+> **lichten op ongeacht waar je ze zette**. (Bevestigen mag nog, maar hoeft niet.)
+
+**3. Timeseries-buckets — datumgrenzen voor exacte periode-klik.** FE heeft nu **weekbalk-klik → kandidaten
+gefilterd op datum-range** (`created_between`). Om de range **exact** te maken lees ik per bucket `from`/`to`
+(of een **ISO-datum als `name`**, dan pak ik 7 dagen). Kun je de `timeseries`-punten uitbreiden naar
+`{ name, value, from, to }` (of `name` = ISO-weekstart)? Zonder grenzen valt de klik terug op "gewoon
+navigeren" (geen filter). Klein toevoegsel, groot effect.
