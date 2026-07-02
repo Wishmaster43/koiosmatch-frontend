@@ -1417,5 +1417,8 @@
     "sales": "Kansen, pijplijnwaarde en leads.",
     "planning": "Diensten, WhatsApp-wachtrij en incomplete runs.",
     "readonly": "Alleen-lezen samenvatting."
-  }
+  },
+  "dashboardsToggleHint": "Klik een KPI of grafiek om 'm voor deze rol aan/uit te zetten — alles staat standaard aan.",
+  "dashboardsToggleOn": "Inschakelen",
+  "dashboardsToggleOff": "Uitschakelen"
 }

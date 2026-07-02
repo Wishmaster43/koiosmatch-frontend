@@ -1417,5 +1417,8 @@
     "sales": "Chancen, Pipeline-Wert und Leads.",
     "planning": "Dienste, WhatsApp-Warteschlange und unvollständige Runs.",
     "readonly": "Schreibgeschützte Zusammenfassung."
-  }
+  },
+  "dashboardsToggleHint": "Klicken Sie auf eine KPI oder ein Diagramm, um es für diese Rolle ein-/auszuschalten — standardmäßig ist alles an.",
+  "dashboardsToggleOn": "Einschalten",
+  "dashboardsToggleOff": "Ausschalten"
 }

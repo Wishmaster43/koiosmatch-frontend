@@ -1417,5 +1417,8 @@
     "sales": "Oportunidades, valor del pipeline y leads.",
     "planning": "Turnos, cola de WhatsApp y ejecuciones incompletas.",
     "readonly": "Resumen de solo lectura."
-  }
+  },
+  "dashboardsToggleHint": "Haz clic en un KPI o gráfico para activarlo/desactivarlo para este rol — todo está activado por defecto.",
+  "dashboardsToggleOn": "Activar",
+  "dashboardsToggleOff": "Desactivar"
 }

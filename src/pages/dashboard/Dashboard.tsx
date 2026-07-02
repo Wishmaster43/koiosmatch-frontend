@@ -24,6 +24,7 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 import type {
   DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow,
 } from '@/types/dashboard'
+import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { visibleBlock, kpiRow } from './templates'
 import type { DashboardType } from './templates'
 
@@ -120,7 +121,13 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // The active view/type is chosen in the topbar switcher (DashboardLayout); fall
   // back to the user's own type if rendered standalone. management/'*' = full view.
   const activeType = (viewType ?? auth?.dashboardType?.() ?? 'readonly') as DashboardType
-  const vis = (id: string) => visibleBlock(activeType, id)
+  // Tenant per-role toggles (Settings → Dashboards): a block/KPI is shown if the template
+  // allows it AND it is not switched off for this role. Live via the shared settings store.
+  const settings = useAllSettings()
+  const hidden = getJsonSetting<Record<string, { kpis?: string[]; blocks?: string[] }>>(settings, 'dashboard_hidden', {})
+  const hiddenBlocks = hidden[activeType]?.blocks ?? []
+  const hiddenKpis = hidden[activeType]?.kpis ?? []
+  const vis = (id: string) => visibleBlock(activeType, id) && !hiddenBlocks.includes(id)
 
   // Live total — same source as the Candidates table (/candidates meta.total).
   const { data: candidateTotal, isLoading: countLoading } = useCandidateCount()
@@ -299,7 +306,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     expiringOpps:      { id: 'expiringOpps', label: t('kpi.expiringOpps'), value: num(att.expiring_opps), sub: t('kpi.expiringOppsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: () => onNavigate?.('opportunities') },
   }
   // Every role ALWAYS gets its own full KPI row (never hidden).
-  const kpis = kpiRow(activeType).map(id => kpiById[id]).filter(Boolean)
+  const kpis = kpiRow(activeType).filter(id => !hiddenKpis.includes(id)).map(id => kpiById[id]).filter(Boolean)
 
   return (
     <div style={{ padding: 24, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>

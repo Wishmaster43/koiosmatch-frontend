@@ -1417,5 +1417,8 @@
     "sales": "Opportunities, pipeline value and leads.",
     "planning": "Shifts, WhatsApp queue and incomplete runs.",
     "readonly": "Read-only summary."
-  }
+  },
+  "dashboardsToggleHint": "Click a KPI or chart to switch it on/off for this role — everything is on by default.",
+  "dashboardsToggleOn": "Turn on",
+  "dashboardsToggleOff": "Turn off"
 }
