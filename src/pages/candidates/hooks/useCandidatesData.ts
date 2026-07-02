@@ -26,6 +26,13 @@ interface UseCandidatesDataParams {
   setActionMsg: (msg: ActionMsg) => void
 }
 
+// Stable empty defaults. A fresh `?? []` each render gives the memo chain (options →
+// filterGroups) a new identity, which re-registers the filter groups every render and
+// loops setState in RightPanelContext ("Maximum update depth exceeded"). Module-level
+// constants keep the reference stable while a query is loading/errored.
+const EMPTY_CANDIDATES: Candidate[] = []
+const EMPTY_LOCATIONS: LocationOption[] = []
+
 export function useCandidatesData({ filterParams, page, pageSize, t, setActionMsg }: UseCandidatesDataParams) {
   const queryClient = useQueryClient()
 
@@ -49,7 +56,7 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
     placeholderData: keepPreviousData,
   })
 
-  const candidates = listQuery.data?.candidates ?? []
+  const candidates = listQuery.data?.candidates ?? EMPTY_CANDIDATES
   const total      = listQuery.data?.total ?? 0
   const lastPage   = listQuery.data?.lastPage ?? 1
   const loading    = listQuery.isLoading
@@ -65,7 +72,7 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
   })
 
   // Vestiging (location) filter options — best-effort, cached for the session.
-  const { data: locations = [] } = useQuery({
+  const { data: locations = EMPTY_LOCATIONS } = useQuery({
     queryKey: ['locations'],
     queryFn: async ({ signal }): Promise<LocationOption[]> => {
       const res = await api.get('/locations', { signal })
