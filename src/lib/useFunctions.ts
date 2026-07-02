@@ -5,7 +5,7 @@
  * API is empty/unavailable. Managed in Settings → Functies. Items are plain name
  * strings (the candidate/vacancy stores the name). `allowFreeEntry` = creatable
  * combobox (true) vs strict dropdown (false): the tenant toggle (setting
- * `functions_allow_free_entry`) wins, else the API flag, else true.
+ * `functions_allow_free_entry`) wins, else the API flag, else **false** (strict default).
  */
 import { useState, useEffect } from 'react'
 import api from './api'
@@ -31,8 +31,9 @@ export function useFunctions() {
     }).catch(() => {})
   }, [])
 
-  // The Settings → Functies toggle is the source of truth; fall back to the API flag, then true.
-  const allowFreeEntry = getBoolSetting(settings, 'functions_allow_free_entry', apiFreeEntry ?? true)
+  // The Settings → Functies toggle is the source of truth; fall back to the API flag, then
+  // false — strict by default (clean vocab for matching/AI; the backend default is OFF too).
+  const allowFreeEntry = getBoolSetting(settings, 'functions_allow_free_entry', apiFreeEntry ?? false)
 
   return { functions, allowFreeEntry }
 }
