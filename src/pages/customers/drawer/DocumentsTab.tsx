@@ -1,67 +1,53 @@
 /**
  * DocumentsTab — the customer's documents with upload, type, rename, delete and
- * preview. Mirrors the candidate DocumentsSection but persists to
- * /customers/{id}/documents (multipart upload, PATCH rename, DELETE). Document
- * types come from the tenant /document-types lookup. New rows keep a local blob
- * preview until the server row (with url) returns.
+ * preview. Data + persistence live in useEntityDocuments (G-3/G-4): the list loads
+ * from /customers/{id}/documents and upload/rename/delete are optimistic. Document
+ * types come from the tenant /document-types lookup. Preview opens the signed
+ * download_url (or the local blob for a not-yet-uploaded row).
  */
 import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Plus, X, FileText, Pencil, Eye } from 'lucide-react'
-import api from '@/lib/api'
-import { notifyError } from '@/lib/notify'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
+import { useEntityDocuments, type EntityDoc } from '@/hooks/useEntityDocuments'
 import type { Id } from '@/types/common'
 
-interface DocItem { id?: Id; name?: string; file_name?: string; size?: string | number; type?: string; objectUrl?: string; url?: string; created_at?: string }
 interface PendingFile { file: File; objectUrl: string; name: string; size: string }
 
 // Split a filename into base + extension so rename never touches the extension.
 const splitExt = (fn: string) => { const m = fn.match(/\.[^./\\]+$/); return { base: m ? fn.slice(0, -m[0].length) : fn, ext: m ? m[0] : '' } }
 
-export default function DocumentsTab({ customerId, documents = [] }: { customerId: Id | undefined; documents?: DocItem[] }) {
+export default function DocumentsTab({ customerId }: { customerId: Id | undefined }) {
   const { t } = useTranslation('customers')
   const { formatDate } = useDateFormat()
   const { types: docTypes, labelOf: docTypeLabel, colorOf: docColor } = useDocumentTypes()
-  const [docs,        setDocs]        = useState<DocItem[]>(documents)
+  // List + optimistic upload/rename/delete against /customers/{id}/documents.
+  const { docs, upload, rename, remove } = useEntityDocuments('customers', customerId)
   const [pendingFile, setPendingFile] = useState<PendingFile | null>(null)
   const [pendingType, setPendingType] = useState('CV')
-  const [renamingDoc, setRenamingDoc] = useState<number | null>(null)
+  const [renamingId,  setRenamingId]  = useState<Id | null>(null)
   const [renameValue, setRenameValue] = useState('')
   const [docSearch,   setDocSearch]   = useState('')
   const fileRef = useRef<HTMLInputElement>(null)
 
-  // Upload the pending file (multipart) and optimistically show it right away.
-  const upload = () => {
+  // Send the pending file to the server (an optimistic row appears immediately).
+  const doUpload = () => {
     if (!pendingFile) return
-    const tmpId = -Date.now()
-    const optimistic: DocItem = { id: tmpId, name: pendingFile.name, size: pendingFile.size, type: pendingType, objectUrl: pendingFile.objectUrl }
-    setDocs(d => [...d, optimistic])
-    const fd = new FormData()
-    fd.append('file', pendingFile.file); fd.append('type', pendingType); fd.append('name', pendingFile.name)
+    upload(pendingFile.file, pendingType, pendingFile.name, pendingFile.objectUrl)
     setPendingFile(null)
-    api.post(`/customers/${customerId}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
-      .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) setDocs(d => d.map(x => x.id === tmpId ? { ...optimistic, ...it } : x)) })
-      .catch(() => notifyError(t('bulk.mutateError')))
   }
 
-  // Rename / delete persist once the row has a real (positive numeric) id.
-  const rename = (i: number, base: string) => {
-    const id = docs[i]?.id
-    const cur = String(docs[i]?.name ?? docs[i]?.file_name ?? '')
-    const name = base.trim() + splitExt(cur).ext
-    setDocs(docs.map((x, j) => j === i ? { ...x, name } : x)); setRenamingDoc(null)
-    if (typeof id === 'number' && id > 0) api.patch(`/customers/${customerId}/documents/${id}`, { name }).catch(() => notifyError(t('bulk.mutateError')))
+  // Commit a rename: re-attach the original extension, then persist by id.
+  const doRename = (d: EntityDoc, base: string) => {
+    const cur = String(d.name ?? d.file_name ?? '')
+    rename(d.id, base.trim() + splitExt(cur).ext)
+    setRenamingId(null)
   }
-  const removeDoc = (i: number) => {
-    const id = docs[i]?.id
-    setDocs(docs.filter((_, j) => j !== i))
-    if (typeof id === 'number' && id > 0) api.delete(`/customers/${customerId}/documents/${id}`).catch(() => notifyError(t('bulk.mutateError')))
-  }
-  const preview = (d: DocItem) => { const url = d.url ?? d.objectUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer') }
+  // Preview opens the signed capability URL (persisted) or the local blob (pending).
+  const preview = (d: EntityDoc) => { const url = d.download_url ?? d.objectUrl; if (url) window.open(url, '_blank', 'noopener,noreferrer') }
 
   return (
     <div>
@@ -96,7 +82,7 @@ export default function DocumentsTab({ customerId, documents = [] }: { customerI
               ))}
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={upload}
+              <button onClick={doUpload}
                 style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--text)', color: 'white', border: 'none', cursor: 'pointer' }}>{t('documents.add')}</button>
               <button onClick={() => { URL.revokeObjectURL(pendingFile.objectUrl); setPendingFile(null) }}
                 style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'none', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('drawer.cancel')}</button>
@@ -109,40 +95,37 @@ export default function DocumentsTab({ customerId, documents = [] }: { customerI
             <span>{t('documents.name')}</span><span>{t('documents.type')}</span><span>{t('documents.size')}</span>
           </div>
         )}
-        {docs.map((d, i) => ({ ...d, _i: i }))
+        {docs
           .filter(d => !docSearch || (d.name ?? d.file_name ?? '').toLowerCase().includes(docSearch.toLowerCase()) || (d.type ?? '').toLowerCase().includes(docSearch.toLowerCase()))
-          .map(d => {
-            const i = d._i
-            return (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 100px', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={13} color="white" /></div>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    {renamingDoc === i
-                      ? <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
-                          <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
-                            onKeyDown={e => { if (e.key === 'Enter') rename(i, renameValue); if (e.key === 'Escape') setRenamingDoc(null) }}
-                            onBlur={() => rename(i, renameValue)}
-                            style={{ flex: 1, fontSize: 12, fontWeight: 500, padding: '3px 7px', borderRadius: 6, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', boxSizing: 'border-box', minWidth: 0 }} />
-                          <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{splitExt(String(d.name ?? d.file_name ?? '')).ext}</span>
-                        </div>
-                      : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
-                    }
-                    {d.created_at && <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDate(d.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>}
-                  </div>
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: docColor(d.type) + '18', color: docColor(d.type), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{d.size ?? ''}</span>
-                  <div style={{ display: 'flex' }}>
-                    <button onClick={() => { setRenamingDoc(i); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
-                    <button onClick={() => preview(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
-                    <button onClick={() => removeDoc(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
-                  </div>
+          .map((d, i) => (
+            <div key={String(d.id ?? i)} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 100px', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 8, border: '1px solid var(--border)', background: 'var(--bg)', marginBottom: 6 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                <div style={{ width: 28, height: 28, borderRadius: 6, flexShrink: 0, background: docColor(d.type), display: 'flex', alignItems: 'center', justifyContent: 'center' }}><FileText size={13} color="white" /></div>
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  {renamingId === d.id
+                    ? <div style={{ display: 'flex', alignItems: 'center', gap: 2, minWidth: 0 }}>
+                        <input autoFocus value={renameValue} onChange={e => setRenameValue(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') doRename(d, renameValue); if (e.key === 'Escape') setRenamingId(null) }}
+                          onBlur={() => doRename(d, renameValue)}
+                          style={{ flex: 1, fontSize: 12, fontWeight: 500, padding: '3px 7px', borderRadius: 6, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', boxSizing: 'border-box', minWidth: 0 }} />
+                        <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{splitExt(String(d.name ?? d.file_name ?? '')).ext}</span>
+                      </div>
+                    : <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{d.name ?? d.file_name}</span>
+                  }
+                  {d.created_at && <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDate(d.created_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>}
                 </div>
               </div>
-            )
-          })
+              <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99, background: docColor(d.type) + '18', color: docColor(d.type), whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{d.type ? docTypeLabel(d.type) : '—'}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{d.size ?? ''}</span>
+                <div style={{ display: 'flex' }}>
+                  <button onClick={() => { setRenamingId(d.id ?? null); setRenameValue(splitExt(String(d.name ?? d.file_name ?? '')).base) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Pencil size={12} /></button>
+                  <button onClick={() => preview(d)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><Eye size={12} /></button>
+                  <button onClick={() => remove(d.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '2px 3px', display: 'flex' }}><X size={12} /></button>
+                </div>
+              </div>
+            </div>
+          ))
         }
         <input ref={fileRef} type="file" style={{ display: 'none' }}
           onChange={(e: ChangeEvent<HTMLInputElement>) => {

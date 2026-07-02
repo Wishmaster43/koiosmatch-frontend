@@ -116,7 +116,7 @@ export default function CustomerDrawer({
       case 'opportunities': return <OpportunitiesTab customerId={c.id} />
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
       case 'statistics':    return <StatisticsTab c={c} />
-      case 'documents':     return <DocumentsTab customerId={c.id} documents={(c as { documents?: { id?: Id; name?: string }[] }).documents} />
+      case 'documents':     return <DocumentsTab customerId={c.id} />
       case 'notes':         return (
         <NotesTab
           notes={c.notes ?? []}
