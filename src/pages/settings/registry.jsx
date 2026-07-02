@@ -61,7 +61,7 @@ import MessagingSettings from './sections/messaging'
 import KoiosSettings from './sections/koios'
 import NotificationsSettings from './sections/NotificationsSettings'
 // Planning tijdelijk verborgen (2026-06-26): import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
-import { BetaalmethodenSettings, AutoOpwaarderenSettings, GebruikSettings, FacturenSettings } from './sections/BillingSettings'
+import { GebruikSettings, FacturenSettings } from './sections/BillingSettings'
 
 import {
   kpisLeads, kpisCandidates, kpisApplications, kpisCustomers, kpisLocations,
@@ -244,13 +244,7 @@ export const NAV_GROUPS = [
   {
     key: 'billing', icon: CreditCard,
     items: [
-      // Payment methods + auto top-up merged into one tab; the standalone Plan tab dropped (Danny).
-      { id: 'billing_pay', icon: CreditCard, render: () => (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 36 }}>
-          <BetaalmethodenSettings />
-          <AutoOpwaarderenSettings />
-        </div>
-      ) },
+      // billing_pay (payment methods + auto top-up) dropped per Danny (R-1).
       { id: 'billing_usage', icon: BarChart2, component: GebruikSettings },
       { id: 'billing_invoices', icon: FileText, component: FacturenSettings },
     ],
