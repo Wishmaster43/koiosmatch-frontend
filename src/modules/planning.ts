@@ -8,6 +8,8 @@ export default makeEntityModule({
   type:     'planning',
   label:    'Diensten',
   category: 'Planning',
+  // Native planning node — gated on the 'plan' billing module (picker hides it when off).
+  module:   'plan',
   Icon:     CalendarDays,
   color:    '#0F6E56',
   bg:       '#E1F5EE',

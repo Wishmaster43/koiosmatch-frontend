@@ -133,6 +133,12 @@ export const MODULE_APP_MAP = Object.fromEntries(
   MODULES.filter(m => m.app).map(m => [m.type, m.app])
 )
 
+// Maps module type → required billing module key (e.g. 'plan'). No entry = no module gate.
+// Separate axis from MODULE_APP_MAP: apps = connectors (AppsContext), modules = package add-ons.
+export const MODULE_REQUIRED_MODULE = Object.fromEntries(
+  MODULES.filter(m => m.module).map(m => [m.type, m.module as string])
+)
+
 // Maps Make.com module identifiers → internal type.
 export const MAKE_MODULE_MAP = Object.fromEntries(
   MODULES.filter(m => m.makeType).map(m => [String(m.makeType), m.type])

@@ -301,9 +301,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isSuperAdmin = () => user?.is_super_admin === true || hasRole('super_admin') || (!!user && user.tenant_id == null && !user.tenant)
 
   // Capability check for paid add-on modules ('sm', 'hf', 'ai', 'ats', 'plan').
-  // Used to gate SM nav/pages now that /sm/* is hard-gated server-side (403).
+  // Module gating is uniform: an off module is unprovisioned for the tenant, so it stays
+  // hidden for EVERYONE incl. super-admins (Danny 2026-07-02) — mirrors lib/access.ts. The
+  // server still 403s the endpoints. No isSuperAdmin bypass here on purpose.
   const hasModule = (key: string) =>
-    tenantHasModule(key, activeTenant ?? user?.tenant, { isSuperAdmin: isSuperAdmin() })
+    tenantHasModule(key, activeTenant ?? user?.tenant)
 
   // Start-dashboard type from the first role that carries one (C-35). The shape is
   // live (roles are objects), but the seeded dashboard_type values read null until a

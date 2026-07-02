@@ -7,8 +7,9 @@ import { useState } from 'react'
 import { X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { MODULE_META, MODULE_APP_MAP } from '@/modules/index'
+import { MODULE_META, MODULE_APP_MAP, MODULE_REQUIRED_MODULE } from '@/modules/index'
 import { useApps } from '@/context/AppsContext'
+import { useAuth } from '@/context/AuthContext'
 import { categorySlug } from './moduleI18n'
 
 // One [type, meta] pair from the module registry (used by the picker rows).
@@ -25,13 +26,17 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
   const [search, setSearch] = useState('')
   const [tab,    setTab]    = useState('Alle')
   const { isAppEnabled } = useApps() ?? {}
+  const { hasModule } = (useAuth() as unknown as { hasModule?: (m: string) => boolean }) ?? {}
 
   // Translated module label + category (registry value = nl source / defaultValue).
   const modLabel = (type: string, label: string) => t('modules.' + type, { defaultValue: label })
   const catLabel = (cat: string) => t('categories.' + categorySlug(cat), { defaultValue: cat })
 
-  // Filter out modules whose app is not enabled
+  // Hide a module when its connector-app is disabled OR its billing module is off.
+  // Two axes: MODULE_APP_MAP → AppsContext connectors; MODULE_REQUIRED_MODULE → package add-ons.
   const isModuleEnabled = (type: string) => {
+    const reqModule = MODULE_REQUIRED_MODULE[type]
+    if (reqModule && !(hasModule?.(reqModule) ?? true)) return false
     const req = MODULE_APP_MAP[type]
     if (!req) return true
     const apps = Array.isArray(req) ? req : [req]

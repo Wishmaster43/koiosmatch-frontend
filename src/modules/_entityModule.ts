@@ -19,11 +19,13 @@ interface EntityModuleConfig {
   filterFields?: unknown[]
   sortOptions?: unknown[]
   schemaExtra?: SchemaField[]
+  // Required billing module — forwarded so the picker can hide the node when off.
+  module?: string
 }
 
 export default function makeEntityModule(cfg: EntityModuleConfig): ModuleDef {
   const {
-    type, label, category, Icon, color, bg,
+    type, label, category, Icon, color, bg, module,
     actions      = ['Ophalen', 'Aanmaken', 'Bijwerken'],
     filterFields = [],
     sortOptions  = [],
@@ -32,6 +34,7 @@ export default function makeEntityModule(cfg: EntityModuleConfig): ModuleDef {
 
   return {
     type, label, category, Icon, color, bg,
+    ...(module ? { module } : {}),
     schema: [
       // Action picker — drives which section shows (defaults to the first action).
       { key: 'action', label: 'Actie', type: 'select', default: actions[0], options: actions },

@@ -26,6 +26,9 @@ export interface ModuleDef {
   bg?: string
   schema?: SchemaField[]
   app?: string | string[]
+  // Required billing module (e.g. 'plan'); the picker hides the node when the
+  // tenant lacks it. Separate axis from `app` (connector-apps via AppsContext).
+  module?: string
   makeType?: string | string[]
   [k: string]: unknown
 }

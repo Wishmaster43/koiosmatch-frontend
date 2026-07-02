@@ -22,11 +22,12 @@ const TIERS = [
 
 // Add-ons (toggle on top of any tier). Each id maps 1:1 to a module key the backend
 // must surface in tenant.modules (/auth/me) so the UI gate (lib/access.ts) can hide/show it.
+// 'sm_ai' (Shiftmanager AI Planner) is retired (Danny 2026-07-02): no distinct surface, so it
+// is no longer offered here — legacy tenants keep working (it still resolves to shiftmanager).
 const ADDONS = [
   { id: 'reports', name: 'Rapporten Koios Match' },
   { id: 'sm',    name: 'Rapportage Shiftmanager' },
   { id: 'hf',    name: 'Rapportage HelloFlex' },
-  { id: 'sm_ai', name: 'Shiftmanager AI Planner' },
   { id: 'plan',  name: 'Planning' },
 ]
 

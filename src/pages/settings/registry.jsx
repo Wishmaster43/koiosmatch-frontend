@@ -16,8 +16,8 @@
  * (or a line to an existing schema) and skip writing a component entirely.
  */
 import {
-  AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, Car,
-  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Key,
+  AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
+  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Phone, Shield, Sparkles, Star,
   Store, Tags, Target, Users, Webhook, XCircle,
 } from 'lucide-react'
@@ -62,7 +62,8 @@ import ApiKeysSettings from './sections/apikeys'
 import MessagingSettings from './sections/messaging'
 import KoiosSettings from './sections/koios'
 import NotificationsSettings from './sections/NotificationsSettings'
-// Planning tijdelijk verborgen (2026-06-26): import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
+// Planning settings — gated on the 'plan' module (requiresPage: 'planning'); hidden until it is on.
+import { ShiftTypesSettings, AvailabilitySettings, AutoMatchSettings, PlanningBoardSettings } from './sections/PlanningSettings'
 import { GebruikSettings, FacturenSettings } from './sections/BillingSettings'
 
 import {
@@ -198,19 +199,17 @@ export const NAV_GROUPS = [
       { id: 'outreach_statuses', icon: Tags, component: OutreachStatusSettings },
     ],
   },
-  // Planning tijdelijk verborgen (2026-06-26) — niet verwijderd, alleen uit. Terugzetten = dit blok +
-  // de PlanningSettings-import + de CalendarDays/LayoutGrid-iconen weer activeren.
-  /*
+  // Planning lookups — each item gated on the 'plan' module (requiresPage → canAccessPage →
+  // hasModule('plan')). All 4 filtered out when off → the whole group drops (super-admins too).
   {
     key: 'planning', icon: CalendarDays,
     items: [
-      { id: 'shift_types', icon: Clock, component: ShiftTypesSettings },
-      { id: 'availability', icon: CalendarCheck, component: AvailabilitySettings },
-      { id: 'automatch', icon: Sparkles, component: AutoMatchSettings },
-      { id: 'planning_board', icon: LayoutGrid, component: PlanningBoardSettings },
+      { id: 'shift_types', icon: Clock, component: ShiftTypesSettings, requiresPage: 'planning' },
+      { id: 'availability', icon: CalendarCheck, component: AvailabilitySettings, requiresPage: 'planning' },
+      { id: 'automatch', icon: Sparkles, component: AutoMatchSettings, requiresPage: 'planning' },
+      { id: 'planning_board', icon: LayoutGrid, component: PlanningBoardSettings, requiresPage: 'planning' },
     ],
   },
-  */
   {
     key: 'views', icon: BarChart2,
     items: [
