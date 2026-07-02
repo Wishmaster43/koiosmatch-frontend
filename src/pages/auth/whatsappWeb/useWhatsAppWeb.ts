@@ -12,10 +12,12 @@
  *
  * status ∈ disconnected | connecting | qr_pending | connected. Because connect()
  * only returns 'connecting', the QR and the final status arrive by polling GET
- * while any device is still in a transient state.
+ * while any device is still in a transient state — driven here by React Query's
+ * refetchInterval, which polls only while a device is transient and then settles (A-3).
  */
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import type { AxiosResponse } from 'axios'
+import { useQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { TRANSIENT_STATUSES } from './statusMeta'
 import type { WhatsAppDevice } from './statusMeta'
@@ -36,55 +38,35 @@ function readList(res: AxiosResponse | undefined): WhatsAppDevice[] {
 }
 
 export function useWhatsAppWeb() {
-  // Devices + the coarse view phase; busyId flags the row (or 'new') being mutated.
-  const [devices, setDevices] = useState<WhatsAppDevice[]>([])
-  const [phase, setPhase]     = useState<Phase>('loading')
-  const [busyId, setBusyId]   = useState<DeviceId | null>(null)
-  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  // busyId flags the row (or 'new') being mutated — UI state, not part of the cache.
+  const [busyId, setBusyId] = useState<DeviceId | null>(null)
 
-  // Fetch the device list. A 404 means the backend feature is off → calm "unavailable".
-  const load = useCallback(async (signal?: AbortSignal) => {
-    try {
-      const res = await api.get('/profile/whatsapp-web', { signal })
-      setDevices(readList(res))
-      setPhase('ready')
-    } catch (e) {
-      const err = e as { code?: string; response?: { status?: number } }
-      if (err?.code === 'ERR_CANCELED') return
-      setPhase(err?.response?.status === 404 ? 'unavailable' : 'error')
-    }
-  }, [])
+  // Device list. refetchInterval polls only while a device is still connecting/awaiting
+  // a QR scan, then stops. A 404 = backend feature off (calm "unavailable"), so no retry.
+  const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['whatsapp-web'],
+    queryFn: async ({ signal }) => readList(await api.get('/profile/whatsapp-web', { signal })),
+    refetchInterval: (query) => (query.state.data?.some(isTransient) ? POLL_MS : false),
+    retry: false,
+  })
 
-  // Initial load, cancelled on unmount.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    load(ctrl.signal)
-    return () => ctrl.abort()
-  }, [load])
+  const devices = data ?? []
+  // Coarse view phase from the query state. The error phase is gated on "never loaded"
+  // (data === undefined) so a transient poll failure keeps the last known list on screen.
+  const phase: Phase = isLoading
+    ? 'loading'
+    : isError && data === undefined
+      ? ((error as { response?: { status?: number } })?.response?.status === 404 ? 'unavailable' : 'error')
+      : 'ready'
 
-  // Poll the list while any device is connecting / awaiting a QR scan; stop once
-  // everything has settled. One interval, refreshed whenever the device set changes.
-  useEffect(() => {
-    if (pollRef.current) clearInterval(pollRef.current)
-    if (!devices.some(isTransient)) return
-    pollRef.current = setInterval(async () => {
-      try { setDevices(readList(await api.get('/profile/whatsapp-web'))) }
-      catch { /* keep the last known state; retry next tick */ }
-    }, POLL_MS)
-    return () => { if (pollRef.current) clearInterval(pollRef.current) }
-  }, [devices])
-
-  // Stop polling for good when the hook unmounts.
-  useEffect(() => () => { if (pollRef.current) clearInterval(pollRef.current) }, [])
-
-  // Run a mutation: flag the row busy, perform it, then refetch so the UI reflects
-  // the real server state (connect() in particular only returns 'connecting').
+  // Run a mutation: flag the row busy, perform it, then refetch so the UI reflects the
+  // real server state (connect() in particular only returns 'connecting').
   const run = useCallback(async (id: DeviceId, fn: () => Promise<unknown>) => {
     setBusyId(id)
-    try { await fn(); await load() }
+    try { await fn(); await refetch() }
     catch { /* the list reload reflects reality; nothing destructive to surface */ }
     finally { setBusyId(null) }
-  }, [load])
+  }, [refetch])
 
   // Create a new device session; the user then links it from its card.
   const createDevice = useCallback(() => run('new', () => api.post('/profile/whatsapp-web')), [run])
@@ -92,5 +74,8 @@ export function useWhatsAppWeb() {
   const disconnect   = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.post(`/profile/whatsapp-web/${id}/disconnect`)), [run])
   const remove       = useCallback((id: WhatsAppDevice['id']) => run(id, () => api.delete(`/profile/whatsapp-web/${id}`)), [run])
 
-  return { devices, phase, busyId, reload: load, createDevice, connect, disconnect, remove }
+  // reload wraps refetch so callers keep a simple `() => Promise<void>` (was `load`).
+  const reload = useCallback(async () => { await refetch() }, [refetch])
+
+  return { devices, phase, busyId, reload, createDevice, connect, disconnect, remove }
 }
