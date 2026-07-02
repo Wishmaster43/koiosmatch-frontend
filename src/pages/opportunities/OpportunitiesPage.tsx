@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
+import HeaderSearch from '@/components/ui/HeaderSearch'
 import OpportunitiesTable from './OpportunitiesTable'
 import OpportunitiesBoard from './OpportunitiesBoard'
 import OpportunityDrawer from './OpportunityDrawer'
@@ -52,6 +53,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const [owner,    setOwner]    = useState<string[]>([]) // selected owner names (donut + panel)
   const [client,   setClient]   = useState<string[]>([]) // selected client names (panel)
   const [addOpen,  setAddOpen]  = useState(false)
+  const [query,    setQuery]    = useState('')  // shared header search (client-side, R-5)
 
   // Seed the stage filter from a navigation intent (dashboard chart click carries the
   // stage key; the page filters by label, so map key → label via the lookup).
@@ -66,7 +68,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
 
   // Reset to the first page + drop the selection whenever a filter changes.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { setPage(1); clearSelection() }, [stage, owner, client])
+  useEffect(() => { setPage(1); clearSelection() }, [stage, owner, client, query])
 
   // Right-panel filters (stage · owner · client) — options derived from the loaded rows.
   const optionsFrom = (key: 'stage' | 'owner' | 'client') => {
@@ -95,9 +97,10 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       if (stage.length  && !stage.includes(r.stage))   return false
       if (owner.length  && !owner.includes(r.owner))   return false
       if (client.length && !client.includes(r.client)) return false
+      if (query.trim() && !`${r.title ?? ''} ${r.client ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())) return false
       return true
     })
-  }, [rows, stage, owner, client, showArchived])
+  }, [rows, stage, owner, client, showArchived, query])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
@@ -126,6 +129,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
                 borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
               + {t('page.add')}
             </button>
+            <HeaderSearch onSearch={setQuery} width={280} />
             {/* Selection strip — count + clear (bulk actions land with C-41). */}
             {selectedIds.size > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--text)' }}>

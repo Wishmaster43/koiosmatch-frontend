@@ -11,6 +11,7 @@ import { LayoutList, Kanban, Archive, Plus } from 'lucide-react'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { useAuth } from '@/context/AuthContext'
 import InsightsRow from '@/components/insights/InsightsRow'
+import HeaderSearch from '@/components/ui/HeaderSearch'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import { useOutreachCampaigns } from './hooks/useOutreachCampaigns'
 import type { Campaign } from './hooks/useOutreachCampaigns'
@@ -48,6 +49,7 @@ export default function OutreachPage() {
   // KPI/donut click-to-filter (status) + checkbox selection.
   const [selectedStatus, setSelectedStatus] = useState<string[]>([])
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
+  const [query, setQuery] = useState('')  // shared header search (client-side, R-5)
 
   // Archived campaigns are fetched lazily (only while the archived toggle is on).
   const [archived, setArchived] = useState<Campaign[]>([])
@@ -76,9 +78,12 @@ export default function OutreachPage() {
   // Base rows = active list, or the archived list when the archived toggle is on.
   const baseRows = showArchived ? archived : campaigns
   // Status filter (from the donut/KPI) narrows both the table and the board.
-  const filtered = useMemo(() =>
-    selectedStatus.length ? baseRows.filter((c) => selectedStatus.includes(statusKey(c))) : baseRows
-  , [baseRows, selectedStatus])
+  const filtered = useMemo(() => {
+    const byStatus = selectedStatus.length ? baseRows.filter((c) => selectedStatus.includes(statusKey(c))) : baseRows
+    if (!query.trim()) return byStatus
+    const q = query.trim().toLowerCase()
+    return byStatus.filter((c) => `${(c as { name?: string }).name ?? ''}`.toLowerCase().includes(q))
+  }, [baseRows, selectedStatus, query])
 
   // Donut/KPI click = set exactly one status value (or clear when clicked again).
   const pickStatus = (v?: string) => { if (v != null) setSelectedStatus((p) => (p.length === 1 && p[0] === v) ? [] : [v]) }
@@ -151,6 +156,7 @@ export default function OutreachPage() {
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
             <Plus size={15} /> {t('new')}
           </button>
+          <HeaderSearch onSearch={setQuery} width={280} />
 
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Archived (soft-deleted) toggle */}

@@ -13,6 +13,7 @@ import type { TaskLookupItem } from '@/context/TaskLookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
+import HeaderSearch from '@/components/ui/HeaderSearch'
 import TasksTable from './TasksTable'
 import TasksBulkBar from './TasksBulkBar'
 import PaginationBar from '@/components/ui/PaginationBar'
@@ -73,6 +74,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const [selected, setSelected] = useState<TaskDetail | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [addOpen,  setAddOpen]  = useState(false)
+  const [query,    setQuery]    = useState('')  // shared header search (client-side, R-5)
   // Bulk-selection (checkboxes) — id-set, cleared on filter/page change.
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   const [selectedStatus,   setSelectedStatus]   = useState<string[]>([])
@@ -173,7 +175,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   }
 
   // Reset to the first page + clear the selection whenever a filter/KPI tile changes.
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter, showArchived])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter, showArchived, query])
 
   // The visible rows: status/priority/type/assignee filters + the active KPI tile.
   const filteredAll = useMemo(() => {
@@ -182,9 +184,10 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
       if (selectedPriority.length && !selectedPriority.includes(String(x.priorityKey)))   return false
       if (selectedType.length     && !selectedType.includes(String(x.typeKey)))           return false
       if (selectedAssignee.length && !selectedAssignee.includes(x.assignee?.name ?? ''))  return false
+      if (query.trim() && !`${(x as { title?: string }).title ?? ''} ${x.assignee?.name ?? ''} ${(x as { description?: string }).description ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())) return false
       return matchesKpi(x)
     })
-  }, [all, selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [all, selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter, query]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
@@ -321,6 +324,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
               borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
             <Plus size={15} /> {t('add')}
           </button>
+          <HeaderSearch onSearch={setQuery} width={280} />
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Archived (soft-deleted) toggle */}
             <button onClick={() => setShowArchived(v => !v)} title={t('view.archived')}
