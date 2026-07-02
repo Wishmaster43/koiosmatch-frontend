@@ -24,8 +24,9 @@ interface DrawerUser { id: Id; name: string }
 interface DrawerCustomer { id: Id; name: string }
 
 // Tab list — config only; each renders one small component (one per tab/section).
+// 'details' is NOT a tab: the field editor is the drawer's primary view, shown above
+// the tab bar (R-7 — Danny: Details = standaard hoofdweergave, geen aparte tab).
 const TABS: { id: string; tKey: string; render: (v: VacancyDetail, onUpdate?: UpdateFn) => ReactNode }[] = [
-  { id: 'details',    tKey: 'details',    render: (v, onUpdate) => <DetailsTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'applicants', tKey: 'applicants', render: v => <ApplicantsTab vacancy={v} /> },
   { id: 'matching',   tKey: 'matching',   render: (v, onUpdate) => <MatchingTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'publishing', tKey: 'publishing', render: (v, onUpdate) => <PublishingTab vacancy={v} onUpdate={onUpdate} /> },
@@ -84,6 +85,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
       footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDate(v.created) || '—' })}</span>}
       tabs={visibleTabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: () => tab.render(v, onUpdate) }))}
       header={() => (
+        <>
         <EntityHeader
           label={t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
@@ -111,6 +113,12 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
             {v.published ? t('drawer.published') : t('drawer.notPublished')}
           </div>
         </EntityHeader>
+        {/* Details = the drawer's primary view: the field editor sits above the tab bar (R-7).
+            Capped height + own scroll so it never crowds out the tabs and their content. */}
+        <div style={{ maxHeight: 320, overflowY: 'auto', margin: '2px -16px 8px', padding: '10px 16px 0', borderTop: '1px solid var(--border)' }}>
+          <DetailsTab vacancy={v} onUpdate={onUpdate} />
+        </div>
+        </>
       )}
     />
   )
