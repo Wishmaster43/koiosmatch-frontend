@@ -95,13 +95,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const setActiveTenant = async (tenant: Tenant): Promise<void> => {
     localStorage.setItem('active_tenant', tenant.id)
     setActiveTenantState(tenant)
-    // Drop all cached per-tenant queries (counts, users, …) so they refetch for
-    // the newly selected bureau instead of showing the previous tenant's data.
     queryClient.clear()
-    try {
-      const res = await api.get('/auth/me')
-      applyAuthResponse(res.data)
-    } catch { /* keep optimistic selection on a failed refresh */ }
+    // React Query is cleared above, but module-level caches (lookups, custom-fields, all-settings,
+    // KPI) + context state survive a soft switch and would LEAK the previous tenant's data into the
+    // newly selected bureau. Special-category health data (AVG) — isolation must be absolute, so we
+    // hard-reload to re-bootstrap the whole app for the new tenant (X-Tenant already points at it).
+    window.location.reload()
   }
 
   // Decides whether we may call the super-admin-only /tenants endpoint.
