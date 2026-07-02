@@ -11,7 +11,7 @@ import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControl
 
 // extraField (optioneel): { key, label, options: [{value,label}], default } —
 // rendert een extra keuzeveld in de aanmaak-modal + een badge in de rij.
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, allowAdd = true }) {
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, allowAdd = true, showRank = false }) {
   const { t } = useTranslation('settings')
   const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(extraField ? { [extraField.key]: extraField.default } : {}) })
   // Lookups differ in their display field: name (phases/status) vs label/value (genders/languages).
@@ -120,6 +120,15 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
           onReorder={setItems}
           renderItem={(item) => (
             <>
+              {/* Priority rank = position (top = 1 = sent first). Makes the drag-order priority explicit. */}
+              {showRank && (
+                <span title={t('statusList.priorityRank', { defaultValue: 'Prioriteit (1 = eerst verstuurd)' })}
+                  style={{ minWidth: 22, height: 22, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                           fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace",
+                           color: 'var(--text-muted)', background: 'var(--border)', borderRadius: 6, flexShrink: 0 }}>
+                  {items.findIndex(x => x.id === item.id) + 1}
+                </span>
+              )}
               {withColor && <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />}
               {withColor
                 ? <ColorBadge label={labelOf(item)} color={item.color ?? '#6B7280'} />

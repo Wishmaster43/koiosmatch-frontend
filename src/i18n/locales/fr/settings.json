@@ -393,7 +393,8 @@
     "confirmDelete": "Supprimer « {{name}} » ?",
     "edit": "Modifier",
     "editTitle": "Modifier",
-    "inUse": "Utilisé — suppression impossible"
+    "inUse": "Utilisé — suppression impossible",
+    "priorityRank": "Priorité (1 = envoyé en premier)"
   },
   "phases": {
     "title": "Phases",

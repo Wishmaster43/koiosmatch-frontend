@@ -393,7 +393,8 @@
     "confirmDelete": "„{{name}}\" wirklich löschen?",
     "edit": "Bearbeiten",
     "editTitle": "Bearbeiten",
-    "inUse": "In Verwendung — kann nicht gelöscht werden"
+    "inUse": "In Verwendung — kann nicht gelöscht werden",
+    "priorityRank": "Priorität (1 = zuerst gesendet)"
   },
   "phases": {
     "title": "Phasen",

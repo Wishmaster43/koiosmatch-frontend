@@ -412,7 +412,8 @@
     "confirmDelete": "Delete \"{{name}}\"?",
     "edit": "Edit",
     "editTitle": "Edit",
-    "inUse": "In use — cannot delete"
+    "inUse": "In use — cannot delete",
+    "priorityRank": "Priority (1 = sent first)"
   },
   "phases": {
     "title": "Phases",

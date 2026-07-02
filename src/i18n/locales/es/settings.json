@@ -393,7 +393,8 @@
     "confirmDelete": "¿Eliminar \"{{name}}\"?",
     "edit": "Editar",
     "editTitle": "Editar",
-    "inUse": "En uso — no se puede eliminar"
+    "inUse": "En uso — no se puede eliminar",
+    "priorityRank": "Prioridad (1 = enviado primero)"
   },
   "phases": {
     "title": "Fases",

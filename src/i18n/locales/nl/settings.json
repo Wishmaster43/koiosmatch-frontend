@@ -412,7 +412,8 @@
     "confirmDelete": "Weet je zeker dat je \"{{name}}\" wilt verwijderen?",
     "edit": "Bewerken",
     "editTitle": "Bewerken",
-    "inUse": "In gebruik — kan niet verwijderen"
+    "inUse": "In gebruik — kan niet verwijderen",
+    "priorityRank": "Prioriteit (1 = eerst verstuurd)"
   },
   "phases": {
     "title": "Fasen",

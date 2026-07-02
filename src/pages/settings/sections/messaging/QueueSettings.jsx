@@ -67,13 +67,13 @@ export default function QueueSettings() {
         </div>
       </div>
 
-      {/* Message-type classification — the drag-order IS the send priority */}
+      {/* Message-type classification — the drag-order IS the send priority (rank shown explicitly) */}
       <StatusListEditor
         title={t('messaging.queue.typesTitle')}
         subtitle={t('messaging.queue.typesSubtitle')}
         endpoint="/whatsapp-message-types"
         addLabel={t('messaging.queue.typesAdd')}
-        withColor compact />
+        withColor compact showRank />
     </div>
   )
 }
