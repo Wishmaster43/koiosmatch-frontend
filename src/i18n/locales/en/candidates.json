@@ -243,7 +243,7 @@
     "customFields": "Custom fields",
     "placedPickPlaceholder": "Choose a match…",
     "placedOrNew": "Or create a new one",
-    "placedNewPlaceholder": "Vacancy / role name"
+    "placedNewPlaceholder": "Select a vacancy…"
   },
   "stage": {
     "lead": "Lead",

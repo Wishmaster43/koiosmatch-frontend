@@ -1,8 +1,10 @@
 /**
- * useCreateMatch — create a match for a candidate (C-19: POST /candidates/{id}/matches).
- * Kept out of the drawer so it stays presentational (§3). Returns the new match id,
- * or null on failure (notifyError, ERR-1). The endpoint is pending backend C-19; the
- * call degrades gracefully (toast) until it exists.
+ * useCreateMatch — create a match for a candidate via the canonical direct-match
+ * endpoint (G-2: POST /matches { candidate_id, vacancy_id }, idempotent → sets
+ * deployability Placed). Was the title-based POST /candidates/{id}/matches (C-19);
+ * now there is one create path, keyed on a real vacancy (§3B "direct match").
+ * Kept out of the drawer so it stays presentational (§3). Returns the new (or
+ * existing) match id, or null on failure (notifyError, ERR-1).
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,11 +16,12 @@ export function useCreateMatch(candidateId: Id) {
   const { t } = useTranslation('candidates')
   const [creating, setCreating] = useState(false)
 
-  // Create a bare match from a vacancy/role title; returns its id (string) or null.
-  const createMatch = async (vacancyTitle: string): Promise<string | null> => {
+  // Couple this candidate to a vacancy; returns the match id (string) or null.
+  const createMatch = async (vacancyId: Id): Promise<string | null> => {
+    if (!candidateId || !vacancyId) return null
     setCreating(true)
     try {
-      const r = await api.post(`/candidates/${candidateId}/matches`, { vacancy_title: vacancyTitle })
+      const r = await api.post('/matches', { candidate_id: candidateId, vacancy_id: vacancyId })
       const m = (r?.data?.data ?? r?.data) as { id?: Id } | undefined
       return m?.id != null ? String(m.id) : null
     } catch {

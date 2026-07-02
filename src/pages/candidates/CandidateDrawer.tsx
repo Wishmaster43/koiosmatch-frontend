@@ -16,6 +16,7 @@ import { useGenders } from '@/lib/useGenders'
 import { useAllSettings, getBoolSetting, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useFunctions } from '@/lib/useFunctions'
 import { useCreateMatch } from './hooks/useCreateMatch'
+import { useVacancyOptions } from './hooks/useVacancyOptions'
 import { useAuth } from '@/context/AuthContext'
 import ProfilePanel from './drawer/ProfilePanel'
 import BackgroundTab from './drawer/BackgroundTab'
@@ -103,11 +104,14 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [recruiter,     setRecruiter]     = useState<(AppUser & { initials: string }) | null>(null)
   const [phase,         setPhase]         = useState<string | null>(null)
   const [status,        setStatus]        = useState<string | null>(null)
-  // "Geplaatst" requires a linked Match — pick an existing one (dropdown) or create
-  // a new one (title → C-19 POST). `matchChoice` = picked id; `newMatchTitle` = create.
-  const [matchPrompt,   setMatchPrompt]   = useState(false)
-  const [matchChoice,   setMatchChoice]   = useState<string | null>(null)
-  const [newMatchTitle, setNewMatchTitle] = useState('')
+  // "Geplaatst" requires a linked Match — pick an existing one (dropdown) or create a
+  // new one by choosing a vacancy (G-2 POST /matches). `matchChoice` = picked existing
+  // match id; `newMatchVacancyId` = the vacancy to create a fresh match against.
+  const [matchPrompt,       setMatchPrompt]       = useState(false)
+  const [matchChoice,       setMatchChoice]       = useState<string | null>(null)
+  const [newMatchVacancyId, setNewMatchVacancyId] = useState('')
+  // Vacancy picker options — only fetched while the placed prompt is open.
+  const vacancyOptions = useVacancyOptions(matchPrompt)
   // Convert guard (blocks an accidental CV click right after) + a signal that opens Profile edit.
   const [converting,    setConverting]    = useState(false)
   const [profileEditSignal, setProfileEditSignal] = useState(0)
@@ -381,7 +385,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
 
           {/* Pick one of the candidate's existing matches (dropdown). */}
           {(c.matches?.length ?? 0) > 0 && (
-            <select value={matchChoice ?? ''} onChange={e => { setMatchChoice(e.target.value || null); if (e.target.value) setNewMatchTitle('') }}
+            <select value={matchChoice ?? ''} onChange={e => { setMatchChoice(e.target.value || null); if (e.target.value) setNewMatchVacancyId('') }}
               style={{ width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none', marginBottom: 12 }}>
               <option value="">{t('drawer.placedPickPlaceholder')}</option>
               {(c.matches ?? []).map((m, i) => {
@@ -392,24 +396,29 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
             </select>
           )}
 
-          {/* Or create a new match from a vacancy/role title (C-19 POST). */}
+          {/* Or create a new match by picking a vacancy (G-2 direct match → POST /matches). */}
           <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', margin: '2px 0 6px' }}>{t('drawer.placedOrNew')}</div>
-          <input value={newMatchTitle} onChange={e => { setNewMatchTitle(e.target.value); if (e.target.value) setMatchChoice(null) }}
-            placeholder={t('drawer.placedNewPlaceholder')} aria-label={t('drawer.placedNewPlaceholder')}
-            style={{ width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none', marginBottom: 16 }} />
+          <select value={newMatchVacancyId} onChange={e => { setNewMatchVacancyId(e.target.value); if (e.target.value) setMatchChoice(null) }}
+            aria-label={t('drawer.placedNewPlaceholder')}
+            style={{ width: '100%', padding: '8px 11px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none', marginBottom: 16 }}>
+            <option value="">{t('drawer.placedNewPlaceholder')}</option>
+            {vacancyOptions.map(v => (
+              <option key={String(v.value)} value={String(v.value)}>{[v.label || '—', v.client].filter(Boolean).join(' · ')}</option>
+            ))}
+          </select>
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
             <button onClick={() => setMatchPrompt(false)} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
-            <button disabled={(!matchChoice && !newMatchTitle.trim()) || creatingMatch}
+            <button disabled={(!matchChoice && !newMatchVacancyId) || creatingMatch}
               onClick={async () => {
-                // Use the picked match, or create one from the typed title first.
+                // Use the picked match, or create one against the chosen vacancy first.
                 let mid = matchChoice
-                if (!mid && newMatchTitle.trim()) mid = await createMatch(newMatchTitle.trim())
+                if (!mid && newMatchVacancyId) mid = await createMatch(newMatchVacancyId)
                 if (!mid) return
                 setStatus('placed'); onUpdate?.(c.id, { status: 'placed', match_id: mid })
-                setMatchPrompt(false); setMatchChoice(null); setNewMatchTitle('')
+                setMatchPrompt(false); setMatchChoice(null); setNewMatchVacancyId('')
               }}
-              style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: ((matchChoice || newMatchTitle.trim()) && !creatingMatch) ? 1 : 0.5 }}>{t('drawer.placedConfirm')}</button>
+              style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: ((matchChoice || newMatchVacancyId) && !creatingMatch) ? 1 : 0.5 }}>{t('drawer.placedConfirm')}</button>
           </div>
         </div>
       </div>
