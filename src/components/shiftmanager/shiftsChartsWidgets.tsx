@@ -54,6 +54,7 @@ export function BarChartWidget({ data, bars, onBarClick }: {
             legendType="none"
             radius={[4, 4, 0, 0]}
             cursor="pointer"
+            isAnimationActive={false}
             onClick={(datum) => onBarClick(datum as unknown as ShiftsChartDatum, b)}
           />
         ))}

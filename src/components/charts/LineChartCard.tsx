@@ -56,6 +56,7 @@ export default function LineChartCard({ title, data = [], color = 'var(--color-p
             dataKey="value"
             stroke={color}
             strokeWidth={2}
+            isAnimationActive={false}
             dot={{ r: 4, fill: color, strokeWidth: 0, cursor: onItemClick ? 'pointer' : 'default' }}
             activeDot={{
               r: 6,

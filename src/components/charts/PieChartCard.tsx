@@ -64,6 +64,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
               paddingAngle={2} dataKey="value"
               cursor={onItemClick ? 'pointer' : 'default'}
               onClick={(d: unknown) => onItemClick?.(d)}
+              isAnimationActive={false}
             >
               {data.map((_, i) => (
                 <Cell key={i} fill={colors[i % colors.length]} stroke="white" strokeWidth={2} />

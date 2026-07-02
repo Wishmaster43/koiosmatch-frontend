@@ -40,7 +40,8 @@ export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 5
         <Pie data={data} cx="50%" cy="50%" innerRadius={innerR} outerRadius={outerR}
           paddingAngle={data.length > 1 ? 2 : 0} dataKey="value"
           cursor={onItemClick ? 'pointer' : 'default'}
-          onClick={(d: unknown) => onItemClick?.(d)} stroke="none">
+          onClick={(d: unknown) => onItemClick?.(d)} stroke="none"
+          isAnimationActive={false}>
           {data.map((d, i) => (
             <Cell key={i} fill={d.color || colors[i % colors.length]} />
           ))}

@@ -250,9 +250,9 @@ export function ActivityChart({ data, loading }: { data: WaActivityDatum[]; load
                 {v === 'outbound' ? t('outbound') : t('inbound')}
               </span>} />
             <Area type="monotone" dataKey="outbound" name="outbound"
-              stroke="#3B8FD4" fill="url(#gradOut)" strokeWidth={2} dot={false} />
+              stroke="#3B8FD4" fill="url(#gradOut)" strokeWidth={2} dot={false} isAnimationActive={false} />
             <Area type="monotone" dataKey="inbound" name="inbound"
-              stroke="var(--color-success)" fill="url(#gradIn)" strokeWidth={2} dot={false} />
+              stroke="var(--color-success)" fill="url(#gradIn)" strokeWidth={2} dot={false} isAnimationActive={false} />
           </AreaChart>
         </ResponsiveContainer>
       )}

@@ -87,6 +87,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
             radius={[4, 4, 0, 0]}
             cursor={onBarClick ? 'pointer' : 'default'}
             onClick={(_: unknown, idx: number) => onBarClick?.(data[idx])}
+            isAnimationActive={false}
           >
             {data.map((_, i) => (
               <Cell key={i} fill={colors[i % colors.length] || 'var(--color-primary)'} />

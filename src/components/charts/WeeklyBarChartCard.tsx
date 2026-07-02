@@ -52,9 +52,10 @@ export default function WeeklyBarChartCard({ title, data = [], series = [], heig
           <Tooltip content={<MultiTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 6 }} iconType="circle" iconSize={8} />
           {series.map(s => s.line ? (
-            <Line key={s.key} type="monotone" dataKey={s.key} name={s.label} stroke={s.color} strokeWidth={2} dot={{ r: 2 }} />
+            <Line key={s.key} type="monotone" dataKey={s.key} name={s.label} stroke={s.color} strokeWidth={2} dot={{ r: 2 }} isAnimationActive={false} />
           ) : (
             <Bar key={s.key} dataKey={s.key} name={s.label} fill={s.color} radius={[3, 3, 0, 0]}
+              isAnimationActive={false}
               cursor={onBarClick ? 'pointer' : 'default'}
               onClick={onBarClick ? (row: unknown) => onBarClick(row, s) : undefined} />
           ))}
