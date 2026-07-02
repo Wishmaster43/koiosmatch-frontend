@@ -71,7 +71,7 @@ function CandidateBlock({ invite }: { invite: ShiftInvite }) {
 
   return (
     <div style={{ marginTop: 6, padding: '8px 10px', borderRadius: 6,
-                  background: '#F8FAFF', border: '1px solid #E0E7FF' }}>
+                  background: 'var(--color-primary-bg)', border: '1px solid var(--border)' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
         <div style={{ width: 24, height: 24, borderRadius: '50%', flexShrink: 0,
                       background: 'var(--color-primary-bg)', color: 'var(--color-primary)',

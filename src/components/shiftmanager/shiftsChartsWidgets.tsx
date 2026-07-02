@@ -99,7 +99,7 @@ export function ChartCard({ title, subtitle, loading, error, children }: {
           <div className="flex items-center justify-center h-64 text-slate-400">{t('charts.loading')}</div>
         )}
         {error && !loading && (
-          <div className="flex items-center justify-center h-64 text-red-500">{error}</div>
+          <div className="flex items-center justify-center h-64 text-[var(--color-danger)]">{error}</div>
         )}
         {!loading && !error && children}
       </div>

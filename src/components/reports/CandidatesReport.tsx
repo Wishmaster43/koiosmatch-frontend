@@ -239,7 +239,7 @@ export default function CandidatesReport() {
 
       {/* Grid layout for the cards */}
       {loading ? (
-        <div className="flex flex-col items-center justify-center h-64 gap-3 bg-[var(--surface)] border border-gray-100 shadow-sm rounded-xl">
+        <div className="flex flex-col items-center justify-center h-64 gap-3 bg-[var(--surface)] border border-[var(--border)] shadow-sm rounded-xl">
           <RefreshCw size={20} className="text-[var(--text-muted)] animate-spin" />
           <p className="text-sm text-[var(--text-muted)]">{t('candidates.loading')}</p>
         </div>
@@ -247,17 +247,17 @@ export default function CandidatesReport() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 
           {/* Card 1: By position */}
-          <div className="min-w-0 p-6 bg-[var(--surface)] border border-gray-100 shadow-sm rounded-xl">
+          <div className="min-w-0 p-6 bg-[var(--surface)] border border-[var(--border)] shadow-sm rounded-xl">
             <PieChartCard title={t('report.charts.perPosition')} data={positionData} showPercent={showPercent} size={260} unit={t('report.unitCandidates')} onItemClick={handlePositionDrillDown} />
           </div>
 
           {/* Card 2: Last login */}
-          <div className="min-w-0 p-6 bg-[var(--surface)] border border-gray-100 shadow-sm rounded-xl">
+          <div className="min-w-0 p-6 bg-[var(--surface)] border border-[var(--border)] shadow-sm rounded-xl">
             <BarChartCard title={t('report.charts.lastLogin')} data={loginData} showPercent={showPercent} colors={LOGIN_COLORS} height={260} onBarClick={handleLoginDrillDown} />
           </div>
 
           {/* Card 3: New candidates per month — time series, no % */}
-          <div className="min-w-0 p-6 bg-[var(--surface)] border border-gray-100 shadow-sm rounded-xl">
+          <div className="min-w-0 p-6 bg-[var(--surface)] border border-[var(--border)] shadow-sm rounded-xl">
             <BarChartCard
               title={`${t('report.charts.newPerMonth')}${selectedYear ? ` (${selectedYear})` : ''}`}
               data={monthData} colors={[MONTH_COLOR]} height={260}
@@ -266,7 +266,7 @@ export default function CandidatesReport() {
           </div>
 
           {/* Card 4: New candidates per week — time series, no % */}
-          <div className="min-w-0 p-6 bg-[var(--surface)] border border-gray-100 shadow-sm rounded-xl">
+          <div className="min-w-0 p-6 bg-[var(--surface)] border border-[var(--border)] shadow-sm rounded-xl">
             <LineChartCard
               title={`${t('report.charts.newPerWeek')}${selectedYear ? ` (${selectedYear})` : ''}`}
               data={weekData} color={MONTH_COLOR} height={260}
@@ -276,7 +276,7 @@ export default function CandidatesReport() {
           </div>
 
           {/* Card 5: Deregistered per month — time series, no % */}
-          <div className="min-w-0 p-6 bg-[var(--surface)] border border-gray-100 shadow-sm rounded-xl">
+          <div className="min-w-0 p-6 bg-[var(--surface)] border border-[var(--border)] shadow-sm rounded-xl">
             <BarChartCard
               title={`${t('report.charts.endPerMonth')}${selectedYear ? ` (${selectedYear})` : ''}`}
               data={endMonthData} colors={['#FCA5A5']} height={260}
@@ -285,7 +285,7 @@ export default function CandidatesReport() {
           </div>
 
           {/* Card 6: Deregistered per week — time series, no % */}
-          <div className="min-w-0 p-6 bg-[var(--surface)] border border-gray-100 shadow-sm rounded-xl">
+          <div className="min-w-0 p-6 bg-[var(--surface)] border border-[var(--border)] shadow-sm rounded-xl">
             <LineChartCard
               title={`${t('report.charts.endPerWeek')}${selectedYear ? ` (${selectedYear})` : ''}`}
               data={endWeekData} color={END_COLOR} height={260}
@@ -295,7 +295,7 @@ export default function CandidatesReport() {
           </div>
 
           {/* Card 7: Top cities (full width) */}
-          <div className="min-w-0 p-6 bg-[var(--surface)] border border-gray-100 shadow-sm rounded-xl lg:col-span-2">
+          <div className="min-w-0 p-6 bg-[var(--surface)] border border-[var(--border)] shadow-sm rounded-xl lg:col-span-2">
             <BarChartCard
               title={t('report.charts.topCities', { n: top_cities_n })}
               data={cityData} colors={[SAP_BLUE]} height={260}
