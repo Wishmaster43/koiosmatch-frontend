@@ -8,7 +8,41 @@
 > **Eén bron per feit:** dit bestand = de **bewijslast** (`file:line` + reviewed-clean register). De
 > geprioriteerde **acties + actuele status** leven in `worklist.md §G` onder dezelfde IDs — hier niet herhaald.
 
-## Bevindingen (met worklist-ID)
+## 2026-07-02 · Volledige audit (FE + BE) — consistentie · refactor · schaal · architectuur
+
+> Diepe, evidence-based audit van beide repo's. **Kernoordeel: beide codebases zijn gezond** — findings zijn
+> **verfijningen, geen fires**. Twee "enge" BE-findings bleken vals na verificatie (eager-loading is er wél —
+> `::with` 54×, geen systemische N+1; `Location`'s "BelongsToTenant" is een comment). Samengevat ook in backend's
+> canonieke `COORDINATION-LOG` (2026-07-02) voor het gezamenlijke overleg.
+
+**FE — geverifieerd sterk:** blueprint (7 entiteiten Page/Table/Drawer) · code-splitting 35× `React.lazy` ·
+i18n 20 ns × 5 locales + parity-test · 0 `console.log` · dangerous-HTML alleen in `SafeHtml` (DOMPurify).
+
+| # | Sev | Finding (bewijs) | Advies |
+|---|---|---|---|
+| **FE-1** | 🔴 P1-sec | `auth_token` in `localStorage` — 7 files (5 lookup-contexts lezen 'm direct) → XSS-exfiltratabel | cookie-flip (CO3/D1) + token-read centraliseren |
+| **FE-2** | 🟠 scale | `@tanstack/react-query` in deps maar ~onbenut (1 file vs **25 rauwe `useEffect`-fetch**) | migreer list/detail-fetches → react-query + stale-times |
+| **FE-3** | 🟡 consist | 23 hardcoded status/stage-keys (applications/candidates/outreach/tasks) | bind op flags (`is_match`/`is_rejected`/`requires_match`, §0) |
+| **FE-4** | 🟡 mod | 3 files > 400r: `Dashboard` 502 · `CandidateDrawer` 446 · `ApplicationsPage` 433 | splitsen (single-purpose) |
+| **FE-5** | 🟡 scale | 3/11 DataTables zonder `scrollParentRef` (kandidaten = 10k-target) | virtualisatie aanzetten |
+
+**BE — geverifieerd sterk:** geen god-files (0 >400r) · migratie-conventie 100% · geen `raw_data` · eager-loading
+aanwezig · geen tenant-lek (36 `where('tenant_id')` = legitieme central-user-validaties) · 126 tests · 0 TODO.
+
+| # | Sev | Finding | Advies |
+|---|---|---|---|
+| **BE-1** | 🟡 mod | `routes/api/tenant.php` = **1000r (op de cap)** | per-domein splitsen (AP-E5, nu Medium) |
+| **BE-2** | 🟡 open | H2 status-provenance · H4 globale rate-limit · candidate/vacancy custom-fields-follow-ups (AP-E9) | afmaken |
+
+**Cross-cutting:** **X-1 (🟠)** AP-P1 OpenAPI→FE-types nog niet gedaan (sterkste drift-preventie ontbreekt) ·
+**X-2** stale FE-docs (`DATA-API.md` + oude AUDIT-secties) · **X-3** nog op gedeelde working tree (worktrees pending).
+
+**Top-3 om met backend te bespreken (hoogste hefboom):** (1) **AP-P1 OpenAPI→FE-types** (drift = compile-error) ·
+(2) **FE-2 react-query** (refetch-storms) · (3) **FE-1 auth cookie-flip** (enige open P1-security).
+
+---
+
+## Bevindingen (met worklist-ID) — historisch (2026-06-29)
 
 | ID | Lens | Sev | Bestand(en) `:line` | Probleem (bewijslast) |
 |---|---|---|---|---|
