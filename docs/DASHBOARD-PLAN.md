@@ -57,7 +57,7 @@
 
 > **BE = `koiosmatch-api` (deze lane), FE = `koiosmatch-frontend`.** Backend levert feed/velden; frontend wired de blokken. Sectie bijgehouden door **BE-Claude** — hou 'm in sync (identieke kopie in `koiosmatch-api/docs/DASHBOARD-PLAN.md`).
 
-### ✅ Klaar (backend geleverd — live + groen op main, t/m `8328f53`)
+### ✅ Klaar (backend geleverd — live + groen op main, t/m `7acd261`)
 - **Contact-recorder (item 1)** — gedeelde `RecordsLastContact`-trait op **kandidaten én klant-contactpersonen**, gestempeld via **model-events** (elk schrijfpad, monotoon, geen updated_at-bump):
   - Kandidaat: **notitie** → `note`, **afspraak** → `appointment` / `call` (belafspraak) / `meet` (Google Meet).
   - Contactpersoon: **klant-notitie** → de **primaire contactpersoon** (kanaal `note`).
@@ -67,11 +67,12 @@
 - **`dashboard_type`-enum (item 6) — backend is leidend.** Echte waarden: **`admin · management · recruitment · planning · backoffice · sales · readonly`**. ⚠️ **NIET** `recruiter`/`planner` → FE gebruikt **`recruitment`** en **`planning`**. `/auth/me` geeft `roles[].dashboard_type`.
 - **Item 2 — Uitstroom-timeseries** — `GET /dashboard/charts` → `timeseries.out.{candidates_out, applications_rejected, matches_ended}` + `net` (instroom − uitstroom, `[{name,value}]`). `candidates_out` = gearchiveerd (deleted_at) **OF** naar een `requires_reason`-status (via de flag). Stamps: `matches.ended_at` + `candidates.status_changed_at`.
 - **Item 4 — Metrics (deel 1/2)** — nieuwe KPI's op `GET /dashboard`: `placements` · `intakes` (permissie-gated) · `wa_queue` (whatsapp-module) · `incomplete_runs` (workflows-module).
+- **Item 3 — Rol-gescopte feed** — recruiter (`dashboard_type=recruitment`) of `?mine`/`?type=own|recruitment` → `owner_id=me` op álle candidate-centric queries (kpis·recent·charts·uitstroom); management/super-admin/overig = tenant-breed. `?type` narrowt alleen, wident nooit (§5, enforced op central-rol).
+- **Attention-feeds (FE-review)** — `attention.{failed_workflows, tasks_overdue, expiring_opps}` op `GET /dashboard` (permissie/module-gated).
 
 ### ⏳ Eerstvolgend (backend — deblokkeert de management-grafieken)
-- **Item 3 — Rol-gescopte feed** — `?type=<dashboard_type>` → `owner_id=me` vs tenant-breed; backend enforce't op de caller-rol (§5).
 - **Item 4 — Metrics (deel 2/2)** — fill-rate · time-to-fill · source→hires (definitie-keuze nodig) · bezettingsgraad (Dash's planning-data).
-- **Dashboard-attention-feeds (FE-review)** — `attention.failed_workflows`/`tasks_overdue`/`expiring_opps` + `expiring_opportunities[]`; `escalations[]` (bron-definitie nodig); `role.dashboard_type` schrijfbaar. *(BE-Claude pakt deze; Dash: task-overdue-filter + icon-kolom + opps won/lost + notifications-feed.)*
+- **`escalations[]` + `expiring_opportunities[]`-lijst + `role.dashboard_type` schrijfbaar (`PUT /roles/{id}`)** — `escalations[]` wacht op bron-definitie. *(Dash: task-overdue-filter + icon-kolom + opps won/lost + notifications-feed.)*
 - **Item 1 rest** — overige contact-bronnen: WhatsApp (zakelijk+privé) + e-mail; per-persoon-precisie (`customer_contact_id` op notitie/afspraak); opportunity-contact.
 - **Item 5 uitbreiden** — datumfilters naar de overige lijst-endpoints.
 
@@ -143,3 +144,21 @@
 sales `won/lost` · `role.dashboard_type` write · icon-kolom op taken-lookups.
 
 **Geen actie van jou vereist behalve leveren** — ik verifieer per levering en meld terug via Danny.
+
+---
+
+## ❓ Overleg aan Dash (2026-07-02, na jouw laatste levering)
+
+**1. Rol → dashboard koppelen (item #1 — write).** FE zet nu in **RolesSettings** een **"Startdashboard"-dropdown**
+(labels = de switcher-`types.*`) en stuurt `dashboard_type` **mee in de bestaande `PUT /roles/{id}`** (naast
+`color`/`icon`). Vraag: accepteert die PUT `dashboard_type` al, of moet FE een ander veld/endpoint gebruiken?
+Graag write aanzetten. Multi-role-precedentie die FE hanteert: `admin > management > recruitment > backoffice >
+sales > planning > readonly` (`resolveDashboardType`).
+
+**2. Verificatie van je nieuwe leveringen (top, dank!) — bevestig de veldpaden dan wire ik ze meteen:**
+- **Uitstroom + net** — je noemt `GET /dashboard/charts` → `timeseries.out.*` + `net`. FE leest de weekly-serie nu uit
+  **`dash.charts.timeseries`** (van `GET /dashboard`). Staat `charts` genest op `/dashboard`, of moet FE
+  **`/dashboard/charts` apart** ophalen? Bevestig → dan zet ik uitstroom-bars + een net-lijn aan.
+- **Metrics deel 1** (`placements`·`intakes`·`wa_queue`·`incomplete_runs` op `GET /dashboard`) — top-level of onder
+  **`attention.*`**? FE-KPI's lezen nu `attention.placements` / `attention.intake_planned` / etc. Geef het pad, dan
+  sluit ik exact aan (of ik pas de KPI-reads aan).
