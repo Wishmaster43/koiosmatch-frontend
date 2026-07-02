@@ -7,13 +7,13 @@
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Heart, Ban } from 'lucide-react'
-import { DUMMY_OPEN_SHIFTS } from '../data/mocks'
 import { sectionBlock } from './constants'
 import { useFunctions } from '@/lib/useFunctions'
 import type { Id } from '@/types/common'
 import type { FavLists, OpenFilters, OpenShift } from './planningTypes'
 
 interface PlanningOpenShiftsProps {
+  openShifts: OpenShift[]
   openFilters: OpenFilters
   setOpenFilters: Dispatch<SetStateAction<OpenFilters>>
   scheduledIds: Set<Id>
@@ -22,16 +22,14 @@ interface PlanningOpenShiftsProps {
   blacklist: FavLists
 }
 
-const OPEN_SHIFTS = DUMMY_OPEN_SHIFTS as unknown as OpenShift[]
-
-export default function PlanningOpenShifts({ openFilters, setOpenFilters, scheduledIds, setScheduledIds, favorites, blacklist }: PlanningOpenShiftsProps) {
+export default function PlanningOpenShifts({ openShifts, openFilters, setOpenFilters, scheduledIds, setScheduledIds, favorites, blacklist }: PlanningOpenShiftsProps) {
   const { t } = useTranslation('candidates')
   // Function/level options from the tenant lookup (no hardcoded care-level list).
   const { functions: FUNCTION_LEVELS } = useFunctions() as { functions: string[] }
 
   // Filter open shifts by distance, candidate level and selected shift types.
   const candLevel = openFilters.max_level
-  const filtered = OPEN_SHIFTS.filter(d =>
+  const filtered = openShifts.filter(d =>
     d.distance <= openFilters.distance &&
     d.level <= candLevel &&
     (openFilters.shiftTypes.length === 0 || openFilters.shiftTypes.includes(d.shiftType))
@@ -82,7 +80,7 @@ export default function PlanningOpenShifts({ openFilters, setOpenFilters, schedu
           </div>
           <div style={{ marginLeft: 'auto' }}>
             <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              {filtered.length}/{OPEN_SHIFTS.length} {t('planning.shifts')}
+              {filtered.length}/{openShifts.length} {t('planning.shifts')}
             </span>
           </div>
         </div>

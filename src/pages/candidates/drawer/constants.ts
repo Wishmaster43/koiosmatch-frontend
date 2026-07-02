@@ -1,6 +1,6 @@
 /**
  * Candidate drawer constants — shared styling + the one fixed real-world list.
- * (Dummy datasets live in ../data/mocks.js.)
+ * (Planning data is now real: ../hooks/useCandidateSchedule; the dummy datasets are gone.)
  *
  * Controlled vocabularies are NOT here: document types, note types, statuses,
  * funnel, candidate types, functions, pools, languages, driving licences, …

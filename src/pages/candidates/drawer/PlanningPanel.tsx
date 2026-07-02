@@ -6,6 +6,7 @@ import PlanningScheduling from './PlanningScheduling'
 import PlanningOpenShifts from './PlanningOpenShifts'
 import PlanningFavorites from './PlanningFavorites'
 import { useCandidatePlanningPreferences, usePlanningPreferenceTargets, namesByType } from '../hooks/useCandidatePlanning'
+import { useCandidateSchedule } from '../hooks/useCandidateSchedule'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 import type { OpenFilters, RosterShift, ScheduleFavorites } from './planningTypes'
@@ -26,6 +27,8 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
   // tab only needs the grouped NAME lists to dim/flag rows, so derive those via namesByType.
   const prefs = useCandidatePlanningPreferences(c.id)
   const { groups: prefTargets } = usePlanningPreferenceTargets()
+  // Real agenda + open shifts (G-7 — replaces the dummy roster/open-shift datasets).
+  const { roster, openShifts } = useCandidateSchedule(c.id)
   const favoriteNames  = namesByType(prefs.favorites)
   const blacklistNames = namesByType(prefs.blacklist)
 
@@ -54,7 +57,7 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
       {planningSubTab === 'availability' && <AvailabilityEditor candidateId={c.id} />}
 
       {planningSubTab === 'scheduling' && (
-        <PlanningScheduling c={c}
+        <PlanningScheduling c={c} baseShifts={roster} openShifts={openShifts}
           scheduleSelected={scheduleSelected} setScheduleSelected={setScheduleSelected}
           scheduleFavorites={scheduleFavorites} setScheduleFavorites={setScheduleFavorites}
           scheduledIds={scheduledIds} setScheduledIds={setScheduledIds}
@@ -62,7 +65,7 @@ export default function PlanningPanel({ c }: { c: Candidate }) {
       )}
 
       {planningSubTab === 'openShifts' && (
-        <PlanningOpenShifts
+        <PlanningOpenShifts openShifts={openShifts}
           openFilters={openFilters} setOpenFilters={setOpenFilters}
           scheduledIds={scheduledIds} setScheduledIds={setScheduledIds}
           favorites={favoriteNames} blacklist={blacklistNames} />

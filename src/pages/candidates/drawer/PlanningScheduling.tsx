@@ -7,7 +7,6 @@
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Mail, Clock, MapPin, Heart, X, Check } from 'lucide-react'
-import { DUMMY_SHIFTS_LIST, DUMMY_OPEN_SHIFTS } from '../data/mocks'
 import { sectionBlock, sectionTitle } from './constants'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -15,6 +14,8 @@ import type { OpenShift, RosterShift, ScheduleFavorites } from './planningTypes'
 
 interface PlanningSchedulingProps {
   c: Candidate
+  baseShifts: RosterShift[]
+  openShifts: OpenShift[]
   scheduleSelected: RosterShift | null
   setScheduleSelected: Dispatch<SetStateAction<RosterShift | null>>
   scheduleFavorites: ScheduleFavorites
@@ -25,18 +26,15 @@ interface PlanningSchedulingProps {
   setUnscheduledIdx: Dispatch<SetStateAction<Set<number>>>
 }
 
-const BASE_SHIFTS = DUMMY_SHIFTS_LIST as unknown as RosterShift[]
-const OPEN_SHIFTS = DUMMY_OPEN_SHIFTS as unknown as OpenShift[]
-
 export default function PlanningScheduling({
-  c, scheduleSelected, setScheduleSelected, scheduleFavorites, setScheduleFavorites,
+  c, baseShifts, openShifts, scheduleSelected, setScheduleSelected, scheduleFavorites, setScheduleFavorites,
   scheduledIds, setScheduledIds, unscheduledIdx, setUnscheduledIdx,
 }: PlanningSchedulingProps) {
   const { t } = useTranslation('candidates')
 
   // Build the roster: base shifts minus unscheduled ones, plus shifts picked from open shifts.
-  const visibleBase = BASE_SHIFTS.filter((_, i) => !unscheduledIdx.has(i))
-  const extraScheduled: RosterShift[] = OPEN_SHIFTS.filter(d => scheduledIds.has(d.id)).map(d => ({
+  const visibleBase = baseShifts.filter((_, i) => !unscheduledIdx.has(i))
+  const extraScheduled: RosterShift[] = openShifts.filter(d => scheduledIds.has(d.id)).map(d => ({
     date: d.date, time: d.time, client: d.client, function: d.function,
     location: d.location, color: d.color, workedBefore: 0, favorite: false,
     address: '-', remarks: 'Ingepland via open diensten.', _openId: d.id,
@@ -98,7 +96,7 @@ export default function PlanningScheduling({
         const d = scheduleSelected
         const fav = scheduleFavorites[d.date + d.client] ?? d.favorite
         const toggleFav = () => setScheduleFavorites(p => ({ ...p, [d.date + d.client]: !fav }))
-        const baseIdx = BASE_SHIFTS.indexOf(d)
+        const baseIdx = baseShifts.indexOf(d)
         // Remove this shift from the roster (open-shift pick vs. base shift differ).
         const handleUnschedule = () => {
           const openId = d._openId
