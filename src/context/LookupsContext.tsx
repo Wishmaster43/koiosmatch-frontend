@@ -25,9 +25,16 @@ import { COOKIE_AUTH } from '../lib/authMode'
  *   Item = { value, label, color?, order?, active? }
  */
 
-// One configurable lookup row (statuses also carry is_applicant). The index
-// signature keeps it structurally compatible with the shared LookupOption.
-export interface LookupItem { value: string; label: string; color: string; is_applicant?: boolean; [k: string]: unknown }
+// One configurable lookup row. Flag semantics (§3B — flag-driven, never label-matched):
+// statuses carry requires_match/requires_reason/expects_return_date; statuses + funnel
+// carry is_applicant; funnel carries requires_appointment. Index signature keeps it
+// structurally compatible with the shared LookupOption.
+export interface LookupItem {
+  value: string; label: string; color: string
+  is_applicant?: boolean; requires_appointment?: boolean
+  requires_match?: boolean; requires_reason?: boolean; expects_return_date?: boolean
+  [k: string]: unknown
+}
 
 interface LookupsValue {
   candidateTypes: LookupItem[]
@@ -67,7 +74,7 @@ export const DEFAULT_PHASES: LookupItem[] = [
 // carries `requires_appointment` once configured (see §3B / C-22).
 export const DEFAULT_FUNNEL_TYPES: LookupItem[] = [
   { value: 'applied',  label: 'Gesolliciteerd',     color: '#94A3B8' },
-  { value: 'invited',  label: 'Uitgenodigd/Intake', color: '#8C86D9' },
+  { value: 'invited',  label: 'Uitgenodigd/Intake', color: '#8C86D9', requires_appointment: true },
   { value: 'proposal', label: 'Voorgesteld',        color: '#6FA8C4' },
   { value: 'hired',    label: 'Aangenomen',         color: '#79B58E' },
   { value: 'rejected', label: 'Afgewezen',          color: '#D98A8A' },
@@ -96,8 +103,9 @@ const DEFAULT_AVAILABILITY: LookupItem[] = [
 ]
 
 // Normalise a raw API list: keep active items, sort by order, fall back to seed.
-// `is_applicant` is carried through (statuses only) so the funnel-revealing status
-// is detectable without label matching.
+// ALL flag fields are carried through (§3B — flag-driven): is_applicant + funnel's
+// requires_appointment (previously dropped here, breaking intake detection) alongside
+// the status flags, so behaviour never falls back to matching hardcoded value keys.
 function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
   if (!Array.isArray(raw) || raw.length === 0) return fallback
   return (raw as Record<string, unknown>[])
@@ -105,7 +113,10 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
     .sort((a, b) => (Number(a.order ?? a.sort_order ?? 0)) - (Number(b.order ?? b.sort_order ?? 0)))
     .map(it => ({ value: String(it.value), label: String(it.label ?? it.value), color: (it.color as string) ?? '#6B7280',
       requires_reason: it.requires_reason === true,
-      requires_match: it.requires_match === true, expects_return_date: it.expects_return_date === true }))
+      requires_match: it.requires_match === true,
+      expects_return_date: it.expects_return_date === true,
+      is_applicant: it.is_applicant === true,
+      requires_appointment: it.requires_appointment === true }))
 }
 
 const LookupsContext = createContext<LookupsValue | null>(null)

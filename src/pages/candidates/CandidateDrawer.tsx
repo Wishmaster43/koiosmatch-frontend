@@ -190,7 +190,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   // requires_match → must link a Match; requires_reason/expects_return_date → ask first.
   const changeStatus = (v: string) => {
     const it = statuses.find(s => s.value === v) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown }) | undefined
-    if (Boolean(it?.requires_match) || v === 'placed') { setMatchChoice(null); setMatchPrompt(true); return }
+    if (it?.requires_match) { setMatchChoice(null); setMatchPrompt(true); return }
     if (Boolean(it?.requires_reason) || Boolean(it?.expects_return_date)) {
       setStatusModal({ target: v, reason: '', date: '', needReason: Boolean(it?.requires_reason), needDate: Boolean(it?.expects_return_date) })
       return
