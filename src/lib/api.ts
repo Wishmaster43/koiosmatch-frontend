@@ -5,6 +5,7 @@ import axios, {
 } from 'axios'
 import type { ListResult, PaginationMeta } from '../types/api'
 import { COOKIE_AUTH, CSRF_COOKIE_URL } from './authMode'
+import { notifyError } from './notify'
 
 /**
  * api — the single shared axios instance for the whole app.
@@ -120,6 +121,13 @@ api.interceptors.response.use(
       .replace(/\/\d+(?=\/|$|\?)/g, '/:id')
     if (import.meta.env.DEV && !benignTenants403 && !benignUnavailable) {
       console.error('API Error:', status, method.toUpperCase(), safeUrl)
+    }
+
+    // A-7: surface silent write-failures in dev. A failed mutation otherwise vanishes
+    // into a component's `.catch` — a dev toast makes a broken/missing/500 endpoint
+    // visible (this is why saves "silently" don't persist). GET stays quiet (loads degrade).
+    if (import.meta.env.DEV && method !== 'get' && status && status !== 401 && !benignTenants403 && !benignUnavailable) {
+      notifyError(`API ${method.toUpperCase()} ${safeUrl} → ${status}`)
     }
 
     const isAuthCall = url.includes('/auth/login') || url.includes('/auth/me')
