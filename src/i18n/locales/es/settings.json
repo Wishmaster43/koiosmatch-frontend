@@ -130,6 +130,10 @@
     "vacancy_channels": "Portales de empleo",
     "vacancy_matching": "Matching",
     "task_statuses": "Estados",
+    "matches": "Coincidencias",
+    "outreach": "Listas de llamadas",
+    "match_statuses": "Estados",
+    "outreach_statuses": "Estados",
     "task_types": "Tipos de actividad",
     "task_priorities": "Prioridades",
     "task_display": "Vista de tabla",
@@ -1239,6 +1243,16 @@
     "contextLabel": "Tipo de grupo",
     "contextRecruitment": "Reclutamiento (grupo de talento)",
     "contextPlanning": "Planificación (grupo de asignación)"
+  },
+  "matches": {
+    "statusTitle": "Estados",
+    "statusSubtitle": "Gestiona los estados de coincidencias (estado + color).",
+    "statusAdd": "Añadir estado"
+  },
+  "outreach": {
+    "statusTitle": "Estados",
+    "statusSubtitle": "Gestiona los estados de listas de llamadas (estado + color).",
+    "statusAdd": "Añadir estado"
   },
   "tasks": {
     "statusTitle": "Estados",

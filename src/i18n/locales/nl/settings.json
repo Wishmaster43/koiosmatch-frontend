@@ -126,6 +126,10 @@
     "vacancy_app_defaults": "Sollicitatie-instellingen",
     "vacancy_matching": "Matching",
     "task_statuses": "Statussen",
+    "matches": "Matches",
+    "outreach": "Bellijsten",
+    "match_statuses": "Statussen",
+    "outreach_statuses": "Statussen",
     "task_types": "Activiteit-types",
     "task_priorities": "Prioriteiten",
     "task_display": "Tabelweergave",
@@ -498,6 +502,16 @@
     "channelsAdd": "Vacaturesite toevoegen",
     "appDefaultsTitle": "Sollicitatie-instellingen",
     "appDefaultsSubtitle": "De standaard die een nieuwe vacature overneemt. Per vacature aanpasbaar in de drawer."
+  },
+  "matches": {
+    "statusTitle": "Statussen",
+    "statusSubtitle": "Beheer de match-statussen (status + kleur).",
+    "statusAdd": "Status toevoegen"
+  },
+  "outreach": {
+    "statusTitle": "Statussen",
+    "statusSubtitle": "Beheer de bellijst-statussen (status + kleur).",
+    "statusAdd": "Status toevoegen"
   },
   "tasks": {
     "statusTitle": "Statussen",

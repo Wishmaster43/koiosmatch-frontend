@@ -41,6 +41,8 @@ import FunctionsSettings from './sections/FunctionsSettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancyFieldsSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
+import { MatchStatusSettings } from './sections/MatchSettings'
+import { OutreachStatusSettings } from './sections/OutreachSettings'
 import RejectionSettings from './sections/RejectionSettings'
 import CandidateCustomFieldsSettings from './sections/CandidateCustomFieldsSettings'
 import CandidateRequiredFieldsSettings from './sections/CandidateRequiredFieldsSettings'
@@ -180,6 +182,20 @@ export const NAV_GROUPS = [
       { id: 'task_types', icon: Tags, component: TaskTypeSettings },
       { id: 'task_priorities', icon: Flag, component: TaskPrioritySettings },
       { id: 'task_display', icon: Palette, schema: taskDisplay },
+    ],
+  },
+  {
+    // Match lookups — statuses for the Matches feature (R-1; BE /match-statuses).
+    key: 'matches', icon: Sparkles,
+    items: [
+      { id: 'match_statuses', icon: Tags, component: MatchStatusSettings },
+    ],
+  },
+  {
+    // Outreach (call-list / bellijsten) lookups (R-1; BE /outreach-statuses).
+    key: 'outreach', icon: Phone,
+    items: [
+      { id: 'outreach_statuses', icon: Tags, component: OutreachStatusSettings },
     ],
   },
   // Planning tijdelijk verborgen (2026-06-26) — niet verwijderd, alleen uit. Terugzetten = dit blok +

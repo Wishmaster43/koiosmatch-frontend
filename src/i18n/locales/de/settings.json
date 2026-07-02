@@ -130,6 +130,10 @@
     "vacancy_channels": "Jobbörsen",
     "vacancy_matching": "Matching",
     "task_statuses": "Status",
+    "matches": "Matches",
+    "outreach": "Anruflisten",
+    "match_statuses": "Status",
+    "outreach_statuses": "Status",
     "task_types": "Aktivitätstypen",
     "task_priorities": "Prioritäten",
     "task_display": "Tabellenansicht",
@@ -1239,6 +1243,16 @@
     "contextLabel": "Pool-Typ",
     "contextRecruitment": "Recruitment (Talentpool)",
     "contextPlanning": "Planung (Einsatzpool)"
+  },
+  "matches": {
+    "statusTitle": "Status",
+    "statusSubtitle": "Verwalte die Match-Status (Status + Farbe).",
+    "statusAdd": "Status hinzufügen"
+  },
+  "outreach": {
+    "statusTitle": "Status",
+    "statusSubtitle": "Verwalte die Anruflisten-Status (Status + Farbe).",
+    "statusAdd": "Status hinzufügen"
   },
   "tasks": {
     "statusTitle": "Status",

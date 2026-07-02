@@ -126,6 +126,10 @@
     "vacancy_app_defaults": "Application settings",
     "vacancy_matching": "Matching",
     "task_statuses": "Statuses",
+    "matches": "Matches",
+    "outreach": "Call lists",
+    "match_statuses": "Statuses",
+    "outreach_statuses": "Statuses",
     "task_types": "Activity types",
     "task_priorities": "Priorities",
     "task_display": "Table display",
@@ -498,6 +502,16 @@
     "channelsAdd": "Add job board",
     "appDefaultsTitle": "Application settings",
     "appDefaultsSubtitle": "The default a new vacancy inherits. Override it per vacancy in the drawer."
+  },
+  "matches": {
+    "statusTitle": "Statuses",
+    "statusSubtitle": "Manage the match statuses (status + colour).",
+    "statusAdd": "Add status"
+  },
+  "outreach": {
+    "statusTitle": "Statuses",
+    "statusSubtitle": "Manage the call-list statuses (status + colour).",
+    "statusAdd": "Add status"
   },
   "tasks": {
     "statusTitle": "Statuses",

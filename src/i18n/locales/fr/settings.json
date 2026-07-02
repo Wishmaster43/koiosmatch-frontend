@@ -130,6 +130,10 @@
     "vacancy_channels": "Sites d'emploi",
     "vacancy_matching": "Matching",
     "task_statuses": "Statuts",
+    "matches": "Correspondances",
+    "outreach": "Listes d'appels",
+    "match_statuses": "Statuts",
+    "outreach_statuses": "Statuts",
     "task_types": "Types d'activité",
     "task_priorities": "Priorités",
     "task_display": "Affichage tableau",
@@ -1239,6 +1243,16 @@
     "contextLabel": "Type de vivier",
     "contextRecruitment": "Recrutement (vivier de talents)",
     "contextPlanning": "Planning (vivier d'affectation)"
+  },
+  "matches": {
+    "statusTitle": "Statuts",
+    "statusSubtitle": "Gérer les statuts des correspondances (statut + couleur).",
+    "statusAdd": "Ajouter un statut"
+  },
+  "outreach": {
+    "statusTitle": "Statuts",
+    "statusSubtitle": "Gérer les statuts des listes d'appels (statut + couleur).",
+    "statusAdd": "Ajouter un statut"
   },
   "tasks": {
     "statusTitle": "Statuts",
