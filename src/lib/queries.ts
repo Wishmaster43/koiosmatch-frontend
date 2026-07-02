@@ -9,11 +9,17 @@ import api, { unwrapList } from './api'
  * useEffect). Add new hooks here as pages migrate to React Query.
  */
 
+// Stable empty default. Without it, `data` is undefined while loading, and each
+// `const { data = [] } = useUsers()` call site would create a fresh [] every render —
+// feeding memo/effect chains that loop setState (see useCandidatesData / RightPanelContext).
+const EMPTY_USERS: unknown[] = []
+
 /** Tenant users (owners/assignees). Cached + deduped app-wide. */
 export function useUsers() {
   return useQuery({
     queryKey: ['users'],
     queryFn: async ({ signal }) => unwrapList(await api.get('/users', { signal })).rows,
+    placeholderData: EMPTY_USERS,
   })
 }
 

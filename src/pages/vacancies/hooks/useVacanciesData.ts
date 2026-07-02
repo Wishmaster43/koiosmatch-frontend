@@ -30,11 +30,16 @@ interface UseVacanciesDataResult {
 }
 interface ListResult { vacancies: Vacancy[]; total: number; lastPage: number }
 
+// Stable empty defaults — a fresh `?? []` each render loops the registerFilters effect
+// (see useCandidatesData for the full note).
+const EMPTY_VACANCIES: Vacancy[] = []
+const EMPTY_CUSTOMERS: VacancyCustomer[] = []
+
 export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanciesDataArgs): UseVacanciesDataResult {
   const queryClient = useQueryClient()
 
   // Customers once, for the filters/drawer/modal/bulk pickers.
-  const { data: customers = [] } = useQuery({
+  const { data: customers = EMPTY_CUSTOMERS } = useQuery({
     queryKey: ['vacancies', 'customer-pickers'],
     queryFn: async ({ signal }): Promise<VacancyCustomer[]> => {
       const res = await api.get('/customers', { signal })
@@ -58,7 +63,7 @@ export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanci
     placeholderData: keepPreviousData,
   })
 
-  const vacancies = listQuery.data?.vacancies ?? []
+  const vacancies = listQuery.data?.vacancies ?? EMPTY_VACANCIES
   const total     = listQuery.data?.total ?? 0
   const lastPage  = listQuery.data?.lastPage ?? 1
   const loading   = listQuery.isLoading

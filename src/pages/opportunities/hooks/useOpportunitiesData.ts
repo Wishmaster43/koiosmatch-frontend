@@ -19,6 +19,10 @@ import type { Id } from '@/types/common'
 interface AppUser { id: Id; name: string }
 interface PageCustomer { id: Id; name: string }
 
+// Stable empty default — a fresh `?? []` each render loops the registerFilters effect
+// (see useCandidatesData for the full note).
+const EMPTY_OPPORTUNITIES: Opportunity[] = []
+
 export function useOpportunitiesData() {
   const { t } = useTranslation()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
@@ -42,7 +46,7 @@ export function useOpportunitiesData() {
       }
     },
   })
-  const rows = data ?? []
+  const rows = data ?? EMPTY_OPPORTUNITIES
   // Keep the setRows(prev => …) API the optimistic mutations use, backed by the query cache.
   const setRows = useCallback((updater: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])) => {
     queryClient.setQueryData<Opportunity[]>(['opportunities', showArchived], prev =>

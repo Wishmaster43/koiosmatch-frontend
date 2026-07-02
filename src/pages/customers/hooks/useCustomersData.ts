@@ -23,6 +23,10 @@ export interface PageStats {
 interface Args { filterParams: Record<string, unknown>; page: number; pageSize: number; t: TFunction }
 interface ListResult { customers: Customer[]; total: number; lastPage: number }
 
+// Stable empty default — a fresh `?? []` each render loops the registerFilters effect
+// (see useCandidatesData for the full note).
+const EMPTY_CUSTOMERS: Customer[] = []
+
 export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
   const queryClient = useQueryClient()
 
@@ -42,7 +46,7 @@ export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
     placeholderData: keepPreviousData,
   })
 
-  const customers = listQuery.data?.customers ?? []
+  const customers = listQuery.data?.customers ?? EMPTY_CUSTOMERS
   const total     = listQuery.data?.total ?? 0
   const lastPage  = listQuery.data?.lastPage ?? 1
   const loading   = listQuery.isLoading
