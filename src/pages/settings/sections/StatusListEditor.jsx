@@ -11,7 +11,7 @@ import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControl
 
 // extraField (optioneel): { key, label, options: [{value,label}], default } —
 // rendert een extra keuzeveld in de aanmaak-modal + een badge in de rij.
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null }) {
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, allowAdd = true }) {
   const { t } = useTranslation('settings')
   const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(extraField ? { [extraField.key]: extraField.default } : {}) })
   // Lookups differ in their display field: name (phases/status) vs label/value (genders/languages).
@@ -102,13 +102,15 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
               {saved ? <><Check size={13}/> {t('common.saved')}</> : <><Save size={13}/> {t('common.save')}</>}
             </button>
           )}
-          <button onClick={openCreate}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                     fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-                     whiteSpace: 'nowrap', flexShrink: 0,
-                     background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
-            <Plus size={13} /> {addLabel}
-          </button>
+          {allowAdd && (
+            <button onClick={openCreate}
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
+                       fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
+                       whiteSpace: 'nowrap', flexShrink: 0,
+                       background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+              <Plus size={13} /> {addLabel}
+            </button>
+          )}
         </div>
       </div>
 
