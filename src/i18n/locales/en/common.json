@@ -11,6 +11,7 @@
   "to": "to",
   "empty": "No data yet.",
   "search": "Search…",
+  "clear": "Clear",
   "loading": "Loading…",
   "noResults": "No results",
   "resultsCount": "{{count}} results",
@@ -138,5 +139,7 @@
   "notifications": {
     "title": "Notifications",
     "empty": "No notifications"
-  }
+  },
+  "activeFilters": "Active filters",
+  "clearAll": "Clear all"
 }

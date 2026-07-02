@@ -11,6 +11,7 @@
   "to": "tot",
   "empty": "Nog geen gegevens.",
   "search": "Zoeken…",
+  "clear": "Wissen",
   "loading": "Laden…",
   "noResults": "Geen resultaten",
   "resultsCount": "{{count}} resultaten",
@@ -138,5 +139,7 @@
   "notifications": {
     "title": "Notificaties",
     "empty": "Geen notificaties"
-  }
+  },
+  "activeFilters": "Actieve filters",
+  "clearAll": "Alles wissen"
 }

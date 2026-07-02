@@ -11,6 +11,7 @@
   "to": "a",
   "empty": "Aún no hay datos.",
   "search": "Buscar…",
+  "clear": "Borrar",
   "loading": "Cargando…",
   "noResults": "Sin resultados",
   "resultsCount": "{{count}} resultados",
@@ -138,5 +139,7 @@
   "notifications": {
     "title": "Notificaciones",
     "empty": "Sin notificaciones"
-  }
+  },
+  "activeFilters": "Filtros activos",
+  "clearAll": "Borrar todo"
 }

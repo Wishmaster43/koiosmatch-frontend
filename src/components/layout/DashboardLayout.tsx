@@ -16,6 +16,7 @@ import { renderPage, PAGE_TITLES } from './appPages'
 import { NavigationProvider } from '@/context/NavigationContext'
 import DashboardSwitcher from '@/pages/dashboard/DashboardSwitcher'
 import NotificationBell from '@/components/layout/NotificationBell'
+import ActiveFilterChips from '@/components/layout/ActiveFilterChips'
 import { DASHBOARD_TYPES, canSwitchViews } from '@/pages/dashboard/templates'
 import type { DashboardType } from '@/pages/dashboard/templates'
 import type { ReportFilterGroup } from '@/types/reports'
@@ -229,6 +230,9 @@ export default function DashboardLayout() {
             </button>
           </div>
         </div>
+
+        {/* Active-filter bar — shows/clears the current list filters (e.g. a dashboard jump). */}
+        <ActiveFilterChips />
 
         {/* Content row: page + optional right filter panel side by side */}
         <div className="flex flex-1 overflow-hidden">

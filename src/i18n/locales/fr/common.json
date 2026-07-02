@@ -11,6 +11,7 @@
   "to": "à",
   "empty": "Aucune donnée.",
   "search": "Rechercher…",
+  "clear": "Effacer",
   "loading": "Chargement…",
   "noResults": "Aucun résultat",
   "resultsCount": "{{count}} résultats",
@@ -138,5 +139,7 @@
   "notifications": {
     "title": "Notifications",
     "empty": "Aucune notification"
-  }
+  },
+  "activeFilters": "Filtres actifs",
+  "clearAll": "Tout effacer"
 }
