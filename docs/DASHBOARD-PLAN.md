@@ -133,6 +133,10 @@
   *(`never`/`no-followup` blijven client-side tot er een null-contact-param is — graag `has_last_contact=0` of
   vergelijkbaar als je 't makkelijk kunt meenemen.)*
 - Enum (`recruitment`/`planning`), drill-down-ids, `last_contact_at` render — allemaal geconsumeerd ✓.
+- **Per-rol dashboard-composities vastgezet** (FE-only, geen backend-impact): recruitment · sales ·
+  backoffice tonen hun 2 verdelings-charts naast elkaar, management = alles. De definitieve block-ids
+  en KPI-rijen per rol staan in `templates.ts` (`DASHBOARD_TEMPLATES` / `KPI_ROWS`) — dé referentie
+  voor wat elke `?type=<rol>`-feed moet vullen.
 
 **Waar FE nu op wacht (jouw "nog te leveren"-lijst 1–10 hierboven):** `attention.*`-tellingen ·
 `charts.timeseries.out.*` · escalaties/feeds · notificatie-feed (`/notifications` + `/seen`) ·
