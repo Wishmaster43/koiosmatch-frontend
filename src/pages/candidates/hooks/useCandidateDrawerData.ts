@@ -1,13 +1,13 @@
 /**
  * Candidate-drawer data hooks — per-tab fetches live here so the tab components
  * (ChangelogTab, BranchSection) stay presentational (§3: logic in hooks, not JSX).
- * All GET-loads are tolerant of a missing endpoint (treated as empty, never a
- * hard error) and abort on unmount.
+ * GET-loads go through React Query (A-3: cached + dedup + signal-cancel), disabled
+ * until their inputs exist and tolerant of a missing endpoint (empty, never a hard error).
  */
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
 import { notifyError } from '@/lib/notify'
 import type { Candidate, CandidateBranch } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -25,30 +25,23 @@ export interface ActivityEvent {
   ip?: string
 }
 
-// Candidate audit trail (C-16). 404 = endpoint not built yet → empty (calm), not
-// an error. Returns the four-state building blocks the tab renders.
+// Candidate audit trail (C-16). 404 = endpoint not built yet → empty (calm), not an
+// error. Returns the four-state building blocks the tab renders.
 export function useCandidateActivity(id?: Id): { items: ActivityEvent[]; loading: boolean; error: boolean } {
-  const [items,   setItems]   = useState<ActivityEvent[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(false)
-
-  useEffect(() => {
-    if (!id) { setLoading(false); return }
-    const ctrl = new AbortController()
-    setLoading(true); setError(false)
-    api.get(`/candidates/${id}/activity`, { signal: ctrl.signal })
-      .then(res => setItems(res.data?.data ?? res.data ?? []))
-      .catch(err => {
-        if (isAbortError(err)) return
-        // 404 = endpoint not built yet → treat as empty (calm), not a hard error.
-        if (err?.response?.status && err.response.status !== 404) setError(true)
-        setItems([])
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [id])
-
-  return { items, loading, error }
+  const { data = [], isLoading: loading, isError: error } = useQuery({
+    queryKey: ['candidates', id, 'activity'],
+    enabled: !!id,
+    queryFn: async ({ signal }): Promise<ActivityEvent[]> => {
+      try {
+        const res = await api.get(`/candidates/${id}/activity`, { signal })
+        return (res.data?.data ?? res.data ?? []) as ActivityEvent[]
+      } catch (err) {
+        if ((err as { response?: { status?: number } })?.response?.status === 404) return []
+        throw err
+      }
+    },
+  })
+  return { items: data, loading, error }
 }
 
 export interface BranchOption { value: string; label: string }
@@ -58,20 +51,16 @@ interface CustomerLite { name?: string; company_name?: string; id?: Id }
 // Customer branches as id-keyed {value,label} options (GET /customers) for the
 // branch link — value is the branch id so membership can persist by id (C-4).
 export function useBranchCustomerOptions(): BranchOption[] {
-  const [options, setOptions] = useState<BranchOption[]>([])
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/customers', { signal: ctrl.signal })
-      .then(r => {
-        const rows = unwrapList<CustomerLite>(r).rows
-        setOptions(rows
-          .map(l => { const name = String(l.name ?? l.company_name ?? l.id ?? ''); return { value: String(l.id ?? name), label: name } })
-          .filter(o => o.value && o.label))
-      })
-      .catch(() => {})
-    return () => ctrl.abort()
-  }, [])
-  return options
+  const { data = [] } = useQuery({
+    queryKey: ['customers', 'branch-options'],
+    queryFn: async ({ signal }): Promise<BranchOption[]> => {
+      const rows = unwrapList<CustomerLite>(await api.get('/customers', { signal })).rows
+      return rows
+        .map(l => { const name = String(l.name ?? l.company_name ?? l.id ?? ''); return { value: String(l.id ?? name), label: name } })
+        .filter(o => o.value && o.label)
+    },
+  })
+  return data
 }
 
 // A candidate's branch membership (C-4, M2M): local optimistic chips + persisted

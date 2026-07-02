@@ -1,14 +1,14 @@
 /**
- * useVacanciesData — data layer for VacanciesPage: loads the customers (for the
- * filter/drawer/modal/bulk pickers), the paginated + server-filtered vacancy list
- * and the server-wide stats. Returns the setters so optimistic bulk/drawer updates
- * in the container can mutate the list directly.
+ * useVacanciesData — data layer for VacanciesPage: the customers (for the pickers),
+ * the paginated + server-filtered vacancy list and the server-wide stats — all via
+ * React Query (A-3: cached per filter/page, keepPreviousData). Returns setter wrappers
+ * over the list cache so the container's optimistic bulk/drawer updates keep working.
  */
-import { useState, useEffect } from 'react'
+import { useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrapList } from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
 import { mapVacancy } from '../data/mapVacancy'
 import type { Vacancy, ApiVacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -28,54 +28,65 @@ interface UseVacanciesDataResult {
   stats: VacancyStats | null
   customers: VacancyCustomer[]
 }
+interface ListResult { vacancies: Vacancy[]; total: number; lastPage: number }
 
 export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanciesDataArgs): UseVacanciesDataResult {
-  const [vacancies, setVacancies] = useState<Vacancy[]>([])
-  const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState<string | null>(null)
-  const [total,     setTotal]     = useState(0)
-  const [lastPage,  setLastPage]  = useState(1)
-  const [stats,     setStats]     = useState<VacancyStats | null>(null)
-  const [customers, setCustomers] = useState<VacancyCustomer[]>([])
+  const queryClient = useQueryClient()
 
-  // Load the customers once for the filters/drawer/modal/bulk pickers.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/customers', { signal: ctrl.signal })
-      .then(res => setCustomers(unwrapList<{ id?: Id; name?: string; company_name?: string }>(res).rows.map(c => ({ id: c.id, name: c.name ?? c.company_name ?? '—' }))))
-      .catch(() => {})
-    return () => ctrl.abort()
-  }, [])
+  // Customers once, for the filters/drawer/modal/bulk pickers.
+  const { data: customers = [] } = useQuery({
+    queryKey: ['vacancies', 'customer-pickers'],
+    queryFn: async ({ signal }): Promise<VacancyCustomer[]> => {
+      const res = await api.get('/customers', { signal })
+      return unwrapList<{ id?: Id; name?: string; company_name?: string }>(res).rows.map(c => ({ id: c.id, name: c.name ?? c.company_name ?? '—' }))
+    },
+  })
 
-  // ── List (paginated, server-filtered) ──
-  useEffect(() => {
-    const ctrl = new AbortController()
-    setLoading(true); setError(null)
-    api.get('/vacancies', { params: { ...filterParams, page, per_page: pageSize }, signal: ctrl.signal })
-      .then(res => {
+  // List (paginated, server-filtered). 404 = endpoint not built → empty, not an error.
+  const listQuery = useQuery({
+    queryKey: ['vacancies', filterParams, page, pageSize],
+    queryFn: async ({ signal }): Promise<ListResult> => {
+      try {
+        const res = await api.get('/vacancies', { params: { ...filterParams, page, per_page: pageSize }, signal })
         const { rows, total, lastPage } = unwrapList<ApiVacancy>(res)
-        setVacancies(rows.map(mapVacancy)); setTotal(total); setLastPage(lastPage)
-      })
-      .catch(err => {
-        if (isAbortError(err)) return
-        // A 404 means the endpoint isn't built yet → empty, not an error.
-        if (err?.response?.status && err.response.status !== 404) {
-          setError(t('page.loadError'))
-        }
-        setVacancies([]); setTotal(0); setLastPage(1)
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [filterParams, page, pageSize, t])
+        return { vacancies: rows.map(mapVacancy), total, lastPage }
+      } catch (err) {
+        if ((err as { response?: { status?: number } })?.response?.status === 404) return { vacancies: [], total: 0, lastPage: 1 }
+        throw err
+      }
+    },
+    placeholderData: keepPreviousData,
+  })
 
-  // ── Stats (server-wide totals; honour the filters) ──
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/vacancies/stats', { params: filterParams, signal: ctrl.signal })
-      .then(res => setStats(res.data?.data ?? res.data ?? null))
-      .catch(err => { if (!isAbortError(err)) setStats(null) })
-    return () => ctrl.abort()
-  }, [filterParams])
+  const vacancies = listQuery.data?.vacancies ?? []
+  const total     = listQuery.data?.total ?? 0
+  const lastPage  = listQuery.data?.lastPage ?? 1
+  const loading   = listQuery.isLoading
+  const error     = listQuery.isError ? t('page.loadError') : null
+
+  // Stats (server-wide totals; honour the filters).
+  const { data: stats = null } = useQuery({
+    queryKey: ['vacancies', 'stats', filterParams],
+    queryFn: async ({ signal }): Promise<VacancyStats | null> => {
+      const res = await api.get('/vacancies/stats', { params: filterParams, signal })
+      return (res.data?.data ?? res.data ?? null) as VacancyStats | null
+    },
+  })
+
+  // Setter wrappers over the list cache — keep the container's optimistic mutations working.
+  const setVacancies = useCallback<Dispatch<SetStateAction<Vacancy[]>>>(updater => {
+    queryClient.setQueryData<ListResult>(['vacancies', filterParams, page, pageSize], prev => {
+      const cur = prev ?? { vacancies: [], total: 0, lastPage: 1 }
+      return { ...cur, vacancies: typeof updater === 'function' ? (updater as (p: Vacancy[]) => Vacancy[])(cur.vacancies) : updater }
+    })
+  }, [queryClient, filterParams, page, pageSize])
+
+  const setTotal = useCallback<Dispatch<SetStateAction<number>>>(updater => {
+    queryClient.setQueryData<ListResult>(['vacancies', filterParams, page, pageSize], prev => {
+      const cur = prev ?? { vacancies: [], total: 0, lastPage: 1 }
+      return { ...cur, total: typeof updater === 'function' ? (updater as (p: number) => number)(cur.total) : updater }
+    })
+  }, [queryClient, filterParams, page, pageSize])
 
   return { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers }
 }

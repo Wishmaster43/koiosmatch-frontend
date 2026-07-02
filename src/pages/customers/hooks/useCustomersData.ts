@@ -1,12 +1,14 @@
 /**
  * useCustomersData — the list data layer for CustomersPage (§3): the paginated,
- * server-filtered list + the server-wide stats. A missing endpoint (404) is an
- * empty list, not an error. Mirrors useCandidatesData / useVacanciesData.
+ * server-filtered list + the server-wide stats, via React Query (A-3: cached per
+ * filter/page, keepPreviousData). A missing endpoint (404) is an empty list, not an
+ * error. Returns setter wrappers over the cache so optimistic updates keep working.
  */
-import { useState, useEffect } from 'react'
+import { useCallback } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
+import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrapList } from '@/lib/api'
-import { isAbortError } from '@/lib/mocks'
 import { mapCustomer } from '../data/mapCustomer'
 import type { Customer, ApiCustomer } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -19,43 +21,56 @@ export interface PageStats {
 }
 
 interface Args { filterParams: Record<string, unknown>; page: number; pageSize: number; t: TFunction }
+interface ListResult { customers: Customer[]; total: number; lastPage: number }
 
 export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
-  const [customers, setCustomers] = useState<Customer[]>([])
-  const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState<string | null>(null)
-  const [lastPage,  setLastPage]  = useState(1)
-  const [total,     setTotal]     = useState(0)
-  const [stats,     setStats]     = useState<PageStats | null>(null)
-  const filterKey = JSON.stringify(filterParams)
+  const queryClient = useQueryClient()
 
-  // List (paginated, server-filtered).
-  useEffect(() => {
-    const ctrl = new AbortController()
-    setLoading(true); setError(null)
-    api.get('/customers', { params: { ...filterParams, page, per_page: pageSize }, signal: ctrl.signal })
-      .then(res => {
+  // List (paginated, server-filtered). 404 = endpoint not built → empty, not an error.
+  const listQuery = useQuery({
+    queryKey: ['customers', filterParams, page, pageSize],
+    queryFn: async ({ signal }): Promise<ListResult> => {
+      try {
+        const res = await api.get('/customers', { params: { ...filterParams, page, per_page: pageSize }, signal })
         const { rows, total, lastPage } = unwrapList<ApiCustomer>(res)
-        setCustomers(rows.map(mapCustomer)); setTotal(total); setLastPage(lastPage)
-      })
-      .catch(err => {
-        if (isAbortError(err)) return
-        // A 404 means the endpoint isn't built yet → treat as empty, not an error.
-        if (err?.response?.status && err.response.status !== 404) setError(t('page.loadError'))
-        setCustomers([]); setTotal(0); setLastPage(1)
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [filterKey, page, pageSize, t]) // eslint-disable-line react-hooks/exhaustive-deps
+        return { customers: rows.map(mapCustomer), total, lastPage }
+      } catch (err) {
+        if ((err as { response?: { status?: number } })?.response?.status === 404) return { customers: [], total: 0, lastPage: 1 }
+        throw err
+      }
+    },
+    placeholderData: keepPreviousData,
+  })
+
+  const customers = listQuery.data?.customers ?? []
+  const total     = listQuery.data?.total ?? 0
+  const lastPage  = listQuery.data?.lastPage ?? 1
+  const loading   = listQuery.isLoading
+  const error     = listQuery.isError ? t('page.loadError') : null
 
   // Stats (server-wide totals, honour the filters).
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/customers/stats', { params: filterParams, signal: ctrl.signal })
-      .then(res => setStats(res.data?.data ?? res.data ?? null))
-      .catch(err => { if (!isAbortError(err)) setStats(null) })
-    return () => ctrl.abort()
-  }, [filterKey]) // eslint-disable-line react-hooks/exhaustive-deps
+  const { data: stats = null } = useQuery({
+    queryKey: ['customers', 'stats', filterParams],
+    queryFn: async ({ signal }): Promise<PageStats | null> => {
+      const res = await api.get('/customers/stats', { params: filterParams, signal })
+      return (res.data?.data ?? res.data ?? null) as PageStats | null
+    },
+  })
+
+  // Setter wrappers over the list cache — keep the container's optimistic mutations working.
+  const setCustomers = useCallback<Dispatch<SetStateAction<Customer[]>>>(updater => {
+    queryClient.setQueryData<ListResult>(['customers', filterParams, page, pageSize], prev => {
+      const cur = prev ?? { customers: [], total: 0, lastPage: 1 }
+      return { ...cur, customers: typeof updater === 'function' ? (updater as (p: Customer[]) => Customer[])(cur.customers) : updater }
+    })
+  }, [queryClient, filterParams, page, pageSize])
+
+  const setTotal = useCallback<Dispatch<SetStateAction<number>>>(updater => {
+    queryClient.setQueryData<ListResult>(['customers', filterParams, page, pageSize], prev => {
+      const cur = prev ?? { customers: [], total: 0, lastPage: 1 }
+      return { ...cur, total: typeof updater === 'function' ? (updater as (p: number) => number)(cur.total) : updater }
+    })
+  }, [queryClient, filterParams, page, pageSize])
 
   return { customers, setCustomers, loading, error, total, setTotal, lastPage, stats }
 }
