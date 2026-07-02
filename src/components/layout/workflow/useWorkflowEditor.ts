@@ -117,7 +117,8 @@ export function useWorkflowEditor({ workflow, onSave }: {
         output = res?.data?.data ?? res?.data ?? []
 
       } else {
-        // Generieke test-module call (backend mag dit implementeren)
+        // Generic module test-run — backend POST /workflows/test-module (G-9): previews the
+        // module's output; 422 for an unknown or non-testable (really-sends) module type.
         const res = await api.post('/workflows/test-module', { module_type: data.type, config: data.config })
         output = res.data?.output ?? res.data
       }
