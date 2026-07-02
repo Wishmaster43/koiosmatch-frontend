@@ -19,6 +19,7 @@ import ApplicationDrawer from './ApplicationDrawer'
 import ApplicationsBulkBar from './ApplicationsBulkBar'
 import AddApplicationModal from './AddApplicationModal'
 import PaginationBar from '@/components/ui/PaginationBar'
+import HeaderSearch from '@/components/ui/HeaderSearch'
 import { mapApplication, mapApplicationDetail } from './data/mapApplication'
 import { bucketOfPhase } from './data/applicationsShared'
 import type { Application, ApplicationDetail, ApiApplication } from '@/types/application'
@@ -70,11 +71,12 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const [addOpen,        setAddOpen]        = useState(false)
   const [stats,          setStats]          = useState<AppStats | null>(null)
   const [showArchived,   setShowArchived]   = useState(false)
+  const [query,          setQuery]          = useState('')
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
 
   // Clear the selection whenever the visible set changes (bucket/filters/paging).
   useEffect(() => { setSelectedIds(new Set()) },
-    [bucket, showArchived, page, pageSize, selectedPhase, selectedOwner, selectedSource, selectedVac])
+    [bucket, showArchived, page, pageSize, selectedPhase, selectedOwner, selectedSource, selectedVac, query])
 
   // Row-selection handlers for the table checkboxes + bulk bar.
   const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
@@ -159,7 +161,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Reset to the first page whenever the bucket or any filter changes.
-  useEffect(() => { setPage(1) }, [bucket, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived])
+  useEffect(() => { setPage(1) }, [bucket, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived, query])
 
   // The visible rows: bucket + phase/owner/source/vacancy filters, decorated.
   const filteredAll = useMemo(() => {
@@ -172,9 +174,14 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
       if (selectedOwner.length  && !selectedOwner.includes(a.owner?.name || OWNER_NONE)) return false
       if (selectedSource.length && !selectedSource.includes(a.source))          return false
       if (selectedVac.length    && !selectedVac.includes(String(a.vacancyId)))  return false
+      // Free-text search across candidate · vacancy · source (client-side; mirrors candidates).
+      if (query.trim()) {
+        const q = query.trim().toLowerCase()
+        if (!`${a.candidateName ?? ''} ${a.vacancyTitle ?? ''} ${a.source ?? ''}`.toLowerCase().includes(q)) return false
+      }
       return true
     }).map(decorate)
-  }, [applications, bucket, showArchived, selectedPhase, selectedOwner, selectedSource, selectedVac, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [applications, bucket, showArchived, selectedPhase, selectedOwner, selectedSource, selectedVac, query, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Clientside pagination slice (the endpoint returns all rows at once).
   const totalRows  = filteredAll.length
@@ -329,11 +336,15 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         {/* Tab bar — add + buckets + view toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between',
           padding: '8px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-          <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 5,
-            padding: '6px 14px', fontSize: 13, fontWeight: 500, background: 'var(--color-primary)', color: '#fff',
-            border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-            <Plus size={14} /> {t('add.button')}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 5,
+              padding: '6px 14px', fontSize: 13, fontWeight: 500, background: 'var(--color-primary)', color: '#fff',
+              border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+              <Plus size={14} /> {t('add.button')}
+            </button>
+            {/* Shared header search (T10) — debounced, client-side text filter. */}
+            <HeaderSearch onSearch={setQuery} width={300} />
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Bucket tabs — soft-tinted active (§4: never a solid fill). */}
           {BUCKETS.map(b => {

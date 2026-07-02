@@ -11,6 +11,7 @@ import { useCustomerLookups } from '@/lib/useCustomerLookups'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
+import HeaderSearch from '@/components/ui/HeaderSearch'
 import CustomersTable from './CustomersTable'
 import CustomersBulkBar from './CustomersBulkBar'
 import CustomerDrawer from './CustomerDrawer'
@@ -123,12 +124,11 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const catOrg     = t('filters.categories.organisation')
 
   const filterGroups = useMemo(() => [
-    { key: 'global-search', type: 'global-search', label: t('filters.search'), placeholder: t('page.searchPlaceholder'), value: globalSearch, onChange: setGlobalSearch },
     { key: 'status',   type: 'search-select', category: catGeneral, label: t('filters.status'),         selected: selectedStatus,   options: statusOptions,   onToggle: tog(setSelectedStatus) },
     { key: 'industry', type: 'search-select', category: catGeneral, label: t('filters.industry'),       selected: selectedIndustry, options: industryOptions, onToggle: tog(setSelectedIndustry) },
     { key: 'city',     type: 'search-select', category: catGeneral, label: t('filters.city'),           selected: selectedCity,     options: cityOptions,     onToggle: tog(setSelectedCity) },
     { key: 'owner',    type: 'search-select', category: catOrg,     label: t('filters.accountManager'), selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
-  ], [t, catGeneral, catOrg, globalSearch, selectedStatus, selectedIndustry, selectedCity, selectedOwner, statusOptions, industryOptions, cityOptions, ownerOptions])
+  ], [t, catGeneral, catOrg, selectedStatus, selectedIndustry, selectedCity, selectedOwner, statusOptions, industryOptions, cityOptions, ownerOptions])
 
   useEffect(() => {
     registerFilters('customers-page', filterGroups)
@@ -195,6 +195,9 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                   background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
                   + {t('page.add')}
                 </button>
+                {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
+                <HeaderSearch onSearch={setGlobalSearch} defaultValue={globalSearch}
+                  placeholder={t('page.searchPlaceholder')} width={300} />
                 {/* Archived (soft-deleted) quick-view on the right */}
                 <button onClick={() => setShowArchived(v => !v)} title={t('page.archivedView')}
                   style={{ marginLeft: 'auto', padding: '6px 12px', fontSize: 12, fontWeight: showArchived ? 600 : 400,

@@ -17,6 +17,7 @@ import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLook
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
+import HeaderSearch from '@/components/ui/HeaderSearch'
 import VacanciesTable from './VacanciesTable'
 import VacanciesBulkBar from './VacanciesBulkBar'
 import VacancyDrawer from './VacancyDrawer'
@@ -139,10 +140,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // Register the right-panel filters (owner + client; status is the tab bar).
   const catOrg = t('filters.categories.organisation')
   const filterGroups = useMemo(() => [
-    { key: 'global-search', type: 'global-search', label: t('filters.search'), placeholder: t('page.searchPlaceholder'), value: globalSearch, onChange: setGlobalSearch },
     { key: 'owner',  type: 'search-select', category: catOrg, label: t('filters.owner'),  selected: selectedOwner,  options: ownerOptions,  onToggle: tog(setSelectedOwner) },
     { key: 'client', type: 'search-select', category: catOrg, label: t('filters.client'), selected: selectedClient, options: clientOptions, onToggle: tog(setSelectedClient) },
-  ], [t, catOrg, globalSearch, selectedOwner, selectedClient, ownerOptions, clientOptions])
+  ], [t, catOrg, selectedOwner, selectedClient, ownerOptions, clientOptions])
 
   useEffect(() => {
     registerFilters('vacancies-page', filterGroups)
@@ -180,7 +180,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
           {/* Add/bulk on the left (like Candidates/Applications); status tabs pushed right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
             padding: '0 24px 10px', flexShrink: 0 }}>
-            <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               {selectedIds.size > 0 ? (
                 <VacanciesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
                   onSetOwner={bulkSetOwner} onSetStatus={bulkSetStatus} onSetClient={bulkSetClient}
@@ -189,10 +189,15 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                   canArchive={hasPermission('vacancies.delete')}
                   users={users} statuses={statuses} customers={customerList} selectedTags={selectedTags} />
               ) : (
-                <button onClick={() => setAddOpen(true)} style={{ padding: '7px 14px', fontSize: 12, fontWeight: 500,
-                  background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-                  + {t('page.add')}
-                </button>
+                <>
+                  <button onClick={() => setAddOpen(true)} style={{ padding: '7px 14px', fontSize: 12, fontWeight: 500,
+                    background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+                    + {t('page.add')}
+                  </button>
+                  {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
+                  <HeaderSearch onSearch={setGlobalSearch} defaultValue={globalSearch}
+                    placeholder={t('page.searchPlaceholder')} width={300} />
+                </>
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginLeft: 'auto' }}>
