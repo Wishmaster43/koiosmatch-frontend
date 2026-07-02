@@ -20,13 +20,14 @@ const TIERS = [
   { id: 'enterprise', name: 'Koios Enterprise', desc: '+ REST API + WhatsApp persoonlijk + Insights+ + Connectors + SLA' },
 ]
 
-// Add-ons (toggle on top of any tier). Planning is hidden until its module (portal + app) exists.
+// Add-ons (toggle on top of any tier). Each id maps 1:1 to a module key the backend
+// must surface in tenant.modules (/auth/me) so the UI gate (lib/access.ts) can hide/show it.
 const ADDONS = [
   { id: 'reports', name: 'Rapporten Koios Match' },
   { id: 'sm',    name: 'Rapportage Shiftmanager' },
   { id: 'hf',    name: 'Rapportage HelloFlex' },
   { id: 'sm_ai', name: 'Shiftmanager AI Planner' },
-  { id: 'plan',  name: 'Planning', comingSoon: true },
+  { id: 'plan',  name: 'Planning' },
 ]
 
 // Legacy package string → new base tier (display only; the backend sends {package, addons}
