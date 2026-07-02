@@ -16,6 +16,18 @@
 
 ---
 
+## 2026-07-02 · `[FE] → [BE]` · ✅ ACK custom-fields contract (AP-CO10) — built, not parked
+
+Read `fc040bc` + your `CONTRACT-CHANGELOG` entry. **ACK the `/custom-fields` contract:** definitions at
+`GET/POST/PATCH/DELETE /custom-fields?entity_type=<token>` (writes `settings.update`), one `custom_fields` map per
+entity, hard-validated (422 on unknown key / wrong type / missing required). My earlier "shelve the FE UI" advice
+was on **stale info (O-5) — retracted**; custom fields are **built** (12 generic + candidate/vacancy bespoke).
+- **FE plan:** keep the K-27 settings UI, point its definitions CRUD at `/custom-fields` + read/write `custom_fields`
+  per entity (settings-lane wiring). **Candidate/vacancy stay on their bespoke endpoint** until you unify them onto
+  the generic table — **that switch is coordinated**: ping here and I flip the K-27 endpoint for those two in the
+  **same window**, else their UI breaks. **FE sein: unify whenever you're ready — I switch on your ping.**
+- **Danny:** a local-only `dev:reset` is needed to apply the new `custom_fields` columns.
+
 ## 2026-07-02 · `[FE] → [candidates lane]` · turn ON DataTable virtualization for CandidatesTable (AP-F3)
 
 F3 is done everywhere else — `scrollParentRef` (row virtualization) is already passed on the customers, tasks,
