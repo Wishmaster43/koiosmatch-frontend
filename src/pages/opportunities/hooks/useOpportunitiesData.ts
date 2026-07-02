@@ -5,7 +5,8 @@
  * Lookups (users, stages) are pulled in here too so the page stays presentational.
  * A missing endpoint (404) is an empty list, not an error.
  */
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
@@ -23,11 +24,30 @@ export function useOpportunitiesData() {
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { stages, stageMeta } = useOpportunityStages()
 
-  const [rows,      setRows]      = useState<Opportunity[]>([])
-  const [loading,   setLoading]   = useState(true)
-  const [error,     setError]     = useState(false)
+  const queryClient = useQueryClient()
   const [customers, setCustomers] = useState<PageCustomer[]>([])
   const [showArchived, setShowArchived] = useState(false)
+
+  // Opportunities list via React Query (A-3); the archived view opts into ?include_archived=1.
+  // A missing endpoint (404) is an empty list, not an error.
+  const { data, isLoading: loading, isError: error } = useQuery({
+    queryKey: ['opportunities', showArchived],
+    queryFn: async ({ signal }) => {
+      try {
+        const r = await api.get('/opportunities', { params: showArchived ? { include_archived: 1 } : undefined, signal })
+        return ((r.data?.data ?? r.data ?? []) as ApiOpportunity[]).map(mapOpportunity)
+      } catch (e) {
+        if ((e as { response?: { status?: number } })?.response?.status === 404) return [] as Opportunity[]
+        throw e
+      }
+    },
+  })
+  const rows = data ?? []
+  // Keep the setRows(prev => …) API the optimistic mutations use, backed by the query cache.
+  const setRows = useCallback((updater: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])) => {
+    queryClient.setQueryData<Opportunity[]>(['opportunities', showArchived], prev =>
+      typeof updater === 'function' ? (updater as (p: Opportunity[]) => Opportunity[])(prev ?? []) : updater)
+  }, [queryClient, showArchived])
   const [selected,       setSelected]       = useState<Opportunity | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
@@ -36,18 +56,6 @@ export function useOpportunitiesData() {
   const toggleRow = (id: Id) => setSelectedIds(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next })
   const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const next = new Set(prev); ids.forEach(id => allSelected ? next.delete(id) : next.add(id)); return next })
   const clearSelection = () => setSelectedIds(new Set())
-
-  // Load opportunities; the archived view opts into ?include_archived=1 (mirrors
-  // candidates). A missing endpoint (404) is an empty list, not an error.
-  useEffect(() => {
-    let alive = true
-    setLoading(true)
-    api.get('/opportunities', { params: showArchived ? { include_archived: 1 } : undefined })
-      .then(r => { if (alive) setRows(((r.data?.data ?? r.data ?? []) as ApiOpportunity[]).map(mapOpportunity)) })
-      .catch(e => { if (alive && e?.response?.status && e.response.status !== 404) setError(true) })
-      .finally(() => { if (alive) setLoading(false) })
-    return () => { alive = false }
-  }, [showArchived])
 
   // Load customers once for the drawer/modal pickers.
   useEffect(() => {
