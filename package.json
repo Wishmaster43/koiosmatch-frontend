@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "gen:types": "npx -y openapi-typescript@7 ../koiosmatch-api/docs/openapi.yaml -o src/types/api-generated.ts",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
