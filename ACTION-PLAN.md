@@ -40,7 +40,7 @@
 | **AP-CO7** | 503 = "integration not configured yet", not a user error | 🟡 | FE | ☐ |
 | **AP-CO8** | Base path `/api/v1` + envelope/pagination | 🔵 | FE | ☐ |
 | **AP-CO9** | Planning shape: assignment **IS** a schedule, hours **on** the schedule | 🟡 | FE | ☐ |
-| **AP-CO10** | Custom fields (C-29): FE built UI vs BE parked — decide together | 🟡 | BOTH+Danny | ☐ |
+| **AP-CO10** | Custom fields — generic mechanism ✅ live on 12 entities; candidate/vacancy unify + follow-ups pending (AP-E9) | 🟠 | BOTH | ◐ |
 | **AP-CO11** | Placement status label: code sets **`placed`**; docs say "Matched" (v1 leftover) | 🟡 | BOTH | ☐ |
 | **AP-P1** | Generate the contract from code — OpenAPI (Scribe) + FE TS types | 🟠 | BOTH | ☐ |
 | **AP-P2** | Contract snapshot tests per resource (incl. `/dashboard` first) | 🟠 | BE | ◐ |
@@ -130,7 +130,7 @@ traffic"). A compromised/looping client can hammer expensive tenant endpoints un
 | **AP-CO7** | 503 handling | Treat HelloFlex/AI `503` as "not configured yet", friendly empty state | Returns 503-until-configured by design |
 | **AP-CO8** | `/api/v1` + envelope | Verify the axios client uses `/api/v1`, `{data,meta}` + pagination, UUID ids, `null` (not sentinels) | Contract stable |
 | **AP-CO9** | Planning model shape | Consume: an **assignment = a schedule row**, **hours live on the schedule** (no separate `planning_assignments`/`planning_hours` tables). Fix any FE code/worklist expecting them | Confirmed built this way |
-| **AP-CO10** | Custom fields (C-29) | FE built the settings UI + treats it un-parked (K-27) | BE **parked** it (O-5). **Decide with Danny:** un-park (BE builds) or FE shelves the UI |
+| **AP-CO10** | Custom fields (C-29) | Point the K-27 settings UI at `/custom-fields?entity_type=<token>`; read/write `custom_fields` per entity; ACK'd. Candidate/vacancy stay on their bespoke endpoint until BE unifies (coordinated) | ✅ generic mechanism live on 12 entities (see AP-E9); candidate/vacancy bespoke → unify pending |
 | **AP-CO11** | Placement status label | Bind to the `requires_match` flag / the `placed` value — never label it "Matched". Fix FE `CLAUDE.md §3B` ("status → Matched") | Code sets `placed` (`onMatched` → the `requires_match` status). Fix `ARCHITECTURE.md §6` + A5 wording "candidate → matched" → **placed** (the "matched" *bucket* name is the application bucket, a different thing) |
 
 ---
