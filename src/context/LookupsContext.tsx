@@ -31,8 +31,8 @@ import { COOKIE_AUTH } from '../lib/authMode'
 // structurally compatible with the shared LookupOption.
 export interface LookupItem {
   value: string; label: string; color: string
-  is_applicant?: boolean; requires_appointment?: boolean
-  requires_match?: boolean; requires_reason?: boolean; expects_return_date?: boolean
+  is_applicant?: boolean; requires_appointment?: boolean; is_default?: boolean
+  requires_match?: boolean; requires_reason?: boolean; expects_return_date?: boolean; is_blacklist?: boolean
   [k: string]: unknown
 }
 
@@ -66,7 +66,7 @@ export const DEFAULT_CANDIDATE_TYPES: LookupItem[] = [
 // Phase = relationship lifecycle (single value), seed Lead → Candidate. NEW axis
 // (model v2, split out of the old "status"). Lead → Candidate via automation.
 export const DEFAULT_PHASES: LookupItem[] = [
-  { value: 'lead',      label: 'Lead',      color: '#94A3B8' },
+  { value: 'lead',      label: 'Lead',      color: '#94A3B8', is_default: true },
   { value: 'candidate', label: 'Kandidaat', color: '#79B58E' },
 ]
 
@@ -90,7 +90,7 @@ export const DEFAULT_STATUSES: LookupItem[] = [
   { value: 'unavailable', label: 'Niet beschikbaar', color: '#C9AC64', requires_reason: true, expects_return_date: true },
   { value: 'sick',        label: 'Ziek',             color: '#D98A8A', expects_return_date: true },
   { value: 'leave',       label: 'Verlof',           color: '#6FA8C4', expects_return_date: true },
-  { value: 'blacklist',   label: 'Blacklist',        color: '#D14B4B', requires_reason: true },
+  { value: 'blacklist',   label: 'Blacklist',        color: '#D14B4B', requires_reason: true, is_blacklist: true },
 ]
 
 // Availability is a SEPARATE axis from the lifecycle status (a candidate can be
@@ -116,7 +116,9 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
       requires_match: it.requires_match === true,
       expects_return_date: it.expects_return_date === true,
       is_applicant: it.is_applicant === true,
-      requires_appointment: it.requires_appointment === true }))
+      requires_appointment: it.requires_appointment === true,
+      is_blacklist: it.is_blacklist === true,
+      is_default: it.is_default === true }))
 }
 
 const LookupsContext = createContext<LookupsValue | null>(null)

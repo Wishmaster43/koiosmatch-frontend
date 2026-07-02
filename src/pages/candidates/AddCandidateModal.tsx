@@ -57,7 +57,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   // On create you pick the PHASE (Lead/Kandidaat); deployability defaults to available.
   const entryStatuses = phases.filter(s => CREATE_STATUSES.includes(s.value))
   const pickStatuses  = entryStatuses.length ? entryStatuses : phases
-  const defaultStatus = () => pickStatuses.find(s => s.value === 'lead')?.value ?? pickStatuses[0]?.value ?? ''
+  // Default entry phase is flag-driven (§3B: is_default), not the hardcoded 'lead' key.
+  const defaultStatus = () => pickStatuses.find(s => (s as { is_default?: boolean }).is_default)?.value ?? pickStatuses[0]?.value ?? ''
 
   const [status,    setStatus]    = useState(defaultStatus)
   const [errors,    setErrors]    = useState<Record<string, boolean>>({})

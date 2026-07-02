@@ -163,9 +163,11 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const pickFunnel = pickOne(setSelectedFunnel)
   const pickOwner  = pickOne(setSelectedOwner)
   const toggleAttention = (key: string) => setAttentionFilter(prev => prev === key ? null : key)
-  // Blacklist quick-view: set the status filter to just 'blacklist' (or clear it).
-  const blacklistActive = selectedStatus.length === 1 && selectedStatus[0] === 'blacklist'
-  const toggleBlacklist = () => setSelectedStatus(blacklistActive ? [] : ['blacklist'])
+  // Blacklist quick-view: the blacklist status is flag-driven (§3B: is_blacklist), never a
+  // hardcoded value key. Set/clear the status filter to just that value.
+  const blacklistValue = statuses.find(s => s.is_blacklist)?.value ?? 'blacklist'
+  const blacklistActive = selectedStatus.length === 1 && selectedStatus[0] === blacklistValue
+  const toggleBlacklist = () => setSelectedStatus(blacklistActive ? [] : [blacklistValue])
 
   const catLifecycle      = t('filters.categories.lifecycle')
   const catQualifications = t('filters.categories.qualifications')
