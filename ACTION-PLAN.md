@@ -1,1 +1,0 @@
-> **Moved — single-source.** The joint action plan is now **canonical in `koiosmatch-api/ACTION-PLAN.md`** (docs single-source, backend `DECISIONS.md P-7`, 2026-07-02). Read/append it there; this FE mirror is retired.

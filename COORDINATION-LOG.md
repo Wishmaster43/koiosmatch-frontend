@@ -1,1 +1,0 @@
-> **Moved — single-source.** The cross-Claude coordination log is now **canonical in `koiosmatch-api/COORDINATION-LOG.md`** (docs single-source, backend `DECISIONS.md P-7`, 2026-07-02; the FE's unique entries were absorbed there verbatim). Read/append it there; this FE mirror is retired.

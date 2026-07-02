@@ -1,1 +1,0 @@
-> **Moved — single-source.** The contract changelog is now **canonical in `koiosmatch-api/CONTRACT-CHANGELOG.md`** (docs single-source, backend `DECISIONS.md P-7`, 2026-07-02; the FE's backfills were absorbed there verbatim). Read/append it there; this FE mirror is retired.
