@@ -1,42 +1,43 @@
 /**
  * useReportDrill — data layer for ReportDrillDrawer (§3): when a drill opens, loads
  * the underlying records (rowsEndpoint) + Koios AI advice (adviceEndpoint). Both
- * degrade gracefully (a missing endpoint just leaves an empty list / no advice) and
- * abort when the drill changes or on unmount.
+ * degrade gracefully (a missing endpoint just leaves an empty list / no advice). Via
+ * React Query: each query stays disabled until its endpoint exists, caches per
+ * drill target and cancels a superseded fetch (A-3).
  */
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
 import type { DrillSpec } from './ReportDrillDrawer'
 
 type DrillRow = Record<string, unknown>
 
 export function useReportDrill(drill: DrillSpec | null) {
-  const [rows,          setRows]          = useState<DrillRow[]>([])
-  const [rowsLoading,   setRowsLoading]   = useState(false)
-  const [advice,        setAdvice]        = useState<string | null>(null)
-  const [adviceLoading, setAdviceLoading] = useState(false)
+  // Underlying records for the open drill (idle until a drill with a rows endpoint opens).
+  const rowsQ = useQuery({
+    queryKey: ['report-drill', 'rows', drill?.rowsEndpoint, drill?.rowsParams],
+    enabled: !!drill?.rowsEndpoint,
+    queryFn: async ({ signal }) => {
+      if (!drill?.rowsEndpoint) return [] as DrillRow[]
+      const r = await api.get(drill.rowsEndpoint, { params: drill.rowsParams, signal })
+      return (r.data?.data ?? r.data ?? []) as DrillRow[]
+    },
+  })
 
-  useEffect(() => {
-    if (!drill) return
-    const ctrl = new AbortController()
+  // Koios AI advice for the open drill (idle until a drill with an advice endpoint opens).
+  const adviceQ = useQuery({
+    queryKey: ['report-drill', 'advice', drill?.adviceEndpoint, drill?.adviceParams],
+    enabled: !!drill?.adviceEndpoint,
+    queryFn: async ({ signal }) => {
+      if (!drill?.adviceEndpoint) return null
+      const r = await api.get(drill.adviceEndpoint, { params: drill.adviceParams, signal })
+      return (r.data?.advice ?? r.data?.data?.advice ?? (typeof r.data === 'string' ? r.data : null)) as string | null
+    },
+  })
 
-    setRows([]); setAdvice(null)
-    if (drill.rowsEndpoint) {
-      setRowsLoading(true)
-      api.get(drill.rowsEndpoint, { params: drill.rowsParams, signal: ctrl.signal })
-        .then(r => setRows(r.data?.data ?? r.data ?? []))
-        .catch(() => {})
-        .finally(() => setRowsLoading(false))
-    }
-    if (drill.adviceEndpoint) {
-      setAdviceLoading(true)
-      api.get(drill.adviceEndpoint, { params: drill.adviceParams, signal: ctrl.signal })
-        .then(r => setAdvice(r.data?.advice ?? r.data?.data?.advice ?? (typeof r.data === 'string' ? r.data : null)))
-        .catch(() => {})
-        .finally(() => setAdviceLoading(false))
-    }
-    return () => ctrl.abort()
-  }, [drill])
-
-  return { rows, rowsLoading, advice, adviceLoading }
+  return {
+    rows:          rowsQ.data ?? [],
+    rowsLoading:   rowsQ.isLoading,
+    advice:        adviceQ.data ?? null,
+    adviceLoading: adviceQ.isLoading,
+  }
 }
