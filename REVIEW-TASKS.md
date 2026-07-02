@@ -7,6 +7,14 @@
 
 ---
 
+## ⚠️ URGENT — candidate/settings-lane · flip K-27 candidate naar het generieke endpoint (AP-CO10/AP-E9)
+> Backend heeft candidate **geünificeerd** op de generieke mechaniek (commit `42294f1`) en de **bespoke
+> `/candidate-custom-fields` retired**. Blijft de FE die aanroepen → de kandidaat-eigen-velden-instelling breekt.
+- **T0 · Doen:** de K-27 kandidaat-custom-fields-UI + read/write ompunten naar **`/custom-fields?entity_type=candidate`**.
+  Payload-velden: `key · label_i18n · type · options · required · required_phases · show_in_table · sort_order · active`.
+- **⚠️ Let op:** onbekende key op een candidate-write geeft nu **422** (was: stil gedropt) — valideer client-side + toon de fout.
+- **Acceptatie:** kandidaat-eigen-velden CRUD + waarden werken via het generieke endpoint; geen call meer naar `/candidate-custom-fields`.
+
 ## Settings-lane (`src/pages/settings/`)
 
 ### T1 · `billing_pay` verwijderen (B-32)
