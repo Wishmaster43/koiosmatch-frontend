@@ -1,10 +1,10 @@
-import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import SectionCard from '@/components/ui/SectionCard'
 import { useNoteTypes } from '@/lib/useNoteTypes'
+import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
@@ -23,7 +23,8 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
   const { formatDate } = useDateFormat()
   // Note categories from the tenant lookup (seed fallback until /note-types lands).
   const { types: noteTypes } = useNoteTypes()
-  const [notes, setNotes] = useState<Record<string, unknown>[]>(c.notes ?? [])
+  // Notes now persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
+  const { notes, addNote, editNote } = useCandidateNotes(c.id)
 
   // Channel consent (AVG) — nested `consent.{channel}_*` (C-11). Toggling saves the
   // full consent object; the server stamps `*_consent_at` on a flip (shown inline).
@@ -56,8 +57,8 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
       </SectionCard>
       <NotesTab
         notes={notes}
-        onAddNote={(n: Record<string, unknown>) => setNotes(p => [{ ...n, created_at: new Date().toISOString(), ago: t('common:justNow', { defaultValue: 'zojuist' }) }, ...p])}
-        onEditNote={(i: number, n: Record<string, unknown>) => setNotes(p => p.map((x, idx) => idx === i ? { ...x, ...n } : x))}
+        onAddNote={addNote}
+        onEditNote={editNote}
         timeline={c.timeline ?? []}
         noteTypes={noteTypes}
         authorInitials={c.ownerInitials}
