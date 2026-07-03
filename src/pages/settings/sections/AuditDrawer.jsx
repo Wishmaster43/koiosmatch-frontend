@@ -2,6 +2,7 @@
  * AuditDrawer — drill-down for one audit entry: before/after diff (DiffRow) per
  * changed field. Extracted from AuditLog.
  */
+import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import { KPI_KEYS, LogBadge } from './auditShared'
@@ -48,15 +49,17 @@ export function AuditDrawer({ entry, onClose }) {
               { label: t('audit.http.status'), value: status, statusColor, statusBg },
               { label: t('audit.http.duration'), value: p.duration ?? '—' },
             ].map(row => (
-              <><span key={row.label + 'l'} style={{ fontSize: 12, color: 'var(--text-muted)', alignSelf: 'center' }}>{row.label}</span>
-              <span key={row.label + 'v'} style={{ fontSize: 13, color: row.statusColor ?? 'var(--text)',
-                                  background: row.statusBg ?? 'transparent',
-                                  borderRadius: row.statusBg ? 6 : 0,
-                                  padding: row.statusBg ? '1px 7px' : 0,
-                                  fontFamily: row.mono ? 'monospace' : 'inherit',
-                                  fontWeight: row.statusColor ? 700 : 400 }}>
-                {row.value ?? '—'}
-              </span></>
+              <Fragment key={row.label}>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)', alignSelf: 'center' }}>{row.label}</span>
+                <span style={{ fontSize: 13, color: row.statusColor ?? 'var(--text)',
+                                    background: row.statusBg ?? 'transparent',
+                                    borderRadius: row.statusBg ? 6 : 0,
+                                    padding: row.statusBg ? '1px 7px' : 0,
+                                    fontFamily: row.mono ? 'monospace' : 'inherit',
+                                    fontWeight: row.statusColor ? 700 : 400 }}>
+                  {row.value ?? '—'}
+                </span>
+              </Fragment>
             ))}
           </div>
           {p.payload && Object.keys(p.payload).length > 0 && (
