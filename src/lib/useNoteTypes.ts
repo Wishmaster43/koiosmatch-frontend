@@ -12,14 +12,16 @@ import { useState, useEffect } from 'react'
 import api from './api'
 import type { LookupOption } from '@/types/common'
 
-// Seed defaults (labels NL — the API overrides per tenant once /note-types lands).
+// Seed defaults. VALUES are the API slugs (mirror the backend note_types seed) — the old
+// Dutch-label-as-value fallback made a note 422 ("type invalid") whenever the lookup hadn't
+// loaded yet (smoke-suite catch, 2026-07-03). Labels stay NL for display.
 export const DEFAULT_NOTE_TYPES: LookupOption[] = [
-  { value: 'Algemeen',     label: 'Algemeen' },
-  { value: 'Intake',       label: 'Intake' },
-  { value: 'Feedback',     label: 'Feedback' },
-  { value: 'Afspraak',     label: 'Afspraak' },
-  { value: 'Follow-up',    label: 'Follow-up' },
-  { value: 'Waarschuwing', label: 'Waarschuwing' },
+  { value: 'general',     label: 'Algemeen' },
+  { value: 'intake',      label: 'Intake' },
+  { value: 'feedback',    label: 'Feedback' },
+  { value: 'appointment', label: 'Afspraak' },
+  { value: 'followup',    label: 'Follow-up' },
+  { value: 'warning',     label: 'Waarschuwing' },
 ]
 
 const norm = (s?: unknown) => (s ?? '').toString().trim().toLowerCase()

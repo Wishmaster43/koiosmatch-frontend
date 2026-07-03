@@ -582,6 +582,13 @@ Be honest. If something is not done, say so — do not pretend.
 ## 13. Testing
 
 - Vitest + React Testing Library. Test **behavior**, not implementation.
+- **Smoke suite (`npm run smoke`, `e2e/`) — the seam guard.** Playwright flows that click
+  the REAL app against the REAL API (login, page render, drill-downs, board drags,
+  status-with-reason, note-with-channel, search, archive→find-back). Unit tests on both
+  sides stay green while the seam breaks (2026-07-03: wrong field names, missing routes,
+  missing resource fields, label-as-value seeds) — so: **run the smoke suite after every
+  backend delivery and before declaring any feature done. A red flow is a real finding,
+  never "flaky". "Done" = clicked, not just compiled.**
 - Cover critical paths: forms, auth-gated UI, data tables, the four UI states.
 - Every bug fix ships with a regression test.
 
