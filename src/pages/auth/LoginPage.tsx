@@ -18,40 +18,41 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 // Read a server-provided error message off an axios-style error, if present.
 const messageOf = (e: unknown) => (e as { response?: { data?: { message?: string } } })?.response?.data?.message
 
-// ── Shared layout wrapper — brand hero (big agent) left, login card right. ─────
+// ── Shared layout wrapper — balanced brand hero left, login card right. ────────
 function LoginShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation('auth')
   // Copyright year is dynamic — never a stale hardcoded value.
   const year = new Date().getFullYear()
   return (
     <div className="flex min-h-screen" style={{ background: 'var(--bg)' }}>
-      {/* Left — the brand hero: a LARGE Koios agent on a gradient of the three brand colours. */}
-      <div className="relative flex-col hidden w-1/2 p-10 overflow-hidden lg:flex xl:w-[58%]"
+      {/* Left — brand hero: a balanced Koios agent on a calm wash of the three brand colours. */}
+      <div className="relative flex-col hidden w-1/2 p-12 overflow-hidden lg:flex xl:w-[55%]"
         style={{ background: [
-          'radial-gradient(90% 70% at 14% 6%, color-mix(in srgb, var(--color-primary) 34%, transparent), transparent 56%)',
-          'radial-gradient(85% 75% at 92% 26%, color-mix(in srgb, var(--color-secondary) 30%, transparent), transparent 56%)',
-          'radial-gradient(72% 62% at 82% 100%, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 55%)',
+          'radial-gradient(90% 70% at 14% 6%, color-mix(in srgb, var(--color-primary) 20%, transparent), transparent 56%)',
+          'radial-gradient(85% 75% at 92% 26%, color-mix(in srgb, var(--color-secondary) 17%, transparent), transparent 56%)',
+          'radial-gradient(72% 62% at 82% 100%, color-mix(in srgb, var(--color-accent) 9%, transparent), transparent 55%)',
           'var(--sidebar-bg)',
         ].join(', ') }}>
         <img src="/KoiosMatch.png" alt="KoiosMatch" className="relative w-auto h-8" />
 
-        {/* Big agent — fills the panel, object-contain so it never crops. */}
-        <div className="relative flex items-center justify-center flex-1 min-h-0 py-6">
-          <img src="/koios-agent.png" alt="Koios AI agent"
-            className="object-contain w-full h-full rounded-3xl"
-            style={{ filter: 'drop-shadow(0 12px 48px rgba(25,165,202,0.32))' }} />
-        </div>
-
-        {/* Headline + tagline — prominent, readable. */}
-        <div className="relative">
+        {/* Headline + tagline — above the illustration, sharp hierarchy + whitespace. */}
+        <div className="relative mt-10" style={{ maxWidth: 480 }}>
           <p className="mb-2 font-semibold leading-tight" style={{ color: 'var(--sidebar-text)', fontSize: 30 }}>
             {t('brand.line1')} {t('brand.line2')}
           </p>
-          <p className="leading-relaxed" style={{ color: 'var(--sidebar-muted)', fontSize: 15, maxWidth: 470 }}>
+          <p className="leading-relaxed" style={{ color: 'var(--sidebar-muted)', fontSize: 15 }}>
             {t('brand.sub')}
           </p>
-          <p className="mt-6 text-xs" style={{ color: 'var(--sidebar-muted)' }}>© {year} KoiosMatch</p>
         </div>
+
+        {/* Agent — balanced hero: centred with breathing room, capped so it never dominates or crops. */}
+        <div className="relative flex items-center justify-center flex-1 min-h-0 py-6">
+          <img src="/koios-agent.png" alt="Koios AI agent"
+            className="object-contain rounded-3xl"
+            style={{ maxHeight: '58%', maxWidth: '80%', filter: 'drop-shadow(0 12px 48px rgba(25,165,202,0.28))' }} />
+        </div>
+
+        <p className="relative text-xs" style={{ color: 'var(--sidebar-muted)' }}>© {year} KoiosMatch</p>
       </div>
 
       {/* Right — login card on a soft primary tint. */}
