@@ -77,7 +77,11 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   const noFollowupCount = stats?.attention?.no_followup_planned ?? candidates.filter(isNoFollowup).length
   // Intake stages are flag-driven (§3B: requires_appointment), never a hardcoded value key.
   const intakeStages = useMemo(() => new Set(funnelTypes.filter(f => (f as { requires_appointment?: boolean }).requires_appointment).map(f => f.value)), [funnelTypes])
-  const intakeCount  = useMemo(() => candidates.filter(c => c.stage && intakeStages.has(c.stage)).length, [candidates, intakeStages])
+  // "Intake planned" = the server-wide appointment-based total from /candidates/stats (honours the
+  // active filters); page-local stage-count fallback while stats is unavailable.
+  const intakeCount  = useMemo(() =>
+    stats?.attention?.intake_planned ?? candidates.filter(c => c.stage && intakeStages.has(c.stage)).length
+  , [stats, candidates, intakeStages])
   // Proxy for "active conversations" until WhatsApp/e-mail threads exist: contacted
   // in the last 14 days. Cutoff captured once (lazy init) so the memo stays pure.
   const [convCutoff] = useState(() => Date.now() - 14 * 86400000)
@@ -90,7 +94,7 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   return {
     statusOptions, funnelOptions, typeOptions, ownerOptions,
     genderOptions, provinceOptions, titleOptions, locationOptions,
-    statusData, funnelData, rcData,
+    statusData, funnelData, rcData, intakeStages,
     staleCount, neverContactedCount, noFollowupCount, intakeCount, activeConvCount, tasksCount,
   }
 }

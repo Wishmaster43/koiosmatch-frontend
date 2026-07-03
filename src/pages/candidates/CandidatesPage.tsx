@@ -153,9 +153,15 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const {
     statusOptions, funnelOptions, typeOptions, ownerOptions,
     genderOptions, provinceOptions, titleOptions, locationOptions,
-    statusData, funnelData, rcData,
+    statusData, funnelData, rcData, intakeStages,
     staleCount, neverContactedCount, noFollowupCount, intakeCount, activeConvCount, tasksCount,
   } = useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders })
+
+  // Intake quick-filter: the requires_appointment funnel stages (§3B flag-driven, never a
+  // hardcoded value). Active when exactly that stage set is selected.
+  const intakeStageValues = [...intakeStages] as string[]
+  const intakeActive = intakeStageValues.length > 0 && selectedFunnel.length === intakeStageValues.length
+    && intakeStageValues.every(s => selectedFunnel.includes(s))
 
   const tog = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
   // Klik-op-chart → zet precies één waarde, of wis bij nogmaals klikken (toggle).
@@ -273,7 +279,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     { key: 'noFollowup', label: t('analytics.noFollowup'), value: noFollowupCount, sub: t('analytics.noFollowupSub'), color: 'var(--color-danger)',
       onClick: () => toggleAttention('noFollowup'), active: attentionFilter === 'noFollowup' },
     { key: 'intake',     label: t('kpi.intake'),           value: intakeCount,     sub: t('kpi.intakeSub'),           color: '#8B5CF6',
-      onClick: () => toggleOneValue(setSelectedFunnel, 'invited'), active: selectedFunnel.length === 1 && selectedFunnel[0] === 'invited' },
+      onClick: () => setSelectedFunnel(intakeActive ? [] : intakeStageValues), active: intakeActive },
     { key: 'conversations', label: t('analytics.conversations'), value: activeConvCount, color: 'var(--color-success)', channels: [
       { label: 'WhatsApp Business', value: '–', color: '#25D366' },
       { label: 'WhatsApp Web',      value: '–', color: '#128C7E' },
