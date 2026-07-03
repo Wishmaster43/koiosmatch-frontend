@@ -84,7 +84,8 @@
     "statusChanged": "Status → {{value}} ({{count}})",
     "addTag": "Add tag",
     "addTagPlaceholder": "Tag…",
-    "tagAdded": "Tag \"{{tag}}\" added ({{count}})"
+    "tagAdded": "Tag \"{{tag}}\" added ({{count}})",
+    "stageFailed": "{{count}} candidates not updated."
   },
   "kpi": {
     "total": "Total",

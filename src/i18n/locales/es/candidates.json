@@ -77,7 +77,8 @@
     "statusChanged": "Estado → {{value}} ({{count}})",
     "addTag": "Añadir etiqueta",
     "addTagPlaceholder": "Etiqueta…",
-    "tagAdded": "Etiqueta \"{{tag}}\" añadida ({{count}})"
+    "tagAdded": "Etiqueta \"{{tag}}\" añadida ({{count}})",
+    "stageFailed": "{{count}} candidatos no actualizados."
   },
   "kpi": {
     "total": "Total",
