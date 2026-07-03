@@ -1276,7 +1276,15 @@
       "rateUnit": "berichten/uur",
       "typesTitle": "Berichttypes",
       "typesSubtitle": "De volgorde bepaalt de prioriteit: bovenaan wordt eerst verstuurd (bijv. sollicitatie vóór verjaardag).",
-      "typesAdd": "Type toevoegen"
+      "typesAdd": "Type toevoegen",
+      "knownTitle": "Bekende contacten",
+      "knownHelp": "Nummers waar al een gesprek mee is — ruime limiet, laag blokkaderisico.",
+      "newTitle": "Nieuwe / onbekende nummers",
+      "newHelp": "Eerste bericht naar een nieuw nummer — streng beperkt tegen blokkade. De wachtrij verstuurt binnen deze limieten op prioriteit.",
+      "perHour": "per uur",
+      "perDay": "per dag",
+      "perWeek": "per week",
+      "limitsSaved": "Limieten opgeslagen"
     },
     "limits": {
       "subtitle": "Stel de berichtenlimiet in. Het plafond is door ons bepaald en kan niet worden overschreden.",

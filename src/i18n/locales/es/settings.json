@@ -1146,7 +1146,15 @@
       "rateUnit": "mensajes/hora",
       "typesTitle": "Tipos de mensaje",
       "typesSubtitle": "El orden define la prioridad: lo de arriba se envía primero (p. ej. una candidatura antes que un cumpleaños).",
-      "typesAdd": "Añadir tipo"
+      "typesAdd": "Añadir tipo",
+      "knownTitle": "Contactos conocidos",
+      "knownHelp": "Números con los que ya hay conversación — límite amplio, bajo riesgo de bloqueo.",
+      "newTitle": "Números nuevos / desconocidos",
+      "newHelp": "Primer mensaje a un número nuevo — estrictamente limitado para evitar bloqueos. La cola envía por prioridad dentro de estos límites.",
+      "perHour": "por hora",
+      "perDay": "por día",
+      "perWeek": "por semana",
+      "limitsSaved": "Límites guardados"
     },
     "limits": {
       "subtitle": "Configura el límite de mensajes. El techo lo fijamos nosotros y no se puede superar.",

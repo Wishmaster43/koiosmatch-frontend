@@ -1146,7 +1146,15 @@
       "rateUnit": "Nachrichten/Std.",
       "typesTitle": "Nachrichtentypen",
       "typesSubtitle": "Die Reihenfolge bestimmt die Priorität: Oben wird zuerst gesendet (z. B. Bewerbung vor Geburtstag).",
-      "typesAdd": "Typ hinzufügen"
+      "typesAdd": "Typ hinzufügen",
+      "knownTitle": "Bekannte Kontakte",
+      "knownHelp": "Nummern mit bestehendem Gespräch — großzügiges Limit, geringes Sperrrisiko.",
+      "newTitle": "Neue / unbekannte Nummern",
+      "newHelp": "Erste Nachricht an eine neue Nummer — streng begrenzt gegen Sperren. Die Warteschlange sendet innerhalb dieser Limits nach Priorität.",
+      "perHour": "pro Stunde",
+      "perDay": "pro Tag",
+      "perWeek": "pro Woche",
+      "limitsSaved": "Limits gespeichert"
     },
     "limits": {
       "subtitle": "Legen Sie das Nachrichtenlimit fest. Die Obergrenze ist von uns festgelegt und kann nicht überschritten werden.",

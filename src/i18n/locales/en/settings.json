@@ -1276,7 +1276,15 @@
       "rateUnit": "messages/hour",
       "typesTitle": "Message types",
       "typesSubtitle": "The order sets the priority: the top is sent first (e.g. an application before a birthday).",
-      "typesAdd": "Add type"
+      "typesAdd": "Add type",
+      "knownTitle": "Known contacts",
+      "knownHelp": "Numbers you already have a conversation with — generous limit, low ban risk.",
+      "newTitle": "New / unknown numbers",
+      "newHelp": "First message to a new number — strictly limited to avoid bans. The queue sends within these limits by priority.",
+      "perHour": "per hour",
+      "perDay": "per day",
+      "perWeek": "per week",
+      "limitsSaved": "Limits saved"
     },
     "limits": {
       "subtitle": "Set the messaging limit. The ceiling is set by us and cannot be exceeded.",

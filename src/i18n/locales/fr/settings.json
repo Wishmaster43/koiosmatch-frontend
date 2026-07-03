@@ -1146,7 +1146,15 @@
       "rateUnit": "messages/heure",
       "typesTitle": "Types de message",
       "typesSubtitle": "L'ordre définit la priorité : le haut est envoyé en premier (p. ex. une candidature avant un anniversaire).",
-      "typesAdd": "Ajouter un type"
+      "typesAdd": "Ajouter un type",
+      "knownTitle": "Contacts connus",
+      "knownHelp": "Numéros avec lesquels une conversation existe déjà — limite généreuse, faible risque de blocage.",
+      "newTitle": "Nouveaux / numéros inconnus",
+      "newHelp": "Premier message vers un nouveau numéro — strictement limité pour éviter les blocages. La file envoie selon la priorité dans ces limites.",
+      "perHour": "par heure",
+      "perDay": "par jour",
+      "perWeek": "par semaine",
+      "limitsSaved": "Limites enregistrées"
     },
     "limits": {
       "subtitle": "Définissez la limite de messages. Le plafond est fixé par nos soins et ne peut être dépassé.",
