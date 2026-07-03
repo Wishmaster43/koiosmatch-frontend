@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { ComponentType, CSSProperties } from 'react'
-import { Target, Phone, CalendarPlus, Sparkles, Mail, MessageCircle, PhoneCall, HelpCircle } from 'lucide-react' // HelpCircle = fallback for unknown contact channel
+import { Target, Phone, CalendarPlus, Sparkles, Mail, MessageCircle, PhoneCall, Building2, Video, FileText, HelpCircle } from 'lucide-react' // HelpCircle = fallback for unknown contact channel
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
@@ -19,11 +19,17 @@ const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
 
 type LucideIcon = ComponentType<{ size?: number; title?: string; style?: CSSProperties }>
 
-// Icon per contact channel slug — shown in the last-contact-type column.
+// Icon per contact channel slug — shown in the last-contact-type column. Covers the full
+// last_contact_types lookup so no channel falls back to the "?" (HelpCircle). Danny 2026-07-03.
 const CONTACT_TYPE_ICON: Record<string, LucideIcon> = {
-  email:     Mail,
-  phone:     PhoneCall,
-  whatsapp:  MessageCircle,
+  email:            Mail,
+  phone:            PhoneCall,   // Telefonisch
+  call:             PhoneCall,   // Belafspraak (phone appointment)
+  whatsapp:         MessageCircle,
+  whatsapp_private: MessageCircle,
+  appointment:      Building2,   // Afspraak (fysiek/kantoor)
+  meet:             Video,       // Google Meet (online meeting)
+  note:             FileText,
 }
 
 // Icon + colour per Koios advice action (hex so `+ alpha` tints work).
