@@ -20,6 +20,7 @@ import ApplicationsBulkBar from './ApplicationsBulkBar'
 import AddApplicationModal from './AddApplicationModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { mapApplication, mapApplicationDetail } from './data/mapApplication'
 import { bucketOfPhase } from './data/applicationsShared'
 import type { Application, ApplicationDetail, ApiApplication } from '@/types/application'
@@ -359,15 +360,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
             </button>
             )
           })}
-          {/* Archived (detached) view toggle — soft-tinted active; shows soft-deleted + restore. */}
-          <button onClick={() => setShowArchived(v => !v)} title={t('archived.toggle')}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 12px', fontSize: 13,
-              fontWeight: showArchived ? 600 : 400, borderRadius: 7, cursor: 'pointer',
-              color: showArchived ? 'var(--color-primary)' : 'var(--text-muted)',
-              background: showArchived ? 'color-mix(in srgb, var(--color-primary) 14%, transparent)' : 'transparent',
-              border: `1px solid ${showArchived ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}` }}>
-            <Archive size={13} /> {t('archived.toggle')}
-          </button>
+          {/* Archived (detached) view — shared quick-view toggle (§4). */}
+          <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+            label={t('archived.toggle')} icon={Archive} />
           <div style={{ display: 'flex', gap: 4 }}>
             <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
               style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',

@@ -198,6 +198,11 @@ same validation/UX, lookups via `useX()` hooks (never hardcoded option lists).
 - `EditableFieldTable` — grouped key/value blocks with in-place edit (pass `group`
   per field for titled cards). `CreatableSelect` — dropdown that can also add a value.
 - `Avatar` (use the `soft` variant in headers), `SelectMenu`, `StatusPill`, `KoiosAiMark`.
+- **`QuickViewToggle`** (`components/ui/QuickViewToggle`) — the ONE component for **every**
+  quick-view toggle (Blacklist / Archived / status / phase / …). **Never hand-roll the toggle
+  button per page** — that is exactly how eight pages drifted into five different styles (solid
+  fills, grey-inactive, border-only). Pass `active` / `onToggle` / `label` / `color` / `icon`;
+  the §4 soft-tint is baked in. One component ⇒ one look, forever.
 - **Soft-chip convention** (everywhere — table + drawer): coloured chips =
   `color + '1A'` background, `color` text, `color + '55'` border. Never solid fills.
 - **In-place edit pattern:** a pencil toggles to diskette (save) + ✕ (cancel), shown
@@ -394,6 +399,17 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
   is a stronger tint **+ `fontWeight: 600`**. Use `color-mix` so it works for CSS-var
   tokens, not just hex. Identical treatment across candidates · applications · vacancies ·
   matches · opportunities · tasks · call-lists · customers — never a per-screen restyle.
+  **Quick-view toggles go through the shared `components/ui/QuickViewToggle` — never
+  re-implement the button inline** (that produced five drifting styles across eight pages;
+  this must not regress). New toggle = pass props to that component; new look = change the
+  component once.
+- **Blueprint-conformance checklist — a new/updated entity page mirrors the candidate page
+  1:1 (§3A). Verify before shipping:** (1) quick-view toggles via `QuickViewToggle`; (2) the
+  shared `HeaderSearch` present; (3) `<Entity>InsightsRow` with the same donut/KPI footprint;
+  (4) "+ Add" in the same place/style; (5) table via the shared `DataTable` with soft chips
+  (`StatusPill` / soft-chip); (6) drawer record-history is a **changelog icon-popover in the
+  title row, never a tab**; (7) drawer header stays calm (colour-coded badge, not pickers).
+  A deviation needs a written reason in the code; otherwise it is a consistency bug.
 - **Typography consistency (one scale, everywhere).** Inter for UI, JetBrains Mono for
   numbers/IDs. Weights: body/labels **400–500**, active/selected + section titles
   **600–700**, never heavier. **Bold = emphasis or active state only** (not decoration).

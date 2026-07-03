@@ -7,6 +7,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import OpportunitiesTable from './OpportunitiesTable'
 import OpportunitiesBoard from './OpportunitiesBoard'
 import OpportunityDrawer from './OpportunityDrawer'
@@ -141,15 +142,9 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
               </div>
             )}
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-              {/* Archived (soft-deleted) view toggle → ?include_archived=1. */}
-              <button onClick={() => setShowArchived(v => !v)} title={t('page.archivedView')}
-                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, fontWeight: showArchived ? 600 : 500,
-                  borderRadius: 8, cursor: 'pointer',
-                  border: `1px solid ${showArchived ? 'var(--color-primary)' : 'var(--border)'}`,
-                  background: showArchived ? 'var(--color-primary-bg)' : 'var(--surface)',
-                  color: showArchived ? 'var(--color-primary)' : 'var(--text)' }}>
-                <Archive size={14} /> {t('page.archived')}
-              </button>
+              {/* Archived (soft-deleted) view — shared quick-view toggle (§4). */}
+              <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+                label={t('page.archived')} icon={Archive} />
               <div style={{ display: 'flex', gap: 4 }}>
                 <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
                   style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',

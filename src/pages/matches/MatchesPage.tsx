@@ -16,6 +16,7 @@ import MatchDrawer from './MatchDrawer'
 import MatchesBulkBar from './MatchesBulkBar'
 import AddMatchModal from './AddMatchModal'
 import PaginationBar from '@/components/ui/PaginationBar'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useMatches } from './hooks/useMatches'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import type { MatchRow } from '@/types/match'
@@ -179,15 +180,9 @@ export default function MatchesPage() {
 
         {/* Right — archived (separate, with label) + icon-only view toggle (mirror opportunities) */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Archived (soft-deleted) view toggle → ?include_archived=1 */}
-          <button onClick={() => setShowArchived(v => !v)} title={t('view.archived')}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12,
-              fontWeight: showArchived ? 600 : 500, borderRadius: 8, cursor: 'pointer',
-              border: `1px solid ${showArchived ? 'var(--color-primary)' : 'var(--border)'}`,
-              background: showArchived ? 'var(--color-primary-bg)' : 'var(--surface)',
-              color: showArchived ? 'var(--color-primary)' : 'var(--text)' }}>
-            <Archive size={14} aria-hidden="true" /> {t('view.archived')}
-          </button>
+          {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
+          <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+            label={t('view.archived')} icon={Archive} />
 
           {/* View toggle — icon-only (label as aria-label + tooltip, §6) */}
           <button onClick={() => setView('table')} title={t('view.matches')} aria-label={t('view.matches')}

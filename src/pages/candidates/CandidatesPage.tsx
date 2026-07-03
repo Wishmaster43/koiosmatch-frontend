@@ -21,6 +21,7 @@ import CandidatesBulkBar from './CandidatesBulkBar'
 import InsightsRowJs from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { toggleOneValue, isStale, isNeverContacted, isNoFollowup } from './data/candidatesShared'
 import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
@@ -330,22 +331,11 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
                   placeholder={t('page.searchPlaceholder')} width={300} />
                 {/* Quick-view toggles on the right: blacklisted-only + archived-only */}
                 <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-                  {/* Soft-chip toggles (§3A): always tinted in their own colour (danger /
-                      primary), stronger when active. Never a solid fill. */}
-                  <button onClick={toggleBlacklist} title={t('page.blacklistView')}
-                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, fontWeight: blacklistActive ? 600 : 500,
-                      borderRadius: 8, cursor: 'pointer', color: 'var(--color-danger)',
-                      background: `color-mix(in srgb, var(--color-danger) ${blacklistActive ? 16 : 8}%, transparent)`,
-                      border: `1px solid color-mix(in srgb, var(--color-danger) ${blacklistActive ? 50 : 28}%, transparent)` }}>
-                    <Ban size={13} /> {t('page.blacklistView')}
-                  </button>
-                  <button onClick={() => setShowArchived(v => !v)} title={t('page.archivedView')}
-                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12, fontWeight: showArchived ? 600 : 500,
-                      borderRadius: 8, cursor: 'pointer', color: 'var(--color-primary)',
-                      background: `color-mix(in srgb, var(--color-primary) ${showArchived ? 16 : 8}%, transparent)`,
-                      border: `1px solid color-mix(in srgb, var(--color-primary) ${showArchived ? 50 : 28}%, transparent)` }}>
-                    <Archive size={13} /> {t('page.archivedView')}
-                  </button>
+                  {/* Shared quick-view toggles (§4 soft convention) — one component everywhere. */}
+                  <QuickViewToggle active={blacklistActive} onToggle={toggleBlacklist}
+                    label={t('page.blacklistView')} color="var(--color-danger)" icon={Ban} />
+                  <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+                    label={t('page.archivedView')} icon={Archive} />
                 </div>
               </>
             )}

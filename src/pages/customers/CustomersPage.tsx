@@ -1,11 +1,12 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, X, Archive } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useUsers } from '@/lib/queries'
 import { useCustomerLookups } from '@/lib/useCustomerLookups'
 import InsightsRow from '@/components/insights/InsightsRow'
@@ -198,13 +199,11 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                 {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
                 <HeaderSearch onSearch={setGlobalSearch} defaultValue={globalSearch}
                   placeholder={t('page.searchPlaceholder')} width={300} />
-                {/* Archived (soft-deleted) quick-view on the right */}
-                <button onClick={() => setShowArchived(v => !v)} title={t('page.archivedView')}
-                  style={{ marginLeft: 'auto', padding: '6px 12px', fontSize: 12, fontWeight: showArchived ? 600 : 400,
-                    borderRadius: 8, cursor: 'pointer', background: showArchived ? 'var(--color-primary)' : 'transparent',
-                    color: showArchived ? '#fff' : 'var(--text-muted)', border: showArchived ? 'none' : '1px solid var(--border)' }}>
-                  {t('page.archivedView')}
-                </button>
+                {/* Archived (soft-deleted) quick-view on the right — shared toggle (§4). */}
+                <div style={{ marginLeft: 'auto' }}>
+                  <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+                    label={t('page.archivedView')} icon={Archive} />
+                </div>
               </>
             )}
           </div>
