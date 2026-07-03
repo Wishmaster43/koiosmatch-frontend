@@ -280,11 +280,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       onClick: () => toggleAttention('noFollowup'), active: attentionFilter === 'noFollowup' },
     { key: 'intake',     label: t('kpi.intake'),           value: intakeCount,     sub: t('kpi.intakeSub'),           color: '#8B5CF6',
       onClick: () => setSelectedFunnel(intakeActive ? [] : intakeStageValues), active: intakeActive },
-    { key: 'conversations', label: t('analytics.conversations'), value: activeConvCount, color: 'var(--color-success)', channels: [
-      { label: 'WhatsApp Business', value: '–', color: '#25D366' },
-      { label: 'WhatsApp Web',      value: '–', color: '#128C7E' },
-      { label: 'E-mail',            value: '–', color: '#3B8FD4' },
-    ] },
+    // Channel breakdown is hidden until real WhatsApp/e-mail data exists (BE KPI-1) — no '–' placeholders.
+    { key: 'conversations', label: t('analytics.conversations'), value: activeConvCount, color: 'var(--color-success)' },
     { key: 'tasks', label: t('kpi.tasks'), value: tasksCount, sub: t('kpi.tasksSub'), color: '#0D9488' },
   ]
 
