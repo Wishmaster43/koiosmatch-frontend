@@ -8,9 +8,13 @@
 import { go, expect, sleep } from '../lib.mjs'
 
 // Open the drawer of the first candidate row; returns the candidate's name.
-async function openFirstCandidate(page) {
+async function openFirstCandidate(page, { withStatus = false } = {}) {
   await go(page, 'Kandidaten')
-  const row = page.locator('table tbody tr').first()
+  // A Lead has no status → the drawer hides the deployability picker; status flows need a
+  // row that actually carries a status chip.
+  const row = withStatus
+    ? page.locator('table tbody tr:has-text("Beschikbaar"), table tbody tr:has-text("Ziek"), table tbody tr:has-text("Verlof")').first()
+    : page.locator('table tbody tr').first()
   expect(await row.count(), 'geen kandidaat-rijen')
   const name = (await row.locator('td').nth(1).innerText()).split('\n')[0].trim()
   await row.click()
@@ -21,7 +25,7 @@ async function openFirstCandidate(page) {
 // Status → Ziek: the prompt must open, accept a reason + return date, and PATCH ok.
 export async function statusWithReason({ page, errors }) {
   const at = errors.length
-  await openFirstCandidate(page)
+  await openFirstCandidate(page, { withStatus: true })
   // The deployability picker sits in the drawer header meta (SelectMenu).
   const picker = page.locator('text=Inzetbaarheid').locator('..').locator('button, [role="button"]').first()
   if (await picker.count()) await picker.click()

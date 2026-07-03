@@ -138,7 +138,10 @@
     },
     "archived": "Archive status",
     "periodCreated": "Created",
-    "periodLastContact": "Last contact"
+    "periodLastContact": "Last contact",
+    "pool": "Talent pool",
+    "city": "City",
+    "source": "Source"
   },
   "modal": {
     "title": "Add candidate",

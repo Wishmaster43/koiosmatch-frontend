@@ -131,7 +131,10 @@
     },
     "archived": "Statut d'archive",
     "periodCreated": "Créé",
-    "periodLastContact": "Dernier contact"
+    "periodLastContact": "Dernier contact",
+    "pool": "Vivier",
+    "city": "Ville",
+    "source": "Source"
   },
   "modal": {
     "title": "Ajouter un candidat",

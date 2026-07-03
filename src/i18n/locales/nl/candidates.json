@@ -138,7 +138,10 @@
     },
     "archived": "Archiefstatus",
     "periodCreated": "Aangemaakt",
-    "periodLastContact": "Laatste contact"
+    "periodLastContact": "Laatste contact",
+    "pool": "Talentenpool",
+    "city": "Woonplaats",
+    "source": "Bron"
   },
   "modal": {
     "title": "Kandidaat toevoegen",

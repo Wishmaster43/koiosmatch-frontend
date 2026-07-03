@@ -23,7 +23,8 @@ import InsightsRowJs from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import { toggleOneValue, isStale, isNeverContacted } from './data/candidatesShared'
+import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
+import { usePools } from '@/lib/usePools'
 import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
@@ -73,6 +74,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const [addOpen,        setAddOpen]        = useState(false)
   // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
   const [showArchived,   setShowArchived]   = useState(false)
+  // CAND-FILTERS (2026-07-03): pool (ids) · city (exact) · source — server-side params.
+  const [selectedPool,   setSelectedPool]   = useState<string[]>([])
+  const [selectedCity,   setSelectedCity]   = useState<string[]>([])
+  const [selectedSource, setSelectedSource] = useState<string[]>([])
   const [detail,         setDetail]         = useState<Candidate | null>(null)
   const selectedIdRef = useRef<Id | null>(null)
 
@@ -127,6 +132,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     if (selectedProvince.length) p.province       = selectedProvince
     if (selectedTitle.length)    p.function_title = selectedTitle
     if (selectedLocation.length) p.location_id    = selectedLocation
+    if (selectedPool.length)     p.pool           = selectedPool
+    if (selectedCity.length)     p.city           = selectedCity
+    if (selectedSource.length)   p.source         = selectedSource
     if (showArchived)            p.include_archived = 1
     // "> N months no contact" filters server-wide via last_contact_between at the configured
     // threshold; never-contacted + no-follow-up now send server params too (BE KPI-2a).
@@ -140,7 +148,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     // Period-click date range (created / last-contact); set last so it wins over stale6m if both target last_contact.
     if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     return p
-  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, showArchived, attentionFilter, dateRange, staleMonths])
+  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, selectedPool, selectedCity, selectedSource, showArchived, attentionFilter, dateRange, staleMonths])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1. Visible rows change → drop the bulk selection.
@@ -166,6 +174,12 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     statusData, funnelData, rcData, intakeStages,
     staleCount, neverContactedCount, noFollowupCount, intakeCount, activeConvCount, tasksCount,
   } = useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders })
+
+  // CAND-FILTERS option lists: pools (ids from the lookup), city/source (page-derived).
+  const { poolItems } = usePools()
+  const poolOptions   = useMemo(() => poolItems.map(p => ({ value: p.id, label: p.name })), [poolItems])
+  const cityOptions   = useMemo(() => optsFrom(candidates.map(c => c.city).filter(Boolean) as string[]), [candidates])
+  const sourceOptions = useMemo(() => optsFrom(candidates.map(c => (c as { source?: string | null }).source ?? '').filter(Boolean)), [candidates])
 
   // Intake quick-filter: the requires_appointment funnel stages (§3B flag-driven, never a
   // hardcoded value). Active when exactly that stage set is selected.
@@ -204,6 +218,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     { key: 'province', type: 'search-select', category: catPerson, label: t('filters.province'), selected: selectedProvince, options: provinceOptions, onToggle: tog(setSelectedProvince) },
     { key: 'owner',    type: 'search-select', category: catOrganisation, label: t('filters.owner'),  selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
     { key: 'location', type: 'search-select', category: catOrganisation, label: t('filters.branch'), selected: selectedLocation, options: locationOptions, onToggle: tog(setSelectedLocation) },
+    // CAND-FILTERS: only shown when there are options (source waits on the list payload).
+    ...(poolOptions.length   ? [{ key: 'pool',   type: 'search-select', category: catQualifications, label: t('filters.pool'),   selected: selectedPool,   options: poolOptions,   onToggle: tog(setSelectedPool) }] : []),
+    ...(cityOptions.length   ? [{ key: 'city',   type: 'search-select', category: catPerson,         label: t('filters.city'),   selected: selectedCity,   options: cityOptions,   onToggle: tog(setSelectedCity) }] : []),
+    ...(sourceOptions.length ? [{ key: 'source', type: 'search-select', category: catOrganisation,   label: t('filters.source'), selected: selectedSource, options: sourceOptions, onToggle: tog(setSelectedSource) }] : []),
     // Period (date range) from a dashboard bar click — a single removable value so it shows in the chip bar + panel.
     ...(dateRange ? [{
       key: 'period', type: 'search-select', category: catLifecycle,
@@ -214,6 +232,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     }] : []),
   ], [t, catLifecycle, catQualifications, catPerson, catOrganisation, showArchived, dateRange,
       selectedStatus, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner, selectedLocation,
+      selectedPool, selectedCity, selectedSource, poolOptions, cityOptions, sourceOptions,
       statusOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
 
   useEffect(() => {

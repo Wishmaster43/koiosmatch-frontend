@@ -131,7 +131,10 @@
     },
     "archived": "Archivstatus",
     "periodCreated": "Erstellt",
-    "periodLastContact": "Letzter Kontakt"
+    "periodLastContact": "Letzter Kontakt",
+    "pool": "Talentpool",
+    "city": "Wohnort",
+    "source": "Quelle"
   },
   "modal": {
     "title": "Kandidat hinzufügen",

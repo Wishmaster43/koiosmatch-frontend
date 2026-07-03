@@ -87,6 +87,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     ownerColor:      c.owner?.avatar_color ?? c.recruiter?.avatar_color ?? c.owner_avatar_color ?? null,
     ownerInitials:   initialsOf(ownerName),
     city:            c.city ?? '',
+    // Acquisition source (website/facebook/…) — feeds the source filter once the list sends it.
+    source:          (c.source as string | undefined) ?? null,
     province:        c.province ?? '',
     lastContactAt:   c.last_contact_at ?? c.last_contacted_at ?? null,
     // Backend sends these flat (last_contact_at / last_contact_type); keep the

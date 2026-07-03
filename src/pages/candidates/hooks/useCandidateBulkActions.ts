@@ -122,29 +122,13 @@ export function useCandidateBulkActions({
     keys: ['owner', 'ownerId', 'ownerInitials', 'ownerColor'],
     onSuccess: (n) => notify('success', t('bulk.ownerChanged', { name: user.name, count: n })),
   })
-  // Move the selection to a funnel stage. BRIDGE: /candidates/bulk/funnel-stage does not
-  // exist backend-side (404 — Danny's mass-mutation bug); until BULK-2 lands we PATCH per
-  // candidate (funnel_type on the single PATCH works) with limited concurrency, optimistic
-  // + per-id revert on failure. Swap back to the bulk endpoint once BE ships it.
-  const bulkSetStage = async (stage: string) => {
-    const ids = [...selectedIds]
-    if (!ids.length) return
-    const prev = new Map(candidates.filter(c => ids.includes(c.id)).map(c => [c.id, c.stage]))
-    setCandidates(p => p.map(c => ids.includes(c.id) ? { ...c, stage } : c))
-    setSelectedIds(new Set())
-    const failed: Id[] = []
-    // Sequential chunks of 5 — demo-scale friendly; the real bulk route replaces this.
-    for (let i = 0; i < ids.length; i += 5) {
-      await Promise.all(ids.slice(i, i + 5).map(id =>
-        api.patch(`/candidates/${id}`, { funnel_type: stage }).catch(() => { failed.push(id) })))
-    }
-    if (failed.length) {
-      setCandidates(p => p.map(c => failed.includes(c.id) ? { ...c, stage: prev.get(c.id) ?? c.stage } : c))
-      notify('error', t('bulk.stageFailed', { count: failed.length, defaultValue: '{{count}} kandidaten niet bijgewerkt.' }))
-    }
-    const ok = ids.length - failed.length
-    if (ok) notify('success', t('bulk.stageChanged', { value: metaOf(funnelTypes, stage)?.label ?? stage, count: ok }))
-  }
+  // Move the selection to a funnel stage — the real bulk route (BULK-2) with single-PATCH
+  // semantics (Match-spawn on hired, event after commit). Replaces the per-id bridge.
+  const bulkSetStage = (stage: string) => bulkMutate({
+    url: '/candidates/bulk/funnel-stage', body: { funnel_type: stage },
+    patch: { stage }, keys: ['stage'],
+    onSuccess: (n) => notify('success', t('bulk.stageChanged', { value: metaOf(funnelTypes, stage)?.label ?? stage, count: n })),
+  })
   // Set the EXACT candidate-type set for the selection (multi-select add/remove).
   // An empty set clears all types — so an unused type can then be deleted in Settings.
   const bulkSetTypes = (types: string[]) => bulkMutate({

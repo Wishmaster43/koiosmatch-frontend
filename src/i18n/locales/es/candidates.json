@@ -131,7 +131,10 @@
     },
     "archived": "Estado de archivo",
     "periodCreated": "Creado",
-    "periodLastContact": "Último contacto"
+    "periodLastContact": "Último contacto",
+    "pool": "Grupo de talento",
+    "city": "Ciudad",
+    "source": "Fuente"
   },
   "modal": {
     "title": "Añadir candidato",
