@@ -22,9 +22,11 @@ export const PACKAGE_MODULES: Record<string, ModuleKey[]> = {
   // 3-package model (besloten 2026-06-23): base packages. Add-ons (plan/sm/hf/sm_ai)
   // are layered on top via the tenant.modules array the backend sends (base + add-ons);
   // these entries are only the package fallback when no explicit modules array is present.
+  // Granular BE vocabulary (aligned 2026-07-03) — mirrors effectiveModules() so the
+  // fallback (no explicit tenant.modules) grants the same pages as the live payload.
   core:                  ['ats'],
-  pro:                   ['ats', 'ai'],
-  enterprise:            ['ats', 'ai', 'api', 'insights'],
+  pro:                   ['ats', 'whatsapp', 'aiagents', 'workflows', 'koios_ai'],
+  enterprise:            ['ats', 'whatsapp', 'aiagents', 'workflows', 'koios_ai', 'apps', 'api', 'whatsapp_personal', 'insights'],
   // Legacy 10-package model — kept so existing tenants keep working (backward-compat).
   reporting_sm:          ['sm'],
   reporting_hf:          ['hf'],

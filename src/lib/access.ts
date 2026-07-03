@@ -22,28 +22,41 @@ type PermLike = string | { name?: string }
 
 // Pages that require a paid add-on module. These are ALSO hard-gated server-side
 // (e.g. /sm/* → 403 without the 'sm' module), so this is just UI mirroring.
+// Pages module-gated on a granular BE key (COORDINATION-LOG 2026-07-03). Gate applies to
+// EVERYONE incl. super-admins → a package-switch shows/hides these. Also 403'd server-side.
 const PAGE_REQUIRED_MODULE: Record<string, ModuleKey> = {
   shiftmanager: 'sm',
   helloflex:    'hf',
   reports:      'reports',
   planning:     'plan',
+  aiagents:     'aiagents',
+  workflows:    'workflows',
+  whatsapp:     'whatsapp',
+  apps:         'apps',
 }
 
 const ATS_BASE   = ['dashboard', 'candidates', 'applications', 'vacancies', 'matches', 'opportunities', 'tasks', 'outreach', 'customers', 'locations', 'departments', 'contacts', 'details', 'users']
-const AI_PAGES   = ['aiagents', 'whatsapp', 'workflows', 'apps']
+const AI_PAGES   = ['aiagents', 'whatsapp', 'workflows', 'apps']  // kept for the legacy PACKAGE_PAGES map
 const PLANNING   = ['planning']
 
-// Module key → pages it grants. A tenant's accessible pages are the union over its
-// effective modules (base package + add-ons).
+// Module key → pages it grants. Keyed on the granular BE vocabulary that tenant.modules
+// emits — one key per page, no synthetic 'ai'/'ats' bundles. A tenant's accessible pages
+// are the union over its effective modules (base package + add-ons).
 const MODULE_TO_PAGES: Record<string, string[]> = {
-  ats:      ATS_BASE,
-  ai:       AI_PAGES,
-  plan:     PLANNING,
-  sm:       ['shiftmanager'],
-  sm_ai:    ['shiftmanager'],   // ShiftManager reporting + AI
-  hf:       ['helloflex'],
-  api:      [],                 // REST API lives in settings (no top-level nav page)
-  insights: [],                 // Insights+ within reporting/settings (no separate gate yet)
+  ats:               ATS_BASE,         // CRM/ATS core — every base package carries 'ats'
+  aiagents:          ['aiagents'],
+  workflows:         ['workflows'],
+  whatsapp:          ['whatsapp'],
+  apps:              ['apps'],
+  koios_ai:          [],               // Koios AI assistant — gated via canUseKoios, no nav page
+  plan:              PLANNING,
+  sm:                ['shiftmanager'],
+  sm_ai:             ['shiftmanager'], // legacy alias → SM reporting
+  hf:                ['helloflex'],
+  reports:           ['reports'],
+  api:               [],               // REST API lives in settings (no top-level nav page)
+  insights:          [],               // Insights+ within reporting/settings (no separate gate yet)
+  whatsapp_personal: [],               // personal WhatsApp Web (QR under Profile, no nav page)
 }
 
 const PACKAGE_PAGES: Record<string, string[]> = {

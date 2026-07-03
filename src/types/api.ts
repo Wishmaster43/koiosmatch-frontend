@@ -6,10 +6,14 @@
  * contract). Import these as `import type { ... } from '../types/api'`.
  */
 
-/** Module keys (base-package modules + paid add-ons). SM endpoints are hard-gated
- *  server-side on 'sm'. 3-package model: core=ats, pro=ats+ai, enterprise=+api/insights;
- *  add-ons = plan/sm/hf/sm_ai/reports layered on top via tenant.modules. */
-export type ModuleKey = 'ats' | 'ai' | 'plan' | 'sm' | 'hf' | 'sm_ai' | 'api' | 'insights' | 'reports'
+/** Module keys — the granular BE vocabulary emitted by effectiveModules() in tenant.modules
+ *  (aligned 2026-07-03, COORDINATION-LOG). SM endpoints are hard-gated server-side on 'sm'.
+ *  Base: core=[ats], pro=[ats,whatsapp,aiagents,workflows,koios_ai],
+ *  enterprise=[+apps,api,whatsapp_personal,insights]; add-ons = sm/hf/plan/reports on top.
+ *  'ai' is the legacy synthetic bundle key (kept for backward-compat, no longer emitted). */
+export type ModuleKey =
+  | 'ats' | 'whatsapp' | 'aiagents' | 'workflows' | 'koios_ai' | 'apps' | 'api'
+  | 'whatsapp_personal' | 'insights' | 'sm' | 'hf' | 'plan' | 'reports' | 'sm_ai' | 'ai'
 
 /** A role or permission can arrive as a bare string or an object with a name. */
 export type Named = string | { name: string }
