@@ -134,10 +134,13 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
         if (!c.lastContactAt) return <span style={{ color: 'var(--text-muted)' }}>—</span>
         const label = lastContactLabel(c.lastContactType)
         const Icon = c.lastContactType ? (CONTACT_TYPE_ICON[c.lastContactType] ?? HelpCircle) : null
+        // Tooltip + subtle "· by whom" once the backend returns last_contact_by (graceful null).
+        const tip = c.lastContactBy ? `${label} · ${c.lastContactBy}` : label
         return (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12 }}>
             {formatDate(c.lastContactAt)}
-            {Icon && <Icon size={12} title={label} style={{ flexShrink: 0, opacity: 0.6 }} />}
+            {Icon && <Icon size={12} title={tip} style={{ flexShrink: 0, opacity: 0.6 }} />}
+            {c.lastContactBy && <span style={{ color: 'var(--text-muted)', fontSize: 11, whiteSpace: 'nowrap' }}>· {c.lastContactBy}</span>}
           </span>
         )
       },

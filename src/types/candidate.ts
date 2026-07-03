@@ -117,6 +117,7 @@ export interface Candidate {
   lastContactAt: string | null
   lastContactDate: string | null
   lastContactType: string | null
+  lastContactBy: string | null
   client: string
   created: string
   email: string

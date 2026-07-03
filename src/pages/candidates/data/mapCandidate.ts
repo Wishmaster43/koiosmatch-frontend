@@ -93,6 +93,10 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     // nested last_contact.{date,type} as a fallback for older payloads.
     lastContactDate: c.last_contact?.date ?? c.last_contact_at ?? c.last_contacted_at ?? null,
     lastContactType: c.last_contact_type ?? c.last_contact?.type ?? null,
+    // "By whom" the last contact was (set by recordContact); flat name or nested — graceful null.
+    lastContactBy:   (typeof c.last_contact_by === 'object'
+      ? (c.last_contact_by as { name?: string } | null)?.name ?? null
+      : (c.last_contact_by as string | null | undefined)) ?? (c.last_contact as { by?: string } | undefined)?.by ?? null,
     client:          c.client?.name ?? c.customer?.name ?? c.client_name ?? '',
     created:         c.created_at ?? c.created ?? '',
     email:           c.email ?? '-',
