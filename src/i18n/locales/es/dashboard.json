@@ -44,7 +44,9 @@
     "uncalledCallist": "Sin llamar",
     "uncalledCallistSub": "en listas de llamadas",
     "expiringOpps": "Oportunidades por vencer",
-    "expiringOppsSub": "cierran pronto"
+    "expiringOppsSub": "cierran pronto",
+    "pipelineHours": "Horas de pipeline",
+    "hoursUnit": "h"
   },
   "chart": {
     "byStatus": "Candidatos por estado",

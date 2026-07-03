@@ -24,7 +24,7 @@ import type { ChartDatum } from '@/components/charts/chartTypes'
 import type {
   DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow,
 } from '@/types/dashboard'
-import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { visibleBlock, kpiRow } from './templates'
 import type { DashboardType } from './templates'
 
@@ -124,6 +124,9 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // Tenant per-role toggles (Settings → Dashboards): a block/KPI is shown if the template
   // allows it AND it is not switched off for this role. Live via the shared settings store.
   const settings = useAllSettings()
+  // Deal magnitude in hours instead of euro (Settings → Opportunities → display) — the
+  // pipeline KPI must follow the same tenant rule as the opportunities page.
+  const valueInHours = getBoolSetting(settings, 'opportunity_value_in_hours', false)
   const hidden = getJsonSetting<Record<string, { kpis?: string[]; blocks?: string[] }>>(settings, 'dashboard_hidden', {})
   const hiddenBlocks = hidden[activeType]?.blocks ?? []
   const hiddenKpis = hidden[activeType]?.kpis ?? []
@@ -307,7 +310,13 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     never:             { id: 'never', label: t('kpi.neverContacted'), value: num(att.never_contacted), sub: t('kpi.attentionNeeded'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'neverContacted' }) },
     tasks:             { id: 'tasks', label: t('kpi.openTasks'), value: num(att.tasks), sub: t('kpi.linkedToCandidates'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: CheckCircle, onClick: () => onNavigate?.('tasks', { kpi: 'open' }) },
     opps:              { id: 'opps', label: t('kpi.opportunities'), value: num(opp?.total), sub: t('kpi.openOpportunities'), color: '#8B5CF6', bg: '#F3E8FF', Icon: Target, onClick: () => onNavigate?.('opportunities') },
-    pipeline:          { id: 'pipeline', label: t('kpi.pipelineValue'), value: opp?.pipeline_value != null ? eur(opp.pipeline_value) : '—', sub: t('kpi.sumOpenOpps'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Euro, onClick: () => onNavigate?.('opportunities') },
+    // Deal magnitude follows the tenant setting (euro vs hours) — same rule as the
+    // opportunities page. Hours mode shows the hours sum once the feed carries it (DASH-HOURS).
+    pipeline:          { id: 'pipeline', label: valueInHours ? t('kpi.pipelineHours') : t('kpi.pipelineValue'),
+      value: valueInHours
+        ? ((opp as { pipeline_hours?: number } | null)?.pipeline_hours != null ? `${num((opp as { pipeline_hours?: number }).pipeline_hours)} ${t('kpi.hoursUnit')}` : '—')
+        : (opp?.pipeline_value != null ? eur(opp.pipeline_value) : '—'),
+      sub: t('kpi.sumOpenOpps'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: valueInHours ? CalendarClock : Euro, onClick: () => onNavigate?.('opportunities') },
     placements:        { id: 'placements', label: t('kpi.placements'), value: num(att.placements), sub: t('kpi.placementsSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: () => onNavigate?.('matches') },
     intakes:           { id: 'intakes', label: t('kpi.intakes'), value: num(att.intake_planned ?? att.intakes), sub: t('kpi.intakesSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: CalendarCheck, onClick: () => onNavigate?.('candidates') },
     fillRate:          { id: 'fillRate', label: t('kpi.fillRate'), value: att.fill_rate != null ? `${att.fill_rate}%` : '—', sub: t('kpi.fillRateSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: TrendingUp, onClick: () => onNavigate?.('vacancies') },

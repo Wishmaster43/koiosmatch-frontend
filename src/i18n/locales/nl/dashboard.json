@@ -44,7 +44,9 @@
     "uncalledCallist": "Niet gebeld",
     "uncalledCallistSub": "in bellijsten",
     "expiringOpps": "Aflopende kansen",
-    "expiringOppsSub": "sluiten binnenkort"
+    "expiringOppsSub": "sluiten binnenkort",
+    "pipelineHours": "Pijplijn uren",
+    "hoursUnit": "uur"
   },
   "chart": {
     "byStatus": "Kandidaten per status",

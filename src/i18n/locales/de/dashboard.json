@@ -44,7 +44,9 @@
     "uncalledCallist": "Nicht angerufen",
     "uncalledCallistSub": "in Anruflisten",
     "expiringOpps": "Auslaufende Chancen",
-    "expiringOppsSub": "laufen bald aus"
+    "expiringOppsSub": "laufen bald aus",
+    "pipelineHours": "Pipeline-Stunden",
+    "hoursUnit": "Std."
   },
   "chart": {
     "byStatus": "Kandidaten nach Status",

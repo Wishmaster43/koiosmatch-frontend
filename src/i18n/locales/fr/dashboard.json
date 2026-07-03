@@ -44,7 +44,9 @@
     "uncalledCallist": "Non appelés",
     "uncalledCallistSub": "dans les listes d appels",
     "expiringOpps": "Opportunités expirantes",
-    "expiringOppsSub": "clôture proche"
+    "expiringOppsSub": "clôture proche",
+    "pipelineHours": "Heures pipeline",
+    "hoursUnit": "h"
   },
   "chart": {
     "byStatus": "Candidats par statut",
