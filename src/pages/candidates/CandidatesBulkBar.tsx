@@ -53,8 +53,12 @@ export default function CandidatesBulkBar({
   const stageOptions = funnelTypes.map(f => ({ value: f.value, label: f.label, color: f.color }))
   const typeOptions = candidateTypes.map(ct => ({ value: ct.value, label: ct.label, color: ct.color }))
   const phaseOptions = phases.map(p => ({ value: p.value, label: p.label, color: p.color }))
-  // Only "simple" statuses in bulk — exclude Match/reason-gated (placed/unavailable/blacklist).
-  const statusOptions = statuses.filter(s => !s.requires_match && !s.requires_reason).map(s => ({ value: s.value, label: s.label, color: s.color }))
+  // Only "simple" statuses in bulk — exclude anything needing extra per-candidate input:
+  // requires_match (placed), requires_reason (unavailable/blacklist) AND expects_return_date
+  // (sick/leave). Those go through the drawer prompt so the guard contract is satisfied.
+  const statusOptions = statuses
+    .filter(s => !s.requires_match && !s.requires_reason && !(s as { expects_return_date?: boolean }).expects_return_date)
+    .map(s => ({ value: s.value, label: s.label, color: s.color }))
   const tagOptions = selectedTags.map(tg => ({ value: tg, label: tg }))
 
   // Resolve a picked pool/user id back to the full object the parent needs.
