@@ -321,6 +321,8 @@
   "communication": {
     "newNote": "Nouvelle note",
     "type": "Type",
+    "channel": "Canal de contact",
+    "channelNone": "Note interne",
     "notePlaceholder": "Note {{type}}",
     "noteTypes": {
       "general": "Générale",
@@ -570,7 +572,8 @@
     "error": "Impossible de charger le journal.",
     "empty": "Aucune modification enregistrée.",
     "fromIp": "Modifié depuis l'IP {{ip}}",
-    "system": "Système"
+    "system": "Système",
+    "emptyValue": "Vide"
   },
   "matchesView": {
     "title": "Matches",

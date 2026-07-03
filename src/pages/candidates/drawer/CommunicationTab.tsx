@@ -4,6 +4,7 @@ import { useDateFormat } from '@/lib/datetime'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import SectionCard from '@/components/ui/SectionCard'
 import { useNoteTypes } from '@/lib/useNoteTypes'
+import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
 import type { Candidate } from '@/types/candidate'
 
@@ -23,6 +24,8 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
   const { formatDate } = useDateFormat()
   // Note categories from the tenant lookup (seed fallback until /note-types lands).
   const { types: noteTypes } = useNoteTypes()
+  // Contact channels (last_contact_types) — picking one on a note stamps last_contact_at/_type/_by.
+  const { types: channels } = useLastContactTypes()
   // Notes now persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
   const { notes, addNote, editNote } = useCandidateNotes(c.id)
 
@@ -61,6 +64,7 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
         onEditNote={editNote}
         timeline={c.timeline ?? []}
         noteTypes={noteTypes}
+        channels={channels}
         authorInitials={c.ownerInitials}
         timelineName={c.name}
         timelineInitials={c.initials}
@@ -69,6 +73,8 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
           notes: t('sections.notes'),
           newNote: t('communication.newNote'),
           type: t('communication.type'),
+          channel: t('communication.channel'),
+          channelNone: t('communication.channelNone'),
           save: t('common:save'),
           cancel: t('common:cancel'),
           notesEmpty: t('sections.notesEmpty'),

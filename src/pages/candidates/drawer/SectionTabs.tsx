@@ -46,14 +46,14 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
         const range = e.current
           ? (fmt(start) ? `${fmt(start)} – ${t('addFields.present')}` : t('addFields.present'))
           : (e.period ?? [fmt(start), fmt(end)].filter(Boolean).join(' – '))
+        // Compact secondary line: employer · location · period on one muted row (strak, like Education).
+        const secondary = [e.company ?? e.employer, e.location, range].filter(Boolean).join(' · ')
         return (
           <div key={e.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{e.title ?? e.function_title}</div>
-              {(e.company ?? e.employer) && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{e.company ?? e.employer}</div>}
-              {e.location && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{e.location}</div>}
-              {range && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{range}</div>}
+              {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
             </div>
           </div>
         )
@@ -89,14 +89,14 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
           ? (fmt(start) ? `${fmt(start)} – ${t('addFields.present')}` : t('addFields.inProgress'))
           : [fmt(start), fmt(end)].filter(Boolean).join(' – '))
         const issued = fmt(o.issued ?? o.issue_date)
+        // Compact secondary line: school · period · issue-date on one muted row (like Experience).
+        const secondary = [o.school ?? o.institution, range, issued ? `${t('addFields.issueDate')}: ${issued}` : null].filter(Boolean).join(' · ')
         return (
           <div key={o.id ?? i} style={{ display: 'flex', gap: 10, padding: '10px 0', borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
             <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0, marginTop: 5 }} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{o.title ?? o.education}</div>
-              {(o.school ?? o.institution) && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{o.school ?? o.institution}</div>}
-              {range && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{range}</div>}
-              {issued && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('addFields.issueDate')}: {issued}</div>}
+              {secondary && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{secondary}</div>}
             </div>
           </div>
         )

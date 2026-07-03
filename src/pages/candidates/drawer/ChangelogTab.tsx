@@ -1,11 +1,22 @@
 import { useTranslation } from 'react-i18next'
-import { History, AlertTriangle } from 'lucide-react'
+import { History, AlertTriangle, ArrowRight } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SectionCard from '@/components/ui/SectionCard'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
-import { useCandidateActivity } from '../hooks/useCandidateDrawerData'
+import { useCandidateActivity, type ActivityEvent } from '../hooks/useCandidateDrawerData'
 import type { Candidate } from '@/types/candidate'
+
+// Backend field key → a readable label (dynamic keys aren't all translatable).
+const humanizeField = (f: string) => f.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^\w/, c => c.toUpperCase())
+
+// Per-field changes from a Spatie Activitylog properties bag ({ attributes, old }).
+const changesOf = (ev: ActivityEvent): Array<{ field: string; old: unknown; next: unknown }> => {
+  const attrs = ev.properties?.attributes
+  if (!attrs || typeof attrs !== 'object') return []
+  const old = (ev.properties?.old ?? {}) as Record<string, unknown>
+  return Object.keys(attrs).map(field => ({ field, old: old[field], next: (attrs as Record<string, unknown>)[field] }))
+}
 
 /**
  * ChangelogTab — the candidate's audit trail (who changed what, when). Presentational:
@@ -18,6 +29,13 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const { items, loading, error } = useCandidateActivity(c?.id)
+
+  // Render a before/after value calmly: empty → "Leeg", booleans → Yes/No.
+  const fmtVal = (v: unknown): string => {
+    if (v === null || v === undefined || v === '') return t('changelog.emptyValue')
+    if (typeof v === 'boolean') return v ? t('common:yes') : t('common:no')
+    return String(v)
+  }
 
   const body = (
     <>
@@ -46,6 +64,15 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
               <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{formatDate(ev.created_at)}</span>
             </div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ev.description || ev.log_name}</div>
+            {/* Field-level diffs (HelloFlex-style): one "field: old → new" row per change. */}
+            {changesOf(ev).map(ch => (
+              <div key={ch.field} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, fontSize: 12, marginTop: 3 }}>
+                <span style={{ fontWeight: 500, color: 'var(--text)' }}>{humanizeField(ch.field)}</span>
+                <span style={{ color: 'var(--text-muted)' }}>{fmtVal(ch.old)}</span>
+                <ArrowRight size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                <span style={{ color: 'var(--text)' }}>{fmtVal(ch.next)}</span>
+              </div>
+            ))}
             {ev.ip && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{t('changelog.fromIp', { ip: ev.ip })}</div>}
           </div>
         </div>

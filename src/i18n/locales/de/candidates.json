@@ -321,6 +321,8 @@
   "communication": {
     "newNote": "Neue Notiz",
     "type": "Typ",
+    "channel": "Kontaktkanal",
+    "channelNone": "Interne Notiz",
     "notePlaceholder": "{{type}}-Notiz",
     "noteTypes": {
       "general": "Allgemein",
@@ -570,7 +572,8 @@
     "error": "Änderungsprotokoll konnte nicht geladen werden.",
     "empty": "Noch keine Änderungen erfasst.",
     "fromIp": "Geändert von IP {{ip}}",
-    "system": "System"
+    "system": "System",
+    "emptyValue": "Leer"
   },
   "matchesView": {
     "title": "Matches",

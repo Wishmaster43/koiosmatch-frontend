@@ -4,8 +4,8 @@
  * for candidates, customers, vacancies, tasks alike.
  */
 import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
-import { Plus, Edit2, Save, X } from 'lucide-react'
+import type { CSSProperties, ReactNode, ComponentType } from 'react'
+import { Plus, Edit2, Save, X, Mail, PhoneCall, MessageCircle, Building2, Video, FileText } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SafeHtml from '@/components/ui/SafeHtml'
 import RichTextEditor from '@/components/ui/RichTextEditor'
@@ -14,20 +14,29 @@ import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
 
 interface NoteType { value: string; label: string; color?: string }
-interface NoteItem { type?: string; title?: string; author?: string; author_name?: string; created_by?: string | { name?: string }; text?: string; body?: string; ago?: string; created_at?: string; [k: string]: unknown }
+interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; [k: string]: unknown }
 interface TimelineItem { time?: string; created_at?: string; text?: string; description?: string; [k: string]: unknown }
 interface NotesLabels {
-  notes?: ReactNode; newNote?: ReactNode; type?: ReactNode; save?: string; cancel?: string; edit?: string
+  notes?: ReactNode; newNote?: ReactNode; type?: ReactNode; channel?: ReactNode; channelNone?: ReactNode; save?: string; cancel?: string; edit?: string
   notesEmpty?: ReactNode; timeline?: ReactNode; timelineEmpty?: ReactNode
   conversations?: ReactNode; conversationsEmpty?: ReactNode
   notePlaceholder?: (typeLabel: string) => string
 }
-interface NotePayload { type: string; title: string; body: string }
+interface NotePayload { type: string; title: string; body: string; channel?: string }
+
+// Icon per contact-channel slug — shown on the picker + the chip (mirrors CandidatesTable).
+const CHANNEL_ICON: Record<string, ComponentType<{ size?: number }>> = {
+  email: Mail, phone: PhoneCall, call: PhoneCall, whatsapp: MessageCircle,
+  whatsapp_private: MessageCircle, appointment: Building2, meet: Video, note: FileText,
+}
 
 interface NotesTabProps {
   notes?: NoteItem[]
   timeline?: TimelineItem[]
   noteTypes?: NoteType[]
+  // Optional contact channels (last_contact_types). Picking one marks the note a
+  // contact moment → the backend stamps last_contact_at/_type/_by. Empty = internal note.
+  channels?: NoteType[]
   labels?: NotesLabels
   editorLabels?: Record<string, string>
   authorInitials?: string
@@ -41,7 +50,7 @@ interface NotesTabProps {
 }
 
 export default function NotesTab({
-  notes = [], timeline = [], noteTypes = [], labels = {}, editorLabels,
+  notes = [], timeline = [], noteTypes = [], channels = [], labels = {}, editorLabels,
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
   showTimeline = true, showConversations = true,
 }: NotesTabProps) {
@@ -50,6 +59,8 @@ export default function NotesTab({
   const [body, setBody]       = useState('')
   const [title, setTitle]     = useState('')
   const [type, setType]       = useState(noteTypes[0]?.value ?? '')
+  // Optional contact channel — empty = internal note (no contact moment).
+  const [channel, setChannel] = useState('')
   const [expanded, setExpanded] = useState(false)
   const { formatDate } = useDateFormat()
   // Note timestamp: real date+time when the note carries one, else the relative "ago".
@@ -59,15 +70,19 @@ export default function NotesTab({
   // Note author ("by whom"): the note's own author, from any of the API shapes.
   const noteAuthor = (n: NoteItem) =>
     (typeof n.created_by === 'object' ? n.created_by?.name : n.created_by) ?? n.author_name ?? n.author ?? ''
+  // Editor ("edited by") — shown only once the backend logs it (NOTES-2b); graceful until then.
+  const noteEditor = (n: NoteItem) =>
+    (typeof n.updated_by === 'object' ? n.updated_by?.name : n.updated_by) ?? n.edited_by ?? ''
+  const noteEdited = (n: NoteItem) => Boolean(noteEditor(n) && n.updated_at && n.updated_at !== n.created_at)
 
-  const reset = () => { setAdding(false); setEditingIdx(null); setBody(''); setTitle(''); setType(noteTypes[0]?.value ?? ''); setExpanded(false) }
+  const reset = () => { setAdding(false); setEditingIdx(null); setBody(''); setTitle(''); setType(noteTypes[0]?.value ?? ''); setChannel(''); setExpanded(false) }
   const openEdit = (i: number) => {
     const n = notes[i]
-    setType(n.type ?? noteTypes[0]?.value ?? ''); setTitle(n.title ?? ''); setBody(n.text ?? n.body ?? '')
+    setType(n.type ?? noteTypes[0]?.value ?? ''); setChannel(n.channel ?? ''); setTitle(n.title ?? ''); setBody(n.text ?? n.body ?? '')
     setEditingIdx(i); setAdding(true)
   }
   const save = () => {
-    const payload: NotePayload = { type, title, body }
+    const payload: NotePayload = { type, title, body, channel: channel || undefined }
     if (editingIdx == null) onAddNote?.(payload)
     else onEditNote?.(editingIdx, payload)
     reset()
@@ -83,6 +98,18 @@ export default function NotesTab({
       ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
       : { background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }
     return <span style={{ fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99, marginRight: 6, ...soft }}>{nt?.label ?? value}</span>
+  }
+
+  // Channel chip — resolves value→label from the contact-channel lookup; soft tint.
+  const renderChannelChip = (value: string) => {
+    const ch = channels.find(c => c.value === value || c.label === value)
+    const col = ch?.color ?? 'var(--color-secondary)'
+    const isHex = typeof col === 'string' && col.startsWith('#')
+    const soft: CSSProperties = isHex
+      ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
+      : { background: `color-mix(in srgb, ${col} 12%, transparent)`, color: col, border: `1px solid color-mix(in srgb, ${col} 40%, transparent)` }
+    const Icon = CHANNEL_ICON[value]
+    return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99, marginRight: 6, ...soft }}>{Icon && <Icon size={10} />}{ch?.label ?? value}</span>
   }
 
   return (
@@ -114,6 +141,30 @@ export default function NotesTab({
                 ))}
               </div>
             </div>
+            {/* Contact channel — optional; picking one marks this note a contact moment.
+                No "internal" button: no channel selected = internal note (that's the note TYPE).
+                Soft-chip toggle (§4) with an icon; click a selected channel again to clear it. */}
+            {channels.length > 0 && (
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 6 }}>{labels.channel}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {channels.map(ch => {
+                    const active = channel === ch.value
+                    const col = ch.color ?? 'var(--color-primary)'
+                    const Icon = CHANNEL_ICON[ch.value]
+                    return (
+                      <button key={ch.value} type="button" onClick={() => setChannel(active ? '' : ch.value)}
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 10px', fontSize: 11,
+                          fontWeight: active ? 600 : 500, borderRadius: 99, cursor: 'pointer', color: col,
+                          background: `color-mix(in srgb, ${col} ${active ? 16 : 8}%, transparent)`,
+                          border: `1px solid color-mix(in srgb, ${col} ${active ? 50 : 28}%, transparent)` }}>
+                        {Icon && <Icon size={12} />} {ch.label}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
             <input value={title} onChange={e => setTitle(e.target.value)} placeholder={labels.notePlaceholder?.(typeLabel)}
               style={{ width: '100%', padding: '8px 12px', fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)', background: 'white', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }} />
             <RichTextEditor value={body} onChange={setBody} expanded={expanded} onToggleExpand={() => setExpanded(e => !e)} labels={editorLabels} />
@@ -136,11 +187,17 @@ export default function NotesTab({
                   <div style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
                     <div style={{ flex: 1 }}>
                       {n.type && renderTypeChip(n.type)}
+                      {n.channel && renderChannelChip(n.channel)}
                       <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{n.title ?? who}</span>
                     </div>
-                    {/* "By whom · when" — the note's own author + timestamp. */}
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                      {who && n.title ? `${who} · ` : ''}{noteWhen(n)}
+                    {/* "By whom · when" (always) + "edited by X" once the backend logs it (NOTES-2b). */}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      {who ? `${who} · ` : ''}{noteWhen(n)}
+                      {noteEdited(n) && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }} title={labels.edit as string}>
+                          <Edit2 size={9} /> {noteEditor(n)}
+                        </span>
+                      )}
                     </span>
                     {onEditNote && (
                       <button onClick={() => openEdit(i)} title={labels.edit}

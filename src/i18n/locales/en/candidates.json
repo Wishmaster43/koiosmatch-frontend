@@ -328,6 +328,8 @@
   "communication": {
     "newNote": "New note",
     "type": "Type",
+    "channel": "Contact channel",
+    "channelNone": "Internal note",
     "notePlaceholder": "{{type}} note",
     "noteTypes": {
       "general": "General",
@@ -577,7 +579,8 @@
     "error": "Could not load the changelog.",
     "empty": "No changes recorded yet.",
     "fromIp": "Changed from IP {{ip}}",
-    "system": "System"
+    "system": "System",
+    "emptyValue": "Empty"
   },
   "matchesView": {
     "title": "Matches",

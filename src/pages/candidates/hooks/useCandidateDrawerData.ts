@@ -23,6 +23,9 @@ export interface ActivityEvent {
   subject_type?: string
   subject_id?: Id
   ip?: string
+  // C-16: field-level diff (Spatie Activitylog shape) — `attributes` = the new values,
+  // `old` = the previous values; the tab renders one "field: old → new" row per change.
+  properties?: { attributes?: Record<string, unknown>; old?: Record<string, unknown>; [k: string]: unknown }
 }
 
 // Candidate audit trail (C-16). 404 = endpoint not built yet → empty (calm), not an

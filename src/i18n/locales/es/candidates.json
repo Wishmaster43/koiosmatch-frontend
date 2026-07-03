@@ -321,6 +321,8 @@
   "communication": {
     "newNote": "Nueva nota",
     "type": "Tipo",
+    "channel": "Canal de contacto",
+    "channelNone": "Nota interna",
     "notePlaceholder": "Nota {{type}}",
     "noteTypes": {
       "general": "General",
@@ -570,7 +572,8 @@
     "error": "No se pudo cargar el registro.",
     "empty": "Aún no hay cambios registrados.",
     "fromIp": "Modificado desde la IP {{ip}}",
-    "system": "Sistema"
+    "system": "Sistema",
+    "emptyValue": "Vacío"
   },
   "matchesView": {
     "title": "Coincidencias",

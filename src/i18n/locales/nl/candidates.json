@@ -328,6 +328,8 @@
   "communication": {
     "newNote": "Nieuwe notitie",
     "type": "Type",
+    "channel": "Contactkanaal",
+    "channelNone": "Interne notitie",
     "notePlaceholder": "{{type}} notitie",
     "noteTypes": {
       "general": "Algemeen",
@@ -577,7 +579,8 @@
     "error": "Wijzigingslog kon niet geladen worden.",
     "empty": "Nog geen wijzigingen vastgelegd.",
     "fromIp": "Gewijzigd vanaf IP {{ip}}",
-    "system": "Systeem"
+    "system": "Systeem",
+    "emptyValue": "Leeg"
   },
   "matchesView": {
     "title": "Matches",
