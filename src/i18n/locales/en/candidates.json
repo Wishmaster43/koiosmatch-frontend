@@ -254,7 +254,11 @@
     "archived": "Candidate archived.",
     "archiveFailed": "Archiving failed (possibly active links).",
     "blacklistReasonLabel": "Blacklist reason",
-    "blacklistReasonPick": "Pick a reason…"
+    "blacklistReasonPick": "Pick a reason…",
+    "tasksTitle": "Tasks",
+    "tasksLoading": "Loading tasks…",
+    "tasksError": "Failed to load tasks.",
+    "tasksEmpty": "No open tasks for this candidate."
   },
   "stage": {
     "lead": "Lead",

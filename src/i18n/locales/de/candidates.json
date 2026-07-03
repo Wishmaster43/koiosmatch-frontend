@@ -247,7 +247,11 @@
     "archived": "Kandidat archiviert.",
     "archiveFailed": "Archivieren fehlgeschlagen (möglicherweise aktive Verknüpfungen).",
     "blacklistReasonLabel": "Blacklist-Grund",
-    "blacklistReasonPick": "Grund wählen…"
+    "blacklistReasonPick": "Grund wählen…",
+    "tasksTitle": "Aufgaben",
+    "tasksLoading": "Aufgaben laden…",
+    "tasksError": "Aufgaben konnten nicht geladen werden.",
+    "tasksEmpty": "Keine offenen Aufgaben für diesen Kandidaten."
   },
   "stage": {
     "lead": "Lead",

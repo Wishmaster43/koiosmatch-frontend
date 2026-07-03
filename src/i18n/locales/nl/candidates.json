@@ -254,7 +254,11 @@
     "archived": "Kandidaat gearchiveerd.",
     "archiveFailed": "Archiveren is mislukt (mogelijk actieve koppelingen).",
     "blacklistReasonLabel": "Blacklist-reden",
-    "blacklistReasonPick": "Kies een reden…"
+    "blacklistReasonPick": "Kies een reden…",
+    "tasksTitle": "Taken",
+    "tasksLoading": "Taken laden…",
+    "tasksError": "Taken laden is mislukt.",
+    "tasksEmpty": "Geen open taken voor deze kandidaat."
   },
   "stage": {
     "lead": "Lead",

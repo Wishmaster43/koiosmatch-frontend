@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import SectionCard from '@/components/ui/SectionCard'
+import CandidateTasks from './CandidateTasks'
 import { useNoteTypes } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
@@ -58,6 +59,9 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
           })}
         </div>
       </SectionCard>
+
+      {/* Open tasks linked to this candidate — the follow-up hub lives here (notes + tasks). */}
+      <CandidateTasks candidateId={c.id} />
       <NotesTab
         notes={notes}
         onAddNote={addNote}

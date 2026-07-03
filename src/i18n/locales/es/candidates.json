@@ -247,7 +247,11 @@
     "archived": "Candidato archivado.",
     "archiveFailed": "Error al archivar (posibles vínculos activos).",
     "blacklistReasonLabel": "Motivo de blacklist",
-    "blacklistReasonPick": "Elige un motivo…"
+    "blacklistReasonPick": "Elige un motivo…",
+    "tasksTitle": "Tareas",
+    "tasksLoading": "Cargando tareas…",
+    "tasksError": "No se pudieron cargar las tareas.",
+    "tasksEmpty": "Sin tareas abiertas para este candidato."
   },
   "stage": {
     "lead": "Lead",

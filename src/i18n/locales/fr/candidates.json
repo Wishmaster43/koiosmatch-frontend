@@ -247,7 +247,11 @@
     "archived": "Candidat archivé.",
     "archiveFailed": "Échec de l archivage (liens actifs possibles).",
     "blacklistReasonLabel": "Motif de blacklist",
-    "blacklistReasonPick": "Choisir un motif…"
+    "blacklistReasonPick": "Choisir un motif…",
+    "tasksTitle": "Tâches",
+    "tasksLoading": "Chargement des tâches…",
+    "tasksError": "Échec du chargement des tâches.",
+    "tasksEmpty": "Aucune tâche ouverte pour ce candidat."
   },
   "stage": {
     "lead": "Piste",

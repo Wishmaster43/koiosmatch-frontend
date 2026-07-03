@@ -145,6 +145,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     if (attentionFilter === 'neverContacted') p.never_contacted = 1
     if (attentionFilter === 'noFollowup')     p.no_followup = 1
     if (attentionFilter === 'hasTasks')       p.has_open_tasks = 1
+    if (attentionFilter === 'intakePlanned')  p.intake_planned = 1
     // Period-click date range (created / last-contact); set last so it wins over stale6m if both target last_contact.
     if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     return p
@@ -171,7 +172,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const {
     statusOptions, funnelOptions, typeOptions, ownerOptions,
     genderOptions, provinceOptions, titleOptions, locationOptions,
-    statusData, funnelData, rcData, intakeStages,
+    statusData, funnelData, rcData,
     staleCount, neverContactedCount, noFollowupCount, intakeCount, activeConvCount, tasksCount,
   } = useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders })
 
@@ -181,11 +182,6 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const cityOptions   = useMemo(() => optsFrom(candidates.map(c => c.city).filter(Boolean) as string[]), [candidates])
   const sourceOptions = useMemo(() => optsFrom(candidates.map(c => (c as { source?: string | null }).source ?? '').filter(Boolean)), [candidates])
 
-  // Intake quick-filter: the requires_appointment funnel stages (§3B flag-driven, never a
-  // hardcoded value). Active when exactly that stage set is selected.
-  const intakeStageValues = [...intakeStages] as string[]
-  const intakeActive = intakeStageValues.length > 0 && selectedFunnel.length === intakeStageValues.length
-    && intakeStageValues.every(s => selectedFunnel.includes(s))
 
   const tog = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
   // Klik-op-chart → zet precies één waarde, of wis bij nogmaals klikken (toggle).
@@ -322,7 +318,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     { key: 'noFollowup', label: t('analytics.noFollowup'), value: noFollowupCount, sub: t('analytics.noFollowupSub'), color: 'var(--color-danger)',
       onClick: () => toggleAttention('noFollowup'), active: attentionFilter === 'noFollowup' },
     { key: 'intake',     label: t('kpi.intake'),           value: intakeCount,     sub: t('kpi.intakeSub'),           color: '#8B5CF6',
-      onClick: () => setSelectedFunnel(intakeActive ? [] : intakeStageValues), active: intakeActive },
+      // Click filters on the SAME definition as the stat (planned intake appointments) via
+      // the intake_planned param (INTAKE-1) — the old funnel-stage set never matched the count.
+      onClick: () => toggleAttention('intakePlanned'), active: attentionFilter === 'intakePlanned' },
     // Channel breakdown is hidden until real WhatsApp/e-mail data exists (BE KPI-1) — no '–' placeholders.
     { key: 'conversations', label: t('analytics.conversations'), value: activeConvCount, color: 'var(--color-success)' },
     { key: 'tasks', label: t('kpi.tasks'), value: tasksCount, sub: t('kpi.tasksSub'), color: '#0D9488',
