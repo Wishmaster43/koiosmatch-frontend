@@ -134,6 +134,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     }
     if (attentionFilter === 'neverContacted') p.never_contacted = 1
     if (attentionFilter === 'noFollowup')     p.no_followup = 1
+    if (attentionFilter === 'hasTasks')       p.has_open_tasks = 1
     // Period-click date range (created / last-contact); set last so it wins over stale6m if both target last_contact.
     if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     return p
@@ -289,7 +290,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       onClick: () => setSelectedFunnel(intakeActive ? [] : intakeStageValues), active: intakeActive },
     // Channel breakdown is hidden until real WhatsApp/e-mail data exists (BE KPI-1) — no '–' placeholders.
     { key: 'conversations', label: t('analytics.conversations'), value: activeConvCount, color: 'var(--color-success)' },
-    { key: 'tasks', label: t('kpi.tasks'), value: tasksCount, sub: t('kpi.tasksSub'), color: '#0D9488' },
+    { key: 'tasks', label: t('kpi.tasks'), value: tasksCount, sub: t('kpi.tasksSub'), color: '#0D9488',
+      onClick: () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },
   ]
 
   return (
