@@ -5,8 +5,10 @@
  * needs the backlog count, not the rows.
  *
  * Contract: GET /whatsapp-web/queue → { data:[{id, candidate:{id,name},
- *   message_type:{value,label,color}, priority, status, attempts, scheduled_at, number_id}], meta }
- *   (PII-arm: no phone/body). GET /whatsapp-web/queue/stats → per number
+ *   message_type:{value,label,color}, priority, status, attempts, scheduled_at, number_id,
+ *   hold_reason}], meta } — hold_reason = WHY a message waits (WA-5): new_number_daily/
+ *   hourly/weekly, rate_limit, priority_wait, scheduled, ready. (PII-arm: no phone/body.)
+ *   GET /whatsapp-web/queue/stats → per number
  *   [{ number_id, label, rate_limit, in_queue, est_drain }]. Mutations gated messaging.manage.
  */
 import { useState, useEffect, useCallback } from 'react'
@@ -21,6 +23,8 @@ export interface QueueItem {
   attempts?: number | null
   scheduled_at?: string | null
   number_id?: string | number | null
+  // Why this message is still waiting (BE WA-5): explains the cap/hold to the recruiter.
+  hold_reason?: string | null
 }
 // Stats are per-number: the drain budget + backlog + estimated drain time.
 export interface QueueNumberStats {

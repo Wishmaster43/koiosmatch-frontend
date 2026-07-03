@@ -14,12 +14,13 @@ import { getQueueConfig, putQueueConfig } from './messagingApi'
 import StatusListEditor from '../StatusListEditor'
 
 // Seed defaults until the backend endpoint exists (C-43 / WA-4). Known = generous;
-// new-number caps are conservative on purpose (WhatsApp bans cold outreach hardest).
+// NEW-number caps are deliberately LOW — cold outreach to unknown numbers is what gets a
+// number banned. Danny 2026-07-03: 10/day is the hard cap for now. BE enforces these.
 const DEFAULTS = {
   known_hourly_limit: 1000,
-  new_hourly_limit:   20,
-  new_daily_limit:    50,
-  new_weekly_limit:   200,
+  new_hourly_limit:   5,
+  new_daily_limit:    10,
+  new_weekly_limit:   30,
 }
 
 // Read a positive integer from the response, else the seed default.

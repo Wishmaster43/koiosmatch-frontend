@@ -23,9 +23,7 @@ export default function MessagingSettings() {
 
   return (
     <div>
-      <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('messaging.title')}</h2>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 18 }}>{t('messaging.subtitle')}</p>
-
+      {/* Section title comes from the nav label ("WhatsApp Privé") — no redundant heading here. */}
       {/* Sub-tabs */}
       <div role="tablist" style={{ display: 'flex', gap: 4, borderBottom: '1px solid var(--border)', marginBottom: 24 }}>
         {tabs.map(([id, label]) => {

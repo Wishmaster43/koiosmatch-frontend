@@ -51,6 +51,7 @@ export default function QueueTab({ queue }: { queue: ReturnType<typeof useWhatsA
             <th style={th}>{t('queue.col.type')}</th>
             <th style={th}>{t('queue.col.priority')}</th>
             <th style={th}>{t('queue.col.status')}</th>
+            <th style={th}>{t('queue.col.reason')}</th>
             <th style={th}>{t('queue.col.scheduled')}</th>
             <th style={th}>{t('queue.col.attempts')}</th>
             {canAct && <th style={{ ...th, textAlign: 'right' }}>{t('queue.col.actions')}</th>}
@@ -65,6 +66,12 @@ export default function QueueTab({ queue }: { queue: ReturnType<typeof useWhatsA
                 <td style={td}>{it.message_type?.label ? <SoftChip label={it.message_type.label} color={it.message_type.color} /> : '—'}</td>
                 <td style={mono}>{it.priority ?? '—'}</td>
                 <td style={td}><SoftChip label={t(`queue.status.${st}`, { defaultValue: st })} color={STATUS_COLOR[st] ?? '#9CA3AF'} /></td>
+                {/* Why it waits — cap/rate reasons in a warning tint so the hold is obvious. */}
+                <td style={td}>{it.hold_reason
+                  ? <span style={{ fontSize: 12, color: /^(new_number|rate_limit)/.test(it.hold_reason) ? 'var(--color-warning)' : 'var(--text-muted)' }}>
+                      {t(`queue.reason.${it.hold_reason}`, { defaultValue: it.hold_reason })}
+                    </span>
+                  : <span style={{ color: 'var(--text-muted)' }}>—</span>}</td>
                 <td style={{ ...td, color: 'var(--text-muted)' }}>{it.scheduled_at ? formatDate(it.scheduled_at, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}</td>
                 <td style={mono}>{it.attempts ?? 0}</td>
                 {canAct && (

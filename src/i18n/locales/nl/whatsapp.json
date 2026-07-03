@@ -1,19 +1,70 @@
 {
-  "tabs": { "overview": "Overzicht", "messages": "Berichten", "queue": "Wachtrij", "escalations": "Escalaties" },
-  "drill": { "noDetail": "Nog geen detailgegevens voor deze KPI — backend levert dit binnenkort." },
-  "overview": { "statusTitle": "Berichtstatus", "reasonsTitle": "Escalatieredenen" },
+  "tabs": {
+    "overview": "Overzicht",
+    "messages": "Berichten",
+    "queue": "Wachtrij",
+    "escalations": "Escalaties"
+  },
+  "drill": {
+    "noDetail": "Nog geen detailgegevens voor deze KPI — backend levert dit binnenkort."
+  },
+  "overview": {
+    "statusTitle": "Berichtstatus",
+    "reasonsTitle": "Escalatieredenen"
+  },
   "queue": {
     "loading": "Wachtrij laden…",
     "error": "Wachtrij laden is mislukt.",
     "emptyTitle": "Wachtrij is leeg",
     "emptyDesc": "Er staan geen persoonlijke WhatsApp-berichten in de wachtrij.",
-    "col": { "candidate": "Kandidaat", "type": "Type", "priority": "Prioriteit", "status": "Status", "scheduled": "Gepland", "attempts": "Poging", "actions": "Acties" },
-    "status": { "queued": "In wachtrij", "sending": "Verzenden", "sent": "Verzonden", "failed": "Mislukt", "skipped": "Overgeslagen", "paused": "Gepauzeerd" },
-    "action": { "sendNow": "Nu versturen", "pause": "Pauzeren", "retry": "Opnieuw", "cancel": "Verwijderen" }
+    "col": {
+      "candidate": "Kandidaat",
+      "type": "Type",
+      "priority": "Prioriteit",
+      "status": "Status",
+      "scheduled": "Gepland",
+      "attempts": "Poging",
+      "actions": "Acties",
+      "reason": "Reden"
+    },
+    "status": {
+      "queued": "In wachtrij",
+      "sending": "Verzenden",
+      "sent": "Verzonden",
+      "failed": "Mislukt",
+      "skipped": "Overgeslagen",
+      "paused": "Gepauzeerd"
+    },
+    "action": {
+      "sendNow": "Nu versturen",
+      "pause": "Pauzeren",
+      "retry": "Opnieuw",
+      "cancel": "Verwijderen"
+    },
+    "reason": {
+      "new_number_daily": "Nieuw nummer — dagcap bereikt",
+      "new_number_hourly": "Nieuw nummer — uurcap bereikt",
+      "new_number_weekly": "Nieuw nummer — weekcap bereikt",
+      "rate_limit": "Uurlimiet bereikt",
+      "priority_wait": "Wacht op prioriteit",
+      "scheduled": "Gepland",
+      "ready": "Klaar om te verzenden"
+    }
   },
-  "filters": {"status":"Status","direction":"Richting"},
-  "msgStatus": {"read":"Gelezen","delivered":"Afgeleverd","sent":"Verzonden","failed":"Mislukt"},
-  "msgDirection": {"inbound":"Inkomend","outbound":"Uitgaand"},
+  "filters": {
+    "status": "Status",
+    "direction": "Richting"
+  },
+  "msgStatus": {
+    "read": "Gelezen",
+    "delivered": "Afgeleverd",
+    "sent": "Verzonden",
+    "failed": "Mislukt"
+  },
+  "msgDirection": {
+    "inbound": "Inkomend",
+    "outbound": "Uitgaand"
+  },
   "title": "WhatsApp",
   "updatedAt": "Bijgewerkt om {{time}}",
   "refresh": "Verversen",
