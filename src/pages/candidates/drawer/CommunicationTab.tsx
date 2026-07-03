@@ -72,14 +72,14 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      {/* Sub-tab strip — same shared bar as the Planning panel. */}
+      {/* Sub-tab strip — same shared bar as the Planning panel; order per Danny 2026-07-03. */}
       <SubTabBar
         tabs={[
-          { id: 'consent',       label: t('communication.consentTitle') },
-          { id: 'tasks',         label: t('drawer.tasksTitle') },
-          { id: 'notes',         label: t('sections.notes') },
-          { id: 'timeline',      label: t('sections.timeline') },
           { id: 'conversations', label: t('sections.conversations') },
+          { id: 'notes',         label: t('sections.notes') },
+          { id: 'tasks',         label: t('drawer.tasksTitle') },
+          { id: 'timeline',      label: t('sections.timeline') },
+          { id: 'consent',       label: t('communication.consentTitle') },
         ]}
         active={subTab}
         onChange={setSubTab}
