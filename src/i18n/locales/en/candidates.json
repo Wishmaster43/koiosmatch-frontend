@@ -259,7 +259,22 @@
     "tasksLoading": "Loading tasks…",
     "tasksError": "Failed to load tasks.",
     "tasksEmpty": "No open tasks for this candidate.",
-    "editStatusInfo": "Edit reason or date"
+    "editStatusInfo": "Edit reason or date",
+    "byWho": "by {{name}}",
+    "recordGone": "This candidate no longer exists — row removed from the list.",
+    "archivedOn": "Archived on {{date}}",
+    "archivedFlag": "Archived",
+    "restore": "Restore",
+    "restored": "Candidate restored.",
+    "restoreFailed": "Restore failed.",
+    "hardDelete": "Delete permanently",
+    "hardDeleteConfirm": "Permanently delete {{name}}? This cannot be undone.",
+    "hardDeleted": "Candidate permanently deleted.",
+    "hardDeleteFailed": "Permanent delete failed.",
+    "newTask": "New task",
+    "taskFor": "for {{name}}",
+    "taskCreatedBy": "created by {{name}}",
+    "taskOpen": "Open task"
   },
   "stage": {
     "lead": "Lead",

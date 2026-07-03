@@ -259,7 +259,22 @@
     "tasksLoading": "Taken laden…",
     "tasksError": "Taken laden is mislukt.",
     "tasksEmpty": "Geen open taken voor deze kandidaat.",
-    "editStatusInfo": "Reden of datum wijzigen"
+    "editStatusInfo": "Reden of datum wijzigen",
+    "byWho": "door {{name}}",
+    "recordGone": "Deze kandidaat bestaat niet meer — rij verwijderd uit de lijst.",
+    "archivedOn": "Gearchiveerd per {{date}}",
+    "archivedFlag": "Gearchiveerd",
+    "restore": "Herstellen",
+    "restored": "Kandidaat hersteld.",
+    "restoreFailed": "Herstellen mislukt.",
+    "hardDelete": "Definitief verwijderen",
+    "hardDeleteConfirm": "{{name}} definitief verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "hardDeleted": "Kandidaat definitief verwijderd.",
+    "hardDeleteFailed": "Definitief verwijderen mislukt.",
+    "newTask": "Nieuwe taak",
+    "taskFor": "voor {{name}}",
+    "taskCreatedBy": "aangemaakt door {{name}}",
+    "taskOpen": "Taak openen"
   },
   "stage": {
     "lead": "Lead",

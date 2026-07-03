@@ -252,7 +252,22 @@
     "tasksLoading": "Chargement des tâches…",
     "tasksError": "Échec du chargement des tâches.",
     "tasksEmpty": "Aucune tâche ouverte pour ce candidat.",
-    "editStatusInfo": "Modifier le motif ou la date"
+    "editStatusInfo": "Modifier le motif ou la date",
+    "byWho": "par {{name}}",
+    "recordGone": "Ce candidat n'existe plus — ligne retirée de la liste.",
+    "archivedOn": "Archivé le {{date}}",
+    "archivedFlag": "Archivé",
+    "restore": "Restaurer",
+    "restored": "Candidat restauré.",
+    "restoreFailed": "Échec de la restauration.",
+    "hardDelete": "Supprimer définitivement",
+    "hardDeleteConfirm": "Supprimer définitivement {{name}} ? Cette action est irréversible.",
+    "hardDeleted": "Candidat supprimé définitivement.",
+    "hardDeleteFailed": "Échec de la suppression définitive.",
+    "newTask": "Nouvelle tâche",
+    "taskFor": "pour {{name}}",
+    "taskCreatedBy": "créée par {{name}}",
+    "taskOpen": "Ouvrir la tâche"
   },
   "stage": {
     "lead": "Piste",

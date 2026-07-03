@@ -27,7 +27,7 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
  * candidate/customer/contact pickers) — nothing hardcoded. On save it POSTs the
  * task with its polymorphic `links[]` and hands the created row back to the page.
  */
-export default function AddTaskModal({ onClose, onCreated }: { onClose: () => void; onCreated?: (raw: unknown) => void }) {
+export default function AddTaskModal({ onClose, onCreated, initial }: { onClose: () => void; onCreated?: (raw: unknown) => void; initial?: Partial<TaskForm> }) {
   const { t } = useTranslation('tasks')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { types, statuses, priorities, defaultPriority } = useTaskLookups()
@@ -35,9 +35,10 @@ export default function AddTaskModal({ onClose, onCreated }: { onClose: () => vo
   const auth = useAuth()
   const ownerName = auth?.user ? userName(auth.user as UserLike) : ''
 
+  // `initial` pre-fills fields/links when opened from an entity drawer (e.g. the candidate).
   const [form, setForm] = useState<TaskForm>({
     type: '', title: '', assigneeId: '', status: '', due: '', priority: '', description: '',
-    candidateId: '', customerId: '', contactId: '',
+    candidateId: '', customerId: '', contactId: '', ...initial,
   })
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)

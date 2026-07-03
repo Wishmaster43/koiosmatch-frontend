@@ -53,7 +53,8 @@ interface AppUser { id: Id; name: string; [k: string]: unknown }
 const CandidateDrawer = CandidateDrawerJs as ComponentType<{
   candidate: Candidate | null; onClose: () => void; expanded: boolean
   onToggleExpand: () => void; onUpdate: (id: Id, patch: Record<string, unknown>) => void
-  onArchive?: (id: Id) => void; users: AppUser[]
+  onArchive?: (id: Id) => void; onRestore?: (id: Id) => void; onHardDelete?: (id: Id) => void
+  users: AppUser[]
 }>
 const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: unknown[]; clearTitle?: string }>
 
@@ -251,10 +252,21 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const { fetchDetail, patchCandidate } = useCandidateRecord()
 
   // Open a candidate: hand the light row to the drawer, then fetch the full record.
+  // 404 ('gone') = a stale row (reseed / deleted elsewhere) → drop it + tell the user.
   const selectCandidate = (c: Candidate) => {
     selectedIdRef.current = c.id
     setSelected(c); setDetail(null); setDrawerExpanded(false)
-    fetchDetail(c.id).then(full => { if (full && selectedIdRef.current === c.id) setDetail(full) })
+    fetchDetail(c.id).then(full => {
+      if (selectedIdRef.current !== c.id) return
+      if (full === 'gone') {
+        setCandidates(p => p.filter(x => x.id !== c.id))
+        setTotal(v => Math.max(0, v - 1))
+        closeDrawer()
+        setActionMsg({ type: 'error', text: t('drawer.recordGone') })
+        return
+      }
+      if (full) setDetail(full)
+    })
   }
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
 
@@ -269,6 +281,31 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       setActionMsg({ type: 'success', text: t('drawer.archived') })
     } catch {
       setActionMsg({ type: 'error', text: t('drawer.archiveFailed') })
+    }
+  }
+  // Restore an ARCHIVED candidate (undo the soft-delete) — mirrors archive via the bulk route.
+  const restoreOne = async (id: Id) => {
+    try {
+      await api.post('/candidates/bulk/restore', { candidate_ids: [id] })
+      setCandidates(p => p.filter(x => x.id !== id))
+      setTotal(v => Math.max(0, v - 1))
+      closeDrawer()
+      setActionMsg({ type: 'success', text: t('drawer.restored') })
+    } catch {
+      setActionMsg({ type: 'error', text: t('drawer.restoreFailed') })
+    }
+  }
+  // PERMANENTLY delete an archived candidate — admin-only (UI-gated in the drawer; the
+  // backend re-checks the role and that nothing live hangs off the record — §3B/§7).
+  const hardDeleteOne = async (id: Id) => {
+    try {
+      await api.delete(`/candidates/${id}/force`)
+      setCandidates(p => p.filter(x => x.id !== id))
+      setTotal(v => Math.max(0, v - 1))
+      closeDrawer()
+      setActionMsg({ type: 'success', text: t('drawer.hardDeleted') })
+    } catch {
+      setActionMsg({ type: 'error', text: t('drawer.hardDeleteFailed') })
     }
   }
   // Open a candidate drawer when arriving via a dashboard/cross-entity link ({ open: id }).
@@ -426,6 +463,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           onToggleExpand={() => setDrawerExpanded(v => !v)}
           onUpdate={updateCandidate}
           onArchive={archiveOne}
+          onRestore={restoreOne}
+          onHardDelete={hardDeleteOne}
           users={users}
         />
       </div>

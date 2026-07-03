@@ -23,6 +23,7 @@ import type { BoardColumn } from './TasksBoard'
 import TaskDrawer from './TaskDrawer'
 import AddTaskModal from './AddTaskModal'
 import { mapTask, mapTaskDetail } from './data/mapTask'
+import { useOpenFromIntent } from '@/context/NavigationContext'
 import type { Task, TaskDetail, ApiTask } from '@/types/task'
 import type { Id } from '@/types/common'
 
@@ -205,6 +206,8 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
       .then(r => { if (selectedIdRef.current === task.id) setSelected(decorate(mapTaskDetail(r.data?.data ?? r.data))) })
       .catch(() => {})
   }
+  // Open a task drawer when arriving via a cross-entity link ({ open: id }, candidate → task).
+  useOpenFromIntent(intent, (id) => selectTask({ id } as Task))
 
   // Edit one or more fields (drawer or kanban drag). `patch` is LOCAL-shaped.
   const handleUpdate = (id: Id | undefined, patch: Record<string, unknown>) => {

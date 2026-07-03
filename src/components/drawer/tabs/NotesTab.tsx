@@ -44,7 +44,8 @@ interface NotesTabProps {
   timelineInitials?: string
   onAddNote?: (payload: NotePayload) => void
   onEditNote?: (i: number, payload: NotePayload) => void
-  // Optional section toggles — hosts with their own timeline/chat tabs hide these.
+  // Optional section toggles — hosts with their own sub-tabs render one section at a time.
+  showNotes?: boolean
   showTimeline?: boolean
   showConversations?: boolean
 }
@@ -52,7 +53,7 @@ interface NotesTabProps {
 export default function NotesTab({
   notes = [], timeline = [], noteTypes = [], channels = [], labels = {}, editorLabels,
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
-  showTimeline = true, showConversations = true,
+  showNotes = true, showTimeline = true, showConversations = true,
 }: NotesTabProps) {
   const [adding, setAdding]   = useState(false)
   const [editingIdx, setEditingIdx] = useState<number | null>(null)   // null = new; index = editing
@@ -115,6 +116,7 @@ export default function NotesTab({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Notes */}
+      {showNotes && (
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{labels.notes}</span>
@@ -213,6 +215,7 @@ export default function NotesTab({
         }
       </div>
       </div>
+      )}
 
       {/* Timeline */}
       {showTimeline && (

@@ -252,7 +252,22 @@
     "tasksLoading": "Aufgaben laden…",
     "tasksError": "Aufgaben konnten nicht geladen werden.",
     "tasksEmpty": "Keine offenen Aufgaben für diesen Kandidaten.",
-    "editStatusInfo": "Grund oder Datum ändern"
+    "editStatusInfo": "Grund oder Datum ändern",
+    "byWho": "von {{name}}",
+    "recordGone": "Dieser Kandidat existiert nicht mehr — Zeile aus der Liste entfernt.",
+    "archivedOn": "Archiviert am {{date}}",
+    "archivedFlag": "Archiviert",
+    "restore": "Wiederherstellen",
+    "restored": "Kandidat wiederhergestellt.",
+    "restoreFailed": "Wiederherstellen fehlgeschlagen.",
+    "hardDelete": "Endgültig löschen",
+    "hardDeleteConfirm": "{{name}} endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
+    "hardDeleted": "Kandidat endgültig gelöscht.",
+    "hardDeleteFailed": "Endgültiges Löschen fehlgeschlagen.",
+    "newTask": "Neue Aufgabe",
+    "taskFor": "für {{name}}",
+    "taskCreatedBy": "erstellt von {{name}}",
+    "taskOpen": "Aufgabe öffnen"
   },
   "stage": {
     "lead": "Lead",

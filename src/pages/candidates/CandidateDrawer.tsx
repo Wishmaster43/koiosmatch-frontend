@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
-import { Download, Edit2, Save, Trash2, UserCheck, X } from 'lucide-react'
+import { Download, Edit2, RotateCcw, Save, Trash2, UserCheck, X } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { CvDocument } from './CandidateCvTemplate'
 import type { CvCandidate } from './CandidateCvTemplate'
@@ -70,10 +70,13 @@ interface CandidateDrawerProps {
   onUpdate?: (id: Id, patch: Record<string, unknown>) => void
   // Soft-delete → archived (Gearchiveerd view); backend re-checks live links (§3B).
   onArchive?: (id: Id) => void
+  // Archived candidates only: bring back (restore) or permanently delete (admin-only, ARCH-2).
+  onRestore?: (id: Id) => void
+  onHardDelete?: (id: Id) => void
   users?: AppUser[]
 }
 
-export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, users = [] }: CandidateDrawerProps) {
+export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onRestore, onHardDelete, users = [] }: CandidateDrawerProps) {
   const { settings: cvSettings } = useCvSettings() as { settings?: unknown }
   const { t } = useTranslation('candidates')
   const locale = useLocale() as string
@@ -90,7 +93,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const avatarColor = coloredByGender ? (genderColor(c?.gender) ?? '#9CA3AF') : '#9CA3AF'
   const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
   const { createMatch, creating: creatingMatch } = useCreateMatch(c?.id ?? '')
-  const { hasModule } = useAuth() as unknown as { hasModule: (m: string) => boolean }
+  const { hasModule, isSuperAdmin, hasRole } = useAuth() as unknown as { hasModule: (m: string) => boolean; isSuperAdmin: () => boolean; hasRole: (r: string) => boolean }
+  // Hard delete is admin-only (Danny 2026-07-03) — the backend re-checks (§7: UI gating is UX).
+  const canHardDelete = isSuperAdmin() || hasRole('admin')
   // Conditional tabs: Match only when the candidate has (had) a match or
   // application; Freelance (zzp) only when flagged ZZP; Planning behind its module.
   const hasMatchOrApplication = !!(c?.matches?.length || c?.applications?.length)
@@ -176,10 +181,13 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const statusInfoLine: string | null = (() => {
     const st = currentStatus
     if (!st || !statusFlags) return null
+    // "By whom" the status was set — shows once the backend returns status_changed_by (H2).
+    const byWho = c.statusChangedBy ? t('drawer.byWho', { name: c.statusChangedBy }) : null
     if (statusFlags.is_blacklist && (c.blacklistReason || c.statusChangedAt)) {
       return [
         c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(st).label, date: formatDate(c.statusChangedAt) }) : t('drawer.blacklisted'),
         c.blacklistReason,
+        byWho,
       ].filter(Boolean).join(' · ')
     }
     if ((statusFlags.requires_reason || statusFlags.expects_return_date) && (c.statusReason || c.statusReturnDate || c.statusChangedAt)) {
@@ -187,6 +195,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(st).label, date: formatDate(c.statusChangedAt) }) : statusMeta(st).label,
         c.statusReason,
         c.statusReturnDate ? t('drawer.availableAgain', { date: formatDate(c.statusReturnDate) }) : null,
+        byWho,
       ].filter(Boolean).join(' · ')
     }
     return null
@@ -411,7 +420,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           titleActions={<>
             <ChangelogPopover c={c} />
             {/* Soft-delete → Gearchiveerd (§3B: soft-delete only; backend re-checks live links). */}
-            {onArchive && (
+            {onArchive && !c.archived && (
               <button onClick={() => { if (confirm(t('drawer.archiveConfirm', { name: c.name }))) onArchive(c.id) }}
                 title={t('drawer.archive')} aria-label={t('drawer.archive')}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
@@ -427,7 +436,36 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           ]}
           tags={{ items: currentTags, onAdd: (tag: string) => setTags([...currentTags, tag]), onRemove: (tag: string) => setTags(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
           tagsLabel={t('drawer.tags')}
-        />
+        >
+          {/* Archived banner (Danny 2026-07-03): when/by whom/why + restore + hard delete
+              (admin-only; the backend re-checks and 403s/409s — §7 UI gating is UX only). */}
+          {c.archived && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '7px 10px', borderRadius: 8, fontSize: 12,
+              color: 'var(--color-danger)', background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-danger) 28%, transparent)' }}>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                {[
+                  c.archivedAt ? t('drawer.archivedOn', { date: formatDate(c.archivedAt) }) : t('drawer.archivedFlag'),
+                  c.archivedBy ? t('drawer.byWho', { name: c.archivedBy }) : null,
+                  c.archiveReason,
+                ].filter(Boolean).join(' · ')}
+              </span>
+              {onRestore && (
+                <button onClick={() => onRestore(c.id)} title={t('drawer.restore')} aria-label={t('drawer.restore')}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-primary)' }}>
+                  <RotateCcw size={14} />
+                </button>
+              )}
+              {onHardDelete && canHardDelete && (
+                <button onClick={() => { if (confirm(t('drawer.hardDeleteConfirm', { name: c.name }))) onHardDelete(c.id) }}
+                  title={t('drawer.hardDelete')} aria-label={t('drawer.hardDelete')}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-danger)' }}>
+                  <Trash2 size={14} />
+                </button>
+              )}
+            </div>
+          )}
+        </EntityHeader>
       )}
     />
     <CandidateStatusModals

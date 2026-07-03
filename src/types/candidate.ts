@@ -106,6 +106,8 @@ export interface Candidate {
   statusReason: string | null
   statusReturnDate: string | null
   statusChangedAt: string | null
+  // "By whom" the status changed — shown in the header info line once the API sends it (H2).
+  statusChangedBy: string | null
   blacklistReason: string | null
   availability: string | null
   owner: string
@@ -138,6 +140,10 @@ export interface Candidate {
   summary: string
   tags: string[]
   archived: boolean
+  // Archive audit (ARCH-2): when / by whom / why — feeds the drawer's archived banner.
+  archivedAt: string | null
+  archivedBy: string | null
+  archiveReason: string | null
   // Inconsistency flag (§3B): at a requires_appointment stage but none planned.
   missingAppointment: boolean
   branches: CandidateBranch[]

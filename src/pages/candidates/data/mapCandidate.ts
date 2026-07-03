@@ -77,8 +77,13 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     // Status audit (Golf ②): reason + "available again" date + when/who it changed;
     // blacklist reason + by/at. Shown in the drawer once the backend returns them.
     statusReason:     c.status_reason ?? null,
-    statusReturnDate: c.status_return_date ?? null,
+    // The API validates/returns `available_again_date`; the old key stays as fallback.
+    statusReturnDate: (c.available_again_date as string | null | undefined) ?? c.status_return_date ?? null,
     statusChangedAt:  c.status_changed_at ?? c.status_effective_from ?? null,
+    // "By whom" the status was changed — flat name or nested user; graceful null (H2).
+    statusChangedBy:  (typeof c.status_changed_by === 'object'
+      ? (c.status_changed_by as { name?: string } | null)?.name ?? null
+      : (c.status_changed_by as string | null | undefined)) ?? null,
     blacklistReason:  c.blacklist_reason ?? null,
     // Availability — legacy separate axis (folded into deployability in v2); kept for back-compat.
     availability:    c.availability ?? null,
@@ -118,8 +123,14 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     summary:         c.summary ?? c.bio ?? '',
     tags:            c.tags ?? [],
     // Archived = soft-deleted (deleted_at set). Off by default in the list; the
-    // "Gearchiveerd" view opts in via ?include_archived=1.
+    // "Gearchiveerd" view opts in via ?include_archived=1. When/by whom/why feed the
+    // drawer's archived banner (ARCH-2) — graceful null until the backend delivers.
     archived:        !!(c.deleted_at ?? c.archived),
+    archivedAt:      (c.deleted_at as string | null | undefined) ?? (c.archived_at as string | null | undefined) ?? null,
+    archivedBy:      (typeof c.deleted_by === 'object'
+      ? (c.deleted_by as { name?: string } | null)?.name ?? null
+      : (c.deleted_by as string | null | undefined)) ?? (c.archived_by as string | null | undefined) ?? null,
+    archiveReason:   (c.archive_reason as string | null | undefined) ?? (c.deleted_reason as string | null | undefined) ?? null,
     // Inconsistency flag (§3B): requires_appointment stage with no planned appointment.
     missingAppointment: !!c.missing_appointment,
     // Branches (C-4, M2M) — each { id, name }; accepts bare names too (→ { name }).

@@ -35,13 +35,15 @@ export function useCreateCandidate() {
 export function useCandidateRecord() {
   const { t } = useTranslation('candidates')
 
-  // GET the full detail record; a missing/failed load resolves to null (soft-fail).
-  const fetchDetail = async (id: Id): Promise<Candidate | null> => {
+  // GET the full detail record. 404 → 'gone' (a stale row: the record no longer exists,
+  // e.g. after a reseed or another user's delete) so the page can drop the row + tell the
+  // user; any other failure soft-fails to null (keep the light row, no data loss).
+  const fetchDetail = async (id: Id): Promise<Candidate | 'gone' | null> => {
     try {
       const r = await api.get(`/candidates/${id}`)
       return mapCandidate(r.data?.data ?? r.data)
-    } catch {
-      return null
+    } catch (e) {
+      return (e as { response?: { status?: number } })?.response?.status === 404 ? 'gone' : null
     }
   }
 

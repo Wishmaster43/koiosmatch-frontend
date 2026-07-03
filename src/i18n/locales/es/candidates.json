@@ -252,7 +252,22 @@
     "tasksLoading": "Cargando tareas…",
     "tasksError": "No se pudieron cargar las tareas.",
     "tasksEmpty": "Sin tareas abiertas para este candidato.",
-    "editStatusInfo": "Editar motivo o fecha"
+    "editStatusInfo": "Editar motivo o fecha",
+    "byWho": "por {{name}}",
+    "recordGone": "Este candidato ya no existe — fila eliminada de la lista.",
+    "archivedOn": "Archivado el {{date}}",
+    "archivedFlag": "Archivado",
+    "restore": "Restaurar",
+    "restored": "Candidato restaurado.",
+    "restoreFailed": "Error al restaurar.",
+    "hardDelete": "Eliminar definitivamente",
+    "hardDeleteConfirm": "¿Eliminar definitivamente a {{name}}? Esta acción no se puede deshacer.",
+    "hardDeleted": "Candidato eliminado definitivamente.",
+    "hardDeleteFailed": "Error al eliminar definitivamente.",
+    "newTask": "Nueva tarea",
+    "taskFor": "para {{name}}",
+    "taskCreatedBy": "creada por {{name}}",
+    "taskOpen": "Abrir tarea"
   },
   "stage": {
     "lead": "Lead",
