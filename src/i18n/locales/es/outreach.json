@@ -72,5 +72,27 @@
   },
   "page": {
     "searchPlaceholder": "Buscar listas de llamadas"
+  },
+  "drawer": {
+    "label": "Lista de llamadas",
+    "tabs": {
+      "targets": "Lista de llamadas"
+    },
+    "loading": "Cargando…",
+    "error": "No se pudo cargar la lista de llamadas.",
+    "empty": "Aún no hay candidatos en esta lista.",
+    "progress": "{{done}} de {{total}} gestionados",
+    "target": {
+      "todo": "Pendiente",
+      "contacted": "Contactado",
+      "answered": "Respondido",
+      "skipped": "Omitido"
+    },
+    "action": {
+      "contacted": "Marcar contactado",
+      "answered": "Marcar respondido",
+      "skipped": "Omitir",
+      "reset": "Volver a pendiente"
+    }
   }
 }

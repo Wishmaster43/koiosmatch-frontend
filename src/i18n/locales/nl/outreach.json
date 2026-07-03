@@ -72,5 +72,27 @@
   },
   "page": {
     "searchPlaceholder": "Zoek naar bellijsten"
+  },
+  "drawer": {
+    "label": "Bellijst",
+    "tabs": {
+      "targets": "Bellijst"
+    },
+    "loading": "Laden…",
+    "error": "Bellijst laden is mislukt.",
+    "empty": "Nog geen kandidaten in deze lijst.",
+    "progress": "{{done}} van {{total}} afgehandeld",
+    "target": {
+      "todo": "Te doen",
+      "contacted": "Benaderd",
+      "answered": "Beantwoord",
+      "skipped": "Overgeslagen"
+    },
+    "action": {
+      "contacted": "Markeer als benaderd",
+      "answered": "Markeer als beantwoord",
+      "skipped": "Overslaan",
+      "reset": "Terug naar te doen"
+    }
   }
 }

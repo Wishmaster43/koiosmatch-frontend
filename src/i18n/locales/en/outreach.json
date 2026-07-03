@@ -72,5 +72,27 @@
   },
   "page": {
     "searchPlaceholder": "Search call lists"
+  },
+  "drawer": {
+    "label": "Call list",
+    "tabs": {
+      "targets": "Call list"
+    },
+    "loading": "Loading…",
+    "error": "Failed to load the call list.",
+    "empty": "No candidates in this list yet.",
+    "progress": "{{done}} of {{total}} handled",
+    "target": {
+      "todo": "To do",
+      "contacted": "Contacted",
+      "answered": "Answered",
+      "skipped": "Skipped"
+    },
+    "action": {
+      "contacted": "Mark contacted",
+      "answered": "Mark answered",
+      "skipped": "Skip",
+      "reset": "Back to to-do"
+    }
   }
 }

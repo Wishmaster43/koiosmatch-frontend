@@ -72,5 +72,27 @@
   },
   "page": {
     "searchPlaceholder": "Rechercher des listes d'appel"
+  },
+  "drawer": {
+    "label": "Liste d'appel",
+    "tabs": {
+      "targets": "Liste d'appel"
+    },
+    "loading": "Chargement…",
+    "error": "Échec du chargement de la liste d'appel.",
+    "empty": "Aucun candidat dans cette liste.",
+    "progress": "{{done}} sur {{total}} traités",
+    "target": {
+      "todo": "À faire",
+      "contacted": "Contacté",
+      "answered": "Répondu",
+      "skipped": "Ignoré"
+    },
+    "action": {
+      "contacted": "Marquer contacté",
+      "answered": "Marquer répondu",
+      "skipped": "Ignorer",
+      "reset": "Remettre à faire"
+    }
   }
 }

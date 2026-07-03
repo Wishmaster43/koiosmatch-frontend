@@ -72,5 +72,27 @@
   },
   "page": {
     "searchPlaceholder": "Anruflisten suchen"
+  },
+  "drawer": {
+    "label": "Anrufliste",
+    "tabs": {
+      "targets": "Anrufliste"
+    },
+    "loading": "Laden…",
+    "error": "Anrufliste konnte nicht geladen werden.",
+    "empty": "Noch keine Kandidaten in dieser Liste.",
+    "progress": "{{done}} von {{total}} erledigt",
+    "target": {
+      "todo": "Offen",
+      "contacted": "Kontaktiert",
+      "answered": "Beantwortet",
+      "skipped": "Übersprungen"
+    },
+    "action": {
+      "contacted": "Als kontaktiert markieren",
+      "answered": "Als beantwortet markieren",
+      "skipped": "Überspringen",
+      "reset": "Zurück zu offen"
+    }
   }
 }

@@ -21,6 +21,7 @@ import OutreachList from './OutreachList'
 import OutreachBoard from './OutreachBoard'
 import OutreachBulkBar from './OutreachBulkBar'
 import OutreachCreate from './OutreachCreate'
+import OutreachDrawer from './OutreachDrawer'
 
 // Fixed status enum (not a tenant lookup) → board columns, donut + colours (hex for the chart).
 const STATUSES = [
@@ -45,6 +46,9 @@ export default function OutreachPage() {
   const { campaigns, loading, error, reload, add, patch, drop } = useOutreachCampaigns()
 
   const [view, setView] = useState<'table' | 'board'>('table')
+  // Drill-down: the opened bellijst (campaign) — row click opens the drawer.
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [showArchived, setShowArchived] = useState(false)
   const [creating, setCreating] = useState(false)
   // KPI/donut click-to-filter (status) + checkbox selection.
@@ -195,10 +199,14 @@ export default function OutreachPage() {
               selectedIds={selectedIds}
               onToggleRow={toggleRow}
               onToggleAll={toggleAll}
+              onOpen={setOpenId}
             />
           </div>
         )}
       </div>
+      {/* Per-bellijst drill-down (the call list itself) — row click opens it. */}
+      <OutreachDrawer id={openId} onClose={() => setOpenId(null)}
+        expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(e => !e)} />
     </div>
   )
 }
