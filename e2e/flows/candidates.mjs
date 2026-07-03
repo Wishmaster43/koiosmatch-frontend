@@ -26,15 +26,17 @@ async function openFirstCandidate(page, { withStatus = false } = {}) {
 export async function statusWithReason({ page, errors }) {
   const at = errors.length
   await openFirstCandidate(page, { withStatus: true })
-  // The deployability picker sits in the drawer header meta (SelectMenu).
-  const picker = page.locator('text=Inzetbaarheid').locator('..').locator('button, [role="button"]').first()
-  if (await picker.count()) await picker.click()
-  else {
-    // Fallback: any header select carrying a known status label.
-    await page.locator('button:has-text("Beschikbaar"), button:has-text("Niet beschikbaar"), button:has-text("Geplaatst")').first().click()
-  }
+  // The deployability picker is the drawer button whose EXACT text is the current status
+  // ("Niet beschikbaar" contains "Beschikbaar" — substring locators pick the wrong thing).
+  const STATUSES = /^(Beschikbaar|Niet beschikbaar|Geplaatst|Ziek|Verlof|Blacklist)$/
+  const picker = page.locator('button', { hasText: STATUSES }).last()
+  expect(await picker.count(), 'status-picker niet gevonden in de drawer')
+  const current = (await picker.innerText()).trim()
+  await picker.click()
   await sleep(400)
-  await page.locator('text=Ziek').last().click()
+  // Force a real transition to a reason/date status: Ziek, or Verlof when already Ziek.
+  const target = current === 'Ziek' ? 'Verlof' : 'Ziek'
+  await page.locator(`text=${target}`).last().click()
   await sleep(600)
   // The reason/date prompt must be visible (this was the silent-422 bug).
   const modal = page.locator('text=Reden').first()
