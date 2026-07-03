@@ -18,6 +18,16 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 // Read a server-provided error message off an axios-style error, if present.
 const messageOf = (e: unknown) => (e as { response?: { data?: { message?: string } } })?.response?.data?.message
 
+// Typographic wordmark — a crisp placeholder until the final logo asset is delivered
+// (then swap <Wordmark/> for an <img>). Reads well on any background via tokens.
+function Wordmark({ className }: { className?: string }) {
+  return (
+    <span className={className} style={{ fontSize: 21, fontWeight: 700, letterSpacing: '-0.015em', color: 'var(--sidebar-text)', whiteSpace: 'nowrap' }}>
+      <span style={{ color: 'var(--color-primary)' }}>Koios</span>Match
+    </span>
+  )
+}
+
 // ── Shared layout wrapper — balanced brand hero left, login card right. ────────
 function LoginShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation('auth')
@@ -33,7 +43,7 @@ function LoginShell({ children }: { children: ReactNode }) {
           'radial-gradient(72% 62% at 82% 100%, color-mix(in srgb, var(--color-accent) 9%, transparent), transparent 55%)',
           'var(--sidebar-bg)',
         ].join(', ') }}>
-        <img src="/KoiosMatch.png" alt="KoiosMatch" className="relative w-auto h-8" />
+        <Wordmark className="relative" />
 
         {/* Headline + tagline — above the illustration, sharp hierarchy + whitespace. */}
         <div className="relative mt-10" style={{ maxWidth: 480 }}>
@@ -59,8 +69,8 @@ function LoginShell({ children }: { children: ReactNode }) {
       <div className="relative flex items-center justify-center flex-1 p-6 sm:p-10"
         style={{ background: 'linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 7%, var(--bg)) 0%, var(--bg) 55%)' }}>
         <div className="w-full" style={{ maxWidth: 400 }}>
-          <div className="flex items-center gap-2 mb-6 lg:hidden">
-            <img src="/KoiosMatch.png" alt="KoiosMatch" className="w-auto h-7" />
+          <div className="flex items-center justify-center gap-2 mb-6 lg:hidden">
+            <Wordmark />
           </div>
           <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18,
             padding: '32px 30px 34px', boxShadow: '0 12px 40px rgba(15,23,42,0.10)' }}>
