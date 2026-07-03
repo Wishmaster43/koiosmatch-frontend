@@ -237,7 +237,13 @@
     "blacklisted": "Sur liste noire",
     "placedPickPlaceholder": "Choisir un match…",
     "placedOrNew": "Ou en créer un",
-    "placedNewPlaceholder": "Sélectionner un poste…"
+    "placedNewPlaceholder": "Sélectionner un poste…",
+    "archive": "Archiver le candidat",
+    "archiveConfirm": "Archiver {{name}} ? Le candidat passe dans Archivés et peut être restauré.",
+    "archived": "Candidat archivé.",
+    "archiveFailed": "Échec de l archivage (liens actifs possibles).",
+    "blacklistReasonLabel": "Motif de blacklist",
+    "blacklistReasonPick": "Choisir un motif…"
   },
   "stage": {
     "lead": "Piste",

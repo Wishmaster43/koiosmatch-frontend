@@ -5,12 +5,16 @@
  * of CandidateDrawer so the container stays a thin composition (§3 / A-5). Presentational:
  * the parent owns the state + the two confirm handlers.
  */
+import { useState, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
+import api from '@/lib/api'
 import type { VacancyOption } from '../hooks/useVacancyOptions'
 
 interface MatchRow { id?: string | number; vacancyTitle?: string; client?: string }
-export interface StatusModalState { target: string; reason: string; date: string; needReason: boolean; needDate: boolean }
+// isBlacklist → the reason is the lookup-backed blacklist_reason (dropdown from
+// /blacklist-reasons; BE validates Rule::exists), never free text.
+export interface StatusModalState { target: string; reason: string; date: string; needReason: boolean; needDate: boolean; isBlacklist?: boolean }
 
 interface Props {
   // "Placed" → link an existing match or create one against a vacancy.
@@ -35,6 +39,16 @@ export default function CandidateStatusModals({
   vacancyOptions, creatingMatch, onConfirmMatch, statusModal, setStatusModal, onConfirmStatus,
 }: Props) {
   const { t } = useTranslation('candidates')
+
+  // Blacklist reasons (tenant lookup) — loaded once when a blacklist prompt opens; the
+  // backend validates against blacklist_reasons.name, so free text would 422.
+  const [blReasons, setBlReasons] = useState<string[]>([])
+  useEffect(() => {
+    if (!statusModal?.isBlacklist || blReasons.length) return
+    api.get('/blacklist-reasons')
+      .then(r => setBlReasons(((r.data?.data ?? r.data ?? []) as Array<{ name?: string }>).map(x => String(x.name ?? '')).filter(Boolean)))
+      .catch(() => setBlReasons([]))
+  }, [statusModal?.isBlacklist, blReasons.length])
 
   return (
     <>
@@ -84,9 +98,20 @@ export default function CandidateStatusModals({
             <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', marginBottom: 12 }}>{t('drawer.statusReasonTitle')}</div>
             {statusModal.needReason && (
               <div style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('drawer.reasonLabel')}</div>
-                <textarea value={statusModal.reason} onChange={e => setStatusModal(m => m && ({ ...m, reason: e.target.value }))} rows={3}
-                  style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, outline: 'none', resize: 'vertical' }} />
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>
+                  {statusModal.isBlacklist ? t('drawer.blacklistReasonLabel') : t('drawer.reasonLabel')}
+                </div>
+                {statusModal.isBlacklist ? (
+                  // Blacklist: lookup-backed dropdown (BE validates exists on blacklist_reasons.name).
+                  <select value={statusModal.reason} onChange={e => setStatusModal(m => m && ({ ...m, reason: e.target.value }))}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, outline: 'none', background: 'var(--surface)' }}>
+                    <option value="">{t('drawer.blacklistReasonPick')}</option>
+                    {blReasons.map(r => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                ) : (
+                  <textarea value={statusModal.reason} onChange={e => setStatusModal(m => m && ({ ...m, reason: e.target.value }))} rows={3}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, outline: 'none', resize: 'vertical' }} />
+                )}
               </div>
             )}
             {statusModal.needDate && (

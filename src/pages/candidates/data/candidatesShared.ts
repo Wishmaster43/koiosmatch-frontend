@@ -47,7 +47,10 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   if ('status'         in patch) body.status          = patch.status
   if ('phase'          in patch) body.phase           = patch.phase
   if ('status_reason'  in patch) body.status_reason   = patch.status_reason
-  if ('status_return_date' in patch) body.status_return_date = patch.status_return_date
+  if ('blacklist_reason' in patch) body.blacklist_reason = patch.blacklist_reason
+  // The backend validates `available_again_date` (CandidateProfileRequest) — the old
+  // status_return_date key was silently dropped, so the return date never persisted.
+  if ('status_return_date' in patch) body.available_again_date = patch.status_return_date
   if ('match_id'       in patch) body.match_id        = patch.match_id
   if ('availability'   in patch) body.availability    = patch.availability
   if ('stage'          in patch) body.funnel_type     = patch.stage

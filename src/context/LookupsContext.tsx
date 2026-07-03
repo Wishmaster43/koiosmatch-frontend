@@ -108,17 +108,26 @@ const DEFAULT_AVAILABILITY: LookupItem[] = [
 // the status flags, so behaviour never falls back to matching hardcoded value keys.
 function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
   if (!Array.isArray(raw) || raw.length === 0) return fallback
+  // Flag resolution: an explicit API boolean wins; when the API OMITS the key entirely
+  // (LookupItemResource doesn't emit requires_reason/requires_match/expects_return_date yet —
+  // STATUS-1), fall back to the seed flags by value. Without this, "unavailable/sick/leave/
+  // blacklist" lost their reason/return-date prompt → bare PATCH → 422 (2026-07-03).
+  const flag = (it: Record<string, unknown>, key: keyof LookupItem): boolean => {
+    if (typeof it[key] === 'boolean') return it[key] as boolean
+    const seed = fallback.find(f => f.value === String(it.value))
+    return seed?.[key] === true
+  }
   return (raw as Record<string, unknown>[])
     .filter(it => it.active !== false)
     .sort((a, b) => (Number(a.order ?? a.sort_order ?? 0)) - (Number(b.order ?? b.sort_order ?? 0)))
     .map(it => ({ value: String(it.value), label: String(it.label ?? it.value), color: (it.color as string) ?? '#6B7280',
-      requires_reason: it.requires_reason === true,
-      requires_match: it.requires_match === true,
-      expects_return_date: it.expects_return_date === true,
-      is_applicant: it.is_applicant === true,
-      requires_appointment: it.requires_appointment === true,
-      is_blacklist: it.is_blacklist === true,
-      is_default: it.is_default === true }))
+      requires_reason: flag(it, 'requires_reason'),
+      requires_match: flag(it, 'requires_match'),
+      expects_return_date: flag(it, 'expects_return_date'),
+      is_applicant: flag(it, 'is_applicant'),
+      requires_appointment: flag(it, 'requires_appointment'),
+      is_blacklist: flag(it, 'is_blacklist'),
+      is_default: flag(it, 'is_default') }))
 }
 
 const LookupsContext = createContext<LookupsValue | null>(null)

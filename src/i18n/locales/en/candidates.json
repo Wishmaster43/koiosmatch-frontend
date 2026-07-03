@@ -244,7 +244,13 @@
     "customFields": "Custom fields",
     "placedPickPlaceholder": "Choose a match…",
     "placedOrNew": "Or create a new one",
-    "placedNewPlaceholder": "Select a vacancy…"
+    "placedNewPlaceholder": "Select a vacancy…",
+    "archive": "Archive candidate",
+    "archiveConfirm": "Archive {{name}}? The candidate moves to Archived and can be restored.",
+    "archived": "Candidate archived.",
+    "archiveFailed": "Archiving failed (possibly active links).",
+    "blacklistReasonLabel": "Blacklist reason",
+    "blacklistReasonPick": "Pick a reason…"
   },
   "stage": {
     "lead": "Lead",

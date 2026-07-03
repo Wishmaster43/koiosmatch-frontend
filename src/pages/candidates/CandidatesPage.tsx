@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useGenders } from '@/lib/useGenders'
 import { useUsers } from '@/lib/queries'
+import api from '@/lib/api'
 import CandidateDrawerJs from './CandidateDrawer'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesTable from './CandidatesTable'
@@ -50,7 +51,8 @@ interface AppUser { id: Id; name: string; [k: string]: unknown }
 // Still-untyped JS components — declare the props this page passes (typed boundary).
 const CandidateDrawer = CandidateDrawerJs as ComponentType<{
   candidate: Candidate | null; onClose: () => void; expanded: boolean
-  onToggleExpand: () => void; onUpdate: (id: Id, patch: Record<string, unknown>) => void; users: AppUser[]
+  onToggleExpand: () => void; onUpdate: (id: Id, patch: Record<string, unknown>) => void
+  onArchive?: (id: Id) => void; users: AppUser[]
 }>
 const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: unknown[]; clearTitle?: string }>
 
@@ -240,6 +242,20 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     fetchDetail(c.id).then(full => { if (full && selectedIdRef.current === c.id) setDetail(full) })
   }
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
+
+  // Archive ONE candidate from the drawer (soft-delete → Gearchiveerd view). Reuses the
+  // bulk endpoint with a single id; the backend re-checks live links (§3B) and 409s.
+  const archiveOne = async (id: Id) => {
+    try {
+      await api.post('/candidates/bulk/archive', { candidate_ids: [id] })
+      setCandidates(p => p.filter(x => x.id !== id))
+      setTotal(v => Math.max(0, v - 1))
+      closeDrawer()
+      setActionMsg({ type: 'success', text: t('drawer.archived') })
+    } catch {
+      setActionMsg({ type: 'error', text: t('drawer.archiveFailed') })
+    }
+  }
   // Open a candidate drawer when arriving via a dashboard/cross-entity link ({ open: id }).
   useOpenFromIntent(intent, (id) => selectCandidate({ id } as Candidate))
 
@@ -392,6 +408,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           expanded={drawerExpanded}
           onToggleExpand={() => setDrawerExpanded(v => !v)}
           onUpdate={updateCandidate}
+          onArchive={archiveOne}
           users={users}
         />
       </div>

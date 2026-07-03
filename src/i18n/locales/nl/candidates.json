@@ -244,7 +244,13 @@
     "blacklisted": "Geblacklist",
     "placedPickPlaceholder": "Kies een match…",
     "placedOrNew": "Of maak een nieuwe",
-    "placedNewPlaceholder": "Selecteer een vacature…"
+    "placedNewPlaceholder": "Selecteer een vacature…",
+    "archive": "Kandidaat archiveren",
+    "archiveConfirm": "Weet je zeker dat je {{name}} wilt archiveren? De kandidaat verhuist naar Gearchiveerd en kan teruggehaald worden.",
+    "archived": "Kandidaat gearchiveerd.",
+    "archiveFailed": "Archiveren is mislukt (mogelijk actieve koppelingen).",
+    "blacklistReasonLabel": "Blacklist-reden",
+    "blacklistReasonPick": "Kies een reden…"
   },
   "stage": {
     "lead": "Lead",

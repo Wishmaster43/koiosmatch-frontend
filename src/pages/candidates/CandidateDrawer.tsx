@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
-import { Download, Edit2, Save, UserCheck, X } from 'lucide-react'
+import { Download, Edit2, Save, Trash2, UserCheck, X } from 'lucide-react'
 import { pdf } from '@react-pdf/renderer'
 import { CvDocument } from './CandidateCvTemplate'
 import type { CvCandidate } from './CandidateCvTemplate'
@@ -68,10 +68,12 @@ interface CandidateDrawerProps {
   expanded: boolean
   onToggleExpand: () => void
   onUpdate?: (id: Id, patch: Record<string, unknown>) => void
+  // Soft-delete → archived (Gearchiveerd view); backend re-checks live links (§3B).
+  onArchive?: (id: Id) => void
   users?: AppUser[]
 }
 
-export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, users = [] }: CandidateDrawerProps) {
+export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, users = [] }: CandidateDrawerProps) {
   const { settings: cvSettings } = useCvSettings() as { settings?: unknown }
   const { t } = useTranslation('candidates')
   const locale = useLocale() as string
@@ -117,7 +119,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [converting,    setConverting]    = useState(false)
   const [profileEditSignal, setProfileEditSignal] = useState(0)
   // Status change that needs a reason and/or a return date (driven by the status lookup flags).
-  const [statusModal,   setStatusModal]   = useState<{ target: string; reason: string; date: string; needReason: boolean; needDate: boolean } | null>(null)
+  const [statusModal,   setStatusModal]   = useState<{ target: string; reason: string; date: string; needReason: boolean; needDate: boolean; isBlacklist?: boolean } | null>(null)
   const [tags,          setTags]          = useState<string[] | null>(null)
   // Header (name + function) edit — independent from the Profile-tab fields.
   const [headerEditing, setHeaderEditing] = useState(false)
@@ -190,19 +192,23 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   // Status (deployability) change, driven by the status lookup flags:
   // requires_match → must link a Match; requires_reason/expects_return_date → ask first.
   const changeStatus = (v: string) => {
-    const it = statuses.find(s => s.value === v) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown }) | undefined
+    const it = statuses.find(s => s.value === v) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown; is_blacklist?: unknown }) | undefined
     if (it?.requires_match) { setMatchChoice(null); setMatchPrompt(true); return }
     if (Boolean(it?.requires_reason) || Boolean(it?.expects_return_date)) {
-      setStatusModal({ target: v, reason: '', date: '', needReason: Boolean(it?.requires_reason), needDate: Boolean(it?.expects_return_date) })
+      setStatusModal({ target: v, reason: '', date: '', needReason: Boolean(it?.requires_reason), needDate: Boolean(it?.expects_return_date), isBlacklist: Boolean(it?.is_blacklist) })
       return
     }
     setStatus(v); onUpdate?.(c.id, { status: v })
   }
-  // Confirm a reason/return-date status change.
+  // Confirm a reason/return-date status change. Blacklist carries the lookup-backed
+  // blacklist_reason (BE guard validates it); other statuses use free-text status_reason.
   const confirmStatus = () => {
     if (!statusModal) return
     setStatus(statusModal.target)
-    onUpdate?.(c.id, { status: statusModal.target, status_reason: statusModal.reason || null, status_return_date: statusModal.date || null })
+    const reasonPatch = statusModal.isBlacklist
+      ? { blacklist_reason: statusModal.reason || null }
+      : { status_reason: statusModal.reason || null }
+    onUpdate?.(c.id, { status: statusModal.target, ...reasonPatch, status_return_date: statusModal.date || null })
     setStatusModal(null)
   }
   // Confirm the "Placed" prompt: use the picked match, or create one against the chosen vacancy.
@@ -373,7 +379,17 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           onPhotoChange={setPhotoUrl}
           photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
           renderTitle={renderTitle}
-          titleActions={<ChangelogPopover c={c} />}
+          titleActions={<>
+            <ChangelogPopover c={c} />
+            {/* Soft-delete → Gearchiveerd (§3B: soft-delete only; backend re-checks live links). */}
+            {onArchive && (
+              <button onClick={() => { if (confirm(t('drawer.archiveConfirm', { name: c.name }))) onArchive(c.id) }}
+                title={t('drawer.archive')} aria-label={t('drawer.archive')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
+                <Trash2 size={14} />
+              </button>
+            )}
+          </>}
           actions={headerActions(setActiveTab)}
           meta={[
             // Status only for a Kandidaat (not a Lead) — a Lead isn't deployable yet.

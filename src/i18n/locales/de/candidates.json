@@ -237,7 +237,13 @@
     "blacklisted": "Auf Blacklist",
     "placedPickPlaceholder": "Match wählen…",
     "placedOrNew": "Oder neu erstellen",
-    "placedNewPlaceholder": "Stelle auswählen…"
+    "placedNewPlaceholder": "Stelle auswählen…",
+    "archive": "Kandidat archivieren",
+    "archiveConfirm": "{{name}} archivieren? Der Kandidat wandert nach Archiviert und kann wiederhergestellt werden.",
+    "archived": "Kandidat archiviert.",
+    "archiveFailed": "Archivieren fehlgeschlagen (möglicherweise aktive Verknüpfungen).",
+    "blacklistReasonLabel": "Blacklist-Grund",
+    "blacklistReasonPick": "Grund wählen…"
   },
   "stage": {
     "lead": "Lead",

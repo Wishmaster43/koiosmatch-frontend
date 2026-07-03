@@ -237,7 +237,13 @@
     "blacklisted": "En lista negra",
     "placedPickPlaceholder": "Elegir un match…",
     "placedOrNew": "O crear uno nuevo",
-    "placedNewPlaceholder": "Seleccionar una vacante…"
+    "placedNewPlaceholder": "Seleccionar una vacante…",
+    "archive": "Archivar candidato",
+    "archiveConfirm": "¿Archivar a {{name}}? El candidato pasa a Archivados y puede restaurarse.",
+    "archived": "Candidato archivado.",
+    "archiveFailed": "Error al archivar (posibles vínculos activos).",
+    "blacklistReasonLabel": "Motivo de blacklist",
+    "blacklistReasonPick": "Elige un motivo…"
   },
   "stage": {
     "lead": "Lead",
