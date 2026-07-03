@@ -152,7 +152,7 @@ export default function OutreachPage() {
         <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
         {/* Toolbar — create on the LEFT, archived toggle + view toggle on the RIGHT (mirror Opportunities) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 24px', background: 'var(--bg)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
           <button onClick={() => setCreating(true)}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
             <Plus size={15} /> {t('new')}

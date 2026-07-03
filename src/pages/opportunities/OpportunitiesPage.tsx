@@ -123,8 +123,8 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
           />
 
           {/* Toolbar — add on the LEFT, archived + view toggle on the RIGHT (mirror candidates). */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8,
-            padding: '8px 24px', background: 'var(--bg)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10,
+            padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
             <button onClick={() => setAddOpen(true)}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13, fontWeight: 600,
                 borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>

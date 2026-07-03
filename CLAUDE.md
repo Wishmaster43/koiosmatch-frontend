@@ -408,8 +408,12 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
   shared `HeaderSearch` present; (3) `<Entity>InsightsRow` with the same donut/KPI footprint;
   (4) "+ Add" in the same place/style; (5) table via the shared `DataTable` with soft chips
   (`StatusPill` / soft-chip); (6) drawer record-history is a **changelog icon-popover in the
-  title row, never a tab**; (7) drawer header stays calm (colour-coded badge, not pickers).
-  A deviation needs a written reason in the code; otherwise it is a consistency bug.
+  title row, never a tab**; (7) drawer header stays calm (colour-coded badge, not pickers);
+  (8) **the toolbar row under the InsightsRow uses the one spacing spec** — `padding: '0 24px
+  12px'`, `minHeight: 36`, `gap: 10`, `alignItems: 'center'`, **no background/divider** — so the
+  KPI-row→button gap is identical on every page (it had drifted: 0-vs-8px top, 10/12/8/0 bottom,
+  36/46 minHeight, stray `background`/`borderBottom` on some). A deviation needs a written reason
+  in the code; otherwise it is a consistency bug.
 - **Typography consistency (one scale, everywhere).** Inter for UI, JetBrains Mono for
   numbers/IDs. Weights: body/labels **400–500**, active/selected + section titles
   **600–700**, never heavier. **Bold = emphasis or active state only** (not decoration).

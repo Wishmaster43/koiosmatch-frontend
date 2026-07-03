@@ -181,8 +181,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
           <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
           {/* Add/bulk on the left (like Candidates/Applications); status tabs pushed right */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
-            padding: '0 24px 10px', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
+            padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               {selectedIds.size > 0 ? (
                 <VacanciesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}

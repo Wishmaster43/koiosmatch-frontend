@@ -160,7 +160,7 @@ export default function MatchesPage() {
       />
 
       {/* Toolbar — bulk bar or add button (left) + segmented view/archive selector (right) */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 10px', flexShrink: 0, minHeight: 46 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 12px', flexShrink: 0, minHeight: 36 }}>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
           {selectedIds.size > 0 ? (
             <MatchesBulkBar

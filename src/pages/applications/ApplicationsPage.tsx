@@ -335,8 +335,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
         {/* Tab bar — add + buckets + view toggle */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'space-between',
-          padding: '8px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between',
+          padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 5,
               padding: '6px 14px', fontSize: 13, fontWeight: 500, background: 'var(--color-primary)', color: '#fff',
