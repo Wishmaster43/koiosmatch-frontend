@@ -170,17 +170,19 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const showStatus = !!currentPhase && !isEntryPhase
   // Human-readable status detail line — shows once the backend returns the audit
   // fields (reason + the change-log date `statusChangedAt`). Empty until then.
+  // Flag-driven (§3B): any is_blacklist status shows its lookup-backed reason; any
+  // requires_reason/expects_return_date status shows reason + "available again" date.
+  const statusFlags = statuses.find(s => s.value === currentStatus) as (LookupOption & { requires_reason?: boolean; expects_return_date?: boolean; is_blacklist?: boolean }) | undefined
   const statusInfoLine: string | null = (() => {
     const st = currentStatus
-    // Blacklist = a status value; "who/when" comes from the status change-log
-    // (statusChangedAt), the reason from the lookup-validated blacklist_reason.
-    if (st === 'blacklist' && (c.blacklistReason || c.statusChangedAt)) {
+    if (!st || !statusFlags) return null
+    if (statusFlags.is_blacklist && (c.blacklistReason || c.statusChangedAt)) {
       return [
         c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(st).label, date: formatDate(c.statusChangedAt) }) : t('drawer.blacklisted'),
         c.blacklistReason,
       ].filter(Boolean).join(' · ')
     }
-    if ((st === 'unavailable' || st === 'sick' || st === 'leave') && (c.statusReason || c.statusReturnDate || c.statusChangedAt)) {
+    if ((statusFlags.requires_reason || statusFlags.expects_return_date) && (c.statusReason || c.statusReturnDate || c.statusChangedAt)) {
       return [
         c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(st).label, date: formatDate(c.statusChangedAt) }) : statusMeta(st).label,
         c.statusReason,
@@ -189,6 +191,19 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     }
     return null
   })()
+  // Edit the reason/return date of the CURRENT status: reopen the prompt prefilled.
+  // Same PATCH path; the guard skips unchanged statuses, so this is a clean edit.
+  const openStatusEdit = () => {
+    if (!statusFlags) return
+    setStatusModal({
+      target: currentStatus,
+      reason: (statusFlags.is_blacklist ? c.blacklistReason : c.statusReason) ?? '',
+      date: (c.statusReturnDate ?? '').slice(0, 10),
+      needReason: !!statusFlags.requires_reason,
+      needDate: !!statusFlags.expects_return_date,
+      isBlacklist: !!statusFlags.is_blacklist,
+    })
+  }
   // Status (deployability) change, driven by the status lookup flags:
   // requires_match → must link a Match; requires_reason/expects_return_date → ask first.
   const changeStatus = (v: string) => {
@@ -205,10 +220,15 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const confirmStatus = () => {
     if (!statusModal) return
     setStatus(statusModal.target)
+    // Camel UI keys: the optimistic merge writes the row fields the header/table read
+    // (statusReason/…), so the reason/date shows IMMEDIATELY — buildCandidatePatch maps
+    // them onto the API keys. statusChangedAt only on a real transition (BE stamps too).
     const reasonPatch = statusModal.isBlacklist
-      ? { blacklist_reason: statusModal.reason || null }
-      : { status_reason: statusModal.reason || null }
-    onUpdate?.(c.id, { status: statusModal.target, ...reasonPatch, status_return_date: statusModal.date || null })
+      ? { blacklistReason: statusModal.reason || null }
+      : { statusReason: statusModal.reason || null }
+    const changed = statusModal.target !== c.status
+    onUpdate?.(c.id, { status: statusModal.target, ...reasonPatch, statusReturnDate: statusModal.date || null,
+      ...(changed ? { statusChangedAt: new Date().toISOString() } : {}) })
     setStatusModal(null)
   }
   // Confirm the "Placed" prompt: use the picked match, or create one against the chosen vacancy.
@@ -295,7 +315,16 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         )}
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.title || '—'}</div>
-      {statusInfoLine && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>{statusInfoLine}</div>}
+      {statusInfoLine && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{statusInfoLine}</span>
+          {/* Pencil: edit the reason / return date without changing the status. */}
+          <button onClick={openStatusEdit} title={t('drawer.editStatusInfo')} aria-label={t('drawer.editStatusInfo')}
+            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 1, display: 'flex', color: 'var(--text-muted)' }}>
+            <Edit2 size={10} />
+          </button>
+        </div>
+      )}
     </>
   )
 

@@ -17,7 +17,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrap, unwrapList } from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 
 // One note as the drawer renders it — matches NotesTab's NoteItem + the API shape.
@@ -38,18 +38,20 @@ export function useCandidateNotes(candidateId: string | number | undefined) {
   const { t } = useTranslation()
   const [notes, setNotes] = useState<CandidateNote[]>([])
 
-  // Load the thread whenever the candidate changes (server returns newest-first).
-  useEffect(() => {
+  // One loader — the effect uses it, and every successful write RE-FETCHES the thread so
+  // the server truth (author, updated_by/updated_at, stamped last-contact) shows at once.
+  const load = useCallback(() => {
     if (!candidateId) { setNotes([]); return }
-    let alive = true
     api.get(`/candidates/${candidateId}/notes`)
-      .then(res => { if (alive) setNotes(unwrapList<CandidateNote>(res).rows) })
+      .then(res => setNotes(unwrapList<CandidateNote>(res).rows))
       // GET degrades to an empty thread; the dev interceptor already surfaces write errors.
-      .catch(() => { if (alive) setNotes([]) })
-    return () => { alive = false }
+      .catch(() => setNotes([]))
   }, [candidateId])
 
-  // Create — optimistic prepend, then swap the temp note for the server's (real id/author).
+  // Load the thread whenever the candidate changes (server returns newest-first).
+  useEffect(() => { load() }, [load])
+
+  // Create — optimistic prepend, then reload the thread (real id/author/last-contact stamp).
   const addNote = useCallback((payload: NotePayload) => {
     if (!candidateId) return
     const temp: CandidateNote = {
@@ -57,11 +59,11 @@ export function useCandidateNotes(candidateId: string | number | undefined) {
     }
     setNotes(prev => [temp, ...prev])
     api.post(`/candidates/${candidateId}/notes`, { type: payload.type, text: payload.body, channel: payload.channel })
-      .then(res => { const saved = unwrap<CandidateNote>(res); setNotes(prev => prev.map(n => (n.id === temp.id ? saved : n))) })
+      .then(() => load())
       .catch(() => { setNotes(prev => prev.filter(n => n.id !== temp.id)); notifyError(t('common:actionFailed')) })
-  }, [candidateId, t])
+  }, [candidateId, load, t])
 
-  // Edit — NotesTab passes a list index; resolve to the note's real id, patch with revert.
+  // Edit — NotesTab passes a list index; optimistic, then reload so "edited by ·when" shows.
   const editNote = useCallback((index: number, payload: NotePayload) => {
     if (!candidateId) return
     const target = notes[index]
@@ -69,8 +71,9 @@ export function useCandidateNotes(candidateId: string | number | undefined) {
     const snapshot = notes
     setNotes(prev => prev.map((n, i) => (i === index ? { ...n, type: payload.type, channel: payload.channel, body: payload.body } : n)))
     api.patch(`/candidates/${candidateId}/notes/${target.id}`, { text: payload.body, type: payload.type, channel: payload.channel })
+      .then(() => load())
       .catch(() => { setNotes(snapshot); notifyError(t('common:actionFailed')) })
-  }, [candidateId, notes, t])
+  }, [candidateId, notes, load, t])
 
   // Delete — optimistic remove with revert (ready for a NotesTab delete affordance).
   const deleteNote = useCallback((index: number) => {

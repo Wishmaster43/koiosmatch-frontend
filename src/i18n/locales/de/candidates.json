@@ -251,7 +251,8 @@
     "tasksTitle": "Aufgaben",
     "tasksLoading": "Aufgaben laden…",
     "tasksError": "Aufgaben konnten nicht geladen werden.",
-    "tasksEmpty": "Keine offenen Aufgaben für diesen Kandidaten."
+    "tasksEmpty": "Keine offenen Aufgaben für diesen Kandidaten.",
+    "editStatusInfo": "Grund oder Datum ändern"
   },
   "stage": {
     "lead": "Lead",
@@ -588,7 +589,11 @@
     "empty": "Noch keine Änderungen erfasst.",
     "fromIp": "Geändert von IP {{ip}}",
     "system": "System",
-    "emptyValue": "Leer"
+    "emptyValue": "Leer",
+    "axisStatus": "Status",
+    "axisPhase": "Phase",
+    "reasonGiven": "Grund angegeben",
+    "effectiveFrom": "per {{date}}"
   },
   "matchesView": {
     "title": "Matches",

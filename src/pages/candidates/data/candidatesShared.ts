@@ -48,6 +48,11 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   if ('phase'          in patch) body.phase           = patch.phase
   if ('status_reason'  in patch) body.status_reason   = patch.status_reason
   if ('blacklist_reason' in patch) body.blacklist_reason = patch.blacklist_reason
+  // Camel UI keys (drawer optimistic merge) → API keys. statusChangedAt is display-only
+  // (the backend stamps its own status_changed_at) and is deliberately NOT mapped.
+  if ('statusReason'    in patch) body.status_reason        = patch.statusReason
+  if ('blacklistReason' in patch) body.blacklist_reason     = patch.blacklistReason
+  if ('statusReturnDate' in patch) body.available_again_date = patch.statusReturnDate
   // The backend validates `available_again_date` (CandidateProfileRequest) — the old
   // status_return_date key was silently dropped, so the return date never persisted.
   if ('status_return_date' in patch) body.available_again_date = patch.status_return_date

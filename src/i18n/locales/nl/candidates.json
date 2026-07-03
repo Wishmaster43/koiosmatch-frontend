@@ -258,7 +258,8 @@
     "tasksTitle": "Taken",
     "tasksLoading": "Taken laden…",
     "tasksError": "Taken laden is mislukt.",
-    "tasksEmpty": "Geen open taken voor deze kandidaat."
+    "tasksEmpty": "Geen open taken voor deze kandidaat.",
+    "editStatusInfo": "Reden of datum wijzigen"
   },
   "stage": {
     "lead": "Lead",
@@ -595,7 +596,11 @@
     "empty": "Nog geen wijzigingen vastgelegd.",
     "fromIp": "Gewijzigd vanaf IP {{ip}}",
     "system": "Systeem",
-    "emptyValue": "Leeg"
+    "emptyValue": "Leeg",
+    "axisStatus": "Status",
+    "axisPhase": "Fase",
+    "reasonGiven": "reden opgegeven",
+    "effectiveFrom": "per {{date}}"
   },
   "matchesView": {
     "title": "Matches",

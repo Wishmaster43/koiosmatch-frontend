@@ -251,7 +251,8 @@
     "tasksTitle": "Tâches",
     "tasksLoading": "Chargement des tâches…",
     "tasksError": "Échec du chargement des tâches.",
-    "tasksEmpty": "Aucune tâche ouverte pour ce candidat."
+    "tasksEmpty": "Aucune tâche ouverte pour ce candidat.",
+    "editStatusInfo": "Modifier le motif ou la date"
   },
   "stage": {
     "lead": "Piste",
@@ -588,7 +589,11 @@
     "empty": "Aucune modification enregistrée.",
     "fromIp": "Modifié depuis l'IP {{ip}}",
     "system": "Système",
-    "emptyValue": "Vide"
+    "emptyValue": "Vide",
+    "axisStatus": "Statut",
+    "axisPhase": "Phase",
+    "reasonGiven": "motif renseigné",
+    "effectiveFrom": "au {{date}}"
   },
   "matchesView": {
     "title": "Matches",

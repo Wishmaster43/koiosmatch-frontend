@@ -251,7 +251,8 @@
     "tasksTitle": "Tareas",
     "tasksLoading": "Cargando tareas…",
     "tasksError": "No se pudieron cargar las tareas.",
-    "tasksEmpty": "Sin tareas abiertas para este candidato."
+    "tasksEmpty": "Sin tareas abiertas para este candidato.",
+    "editStatusInfo": "Editar motivo o fecha"
   },
   "stage": {
     "lead": "Lead",
@@ -588,7 +589,11 @@
     "empty": "Aún no hay cambios registrados.",
     "fromIp": "Modificado desde la IP {{ip}}",
     "system": "Sistema",
-    "emptyValue": "Vacío"
+    "emptyValue": "Vacío",
+    "axisStatus": "Estado",
+    "axisPhase": "Fase",
+    "reasonGiven": "motivo indicado",
+    "effectiveFrom": "a partir del {{date}}"
   },
   "matchesView": {
     "title": "Coincidencias",

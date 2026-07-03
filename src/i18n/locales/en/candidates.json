@@ -258,7 +258,8 @@
     "tasksTitle": "Tasks",
     "tasksLoading": "Loading tasks…",
     "tasksError": "Failed to load tasks.",
-    "tasksEmpty": "No open tasks for this candidate."
+    "tasksEmpty": "No open tasks for this candidate.",
+    "editStatusInfo": "Edit reason or date"
   },
   "stage": {
     "lead": "Lead",
@@ -595,7 +596,11 @@
     "empty": "No changes recorded yet.",
     "fromIp": "Changed from IP {{ip}}",
     "system": "System",
-    "emptyValue": "Empty"
+    "emptyValue": "Empty",
+    "axisStatus": "Status",
+    "axisPhase": "Phase",
+    "reasonGiven": "reason given",
+    "effectiveFrom": "as of {{date}}"
   },
   "matchesView": {
     "title": "Matches",
