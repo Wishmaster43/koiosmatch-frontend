@@ -9,6 +9,7 @@ import { boot } from './lib.mjs'
 import { pagesRender, drillDowns } from './flows/nav.mjs'
 import { boardsDrag } from './flows/boards.mjs'
 import { statusWithReason, archiveAndFindBack, noteWithChannel, superSearch } from './flows/candidates.mjs'
+import { mfaLifecycle } from './flows/mfa.mjs'
 
 const FLOWS = [
   ['pages-render', pagesRender],
@@ -17,6 +18,7 @@ const FLOWS = [
   ['status-met-reden', statusWithReason],
   ['notitie-met-kanaal', noteWithChannel],
   ['super-search', superSearch],
+  ['mfa-lifecycle', mfaLifecycle],
   ['archiveren-terugvinden', archiveAndFindBack], // last: it mutates the list
 ]
 
