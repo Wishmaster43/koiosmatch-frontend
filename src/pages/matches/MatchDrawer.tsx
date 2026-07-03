@@ -12,7 +12,7 @@ import EntityHeader from '@/components/drawer/EntityHeader'
 import StatusPill from '@/components/ui/StatusPill'
 import ScorePill from './ScorePill'
 import OverviewTab from './drawer/OverviewTab'
-import ChangelogTab from './drawer/ChangelogTab'
+import MatchChangelogPopover from './drawer/MatchChangelogPopover'
 import type { MatchRow } from '@/types/match'
 
 interface MatchDrawerProps {
@@ -35,12 +35,10 @@ export default function MatchDrawer({ match, onClose, expanded = false, onToggle
     </div>
   )
 
-  // Tabs are config (§3A). Overview renders from row data now; Changelog is
-  // forward-compatible (404 → calm empty until GET /matches/{id}/activity ships).
-  // A Placement tab waits on a backend detail contract — see docs/DATA-API.md.
+  // Tabs are config (§3A). Record history is the changelog ICON-popover in the title row
+  // (never a tab) — see titleActions below. A Placement tab waits on a backend detail contract.
   const tabs: EntityTab[] = [
     { id: 'overview',  label: t('drawer.tabs.overview'),  render: () => <OverviewTab match={match} /> },
-    { id: 'changelog', label: t('drawer.tabs.changelog'), render: () => <ChangelogTab match={match} /> },
   ]
 
   return (
@@ -57,6 +55,7 @@ export default function MatchDrawer({ match, onClose, expanded = false, onToggle
           expanded={expanded}
           onToggleExpand={onToggleExpand}
           onClose={onClose}
+          titleActions={<MatchChangelogPopover match={match} />}
         >
           {headerChips}
         </EntityHeader>
