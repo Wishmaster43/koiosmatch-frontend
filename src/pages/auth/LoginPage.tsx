@@ -18,39 +18,55 @@ import ErrorBanner from '@/components/ui/ErrorBanner'
 // Read a server-provided error message off an axios-style error, if present.
 const messageOf = (e: unknown) => (e as { response?: { data?: { message?: string } } })?.response?.data?.message
 
-// ── Shared layout wrapper — centered card on a softly branded backdrop. ────────
+// ── Shared layout wrapper — brand hero (big agent) left, login card right. ─────
 function LoginShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation('auth')
   // Copyright year is dynamic — never a stale hardcoded value.
   const year = new Date().getFullYear()
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4 py-10"
-      style={{ background: [
-        'radial-gradient(90% 70% at 12% 8%, color-mix(in srgb, var(--color-primary) 16%, transparent), transparent 55%)',
-        'radial-gradient(85% 70% at 92% 18%, color-mix(in srgb, var(--color-secondary) 15%, transparent), transparent 55%)',
-        'radial-gradient(75% 65% at 82% 96%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 55%)',
-        'var(--bg)',
-      ].join(', ') }}>
-      <div className="w-full" style={{ maxWidth: 420 }}>
+    <div className="flex min-h-screen" style={{ background: 'var(--bg)' }}>
+      {/* Left — the brand hero: a LARGE Koios agent on a gradient of the three brand colours. */}
+      <div className="relative flex-col hidden w-1/2 p-10 overflow-hidden lg:flex xl:w-[58%]"
+        style={{ background: [
+          'radial-gradient(90% 70% at 14% 6%, color-mix(in srgb, var(--color-primary) 34%, transparent), transparent 56%)',
+          'radial-gradient(85% 75% at 92% 26%, color-mix(in srgb, var(--color-secondary) 30%, transparent), transparent 56%)',
+          'radial-gradient(72% 62% at 82% 100%, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 55%)',
+          'var(--sidebar-bg)',
+        ].join(', ') }}>
+        <img src="/KoiosMatch.png" alt="KoiosMatch" className="relative w-auto h-8" />
 
-        {/* Brand hero — agent + logo + tagline, centered above the card. */}
-        <div className="flex flex-col items-center mb-6 text-center">
+        {/* Big agent — fills the panel, object-contain so it never crops. */}
+        <div className="relative flex items-center justify-center flex-1 min-h-0 py-6">
           <img src="/koios-agent.png" alt="Koios AI agent"
-            className="object-contain rounded-2xl opacity-95"
-            style={{ maxHeight: 190, maxWidth: '72%', boxShadow: '0 8px 44px rgba(25,165,202,0.28)' }} />
-          <img src="/KoiosMatch.png" alt="KoiosMatch" className="w-auto h-7 mt-5" />
-          <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--text-muted)', maxWidth: 340 }}>
+            className="object-contain w-full h-full rounded-3xl"
+            style={{ filter: 'drop-shadow(0 12px 48px rgba(25,165,202,0.32))' }} />
+        </div>
+
+        {/* Headline + tagline — prominent, readable. */}
+        <div className="relative">
+          <p className="mb-2 font-semibold leading-tight" style={{ color: 'var(--sidebar-text)', fontSize: 30 }}>
+            {t('brand.line1')} {t('brand.line2')}
+          </p>
+          <p className="leading-relaxed" style={{ color: 'var(--sidebar-muted)', fontSize: 15, maxWidth: 470 }}>
             {t('brand.sub')}
           </p>
+          <p className="mt-6 text-xs" style={{ color: 'var(--sidebar-muted)' }}>© {year} KoiosMatch</p>
         </div>
+      </div>
 
-        {/* Login card. */}
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18,
-          padding: '32px 30px 34px', boxShadow: '0 12px 40px rgba(15,23,42,0.10)' }}>
-          {children}
+      {/* Right — login card on a soft primary tint. */}
+      <div className="relative flex items-center justify-center flex-1 p-6 sm:p-10"
+        style={{ background: 'linear-gradient(160deg, color-mix(in srgb, var(--color-primary) 7%, var(--bg)) 0%, var(--bg) 55%)' }}>
+        <div className="w-full" style={{ maxWidth: 400 }}>
+          <div className="flex items-center gap-2 mb-6 lg:hidden">
+            <img src="/KoiosMatch.png" alt="KoiosMatch" className="w-auto h-7" />
+          </div>
+          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 18,
+            padding: '32px 30px 34px', boxShadow: '0 12px 40px rgba(15,23,42,0.10)' }}>
+            {children}
+          </div>
+          <p className="mt-6 text-xs text-center lg:hidden" style={{ color: 'var(--text-muted)' }}>© {year} KoiosMatch</p>
         </div>
-
-        <p className="mt-6 text-xs text-center" style={{ color: 'var(--text-muted)' }}>© {year} KoiosMatch</p>
       </div>
     </div>
   )
