@@ -80,3 +80,11 @@ export function getJsonSetting<T>(values: SettingsBlob | null | undefined, key: 
   if (raw == null) return fallback
   try { return (typeof raw === 'string' ? JSON.parse(raw) : raw) as T } catch { return fallback }
 }
+
+/** Read a numeric setting (coerced from a stored string/number), falling back when absent/invalid. */
+export function getNumberSetting(values: SettingsBlob | null | undefined, key: string, fallback: number): number {
+  const raw = values?.[key]
+  if (raw == null) return fallback
+  const n = typeof raw === 'number' ? raw : Number(raw)
+  return Number.isFinite(n) ? n : fallback
+}

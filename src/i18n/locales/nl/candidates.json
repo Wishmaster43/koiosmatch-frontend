@@ -110,7 +110,8 @@
     "noFollowupSub": "nieuw, geen contact",
     "conversations": "Actieve gesprekken",
     "neverContacted": "Nooit benaderd",
-    "neverContactedSub": "nog geen contactmoment"
+    "neverContactedSub": "nog geen contactmoment",
+    "staleMonths": "Niet benaderd > {{months}} mnd"
   },
   "filters": {
     "search": "Zoeken",

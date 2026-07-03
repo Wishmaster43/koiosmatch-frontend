@@ -22,7 +22,8 @@ import InsightsRowJs from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import { toggleOneValue, isStale, isNeverContacted, isNoFollowup } from './data/candidatesShared'
+import { toggleOneValue, isStale, isNeverContacted } from './data/candidatesShared'
+import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
 import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
@@ -107,6 +108,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
 
+  // "Not contacted > N months" threshold — tenant setting (Settings → KPI's → Candidates), default 6.
+  const settings = useAllSettings()
+  const staleMonths = getNumberSetting(settings, 'no_contact_alert_months', 6)
+
   // Server-side filter params (axios serialises arrays as `key[]`). Only the
   // dimensions the API supports; the rest of the right panel is hidden for now.
   const filterParams = useMemo(() => {
@@ -121,16 +126,18 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     if (selectedTitle.length)    p.function_title = selectedTitle
     if (selectedLocation.length) p.location_id    = selectedLocation
     if (showArchived)            p.include_archived = 1
-    // ">6 months no contact" now filters server-wide via the delivered last_contact_between
-    // (positional [from, to]); never/no-followup stay client-side until a null-contact param exists.
+    // "> N months no contact" filters server-wide via last_contact_between at the configured
+    // threshold; never-contacted + no-follow-up now send server params too (BE KPI-2a).
     if (attentionFilter === 'stale6m') {
-      const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - 6)
+      const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - staleMonths)
       p.last_contact_between = ['1900-01-01', cutoff.toISOString().slice(0, 10)]
     }
+    if (attentionFilter === 'neverContacted') p.never_contacted = 1
+    if (attentionFilter === 'noFollowup')     p.no_followup = 1
     // Period-click date range (created / last-contact); set last so it wins over stale6m if both target last_contact.
     if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     return p
-  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, showArchived, attentionFilter, dateRange])
+  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, showArchived, attentionFilter, dateRange, staleMonths])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1. Visible rows change → drop the bulk selection.
@@ -215,12 +222,12 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const filtered = useMemo(() => {
     // Archived view shows only archived rows; otherwise archived (soft-deleted) hidden.
     const base = candidates.filter(c => (showArchived ? c.archived : !c.archived))
-    if (!attentionFilter) return base
-    const pred = attentionFilter === 'stale6m' ? isStale
-               : attentionFilter === 'neverContacted' ? isNeverContacted
-               : isNoFollowup
-    return base.filter(pred)
-  }, [candidates, attentionFilter, showArchived])
+    // stale/never keep a page-local refine (correct predicates); no-follow-up has no correct client
+    // predicate → it's server-side only (the no_followup param), so don't page-filter it here.
+    if (attentionFilter === 'stale6m')        return base.filter(c => isStale(c, staleMonths))
+    if (attentionFilter === 'neverContacted') return base.filter(isNeverContacted)
+    return base
+  }, [candidates, attentionFilter, showArchived, staleMonths])
 
   // Full-record load + edit persistence (fetch/PATCH live in the hook, §3).
   const { fetchDetail, patchCandidate } = useCandidateRecord()
@@ -272,7 +279,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       active: selectedOwner.length > 0, onClear: () => setSelectedOwner([]) },
   ]
   const insightKpis = [
-    { key: 'stale',      label: t('analytics.stale6m'),    value: staleCount,      sub: t('analytics.stale6mSub'),    color: 'var(--color-warning)',
+    { key: 'stale',      label: t('analytics.staleMonths', { months: staleMonths }), value: staleCount, sub: t('analytics.stale6mSub'), color: 'var(--color-warning)',
       onClick: () => toggleAttention('stale6m'),    active: attentionFilter === 'stale6m' },
     { key: 'neverContacted', label: t('analytics.neverContacted'), value: neverContactedCount, sub: t('analytics.neverContactedSub'), color: '#0EA5E9',
       onClick: () => toggleAttention('neverContacted'), active: attentionFilter === 'neverContacted' },

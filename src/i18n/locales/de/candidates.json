@@ -103,7 +103,8 @@
     "noFollowupSub": "neu, kein Kontakt",
     "conversations": "Aktive Gespräche",
     "neverContacted": "Nie kontaktiert",
-    "neverContactedSub": "noch kein Kontakt"
+    "neverContactedSub": "noch kein Kontakt",
+    "staleMonths": "Nicht kontaktiert > {{months}} Mon."
   },
   "filters": {
     "search": "Suchen",

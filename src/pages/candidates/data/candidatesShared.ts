@@ -5,14 +5,15 @@
  */
 import type { Candidate } from '@/types/candidate'
 
-export const SIX_MONTHS_MS = 182 * 86400000
-
-// Not contacted > 6 months: never contacted, or last contact older than 6 months.
-export const isStale = (c: Candidate): boolean => {
-  const t = c.lastContactAt ? new Date(c.lastContactAt).getTime() : null
-  return t == null || (Date.now() - t) > SIX_MONTHS_MS
+// Not contacted > N months: never contacted, or last contact older than the threshold. The
+// threshold is the tenant setting `no_contact_alert_months` (Settings → KPI's → Candidates),
+// default 6 — the caller passes it so the filter matches the configured KPI.
+export const isStale = (c: Candidate, months = 6): boolean => {
+  if (!c.lastContactAt) return true
+  const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - months)
+  return new Date(c.lastContactAt) < cutoff
 }
-// No follow-up: a new lead without any contact.
+// No follow-up (page-local count fallback only; the real filter is the server no_followup param).
 export const isNoFollowup = (c: Candidate): boolean => c.status === 'lead' && !c.lastContactAt
 // Never contacted: no recorded contact moment at all (page-local fallback predicate).
 export const isNeverContacted = (c: Candidate): boolean => !c.lastContactAt
