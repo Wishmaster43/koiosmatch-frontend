@@ -83,6 +83,20 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     } catch { /* noop */ } finally { setSaving(false) }
   }
 
+  // Set an item's priority by typing its rank: move it to that 1-based position.
+  // Local reorder only — the Save button persists the new order (same as drag).
+  const commitRank = (item, raw) => {
+    const cur = items.findIndex(x => x.id === item.id)
+    const target = Math.max(1, Math.min(items.length, parseInt(raw, 10) || cur + 1)) - 1
+    if (target === cur || cur < 0) return
+    setItems(prev => {
+      const next = [...prev]
+      const [moved] = next.splice(cur, 1)
+      next.splice(target, 0, moved)
+      return next
+    })
+  }
+
   return (
     <div style={{ maxWidth: 640 }}>
       <div className="flex items-start justify-between" style={{ marginBottom: 20, gap: 16 }}>
@@ -120,14 +134,21 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
           onReorder={setItems}
           renderItem={(item) => (
             <>
-              {/* Priority rank = position (top = 1 = sent first). Makes the drag-order priority explicit. */}
+              {/* Priority rank = position (top = 1 = sent first). Editable: type a number to move
+                  it there. key resets the uncommitted value after a reorder; Save persists (like drag). */}
               {showRank && (
-                <span title={t('statusList.priorityRank', { defaultValue: 'Prioriteit (1 = eerst verstuurd)' })}
-                  style={{ minWidth: 22, height: 22, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                <input type="number" min={1} max={items.length}
+                  key={`rank-${item.id}-${items.findIndex(x => x.id === item.id)}`}
+                  defaultValue={items.findIndex(x => x.id === item.id) + 1}
+                  onMouseDown={e => e.stopPropagation()}
+                  onBlur={e => commitRank(item, e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') e.currentTarget.blur() }}
+                  aria-label={t('statusList.priorityRank', { defaultValue: 'Prioriteit (1 = eerst verstuurd)' })}
+                  title={t('statusList.priorityRank', { defaultValue: 'Prioriteit (1 = eerst verstuurd)' })}
+                  style={{ width: 40, height: 24, textAlign: 'center', padding: 0,
                            fontSize: 11, fontWeight: 700, fontFamily: "'JetBrains Mono', monospace",
-                           color: 'var(--text-muted)', background: 'var(--border)', borderRadius: 6, flexShrink: 0 }}>
-                  {items.findIndex(x => x.id === item.id) + 1}
-                </span>
+                           color: 'var(--text)', background: 'var(--surface)', border: '1px solid var(--border)',
+                           borderRadius: 6, flexShrink: 0, outline: 'none' }} />
               )}
               {withColor && <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />}
               {withColor
