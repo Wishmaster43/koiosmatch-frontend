@@ -22,13 +22,31 @@ const RightPanelContext = createContext<RightPanelValue>({
   unregisterFilters: () => {},
 })
 
+// A stable signature of a group's MEANINGFUL content — ignores the fresh onToggle/onChange
+// closures a registrant recreates every render. Two renders with the same signature are
+// functionally identical (our handlers use stable state setters), so we can skip the update.
+function groupsSignature(groups: FilterGroup[]): string {
+  return JSON.stringify((groups ?? []).map(g => ({
+    k: g.key, t: g.type, l: g.label, v: g.value,
+    s: Array.isArray(g.selected) ? (g.selected as unknown[]).map(String) : g.selected,
+    o: Array.isArray(g.options) ? (g.options as unknown[]).length : 0,
+  })))
+}
+
 export function RightPanelProvider({ children }: { children: ReactNode }) {
   // registry = { [key]: filterGroups[] } — one entry per registering component.
   const [registry, setRegistry] = useState<Record<string, FilterGroup[]>>({})
 
   // Register filterGroups under a unique key (e.g. 'shifts-charts', 'candidates-bar').
+  // Content-aware: skip the setState when the signature is unchanged, so a registrant that
+  // re-creates its groups every render degrades to a no-op instead of an infinite setState
+  // loop (the RightPanelContext ↔ CandidatesPage bug, 2026-07-03). Defence in depth.
   const registerFilters = useCallback((key: string, groups: FilterGroup[]) => {
-    setRegistry(prev => ({ ...prev, [key]: groups }))
+    setRegistry(prev => {
+      const prevGroups = prev[key]
+      if (prevGroups && groupsSignature(prevGroups) === groupsSignature(groups)) return prev
+      return { ...prev, [key]: groups }
+    })
   }, [])
 
   // Remove a registration when the component unmounts.
