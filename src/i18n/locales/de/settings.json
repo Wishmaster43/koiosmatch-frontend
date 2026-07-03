@@ -153,7 +153,9 @@
     "kpis_contacts": "Kontakte",
     "kpis_tasks": "Aufgaben",
     "kpis_calllists": "Anruflisten",
-    "kpis_matches": "Matches"
+    "kpis_matches": "Matches",
+    "email_log": "E-Mail-Protokoll",
+    "whatsapp_log": "Nachrichtenprotokoll"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1464,5 +1466,27 @@
   },
   "dashboardsToggleHint": "Klicken Sie auf eine KPI oder ein Diagramm, um es für diese Rolle ein-/auszuschalten — standardmäßig ist alles an.",
   "dashboardsToggleOn": "Einschalten",
-  "dashboardsToggleOff": "Ausschalten"
+  "dashboardsToggleOff": "Ausschalten",
+  "log": {
+    "in": "Eingehend",
+    "out": "Ausgehend",
+    "direction": "Richtung",
+    "status": "Status",
+    "date": "Datum"
+  },
+  "emailLog": {
+    "party": "Von / An",
+    "subject": "Betreff",
+    "from": "Von",
+    "to": "An",
+    "title": "E-Mail",
+    "searchPlaceholder": "Nach Absender, Empfänger oder Betreff suchen…",
+    "empty": "Noch keine E-Mails protokolliert."
+  },
+  "waLog": {
+    "contact": "Kontakt",
+    "message": "Nachricht",
+    "searchPlaceholder": "Nach Kontakt oder Nachricht suchen…",
+    "empty": "Noch keine WhatsApp-Nachrichten."
+  }
 }

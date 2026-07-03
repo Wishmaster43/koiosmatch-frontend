@@ -153,7 +153,9 @@
     "kpis_contacts": "Contactpersonen",
     "kpis_tasks": "Taken",
     "kpis_calllists": "Bellijsten",
-    "kpis_matches": "Matches"
+    "kpis_matches": "Matches",
+    "email_log": "E-mail-log",
+    "whatsapp_log": "Berichtenlog"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1464,5 +1466,27 @@
   },
   "dashboardsToggleHint": "Klik een KPI of grafiek om 'm voor deze rol aan/uit te zetten — alles staat standaard aan.",
   "dashboardsToggleOn": "Inschakelen",
-  "dashboardsToggleOff": "Uitschakelen"
+  "dashboardsToggleOff": "Uitschakelen",
+  "log": {
+    "in": "Inkomend",
+    "out": "Uitgaand",
+    "direction": "Richting",
+    "status": "Status",
+    "date": "Datum"
+  },
+  "emailLog": {
+    "party": "Van / Naar",
+    "subject": "Onderwerp",
+    "from": "Van",
+    "to": "Naar",
+    "title": "E-mail",
+    "searchPlaceholder": "Zoek op afzender, ontvanger of onderwerp…",
+    "empty": "Nog geen e-mails gelogd."
+  },
+  "waLog": {
+    "contact": "Contact",
+    "message": "Bericht",
+    "searchPlaceholder": "Zoek op contact of bericht…",
+    "empty": "Nog geen WhatsApp-berichten."
+  }
 }

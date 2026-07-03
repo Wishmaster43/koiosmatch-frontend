@@ -153,7 +153,9 @@
     "kpis_contacts": "Contacts",
     "kpis_tasks": "Tasks",
     "kpis_calllists": "Call lists",
-    "kpis_matches": "Matches"
+    "kpis_matches": "Matches",
+    "email_log": "Email log",
+    "whatsapp_log": "Message log"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1464,5 +1466,27 @@
   },
   "dashboardsToggleHint": "Click a KPI or chart to switch it on/off for this role — everything is on by default.",
   "dashboardsToggleOn": "Turn on",
-  "dashboardsToggleOff": "Turn off"
+  "dashboardsToggleOff": "Turn off",
+  "log": {
+    "in": "Incoming",
+    "out": "Outgoing",
+    "direction": "Direction",
+    "status": "Status",
+    "date": "Date"
+  },
+  "emailLog": {
+    "party": "From / To",
+    "subject": "Subject",
+    "from": "From",
+    "to": "To",
+    "title": "Email",
+    "searchPlaceholder": "Search sender, recipient or subject…",
+    "empty": "No emails logged yet."
+  },
+  "waLog": {
+    "contact": "Contact",
+    "message": "Message",
+    "searchPlaceholder": "Search contact or message…",
+    "empty": "No WhatsApp messages yet."
+  }
 }

@@ -153,7 +153,9 @@
     "kpis_contacts": "Contacts",
     "kpis_tasks": "Tâches",
     "kpis_calllists": "Listes d'appels",
-    "kpis_matches": "Correspondances"
+    "kpis_matches": "Correspondances",
+    "email_log": "Journal e-mail",
+    "whatsapp_log": "Journal des messages"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -1464,5 +1466,27 @@
   },
   "dashboardsToggleHint": "Cliquez sur un KPI ou un graphique pour l activer/désactiver pour ce rôle — tout est activé par défaut.",
   "dashboardsToggleOn": "Activer",
-  "dashboardsToggleOff": "Désactiver"
+  "dashboardsToggleOff": "Désactiver",
+  "log": {
+    "in": "Entrant",
+    "out": "Sortant",
+    "direction": "Direction",
+    "status": "Statut",
+    "date": "Date"
+  },
+  "emailLog": {
+    "party": "De / À",
+    "subject": "Objet",
+    "from": "De",
+    "to": "À",
+    "title": "E-mail",
+    "searchPlaceholder": "Rechercher expéditeur, destinataire ou objet…",
+    "empty": "Aucun e-mail encore journalisé."
+  },
+  "waLog": {
+    "contact": "Contact",
+    "message": "Message",
+    "searchPlaceholder": "Rechercher contact ou message…",
+    "empty": "Aucun message WhatsApp."
+  }
 }

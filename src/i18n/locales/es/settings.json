@@ -153,7 +153,9 @@
     "kpis_contacts": "Contactos",
     "kpis_tasks": "Tareas",
     "kpis_calllists": "Listas de llamadas",
-    "kpis_matches": "Coincidencias"
+    "kpis_matches": "Coincidencias",
+    "email_log": "Registro de correo",
+    "whatsapp_log": "Registro de mensajes"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1464,5 +1466,27 @@
   },
   "dashboardsToggleHint": "Haz clic en un KPI o gráfico para activarlo/desactivarlo para este rol — todo está activado por defecto.",
   "dashboardsToggleOn": "Activar",
-  "dashboardsToggleOff": "Desactivar"
+  "dashboardsToggleOff": "Desactivar",
+  "log": {
+    "in": "Entrante",
+    "out": "Saliente",
+    "direction": "Dirección",
+    "status": "Estado",
+    "date": "Fecha"
+  },
+  "emailLog": {
+    "party": "De / Para",
+    "subject": "Asunto",
+    "from": "De",
+    "to": "Para",
+    "title": "Correo",
+    "searchPlaceholder": "Buscar remitente, destinatario o asunto…",
+    "empty": "Aún no hay correos registrados."
+  },
+  "waLog": {
+    "contact": "Contacto",
+    "message": "Mensaje",
+    "searchPlaceholder": "Buscar contacto o mensaje…",
+    "empty": "Aún no hay mensajes de WhatsApp."
+  }
 }

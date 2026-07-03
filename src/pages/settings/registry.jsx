@@ -60,6 +60,8 @@ import WhatsAppSettings from './sections/WhatsAppSettings'
 import ImporterenSettings from './sections/ImporterenSettings'
 import ApiKeysSettings from './sections/apikeys'
 import MessagingSettings from './sections/messaging'
+import EmailLog from './sections/EmailLog'
+import WhatsAppLog from './sections/WhatsAppLog'
 import KoiosSettings from './sections/koios'
 import NotificationsSettings from './sections/NotificationsSettings'
 // Planning settings — gated on the 'plan' module (requiresPage: 'planning'); hidden until it is on.
@@ -227,6 +229,7 @@ export const NAV_GROUPS = [
       { id: 'email_klanten', icon: Mail, render: () => <EmailSettings context="klanten" /> },
       { id: 'email_kandidaten', icon: Mail, render: () => <EmailSettings context="kandidaten" /> },
       { id: 'email_planning', icon: Mail, render: () => <EmailSettings context="planning" /> },
+      { id: 'email_log', icon: ClipboardList, component: EmailLog },
     ],
   },
   {
@@ -235,6 +238,7 @@ export const NAV_GROUPS = [
     items: [
       { id: 'whatsapp', icon: MessageCircle, component: WhatsAppSettings, requiresPage: 'whatsapp' },
       { id: 'messaging', icon: MessageSquare, component: MessagingSettings },
+      { id: 'whatsapp_log', icon: ClipboardList, component: WhatsAppLog },
     ],
   },
   {
