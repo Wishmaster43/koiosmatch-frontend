@@ -9,7 +9,7 @@ import { Plus, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import type { WorkflowField, EdgeFilters, WorkflowVarGroup } from '@/types/workflow'
 import {
-  FaqSelectField, WebhookSelectField,
+  FaqSelectField, WebhookSelectField, LookupSelectField,
   FiltersField, ResponseStructureField, type OnChange,
 } from './fieldControls'
 import { TextFieldWithVars } from './VariablePicker'
@@ -26,6 +26,9 @@ export function FieldInput({ field, value, onChange, variables }: {
   }
   if (field.type === 'faq_select') {
     return <FaqSelectField value={value} onChange={onChange} fieldKey={field.key} />
+  }
+  if (field.type === 'lookup_select') {
+    return <LookupSelectField value={value} onChange={onChange} fieldKey={field.key} endpoint={String(field.endpoint ?? '')} />
   }
   if (field.type === 'response_structure') {
     return <ResponseStructureField value={value} onChange={onChange} fieldKey={field.key} />

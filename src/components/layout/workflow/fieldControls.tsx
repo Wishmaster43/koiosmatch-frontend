@@ -161,6 +161,41 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
   )
 }
 
+// ── Lookup-backed select ────────────────────────────────────────────────────────
+// Options come from a tenant lookup endpoint (e.g. /whatsapp-message-types) instead of
+// a hardcoded list (§10: no hardcoded vocabularies in workflow nodes). Lazy api import,
+// mirroring WebhookSelectField. Fail-soft to an empty list.
+export function LookupSelectField({ value, onChange, fieldKey, endpoint }: {
+  value?: unknown; onChange: OnChange; fieldKey: string; endpoint: string
+}) {
+  const { t } = useTranslation('workflows')
+  const [opts, setOpts] = useState<Array<{ value: string; label: string }>>([])
+
+  // Load the lookup values once; accept the common {value|id, label|name} shapes.
+  useEffect(() => {
+    if (!endpoint) return
+    let alive = true
+    import('@/lib/api').then(m => m.default.get(endpoint))
+      .then(r => {
+        const rows = (r.data?.data ?? r.data ?? []) as Array<Record<string, unknown>>
+        if (alive) setOpts(rows
+          .map(o => ({ value: String(o.value ?? o.id ?? ''), label: String(o.label ?? o.name ?? o.value ?? '') }))
+          .filter(o => o.value))
+      })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [endpoint])
+
+  return (
+    <select value={(value as string) ?? ''} onChange={e => onChange(fieldKey, e.target.value)}
+      aria-label={fieldKey}
+      style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none', cursor: 'pointer' }}>
+      <option value="">{t('fields.selectPlaceholder')}</option>
+      {opts.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+    </select>
+  )
+}
+
 // ── Filters field ───────────────────────────────────────────────────────────────
 // Inline conditions builder (field / operator / value + AND-OR), used inside an
 // entity module so fetch + filter live in one module. Reuses the edge OPERATORS;

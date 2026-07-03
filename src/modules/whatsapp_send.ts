@@ -10,7 +10,10 @@ export default {
   color: '#3B6D11',
   bg:    '#EAF3DE',
   schema: [
-    { key: 'message_type',        label: 'Berichttype',            type: 'select',  options: ['template','flow'] },
+    // Classification that drives the send-queue priority (tenant lookup, §10 — not hardcoded).
+    { key: 'priority_type',       label: 'Berichttype (prioriteit)', type: 'lookup_select', endpoint: '/whatsapp-message-types' },
+    // WhatsApp send FORMAT (not the classification above); key stays as the BE contract expects.
+    { key: 'message_type',        label: 'Formaat',                type: 'select',  options: ['template','flow'] },
     { key: 'phone_number_id',     label: 'Afzender',               type: 'select',  options: ['085 020 5160 (Yesway)','085 020 5161 (Yesway 2)'] },
     { key: 'template_name',       label: 'Template naam',          type: 'text',    placeholder: 'geen_reactie_shiftmanager' },
     { key: 'update_conversation', label: 'Gespreksstatus updaten', type: 'boolean' },
