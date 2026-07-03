@@ -1061,7 +1061,24 @@
     "loadMore": "Cargar más ({{count}})",
     "colDate": "Fecha",
     "colTime": "Hora",
-    "filterDate": "Periodo"
+    "filterDate": "Periodo",
+    "colEntity": "Entidad",
+    "filterActor": "Tipo de actor",
+    "actorUser": "Usuario",
+    "actorSystem": "Sistema",
+    "entity": {
+      "candidate": "Candidato",
+      "customer": "Cliente",
+      "user": "Usuario",
+      "role": "Rol",
+      "vacancy": "Vacante",
+      "application": "Candidatura",
+      "contact": "Contacto",
+      "location": "Ubicación",
+      "department": "Departamento",
+      "opportunity": "Oportunidad",
+      "task": "Tarea"
+    }
   },
   "lookups": {
     "add": "Añadir",

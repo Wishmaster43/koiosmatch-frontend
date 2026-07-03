@@ -1216,7 +1216,24 @@
       "role": "Role"
     },
     "export": "Export",
-    "loadMore": "Load more ({{count}})"
+    "loadMore": "Load more ({{count}})",
+    "colEntity": "Entity",
+    "filterActor": "Actor type",
+    "actorUser": "User",
+    "actorSystem": "System",
+    "entity": {
+      "candidate": "Candidate",
+      "customer": "Customer",
+      "user": "User",
+      "role": "Role",
+      "vacancy": "Vacancy",
+      "application": "Application",
+      "contact": "Contact",
+      "location": "Location",
+      "department": "Department",
+      "opportunity": "Opportunity",
+      "task": "Task"
+    }
   },
   "languageSettings": {
     "languagesTitle": "Languages",

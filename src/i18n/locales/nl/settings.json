@@ -1216,7 +1216,24 @@
       "role": "Rol"
     },
     "export": "Exporteren",
-    "loadMore": "Meer laden ({{count}})"
+    "loadMore": "Meer laden ({{count}})",
+    "colEntity": "Entiteit",
+    "filterActor": "Actor-type",
+    "actorUser": "Gebruiker",
+    "actorSystem": "Systeem",
+    "entity": {
+      "candidate": "Kandidaat",
+      "customer": "Klant",
+      "user": "Gebruiker",
+      "role": "Rol",
+      "vacancy": "Vacature",
+      "application": "Sollicitatie",
+      "contact": "Contactpersoon",
+      "location": "Locatie",
+      "department": "Afdeling",
+      "opportunity": "Kans",
+      "task": "Taak"
+    }
   },
   "languageSettings": {
     "languagesTitle": "Talen",

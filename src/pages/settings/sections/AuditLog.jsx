@@ -61,6 +61,14 @@ function SortIcon({ col, sortCol, sortDir }) {
     : <ChevronDn  size={10} style={{ color: 'var(--color-primary)', marginLeft: 3 }} />
 }
 
+// Humanise a Spatie subject_type ("App\\Models\\Candidate") to a readable entity label.
+function entityLabel(subjectType, t) {
+  if (!subjectType) return null
+  const base = String(subjectType).split('\\').pop()
+  const key = base.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase()
+  return t(`audit.entity.${key}`, { defaultValue: base })
+}
+
 export default function AuditLog() {
   const { t } = useTranslation('settings')
   const [logs,          setLogs]          = useState([])
@@ -70,6 +78,8 @@ export default function AuditLog() {
   const [selectedTypes, setSelectedTypes] = useState([])
   const [selectedUsers, setSelectedUsers] = useState([])
   const [selectedRoles, setSelectedRoles] = useState([])
+  // Actor-type filter: '' = all, 'user' = human causer, 'system' = automation/service (no email).
+  const [selectedActor, setSelectedActor] = useState([])
   const [dateFrom,      setDateFrom]      = useState('')
   const [dateTo,        setDateTo]        = useState('')
   const [drill,         setDrill]         = useState(null)
@@ -102,6 +112,10 @@ export default function AuditLog() {
         const role = l.properties?.role ?? l.properties?.name
         if (!role || !selectedRoles.includes(role)) return false
       }
+      if (selectedActor.length) {
+        const actor = l.causer_email ? 'user' : 'system'
+        if (!selectedActor.includes(actor)) return false
+      }
       if (dateFrom && new Date(l.created_at) < new Date(dateFrom))                    return false
       if (dateTo   && new Date(l.created_at) > new Date(dateTo + 'T23:59:59'))        return false
       if (q) return (
@@ -111,7 +125,7 @@ export default function AuditLog() {
       )
       return true
     })
-  }, [logs, search, selectedTypes, selectedUsers, selectedRoles, dateFrom, dateTo])
+  }, [logs, search, selectedTypes, selectedUsers, selectedRoles, selectedActor, dateFrom, dateTo])
 
   // Sort the filtered list.
   const sorted = useMemo(() => {
@@ -126,7 +140,7 @@ export default function AuditLog() {
   }, [filteredAll, sortCol, sortDir])
 
   // Reset page when filters change.
-  useEffect(() => { setPage(1) }, [search, selectedTypes, selectedUsers, selectedRoles, dateFrom, dateTo])
+  useEffect(() => { setPage(1) }, [search, selectedTypes, selectedUsers, selectedRoles, selectedActor, dateFrom, dateTo])
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))
   const pageRows   = useMemo(() => sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [sorted, page])
@@ -159,6 +173,15 @@ export default function AuditLog() {
       onToggle: v => setSelectedTypes(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     },
     {
+      key: 'actor', label: t('audit.filterActor'), type: 'search-select',
+      selected: selectedActor,
+      options: [
+        { value: 'user',   label: t('audit.actorUser'),   count: logs.filter(l => l.causer_email).length },
+        { value: 'system', label: t('audit.actorSystem'), count: logs.filter(l => !l.causer_email).length },
+      ],
+      onToggle: v => setSelectedActor(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+    },
+    {
       key: 'user', label: t('audit.filterWho'),
       selected: selectedUsers,
       options: userOptions.map(u => ({
@@ -176,7 +199,7 @@ export default function AuditLog() {
       })),
       onToggle: v => setSelectedRoles(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     }] : []),
-  ], [selectedTypes, selectedUsers, selectedRoles, typeOptions, userOptions, roleOptions, logs, dateFrom, dateTo, t])
+  ], [selectedTypes, selectedUsers, selectedRoles, selectedActor, typeOptions, userOptions, roleOptions, logs, dateFrom, dateTo, t])
 
   useEffect(() => {
     registerFilters('audit-log', filterGroups)
@@ -189,14 +212,16 @@ export default function AuditLog() {
     const who = (e) => e.causer_email
       ? `${e.causer_name ?? t('audit.system')} (${e.causer_email})`
       : (e.causer_name ?? t('audit.system'))
-    const header = [t('audit.colDate'), t('audit.colTime'), t('audit.colWho'), t('audit.colType'), t('audit.colAction'), t('audit.colOldValue'), t('audit.colNewValue')]
+    const header = [t('audit.colDate'), t('audit.colTime'), t('audit.colWho'), t('audit.colType'), t('audit.colEntity'), t('audit.colAction'), t('audit.colOldValue'), t('audit.colNewValue')]
     const rows = filteredAll.map(e => {
       const { beforeCell, afterCell } = buildDiffCells(e, t)
+      const entityStr = e.subject_type ? entityLabel(e.subject_type, t) + (e.subject_label ? ` · ${e.subject_label}` : '') : ''
       return [
         new Date(e.created_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }),
         new Date(e.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }),
         who(e),
         t(`audit.logName.${e.log_name}`, { defaultValue: e.log_name }),
+        entityStr,
         e.description ?? '', beforeCell, afterCell]
     })
     const csv = '﻿' + [header, ...rows].map(r => r.map(esc).join(',')).join('\r\n')
@@ -268,7 +293,8 @@ export default function AuditLog() {
                     {t('audit.colType')}<SortIcon col="log_name" sortCol={sortCol} sortDir={sortDir} />
                   </span>
                 </th>
-                <th style={{ ...TH('description'), width: 300 }} onClick={() => handleSort('description')}>
+                <th style={{ ...TH(null), width: 150 }}>{t('audit.colEntity')}</th>
+                <th style={{ ...TH('description'), width: 280 }} onClick={() => handleSort('description')}>
                   <span style={{ display: 'flex', alignItems: 'center' }}>
                     {t('audit.colAction')}<SortIcon col="description" sortCol={sortCol} sortDir={sortDir} />
                   </span>
@@ -280,7 +306,7 @@ export default function AuditLog() {
             <tbody>
               {pageRows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>
+                  <td colSpan={8} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>
                     {t('audit.noEntries')}
                   </td>
                 </tr>
@@ -301,6 +327,14 @@ export default function AuditLog() {
                       <div style={{ fontWeight: 500, color: 'var(--text)' }}>{entry.causer_name ?? t('audit.system')}</div>
                     </td>
                     <td style={TD}><LogBadge logName={entry.log_name} /></td>
+                    <td style={TD}>
+                      {entry.subject_type ? (
+                        <>
+                          <div style={{ fontWeight: 500, color: 'var(--text)' }}>{entityLabel(entry.subject_type, t)}</div>
+                          {entry.subject_label && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{entry.subject_label}</div>}
+                        </>
+                      ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
+                    </td>
                     <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{entry.description}</td>
                     <td style={{ ...TD, fontSize: 11, color: 'var(--color-danger)' }}>{beforeCell}</td>
                     <td style={{ ...TD, fontSize: 11, color: 'var(--color-success)' }}>{afterCell}</td>

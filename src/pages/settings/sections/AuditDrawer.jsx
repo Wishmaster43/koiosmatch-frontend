@@ -208,6 +208,29 @@ export function AuditDrawer({ entry, onClose }) {
       )
     }
 
+    // Field-level diff (Spatie logOnlyDirty): properties.old + properties.attributes → HelloFlex-style
+    // "field: old → new" per changed field. Renders as soon as the backend logs field diffs (C-16).
+    if (p.attributes && typeof p.attributes === 'object' && !Array.isArray(p.attributes)) {
+      const before = (p.old && typeof p.old === 'object') ? p.old : {}
+      const after = p.attributes
+      const changed = Object.keys(after).filter(k => JSON.stringify(before[k]) !== JSON.stringify(after[k]))
+      if (changed.length > 0) {
+        const fieldLabel = (k) => t(`audit.field.${k}`, { defaultValue: k.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()) })
+        return (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr 1fr', gap: 8, padding: '6px 0', marginBottom: 4 }}>
+              <span />
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-danger)' }}>{t('audit.oldValue')}</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)' }}>{t('audit.newValue')}</span>
+            </div>
+            {changed.map(k => (
+              <DiffRow key={k} label={fieldLabel(k)} before={before[k] ?? '—'} after={after[k]} />
+            ))}
+          </div>
+        )
+      }
+    }
+
     // Generic fallback
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
