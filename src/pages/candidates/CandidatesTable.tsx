@@ -119,8 +119,9 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
     },
     {
       // Deployability ("status": Beschikbaar/Geplaatst/…) — model v2 axis.
-      key: 'status', header: t('columns.deployability'), sortable: true, sortValue: c => statusMeta(c.status).label,
-      render: c => { const m = statusMeta(c.status)
+      key: 'status', header: t('columns.deployability'), sortable: true, sortValue: c => c.status ? statusMeta(c.status).label : '',
+      // No deployability status (e.g. a Lead) → a dash, never an empty grey chip (like contactdatum).
+      render: c => { if (!c.status) return dash; const m = statusMeta(c.status)
         if (!colorStatus) return <span style={plainCell}>{m.label}</span>
         return <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
           background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span> },
