@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { Loader2, Plus, X, Check, Copy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { OPERATORS } from './constants'
+import { fieldLabel, optionLabel } from './moduleI18n'
 import type { WorkflowField, EdgeFilters, FilterCondition } from '@/types/workflow'
 
 // Shared change handler: writes one field's value into the node config.
@@ -234,13 +235,13 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
               aria-label={t('fields.fieldPlaceholder')}
               style={{ flex: 1, minWidth: 0, padding: '5px 6px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
               <option value="">{t('fields.fieldPlaceholder')}</option>
-              {opts.map(o => { const v = typeof o === 'object' ? o.value : o; const l = typeof o === 'object' ? o.label : o; return <option key={v} value={v}>{l}</option> })}
+              {opts.map(o => { const v = typeof o === 'object' ? o.value : o; const l = typeof o === 'object' ? o.label : o; return <option key={v} value={v}>{fieldLabel(t, l as string)}</option> })}
               {/* (field option list) */}
             </select>
             <select value={c.operator} onChange={e => upd(i, 'operator', e.target.value)}
               aria-label={t('fields.operator', { defaultValue: 'Operator' })}
               style={{ padding: '5px 4px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
-              {OPERATORS.map(op => <option key={op} value={op}>{op}</option>)}
+              {OPERATORS.map(op => <option key={op} value={op}>{optionLabel(t, op)}</option>)}
             </select>
             {needsValue && (
               <input value={c.value ?? ''} onChange={e => upd(i, 'value', e.target.value)} placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}

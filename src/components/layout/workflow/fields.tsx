@@ -13,6 +13,7 @@ import {
   FiltersField, ResponseStructureField, type OnChange,
 } from './fieldControls'
 import { TextFieldWithVars } from './VariablePicker'
+import { optionLabel } from './moduleI18n'
 
 export function FieldInput({ field, value, onChange, variables }: {
   field: WorkflowField; value?: unknown; onChange: OnChange; variables?: WorkflowVarGroup[]
@@ -61,7 +62,7 @@ export function FieldInput({ field, value, onChange, variables }: {
                 border:     `1px solid ${active ? '#C4C0F0' : 'var(--border)'}`,
                 cursor: 'pointer',
               }}>
-              {opt}
+              {optionLabel(t, opt)}
             </button>
           )
         })}
@@ -77,7 +78,7 @@ export function FieldInput({ field, value, onChange, variables }: {
         {(field.options ?? []).map(o => {
           const val = typeof o === 'object' ? o.value : o
           const lbl = typeof o === 'object' ? o.label : o
-          return <option key={val} value={val}>{lbl}</option>
+          return <option key={val} value={val}>{optionLabel(t, lbl as string)}</option>
         })}
       </select>
     )

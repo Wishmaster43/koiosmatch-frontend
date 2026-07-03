@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { MODULE_META, MODULE_SCHEMAS } from '@/modules/index'
 import { AgentsTab, PromptsTab, FAQTab, KnowledgeTab, ToolsTab } from '@/components/ai/AIManagementTabs'
 import { FieldInput } from './fields'
-import { categorySlug } from './moduleI18n'
+import { categorySlug, fieldLabel } from './moduleI18n'
 import AgentTestPanel from './AgentTestPanel'
 import type { FlowNode, WorkflowField, WorkflowVarGroup } from '@/types/workflow'
 
@@ -78,7 +78,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
       {fields.map(field => (
         <div key={field.key}>
           <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-            {String(field.label ?? '')}
+            {fieldLabel(t, field.label as string | undefined)}
             {!!(field as WorkflowField & { required?: boolean }).required && <span style={{ color: 'var(--color-danger)', marginLeft: 3 }}>*</span>}
           </label>
           <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables}
@@ -174,7 +174,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
             .map(field => (
               <div key={field.key}>
                 <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-                  {field.label}
+                  {fieldLabel(t, field.label as string | undefined)}
                 </label>
                 <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables}
                   onChange={(key, val) => onUpdate(node.id, key, val)} />
