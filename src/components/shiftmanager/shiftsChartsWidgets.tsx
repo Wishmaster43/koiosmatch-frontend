@@ -10,6 +10,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from "recharts"
 import { useTranslation } from "react-i18next"
+import ErrorBoundary from "../ui/ErrorBoundary"
 import { YEAR_OPACITY } from "./shiftsChartsConfig"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 
@@ -102,7 +103,14 @@ export function ChartCard({ title, subtitle, loading, error, children }: {
         {error && !loading && (
           <div className="flex items-center justify-center h-64 text-[var(--color-danger)]">{error}</div>
         )}
-        {!loading && !error && children}
+        {/* Local boundary: a broken chart (bad data / lib error) shows a fallback, not a dead page. */}
+        {!loading && !error && (
+          <ErrorBoundary fallback={() => (
+            <div className="flex items-center justify-center h-64 text-slate-400">—</div>
+          )}>
+            {children}
+          </ErrorBoundary>
+        )}
       </div>
     </div>
   )

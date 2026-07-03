@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Clock, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
+import ErrorBoundary from '@/components/ui/ErrorBoundary'
 import type { WaCandidate, WaMessage, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
 
 
@@ -224,6 +225,10 @@ export function ActivityChart({ data, loading }: { data: WaActivityDatum[]; load
         <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center',
                       color: 'var(--text-muted)', fontSize: 13 }}>{t('loading')}</div>
       ) : (
+        // Local boundary — one broken chart must not take down the WhatsApp page.
+        <ErrorBoundary fallback={() => (
+          <div style={{ height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: 13 }}>—</div>
+        )}>
         <ResponsiveContainer width="100%" height={180}>
           <AreaChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
             <defs>
@@ -255,6 +260,7 @@ export function ActivityChart({ data, loading }: { data: WaActivityDatum[]; load
               stroke="var(--color-success)" fill="url(#gradIn)" strokeWidth={2} dot={false} isAnimationActive={false} />
           </AreaChart>
         </ResponsiveContainer>
+        </ErrorBoundary>
       )}
     </div>
   )
