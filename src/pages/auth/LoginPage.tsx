@@ -44,11 +44,11 @@ function LoginShell({ children }: { children: ReactNode }) {
           </p>
         </div>
 
-        {/* Koios AI agent — object-contain + capped height so it never crops or dominates. */}
-        <div className="relative flex flex-col items-center justify-center flex-1 py-6">
+        {/* Koios AI agent — large but object-contain so it never crops. */}
+        <div className="relative flex flex-col items-center justify-center flex-1 py-4">
           <img src="/koios-agent.png" alt="Koios AI agent"
-            className="object-contain w-auto rounded-2xl opacity-95"
-            style={{ maxHeight: 260, maxWidth: '100%', boxShadow: '0 0 40px rgba(25,165,202,0.22)' }} />
+            className="object-contain w-full rounded-2xl opacity-95"
+            style={{ maxHeight: 440, boxShadow: '0 0 40px rgba(25,165,202,0.22)' }} />
           <p className="mt-5 text-lg font-semibold" style={{ color: 'var(--sidebar-text)' }}>Koios</p>
           <p className="text-xs" style={{ color: 'var(--sidebar-muted)' }}>{t('brand.agentTagline')}</p>
         </div>
