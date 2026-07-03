@@ -130,7 +130,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
                 borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
               + {t('page.add')}
             </button>
-            <HeaderSearch onSearch={setQuery} width={280} />
+            <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
             {/* Selection strip — count + clear (bulk actions land with C-41). */}
             {selectedIds.size > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--text)' }}>

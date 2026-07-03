@@ -69,5 +69,8 @@
     "submit": "Crear lista",
     "saving": "Creando…",
     "error": "Error al crear. Inténtalo de nuevo."
+  },
+  "page": {
+    "searchPlaceholder": "Buscar listas de llamadas"
   }
 }

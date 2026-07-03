@@ -122,5 +122,8 @@
     "noUsers": "Keine Benutzer",
     "archive": "Archivieren",
     "done": "{{count}} Aufgaben aktualisiert"
+  },
+  "page": {
+    "searchPlaceholder": "Aufgaben suchen"
   }
 }

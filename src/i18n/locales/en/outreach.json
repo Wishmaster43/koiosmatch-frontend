@@ -69,5 +69,8 @@
     "submit": "Create call list",
     "saving": "Creating…",
     "error": "Creating failed. Please try again."
+  },
+  "page": {
+    "searchPlaceholder": "Search call lists"
   }
 }

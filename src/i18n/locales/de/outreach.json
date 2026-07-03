@@ -69,5 +69,8 @@
     "submit": "Anrufliste erstellen",
     "saving": "Wird erstellt…",
     "error": "Erstellung fehlgeschlagen. Bitte erneut versuchen."
+  },
+  "page": {
+    "searchPlaceholder": "Anruflisten suchen"
   }
 }

@@ -8,7 +8,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, AlertTriangle, X } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, X, Archive } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
@@ -18,6 +18,7 @@ import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import VacanciesTable from './VacanciesTable'
 import VacanciesBulkBar from './VacanciesBulkBar'
 import VacancyDrawer from './VacancyDrawer'
@@ -63,6 +64,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const [selectedOwner,  setSelectedOwner]  = useState<string[]>([])
   const [selectedClient, setSelectedClient] = useState<string[]>([])
   const [globalSearch,   setGlobalSearch]   = useState('')
+  const [showArchived,   setShowArchived]   = useState(false)
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
 
@@ -73,8 +75,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     if (statusBucket !== 'all') p.status      = [statusBucket]
     if (selectedOwner.length)   p.owner_id    = selectedOwner
     if (selectedClient.length)  p.customer_id = selectedClient
+    if (showArchived)           p.include_archived = 1
     return p
-  }, [globalSearch, statusBucket, selectedOwner, selectedClient])
+  }, [globalSearch, statusBucket, selectedOwner, selectedClient, showArchived])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
@@ -201,6 +204,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginLeft: 'auto' }}>
+              {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
+              <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+                label={t('page.archivedView')} icon={Archive} />
               {buckets.map(b => (
                 <button key={b.value} onClick={() => setStatusBucket(b.value)}
                   style={{ padding: '5px 14px', fontSize: 13, fontWeight: statusBucket === b.value ? 600 : 400, borderRadius: 7, cursor: 'pointer',

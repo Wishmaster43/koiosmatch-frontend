@@ -7,7 +7,8 @@
     "loading": "Loading vacancies…",
     "empty": "No vacancies yet.",
     "loadError": "Couldn't load vacancies.",
-    "count": "All vacancies"
+    "count": "All vacancies",
+    "archivedView": "Archived"
   },
   "buckets": {
     "all": "All"

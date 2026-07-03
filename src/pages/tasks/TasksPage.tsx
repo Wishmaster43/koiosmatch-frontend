@@ -325,7 +325,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
               borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
             <Plus size={15} /> {t('add')}
           </button>
-          <HeaderSearch onSearch={setQuery} width={280} />
+          <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
             <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}

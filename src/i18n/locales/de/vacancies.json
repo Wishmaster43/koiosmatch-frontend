@@ -7,7 +7,8 @@
     "loading": "Stellen werden geladen…",
     "empty": "Noch keine Stellen.",
     "loadError": "Stellen konnten nicht geladen werden.",
-    "count": "Alle Stellen"
+    "count": "Alle Stellen",
+    "archivedView": "Archiviert"
   },
   "buckets": {
     "all": "Alle"

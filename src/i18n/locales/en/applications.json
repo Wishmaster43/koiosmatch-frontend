@@ -179,5 +179,8 @@
   "restore": {
     "button": "Restore",
     "done": "Application restored"
+  },
+  "page": {
+    "searchPlaceholder": "Search applications"
   }
 }

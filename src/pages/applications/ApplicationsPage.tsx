@@ -344,7 +344,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
               <Plus size={14} /> {t('add.button')}
             </button>
             {/* Shared header search (T10) — debounced, client-side text filter. */}
-            <HeaderSearch onSearch={setQuery} width={300} />
+            <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={300} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Bucket tabs — soft-tinted active (§4: never a solid fill). */}

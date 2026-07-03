@@ -8,7 +8,8 @@
     "selected": "{{count}} ausgewählt",
     "clearSelection": "Auswahl aufheben",
     "archived": "Archiviert",
-    "archivedView": "Archivierte Chancen anzeigen"
+    "archivedView": "Archivierte Chancen anzeigen",
+    "searchPlaceholder": "Chancen suchen"
   },
   "cols": {
     "title": "Opportunity",

@@ -122,5 +122,8 @@
     "saving": "Saving…",
     "cancel": "Cancel",
     "required": "Required"
+  },
+  "page": {
+    "searchPlaceholder": "Search tasks"
   }
 }

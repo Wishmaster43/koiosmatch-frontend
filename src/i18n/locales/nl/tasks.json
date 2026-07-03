@@ -122,5 +122,8 @@
     "saving": "Opslaan…",
     "cancel": "Annuleren",
     "required": "Verplicht"
+  },
+  "page": {
+    "searchPlaceholder": "Zoek naar taken"
   }
 }

@@ -81,5 +81,8 @@
   },
   "board": {
     "empty": "Aucun match"
+  },
+  "page": {
+    "searchPlaceholder": "Rechercher des matchs"
   }
 }

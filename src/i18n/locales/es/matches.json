@@ -81,5 +81,8 @@
   },
   "board": {
     "empty": "Sin matches"
+  },
+  "page": {
+    "searchPlaceholder": "Buscar coincidencias"
   }
 }

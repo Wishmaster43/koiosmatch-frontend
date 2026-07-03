@@ -17,6 +17,7 @@ import MatchesBulkBar from './MatchesBulkBar'
 import AddMatchModal from './AddMatchModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import HeaderSearch from '@/components/ui/HeaderSearch'
 import { useMatches } from './hooks/useMatches'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import type { MatchRow } from '@/types/match'
@@ -41,6 +42,7 @@ export default function MatchesPage() {
   const [pageSize,    setPageSize]    = useState(() => user?.default_per_page ?? 50)
   const [stageFilter, setStageFilter] = useState<string[]>([])
   const [ownerFilter, setOwnerFilter] = useState<string[]>([])
+  const [query,       setQuery]       = useState('')
   // Bulk selection (checkboxes); accumulates across pages, clears on filter change.
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   const { toggleRow, toggleAll, bulkCoupleHelloFlex, bulkCoupleShiftManager } =
@@ -89,16 +91,18 @@ export default function MatchesPage() {
 
   // Reset to the first page and clear the selection whenever a filter changes
   // (kept out of the memo — setting state during render can loop).
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter, showArchived])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter, showArchived, query])
 
   // Filter the visible rows by donut selection.
   const filteredAll = useMemo(() => {
+    const q = query.trim().toLowerCase()
     return rows.filter(r => {
       if (stageFilter.length && !stageFilter.includes(r.stage)) return false
       if (ownerFilter.length && !ownerFilter.includes(r.owner)) return false
+      if (q && ![r.candidate, r.vacancy, r.client].some(v => String(v ?? '').toLowerCase().includes(q))) return false
       return true
     })
-  }, [rows, stageFilter, ownerFilter])
+  }, [rows, stageFilter, ownerFilter, query])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
@@ -157,7 +161,7 @@ export default function MatchesPage() {
 
       {/* Toolbar — bulk bar or add button (left) + segmented view/archive selector (right) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '0 24px 10px', flexShrink: 0, minHeight: 46 }}>
-        <div style={{ flex: 1, display: 'flex' }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10 }}>
           {selectedIds.size > 0 ? (
             <MatchesBulkBar
               count={selectedIds.size}
@@ -176,6 +180,8 @@ export default function MatchesPage() {
               <Plus size={15} aria-hidden="true" /> {t('add.button')}
             </button>
           )}
+          {/* Shared search — mirror the other list pages (§3A). */}
+          <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={260} />
         </div>
 
         {/* Right — archived (separate, with label) + icon-only view toggle (mirror opportunities) */}

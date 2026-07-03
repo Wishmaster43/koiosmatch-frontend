@@ -197,5 +197,8 @@
     "searchPhase": "Rechercher une phase…",
     "detach": "Dissocier",
     "done": "{{count}} mis(es) à jour"
+  },
+  "page": {
+    "searchPlaceholder": "Rechercher des candidatures"
   }
 }

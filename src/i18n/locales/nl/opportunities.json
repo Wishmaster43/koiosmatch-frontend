@@ -8,7 +8,8 @@
     "selected": "{{count}} geselecteerd",
     "clearSelection": "Selectie wissen",
     "archived": "Gearchiveerd",
-    "archivedView": "Gearchiveerde kansen tonen"
+    "archivedView": "Gearchiveerde kansen tonen",
+    "searchPlaceholder": "Zoek naar kansen"
   },
   "cols": {
     "title": "Kans",

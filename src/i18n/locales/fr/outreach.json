@@ -69,5 +69,8 @@
     "submit": "Créer la liste",
     "saving": "Création…",
     "error": "Échec de la création. Veuillez réessayer."
+  },
+  "page": {
+    "searchPlaceholder": "Rechercher des listes d'appel"
   }
 }

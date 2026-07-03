@@ -7,7 +7,8 @@
     "loading": "Cargando vacantes…",
     "empty": "Aún no hay vacantes.",
     "loadError": "No se pudieron cargar las vacantes.",
-    "count": "Todas las vacantes"
+    "count": "Todas las vacantes",
+    "archivedView": "Archivadas"
   },
   "buckets": {
     "all": "Todas"

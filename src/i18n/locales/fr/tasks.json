@@ -122,5 +122,8 @@
     "noUsers": "Aucun utilisateur",
     "archive": "Archiver",
     "done": "{{count}} tâches mises à jour"
+  },
+  "page": {
+    "searchPlaceholder": "Rechercher des tâches"
   }
 }

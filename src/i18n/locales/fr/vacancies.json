@@ -7,7 +7,8 @@
     "loading": "Chargement des postes…",
     "empty": "Aucun poste pour le moment.",
     "loadError": "Impossible de charger les postes.",
-    "count": "Tous les postes"
+    "count": "Tous les postes",
+    "archivedView": "Archivées"
   },
   "buckets": {
     "all": "Tous"

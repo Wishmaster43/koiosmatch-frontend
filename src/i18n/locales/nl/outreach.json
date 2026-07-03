@@ -69,5 +69,8 @@
     "submit": "Bellijst aanmaken",
     "saving": "Aanmaken…",
     "error": "Aanmaken is mislukt. Probeer het opnieuw."
+  },
+  "page": {
+    "searchPlaceholder": "Zoek naar bellijsten"
   }
 }

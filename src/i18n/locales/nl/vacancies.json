@@ -7,7 +7,8 @@
     "loading": "Vacatures laden…",
     "empty": "Nog geen vacatures.",
     "loadError": "Vacatures laden is mislukt.",
-    "count": "Alle vacatures"
+    "count": "Alle vacatures",
+    "archivedView": "Gearchiveerd"
   },
   "buckets": {
     "all": "Alle"

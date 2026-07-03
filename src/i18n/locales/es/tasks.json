@@ -122,5 +122,8 @@
     "noUsers": "Sin usuarios",
     "archive": "Archivar",
     "done": "{{count}} tareas actualizadas"
+  },
+  "page": {
+    "searchPlaceholder": "Buscar tareas"
   }
 }
