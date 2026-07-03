@@ -36,7 +36,7 @@ function LoginShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen" style={{ background: 'var(--bg)' }}>
       {/* Left — brand hero: a balanced Koios agent on a calm wash of the three brand colours. */}
-      <div className="relative flex-col hidden w-1/2 p-12 overflow-hidden lg:flex xl:w-[55%]"
+      <div className="relative flex-col items-center hidden w-1/2 p-12 overflow-hidden text-center lg:flex xl:w-[55%]"
         style={{ background: [
           'radial-gradient(90% 70% at 14% 6%, color-mix(in srgb, var(--color-primary) 20%, transparent), transparent 56%)',
           'radial-gradient(85% 75% at 92% 26%, color-mix(in srgb, var(--color-secondary) 17%, transparent), transparent 56%)',
@@ -45,19 +45,14 @@ function LoginShell({ children }: { children: ReactNode }) {
         ].join(', ') }}>
         <Wordmark className="relative" />
 
-        {/* Headline + tagline — above the illustration, sharp hierarchy + whitespace. */}
-        <div className="relative mt-10" style={{ maxWidth: 480 }}>
-          <p className="mb-2 font-semibold leading-tight" style={{ color: 'var(--sidebar-text)', fontSize: 30 }}>
-            {t('brand.line1')} {t('brand.line2')}
-          </p>
-          <p className="leading-relaxed" style={{ color: 'var(--sidebar-muted)', fontSize: 15 }}>
-            {t('brand.sub')}
-          </p>
-        </div>
+        {/* Brand statement — the single headline, centred above the illustration. */}
+        <p className="relative mt-10 font-semibold leading-snug" style={{ color: 'var(--sidebar-text)', fontSize: 27, maxWidth: 520 }}>
+          {t('brand.sub')}
+        </p>
 
         {/* Agent — balanced hero: centred with breathing room, capped so it never dominates or crops. */}
         <div className="relative flex items-center justify-center flex-1 min-h-0 py-6">
-          <img src="/koios-agent.png" alt="Koios AI agent"
+          <img src="/koios-agent.jpg" alt="Koios AI agent"
             className="object-contain rounded-3xl"
             style={{ maxHeight: '58%', maxWidth: '80%', filter: 'drop-shadow(0 12px 48px rgba(25,165,202,0.28))' }} />
         </div>
