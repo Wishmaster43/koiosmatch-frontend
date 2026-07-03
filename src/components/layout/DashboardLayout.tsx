@@ -3,7 +3,7 @@
  * [Left nav] [Topbar + Content] [Right filter panel (optional)]
  * Owns the active-page + panel state; the page itself comes from renderPage().
  */
-import { useState, useEffect, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import type { ComponentType } from 'react'
 import { SlidersHorizontal, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
@@ -16,6 +16,7 @@ import { renderPage, PAGE_TITLES } from './appPages'
 import { NavigationProvider } from '@/context/NavigationContext'
 import DashboardSwitcher from '@/pages/dashboard/DashboardSwitcher'
 import NotificationBell from '@/components/layout/NotificationBell'
+import { useTenantTheme } from '@/hooks/useTenantTheme'
 import { DASHBOARD_TYPES, canSwitchViews } from '@/pages/dashboard/templates'
 import type { DashboardType } from '@/pages/dashboard/templates'
 import type { ReportFilterGroup } from '@/types/reports'
@@ -42,21 +43,6 @@ function NoAccessPage() {
       </div>
     </div>
   )
-}
-
-/**
- * useTenantTheme — applies CSS variables based on tenant branding.
- * Backend returns { primary_color, logo_url } via /api/auth/me.
- */
-function useTenantTheme(tenant?: { primary_color?: string } | null) {
-  useEffect(() => {
-    if (!tenant) return
-    const root = document.documentElement
-    if (tenant.primary_color) {
-      root.style.setProperty('--color-primary',    tenant.primary_color)
-      root.style.setProperty('--color-primary-bg', tenant.primary_color + '18')
-    }
-  }, [tenant])
 }
 
 export default function DashboardLayout() {
