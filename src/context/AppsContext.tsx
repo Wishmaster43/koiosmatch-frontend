@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import api from '../lib/api'
-import { COOKIE_AUTH } from '../lib/authMode'
+import { useAuth } from './AuthContext'
 
 /**
  * AppsContext — which paid add-on "apps" are enabled for the current tenant.
@@ -99,15 +99,15 @@ export function AppsProvider({ children }: { children: ReactNode }) {
     try { return JSON.parse(localStorage.getItem('enabled_apps') ?? '[]') as string[] } catch { return [] }
   })
   const [loading, setLoading] = useState(true)
+  // Session state gates the fetch — the provider mounts before login (App shell order).
+  const { user } = useAuth() ?? {}
 
   // Fetch the authoritative enabled-apps list once on mount and update the cache.
   // Backend contract: GET /settings/apps returns { enabled: ["whatsapp", ...] }.
   useEffect(() => {
-    // Cookie mode has no JS-visible token — let the request go and rely on 401.
-    if (!COOKIE_AUTH && !localStorage.getItem('auth_token')) {
-      setLoading(false)
-      return
-    }
+    // No session yet → cached/default apps and stay quiet (no pre-login 401);
+    // the effect re-runs the moment the user logs in (or switches tenant).
+    if (!user) { setLoading(false); return }
     api.get('/settings/apps')
       .then(res => {
         const list = res.data?.enabled ?? res.data ?? []
@@ -116,7 +116,8 @@ export function AppsProvider({ children }: { children: ReactNode }) {
       })
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch per login/tenant-switch
+  }, [user?.id])
 
   // True if the given app ID is currently enabled (used to gate UI/modules).
   const isAppEnabled = (appId: string) => enabled.includes(appId)

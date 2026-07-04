@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import api from '../lib/api'
-import { COOKIE_AUTH } from '../lib/authMode'
+import { useAuth } from './AuthContext'
 
 /**
  * LookupsContext — the tenant-configurable candidate lookups.
@@ -142,10 +142,13 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
   const [statuses,       setStatuses]       = useState<LookupItem[]>(DEFAULT_STATUSES)
   const [availability] = useState<LookupItem[]>(DEFAULT_AVAILABILITY)
   const [loading,        setLoading]        = useState(true)
+  // Session state gates the fetch — providers mount before login (App shell order).
+  const { user } = useAuth() ?? {}
 
   useEffect(() => {
-    // Cookie mode has no JS-visible token — let the request go and rely on 401.
-    if (!COOKIE_AUTH && !localStorage.getItem('auth_token')) { setLoading(false); return }
+    // No session yet → keep the seeds and stay quiet (no pre-login 401 in the console);
+    // the effect re-runs the moment the user logs in (or switches tenant).
+    if (!user) { setLoading(false); return }
     api.get('/settings/candidate-lookups')
       .then(res => {
         const d = res.data ?? {}
@@ -159,7 +162,8 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
     // C-39: availability was merged into the status axis (v2) and the
     // /availability-options endpoint was removed backend-side — keep the seed
     // default and stop fetching (kills the 404). Full removal of the axis is C-39.
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- refetch per login/tenant-switch
+  }, [user?.id])
 
   // value → item helpers (with a neutral fallback so the UI never crashes).
   const find = (list: LookupItem[], value?: string | null) => list.find(i => i.value === value)
