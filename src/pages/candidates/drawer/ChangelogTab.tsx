@@ -15,12 +15,23 @@ interface H2Props { axis?: string; from?: string | null; to?: string | null; eff
 // Backend field key → a readable label (dynamic keys aren't all translatable).
 const humanizeField = (f: string) => f.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^\w/, c => c.toUpperCase())
 
-// Per-field changes from a Spatie Activitylog properties bag ({ attributes, old }).
+// Bookkeeping fields carry no user meaning — never show them as diff rows.
+const NOISE_FIELDS = new Set(['id', 'tenant_id', 'external_id', 'updated_at', 'created_at', 'remember_token', 'password'])
+
+// Raw references / machine formats the reader can't interpret.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+const DATE_RE = /^\d{4}-\d{2}-\d{2}([T ]|$)/
+
+// Per-field changes from the diff bag — the current resource sends `changes`,
+// older payloads sent `properties` (both Spatie { attributes, old } shape).
 const changesOf = (ev: ActivityEvent): Array<{ field: string; old: unknown; next: unknown }> => {
-  const attrs = ev.properties?.attributes
+  const bag = ev.changes ?? ev.properties
+  const attrs = bag?.attributes
   if (!attrs || typeof attrs !== 'object') return []
-  const old = (ev.properties?.old ?? {}) as Record<string, unknown>
-  return Object.keys(attrs).map(field => ({ field, old: old[field], next: (attrs as Record<string, unknown>)[field] }))
+  const old = (bag?.old ?? {}) as Record<string, unknown>
+  return Object.keys(attrs)
+    .filter(field => !NOISE_FIELDS.has(field))
+    .map(field => ({ field, old: old[field], next: (attrs as Record<string, unknown>)[field] }))
 }
 
 /**
@@ -34,14 +45,15 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   const { items, loading, error } = useCandidateActivity(c?.id)
-  // Lookup meta so H2 transition values render as their tenant labels (not slugs).
-  const { statusMeta, phaseMeta } = useLookups() as unknown as {
+  // Lookup meta so transition/diff values render as their tenant labels (not slugs).
+  const { statusMeta, phaseMeta, funnelMeta, typeMeta } = useLookups() as unknown as {
     statusMeta: (v: string) => { label: string }; phaseMeta: (v: string) => { label: string }
+    funnelMeta: (v: string) => { label: string }; typeMeta: (v: string) => { label: string }
   }
 
-  // One readable line for an H2 status/phase transition entry.
+  // One readable line for an H2 status/phase transition entry (either payload key).
   const h2Line = (ev: ActivityEvent): string | null => {
-    const p = ev.properties as H2Props | undefined
+    const p = (ev.properties ?? ev.changes) as H2Props | undefined
     if (!p?.axis || !p?.to) return null
     const meta = p.axis === 'phase' ? phaseMeta : statusMeta
     const label = (v?: string | null) => (v ? meta(v).label : t('changelog.emptyValue'))
@@ -54,11 +66,35 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
     ].filter(Boolean).join(' · ')
   }
 
-  // Render a before/after value calmly: empty → "Leeg", booleans → Yes/No.
-  const fmtVal = (v: unknown): string => {
+  // Field key → translated label; unknown keys degrade to a humanized form.
+  const fieldLabel = (f: string) => t(`changelog.fields.${f}`, { defaultValue: humanizeField(f) })
+
+  // Render a before/after value calmly: empty → "Leeg", booleans → Ja/Nee, lookup
+  // slugs → tenant labels, ISO dates → DD-MM-YYYY. Returns null for a raw uuid
+  // reference the reader can't interpret (the row then says "bijgewerkt" instead).
+  const fmtVal = (field: string, v: unknown): string | null => {
     if (v === null || v === undefined || v === '') return t('changelog.emptyValue')
     if (typeof v === 'boolean') return v ? t('common:yes') : t('common:no')
-    return String(v)
+    if (Array.isArray(v)) {
+      const meta = field === 'candidate_types' ? typeMeta : null
+      return v.map(x => (meta ? meta(String(x)).label : String(x))).join(', ') || t('changelog.emptyValue')
+    }
+    const s = String(v)
+    if (field === 'status')       return statusMeta(s).label
+    if (field === 'phase')        return phaseMeta(s).label
+    if (field === 'funnel_type')  return funnelMeta(s).label
+    if (UUID_RE.test(s))          return null
+    if (DATE_RE.test(s))          return formatDate(s)
+    return s
+  }
+
+  // Friendly action line: bare Spatie verbs ("updated") become readable text; a real
+  // human description from the backend always wins.
+  const actionLine = (ev: ActivityEvent): string => {
+    const d = ev.description
+    if (d && !['updated', 'created', 'deleted', 'restored', ev.log_name].includes(d)) return d
+    const verb = ev.event ?? d ?? 'updated'
+    return t(`changelog.actions.${verb}`, { defaultValue: d ?? verb })
   }
 
   const body = (
@@ -87,18 +123,29 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
               <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{ev.causer_name || t('changelog.system')}</span>
               <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{formatDate(ev.created_at)}</span>
             </div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ev.description || ev.log_name}</div>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{actionLine(ev)}</div>
             {/* H2 provenance: "Status: Beschikbaar → Ziek · reden opgegeven · per 01-08-2026". */}
             {h2Line(ev) && <div style={{ fontSize: 12, color: 'var(--text)', marginTop: 3 }}>{h2Line(ev)}</div>}
-            {/* Field-level diffs (HelloFlex-style): one "field: old → new" row per change. */}
-            {changesOf(ev).map(ch => (
-              <div key={ch.field} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, fontSize: 12, marginTop: 3 }}>
-                <span style={{ fontWeight: 500, color: 'var(--text)' }}>{humanizeField(ch.field)}</span>
-                <span style={{ color: 'var(--text-muted)' }}>{fmtVal(ch.old)}</span>
-                <ArrowRight size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
-                <span style={{ color: 'var(--text)' }}>{fmtVal(ch.next)}</span>
-              </div>
-            ))}
+            {/* Field-level diffs: "Veld: oud → nieuw" with translated labels + resolved values;
+                a raw reference (uuid) the reader can't interpret renders as "Veld · bijgewerkt". */}
+            {changesOf(ev).map(ch => {
+              const oldVal = fmtVal(ch.field, ch.old)
+              const nextVal = fmtVal(ch.field, ch.next)
+              return (
+                <div key={ch.field} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, fontSize: 12, marginTop: 3 }}>
+                  <span style={{ fontWeight: 500, color: 'var(--text)' }}>{fieldLabel(ch.field)}</span>
+                  {(oldVal === null || nextVal === null) ? (
+                    <span style={{ color: 'var(--text-muted)' }}>{t('changelog.updatedValue')}</span>
+                  ) : (
+                    <>
+                      <span style={{ color: 'var(--text-muted)' }}>{oldVal}</span>
+                      <ArrowRight size={11} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+                      <span style={{ color: 'var(--text)' }}>{nextVal}</span>
+                    </>
+                  )}
+                </div>
+              )
+            })}
             {ev.ip && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>{t('changelog.fromIp', { ip: ev.ip })}</div>}
           </div>
         </div>
