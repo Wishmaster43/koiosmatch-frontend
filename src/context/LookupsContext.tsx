@@ -87,9 +87,12 @@ export const DEFAULT_FUNNEL_TYPES: LookupItem[] = [
 export const DEFAULT_STATUSES: LookupItem[] = [
   { value: 'available',   label: 'Beschikbaar',      color: '#79B58E' },
   { value: 'placed',      label: 'Geplaatst',        color: '#6E8FD6', requires_match: true },
+  // Flags MUST mirror the backend guard (CandidateStatusGuard): sick/leave also require
+  // a reason — a seed without it races the lookups fetch into a reason-less PATCH → 422
+  // (caught by the cookie-mode smoke on the slower proxy, 2026-07-04).
   { value: 'unavailable', label: 'Niet beschikbaar', color: '#C9AC64', requires_reason: true, expects_return_date: true },
-  { value: 'sick',        label: 'Ziek',             color: '#D98A8A', expects_return_date: true },
-  { value: 'leave',       label: 'Verlof',           color: '#6FA8C4', expects_return_date: true },
+  { value: 'sick',        label: 'Ziek',             color: '#D98A8A', requires_reason: true, expects_return_date: true },
+  { value: 'leave',       label: 'Verlof',           color: '#6FA8C4', requires_reason: true, expects_return_date: true },
   { value: 'blacklist',   label: 'Blacklist',        color: '#D14B4B', requires_reason: true, is_blacklist: true },
 ]
 
