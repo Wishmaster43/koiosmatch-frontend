@@ -106,7 +106,19 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
 
   // ── Donut data (status / owner / client) — stats first, page-derived fallback ──
   const statusData = useMemo<Aggregate[]>(() => {
-    if (s?.by_status) return s.by_status.map(o => { const v = o.value ?? o.status; const m = statusMeta(v); return { name: m.label ?? '', value: o.count ?? 0, key: String(v ?? ''), color: m.color } })
+    if (s?.by_status) {
+      // Stats carry bare uuid's; resolve label/colour via the lookup OR the loaded rows
+      // (the seed created two status sets — VAC-SEED-1 — so the lookup alone can miss).
+      const rowMeta = new Map(vacancies.filter(v => v.statusValue).map(v => [String(v.statusValue), { label: v.statusLabel, color: v.statusColor }]))
+      return s.by_status.map(o => {
+        const v = o.value ?? o.status
+        // 41/71 seeded vacancies have NO status — a real, named segment (not clickable-to-nothing).
+        if (v == null) return { name: t('insights.noStatus'), value: o.count ?? 0, key: '__none', color: '#9CA3AF' }
+        const m = statusMeta(v)
+        const rm = rowMeta.get(String(v))
+        return { name: m.label || rm?.label || t('insights.noStatus'), value: o.count ?? 0, key: String(v), color: (m.label ? m.color : rm?.color) ?? '#9CA3AF' }
+      })
+    }
     return statuses.map(st => ({ name: st.label, key: st.value, color: st.color, value: vacancies.filter(v => v.statusValue === st.value).length })).filter(d => d.value > 0)
   }, [s, statuses, vacancies, statusMeta])
   const ownerData = useMemo<Aggregate[]>(() => {
@@ -159,7 +171,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // ── Insights strip: 3 donuts + funnel-phase KPI cards ──
   const insightDonuts: DonutSpec[] = [
     { key: 'status', title: t('insights.statusTitle'), data: statusData,
-      onPick: d => { const k = pickKey(d); setStatusBucket(prev => (prev === k ? 'all' : (k ?? 'all'))) },
+      onPick: d => { const k = pickKey(d); if (k === '__none') return; setStatusBucket(prev => (prev === k ? 'all' : (k ?? 'all'))) },
       active: statusBucket !== 'all', onClear: () => setStatusBucket('all') },
     { key: 'owner',  title: t('insights.ownerTitle'),  data: ownerData,  onPick: d => pickOne(setSelectedOwner)(pickKey(d)),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
     { key: 'client', title: t('insights.clientTitle'), data: clientData, onPick: d => pickOne(setSelectedClient)(pickKey(d)), active: selectedClient.length > 0, onClear: () => setSelectedClient([]) },

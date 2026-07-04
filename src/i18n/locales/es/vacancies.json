@@ -32,7 +32,8 @@
     "statusTitle": "Estado",
     "ownerTitle": "Reclutador",
     "clientTitle": "Cliente",
-    "clearFilter": "Borrar filtro"
+    "clearFilter": "Borrar filtro",
+    "noStatus": "Sin estado"
   },
   "kpi": {
     "applied": "Postulado",

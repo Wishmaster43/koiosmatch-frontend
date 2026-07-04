@@ -32,7 +32,8 @@
     "statusTitle": "Status",
     "ownerTitle": "Recruiter",
     "clientTitle": "Klant",
-    "clearFilter": "Filter wissen"
+    "clearFilter": "Filter wissen",
+    "noStatus": "Geen status"
   },
   "kpi": {
     "applied": "Gesolliciteerd",

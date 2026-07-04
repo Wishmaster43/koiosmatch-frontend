@@ -32,7 +32,8 @@
     "statusTitle": "Status",
     "ownerTitle": "Recruiter",
     "clientTitle": "Kunde",
-    "clearFilter": "Filter zurücksetzen"
+    "clearFilter": "Filter zurücksetzen",
+    "noStatus": "Kein Status"
   },
   "kpi": {
     "applied": "Beworben",

@@ -32,7 +32,8 @@
     "statusTitle": "Status",
     "ownerTitle": "Recruiter",
     "clientTitle": "Client",
-    "clearFilter": "Clear filter"
+    "clearFilter": "Clear filter",
+    "noStatus": "No status"
   },
   "kpi": {
     "applied": "Applied",
