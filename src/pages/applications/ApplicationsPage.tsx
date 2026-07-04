@@ -66,6 +66,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const [selected,     setSelected]     = useState<ApplicationDetail | null>(null)
   const [expanded,     setExpanded]     = useState(false)
   const [selectedPhase,  setSelectedPhase]  = useState<string[]>([])
+  // KPI-card attention toggle: null | 'new' | 'scored' | 'aiTasks' (one at a time).
+  const [attention, setAttention] = useState<string | null>(null)
+  const toggleAttention = (k: string) => setAttention(p => (p === k ? null : k))
   const [selectedOwner,  setSelectedOwner]  = useState<string[]>([])
   const [selectedSource, setSelectedSource] = useState<string[]>([])
   const [selectedVac,    setSelectedVac]    = useState<string[]>([])
@@ -162,7 +165,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Reset to the first page whenever the bucket or any filter changes.
-  useEffect(() => { setPage(1) }, [bucket, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived, query])
+  useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived, query])
 
   // The visible rows: bucket + phase/owner/source/vacancy filters, decorated.
   const filteredAll = useMemo(() => {
@@ -175,6 +178,10 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
       if (selectedOwner.length  && !selectedOwner.includes(a.owner?.name || OWNER_NONE)) return false
       if (selectedSource.length && !selectedSource.includes(a.source))          return false
       if (selectedVac.length    && !selectedVac.includes(String(a.vacancyId)))  return false
+      // KPI attention filters (mirror the card definitions above).
+      if (attention === 'new'     && !(a.isNew && a.bucket === 'active'))       return false
+      if (attention === 'scored'  && !(typeof a.score === 'number' && a.bucket !== 'rejected')) return false
+      if (attention === 'aiTasks' && !(a.task && a.bucket === 'active'))        return false
       // Free-text search across candidate · vacancy · source (client-side; mirrors candidates).
       if (query.trim()) {
         const q = query.trim().toLowerCase()
@@ -182,7 +189,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
       }
       return true
     }).map(decorate)
-  }, [applications, bucket, showArchived, selectedPhase, selectedOwner, selectedSource, selectedVac, query, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [applications, bucket, showArchived, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, query, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Clientside pagination slice (the endpoint returns all rows at once).
   const totalRows  = filteredAll.length
@@ -318,15 +325,20 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // KPI cards — mirror the candidate strip: count + sub-line, click-to-filter where it maps.
   const insightKpis: KpiSpec[] = [
     { key: 'totalActive', label: t('kpi.totalActive'), value: bucketCount('active') + bucketCount('matched'),
-      sub: t('kpi.totalActiveSub'), color: 'var(--color-primary)' },
+      sub: t('kpi.totalActiveSub'), color: 'var(--color-primary)',
+      onClick: () => { setShowArchived(false); setBucket('active'); setAttention(null) },
+      active: !showArchived && bucket === 'active' && attention === null },
     { key: 'new', label: t('kpi.new'), value: applications.filter(a => a.isNew && a.bucket === 'active').length,
-      sub: t('kpi.newSub'), color: 'var(--color-warning)' },
+      sub: t('kpi.newSub'), color: 'var(--color-warning)',
+      onClick: () => { setShowArchived(false); setBucket('active'); toggleAttention('new') }, active: attention === 'new' },
     { key: 'matched', label: t('kpi.matched'), value: bucketCount('matched'), sub: t('kpi.matchedSub'),
       color: 'var(--color-success)', onClick: () => { setShowArchived(false); setBucket('matched') }, active: !showArchived && bucket === 'matched' },
     { key: 'rejected', label: t('kpi.rejected'), value: bucketCount('rejected'), sub: t('kpi.rejectedSub'),
       color: 'var(--color-danger)', onClick: () => { setShowArchived(false); setBucket('rejected') }, active: !showArchived && bucket === 'rejected' },
-    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore, sub: t('kpi.avgScoreSub'), color: '#8B5CF6' },
-    { key: 'aiTasks', label: t('kpi.aiTasks'), value: aiTaskCount, sub: t('kpi.aiTasksSub'), color: '#0D9488' },
+    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore, sub: t('kpi.avgScoreSub'), color: '#8B5CF6',
+      onClick: () => { setShowArchived(false); toggleAttention('scored') }, active: attention === 'scored' },
+    { key: 'aiTasks', label: t('kpi.aiTasks'), value: aiTaskCount, sub: t('kpi.aiTasksSub'), color: '#0D9488',
+      onClick: () => { setShowArchived(false); setBucket('active'); toggleAttention('aiTasks') }, active: attention === 'aiTasks' },
   ]
 
   return (

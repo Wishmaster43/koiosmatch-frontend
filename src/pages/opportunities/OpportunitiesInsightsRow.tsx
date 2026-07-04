@@ -33,6 +33,8 @@ interface OpportunitiesInsightsRowProps {
   onClearOwner: () => void
   onPickClient: (d: unknown) => void
   onClearClient: () => void
+  // Direct setter for the stage filter — the KPI cards drive it (won/lost/open/closed).
+  onSetStageFilter: (labels: string[]) => void
 }
 
 /**
@@ -44,6 +46,7 @@ interface OpportunitiesInsightsRowProps {
 export default function OpportunitiesInsightsRow({
   rows, stages, valueInHours, stage, owner, client,
   onPickStage, onClearStage, onPickOwner, onClearOwner, onPickClient, onClearClient,
+  onSetStageFilter,
 }: OpportunitiesInsightsRowProps) {
   const { t } = useTranslation('opportunities')
 
@@ -78,13 +81,31 @@ export default function OpportunitiesInsightsRow({
     { key: 'owner',  title: t('insights.owner'),  data: ownerData,  onPick: onPickOwner,  active: owner.length > 0,  onClear: onClearOwner,  picked: owner[0] ?? null },
     { key: 'client', title: t('insights.client'), data: clientData, onPick: onPickClient, active: client.length > 0, onClear: onClearClient, picked: client[0] ?? null },
   ]
+  // KPI clicks drive the stage filter (Danny: every card must DO something):
+  // won/lost → that terminal stage; open/pipeline/avg → the running stages;
+  // winrate → the closed stages. Clicking the active card again clears.
+  const wonLabel   = stages.find(s => s.isWon)?.label
+  const lostLabel  = stages.find(s => s.isLost)?.label
+  const openLabels = stages.filter(s => !s.isWon && !s.isLost).map(s => s.label)
+  const eqSet = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join('|') === [...b].sort().join('|')
+  const toggleStages = (labels: (string | undefined)[]) => {
+    const clean = labels.filter((l): l is string => !!l)
+    if (clean.length) onSetStageFilter(eqSet(stage, clean) ? [] : clean)
+  }
+  const activeIs = (labels: (string | undefined)[]) => eqSet(stage, labels.filter((l): l is string => !!l))
   const kpis: KpiSpec[] = [
-    { key: 'open',     label: t('kpi.open'),                                   value: open,     color: 'var(--color-primary)' },
-    { key: 'pipeline', label: t(valueInHours ? 'kpi.pipelineHours' : 'kpi.pipeline'), value: pipeline, color: 'var(--color-success)' },
-    { key: 'avg',      label: t(valueInHours ? 'kpi.avgHours' : 'kpi.avg'),    value: avg,      color: 'var(--text)' },
-    { key: 'won',      label: t('kpi.won'),                                    value: won,      color: 'var(--color-success)' },
-    { key: 'lost',     label: t('kpi.lost'),                                   value: lost,     color: 'var(--color-danger)' },
-    { key: 'winrate',  label: t('kpi.winRate'),                                value: winRate,  color: 'var(--color-warning)' },
+    { key: 'open',     label: t('kpi.open'),                                   value: open,     color: 'var(--color-primary)',
+      onClick: () => toggleStages(openLabels), active: activeIs(openLabels) },
+    { key: 'pipeline', label: t(valueInHours ? 'kpi.pipelineHours' : 'kpi.pipeline'), value: pipeline, color: 'var(--color-success)',
+      onClick: () => toggleStages(openLabels), active: activeIs(openLabels) },
+    { key: 'avg',      label: t(valueInHours ? 'kpi.avgHours' : 'kpi.avg'),    value: avg,      color: 'var(--text)',
+      onClick: () => toggleStages(openLabels), active: activeIs(openLabels) },
+    { key: 'won',      label: t('kpi.won'),                                    value: won,      color: 'var(--color-success)',
+      onClick: () => toggleStages([wonLabel]), active: activeIs([wonLabel]) },
+    { key: 'lost',     label: t('kpi.lost'),                                   value: lost,     color: 'var(--color-danger)',
+      onClick: () => toggleStages([lostLabel]), active: activeIs([lostLabel]) },
+    { key: 'winrate',  label: t('kpi.winRate'),                                value: winRate,  color: 'var(--color-warning)',
+      onClick: () => toggleStages([wonLabel, lostLabel]), active: activeIs([wonLabel, lostLabel]) },
   ]
 
   return <InsightsRow donuts={donuts} kpis={kpis} clearTitle={t('insights.clearFilter')} />

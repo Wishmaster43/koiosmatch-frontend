@@ -120,6 +120,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
             onPickStage={pickOne(setStage)} onClearStage={() => setStage([])}
             onPickOwner={pickOne(setOwner)} onClearOwner={() => setOwner([])}
             onPickClient={pickOne(setClient)} onClearClient={() => setClient([])}
+            onSetStageFilter={setStage}
           />
 
           {/* Toolbar — add on the LEFT, archived + view toggle on the RIGHT (mirror candidates). */}
