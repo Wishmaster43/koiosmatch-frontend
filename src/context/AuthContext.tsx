@@ -204,8 +204,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const { token, tenant } = res.data
-    // Bearer mode stores the token; cookie mode has no token in the body.
-    if (token) localStorage.setItem('auth_token', token)
+    // Bearer mode stores the token. In COOKIE mode the session cookie carries auth —
+    // NEVER store a body token (the API still sends one; storing it would put an
+    // XSS-readable credential right back in localStorage — Danny's 2026-07-04 catch).
+    if (!COOKIE_AUTH && token) localStorage.setItem('auth_token', token)
     const u = applyAuthResponse(res.data)
 
     if (tenant?.id) {
@@ -239,7 +241,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const verifyMfa = async (mfaToken: string, code: string): Promise<AuthUser> => {
     const res = await api.post('/auth/mfa/verify', { mfa_token: mfaToken, code })
     const { token, tenant } = res.data
-    if (token) localStorage.setItem('auth_token', token)  // cookie mode: no body token
+    // Same rule as login(): cookie mode never stores the body token (see above).
+    if (!COOKIE_AUTH && token) localStorage.setItem('auth_token', token)
     const u = applyAuthResponse(res.data)
 
     if (tenant?.id) {

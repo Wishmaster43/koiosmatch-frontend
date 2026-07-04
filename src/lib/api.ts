@@ -48,6 +48,10 @@ export async function primeCsrf(): Promise<void> {
   await axios.get(CSRF_COOKIE_URL, { withCredentials: true })
 }
 
+// D1: in cookie mode a LEGACY bearer token left behind by the old flow is a live
+// XSS-readable credential (it may still be valid server-side) — purge it at boot.
+if (COOKIE_AUTH) localStorage.removeItem('auth_token')
+
 /**
  * Request interceptor — attaches the saved auth token + active tenant.
  *
@@ -132,7 +136,9 @@ api.interceptors.response.use(
     const safeUrl = url
       .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, ':id')
       .replace(/\/\d+(?=\/|$|\?)/g, '/:id')
-    if (import.meta.env.DEV && !benignTenants403 && !benignUnavailable && !benignOptional404) {
+    // 401 = auth state (pre-login boot calls / expired session), handled centrally by
+    // the redirect below — logging each one only alarms whoever reads the console.
+    if (import.meta.env.DEV && status !== 401 && !benignTenants403 && !benignUnavailable && !benignOptional404) {
       console.error('API Error:', status, method.toUpperCase(), safeUrl)
     }
 
