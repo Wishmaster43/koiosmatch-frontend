@@ -59,7 +59,6 @@ import TenantUsageSettings from './sections/TenantUsageSettings'
 import WhatsAppSettings from './sections/WhatsAppSettings'
 import ImporterenSettings from './sections/ImporterenSettings'
 import ApiKeysSettings from './sections/apikeys'
-import MessagingSettings from './sections/messaging'
 import EmailLog from './sections/EmailLog'
 import WhatsAppLog from './sections/WhatsAppLog'
 import KoiosSettings from './sections/koios'
@@ -237,7 +236,6 @@ export const NAV_GROUPS = [
     key: 'whatsapp', icon: MessageCircle,
     items: [
       { id: 'whatsapp', icon: MessageCircle, component: WhatsAppSettings, requiresPage: 'whatsapp' },
-      { id: 'messaging', icon: MessageSquare, component: MessagingSettings },
       { id: 'whatsapp_log', icon: ClipboardList, component: WhatsAppLog },
     ],
   },

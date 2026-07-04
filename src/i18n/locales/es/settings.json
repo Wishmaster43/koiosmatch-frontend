@@ -101,7 +101,6 @@
     "availability": "Disponibilidad",
     "automatch": "Reglas de coincidencia",
     "planning_board": "Tablero de planificación",
-    "messaging": "WhatsApp Privado",
     "koios": "Koios AI",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
@@ -1146,61 +1145,6 @@
     "board": {
       "title": "Tablero de planificación",
       "desc": "Columnas y diseño predeterminado del tablero de planificación."
-    }
-  },
-  "messaging": {
-    "title": "Mensajería",
-    "subtitle": "Límites, costes y retención de tu tráfico de mensajes.",
-    "loadError": "No se pudieron cargar los datos.",
-    "tab": {
-      "limits": "Límites",
-      "queue": "Cola",
-      "costs": "Costes",
-      "retention": "Retención"
-    },
-    "queue": {
-      "subtitle": "Cola para mensajes personales de WhatsApp: velocidad de envío por número y la prioridad por tipo de mensaje.",
-      "rateLabel": "Velocidad de envío por número",
-      "rateHelp": "Protege el número frente a bloqueos. La cola no envía más rápido que esto.",
-      "rateUnit": "mensajes/hora",
-      "typesTitle": "Tipos de mensaje",
-      "typesSubtitle": "El orden define la prioridad: lo de arriba se envía primero (p. ej. una candidatura antes que un cumpleaños).",
-      "typesAdd": "Añadir tipo",
-      "knownTitle": "Contactos conocidos",
-      "knownHelp": "Números con los que ya hay conversación — límite amplio, bajo riesgo de bloqueo.",
-      "newTitle": "Números nuevos / desconocidos",
-      "newHelp": "Primer mensaje a un número nuevo — estrictamente limitado para evitar bloqueos. La cola envía por prioridad dentro de estos límites.",
-      "perHour": "por hora",
-      "perDay": "por día",
-      "perWeek": "por semana",
-      "limitsSaved": "Límites guardados"
-    },
-    "limits": {
-      "subtitle": "Configura el límite de mensajes. El techo lo fijamos nosotros y no se puede superar.",
-      "label": "Límite de mensajes",
-      "unit": "por día",
-      "ceiling": "Techo: {{value}} {{unit}}",
-      "overCeiling": "Máximo {{value}} {{unit}} permitidos."
-    },
-    "costs": {
-      "subtitle": "Uso y costes de este periodo.",
-      "numbers": "Números de teléfono",
-      "waba": "Mensajes de WhatsApp Business",
-      "base": "Tarifa base",
-      "total": "Total",
-      "byNumber": "Por número",
-      "messages": "{{count}} mensajes"
-    },
-    "retention": {
-      "subtitle": "Cuánto tiempo se conservan los mensajes. El periodo efectivo es el menor de los dos.",
-      "tenant": "Organización",
-      "tenantHint": "Se aplica a toda la organización",
-      "own": "Personal",
-      "ownHint": "Solo tus mensajes",
-      "days": "días",
-      "effective": "Retención efectiva:",
-      "effectiveDays": "{{count}} días",
-      "unlimited": "Ilimitado"
     }
   },
   "smKpis": {

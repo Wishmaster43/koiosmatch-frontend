@@ -101,7 +101,6 @@
     "availability": "Verfügbarkeit",
     "automatch": "Auto-Match-Regeln",
     "planning_board": "Planungstafel",
-    "messaging": "WhatsApp Privat",
     "koios": "Koios AI",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
@@ -1146,61 +1145,6 @@
     "board": {
       "title": "Planungstafel",
       "desc": "Spalten und Standardansicht der Planungstafel."
-    }
-  },
-  "messaging": {
-    "title": "Nachrichten",
-    "subtitle": "Limits, Kosten und Aufbewahrung für Ihren Nachrichtenverkehr.",
-    "loadError": "Daten konnten nicht geladen werden.",
-    "tab": {
-      "limits": "Limits",
-      "queue": "Warteschlange",
-      "costs": "Kosten",
-      "retention": "Aufbewahrung"
-    },
-    "queue": {
-      "subtitle": "Warteschlange für persönliche WhatsApp-Nachrichten: Senderate pro Nummer und die Priorität pro Nachrichtentyp.",
-      "rateLabel": "Senderate pro Nummer",
-      "rateHelp": "Schützt die Nummer vor Sperrung. Die Warteschlange sendet nicht schneller als dies.",
-      "rateUnit": "Nachrichten/Std.",
-      "typesTitle": "Nachrichtentypen",
-      "typesSubtitle": "Die Reihenfolge bestimmt die Priorität: Oben wird zuerst gesendet (z. B. Bewerbung vor Geburtstag).",
-      "typesAdd": "Typ hinzufügen",
-      "knownTitle": "Bekannte Kontakte",
-      "knownHelp": "Nummern mit bestehendem Gespräch — großzügiges Limit, geringes Sperrrisiko.",
-      "newTitle": "Neue / unbekannte Nummern",
-      "newHelp": "Erste Nachricht an eine neue Nummer — streng begrenzt gegen Sperren. Die Warteschlange sendet innerhalb dieser Limits nach Priorität.",
-      "perHour": "pro Stunde",
-      "perDay": "pro Tag",
-      "perWeek": "pro Woche",
-      "limitsSaved": "Limits gespeichert"
-    },
-    "limits": {
-      "subtitle": "Legen Sie das Nachrichtenlimit fest. Die Obergrenze ist von uns festgelegt und kann nicht überschritten werden.",
-      "label": "Nachrichtenlimit",
-      "unit": "pro Tag",
-      "ceiling": "Obergrenze: {{value}} {{unit}}",
-      "overCeiling": "Höchstens {{value}} {{unit}} erlaubt."
-    },
-    "costs": {
-      "subtitle": "Verbrauch und Kosten dieser Periode.",
-      "numbers": "Telefonnummern",
-      "waba": "WhatsApp-Business-Nachrichten",
-      "base": "Grundtarif",
-      "total": "Gesamt",
-      "byNumber": "Pro Nummer",
-      "messages": "{{count}} Nachrichten"
-    },
-    "retention": {
-      "subtitle": "Wie lange Nachrichten aufbewahrt werden. Effektiv gilt der niedrigste der beiden Werte.",
-      "tenant": "Organisation",
-      "tenantHint": "Gilt für die gesamte Organisation",
-      "own": "Persönlich",
-      "ownHint": "Nur Ihre Nachrichten",
-      "days": "Tage",
-      "effective": "Effektive Aufbewahrung:",
-      "effectiveDays": "{{count}} Tage",
-      "unlimited": "Unbegrenzt"
     }
   },
   "smKpis": {

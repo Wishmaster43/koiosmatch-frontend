@@ -88,7 +88,6 @@ export default function TenantUsageSettings() {
             <Tile label={t('usage.col.aiTokens', { defaultValue: 'AI-tokens' })}   value={num(usage?.ai?.tokens)} />
             <Tile label={t('usage.col.aiCalls', { defaultValue: 'AI-calls' })}     value={num(usage?.ai?.requests)} />
             <Tile label={t('usage.col.waBusiness', { defaultValue: 'WhatsApp Business' })} value={num(usage?.whatsapp?.business_numbers)} />
-            <Tile label={t('usage.col.waPrivate', { defaultValue: 'WhatsApp privé' })}     value={num(usage?.whatsapp?.private_numbers)} />
             <Tile label={t('usage.col.hours', { defaultValue: 'Verwerkte uren' })}  value={num(usage?.planning?.processed_hours)} />
           </div>
 

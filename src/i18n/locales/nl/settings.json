@@ -109,7 +109,6 @@
     "availability": "Beschikbaarheid",
     "automatch": "Automatch-regels",
     "planning_board": "Planbord-weergave",
-    "messaging": "WhatsApp Privé",
     "koios": "Koios AI",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
@@ -1276,61 +1275,6 @@
     "board": {
       "title": "Planbord-weergave",
       "desc": "Kolommen en standaardweergave van het planbord."
-    }
-  },
-  "messaging": {
-    "title": "Berichten",
-    "subtitle": "Limieten, kosten en bewaartermijn voor je berichtenverkeer.",
-    "loadError": "Kon de gegevens niet laden.",
-    "tab": {
-      "limits": "Limieten",
-      "queue": "Wachtrij",
-      "costs": "Kosten",
-      "retention": "Bewaartermijn"
-    },
-    "queue": {
-      "subtitle": "Wachtrij voor persoonlijke WhatsApp-berichten: verzendsnelheid per nummer en de prioriteit per berichttype.",
-      "rateLabel": "Verzendsnelheid per nummer",
-      "rateHelp": "Beschermt tegen blokkade van het nummer. De wachtrij verstuurt niet sneller dan dit.",
-      "rateUnit": "berichten/uur",
-      "typesTitle": "Berichttypes",
-      "typesSubtitle": "De volgorde bepaalt de prioriteit: bovenaan wordt eerst verstuurd (bijv. sollicitatie vóór verjaardag).",
-      "typesAdd": "Type toevoegen",
-      "knownTitle": "Bekende contacten",
-      "knownHelp": "Nummers waar al een gesprek mee is — ruime limiet, laag blokkaderisico.",
-      "newTitle": "Nieuwe / onbekende nummers",
-      "newHelp": "Eerste bericht naar een nieuw nummer — streng beperkt tegen blokkade. De wachtrij verstuurt binnen deze limieten op prioriteit.",
-      "perHour": "per uur",
-      "perDay": "per dag",
-      "perWeek": "per week",
-      "limitsSaved": "Limieten opgeslagen"
-    },
-    "limits": {
-      "subtitle": "Stel de berichtenlimiet in. Het plafond is door ons bepaald en kan niet worden overschreden.",
-      "label": "Berichtenlimiet",
-      "unit": "per dag",
-      "ceiling": "Plafond: {{value}} {{unit}}",
-      "overCeiling": "Maximaal {{value}} {{unit}} toegestaan."
-    },
-    "costs": {
-      "subtitle": "Verbruik en kosten van deze periode.",
-      "numbers": "Telefoonnummers",
-      "waba": "WhatsApp Business-berichten",
-      "base": "Basistarief",
-      "total": "Totaal",
-      "byNumber": "Per nummer",
-      "messages": "{{count}} berichten"
-    },
-    "retention": {
-      "subtitle": "Hoe lang berichten bewaard blijven. De effectieve termijn is de laagste van beide.",
-      "tenant": "Organisatie",
-      "tenantHint": "Geldt voor de hele organisatie",
-      "own": "Persoonlijk",
-      "ownHint": "Alleen jouw berichten",
-      "days": "dagen",
-      "effective": "Effectieve bewaartermijn:",
-      "effectiveDays": "{{count}} dagen",
-      "unlimited": "Onbeperkt"
     }
   },
   "smKpis": {

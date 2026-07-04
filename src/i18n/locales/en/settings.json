@@ -109,7 +109,6 @@
     "availability": "Availability",
     "automatch": "Auto-match rules",
     "planning_board": "Planning board",
-    "messaging": "WhatsApp Personal",
     "koios": "Koios AI",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
@@ -1276,61 +1275,6 @@
     "board": {
       "title": "Planning board",
       "desc": "Columns and default layout of the planning board."
-    }
-  },
-  "messaging": {
-    "title": "Messaging",
-    "subtitle": "Limits, costs and retention for your messaging traffic.",
-    "loadError": "Could not load the data.",
-    "tab": {
-      "limits": "Limits",
-      "queue": "Queue",
-      "costs": "Costs",
-      "retention": "Retention"
-    },
-    "queue": {
-      "subtitle": "Queue for personal WhatsApp messages: send rate per number and the priority per message type.",
-      "rateLabel": "Send rate per number",
-      "rateHelp": "Protects the number from being blocked. The queue won't send faster than this.",
-      "rateUnit": "messages/hour",
-      "typesTitle": "Message types",
-      "typesSubtitle": "The order sets the priority: the top is sent first (e.g. an application before a birthday).",
-      "typesAdd": "Add type",
-      "knownTitle": "Known contacts",
-      "knownHelp": "Numbers you already have a conversation with — generous limit, low ban risk.",
-      "newTitle": "New / unknown numbers",
-      "newHelp": "First message to a new number — strictly limited to avoid bans. The queue sends within these limits by priority.",
-      "perHour": "per hour",
-      "perDay": "per day",
-      "perWeek": "per week",
-      "limitsSaved": "Limits saved"
-    },
-    "limits": {
-      "subtitle": "Set the messaging limit. The ceiling is set by us and cannot be exceeded.",
-      "label": "Messaging limit",
-      "unit": "per day",
-      "ceiling": "Ceiling: {{value}} {{unit}}",
-      "overCeiling": "At most {{value}} {{unit}} allowed."
-    },
-    "costs": {
-      "subtitle": "Usage and costs for this period.",
-      "numbers": "Phone numbers",
-      "waba": "WhatsApp Business messages",
-      "base": "Base rate",
-      "total": "Total",
-      "byNumber": "Per number",
-      "messages": "{{count}} messages"
-    },
-    "retention": {
-      "subtitle": "How long messages are kept. The effective period is the lowest of the two.",
-      "tenant": "Organisation",
-      "tenantHint": "Applies to the whole organisation",
-      "own": "Personal",
-      "ownHint": "Only your messages",
-      "days": "days",
-      "effective": "Effective retention:",
-      "effectiveDays": "{{count}} days",
-      "unlimited": "Unlimited"
     }
   },
   "smKpis": {
