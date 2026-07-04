@@ -6,6 +6,7 @@ import { useLookups } from '@/context/LookupsContext'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useIndustries } from '@/lib/useIndustries'
 import { useFunctions } from '@/lib/useFunctions'
+import { useCustomerOptions } from '../hooks/useCustomerOptions'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import EntityLink from '@/components/ui/EntityLink'
@@ -53,6 +54,8 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
   const skillStr = (s: unknown): string => (typeof s === 'string' ? s : ((s as { name?: string; label?: string })?.name ?? (s as { label?: string })?.label ?? ''))
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState<Form>(seedForm)
+  // Client moved here from the drawer header (P3: calm header, max status+owner pickers).
+  const [clientId, setClientId] = useState<string>(String(v.clientId ?? ''))
   const [types, setTypes] = useState<string[]>(v.contractTypes ?? [])
   const [skills, setSkills] = useState<string[]>(() => (v.skills ?? []).map(skillStr).filter(Boolean))
   const [newSkill, setNewSkill] = useState('')
@@ -66,6 +69,9 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
   const [descExpanded, setDescExpanded] = useState(false)
   const [description, setDescription] = useState(v.description ?? '')
 
+  // Customer options load only while editing (capped page, React Query).
+  const customerOptions = useCustomerOptions(editing)
+
   const save = () => {
     const sen = seniorityLevels.find(s => s.value === form.seniority)
     const edu = educationLevels.find(e => e.value === form.education)
@@ -73,6 +79,8 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
     const hours  = [form.hoursMin, form.hoursMax].filter(Boolean).join(' – ')
     const location = composeAddress(form.street, form.houseNumber, form.houseNumberSuffix, form.postalCode, form.city)
     onUpdate?.(v.id, {
+      // Client lives in Details now (header stays calm) — send the name too for optimistic UI.
+      clientId, clientName: customerOptions.find(c => String(c.value) === clientId)?.label ?? v.clientName,
       contractTypes: types, category: form.category, industry: form.industry,
       street: form.street, houseNumber: form.houseNumber, houseNumberSuffix: form.houseNumberSuffix,
       postalCode: form.postalCode, city: form.city, province: form.province, location,
@@ -83,7 +91,7 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
     })
     setEditing(false)
   }
-  const cancel = () => { setForm(seedForm()); setTypes(v.contractTypes ?? []); setSkills((v.skills ?? []).map(skillStr).filter(Boolean)); setNewSkill(''); setEditing(false) }
+  const cancel = () => { setForm(seedForm()); setClientId(String(v.clientId ?? '')); setTypes(v.contractTypes ?? []); setSkills((v.skills ?? []).map(skillStr).filter(Boolean)); setNewSkill(''); setEditing(false) }
   const saveDesc = () => { onUpdate?.(v.id, { description }); setDescEditing(false) }
   const cancelDesc = () => { setDescription(v.description ?? ''); setDescEditing(false) }
 
@@ -153,7 +161,10 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
         {row(t('details.id'), <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>, <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>)}
         {row(t('drawer.client'),
           <EntityLink page="customers" id={v.clientId}>{v.clientName || '—'}</EntityLink>,
-          <EntityLink page="customers" id={v.clientId}>{v.clientName || '—'}</EntityLink>)}
+          <select value={clientId} onChange={e => setClientId(e.target.value)} style={inputStyle}>
+            <option value="">{t('common:select')}</option>
+            {customerOptions.map(c => <option key={String(c.value)} value={String(c.value)}>{c.label}</option>)}
+          </select>)}
         {row(t('details.function'), v.category || dash, select('category', fnOptions))}
         {row(t('details.preferredIndustry'), v.industry || dash, select('industry', industries.map(i => ({ value: i, label: i }))))}
       </>)}

@@ -267,7 +267,6 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
           onToggleExpand={() => setDrawerExpanded(v => !v)}
           onUpdate={updateVacancy}
           users={users}
-          customers={customerList}
         />
       </div>
     </>

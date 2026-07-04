@@ -21,7 +21,6 @@ import type { Id } from '@/types/common'
 
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 interface DrawerUser { id: Id; name: string }
-interface DrawerCustomer { id: Id; name: string }
 
 // Tab list — config only; each renders one small component (one per tab/section).
 // Details is the FIRST tab (Danny 2026-07-04 — reverses R-7's pinned-above-the-tabs
@@ -45,14 +44,13 @@ interface VacancyDrawerProps {
   onToggleExpand?: () => void
   onUpdate?: UpdateFn
   users?: DrawerUser[]
-  customers?: DrawerCustomer[]
 }
 
 /**
  * VacancyDrawer — thin container: wires data (lookups + onUpdate) and declares the
  * header config + tab list. No heavy JSX, no business logic (mirror CandidateDrawer).
  */
-export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, users = [], customers = [] }: VacancyDrawerProps) {
+export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, users = [] }: VacancyDrawerProps) {
   const { t } = useTranslation('vacancies')
   const { statuses } = useVacancyLookups()
   const { formatDate } = useDateFormat()
@@ -76,7 +74,6 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
     ...(users.some(u => u.id === v.owner?.id) || !v.owner?.name ? [] : [{ value: v.owner.id, label: v.owner.name }]),
     ...users.map(u => ({ value: u.id, label: u.name })),
   ]
-  const clientOptions = customers.map(c => ({ value: c.id, label: c.name }))
 
   return (
     <EntityDrawer
@@ -97,11 +94,10 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
             { key: 'status', label: t('drawer.status'), value: v.statusValue,
               options: statuses.map(s => ({ value: s.value, label: s.label })),
               onChange: val => onUpdate?.(v.id, { statusValue: val }), menuWidth: 160, width: 150 },
+            // Client moved to the Details tab (P3: calm header — max status + owner,
+            // mirror the candidate blueprint §3A(c)); the subtitle still shows it.
             { key: 'owner', label: t('drawer.owner'), value: v.owner?.id,
               options: ownerOptions, onChange: val => onUpdate?.(v.id, { ownerId: val }), menuWidth: 200, width: 180 },
-            { key: 'client', label: t('drawer.client'), value: v.clientId,
-              options: clientOptions, placeholder: t('drawer.selectClient'),
-              onChange: val => onUpdate?.(v.id, { clientId: val }), menuWidth: 220, width: 200 },
           ]}
           tags={{ items: currentTags, onAdd: tag => setTagsAndSave([...currentTags, tag]),
             onRemove: tag => setTagsAndSave(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
