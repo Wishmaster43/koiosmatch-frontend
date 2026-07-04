@@ -617,7 +617,7 @@
     "reasonGiven": "reason given",
     "effectiveFrom": "as of {{date}}",
     "actions": {
-      "updated": "Details updated",
+      "updated": "Updated",
       "created": "Created",
       "deleted": "Archived",
       "restored": "Restored"
@@ -658,7 +658,10 @@
       "last_contact_type": "Contact channel",
       "tags": "Tags",
       "deleted_at": "Archived on"
-    }
+    },
+    "dateFrom": "Date from",
+    "dateUntil": "Date until",
+    "export": "Export"
   },
   "matchesView": {
     "title": "Matches",

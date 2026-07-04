@@ -610,7 +610,7 @@
     "reasonGiven": "motif renseigné",
     "effectiveFrom": "au {{date}}",
     "actions": {
-      "updated": "Données mises à jour",
+      "updated": "Mis à jour",
       "created": "Créé",
       "deleted": "Archivé",
       "restored": "Restauré"
@@ -651,7 +651,10 @@
       "last_contact_type": "Canal de contact",
       "tags": "Étiquettes",
       "deleted_at": "Archivé le"
-    }
+    },
+    "dateFrom": "Date de",
+    "dateUntil": "Date jusqu'au",
+    "export": "Exporter"
   },
   "matchesView": {
     "title": "Matches",

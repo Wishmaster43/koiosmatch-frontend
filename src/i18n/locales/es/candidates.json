@@ -610,7 +610,7 @@
     "reasonGiven": "motivo indicado",
     "effectiveFrom": "a partir del {{date}}",
     "actions": {
-      "updated": "Datos actualizados",
+      "updated": "Actualizado",
       "created": "Creado",
       "deleted": "Archivado",
       "restored": "Restaurado"
@@ -651,7 +651,10 @@
       "last_contact_type": "Canal de contacto",
       "tags": "Etiquetas",
       "deleted_at": "Archivado el"
-    }
+    },
+    "dateFrom": "Fecha desde",
+    "dateUntil": "Fecha hasta",
+    "export": "Exportar"
   },
   "matchesView": {
     "title": "Coincidencias",

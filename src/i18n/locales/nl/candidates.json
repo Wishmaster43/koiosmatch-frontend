@@ -617,7 +617,7 @@
     "reasonGiven": "reden opgegeven",
     "effectiveFrom": "per {{date}}",
     "actions": {
-      "updated": "Gegevens bijgewerkt",
+      "updated": "Bijgewerkt",
       "created": "Aangemaakt",
       "deleted": "Gearchiveerd",
       "restored": "Hersteld"
@@ -658,7 +658,10 @@
       "last_contact_type": "Contactkanaal",
       "tags": "Labels",
       "deleted_at": "Gearchiveerd per"
-    }
+    },
+    "dateFrom": "Datum van",
+    "dateUntil": "Datum t/m",
+    "export": "Exporteren"
   },
   "matchesView": {
     "title": "Matches",

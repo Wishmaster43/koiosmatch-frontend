@@ -610,7 +610,7 @@
     "reasonGiven": "Grund angegeben",
     "effectiveFrom": "per {{date}}",
     "actions": {
-      "updated": "Daten aktualisiert",
+      "updated": "Aktualisiert",
       "created": "Erstellt",
       "deleted": "Archiviert",
       "restored": "Wiederhergestellt"
@@ -651,7 +651,10 @@
       "last_contact_type": "Kontaktkanal",
       "tags": "Labels",
       "deleted_at": "Archiviert am"
-    }
+    },
+    "dateFrom": "Datum von",
+    "dateUntil": "Datum bis",
+    "export": "Exportieren"
   },
   "matchesView": {
     "title": "Matches",
