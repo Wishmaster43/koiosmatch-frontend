@@ -35,12 +35,14 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
   const [adding, setAdding] = useState(false)
+  // Open vs Historie (Danny 2026-07-04: "tabje history met alle oude taken").
+  const [view, setView] = useState<'open' | 'history'>('open')
 
   // Load the candidate-linked tasks; a 404/422 (param not built yet) reads as empty, not broken.
   const load = useCallback(() => {
     setLoading(true); setError(false)
     api.get('/tasks', { params: { candidate: candidateId } })
-      .then(r => setTasks(((r.data?.data ?? r.data ?? []) as TaskRow[]).filter(x => !x.completed_at)))
+      .then(r => setTasks((r.data?.data ?? r.data ?? []) as TaskRow[]))
       .catch(e => { if ([404, 422].includes(e?.response?.status)) setTasks([]); else setError(true) })
       .finally(() => setLoading(false))
   }, [candidateId])
@@ -55,24 +57,39 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
       background: `color-mix(in srgb, ${color} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${color} 35%, transparent)` }}>{label}</span>
   }
 
-  // "+ Taak" in the card header — opens the shared task modal pre-linked to this candidate.
-  const addAction = (
-    <button onClick={() => setAdding(true)}
-      style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
-      <Plus size={11} /> {t('drawer.newTask')}
+  // The rendered list follows the sub-view: open tasks vs the completed history.
+  const visible = tasks.filter(x => (view === 'open' ? !x.completed_at : !!x.completed_at))
+
+  // Header: Open/Historie sub-toggle + "+ Taak" (shared task modal, pre-linked).
+  const viewChip = (id: 'open' | 'history', label: string) => (
+    <button key={id} onClick={() => setView(id)}
+      style={{ padding: '2px 9px', fontSize: 10, fontWeight: view === id ? 600 : 500, borderRadius: 99, cursor: 'pointer',
+        color: 'var(--color-primary)', border: `1px solid color-mix(in srgb, var(--color-primary) ${view === id ? 50 : 28}%, transparent)`,
+        background: `color-mix(in srgb, var(--color-primary) ${view === id ? 16 : 8}%, transparent)` }}>
+      {label}
     </button>
+  )
+  const addAction = (
+    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      {viewChip('open', t('drawer.tasksOpen'))}
+      {viewChip('history', t('drawer.tasksHistory'))}
+      <button onClick={() => setAdding(true)}
+        style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+        <Plus size={11} /> {t('drawer.newTask')}
+      </button>
+    </span>
   )
 
   return (
     <SectionCard title={t('drawer.tasksTitle')} action={addAction}>
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.tasksLoading')}</div>}
       {!loading && error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('drawer.tasksError')}</div>}
-      {!loading && !error && tasks.length === 0 && (
+      {!loading && !error && visible.length === 0 && (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text-muted)' }}>
           <ListChecks size={14} style={{ opacity: 0.6 }} /> {t('drawer.tasksEmpty')}
         </div>
       )}
-      {!loading && !error && tasks.map(task => {
+      {!loading && !error && visible.map(task => {
         const assignee = personName(task.assignee)
         const creator  = personName(task.created_by)
         // Created line: "aangemaakt door X · date" — parts render only when the API delivers them.

@@ -20,7 +20,7 @@ interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: stri
 const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
 // The tab order. The changelog is a header popover (not a tab), mirroring candidate.
-const TAB_IDS = ['details', 'links', 'comments']
+const TAB_IDS = ['details', 'links']
 
 interface TaskDrawerProps {
   task: TaskDetail | null

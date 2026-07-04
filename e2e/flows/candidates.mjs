@@ -70,10 +70,16 @@ export async function archiveAndFindBack({ page, errors }) {
   await page.locator('button:has-text("Gearchiveerd")').first().click()
   await sleep(1500)
   const found = await page.locator(`table tbody tr:has-text("${name}")`).count()
+  expect(found > 0, `gearchiveerde kandidaat "${name}" NIET terug te vinden in de Gearchiveerd-view (ARCH-1)`)
+  // The archived row must OPEN (drawer on row data + banner) — it 404'd as "bestaat
+  // niet meer" before (Danny 2026-07-04); the restore icon proves the banner rendered.
+  await page.locator(`table tbody tr:has-text("${name}")`).first().click()
+  await sleep(1000)
+  expect(await page.locator('button[title="Herstellen"]').count(), 'gearchiveerde kandidaat opent NIET (drawer/banner ontbreekt)')
+  await page.keyboard.press('Escape'); await sleep(300)
   // Leave the archived view clean for the next flow.
   await page.locator('button:has-text("Gearchiveerd")').first().click()
   await sleep(600)
-  expect(found > 0, `gearchiveerde kandidaat "${name}" NIET terug te vinden in de Gearchiveerd-view (ARCH-1)`)
   const fresh = errors.slice(at)
   expect(fresh.length === 0, `archiveren gaf fouten: ${fresh.join(' | ')}`)
 }

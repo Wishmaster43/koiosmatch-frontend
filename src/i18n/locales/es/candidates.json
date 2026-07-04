@@ -267,7 +267,9 @@
     "newTask": "Nueva tarea",
     "taskFor": "para {{name}}",
     "taskCreatedBy": "creada por {{name}}",
-    "taskOpen": "Abrir tarea"
+    "taskOpen": "Abrir tarea",
+    "tasksOpen": "Abiertas",
+    "tasksHistory": "Historial"
   },
   "stage": {
     "lead": "Lead",

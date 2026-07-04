@@ -274,7 +274,9 @@
     "newTask": "Nieuwe taak",
     "taskFor": "voor {{name}}",
     "taskCreatedBy": "aangemaakt door {{name}}",
-    "taskOpen": "Taak openen"
+    "taskOpen": "Taak openen",
+    "tasksOpen": "Open",
+    "tasksHistory": "Historie"
   },
   "stage": {
     "lead": "Lead",

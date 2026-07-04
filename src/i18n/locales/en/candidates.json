@@ -274,7 +274,9 @@
     "newTask": "New task",
     "taskFor": "for {{name}}",
     "taskCreatedBy": "created by {{name}}",
-    "taskOpen": "Open task"
+    "taskOpen": "Open task",
+    "tasksOpen": "Open",
+    "tasksHistory": "History"
   },
   "stage": {
     "lead": "Lead",

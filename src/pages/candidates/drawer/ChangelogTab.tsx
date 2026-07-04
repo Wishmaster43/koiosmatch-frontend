@@ -19,7 +19,7 @@ interface LogCard { when?: string; who: string; action: string; field?: string; 
 const humanizeField = (f: string) => f.replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^\w/, c => c.toUpperCase())
 
 // Bookkeeping fields carry no user meaning — never show them as diff rows.
-const NOISE_FIELDS = new Set(['id', 'tenant_id', 'external_id', 'updated_at', 'created_at', 'remember_token', 'password'])
+const NOISE_FIELDS = new Set(['id', 'tenant_id', 'external_id', 'updated_at', 'created_at', 'remember_token', 'password', 'candidate_user_id', 'user_id', 'initials', 'uuid'])
 
 // Raw references / machine formats the reader can't interpret.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -110,7 +110,13 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
       if (h2) return [{ ...base, field: t('changelog.fields.status'), line: h2 }]
       const diffs = changesOf(ev)
       if (!diffs.length) return [base]
-      return diffs.map(ch => ({ ...base, field: fieldLabel(ch.field), oldVal: fmtVal(ch.field, ch.old), newVal: fmtVal(ch.field, ch.next) }))
+      const isCreate = (ev.event ?? ev.description) === 'created'
+      return diffs
+        .map(ch => ({ ...base, field: fieldLabel(ch.field), oldVal: fmtVal(ch.field, ch.old), newVal: fmtVal(ch.field, ch.next) }))
+        // Danny 2026-07-04 ("nog steeds ruk"): no "Leeg → Leeg" rows, and a CREATE
+        // only lists the fields that actually got a value.
+        .filter(cd => cd.oldVal !== cd.newVal)
+        .filter(cd => !isCreate || cd.newVal !== t('changelog.emptyValue'))
     })
     return all.filter(cd => {
       if (!cd.when) return true
