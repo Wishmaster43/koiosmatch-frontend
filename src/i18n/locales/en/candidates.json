@@ -505,7 +505,7 @@
   },
   "preferences": {
     "title": "Preferences",
-    "availableFrom": "Available from",
+    "availableFrom": "Deployable from",
     "hoursPerWeek": "Hours per week",
     "days": "Preferred days",
     "maxDistance": "Max. travel distance (km)",

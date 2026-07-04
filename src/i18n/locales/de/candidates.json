@@ -498,7 +498,7 @@
   },
   "preferences": {
     "title": "Präferenzen",
-    "availableFrom": "Verfügbar ab",
+    "availableFrom": "Einsetzbar ab",
     "hoursPerWeek": "Stunden pro Woche",
     "days": "Bevorzugte Tage",
     "maxDistance": "Max. Reisedistanz (km)",

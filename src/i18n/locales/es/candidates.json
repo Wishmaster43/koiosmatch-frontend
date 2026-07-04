@@ -498,7 +498,7 @@
   },
   "preferences": {
     "title": "Preferencias",
-    "availableFrom": "Disponible a partir de",
+    "availableFrom": "Desplegable desde",
     "hoursPerWeek": "Horas por semana",
     "days": "Días preferidos",
     "maxDistance": "Distancia máx. (km)",

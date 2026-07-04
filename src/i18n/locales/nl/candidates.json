@@ -505,7 +505,7 @@
   },
   "preferences": {
     "title": "Voorkeuren",
-    "availableFrom": "Beschikbaar per",
+    "availableFrom": "Inzetbaar vanaf",
     "hoursPerWeek": "Uren per week",
     "days": "Voorkeursdagen",
     "maxDistance": "Max. reisafstand (km)",
