@@ -77,7 +77,8 @@
     "location": "Standort",
     "department": "Abteilung",
     "contact": "Kontakt",
-    "workflow": "Workflow"
+    "workflow": "Workflow",
+    "open": "Öffnen"
   },
   "activity": {
     "empty": "Noch keine Aktivität."

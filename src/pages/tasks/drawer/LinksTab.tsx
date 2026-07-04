@@ -5,6 +5,7 @@ import { Link2, X, Plus } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { SelectField } from '@/components/forms/fields'
 import SearchSelectJs from '@/components/ui/SearchSelect'
+import EntityLink from '@/components/ui/EntityLink'
 import type { TaskDetail, TaskLink } from '@/types/task'
 import type { Id } from '@/types/common'
 
@@ -27,6 +28,13 @@ const TYPE_ENDPOINTS: Record<string, LinkEndpoint> = {
   department:  { url: '/departments',  label: r => r.name || `#${r.id}` },
   contact:     { url: '/contacts',     label: personName },
   workflow:    { url: '/workflows',    label: r => r.name || `#${r.id}` },
+}
+
+// Link type → the page that honours the { open: id } intent (click-through, Danny
+// 2026-07-04). Types without a drill-down surface yet (contact/location/…) render
+// as plain text until their page exists (contacts = CUST-3).
+const LINK_PAGE: Record<string, string> = {
+  candidate: 'candidates', vacancy: 'vacancies', customer: 'customers', application: 'applications',
 }
 
 // Inline "add link" row: pick a type, then pick an entity of that type.
@@ -112,8 +120,11 @@ export default function LinksTab({ task, onAddLink, onRemoveLink }: {
                 <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
                   {typeLabel(l.type)}
                 </div>
+                {/* Click through to the linked record's own drawer (intent navigation). */}
                 <div style={{ fontSize: 13, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {l.label || '—'}
+                  <EntityLink page={LINK_PAGE[l.type] ?? ''} id={LINK_PAGE[l.type] ? l.id : null} title={t('links.open')}>
+                    {l.label || '—'}
+                  </EntityLink>
                 </div>
               </div>
               <button onClick={() => onRemoveLink({ type: l.type, id: l.id })} title={t('links.remove')} aria-label={t('links.remove')}

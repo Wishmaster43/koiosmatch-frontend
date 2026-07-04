@@ -77,7 +77,8 @@
     "location": "Site",
     "department": "Service",
     "contact": "Contact",
-    "workflow": "Workflow"
+    "workflow": "Workflow",
+    "open": "Ouvrir"
   },
   "activity": {
     "empty": "Aucune activité pour le moment."
