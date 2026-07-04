@@ -32,7 +32,8 @@ export async function boot({ tenant = 'demo' } = {}) {
   // OPTIONAL endpoints (app has a seed fallback + calls them with quiet404): a 404 here
   // is the agreed "backend hasn't shipped this lookup yet" state, not a finding. Remove
   // an entry the moment the backend delivers it — then a 404 is a regression again.
-  const OPTIONAL_404 = [/\/outreach-outcomes(\?|$)/]
+  // (outreach-outcomes shipped 2026-07-04 → removed; list is empty right now.)
+  const OPTIONAL_404 = []
   const isOptional404 = (text) => OPTIONAL_404.some(re => re.test(text)) && /404/.test(text)
   page.on('pageerror', e => errors.push(`[pageerror] ${String(e).slice(0, 250)}`))
   page.on('console', m => {
