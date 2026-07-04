@@ -29,10 +29,23 @@ export async function boot({ tenant = 'demo' } = {}) {
   const browser = await chromium.launch()
   const page = await browser.newPage()
   const errors = []
+  // OPTIONAL endpoints (app has a seed fallback + calls them with quiet404): a 404 here
+  // is the agreed "backend hasn't shipped this lookup yet" state, not a finding. Remove
+  // an entry the moment the backend delivers it — then a 404 is a regression again.
+  const OPTIONAL_404 = [/\/outreach-outcomes(\?|$)/]
+  const isOptional404 = (text) => OPTIONAL_404.some(re => re.test(text)) && /404/.test(text)
   page.on('pageerror', e => errors.push(`[pageerror] ${String(e).slice(0, 250)}`))
-  page.on('console', m => { if (m.type() === 'error') errors.push(`[console] ${m.text().slice(0, 250)}`) })
+  page.on('console', m => {
+    if (m.type() !== 'error') return
+    const text = m.text().slice(0, 250)
+    if (isOptional404(text) || (OPTIONAL_404.some(re => re.test(m.location()?.url ?? '')) )) return
+    // Chrome's bare network line ("Failed to load resource … 404") carries the url in location.
+    if (/Failed to load resource/.test(text) && OPTIONAL_404.some(re => re.test(m.location()?.url ?? ''))) return
+    errors.push(`[console] ${text}`)
+  })
   page.on('response', async r => {
     if (r.status() >= 400) {
+      if (r.status() === 404 && OPTIONAL_404.some(re => re.test(r.url()))) return
       // Include the response body — a bare "422" hides WHICH rule failed (the whole point).
       let body = ''
       try { body = (await r.text()).slice(0, 200) } catch { /* stream may be gone */ }

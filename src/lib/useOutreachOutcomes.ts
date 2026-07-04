@@ -27,10 +27,11 @@ const toOption = (r: Record<string, unknown>): LookupOption => ({
 export function useOutreachOutcomes() {
   const [outcomes, setOutcomes] = useState<LookupOption[]>(DEFAULT_OUTREACH_OUTCOMES)
 
-  // Load the tenant lookup once; keep the seed while the endpoint is missing (404).
+  // Load the tenant lookup once; keep the seed while the endpoint is missing
+  // (quiet404: the endpoint is optional until OUTREACH-2 lands backend-side).
   useEffect(() => {
     let alive = true
-    api.get('/outreach-outcomes')
+    api.get('/outreach-outcomes', { quiet404: true })
       .then(res => {
         const rows = (res.data?.data ?? res.data ?? []) as Record<string, unknown>[]
         if (alive && Array.isArray(rows) && rows.length) setOutcomes(rows.map(toOption))

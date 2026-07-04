@@ -70,6 +70,17 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 // axios doesn't know about our one-shot retry flag — extend the config type.
 interface RetryableConfig extends InternalAxiosRequestConfig {
   _retried429?: boolean
+  // Opt-in per request: a 404 on an OPTIONAL endpoint (a lookup the backend hasn't
+  // shipped yet; the caller has a seed fallback) is expected — keep it out of the
+  // dev log so it doesn't read as (or turn the smoke suite) red.
+  quiet404?: boolean
+}
+
+// Callers pass { quiet404: true } on api.get(...) — teach axios' request config the flag.
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    quiet404?: boolean
+  }
 }
 
 /**
@@ -110,6 +121,8 @@ api.interceptors.response.use(
     // A 503 means an external integration isn't configured yet (HelloFlex, AI key):
     // an expected "not available yet", not a real error — keep it out of the dev log (CO7).
     const benignUnavailable = status === 503
+    // Caller-declared optional endpoint (seed fallback in place) — expected 404.
+    const benignOptional404 = status === 404 && Boolean(config.quiet404)
     // Dev-only log of request CONTEXT only (status + method + url). NEVER log the
     // response body — a 4xx/5xx body can carry special-category data OR sensitive
     // backend detail (stack traces, paths). Inspect the body on demand in the
@@ -119,7 +132,7 @@ api.interceptors.response.use(
     const safeUrl = url
       .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi, ':id')
       .replace(/\/\d+(?=\/|$|\?)/g, '/:id')
-    if (import.meta.env.DEV && !benignTenants403 && !benignUnavailable) {
+    if (import.meta.env.DEV && !benignTenants403 && !benignUnavailable && !benignOptional404) {
       console.error('API Error:', status, method.toUpperCase(), safeUrl)
     }
 
