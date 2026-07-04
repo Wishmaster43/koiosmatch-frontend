@@ -2,7 +2,6 @@
   "tabs": {
     "overview": "Resumen",
     "messages": "Mensajes",
-    "queue": "Cola",
     "escalations": "Escalaciones"
   },
   "drill": {
@@ -11,45 +10,6 @@
   "overview": {
     "statusTitle": "Estado de mensajes",
     "reasonsTitle": "Motivos de escalación"
-  },
-  "queue": {
-    "loading": "Cargando la cola…",
-    "error": "No se pudo cargar la cola.",
-    "emptyTitle": "La cola está vacía",
-    "emptyDesc": "No hay mensajes personales de WhatsApp en la cola.",
-    "col": {
-      "candidate": "Candidato",
-      "type": "Tipo",
-      "priority": "Prioridad",
-      "status": "Estado",
-      "scheduled": "Programado",
-      "attempts": "Intento",
-      "actions": "Acciones",
-      "reason": "Motivo"
-    },
-    "status": {
-      "queued": "En cola",
-      "sending": "Enviando",
-      "sent": "Enviado",
-      "failed": "Fallido",
-      "skipped": "Omitido",
-      "paused": "Pausado"
-    },
-    "action": {
-      "sendNow": "Enviar ahora",
-      "pause": "Pausar",
-      "retry": "Reintentar",
-      "cancel": "Eliminar"
-    },
-    "reason": {
-      "new_number_daily": "Número nuevo — límite diario alcanzado",
-      "new_number_hourly": "Número nuevo — límite por hora alcanzado",
-      "new_number_weekly": "Número nuevo — límite semanal alcanzado",
-      "rate_limit": "Límite por hora alcanzado",
-      "priority_wait": "Esperando prioridad",
-      "scheduled": "Programado",
-      "ready": "Listo para enviar"
-    }
   },
   "title": "WhatsApp",
   "updatedAt": "Actualizado a las {{time}}",

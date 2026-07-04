@@ -2,7 +2,6 @@
   "tabs": {
     "overview": "Overview",
     "messages": "Messages",
-    "queue": "Queue",
     "escalations": "Escalations"
   },
   "drill": {
@@ -11,45 +10,6 @@
   "overview": {
     "statusTitle": "Message status",
     "reasonsTitle": "Escalation reasons"
-  },
-  "queue": {
-    "loading": "Loading queue…",
-    "error": "Could not load the queue.",
-    "emptyTitle": "Queue is empty",
-    "emptyDesc": "There are no personal WhatsApp messages in the queue.",
-    "col": {
-      "candidate": "Candidate",
-      "type": "Type",
-      "priority": "Priority",
-      "status": "Status",
-      "scheduled": "Scheduled",
-      "attempts": "Attempt",
-      "actions": "Actions",
-      "reason": "Reason"
-    },
-    "status": {
-      "queued": "Queued",
-      "sending": "Sending",
-      "sent": "Sent",
-      "failed": "Failed",
-      "skipped": "Skipped",
-      "paused": "Paused"
-    },
-    "action": {
-      "sendNow": "Send now",
-      "pause": "Pause",
-      "retry": "Retry",
-      "cancel": "Delete"
-    },
-    "reason": {
-      "new_number_daily": "New number — daily cap reached",
-      "new_number_hourly": "New number — hourly cap reached",
-      "new_number_weekly": "New number — weekly cap reached",
-      "rate_limit": "Hourly limit reached",
-      "priority_wait": "Waiting for priority",
-      "scheduled": "Scheduled",
-      "ready": "Ready to send"
-    }
   },
   "filters": {
     "status": "Status",

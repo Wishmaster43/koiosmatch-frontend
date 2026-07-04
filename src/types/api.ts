@@ -9,11 +9,12 @@
 /** Module keys — the granular BE vocabulary emitted by effectiveModules() in tenant.modules
  *  (aligned 2026-07-03, COORDINATION-LOG). SM endpoints are hard-gated server-side on 'sm'.
  *  Base: core=[ats], pro=[ats,whatsapp,aiagents,workflows,koios_ai],
- *  enterprise=[+apps,api,whatsapp_personal,insights]; add-ons = sm/hf/plan/reports on top.
+ *  enterprise=[+apps,api,insights]; add-ons = sm/hf/plan/reports on top. (whatsapp_personal
+ *  retired 2026-07-04 — Business API only; kept OUT of the union so new code can't use it.)
  *  'ai' is the legacy synthetic bundle key (kept for backward-compat, no longer emitted). */
 export type ModuleKey =
   | 'ats' | 'whatsapp' | 'aiagents' | 'workflows' | 'koios_ai' | 'apps' | 'api'
-  | 'whatsapp_personal' | 'insights' | 'sm' | 'hf' | 'plan' | 'reports' | 'sm_ai' | 'ai'
+  | 'insights' | 'sm' | 'hf' | 'plan' | 'reports' | 'sm_ai' | 'ai'
 
 /** A role or permission can arrive as a bare string or an object with a name. */
 export type Named = string | { name: string }

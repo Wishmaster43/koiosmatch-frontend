@@ -12,11 +12,9 @@ import BarChartCard from '@/components/charts/BarChartCard'
 import LineChartCard from '@/components/charts/LineChartCard'
 import WeeklyBarChartCard from '@/components/charts/WeeklyBarChartCard'
 import FunnelConversion from './blocks/FunnelConversion'
-import WhatsAppQueue from './blocks/WhatsAppQueue'
 import ShiftsSummary from './blocks/ShiftsSummary'
 import TouchpointsFeed from './blocks/TouchpointsFeed'
 import AttentionCandidates from './blocks/AttentionCandidates'
-import { useWhatsAppQueue } from '@/pages/whatsapp/hooks/useWhatsAppQueue'
 import { Users, CheckCircle, AlertCircle, AlertTriangle, Target, Euro, Briefcase, CalendarCheck, TrendingUp, MessageSquare, Zap, FileText, CalendarClock, Link2, PhoneOff } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { initialsOf } from '@/lib/initials'
@@ -299,7 +297,6 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   }, [activeTenant?.id, selPeriode, selVestiging, selStatus])
 
   // WhatsApp backlog + failed (planner/recruiter KPIs); fail-soft 0 without access.
-  const wa = useWhatsAppQueue({ enabled: true, statsOnly: true }) as { inQueue?: number; failed?: number }
   const incompleteRuns = runs.filter(r => !r.ok).length
 
   // All KPI blocks (live value; 🟡 metrics read "—" until the backend feed lands —
@@ -320,8 +317,6 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     placements:        { id: 'placements', label: t('kpi.placements'), value: num(att.placements), sub: t('kpi.placementsSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: () => onNavigate?.('matches') },
     intakes:           { id: 'intakes', label: t('kpi.intakes'), value: num(att.intake_planned ?? att.intakes), sub: t('kpi.intakesSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: CalendarCheck, onClick: () => onNavigate?.('candidates') },
     fillRate:          { id: 'fillRate', label: t('kpi.fillRate'), value: att.fill_rate != null ? `${att.fill_rate}%` : '—', sub: t('kpi.fillRateSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: TrendingUp, onClick: () => onNavigate?.('vacancies') },
-    failedWa:          { id: 'failedWa', label: t('kpi.failedWa'), value: num(wa.failed), sub: t('kpi.failedWaSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'queue' }) },
-    waQueue:           { id: 'waQueue', label: t('kpi.waQueue'), value: num(att.wa_queue ?? wa.inQueue), sub: t('kpi.waQueueSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'queue' }) },
     incompleteRuns:    { id: 'incompleteRuns', label: t('kpi.incompleteRuns'), value: num(att.incomplete_runs ?? incompleteRuns), sub: t('kpi.incompleteRunsSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: Zap, onClick: () => onNavigate?.('aiagents') },
     activeConv:        { id: 'activeConv', label: t('kpi.activeConv'), value: num(att.active_conversations ?? conversations.length), sub: t('kpi.activeConvSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'messages' }) },
     missingDocs:       { id: 'missingDocs', label: t('kpi.missingDocs'), value: num(att.missing_documents), sub: t('kpi.missingDocsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: FileText, onClick: () => onNavigate?.('candidates') },
@@ -400,9 +395,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
       )}
 
       {/* Planning-blokken — WhatsApp-wachtrij (🟢) + diensten-overzicht (🟡 tot de feed). */}
-      {(vis('block.waQueue') || vis('block.shifts')) && (
+      {vis('block.shifts') && (
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-        {vis('block.waQueue') && <WhatsAppQueue inQueue={wa.inQueue} failed={wa.failed} onOpen={() => onNavigate?.('whatsapp', { tab: 'queue' })} />}
         {vis('block.shifts') && <ShiftsSummary open={att.open_shifts} filled={att.filled_shifts} unfilled={att.unfilled_shifts} occupancy={att.occupancy} onOpen={() => onNavigate?.('planning')} />}
       </div>
       )}

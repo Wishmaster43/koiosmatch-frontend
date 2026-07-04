@@ -17,7 +17,7 @@ import { useAuth } from '@/context/AuthContext'
 const TIERS = [
   { id: 'core',       name: 'Koios Core',       desc: 'ATS + CRM' },
   { id: 'pro',        name: 'Koios Pro',        desc: '+ Koios AI + AI Agents + Workflows + WhatsApp Business' },
-  { id: 'enterprise', name: 'Koios Enterprise', desc: '+ REST API + WhatsApp persoonlijk + Insights+ + Connectors + SLA' },
+  { id: 'enterprise', name: 'Koios Enterprise', desc: '+ REST API + Insights+ + Connectors + SLA' },
 ]
 
 // Add-ons (toggle on top of any tier). Each id maps 1:1 to a module key the backend

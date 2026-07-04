@@ -56,7 +56,6 @@ const MODULE_TO_PAGES: Record<string, string[]> = {
   reports:           ['reports'],
   api:               [],               // REST API lives in settings (no top-level nav page)
   insights:          [],               // Insights+ within reporting/settings (no separate gate yet)
-  whatsapp_personal: [],               // personal WhatsApp Web (QR under Profile, no nav page)
 }
 
 const PACKAGE_PAGES: Record<string, string[]> = {

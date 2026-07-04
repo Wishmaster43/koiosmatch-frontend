@@ -17,8 +17,6 @@ import { useTranslation } from 'react-i18next'
 import { MessageCircle, RefreshCw } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useWhatsAppData } from './hooks/useWhatsAppData'
-import { useWhatsAppQueue } from './hooks/useWhatsAppQueue'
-import QueueTab from './QueueTab'
 import InsightsRow from '@/components/insights/InsightsRow'
 import RightDrawer from '@/components/ui/RightDrawer'
 import PieChartCard from '@/components/charts/PieChartCard'
@@ -62,14 +60,12 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
     return true
   }), [messages, selectedStatus, selectedDirection])
 
-  // Operational queue (privé outbox) + active tab. The queue hook is graceful —
-  // it stays empty (badge 0) until backend C-43 is live.
-  const queue = useWhatsAppQueue()
-  const [tab, setTab] = useState<'overview' | 'messages' | 'queue' | 'escalations'>('overview')
-  // Open a specific tab when arriving via a dashboard link (queue / messages / escalations).
+  // Active tab (personal-WhatsApp queue removed 2026-07-04 — Business API only).
+  const [tab, setTab] = useState<'overview' | 'messages' | 'escalations'>('overview')
+  // Open a specific tab when arriving via a dashboard link (messages / escalations).
   useEffect(() => {
     const wanted = (intent as { tab?: string } | undefined)?.tab
-    if (wanted && ['overview', 'messages', 'queue', 'escalations'].includes(wanted)) setTab(wanted as typeof tab)
+    if (wanted && ['overview', 'messages', 'escalations'].includes(wanted)) setTab(wanted as typeof tab)
   }, [intent])
   // Which KPI's right drill-down drawer is open (null = closed).
   const [drill, setDrill] = useState<null | 'today' | 'contacted' | 'filled' | 'escal'>(null)
@@ -78,7 +74,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   const handleRefresh = () => {
     if (refreshing) return
     setRefreshing(true)
-    reload(); queue.reload()
+    reload()
     setTimeout(() => setRefreshing(false), 1000)
   }
 
@@ -128,10 +124,10 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
       {/* Tabs + verversen op één lijn; badge = wachtrij-achterstand */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
         <div role="tablist" style={{ display: 'flex', gap: 4 }}>
-        {([['overview', t('tabs.overview')], ['messages', t('tabs.messages')], ['queue', t('tabs.queue')], ['escalations', t('tabs.escalations')]] as const).map(([id, label]) => {
+        {([['overview', t('tabs.overview')], ['messages', t('tabs.messages')], ['escalations', t('tabs.escalations')]] as const).map(([id, label]) => {
           const active = id === tab
-          const badge = id === 'queue' ? queue.count : id === 'escalations' ? escalations.length : 0
-          const badgeDanger = id === 'escalations' || (id === 'queue' && queue.failed > 0)
+          const badge = id === 'escalations' ? escalations.length : 0
+          const badgeDanger = id === 'escalations'
           return (
             <button key={id} role="tab" aria-selected={active} onClick={() => setTab(id)}
               style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 14px', border: 'none', background: 'transparent',
@@ -174,7 +170,6 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
       {tab === 'messages' && (wabaDown ? NoConn : <MessageFeed messages={filteredMessages} loading={loading.messages} />)}
 
       {/* Wachtrij — privé outbox (backend C-43) */}
-      {tab === 'queue' && <QueueTab queue={queue} />}
 
       {/* Escalaties */}
       {tab === 'escalations' && (wabaDown ? NoConn : <EscalationList escalations={escalations} loading={loading.escalations} />)}

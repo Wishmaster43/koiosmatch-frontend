@@ -1012,7 +1012,7 @@
     "tierDesc": {
       "core": "ATS + CRM",
       "pro": "+ Koios AI + AI Agents + Workflows + WhatsApp Business",
-      "enterprise": "+ REST API + personal WhatsApp + Insights+ + Connectors + SLA"
+      "enterprise": "+ REST API + Insights+ + Connectors + SLA"
     },
     "addon": {
       "sm": "Reporting Shiftmanager",

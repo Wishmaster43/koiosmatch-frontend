@@ -2,7 +2,6 @@
   "tabs": {
     "overview": "Übersicht",
     "messages": "Nachrichten",
-    "queue": "Warteschlange",
     "escalations": "Eskalationen"
   },
   "drill": {
@@ -11,45 +10,6 @@
   "overview": {
     "statusTitle": "Nachrichtenstatus",
     "reasonsTitle": "Eskalationsgründe"
-  },
-  "queue": {
-    "loading": "Warteschlange wird geladen…",
-    "error": "Warteschlange konnte nicht geladen werden.",
-    "emptyTitle": "Warteschlange ist leer",
-    "emptyDesc": "Es befinden sich keine persönlichen WhatsApp-Nachrichten in der Warteschlange.",
-    "col": {
-      "candidate": "Kandidat",
-      "type": "Typ",
-      "priority": "Priorität",
-      "status": "Status",
-      "scheduled": "Geplant",
-      "attempts": "Versuch",
-      "actions": "Aktionen",
-      "reason": "Grund"
-    },
-    "status": {
-      "queued": "In Warteschlange",
-      "sending": "Wird gesendet",
-      "sent": "Gesendet",
-      "failed": "Fehlgeschlagen",
-      "skipped": "Übersprungen",
-      "paused": "Pausiert"
-    },
-    "action": {
-      "sendNow": "Jetzt senden",
-      "pause": "Pausieren",
-      "retry": "Wiederholen",
-      "cancel": "Löschen"
-    },
-    "reason": {
-      "new_number_daily": "Neue Nummer — Tageslimit erreicht",
-      "new_number_hourly": "Neue Nummer — Stundenlimit erreicht",
-      "new_number_weekly": "Neue Nummer — Wochenlimit erreicht",
-      "rate_limit": "Stundenlimit erreicht",
-      "priority_wait": "Wartet auf Priorität",
-      "scheduled": "Geplant",
-      "ready": "Sendebereit"
-    }
   },
   "title": "WhatsApp",
   "updatedAt": "Aktualisiert um {{time}}",

@@ -6,10 +6,9 @@
  */
 import { useState } from 'react'
 import { useTranslation }      from 'react-i18next'
-import { User, Mail, Sun, Loader2, Camera, MessageCircle, Shield } from 'lucide-react'
+import { User, Mail, Sun, Loader2, Camera, Shield } from 'lucide-react'
 import { useTheme }           from '@/context/ThemeContext'
 import Avatar                 from '@/components/ui/Avatar'
-import ProfileWhatsAppWeb     from './ProfileWhatsAppWeb'
 import ProfileEmailConnect    from './ProfileEmailConnect'
 import SecuritySettings        from '../settings/sections/SecuritySettings'
 import { Section, ProfileTabs } from './profileParts'
@@ -31,7 +30,6 @@ export default function ProfilePage() {
     { id: 'profile',  label: t('profile.tabs.profile'), icon: User },
     { id: 'email',    label: t('profile.tabs.email'),   icon: Mail },
     { id: 'display',  label: t('profile.tabs.display'), icon: Sun },
-    { id: 'whatsapp', label: t('profile.whatsappWeb.title'), icon: MessageCircle },
     { id: 'security', label: tSettings('nav.security'), icon: Shield },
   ]
 
@@ -89,12 +87,6 @@ export default function ProfilePage() {
       {tab === 'display' && (
         <ProfileDisplayTab form={form} setForm={setForm}
           theme={theme} setTheme={setTheme} language={language} setLanguage={setLanguage} />
-      )}
-
-      {tab === 'whatsapp' && (
-        <Section title={t('profile.whatsappWeb.title')}>
-          <ProfileWhatsAppWeb />
-        </Section>
       )}
 
       {tab === 'security' && (

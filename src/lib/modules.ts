@@ -26,7 +26,7 @@ export const PACKAGE_MODULES: Record<string, ModuleKey[]> = {
   // fallback (no explicit tenant.modules) grants the same pages as the live payload.
   core:                  ['ats'],
   pro:                   ['ats', 'whatsapp', 'aiagents', 'workflows', 'koios_ai'],
-  enterprise:            ['ats', 'whatsapp', 'aiagents', 'workflows', 'koios_ai', 'apps', 'api', 'whatsapp_personal', 'insights'],
+  enterprise:            ['ats', 'whatsapp', 'aiagents', 'workflows', 'koios_ai', 'apps', 'api', 'insights'],
   // Legacy 10-package model — kept so existing tenants keep working (backward-compat).
   reporting_sm:          ['sm'],
   reporting_hf:          ['hf'],
