@@ -13,7 +13,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepare": "git config core.hooksPath .githooks || true",
-    "smoke": "node e2e/run.mjs"
+    "smoke": "SMOKE_COOKIE=1 node e2e/run.mjs"
   },
   "dependencies": {
     "@react-pdf/renderer": "^4.5.1",

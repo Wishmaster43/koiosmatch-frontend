@@ -128,7 +128,10 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   const hidden = getJsonSetting<Record<string, { kpis?: string[]; blocks?: string[] }>>(settings, 'dashboard_hidden', {})
   const hiddenBlocks = hidden[activeType]?.blocks ?? []
   const hiddenKpis = hidden[activeType]?.kpis ?? []
-  const vis = (id: string) => visibleBlock(activeType, id) && !hiddenBlocks.includes(id)
+  // Planning-gated surfaces (Diensten-blok + open-diensten-KPI) only exist when the
+  // tenant has the module (Danny 2026-07-04: "Planning staat uit en ik zie DIENSTEN??").
+  const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
+  const vis = (id: string) => visibleBlock(activeType, id) && !hiddenBlocks.includes(id) && (id !== 'block.shifts' || hasPlanning)
 
   // Live total — same source as the Candidates table (/candidates meta.total).
   const { data: candidateTotal, isLoading: countLoading } = useCandidateCount()
@@ -332,7 +335,11 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     expiringOpps:      { id: 'expiringOpps', label: t('kpi.expiringOpps'), value: num(att.expiring_opps), sub: t('kpi.expiringOppsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: CalendarClock, onClick: () => onNavigate?.('opportunities') },
   }
   // Every role ALWAYS gets its own full KPI row (never hidden).
-  const kpis = kpiRow(activeType).filter(id => !hiddenKpis.includes(id)).map(id => kpiById[id]).filter(Boolean)
+  const kpis = kpiRow(activeType)
+    .filter(id => !hiddenKpis.includes(id))
+    // Open-diensten is a Planning-module KPI — hide it when the tenant lacks the module.
+    .filter(id => id !== 'openShifts' || hasPlanning)
+    .map(id => kpiById[id]).filter(Boolean)
 
   return (
     <div style={{ padding: 24, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
