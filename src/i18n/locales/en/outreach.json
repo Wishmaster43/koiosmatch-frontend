@@ -92,7 +92,15 @@
       "contacted": "Mark contacted",
       "answered": "Mark answered",
       "skipped": "Skip",
-      "reset": "Back to to-do"
-    }
+      "reset": "Back to to-do",
+      "newTask": "New task",
+      "makeMatch": "Create match",
+      "openCandidate": "Open candidate"
+    },
+    "outcomeLabel": "Outcome",
+    "matchPick": "Pick a vacancy…",
+    "matchConfirm": "Create match",
+    "matchCreated": "Match created.",
+    "matchFailed": "Creating the match failed."
   }
 }

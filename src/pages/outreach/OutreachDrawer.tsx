@@ -25,7 +25,7 @@ export default function OutreachDrawer({ id, onClose, expanded = false, onToggle
   onToggleExpand?: () => void
 }) {
   const { t } = useTranslation('outreach')
-  const { detail, loading, error, setTargetStatus } = useOutreachDetail(id)
+  const { detail, loading, error, setTargetStatus, setTargetOutcome } = useOutreachDetail(id)
   if (!id) return null
 
   const name = detail?.name ?? '…'
@@ -36,7 +36,7 @@ export default function OutreachDrawer({ id, onClose, expanded = false, onToggle
   // Tabs are config (§3A) — the call list is the single tab.
   const tabs: EntityTab[] = [
     { id: 'targets', label: t('drawer.tabs.targets'), render: () => (
-      <TargetsTab targets={detail?.targets ?? []} loading={loading} error={error} onSetStatus={setTargetStatus} />
+      <TargetsTab targets={detail?.targets ?? []} loading={loading} error={error} onSetStatus={setTargetStatus} onSetOutcome={setTargetOutcome} />
     ) },
   ]
 

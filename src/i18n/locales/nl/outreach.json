@@ -92,7 +92,15 @@
       "contacted": "Markeer als benaderd",
       "answered": "Markeer als beantwoord",
       "skipped": "Overslaan",
-      "reset": "Terug naar te doen"
-    }
+      "reset": "Terug naar te doen",
+      "newTask": "Nieuwe taak",
+      "makeMatch": "Match maken",
+      "openCandidate": "Open kandidaat"
+    },
+    "outcomeLabel": "Uitkomst",
+    "matchPick": "Kies vacature…",
+    "matchConfirm": "Maak match",
+    "matchCreated": "Match aangemaakt.",
+    "matchFailed": "Match maken mislukt."
   }
 }

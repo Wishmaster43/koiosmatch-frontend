@@ -10,6 +10,8 @@ import type { Campaign } from './useOutreachCampaigns'
 export interface OutreachTarget {
   id: string
   status?: 'todo' | 'contacted' | 'answered' | 'skipped' | string
+  // Call outcome (OUTREACH-2) — a slug from the /outreach-outcomes tenant lookup.
+  outcome?: string | null
   note?: string | null
   contacted_at?: string | null
   candidate?: { id?: string; name?: string; first_name?: string; last_name?: string } | null
@@ -45,5 +47,17 @@ export function useOutreachDetail(id: string | null) {
     catch { setDetail(d => (d && prev ? { ...d, targets: prev } : d)) }
   }, [])
 
-  return { detail, loading, error, setTargetStatus }
+  // Record the call OUTCOME for one target (OUTREACH-2) — optimistic, revert on failure
+  // (the PATCH 422s until the backend ships the `outcome` column; the UI stays honest).
+  const setTargetOutcome = useCallback(async (targetId: string, outcome: string | null) => {
+    let prev: OutreachTarget[] | undefined
+    setDetail(d => {
+      prev = d?.targets
+      return d ? { ...d, targets: (d.targets ?? []).map(t => t.id === targetId ? { ...t, outcome } : t) } : d
+    })
+    try { await updateTarget(targetId, { outcome }) }
+    catch { setDetail(d => (d && prev ? { ...d, targets: prev } : d)) }
+  }, [])
+
+  return { detail, loading, error, setTargetStatus, setTargetOutcome }
 }

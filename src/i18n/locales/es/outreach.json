@@ -92,7 +92,15 @@
       "contacted": "Marcar contactado",
       "answered": "Marcar respondido",
       "skipped": "Omitir",
-      "reset": "Volver a pendiente"
-    }
+      "reset": "Volver a pendiente",
+      "newTask": "Nueva tarea",
+      "makeMatch": "Crear match",
+      "openCandidate": "Abrir candidato"
+    },
+    "outcomeLabel": "Resultado",
+    "matchPick": "Elegir vacante…",
+    "matchConfirm": "Crear match",
+    "matchCreated": "Match creado.",
+    "matchFailed": "Error al crear el match."
   }
 }

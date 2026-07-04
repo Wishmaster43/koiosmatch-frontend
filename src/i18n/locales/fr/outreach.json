@@ -92,7 +92,15 @@
       "contacted": "Marquer contacté",
       "answered": "Marquer répondu",
       "skipped": "Ignorer",
-      "reset": "Remettre à faire"
-    }
+      "reset": "Remettre à faire",
+      "newTask": "Nouvelle tâche",
+      "makeMatch": "Créer un match",
+      "openCandidate": "Ouvrir le candidat"
+    },
+    "outcomeLabel": "Résultat",
+    "matchPick": "Choisir un poste…",
+    "matchConfirm": "Créer un match",
+    "matchCreated": "Match créé.",
+    "matchFailed": "Échec de la création du match."
   }
 }

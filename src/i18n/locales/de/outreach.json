@@ -92,7 +92,15 @@
       "contacted": "Als kontaktiert markieren",
       "answered": "Als beantwortet markieren",
       "skipped": "Überspringen",
-      "reset": "Zurück zu offen"
-    }
+      "reset": "Zurück zu offen",
+      "newTask": "Neue Aufgabe",
+      "makeMatch": "Match erstellen",
+      "openCandidate": "Kandidat öffnen"
+    },
+    "outcomeLabel": "Ergebnis",
+    "matchPick": "Stelle wählen…",
+    "matchConfirm": "Match erstellen",
+    "matchCreated": "Match erstellt.",
+    "matchFailed": "Match erstellen fehlgeschlagen."
   }
 }
