@@ -7,7 +7,7 @@
  * Model: besloten 2026-06-23 (memory `project-pricing-model`). Legacy package strings
  * are normalised to the new tier for display until the backend sends {package, addons}.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save } from 'lucide-react'
 import api from '@/lib/api'
@@ -70,6 +70,29 @@ export default function ModulesSettings() {
   }, [activeTenant?.id])
 
   const hasChange = pkg !== savedAt.pkg || !sameSet(addons, savedAt.addons)
+
+  // Re-sync on window focus so a long-open tab never shows stale toggles (a reseed or a
+  // colleague's change elsewhere) — but never clobber the admin's unsaved edits.
+  const stateRef = useRef({ pkg, addons, savedAt })
+  useEffect(() => { stateRef.current = { pkg, addons, savedAt } }, [pkg, addons, savedAt])
+  useEffect(() => {
+    const onFocus = () => {
+      if (!activeTenant?.id) return
+      api.get('/tenant-modules', { params: { tenant_id: activeTenant.id } })
+        .then(res => {
+          const tier = LEGACY_TO_TIER[res.data?.package] ?? 'core'
+          const ad   = Array.isArray(res.data?.addons) ? res.data.addons : []
+          const { pkg: p, addons: a, savedAt: s } = stateRef.current
+          const dirty = p !== s.pkg || !sameSet(a, s.addons)
+          // Only adopt the fresh server truth when there is no pending local change.
+          if (!dirty) { setPkg(tier); setAddons(ad) }
+          setSavedAt({ pkg: tier, addons: ad })
+        })
+        .catch(() => {})
+    }
+    window.addEventListener('focus', onFocus)
+    return () => window.removeEventListener('focus', onFocus)
+  }, [activeTenant?.id])
   const toggleAddon = (id) => setAddons(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id])
 
   // Persist { package, addons }. The backend re-checks authorization + validates.
