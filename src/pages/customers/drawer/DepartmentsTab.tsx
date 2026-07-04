@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { Building } from 'lucide-react'
 import SubEntityTab from './SubEntityTab'
 import PlanningSummary from './PlanningSummary'
+import { useAuth } from '@/context/AuthContext'
 import type { Column } from '@/components/ui/DataTable'
 import DetailTableJs from '@/components/ui/DetailTable'
 import SectionCard from '@/components/ui/SectionCard'
@@ -19,6 +20,9 @@ const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>
 
 export default function DepartmentsTab({ customerId, departments = [], onAdd }: { customerId?: Id; departments?: Department[]; onAdd?: () => void }) {
   const { t } = useTranslation('customers')
+  // Planning section only exists when the tenant has the module — no dead placeholder.
+  const auth = useAuth()
+  const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
 
   const columns: Column<Department>[] = [
     { key: 'name', header: t('departments.col.name'), sortable: true, sortValue: d => d.name,
@@ -61,9 +65,11 @@ export default function DepartmentsTab({ customerId, departments = [], onAdd }: 
           )}
       </SectionCard>
 
-      <SectionCard title={t('planning.title')}>
-        <PlanningSummary customerId={customerId ?? ''} params={{ department_id: d.id }} />
-      </SectionCard>
+      {hasPlanning && (
+        <SectionCard title={t('planning.title')}>
+          <PlanningSummary customerId={customerId ?? ''} params={{ department_id: d.id }} />
+        </SectionCard>
+      )}
     </div>
   )
 

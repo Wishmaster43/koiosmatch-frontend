@@ -44,14 +44,20 @@ function OpenShifts({ customerId }: { customerId?: Id }) {
 
 export default function OpportunitiesTab({ customerId }: { customerId?: Id }) {
   const { t } = useTranslation('customers')
+  // Open-shifts section only exists when the tenant has the Planning module —
+  // no dead placeholder ("moet weg, module staat toch uit" — Danny 2026-07-04).
+  const auth = useAuth()
+  const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <SectionCard title={t('opportunities.openVacancies')}>
         <VacanciesTab customerId={customerId} params={{ status: 'open' }} />
       </SectionCard>
-      <SectionCard title={t('opportunities.openShifts')}>
-        <OpenShifts customerId={customerId} />
-      </SectionCard>
+      {hasPlanning && (
+        <SectionCard title={t('opportunities.openShifts')}>
+          <OpenShifts customerId={customerId} />
+        </SectionCard>
+      )}
     </div>
   )
 }

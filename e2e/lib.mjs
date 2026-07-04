@@ -64,9 +64,16 @@ export async function boot({ tenant = 'demo' } = {}) {
 }
 
 // Navigate via the sidebar (hash boot is flaky headless; the sidebar is the real UX path).
+// Match the exact BUTTON text — the old `text=` substring matcher could hit page content
+// (e.g. a heading or settings row) and then fail on "element intercepts pointer events".
 export async function go(page, navLabel, ms = 1400) {
-  await page.locator(`text=${navLabel}`).first().click()
+  await page.locator('button', { hasText: new RegExp(`^\\s*${navLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`) }).first().click()
   await page.waitForTimeout(ms)
+}
+
+// True when the sidebar actually shows this nav page (module-gated pages differ per tenant).
+export async function hasNav(page, navLabel) {
+  return (await page.locator('button', { hasText: new RegExp(`^\\s*${navLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`) }).count()) > 0
 }
 
 // Assert helper that throws with a readable message (runner catches per flow).

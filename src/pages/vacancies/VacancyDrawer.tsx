@@ -24,9 +24,10 @@ interface DrawerUser { id: Id; name: string }
 interface DrawerCustomer { id: Id; name: string }
 
 // Tab list — config only; each renders one small component (one per tab/section).
-// 'details' is NOT a tab: the field editor is the drawer's primary view, shown above
-// the tab bar (R-7 — Danny: Details = standaard hoofdweergave, geen aparte tab).
+// Details is the FIRST tab (Danny 2026-07-04 — reverses R-7's pinned-above-the-tabs
+// layout: "Details moet gewoon eerste tabje zijn", the pinned editor crowded the drawer).
 const TABS: { id: string; tKey: string; render: (v: VacancyDetail, onUpdate?: UpdateFn) => ReactNode }[] = [
+  { id: 'details',    tKey: 'details',    render: (v, onUpdate) => <DetailsTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'applicants', tKey: 'applicants', render: v => <ApplicantsTab vacancy={v} /> },
   { id: 'matching',   tKey: 'matching',   render: (v, onUpdate) => <MatchingTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'publishing', tKey: 'publishing', render: (v, onUpdate) => <PublishingTab vacancy={v} onUpdate={onUpdate} /> },
@@ -113,11 +114,6 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
             {v.published ? t('drawer.published') : t('drawer.notPublished')}
           </div>
         </EntityHeader>
-        {/* Details = the drawer's primary view: the field editor sits above the tab bar (R-7).
-            Capped height + own scroll so it never crowds out the tabs and their content. */}
-        <div style={{ maxHeight: 320, overflowY: 'auto', margin: '2px -16px 8px', padding: '10px 16px 0', borderTop: '1px solid var(--border)' }}>
-          <DetailsTab vacancy={v} onUpdate={onUpdate} />
-        </div>
         </>
       )}
     />

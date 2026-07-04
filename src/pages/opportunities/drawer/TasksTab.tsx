@@ -29,7 +29,11 @@ export default function TasksTab({ opportunity: o }: { opportunity: Opportunity 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {items.map((task, i) => {
-        const color = task.status_color || '#9CA3AF'
+        // The API now sends `status` as a lookup OBJECT ({value,label,color,is_done});
+        // older payloads sent a bare string — resolve both, never render the object raw.
+        const st = task.status as { label?: string; value?: string; color?: string } | string | null | undefined
+        const statusLabel = task.status_label ?? (typeof st === 'object' ? st?.label ?? st?.value : st)
+        const color = task.status_color || (typeof st === 'object' ? st?.color : null) || '#9CA3AF'
         const due = task.due_at ?? task.due_date
         return (
           <div key={task.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 11px',
@@ -42,10 +46,10 @@ export default function TasksTab({ opportunity: o }: { opportunity: Opportunity 
                 </div>
               )}
             </div>
-            {(task.status_label || task.status) && (
+            {statusLabel && (
               <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5, flexShrink: 0,
                 background: color + '1A', color, border: `1px solid ${color}55` }}>
-                {task.status_label || task.status}
+                {statusLabel}
               </span>
             )}
           </div>

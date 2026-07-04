@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { MapPin } from 'lucide-react'
 import SubEntityTab from './SubEntityTab'
 import PlanningSummary from './PlanningSummary'
+import { useAuth } from '@/context/AuthContext'
 import type { Column } from '@/components/ui/DataTable'
 import DetailTableJs from '@/components/ui/DetailTable'
 import SectionCard from '@/components/ui/SectionCard'
@@ -37,6 +38,10 @@ function MiniList<T extends { id?: Id }>({ items, getPrimary, getSecondary, empt
 
 export default function LocationsTab({ customerId, locations = [], onAdd }: { customerId?: Id; locations?: Location[]; onAdd?: () => void }) {
   const { t } = useTranslation('customers')
+  // Planning section only exists when the tenant has the module — no dead placeholder
+  // ("moet weg, module staat toch uit" — Danny 2026-07-04).
+  const auth = useAuth()
+  const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
 
   const columns: Column<Location>[] = [
     { key: 'name', header: t('locations.col.name'), sortable: true, sortValue: l => l.name,
@@ -78,9 +83,11 @@ export default function LocationsTab({ customerId, locations = [], onAdd }: { cu
         <MiniList<Contact> items={l.contacts} getPrimary={p => p.name} getSecondary={p => [p.role, p.email].filter(Boolean).join(' · ')} emptyText={t('locations.detail.none')} />
       </SectionCard>
 
-      <SectionCard title={t('planning.title')}>
-        <PlanningSummary customerId={customerId ?? ''} params={{ location_id: l.id }} />
-      </SectionCard>
+      {hasPlanning && (
+        <SectionCard title={t('planning.title')}>
+          <PlanningSummary customerId={customerId ?? ''} params={{ location_id: l.id }} />
+        </SectionCard>
+      )}
     </div>
   )
 

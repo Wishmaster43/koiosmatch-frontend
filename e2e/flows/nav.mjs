@@ -3,18 +3,24 @@
  * drill-down (row click → drawer with content) actually opens. Catches dead pages,
  * empty drawers and 4xx/5xx on the detail endpoints.
  */
-import { go, expect, sleep } from '../lib.mjs'
+import { go, hasNav, expect, sleep } from '../lib.mjs'
 
-const NAV_PAGES = ['Dashboard', 'Kandidaten', 'Sollicitaties', 'Vacatures', 'Matches', 'Kansen', 'Taken', 'Bellijsten', 'Klanten', 'Rapporten', 'Planning', 'AI & Workflows', 'WhatsApp']
+// Core pages every tenant has; MODULE_PAGES only exist when the tenant's add-ons
+// grant them (reports/plan/sm/hf) — visit those only when the sidebar shows them.
+const NAV_PAGES = ['Dashboard', 'Kandidaten', 'Sollicitaties', 'Vacatures', 'Matches', 'Kansen', 'Taken', 'Bellijsten', 'Klanten', 'AI & Workflows', 'WhatsApp']
+const MODULE_PAGES = ['Rapporten', 'Planning', 'Shiftmanager', 'HelloFlex']
 
 // Every page in the sidebar renders and produces zero console/network errors.
 export async function pagesRender({ page, errors }) {
-  for (const nav of NAV_PAGES) {
+  const skipped = []
+  for (const nav of [...NAV_PAGES, ...MODULE_PAGES]) {
+    if (MODULE_PAGES.includes(nav) && !(await hasNav(page, nav))) { skipped.push(nav); continue }
     const at = errors.length
     await go(page, nav)
     const fresh = errors.slice(at)
     expect(fresh.length === 0, `${nav}: ${fresh.join(' | ')}`)
   }
+  if (skipped.length) console.log(`   (module-pagina's niet in deze tenant — overgeslagen: ${skipped.join(', ')})`)
 }
 
 // Row click opens a drawer that actually contains content (not an empty shell).

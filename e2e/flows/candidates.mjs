@@ -33,14 +33,19 @@ export async function statusWithReason({ page, errors }) {
   expect(await picker.count(), 'status-picker niet gevonden in de drawer')
   const current = (await picker.innerText()).trim()
   await picker.click()
-  await sleep(400)
   // Force a real transition to a reason/date status: Ziek, or Verlof when already Ziek.
+  // WAIT for the dropdown option to be visible before clicking — on the slower cookie-mode
+  // proxy a fixed 400ms raced the menu open and `text=` then hit a table cell instead.
   const target = current === 'Ziek' ? 'Verlof' : 'Ziek'
-  await page.locator(`text=${target}`).last().click()
-  await sleep(600)
-  // The reason/date prompt must be visible (this was the silent-422 bug).
-  const modal = page.locator('text=Reden').first()
-  expect(await modal.count(), 'reden/datum-popup opende NIET (status-flags?)')
+  const option = page.locator('button, [role="option"], li', { hasText: new RegExp(`^\\s*${target}\\s*$`) }).last()
+  await option.waitFor({ state: 'visible', timeout: 5000 })
+  await option.click()
+  // The reason/date prompt must be visible (this was the silent-422 bug). Assert on the
+  // modal TITLE — a date-only status (Verlof) renders no "Reden" label, and the cookie-mode
+  // proxy paints a beat later than bearer, so: title + waitFor instead of text+sleep.
+  const modal = page.locator('text=Statuswijziging').first()
+  await modal.waitFor({ state: 'visible', timeout: 6000 })
+    .catch(() => expect(false, 'reden/datum-popup opende NIET (status-flags?)'))
   const box = page.locator('textarea').last()
   if (await box.count()) await box.fill('smoke: griep')
   const date = page.locator('input[type="date"]').last()

@@ -38,13 +38,15 @@ const mapVacancyRow = (v: Record<string, unknown> = {}): VacancyRow => {
   }
 }
 
-// The customer's vacancies (GET /vacancies?customer_id={id}); missing endpoint = empty.
+// The customer's vacancies (GET /vacancies?client_id={id}); missing endpoint = empty.
+// NB: the filter param is `client_id` — since the BE refactor `customer_id` validates
+// as an ARRAY (bulk vocabulary) so a bare uuid 422s (seam catch 2026-07-04).
 export function useCustomerVacancies(customerId?: Id, params?: Record<string, unknown>) {
   const { data = [], isLoading: loading } = useQuery({
     queryKey: ['customers', customerId, 'vacancies', params ?? {}],
     enabled: !!customerId,
     queryFn: async ({ signal }): Promise<VacancyRow[]> =>
-      unwrapList<Record<string, unknown>>(await api.get('/vacancies', { params: { customer_id: customerId, ...params }, signal })).rows.map(mapVacancyRow),
+      unwrapList<Record<string, unknown>>(await api.get('/vacancies', { params: { client_id: customerId, ...params }, signal })).rows.map(mapVacancyRow),
   })
   return { rows: data, loading }
 }
