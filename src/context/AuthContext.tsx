@@ -164,6 +164,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
       return
     }
+    // Cookie mode: the httpOnly cookie is invisible to JS, but the cached auth_user
+    // doubles as the "there was a session" hint — without it (first visit / after
+    // logout) skip the probe entirely, so the login screen shows ZERO 401s.
+    if (COOKIE_AUTH && !saved) {
+      setLoading(false)
+      return
+    }
 
     if (saved) {
       try { setUser(JSON.parse(saved) as AuthUser) } catch { localStorage.removeItem('auth_user') }

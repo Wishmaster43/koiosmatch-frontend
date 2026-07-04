@@ -64,7 +64,10 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token  = localStorage.getItem('auth_token')
   const tenant = localStorage.getItem('active_tenant')
   // In cookie mode the httpOnly cookie carries auth — never attach a Bearer header.
+  // X-Auth-Mode tells the backend to return token:null on login (no bearer credential
+  // over the wire at all — D1 aftercare, agreed with BE 2026-07-04).
   if (!COOKIE_AUTH && token) config.headers.Authorization = `Bearer ${token}`
+  if (COOKIE_AUTH) config.headers['X-Auth-Mode'] = 'cookie'
   if (tenant) config.headers['X-Tenant'] = tenant
   return config
 })
