@@ -50,7 +50,16 @@ export async function primeCsrf(): Promise<void> {
 
 // D1: in cookie mode a LEGACY bearer token left behind by the old flow is a live
 // XSS-readable credential (it may still be valid server-side) — purge it at boot.
-if (COOKIE_AUTH) localStorage.removeItem('auth_token')
+// The cached profile/pages are PII in localStorage (Danny 2026-07-04) — purge too;
+// cookie mode keeps the profile in memory only (km_session is the neutral hint).
+// Also swept: auth-shaped keys from OLDER apps that shared this origin (localhost
+// dev port) — `token` (a legacy JWT), `user`, `yesway_admin_token`. Not ours, but
+// they read as "auth in localStorage" and have no business surviving here.
+if (COOKIE_AUTH) {
+  for (const key of ['auth_token', 'auth_user', 'accessible_pages', 'token', 'user', 'yesway_admin_token']) {
+    localStorage.removeItem(key)
+  }
+}
 
 /**
  * Request interceptor — attaches the saved auth token + active tenant.
@@ -158,6 +167,7 @@ api.interceptors.response.use(
       localStorage.removeItem('auth_user')
       localStorage.removeItem('active_tenant')
       localStorage.removeItem('accessible_pages')
+      localStorage.removeItem('km_session')
       if (window.location.pathname !== '/login') {
         sessionStorage.setItem('km_session_expired', '1')
         window.dispatchEvent(new CustomEvent('km:auth-expired'))

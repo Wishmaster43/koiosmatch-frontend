@@ -51,8 +51,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [tenants,       setTenants]           = useState<Tenant[]>([])
   const [activeTenant,  setActiveTenantState] = useState<Tenant | null>(null)
   // Pages the backend says this user may open (single source of truth for
-  // gated pages — see lib/access.js). Seeded from cache to avoid flash on boot.
+  // gated pages — see lib/access.js). Seeded from cache to avoid flash on boot —
+  // bearer mode only: cookie mode keeps NOTHING auth-shaped in localStorage (D1).
   const [accessiblePages, setAccessiblePages] = useState<string[]>(() => {
+    if (COOKIE_AUTH) return []
     try { return JSON.parse(localStorage.getItem('accessible_pages') ?? '[]') as string[] } catch { return [] }
   })
 
@@ -65,9 +67,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const u     = (d?.user ?? d?.data ?? data) as AuthUser
     const pages = d?.accessible_pages ?? u?.accessible_pages ?? []
     setUser(u)
-    localStorage.setItem('auth_user', JSON.stringify(u))
     setAccessiblePages(pages)
-    localStorage.setItem('accessible_pages', JSON.stringify(pages))
+    if (COOKIE_AUTH) {
+      // D1 (Danny 2026-07-04): the profile stays in MEMORY only — no user PII,
+      // roles or pages in localStorage. A neutral flag is the "there was a
+      // session" boot hint, so the login screen still shows zero 401s.
+      localStorage.setItem('km_session', '1')
+    } else {
+      localStorage.setItem('auth_user', JSON.stringify(u))
+      localStorage.setItem('accessible_pages', JSON.stringify(pages))
+    }
 
     // If the response carries a tenant (non-super-admin or /auth/me), keep the
     // active tenant state in sync so tenant.package + tenant.modules stay fresh.
@@ -164,15 +173,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
       return
     }
-    // Cookie mode: the httpOnly cookie is invisible to JS, but the cached auth_user
-    // doubles as the "there was a session" hint — without it (first visit / after
-    // logout) skip the probe entirely, so the login screen shows ZERO 401s.
-    if (COOKIE_AUTH && !saved) {
+    // Cookie mode: the httpOnly cookie is invisible to JS; the NEUTRAL km_session
+    // flag (never the profile — D1 keeps PII out of localStorage) is the "there
+    // was a session" hint — without it (first visit / after logout) skip the
+    // probe entirely, so the login screen shows ZERO 401s.
+    if (COOKIE_AUTH && localStorage.getItem('km_session') !== '1') {
       setLoading(false)
       return
     }
 
-    if (saved) {
+    // Bearer mode only: pre-seed the user from cache to avoid a paint flash.
+    if (!COOKIE_AUTH && saved) {
       try { setUser(JSON.parse(saved) as AuthUser) } catch { localStorage.removeItem('auth_user') }
     }
 
@@ -186,6 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('auth_user')
         localStorage.removeItem('active_tenant')
         localStorage.removeItem('accessible_pages')
+        localStorage.removeItem('km_session')
         setUser(null)
       })
       .finally(() => setLoading(false))
@@ -297,6 +309,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('auth_user')
     localStorage.removeItem('active_tenant')
     localStorage.removeItem('accessible_pages')
+    localStorage.removeItem('km_session')
     setUser(null)
     setActiveTenantState(null)
     setTenants([])
