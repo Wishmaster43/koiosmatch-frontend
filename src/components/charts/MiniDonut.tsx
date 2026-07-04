@@ -26,12 +26,19 @@ function MiniTooltip({ active, payload, total }: TipProps & { total?: number }) 
   )
 }
 
-export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 56, onItemClick }: {
+export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 56, onItemClick, pickedKey = null }: {
   data?: ChartDatum[]; colors?: string[]; size?: number; onItemClick?: (d: unknown) => void
+  // Active-filter value (key or label) — the other segments dim so the pick is visible.
+  pickedKey?: string | null
 }) {
   const total = data.reduce((s, d) => s + d.value, 0)
   const innerR = Math.round(size * 0.34)
   const outerR = Math.round(size * 0.5)
+  // A segment counts as picked when the filter value matches its key OR its label.
+  const isPicked = (d: ChartDatum) => {
+    const k = (d as { key?: string }).key
+    return pickedKey != null && (k === pickedKey || d.name === pickedKey)
+  }
 
   return (
     <div style={{ position: 'relative', width: size, height: size, flexShrink: 0 }}>
@@ -43,7 +50,8 @@ export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 5
           onClick={(d: unknown) => onItemClick?.(d)} stroke="none"
           isAnimationActive={false}>
           {data.map((d, i) => (
-            <Cell key={i} fill={d.color || colors[i % colors.length]} />
+            <Cell key={i} fill={d.color || colors[i % colors.length]}
+              opacity={pickedKey != null && !isPicked(d) ? 0.25 : 1} />
           ))}
         </Pie>
         <Tooltip content={<MiniTooltip total={total} />} />

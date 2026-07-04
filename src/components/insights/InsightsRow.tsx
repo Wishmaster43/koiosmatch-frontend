@@ -16,7 +16,10 @@ type AnyProps = Record<string, unknown>
 const MiniDonut = MiniDonutJs as unknown as ComponentType<AnyProps>
 
 interface DonutChannel { label: string; value: ReactNode; color: string }
-export interface DonutSpec { key: string; title?: ReactNode; data: unknown[]; colors?: string[]; onPick?: (d: unknown) => void; active?: boolean; onClear?: () => void }
+// `picked` = the active filter's display label; the card then shows a visible
+// "label ✕"-chip and the donut dims the other segments — filtering on the biggest
+// segment previously LOOKED dead (rows already matched; Danny's "58% toont niks").
+export interface DonutSpec { key: string; title?: ReactNode; data: unknown[]; colors?: string[]; onPick?: (d: unknown) => void; active?: boolean; onClear?: () => void; picked?: string | null }
 export interface KpiSpec { key: string; label?: ReactNode; value: number | string; sub?: ReactNode; color?: string; onClick?: () => void; active?: boolean; channels?: DonutChannel[] }
 
 const CARD: CSSProperties = {
@@ -29,24 +32,27 @@ const TITLE: CSSProperties = {
   letterSpacing: '0.04em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
 }
 
-function DonutCard({ title, data, colors, onPick, active, onClear, clearTitle }: Omit<DonutSpec, 'key'> & { clearTitle?: string }) {
+function DonutCard({ title, data, colors, onPick, active, onClear, picked, clearTitle }: Omit<DonutSpec, 'key'> & { clearTitle?: string }) {
   return (
-    <div style={{ ...CARD, position: 'relative' }}>
-      <div style={TITLE}>{title}</div>
+    <div style={{ ...CARD, position: 'relative', borderColor: active ? 'var(--color-primary)' : 'var(--border)' }}>
+      <div style={{ ...TITLE, paddingRight: active ? 64 : 0 }}>{title}</div>
+      {/* Active filter: a VISIBLE "value ✕" chip (not just a tiny icon) — clicking clears. */}
       {active && onClear && (
         <button onClick={onClear} title={clearTitle}
-          style={{ position: 'absolute', top: 6, right: 6, width: 20, height: 20, borderRadius: 5,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
-            background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: 'none', padding: 0 }}
+          style={{ position: 'absolute', top: 5, right: 6, maxWidth: '70%', height: 20, borderRadius: 999,
+            display: 'flex', alignItems: 'center', gap: 4, padding: '0 7px', cursor: 'pointer',
+            background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: 'none',
+            fontSize: 10, fontWeight: 600 }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.color = '#fff' }}
           onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-primary-bg)'; e.currentTarget.style.color = 'var(--color-primary)' }}>
-          <FilterX size={12} />
+          {picked && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{picked}</span>}
+          <FilterX size={11} style={{ flexShrink: 0 }} />
         </button>
       )}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {data.length === 0
           ? <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
-          : <MiniDonut data={data} colors={colors} size={54} onItemClick={(d: unknown) => onPick?.(d)} />}
+          : <MiniDonut data={data} colors={colors} size={54} onItemClick={(d: unknown) => onPick?.(d)} pickedKey={active ? picked : null} />}
       </div>
     </div>
   )

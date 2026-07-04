@@ -72,10 +72,11 @@ export default function OpportunitiesInsightsRow({
     }
   }, [rows, stages, valueInHours])
 
+  // `picked` doubles as the visible filter-chip label (on this page labels ARE the keys).
   const donuts: DonutSpec[] = [
-    { key: 'stage',  title: t('insights.stage'),  data: stageData,  onPick: onPickStage,  active: stage.length > 0,  onClear: onClearStage },
-    { key: 'owner',  title: t('insights.owner'),  data: ownerData,  onPick: onPickOwner,  active: owner.length > 0,  onClear: onClearOwner },
-    { key: 'client', title: t('insights.client'), data: clientData, onPick: onPickClient, active: client.length > 0, onClear: onClearClient },
+    { key: 'stage',  title: t('insights.stage'),  data: stageData,  onPick: onPickStage,  active: stage.length > 0,  onClear: onClearStage,  picked: stage[0] ?? null },
+    { key: 'owner',  title: t('insights.owner'),  data: ownerData,  onPick: onPickOwner,  active: owner.length > 0,  onClear: onClearOwner,  picked: owner[0] ?? null },
+    { key: 'client', title: t('insights.client'), data: clientData, onPick: onPickClient, active: client.length > 0, onClear: onClearClient, picked: client[0] ?? null },
   ]
   const kpis: KpiSpec[] = [
     { key: 'open',     label: t('kpi.open'),                                   value: open,     color: 'var(--color-primary)' },

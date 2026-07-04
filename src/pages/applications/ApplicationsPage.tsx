@@ -302,10 +302,12 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   }
 
   // ── Insights strip: 3 donuts (filterable) + 4 KPI cards, equal footprint ──
+  // `picked` = the chip label; phase filters store the SLUG, so resolve it to its label.
+  const pickedLabel = (data: Aggregate[], v?: string) => (v ? (data.find(d => d.key === v)?.name ?? v) : null)
   const insightDonuts: DonutSpec[] = [
-    { key: 'phase',  title: t('insights.phase'),  data: phaseData,  onPick: pickOne(setSelectedPhase),  active: selectedPhase.length > 0,  onClear: () => setSelectedPhase([]) },
-    { key: 'owner',  title: t('insights.owner'),  data: ownerData,  onPick: pickOne(setSelectedOwner),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
-    { key: 'source', title: t('insights.source'), data: sourceData, onPick: pickOne(setSelectedSource), active: selectedSource.length > 0, onClear: () => setSelectedSource([]) },
+    { key: 'phase',  title: t('insights.phase'),  data: phaseData,  onPick: pickOne(setSelectedPhase),  active: selectedPhase.length > 0,  onClear: () => setSelectedPhase([]),  picked: pickedLabel(phaseData, selectedPhase[0]) },
+    { key: 'owner',  title: t('insights.owner'),  data: ownerData,  onPick: pickOne(setSelectedOwner),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]),  picked: pickedLabel(ownerData, selectedOwner[0]) },
+    { key: 'source', title: t('insights.source'), data: sourceData, onPick: pickOne(setSelectedSource), active: selectedSource.length > 0, onClear: () => setSelectedSource([]), picked: pickedLabel(sourceData, selectedSource[0]) },
   ]
   // Average match score across non-rejected applications (KPI, "—" when none scored).
   const scored = applications.filter(a => a.bucket !== 'rejected' && typeof a.score === 'number')
