@@ -10,13 +10,15 @@ import type { Id } from '@/types/common'
  * `useOpenFromIntent` (below). Keeps the four features one navigable graph.
  */
 type OpenEntity = (page: string, id?: Id | null) => void
+type Navigate = (page: string, intent?: unknown) => void
 
-const NavigationContext = createContext<{ openEntity: OpenEntity }>({ openEntity: () => {} })
+const NavigationContext = createContext<{ openEntity: OpenEntity; navigate: Navigate }>({ openEntity: () => {}, navigate: () => {} })
 
 export function NavigationProvider({ goTo, children }: { goTo: (page: string, intent?: unknown) => void; children: ReactNode }) {
-  // Translate an entity jump into the shell's page-switch + open intent.
+  // Translate an entity jump into the shell's page-switch + open intent; `navigate`
+  // is the generic page-switch with an arbitrary intent (KPI → filtered list jumps).
   const openEntity: OpenEntity = (page, id) => goTo(page, id != null ? { open: id } : null)
-  return <NavigationContext.Provider value={{ openEntity }}>{children}</NavigationContext.Provider>
+  return <NavigationContext.Provider value={{ openEntity, navigate: goTo }}>{children}</NavigationContext.Provider>
 }
 
 export function useNavigation() { return useContext(NavigationContext) }

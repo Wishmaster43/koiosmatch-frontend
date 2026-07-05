@@ -24,6 +24,7 @@ import VacanciesBulkBar from './VacanciesBulkBar'
 import VacancyDrawer from './VacancyDrawer'
 import AddVacancyModal from './AddVacancyModal'
 import { toggleOneValue, pickKey } from './data/vacanciesShared'
+import { useNavigation } from '@/context/NavigationContext'
 import { useVacanciesData } from './hooks/useVacanciesData'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
 import { useOpenFromIntent } from '@/context/NavigationContext'
@@ -42,6 +43,8 @@ interface VacancyStatsShape {
 
 function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { t } = useTranslation('vacancies')
+  // Cross-page jump for the funnel KPI cards (→ Sollicitaties with the stage filter).
+  const { navigate } = useNavigation()
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
   const tableScrollRef = useRef<HTMLDivElement>(null)
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -176,8 +179,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     { key: 'owner',  title: t('insights.ownerTitle'),  data: ownerData,  onPick: d => pickOne(setSelectedOwner)(pickKey(d)),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
     { key: 'client', title: t('insights.clientTitle'), data: clientData, onPick: d => pickOne(setSelectedClient)(pickKey(d)), active: selectedClient.length > 0, onClear: () => setSelectedClient([]) },
   ]
+  // Funnel counts are APPLICATION numbers — clicking jumps to Sollicitaties with that
+  // stage pre-filtered (Danny's "Gesolliciteerd doet niks": these cards had no click).
   const insightKpis: KpiSpec[] = phases.map(p => ({
     key: p.value, label: t(`kpi.${p.value}`, p.label), value: phaseCounts[p.value] ?? 0, color: p.color,
+    onClick: () => navigate('applications', { stage: p.value }),
   }))
 
   // Status tab bar: "All" + one button per configured status.
