@@ -3,7 +3,8 @@
  * [Left nav] [Topbar + Content] [Right filter panel (optional)]
  * Owns the active-page + panel state; the page itself comes from renderPage().
  */
-import { useState, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ComponentType } from 'react'
 import { SlidersHorizontal, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
@@ -46,14 +47,39 @@ function NoAccessPage() {
 }
 
 export default function DashboardLayout() {
+  const { t } = useTranslation('common')
   const [expanded,       setExpanded]       = useState(true)
   const auth0                               = useAuth()
   const pkg0                                = auth0?.activeTenant?.package ?? auth0?.user?.tenant?.package
-  const [activePage,     setActivePage]     = useState(PACKAGE_DEFAULT_PAGE[pkg0 ?? ''] ?? 'dashboard')
+  // Boot from the URL hash when it names a known page (deep-link/refresh survive);
+  // Settings rewrites the hash to its own sections, so unknown hashes fall back.
+  const [activePage,     setActivePage]     = useState(() => {
+    const fromHash = window.location.hash.replace(/^#/, '').split('/')[0]
+    return (fromHash && PAGE_TITLES[fromHash]) ? fromHash : (PACKAGE_DEFAULT_PAGE[pkg0 ?? ''] ?? 'dashboard')
+  })
   // Navigation intent: a filter the target page should apply when navigated to
   // (e.g. a dashboard KPI/chart click). Plain navigation (sidebar) clears it.
   const [navIntent,      setNavIntent]      = useState<unknown>(null)
-  const goTo = (page: string, intent: unknown = null) => { setNavIntent(intent); setActivePage(page) }
+  // Every page switch becomes a real history entry, so the browser's back/forward
+  // work (Danny 2026-07-05: "terug in de browser doet niks").
+  // A jump WITH an intent (KPI/doorklik) remembers where it came from → back-chip;
+  // plain navigation (sidebar) clears it.
+  const [jumpOrigin, setJumpOrigin] = useState<string | null>(null)
+  const goTo = (page: string, intent: unknown = null) => {
+    setJumpOrigin(intent != null && page !== activePage ? activePage : null)
+    setNavIntent(intent); setActivePage(page)
+    window.history.pushState({ kmPage: page }, '', `#${page}`)
+  }
+  // Back/forward: restore the page from our history state (hash as reload fallback).
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const page = (e.state as { kmPage?: string } | null)?.kmPage
+        ?? window.location.hash.replace(/^#/, '').split('/')[0]
+      if (page && PAGE_TITLES[page]) { setNavIntent(null); setActivePage(page) }
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
   const [rightPanelOpen, setRightPanelOpen] = useState(false)
   const [koiosOpen,      setKoiosOpen]      = useState(false)
   const auth                                = auth0
@@ -139,6 +165,16 @@ export default function DashboardLayout() {
           <span className="font-medium truncate" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
             {PAGE_TITLES[activePage] || activePage}
           </span>
+          {/* Back-chip after a cross-entity jump — one click returns to where you came from. */}
+          {jumpOrigin && jumpOrigin !== activePage && (
+            <button onClick={() => goTo(jumpOrigin)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '2px 10px', fontSize: 11, fontWeight: 600,
+                borderRadius: 999, cursor: 'pointer', color: 'var(--color-primary)', flexShrink: 0,
+                background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
+              ← {t('back')} · {PAGE_TITLES[jumpOrigin] || jumpOrigin}
+            </button>
+          )}
 
           {/* Right actions */}
           <div className="flex items-center flex-shrink-0 gap-2 ml-auto">
