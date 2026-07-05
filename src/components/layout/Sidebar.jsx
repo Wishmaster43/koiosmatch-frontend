@@ -47,8 +47,12 @@ const NAV_ITEMS = [
   { id: 'tasks',          label: 'Taken',          icon: ListChecks },
   { id: 'outreach',       label: 'Bellijsten',     icon: PhoneCall },
   { id: 'customers',      label: 'Klanten',        icon: Building2 },
-  // Reports hub — gated on the "Rapporten Koios Match" add-on (access.ts). Children
-  // map to ReportsPage tabs; labels resolve via common.nav.* (navLabel).
+  { id: 'planning',       label: 'Planning',       icon: CalendarDays },
+  { id: 'aiagents',       label: 'AI & Workflows', icon: Brain },
+  { id: 'whatsapp',       label: 'WhatsApp',       icon: MessageCircle },
+  // Reports hub — LAST standard item, right above the MODULES group (Danny 2026-07-05).
+  // Gated on the "Rapporten Koios Match" add-on (access.ts). Children map to
+  // ReportsPage tabs; labels resolve via common.nav.* (navLabel).
   {
     id: 'reports', label: 'Rapporten', icon: PieChart,
     children: [
@@ -58,9 +62,6 @@ const NAV_ITEMS = [
       { id: 'reports.matches',    label: 'Matches' },
     ],
   },
-  { id: 'planning',       label: 'Planning',       icon: CalendarDays },
-  { id: 'aiagents',       label: 'AI & Workflows', icon: Brain },
-  { id: 'whatsapp',       label: 'WhatsApp',       icon: MessageCircle },
 ]
 
 // Module pages — shown in a separate "Modules" nav group. All are gated by
