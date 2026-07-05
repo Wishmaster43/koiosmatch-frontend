@@ -41,6 +41,8 @@ export default function MatchesPage() {
   const [page,        setPage]        = useState(1)
   const [pageSize,    setPageSize]    = useState(() => user?.default_per_page ?? 50)
   const [stageFilter, setStageFilter] = useState<string[]>([])
+  // KPI attention toggle (Gem. score → only scored matches).
+  const [kpiScored, setKpiScored] = useState(false)
   const [ownerFilter, setOwnerFilter] = useState<string[]>([])
   const [query,       setQuery]       = useState('')
   // Bulk selection (checkboxes); accumulates across pages, clears on filter change.
@@ -91,18 +93,19 @@ export default function MatchesPage() {
 
   // Reset to the first page and clear the selection whenever a filter changes
   // (kept out of the memo — setting state during render can loop).
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter, showArchived, query])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter, kpiScored, showArchived, query])
 
   // Filter the visible rows by donut selection.
   const filteredAll = useMemo(() => {
     const q = query.trim().toLowerCase()
     return rows.filter(r => {
       if (stageFilter.length && !stageFilter.includes(r.stage)) return false
+      if (kpiScored && typeof r.score !== 'number') return false
       if (ownerFilter.length && !ownerFilter.includes(r.owner)) return false
       if (q && ![r.candidate, r.vacancy, r.client].some(v => String(v ?? '').toLowerCase().includes(q))) return false
       return true
     })
-  }, [rows, stageFilter, ownerFilter, query])
+  }, [rows, stageFilter, ownerFilter, kpiScored, query])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
@@ -121,11 +124,22 @@ export default function MatchesPage() {
       active: ownerFilter.length > 0, onClear: () => setOwnerFilter([]) },
   ]
 
+  // KPI clicks drive the existing stage filter (chip + clear come for free);
+  // clicking the active card again clears (mirror of the kansen cards).
+  const eqSet = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join('|') === [...b].sort().join('|')
+  const activeStages = [...new Set(rows.filter(r => !['rejected', 'closed'].includes(r.stage?.toLowerCase())).map(r => r.stage))]
+  const hiredStages  = [...new Set(rows.filter(r => ['hired', 'aangenomen'].includes(r.stage?.toLowerCase())).map(r => r.stage))]
+  const toggleStages = (labels: string[]) => { if (labels.length) setStageFilter(p => (eqSet(p, labels) ? [] : labels)) }
   const insightKpis: KpiSpec[] = [
-    { key: 'total',    label: t('kpi.total'),    value: rows.length, color: 'var(--color-primary)' },
-    { key: 'active',   label: t('kpi.active'),   value: activeCount, color: 'var(--color-primary)' },
-    { key: 'hired',    label: t('kpi.hired'),    value: hiredCount,  color: 'var(--color-success)' },
-    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary)' },
+    { key: 'total',    label: t('kpi.total'),    value: rows.length, color: 'var(--color-primary)',
+      onClick: () => { setStageFilter([]); setOwnerFilter([]); setKpiScored(false) },
+      active: stageFilter.length === 0 && ownerFilter.length === 0 && !kpiScored },
+    { key: 'active',   label: t('kpi.active'),   value: activeCount, color: 'var(--color-primary)',
+      onClick: () => toggleStages(activeStages), active: stageFilter.length > 0 && eqSet(stageFilter, activeStages) },
+    { key: 'hired',    label: t('kpi.hired'),    value: hiredCount,  color: 'var(--color-success)',
+      onClick: () => toggleStages(hiredStages), active: stageFilter.length > 0 && eqSet(stageFilter, hiredStages) },
+    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary)',
+      onClick: () => setKpiScored(v => !v), active: kpiScored },
   ]
 
   // Direct-match creation modal (§3B "direct match" path).

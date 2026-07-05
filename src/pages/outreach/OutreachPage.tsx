@@ -53,6 +53,9 @@ export default function OutreachPage() {
   const [creating, setCreating] = useState(false)
   // KPI/donut click-to-filter (status) + checkbox selection.
   const [selectedStatus, setSelectedStatus] = useState<string[]>([])
+  // Channel filter (second donut) + targets-only KPI toggle.
+  const [selectedChannel, setSelectedChannel] = useState<string[]>([])
+  const [kpiTargets, setKpiTargets] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set())
   const [query, setQuery] = useState('')  // shared header search (client-side, R-5)
 
@@ -70,7 +73,7 @@ export default function OutreachPage() {
   }, [showArchived])
 
   // Clear the selection whenever the filter/view/archived toggle changes.
-  useEffect(() => { setSelectedIds(new Set()) }, [selectedStatus, view, showArchived])
+  useEffect(() => { setSelectedIds(new Set()) }, [selectedStatus, selectedChannel, kpiTargets, view, showArchived])
 
   // Board columns + donut items, labelled via i18n.
   const columns = useMemo(() => STATUSES.map((s) => ({ key: s.key, label: t(`status.${s.key}`), color: s.color })), [t])
@@ -84,25 +87,31 @@ export default function OutreachPage() {
   const baseRows = showArchived ? archived : campaigns
   // Status filter (from the donut/KPI) narrows both the table and the board.
   const filtered = useMemo(() => {
-    const byStatus = selectedStatus.length ? baseRows.filter((c) => selectedStatus.includes(statusKey(c))) : baseRows
+    let byStatus = selectedStatus.length ? baseRows.filter((c) => selectedStatus.includes(statusKey(c))) : baseRows
+    if (selectedChannel.length) byStatus = byStatus.filter((c) => selectedChannel.includes(channelKey(c)))
+    if (kpiTargets) byStatus = byStatus.filter((c) => targetsOf(c) > 0)
     if (!query.trim()) return byStatus
     const q = query.trim().toLowerCase()
     return byStatus.filter((c) => `${(c as { name?: string }).name ?? ''}`.toLowerCase().includes(q))
-  }, [baseRows, selectedStatus, query])
+  }, [baseRows, selectedStatus, selectedChannel, kpiTargets, query])
 
   // Donut/KPI click = set exactly one status value (or clear when clicked again).
-  const pickStatus = (v?: string) => { if (v != null) setSelectedStatus((p) => (p.length === 1 && p[0] === v) ? [] : [v]) }
+  const pickStatus  = (v?: string) => { if (v != null) setSelectedStatus((p) => (p.length === 1 && p[0] === v) ? [] : [v]) }
+  const pickChannel = (v?: string) => { if (v != null) setSelectedChannel((p) => (p.length === 1 && p[0] === v) ? [] : [v]) }
 
   // ── Insights: 2 donuts (status/channel, filterable) + 3 KPI cards ──
   const insightDonuts: DonutSpec[] = [
     { key: 'status',  title: t('insights.status'),  data: statusData,  onPick: (d) => pickStatus((d as { key?: string })?.key), active: selectedStatus.length > 0, onClear: () => setSelectedStatus([]) },
-    { key: 'channel', title: t('insights.channel'), data: channelData },
+    { key: 'channel', title: t('insights.channel'), data: channelData, onPick: (d) => pickChannel((d as { key?: string })?.key), active: selectedChannel.length > 0, onClear: () => setSelectedChannel([]) },
   ]
   const insightKpis: KpiSpec[] = [
-    { key: 'total',   label: t('kpi.total'),   value: campaigns.length,                                          sub: t('kpi.totalSub') },
+    { key: 'total',   label: t('kpi.total'),   value: campaigns.length,                                          sub: t('kpi.totalSub'),
+      onClick: () => { setSelectedStatus([]); setSelectedChannel([]); setKpiTargets(false) },
+      active: selectedStatus.length === 0 && selectedChannel.length === 0 && !kpiTargets },
     { key: 'active',  label: t('kpi.active'),  value: campaigns.filter((c) => statusKey(c) === 'active').length, sub: t('kpi.activeSub'), color: '#16A34A',
       onClick: () => pickStatus('active'), active: selectedStatus.length === 1 && selectedStatus[0] === 'active' },
-    { key: 'targets', label: t('kpi.targets'), value: campaigns.reduce((n, c) => n + targetsOf(c), 0),           sub: t('kpi.targetsSub'), color: 'var(--color-primary)' },
+    { key: 'targets', label: t('kpi.targets'), value: campaigns.reduce((n, c) => n + targetsOf(c), 0),           sub: t('kpi.targetsSub'), color: 'var(--color-primary)',
+      onClick: () => setKpiTargets(v => !v), active: kpiTargets },
   ]
 
   // Kanban drag = a status-only update (optimistic; revert via reload on failure).

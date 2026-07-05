@@ -30,7 +30,7 @@ import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
 import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
 import { useCandidateRecord } from './hooks/useCandidateMutations'
-import { useOpenFromIntent } from '@/context/NavigationContext'
+import { useOpenFromIntent, useNavigation } from '@/context/NavigationContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -65,6 +65,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const { candidateTypes, funnelTypes, statuses, phases } = useLookups()
   const { genders } = useGenders()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
+  const { navigate } = useNavigation()
   const { registerFilters, unregisterFilters } = useRightPanel() as { registerFilters: (id: string, groups: unknown) => void; unregisterFilters: (id: string) => void }
 
   const [page,           setPage]           = useState(1)
@@ -362,7 +363,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       // the intake_planned param (INTAKE-1) — the old funnel-stage set never matched the count.
       onClick: () => toggleAttention('intakePlanned'), active: attentionFilter === 'intakePlanned' },
     // Channel breakdown is hidden until real WhatsApp/e-mail data exists (BE KPI-1) — no '–' placeholders.
-    { key: 'conversations', label: t('analytics.conversations'), value: activeConvCount, color: 'var(--color-success)' },
+    // Active conversations live on the WhatsApp page — the card jumps there.
+    { key: 'conversations', label: t('analytics.conversations'), value: activeConvCount, color: 'var(--color-success)',
+      onClick: () => navigate('whatsapp') },
     { key: 'tasks', label: t('kpi.tasks'), value: tasksCount, sub: t('kpi.tasksSub'), color: '#0D9488',
       onClick: () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },
   ]

@@ -140,6 +140,18 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const statusData = useMemo(() => statusOptions.map(o => ({ name: o.label, value: o.count, key: String(o.value), color: statusOf(String(o.value))?.color })), [statusOptions, statuses]) // eslint-disable-line react-hooks/exhaustive-deps
   const ownerData  = useMemo(() => ownerOptions.map(o => ({ name: o.label, value: o.count, key: String(o.value) })), [ownerOptions])
 
+  // KPI-card filter (one at a time): rows with ≥1 of the counted thing — or, for
+  // "zonder contactpersoon", exactly 0 (Danny: every card must DO something).
+  const [kpiFilter, setKpiFilter] = useState<string | null>(null)
+  const toggleKpi = (k: string) => setKpiFilter(p => (p === k ? null : k))
+  const KPI_PRED: Record<string, (c: (typeof customers)[number]) => boolean> = {
+    locations:   c => c.locationsCount > 0,
+    departments: c => c.departmentsCount > 0,
+    contacts:    c => c.contactsCount > 0,
+    openVac:     c => c.openVacanciesCount > 0,
+    active:      c => c.activeMatchesCount > 0,
+    noContact:   c => c.contactsCount === 0,
+  }
   const totalLocations   = stats?.locations   ?? customers.reduce((s, c) => s + c.locationsCount, 0)
   const totalDepartments = stats?.departments ?? customers.reduce((s, c) => s + c.departmentsCount, 0)
   const totalContacts    = stats?.contacts    ?? customers.reduce((s, c) => s + c.contactsCount, 0)
@@ -153,13 +165,15 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     { key: 'am', title: t('insights.amTitle'), data: ownerData, onPick: d => pickOne(setSelectedOwner)(pickKey(d)),
       active: selectedOwner.length > 0, onClear: () => setSelectedOwner([]) },
   ]
+  const kpiCard = (key: string, label: string, value: number, sub: string, color: string): KpiSpec =>
+    ({ key, label, value, sub, color, onClick: () => toggleKpi(key), active: kpiFilter === key })
   const insightKpis: KpiSpec[] = [
-    { key: 'locations',   label: t('insights.locations'),     value: totalLocations,   sub: t('insights.locationsSub'),     color: 'var(--color-secondary)' },
-    { key: 'departments', label: t('insights.departments'),   value: totalDepartments, sub: t('insights.departmentsSub'),   color: '#8B5CF6' },
-    { key: 'contacts',    label: t('insights.contacts'),      value: totalContacts,    sub: t('insights.contactsSub'),      color: 'var(--color-primary)' },
-    { key: 'openVac',     label: t('insights.openVacancies'), value: totalOpenVac,     sub: t('insights.openVacanciesSub'), color: 'var(--color-warning)' },
-    { key: 'active',      label: t('insights.activeMatches'), value: totalActive,      sub: t('insights.activeMatchesSub'), color: 'var(--color-success)' },
-    { key: 'noContact',   label: t('insights.noContact'),     value: noContactCount,   sub: t('insights.noContactSub'),     color: 'var(--color-danger)' },
+    kpiCard('locations',   t('insights.locations'),     totalLocations,   t('insights.locationsSub'),     'var(--color-secondary)'),
+    kpiCard('departments', t('insights.departments'),   totalDepartments, t('insights.departmentsSub'),   '#8B5CF6'),
+    kpiCard('contacts',    t('insights.contacts'),      totalContacts,    t('insights.contactsSub'),      'var(--color-primary)'),
+    kpiCard('openVac',     t('insights.openVacancies'), totalOpenVac,     t('insights.openVacanciesSub'), 'var(--color-warning)'),
+    kpiCard('active',      t('insights.activeMatches'), totalActive,      t('insights.activeMatchesSub'), 'var(--color-success)'),
+    kpiCard('noContact',   t('insights.noContact'),     noContactCount,   t('insights.noContactSub'),     'var(--color-danger)'),
   ]
 
   return (
@@ -212,7 +226,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
             {error && (
               <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
             )}
-            <CustomersTable rows={customers.filter(c => (showArchived ? c.archived : !c.archived))} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
+            <CustomersTable rows={customers.filter(c => (showArchived ? c.archived : !c.archived)).filter(c => !kpiFilter || KPI_PRED[kpiFilter]?.(c))} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
               statusMeta={statusMeta} selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
               stickyHeader scrollParentRef={tableScrollRef} />
           </div>
