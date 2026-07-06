@@ -1,9 +1,10 @@
 import { useState, useMemo, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Layers, MapPin, Building2, Users } from 'lucide-react'
+import { Layers, Building2, Users } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { ac, Avatar, StatusBadge } from './departmentParts'
+import DepartmentsTable from './DepartmentsTable'
+import PaginationBar from '@/components/ui/PaginationBar'
 import DepartmentDrawer from './DepartmentDrawer'
 import { useSmDepartments } from './hooks/useSmDepartments'
 import type { SmDepartmentRow } from '@/types/shiftmanager'
@@ -15,10 +16,10 @@ export default function DepartmentsPage() {
   const [search]                      = useState('')
   const [selected,    setSelected]    = useState<SmDepartmentRow | null>(null)
   const [page,        setPage]        = useState(1)
+  const [pageSize,    setPageSize]    = useState(50)
   const [selStatuses,  setSelStatuses]  = useState<string[]>([])
   const [selCustomers,   setSelCustomers]   = useState<string[]>([])
   const [selLocations,  setSelLocations]  = useState<string[]>([])
-  const pageSize = 12
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -73,11 +74,6 @@ export default function DepartmentsPage() {
     { label: t('departmentsPage.kpi.linkedCustomers'), value: [...new Set(departments.map(d => d.customer))].length,    color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Building2 },
   ]
 
-  const headers = [
-    t('departmentsPage.cols.department'), t('departmentsPage.cols.customer'), t('departmentsPage.cols.location'),
-    t('departmentsPage.cols.employees'), t('departmentsPage.cols.shifts'), t('departmentsPage.cols.status'),
-  ]
-
   return (
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
@@ -99,103 +95,14 @@ export default function DepartmentsPage() {
           ))}
         </div>
 
-        {/* Table */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 24px' }}>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  {headers.map(h => (
-                    <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11,
-                      fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.04em',
-                      textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {paged.map((dep, i) => {
-                  const isSel = selected?.id === dep.id
-                  return (
-                    <tr key={dep.id} onClick={() => setSelected(isSel ? null : dep)}
-                      style={{ borderBottom: i < paged.length - 1 ? '1px solid var(--border)' : 'none',
-                        cursor: 'pointer', transition: 'background 0.1s',
-                        background: isSel ? 'var(--color-primary-bg)' : 'transparent' }}
-                      onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = 'var(--hover-bg)' }}
-                      onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = 'transparent' }}>
-
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <Avatar label={dep.name} size={28} radius={6} />
-                          <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{dep.name}</span>
-                        </div>
-                      </td>
-
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{ width: 20, height: 20, borderRadius: 5, background: ac(dep.customer),
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 8, fontWeight: 800, color: 'var(--surface)', flexShrink: 0 }}>
-                            {dep.customer?.charAt(0)}
-                          </div>
-                          <span style={{ fontSize: 12, color: 'var(--text)', whiteSpace: 'nowrap', maxWidth: 160,
-                            overflow: 'hidden', textOverflow: 'ellipsis' }}>{dep.customer}</span>
-                        </div>
-                      </td>
-
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <MapPin size={11} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-                          <span style={{ fontSize: 12, color: 'var(--text)', whiteSpace: 'nowrap', maxWidth: 200,
-                            overflow: 'hidden', textOverflow: 'ellipsis' }}>{dep.location}</span>
-                        </div>
-                      </td>
-
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <Users size={12} color="var(--text-muted)" />
-                          <span style={{ fontSize: 13, fontWeight: (dep.employees ?? 0) > 0 ? 600 : 400,
-                            color: (dep.employees ?? 0) > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{dep.employees}</span>
-                        </div>
-                      </td>
-
-                      <td style={{ padding: '12px 14px' }}>
-                        <span style={{ fontSize: 13, color: (dep.shifts ?? 0) > 0 ? 'var(--text)' : 'var(--text-muted)',
-                          fontWeight: (dep.shifts ?? 0) > 0 ? 600 : 400 }}>{dep.shifts}</span>
-                      </td>
-
-                      <td style={{ padding: '12px 14px' }}>
-                        <StatusBadge status={dep.status} />
-                      </td>
-                    </tr>
-                  )
-                })}
-                {paged.length === 0 && (
-                  <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center',
-                    color: 'var(--text-muted)', fontSize: 13 }}>{t('departmentsPage.empty')}</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginTop: 14, fontSize: 13, color: 'var(--text-muted)' }}>
-            <span>{t('departmentsPage.count', { count: filtered.length })}</span>
-            {totalPages > 1 && (
-              <div style={{ display: 'flex', gap: 4 }}>
-                <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}
-                  style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid var(--border)',
-                    background: 'none', cursor: page > 1 ? 'pointer' : 'default',
-                    color: page > 1 ? 'var(--text)' : 'var(--text-muted)', fontSize: 16,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
-                <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page === totalPages}
-                  style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid var(--border)',
-                    background: 'none', cursor: page < totalPages ? 'pointer' : 'default',
-                    color: page < totalPages ? 'var(--text)' : 'var(--text-muted)', fontSize: 16,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
-              </div>
-            )}
-          </div>
+        {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+          <DepartmentsTable rows={paged} selectedId={selected?.id}
+            onSelect={dep => setSelected(prev => prev?.id === dep.id ? null : dep)} />
         </div>
+
+        <PaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
+          onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
       </div>
 
       <DepartmentDrawer dep={selected} onClose={() => setSelected(null)} />

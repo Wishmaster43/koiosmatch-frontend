@@ -3,7 +3,8 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MapPin, Building2, Layers } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { Avatar, StatusBadge, ac } from './locationParts'
+import LocationsTable from './LocationsTable'
+import PaginationBar from '@/components/ui/PaginationBar'
 import LocationDrawer from './LocationDrawer'
 import { useSmLocations } from './hooks/useSmLocations'
 import type { SmLocationRow } from '@/types/shiftmanager'
@@ -16,10 +17,10 @@ export default function LocationsPage() {
   const [search]                  = useState('')
   const [selected,  setSelected]  = useState<SmLocationRow | null>(null)
   const [page,      setPage]      = useState(1)
+  const [pageSize,  setPageSize]  = useState(50)
   const [selStatuses,  setSelStatuses]  = useState<string[]>([])
   const [selCustomers,   setSelCustomers]   = useState<string[]>([])
   const [selCities,    setSelCities]    = useState<string[]>([])
-  const pageSize = 10
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -74,11 +75,6 @@ export default function LocationsPage() {
     { label: t('locationsPage.kpi.linkedCustomers'), value: [...new Set(locations.map(l => l.customer))].length,  color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Building2 },
   ]
 
-  const headers = [
-    t('locationsPage.cols.location'), t('locationsPage.cols.customer'), t('locationsPage.cols.city'),
-    t('locationsPage.cols.departments'), t('locationsPage.cols.shifts'), t('locationsPage.cols.status'),
-  ]
-
   return (
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
@@ -100,126 +96,14 @@ export default function LocationsPage() {
           ))}
         </div>
 
-        {/* Table */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 24px' }}>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  {headers.map(h => (
-                    <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11,
-                      fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.04em',
-                      textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {paged.map((loc, i) => {
-                  const isSel = selected?.id === loc.id
-                  const deps = loc.departments ?? []
-                  return (
-                    <tr key={loc.id} onClick={() => setSelected(isSel ? null : loc)}
-                      style={{ borderBottom: i < paged.length - 1 ? '1px solid var(--border)' : 'none',
-                        cursor: 'pointer', transition: 'background 0.1s',
-                        background: isSel ? 'var(--color-primary-bg)' : 'transparent' }}
-                      onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = 'var(--hover-bg)' }}
-                      onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = 'transparent' }}>
-
-                      {/* Locatie */}
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <Avatar label={loc.name} size={30} />
-                          <div>
-                            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{loc.name}</div>
-                            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{loc.address}</div>
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Klant */}
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <div style={{ width: 22, height: 22, borderRadius: 5, background: ac(loc.customer),
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 9, fontWeight: 800, color: 'var(--surface)', flexShrink: 0 }}>
-                            {loc.customer?.charAt(0)}
-                          </div>
-                          <span style={{ fontSize: 13, color: 'var(--text)', whiteSpace: 'nowrap' }}>{loc.customer}</span>
-                        </div>
-                      </td>
-
-                      {/* Stad */}
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <MapPin size={12} color="var(--text-muted)" />
-                          <span style={{ fontSize: 13, color: 'var(--text)' }}>{loc.city}</span>
-                        </div>
-                      </td>
-
-                      {/* Afdelingen */}
-                      <td style={{ padding: '12px 14px' }}>
-                        {deps.length > 0 ? (
-                          <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{deps.length}</span>
-                            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
-                              {deps.slice(0, 2).map(d => (
-                                <span key={d} style={{ fontSize: 10, padding: '2px 7px', borderRadius: 999,
-                                  background: 'var(--hover-bg)', border: '1px solid var(--border)',
-                                  color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{d}</span>
-                              ))}
-                              {deps.length > 2 && (
-                                <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 999,
-                                  background: 'var(--hover-bg)', border: '1px solid var(--border)',
-                                  color: 'var(--text-muted)' }}>+{deps.length - 2}</span>
-                              )}
-                            </div>
-                          </div>
-                        ) : (
-                          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
-                        )}
-                      </td>
-
-                      {/* Diensten */}
-                      <td style={{ padding: '12px 14px' }}>
-                        <span style={{ fontSize: 13, color: (loc.shifts ?? 0) > 0 ? 'var(--text)' : 'var(--text-muted)',
-                          fontWeight: (loc.shifts ?? 0) > 0 ? 600 : 400 }}>{loc.shifts}</span>
-                      </td>
-
-                      {/* Status */}
-                      <td style={{ padding: '12px 14px' }}>
-                        <StatusBadge status={loc.status} />
-                      </td>
-                    </tr>
-                  )
-                })}
-                {paged.length === 0 && (
-                  <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center',
-                    color: 'var(--text-muted)', fontSize: 13 }}>{t('locationsPage.empty')}</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginTop: 14, fontSize: 13, color: 'var(--text-muted)' }}>
-            <span>{t('locationsPage.count', { count: filtered.length })}</span>
-            {totalPages > 1 && (
-              <div style={{ display: 'flex', gap: 4 }}>
-                <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}
-                  style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid var(--border)',
-                    background: 'none', cursor: page > 1 ? 'pointer' : 'default',
-                    color: page > 1 ? 'var(--text)' : 'var(--text-muted)', fontSize: 16,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
-                <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page === totalPages}
-                  style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid var(--border)',
-                    background: 'none', cursor: page < totalPages ? 'pointer' : 'default',
-                    color: page < totalPages ? 'var(--text)' : 'var(--text-muted)', fontSize: 16,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
-              </div>
-            )}
-          </div>
+        {/* Table — shared DataTable (sticky header, sorting, soft-chip status colours) */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+          <LocationsTable rows={paged} selectedId={selected?.id}
+            onSelect={loc => setSelected(prev => prev?.id === loc.id ? null : loc)} />
         </div>
+
+        <PaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
+          onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
       </div>
 
       <LocationDrawer loc={selected} onClose={() => setSelected(null)} />
