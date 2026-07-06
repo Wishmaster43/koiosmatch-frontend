@@ -90,7 +90,14 @@
       "orderIdExt": "Order ID (external)",
       "rate": "Rate",
       "pickup": "Pickup"
-    }
+    },
+    "byCustomer": "By customer",
+    "byFunction": "By role",
+    "byLocation": "By location",
+    "countCol": "Count",
+    "totalRow": "Total",
+    "viewTotals": "Totals",
+    "viewDetails": "Details"
   },
   "charts": {
     "hours": "Number of hours",

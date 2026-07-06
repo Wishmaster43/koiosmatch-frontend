@@ -66,6 +66,14 @@ export default function ShiftsChartsBlock({
       seriesLabel,
     })
 
+  // Location id → { name, customer } so the drill-down totals can show real customer
+  // names (the detail rows only carry a customer_external_id).
+  const locationMeta = useMemo(() => {
+    const m = new Map<string, { name?: string; customer?: string }>()
+    for (const l of filterOptions.locations) m.set(String(l.id), { name: l.name, customer: l.customer as string | undefined })
+    return m
+  }, [filterOptions.locations])
+
   // ── Drill-down ────────────────────────────────────────────────────────────
   const handleBarClick = (datum: ShiftsChartDatum, barMeta: ShiftBar) => {
     const { year, seriesKey } = barMeta
@@ -164,6 +172,7 @@ export default function ShiftsChartsBlock({
           title={drill.title}
           fetchUrl={drill.fetchUrl}
           onClose={() => setDrill(null)}
+          locationMeta={locationMeta}
         />
       )}
     </>

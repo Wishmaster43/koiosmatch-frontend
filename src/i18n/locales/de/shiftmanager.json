@@ -90,7 +90,14 @@
       "orderIdExt": "Auftrags-ID (extern)",
       "rate": "Tarif",
       "pickup": "Abholung"
-    }
+    },
+    "byCustomer": "Nach Kunde",
+    "byFunction": "Nach Funktion",
+    "byLocation": "Nach Standort",
+    "countCol": "Anzahl",
+    "totalRow": "Gesamt",
+    "viewTotals": "Summen",
+    "viewDetails": "Details"
   },
   "charts": {
     "hours": "Anzahl Stunden",

@@ -90,7 +90,14 @@
       "orderIdExt": "Order-ID (extern)",
       "rate": "Tarief",
       "pickup": "Ophaal"
-    }
+    },
+    "byCustomer": "Per klant",
+    "byFunction": "Per functie",
+    "byLocation": "Per locatie",
+    "countCol": "Aantal",
+    "totalRow": "Totaal",
+    "viewTotals": "Totalen",
+    "viewDetails": "Details"
   },
   "charts": {
     "hours": "Aantal uren",

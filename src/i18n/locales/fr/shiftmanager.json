@@ -90,7 +90,14 @@
       "orderIdExt": "ID commande (externe)",
       "rate": "Tarif",
       "pickup": "Ramassage"
-    }
+    },
+    "byCustomer": "Par client",
+    "byFunction": "Par fonction",
+    "byLocation": "Par lieu",
+    "countCol": "Nombre",
+    "totalRow": "Total",
+    "viewTotals": "Totaux",
+    "viewDetails": "Détails"
   },
   "charts": {
     "hours": "Nombre d'heures",

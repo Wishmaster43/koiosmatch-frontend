@@ -90,7 +90,14 @@
       "orderIdExt": "ID de pedido (externo)",
       "rate": "Tarifa",
       "pickup": "Recogida"
-    }
+    },
+    "byCustomer": "Por cliente",
+    "byFunction": "Por función",
+    "byLocation": "Por ubicación",
+    "countCol": "Cantidad",
+    "totalRow": "Total",
+    "viewTotals": "Totales",
+    "viewDetails": "Detalles"
   },
   "charts": {
     "hours": "Número de horas",

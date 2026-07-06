@@ -10,7 +10,12 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDrillDownShifts } from './hooks/useDrillDownShifts'
+import ShiftsDrillDownTotals from './ShiftsDrillDownTotals'
+import type { LocationMeta } from './ShiftsDrillDownTotals'
 import type { ShiftInvite } from '@/types/shiftmanager'
+
+// Stable empty location-meta fallback (keeps a constant ref for the totals useMemo).
+const EMPTY_META: LocationMeta = new Map()
 
 // Shift status → badge colours. Label = t('shiftsDrawer.status.<key>').
 const STATUS_META: Record<string, { bg: string; color: string }> = {
@@ -94,14 +99,18 @@ function CandidateBlock({ invite }: { invite: ShiftInvite }) {
   )
 }
 
-export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }: {
+export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose, locationMeta }: {
   title: ReactNode
   fetchUrl: string
   onClose: () => void
+  // Location id → { name, customer } so the totals view can show real customer names.
+  locationMeta?: LocationMeta
 }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('shiftmanager')
   const [search, setSearch] = useState('')
+  // Default to grouped totals (Danny: "geen orderlijsten maar totalen"); Details stays reachable.
+  const [view, setView] = useState<'totals' | 'details'>('totals')
   const { shifts, loading, error } = useDrillDownShifts(fetchUrl)
 
   const filtered = shifts.filter(s => {
@@ -145,16 +154,29 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }: {
           </button>
         </div>
 
-        {/* Search bar */}
-        <div style={{ flexShrink: 0, padding: '8px 14px', borderBottom: '1px solid var(--hover-bg)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px',
-                        background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7 }}>
-            <Search size={13} color="var(--text-muted)" />
-            <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder={t('shiftsDrawer.search')} aria-label={t('shiftsDrawer.search')}
-              style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none',
-                       fontSize: 12, color: 'var(--text)' }} />
+        {/* View toggle (Totalen | Details) + search — search only applies to the details list */}
+        <div style={{ flexShrink: 0, padding: '8px 14px', borderBottom: '1px solid var(--hover-bg)',
+                      display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+            {(['totals', 'details'] as const).map(v => (
+              <button key={v} type="button" onClick={() => setView(v)}
+                style={{ padding: '5px 12px', fontSize: 12, fontWeight: view === v ? 600 : 400, border: 'none', cursor: 'pointer',
+                  background: view === v ? 'var(--color-primary-bg)' : 'transparent',
+                  color: view === v ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                {v === 'totals' ? t('shiftsDrawer.viewTotals') : t('shiftsDrawer.viewDetails')}
+              </button>
+            ))}
           </div>
+          {view === 'details' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '5px 10px', flex: 1,
+                          background: 'var(--hover-bg)', border: '1px solid var(--border)', borderRadius: 7 }}>
+              <Search size={13} color="var(--text-muted)" />
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder={t('shiftsDrawer.search')} aria-label={t('shiftsDrawer.search')}
+                style={{ flex: 1, border: 'none', background: 'transparent', outline: 'none',
+                         fontSize: 12, color: 'var(--text)' }} />
+            </div>
+          )}
         </div>
 
         {/* List */}
@@ -167,12 +189,17 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose }: {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                           height: 120, fontSize: 13, color: 'var(--color-danger)' }}>{t('shiftsDrawer.loadError')}</div>
           )}
-          {!loading && !error && filtered.length === 0 && (
+          {/* Totals view — grouped counts per customer / role / location */}
+          {!loading && !error && view === 'totals' && (
+            <ShiftsDrillDownTotals shifts={shifts} locationMeta={locationMeta ?? EMPTY_META} />
+          )}
+
+          {!loading && !error && view === 'details' && filtered.length === 0 && (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                           height: 120, fontSize: 13, color: 'var(--text-muted)' }}>{t('shiftsDrawer.empty')}</div>
           )}
 
-          {!loading && !error && filtered.map((shift, i) => {
+          {!loading && !error && view === 'details' && filtered.map((shift, i) => {
             const loc     = shift.order?.customer_location
             const planned = ['in_process', 'completed'].includes(shift.own_status ?? '')
             const invites = shift.invites ?? []
