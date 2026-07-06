@@ -204,7 +204,9 @@
       "hoursThisMonth": "Uren huidige maand",
       "occupancy": "Bezettingsgraad",
       "messagesSent": "Berichten verstuurd",
-      "responseRate": "Response rate"
+      "responseRate": "Response rate",
+      "newThisMonth": "Nieuw deze maand",
+      "avgTarget": "gem {{avg}} · doel {{target}}"
     },
     "statSub": {
       "urgent": "{{n}} urgent",

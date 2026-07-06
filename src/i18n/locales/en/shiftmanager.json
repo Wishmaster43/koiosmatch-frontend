@@ -204,7 +204,9 @@
       "hoursThisMonth": "Hours this month",
       "occupancy": "Occupancy rate",
       "messagesSent": "Messages sent",
-      "responseRate": "Response rate"
+      "responseRate": "Response rate",
+      "newThisMonth": "New this month",
+      "avgTarget": "avg {{avg}} · target {{target}}"
     },
     "statSub": {
       "urgent": "{{n}} urgent",

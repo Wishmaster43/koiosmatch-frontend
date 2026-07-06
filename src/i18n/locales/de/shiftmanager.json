@@ -204,7 +204,9 @@
       "hoursThisMonth": "Stunden aktueller Monat",
       "occupancy": "Auslastung",
       "messagesSent": "Gesendete Nachrichten",
-      "responseRate": "Antwortrate"
+      "responseRate": "Antwortrate",
+      "newThisMonth": "Neu diesen Monat",
+      "avgTarget": "Ø {{avg}} · Ziel {{target}}"
     },
     "statSub": {
       "urgent": "{{n}} dringend",
