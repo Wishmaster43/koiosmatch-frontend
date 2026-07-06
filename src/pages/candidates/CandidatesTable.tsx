@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import type { ComponentType, CSSProperties } from 'react'
 import { Target, Phone, CalendarPlus, Sparkles, Mail, MessageCircle, PhoneCall, Building2, Video, FileText, HelpCircle } from 'lucide-react' // HelpCircle = fallback for unknown contact channel
 import DataTable from '@/components/ui/DataTable'
+import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
@@ -65,13 +66,12 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // LookupsContext is still untyped JS — cast its API to the meta shapes used here.
-  const { funnelTypes, funnelMeta, statusMeta, phaseMeta, typeMeta, phases } = useLookups() as unknown as {
+  const { funnelTypes, funnelMeta, statusMeta, phaseMeta, typeMeta } = useLookups() as unknown as {
     funnelTypes: Array<{ value: string }>
     funnelMeta: (v: string) => { label: string; color: string }
     statusMeta: (v: string) => { label: string; color: string }
     phaseMeta: (v: string) => { label: string; color: string }
     typeMeta: (v: string) => { label: string; color: string }
-    phases: Array<{ value: string }>
   }
   const { colorOf: genderColor } = useGenders()
   const { labelOf: lastContactLabel } = useLastContactTypes()
@@ -123,13 +123,8 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
     {
       // Deployability ("status": Beschikbaar/Geplaatst/…) — model v2 axis.
       key: 'status', header: t('columns.deployability'), sortable: true, sortValue: c => c.status ? statusMeta(c.status).label : '',
-      // No deployability status → a dash. A Lead is NOT deployable (model v2, Danny
-      // 2026-06-29): the entry phase never shows a status chip even when the record
-      // carries a seeded value — the drawer hides the picker for the same reason.
-      render: c => { if (!c.status || c.phase === phases[0]?.value) return dash; const m = statusMeta(c.status)
-        if (!colorStatus) return <span style={plainCell}>{m.label}</span>
-        return <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
-          background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span> },
+      // The entry-phase/no-status dash rule lives inside the shared chip (C-CHIP).
+      render: c => <CandidateStatusChip status={c.status} phase={c.phase} plain={!colorStatus} />,
     },
     { key: 'created', header: t('columns.createdAt'), nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.created, render: c => formatDate(c.created) },
     {
