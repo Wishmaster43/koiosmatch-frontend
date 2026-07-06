@@ -96,8 +96,8 @@ export async function noteWithChannel({ page, errors }) {
   const chip = page.locator('button:has-text("WhatsApp")').last()
   if (await chip.count()) await chip.click()
   const editor = page.locator('[contenteditable="true"], textarea').last()
-  await editor.fill?.('smoke: gebeld over dienst').catch?.(() => {})
-  try { await editor.fill('smoke: contactmoment') } catch { await editor.type('smoke: contactmoment') }
+  await editor.fill?.('Gebeld over de dienst (demo)').catch?.(() => {})
+  try { await editor.fill('Contactmoment vastgelegd (demo)') } catch { await editor.type('Contactmoment vastgelegd (demo)') }
   await page.locator('button[title="Opslaan"], button:has-text("Opslaan")').last().click()
   await sleep(1400)
   const fresh = errors.slice(at)
