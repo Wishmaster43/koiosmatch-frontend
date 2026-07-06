@@ -10,24 +10,27 @@ import { useTranslation } from 'react-i18next'
 import { ChartCard } from './shiftsChartsWidgets'
 import type { BreakdownRow } from './useShiftsBreakdown'
 
-// One horizontal ranked bar chart (top 10 by value).
+// Both breakdown charts share one fixed height so the labels line up nicely (Danny).
+const CHART_HEIGHT = 340
+
+// One horizontal ranked bar chart (top 8 by value).
 function HBars({ rows, unit, color, empty }: { rows: BreakdownRow[]; unit: 'hours' | 'count'; color: string; empty: string }) {
   const data = [...rows]
     .map(r => ({ label: r.label || '—', value: unit === 'hours' ? Number(r.hours) || 0 : Number(r.count) || 0 }))
     .sort((a, b) => b.value - a.value)
-    .slice(0, 10)
+    .slice(0, 8)
 
   if (data.length === 0) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 120, fontSize: 13, color: 'var(--text-muted)' }}>{empty}</div>
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: CHART_HEIGHT, fontSize: 13, color: 'var(--text-muted)' }}>{empty}</div>
   }
   const fmt = (v: unknown) => (Number(v) || 0).toLocaleString('nl-NL')
 
   return (
-    <ResponsiveContainer width="100%" height={Math.max(180, data.length * 34)}>
-      <BarChart data={data} layout="vertical" margin={{ top: 4, right: 28, left: 8, bottom: 4 }}>
+    <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
+      <BarChart data={data} layout="vertical" barCategoryGap="22%" margin={{ top: 4, right: 28, left: 8, bottom: 4 }}>
         <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
         <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={fmt} />
-        <YAxis type="category" dataKey="label" width={170} tick={{ fontSize: 11, fill: '#334155' }} />
+        <YAxis type="category" dataKey="label" width={180} tick={{ fontSize: 11, fill: '#334155' }} />
         <Tooltip formatter={fmt} contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13 }} />
         <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} isAnimationActive={false} />
       </BarChart>
