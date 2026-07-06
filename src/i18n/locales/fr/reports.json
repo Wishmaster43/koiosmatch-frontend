@@ -265,7 +265,9 @@
       "lastShift": "Dernière mission",
       "shiftsWorked": "Missions effectuées",
       "noShows": "Absences"
-    }
+    },
+    "timesWorked": "travaillé {{n}}×",
+    "lastLogin": "Dernière connexion"
   },
   "messages": {
     "title": "Détails — Messages",

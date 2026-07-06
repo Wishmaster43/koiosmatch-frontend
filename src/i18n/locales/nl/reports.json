@@ -265,7 +265,9 @@
       "lastShift": "Laatste dienst",
       "shiftsWorked": "Diensten gewerkt",
       "noShows": "No-shows"
-    }
+    },
+    "timesWorked": "{{n}}× gewerkt",
+    "lastLogin": "Laatst ingelogd"
   },
   "messages": {
     "title": "Details — Berichten",

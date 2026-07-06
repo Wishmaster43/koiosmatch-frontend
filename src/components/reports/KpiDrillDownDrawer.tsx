@@ -103,6 +103,20 @@ function CandidateList({ candidates, dateField, dateLabel, onSelect }: { candida
                   {c.position && dateValue && <span> · </span>}
                   {dateValue && <span>{dateLabel}: {formatDate(dateValue)}</span>}
                 </div>
+                {/* Activity meta — keer gewerkt + laatst ingelogd (SM candidate fields) */}
+                {(() => {
+                  const sm = c as { number_of_times_worked?: number; last_login_at?: string }
+                  const worked = sm.number_of_times_worked
+                  const login  = sm.last_login_at
+                  if (worked == null && !login) return null
+                  return (
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>
+                      {worked != null && <span>{t('drilldown.timesWorked', { n: worked })}</span>}
+                      {worked != null && login && <span> · </span>}
+                      {login && <span>{t('drilldown.lastLogin')}: {formatDate(login)}</span>}
+                    </div>
+                  )
+                })()}
               </div>
             </div>
           )

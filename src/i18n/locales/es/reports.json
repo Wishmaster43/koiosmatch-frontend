@@ -265,7 +265,9 @@
       "lastShift": "Último turno",
       "shiftsWorked": "Turnos trabajados",
       "noShows": "Ausencias"
-    }
+    },
+    "timesWorked": "trabajó {{n}}×",
+    "lastLogin": "Último acceso"
   },
   "messages": {
     "title": "Detalles — Mensajes",

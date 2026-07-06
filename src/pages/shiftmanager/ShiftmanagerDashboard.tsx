@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle } from 'lucide-react'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useAuth } from '@/context/AuthContext'
-import type { KpiSpec, DonutSpec } from '@/components/insights/InsightsRow'
+import type { KpiSpec } from '@/components/insights/InsightsRow'
 import KpiDrillDownDrawer from '@/components/reports/KpiDrillDownDrawer'
 import type { ReportCandidate } from '@/types/reports'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
@@ -64,34 +64,30 @@ export default function ShiftmanagerDashboard() {
     { key: 'never',   label: t('dashboard.stats.neverWorked'),     list: derived.bNever,   color: '#DC2626' },
     { key: 'idle',    label: t('dashboard.stats.idle'),            list: derived.bIdle,    color: '#94A3B8' },
   ]), [derived, t])
-  const activityDonut = activityBuckets.map(b => ({ name: b.label, value: b.list.length, key: b.key, color: b.color }))
-
-  // Drill-down: a candidate KPI/donut segment opens the shared drawer — 'average'
-  // shows the per-month breakdown vs KPI target, other picks list their subset.
+  // Drill-down: a candidate KPI opens the shared drawer — 'average' shows the per-month
+  // breakdown vs KPI target, other picks list their subset.
   const [drill, setDrill] = useState<{ mode: string; title: string; candidates: ReportCandidate[]; tabs?: { key: string; label: string; candidates: ReportCandidate[] }[]; initialTab?: string } | null>(null)
   const openDrill = (mode: string, title: string, list: Array<Record<string, unknown>>) =>
     setDrill({ mode, title, candidates: list as unknown as ReportCandidate[] })
-  // A click on an activity donut segment opens the drill on that bucket, with a
-  // switcher across all four buckets (Danny: "in drill down kunnen switchen").
+  // The Activiteit card opens the drill with a tab per bucket (Danny: "kunnen switchen"),
+  // starting on the biggest bucket.
   const activityTabs = activityBuckets.map(b => ({ key: b.key, label: b.label, candidates: b.list as unknown as ReportCandidate[] }))
-  const onActivityPick = (d: unknown) => {
-    const k = (d as { key?: string })?.key
-    if (activityBuckets.some(x => x.key === k)) setDrill({ mode: 'nieuw', title: '', candidates: [], tabs: activityTabs, initialTab: k })
+  const openActivityDrill = () => {
+    const biggest = [...activityBuckets].sort((a, b) => b.list.length - a.list.length)[0]
+    setDrill({ mode: 'nieuw', title: '', candidates: [], tabs: activityTabs, initialTab: biggest?.key })
   }
 
-  // KPI row — shared InsightsRow (same 96px footprint as every other entity page),
-  // standardised to 9 tiles (Danny: "overal 9 stuks"); candidate tiles are click-to-drill.
+  // Candidate cards (NOT filter-driven) — passed into ShiftsChartsBlock, which adds the
+  // filter-driven shift cards → one combined 9-card row. Activiteit is a clearer channels
+  // card (big total + a coloured count per bucket) instead of a cramped 54px donut (Danny).
   const newColor = derived.newList.length >= target ? 'var(--color-success)'
                  : derived.newList.length >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
-  // Candidate cards (NOT filter-driven) — passed into ShiftsChartsBlock, which adds the
-  // filter-driven shift cards (hour tiles + klant/functie donuts) → one combined 9-card row.
   const leadingKpis: KpiSpec[] = [
+    { key: 'activity', label: t('dashboard.charts.activity'), value: derived.active.length, onClick: openActivityDrill,
+      channels: activityBuckets.map(b => ({ label: b.label, value: b.list.length, color: b.color })) },
     { key: 'new',      label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
     { key: 'total',    label: t('dashboard.stats.totalCandidates'), value: derived.all.length,      color: 'var(--color-primary)', onClick: () => openDrill('nieuw', t('dashboard.stats.totalCandidates'), derived.all) },
     { key: 'inactive', label: t('dashboard.stats.inactive'),        value: derived.inactive.length, color: 'var(--text-muted)',    onClick: () => openDrill('nieuw', t('dashboard.stats.inactive'), derived.inactive) },
-  ]
-  const leadingDonuts: DonutSpec[] = [
-    { key: 'activity', title: t('dashboard.charts.activity'), data: activityDonut, colors: activityDonut.map(d => d.color), onPick: onActivityPick },
   ]
 
   return (
@@ -102,7 +98,7 @@ export default function ShiftmanagerDashboard() {
       )}
 
       {/* Combined KPI row + charts — ShiftsChartsBlock owns the row so the shift cards follow the applied filter */}
-      <ShiftsChartsBlock filterKey="shiftmanager-dashboard" leadingKpis={leadingKpis} leadingDonuts={leadingDonuts} />
+      <ShiftsChartsBlock filterKey="shiftmanager-dashboard" leadingKpis={leadingKpis} />
 
       {/* Recent runs + conversations — only for packages with AI & Workflow */}
       {hasAI && <div className="grid grid-cols-2 gap-4 mt-6 mb-6">

@@ -265,7 +265,9 @@
       "lastShift": "Letzter Einsatz",
       "shiftsWorked": "Geleistete Einsätze",
       "noShows": "No-Shows"
-    }
+    },
+    "timesWorked": "{{n}}× gearbeitet",
+    "lastLogin": "Zuletzt angemeldet"
   },
   "messages": {
     "title": "Details — Nachrichten",
