@@ -57,9 +57,12 @@ export default function OpportunitiesInsightsRow({
     const isWonRow  = (r: Opportunity) => !!wonStage  && r.stageValue === wonStage.value
     const isLostRow = (r: Opportunity) => !!lostStage && r.stageValue === lostStage.value
     // Deal magnitude field follows the €/hours setting. Pipeline = OPEN deals only
-    // (won/lost inflated the sum → it never matched the dashboard, Danny 2026-07-06).
+    // (won/lost inflated the sum) and UNIT-AWARE like the backend (R-4): an
+    // hours-typed deal never counts in the € pipeline and vice versa; a deal
+    // without a type counts in both (Danny's "1256 vs 2560" was this filter).
     const magnitude = (r: Opportunity) => valueInHours ? r.hours : r.value
-    const withMag = rows.filter(r => !isWonRow(r) && !isLostRow(r) && typeof magnitude(r) === 'number')
+    const unitOk = (r: Opportunity) => r.dealTypeUnit == null || r.dealTypeUnit === (valueInHours ? 'hours' : 'euro')
+    const withMag = rows.filter(r => !isWonRow(r) && !isLostRow(r) && unitOk(r) && typeof magnitude(r) === 'number')
     const sum = withMag.reduce((s, r) => s + (magnitude(r) ?? 0), 0)
     const wonCount  = rows.filter(isWonRow).length
     const lostCount = rows.filter(isLostRow).length

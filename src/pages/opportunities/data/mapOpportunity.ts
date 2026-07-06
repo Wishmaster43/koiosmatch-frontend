@@ -39,6 +39,8 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     // Zorg-detachering fields (C-42) — tolerated absent until the backend lands.
     hours:            num(o.hours),
     hoursPeriod:      o.hours_period ?? 'week',
+    // R-4 unit-awareness: an hours-typed deal never inflates the € pipeline and vice versa.
+    dealTypeUnit:     o.deal_type?.unit ?? null,
     startDate:        o.start_date ?? null,
     endDate:          o.end_date ?? null,
     serviceType:      svc?.label ?? (typeof o.service_type === 'string' ? o.service_type : '') ?? '',

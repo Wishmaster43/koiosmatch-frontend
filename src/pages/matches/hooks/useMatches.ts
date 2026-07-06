@@ -40,10 +40,23 @@ export function useMatches(includeArchived = false) {
   useEffect(() => {
     let alive = true
     setLoading(true)
-    // per_page=500: the page paginates client-side — the default 25-row page made
-    // every KPI/board undercount (Danny: "84 klopt niet, zijn er maar 25" — 25 wás de bug).
-    api.get(includeArchived ? '/matches?per_page=500&include_archived=1' : '/matches?per_page=500')
-      .then(r => { if (alive) setRows((r.data?.data ?? r.data ?? []).map(mapMatch)) })
+    // Fetch the FULL set: the default 25-row page made every KPI/board undercount
+    // (Danny: "84 vs 25" — 25 wás de bug). per_page is server-capped at 100 (422
+    // above it), so follow last_page and accumulate; safety cap at 10 pages.
+    const base: Record<string, unknown> = { per_page: 100 }
+    if (includeArchived) base.include_archived = 1
+    const loadAll = async () => {
+      const all: RawMatch[] = []
+      for (let pageNo = 1; pageNo <= 10; pageNo++) {
+        const r = await api.get('/matches', { params: { ...base, page: pageNo } })
+        all.push(...(r.data?.data ?? []))
+        const last = r.data?.meta?.last_page ?? 1
+        if (pageNo >= last) break
+      }
+      return all
+    }
+    loadAll()
+      .then(raw => { if (alive) setRows(raw.map(mapMatch)) })
       .catch(e => { if (alive && e?.response?.status && e.response.status !== 404) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }

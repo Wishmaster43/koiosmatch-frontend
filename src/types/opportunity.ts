@@ -21,6 +21,8 @@ export interface Opportunity {
   ownerId: Id | null
   date: string
   expectedCloseAt: string | null
+  // Deal-type unit (R-4): 'euro' | 'hours' | null — null counts in both pipelines.
+  dealTypeUnit: string | null
   archived: boolean
   // Deal magnitude in hours (staffing) alongside the € value.
   hours: number | null
@@ -70,6 +72,7 @@ export interface ApiOpportunity {
   owner_id?: Id
   created_at?: string
   expected_close_at?: string | null
+  deal_type?: { id?: string; value?: string; label?: string; color?: string; unit?: string } | null
   close_date?: string
   archived?: boolean
   deleted_at?: string | null

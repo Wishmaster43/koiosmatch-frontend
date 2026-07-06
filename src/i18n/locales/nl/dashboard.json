@@ -46,7 +46,9 @@
     "expiringOpps": "Aflopende kansen",
     "expiringOppsSub": "sluiten binnenkort",
     "pipelineHours": "Pijplijn uren",
-    "hoursUnit": "uur"
+    "hoursUnit": "uur",
+    "openVacancies": "Vacatures",
+    "openVacanciesSub": "Actief in beheer"
   },
   "chart": {
     "byStatus": "Kandidaten per status",

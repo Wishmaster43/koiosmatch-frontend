@@ -46,7 +46,9 @@
     "expiringOpps": "Expiring opportunities",
     "expiringOppsSub": "closing soon",
     "pipelineHours": "Pipeline hours",
-    "hoursUnit": "hrs"
+    "hoursUnit": "hrs",
+    "openVacancies": "Vacancies",
+    "openVacanciesSub": "Active under management"
   },
   "chart": {
     "byStatus": "Candidates by status",

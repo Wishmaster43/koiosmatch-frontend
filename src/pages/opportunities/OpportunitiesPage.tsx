@@ -58,10 +58,12 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const [addOpen,  setAddOpen]  = useState(false)
   const [query,    setQuery]    = usePageMemory('opps.search', '')  // shared header search (client-side, R-5)
 
-  // "Aflopend" quick-filter (dashboard KPI): open deals with a close date within 30 days.
+  // "Aflopend" quick-filter (dashboard KPI). Definition MIRRORS the backend's
+  // expiring_opps exactly (DashboardService): close date TODAY t/m +14 dagen,
+  // date-granular — anders wijkt de lijst af van het KPI-getal (Danny: "1 vs 3").
   // Reference moment captured once per mount (purity rule — mirrors convCutoff).
   const [expiringOnly, setExpiringOnly] = useState(false)
-  const [nowTs] = useState(() => Date.now())
+  const [dayStart] = useState(() => new Date(new Date().setHours(0, 0, 0, 0)).getTime())
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(query.trim() || stage.length || owner.length || client.length || expiringOnly)
   const [searchEpoch, setSearchEpoch] = useState(0)
@@ -113,14 +115,14 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       if (owner.length  && !owner.includes(r.owner))   return false
       if (client.length && !client.includes(r.client)) return false
       if (query.trim() && !`${r.title ?? ''} ${r.client ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())) return false
-      // Aflopend: open deal with a close date within the next 30 days.
+      // Aflopend: close date within today..+14 days (same window as the KPI count).
       if (expiringOnly) {
         const d = r.expectedCloseAt ? new Date(r.expectedCloseAt).getTime() : null
-        if (d == null || d > nowTs + 30 * 86400000 || d < nowTs - 86400000) return false
+        if (d == null || d < dayStart || d >= dayStart + 15 * 86400000) return false
       }
       return true
     })
-  }, [rows, stage, owner, client, showArchived, query, expiringOnly, nowTs])
+  }, [rows, stage, owner, client, showArchived, query, expiringOnly, dayStart])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))

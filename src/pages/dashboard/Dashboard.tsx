@@ -158,15 +158,21 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
   // Status/funnel labels + colours come from the tenant lookups (NL, configurable)
   // — never humanised backend slugs. Mirrors how the Candidates page renders them.
-  const { statusMeta, funnelMeta } = useLookups()
+  const { statusMeta, funnelMeta, funnelTypes } = useLookups()
 
   // Chart data: [{ name, value, color }] for the shared chart cards.
   const statusData = useMemo(() =>
     (stats?.by_status ?? []).map(o => { const v = o.value ?? o.status; const m = statusMeta(v); return { name: m.label, value: o.count ?? 0, color: m.color, filterValue: v } }).filter(d => d.value) as ChartDatum[], [stats, statusMeta])
   const recruiterData = useMemo(() =>
     (stats?.by_owner ?? []).map(o => ({ name: o.name || '—', value: o.count ?? 0, filterValue: o.id ?? o.owner_id })).filter(d => d.value) as ChartDatum[], [stats])
-  const funnelData = useMemo(() =>
-    (dash?.charts?.by_funnel ?? []).map(o => ({ name: o.label ?? '', value: o.count ?? 0, color: o.color, filterValue: o.value })).filter(d => d.value) as ChartDatum[], [dash])
+  // Funnel bars: EVERY lookup phase shows, also at 0 — the count-only mapping hid
+  // the new Intake phase entirely (Danny: "intake ontbreekt nog steeds").
+  const funnelData = useMemo(() => {
+    const counts = new Map((dash?.charts?.by_funnel ?? []).map(o => [String(o.value), o.count ?? 0]))
+    return (funnelTypes as Array<{ value: string; label: string; color?: string }>).map(f => ({
+      name: f.label, value: counts.get(String(f.value)) ?? 0, color: f.color, filterValue: f.value,
+    })) as ChartDatum[]
+  }, [dash, funnelTypes])
   const oppStageData = useMemo(() =>
     (opp?.by_stage ?? []).map(o => ({ name: o.label ?? humanize(o.key), value: Number(o.value ?? 0), color: o.color, filterValue: o.key })).filter(d => d.value) as ChartDatum[], [opp])
 
@@ -302,13 +308,17 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // WhatsApp backlog + failed (planner/recruiter KPIs); fail-soft 0 without access.
   const incompleteRuns = runs.filter(r => !r.ok).length
 
-  // Plaatsingen = matches (Danny 2026-07-06): light count via meta.total, refetched
-  // with the tenant; the dedicated att.placements feed wins once BE delivers it.
+  // Plaatsingen = matches + Vacatures-telling (Danny 2026-07-06): light meta.total
+  // fetches, refetched with the tenant; dedicated backend feeds win once delivered.
   const [matchesTotal, setMatchesTotal] = useState<number | null>(null)
+  const [vacanciesTotal, setVacanciesTotal] = useState<number | null>(null)
   useEffect(() => {
     let alive = true
     api.get('/matches', { params: { per_page: 1 }, quiet404: true })
       .then(r => { if (alive) setMatchesTotal(r.data?.meta?.total ?? (Array.isArray(r.data?.data) ? r.data.data.length : null)) })
+      .catch(() => {})
+    api.get('/vacancies', { params: { per_page: 1 }, quiet404: true })
+      .then(r => { if (alive) setVacanciesTotal(r.data?.meta?.total ?? null) })
       .catch(() => {})
     return () => { alive = false }
   }, [activeTenant?.id])
@@ -331,6 +341,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     placements:        { id: 'placements', label: t('kpi.placements'), value: num(att.placements ?? matchesTotal), sub: t('kpi.placementsSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: () => onNavigate?.('matches', {}) },
     intakes:           { id: 'intakes', label: t('kpi.intakes'), value: num(att.intake_planned ?? att.intakes), sub: t('kpi.intakesSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: CalendarCheck, onClick: () => onNavigate?.('candidates', { attention: 'intakePlanned' }) },
     fillRate:          { id: 'fillRate', label: t('kpi.fillRate'), value: att.fill_rate != null ? `${att.fill_rate}%` : '—', sub: t('kpi.fillRateSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: TrendingUp, onClick: () => onNavigate?.('vacancies', {}) },
+    // Live vacancy count (non-archived) — replaced the feed-less Invulgraad card.
+    openVacancies:     { id: 'openVacancies', label: t('kpi.openVacancies'), value: num(att.open_vacancies ?? vacanciesTotal), sub: t('kpi.openVacanciesSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: Briefcase, onClick: () => onNavigate?.('vacancies', {}) },
     incompleteRuns:    { id: 'incompleteRuns', label: t('kpi.incompleteRuns'), value: num(att.incomplete_runs ?? incompleteRuns), sub: t('kpi.incompleteRunsSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: Zap, onClick: () => onNavigate?.('aiagents', {}) },
     activeConv:        { id: 'activeConv', label: t('kpi.activeConv'), value: num(att.active_conversations ?? conversations.length), sub: t('kpi.activeConvSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'messages' }) },
     missingDocs:       { id: 'missingDocs', label: t('kpi.missingDocs'), value: num(att.missing_documents), sub: t('kpi.missingDocsSub'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: FileText, onClick: () => onNavigate?.('candidates', {}) },

@@ -46,7 +46,9 @@
     "expiringOpps": "Auslaufende Chancen",
     "expiringOppsSub": "laufen bald aus",
     "pipelineHours": "Pipeline-Stunden",
-    "hoursUnit": "Std."
+    "hoursUnit": "Std.",
+    "openVacancies": "Stellen",
+    "openVacanciesSub": "Aktiv in Verwaltung"
   },
   "chart": {
     "byStatus": "Kandidaten nach Status",

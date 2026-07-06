@@ -20,8 +20,10 @@ export const SUPER_VIEWS: DashboardType[] = ['admin', 'management']
 // shows a full, role-specific row (never hidden). 🟡 metrics render "—" until the
 // backend feed lands (see docs/DASHBOARD-PLAN.md).
 export const KPI_ROWS: Record<DashboardType, string[]> = {
-  admin:       ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'fillRate', 'escalations'],
-  management:  ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'fillRate', 'escalations'],
+  // Invulgraad/Escalaties vervangen (Danny 2026-07-06): geen feed/actie — nu Open
+  // vacatures · Taken over tijd · Actieve gesprekken (alle drie live) = 9 blokjes.
+  admin:       ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
+  management:  ['candidates', 'opps', 'pipeline', 'expiringOpps', 'placements', 'intakes', 'openVacancies', 'tasksOverdue', 'activeConv'],
   recruitment: ['candidates', 'never', 'stale', 'tasksOverdue', 'failedWa', 'failedWf', 'uncalledCallist', 'intakes'],
   backoffice:  ['tasks', 'placements', 'missingDocs', 'expiringContracts', 'couplingErrors', 'incompleteRuns'],
   sales:       ['opps', 'pipeline', 'expiringOpps', 'fillRate', 'placements', 'activeConv'],

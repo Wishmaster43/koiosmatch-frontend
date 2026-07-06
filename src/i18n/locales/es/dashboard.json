@@ -46,7 +46,9 @@
     "expiringOpps": "Oportunidades por vencer",
     "expiringOppsSub": "cierran pronto",
     "pipelineHours": "Horas de pipeline",
-    "hoursUnit": "h"
+    "hoursUnit": "h",
+    "openVacancies": "Vacantes",
+    "openVacanciesSub": "Activas en gestión"
   },
   "chart": {
     "byStatus": "Candidatos por estado",
