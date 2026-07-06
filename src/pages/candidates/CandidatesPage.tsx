@@ -27,8 +27,9 @@ import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
 import { usePools } from '@/lib/usePools'
 import { usePageMemory } from '@/lib/usePageMemory'
-import { geocodeNL } from '@/lib/geocode'
 import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
+import { useCandidateFilters } from './hooks/useCandidateFilters'
+import { buildCandidateFilterGroups } from './data/candidateFilterGroups'
 import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
 import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
@@ -36,9 +37,6 @@ import { useCandidateRecord } from './hooks/useCandidateMutations'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
-
-// DD-MM-YYYY (nl) for the period-chip label; echoes the input if unparseable.
-const fmtD = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? s : d.toLocaleDateString('nl-NL') }
 
 interface CandidateIntent {
   attention?: string
@@ -78,41 +76,38 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const [selected,       setSelected]       = useState<Candidate | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [addOpen,        setAddOpen]        = useState(false)
-  // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
-  const [showArchived,   setShowArchived]   = usePageMemory('cand.archived', false)
   // STRAAL-1: table ⇄ map view; the map searches server-side within centre+radius.
   const [view,           setView]           = usePageMemory<'table' | 'map'>('cand.viewMode', 'table')
   const [mapCenter,      setMapCenter]      = usePageMemory('cand.mapCenter', { lat: 52.09, lng: 5.12 })
   const [mapRadius,      setMapRadius]      = usePageMemory('cand.mapRadius', 30)
-  // CAND-FILTERS (2026-07-03): pool (ids) · city (exact) · source — server-side params.
-  const [selectedPool,   setSelectedPool]   = usePageMemory<string[]>('cand.pool', [])
-  const [selectedCity,   setSelectedCity]   = usePageMemory<string[]>('cand.city', [])
-  const [selectedSource, setSelectedSource] = usePageMemory<string[]>('cand.source', [])
   const [detail,         setDetail]         = useState<Candidate | null>(null)
   const selectedIdRef = useRef<Id | null>(null)
 
-  // Server-side filter dimensions (the API supports these). Owner holds owner_ids.
-  const [selectedStatus,   setSelectedStatus]   = usePageMemory<string[]>('cand.status', [])
-  const [selectedFunnel,   setSelectedFunnel]   = usePageMemory<string[]>('cand.funnel', [])
-  const [selectedType,     setSelectedType]     = usePageMemory<string[]>('cand.type', [])
-  const [selectedOwner,    setSelectedOwner]    = usePageMemory<Array<string | number>>('cand.owner', [])
-  const [selectedGeslacht, setSelectedGeslacht] = usePageMemory<string[]>('cand.gender', [])
-  const [selectedProvince, setSelectedProvince] = usePageMemory<string[]>('cand.province', [])
-  const [selectedTitle,    setSelectedTitle]    = usePageMemory<string[]>('cand.title', [])
-  const [selectedLocation, setSelectedLocation] = usePageMemory<Array<string | number>>('cand.location', [])
-  const [globalSearch,     setGlobalSearch]     = usePageMemory('cand.search', '')
-  // Aandacht-tile filter: null | 'stale6m' | 'neverContacted' | 'noFollowup' (klik = aan/uit).
-  const [attentionFilter,  setAttentionFilter]  = usePageMemory<string | null>('cand.attention', null)
-  // Date-range filter from a dashboard period click (created or last-contact between two dates).
-  const [dateRange, setDateRange] = useState<{ param: 'created_between' | 'last_contact_between'; from: string; to: string } | null>(null)
-  // Straal-filter (sidebar): place/postcode geocoded via PDOK → server-side lat/lng/radius.
-  const [geoFilter, setGeoFilter] = usePageMemory<{ q: string; km: number; lat: number; lng: number; label: string } | null>('cand.geo', null)
-  const [geoHint, setGeoHint] = useState<string | null>(null)
   // Bulk-selectie (checkboxes) — id-set; gewist bij filter/pagina-wissel.
   const [selectedIds,      setSelectedIds]      = useState<Set<Id>>(() => new Set())
   // Transient feedback for bulk mutations (success/error), auto-dismissed.
   const [actionMsg,        setActionMsg]        = useState<ActionMsg | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // 14-day window for the "actieve gesprekken" card filter — captured once (pure render).
+  const [convCutoff] = useState(() => Date.now() - 14 * 86400000)
+  // "Not contacted > N months" threshold — tenant setting (Settings → KPI's → Candidates), default 6.
+  const settings = useAllSettings()
+  const staleMonths = getNumberSetting(settings, 'no_contact_alert_months', 6)
+
+  // ALL filter state + derived filterParams live in one hook (§0.3 size split).
+  const {
+    showArchived, setShowArchived,
+    selectedStatus, setSelectedStatus, selectedFunnel, setSelectedFunnel,
+    selectedType, setSelectedType, selectedOwner, setSelectedOwner,
+    selectedGeslacht, setSelectedGeslacht, selectedProvince, setSelectedProvince,
+    selectedTitle, setSelectedTitle, selectedLocation, setSelectedLocation,
+    selectedPool, setSelectedPool, selectedCity, setSelectedCity,
+    selectedSource, setSelectedSource,
+    globalSearch, setGlobalSearch, attentionFilter, setAttentionFilter,
+    dateRange, setDateRange, geoFilter, geoHint, applyGeo, clearGeo,
+    anyFilterActive, clearAllFilters, searchEpoch, filterParams, filterKey,
+  } = useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius, setMapCenter, setMapRadius })
 
   // Seed filters from a navigation intent (e.g. a dashboard KPI/chart click).
   useEffect(() => {
@@ -127,63 +122,6 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   }, [intent])
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
-
-  // Anything narrowing the default view → the shared clear-button shows; one click resets.
-  const anyFilterActive = Boolean(globalSearch.trim() || attentionFilter || dateRange || showArchived || geoFilter
-    || selectedStatus.length || selectedFunnel.length || selectedType.length || selectedOwner.length
-    || selectedGeslacht.length || selectedProvince.length || selectedTitle.length || selectedLocation.length
-    || selectedPool.length || selectedCity.length || selectedSource.length)
-  // Remount the (self-stateful) search input on clear so the visible text resets too.
-  const [searchEpoch, setSearchEpoch] = useState(0)
-  const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1)
-    setGlobalSearch(''); setAttentionFilter(null); setDateRange(null); setShowArchived(false)
-    setSelectedStatus([]); setSelectedFunnel([]); setSelectedType([]); setSelectedOwner([])
-    setSelectedGeslacht([]); setSelectedProvince([]); setSelectedTitle([]); setSelectedLocation([])
-    setSelectedPool([]); setSelectedCity([]); setSelectedSource([]); setGeoFilter(null); setGeoHint(null); setPage(1)
-  }
-
-  // 14-day window for the "actieve gesprekken" card filter — captured once (pure render).
-  const [convCutoff] = useState(() => Date.now() - 14 * 86400000)
-  // "Not contacted > N months" threshold — tenant setting (Settings → KPI's → Candidates), default 6.
-  const settings = useAllSettings()
-  const staleMonths = getNumberSetting(settings, 'no_contact_alert_months', 6)
-
-  // Server-side filter params (axios serialises arrays as `key[]`). Only the
-  // dimensions the API supports; the rest of the right panel is hidden for now.
-  const filterParams = useMemo(() => {
-    const p: Record<string, unknown> = {}
-    // Map view searches server-side within the chosen centre + radius (STRAAL-1).
-    if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
-    else if (geoFilter) { p.lat = geoFilter.lat; p.lng = geoFilter.lng; p.radius = geoFilter.km }
-    if (globalSearch.trim())     p.search         = globalSearch.trim()
-    if (selectedStatus.length)   p.status         = selectedStatus
-    if (selectedFunnel.length)   p.funnel_type    = selectedFunnel
-    if (selectedType.length)     p.candidate_type = selectedType
-    if (selectedOwner.length)    p.owner_id       = selectedOwner
-    if (selectedGeslacht.length) p.gender         = selectedGeslacht
-    if (selectedProvince.length) p.province       = selectedProvince
-    if (selectedTitle.length)    p.function_title = selectedTitle
-    if (selectedLocation.length) p.location_id    = selectedLocation
-    if (selectedPool.length)     p.pool           = selectedPool
-    if (selectedCity.length)     p.city           = selectedCity
-    if (selectedSource.length)   p.source         = selectedSource
-    if (showArchived)            p.include_archived = 1
-    // "> N months no contact" filters server-wide via last_contact_between at the configured
-    // threshold; never-contacted + no-follow-up now send server params too (BE KPI-2a).
-    if (attentionFilter === 'stale6m') {
-      const cutoff = new Date(); cutoff.setMonth(cutoff.getMonth() - staleMonths)
-      p.last_contact_between = ['1900-01-01', cutoff.toISOString().slice(0, 10)]
-    }
-    if (attentionFilter === 'neverContacted') p.never_contacted = 1
-    if (attentionFilter === 'noFollowup')     p.no_followup = 1
-    if (attentionFilter === 'hasTasks')       p.has_open_tasks = 1
-    if (attentionFilter === 'intakePlanned')  p.intake_planned = 1
-    // Period-click date range (created / last-contact); set last so it wins over stale6m if both target last_contact.
-    if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
-    return p
-  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, selectedPool, selectedCity, selectedSource, showArchived, attentionFilter, dateRange, staleMonths, view, mapCenter, mapRadius, geoFilter])
-  const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1. Visible rows change → drop the bulk selection.
   useEffect(() => { setPage(1) }, [filterKey])
@@ -229,58 +167,27 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const blacklistActive = selectedStatus.length === 1 && selectedStatus[0] === blacklistValue
   const toggleBlacklist = () => setSelectedStatus(blacklistActive ? [] : [blacklistValue])
 
-  // Straal-blok apply: PDOK-geocode the input; not found → hint, found → filter + map sync.
-  const applyGeo = async (q: string, km: number) => {
-    setGeoHint(null)
-    const hit = await geocodeNL(q)
-    if (!hit) { setGeoHint(t('common:filters.notFound')); return }
-    setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
-    setMapCenter({ lat: hit.lat, lng: hit.lng }); setMapRadius(km)
-  }
-
-  const catLifecycle      = t('filters.categories.lifecycle')
-  const catQualifications = t('filters.categories.qualifications')
-  const catPerson         = t('filters.categories.person')
-  const catOrganisation   = t('filters.categories.organisation')
-  const catDisplay        = t('filters.categories.display')
-
-  // Only the dimensions the API filters server-side. Regrouped along the §3B axes
-  // (2026-07-06 redesign): small fixed lookups render as OPEN checkbox lists
-  // (display: 'open'), long lists keep the searchable dropdown.
-  const filterGroups = useMemo(() => [
-    // ── Werving: the recruiting axes (status/funnel/contract form) — open lists.
-    { key: 'status', type: 'search-select', display: 'open', category: catLifecycle, label: t('filters.status'),        selected: selectedStatus, options: statusOptions, onToggle: tog(setSelectedStatus) },
-    { key: 'funnel', type: 'search-select', display: 'open', category: catLifecycle, label: t('filters.funnelType'),    selected: selectedFunnel, options: funnelOptions, onToggle: tog(setSelectedFunnel) },
-    { key: 'type',   type: 'search-select', display: 'open', category: catLifecycle, label: t('filters.candidateType'), selected: selectedType,   options: typeOptions,   onToggle: tog(setSelectedType) },
-    // ── Kwalificaties: function + pools.
-    { key: 'title',  type: 'search-select', category: catQualifications, label: t('filters.function'), selected: selectedTitle, options: titleOptions, onToggle: tog(setSelectedTitle) },
-    ...(poolOptions.length   ? [{ key: 'pool',   type: 'search-select', category: catQualifications, label: t('filters.pool'),   selected: selectedPool,   options: poolOptions,   onToggle: tog(setSelectedPool) }] : []),
-    // ── Persoon: WHERE (straal/plaats/provincie) + who.
-    { key: 'geo', type: 'geo-radius', category: catPerson, label: t('common:filters.radius'),
-      applied: geoFilter ? { label: geoFilter.label } : null, hint: geoHint, km: geoFilter?.km ?? 30,
-      onApply: applyGeo, onClear: () => { setGeoFilter(null); setGeoHint(null) } },
-    ...(cityOptions.length   ? [{ key: 'city',   type: 'search-select', category: catPerson,         label: t('filters.city'),   selected: selectedCity,   options: cityOptions,   onToggle: tog(setSelectedCity) }] : []),
-    { key: 'province', type: 'search-select', category: catPerson, label: t('filters.province'), selected: selectedProvince, options: provinceOptions, onToggle: tog(setSelectedProvince) },
-    { key: 'gender',   type: 'search-select', display: 'open', category: catPerson, label: t('filters.gender'),   selected: selectedGeslacht, options: genderOptions,   onToggle: tog(setSelectedGeslacht) },
-    // ── Organisatie: owner/branch/source.
-    { key: 'owner',    type: 'search-select', category: catOrganisation, label: t('filters.owner'),  selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
-    { key: 'location', type: 'search-select', category: catOrganisation, label: t('filters.branch'), selected: selectedLocation, options: locationOptions, onToggle: tog(setSelectedLocation) },
-    ...(sourceOptions.length ? [{ key: 'source', type: 'search-select', category: catOrganisation,   label: t('filters.source'), selected: selectedSource, options: sourceOptions, onToggle: tog(setSelectedSource) }] : []),
-    // ── Weergave: archived + period (view-scoping, not recruiting data).
-    // Archived mirrors the quick-view toggle; both share the showArchived state.
-    { key: 'archived', type: 'checkbox', category: catDisplay, label: t('filters.archived'), selected: showArchived ? ['archived'] : [], options: [{ value: 'archived', label: t('page.archivedView') }], onToggle: () => setShowArchived(v => !v) },
-    // Period (date range) from a dashboard bar click — a single removable value so it shows in the chip bar + panel.
-    ...(dateRange ? [{
-      key: 'period', type: 'search-select', category: catDisplay,
-      label: t(dateRange.param === 'created_between' ? 'filters.periodCreated' : 'filters.periodLastContact'),
-      selected: [`${dateRange.from}|${dateRange.to}`],
-      options: [{ value: `${dateRange.from}|${dateRange.to}`, label: `${fmtD(dateRange.from)} – ${fmtD(dateRange.to)}` }],
-      onToggle: () => setDateRange(null),
-    }] : []),
-  ], [t, catLifecycle, catQualifications, catPerson, catOrganisation, catDisplay, showArchived, dateRange, geoFilter, geoHint,
-      selectedStatus, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner, selectedLocation,
-      selectedPool, selectedCity, selectedSource, poolOptions, cityOptions, sourceOptions,
-      statusOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
+  // Panel groups are config built by a pure helper (§0.3 size split) — the memo
+  // only re-runs when a selection or option list actually changes.
+  const filterGroups = useMemo(() => buildCandidateFilterGroups({
+    t, tog, filters: {
+      selectedStatus, setSelectedStatus, selectedFunnel, setSelectedFunnel,
+      selectedType, setSelectedType, selectedTitle, setSelectedTitle,
+      selectedPool, setSelectedPool, selectedCity, setSelectedCity,
+      selectedProvince, setSelectedProvince, selectedGeslacht, setSelectedGeslacht,
+      selectedOwner, setSelectedOwner, selectedLocation, setSelectedLocation,
+      selectedSource, setSelectedSource,
+      showArchived, setShowArchived, dateRange, setDateRange,
+      geoFilter, geoHint, applyGeo, clearGeo,
+    },
+    options: { statusOptions, funnelOptions, typeOptions, titleOptions, poolOptions, cityOptions,
+      provinceOptions, genderOptions, ownerOptions, locationOptions, sourceOptions },
+  }),
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  [t, showArchived, dateRange, geoFilter, geoHint,
+   selectedStatus, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner, selectedLocation,
+   selectedPool, selectedCity, selectedSource, poolOptions, cityOptions, sourceOptions,
+   statusOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
 
   useEffect(() => {
     registerFilters('candidates-page', filterGroups)
