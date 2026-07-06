@@ -656,7 +656,9 @@
     },
     "dateFrom": "Datum von",
     "dateUntil": "Datum bis",
-    "export": "Exportieren"
+    "export": "Exportieren",
+    "search": "Suchen",
+    "searchPlaceholder": "Feld, Wert oder wer…"
   },
   "matchesView": {
     "title": "Matches",

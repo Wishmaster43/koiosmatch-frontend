@@ -656,7 +656,9 @@
     },
     "dateFrom": "Fecha desde",
     "dateUntil": "Fecha hasta",
-    "export": "Exportar"
+    "export": "Exportar",
+    "search": "Buscar",
+    "searchPlaceholder": "Campo, valor o quién…"
   },
   "matchesView": {
     "title": "Coincidencias",

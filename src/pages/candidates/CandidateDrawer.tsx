@@ -18,6 +18,7 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useCreateMatch } from './hooks/useCreateMatch'
 import { useVacancyOptions } from './hooks/useVacancyOptions'
 import { useAuth } from '@/context/AuthContext'
+import api from '@/lib/api'
 import ProfilePanel from './drawer/ProfilePanel'
 import BackgroundTab from './drawer/BackgroundTab'
 import WorkTab from './drawer/WorkTab'
@@ -238,6 +239,17 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     const changed = statusModal.target !== c.status
     onUpdate?.(c.id, { status: statusModal.target, ...reasonPatch, statusReturnDate: statusModal.date || null,
       ...(changed ? { statusChangedAt: new Date().toISOString() } : {}) })
+    // N-1 (Danny): every status prompt ALSO lands as a note in the thread — the FE
+    // writes it until the backend guard does this centrally (then this block goes).
+    // Type status_change; falls back to general while the note-type lookup lacks it.
+    // No channel: a status change is not a contact moment (agreed design).
+    const noteLine = [
+      t('drawer.statusSince', { status: statusMeta(statusModal.target).label, date: formatDate(new Date().toISOString()) }),
+      statusModal.reason || null,
+      statusModal.date ? t('drawer.availableAgain', { date: formatDate(statusModal.date) }) : null,
+    ].filter(Boolean).join(' · ')
+    api.post(`/candidates/${c.id}/notes`, { type: 'status_change', text: noteLine })
+      .catch(() => api.post(`/candidates/${c.id}/notes`, { type: 'general', text: noteLine }).catch(() => {}))
     setStatusModal(null)
   }
   // Confirm the "Placed" prompt: use the picked match, or create one against the chosen vacancy.

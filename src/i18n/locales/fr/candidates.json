@@ -656,7 +656,9 @@
     },
     "dateFrom": "Date de",
     "dateUntil": "Date jusqu'au",
-    "export": "Exporter"
+    "export": "Exporter",
+    "search": "Rechercher",
+    "searchPlaceholder": "Champ, valeur ou qui…"
   },
   "matchesView": {
     "title": "Matches",

@@ -663,7 +663,9 @@
     },
     "dateFrom": "Datum van",
     "dateUntil": "Datum t/m",
-    "export": "Exporteren"
+    "export": "Exporteren",
+    "search": "Zoeken",
+    "searchPlaceholder": "Zoek op veld, waarde of wie…"
   },
   "matchesView": {
     "title": "Matches",

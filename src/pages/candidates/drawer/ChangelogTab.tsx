@@ -53,9 +53,10 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
     statusMeta: (v: string) => { label: string }; phaseMeta: (v: string) => { label: string }
     funnelMeta: (v: string) => { label: string }; typeMeta: (v: string) => { label: string }
   }
-  // Client-side date-range filter (HelloFlex: "Datum van / t/m").
+  // Client-side date-range filter + free-text search (HelloFlex: "Datum van / t/m").
   const [from, setFrom] = useState('')
   const [until, setUntil] = useState('')
+  const [q, setQ] = useState('')
 
   // Field key → translated label; unknown keys degrade to a humanized form.
   const fieldLabel = (f: string) => t(`changelog.fields.${f}`, { defaultValue: humanizeField(f) })
@@ -119,12 +120,19 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
         .filter(cd => !isCreate || cd.newVal !== t('changelog.emptyValue'))
     })
     return all.filter(cd => {
-      if (!cd.when) return true
-      const d = cd.when.slice(0, 10)
-      return (!from || d >= from) && (!until || d <= until)
+      if (cd.when) {
+        const d = cd.when.slice(0, 10)
+        if ((from && d < from) || (until && d > until)) return false
+      }
+      // Search across who/action/field/values — mirrors HelloFlex's searchable Historie.
+      if (q.trim()) {
+        const hay = [cd.who, cd.action, cd.field, cd.oldVal, cd.newVal, cd.line].filter(Boolean).join(' ').toLowerCase()
+        if (!hay.includes(q.trim().toLowerCase())) return false
+      }
+      return true
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps -- t/lookup metas are stable enough per render
-  }, [items, from, until])
+  }, [items, from, until, q])
 
   // Client-side CSV export of the filtered view (user-initiated download, §8-safe).
   const exportCsv = () => {
@@ -143,8 +151,8 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
 
   const body = (
     <>
-      {/* Date-range filter + export — hidden in the compact popover (bare). */}
-      {!bare && (
+      {/* Date-range filter + search + export (also in the wide popover modal). */}
+      {(
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, marginBottom: 12, flexWrap: 'wrap' }}>
           <label style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
             {t('changelog.dateFrom')}
@@ -153,6 +161,10 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
           <label style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11, color: 'var(--text-muted)' }}>
             {t('changelog.dateUntil')}
             <input type="date" value={until} onChange={e => setUntil(e.target.value)} style={inputStyle} />
+          </label>
+          <label style={{ display: 'flex', flexDirection: 'column', gap: 3, fontSize: 11, color: 'var(--text-muted)', flex: 1, minWidth: 160 }}>
+            {t('changelog.search')}
+            <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={t('changelog.searchPlaceholder')} style={{ ...inputStyle, width: '100%', boxSizing: 'border-box' }} />
           </label>
           <button onClick={exportCsv} title={t('changelog.export')} aria-label={t('changelog.export')}
             style={{ width: 30, height: 30, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7,

@@ -31,7 +31,7 @@ import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
 import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
 import { useCandidateRecord } from './hooks/useCandidateMutations'
-import { useOpenFromIntent, useNavigation } from '@/context/NavigationContext'
+import { useOpenFromIntent } from '@/context/NavigationContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -66,7 +66,6 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const { candidateTypes, funnelTypes, statuses, phases } = useLookups()
   const { genders } = useGenders()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
-  const { navigate } = useNavigation()
   const { registerFilters, unregisterFilters } = useRightPanel() as { registerFilters: (id: string, groups: unknown) => void; unregisterFilters: (id: string) => void }
 
   const [page,           setPage]           = usePageMemory('cand.page', 1)
@@ -118,6 +117,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
 
+  // 14-day window for the "actieve gesprekken" card filter — captured once (pure render).
+  const [convCutoff] = useState(() => Date.now() - 14 * 86400000)
   // "Not contacted > N months" threshold — tenant setting (Settings → KPI's → Candidates), default 6.
   const settings = useAllSettings()
   const staleMonths = getNumberSetting(settings, 'no_contact_alert_months', 6)
@@ -247,6 +248,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     // predicate → it's server-side only (the no_followup param), so don't page-filter it here.
     if (attentionFilter === 'stale6m')        return base.filter(c => isStale(c, staleMonths))
     if (attentionFilter === 'neverContacted') return base.filter(isNeverContacted)
+    if (attentionFilter === 'activeConv')     return base.filter(c => c.lastContactAt && new Date(c.lastContactAt).getTime() > convCutoff)
     return base
   }, [candidates, attentionFilter, showArchived, staleMonths])
 
@@ -370,9 +372,11 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       // the intake_planned param (INTAKE-1) — the old funnel-stage set never matched the count.
       onClick: () => toggleAttention('intakePlanned'), active: attentionFilter === 'intakePlanned' },
     // Channel breakdown is hidden until real WhatsApp/e-mail data exists (BE KPI-1) — no '–' placeholders.
-    // Active conversations live on the WhatsApp page — the card jumps there.
+    // "Actieve gesprekken" = contact in de laatste 14 dagen (zelfde proxy als de teller):
+    // de kaart filtert de LIJST op precies die kandidaten (Danny 2026-07-06 — geen
+    // WhatsApp-sprong meer: daar staan de gesprekken zelf nog niet).
     { key: 'conversations', label: t('analytics.conversations'), value: activeConvCount, color: 'var(--color-success)',
-      onClick: () => navigate('whatsapp') },
+      onClick: () => toggleAttention('activeConv'), active: attentionFilter === 'activeConv' },
     { key: 'tasks', label: t('kpi.tasks'), value: tasksCount, sub: t('kpi.tasksSub'), color: '#0D9488',
       onClick: () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },
   ]

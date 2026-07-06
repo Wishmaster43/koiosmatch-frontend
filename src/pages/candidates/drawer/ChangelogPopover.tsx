@@ -38,8 +38,8 @@ export default function ChangelogPopover({ c }: { c: Candidate }) {
 
       {open && (
         <div role="dialog" aria-label={t('drawer.tabs.changelog')}
-          style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, zIndex: 300,
-            width: 360, maxWidth: '90vw', maxHeight: 440, display: 'flex', flexDirection: 'column',
+          style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 400,
+            width: 900, maxWidth: '92vw', maxHeight: '82vh', display: 'flex', flexDirection: 'column',
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
             boxShadow: '0 8px 28px rgba(0,0,0,0.16)', overflow: 'hidden' }}>
           {/* Popover header — title + close, supplies the chrome the bare tab drops. */}
