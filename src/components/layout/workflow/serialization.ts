@@ -38,7 +38,10 @@ export function stepsToFlow(steps: WorkflowStep[]): { nodes: FlowNode[]; edges: 
         data: n.filters ? { filters: n.filters } : undefined,
       })))
     : steps.slice(0, -1).map((s, i) => mkEdge(s.id, steps[i + 1].id))
-  return { nodes, edges }
+  // Drop dangling edges (an endpoint that isn't a node — e.g. a stale client id
+  // saved in `next`): ReactFlow spams error#008 for every unresolvable edge.
+  const nodeIds = new Set(nodes.map(n => n.id))
+  return { nodes, edges: edges.filter(e => nodeIds.has(e.source) && nodeIds.has(e.target)) }
 }
 
 // { nodes, edges } → steps[]. Best-effort linear order for the `order` index; the
@@ -56,12 +59,14 @@ export function flowToSteps(nodes: FlowNode[], edges: FlowEdge[]): WorkflowStep[
     cur = adj[cur.id] ? nodeMap[adj[cur.id]] : null
   }
   nodes.forEach(n => { if (!ordered.includes(n)) ordered.push(n) })
+  // Never persist a connection to a node that doesn't exist (keeps saved graphs clean).
+  const validIds = new Set(nodes.map(n => n.id))
   return ordered.map(n => ({
     id:       n.id,
     type:     n.data.type,
     config:   n.data.config,
     position: n.position,
-    next:     edges.filter(e => e.source === n.id).map(e => ({
+    next:     edges.filter(e => e.source === n.id && validIds.has(e.target)).map(e => ({
       target:  e.target,
       filters: e.data?.filters ?? null,
     })),

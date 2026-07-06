@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { MouseEvent, DragEvent } from 'react'
 import { Handle, Position, BaseEdge, EdgeLabelRenderer, getStraightPath } from '@xyflow/react'
-import { CheckCircle, Filter, Loader2, Play, Plus, Trash2, X } from 'lucide-react'
+import { CheckCircle, Filter, HelpCircle, Loader2, Play, Plus, Trash2, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { MODULE_META } from '@/modules/index'
 import { NODE_W, NODE_H } from './serialization'
@@ -22,14 +22,17 @@ import type { FlowNodeData, EdgeFilters, FilterCondition } from '@/types/workflo
 const DRAG_TYPE = 'application/x-wf-start'
 
 function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; selected?: boolean }) {
-  const meta    = data.type ? MODULE_META[data.type] : undefined
   const onRun   = useContext(NodeRunContext)
   const startCtx = useContext(StartContext)
   const [busy, setBusy] = useState(false)
   const [dropOver, setDropOver] = useState(false)
   const dragRef = useRef(false)
   const { t } = useTranslation('workflows')
-  if (!meta) return null
+  // Unknown module type → grey fallback node, NEVER null: an unrendered node has
+  // no handles, so ReactFlow drops every touching edge (the error#008 spam) and
+  // the step becomes invisible/uneditable.
+  const meta = (data.type ? MODULE_META[data.type] : undefined)
+    ?? { label: data.type ?? 'Onbekend', Icon: HelpCircle, color: '#64748B', bg: '#F1F5F9', category: 'Onbekend' }
   // The registry types Icon narrowly (size only); lucide icons also take `color`.
   const Icon = meta.Icon as unknown as LucideIcon
 
