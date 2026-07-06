@@ -53,7 +53,14 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   // title is page-derived until a dedicated options endpoint exists.
   const genderOptions   = useMemo(() => genders.map(g => ({ value: g.value, label: g.label })), [genders])
   const provinceOptions = useMemo(() => NL_PROVINCES.map(p => ({ value: p, label: p })), [])
-  const titleOptions    = useMemo(() => optsFrom(candidates.map(c => c.title).filter(Boolean)), [candidates])
+  // Server-wide title options (stats.function_titles) win over the page-derived
+  // fallback, so the dropdown works even when the current page is empty/filtered.
+  const titleOptions    = useMemo(() => {
+    if (stats?.function_titles?.length) {
+      return stats.function_titles.map(v => ({ value: v, label: v, count: candidates.filter(c => c.title === v).length }))
+    }
+    return optsFrom(candidates.map(c => c.title).filter(Boolean))
+  }, [stats, candidates])
   const locationOptions = useMemo(() => (locations ?? []).map(l => ({ value: l.id, label: l.name })).filter(o => o.value != null), [locations])
 
   // Donut-data: reuse the count-options, enriched with the lookup colour per value.
