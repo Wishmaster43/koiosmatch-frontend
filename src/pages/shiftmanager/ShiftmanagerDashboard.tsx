@@ -72,14 +72,15 @@ export default function ShiftmanagerDashboard() {
 
   // Drill-down: a candidate KPI/donut segment opens the shared drawer — 'average'
   // shows the per-month breakdown vs KPI target, other picks list their subset.
-  const [drill, setDrill] = useState<{ mode: string; title: string; candidates: ReportCandidate[] } | null>(null)
+  const [drill, setDrill] = useState<{ mode: string; title: string; candidates: ReportCandidate[]; tabs?: { key: string; label: string; candidates: ReportCandidate[] }[]; initialTab?: string } | null>(null)
   const openDrill = (mode: string, title: string, list: Array<Record<string, unknown>>) =>
     setDrill({ mode, title, candidates: list as unknown as ReportCandidate[] })
-  // A click on an activity donut segment drills into that bucket's candidates.
+  // A click on an activity donut segment opens the drill on that bucket, with a
+  // switcher across all four buckets (Danny: "in drill down kunnen switchen").
+  const activityTabs = activityBuckets.map(b => ({ key: b.key, label: b.label, candidates: b.list as unknown as ReportCandidate[] }))
   const onActivityPick = (d: unknown) => {
     const k = (d as { key?: string })?.key
-    const b = activityBuckets.find(x => x.key === k)
-    if (b) openDrill('nieuw', b.label, b.list)
+    if (activityBuckets.some(x => x.key === k)) setDrill({ mode: 'nieuw', title: '', candidates: [], tabs: activityTabs, initialTab: k })
   }
 
   // KPI row — shared InsightsRow (same 96px footprint as every other entity page),
@@ -115,7 +116,7 @@ export default function ShiftmanagerDashboard() {
 
       {/* Candidate KPI drill-down */}
       {drill && (
-        <KpiDrillDownDrawer mode={drill.mode} title={drill.title} candidates={drill.candidates} onClose={() => setDrill(null)} />
+        <KpiDrillDownDrawer mode={drill.mode} title={drill.title} candidates={drill.candidates} tabs={drill.tabs} initialTab={drill.initialTab} onClose={() => setDrill(null)} />
       )}
 
       {/* Two charts with shared filters */}

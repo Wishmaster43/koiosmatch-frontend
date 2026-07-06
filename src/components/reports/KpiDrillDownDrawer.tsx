@@ -229,12 +229,16 @@ function AverageBreakdown({ candidates, KPI_TARGET }: { candidates: ReportCandid
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClose }: { mode: string; title?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void }) {
+export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClose, tabs, initialTab }: { mode: string; title?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void; tabs?: { key: string; label: string; candidates: ReportCandidate[] }[]; initialTab?: string }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   const { new_candidates_target: KPI_TARGET } = useKpiSettings()
   // Clicking a row opens that candidate's detail on top of the drill-down.
   const [selected, setSelected] = useState<ReportCandidate | null>(null)
+  // Optional bucket switcher (Danny: switch between Nooit gewerkt / Gewerkt / …).
+  const [activeTab, setActiveTab] = useState(initialTab ?? tabs?.[0]?.key)
+  const currentTab = tabs?.find(tb => tb.key === activeTab)
+  const shown = currentTab?.candidates ?? candidates
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
@@ -247,10 +251,10 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div>
-            <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{title}</div>
+            <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{currentTab?.label ?? title}</div>
             {mode !== 'average' && (
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                {t('drilldown.candidatesCount', { count: candidates.length })}
+                {t('drilldown.candidatesCount', { count: shown.length })}
               </div>
             )}
           </div>
@@ -274,12 +278,30 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
           </div>
         </div>
 
+        {/* Bucket switcher — flip between the candidate subsets without reopening */}
+        {tabs && tabs.length > 1 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: '10px 14px', borderBottom: '1px solid var(--hover-bg)', flexShrink: 0 }}>
+            {tabs.map(tb => {
+              const on = tb.key === activeTab
+              return (
+                <button key={tb.key} type="button" onClick={() => setActiveTab(tb.key)}
+                  style={{ padding: '4px 10px', fontSize: 12, fontWeight: on ? 600 : 400, borderRadius: 999, cursor: 'pointer',
+                    border: `1px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`,
+                    background: on ? 'var(--color-primary-bg)' : 'var(--surface)',
+                    color: on ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                  {tb.label} <span style={{ opacity: 0.7 }}>{tb.candidates.length}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
         {/* Content */}
         {mode === 'average' ? (
           <AverageBreakdown candidates={candidates} KPI_TARGET={KPI_TARGET} />
         ) : (
           <CandidateList
-            candidates={candidates}
+            candidates={shown}
             dateField={mode === 'uitgeschreven' ? 'end_date_employment' : 'registration_date'}
             dateLabel={mode === 'uitgeschreven' ? t('drilldown.deregistered') : t('drilldown.registered')}
             onSelect={setSelected}
