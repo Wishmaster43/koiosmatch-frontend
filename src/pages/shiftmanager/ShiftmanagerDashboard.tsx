@@ -49,13 +49,15 @@ export default function ShiftmanagerDashboard() {
     return { newList, avg, active, neverWorked, workedThisMonth, planned, all: list }
   }, [candidates])
 
-  // Distribution donut by function/position (one KPI slot is a donut — Danny).
+  // Distribution donut by function/position — ACTIVE candidates only (Danny).
   const functionDonut = useMemo(() => {
     const counts: Record<string, number> = {}
-    ;(candidates as Array<Record<string, unknown>>).forEach(c => {
-      const p = String(c.position ?? '').trim() || t('dashboard.stats.unknownFunction')
-      counts[p] = (counts[p] || 0) + 1
-    })
+    ;(candidates as Array<Record<string, unknown>>)
+      .filter(c => String(c.status ?? '').toLowerCase() === 'actief')
+      .forEach(c => {
+        const p = String(c.position ?? '').trim() || t('dashboard.stats.unknownFunction')
+        counts[p] = (counts[p] || 0) + 1
+      })
     const sorted  = Object.entries(counts).sort((a, b) => b[1] - a[1])
     const palette = ['#1B60A9', '#19A5CA', '#F0AB00', '#16A34A', '#DC2626', '#7C3AED', '#94A3B8']
     const data: Array<{ name: string; value: number; key: string; color: string }> =
