@@ -20,7 +20,7 @@ interface DonutChannel { label: string; value: ReactNode; color: string }
 // "label ✕"-chip and the donut dims the other segments — filtering on the biggest
 // segment previously LOOKED dead (rows already matched; Danny's "58% toont niks").
 export interface DonutSpec { key: string; title?: ReactNode; data: unknown[]; colors?: string[]; onPick?: (d: unknown) => void; active?: boolean; onClear?: () => void; picked?: string | null }
-export interface KpiSpec { key: string; label?: ReactNode; value: number | string; sub?: ReactNode; color?: string; onClick?: () => void; active?: boolean; channels?: DonutChannel[] }
+export interface KpiSpec { key: string; label?: ReactNode; value?: number | string; sub?: ReactNode; color?: string; onClick?: () => void; active?: boolean; channels?: DonutChannel[]; render?: ReactNode }
 
 const CARD: CSSProperties = {
   flex: '1 1 0', minWidth: 0, height: 96, boxSizing: 'border-box',
@@ -59,7 +59,7 @@ function DonutCard({ title, data, colors, onPick, active, onClear, picked, clear
 }
 
 
-function KpiCard({ label, value, sub, color, onClick, active, channels }: Omit<KpiSpec, 'key'>) {
+function KpiCard({ label, value, sub, color, onClick, active, channels, render }: Omit<KpiSpec, 'key'>) {
   const clickable = typeof onClick === 'function'
   return (
     <div {...interactive(onClick)} title={typeof sub === 'string' ? sub : undefined}
@@ -71,6 +71,8 @@ function KpiCard({ label, value, sub, color, onClick, active, channels }: Omit<K
       onMouseLeave={clickable ? e => { if (!active) e.currentTarget.style.borderColor = 'var(--border)' } : undefined}>
       <div style={TITLE}>{label}</div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
+        {/* Custom card body (e.g. a mini stacked bar) overrides the value/channels. */}
+        {render ?? <>
         <div style={{ fontSize: 24, fontWeight: 700, lineHeight: 1, color: color || 'var(--text)' }}>
           {typeof value === 'number' ? value.toLocaleString('nl-NL') : value}
         </div>
@@ -88,6 +90,7 @@ function KpiCard({ label, value, sub, color, onClick, active, channels }: Omit<K
           <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4, whiteSpace: 'nowrap',
             overflow: 'hidden', textOverflow: 'ellipsis' }}>{sub}</div>
         ) : null}
+        </>}
       </div>
     </div>
   )

@@ -21,7 +21,7 @@ import { useShiftsChartData } from "./useShiftsChartData"
 import { buildShiftsFilterGroups } from "./buildShiftsFilterGroups"
 import { useSavedShiftFilters } from "./useSavedShiftFilters"
 import type { ShiftFilterState } from "./useSavedShiftFilters"
-import { useShiftsBreakdown } from "./useShiftsBreakdown"
+import { useShiftsBreakdown, BREAKDOWN_PALETTE } from "./useShiftsBreakdown"
 import { useSmLastSync } from "./useSmLastSync"
 import ShiftsBreakdownCharts from "./ShiftsBreakdownCharts"
 import InsightsRow from "@/components/insights/InsightsRow"
@@ -85,26 +85,39 @@ export default function ShiftsChartsBlock({
   const showKpiRow = !!leadingKpis
   const lastSync = useSmLastSync(showKpiRow)
   const [shiftUnit, setShiftUnit] = useState<'hours' | 'count'>('hours')
-  const { customerRows, functionRows, functionDonut, activeCustomers, plannedCustomers } = useShiftsBreakdown(queryString)
+  const { customerRows, functionRows, activeCustomers, plannedCustomers } = useShiftsBreakdown(queryString)
   const fmtN = (n: number) => Math.round(n).toLocaleString('nl-NL')
   const isH = shiftUnit === 'hours'
   const H = hourStats.filterHours, C = hourStats.filterShifts, MH = hourStats.monthHours, MC = hourStats.monthShifts
   const val = (h: number, c: number) => fmtN(isH ? h : c)  // uren of diensten per de toggle
+
+  // #6 Open diensten per functie — mini gestapelde balk in de tegel (Danny: donut past niet).
+  const funcSegs  = functionRows.slice(0, 6).map((r, i) => ({ label: r.label || '—', value: isH ? Number(r.hours) || 0 : Number(r.count) || 0, color: BREAKDOWN_PALETTE[i % BREAKDOWN_PALETTE.length] }))
+  const funcTotal = funcSegs.reduce((s, x) => s + x.value, 0)
+  const openFuncBar = (
+    <div>
+      <div style={{ fontSize: 22, fontWeight: 700, lineHeight: 1, color: 'var(--color-warning)' }}>{val(H.geen_kandidaat, C.geen_kandidaat)}</div>
+      <div style={{ display: 'flex', height: 9, borderRadius: 5, overflow: 'hidden', marginTop: 8, background: 'var(--hover-bg)' }}>
+        {funcTotal > 0 && funcSegs.map(seg => (
+          <div key={seg.label} title={`${seg.label}: ${fmtN(seg.value)}`}
+            style={{ width: `${(seg.value / funcTotal) * 100}%`, background: seg.color }} />
+        ))}
+      </div>
+    </div>
+  )
+
   const kpiRow: KpiSpec[] = [
     ...(leadingKpis ?? []),                                             // Gewerkt/Actief · Nieuw · Aandacht
     { key: 'forecast_month',   label: t('dashboard.stats.forecastMonth'), value: val(MH.prognose, MC.prognose),          color: 'var(--color-secondary)' },
     { key: 'open',             label: isH ? t('dashboard.stats.openHours') : t('dashboard.stats.openShifts'), value: val(H.geen_kandidaat, C.geen_kandidaat), color: 'var(--color-warning)' },
+    { key: 'open_functions',   label: t('dashboard.stats.openByFunction'), render: openFuncBar },  // #6 mini stacked bar
     // Actieve klanten: ingeplande / totaal-actief (bv. 5/7), testklant al uitgesloten.
     { key: 'active_customers', label: t('dashboard.stats.activeCustomers'), value: `${fmtN(plannedCustomers)}/${fmtN(activeCustomers)}`, color: 'var(--color-secondary)' },
     // #8/#9 nog te bepalen (Danny) — voorlopig Niet ingevuld + Werkelijk deze maand.
     { key: 'unfilled',         label: t('dashboard.stats.unfilled'),      value: val(H.niet_ingevuld, C.niet_ingevuld),  color: 'var(--color-danger)' },
     { key: 'actual_month',     label: t('dashboard.stats.actualMonth'),   value: val(MH.werkelijk, MC.werkelijk),        color: 'var(--color-success)' },
   ]
-  // #6 Openstaande diensten per functie — compacte donut in de tegel-rij (Danny).
-  const donutRow: DonutSpec[] = [
-    ...(leadingDonuts ?? []),
-    { key: 'open_functions', title: t('dashboard.stats.openByFunction'), data: functionDonut, colors: functionDonut.map(d => d.color) },
-  ]
+  const donutRow: DonutSpec[] = [...(leadingDonuts ?? [])]
 
   // Location id → { name, customer } so the drill-down totals can show real customer
   // names (the detail rows only carry a customer_external_id).
