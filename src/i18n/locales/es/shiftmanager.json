@@ -131,7 +131,11 @@
     "periodCol": "Período",
     "totalRow": "Total",
     "asValues": "Valores",
-    "asPct": "%"
+    "asPct": "%",
+    "byCustomerTitle": "Sin candidato por cliente",
+    "byFunctionTitle": "Turnos abiertos por función",
+    "inHours": "En horas",
+    "inShifts": "En turnos"
   },
   "customersReport": {
     "title": "Informe de clientes",
@@ -219,7 +223,11 @@
       "unknownFunction": "Desconocido",
       "otherFunctions": "Otros",
       "idle": "Sin actividad reciente",
-      "inactive": "Inactivo"
+      "inactive": "Inactivo",
+      "openShifts": "Turnos abiertos",
+      "shiftsThisMonth": "Turnos este mes",
+      "activeCustomers": "Clientes activos",
+      "actualHours": "Horas reales"
     },
     "statSub": {
       "urgent": "{{n}} urgente",

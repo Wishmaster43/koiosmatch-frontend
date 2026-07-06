@@ -131,7 +131,11 @@
     "periodCol": "Period",
     "totalRow": "Total",
     "asValues": "Values",
-    "asPct": "%"
+    "asPct": "%",
+    "byCustomerTitle": "No candidate by customer",
+    "byFunctionTitle": "Open shifts by role",
+    "inHours": "In hours",
+    "inShifts": "In shifts"
   },
   "customersReport": {
     "title": "Customers report",
@@ -219,7 +223,11 @@
       "unknownFunction": "Unknown",
       "otherFunctions": "Other",
       "idle": "No recent activity",
-      "inactive": "Inactive"
+      "inactive": "Inactive",
+      "openShifts": "Open shifts",
+      "shiftsThisMonth": "Shifts this month",
+      "activeCustomers": "Active customers",
+      "actualHours": "Actual hours"
     },
     "statSub": {
       "urgent": "{{n}} urgent",

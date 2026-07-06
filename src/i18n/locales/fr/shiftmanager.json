@@ -131,7 +131,11 @@
     "periodCol": "Période",
     "totalRow": "Total",
     "asValues": "Valeurs",
-    "asPct": "%"
+    "asPct": "%",
+    "byCustomerTitle": "Sans candidat par client",
+    "byFunctionTitle": "Services ouverts par fonction",
+    "inHours": "En heures",
+    "inShifts": "En services"
   },
   "customersReport": {
     "title": "Rapport clients",
@@ -219,7 +223,11 @@
       "unknownFunction": "Inconnu",
       "otherFunctions": "Autres",
       "idle": "Sans activité récente",
-      "inactive": "Inactif"
+      "inactive": "Inactif",
+      "openShifts": "Services ouverts",
+      "shiftsThisMonth": "Services ce mois-ci",
+      "activeCustomers": "Clients actifs",
+      "actualHours": "Heures réelles"
     },
     "statSub": {
       "urgent": "{{n}} urgent",

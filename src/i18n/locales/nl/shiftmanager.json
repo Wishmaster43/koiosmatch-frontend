@@ -131,7 +131,11 @@
     "periodCol": "Periode",
     "totalRow": "Totaal",
     "asValues": "Waarden",
-    "asPct": "%"
+    "asPct": "%",
+    "byCustomerTitle": "Geen kandidaat per klant",
+    "byFunctionTitle": "Open diensten per functie",
+    "inHours": "In uren",
+    "inShifts": "In diensten"
   },
   "customersReport": {
     "title": "Klanten rapport",
@@ -219,7 +223,11 @@
       "unknownFunction": "Onbekend",
       "otherFunctions": "Overig",
       "idle": "Geen recente activiteit",
-      "inactive": "Inactief"
+      "inactive": "Inactief",
+      "openShifts": "Openstaande diensten",
+      "shiftsThisMonth": "Diensten huidige maand",
+      "activeCustomers": "Actieve klanten",
+      "actualHours": "Werkelijke uren"
     },
     "statSub": {
       "urgent": "{{n}} urgent",

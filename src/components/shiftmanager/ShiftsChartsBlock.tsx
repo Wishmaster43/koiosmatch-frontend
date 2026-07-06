@@ -22,6 +22,7 @@ import { buildShiftsFilterGroups } from "./buildShiftsFilterGroups"
 import { useSavedShiftFilters } from "./useSavedShiftFilters"
 import type { ShiftFilterState } from "./useSavedShiftFilters"
 import { useShiftsBreakdown } from "./useShiftsBreakdown"
+import ShiftsBreakdownCharts from "./ShiftsBreakdownCharts"
 import InsightsRow from "@/components/insights/InsightsRow"
 import type { KpiSpec, DonutSpec } from "@/components/insights/InsightsRow"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
@@ -77,23 +78,28 @@ export default function ShiftsChartsBlock({
       seriesLabel,
     })
 
-  // Shift-based dashboard cards (only when this block drives the KPI row). Donuts
-  // (klant/functie) come from the filtered shifts-breakdown; hour tiles from the
-  // filtered chartData. Both follow the applied filter (Danny).
+  // Shift breakdown (klant/functie) + shift KPI cards (only when this block drives the
+  // KPI row on the dashboard). Everything follows the applied filter. The Uren/Diensten
+  // toggle switches the open + this-month tiles and the two breakdown charts (Danny).
   const showKpiRow = !!leadingKpis
-  const { customerDonut, functionDonut } = useShiftsBreakdown(queryString)
-  const fmtH = (n: number) => Math.round(n).toLocaleString('nl-NL')
+  const [shiftUnit, setShiftUnit] = useState<'hours' | 'count'>('hours')
+  const { customerRows, functionRows, activeCustomers } = useShiftsBreakdown(queryString)
+  const fmtN = (n: number) => Math.round(n).toLocaleString('nl-NL')
+  const openTile  = shiftUnit === 'hours'
+    ? { label: t('dashboard.stats.openHours'),  value: fmtN(hourStats.openHours) }
+    : { label: t('dashboard.stats.openShifts'), value: fmtN(hourStats.openShifts) }
+  const monthTile = shiftUnit === 'hours'
+    ? { label: t('dashboard.stats.hoursThisMonth'),  value: fmtN(hourStats.currentMonthForecast) }
+    : { label: t('dashboard.stats.shiftsThisMonth'), value: fmtN(hourStats.currentMonthForecastShifts) }
   const kpiRow: KpiSpec[] = [
     ...(leadingKpis ?? []),
-    { key: 'open_hours',       label: t('dashboard.stats.openHours'),      value: fmtH(hourStats.openHours),           color: 'var(--color-warning)' },
-    { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'), value: fmtH(hourStats.currentMonthForecast), color: 'var(--color-warning)' },
-    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),      value: hourStats.occupancy != null ? `${hourStats.occupancy}%` : '—', color: 'var(--color-success)' },
+    { key: 'active_customers', label: t('dashboard.stats.activeCustomers'), value: fmtN(activeCustomers),       color: 'var(--color-secondary)' },
+    { key: 'open',             label: openTile.label,  value: openTile.value,  color: 'var(--color-warning)' },
+    { key: 'month',            label: monthTile.label, value: monthTile.value, color: 'var(--color-warning)' },
+    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),   value: hourStats.occupancy != null ? `${hourStats.occupancy}%` : '—', color: 'var(--color-success)' },
+    { key: 'actual_hours',     label: t('dashboard.stats.actualHours'), value: fmtN(hourStats.actualHours),      color: 'var(--color-success)' },
   ]
-  const donutRow: DonutSpec[] = [
-    ...(leadingDonuts ?? []),
-    { key: 'function', title: t('dashboard.charts.byFunction'), data: functionDonut, colors: functionDonut.map(d => d.color) },
-    { key: 'customer', title: t('dashboard.charts.byCustomer'), data: customerDonut, colors: customerDonut.map(d => d.color) },
-  ]
+  const donutRow: DonutSpec[] = [...(leadingDonuts ?? [])]
 
   // Location id → { name, customer } so the drill-down totals can show real customer
   // names (the detail rows only carry a customer_external_id).
@@ -201,7 +207,24 @@ export default function ShiftsChartsBlock({
   return (
     <>
       {/* Combined, filter-driven KPI row (dashboard only): candidate cards + shift cards */}
-      {showKpiRow && <InsightsRow donuts={donutRow} kpis={kpiRow} padding="0 0 16px" />}
+      {showKpiRow && (
+        <>
+          {/* Uren / Diensten toggle — drives the switchable tiles + breakdown charts */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 0 8px' }}>
+            <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+              {(['hours', 'count'] as const).map(u => (
+                <button key={u} type="button" onClick={() => setShiftUnit(u)}
+                  style={{ padding: '4px 12px', fontSize: 11, fontWeight: shiftUnit === u ? 600 : 400, border: 'none', cursor: 'pointer',
+                    background: shiftUnit === u ? 'var(--color-primary-bg)' : 'transparent',
+                    color: shiftUnit === u ? 'var(--color-primary)' : 'var(--text-muted)' }}>
+                  {u === 'hours' ? t('charts.inHours') : t('charts.inShifts')}
+                </button>
+              ))}
+            </div>
+          </div>
+          <InsightsRow donuts={donutRow} kpis={kpiRow} padding="0 0 16px" />
+        </>
+      )}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard title={t('charts.hours')} subtitle={periodLabel} loading={loading} error={error}>
@@ -224,6 +247,11 @@ export default function ShiftsChartsBlock({
           <ShiftsDataTable data={chartData} bars={shiftBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} onCellClick={handleBarClick} />
         </ChartCard>
       </div>
+
+      {/* SM-CHARTS2: open diensten per klant + per functie (dashboard only) */}
+      {showKpiRow && (
+        <ShiftsBreakdownCharts customerRows={customerRows} functionRows={functionRows} unit={shiftUnit} loading={loading} error={error} />
+      )}
 
       {drill && (
         <ShiftsDrillDownDrawer
