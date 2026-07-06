@@ -414,7 +414,9 @@
     "edit": "Edit",
     "editTitle": "Edit",
     "inUse": "In use — cannot delete",
-    "priorityRank": "Priority (1 = sent first)"
+    "priorityRank": "Priority (1 = sent first)",
+    "iconLabel": "Icon (emoji)",
+    "iconPlaceholder": "e.g. 📞"
   },
   "phases": {
     "title": "Phases",

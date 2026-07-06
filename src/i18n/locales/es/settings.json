@@ -395,7 +395,9 @@
     "edit": "Editar",
     "editTitle": "Editar",
     "inUse": "En uso — no se puede eliminar",
-    "priorityRank": "Prioridad (1 = enviado primero)"
+    "priorityRank": "Prioridad (1 = enviado primero)",
+    "iconLabel": "Icono (emoji)",
+    "iconPlaceholder": "p. ej. 📞"
   },
   "phases": {
     "title": "Fases",

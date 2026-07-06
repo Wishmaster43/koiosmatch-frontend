@@ -24,7 +24,7 @@ export function TaskTypeSettings() {
   return (
     <div style={{ maxWidth: 640 }}>
       <StatusListEditor compact withColor title={t('tasks.typeTitle')} subtitle={t('tasks.typeSubtitle')}
-        endpoint="/task-types" addLabel={t('tasks.typeAdd')} />
+        endpoint="/task-types" addLabel={t('tasks.typeAdd')} withIcon />
     </div>
   )
 }

@@ -21,7 +21,9 @@ interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: stri
 const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
 // The tab order. The changelog is a header popover (not a tab), mirroring candidate.
-const TAB_IDS = ['details', 'links']
+// Reacties is back as a tab (2026-07-06): the slim-down dropped it, which left the
+// comments UI — and the /tasks/{id}/notes write path — unreachable.
+const TAB_IDS = ['details', 'links', 'comments']
 
 interface TaskDrawerProps {
   task: TaskDetail | null

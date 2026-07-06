@@ -6,6 +6,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { geocodeNL } from '@/lib/geocode'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useUsers } from '@/lib/queries'
@@ -59,6 +60,9 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const [view,      setView]      = usePageMemory<'table' | 'map'>('cust.viewMode', 'table')
   const [mapCenter, setMapCenter] = usePageMemory('cust.mapCenter', { lat: 52.09, lng: 5.12 })
   const [mapRadius, setMapRadius] = usePageMemory('cust.mapRadius', 30)
+  // Straal-filter (sidebar): place/postcode geocoded via PDOK → server-side lat/lng/radius.
+  const [geoFilter, setGeoFilter] = usePageMemory<{ q: string; km: number; lat: number; lng: number; label: string } | null>('cust.geo', null)
+  const [geoHint, setGeoHint] = useState<string | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   const [actionMsg, setActionMsg] = useState<{ type: string; text: string } | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -79,10 +83,12 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     if (selectedCity.length)     p.city     = selectedCity
     if (selectedIndustry.length) p.industry = selectedIndustry
     if (showArchived)            p.include_archived = 1
-    // Map view narrows the list server-side to the chosen circle (STRAAL-1).
+    // Map view narrows the list server-side to the chosen circle (STRAAL-1);
+    // in table view the sidebar's straal-blok drives the same params.
     if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
+    else if (geoFilter) { p.lat = geoFilter.lat; p.lng = geoFilter.lng; p.radius = geoFilter.km }
     return p
-  }, [globalSearch, selectedStatus, selectedOwner, selectedCity, selectedIndustry, showArchived, view, mapCenter, mapRadius])
+  }, [globalSearch, selectedStatus, selectedOwner, selectedCity, selectedIndustry, showArchived, view, mapCenter, mapRadius, geoFilter])
   const filterKey = JSON.stringify(filterParams)
 
   useEffect(() => { setPage(1) }, [filterKey])
@@ -137,6 +143,15 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
   const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (v: string | undefined) => { if (v != null) toggleOneValue(set, v) }
 
+  // Straal-blok apply: PDOK-geocode; found → filter + map sync, not found → hint.
+  const applyGeo = async (q: string, km: number) => {
+    setGeoHint(null)
+    const hit = await geocodeNL(q)
+    if (!hit) { setGeoHint(t('common:filters.notFound')); return }
+    setGeoFilter({ q, km, lat: hit.lat, lng: hit.lng, label: `${hit.label} · ${km} km` })
+    setMapCenter({ lat: hit.lat, lng: hit.lng }); setMapRadius(km)
+  }
+
   const catGeneral = t('filters.categories.general')
   const catOrg     = t('filters.categories.organisation')
 
@@ -144,8 +159,11 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     { key: 'status',   type: 'search-select', category: catGeneral, label: t('filters.status'),         selected: selectedStatus,   options: statusOptions,   onToggle: tog(setSelectedStatus) },
     { key: 'industry', type: 'search-select', category: catGeneral, label: t('filters.industry'),       selected: selectedIndustry, options: industryOptions, onToggle: tog(setSelectedIndustry) },
     { key: 'city',     type: 'search-select', category: catGeneral, label: t('filters.city'),           selected: selectedCity,     options: cityOptions,     onToggle: tog(setSelectedCity) },
+    { key: 'geo', type: 'geo-radius', category: catGeneral, label: t('common:filters.radius'),
+      applied: geoFilter ? { label: geoFilter.label } : null, hint: geoHint, km: geoFilter?.km ?? 30,
+      onApply: applyGeo, onClear: () => { setGeoFilter(null); setGeoHint(null) } },
     { key: 'owner',    type: 'search-select', category: catOrg,     label: t('filters.accountManager'), selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
-  ], [t, catGeneral, catOrg, selectedStatus, selectedIndustry, selectedCity, selectedOwner, statusOptions, industryOptions, cityOptions, ownerOptions])
+  ], [t, catGeneral, catOrg, selectedStatus, selectedIndustry, selectedCity, selectedOwner, statusOptions, industryOptions, cityOptions, ownerOptions, geoFilter, geoHint]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     registerFilters('customers-page', filterGroups)
@@ -162,12 +180,12 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const [kpiFilter, setKpiFilter] = usePageMemory<string | null>('cust.kpi', null)
   const toggleKpi = (k: string) => setKpiFilter(p => (p === k ? null : k))
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || kpiFilter
+  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || kpiFilter || geoFilter
     || selectedStatus.length || selectedOwner.length || selectedCity.length || selectedIndustry.length)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setKpiFilter(null)
-    setSelectedStatus([]); setSelectedOwner([]); setSelectedCity([]); setSelectedIndustry([]); setPage(1)
+    setSelectedStatus([]); setSelectedOwner([]); setSelectedCity([]); setSelectedIndustry([]); setGeoFilter(null); setGeoHint(null); setPage(1)
   }
 
   const KPI_PRED: Record<string, (c: (typeof customers)[number]) => boolean> = {

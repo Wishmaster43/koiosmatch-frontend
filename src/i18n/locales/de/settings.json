@@ -395,7 +395,9 @@
     "edit": "Bearbeiten",
     "editTitle": "Bearbeiten",
     "inUse": "In Verwendung — kann nicht gelöscht werden",
-    "priorityRank": "Priorität (1 = zuerst gesendet)"
+    "priorityRank": "Priorität (1 = zuerst gesendet)",
+    "iconLabel": "Symbol (Emoji)",
+    "iconPlaceholder": "z. B. 📞"
   },
   "phases": {
     "title": "Phasen",

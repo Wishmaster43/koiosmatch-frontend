@@ -47,13 +47,12 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
   return (
     <div className="flex flex-col flex-1 min-w-0">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <div className="text-sm font-medium text-gray-600">{title}</div>
+        {/* Average reads as part of the title — "Titel — gem. 7" — instead of a tiny
+            dashed legend next to it (Danny 2026-07-06). */}
+        <div className="text-sm font-medium text-gray-600">
+          {title}
           {showAverage && displayAverage > 0 && (
-            <div className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--color-primary)' }}>
-              <div style={{ width: 16, borderTop: '2px dashed var(--color-primary)' }} />
-              {t('avg')} {displayAverage}{showPercent ? '%' : ''}
-            </div>
+            <span> — {t('avg')} {displayAverage}{showPercent ? '%' : ''}</span>
           )}
         </div>
         {onBarClick && <span className="text-xs text-gray-300">{t('clickBar')}</span>}

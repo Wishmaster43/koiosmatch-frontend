@@ -414,7 +414,9 @@
     "edit": "Bewerken",
     "editTitle": "Bewerken",
     "inUse": "In gebruik — kan niet verwijderen",
-    "priorityRank": "Prioriteit (1 = eerst verstuurd)"
+    "priorityRank": "Prioriteit (1 = eerst verstuurd)",
+    "iconLabel": "Icoon (emoji)",
+    "iconPlaceholder": "bijv. 📞"
   },
   "phases": {
     "title": "Fasen",

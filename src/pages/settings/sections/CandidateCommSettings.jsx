@@ -10,7 +10,7 @@ export function LastContactTypesSettings() {
     <div style={{ maxWidth: 640 }}>
       <StatusListEditor withColor={false}
         title={t('lastContactTypes.title')} subtitle={t('lastContactTypes.subtitle')}
-        endpoint="/last-contact-types" addLabel={t('lastContactTypes.add')} />
+        endpoint="/last-contact-types" addLabel={t('lastContactTypes.add')} withIcon />
     </div>
   )
 }
