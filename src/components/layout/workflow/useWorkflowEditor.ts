@@ -60,6 +60,7 @@ export function useWorkflowEditor({ workflow, onSave }: {
   const [status,         setStatus]         = useState(workflow.status || 'draft')
   const [saved,          setSaved]          = useState(false)
   const [running,        setRunning]        = useState(false)
+  const [runError,       setRunError]       = useState<string | null>(null)
   const [runningNodeId,  setRunningNodeId]  = useState<string | null>(null)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [pickerState,    setPickerState]    = useState<{ edgeId?: string; append?: boolean } | null>(null)
@@ -259,24 +260,41 @@ export function useWorkflowEditor({ workflow, onSave }: {
 
   const handleRun = useCallback(async () => {
     setRunning(true)
-    // Walk nodes in flow order, animate each
-    const orderedNodes: string[] = []
-    const visited = new Set<string>()
-    const startId = nodes.filter(n => !edges.some(e => e.target === n.id))
-                         .sort((a, b) => a.position.x - b.position.x)[0]?.id
-    let current: string | undefined = startId
-    while (current && !visited.has(current)) {
-      orderedNodes.push(current)
-      visited.add(current)
-      current = edges.find(e => e.source === current)?.target
+    setRunError(null)
+    try {
+      // Actually execute the SAVED workflow server-side (the engine runs the
+      // steps on the queue). This button used to only animate — never ran.
+      const { default: api } = await import('@/lib/api')
+      await api.post(`/workflows/${workflow.id}/run`)
+
+      // Visual walk of the graph while the queued run progresses.
+      const orderedNodes: string[] = []
+      const visited = new Set<string>()
+      const startId = nodes.filter(n => !edges.some(e => e.target === n.id))
+                           .sort((a, b) => a.position.x - b.position.x)[0]?.id
+      let current: string | undefined = startId
+      while (current && !visited.has(current)) {
+        orderedNodes.push(current)
+        visited.add(current)
+        current = edges.find(e => e.source === current)?.target
+      }
+      for (const nid of orderedNodes) {
+        setRunningNodeId(nid)
+        await new Promise(r => setTimeout(r, 800))
+      }
+
+      // Show the run history so the real (server-side) result is visible.
+      setShowLogs(true)
+    } catch (err) {
+      // Surface the backend reason (e.g. "Workflow is niet actief" on a draft);
+      // empty string = generic message via i18n in the component.
+      const e = err as { response?: { data?: { message?: string } } }
+      setRunError(e.response?.data?.message ?? '')
+    } finally {
+      setRunningNodeId(null)
+      setRunning(false)
     }
-    for (const nid of orderedNodes) {
-      setRunningNodeId(nid)
-      await new Promise(r => setTimeout(r, 800))
-    }
-    setRunningNodeId(null)
-    setRunning(false)
-  }, [nodes, edges])
+  }, [nodes, edges, workflow.id])
 
   // Variables a node may reference: the output fields of every upstream module.
   // Walks edges backward (BFS), orders ancestors left-to-right, and derives
@@ -335,7 +353,7 @@ export function useWorkflowEditor({ workflow, onSave }: {
   return {
     edges, onNodesChange, onEdgesChange, onConnect, nodesWithFirst, selectedNode, setSelectedNodeId,
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
-    saved, running, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
+    saved, running, runError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,

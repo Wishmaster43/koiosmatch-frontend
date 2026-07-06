@@ -36,7 +36,7 @@ function EditorInner({ workflow, onClose, onSave }: {
   const {
     edges, onNodesChange, onEdgesChange, onConnect, nodesWithFirst, selectedNode, setSelectedNodeId,
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
-    saved, running, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
+    saved, running, runError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
@@ -137,6 +137,14 @@ function EditorInner({ workflow, onClose, onSave }: {
               <List size={13} />
               {t('editor.logs')}
             </button>
+          )}
+
+          {/* Run feedback: the backend reason (e.g. a draft can't run) or generic. */}
+          {runError !== null && (
+            <span style={{ fontSize: 11, color: 'var(--color-danger, #DC2626)', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              title={runError || t('common:actionFailed')}>
+              {runError || t('common:actionFailed')}
+            </span>
           )}
 
           <button onClick={handleRun} disabled={running}
