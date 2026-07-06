@@ -90,7 +90,7 @@ export default function DashboardLayout() {
   const dashCanSwitch = (auth?.isSuperAdmin?.() ?? false) || canSwitchViews(dashMyType)
   const [dashView, setDashView] = useState<DashboardType>(dashCanSwitch ? 'management' : dashMyType)
   const dashAllowed: DashboardType[] = dashCanSwitch ? [...DASHBOARD_TYPES] : [dashMyType]
-  const { filterGroups }                    = useRightPanel()
+  const { filterGroups, pageFilterActive }  = useRightPanel()
 
   // Active tenant drives topbar branding. Super admins see the tenant they switched to;
   // regular users fall back to their own tenant from /auth/me.
@@ -227,7 +227,7 @@ export default function DashboardLayout() {
                 }}
               >
                 <SlidersHorizontal size={14} />
-                {activeFilters > 0 && (
+                {activeFilters > 0 ? (
                   <span style={{
                     position: 'absolute', top: -5, right: -5,
                     background: 'var(--color-primary)', color: '#fff',
@@ -238,7 +238,16 @@ export default function DashboardLayout() {
                   }}>
                     {activeFilters}
                   </span>
-                )}
+                ) : pageFilterActive ? (
+                  // Page-level filters (search/KPI picks/attention) active — show a
+                  // warning dot so a narrowed list is visible even with the panel idle.
+                  <span aria-label={t('filtersActive')} title={t('filtersActive')} style={{
+                    position: 'absolute', top: -4, right: -4,
+                    width: 10, height: 10, borderRadius: 999,
+                    background: 'var(--color-warning)',
+                    border: '2px solid var(--bg)',
+                  }} />
+                ) : null}
               </button>
             )}
 

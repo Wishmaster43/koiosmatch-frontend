@@ -142,5 +142,6 @@
   },
   "activeFilters": "Filtros activos",
   "clearAll": "Borrar todo",
-  "clearFilters": "Borrar todos los filtros"
+  "clearFilters": "Borrar todos los filtros",
+  "filtersActive": "Filtros activos"
 }

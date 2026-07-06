@@ -142,5 +142,6 @@
   },
   "activeFilters": "Actieve filters",
   "clearAll": "Alles wissen",
-  "clearFilters": "Wis alle filters"
+  "clearFilters": "Wis alle filters",
+  "filtersActive": "Filters actief"
 }

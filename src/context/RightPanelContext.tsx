@@ -14,12 +14,18 @@ interface RightPanelValue {
   filterGroups: FilterGroup[]
   registerFilters: (key: string, groups: FilterGroup[]) => void
   unregisterFilters: (key: string) => void
+  // True while the CURRENT page narrows its list (search/KPI picks/attention/…) —
+  // feeds the topbar filter-icon dot so a filtered view is visible at a glance.
+  pageFilterActive: boolean
+  reportPageFilter: (key: string, active: boolean) => void
 }
 
 const RightPanelContext = createContext<RightPanelValue>({
   filterGroups:      [],
   registerFilters:   () => {},
   unregisterFilters: () => {},
+  pageFilterActive:  false,
+  reportPageFilter:  () => {},
 })
 
 // A stable signature of a group's MEANINGFUL content — ignores the fresh onToggle/onChange
@@ -61,8 +67,21 @@ export function RightPanelProvider({ children }: { children: ReactNode }) {
   // Flatten all registered groups into one list for the sidebar.
   const filterGroups = useMemo(() => Object.values(registry).flat(), [registry])
 
+  // Page-filter signal: keyed per reporter (ClearFiltersButton instances) so a
+  // stale unmount can never wipe a fresh page's flag. Any true ⇒ active.
+  const [pageFlags, setPageFlags] = useState<Record<string, boolean>>({})
+  const reportPageFilter = useCallback((key: string, active: boolean) => {
+    setPageFlags(prev => {
+      if ((prev[key] ?? false) === active) return prev
+      const next = { ...prev }
+      if (active) next[key] = true; else delete next[key]
+      return next
+    })
+  }, [])
+  const pageFilterActive = useMemo(() => Object.values(pageFlags).some(Boolean), [pageFlags])
+
   return (
-    <RightPanelContext.Provider value={{ filterGroups, registerFilters, unregisterFilters }}>
+    <RightPanelContext.Provider value={{ filterGroups, registerFilters, unregisterFilters, pageFilterActive, reportPageFilter }}>
       {children}
     </RightPanelContext.Provider>
   )

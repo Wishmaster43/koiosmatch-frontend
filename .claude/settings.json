@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git commit -q -m ' *)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeDeep.mjs)",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{const j=JSON.parse\\(d\\);const r=\\(j.data??[]\\);console.log\\(r.length,'rijen binnen 30km van Utrecht; eerste distance_km:',r[0]?.distance_km\\)}\\)\")",
+      "Bash(npm install *)",
+      "Bash(npm ls *)",
+      "Bash(npm audit *)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeMap.mjs)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeDot.mjs)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeIntake2.mjs)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeIntake3.mjs)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeIntake5.mjs)",
+      "Bash(cat >> *)"
+    ],
+    "additionalDirectories": [
+      "/Users/danny/Herd/koiosmatch-api/docs"
+    ]
+  }
+}

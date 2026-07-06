@@ -25,7 +25,11 @@ import SettingsSearch from './components/SettingsSearch'
 
 function parseHash() {
   const raw = window.location.hash.replace(/^#/, '')
-  const [category, tab] = raw.split('/')
+  const parts = raw.split('/')
+  // Canonical form is #settings/<category>/<tab> — the prefix keeps settings deep-links
+  // from colliding with page hashes (#applications/… booted the Applications LIST).
+  // The legacy unprefixed #<category>/<tab> is still accepted for old bookmarks.
+  const [category, tab] = parts[0] === 'settings' ? parts.slice(1) : parts
   return category && tab ? { category, tab } : null
 }
 
@@ -101,7 +105,7 @@ export default function SettingsPage() {
   // Keep the URL hash in sync (deep-link / bookmark / back button).
   useEffect(() => {
     if (!category || !tab) return
-    const next = `#${category}/${tab}`
+    const next = `#settings/${category}/${tab}`
     if (window.location.hash !== next) window.history.replaceState(null, '', next)
   }, [category, tab])
 
