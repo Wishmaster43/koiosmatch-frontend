@@ -141,5 +141,6 @@
     "empty": "No notifications"
   },
   "activeFilters": "Active filters",
-  "clearAll": "Clear all"
+  "clearAll": "Clear all",
+  "clearFilters": "Clear all filters"
 }

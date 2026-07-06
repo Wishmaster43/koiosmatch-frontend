@@ -23,6 +23,7 @@ import InsightsRowJs from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
 import { usePools } from '@/lib/usePools'
 import { usePageMemory } from '@/lib/usePageMemory'
@@ -116,6 +117,21 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   }, [intent])
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
+
+  // Anything narrowing the default view → the shared clear-button shows; one click resets.
+  const anyFilterActive = Boolean(globalSearch.trim() || attentionFilter || dateRange || showArchived
+    || selectedStatus.length || selectedFunnel.length || selectedType.length || selectedOwner.length
+    || selectedGeslacht.length || selectedProvince.length || selectedTitle.length || selectedLocation.length
+    || selectedPool.length || selectedCity.length || selectedSource.length)
+  // Remount the (self-stateful) search input on clear so the visible text resets too.
+  const [searchEpoch, setSearchEpoch] = useState(0)
+  const clearAllFilters = () => {
+    setSearchEpoch(e => e + 1)
+    setGlobalSearch(''); setAttentionFilter(null); setDateRange(null); setShowArchived(false)
+    setSelectedStatus([]); setSelectedFunnel([]); setSelectedType([]); setSelectedOwner([])
+    setSelectedGeslacht([]); setSelectedProvince([]); setSelectedTitle([]); setSelectedLocation([])
+    setSelectedPool([]); setSelectedCity([]); setSelectedSource([]); setPage(1)
+  }
 
   // 14-day window for the "actieve gesprekken" card filter — captured once (pure render).
   const [convCutoff] = useState(() => Date.now() - 14 * 86400000)
@@ -426,8 +442,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
                   + {t('page.add')}
                 </button>
                 {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
-                <HeaderSearch onSearch={setGlobalSearch} defaultValue={globalSearch}
+                <HeaderSearch key={searchEpoch} onSearch={setGlobalSearch} defaultValue={globalSearch}
                   placeholder={t('page.searchPlaceholder')} width={300} />
+                <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
                 {/* Quick-view toggles on the right: blacklisted-only + archived-only */}
                 <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
                   {/* Shared quick-view toggles (§4 soft convention) — one component everywhere. */}

@@ -141,5 +141,6 @@
     "empty": "Keine Benachrichtigungen"
   },
   "activeFilters": "Aktive Filter",
-  "clearAll": "Alle löschen"
+  "clearAll": "Alle löschen",
+  "clearFilters": "Alle Filter löschen"
 }

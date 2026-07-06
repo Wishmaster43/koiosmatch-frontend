@@ -141,5 +141,6 @@
     "empty": "Geen notificaties"
   },
   "activeFilters": "Actieve filters",
-  "clearAll": "Alles wissen"
+  "clearAll": "Alles wissen",
+  "clearFilters": "Wis alle filters"
 }

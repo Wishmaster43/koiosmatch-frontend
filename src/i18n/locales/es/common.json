@@ -141,5 +141,6 @@
     "empty": "Sin notificaciones"
   },
   "activeFilters": "Filtros activos",
-  "clearAll": "Borrar todo"
+  "clearAll": "Borrar todo",
+  "clearFilters": "Borrar todos los filtros"
 }

@@ -141,5 +141,6 @@
     "empty": "Aucune notification"
   },
   "activeFilters": "Filtres actifs",
-  "clearAll": "Tout effacer"
+  "clearAll": "Tout effacer",
+  "clearFilters": "Effacer tous les filtres"
 }
