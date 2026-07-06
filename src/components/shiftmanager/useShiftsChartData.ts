@@ -20,6 +20,12 @@ import type { ShiftFilterOptions, ShiftMonthRow, ShiftsChartDatum, ShiftBar } fr
 // data (avoids re-running the downstream useMemo on every render).
 const EMPTY_ROWS: ShiftMonthRow[] = []
 
+// Stable empty filter-options fallback. Critical: without a constant reference,
+// `?? { … }` yields a fresh object every render while the query is pending/errored,
+// so the filterGroups memo recomputes each render and the RightPanel register/
+// unregister effect loops forever ("Maximum update depth exceeded").
+const EMPTY_FILTER_OPTIONS: ShiftFilterOptions = { job_types: [], locations: [] }
+
 export function useShiftsChartData({
   selectedYears, selectedMonths, period, visible,
   selectedJobTypes, selectedCustomers, selectedLocations,
@@ -46,7 +52,7 @@ export function useShiftsChartData({
       ((await api.get('/sm_reports/shifts-filter-options', { signal })).data ?? { job_types: [], locations: [] }) as ShiftFilterOptions,
     staleTime: 5 * 60_000,
   })
-  const filterOptions: ShiftFilterOptions = filterOptionsQ.data ?? { job_types: [], locations: [] }
+  const filterOptions: ShiftFilterOptions = filterOptionsQ.data ?? EMPTY_FILTER_OPTIONS
 
   // Build the effective query string once per input change (also the cache key).
   const queryString = useMemo(() => {
