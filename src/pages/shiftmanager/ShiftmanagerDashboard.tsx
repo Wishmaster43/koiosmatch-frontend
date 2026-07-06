@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle } from 'lucide-react'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useAuth } from '@/context/AuthContext'
-import InsightsRow      from '@/components/insights/InsightsRow'
 import type { KpiSpec, DonutSpec } from '@/components/insights/InsightsRow'
 import KpiDrillDownDrawer from '@/components/reports/KpiDrillDownDrawer'
 import type { ReportCandidate } from '@/types/reports'
@@ -12,9 +11,6 @@ import { useShiftmanagerDashboard } from './hooks/useShiftmanagerDashboard'
 
 // Packages that unlock the AI/Workflow runs + conversations panels.
 const AI_PACKAGES = ['reporting_sm_ai', 'reporting_hf_ai', 'reporting_sm_hf_ai', 'ats_crm_ai', 'ats_crm_ai_planning', 'ats_crm_aiagents', 'ats_crm_workflows', 'connect']
-
-// Locale-aware display of a KPI value (nl-NL) with an em-dash fallback.
-const fmt = (v?: unknown) => v == null ? '—' : (typeof v === 'number' ? v.toLocaleString('nl-NL') : String(v))
 
 // Loosely-typed SM candidate row (mirrors external data).
 type Rec = Record<string, unknown>
@@ -27,7 +23,7 @@ export default function ShiftmanagerDashboard() {
   const hasAI = AI_PACKAGES.includes(pkg)
 
   // Data layer: SM candidates, shift KPIs, + (AI packages) recent runs/conversations.
-  const { candidates, stats, runs, conversations } = useShiftmanagerDashboard(candidates_per_page, hasAI)
+  const { candidates, runs, conversations } = useShiftmanagerDashboard(candidates_per_page, hasAI)
 
   // Candidate-derived KPIs (real data — the shift/hours stats stay graceful "—"
   // until the /sm_reports/dashboard feed lands, worklist SM-SHIFTS). Keep the actual
@@ -85,42 +81,28 @@ export default function ShiftmanagerDashboard() {
 
   // KPI row — shared InsightsRow (same 96px footprint as every other entity page),
   // standardised to 9 tiles (Danny: "overal 9 stuks"); candidate tiles are click-to-drill.
-  const v      = (key: string) => fmt(stats?.[key])
-  const pctVal = (key: string) => stats?.[key] != null ? `${stats?.[key]}%` : '—'
   const newColor = derived.newList.length >= target ? 'var(--color-success)'
                  : derived.newList.length >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
-  const kpis: KpiSpec[] = [
-    // 'New' is the candidate metric; avg reads after the title (Danny: "gem met - achter de titel").
-    { key: 'new',              label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
-    { key: 'total',            label: t('dashboard.stats.totalCandidates'), value: derived.all.length,      color: 'var(--color-primary)', onClick: () => openDrill('nieuw', t('dashboard.stats.totalCandidates'), derived.all) },
-    // Shift-hours stats — still graceful '—' until derived from the filtered shift data
-    // (SM-SHIFTS feed / SM-CHARTS2 aggregation); these read from /sm_reports/dashboard.
-    { key: 'open_hours',       label: t('dashboard.stats.openHours'),      value: v('open_hours'),       color: 'var(--color-warning)' },
-    { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'), value: v('hours_this_month'), color: 'var(--color-warning)' },
-    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),      value: pctVal('occupancy_pct'), color: 'var(--color-success)' },
-    { key: 'messages_sent',    label: t('dashboard.stats.messagesSent'),   value: v('messages_sent'),    color: 'var(--color-secondary)' },
-    { key: 'response_rate',    label: t('dashboard.stats.responseRate'),   value: pctVal('response_rate_pct'), color: 'var(--color-warning)' },
+  // Candidate cards (NOT filter-driven) — passed into ShiftsChartsBlock, which adds the
+  // filter-driven shift cards (hour tiles + klant/functie donuts) → one combined 9-card row.
+  const leadingKpis: KpiSpec[] = [
+    { key: 'new',      label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
+    { key: 'total',    label: t('dashboard.stats.totalCandidates'), value: derived.all.length,      color: 'var(--color-primary)', onClick: () => openDrill('nieuw', t('dashboard.stats.totalCandidates'), derived.all) },
+    { key: 'inactive', label: t('dashboard.stats.inactive'),        value: derived.inactive.length, color: 'var(--text-muted)',    onClick: () => openDrill('nieuw', t('dashboard.stats.inactive'), derived.inactive) },
   ]
-  // Two donuts: a candidate-based activity donut (clickable) + the per-klant shift
-  // donut (customer from the order → name). The klant data comes from the backend
-  // shift aggregation (SM-CHARTS2); until it lands the donut is a graceful "—" slot.
-  const donuts: DonutSpec[] = [
-    { key: 'activity', title: t('dashboard.charts.activity'),   data: activityDonut, colors: activityDonut.map(d => d.color), onPick: onActivityPick },
-    { key: 'customer', title: t('dashboard.charts.byCustomer'), data: [] },
+  const leadingDonuts: DonutSpec[] = [
+    { key: 'activity', title: t('dashboard.charts.activity'), data: activityDonut, colors: activityDonut.map(d => d.color), onPick: onActivityPick },
   ]
 
   return (
     <div className="p-6">
-      {/* KPI row — config-driven, equal-footprint (1 activity donut + 6 tiles) */}
-      <InsightsRow donuts={donuts} kpis={kpis} padding="0 0 16px" />
-
       {/* Candidate KPI drill-down */}
       {drill && (
         <KpiDrillDownDrawer mode={drill.mode} title={drill.title} candidates={drill.candidates} tabs={drill.tabs} initialTab={drill.initialTab} onClose={() => setDrill(null)} />
       )}
 
-      {/* Two charts with shared filters */}
-      <ShiftsChartsBlock filterKey="shiftmanager-dashboard" />
+      {/* Combined KPI row + charts — ShiftsChartsBlock owns the row so the shift cards follow the applied filter */}
+      <ShiftsChartsBlock filterKey="shiftmanager-dashboard" leadingKpis={leadingKpis} leadingDonuts={leadingDonuts} />
 
       {/* Recent runs + conversations — only for packages with AI & Workflow */}
       {hasAI && <div className="grid grid-cols-2 gap-4 mt-6 mb-6">

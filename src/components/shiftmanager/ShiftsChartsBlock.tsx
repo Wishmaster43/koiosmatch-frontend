@@ -21,6 +21,9 @@ import { useShiftsChartData } from "./useShiftsChartData"
 import { buildShiftsFilterGroups } from "./buildShiftsFilterGroups"
 import { useSavedShiftFilters } from "./useSavedShiftFilters"
 import type { ShiftFilterState } from "./useSavedShiftFilters"
+import { useShiftsBreakdown } from "./useShiftsBreakdown"
+import InsightsRow from "@/components/insights/InsightsRow"
+import type { KpiSpec, DonutSpec } from "@/components/insights/InsightsRow"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 
 export default function ShiftsChartsBlock({
@@ -29,12 +32,18 @@ export default function ShiftsChartsBlock({
   fixedLocationIds:  fixedLocationIdsProp = [],
   fixedDepartmentId = null,
   fixedCandidateId  = null,
+  leadingKpis,
+  leadingDonuts,
 }: {
   filterKey?: string
   fixedCustomers?: string[]
   fixedLocationIds?: string[]
   fixedDepartmentId?: string | null
   fixedCandidateId?: string | null
+  // When present (dashboard), a combined InsightsRow is rendered on top with these
+  // candidate cards + the filter-driven shift cards (hour tiles + klant/functie donuts).
+  leadingKpis?: KpiSpec[]
+  leadingDonuts?: DonutSpec[]
 }) {
   const { t } = useTranslation('shiftmanager')
   // Stable series-label resolver (memoised so derived bars don't recompute each render).
@@ -60,13 +69,31 @@ export default function ShiftsChartsBlock({
   const [drill,              setDrill]              = useState<{ baseQuery: string; metric: string; label: string; yearSuffix: string } | null>(null)
 
   // ── Data layer ──────────────────────────────────────────────────────────────
-  const { loading, error, filterOptions, chartData, shiftBars, hoursBars, multiYear } =
+  const { loading, error, filterOptions, chartData, shiftBars, hoursBars, multiYear, queryString, hourStats } =
     useShiftsChartData({
       selectedYears, selectedMonths, period, visible,
       selectedJobTypes, selectedCustomers, selectedLocations,
       fixedCustomers, fixedLocationIds, fixedDepartmentId, fixedCandidateId,
       seriesLabel,
     })
+
+  // Shift-based dashboard cards (only when this block drives the KPI row). Donuts
+  // (klant/functie) come from the filtered shifts-breakdown; hour tiles from the
+  // filtered chartData. Both follow the applied filter (Danny).
+  const showKpiRow = !!leadingKpis
+  const { customerDonut, functionDonut } = useShiftsBreakdown(queryString)
+  const fmtH = (n: number) => Math.round(n).toLocaleString('nl-NL')
+  const kpiRow: KpiSpec[] = [
+    ...(leadingKpis ?? []),
+    { key: 'open_hours',       label: t('dashboard.stats.openHours'),      value: fmtH(hourStats.openHours),           color: 'var(--color-warning)' },
+    { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'), value: fmtH(hourStats.currentMonthForecast), color: 'var(--color-warning)' },
+    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),      value: hourStats.occupancy != null ? `${hourStats.occupancy}%` : '—', color: 'var(--color-success)' },
+  ]
+  const donutRow: DonutSpec[] = [
+    ...(leadingDonuts ?? []),
+    { key: 'function', title: t('dashboard.charts.byFunction'), data: functionDonut, colors: functionDonut.map(d => d.color) },
+    { key: 'customer', title: t('dashboard.charts.byCustomer'), data: customerDonut, colors: customerDonut.map(d => d.color) },
+  ]
 
   // Location id → { name, customer } so the drill-down totals can show real customer
   // names (the detail rows only carry a customer_external_id).
@@ -173,6 +200,9 @@ export default function ShiftsChartsBlock({
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
+      {/* Combined, filter-driven KPI row (dashboard only): candidate cards + shift cards */}
+      {showKpiRow && <InsightsRow donuts={donutRow} kpis={kpiRow} padding="0 0 16px" />}
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard title={t('charts.hours')} subtitle={periodLabel} loading={loading} error={error}>
           <YearIndicator years={selectedYears} />

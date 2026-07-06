@@ -175,5 +175,22 @@ export function useShiftsChartData({
       }))
     ), [selectedYears, activeSeries, seriesLabel])
 
-  return { loading, error, filterOptions, chartData, shiftBars, hoursBars, multiYear }
+  // Filter-driven hour KPIs for the dashboard tiles (derived from the same filtered
+  // chartData): open hours = geen-kandidaat uren · this-month = prognose of the current
+  // month · occupancy = werkelijk ÷ prognose. All over the selected years/months.
+  const hourStats = useMemo(() => {
+    const cm = new Date().getMonth() + 1
+    let open = 0, actual = 0, forecast = 0, curMonthForecast = 0
+    for (const row of chartData) {
+      for (const y of selectedYears) {
+        open     += Number(row[`${y}_geen_kandidaat_uren`] || 0)
+        actual   += Number(row[`${y}_werkelijk_uren`]     || 0)
+        forecast += Number(row[`${y}_prognose_uren`]      || 0)
+        if (row._monthIndex === cm) curMonthForecast += Number(row[`${y}_prognose_uren`] || 0)
+      }
+    }
+    return { openHours: open, currentMonthForecast: curMonthForecast, occupancy: forecast ? Math.round((actual / forecast) * 100) : null }
+  }, [chartData, selectedYears])
+
+  return { loading, error, filterOptions, chartData, shiftBars, hoursBars, multiYear, queryString, hourStats }
 }
