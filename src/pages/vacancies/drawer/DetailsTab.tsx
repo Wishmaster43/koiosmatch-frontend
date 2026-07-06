@@ -61,8 +61,12 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
   const [newSkill, setNewSkill] = useState('')
   const setF = (k: TextKey, val: string) => setForm(p => ({ ...p, [k]: val }))
   const toggleType = (val: string) => setTypes(p => p.includes(val) ? p.filter(x => x !== val) : [...p, val])
-  const addSkill = () => { const s = newSkill.trim(); if (s && !skills.includes(s)) setSkills(p => [...p, s]); setNewSkill('') }
-  const removeSkill = (s: string) => setSkills(p => p.filter(x => x !== s))
+  // Skills are quick-editable OUTSIDE the pencil (Danny 2026-07-06: "kan ik niet
+  // invullen"): adding/removing persists immediately; inside edit-mode the change
+  // rides along with the big Save instead.
+  const persistSkills = (next: string[]) => { setSkills(next); if (!editing) onUpdate?.(v.id, { skills: next }) }
+  const addSkill = () => { const sk = newSkill.trim(); if (sk && !skills.includes(sk)) persistSkills([...skills, sk]); setNewSkill('') }
+  const removeSkill = (s: string) => persistSkills(skills.filter(x => x !== s))
 
   // Description edits in its own block (rich text), like the candidate profile text.
   const [descEditing, setDescEditing] = useState(false)
@@ -131,9 +135,9 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* One edit toggle for the field grid */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={groupTitle}>{t('drawer.tabs.details')}</span>
+      {/* One edit toggle for the field grid — no duplicate "Details" heading (the tab
+          bar already says it; Danny 2026-07-06). */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
         {controls(editing, save, cancel, () => setEditing(true))}
       </div>
 
@@ -189,28 +193,25 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
         {row(t('details.hours'), pair(v.hoursMin, v.hoursMax) || v.hours || dash, twoInputs('hoursMin', 'hoursMax', 'min', 'max'))}
       </>)}
 
-      {/* Required skills — vertical list, add/remove per row while editing. */}
+      {/* Required skills — vertical list; quick-add/remove ALWAYS available (saves
+          immediately outside edit-mode, rides the big Save inside it). */}
       <div>
         <div style={groupTitle}>{t('details.skills')}</div>
-        {skills.length === 0 && !editing ? (
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('details.noSkills')}</div>
-        ) : (
+        {skills.length > 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             {skills.map(s => (
               <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text)', padding: '6px 10px', ...blockStyle }}>
                 <span style={{ flex: 1, minWidth: 0 }}>{s}</span>
-                {editing && <button onClick={() => removeSkill(s)} title={t('common:remove')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={13} /></button>}
+                <button onClick={() => removeSkill(s)} title={t('common:remove')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, display: 'flex' }}><X size={13} /></button>
               </div>
             ))}
           </div>
         )}
-        {editing && (
-          <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
-            <input value={newSkill} onChange={e => setNewSkill(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addSkill() }}
-              placeholder={t('details.addSkill')} style={{ ...inputStyle, flex: 1 }} />
-            <button onClick={addSkill} title={t('details.addSkill')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Plus size={14} /></button>
-          </div>
-        )}
+        <div style={{ display: 'flex', gap: 6, marginTop: 6 }}>
+          <input value={newSkill} onChange={e => setNewSkill(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') addSkill() }}
+            placeholder={t('details.addSkill')} style={{ ...inputStyle, flex: 1 }} />
+          <button onClick={addSkill} title={t('details.addSkill')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Plus size={14} /></button>
+        </div>
       </div>
 
       {/* Description — same rich editor as the candidate profile text (its own toggle). */}

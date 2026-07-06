@@ -208,7 +208,8 @@
     "appliedToHired": "Postulado → contratado",
     "bySource": "Por origen",
     "leadsToApplications": "Leads → candidaturas",
-    "empty": "Aún no hay suficientes datos."
+    "empty": "Aún no hay suficientes datos.",
+    "openApplications": "Abrir las candidaturas"
   },
   "modal": {
     "title": "Nueva vacante",

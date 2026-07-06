@@ -230,8 +230,10 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Seed the funnel-stage filter from a dashboard chart click (funnel / funnel-conversion).
   // Mirrors the candidate status/recruiter drill-down: the InsightsRow then shows the active chip.
   useEffect(() => {
-    const stage = (intent as { stage?: string } | undefined)?.stage
-    if (stage) setSelectedPhase([stage])
+    const i = intent as { stage?: string; vacancy?: string } | undefined
+    if (i?.stage) setSelectedPhase([i.stage])
+    // A vacancy statistics-bar click carries the vacancy too — scope the list to it.
+    if (i?.vacancy) setSelectedVac([String(i.vacancy)])
   }, [intent])
 
   // Kanban move: set the new phase + bucket; label/colour re-resolve from the lookup.

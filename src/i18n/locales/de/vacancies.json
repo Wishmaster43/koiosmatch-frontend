@@ -208,7 +208,8 @@
     "appliedToHired": "Beworben → eingestellt",
     "bySource": "Nach Quelle",
     "leadsToApplications": "Leads → Bewerbungen",
-    "empty": "Noch nicht genügend Daten."
+    "empty": "Noch nicht genügend Daten.",
+    "openApplications": "Bewerbungen öffnen"
   },
   "modal": {
     "title": "Neue Stelle",

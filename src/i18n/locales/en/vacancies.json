@@ -208,7 +208,8 @@
     "appliedToHired": "Applied → hired",
     "bySource": "By source",
     "leadsToApplications": "Leads → applications",
-    "empty": "Not enough data yet."
+    "empty": "Not enough data yet.",
+    "openApplications": "Open the applications"
   },
   "modal": {
     "title": "New vacancy",

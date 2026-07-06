@@ -208,7 +208,8 @@
     "appliedToHired": "Gesolliciteerd → aangenomen",
     "bySource": "Per bron",
     "leadsToApplications": "Leads → sollicitaties",
-    "empty": "Nog onvoldoende gegevens."
+    "empty": "Nog onvoldoende gegevens.",
+    "openApplications": "Open de sollicitaties"
   },
   "modal": {
     "title": "Nieuwe vacature",

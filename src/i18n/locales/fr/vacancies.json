@@ -208,7 +208,8 @@
     "appliedToHired": "Postulé → recruté",
     "bySource": "Par source",
     "leadsToApplications": "Leads → candidatures",
-    "empty": "Pas encore assez de données."
+    "empty": "Pas encore assez de données.",
+    "openApplications": "Ouvrir les candidatures"
   },
   "modal": {
     "title": "Nouveau poste",

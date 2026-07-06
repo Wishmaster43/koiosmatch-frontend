@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigation } from '@/context/NavigationContext'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import type { VacancyDetail } from '@/types/vacancy'
 
@@ -20,6 +21,8 @@ function Stat({ label, value, color }: { label: ReactNode; value: ReactNode; col
  */
 export default function StatisticsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
+  // Bar click → Sollicitaties, pre-filtered on this vacancy + that stage (Danny: 'klikbaar???').
+  const { navigate } = useNavigation()
   const { phases } = useVacancyLookups()
 
   const byPhase = (v.applicationsByPhase ?? {}) as Record<string, number>
@@ -50,7 +53,10 @@ export default function StatisticsTab({ vacancy: v }: { vacancy: VacancyDetail }
           const count = byPhase[p.value] ?? 0
           const width = Math.round((count / maxPhase) * 100)
           return (
-            <div key={p.value} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div key={p.value} role="button" tabIndex={0} title={t('statistics.openApplications')}
+              onClick={() => navigate('applications', { stage: p.value, vacancy: String(v.id) })}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') navigate('applications', { stage: p.value, vacancy: String(v.id) }) }}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
               <span style={{ fontSize: 11, color: 'var(--text-muted)', width: 110, flexShrink: 0 }}>{p.label}</span>
               <div style={{ flex: 1, height: 18, borderRadius: 5, background: 'var(--hover-bg)', overflow: 'hidden' }}>
                 <div style={{ width: `${width}%`, height: '100%', background: `${p.color}59` }} />
