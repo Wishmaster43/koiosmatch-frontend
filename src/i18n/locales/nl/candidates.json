@@ -7,7 +7,8 @@
     "filterUnsupported": "Dit filter wordt (nog) niet door de server ondersteund.",
     "searchPlaceholder": "Zoek kandidaat, notitie, document…",
     "empty": "Geen kandidaten gevonden.",
-    "loading": "Laden…"
+    "loading": "Laden…",
+    "mapView": "Kaart"
   },
   "columns": {
     "name": "Naam",
@@ -682,5 +683,13 @@
       "ended": "Beëindigd"
     },
     "openMatch": "Match openen"
+  },
+  "map": {
+    "loading": "Kaart laden…",
+    "radius": "Straal",
+    "km": "{{km}} km",
+    "kmAway": "{{km}} km",
+    "clickHint": "Klik op de kaart om het middelpunt te verplaatsen",
+    "pointCount": "{{count}} kandidaten op de kaart"
   }
 }

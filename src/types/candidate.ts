@@ -115,6 +115,10 @@ export interface Candidate {
   ownerColor: string | null
   ownerInitials: string
   city: string
+  // STRAAL-1: geocoded coordinates + radius-query distance (null until geocoded).
+  lat: number | null
+  lng: number | null
+  distanceKm: number | null
   province: string
   lastContactAt: string | null
   lastContactDate: string | null
@@ -237,6 +241,10 @@ export interface ApiCandidate {
   province?: string
   last_contact_at?: string | null
   last_contacted_at?: string | null
+  // STRAAL-1: geocoded coordinates + radius distance from the server.
+  lat?: number
+  lng?: number
+  distance_km?: number
   last_contact?: { date?: string | null; type?: string | null }
   last_contact_type?: string | null
   client?: { name?: string }

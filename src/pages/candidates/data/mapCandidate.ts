@@ -92,6 +92,10 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     ownerColor:      c.owner?.avatar_color ?? c.recruiter?.avatar_color ?? c.owner_avatar_color ?? null,
     ownerInitials:   initialsOf(ownerName),
     city:            c.city ?? '',
+    // STRAAL-1: PDOK-geocoded coordinates + the server's distance for a radius query.
+    lat:             typeof c.lat === 'number' ? c.lat : null,
+    lng:             typeof c.lng === 'number' ? c.lng : null,
+    distanceKm:      typeof c.distance_km === 'number' ? c.distance_km : null,
     // Acquisition source (website/facebook/…) — feeds the source filter once the list sends it.
     source:          (c.source as string | undefined) ?? null,
     province:        c.province ?? '',

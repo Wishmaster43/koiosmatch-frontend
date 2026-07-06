@@ -7,7 +7,8 @@
     "filterUnsupported": "This filter isn't supported by the server yet.",
     "searchPlaceholder": "Search candidate, note, document…",
     "empty": "No candidates found.",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "mapView": "Map"
   },
   "columns": {
     "name": "Name",
@@ -682,5 +683,13 @@
       "ended": "Ended"
     },
     "openMatch": "Open match"
+  },
+  "map": {
+    "loading": "Loading map…",
+    "radius": "Radius",
+    "km": "{{km}} km",
+    "kmAway": "{{km}} km",
+    "clickHint": "Click the map to move the centre",
+    "pointCount": "{{count}} candidates on the map"
   }
 }

@@ -5,10 +5,10 @@
  * counts) and the bulk-actions hook, then renders the insights row + table +
  * drawer. Heavy logic lives in the hooks under ./hooks and ./data.
  */
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, AlertTriangle, X, Ban, Archive } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, X, Ban, Archive, Map as MapIcon } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -59,6 +59,8 @@ const CandidateDrawer = CandidateDrawerJs as ComponentType<{
   users: AppUser[]; initialTab?: string
 }>
 const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: unknown[]; clearTitle?: string }>
+// STRAAL-1: the map view lazy-loads so Leaflet stays out of the main bundle (§9).
+const CandidatesMapView = lazy(() => import('./CandidatesMapView'))
 
 export default function CandidatesPage({ intent }: { intent?: CandidateIntent } = {}) {
   // Auth/user must come first — pageSize initial value reads user.default_per_page.
@@ -77,6 +79,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const [addOpen,        setAddOpen]        = useState(false)
   // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
   const [showArchived,   setShowArchived]   = usePageMemory('cand.archived', false)
+  // STRAAL-1: table ⇄ map view; the map searches server-side within centre+radius.
+  const [view,           setView]           = usePageMemory<'table' | 'map'>('cand.viewMode', 'table')
+  const [mapCenter,      setMapCenter]      = usePageMemory('cand.mapCenter', { lat: 52.09, lng: 5.12 })
+  const [mapRadius,      setMapRadius]      = usePageMemory('cand.mapRadius', 30)
   // CAND-FILTERS (2026-07-03): pool (ids) · city (exact) · source — server-side params.
   const [selectedPool,   setSelectedPool]   = usePageMemory<string[]>('cand.pool', [])
   const [selectedCity,   setSelectedCity]   = usePageMemory<string[]>('cand.city', [])
@@ -143,6 +149,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // dimensions the API supports; the rest of the right panel is hidden for now.
   const filterParams = useMemo(() => {
     const p: Record<string, unknown> = {}
+    // Map view searches server-side within the chosen centre + radius (STRAAL-1).
+    if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     if (globalSearch.trim())     p.search         = globalSearch.trim()
     if (selectedStatus.length)   p.status         = selectedStatus
     if (selectedFunnel.length)   p.funnel_type    = selectedFunnel
@@ -169,7 +177,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     // Period-click date range (created / last-contact); set last so it wins over stale6m if both target last_contact.
     if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     return p
-  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, selectedPool, selectedCity, selectedSource, showArchived, attentionFilter, dateRange, staleMonths])
+  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, selectedPool, selectedCity, selectedSource, showArchived, attentionFilter, dateRange, staleMonths, view, mapCenter, mapRadius])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1. Visible rows change → drop the bulk selection.
@@ -455,12 +463,23 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
                     label={t('page.blacklistView')} color="var(--color-danger)" icon={Ban} />
                   <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
                     label={t('page.archivedView')} icon={Archive} />
+                  {/* STRAAL-1: table ⇄ map (radius search) — same shared toggle look. */}
+                  <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
+                    label={t('page.mapView')} color="var(--color-primary)" icon={MapIcon} />
                 </div>
               </>
             )}
           </div>
 
-          {/* Table */}
+          {/* Map view (STRAAL-1) — lazy so Leaflet loads only when opened. */}
+          {view === 'map' ? (
+            <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('map.loading')}</div>}>
+              <CandidatesMapView rows={filtered} center={mapCenter} radiusKm={mapRadius}
+                onCenterChange={(lat, lng) => setMapCenter({ lat, lng })}
+                onRadiusChange={setMapRadius}
+                onPick={(id) => selectCandidate({ id } as Candidate)} />
+            </Suspense>
+          ) : (
           <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', padding: '0 24px 16px' }}>
             {error && (
               <div className="mb-3 rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">
@@ -480,15 +499,16 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
               stickyHeader
             />
           </div>
+          )}
 
-          <PaginationBar
+          {view !== 'map' && <PaginationBar
             page={page}
             totalPages={lastPage}
             totalRows={total}
             pageSize={pageSize}
             onPageChange={setPage}
             onPageSizeChange={handlePageSizeChange}
-          />
+          />}
         </div>
 
         {/* Drawer — remounts (key) when the full detail arrives so the tabs

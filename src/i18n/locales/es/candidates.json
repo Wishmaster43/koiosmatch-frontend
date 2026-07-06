@@ -7,7 +7,8 @@
     "filterUnsupported": "Este filtro (todavía) no es compatible con el servidor.",
     "searchPlaceholder": "Buscar candidato, nota, documento…",
     "empty": "No se encontraron candidatos.",
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "mapView": "Mapa"
   },
   "columns": {
     "name": "Nombre",
@@ -682,5 +683,13 @@
       "contact": "Contactar",
       "plan_intake": "Planificar entrevista"
     }
+  },
+  "map": {
+    "loading": "Cargando mapa…",
+    "radius": "Radio",
+    "km": "{{km}} km",
+    "kmAway": "{{km}} km",
+    "clickHint": "Haz clic en el mapa para mover el centro",
+    "pointCount": "{{count}} candidatos en el mapa"
   }
 }
