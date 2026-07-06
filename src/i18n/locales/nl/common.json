@@ -61,7 +61,10 @@
     "cityPlaceholder": "Plaatsnaam (bijv. Den Haag)",
     "searchAll": "Zoek alles…",
     "clearAll": "Alle filters wissen",
-    "clear": "wis"
+    "clear": "wis",
+    "geoPlaceholder": "Postcode of plaats",
+    "apply": "Toepassen",
+    "notFound": "Locatie niet gevonden"
   },
   "nav": {
     "dashboard": "Dashboard",

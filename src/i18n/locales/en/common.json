@@ -61,7 +61,10 @@
     "cityPlaceholder": "City (e.g. The Hague)",
     "searchAll": "Search everything…",
     "clearAll": "Clear all filters",
-    "clear": "clear"
+    "clear": "clear",
+    "geoPlaceholder": "Postcode or place",
+    "apply": "Apply",
+    "notFound": "Location not found"
   },
   "nav": {
     "dashboard": "Dashboard",

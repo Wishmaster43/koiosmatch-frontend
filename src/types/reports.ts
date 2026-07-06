@@ -12,6 +12,8 @@ export interface FilterOption {
   value: string | number
   label?: string
   count?: number
+  // Optional semantic colour (status/funnel lookups) — shown as a soft dot.
+  color?: string
 }
 
 // A filter group registered for the shared right-hand sidebar. Shape varies by
@@ -38,6 +40,15 @@ export interface ReportFilterGroup {
   onFromChange?: (value: string) => void
   onToChange?: (value: string) => void
   placeholder?: string
+  // 'open' renders the options as an always-visible checkbox list (small fixed
+  // lookups); default keeps the collapsed searchable dropdown (long lists).
+  display?: 'open' | 'dropdown'
+  // geo-radius group (place/postcode + km → server-side lat/lng/radius filter).
+  applied?: { label: string } | null
+  hint?: string | null
+  km?: number
+  onApply?: (query: string, km: number) => void
+  onClear?: () => void
   [key: string]: unknown
 }
 

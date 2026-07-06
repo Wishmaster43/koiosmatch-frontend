@@ -28,8 +28,8 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   // back to page-based counts when stats is unavailable.
   const statusOptions = useMemo(() =>
     stats?.by_status
-      ? stats.by_status.map(o => { const v = o.value ?? o.status; return { value: v, label: metaOf(statuses, v)?.label ?? v, count: o.count } })
-      : statuses.map(s => ({ value: s.value, label: s.label, count: candidates.filter(c => c.status === s.value).length })).filter(o => o.count > 0)
+      ? stats.by_status.map(o => { const v = o.value ?? o.status; const m = metaOf(statuses, v); return { value: v, label: m?.label ?? v, color: m?.color, count: o.count } })
+      : statuses.map(s => ({ value: s.value, label: s.label, color: s.color, count: candidates.filter(c => c.status === s.value).length })).filter(o => o.count > 0)
   , [stats, candidates, statuses])
   const funnelOptions = useMemo(() =>
     stats?.by_funnel
@@ -37,7 +37,7 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
       : funnelTypes.map(f => ({ value: f.value, label: f.label, color: f.color, count: candidates.filter(c => c.stage === f.value).length })).filter(o => o.count > 0)
   , [stats, candidates, funnelTypes])
   const typeOptions = useMemo(() =>
-    candidateTypes.map(ct => ({ value: ct.value, label: ct.label, count: candidates.filter(c => (c.candidateTypes ?? []).includes(ct.value)).length })).filter(o => o.count > 0)
+    candidateTypes.map(ct => ({ value: ct.value, label: ct.label, color: ct.color, count: candidates.filter(c => (c.candidateTypes ?? []).includes(ct.value)).length })).filter(o => o.count > 0)
   , [candidates, candidateTypes])
   // Owner is id-based: options + counts from stats.by_owner; fall back to the page.
   const ownerOptions = useMemo(() => {

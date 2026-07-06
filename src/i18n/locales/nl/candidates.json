@@ -131,10 +131,11 @@
     "languages": "Talen",
     "certifications": "Certificeringen",
     "categories": {
-      "lifecycle": "Lifecycle",
+      "lifecycle": "Werving",
       "qualifications": "Kwalificaties",
       "person": "Persoon",
-      "organisation": "Organisatie"
+      "organisation": "Organisatie",
+      "display": "Weergave"
     },
     "archived": "Archiefstatus",
     "periodCreated": "Aangemaakt",

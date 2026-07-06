@@ -61,7 +61,10 @@
     "cityPlaceholder": "Ort (z. B. Den Haag)",
     "searchAll": "Alles durchsuchen…",
     "clearAll": "Alle Filter löschen",
-    "clear": "löschen"
+    "clear": "löschen",
+    "geoPlaceholder": "PLZ oder Ort",
+    "apply": "Anwenden",
+    "notFound": "Ort nicht gefunden"
   },
   "nav": {
     "dashboard": "Dashboard",

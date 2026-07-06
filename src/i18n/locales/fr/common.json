@@ -61,7 +61,10 @@
     "cityPlaceholder": "Ville (ex. La Haye)",
     "searchAll": "Tout rechercher…",
     "clearAll": "Effacer tous les filtres",
-    "clear": "effacer"
+    "clear": "effacer",
+    "geoPlaceholder": "Code postal ou lieu",
+    "apply": "Appliquer",
+    "notFound": "Lieu introuvable"
   },
   "nav": {
     "dashboard": "Tableau de bord",

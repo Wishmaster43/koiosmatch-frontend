@@ -124,10 +124,11 @@
     "languages": "Idiomas",
     "certifications": "Certificaciones",
     "categories": {
-      "lifecycle": "Ciclo de vida",
+      "lifecycle": "Reclutamiento",
       "qualifications": "Cualificaciones",
       "person": "Persona",
-      "organisation": "Organización"
+      "organisation": "Organización",
+      "display": "Vista"
     },
     "archived": "Estado de archivo",
     "periodCreated": "Creado",

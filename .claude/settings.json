@@ -23,7 +23,10 @@
       "Bash(/bin/sleep 20)",
       "Bash(echo \"exit: $?\")",
       "Bash(/bin/sleep 25)",
-      "Bash(SMOKE_COOKIE=1 node /tmp/probeMaps.mjs)"
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeMaps.mjs)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probePanel.mjs)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probePanel2.mjs)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeFilters.mjs)"
     ],
     "additionalDirectories": [
       "/Users/danny/Herd/koiosmatch-api/docs"

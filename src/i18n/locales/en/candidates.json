@@ -131,10 +131,11 @@
     "languages": "Languages",
     "certifications": "Certifications",
     "categories": {
-      "lifecycle": "Lifecycle",
+      "lifecycle": "Recruitment",
       "qualifications": "Qualifications",
       "person": "Person",
-      "organisation": "Organisation"
+      "organisation": "Organisation",
+      "display": "View"
     },
     "archived": "Archive status",
     "periodCreated": "Created",

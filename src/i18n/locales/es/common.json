@@ -61,7 +61,10 @@
     "cityPlaceholder": "Ciudad (p. ej. La Haya)",
     "searchAll": "Buscar todo…",
     "clearAll": "Borrar todos los filtros",
-    "clear": "borrar"
+    "clear": "borrar",
+    "geoPlaceholder": "Código postal o lugar",
+    "apply": "Aplicar",
+    "notFound": "Ubicación no encontrada"
   },
   "nav": {
     "dashboard": "Panel",
