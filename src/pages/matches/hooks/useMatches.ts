@@ -40,7 +40,9 @@ export function useMatches(includeArchived = false) {
   useEffect(() => {
     let alive = true
     setLoading(true)
-    api.get(includeArchived ? '/matches?include_archived=1' : '/matches')
+    // per_page=500: the page paginates client-side — the default 25-row page made
+    // every KPI/board undercount (Danny: "84 klopt niet, zijn er maar 25" — 25 wás de bug).
+    api.get(includeArchived ? '/matches?per_page=500&include_archived=1' : '/matches?per_page=500')
       .then(r => { if (alive) setRows((r.data?.data ?? r.data ?? []).map(mapMatch)) })
       .catch(e => { if (alive && e?.response?.status && e.response.status !== 404) setError(true) })
       .finally(() => { if (alive) setLoading(false) })

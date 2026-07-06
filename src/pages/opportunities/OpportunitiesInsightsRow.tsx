@@ -56,9 +56,10 @@ export default function OpportunitiesInsightsRow({
     const lostStage = stages.find(s => s.isLost)
     const isWonRow  = (r: Opportunity) => !!wonStage  && r.stageValue === wonStage.value
     const isLostRow = (r: Opportunity) => !!lostStage && r.stageValue === lostStage.value
-    // Deal magnitude field follows the €/hours setting.
+    // Deal magnitude field follows the €/hours setting. Pipeline = OPEN deals only
+    // (won/lost inflated the sum → it never matched the dashboard, Danny 2026-07-06).
     const magnitude = (r: Opportunity) => valueInHours ? r.hours : r.value
-    const withMag = rows.filter(r => typeof magnitude(r) === 'number')
+    const withMag = rows.filter(r => !isWonRow(r) && !isLostRow(r) && typeof magnitude(r) === 'number')
     const sum = withMag.reduce((s, r) => s + (magnitude(r) ?? 0), 0)
     const wonCount  = rows.filter(isWonRow).length
     const lostCount = rows.filter(isLostRow).length

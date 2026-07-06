@@ -58,22 +58,27 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const [addOpen,  setAddOpen]  = useState(false)
   const [query,    setQuery]    = usePageMemory('opps.search', '')  // shared header search (client-side, R-5)
 
+  // "Aflopend" quick-filter (dashboard KPI): open deals with a close date within 30 days.
+  // Reference moment captured once per mount (purity rule — mirrors convCutoff).
+  const [expiringOnly, setExpiringOnly] = useState(false)
+  const [nowTs] = useState(() => Date.now())
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(query.trim() || stage.length || owner.length || client.length)
+  const anyFilterActive = Boolean(query.trim() || stage.length || owner.length || client.length || expiringOnly)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setQuery(''); setStage([]); setOwner([]); setClient([]); setPage(1)
+    setSearchEpoch(e => e + 1); setQuery(''); setStage([]); setOwner([]); setClient([]); setExpiringOnly(false); setPage(1)
   }
 
-  // Seed the stage filter from a navigation intent (dashboard chart click carries the
-  // stage key; the page filters by label, so map key → label via the lookup).
+  // Seed filters from a navigation intent (dashboard chart/KPI click). The stage key
+  // maps to its label via the lookup; { kpi: 'expiring' } switches the aflopend-filter on.
   useEffect(() => {
     if (!intent) return
-    const i = intent as { stage?: string }
+    const i = intent as { stage?: string; kpi?: string }
     if (i.stage != null) {
       const s = stages.find(x => String(x.value) === String(i.stage))
       setStage([s ? s.label : String(i.stage)])
     }
+    if (i.kpi === 'expiring') setExpiringOnly(true)
   }, [intent, stages])
 
   // Reset to the first page + drop the selection whenever a filter changes.
@@ -108,9 +113,14 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       if (owner.length  && !owner.includes(r.owner))   return false
       if (client.length && !client.includes(r.client)) return false
       if (query.trim() && !`${r.title ?? ''} ${r.client ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())) return false
+      // Aflopend: open deal with a close date within the next 30 days.
+      if (expiringOnly) {
+        const d = r.expectedCloseAt ? new Date(r.expectedCloseAt).getTime() : null
+        if (d == null || d > nowTs + 30 * 86400000 || d < nowTs - 86400000) return false
+      }
       return true
     })
-  }, [rows, stage, owner, client, showArchived, query])
+  }, [rows, stage, owner, client, showArchived, query, expiringOnly, nowTs])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
