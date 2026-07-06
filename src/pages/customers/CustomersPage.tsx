@@ -5,6 +5,7 @@ import { CheckCircle2, AlertTriangle, X, Archive } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useOpenFromIntent } from '@/context/NavigationContext'
+import { usePageMemory } from '@/lib/usePageMemory'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useUsers } from '@/lib/queries'
@@ -44,23 +45,23 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const { statuses, statusMeta } = useCustomerLookups()
 
   // ── UI state ──
-  const [page,      setPage]      = useState(1)
+  const [page,      setPage]      = usePageMemory('cust.page', 1)
   // TODO C-33: use user.default_per_page once the backend accepts per_page > 100 on this endpoint.
   const [pageSize,  setPageSize]  = useState(50)
   const [addOpen,   setAddOpen]   = useState(false)
   // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
-  const [showArchived, setShowArchived] = useState(false)
+  const [showArchived, setShowArchived] = usePageMemory('cust.archived', false)
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   const [actionMsg, setActionMsg] = useState<{ type: string; text: string } | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tableScrollRef = useRef<HTMLDivElement>(null)
 
   // ── Filter dimensions (server-side) ──
-  const [globalSearch,     setGlobalSearch]     = useState('')
-  const [selectedStatus,   setSelectedStatus]   = useState<string[]>([])
-  const [selectedOwner,    setSelectedOwner]    = useState<string[]>([])
-  const [selectedCity,     setSelectedCity]     = useState<string[]>([])
-  const [selectedIndustry, setSelectedIndustry] = useState<string[]>([])
+  const [globalSearch,     setGlobalSearch]     = usePageMemory('cust.search', '')
+  const [selectedStatus,   setSelectedStatus]   = usePageMemory<string[]>('cust.status', [])
+  const [selectedOwner,    setSelectedOwner]    = usePageMemory<string[]>('cust.owner', [])
+  const [selectedCity,     setSelectedCity]     = usePageMemory<string[]>('cust.city', [])
+  const [selectedIndustry, setSelectedIndustry] = usePageMemory<string[]>('cust.industry', [])
 
   const filterParams = useMemo(() => {
     const p: Record<string, unknown> = {}
@@ -142,7 +143,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
 
   // KPI-card filter (one at a time): rows with ≥1 of the counted thing — or, for
   // "zonder contactpersoon", exactly 0 (Danny: every card must DO something).
-  const [kpiFilter, setKpiFilter] = useState<string | null>(null)
+  const [kpiFilter, setKpiFilter] = usePageMemory<string | null>('cust.kpi', null)
   const toggleKpi = (k: string) => setKpiFilter(p => (p === k ? null : k))
   const KPI_PRED: Record<string, (c: (typeof customers)[number]) => boolean> = {
     locations:   c => c.locationsCount > 0,

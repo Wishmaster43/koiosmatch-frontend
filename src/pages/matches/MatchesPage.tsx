@@ -13,6 +13,7 @@ import MatchesTable from './MatchesTable'
 import MatchesBoard from './MatchesBoard'
 import type { BoardColumn } from './MatchesBoard'
 import MatchDrawer from './MatchDrawer'
+import { usePageMemory } from '@/lib/usePageMemory'
 import MatchesBulkBar from './MatchesBulkBar'
 import AddMatchModal from './AddMatchModal'
 import PaginationBar from '@/components/ui/PaginationBar'
@@ -32,7 +33,7 @@ export default function MatchesPage() {
   const hasPermission = auth?.hasPermission ?? (() => false)
   // Right-panel filter state: archived is off by default (§3B — archived matches
   // stay searchable but out of the default view so KPI totals drop).
-  const [showArchived, setShowArchived] = useState(false)
+  const [showArchived, setShowArchived] = usePageMemory('matches.archived', false)
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
   const { rows, loading, error, addMatch, updateMatch } = useMatches(showArchived)
   const { registerFilters, unregisterFilters } = useRightPanel()
@@ -40,11 +41,11 @@ export default function MatchesPage() {
   const { funnelTypes } = useLookups()
   const [page,        setPage]        = useState(1)
   const [pageSize,    setPageSize]    = useState(() => user?.default_per_page ?? 50)
-  const [stageFilter, setStageFilter] = useState<string[]>([])
+  const [stageFilter, setStageFilter] = usePageMemory<string[]>('matches.stage', [])
   // KPI attention toggle (Gem. score → only scored matches).
-  const [kpiScored, setKpiScored] = useState(false)
-  const [ownerFilter, setOwnerFilter] = useState<string[]>([])
-  const [query,       setQuery]       = useState('')
+  const [kpiScored, setKpiScored] = usePageMemory('matches.scored', false)
+  const [ownerFilter, setOwnerFilter] = usePageMemory<string[]>('matches.owner', [])
+  const [query,       setQuery]       = usePageMemory('matches.search', '')
   // Bulk selection (checkboxes); accumulates across pages, clears on filter change.
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   const { toggleRow, toggleAll, bulkCoupleHelloFlex, bulkCoupleShiftManager } =
@@ -150,7 +151,7 @@ export default function MatchesPage() {
 
   // View toggle: table ⇄ board (planboard). Board columns = the tenant funnel
   // stages (seed fallback) so there are always columns to drag between (§3B).
-  const [view, setView] = useState<'table' | 'board'>('table')
+  const [view, setView] = usePageMemory<'table' | 'board'>('matches.view', 'table')
   const stageColumns: BoardColumn[] = useMemo(
     () => funnelTypes.map(f => ({ key: f.value, label: f.label, color: f.color })), [funnelTypes])
 

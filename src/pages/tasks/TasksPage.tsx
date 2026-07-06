@@ -24,6 +24,7 @@ import TaskDrawer from './TaskDrawer'
 import AddTaskModal from './AddTaskModal'
 import { mapTask, mapTaskDetail } from './data/mapTask'
 import { useOpenFromIntent } from '@/context/NavigationContext'
+import { usePageMemory } from '@/lib/usePageMemory'
 import type { Task, TaskDetail, ApiTask } from '@/types/task'
 import type { Id } from '@/types/common'
 
@@ -68,20 +69,20 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const [tasks,    setTasks]    = useState<Task[]>([])
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState(false)
-  const [view,     setView]     = useState('table')   // 'table' | 'board'
-  const [showArchived, setShowArchived] = useState(false)
+  const [view,     setView]     = usePageMemory('tasks.view', 'table')   // 'table' | 'board'
+  const [showArchived, setShowArchived] = usePageMemory('tasks.archived', false)
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([])
-  const [page,     setPage]     = useState(1)
+  const [page,     setPage]     = usePageMemory('tasks.page', 1)
   const [pageSize, setPageSize] = useState(() => user?.default_per_page ?? 50)
   const [selected, setSelected] = useState<TaskDetail | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [addOpen,  setAddOpen]  = useState(false)
-  const [query,    setQuery]    = useState('')  // shared header search (client-side, R-5)
+  const [query,    setQuery]    = usePageMemory('tasks.search', '')  // shared header search (client-side, R-5)
   // Bulk-selection (checkboxes) — id-set, cleared on filter/page change.
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
-  const [selectedStatus,   setSelectedStatus]   = useState<string[]>([])
-  const [selectedPriority, setSelectedPriority] = useState<string[]>([])
-  const [selectedType,     setSelectedType]     = useState<string[]>([])
+  const [selectedStatus,   setSelectedStatus]   = usePageMemory<string[]>('tasks.status', [])
+  const [selectedPriority, setSelectedPriority] = usePageMemory<string[]>('tasks.priority', [])
+  const [selectedType,     setSelectedType]     = usePageMemory<string[]>('tasks.type', [])
   const [selectedAssignee, setSelectedAssignee] = useState<string[]>([])
   // KPI tile filter (one at a time): null | 'open' | 'overdue' | 'dueToday' | 'completed'.
   const [kpiFilter, setKpiFilter] = useState<string | null>(null)

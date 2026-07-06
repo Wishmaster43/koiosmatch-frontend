@@ -10,6 +10,7 @@ import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
 import { useOpenFromIntent } from '@/context/NavigationContext'
+import { usePageMemory } from '@/lib/usePageMemory'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import ApplicationsTable from './ApplicationsTable'
@@ -59,23 +60,23 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const [applications, setApplications] = useState<Application[]>([])
   const [loading,      setLoading]      = useState(true)
   const [error,        setError]        = useState(false)
-  const [view,         setView]         = useState('table')   // 'table' | 'board'
-  const [bucket,       setBucket]       = useState('active')
-  const [page,         setPage]         = useState(1)
+  const [view,         setView]         = usePageMemory('apps.view', 'table')   // 'table' | 'board'
+  const [bucket,       setBucket]       = usePageMemory('apps.bucket', 'active')
+  const [page,         setPage]         = usePageMemory('apps.page', 1)
   const [pageSize,     setPageSize]     = useState(() => user?.default_per_page ?? 50)
   const [selected,     setSelected]     = useState<ApplicationDetail | null>(null)
   const [expanded,     setExpanded]     = useState(false)
-  const [selectedPhase,  setSelectedPhase]  = useState<string[]>([])
+  const [selectedPhase,  setSelectedPhase]  = usePageMemory<string[]>('apps.phase', [])
   // KPI-card attention toggle: null | 'new' | 'scored' | 'aiTasks' (one at a time).
-  const [attention, setAttention] = useState<string | null>(null)
+  const [attention, setAttention] = usePageMemory<string | null>('apps.attention', null)
   const toggleAttention = (k: string) => setAttention(p => (p === k ? null : k))
-  const [selectedOwner,  setSelectedOwner]  = useState<string[]>([])
-  const [selectedSource, setSelectedSource] = useState<string[]>([])
-  const [selectedVac,    setSelectedVac]    = useState<string[]>([])
+  const [selectedOwner,  setSelectedOwner]  = usePageMemory<string[]>('apps.owner', [])
+  const [selectedSource, setSelectedSource] = usePageMemory<string[]>('apps.source', [])
+  const [selectedVac,    setSelectedVac]    = usePageMemory<string[]>('apps.vac', [])
   const [addOpen,        setAddOpen]        = useState(false)
   const [stats,          setStats]          = useState<AppStats | null>(null)
-  const [showArchived,   setShowArchived]   = useState(false)
-  const [query,          setQuery]          = useState('')
+  const [showArchived,   setShowArchived]   = usePageMemory('apps.archived', false)
+  const [query,          setQuery]          = usePageMemory('apps.search', '')
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
 
   // Clear the selection whenever the visible set changes (bucket/filters/paging).

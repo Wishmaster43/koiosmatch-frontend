@@ -14,6 +14,7 @@ import OpportunityDrawer from './OpportunityDrawer'
 import AddOpportunityModal from './AddOpportunityModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { useOpportunitiesData } from './hooks/useOpportunitiesData'
+import { usePageMemory } from '@/lib/usePageMemory'
 
 // Single-select donut pick: clicking the active segment clears it.
 const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
@@ -47,14 +48,14 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity,
   } = useOpportunitiesData()
 
-  const [view,     setView]     = useState('table')  // 'table' | 'board'
-  const [page,     setPage]     = useState(1)
+  const [view,     setView]     = usePageMemory('opps.view', 'table')  // 'table' | 'board'
+  const [page,     setPage]     = usePageMemory('opps.page', 1)
   const [pageSize, setPageSize] = useState(() => user?.default_per_page ?? 50)
-  const [stage,    setStage]    = useState<string[]>([]) // selected stage labels (donut + panel)
-  const [owner,    setOwner]    = useState<string[]>([]) // selected owner names (donut + panel)
-  const [client,   setClient]   = useState<string[]>([]) // selected client names (panel)
+  const [stage,    setStage]    = usePageMemory<string[]>('opps.stage', []) // selected stage labels (donut + panel)
+  const [owner,    setOwner]    = usePageMemory<string[]>('opps.owner', []) // selected owner names (donut + panel)
+  const [client,   setClient]   = usePageMemory<string[]>('opps.client', []) // selected client names (panel)
   const [addOpen,  setAddOpen]  = useState(false)
-  const [query,    setQuery]    = useState('')  // shared header search (client-side, R-5)
+  const [query,    setQuery]    = usePageMemory('opps.search', '')  // shared header search (client-side, R-5)
 
   // Seed the stage filter from a navigation intent (dashboard chart click carries the
   // stage key; the page filters by label, so map key → label via the lookup).

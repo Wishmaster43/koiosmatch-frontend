@@ -25,6 +25,7 @@ import VacancyDrawer from './VacancyDrawer'
 import AddVacancyModal from './AddVacancyModal'
 import { toggleOneValue, pickKey } from './data/vacanciesShared'
 import { useNavigation } from '@/context/NavigationContext'
+import { usePageMemory } from '@/lib/usePageMemory'
 import { useVacanciesData } from './hooks/useVacanciesData'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
 import { useOpenFromIntent } from '@/context/NavigationContext'
@@ -55,7 +56,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const statusMetaSafe = (v?: string | number | null) => statusMeta(v == null ? null : String(v))
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
 
-  const [page,      setPage]      = useState(1)
+  const [page,      setPage]      = usePageMemory('vac.page', 1)
   const [pageSize,  setPageSize]  = useState(50)
   const [addOpen,        setAddOpen]        = useState(false)
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
@@ -63,11 +64,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Server-side filter dimensions. Status is driven by the tab bar (single value).
-  const [statusBucket,   setStatusBucket]   = useState('all')
-  const [selectedOwner,  setSelectedOwner]  = useState<string[]>([])
-  const [selectedClient, setSelectedClient] = useState<string[]>([])
-  const [globalSearch,   setGlobalSearch]   = useState('')
-  const [showArchived,   setShowArchived]   = useState(false)
+  const [statusBucket,   setStatusBucket]   = usePageMemory('vac.status', 'all')
+  const [selectedOwner,  setSelectedOwner]  = usePageMemory<string[]>('vac.owner', [])
+  const [selectedClient, setSelectedClient] = usePageMemory<string[]>('vac.client', [])
+  const [globalSearch,   setGlobalSearch]   = usePageMemory('vac.search', '')
+  const [showArchived,   setShowArchived]   = usePageMemory('vac.archived', false)
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
 
