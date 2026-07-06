@@ -8,6 +8,7 @@ import { useCvSettings } from '@/lib/useCvSettings'
 import { useTranslation } from 'react-i18next'
 import { useLocale, useDateFormat } from '@/lib/datetime'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
+import { useNoteTypes } from '@/lib/useNoteTypes'
 import EntityDrawerJs from '@/components/drawer/EntityDrawer'
 import EntityHeaderJs from '@/components/drawer/EntityHeader'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -83,6 +84,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const locale = useLocale() as string
   const { formatDate } = useDateFormat() as { formatDate: (d?: string | null, opts?: Intl.DateTimeFormatOptions) => string }
   const { labelOf: lastContactLabel } = useLastContactTypes()
+  // Note types for the N-1 status note — pick status_change only when the tenant has it.
+  const { types: noteTypes } = useNoteTypes()
   // Only the status lookup is needed here now — candidate-type chips moved to the
   // Preferences tab, last-contact to Communication, funnel chips dropped (shown in Match).
   const { phases, statuses, phaseMeta, statusMeta } = useLookups() as unknown as { phases: LookupOption[]; statuses: LookupOption[]; phaseMeta: (v?: string | null) => { label: string; color: string }; statusMeta: (v?: string | null) => { label: string; color: string } }
@@ -248,8 +251,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       statusModal.reason || null,
       statusModal.date ? t('drawer.availableAgain', { date: formatDate(statusModal.date) }) : null,
     ].filter(Boolean).join(' · ')
-    api.post(`/candidates/${c.id}/notes`, { type: 'status_change', text: noteLine })
-      .catch(() => api.post(`/candidates/${c.id}/notes`, { type: 'general', text: noteLine }).catch(() => {}))
+    const noteType = noteTypes.some(nt => nt.value === 'status_change') ? 'status_change' : (noteTypes[0]?.value ?? 'general')
+    api.post(`/candidates/${c.id}/notes`, { type: noteType, text: noteLine }).catch(() => {})
     setStatusModal(null)
   }
   // Confirm the "Placed" prompt: use the picked match, or create one against the chosen vacancy.
