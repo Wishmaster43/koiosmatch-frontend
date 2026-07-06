@@ -5,6 +5,7 @@ import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useAuth } from '@/context/AuthContext'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import KpiDrillDownDrawer from '@/components/reports/KpiDrillDownDrawer'
+import { calcAandacht } from '@/components/reports/candidateAttention'
 import type { ReportCandidate } from '@/types/reports'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useShiftmanagerDashboard } from './hooks/useShiftmanagerDashboard'
@@ -53,16 +54,13 @@ export default function ShiftmanagerDashboard() {
       else bIdle.push(c)
     }
     const inactive = list.filter(c => String(c.status ?? '').toLowerCase() === 'nietactief')
-    // Aandachtskandidaten — 2 haalbare regels (de 2 "werkt-minder-dan-normaal"-regels
-    // wachten op toekomstige per-kandidaat-uren → shifts-per-candidate):
-    //   (a) nieuw binnen het venster (default 30d; TODO Settings 4/6 wk) én nog niet ingepland;
-    //   (b) actief maar nog nooit ingelogd.
-    const attnWindowMs   = 30 * 86400000
-    const futurePlanned  = (c: Rec) => { const s = c.last_planned_shift; return typeof s === 'string' && new Date(s).getTime() > nowMs }
-    const newNotPlanned  = active.filter(c => { const r = c.registration_date; return typeof r === 'string' && (nowMs - new Date(r).getTime()) <= attnWindowMs && !futurePlanned(c) })
-    const neverLoggedIn  = active.filter(c => !c.last_login_at)
-    const attention      = [...new Set([...newNotPlanned, ...neverLoggedIn])]
-    return { newList, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle, newNotPlanned, neverLoggedIn, attention }
+    // Aandachtskandidaten — dezelfde functie als het kandidaten-rapport (calcAandacht:
+    // actief + nieuw <30d + niet ingepland) zodat de KPI's op beide schermen matchen
+    // (Danny). De "actief maar nooit ingelogd"-regel kán niet: `last_login_at` staat wél
+    // op het model maar NIET in de resource (BE-handoff). De 2 "werkt-minder"-regels
+    // wachten op toekomstige per-kandidaat-uren (shifts-per-candidate).
+    const attention = calcAandacht(list as unknown as ReportCandidate[])
+    return { newList, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle, attention }
   }, [candidates])
 
   // One combined "Activiteit" donut over ACTIVE candidates (Gewerkt deze maand /
@@ -85,15 +83,8 @@ export default function ShiftmanagerDashboard() {
     const biggest = [...activityBuckets].sort((a, b) => b.list.length - a.list.length)[0]
     setDrill({ mode: 'nieuw', title: '', candidates: [], tabs: activityTabs, initialTab: biggest?.key })
   }
-  // Aandachtskandidaten drill: a tab per attention rule (Danny wants the count X/actief).
-  const openAttentionDrill = () => setDrill({
-    mode: 'nieuw', title: '', candidates: [],
-    tabs: [
-      { key: 'new_np',    label: t('dashboard.stats.attnNewNotPlanned'), candidates: derived.newNotPlanned as unknown as ReportCandidate[] },
-      { key: 'never_log', label: t('dashboard.stats.attnNeverLoggedIn'), candidates: derived.neverLoggedIn as unknown as ReportCandidate[] },
-    ],
-    initialTab: 'new_np',
-  })
+  // Aandachtskandidaten drill: the "nieuw & niet ingepland" list (X/actief).
+  const openAttentionDrill = () => openDrill('nieuw', t('dashboard.stats.attnNewNotPlanned'), derived.attention)
 
   // Candidate cards (NOT filter-driven) — passed into ShiftsChartsBlock, which adds the
   // filter-driven shift cards → one combined 9-card row. Activiteit is a clearer channels

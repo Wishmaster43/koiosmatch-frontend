@@ -6,23 +6,13 @@
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, UserCheck, UserX, UserPlus, TrendingUp } from 'lucide-react'
 import KpiCard from '../ui/KpiCard'
+import { calcAandacht } from './candidateAttention'
 import type { ReportCandidate } from '@/types/reports'
 
 // Count candidates whose status matches the given value (defaults missing to 'onbekend').
 const count = (candidates: ReportCandidate[], status: string) =>
   candidates.filter(c => (c.status || 'onbekend').toLowerCase() === status).length
 
-// Compute how many candidates need attention (e.g. stale/expiring), used for the KPI.
-function calcAandacht(candidates: ReportCandidate[]) {
-  const now = Date.now()
-  return candidates.filter(c => {
-    if ((c.status || '').toLowerCase() !== 'actief') return false
-    const reg = c.registration_date ? new Date(c.registration_date) : null
-    const isNew = reg && (now - reg.getTime()) < 30 * 86400000
-    const hasNoPlanned = !c.last_planned_shift || new Date(c.last_planned_shift) < new Date()
-    return isNew && hasNoPlanned
-  })
-}
 
 function calcGepland(candidates: ReportCandidate[]) {
   return candidates.filter(c => {
