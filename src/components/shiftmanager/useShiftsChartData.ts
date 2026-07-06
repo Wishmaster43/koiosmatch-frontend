@@ -3,14 +3,22 @@
  * filter options and the per-month rows from /sm_reports, indexes them, and
  * derives the chart data + bar descriptors (per selected year × series).
  * UI filter state lives in the component and is passed in as arguments.
+ *
+ * Both fetches run through React Query: responses are cached per query, and the
+ * per-month query keeps the previous rows visible while a new one loads
+ * (keepPreviousData) — so toggling a filter no longer blanks the chart or
+ * refetches a combo we already have (was: a raw useEffect that cleared rows to
+ * [] and re-hit the aggregation on every change → felt like a full reload).
  */
-import { useEffect, useMemo, useReducer, useState } from "react"
+import { useMemo } from "react"
+import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import api from "@/lib/api"
 import { SERIES, monthAbbr, YEAR_OPACITY, QUARTERS } from "./shiftsChartsConfig"
 import type { ShiftFilterOptions, ShiftMonthRow, ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 
-// The request lifecycle held by the reducer (replaced wholesale per dispatch).
-interface ChartState { rows: ShiftMonthRow[]; loading: boolean; error: string | null }
+// Stable empty fallback so `rows` keeps a constant reference while there is no
+// data (avoids re-running the downstream useMemo on every render).
+const EMPTY_ROWS: ShiftMonthRow[] = []
 
 export function useShiftsChartData({
   selectedYears, selectedMonths, period, visible,
@@ -31,25 +39,17 @@ export function useShiftsChartData({
   fixedCandidateId: string | null
   seriesLabel: (key: string) => string
 }) {
-  // Single reducer holds the request lifecycle (rows + loading + error).
-  const [{ rows, loading, error }, dispatch] = useReducer(
-    (_: ChartState, action: ChartState) => action,
-    { rows: [], loading: true, error: null } as ChartState
-  )
-  const [filterOptions, setFilterOptions] = useState<ShiftFilterOptions>({ job_types: [], locations: [] })
+  // Available filter options — cached ~5 min (rarely changes).
+  const filterOptionsQ = useQuery({
+    queryKey: ['sm_reports', 'shifts-filter-options'],
+    queryFn: async ({ signal }) =>
+      ((await api.get('/sm_reports/shifts-filter-options', { signal })).data ?? { job_types: [], locations: [] }) as ShiftFilterOptions,
+    staleTime: 5 * 60_000,
+  })
+  const filterOptions: ShiftFilterOptions = filterOptionsQ.data ?? { job_types: [], locations: [] }
 
-  // Load the available filter options once.
-  useEffect(() => {
-    api.get("/sm_reports/shifts-filter-options")
-      .then((res) => setFilterOptions(res.data ?? { job_types: [], locations: [] }))
-      .catch(() => {})
-  }, [])
-
-  // Load the chart rows whenever the effective query changes.
-  useEffect(() => {
-    let active = true
-    dispatch({ rows: [], loading: true, error: null })
-
+  // Build the effective query string once per input change (also the cache key).
+  const queryString = useMemo(() => {
     const params = new URLSearchParams()
     selectedYears.forEach((y) => params.append("years[]", String(y)))
     // Only send months[] for a real subset — all 12 selected == unfiltered (avoids a 12-param query).
@@ -66,27 +66,35 @@ export function useShiftsChartData({
     if (allFixed.length > 0) {
       allFixed.forEach((l) => params.append("location_id[]", l))
     } else {
+      const wantedCustomers = [...selectedCustomers, ...fixedCustomers]
       const effectiveLocations = selectedLocations.length > 0
         ? selectedLocations
-        : [...selectedCustomers, ...fixedCustomers].length > 0
+        : wantedCustomers.length > 0
           ? filterOptions.locations
-              .filter(l => [...selectedCustomers, ...fixedCustomers].includes(l.customer ?? l.name))
+              .filter(l => wantedCustomers.includes((l.customer ?? l.name) as string))
               .map(l => String(l.id))
           : []
       effectiveLocations.forEach((l) => params.append("location_id[]", l))
     }
-
-    api.get(`/sm_reports/shifts-per-month?${params}`)
-      .then((res) => {
-        if (!active) return
-        const data = res.data?.data ?? res.data ?? []
-        dispatch({ rows: Array.isArray(data) ? data : [], loading: false, error: null })
-      })
-      .catch((err) => active && dispatch({ rows: [], loading: false, error: err.message ?? "Laden mislukt" }))
-
-    return () => { active = false }
+    return params.toString()
   }, [selectedYears, selectedMonths, selectedJobTypes, selectedLocations, selectedCustomers,
       filterOptions.locations, fixedLocationIds, fixedCustomers, fixedDepartmentId, fixedCandidateId])
+
+  // Per-month aggregation. keepPreviousData keeps the old bars on screen while a
+  // new query loads and re-shows a previously-seen combo from cache instantly.
+  const rowsQ = useQuery({
+    queryKey: ['sm_reports', 'shifts-per-month', queryString],
+    queryFn: async ({ signal }) => {
+      const res  = await api.get(`/sm_reports/shifts-per-month?${queryString}`, { signal })
+      const data = res.data?.data ?? res.data ?? []
+      return (Array.isArray(data) ? data : []) as ShiftMonthRow[]
+    },
+    placeholderData: keepPreviousData,
+    staleTime: 60_000,
+  })
+  const rows    = rowsQ.data ?? EMPTY_ROWS
+  const loading = rowsQ.isLoading
+  const error   = rowsQ.isError ? ((rowsQ.error as Error)?.message ?? "Laden mislukt") : null
 
   // Index rows by "YYYY-MM" for fast lookup.
   const byYearMonth = useMemo(
