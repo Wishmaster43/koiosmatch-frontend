@@ -56,7 +56,8 @@ export default function ShiftmanagerDashboard() {
       else if (isFuture(c.last_planned_shift)) bPlanned.push(c)
       else bIdle.push(c)
     }
-    return { newList, avg, active, all: list, bNever, bWorked, bPlanned, bIdle }
+    const inactive = list.filter(c => String(c.status ?? '').toLowerCase() !== 'actief')
+    return { newList, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle }
   }, [candidates])
 
   // One combined "Activiteit" donut over ACTIVE candidates (Gewerkt deze maand /
@@ -90,6 +91,8 @@ export default function ShiftmanagerDashboard() {
   const kpis: KpiSpec[] = [
     // 'New' is the candidate metric; avg reads after the title (Danny: "gem met - achter de titel").
     { key: 'new',              label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
+    { key: 'total',            label: t('dashboard.stats.totalCandidates'), value: derived.all.length,      color: 'var(--color-primary)', onClick: () => openDrill('nieuw', t('dashboard.stats.totalCandidates'), derived.all) },
+    { key: 'inactive',         label: t('dashboard.stats.inactive'),        value: derived.inactive.length, color: 'var(--text-muted)',    onClick: () => openDrill('nieuw', t('dashboard.stats.inactive'), derived.inactive) },
     // Shift-hours stats — still graceful '—' until derived from the filtered shift data
     // (SM-SHIFTS feed / SM-CHARTS2 aggregation); these read from /sm_reports/dashboard.
     { key: 'open_hours',       label: t('dashboard.stats.openHours'),      value: v('open_hours'),       color: 'var(--color-warning)' },

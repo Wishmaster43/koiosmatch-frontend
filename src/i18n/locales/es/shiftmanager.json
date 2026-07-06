@@ -218,7 +218,8 @@
       "planned": "Planificado",
       "unknownFunction": "Desconocido",
       "otherFunctions": "Otros",
-      "idle": "Sin actividad reciente"
+      "idle": "Sin actividad reciente",
+      "inactive": "Inactivo"
     },
     "statSub": {
       "urgent": "{{n}} urgente",

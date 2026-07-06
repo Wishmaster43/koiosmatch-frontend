@@ -218,7 +218,8 @@
       "planned": "Ingepland",
       "unknownFunction": "Onbekend",
       "otherFunctions": "Overig",
-      "idle": "Geen recente activiteit"
+      "idle": "Geen recente activiteit",
+      "inactive": "Inactief"
     },
     "statSub": {
       "urgent": "{{n}} urgent",
