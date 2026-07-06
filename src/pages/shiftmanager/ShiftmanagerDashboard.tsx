@@ -42,13 +42,14 @@ export default function ShiftmanagerDashboard() {
     // Both scoped to ACTIVE candidates (Danny: "nooit gewerkt alleen van de actieve").
     const neverWorked     = active.filter(c => (Number(c.number_of_times_worked) || 0) === 0)
     const workedThisMonth = active.filter(c => inMonth(c.last_worked_shift))
-    return { newList, avg, active, neverWorked, workedThisMonth }
+    return { newList, avg, active, neverWorked, workedThisMonth, all: list }
   }, [candidates])
 
-  // Drill-down: clicking a candidate KPI opens the shared drawer with that subset.
-  const [drill, setDrill] = useState<{ title: string; candidates: ReportCandidate[] } | null>(null)
-  const openDrill = (title: string, list: Array<Record<string, unknown>>) =>
-    setDrill({ title, candidates: list as unknown as ReportCandidate[] })
+  // Drill-down: a candidate KPI opens the shared drawer — 'average' shows the
+  // per-month breakdown vs KPI target, other tiles list their subset.
+  const [drill, setDrill] = useState<{ mode: string; title: string; candidates: ReportCandidate[] } | null>(null)
+  const openDrill = (mode: string, title: string, list: Array<Record<string, unknown>>) =>
+    setDrill({ mode, title, candidates: list as unknown as ReportCandidate[] })
 
   // KPI row — shared InsightsRow (same 96px footprint as every other entity page),
   // standardised to 9 tiles (Danny: "overal 9 stuks"); candidate tiles are click-to-drill.
@@ -57,10 +58,10 @@ export default function ShiftmanagerDashboard() {
   const newColor = derived.newList.length >= target ? 'var(--color-success)'
                  : derived.newList.length >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
   const kpis: KpiSpec[] = [
-    { key: 'new',              label: t('dashboard.stats.newThisMonth'),     value: derived.newList.length,         sub: t('dashboard.stats.avgTarget', { avg: derived.avg, target }), color: newColor,               onClick: () => openDrill(t('dashboard.stats.newThisMonth'), derived.newList) },
-    { key: 'active',           label: t('dashboard.stats.active'),           value: derived.active.length,          color: 'var(--color-success)',   onClick: () => openDrill(t('dashboard.stats.active'), derived.active) },
-    { key: 'workedThisMonth',  label: t('dashboard.stats.workedThisMonth'),  value: derived.workedThisMonth.length, color: 'var(--color-secondary)', onClick: () => openDrill(t('dashboard.stats.workedThisMonth'), derived.workedThisMonth) },
-    { key: 'neverWorked',      label: t('dashboard.stats.neverWorked'),      value: derived.neverWorked.length,     color: 'var(--color-danger)',    onClick: () => openDrill(t('dashboard.stats.neverWorked'), derived.neverWorked) },
+    { key: 'new',              label: t('dashboard.stats.newThisMonth'),     value: derived.newList.length,         sub: t('dashboard.stats.avgTarget', { avg: derived.avg, target }), color: newColor,               onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
+    { key: 'active',           label: t('dashboard.stats.active'),           value: derived.active.length,          color: 'var(--color-success)',   onClick: () => openDrill('nieuw', t('dashboard.stats.active'), derived.active) },
+    { key: 'workedThisMonth',  label: t('dashboard.stats.workedThisMonth'),  value: derived.workedThisMonth.length, color: 'var(--color-secondary)', onClick: () => openDrill('nieuw', t('dashboard.stats.workedThisMonth'), derived.workedThisMonth) },
+    { key: 'neverWorked',      label: t('dashboard.stats.neverWorked'),      value: derived.neverWorked.length,     color: 'var(--color-danger)',    onClick: () => openDrill('nieuw', t('dashboard.stats.neverWorked'), derived.neverWorked) },
     { key: 'open_hours',       label: t('dashboard.stats.openHours'),        value: v('open_hours'),       color: 'var(--color-warning)' },
     { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'),   value: v('hours_this_month'), color: 'var(--color-warning)' },
     { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),        value: pctVal('occupancy_pct'), color: 'var(--color-success)' },
@@ -75,7 +76,7 @@ export default function ShiftmanagerDashboard() {
 
       {/* Candidate KPI drill-down */}
       {drill && (
-        <KpiDrillDownDrawer mode="nieuw" title={drill.title} candidates={drill.candidates} onClose={() => setDrill(null)} />
+        <KpiDrillDownDrawer mode={drill.mode} title={drill.title} candidates={drill.candidates} onClose={() => setDrill(null)} />
       )}
 
       {/* Two charts with shared filters */}
