@@ -68,8 +68,10 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   }, [rows])
 
   const ownerData = useMemo(() => {
-    const m: Record<string, { name: string; key: string; color: string; value: number }> = {}
-    rows.forEach(r => { if (r.owner) (m[r.owner] ??= { name: r.owner, key: r.owner, color: '#6B7280', value: 0 }).value++ })
+    // No explicit colour: the donut assigns its palette per owner (one grey for ALL
+    // owners was the bug — a hardcoded colour suppresses the palette fallback).
+    const m: Record<string, { name: string; key: string; value: number }> = {}
+    rows.forEach(r => { if (r.owner) (m[r.owner] ??= { name: r.owner, key: r.owner, value: 0 }).value++ })
     return Object.values(m)
   }, [rows])
 

@@ -32,7 +32,17 @@
       "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{const r=JSON.parse\\(d\\).data??JSON.parse\\(d\\);console.log\\('detail-velden:',Object.keys\\(r\\).filter\\(k=>/comment|note/.test\\(k\\)\\).join\\(', '\\)||'\\(geen comment/note-veld\\)'\\)}\\)\")",
       "Bash(SMOKE_COOKIE=1 node e2e/run.mjs drill)",
       "Bash(git fetch *)",
-      "Bash(grep -E \"width: [0-9]{3},\")"
+      "Bash(grep -E \"width: [0-9]{3},\")",
+      "Bash(git commit -q src/components/shiftmanager/ShiftsChartsBlock.tsx src/components/shiftmanager/buildShiftsFilterGroups.ts src/components/shiftmanager/useShiftsChartData.ts src/types/shiftmanager.ts src/components/shiftmanager/buildShiftsFilterGroups.test.js -m 'fix\\(sm-charts\\): month filter stays chronological + no selection collapse *)",
+      "Bash(grep -nA8 \"interface ShiftBar\" src/types/shiftmanager.ts)",
+      "Bash(grep -nA12 \"SERIES\" src/components/shiftmanager/shiftsChartsConfig.ts)",
+      "Bash(node -e \"const j=require\\('./src/i18n/locales/nl/shiftmanager.json'\\); console.log\\(Object.keys\\(j.charts||{}\\).slice\\(0,20\\).join\\(', '\\)\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(git commit -q src/components/shiftmanager/shiftsChartsWidgets.tsx src/components/shiftmanager/ShiftsChartsBlock.tsx src/i18n/locales/nl/shiftmanager.json src/i18n/locales/en/shiftmanager.json src/i18n/locales/de/shiftmanager.json src/i18n/locales/fr/shiftmanager.json src/i18n/locales/es/shiftmanager.json -m 'feat\\(sm-charts\\): tooltip order + thousands separator + data tables under charts *)",
+      "Bash(grep -rnE \"details.candidates|CandidateDetailDrawer|sm_candidates/\\\\$\\\\{|selectCandidate|openCandidate\" src/pages/shiftmanager)",
+      "Bash(git commit -q src/pages/shiftmanager/hooks/useShiftmanagerDashboard.ts src/components/reports/KpiDrillDownDrawer.tsx -m 'fix\\(sm-dashboard\\): drill shows real names + rows open the candidate *)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeVacDonut.mjs)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeLegend.mjs)"
     ],
     "additionalDirectories": [
       "/Users/danny/Herd/koiosmatch-api/docs"

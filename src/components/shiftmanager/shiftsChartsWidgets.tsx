@@ -3,7 +3,7 @@
  * multi-year indicator and the card wrapper (title + loading/error/empty
  * states). Dumb: they receive data + handlers, no fetching or business logic.
  */
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import type { ReactNode, CSSProperties } from "react"
 import {
   ResponsiveContainer, BarChart, Bar,
@@ -94,37 +94,54 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear 
   totalLabel: ReactNode
   multiYear: boolean
 }) {
+  const { t } = useTranslation('shiftmanager')
+  const [pct, setPct] = useState(false)
   const fmt = (v: unknown) => (Number(v) || 0).toLocaleString('nl-NL')
   const totals = bars.map(b => data.reduce((s, r) => s + (Number(r[b.dataKey]) || 0), 0))
+  // Cell value: absolute, or the bucket's share of that series' total across the shown period (%).
+  const cell = (v: unknown, colTotal: number) => pct ? (colTotal ? `${Math.round((Number(v) || 0) / colTotal * 100)}%` : '—') : fmt(v)
   const th: CSSProperties = { padding: '7px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
   const td: CSSProperties = { padding: '7px 10px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)', fontVariantNumeric: 'tabular-nums' }
   return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th style={{ ...th, textAlign: 'left' }}>{monthLabel}</th>
-            {bars.map(b => (
-              <th key={b.dataKey} style={{ ...th, textAlign: 'right' }}>
-                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: b.color, opacity: b.opacity, marginRight: 5, verticalAlign: 'middle' }} />
-                {b.name}{multiYear ? ` ${b.year}` : ''}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row, ri) => (
-            <tr key={String(row.label) + ri}>
-              <td style={{ ...td, fontWeight: 500, textAlign: 'left' }}>{String(row.label)}</td>
-              {bars.map(b => <td key={b.dataKey} style={{ ...td, textAlign: 'right' }}>{fmt(row[b.dataKey])}</td>)}
-            </tr>
+    <div>
+      {/* Waarden / % switch — % shows each month's share of that column's total. */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+        <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+          {([[false, t('charts.asValues')], [true, t('charts.asPct')]] as const).map(([val, label]) => (
+            <button key={String(val)} type="button" onClick={() => setPct(val)}
+              style={{ padding: '4px 10px', fontSize: 11, fontWeight: pct === val ? 600 : 400, border: 'none', cursor: 'pointer',
+                background: pct === val ? 'var(--color-primary-bg)' : 'transparent',
+                color: pct === val ? 'var(--color-primary)' : 'var(--text-muted)' }}>{label}</button>
           ))}
-          <tr>
-            <td style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'left' }}>{totalLabel}</td>
-            {totals.map((v, i) => <td key={i} style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'right' }}>{fmt(v)}</td>)}
-          </tr>
-        </tbody>
-      </table>
+        </div>
+      </div>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <thead>
+            <tr>
+              <th style={{ ...th, textAlign: 'left' }}>{monthLabel}</th>
+              {bars.map(b => (
+                <th key={b.dataKey} style={{ ...th, textAlign: 'right' }}>
+                  <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: b.color, opacity: b.opacity, marginRight: 5, verticalAlign: 'middle' }} />
+                  {b.name}{multiYear ? ` ${b.year}` : ''}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((row, ri) => (
+              <tr key={String(row.label) + ri}>
+                <td style={{ ...td, fontWeight: 500, textAlign: 'left' }}>{String(row.label)}</td>
+                {bars.map((b, j) => <td key={b.dataKey} style={{ ...td, textAlign: 'right' }}>{cell(row[b.dataKey], totals[j])}</td>)}
+              </tr>
+            ))}
+            <tr>
+              <td style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'left' }}>{totalLabel}</td>
+              {totals.map((v, i) => <td key={i} style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'right' }}>{pct ? (v ? '100%' : '—') : fmt(v)}</td>)}
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
