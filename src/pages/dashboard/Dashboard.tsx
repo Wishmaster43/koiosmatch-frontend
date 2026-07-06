@@ -302,6 +302,17 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // WhatsApp backlog + failed (planner/recruiter KPIs); fail-soft 0 without access.
   const incompleteRuns = runs.filter(r => !r.ok).length
 
+  // Plaatsingen = matches (Danny 2026-07-06): light count via meta.total, refetched
+  // with the tenant; the dedicated att.placements feed wins once BE delivers it.
+  const [matchesTotal, setMatchesTotal] = useState<number | null>(null)
+  useEffect(() => {
+    let alive = true
+    api.get('/matches', { params: { per_page: 1 }, quiet404: true })
+      .then(r => { if (alive) setMatchesTotal(r.data?.meta?.total ?? (Array.isArray(r.data?.data) ? r.data.data.length : null)) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [activeTenant?.id])
+
   // All KPI blocks (live value; 🟡 metrics read "—" until the backend feed lands —
   // see docs/DASHBOARD-PLAN.md). The active role's KPI_ROWS decides which show.
   const kpiById: Record<string, { id: string; label: string; value: ReactNode; sub: string; color: string; bg: string; Icon: LucideIcon; onClick?: () => void }> = {
@@ -314,11 +325,11 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     // opportunities page. Hours mode shows the hours sum once the feed carries it (DASH-HOURS).
     pipeline:          { id: 'pipeline', label: valueInHours ? t('kpi.pipelineHours') : t('kpi.pipelineValue'),
       value: valueInHours
-        ? ((opp as { pipeline_hours?: number } | null)?.pipeline_hours != null ? `${num((opp as { pipeline_hours?: number }).pipeline_hours)} ${t('kpi.hoursUnit')}` : '—')
+        ? ((opp as { pipeline_hours?: number } | null)?.pipeline_hours != null ? num((opp as { pipeline_hours?: number }).pipeline_hours) : '—')
         : (opp?.pipeline_value != null ? eur(opp.pipeline_value) : '—'),
       sub: t('kpi.sumOpenOpps'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: valueInHours ? CalendarClock : Euro, onClick: () => onNavigate?.('opportunities') },
-    placements:        { id: 'placements', label: t('kpi.placements'), value: num(att.placements), sub: t('kpi.placementsSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: () => onNavigate?.('matches') },
-    intakes:           { id: 'intakes', label: t('kpi.intakes'), value: num(att.intake_planned ?? att.intakes), sub: t('kpi.intakesSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: CalendarCheck, onClick: () => onNavigate?.('candidates') },
+    placements:        { id: 'placements', label: t('kpi.placements'), value: num(att.placements ?? matchesTotal), sub: t('kpi.placementsSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: Briefcase, onClick: () => onNavigate?.('matches') },
+    intakes:           { id: 'intakes', label: t('kpi.intakes'), value: num(att.intake_planned ?? att.intakes), sub: t('kpi.intakesSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: CalendarCheck, onClick: () => onNavigate?.('applications', { stage: 'intake' }) },
     fillRate:          { id: 'fillRate', label: t('kpi.fillRate'), value: att.fill_rate != null ? `${att.fill_rate}%` : '—', sub: t('kpi.fillRateSub'), color: 'var(--color-success)', bg: 'var(--color-success-bg)', Icon: TrendingUp, onClick: () => onNavigate?.('vacancies') },
     incompleteRuns:    { id: 'incompleteRuns', label: t('kpi.incompleteRuns'), value: num(att.incomplete_runs ?? incompleteRuns), sub: t('kpi.incompleteRunsSub'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: Zap, onClick: () => onNavigate?.('aiagents') },
     activeConv:        { id: 'activeConv', label: t('kpi.activeConv'), value: num(att.active_conversations ?? conversations.length), sub: t('kpi.activeConvSub'), color: 'var(--color-primary)', bg: 'var(--color-primary-bg)', Icon: MessageSquare, onClick: () => onNavigate?.('whatsapp', { tab: 'messages' }) },
