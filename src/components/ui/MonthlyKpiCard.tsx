@@ -109,7 +109,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
 
   return (
     <>
-      <div className="flex flex-col gap-4 p-5 bg-[var(--surface)] rounded-xl"
+      <div className="flex flex-col gap-3 p-4 bg-[var(--surface)] rounded-xl"
         style={{ border: '1px solid var(--border)' }}>
 
         {/* Header */}
@@ -127,7 +127,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
         </div>
 
         {/* Four clickable values */}
-        <div className="flex" style={{ borderTop: '1px solid var(--hover-bg)', paddingTop: 14 }}>
+        <div className="flex" style={{ borderTop: '1px solid var(--hover-bg)', paddingTop: 10 }}>
 
           {/* New */}
           <div
@@ -138,7 +138,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
             title={t('monthlyKpi.tipDetails')}
           >
             <div className="mb-1 font-semibold leading-none"
-              style={{ fontSize: 26, color, letterSpacing: '-0.5px' }}>
+              style={{ fontSize: 22, color, letterSpacing: '-0.5px' }}>
               {actual}
             </div>
             <div className="text-xs text-gray-400">{t('monthlyKpi.new')}</div>
@@ -155,7 +155,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
             title={t('monthlyKpi.tipAverage')}
           >
             <div className="mb-1 font-semibold leading-none"
-              style={{ fontSize: 26, color: 'var(--text)', letterSpacing: '-0.5px' }}>
+              style={{ fontSize: 22, color: 'var(--text)', letterSpacing: '-0.5px' }}>
               {average}
             </div>
             <div className="text-xs text-gray-400">{t('monthlyKpi.average')}</div>
@@ -172,7 +172,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
             title={t('monthlyKpi.tipKpi')}
           >
             <div className="mb-1 font-semibold leading-none"
-              style={{ fontSize: 26, color: 'var(--text-muted)', letterSpacing: '-0.5px' }}>
+              style={{ fontSize: 22, color: 'var(--text-muted)', letterSpacing: '-0.5px' }}>
               {KPI_TARGET}
             </div>
             <div className="text-xs text-gray-400">{t('monthlyKpi.kpiTarget')}</div>
@@ -191,7 +191,7 @@ export default function MonthlyKpiCard({ candidates = [], loading = false, statu
             title={deregistered > 0 ? t('monthlyKpi.tipDetails') : undefined}
           >
             <div className="mb-1 font-semibold leading-none"
-              style={{ fontSize: 26, color: deregistered > 0 ? 'var(--color-danger)' : 'var(--text-muted)', letterSpacing: '-0.5px' }}>
+              style={{ fontSize: 22, color: deregistered > 0 ? 'var(--color-danger)' : 'var(--text-muted)', letterSpacing: '-0.5px' }}>
               {deregistered}
             </div>
             <div className="text-xs text-gray-400">{t('monthlyKpi.unsubscribed')}</div>
