@@ -9,6 +9,7 @@ import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKpiSettings } from '@/lib/useKpiSettings'
+import CandidateDetailDrawer from './CandidateDetailDrawer'
 import type { ReportCandidate } from '@/types/reports'
 
 // Locale-aware full month name for index 0–11.
@@ -41,7 +42,7 @@ function formatDate(iso?: string | null) {
 
 // ── Candidate list (New / Deregistered) ───────────────────────────────────────
 
-function CandidateList({ candidates, dateField, dateLabel }: { candidates: ReportCandidate[]; dateField: string; dateLabel: string }) {
+function CandidateList({ candidates, dateField, dateLabel, onSelect }: { candidates: ReportCandidate[]; dateField: string; dateLabel: string; onSelect?: (c: ReportCandidate) => void }) {
   const { t } = useTranslation('reports')
   const [search, setSearch] = useState('')
 
@@ -78,8 +79,11 @@ function CandidateList({ candidates, dateField, dateLabel }: { candidates: Repor
           const dateValue = c[dateField] as string | undefined
           return (
             <div key={c.id ?? i}
+              role={onSelect ? 'button' : undefined} tabIndex={onSelect ? 0 : undefined}
+              onClick={onSelect ? () => onSelect(c) : undefined}
+              onKeyDown={onSelect ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(c) } } : undefined}
               style={{ padding: '10px 16px', borderBottom: '1px solid var(--hover-bg)',
-                       display: 'flex', alignItems: 'center', gap: 10 }}
+                       display: 'flex', alignItems: 'center', gap: 10, cursor: onSelect ? 'pointer' : 'default' }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}
             >
@@ -229,6 +233,8 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   const { new_candidates_target: KPI_TARGET } = useKpiSettings()
+  // Clicking a row opens that candidate's detail on top of the drill-down.
+  const [selected, setSelected] = useState<ReportCandidate | null>(null)
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
@@ -276,9 +282,12 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
             candidates={candidates}
             dateField={mode === 'uitgeschreven' ? 'end_date_employment' : 'registration_date'}
             dateLabel={mode === 'uitgeschreven' ? t('drilldown.deregistered') : t('drilldown.registered')}
+            onSelect={setSelected}
           />
         )}
       </div>
+
+      {selected && <CandidateDetailDrawer candidate={selected} onClose={() => setSelected(null)} />}
     </>
   )
 }

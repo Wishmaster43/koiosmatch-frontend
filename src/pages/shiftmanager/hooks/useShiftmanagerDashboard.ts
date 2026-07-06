@@ -7,7 +7,7 @@
  */
 import { useQuery } from '@tanstack/react-query'
 import api, { unwrapList } from '@/lib/api'
-import type { ReportCandidate } from '@/types/reports'
+import { normalizeSmCandidate } from '@/components/reports/useReportCandidates'
 
 // Shift KPI stats from /sm_reports/dashboard.
 export interface SmDashStats {
@@ -26,7 +26,9 @@ export function useShiftmanagerDashboard(candidatesPerPage: number, hasAI: boole
     queryKey: ['sm_candidates', 'dash', candidatesPerPage],
     queryFn: async ({ signal }) => {
       const body = (await api.get('/sm_candidates', { params: { per_page: candidatesPerPage }, signal })).data
-      return (Array.isArray(body) ? body : (body?.data ?? [])) as ReportCandidate[]
+      // Normalise first_name/last_name → firstname/lastname (else the drill shows "Onbekend").
+      const raw = (Array.isArray(body) ? body : (body?.data ?? [])) as Array<Record<string, unknown>>
+      return raw.map(normalizeSmCandidate)
     },
   })
 
