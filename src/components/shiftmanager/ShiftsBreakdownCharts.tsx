@@ -5,16 +5,17 @@
  * and "Verzorgende IG - UZK" read cleanly. Value follows the block's Uren/Diensten
  * unit. Dumb: receives rows + unit, no fetching.
  */
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
+import { ResponsiveContainer, BarChart, Bar, Cell, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
 import { useTranslation } from 'react-i18next'
 import { ChartCard } from './shiftsChartsWidgets'
+import { BREAKDOWN_PALETTE } from './useShiftsBreakdown'
 import type { BreakdownRow } from './useShiftsBreakdown'
 
 // Both breakdown charts share one fixed height so the labels line up nicely (Danny).
 const CHART_HEIGHT = 340
 
-// One horizontal ranked bar chart (top 8 by value).
-function HBars({ rows, unit, color, empty }: { rows: BreakdownRow[]; unit: 'hours' | 'count'; color: string; empty: string }) {
+// One horizontal ranked bar chart (top 8 by value) — each bar its own colour (Danny).
+function HBars({ rows, unit, offset, empty }: { rows: BreakdownRow[]; unit: 'hours' | 'count'; offset: number; empty: string }) {
   const data = [...rows]
     .map(r => ({ label: r.label || '—', value: unit === 'hours' ? Number(r.hours) || 0 : Number(r.count) || 0 }))
     .sort((a, b) => b.value - a.value)
@@ -32,7 +33,9 @@ function HBars({ rows, unit, color, empty }: { rows: BreakdownRow[]; unit: 'hour
         <XAxis type="number" tick={{ fontSize: 11, fill: '#64748b' }} tickFormatter={fmt} />
         <YAxis type="category" dataKey="label" width={180} tick={{ fontSize: 11, fill: '#334155' }} />
         <Tooltip formatter={fmt} contentStyle={{ borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 13 }} />
-        <Bar dataKey="value" fill={color} radius={[0, 4, 4, 0]} isAnimationActive={false} />
+        <Bar dataKey="value" radius={[0, 4, 4, 0]} isAnimationActive={false}>
+          {data.map((_, i) => <Cell key={i} fill={BREAKDOWN_PALETTE[(i + offset) % BREAKDOWN_PALETTE.length]} />)}
+        </Bar>
       </BarChart>
     </ResponsiveContainer>
   )
@@ -51,10 +54,10 @@ export default function ShiftsBreakdownCharts({ customerRows, functionRows, unit
   return (
     <div className="grid grid-cols-1 gap-4 mt-4 lg:grid-cols-2">
       <ChartCard title={t('charts.byCustomerTitle')} subtitle={sub} loading={loading} error={error}>
-        <HBars rows={customerRows} unit={unit} color="#1B60A9" empty={t('charts.empty', { defaultValue: '—' })} />
+        <HBars rows={customerRows} unit={unit} offset={0} empty={t('charts.empty', { defaultValue: '—' })} />
       </ChartCard>
       <ChartCard title={t('charts.byFunctionTitle')} subtitle={sub} loading={loading} error={error}>
-        <HBars rows={functionRows} unit={unit} color="#19A5CA" empty={t('charts.empty', { defaultValue: '—' })} />
+        <HBars rows={functionRows} unit={unit} offset={3} empty={t('charts.empty', { defaultValue: '—' })} />
       </ChartCard>
     </div>
   )
