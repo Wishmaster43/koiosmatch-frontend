@@ -213,13 +213,21 @@
       "totalCandidates": "Kandidaten",
       "neverWorked": "Nooit gewerkt",
       "workedThisMonth": "Gewerkt deze maand",
-      "avgOnly": "gem {{avg}}"
+      "avgOnly": "gem {{avg}}",
+      "workedActive": "Gewerkt / Actief",
+      "planned": "Ingepland",
+      "unknownFunction": "Onbekend",
+      "otherFunctions": "Overig"
     },
     "statSub": {
       "urgent": "{{n}} urgent",
       "prevMonth": "{{pct}} vorige maand",
       "thisMonth": "Deze maand",
       "historicAvg": "gem. {{pct}} historisch"
+    },
+    "charts": {
+      "byFunction": "Per functie",
+      "byStatus": "Per status"
     }
   },
   "locationsPage": {

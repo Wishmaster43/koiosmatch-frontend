@@ -213,13 +213,21 @@
       "totalCandidates": "Candidates",
       "neverWorked": "Never worked",
       "workedThisMonth": "Worked this month",
-      "avgOnly": "avg {{avg}}"
+      "avgOnly": "avg {{avg}}",
+      "workedActive": "Worked / Active",
+      "planned": "Scheduled",
+      "unknownFunction": "Unknown",
+      "otherFunctions": "Other"
     },
     "statSub": {
       "urgent": "{{n}} urgent",
       "prevMonth": "{{pct}} previous month",
       "thisMonth": "This month",
       "historicAvg": "avg. {{pct}} historic"
+    },
+    "charts": {
+      "byFunction": "By role",
+      "byStatus": "By status"
     }
   },
   "locationsPage": {

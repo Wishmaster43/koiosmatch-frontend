@@ -4,7 +4,7 @@ import { CheckCircle, AlertCircle } from 'lucide-react'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useAuth } from '@/context/AuthContext'
 import InsightsRow      from '@/components/insights/InsightsRow'
-import type { KpiSpec } from '@/components/insights/InsightsRow'
+import type { KpiSpec, DonutSpec } from '@/components/insights/InsightsRow'
 import KpiDrillDownDrawer from '@/components/reports/KpiDrillDownDrawer'
 import type { ReportCandidate } from '@/types/reports'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
@@ -34,16 +34,49 @@ export default function ShiftmanagerDashboard() {
     const list = candidates as Array<Record<string, unknown>>
     const active = list.filter(c => String(c.status ?? 'onbekend').toLowerCase() === 'actief')
     const inMonth = (s: unknown) => { if (typeof s !== 'string' || !s) return false; const d = new Date(s); return d.getMonth() === m && d.getFullYear() === y }
-    const newList = active.filter(c => inMonth(c.registration_date))
+    // "New" + its average are over ALL candidates (a new registration counts regardless
+    // of current status) so the tile matches the drill-down's calc (was: active-only → gem 7 vs 9).
+    const newList = list.filter(c => inMonth(c.registration_date))
     const grouped: Record<number, number> = {}
-    active.forEach(c => { const s = c.registration_date; if (typeof s !== 'string') return; const d = new Date(s); if (d.getFullYear() !== y) return; grouped[d.getMonth()] = (grouped[d.getMonth()] || 0) + 1 })
+    list.forEach(c => { const s = c.registration_date; if (typeof s !== 'string') return; const d = new Date(s); if (d.getFullYear() !== y) return; grouped[d.getMonth()] = (grouped[d.getMonth()] || 0) + 1 })
     const vals = Object.values(grouped)
     const avg = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0
-    // Both scoped to ACTIVE candidates (Danny: "nooit gewerkt alleen van de actieve").
+    // Scoped to ACTIVE candidates (Danny: "nooit gewerkt alleen van de actieve").
+    const nowMs           = now.getTime()
     const neverWorked     = active.filter(c => (Number(c.number_of_times_worked) || 0) === 0)
     const workedThisMonth = active.filter(c => inMonth(c.last_worked_shift))
-    return { newList, avg, active, neverWorked, workedThisMonth, all: list }
+    const planned         = active.filter(c => { const s = c.last_planned_shift; return typeof s === 'string' && new Date(s).getTime() > nowMs })
+    return { newList, avg, active, neverWorked, workedThisMonth, planned, all: list }
   }, [candidates])
+
+  // Distribution donut by function/position (one KPI slot is a donut — Danny).
+  const functionDonut = useMemo(() => {
+    const counts: Record<string, number> = {}
+    ;(candidates as Array<Record<string, unknown>>).forEach(c => {
+      const p = String(c.position ?? '').trim() || t('dashboard.stats.unknownFunction')
+      counts[p] = (counts[p] || 0) + 1
+    })
+    const sorted  = Object.entries(counts).sort((a, b) => b[1] - a[1])
+    const palette = ['#1B60A9', '#19A5CA', '#F0AB00', '#16A34A', '#DC2626', '#7C3AED', '#94A3B8']
+    const data: Array<{ name: string; value: number; key: string; color: string }> =
+      sorted.slice(0, 6).map(([name, value], i) => ({ name, value, key: name, color: palette[i] }))
+    const rest = sorted.slice(6).reduce((s, [, v]) => s + v, 0)
+    if (rest) data.push({ name: t('dashboard.stats.otherFunctions'), value: rest, key: '__rest', color: palette[6] })
+    return data
+  }, [candidates, t])
+
+  // Distribution donut by status (deployability). Candidates aren't tied to one
+  // customer, so a per-klant donut belongs on the shift charts, not here.
+  const statusDonut = useMemo(() => {
+    const counts: Record<string, number> = {}
+    ;(candidates as Array<Record<string, unknown>>).forEach(c => {
+      const s = String(c.status ?? '').trim() || t('dashboard.stats.unknownFunction')
+      counts[s] = (counts[s] || 0) + 1
+    })
+    const palette = ['#16A34A', '#F0AB00', '#DC2626', '#1B60A9', '#7C3AED', '#94A3B8', '#64748B']
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 7)
+      .map(([name, value], i) => ({ name, value, key: name, color: palette[i] }))
+  }, [candidates, t])
 
   // Drill-down: a candidate KPI opens the shared drawer — 'average' shows the
   // per-month breakdown vs KPI target, other tiles list their subset.
@@ -58,21 +91,24 @@ export default function ShiftmanagerDashboard() {
   const newColor = derived.newList.length >= target ? 'var(--color-success)'
                  : derived.newList.length >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
   const kpis: KpiSpec[] = [
-    { key: 'new',              label: t('dashboard.stats.newThisMonth'),     value: `${derived.newList.length}/${target}`, sub: t('dashboard.stats.avgOnly', { avg: derived.avg }), color: newColor,        onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
-    { key: 'active',           label: t('dashboard.stats.active'),           value: derived.active.length,          color: 'var(--color-success)',   onClick: () => openDrill('nieuw', t('dashboard.stats.active'), derived.active) },
-    { key: 'workedThisMonth',  label: t('dashboard.stats.workedThisMonth'),  value: derived.workedThisMonth.length, color: 'var(--color-secondary)', onClick: () => openDrill('nieuw', t('dashboard.stats.workedThisMonth'), derived.workedThisMonth) },
-    { key: 'neverWorked',      label: t('dashboard.stats.neverWorked'),      value: derived.neverWorked.length,     color: 'var(--color-danger)',    onClick: () => openDrill('nieuw', t('dashboard.stats.neverWorked'), derived.neverWorked) },
-    { key: 'open_hours',       label: t('dashboard.stats.openHours'),        value: v('open_hours'),       color: 'var(--color-warning)' },
-    { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'),   value: v('hours_this_month'), color: 'var(--color-warning)' },
-    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),        value: pctVal('occupancy_pct'), color: 'var(--color-success)' },
-    { key: 'messages_sent',    label: t('dashboard.stats.messagesSent'),     value: v('messages_sent'),    color: 'var(--color-secondary)' },
-    { key: 'response_rate',    label: t('dashboard.stats.responseRate'),     value: pctVal('response_rate_pct'), color: 'var(--color-warning)' },
+    // avg reads after the title (Danny: "gem met - achter de titel ipv zo klein").
+    { key: 'new',              label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
+    { key: 'workedActive',     label: t('dashboard.stats.workedActive'),   value: `${derived.workedThisMonth.length}/${derived.active.length}`, color: 'var(--color-success)',   onClick: () => openDrill('nieuw', t('dashboard.stats.active'), derived.active) },
+    { key: 'planned',          label: t('dashboard.stats.planned'),        value: derived.planned.length,     color: 'var(--color-secondary)', onClick: () => openDrill('nieuw', t('dashboard.stats.planned'), derived.planned) },
+    { key: 'neverWorked',      label: t('dashboard.stats.neverWorked'),    value: derived.neverWorked.length, color: 'var(--color-danger)',    onClick: () => openDrill('nieuw', t('dashboard.stats.neverWorked'), derived.neverWorked) },
+    { key: 'open_hours',       label: t('dashboard.stats.openHours'),      value: v('open_hours'),       color: 'var(--color-warning)' },
+    { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'), value: v('hours_this_month'), color: 'var(--color-warning)' },
+    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),      value: pctVal('occupancy_pct'), color: 'var(--color-success)' },
+  ]
+  const donuts: DonutSpec[] = [
+    { key: 'function', title: t('dashboard.charts.byFunction'), data: functionDonut, colors: functionDonut.map(d => d.color) },
+    { key: 'status',   title: t('dashboard.charts.byStatus'),   data: statusDonut,   colors: statusDonut.map(d => d.color) },
   ]
 
   return (
     <div className="p-6">
-      {/* KPI row — config-driven, equal-footprint (mirrors the candidate blueprint) */}
-      <InsightsRow kpis={kpis} padding="0 0 16px" />
+      {/* KPI row — config-driven, equal-footprint (2 donuts + 7 tiles = 9) */}
+      <InsightsRow donuts={donuts} kpis={kpis} padding="0 0 16px" />
 
       {/* Candidate KPI drill-down */}
       {drill && (

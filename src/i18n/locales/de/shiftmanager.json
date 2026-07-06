@@ -213,13 +213,21 @@
       "totalCandidates": "Kandidaten",
       "neverWorked": "Nie gearbeitet",
       "workedThisMonth": "Diesen Monat gearbeitet",
-      "avgOnly": "Ø {{avg}}"
+      "avgOnly": "Ø {{avg}}",
+      "workedActive": "Gearbeitet / Aktiv",
+      "planned": "Eingeplant",
+      "unknownFunction": "Unbekannt",
+      "otherFunctions": "Sonstige"
     },
     "statSub": {
       "urgent": "{{n}} dringend",
       "prevMonth": "{{pct}} Vormonat",
       "thisMonth": "Diesen Monat",
       "historicAvg": "Ø {{pct}} historisch"
+    },
+    "charts": {
+      "byFunction": "Nach Funktion",
+      "byStatus": "Nach Status"
     }
   },
   "locationsPage": {
