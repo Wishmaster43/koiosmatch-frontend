@@ -44,6 +44,11 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     tags: v.tags ?? [],
     created: v.created_at ?? v.createdAt ?? '',
     createdSort: v.created_at ?? v.createdAt ?? '',
+    // City + STRAAL-1 geo — the map view plots list rows once the API sends these.
+    city: v.city ?? '',
+    lat: typeof v.lat === 'number' ? v.lat : null,
+    lng: typeof v.lng === 'number' ? v.lng : null,
+    distanceKm: typeof v.distance_km === 'number' ? v.distance_km : null,
   }
 }
 
@@ -99,6 +104,10 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     postalCode: raw.postcode ?? raw.postal_code ?? '',
     city: raw.city ?? '',
     province: raw.province ?? '',
+    // STRAAL-1: geocoded coordinates + radius distance from the server.
+    lat: typeof raw.lat === 'number' ? raw.lat : null,
+    lng: typeof raw.lng === 'number' ? raw.lng : null,
+    distanceKm: typeof raw.distance_km === 'number' ? raw.distance_km : null,
     experienceMin: numStr(raw.experience_min_years),
     experienceMax: numStr(raw.experience_max_years),
     salaryMin: numStr(raw.salary_min),

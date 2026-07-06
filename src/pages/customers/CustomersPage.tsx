@@ -1,7 +1,7 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, AlertTriangle, X, Archive } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, X, Archive, Map as MapIcon } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useOpenFromIntent } from '@/context/NavigationContext'
@@ -27,6 +27,9 @@ import { useCustomerRecord } from './hooks/useCustomerRecord'
 import { useCustomerBulkActions } from './hooks/useCustomerBulkActions'
 import type { Id } from '@/types/common'
 
+// STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
+const CustomersMapView = lazy(() => import('./CustomersMapView'))
+
 interface AppUser { id: Id; name: string; avatar_color?: string }
 interface Opt { value: Id; label: string; count: number }
 
@@ -38,7 +41,7 @@ const pickKey = (d: unknown): string | undefined => {
 const toggleOneValue = (set: Dispatch<SetStateAction<string[]>>, value: string) => set(p => (p.length === 1 && p[0] === value) ? [] : [value])
 
 export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
-  const { t } = useTranslation('customers')
+  const { t } = useTranslation(['customers', 'common'])
   const { registerFilters, unregisterFilters } = useRightPanel()
   const auth = useAuth()
   const hasPermission = auth?.hasPermission ?? (() => false)
@@ -52,6 +55,10 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const [addOpen,   setAddOpen]   = useState(false)
   // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
   const [showArchived, setShowArchived] = usePageMemory('cust.archived', false)
+  // STRAAL-1: map view + radius-search state (server-side ?lat=&lng=&radius=).
+  const [view,      setView]      = usePageMemory<'table' | 'map'>('cust.viewMode', 'table')
+  const [mapCenter, setMapCenter] = usePageMemory('cust.mapCenter', { lat: 52.09, lng: 5.12 })
+  const [mapRadius, setMapRadius] = usePageMemory('cust.mapRadius', 30)
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   const [actionMsg, setActionMsg] = useState<{ type: string; text: string } | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -72,8 +79,10 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     if (selectedCity.length)     p.city     = selectedCity
     if (selectedIndustry.length) p.industry = selectedIndustry
     if (showArchived)            p.include_archived = 1
+    // Map view narrows the list server-side to the chosen circle (STRAAL-1).
+    if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     return p
-  }, [globalSearch, selectedStatus, selectedOwner, selectedCity, selectedIndustry, showArchived])
+  }, [globalSearch, selectedStatus, selectedOwner, selectedCity, selectedIndustry, showArchived, view, mapCenter, mapRadius])
   const filterKey = JSON.stringify(filterParams)
 
   useEffect(() => { setPage(1) }, [filterKey])
@@ -231,8 +240,10 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                 <HeaderSearch key={searchEpoch} onSearch={setGlobalSearch} defaultValue={globalSearch}
                   placeholder={t('page.searchPlaceholder')} width={300} />
                 <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
-                {/* Archived (soft-deleted) quick-view on the right — shared toggle (§4). */}
-                <div style={{ marginLeft: 'auto' }}>
+                {/* Map + archived quick-views on the right — shared toggles (§4). */}
+                <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+                  <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
+                    label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
                   <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
                     label={t('page.archivedView')} icon={Archive} />
                 </div>
@@ -240,17 +251,28 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
             )}
           </div>
 
-          <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-            {error && (
-              <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
-            )}
-            <CustomersTable rows={customers.filter(c => (showArchived ? c.archived : !c.archived)).filter(c => !kpiFilter || KPI_PRED[kpiFilter]?.(c))} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
-              statusMeta={statusMeta} selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
-              stickyHeader scrollParentRef={tableScrollRef} />
-          </div>
+          {view === 'map' ? (
+            <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
+              <CustomersMapView rows={customers.filter(c => (showArchived ? c.archived : !c.archived))}
+                statusColor={v => statusMeta(String(v)).color} center={mapCenter} radiusKm={mapRadius}
+                onCenterChange={(lat, lng) => setMapCenter({ lat, lng })} onRadiusChange={setMapRadius}
+                onPick={id => selectCustomer({ id } as Parameters<typeof selectCustomer>[0])} />
+            </Suspense>
+          ) : (
+            <>
+              <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+                {error && (
+                  <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
+                )}
+                <CustomersTable rows={customers.filter(c => (showArchived ? c.archived : !c.archived)).filter(c => !kpiFilter || KPI_PRED[kpiFilter]?.(c))} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
+                  statusMeta={statusMeta} selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
+                  stickyHeader scrollParentRef={tableScrollRef} />
+              </div>
 
-          <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-            onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
+              <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
+            </>
+          )}
         </div>
 
         <CustomerDrawer

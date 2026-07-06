@@ -228,5 +228,8 @@
     "cancel": "Annuler",
     "creating": "Création…",
     "required": "Le titre est requis."
+  },
+  "map": {
+    "pointCount": "{{count}} postes sur la carte"
   }
 }

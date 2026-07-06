@@ -7,8 +7,7 @@
     "filterUnsupported": "Ce filtre n'est pas (encore) pris en charge par le serveur.",
     "searchPlaceholder": "Rechercher un candidat, une note, un document…",
     "empty": "Aucun candidat trouvé.",
-    "loading": "Chargement…",
-    "mapView": "Carte"
+    "loading": "Chargement…"
   },
   "columns": {
     "name": "Nom",
@@ -685,11 +684,6 @@
     }
   },
   "map": {
-    "loading": "Chargement de la carte…",
-    "radius": "Rayon",
-    "km": "{{km}} km",
-    "kmAway": "{{km}} km",
-    "clickHint": "Cliquez sur la carte pour déplacer le centre",
     "pointCount": "{{count}} candidats sur la carte"
   }
 }

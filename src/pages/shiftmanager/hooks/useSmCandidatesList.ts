@@ -9,7 +9,7 @@ import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import api from '@/lib/api'
 import { useDefaultPageSize } from '@/lib/usePageSize'
 import { useAuth } from '@/context/AuthContext'
-import type { ReportCandidate } from '@/types/reports'
+import { normalizeSmCandidate } from '@/components/reports/useReportCandidates'
 
 export function useSmCandidatesList() {
   const defaultPageSize = useDefaultPageSize()
@@ -25,8 +25,10 @@ export function useSmCandidatesList() {
     queryKey: ['sm_candidates', page, pageSize],
     queryFn: async ({ signal }) => {
       const body = (await api.get('/sm_candidates', { params: { page, per_page: pageSize }, signal })).data
+      // Normalise first_name/last_name → firstname/lastname (same fix as the report hook).
+      const raw = (Array.isArray(body) ? body : (body?.data ?? [])) as Array<Record<string, unknown>>
       return {
-        candidates: (Array.isArray(body) ? body : (body?.data ?? [])) as ReportCandidate[],
+        candidates: raw.map(normalizeSmCandidate),
         total:    body?.meta?.total     ?? body?.total     ?? (Array.isArray(body) ? body.length : 0),
         lastPage: body?.meta?.last_page ?? body?.last_page ?? 1,
       }

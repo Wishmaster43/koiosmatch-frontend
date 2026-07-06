@@ -42,6 +42,11 @@ export interface Vacancy {
   tags: unknown[]
   created: string
   createdSort: string
+  // City + STRAAL-1 geo: the map view plots list rows (null until the API sends them).
+  city: string
+  lat: number | null
+  lng: number | null
+  distanceKm: number | null
 }
 
 /** The enriched vacancy model rendered by the drawer tabs. */
@@ -58,7 +63,6 @@ export interface VacancyDetail extends Vacancy {
   houseNumber: string
   houseNumberSuffix: string
   postalCode: string
-  city: string
   province: string
   // Experience range in years (from–to).
   experienceMin: string
@@ -99,6 +103,8 @@ export interface ApiVacancy {
   reference?: string
   title?: string
   status?: { value?: string | number; label?: string; color?: string } | string
+  // STRAAL-1: geocoded coordinates + radius distance from the server.
+  lat?: number; lng?: number; distance_km?: number
   status_value?: string | number
   status_label?: string
   status_color?: string

@@ -228,5 +228,8 @@
     "cancel": "Cancel",
     "creating": "Creating…",
     "required": "Title is required."
+  },
+  "map": {
+    "pointCount": "{{count}} vacancies on the map"
   }
 }

@@ -228,5 +228,8 @@
     "cancel": "Cancelar",
     "creating": "Creando…",
     "required": "El título es obligatorio."
+  },
+  "map": {
+    "pointCount": "{{count}} vacantes en el mapa"
   }
 }

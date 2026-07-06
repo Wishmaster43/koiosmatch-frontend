@@ -310,5 +310,8 @@
   },
   "changelog": {
     "empty": "Aún no hay cambios."
+  },
+  "map": {
+    "pointCount": "{{count}} clientes en el mapa"
   }
 }

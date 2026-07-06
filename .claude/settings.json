@@ -12,7 +12,18 @@
       "Bash(SMOKE_COOKIE=1 node /tmp/probeIntake2.mjs)",
       "Bash(SMOKE_COOKIE=1 node /tmp/probeIntake3.mjs)",
       "Bash(SMOKE_COOKIE=1 node /tmp/probeIntake5.mjs)",
-      "Bash(cat >> *)"
+      "Bash(cat >> *)",
+      "Bash(python3 -c ' *)",
+      "Bash(grep -nA20 \"interface ReportCandidate\" src/types/reports.ts)",
+      "Bash(awk '{print $1\" tsc errors\"}')",
+      "Bash(break)",
+      "Bash(/bin/sleep 3)",
+      "Bash(git commit -q src/components/reports/useReportCandidates.ts src/pages/shiftmanager/hooks/useSmCandidatesList.ts -m 'fix\\(sm-reports\\): candidate fields no longer '\\\\''Onbekend'\\\\'' — normalize first_name/last_name *)",
+      "Bash(echo \"— exit: $?\")",
+      "Bash(/bin/sleep 20)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(/bin/sleep 25)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeMaps.mjs)"
     ],
     "additionalDirectories": [
       "/Users/danny/Herd/koiosmatch-api/docs"

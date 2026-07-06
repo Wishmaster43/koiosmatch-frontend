@@ -143,5 +143,14 @@
   "activeFilters": "Actieve filters",
   "clearAll": "Alles wissen",
   "clearFilters": "Wis alle filters",
-  "filtersActive": "Filters actief"
+  "filtersActive": "Filters actief",
+  "map": {
+    "loading": "Kaart laden…",
+    "radius": "Straal",
+    "km": "{{km}} km",
+    "kmAway": "{{km}} km",
+    "clickHint": "Klik op de kaart om het middelpunt te verplaatsen",
+    "view": "Kaart",
+    "pointCount": "{{count}} punten op de kaart"
+  }
 }

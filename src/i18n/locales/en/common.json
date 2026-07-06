@@ -143,5 +143,14 @@
   "activeFilters": "Active filters",
   "clearAll": "Clear all",
   "clearFilters": "Clear all filters",
-  "filtersActive": "Filters active"
+  "filtersActive": "Filters active",
+  "map": {
+    "loading": "Loading map…",
+    "radius": "Radius",
+    "km": "{{km}} km",
+    "kmAway": "{{km}} km",
+    "clickHint": "Click the map to move the centre",
+    "view": "Map",
+    "pointCount": "{{count}} points on the map"
+  }
 }

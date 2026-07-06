@@ -95,6 +95,10 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     ownerInitials: initialsOf(owner.name ?? c.account_manager ?? c.owner_name ?? ''),
     ownerColor: owner.avatar_color ?? c.owner_color ?? null,
     city: c.city ?? '',
+    // STRAAL-1: geocoded coordinates + radius distance from the server.
+    lat: typeof c.lat === 'number' ? c.lat : null,
+    lng: typeof c.lng === 'number' ? c.lng : null,
+    distanceKm: typeof c.distance_km === 'number' ? c.distance_km : null,
     industry: (c.industry && typeof c.industry === 'object') ? (c.industry.name ?? '') : (c.industry ?? ''),
     website: c.website ?? '',
     employeeCount: c.employee_count ?? c.employeeCount ?? '',

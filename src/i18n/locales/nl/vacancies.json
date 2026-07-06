@@ -228,5 +228,8 @@
     "cancel": "Annuleren",
     "creating": "Aanmaken…",
     "required": "Titel is verplicht."
+  },
+  "map": {
+    "pointCount": "{{count}} vacatures op de kaart"
   }
 }

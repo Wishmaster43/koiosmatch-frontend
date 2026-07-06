@@ -5,10 +5,10 @@
  * + filters, and renders the insights row + status tabs + table + drawer. Page-
  * scoped VacancyLookupsProvider so the table/drawer/modal/bulk share one fetch.
  */
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, AlertTriangle, X, Archive } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, X, Archive, Map as MapIcon } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
@@ -34,6 +34,9 @@ import { useVacancyBulkActions } from './hooks/useVacancyBulkActions'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
+// STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
+const VacanciesMapView = lazy(() => import('./VacanciesMapView'))
+
 interface AppUser { id: Id; name: string }
 interface Aggregate { name: string; key: string; color?: string; value: number }
 interface VacancyStatsShape {
@@ -44,7 +47,7 @@ interface VacancyStatsShape {
 }
 
 function VacanciesPageInner({ intent }: { intent?: unknown }) {
-  const { t } = useTranslation('vacancies')
+  const { t } = useTranslation(['vacancies', 'common'])
   // Cross-page jump for the funnel KPI cards (→ Sollicitaties with the stage filter).
   const { navigate } = useNavigation()
   // Scroll container for row virtualization (F-11): DataTable virtualizes against it.
@@ -70,6 +73,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const [selectedClient, setSelectedClient] = usePageMemory<string[]>('vac.client', [])
   const [globalSearch,   setGlobalSearch]   = usePageMemory('vac.search', '')
   const [showArchived,   setShowArchived]   = usePageMemory('vac.archived', false)
+  // STRAAL-1: map view + radius-search state (server-side ?lat=&lng=&radius=).
+  const [view,      setView]      = usePageMemory<'table' | 'map'>('vac.viewMode', 'table')
+  const [mapCenter, setMapCenter] = usePageMemory('vac.mapCenter', { lat: 52.09, lng: 5.12 })
+  const [mapRadius, setMapRadius] = usePageMemory('vac.mapRadius', 30)
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
 
@@ -81,8 +88,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     if (selectedOwner.length)   p.owner_id    = selectedOwner
     if (selectedClient.length)  p.customer_id = selectedClient
     if (showArchived)           p.include_archived = 1
+    // Map view narrows the list server-side to the chosen circle (STRAAL-1).
+    if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     return p
-  }, [globalSearch, statusBucket, selectedOwner, selectedClient, showArchived])
+  }, [globalSearch, statusBucket, selectedOwner, selectedClient, showArchived, view, mapCenter, mapRadius])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
@@ -239,6 +248,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginLeft: 'auto' }}>
+              {/* Map quick-view — self-lights once the API sends coordinates (STRAAL-2). */}
+              {(view === 'map' || vacancies.some(v => typeof v.lat === 'number')) && (
+                <QuickViewToggle active={view === 'map'} onToggle={() => setView(x => (x === 'map' ? 'table' : 'map'))}
+                  label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
+              )}
               {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
               <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
                 label={t('page.archivedView')} icon={Archive} />
@@ -270,27 +284,37 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
             </div>
           )}
 
-          {/* Table */}
-          <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
-            {error && (
-              <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
-            )}
-            <VacanciesTable
-              rows={vacancies}
-              loading={loading}
-              selectedId={selected?.id}
-              onSelect={selectVacancy}
-              selectable
-              selectedIds={selectedIds}
-              onToggleRow={toggleRow}
-              onToggleAll={toggleAll}
-              stickyHeader
-              scrollParentRef={tableScrollRef}
-            />
-          </div>
+          {view === 'map' ? (
+            <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
+              <VacanciesMapView rows={vacancies} center={mapCenter} radiusKm={mapRadius}
+                onCenterChange={(lat, lng) => setMapCenter({ lat, lng })} onRadiusChange={setMapRadius}
+                onPick={id => selectVacancy({ id } as Parameters<typeof selectVacancy>[0])} />
+            </Suspense>
+          ) : (
+            <>
+              {/* Table */}
+              <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+                {error && (
+                  <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
+                )}
+                <VacanciesTable
+                  rows={vacancies}
+                  loading={loading}
+                  selectedId={selected?.id}
+                  onSelect={selectVacancy}
+                  selectable
+                  selectedIds={selectedIds}
+                  onToggleRow={toggleRow}
+                  onToggleAll={toggleAll}
+                  stickyHeader
+                  scrollParentRef={tableScrollRef}
+                />
+              </div>
 
-          <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-            onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
+              <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
+            </>
+          )}
         </div>
 
         {/* Drawer — remounts (key) when the full detail arrives so tabs re-init */}

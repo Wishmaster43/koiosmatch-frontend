@@ -7,8 +7,7 @@
     "filterUnsupported": "Dieser Filter wird (noch) nicht vom Server unterstützt.",
     "searchPlaceholder": "Kandidat, Notiz, Dokument suchen…",
     "empty": "Keine Kandidaten gefunden.",
-    "loading": "Laden…",
-    "mapView": "Karte"
+    "loading": "Laden…"
   },
   "columns": {
     "name": "Name",
@@ -685,11 +684,6 @@
     }
   },
   "map": {
-    "loading": "Karte lädt…",
-    "radius": "Radius",
-    "km": "{{km}} km",
-    "kmAway": "{{km}} km",
-    "clickHint": "Klicke auf die Karte, um den Mittelpunkt zu verschieben",
     "pointCount": "{{count}} Kandidaten auf der Karte"
   }
 }

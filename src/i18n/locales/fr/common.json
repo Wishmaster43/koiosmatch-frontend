@@ -143,5 +143,14 @@
   "activeFilters": "Filtres actifs",
   "clearAll": "Tout effacer",
   "clearFilters": "Effacer tous les filtres",
-  "filtersActive": "Filtres actifs"
+  "filtersActive": "Filtres actifs",
+  "map": {
+    "loading": "Chargement de la carte…",
+    "radius": "Rayon",
+    "km": "{{km}} km",
+    "kmAway": "{{km}} km",
+    "clickHint": "Cliquez sur la carte pour déplacer le centre",
+    "view": "Carte",
+    "pointCount": "{{count}} points sur la carte"
+  }
 }

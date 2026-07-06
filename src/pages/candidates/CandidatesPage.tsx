@@ -65,7 +65,7 @@ const CandidatesMapView = lazy(() => import('./CandidatesMapView'))
 export default function CandidatesPage({ intent }: { intent?: CandidateIntent } = {}) {
   // Auth/user must come first — pageSize initial value reads user.default_per_page.
   const { hasPermission, user } = useAuth() as unknown as { hasPermission: (p: string) => boolean; user: { default_per_page?: number } | null }
-  const { t } = useTranslation('candidates')
+  const { t } = useTranslation(['candidates', 'common'])
   const { candidateTypes, funnelTypes, statuses, phases } = useLookups()
   const { genders } = useGenders()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
@@ -465,7 +465,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
                     label={t('page.archivedView')} icon={Archive} />
                   {/* STRAAL-1: table ⇄ map (radius search) — same shared toggle look. */}
                   <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
-                    label={t('page.mapView')} color="var(--color-primary)" icon={MapIcon} />
+                    label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
                 </div>
               </>
             )}
@@ -473,7 +473,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
           {/* Map view (STRAAL-1) — lazy so Leaflet loads only when opened. */}
           {view === 'map' ? (
-            <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('map.loading')}</div>}>
+            <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
               <CandidatesMapView rows={filtered} center={mapCenter} radiusKm={mapRadius}
                 onCenterChange={(lat, lng) => setMapCenter({ lat, lng })}
                 onRadiusChange={setMapRadius}

@@ -228,5 +228,8 @@
     "cancel": "Abbrechen",
     "creating": "Wird erstellt…",
     "required": "Titel ist erforderlich."
+  },
+  "map": {
+    "pointCount": "{{count}} Stellen auf der Karte"
   }
 }
