@@ -14,6 +14,7 @@ import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import CustomersTable from './CustomersTable'
 import CustomersBulkBar from './CustomersBulkBar'
 import CustomerDrawer from './CustomerDrawer'
@@ -146,10 +147,20 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const statusData = useMemo(() => statusOptions.map(o => ({ name: o.label, value: o.count, key: String(o.value), color: statusOf(String(o.value))?.color })), [statusOptions, statuses]) // eslint-disable-line react-hooks/exhaustive-deps
   const ownerData  = useMemo(() => ownerOptions.map(o => ({ name: o.label, value: o.count, key: String(o.value) })), [ownerOptions])
 
+
   // KPI-card filter (one at a time): rows with ≥1 of the counted thing — or, for
   // "zonder contactpersoon", exactly 0 (Danny: every card must DO something).
   const [kpiFilter, setKpiFilter] = usePageMemory<string | null>('cust.kpi', null)
   const toggleKpi = (k: string) => setKpiFilter(p => (p === k ? null : k))
+  // Shared clear-all (page memory keeps filters sticky).
+  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || kpiFilter
+    || selectedStatus.length || selectedOwner.length || selectedCity.length || selectedIndustry.length)
+  const [searchEpoch, setSearchEpoch] = useState(0)
+  const clearAllFilters = () => {
+    setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setKpiFilter(null)
+    setSelectedStatus([]); setSelectedOwner([]); setSelectedCity([]); setSelectedIndustry([]); setPage(1)
+  }
+
   const KPI_PRED: Record<string, (c: (typeof customers)[number]) => boolean> = {
     locations:   c => c.locationsCount > 0,
     departments: c => c.departmentsCount > 0,
@@ -217,8 +228,9 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                   + {t('page.add')}
                 </button>
                 {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
-                <HeaderSearch onSearch={setGlobalSearch} defaultValue={globalSearch}
+                <HeaderSearch key={searchEpoch} onSearch={setGlobalSearch} defaultValue={globalSearch}
                   placeholder={t('page.searchPlaceholder')} width={300} />
+                <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
                 {/* Archived (soft-deleted) quick-view on the right — shared toggle (§4). */}
                 <div style={{ marginLeft: 'auto' }}>
                   <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}

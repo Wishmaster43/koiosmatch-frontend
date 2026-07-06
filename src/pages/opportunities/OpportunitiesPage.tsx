@@ -7,6 +7,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import OpportunitiesTable from './OpportunitiesTable'
 import OpportunitiesBoard from './OpportunitiesBoard'
@@ -56,6 +57,13 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const [client,   setClient]   = usePageMemory<string[]>('opps.client', []) // selected client names (panel)
   const [addOpen,  setAddOpen]  = useState(false)
   const [query,    setQuery]    = usePageMemory('opps.search', '')  // shared header search (client-side, R-5)
+
+  // Shared clear-all (page memory keeps filters sticky).
+  const anyFilterActive = Boolean(query.trim() || stage.length || owner.length || client.length)
+  const [searchEpoch, setSearchEpoch] = useState(0)
+  const clearAllFilters = () => {
+    setSearchEpoch(e => e + 1); setQuery(''); setStage([]); setOwner([]); setClient([]); setPage(1)
+  }
 
   // Seed the stage filter from a navigation intent (dashboard chart click carries the
   // stage key; the page filters by label, so map key → label via the lookup).
@@ -132,7 +140,8 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
                 borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
               + {t('page.add')}
             </button>
-            <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
+            <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
+            <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
             {/* Selection strip — count + clear (bulk actions land with C-41). */}
             {selectedIds.size > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--text)' }}>

@@ -21,6 +21,7 @@ import ApplicationsBulkBar from './ApplicationsBulkBar'
 import AddApplicationModal from './AddApplicationModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { mapApplication, mapApplicationDetail } from './data/mapApplication'
 import { bucketOfPhase } from './data/applicationsShared'
@@ -217,6 +218,15 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   useEffect(() => {{ setRememberedId(selected?.id ?? null) }}, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {{ if (rememberedId && !selected) (id => selectApplication({ id } as Application))(rememberedId) }}, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Shared clear-all (page memory keeps filters sticky): anything off-default resets.
+  const anyFilterActive = Boolean(query.trim() || attention || showArchived || bucket !== 'active'
+    || selectedPhase.length || selectedOwner.length || selectedSource.length || selectedVac.length)
+  const [searchEpoch, setSearchEpoch] = useState(0)
+  const clearAllFilters = () => {
+    setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setBucket('active')
+    setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([]); setPage(1)
+  }
+
   // Seed the funnel-stage filter from a dashboard chart click (funnel / funnel-conversion).
   // Mirrors the candidate status/recruiter drill-down: the InsightsRow then shows the active chip.
   useEffect(() => {
@@ -364,7 +374,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
               <Plus size={14} /> {t('add.button')}
             </button>
             {/* Shared header search (T10) — debounced, client-side text filter. */}
-            <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={300} />
+            <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={300} />
+            <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Bucket tabs — soft-tinted active (§4: never a solid fill). */}

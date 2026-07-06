@@ -14,6 +14,7 @@ import { useAuth } from '@/context/AuthContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import TasksTable from './TasksTable'
 import TasksBulkBar from './TasksBulkBar'
@@ -86,6 +87,15 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const [selectedAssignee, setSelectedAssignee] = useState<string[]>([])
   // KPI tile filter (one at a time): null | 'open' | 'overdue' | 'dueToday' | 'completed'.
   const [kpiFilter, setKpiFilter] = useState<string | null>(null)
+
+  // Shared clear-all (page memory keeps filters sticky).
+  const anyFilterActive = Boolean(query.trim() || showArchived || kpiFilter
+    || selectedStatus.length || selectedPriority.length || selectedType.length || selectedAssignee.length)
+  const [searchEpoch, setSearchEpoch] = useState(0)
+  const clearAllFilters = () => {
+    setSearchEpoch(e => e + 1); setQuery(''); setShowArchived(false); setKpiFilter(null)
+    setSelectedStatus([]); setSelectedPriority([]); setSelectedType([]); setSelectedAssignee([]); setPage(1)
+  }
 
   // Seed filters from a navigation intent (dashboard KPI/chart click).
   useEffect(() => {
@@ -334,7 +344,8 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
               borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
             <Plus size={15} /> {t('add')}
           </button>
-          <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
+          <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={280} />
+            <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
             <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}

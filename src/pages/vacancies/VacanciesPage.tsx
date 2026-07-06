@@ -18,6 +18,7 @@ import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import VacanciesTable from './VacanciesTable'
 import VacanciesBulkBar from './VacanciesBulkBar'
@@ -185,6 +186,15 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     { key: 'owner',  title: t('insights.ownerTitle'),  data: ownerData,  onPick: d => pickOne(setSelectedOwner)(pickKey(d)),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
     { key: 'client', title: t('insights.clientTitle'), data: clientData, onPick: d => pickOne(setSelectedClient)(pickKey(d)), active: selectedClient.length > 0, onClear: () => setSelectedClient([]) },
   ]
+  // Shared clear-all (page memory keeps filters sticky).
+  const anyFilterActive = Boolean(globalSearch.trim() || showArchived || statusBucket !== 'all'
+    || selectedOwner.length || selectedClient.length)
+  const [searchEpoch, setSearchEpoch] = useState(0)
+  const clearAllFilters = () => {
+    setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setStatusBucket('all')
+    setSelectedOwner([]); setSelectedClient([]); setPage(1)
+  }
+
   // Funnel counts are APPLICATION numbers — clicking jumps to Sollicitaties with that
   // stage pre-filtered (Danny's "Gesolliciteerd doet niks": these cards had no click).
   const insightKpis: KpiSpec[] = phases.map(p => ({
@@ -222,8 +232,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                     + {t('page.add')}
                   </button>
                   {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
-                  <HeaderSearch onSearch={setGlobalSearch} defaultValue={globalSearch}
+                  <HeaderSearch key={searchEpoch} onSearch={setGlobalSearch} defaultValue={globalSearch}
                     placeholder={t('page.searchPlaceholder')} width={300} />
+                  <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
                 </>
               )}
             </div>

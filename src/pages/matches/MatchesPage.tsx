@@ -19,6 +19,7 @@ import AddMatchModal from './AddMatchModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useMatches } from './hooks/useMatches'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
@@ -126,6 +127,14 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       active: ownerFilter.length > 0, onClear: () => setOwnerFilter([]) },
   ]
 
+  // Shared clear-all (page memory keeps filters sticky).
+  const anyFilterActive = Boolean(query.trim() || showArchived || kpiScored || stageFilter.length || ownerFilter.length)
+  const [searchEpoch, setSearchEpoch] = useState(0)
+  const clearAllFilters = () => {
+    setSearchEpoch(e => e + 1); setQuery(''); setShowArchived(false); setKpiScored(false)
+    setStageFilter([]); setOwnerFilter([])
+  }
+
   // KPI clicks drive the existing stage filter (chip + clear come for free);
   // clicking the active card again clears (mirror of the kansen cards).
   const eqSet = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join('|') === [...b].sort().join('|')
@@ -206,7 +215,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
             </button>
           )}
           {/* Shared search — mirror the other list pages (§3A). */}
-          <HeaderSearch onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={260} />
+          <HeaderSearch key={searchEpoch} onSearch={setQuery} placeholder={t('page.searchPlaceholder')} width={260} />
+            <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
         </div>
 
         {/* Right — archived (separate, with label) + icon-only view toggle (mirror opportunities) */}
