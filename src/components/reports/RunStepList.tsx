@@ -82,6 +82,21 @@ function StepCard({ step, index }: { step: RunStep; index: number }) {
         <div style={{ fontSize: 11, color: 'var(--text-muted)', padding: '0 12px 10px 33px' }}>{step.message}</div>
       )}
 
+      {/* WF-R3 live meta: retry count, error and when the next attempt fires. */}
+      {(Number(step.attempts ?? 0) > 1 || step.error || step.error_message || step.next_attempt_at) && (
+        <div style={{ fontSize: 11, padding: '0 12px 10px 33px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {Number(step.attempts ?? 0) > 1 && (
+            <span style={{ color: 'var(--text-muted)' }}>{t('runs.drawer.attempts', { count: Number(step.attempts) })}</span>
+          )}
+          {(step.error ?? step.error_message) != null && (
+            <span style={{ color: 'var(--color-danger)' }}>{String(step.error ?? step.error_message)}</span>
+          )}
+          {step.next_attempt_at != null && (
+            <span style={{ color: 'var(--text-muted)' }}>{t('runs.drawer.nextAttempt', { time: new Date(String(step.next_attempt_at)).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' }) })}</span>
+          )}
+        </div>
+      )}
+
       {/* Expanded I/O bundles */}
       {open && hasIO && (
         <div style={{ padding: '0 12px 12px 33px' }}>

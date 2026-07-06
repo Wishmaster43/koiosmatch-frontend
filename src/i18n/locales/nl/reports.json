@@ -358,7 +358,9 @@
       "output": "Output",
       "noData": "Geen data",
       "error": "Foutmelding",
-      "workflowFallback": "Workflow #{{id}}"
+      "workflowFallback": "Workflow #{{id}}",
+      "attempts": "Poging {{count}}",
+      "nextAttempt": "Volgende poging om {{time}}"
     }
   }
 }

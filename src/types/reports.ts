@@ -44,6 +44,11 @@ export interface ReportFilterGroup {
 // Per-step result inside a workflow run. `input`/`output` are the raw data
 // bundles the step received and produced (shown expandable in the run drawer).
 export interface RunStep {
+  // WF-R3 live-run fields (present on runs from the queued engine).
+  attempts?: number
+  error?: string | null
+  error_message?: string | null
+  next_attempt_at?: string | null
   label?: string
   type?: string
   status?: string

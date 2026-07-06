@@ -4,6 +4,8 @@
  * Shared by the global RunsTable and the workflow editor's history view so the
  * run drill-down is defined once (§3A). Focus is trapped while open.
  */
+import { useState, useEffect } from 'react'
+import api from '@/lib/api'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { Zap, Clock, Users, X, AlertTriangle } from 'lucide-react'
@@ -18,7 +20,26 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
 }) {
   const { t } = useTranslation('reports')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-  const steps = run.step_results ?? run.steps ?? []
+  // Live view (WF-R3): while the run is RUNNING, poll its workflow's run list every
+  // 3s so pending/running step states and attempts update in place.
+  const [live, setLive] = useState<RunRow | null>(null)
+  const shown = live ?? run
+  useEffect(() => {
+    setLive(null)
+    if (run.status !== 'running' || run.workflow_id == null) return
+    const timer = setInterval(() => {
+      api.get(`/workflows/${run.workflow_id}/runs`)
+        .then((res: { data?: unknown }) => {
+          const body = res.data as { data?: RunRow[] } | RunRow[] | undefined
+          const rows = (Array.isArray(body) ? body : body?.data ?? []) as RunRow[]
+          const fresh = rows.find(r => String(r.id) === String(run.id))
+          if (fresh) { setLive(fresh); if (fresh.status !== 'running') clearInterval(timer) }
+        })
+        .catch(() => {})
+    }, 3000)
+    return () => clearInterval(timer)
+  }, [run.id, run.status, run.workflow_id])
+  const steps = shown.step_results ?? shown.steps ?? []
 
   return (
     <>

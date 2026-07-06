@@ -122,8 +122,11 @@ export default function WorkflowsPage() {
       }
       // else: editor keeps its own state; no prop change needed
     } catch (err) {
-      const e = err as { response?: { data?: { message?: string } }; message?: string }
-      alert(t('page.saveFailed', { msg: e.response?.data?.message ?? e.message }))
+      // WF-R2 saves validate the graph server-side (loop / disconnected step): surface
+      // the SPECIFIC 422 detail, not just the generic message.
+      const e = err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } }; message?: string }
+      const detail = Object.values(e.response?.data?.errors ?? {}).flat()[0]
+      alert(t('page.saveFailed', { msg: detail ?? e.response?.data?.message ?? e.message }))
     }
   }
 

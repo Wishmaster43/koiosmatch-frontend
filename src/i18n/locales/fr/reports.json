@@ -358,7 +358,9 @@
       "output": "Sortie",
       "noData": "Aucune donnée",
       "error": "Message d'erreur",
-      "workflowFallback": "Workflow #{{id}}"
+      "workflowFallback": "Workflow #{{id}}",
+      "attempts": "Tentative {{count}}",
+      "nextAttempt": "Prochaine tentative à {{time}}"
     }
   }
 }
