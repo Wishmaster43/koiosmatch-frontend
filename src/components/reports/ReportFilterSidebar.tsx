@@ -13,10 +13,12 @@ import SearchSelectGroup from './filter/SearchSelectGroup'
 import PeriodGroup from './filter/PeriodGroup'
 import OpenCheckGroup from './filter/OpenCheckGroup'
 import GeoRadiusGroup from './filter/GeoRadiusGroup'
+import SavedFiltersGroup from './filter/SavedFiltersGroup'
 
 export default function ReportFilterSidebar({ title = 'Filters', groups = [], onClose }: { title?: ReactNode; groups?: ReportFilterGroup[]; onClose: () => void }) {
   const { t } = useTranslation('common')
   const activeCount = groups.reduce((sum, g) => {
+    if (g.type === 'saved-filters') return sum
     if (g.type === 'period') return sum + (g.value ? 1 : 0)
     if (g.type === 'global-search') return sum + (g.value ? 1 : 0)
     if (g.type === 'location') return sum + (g.city ? 1 : 0)
@@ -27,7 +29,8 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
 
   const clearAll = () => {
     groups.forEach(g => {
-      if (g.type === 'period') { g.onChange?.('') }
+      if (g.type === 'saved-filters') { /* not a filter — never cleared */ }
+      else if (g.type === 'period') { g.onChange?.('') }
       else if (g.type === 'global-search') { g.onChange?.('') }
       else if (g.type === 'location') { g.onCityChange?.(''); g.onRadiusChange?.('') }
       else if (g.type === 'date-range') { g.onFromChange?.(''); g.onToChange?.('') }
@@ -35,6 +38,33 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
       else { g.selected?.forEach(v => g.onToggle?.(v)) }
     })
   }
+
+  // Active-filter chips — built up front so the bar hides entirely when empty.
+  // Groups can opt out with `noChip` (e.g. the SM charts, where every month/series
+  // is selected by default and the chip row was just noise — Danny 2026-07-06).
+  const chip = (chipKey: string, label: string, onRemove?: () => void) => (
+    <span key={chipKey} style={{ display: 'flex', alignItems: 'center', gap: 4, maxWidth: '100%',
+      background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+      borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 500 }}>
+      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
+      {onRemove && (
+        <button onClick={onRemove} aria-label={t('filters.clear')}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, lineHeight: 1, display: 'flex' }}>
+          <X size={8} />
+        </button>
+      )}
+    </span>
+  )
+  const chipNodes = groups.flatMap(g => {
+    if (g.noChip || g.type === 'saved-filters') return []
+    if (g.type === 'global-search') return g.value ? [chip(g.key, `"${g.value}"`, () => g.onChange?.(''))] : []
+    if (g.type === 'period')        return g.value ? [chip(g.key, String(g.value), () => g.onChange?.(''))] : []
+    if (g.type === 'location')      return g.city ? [chip(g.key, `${g.city}${g.radius ? ` · ${g.radius} km` : ''}`, () => { g.onCityChange?.(''); g.onRadiusChange?.('') })] : []
+    if (g.type === 'date-range')    return (g.from || g.to) ? [chip(g.key, `${g.from ?? '…'} – ${g.to ?? '…'}`, () => { g.onFromChange?.(''); g.onToChange?.('') })] : []
+    if (g.type === 'geo-radius')    return g.applied ? [chip(g.key, g.applied.label, () => g.onClear?.())] : []
+    return (g.selected ?? []).map(v =>
+      chip(`${g.key}:${v}`, (g.options ?? []).find(o => o.value === v)?.label ?? String(v), () => g.onToggle?.(v)))
+  })
 
   return (
     <div className="flex flex-col flex-shrink-0 bg-[var(--surface)]"
@@ -75,33 +105,19 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
       </div>
 
       {/* Active-filter chips: every applied value in one glance, each removable. */}
-      {activeCount > 0 && (
+      {chipNodes.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, padding: '8px 12px',
                       borderBottom: '1px solid var(--border)' }}>
-          {groups.flatMap(g => {
-            const chip = (chipKey: string, label: string, onRemove?: () => void) => (
-              <span key={chipKey} style={{ display: 'flex', alignItems: 'center', gap: 4, maxWidth: '100%',
-                background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
-                borderRadius: 999, padding: '2px 8px', fontSize: 10.5, fontWeight: 500 }}>
-                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
-                {onRemove && (
-                  <button onClick={onRemove} aria-label={t('filters.clear')}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, lineHeight: 1, display: 'flex' }}>
-                    <X size={8} />
-                  </button>
-                )}
-              </span>
-            )
-            if (g.type === 'global-search') return g.value ? [chip(g.key, `"${g.value}"`, () => g.onChange?.(''))] : []
-            if (g.type === 'period')        return g.value ? [chip(g.key, String(g.value), () => g.onChange?.(''))] : []
-            if (g.type === 'location')      return g.city ? [chip(g.key, `${g.city}${g.radius ? ` · ${g.radius} km` : ''}`, () => { g.onCityChange?.(''); g.onRadiusChange?.('') })] : []
-            if (g.type === 'date-range')    return (g.from || g.to) ? [chip(g.key, `${g.from ?? '…'} – ${g.to ?? '…'}`, () => { g.onFromChange?.(''); g.onToChange?.('') })] : []
-            if (g.type === 'geo-radius')    return g.applied ? [chip(g.key, g.applied.label, () => g.onClear?.())] : []
-            return (g.selected ?? []).map(v =>
-              chip(`${g.key}:${v}`, (g.options ?? []).find(o => o.value === v)?.label ?? String(v), () => g.onToggle?.(v)))
-          })}
+          {chipNodes}
         </div>
       )}
+
+      {/* Saved filter sets (type: 'saved-filters') — pinned above the filter groups */}
+      {groups.filter(g => g.type === 'saved-filters').map(g => (
+        <div key={g.key} style={{ padding: '10px 12px', borderBottom: '1px solid var(--border)' }}>
+          <SavedFiltersGroup group={g} />
+        </div>
+      ))}
 
       {/* Global search (type: 'global-search') — rendered at top before filter groups */}
       {groups.filter(g => g.type === 'global-search').map(g => (
@@ -147,7 +163,7 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
       {/* Groups */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px',
                     display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {groups.filter(g => g.type !== 'global-search' && g.type !== 'location').map((group, i, arr) => (
+        {groups.filter(g => g.type !== 'global-search' && g.type !== 'location' && g.type !== 'saved-filters').map((group, i, arr) => (
           <div key={group.key}>
             {/* Category heading — only shown when the category changes */}
             {group.category && group.category !== arr[i - 1]?.category && (
