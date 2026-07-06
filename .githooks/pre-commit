@@ -21,4 +21,15 @@ npx vitest run src/i18n/localeParity.test.ts || {
   echo "✗ i18n parity failed — a locale (de/fr/es/en) is missing keys nl has. Add them (all 5 locales) before committing."
   exit 1
 }
-echo "✓ gate passed (tsc 0, lint 0 errors, i18n parity)"
+# gen:types freshness (C-CHIP #4): api-generated.ts must match the backend spec.
+# Regenerates when the sibling spec exists; a diff means the contract moved — the
+# regenerated file is left in place: `git add src/types/api-generated.ts` and retry.
+if [ -f ../koiosmatch-api/docs/openapi.yaml ]; then
+  echo "▶ pre-commit: gen:types freshness…"
+  npm run --silent gen:types >/dev/null 2>&1
+  if ! git diff --quiet src/types/api-generated.ts; then
+    echo "✗ api-generated.ts was behind the spec — just regenerated: git add src/types/api-generated.ts and commit again"
+    exit 1
+  fi
+fi
+echo "✓ gate passed (tsc 0, lint 0 errors, i18n parity, types fresh)"
