@@ -262,7 +262,12 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
       {/* Read-only drill-down drawer */}
       <MatchDrawer match={selected} onClose={() => setSelected(null)}
-        expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(v => !v)} />
+        expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(v => !v)}
+        onSetStatus={(status) => {
+          if (!selected?.id) return
+          updateMatch(selected.id, { status }); setSelected(p => (p ? { ...p, status } : p))
+          api.patch(`/matches/${selected.id}`, { status }).catch(() => notify('error', t('bulk.mutateError')))
+        }} />
 
       {/* Direct-match creation modal */}
       {addOpen && <AddMatchModal onClose={() => setAddOpen(false)} onCreated={addMatch} />}

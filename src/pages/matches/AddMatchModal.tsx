@@ -56,6 +56,7 @@ export default function AddMatchModal({ onClose, onCreated }: { onClose: () => v
     initials:   initialsOf(cand?.label),
     vacancy:    vac?.label ?? '—',
     client:     vac?.client ?? '—',
+    status:     'open',
     score:      null,
     stage:      '',
     stageColor: '#6E8FD6',

@@ -47,7 +47,8 @@
       "owner": "Eigenaar",
       "score": "Score",
       "stage": "Fase",
-      "created": "Aangemaakt"
+      "created": "Aangemaakt",
+      "status": "Status"
     }
   },
   "changelog": {

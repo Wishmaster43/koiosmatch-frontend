@@ -20,9 +20,11 @@ interface MatchDrawerProps {
   onClose: () => void
   expanded?: boolean
   onToggleExpand?: () => void
+  // R-1b: change the lifecycle status (lookup-driven); omitting keeps the tab read-only.
+  onSetStatus?: (status: string) => void
 }
 
-export default function MatchDrawer({ match, onClose, expanded = false, onToggleExpand }: MatchDrawerProps) {
+export default function MatchDrawer({ match, onClose, expanded = false, onToggleExpand, onSetStatus }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
   if (!match) return null
 
@@ -38,7 +40,7 @@ export default function MatchDrawer({ match, onClose, expanded = false, onToggle
   // Tabs are config (§3A). Record history is the changelog ICON-popover in the title row
   // (never a tab) — see titleActions below. A Placement tab waits on a backend detail contract.
   const tabs: EntityTab[] = [
-    { id: 'overview',  label: t('drawer.tabs.overview'),  render: () => <OverviewTab match={match} /> },
+    { id: 'overview',  label: t('drawer.tabs.overview'),  render: () => <OverviewTab match={match} onSetStatus={onSetStatus} /> },
   ]
 
   return (

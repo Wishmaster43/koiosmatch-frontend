@@ -31,12 +31,14 @@ export function useLastContactTypes() {
     }).catch(() => {})
   }, [])
 
-  // Resolve a stored value/slug to its label; fall back to the raw value.
+  // Resolve a stored value/slug to its label (R-2: tenant icon prefixes it).
   const labelOf = (value?: string | null): string => {
     const v = norm(value)
     if (!v) return ''
     const hit = types.find(x => norm(x.value) === v || norm(x.label) === v)
-    return hit?.label ?? value ?? ''
+    if (!hit) return value ?? ''
+    const icon = typeof hit.icon === 'string' && hit.icon ? `${hit.icon} ` : ''
+    return `${icon}${hit.label}`
   }
 
   return { types, labelOf }

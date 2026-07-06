@@ -26,7 +26,11 @@
       "Bash(SMOKE_COOKIE=1 node /tmp/probeMaps.mjs)",
       "Bash(SMOKE_COOKIE=1 node /tmp/probePanel.mjs)",
       "Bash(SMOKE_COOKIE=1 node /tmp/probePanel2.mjs)",
-      "Bash(SMOKE_COOKIE=1 node /tmp/probeFilters.mjs)"
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeFilters.mjs)",
+      "Bash(git commit -q src/components/layout/workflow/ModulePicker.tsx -m 'fix\\(workflow\\): wider module picker \\(880->1100px\\) so category tabs fit one line *)",
+      "Bash(git commit -q src/components/layout/DashboardLayout.tsx src/components/ui/SearchSelect.tsx src/components/ui/ActionMenu.tsx src/components/layout/workflow/VariablePicker.tsx src/pages/candidates/drawer/PoolsSection.tsx src/components/layout/NotificationBell.tsx -m 'fix\\(ui\\): filter/choice menus fit their content \\(planned sweep, after ModulePicker\\) *)",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{const r=JSON.parse\\(d\\).data??JSON.parse\\(d\\);console.log\\('detail-velden:',Object.keys\\(r\\).filter\\(k=>/comment|note/.test\\(k\\)\\).join\\(', '\\)||'\\(geen comment/note-veld\\)'\\)}\\)\")",
+      "Bash(SMOKE_COOKIE=1 node e2e/run.mjs drill)"
     ],
     "additionalDirectories": [
       "/Users/danny/Herd/koiosmatch-api/docs"

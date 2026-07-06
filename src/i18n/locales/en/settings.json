@@ -510,12 +510,16 @@
   "matches": {
     "statusTitle": "Statuses",
     "statusSubtitle": "Manage the match statuses (status + colour).",
-    "statusAdd": "Add status"
+    "statusAdd": "Add status",
+    "flagClosed": "Closes the match",
+    "flagClosedDesc": "A match in this status is ended (end date set, no longer counts as open)."
   },
   "outreach": {
     "statusTitle": "Statuses",
     "statusSubtitle": "Manage the call-list statuses (status + colour).",
-    "statusAdd": "Add status"
+    "statusAdd": "Add status",
+    "flagReached": "Counts as reached",
+    "flagReachedDesc": "This status stamps the contact moment on the call-list entry."
   },
   "tasks": {
     "statusTitle": "Statuses",

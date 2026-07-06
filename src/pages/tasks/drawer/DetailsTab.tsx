@@ -63,7 +63,7 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
     setEditing(false)
   }
 
-  const opts = (list: TaskLookupItem[]) => list.map(i => ({ value: i.value, label: i.label }))
+  const opts = (list: TaskLookupItem[]) => list.map(i => ({ value: i.value, label: i.icon ? `${i.icon} ${i.label}` : i.label }))
   const assigneeOpts = [{ value: '', label: t('bureau') }, ...users.map(u => ({ value: String(u.id), label: userName(u) }))]
 
   const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }

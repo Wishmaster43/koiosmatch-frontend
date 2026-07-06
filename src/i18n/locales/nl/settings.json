@@ -510,12 +510,16 @@
   "matches": {
     "statusTitle": "Statussen",
     "statusSubtitle": "Beheer de match-statussen (status + kleur).",
-    "statusAdd": "Status toevoegen"
+    "statusAdd": "Status toevoegen",
+    "flagClosed": "Sluit de match",
+    "flagClosedDesc": "Een match in deze status is beëindigd (einddatum gezet, telt niet meer als open)."
   },
   "outreach": {
     "statusTitle": "Statussen",
     "statusSubtitle": "Beheer de bellijst-statussen (status + kleur).",
-    "statusAdd": "Status toevoegen"
+    "statusAdd": "Status toevoegen",
+    "flagReached": "Telt als bereikt",
+    "flagReachedDesc": "Deze status stempelt het contactmoment op de bellijst-regel."
   },
   "tasks": {
     "statusTitle": "Statussen",

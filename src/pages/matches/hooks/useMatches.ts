@@ -20,6 +20,7 @@ function mapMatch(m: RawMatch): MatchRow {
     client:     m.client_name ?? m.client?.name ?? m.customer?.name ?? '—',
     score:      m.score ?? m.match_score ?? null,
     stage:      m.stage_label ?? m.stage ?? m.status ?? '',
+    status:     m.status ?? '',
     stageColor: m.stage_color ?? '#6E8FD6',
     owner:      m.owner?.name ?? m.owner_name ?? '',
     date:       m.created_at ?? m.matched_at ?? '',

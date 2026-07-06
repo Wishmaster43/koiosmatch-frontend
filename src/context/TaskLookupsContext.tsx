@@ -19,7 +19,7 @@ import { COOKIE_AUTH } from '../lib/authMode'
  */
 
 // One configurable task lookup row; statuses carry is_done, priorities is_default.
-export interface TaskLookupItem { value: string; label: string; color: string; is_done?: boolean; is_default?: boolean; [k: string]: unknown }
+export interface TaskLookupItem { value: string; label: string; color: string; icon?: string; is_done?: boolean; is_default?: boolean; [k: string]: unknown }
 
 interface TaskLookupsValue {
   statuses: TaskLookupItem[]

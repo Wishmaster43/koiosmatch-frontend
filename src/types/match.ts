@@ -36,6 +36,8 @@ export interface MatchRow {
   client: string
   score: number | null
   stage: string
+  // Lifecycle status slug (R-1b /match-statuses; the is_closed flag ends the match).
+  status: string
   stageColor: string
   owner: string
   date: string

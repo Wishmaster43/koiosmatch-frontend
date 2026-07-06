@@ -68,7 +68,7 @@ export function mapTaskDetail(raw: ApiTask = {}): TaskDetail {
   return {
     ...base,
     description: raw.description ?? '',
-    comments: (raw.comments ?? []).map(c => ({
+    comments: (raw.comments ?? raw.notes ?? []).map(c => ({
       id: c.id,
       author: c.author?.name ?? c.author_name ?? '',
       authorInitials: initialsOf(c.author?.name ?? c.author_name ?? ''),

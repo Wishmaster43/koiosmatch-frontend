@@ -1221,12 +1221,16 @@
   "matches": {
     "statusTitle": "Status",
     "statusSubtitle": "Verwalte die Match-Status (Status + Farbe).",
-    "statusAdd": "Status hinzufügen"
+    "statusAdd": "Status hinzufügen",
+    "flagClosed": "Schließt das Match",
+    "flagClosedDesc": "Ein Match mit diesem Status ist beendet (Enddatum gesetzt, zählt nicht mehr als offen)."
   },
   "outreach": {
     "statusTitle": "Status",
     "statusSubtitle": "Verwalte die Anruflisten-Status (Status + Farbe).",
-    "statusAdd": "Status hinzufügen"
+    "statusAdd": "Status hinzufügen",
+    "flagReached": "Zählt als erreicht",
+    "flagReachedDesc": "Dieser Status stempelt den Kontaktmoment auf den Anruflisten-Eintrag."
   },
   "tasks": {
     "statusTitle": "Status",

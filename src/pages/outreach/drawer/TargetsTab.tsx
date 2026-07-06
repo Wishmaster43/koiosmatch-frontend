@@ -8,7 +8,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Phone, Check, X, RotateCcw, ListChecks, Handshake } from 'lucide-react'
+import { Phone, X, RotateCcw, ListChecks, Handshake } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
 import api from '@/lib/api'
@@ -17,14 +17,9 @@ import { initialsOf } from '@/lib/initials'
 import { useDateFormat } from '@/lib/datetime'
 import { useNavigation } from '@/context/NavigationContext'
 import { useOutreachOutcomes } from '@/lib/useOutreachOutcomes'
+import { useOutreachStatuses } from '@/lib/useOutreachStatuses'
 import { useVacancyOptions } from '@/pages/candidates/hooks/useVacancyOptions'
 import type { OutreachTarget } from '../hooks/useOutreachDetail'
-
-// Status → semantic token (soft-chip tint, §4). Todo stays muted; answered = success.
-const STATUS_COLOR: Record<string, string> = {
-  todo: 'var(--text-muted)', contacted: 'var(--color-primary)',
-  answered: 'var(--color-success)', skipped: 'var(--color-warning)',
-}
 
 export default function TargetsTab({ targets, loading, error, onSetStatus, onSetOutcome }: {
   targets: OutreachTarget[]
@@ -37,6 +32,9 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   const { formatDate } = useDateFormat()
   const { openEntity } = useNavigation()
   const { outcomes } = useOutreachOutcomes()
+  // Entry statuses from the tenant lookup (R-1b) — the is_reached FLAG drives
+  // behaviour, so tenant-added statuses appear here without any code change.
+  const { statuses, metaOf, initial } = useOutreachStatuses()
   // Per-row follow-up state: which target has the task modal / match prompt open.
   const [taskFor,  setTaskFor]  = useState<OutreachTarget | null>(null)
   const [matchFor, setMatchFor] = useState<OutreachTarget | null>(null)
@@ -66,8 +64,8 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   if (error)   return <p style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('drawer.error')}</p>
   if (!targets.length) return <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.empty')}</p>
 
-  const actBtn = (title: string, onClick: () => void, icon: React.ReactNode, color: string) => (
-    <button onClick={onClick} title={title} aria-label={title}
+  const actBtn = (title: string, onClick: () => void, icon: React.ReactNode, color: string, key?: string) => (
+    <button key={key} onClick={onClick} title={title} aria-label={title}
       style={{ width: 26, height: 26, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
         borderRadius: 6, cursor: 'pointer', color, border: `1px solid color-mix(in srgb, ${color} 30%, transparent)`,
         background: `color-mix(in srgb, ${color} 8%, transparent)` }}>
@@ -78,9 +76,10 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
       {targets.map(tg => {
-        const st  = tg.status ?? 'todo'
-        const col = STATUS_COLOR[st] ?? 'var(--text-muted)'
-        const handled = st !== 'todo'
+        const st   = tg.status ?? initial?.value ?? 'todo'
+        const meta = metaOf(st)
+        const col  = meta?.color ?? 'var(--text-muted)'
+        const handled = st !== (initial?.value ?? 'todo')
         return (
           <div key={tg.id} style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '8px 10px',
             border: '1px solid var(--border)', borderRadius: 8, background: 'var(--bg)' }}>
@@ -101,21 +100,21 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
               {/* Status soft-chip */}
               <span style={{ fontSize: 10, fontWeight: 600, padding: '2px 8px', borderRadius: 99, color: col,
                 background: `color-mix(in srgb, ${col} 12%, transparent)`, border: `1px solid color-mix(in srgb, ${col} 35%, transparent)` }}>
-                {t(`drawer.target.${st}`, { defaultValue: st })}
+                {meta?.label ?? t(`drawer.target.${st}`, { defaultValue: st })}
               </span>
               {/* Quick check-off: contacted / answered / skipped; done rows can reset to todo. */}
               <div style={{ display: 'flex', gap: 4, flexShrink: 0 }}>
                 {!handled ? (
                   <>
-                    {actBtn(t('drawer.action.contacted'), () => onSetStatus(tg.id, 'contacted'), <Phone size={12} />, 'var(--color-primary)')}
-                    {actBtn(t('drawer.action.answered'),  () => onSetStatus(tg.id, 'answered'),  <Check size={12} />, 'var(--color-success)')}
-                    {actBtn(t('drawer.action.skipped'),   () => onSetStatus(tg.id, 'skipped'),   <X size={12} />, 'var(--color-warning)')}
+                    {statuses.filter(o => o.value !== (initial?.value ?? 'todo')).map(o =>
+                      actBtn(o.label, () => onSetStatus(tg.id, o.value),
+                        o.is_reached ? <Phone size={12} /> : <X size={12} />, o.color ?? 'var(--color-primary)', o.value))}
                   </>
                 ) : (
                   <>
                     {actBtn(t('drawer.action.newTask'),   () => setTaskFor(tg), <ListChecks size={12} />, 'var(--color-primary)')}
                     {actBtn(t('drawer.action.makeMatch'), () => { setMatchFor(tg); setMatchVacancyId('') }, <Handshake size={12} />, 'var(--color-success)')}
-                    {actBtn(t('drawer.action.reset'),     () => onSetStatus(tg.id, 'todo'), <RotateCcw size={12} />, 'var(--text-muted)')}
+                    {actBtn(t('drawer.action.reset'),     () => onSetStatus(tg.id, initial?.value ?? 'todo'), <RotateCcw size={12} />, 'var(--text-muted)')}
                   </>
                 )}
               </div>

@@ -11,10 +11,11 @@ export function MatchStatusSettings() {
   const { t } = useTranslation('settings')
   return (
     <div style={{ maxWidth: 640 }}>
-      {/* allowAdd off until R-1b: a brand-new status isn't write-usable yet (BE side-effects key on
-          the seeded slugs) — the personalisation layer (relabel/colour/reorder) is fully supported. */}
-      <StatusListEditor compact withColor allowAdd={false} title={t('matches.statusTitle')} subtitle={t('matches.statusSubtitle')}
-        endpoint="/match-statuses" addLabel={t('matches.statusAdd')} />
+      {/* R-1b live: tenant-added statuses are write-usable; the is_closed FLAG (never the
+          slug) drives behaviour — a closed status ends the match (ended_at + open count). */}
+      <StatusListEditor compact withColor title={t('matches.statusTitle')} subtitle={t('matches.statusSubtitle')}
+        endpoint="/match-statuses" addLabel={t('matches.statusAdd')}
+        flagField={{ key: 'is_closed', label: t('matches.flagClosed'), description: t('matches.flagClosedDesc') }} />
     </div>
   )
 }

@@ -248,7 +248,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     const authorName = (u?.name || [u?.firstname, u?.lastname].filter(Boolean).join(' ') || u?.email || '').trim()
     const optimistic = { id: `tmp-${Date.now()}`, author: authorName, authorInitials: initialsOf(authorName || '?'), body, time: new Date().toISOString() }
     setSelected(prev => (prev && prev.id === id ? ({ ...prev, comments: [...(prev.comments ?? []), optimistic] } as TaskDetail) : prev))
-    api.post(`/tasks/${id}/comments`, { body }).catch(() => notifyError(t('common:actionFailed')))
+    api.post(`/tasks/${id}/notes`, { body }).catch(() => notifyError(t('common:actionFailed')))
   }
 
   // Apply the authoritative task detail returned by the link endpoints.

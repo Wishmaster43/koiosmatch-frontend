@@ -47,7 +47,8 @@
       "owner": "Owner",
       "score": "Score",
       "stage": "Stage",
-      "created": "Created"
+      "created": "Created",
+      "status": "Status"
     }
   },
   "changelog": {

@@ -1221,12 +1221,16 @@
   "matches": {
     "statusTitle": "Statuts",
     "statusSubtitle": "Gérer les statuts des correspondances (statut + couleur).",
-    "statusAdd": "Ajouter un statut"
+    "statusAdd": "Ajouter un statut",
+    "flagClosed": "Clôture le match",
+    "flagClosedDesc": "Un match dans ce statut est terminé (date de fin définie, ne compte plus comme ouvert)."
   },
   "outreach": {
     "statusTitle": "Statuts",
     "statusSubtitle": "Gérer les statuts des listes d'appels (statut + couleur).",
-    "statusAdd": "Ajouter un statut"
+    "statusAdd": "Ajouter un statut",
+    "flagReached": "Compte comme joint",
+    "flagReachedDesc": "Ce statut horodate le contact sur la ligne de la liste d'appels."
   },
   "tasks": {
     "statusTitle": "Statuts",

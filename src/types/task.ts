@@ -78,6 +78,8 @@ export interface ApiTask {
   links?: Array<{ type?: string; linkable_type?: string; id?: Id; linkable_id?: Id; label?: string; name?: string }>
   comment_count?: number
   comments?: Array<{ id?: Id; author?: { name?: string }; author_name?: string; body?: string; text?: string; created_at?: string; time?: string }>
+  // NOTES-4b: the canonical field name once BE renames the resource (same rows).
+  notes?: Array<{ id?: Id; author?: { name?: string }; author_name?: string; body?: string; text?: string; created_at?: string; time?: string }>
   description?: string
   activity?: Array<{ id?: Id; author?: { name?: string } | string; description?: string; created_at?: string; time?: string }>
   timeline?: Array<{ id?: Id; author?: { name?: string } | string; description?: string; created_at?: string; time?: string }>

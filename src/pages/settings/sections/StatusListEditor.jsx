@@ -11,9 +11,12 @@ import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControl
 
 // extraField (optioneel): { key, label, options: [{value,label}], default } —
 // rendert een extra keuzeveld in de aanmaak-modal + een badge in de rij.
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, allowAdd = true, showRank = false }) {
+// flagField (optioneel): { key, label, description } — boolean gedragsvlag (R-1b:
+// is_closed/is_reached); checkbox in de modal + badge in de rij. De VLAG bepaalt
+// het gedrag, nooit het slug — zo werken tenant-eigen statussen op de schrijfpaden.
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, allowAdd = true, showRank = false }) {
   const { t } = useTranslation('settings')
-  const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(extraField ? { [extraField.key]: extraField.default } : {}) })
+  const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(flagField ? { [flagField.key]: false } : {}) })
   // Lookups differ in their display field: name (phases/status) vs label/value (genders/languages).
   const labelOf = (i) => i.name ?? i.label ?? i.value ?? ''
   // An item is protected when the backend marks it as referenced by existing data.
@@ -36,7 +39,8 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const openEdit = (item) => {
     setEditing(item)
     setDraft({ name: labelOf(item), color: item.color ?? '#3B8FD4',
-      ...(extraField ? { [extraField.key]: item[extraField.key] ?? extraField.default } : {}) })
+      ...(extraField ? { [extraField.key]: item[extraField.key] ?? extraField.default } : {}),
+      ...(flagField ? { [flagField.key]: Boolean(item[flagField.key]) } : {}) })
     setShowModal(true)
   }
 
@@ -154,6 +158,12 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
               {withColor
                 ? <ColorBadge label={labelOf(item)} color={item.color ?? '#6B7280'} />
                 : <span style={{ fontSize: 13, color: 'var(--text)' }}>{labelOf(item)}</span>}
+              {flagField && item[flagField.key] && (
+                <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-primary)',
+                               background: 'var(--color-primary-bg)', padding: '2px 7px', borderRadius: 999, whiteSpace: 'nowrap' }}>
+                  {flagField.label}
+                </span>
+              )}
               {extraField && item[extraField.key] && (
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--border)', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>
                   {extraField.options.find(o => o.value === item[extraField.key])?.label ?? item[extraField.key]}
@@ -206,6 +216,17 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                   {extraField.options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
                 </select>
               </div>
+            )}
+            {flagField && (
+              <label style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 14, cursor: 'pointer' }}>
+                <input type="checkbox" checked={Boolean(draft[flagField.key])}
+                  onChange={e => setDraft(d => ({ ...d, [flagField.key]: e.target.checked }))}
+                  style={{ accentColor: 'var(--color-primary)', width: 14, height: 14, marginTop: 2, flexShrink: 0 }} />
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: 13, color: 'var(--text)', fontWeight: 500 }}>{flagField.label}</span>
+                  {flagField.description && <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-muted)', marginTop: 2 }}>{flagField.description}</span>}
+                </span>
+              </label>
             )}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
               <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>

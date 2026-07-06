@@ -47,7 +47,8 @@
       "owner": "Responsable",
       "score": "Puntuación",
       "stage": "Fase",
-      "created": "Creado"
+      "created": "Creado",
+      "status": "Estado"
     }
   },
   "changelog": {

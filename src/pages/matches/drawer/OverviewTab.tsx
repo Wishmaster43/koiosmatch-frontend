@@ -10,6 +10,8 @@ import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import StatusPill from '@/components/ui/StatusPill'
 import ScorePill from '../ScorePill'
+import SelectMenu from '@/components/ui/SelectMenu'
+import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import type { MatchRow } from '@/types/match'
 
 // One read-only field: label above, value below (§3B field layout).
@@ -27,9 +29,12 @@ function textOrDash(value: string): ReactNode {
   return value && value !== '—' ? value : <span style={{ color: 'var(--text-muted)' }}>—</span>
 }
 
-export default function OverviewTab({ match }: { match: MatchRow }) {
+export default function OverviewTab({ match, onSetStatus }: { match: MatchRow; onSetStatus?: (status: string) => void }) {
   const { t } = useTranslation('matches')
   const { formatDate } = useDateFormat()
+  // Lifecycle status from the tenant lookup — the is_closed FLAG ends the match (R-1b).
+  const { statuses, metaOf } = useMatchStatuses()
+  const statusMeta = metaOf(match.status)
 
   return (
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 14, background: 'var(--bg)' }}>
@@ -48,6 +53,16 @@ export default function OverviewTab({ match }: { match: MatchRow }) {
           {match.stage
             ? <StatusPill label={match.stage} color={match.stageColor} />
             : <span style={{ color: 'var(--text-muted)' }}>—</span>}
+        </Field>
+        {/* Lifecycle status — editable from the tenant lookup; closing statuses end the match. */}
+        <Field label={t('drawer.fields.status')}>
+          {onSetStatus ? (
+            <SelectMenu value={match.status || null} onChange={onSetStatus}
+              placeholder={t('drawer.fields.status')}
+              options={statuses.map(o => ({ value: o.value, label: o.label }))} />
+          ) : statusMeta ? (
+            <StatusPill label={statusMeta.label} color={statusMeta.color} />
+          ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
         </Field>
         <Field label={t('drawer.fields.created')}>{formatDate(match.date)}</Field>
       </div>

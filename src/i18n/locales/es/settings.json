@@ -1221,12 +1221,16 @@
   "matches": {
     "statusTitle": "Estados",
     "statusSubtitle": "Gestiona los estados de coincidencias (estado + color).",
-    "statusAdd": "Añadir estado"
+    "statusAdd": "Añadir estado",
+    "flagClosed": "Cierra el match",
+    "flagClosedDesc": "Un match en este estado queda finalizado (fecha de fin establecida, ya no cuenta como abierto)."
   },
   "outreach": {
     "statusTitle": "Estados",
     "statusSubtitle": "Gestiona los estados de listas de llamadas (estado + color).",
-    "statusAdd": "Añadir estado"
+    "statusAdd": "Añadir estado",
+    "flagReached": "Cuenta como contactado",
+    "flagReachedDesc": "Este estado marca el momento de contacto en la línea de la lista de llamadas."
   },
   "tasks": {
     "statusTitle": "Estados",
