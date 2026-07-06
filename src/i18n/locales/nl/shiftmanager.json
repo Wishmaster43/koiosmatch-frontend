@@ -97,7 +97,9 @@
     "countCol": "Aantal",
     "totalRow": "Totaal",
     "viewTotals": "Totalen",
-    "viewDetails": "Details"
+    "viewDetails": "Details",
+    "metricLabel": "Reeks",
+    "byHours": "Uren"
   },
   "charts": {
     "hours": "Aantal uren",

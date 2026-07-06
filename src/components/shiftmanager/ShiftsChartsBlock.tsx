@@ -55,7 +55,7 @@ export default function ShiftsChartsBlock({
   const [selectedJobTypes,   setSelectedJobTypes]   = useState<string[]>([])
   const [selectedCustomers,  setSelectedCustomers]  = useState<string[]>([])
   const [selectedLocations,  setSelectedLocations]  = useState<string[]>([])
-  const [drill,              setDrill]              = useState<{ title: string; fetchUrl: string } | null>(null)
+  const [drill,              setDrill]              = useState<{ baseQuery: string; metric: string; label: string; yearSuffix: string } | null>(null)
 
   // ── Data layer ──────────────────────────────────────────────────────────────
   const { loading, error, filterOptions, chartData, shiftBars, hoursBars, multiYear } =
@@ -88,19 +88,16 @@ export default function ShiftsChartsBlock({
       params.set("month", `${year}-${mm}`)
     }
 
-    params.set("metric", baseMetric)
+    // NB: metric is NOT baked in — the drawer appends the chosen series, so you can
+    // switch Totaal / Niet ingevuld / … in the drawer without reopening (Danny).
     selectedJobTypes.forEach((j) => params.append("job_type[]", j))
     selectedLocations.forEach((l) => params.append("location_id[]", l))
     fixedLocationIds.forEach((l)  => params.append("location_id[]", l))
     if (fixedDepartmentId) params.append("department_id[]", fixedDepartmentId)
     if (fixedCandidateId)  params.append("candidate_id[]",  fixedCandidateId)
 
-    const metricLabel = seriesLabel(baseMetric)
-    const yearSuffix  = multiYear ? ` '${String(year).slice(2)}` : ""
-    setDrill({
-      title:    `${metricLabel}${yearSuffix} — ${datum.label}`,
-      fetchUrl: `/sm_reports/shifts-per-month/detail?${params}`,
-    })
+    const yearSuffix = multiYear ? ` '${String(year).slice(2)}` : ""
+    setDrill({ baseQuery: params.toString(), metric: baseMetric, label: datum.label, yearSuffix })
   }
 
   // Add/remove a year, keeping at least one selected.
@@ -169,8 +166,10 @@ export default function ShiftsChartsBlock({
 
       {drill && (
         <ShiftsDrillDownDrawer
-          title={drill.title}
-          fetchUrl={drill.fetchUrl}
+          metric={drill.metric}
+          metricOptions={SERIES.map(s => ({ value: s.key, label: seriesLabel(s.key) }))}
+          buildUrl={(m) => `/sm_reports/shifts-per-month/detail?${drill.baseQuery}&metric=${m}`}
+          titleFor={(m) => `${seriesLabel(m)}${drill.yearSuffix} — ${drill.label}`}
           onClose={() => setDrill(null)}
           locationMeta={locationMeta}
         />

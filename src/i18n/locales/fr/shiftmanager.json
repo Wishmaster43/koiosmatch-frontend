@@ -97,7 +97,9 @@
     "countCol": "Nombre",
     "totalRow": "Total",
     "viewTotals": "Totaux",
-    "viewDetails": "Détails"
+    "viewDetails": "Détails",
+    "metricLabel": "Série",
+    "byHours": "Heures"
   },
   "charts": {
     "hours": "Nombre d'heures",

@@ -70,9 +70,14 @@ function formatDate(iso?: string | null) {
 
 function CandidateBlock({ invite }: { invite: ShiftInvite }) {
   const { t } = useTranslation('shiftmanager')
-  const c    = invite.candidate
-  const name = c ? `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() : null
-  const ini  = c ? `${c.first_name?.[0] ?? ''}${c.last_name?.[0] ?? ''}`.toUpperCase() : '?'
+  const c   = (invite.candidate ?? {}) as Record<string, unknown>
+  // Tolerant name: accept first_name/last_name OR firstname/lastname; fall back to the
+  // email local-part so a nameless mirror row no longer reads "Onbekend".
+  const first = String(c.first_name ?? c.firstname ?? '')
+  const last  = String(c.last_name  ?? c.lastname  ?? '')
+  const email = typeof c.email === 'string' ? c.email : ''
+  const name  = `${first} ${last}`.trim() || (email ? email.split('@')[0] : '') || null
+  const ini   = (first[0] ?? last[0] ?? email[0] ?? '?').toUpperCase()
 
   return (
     <div style={{ marginTop: 6, padding: '8px 10px', borderRadius: 6,
@@ -89,8 +94,8 @@ function CandidateBlock({ invite }: { invite: ShiftInvite }) {
         </span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 3, paddingLeft: 31 }}>
-        {c?.email    && <Row icon={User}         label={t('shiftsDrawer.fields.email')}       value={c.email} />}
-        {c?.mobile   && <Row icon={User}         label={t('shiftsDrawer.fields.mobile')}      value={c.mobile} />}
+        {email       && <Row icon={User}         label={t('shiftsDrawer.fields.email')}       value={email} />}
+        {typeof c.mobile === 'string' && c.mobile && <Row icon={User} label={t('shiftsDrawer.fields.mobile')} value={c.mobile} />}
         {invite.scheduled_at     && <Row icon={CalendarCheck} label={t('shiftsDrawer.fields.scheduled')}   value={formatDateTime(invite.scheduled_at)} />}
         {invite.total_time_worked && <Row icon={Timer}        label={t('shiftsDrawer.fields.workedHours')} value={t('shiftsDrawer.hoursUnit', { n: invite.total_time_worked })} />}
         {invite.contract_type    && <Row icon={Hash}          label={t('shiftsDrawer.fields.contract')}    value={invite.contract_type} />}
@@ -99,9 +104,11 @@ function CandidateBlock({ invite }: { invite: ShiftInvite }) {
   )
 }
 
-export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose, locationMeta }: {
-  title: ReactNode
-  fetchUrl: string
+export default function ShiftsDrillDownDrawer({ metric, metricOptions, buildUrl, titleFor, onClose, locationMeta }: {
+  metric: string                                       // initial series (totaal / geen_kandidaat / …)
+  metricOptions: { value: string; label: string }[]    // switchable series list
+  buildUrl: (metric: string) => string                 // detail URL for a chosen series
+  titleFor: (metric: string) => string                 // drawer title for a chosen series
   onClose: () => void
   // Location id → { name, customer } so the totals view can show real customer names.
   locationMeta?: LocationMeta
@@ -111,7 +118,11 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose, locati
   const [search, setSearch] = useState('')
   // Default to grouped totals (Danny: "geen orderlijsten maar totalen"); Details stays reachable.
   const [view, setView] = useState<'totals' | 'details'>('totals')
-  const { shifts, loading, error } = useDrillDownShifts(fetchUrl)
+  // The series (Totaal / Niet ingevuld / Geen kandidaat / Prognose / Werkelijk) can be
+  // switched right here — refetches the same period for the chosen series (Danny).
+  const [currentMetric, setCurrentMetric] = useState(metric)
+  const title = titleFor(currentMetric)
+  const { shifts, loading, error } = useDrillDownShifts(buildUrl(currentMetric))
 
   const filtered = shifts.filter(s => {
     if (!search) return true
@@ -140,8 +151,17 @@ export default function ShiftsDrillDownDrawer({ title, fetchUrl, onClose, locati
                       padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div>
             <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{title}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-              {loading ? t('shiftsDrawer.loading') : t('shiftsDrawer.count', { count: shifts.length })}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+              {/* Series switcher — jump between Totaal/Niet ingevuld/… for the same period */}
+              <select value={currentMetric} onChange={e => setCurrentMetric(e.target.value)}
+                aria-label={t('shiftsDrawer.metricLabel')}
+                style={{ fontSize: 12, padding: '3px 6px', borderRadius: 6, border: '1px solid var(--border)',
+                         background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', outline: 'none' }}>
+                {metricOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+              </select>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                {loading ? t('shiftsDrawer.loading') : t('shiftsDrawer.count', { count: shifts.length })}
+              </span>
             </div>
           </div>
           <button onClick={onClose} aria-label={t('common:close')}
