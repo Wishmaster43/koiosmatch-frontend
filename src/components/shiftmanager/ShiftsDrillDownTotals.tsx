@@ -76,8 +76,9 @@ export default function ShiftsDrillDownTotals({ shifts, locationMeta }: {
 }) {
   const { t, i18n } = useTranslation('shiftmanager')
   const unknown = t('shiftsDrawer.unknown')
-  // Switch the aggregated value between number of shifts and worked hours.
-  const [unit, setUnit] = useState<'count' | 'hours'>('count')
+  // Switch the aggregated value between number of shifts and worked hours —
+  // defaults to hours (Danny: "drill down moet altijd op uren tonen").
+  const [unit, setUnit] = useState<'count' | 'hours'>('hours')
 
   // Resolve the location id once per row for the customer/location lookups.
   const locId = (s: ShiftRow) => String(s.order?.customer_location?.id ?? '')

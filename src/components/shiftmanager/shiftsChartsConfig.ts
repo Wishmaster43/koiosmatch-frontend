@@ -6,9 +6,11 @@
 import type { ShiftSeries } from '@/types/shiftmanager'
 
 // Series key + colour; labels come from i18n via t('charts.series.<key>').
+// Brand-aligned palette (Danny: black for Totaal is niet mooi): Totaal = brand blue,
+// Niet ingevuld = brand gold, Geen kandidaat = red, Prognose = indigo, Werkelijk = green.
 export const SERIES: ShiftSeries[] = [
-  { key: "totaal",         color: "#1e293b" },
-  { key: "niet_ingevuld",  color: "#f59e0b" },
+  { key: "totaal",         color: "#1B60A9" },
+  { key: "niet_ingevuld",  color: "#F0AB00" },
   { key: "geen_kandidaat", color: "#ef4444" },
   { key: "prognose",       color: "#6366f1" },
   { key: "werkelijk",      color: "#10b981" },
