@@ -116,7 +116,11 @@
       "geen_kandidaat": "Geen kandidaat",
       "prognose": "Prognose",
       "werkelijk": "Werkelijk"
-    }
+    },
+    "hoursTable": "Uren per maand",
+    "shiftsTable": "Diensten per maand",
+    "periodCol": "Periode",
+    "totalRow": "Totaal"
   },
   "customersReport": {
     "title": "Klanten rapport",

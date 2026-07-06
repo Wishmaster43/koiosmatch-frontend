@@ -116,7 +116,11 @@
       "geen_kandidaat": "Aucun candidat",
       "prognose": "Prévision",
       "werkelijk": "Réel"
-    }
+    },
+    "hoursTable": "Heures par mois",
+    "shiftsTable": "Services par mois",
+    "periodCol": "Période",
+    "totalRow": "Total"
   },
   "customersReport": {
     "title": "Rapport clients",

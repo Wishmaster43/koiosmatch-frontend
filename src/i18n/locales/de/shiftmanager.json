@@ -116,7 +116,11 @@
       "geen_kandidaat": "Kein Kandidat",
       "prognose": "Prognose",
       "werkelijk": "Tatsächlich"
-    }
+    },
+    "hoursTable": "Stunden pro Monat",
+    "shiftsTable": "Dienste pro Monat",
+    "periodCol": "Zeitraum",
+    "totalRow": "Gesamt"
   },
   "customersReport": {
     "title": "Kundenbericht",

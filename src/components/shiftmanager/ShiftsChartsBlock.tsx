@@ -16,7 +16,7 @@ import { useTranslation }     from "react-i18next"
 import ShiftsDrillDownDrawer  from "./ShiftsDrillDownDrawer"
 import { useRightPanel }      from "@/context/RightPanelContext"
 import { SERIES, CURRENT_YEAR } from "./shiftsChartsConfig"
-import { BarChartWidget, YearIndicator, ChartCard } from "./shiftsChartsWidgets"
+import { BarChartWidget, YearIndicator, ChartCard, ShiftsDataTable } from "./shiftsChartsWidgets"
 import { useShiftsChartData } from "./useShiftsChartData"
 import { buildShiftsFilterGroups } from "./buildShiftsFilterGroups"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
@@ -146,6 +146,16 @@ export default function ShiftsChartsBlock({
         <ChartCard title={t('charts.shifts')} subtitle={periodLabel} loading={loading} error={error}>
           <YearIndicator years={selectedYears} />
           <BarChartWidget data={chartData} bars={shiftBars} onBarClick={handleBarClick} />
+        </ChartCard>
+      </div>
+
+      {/* Same data as a table under each chart (hours + shifts per month, with totals). */}
+      <div className="grid grid-cols-1 gap-4 mt-4 lg:grid-cols-2">
+        <ChartCard title={t('charts.hoursTable')} subtitle={periodLabel} loading={loading} error={error}>
+          <ShiftsDataTable data={chartData} bars={hoursBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} />
+        </ChartCard>
+        <ChartCard title={t('charts.shiftsTable')} subtitle={periodLabel} loading={loading} error={error}>
+          <ShiftsDataTable data={chartData} bars={shiftBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} />
         </ChartCard>
       </div>
 

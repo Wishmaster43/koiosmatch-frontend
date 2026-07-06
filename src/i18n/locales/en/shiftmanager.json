@@ -116,7 +116,11 @@
       "geen_kandidaat": "No candidate",
       "prognose": "Forecast",
       "werkelijk": "Actual"
-    }
+    },
+    "hoursTable": "Hours per month",
+    "shiftsTable": "Shifts per month",
+    "periodCol": "Period",
+    "totalRow": "Total"
   },
   "customersReport": {
     "title": "Customers report",

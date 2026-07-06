@@ -4,7 +4,7 @@
  * states). Dumb: they receive data + handlers, no fetching or business logic.
  */
 import { useMemo } from "react"
-import type { ReactNode } from "react"
+import type { ReactNode, CSSProperties } from "react"
 import {
   ResponsiveContainer, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -39,7 +39,11 @@ export function BarChartWidget({ data, bars, onBarClick }: {
         <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
         <XAxis dataKey="label" tick={{ fontSize: 12, fill: "#64748b" }} />
         <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#64748b" }} />
-        <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 13 }} />
+        {/* nl-NL thousands separator + force the series order (Totaal · Niet ingevuld · Geen
+            kandidaat · Prognose · Werkelijk) instead of recharts' default alphabetical sort. */}
+        <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 13 }}
+          formatter={(value) => (Number(value) || 0).toLocaleString('nl-NL')}
+          itemSorter={(item) => bars.findIndex(b => b.dataKey === (item as { dataKey?: unknown }).dataKey)} />
         <Legend
           // @ts-expect-error recharts omits `payload` from its public prop types but renders it at runtime
           payload={legendPayload}
@@ -77,6 +81,50 @@ export function YearIndicator({ years }: { years: number[] }) {
           {y}
         </span>
       ))}
+    </div>
+  )
+}
+
+// Data table under a chart: one row per bucket (month/quarter), one column per
+// series (in SERIES order), a totals row, nl-NL thousands separators.
+export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear }: {
+  data: ShiftsChartDatum[]
+  bars: ShiftBar[]
+  monthLabel: ReactNode
+  totalLabel: ReactNode
+  multiYear: boolean
+}) {
+  const fmt = (v: unknown) => (Number(v) || 0).toLocaleString('nl-NL')
+  const totals = bars.map(b => data.reduce((s, r) => s + (Number(r[b.dataKey]) || 0), 0))
+  const th: CSSProperties = { padding: '7px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
+  const td: CSSProperties = { padding: '7px 10px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)', fontVariantNumeric: 'tabular-nums' }
+  return (
+    <div style={{ overflowX: 'auto' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr>
+            <th style={{ ...th, textAlign: 'left' }}>{monthLabel}</th>
+            {bars.map(b => (
+              <th key={b.dataKey} style={{ ...th, textAlign: 'right' }}>
+                <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: b.color, opacity: b.opacity, marginRight: 5, verticalAlign: 'middle' }} />
+                {b.name}{multiYear ? ` ${b.year}` : ''}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((row, ri) => (
+            <tr key={String(row.label) + ri}>
+              <td style={{ ...td, fontWeight: 500, textAlign: 'left' }}>{String(row.label)}</td>
+              {bars.map(b => <td key={b.dataKey} style={{ ...td, textAlign: 'right' }}>{fmt(row[b.dataKey])}</td>)}
+            </tr>
+          ))}
+          <tr>
+            <td style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'left' }}>{totalLabel}</td>
+            {totals.map((v, i) => <td key={i} style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'right' }}>{fmt(v)}</td>)}
+          </tr>
+        </tbody>
+      </table>
     </div>
   )
 }
