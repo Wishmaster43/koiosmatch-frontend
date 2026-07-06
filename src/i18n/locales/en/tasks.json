@@ -126,5 +126,11 @@
   },
   "page": {
     "searchPlaceholder": "Search tasks"
+  },
+  "related": {
+    "title": "Tasks for this candidate",
+    "open": "Open",
+    "history": "History",
+    "empty": "No tasks in this view."
   }
 }

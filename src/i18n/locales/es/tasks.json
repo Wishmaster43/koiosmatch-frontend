@@ -126,5 +126,11 @@
   },
   "page": {
     "searchPlaceholder": "Buscar tareas"
+  },
+  "related": {
+    "title": "Tareas de este candidato",
+    "open": "Abiertas",
+    "history": "Historial",
+    "empty": "No hay tareas en esta vista."
   }
 }

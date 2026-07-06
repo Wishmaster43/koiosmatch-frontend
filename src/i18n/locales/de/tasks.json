@@ -126,5 +126,11 @@
   },
   "page": {
     "searchPlaceholder": "Aufgaben suchen"
+  },
+  "related": {
+    "title": "Aufgaben dieses Kandidaten",
+    "open": "Offen",
+    "history": "Historie",
+    "empty": "Keine Aufgaben in dieser Ansicht."
   }
 }

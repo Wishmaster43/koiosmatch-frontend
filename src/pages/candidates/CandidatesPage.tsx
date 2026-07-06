@@ -25,6 +25,7 @@ import HeaderSearch from '@/components/ui/HeaderSearch'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
 import { usePools } from '@/lib/usePools'
+import { usePageMemory } from '@/lib/usePageMemory'
 import { useAllSettings, getNumberSetting } from '@/lib/settings/useAllSettings'
 import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
@@ -68,33 +69,33 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const { navigate } = useNavigation()
   const { registerFilters, unregisterFilters } = useRightPanel() as { registerFilters: (id: string, groups: unknown) => void; unregisterFilters: (id: string) => void }
 
-  const [page,           setPage]           = useState(1)
+  const [page,           setPage]           = usePageMemory('cand.page', 1)
   // Initialise from the user's profile preference (Profile → Records per page).
   const [pageSize,       setPageSize]       = useState<number>(() => user?.default_per_page ?? 50)
   const [selected,       setSelected]       = useState<Candidate | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [addOpen,        setAddOpen]        = useState(false)
   // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
-  const [showArchived,   setShowArchived]   = useState(false)
+  const [showArchived,   setShowArchived]   = usePageMemory('cand.archived', false)
   // CAND-FILTERS (2026-07-03): pool (ids) · city (exact) · source — server-side params.
-  const [selectedPool,   setSelectedPool]   = useState<string[]>([])
-  const [selectedCity,   setSelectedCity]   = useState<string[]>([])
-  const [selectedSource, setSelectedSource] = useState<string[]>([])
+  const [selectedPool,   setSelectedPool]   = usePageMemory<string[]>('cand.pool', [])
+  const [selectedCity,   setSelectedCity]   = usePageMemory<string[]>('cand.city', [])
+  const [selectedSource, setSelectedSource] = usePageMemory<string[]>('cand.source', [])
   const [detail,         setDetail]         = useState<Candidate | null>(null)
   const selectedIdRef = useRef<Id | null>(null)
 
   // Server-side filter dimensions (the API supports these). Owner holds owner_ids.
-  const [selectedStatus,   setSelectedStatus]   = useState<string[]>([])
-  const [selectedFunnel,   setSelectedFunnel]   = useState<string[]>([])
-  const [selectedType,     setSelectedType]     = useState<string[]>([])
-  const [selectedOwner,    setSelectedOwner]    = useState<Array<string | number>>([])
-  const [selectedGeslacht, setSelectedGeslacht] = useState<string[]>([])
-  const [selectedProvince, setSelectedProvince] = useState<string[]>([])
-  const [selectedTitle,    setSelectedTitle]    = useState<string[]>([])
-  const [selectedLocation, setSelectedLocation] = useState<Array<string | number>>([])
-  const [globalSearch,     setGlobalSearch]     = useState('')
+  const [selectedStatus,   setSelectedStatus]   = usePageMemory<string[]>('cand.status', [])
+  const [selectedFunnel,   setSelectedFunnel]   = usePageMemory<string[]>('cand.funnel', [])
+  const [selectedType,     setSelectedType]     = usePageMemory<string[]>('cand.type', [])
+  const [selectedOwner,    setSelectedOwner]    = usePageMemory<Array<string | number>>('cand.owner', [])
+  const [selectedGeslacht, setSelectedGeslacht] = usePageMemory<string[]>('cand.gender', [])
+  const [selectedProvince, setSelectedProvince] = usePageMemory<string[]>('cand.province', [])
+  const [selectedTitle,    setSelectedTitle]    = usePageMemory<string[]>('cand.title', [])
+  const [selectedLocation, setSelectedLocation] = usePageMemory<Array<string | number>>('cand.location', [])
+  const [globalSearch,     setGlobalSearch]     = usePageMemory('cand.search', '')
   // Aandacht-tile filter: null | 'stale6m' | 'neverContacted' | 'noFollowup' (klik = aan/uit).
-  const [attentionFilter,  setAttentionFilter]  = useState<string | null>(null)
+  const [attentionFilter,  setAttentionFilter]  = usePageMemory<string | null>('cand.attention', null)
   // Date-range filter from a dashboard period click (created or last-contact between two dates).
   const [dateRange, setDateRange] = useState<{ param: 'created_between' | 'last_contact_between'; from: string; to: string } | null>(null)
   // Bulk-selectie (checkboxes) — id-set; gewist bij filter/pagina-wissel.
@@ -314,6 +315,12 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   }
   // Open a candidate drawer when arriving via a dashboard/cross-entity link ({ open: id }).
   useOpenFromIntent(intent, (id) => selectCandidate({ id } as Candidate))
+
+  // Remember the open drawer across page switches; coming back reopens it (Danny
+  // 2026-07-06: "opent ook niet vorige items"). Memory-only, mirrors usePageMemory.
+  const [rememberedId, setRememberedId] = usePageMemory<Id | null>('cand.openId', null)
+  useEffect(() => { setRememberedId(selected?.id ?? null) }, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (rememberedId && !selected) selectCandidate({ id: rememberedId } as Candidate) }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // A freshly created candidate: prepend to the list and open its drawer.
   const handleCreated = (c: Candidate) => {

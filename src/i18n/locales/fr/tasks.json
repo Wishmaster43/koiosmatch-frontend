@@ -126,5 +126,11 @@
   },
   "page": {
     "searchPlaceholder": "Rechercher des tâches"
+  },
+  "related": {
+    "title": "Tâches de ce candidat",
+    "open": "Ouvertes",
+    "history": "Historique",
+    "empty": "Aucune tâche dans cette vue."
   }
 }

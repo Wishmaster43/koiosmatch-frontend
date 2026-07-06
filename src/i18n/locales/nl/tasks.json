@@ -126,5 +126,11 @@
   },
   "page": {
     "searchPlaceholder": "Zoek naar taken"
+  },
+  "related": {
+    "title": "Taken van deze kandidaat",
+    "open": "Open",
+    "history": "Historie",
+    "empty": "Geen taken in deze weergave."
   }
 }

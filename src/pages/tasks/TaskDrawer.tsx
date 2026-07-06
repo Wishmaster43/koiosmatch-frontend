@@ -8,6 +8,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useUsers } from '@/lib/queries'
 import DetailsTab from './drawer/DetailsTab'
+import RelatedTasks from './drawer/RelatedTasks'
 import LinksTab from './drawer/LinksTab'
 import CommentsTab from './drawer/CommentsTab'
 import TaskChangelogPopover from './drawer/TaskChangelogPopover'
@@ -49,7 +50,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
     switch (id) {
-      case 'details':  return <DetailsTab task={task} onUpdate={patch => onUpdate(task.id, patch)} />
+      case 'details':  return <><DetailsTab task={task} onUpdate={patch => onUpdate(task.id, patch)} /><RelatedTasks task={task} /></>
       case 'links':    return <LinksTab task={task} onAddLink={link => onAddLink(task.id, link)} onRemoveLink={link => onRemoveLink(task.id, link)} />
       case 'comments': return <CommentsTab task={task} onAdd={body => onAddComment(task.id, body)} />
       default:         return null
