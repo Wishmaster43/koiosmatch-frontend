@@ -229,7 +229,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f23f6-8449-7145-9933-37b168a7ed32
+                 * @example 019f2942-0d69-717d-938a-2e52d4008921
                  */
                 id: string;
             };
@@ -253,7 +253,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f23f6-8449-7145-9933-37b168a7ed32
+                 * @example 019f2942-0d69-717d-938a-2e52d4008921
                  */
                 user_id: string;
             };
@@ -283,7 +283,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f23f6-8449-7145-9933-37b168a7ed32
+                 * @example 019f2942-0d69-717d-938a-2e52d4008921
                  */
                 user_id: string;
             };
@@ -452,22 +452,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/whatsapp-web/webhook": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["postWhatsappWebWebhook"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/whatsapp/stats": {
         parameters: {
             query?: never;
@@ -561,7 +545,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f23f6-9129-7339-b7f1-4909fc3d106f
+                 * @example 019f2942-1ad8-7337-93ff-28dcf296ab0d
                  */
                 whatsappConnection_id: string;
             };
@@ -586,7 +570,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f23f6-9129-7339-b7f1-4909fc3d106f
+                 * @example 019f2942-1ad8-7337-93ff-28dcf296ab0d
                  */
                 whatsappConnection_id: string;
             };
@@ -609,7 +593,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f23f6-9129-7339-b7f1-4909fc3d106f
+                 * @example 019f2942-1ad8-7337-93ff-28dcf296ab0d
                  */
                 whatsappConnection_id: string;
             };
@@ -632,7 +616,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f23f6-9129-7339-b7f1-4909fc3d106f
+                 * @example 019f2942-1ad8-7337-93ff-28dcf296ab0d
                  */
                 whatsappConnection_id: string;
             };
@@ -714,93 +698,6 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/profile/whatsapp-web": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /api/profile/whatsapp-web — the caller's own numbers. */
-        get: operations["getProfileWhatsappWeb"];
-        put?: never;
-        /** POST /api/profile/whatsapp-web — register a new number (status starts disconnected). */
-        post: operations["postProfileWhatsappWeb"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/profile/whatsapp-web/{id}/connect": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /api/profile/whatsapp-web/{id}/connect — start a WAHA session; QR arrives via webhook. */
-        post: operations["postProfileWhatsappWebIdConnect"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/profile/whatsapp-web/{id}/disconnect": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /api/profile/whatsapp-web/{id}/disconnect — end the live link (data is kept). */
-        post: operations["postProfileWhatsappWebIdDisconnect"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/profile/whatsapp-web/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** DELETE /api/profile/whatsapp-web/{id} — remove one of the caller's numbers. */
-        delete: operations["deleteProfileWhatsappWebId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1084,6 +981,70 @@ export interface paths {
         };
         /** GET /candidate/auth/me — profile + active bureau + bureau list. */
         get: operations["getCandidateAuthMe"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/inbound-email/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                token: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /inbound-email/{token} — ingest one received e-mail into the tenant log. */
+        post: operations["postInboundEmailToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/email-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /email-log?direction=in|out&status=&entity_type=&entity_id= — paginated, newest first. */
+        get: operations["getEmailLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/email-log/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the email log.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /email-log/{id} — one message WITH its (decrypted) body for the drawer. The body
+         *     may carry personal/health data (§9), so reading it is an ACCESS event: we record who
+         *     opened which email in the audit trail. IDOR-safe: resolved inside the tenant context.
+         */
+        get: operations["getEmailLogId"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1389,6 +1350,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/auth/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /auth/me/avatar — upload the current user's own avatar image. */
+        post: operations["postAuthMeAvatar"];
+        /** DELETE /auth/me/avatar — remove the avatar; falls back to the colour icon. */
+        delete: operations["deleteAuthMeAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/mfa/setup": {
         parameters: {
             query?: never;
@@ -1445,24 +1424,6 @@ export interface paths {
          *     silently remove the second factor.
          */
         post: operations["postAuthMfaDisable"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/settings/whatsapp-queue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /settings/whatsapp-queue — the current per-number hourly limit (or the code default). */
-        get: operations["getSettingsWhatsappQueue"];
-        /** PUT /settings/whatsapp-queue { per_number_hourly_limit } — persist the tenant default. */
-        put: operations["putSettingsWhatsappQueue"];
-        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1812,6 +1773,27 @@ export interface paths {
         patch: operations["patchCandidatesCandidateNotesNote"];
         trace?: never;
     };
+    "/api/health/connectors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /api/health/connectors — external-integration status (super-admin only,
+         *     enforced by the route middleware). Passive: config + connection rows + the
+         *     outbound 5xx-streak cache; never an actual outbound call.
+         */
+        get: operations["getHealthConnectors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/settings/email/oauth/callback": {
         parameters: {
             query?: never;
@@ -2016,6 +1998,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/hf/webhook/{token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                token: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** POST /hf/webhook/{token} — apply one contract-status change to its Match. */
+        post: operations["postHfWebhookToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/planning": {
         parameters: {
             query?: never;
@@ -2041,7 +2043,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f23f6-912a-72a2-944d-9afc0c179f3b
+                 * @example 019f2942-1ad9-72cf-b6e6-fdc241c4be81
                  */
                 planningConnection_id: string;
             };
@@ -2066,7 +2068,7 @@ export interface paths {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f23f6-912a-72a2-944d-9afc0c179f3b
+                 * @example 019f2942-1ad9-72cf-b6e6-fdc241c4be81
                  */
                 planningConnection_id: string;
             };
@@ -2790,6 +2792,36 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/candidates/{candidate}/force": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * DELETE /candidates/{id}/force — permanently remove a candidate dossier (ARCH-2).
+         * @description Admin-only on top of candidates.delete: a planner can archive, but the
+         *     irreversible hard-delete needs tenant_admin/super_admin (403 otherwise). Refuses
+         *     (409) while applications/matches hang on the candidate — mirror of the archive
+         *     check. The full FK-safe cleanup is the erasure service's hard delete (AVG:
+         *     physically gone). The action is audit-logged BEFORE the row disappears.
+         */
+        delete: operations["deleteCandidatesCandidateForce"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/candidates/bulk/owner": {
         parameters: {
             query?: never;
@@ -2932,6 +2964,28 @@ export interface paths {
         put?: never;
         /** POST /candidates/bulk/status — set the deployability status on a batch. */
         post: operations["postCandidatesBulkStatus"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/candidates/bulk/funnel-stage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /candidates/bulk/funnel-stage — move each candidate's LATEST application to
+         *     the given funnel stage (BULK-2). Semantics = the single PATCH /applications/{id}
+         *     with phase_key: MatchMaker sync + the stage_changed event fire per real move; a
+         *     candidate without an application is `skipped`.
+         */
+        post: operations["postCandidatesBulkFunnelStage"];
         delete?: never;
         options?: never;
         head?: never;
@@ -4299,7 +4353,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** GET /locations — paginated list, ordered by name. */
+        /** GET /locations — paginated list, ordered by name; optional radius filter. */
         get: operations["getLocations"];
         put?: never;
         /** POST /locations — create one establishment. */
@@ -4726,6 +4780,34 @@ export interface paths {
          *     link resolver. Paginated; { id, name, customer_id, customer_name }.
          */
         get: operations["getContacts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/contacts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        /**
+         * GET /contacts/{id} — standalone contact detail (CUST-3): the drawer target when
+         *     clicking through from a task/anywhere. Full contact shape + the display names of
+         *     its customer/location/department. Resolved with findOrFail on the tenant
+         *     connection (foreign id ⇒ 404, no implicit binding — §4).
+         */
+        get: operations["getContactsId"];
         put?: never;
         post?: never;
         delete?: never;
@@ -5386,6 +5468,29 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/matches/bulk/couple": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * POST /matches/bulk/couple (MB-1) — queue the selected matches for backoffice
+         *     coupling. helloflex: per match a rate-limited job that derives the contract from
+         *     the vacancy (function/start date/employment type); a match whose vacancy misses a
+         *     required field is SKIPPED with a reason, never guessed (§10). shiftmanager: no
+         *     coupling mechanism exists → explicit 422, not a silent no-op.
+         */
+        post: operations["postMatchesBulkCouple"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/matches/{match}/contract": {
         parameters: {
             query?: never;
@@ -5410,6 +5515,68 @@ export interface paths {
          */
         post: operations["postMatchesMatchContract"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/match-statuses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getMatchStatuses"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postMatchStatuses"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/match-statuses/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putMatchStatusesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/match-statuses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match status.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putMatchStatusesId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteMatchStatusesId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -5465,7 +5632,7 @@ export interface paths {
             };
             cookie?: never;
         };
-        /** GET /outreach-campaigns/{id}/stats — the target-status distribution. */
+        /** GET /outreach-campaigns/{id}/stats — the target-status + outcome distributions. */
         get: operations["getOutreachCampaignsCampaignStats"];
         put?: never;
         post?: never;
@@ -5513,6 +5680,130 @@ export interface paths {
         head?: never;
         /** PATCH /outreach-targets/{id} — mark the candidate's outreach status + note. */
         patch: operations["patchOutreachTargetsTarget"];
+        trace?: never;
+    };
+    "/api/outreach-statuses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getOutreachStatuses"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postOutreachStatuses"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-outcomes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getOutreachOutcomes"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postOutreachOutcomes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-statuses/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putOutreachStatusesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-statuses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach status.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putOutreachStatusesId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteOutreachStatusesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-outcomes/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putOutreachOutcomesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/outreach-outcomes/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach outcome.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putOutreachOutcomesId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteOutreachOutcomesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/settings/rejection": {
@@ -5709,6 +6000,46 @@ export interface paths {
          *     breakdown). avg_placement_duration_days is null until HelloFlex provides dates.
          */
         get: operations["getReportsMatches"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/outreach": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /reports/outreach (REPORTS-2 fase 1) — tenant-wide bellijst ratios:
+         *     reach-rate + outcome shares over the targets that entered a list in the window.
+         */
+        get: operations["getReportsOutreach"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/reports/sources": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * GET /reports/sources (REPORTS-2 fase 2) — bron-ROI: per candidate source the
+         *     intake cohort, its applications and its placements (+ placement rate).
+         */
+        get: operations["getReportsSources"];
         put?: never;
         post?: never;
         delete?: never;
@@ -7123,6 +7454,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/tasks/{task}/notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The task.
+                 * @example architecto
+                 */
+                task: string;
+            };
+            cookie?: never;
+        };
+        /** GET /tasks/{id}/comments — the thread, oldest first, authors resolved. */
+        get: operations["getTasksTaskNotes"];
+        put?: never;
+        /** POST /tasks/{id}/comments — add a comment authored by the current user. */
+        post: operations["postTasksTaskNotes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/tasks/{task}/comments": {
         parameters: {
             query?: never;
@@ -7189,6 +7544,36 @@ export interface paths {
         post: operations["postTasksTaskLinks"];
         /** DELETE /tasks/{id}/links  { type, id } — detach one entity. */
         delete: operations["deleteTasksTaskLinks"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tasks/{task}/notes/{comment}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The task.
+                 * @example architecto
+                 */
+                task: string;
+                /** @example architecto */
+                comment: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PATCH /tasks/{id}/notes/{note} — edit a note's body (NOTES-4b: the task thread
+         *     became Notities, so it gets the same edit affordance as candidate notes).
+         * @description Records WHO edited (name) so the UI can show "gewijzigd door …".
+         */
+        put: operations["putTasksTaskNotesComment"];
+        post?: never;
+        /** DELETE /tasks/{id}/comments/{comment} — remove a comment from its task. */
+        delete: operations["deleteTasksTaskNotesComment"];
         options?: never;
         head?: never;
         patch?: never;
@@ -8005,132 +8390,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/whatsapp-web/queue": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /whatsapp-web/queue?status=&type=&number_id= — the queue rows. */
-        get: operations["getWhatsappWebQueue"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/whatsapp-web/queue/stats": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** GET /whatsapp-web/queue/stats — per number: rate_limit, in_queue, est_drain (hours). */
-        get: operations["getWhatsappWebQueueStats"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/whatsapp-web/queue/{id}/send-now": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the queue.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /whatsapp-web/queue/{id}/send-now — make it eligible immediately. */
-        post: operations["postWhatsappWebQueueIdSendNow"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/whatsapp-web/queue/{id}/pause": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the queue.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /whatsapp-web/queue/{id}/pause — hold it out of the drain. */
-        post: operations["postWhatsappWebQueueIdPause"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/whatsapp-web/queue/{id}/retry": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the queue.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** POST /whatsapp-web/queue/{id}/retry — requeue a failed/paused item. */
-        post: operations["postWhatsappWebQueueIdRetry"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/whatsapp-web/queue/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the queue.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** DELETE /whatsapp-web/queue/{id} — cancel (kept for audit, not hard-deleted). */
-        delete: operations["deleteWhatsappWebQueueId"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/whatsapp-message-types": {
         parameters: {
             query?: never;
@@ -8480,12 +8739,12 @@ export interface operations {
                     location_id?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     to?: string;
                     /**
@@ -8561,7 +8820,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     scheduled_at: string;
                     /**
@@ -8580,7 +8839,7 @@ export interface operations {
                      */
                     location_id?: string | null;
                     /**
-                     * @example no_show
+                     * @example planned
                      * @enum {string}
                      */
                     status?: "planned" | "completed" | "no_show" | "cancelled";
@@ -8676,7 +8935,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     scheduled_at?: string;
                     /**
@@ -8812,7 +9071,7 @@ export interface operations {
                      */
                     name: string;
                     /**
-                     * @example flex
+                     * @example enterprise
                      * @enum {string}
                      */
                     plan: "flex" | "pro" | "enterprise";
@@ -9040,7 +9299,7 @@ export interface operations {
                      */
                     password: string;
                     /**
-                     * @example tenant_admin
+                     * @example readonly
                      * @enum {string}
                      */
                     role: "tenant_admin" | "planner" | "readonly";
@@ -9073,7 +9332,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f23f6-8449-7145-9933-37b168a7ed32
+                 * @example 019f2942-0d69-717d-938a-2e52d4008921
                  */
                 id: string;
             };
@@ -9101,7 +9360,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f23f6-8449-7145-9933-37b168a7ed32
+                 * @example 019f2942-0d69-717d-938a-2e52d4008921
                  */
                 id: string;
             };
@@ -9129,7 +9388,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f23f6-8449-7145-9933-37b168a7ed32
+                 * @example 019f2942-0d69-717d-938a-2e52d4008921
                  */
                 user_id: string;
             };
@@ -9168,7 +9427,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the user.
-                 * @example 019f23f6-8449-7145-9933-37b168a7ed32
+                 * @example 019f2942-0d69-717d-938a-2e52d4008921
                  */
                 user_id: string;
             };
@@ -9200,7 +9459,7 @@ export interface operations {
                      */
                     password?: string;
                     /**
-                     * @example readonly
+                     * @example planner
                      * @enum {string}
                      */
                     role?: "tenant_admin" | "planner" | "readonly";
@@ -9558,28 +9817,6 @@ export interface operations {
             };
         };
     };
-    postWhatsappWebWebhook: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example invalid signature */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
     getWhatsappStats: {
         parameters: {
             query?: never;
@@ -9740,7 +9977,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f23f6-9129-7339-b7f1-4909fc3d106f
+                 * @example 019f2942-1ad8-7337-93ff-28dcf296ab0d
                  */
                 whatsappConnection_id: string;
             };
@@ -9768,7 +10005,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f23f6-9129-7339-b7f1-4909fc3d106f
+                 * @example 019f2942-1ad8-7337-93ff-28dcf296ab0d
                  */
                 whatsappConnection_id: string;
             };
@@ -9782,7 +10019,7 @@ export interface operations {
                     /** @example architecto */
                     webhook_verify_token?: string;
                     /**
-                     * @example 360dialog
+                     * @example meta
                      * @enum {string}
                      */
                     provider?: "meta" | "360dialog";
@@ -9810,7 +10047,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f23f6-9129-7339-b7f1-4909fc3d106f
+                 * @example 019f2942-1ad8-7337-93ff-28dcf296ab0d
                  */
                 whatsappConnection_id: string;
             };
@@ -9838,7 +10075,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f23f6-9129-7339-b7f1-4909fc3d106f
+                 * @example 019f2942-1ad8-7337-93ff-28dcf296ab0d
                  */
                 whatsappConnection_id: string;
             };
@@ -9866,7 +10103,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f23f6-9129-7339-b7f1-4909fc3d106f
+                 * @example 019f2942-1ad8-7337-93ff-28dcf296ab0d
                  */
                 whatsappConnection_id: string;
             };
@@ -9894,7 +10131,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the whatsappConnection.
-                 * @example 019f23f6-9129-7339-b7f1-4909fc3d106f
+                 * @example 019f2942-1ad8-7337-93ff-28dcf296ab0d
                  */
                 whatsappConnection_id: string;
             };
@@ -10114,154 +10351,6 @@ export interface operations {
             };
         };
     };
-    getProfileWhatsappWeb: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postProfileWhatsappWeb: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 255 characters.
-                     * @example b
-                     */
-                    label?: string | null;
-                    /**
-                     * @description Must not be greater than 32 characters.
-                     * @example n
-                     */
-                    phone_number?: string | null;
-                    /**
-                     * @example waba
-                     * @enum {string}
-                     */
-                    type?: "personal_web" | "waba";
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postProfileWhatsappWebIdConnect: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postProfileWhatsappWebIdDisconnect: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteProfileWhatsappWebId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the whatsapp web.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
     getCandidatesCandidateIdOutreach: {
         parameters: {
             query?: never;
@@ -10419,7 +10508,7 @@ export interface operations {
                     state_ai_flexplanner?: string;
                     /** @example 16 */
                     failed_attempts?: number;
-                    /** @example true */
+                    /** @example false */
                     escalated?: boolean;
                 };
             };
@@ -10491,7 +10580,7 @@ export interface operations {
                     /** @example architecto */
                     context_wamid?: string | null;
                     /**
-                     * @example outbound
+                     * @example inbound
                      * @enum {string}
                      */
                     direction: "inbound" | "outbound";
@@ -10503,7 +10592,7 @@ export interface operations {
                     message_content?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     sent_at?: string;
                 };
@@ -10540,7 +10629,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example read
+                     * @example delivered
                      * @enum {string}
                      */
                     status: "delivered" | "read";
@@ -10746,6 +10835,140 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postInboundEmailToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid email address. Must not be greater than 255 characters.
+                     * @example b
+                     */
+                    from: string;
+                    /**
+                     * @description Must be a valid email address. Must not be greater than 255 characters.
+                     * @example n
+                     */
+                    to: string;
+                    /**
+                     * @description Must not be greater than 500 characters.
+                     * @example g
+                     */
+                    subject?: string | null;
+                    /** @example architecto */
+                    text?: string | null;
+                    /** @example architecto */
+                    html?: string | null;
+                    /**
+                     * @description Must not be greater than 255 characters.
+                     * @example n
+                     */
+                    message_id?: string | null;
+                    /**
+                     * @description Must be a valid date.
+                     * @example 2026-07-06T06:40:35
+                     */
+                    sent_at?: string | null;
+                };
+            };
+        };
+        responses: {
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Onbekende webhook token */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getEmailLog: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @example outbound
+                     * @enum {string}
+                     */
+                    direction?: "in" | "out" | "inbound" | "outbound";
+                    /**
+                     * @description Must not be greater than 16 characters.
+                     * @example bngzmiyvdljnikhw
+                     */
+                    status?: string;
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example a
+                     */
+                    entity_type?: string;
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example 10b3f4c6-2aaf-32e1-a52d-6bf43d9ddd70
+                     */
+                    entity_id?: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getEmailLogId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the email log.
+                 * @example architecto
+                 */
+                id: string;
+            };
             cookie?: never;
         };
         requestBody?: never;
@@ -11281,6 +11504,60 @@ export interface operations {
             };
         };
     };
+    postAuthMeAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description Must be a file. Must not be greater than 2048 kilobytes.
+                     */
+                    avatar: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteAuthMeAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     postAuthMfaSetup: {
         parameters: {
             query?: never;
@@ -11344,60 +11621,6 @@ export interface operations {
                 "application/json": {
                     /** @example architecto */
                     code: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getSettingsWhatsappQueue: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    putSettingsWhatsappQueue: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must be at least 1. Must not be greater than 1000.
-                     * @example 1
-                     */
-                    per_number_hourly_limit: number;
                 };
             };
         };
@@ -11569,7 +11792,7 @@ export interface operations {
                      */
                     body: string;
                     /**
-                     * @example general
+                     * @example followup
                      * @enum {string|null}
                      */
                     type?: "general" | "intake" | "feedback" | "appointment" | "followup" | "warning" | null;
@@ -12147,6 +12370,28 @@ export interface operations {
             };
         };
     };
+    getHealthConnectors: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getSettingsEmailOauthCallback: {
         parameters: {
             query?: never;
@@ -12437,6 +12682,46 @@ export interface operations {
             };
         };
     };
+    postHfWebhookToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example architecto */
+                token: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 64 characters.
+                     * @example b
+                     */
+                    contract_guid: string;
+                    /**
+                     * @example active
+                     * @enum {string}
+                     */
+                    status: "sent" | "active" | "ended";
+                };
+            };
+        };
+        responses: {
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Onbekende webhook token */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getPlanning: {
         parameters: {
             query?: never;
@@ -12470,7 +12755,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example shiftmanager
+                     * @example intus
                      * @enum {string}
                      */
                     system: "shiftmanager" | "intus" | "sdb";
@@ -12520,7 +12805,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f23f6-912a-72a2-944d-9afc0c179f3b
+                 * @example 019f2942-1ad9-72cf-b6e6-fdc241c4be81
                  */
                 planningConnection_id: string;
             };
@@ -12548,7 +12833,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f23f6-912a-72a2-944d-9afc0c179f3b
+                 * @example 019f2942-1ad9-72cf-b6e6-fdc241c4be81
                  */
                 planningConnection_id: string;
             };
@@ -12568,13 +12853,13 @@ export interface operations {
                      */
                     admin_url?: string | null;
                     /**
-                     * @example oauth2
+                     * @example company_token
                      * @enum {string}
                      */
                     auth_type?: "bearer_token" | "oauth2" | "api_key" | "company_token";
                     /** @example null */
                     credentials?: Record<string, never>;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -12600,7 +12885,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f23f6-912a-72a2-944d-9afc0c179f3b
+                 * @example 019f2942-1ad9-72cf-b6e6-fdc241c4be81
                  */
                 planningConnection_id: string;
             };
@@ -12628,7 +12913,7 @@ export interface operations {
             path: {
                 /**
                  * @description The ID of the planningConnection.
-                 * @example 019f23f6-912a-72a2-944d-9afc0c179f3b
+                 * @example 019f2942-1ad9-72cf-b6e6-fdc241c4be81
                  */
                 planningConnection_id: string;
             };
@@ -12693,7 +12978,7 @@ export interface operations {
                     description?: string | null;
                     /**
                      * @description Opt-in: when true, callers MUST send a valid HMAC X-Signature header.
-                     * @example false
+                     * @example true
                      */
                     require_signature?: boolean;
                 };
@@ -12739,7 +13024,7 @@ export interface operations {
                      * @example Et animi quos velit et fugiat.
                      */
                     description?: string | null;
-                    /** @example false */
+                    /** @example true */
                     require_signature?: boolean;
                 };
             };
@@ -12852,11 +13137,11 @@ export interface operations {
                     url: string;
                     /**
                      * @example [
-                     *       "task.created"
+                     *       "application.created"
                      *     ]
                      */
                     events?: ("candidate.created" | "candidate.status_changed" | "application.created" | "application.stage_changed" | "match.created" | "vacancy.created" | "vacancy.status_changed" | "task.created" | "appointment.created" | "message.received" | "message.sent")[];
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -12931,7 +13216,7 @@ export interface operations {
                     url?: string;
                     /**
                      * @example [
-                     *       "candidate.created"
+                     *       "message.received"
                      *     ]
                      */
                     events?: ("candidate.created" | "candidate.status_changed" | "application.created" | "application.stage_changed" | "match.created" | "vacancy.created" | "vacancy.status_changed" | "task.created" | "appointment.created" | "message.received" | "message.sent")[];
@@ -13076,7 +13361,7 @@ export interface operations {
                      */
                     friendly_name: string;
                     /**
-                     * @example primary
+                     * @example additional
                      * @enum {string}
                      */
                     type: "primary" | "additional";
@@ -13108,7 +13393,7 @@ export interface operations {
                     allowed_ips?: string[];
                     /**
                      * @example [
-                     *       "read"
+                     *       "read_write"
                      *     ]
                      */
                     scopes?: ("read" | "read_write")[];
@@ -13184,7 +13469,7 @@ export interface operations {
                      */
                     type?: "primary" | "additional";
                     /**
-                     * @example active
+                     * @example disabled
                      * @enum {string}
                      */
                     status?: "active" | "disabled";
@@ -13216,7 +13501,7 @@ export interface operations {
                     allowed_ips?: string[];
                     /**
                      * @example [
-                     *       "read"
+                     *       "read_write"
                      *     ]
                      */
                     scopes?: ("read" | "read_write")[];
@@ -13503,7 +13788,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -13980,7 +14265,7 @@ export interface operations {
                      * @example n
                      */
                     color?: string | null;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -14268,7 +14553,7 @@ export interface operations {
                     phone?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     date_of_birth?: string | null;
                     /**
@@ -14340,7 +14625,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     available_again_date?: string | null;
                     /**
@@ -14357,7 +14642,7 @@ export interface operations {
                     candidate_types?: string[];
                     /** @example null */
                     consent?: {
-                        /** @example true */
+                        /** @example false */
                         whatsapp_opt_in?: boolean;
                         /** @example false */
                         email_opt_in?: boolean;
@@ -14518,7 +14803,7 @@ export interface operations {
                     phone?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     date_of_birth?: string | null;
                     /**
@@ -14590,7 +14875,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     available_again_date?: string | null;
                     /**
@@ -14611,7 +14896,7 @@ export interface operations {
                         whatsapp_opt_in?: boolean;
                         /** @example false */
                         email_opt_in?: boolean;
-                        /** @example false */
+                        /** @example true */
                         newsletter_opt_in?: boolean;
                     };
                     /** @example null */
@@ -14671,6 +14956,34 @@ export interface operations {
         };
     };
     getCandidatesCandidateActivity: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The candidate.
+                 * @example architecto
+                 */
+                candidate: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteCandidatesCandidateForce: {
         parameters: {
             query?: never;
             header?: never;
@@ -14853,6 +15166,28 @@ export interface operations {
         };
     };
     postCandidatesBulkStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postCandidatesBulkFunnelStage: {
         parameters: {
             query?: never;
             header?: never;
@@ -16124,7 +16459,7 @@ export interface operations {
                      * @example 39
                      */
                     position?: number;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -16348,7 +16683,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -16416,7 +16751,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -16606,7 +16941,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -16837,7 +17172,7 @@ export interface operations {
                     /** @example Eius et animi quos velit et. */
                     description?: string | null;
                     /**
-                     * @example dynamic
+                     * @example ai
                      * @enum {string}
                      */
                     type?: "static" | "dynamic" | "ai";
@@ -16927,7 +17262,7 @@ export interface operations {
                     type?: "static" | "dynamic" | "ai";
                     /** @example null */
                     criteria?: Record<string, never> | null;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -17118,7 +17453,7 @@ export interface operations {
                     currency?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:35
                      */
                     expected_close_at?: string | null;
                     /**
@@ -17143,12 +17478,12 @@ export interface operations {
                     hours_period?: "week" | "month" | "total" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:35
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-07-25
+                     * @example 2052-07-29
                      */
                     end_date?: string | null;
                     /**
@@ -17295,7 +17630,7 @@ export interface operations {
                     currency?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:35
                      */
                     expected_close_at?: string | null;
                     /**
@@ -17320,12 +17655,12 @@ export interface operations {
                     hours_period?: "week" | "month" | "total" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:35
                      */
                     start_date?: string | null;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-07-25
+                     * @example 2052-07-29
                      */
                     end_date?: string | null;
                     /**
@@ -17953,7 +18288,27 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be between -90 and 90.
+                     * @example -89
+                     */
+                    lat?: number;
+                    /**
+                     * @description Must be between -180 and 180.
+                     * @example -179
+                     */
+                    lng?: number;
+                    /**
+                     * @description Must be between 1 and 500.
+                     * @example 1
+                     */
+                    radius?: number;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -18297,7 +18652,7 @@ export interface operations {
                     city?: string | null;
                     /** @example true */
                     hide_company_name?: boolean;
-                    /** @example true */
+                    /** @example false */
                     has_career_page?: boolean;
                     /** @example false */
                     show_in_my_vacancies?: boolean;
@@ -19061,6 +19416,34 @@ export interface operations {
             };
         };
     };
+    getContactsId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the contact.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getDepartments: {
         parameters: {
             query?: never;
@@ -19700,7 +20083,7 @@ export interface operations {
                     /** @example null */
                     history?: ({
                         /**
-                         * @example user
+                         * @example assistant
                          * @enum {string}
                          */
                         role: "user" | "assistant";
@@ -19743,7 +20126,7 @@ export interface operations {
                     /** @example null */
                     conversation_history?: ({
                         /**
-                         * @example user
+                         * @example assistant
                          * @enum {string}
                          */
                         role: "user" | "assistant";
@@ -20073,7 +20456,7 @@ export interface operations {
                      *     ]
                      */
                     faq_ids?: string[];
-                    /** @example true */
+                    /** @example false */
                     use_knowledge?: boolean;
                     /**
                      * @description Must be at least 1. Must not be greater than 50.
@@ -20350,6 +20733,11 @@ export interface operations {
                      * @example architecto
                      */
                     model?: string;
+                    /**
+                     * @description Bevestiging van de kostenschatting (het confirm_costs-antwoord).
+                     * @example true
+                     */
+                    confirm_costs?: boolean;
                 };
             };
         };
@@ -20542,12 +20930,12 @@ export interface operations {
                      */
                     owner_id?: string;
                     /**
-                     * @example closed
+                     * @example open
                      * @enum {string}
                      */
                     status?: "open" | "closed";
                     /**
-                     * @example active
+                     * @example ended
                      * @enum {string}
                      */
                     contract_status?: "none" | "sent" | "active" | "ended";
@@ -20678,6 +21066,45 @@ export interface operations {
             };
         };
     };
+    postMatchesBulkCouple: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    match_ids?: string[];
+                    /**
+                     * @example helloflex
+                     * @enum {string}
+                     */
+                    target: "helloflex" | "shiftmanager";
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     postMatchesMatchContract: {
         parameters: {
             query?: never;
@@ -20721,12 +21148,12 @@ export interface operations {
                     hours_per_week?: number | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:35
                      */
                     start_date: string;
                     /**
                      * @description Must be a valid date. Must be a date after or equal to <code>start_date</code>.
-                     * @example 2052-07-25
+                     * @example 2052-07-29
                      */
                     end_date?: string | null;
                     /**
@@ -20749,6 +21176,183 @@ export interface operations {
                 };
             };
         };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getMatchStatuses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postMatchStatuses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must match the regex /^[a-z0-9_]+$/. Must not be greater than 64 characters.
+                     * @example b
+                     */
+                    value: string;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example n
+                     */
+                    label: string;
+                    /**
+                     * @description Must not be greater than 32 characters.
+                     * @example g
+                     */
+                    color?: string | null;
+                    /** @example 16 */
+                    sort_order?: number;
+                    /** @example false */
+                    active?: boolean;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putMatchStatusesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putMatchStatusesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match status.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example b
+                     */
+                    label?: string;
+                    /**
+                     * @description Must not be greater than 32 characters.
+                     * @example n
+                     */
+                    color?: string | null;
+                    /** @example 16 */
+                    sort_order?: number;
+                    /** @example true */
+                    active?: boolean;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteMatchStatusesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the match status.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -20801,12 +21405,12 @@ export interface operations {
                      */
                     name: string;
                     /**
-                     * @example email
+                     * @example call
                      * @enum {string}
                      */
                     channel: "call" | "email" | "whatsapp";
                     /**
-                     * @example active
+                     * @example done
                      * @enum {string}
                      */
                     status?: "draft" | "active" | "done";
@@ -20893,7 +21497,7 @@ export interface operations {
                      */
                     channel?: "call" | "email" | "whatsapp";
                     /**
-                     * @example active
+                     * @example done
                      * @enum {string}
                      */
                     status?: "draft" | "active" | "done";
@@ -21030,13 +21634,372 @@ export interface operations {
                      */
                     status: "todo" | "contacted" | "skipped" | "answered";
                     /**
+                     * @description Must match an existing stored value.
+                     * @example architecto
+                     */
+                    outcome?: string | null;
+                    /**
                      * @description Must not be greater than 2000 characters.
-                     * @example b
+                     * @example n
                      */
                     note?: string | null;
                 };
             };
         };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOutreachStatuses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOutreachStatuses: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must match the regex /^[a-z0-9_]+$/. Must not be greater than 64 characters.
+                     * @example b
+                     */
+                    value: string;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example n
+                     */
+                    label: string;
+                    /**
+                     * @description Must not be greater than 32 characters.
+                     * @example g
+                     */
+                    color?: string | null;
+                    /** @example 16 */
+                    sort_order?: number;
+                    /** @example true */
+                    active?: boolean;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getOutreachOutcomes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postOutreachOutcomes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must match the regex /^[a-z0-9_]+$/. Must not be greater than 64 characters.
+                     * @example b
+                     */
+                    value: string;
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example n
+                     */
+                    label: string;
+                    /**
+                     * @description Must not be greater than 32 characters.
+                     * @example g
+                     */
+                    color?: string | null;
+                    /** @example 16 */
+                    sort_order?: number;
+                    /** @example false */
+                    active?: boolean;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOutreachStatusesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOutreachStatusesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach status.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example b
+                     */
+                    label?: string;
+                    /**
+                     * @description Must not be greater than 32 characters.
+                     * @example n
+                     */
+                    color?: string | null;
+                    /** @example 16 */
+                    sort_order?: number;
+                    /** @example false */
+                    active?: boolean;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteOutreachStatusesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach status.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOutreachOutcomesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putOutreachOutcomesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach outcome.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 120 characters.
+                     * @example b
+                     */
+                    label?: string;
+                    /**
+                     * @description Must not be greater than 32 characters.
+                     * @example n
+                     */
+                    color?: string | null;
+                    /** @example 16 */
+                    sort_order?: number;
+                    /** @example false */
+                    active?: boolean;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteOutreachOutcomesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the outreach outcome.
+                 * @example architecto
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             401: {
                 headers: {
@@ -21084,7 +22047,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example email
+                     * @example whatsapp
                      * @enum {string}
                      */
                     default_channel: "email" | "whatsapp";
@@ -21246,16 +22209,16 @@ export interface operations {
                     bucket?: "day" | "week" | "month";
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     to?: string;
                     /**
-                     * @example recruiter
+                     * @example source
                      * @enum {string}
                      */
                     group_by?: "recruiter" | "location" | "source" | "function" | "region";
@@ -21374,6 +22337,50 @@ export interface operations {
             };
         };
     };
+    getReportsOutreach: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getReportsSources: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getCandidatesCandidateAvailability: {
         parameters: {
             query?: never;
@@ -21392,12 +22399,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     to?: string;
                 };
@@ -21820,15 +22827,15 @@ export interface operations {
                     function?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     to?: string;
-                    /** @example false */
+                    /** @example true */
                     open_only?: boolean;
                     /**
                      * @description Must be between 1 and 200.
@@ -21982,12 +22989,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     to?: string;
                     /**
@@ -22114,12 +23121,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     to?: string;
                     /**
@@ -22309,7 +23316,7 @@ export interface operations {
                      */
                     email: string;
                     /**
-                     * @example none
+                     * @example ssl
                      * @enum {string|null}
                      */
                     encryption?: "tls" | "ssl" | "none" | null;
@@ -22414,7 +23421,7 @@ export interface operations {
                 "application/json": {
                     /** @example true */
                     ai_enabled?: boolean;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -23085,7 +24092,7 @@ export interface operations {
                     /** @example architecto */
                     note?: string | null;
                     /**
-                     * @example whatsapp
+                     * @example email
                      * @enum {string|null}
                      */
                     channel?: "email" | "whatsapp" | null;
@@ -23153,7 +24160,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example followup
+                     * @example feedback
                      * @enum {string}
                      */
                     type?: "general" | "intake" | "feedback" | "appointment" | "followup" | "warning";
@@ -23628,16 +24635,14 @@ export interface operations {
             };
         };
         responses: {
-            429: {
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
-                        /** @example Te veel aanvragen. Wacht even voor je opnieuw probeert. */
+                        /** @example Invalid credentials */
                         message?: string;
-                        /** @example 60 */
-                        retry_after?: number;
                     };
                 };
             };
@@ -23893,7 +24898,7 @@ export interface operations {
                     sort_order?: number;
                     /** @example false */
                     is_default?: boolean;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -24179,7 +25184,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example false */
+                    /** @example true */
                     is_default?: boolean;
                     /** @example false */
                     active?: boolean;
@@ -24294,7 +25299,7 @@ export interface operations {
                     location_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     due_date?: string | null;
                     /**
@@ -24315,7 +25320,7 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example department
+                         * @example contact
                          * @enum {string}
                          */
                         type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "department" | "contact" | "workflow";
@@ -24445,7 +25450,7 @@ export interface operations {
                     location_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-02T18:57:00
+                     * @example 2026-07-06T06:40:36
                      */
                     due_date?: string | null;
                     /**
@@ -24466,7 +25471,7 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example application
+                         * @example vacancy
                          * @enum {string}
                          */
                         type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "department" | "contact" | "workflow";
@@ -24507,6 +25512,72 @@ export interface operations {
             cookie?: never;
         };
         requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    getTasksTaskNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The task.
+                 * @example architecto
+                 */
+                task: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postTasksTaskNotes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The task.
+                 * @example architecto
+                 */
+                task: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 5000 characters.
+                     * @example b
+                     */
+                    body: string;
+                };
+            };
+        };
         responses: {
             401: {
                 headers: {
@@ -24653,6 +25724,76 @@ export interface operations {
                  * @example architecto
                  */
                 task: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putTasksTaskNotesComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The task.
+                 * @example architecto
+                 */
+                task: string;
+                /** @example architecto */
+                comment: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 5000 characters.
+                     * @example b
+                     */
+                    body: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteTasksTaskNotesComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The task.
+                 * @example architecto
+                 */
+                task: string;
+                /** @example architecto */
+                comment: string;
             };
             cookie?: never;
         };
@@ -26612,182 +27753,6 @@ export interface operations {
             };
         };
     };
-    getWhatsappWebQueue: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    /**
-                     * @description Must not be greater than 32 characters.
-                     * @example b
-                     */
-                    status?: string;
-                    /**
-                     * @description Must not be greater than 64 characters.
-                     * @example n
-                     */
-                    type?: string;
-                    /**
-                     * @description message-type value slug. Must be a valid UUID.
-                     * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
-                     */
-                    number_id?: string;
-                };
-            };
-        };
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    getWhatsappWebQueueStats: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postWhatsappWebQueueIdSendNow: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the queue.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postWhatsappWebQueueIdPause: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the queue.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    postWhatsappWebQueueIdRetry: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the queue.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
-    deleteWhatsappWebQueueId: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /**
-                 * @description The ID of the queue.
-                 * @example architecto
-                 */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example Unauthenticated. */
-                        message?: string;
-                    };
-                };
-            };
-        };
-    };
     getWhatsappMessageTypes: {
         parameters: {
             query?: never;
@@ -26837,7 +27802,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -26918,7 +27883,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
