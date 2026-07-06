@@ -230,7 +230,12 @@
       "openShifts": "Turnos abiertos",
       "shiftsThisMonth": "Turnos este mes",
       "activeCustomers": "Clientes activos",
-      "actualHours": "Horas reales"
+      "actualHours": "Horas reales",
+      "fillRate": "Cobertura (este mes)",
+      "forecastMonth": "Previsión este mes",
+      "actualMonth": "Real este mes",
+      "unfilled": "Sin cubrir",
+      "customersWithOpen": "Clientes con turnos abiertos"
     },
     "statSub": {
       "urgent": "{{n}} urgente",

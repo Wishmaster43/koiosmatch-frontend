@@ -84,13 +84,11 @@ export default function ShiftmanagerDashboard() {
   // card (big total + a coloured count per bucket) instead of a cramped 54px donut (Danny).
   const newColor = derived.newList.length >= target ? 'var(--color-success)'
                  : derived.newList.length >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
+  // Only the two candidate cards on the dashboard; ShiftsChartsBlock adds the seven
+  // shift cards → one 9-card row. (Totaal/Inactief eruit — Danny: "ruk".)
   const leadingKpis: KpiSpec[] = [
-    // Headline = Gewerkt deze maand / Actief (19/124); the other buckets (Ingepland /
-    // Nooit gewerkt / Idle) live in the drill-down tabs (Danny).
     { key: 'activity', label: t('dashboard.stats.workedActive'), value: `${derived.bWorked.length}/${derived.active.length}`, color: 'var(--color-success)', onClick: openActivityDrill },
     { key: 'new',      label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
-    { key: 'total',    label: t('dashboard.stats.totalCandidates'), value: derived.all.length,      color: 'var(--color-primary)', onClick: () => openDrill('nieuw', t('dashboard.stats.totalCandidates'), derived.all) },
-    { key: 'inactive', label: t('dashboard.stats.inactive'),        value: derived.inactive.length, color: 'var(--text-muted)',    onClick: () => openDrill('nieuw', t('dashboard.stats.inactive'), derived.inactive) },
   ]
 
   return (

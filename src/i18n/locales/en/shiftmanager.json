@@ -230,7 +230,12 @@
       "openShifts": "Open shifts",
       "shiftsThisMonth": "Shifts this month",
       "activeCustomers": "Active customers",
-      "actualHours": "Actual hours"
+      "actualHours": "Actual hours",
+      "fillRate": "Fill rate (this month)",
+      "forecastMonth": "Forecast this month",
+      "actualMonth": "Actual this month",
+      "unfilled": "Unfilled",
+      "customersWithOpen": "Customers with open shifts"
     },
     "statSub": {
       "urgent": "{{n}} urgent",

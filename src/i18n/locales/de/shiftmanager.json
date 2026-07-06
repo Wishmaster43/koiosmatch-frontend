@@ -230,7 +230,12 @@
       "openShifts": "Offene Dienste",
       "shiftsThisMonth": "Dienste diesen Monat",
       "activeCustomers": "Aktive Kunden",
-      "actualHours": "Ist-Stunden"
+      "actualHours": "Ist-Stunden",
+      "fillRate": "Besetzungsgrad (Monat)",
+      "forecastMonth": "Prognose diesen Monat",
+      "actualMonth": "Ist diesen Monat",
+      "unfilled": "Nicht besetzt",
+      "customersWithOpen": "Kunden mit offenen Diensten"
     },
     "statSub": {
       "urgent": "{{n}} dringend",

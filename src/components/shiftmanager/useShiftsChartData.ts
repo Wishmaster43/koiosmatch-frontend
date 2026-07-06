@@ -180,24 +180,23 @@ export function useShiftsChartData({
   // month · occupancy = werkelijk ÷ prognose. All over the selected years/months.
   const hourStats = useMemo(() => {
     const cm = new Date().getMonth() + 1
-    let open = 0, actual = 0, forecast = 0, curMonthForecast = 0, curMonthForecastShifts = 0, openShifts = 0
+    // Per series: hours + shift-count, summed over the whole filter AND for the
+    // current calendar month separately (Invulgraad is current-month only — Danny).
+    const zero = () => ({ totaal: 0, niet_ingevuld: 0, geen_kandidaat: 0, prognose: 0, werkelijk: 0 } as Record<string, number>)
+    const fH = zero(), fC = zero(), mH = zero(), mC = zero()
     for (const row of chartData) {
       for (const y of selectedYears) {
-        open       += Number(row[`${y}_geen_kandidaat_uren`] || 0)
-        actual     += Number(row[`${y}_werkelijk_uren`]     || 0)
-        forecast   += Number(row[`${y}_prognose_uren`]      || 0)
-        openShifts += Number(row[`${y}_geen_kandidaat`]     || 0)
-        if (row._monthIndex === cm) {
-          curMonthForecast       += Number(row[`${y}_prognose_uren`] || 0)
-          curMonthForecastShifts += Number(row[`${y}_prognose`]      || 0)
+        for (const s of SERIES) {
+          const h = Number(row[`${y}_${s.key}_uren`] || 0)
+          const c = Number(row[`${y}_${s.key}`]      || 0)
+          fH[s.key] += h; fC[s.key] += c
+          if (row._monthIndex === cm) { mH[s.key] += h; mC[s.key] += c }
         }
       }
     }
-    return {
-      openHours: open, actualHours: actual, openShifts,
-      currentMonthForecast: curMonthForecast, currentMonthForecastShifts: curMonthForecastShifts,
-      occupancy: forecast ? Math.round((actual / forecast) * 100) : null,
-    }
+    // Invulgraad = (prognose − niet ingevuld) ÷ prognose, huidige maand (uren-basis).
+    const fillRateMonth = mH.prognose ? Math.round(((mH.prognose - mH.niet_ingevuld) / mH.prognose) * 100) : null
+    return { filterHours: fH, filterShifts: fC, monthHours: mH, monthShifts: mC, fillRateMonth }
   }, [chartData, selectedYears])
 
   return { loading, error, filterOptions, chartData, shiftBars, hoursBars, multiYear, queryString, hourStats }

@@ -85,21 +85,23 @@ export default function ShiftsChartsBlock({
   const showKpiRow = !!leadingKpis
   const lastSync = useSmLastSync(showKpiRow)
   const [shiftUnit, setShiftUnit] = useState<'hours' | 'count'>('hours')
-  const { customerRows, functionRows, activeCustomers } = useShiftsBreakdown(queryString)
+  const { customerRows, functionRows, activeCustomers, customersWithOpen } = useShiftsBreakdown(queryString)
   const fmtN = (n: number) => Math.round(n).toLocaleString('nl-NL')
-  const openTile  = shiftUnit === 'hours'
-    ? { label: t('dashboard.stats.openHours'),  value: fmtN(hourStats.openHours) }
-    : { label: t('dashboard.stats.openShifts'), value: fmtN(hourStats.openShifts) }
-  const monthTile = shiftUnit === 'hours'
-    ? { label: t('dashboard.stats.hoursThisMonth'),  value: fmtN(hourStats.currentMonthForecast) }
-    : { label: t('dashboard.stats.shiftsThisMonth'), value: fmtN(hourStats.currentMonthForecastShifts) }
+  const isH = shiftUnit === 'hours'
+  const H = hourStats.filterHours, C = hourStats.filterShifts, MH = hourStats.monthHours, MC = hourStats.monthShifts
+  const val = (h: number, c: number) => fmtN(isH ? h : c)  // uren of diensten per de toggle
   const kpiRow: KpiSpec[] = [
     ...(leadingKpis ?? []),
-    { key: 'active_customers', label: t('dashboard.stats.activeCustomers'), value: fmtN(activeCustomers),       color: 'var(--color-secondary)' },
-    { key: 'open',             label: openTile.label,  value: openTile.value,  color: 'var(--color-warning)' },
-    { key: 'month',            label: monthTile.label, value: monthTile.value, color: 'var(--color-warning)' },
-    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),   value: hourStats.occupancy != null ? `${hourStats.occupancy}%` : '—', color: 'var(--color-success)' },
-    { key: 'actual_hours',     label: t('dashboard.stats.actualHours'), value: fmtN(hourStats.actualHours),      color: 'var(--color-success)' },
+    // Invulling van de huidige maand (Danny): invulgraad + prognose + werkelijk.
+    { key: 'fillrate',        label: t('dashboard.stats.fillRate'),          value: hourStats.fillRateMonth != null ? `${hourStats.fillRateMonth}%` : '—', color: 'var(--color-success)' },
+    { key: 'forecast_month',  label: t('dashboard.stats.forecastMonth'),     value: val(MH.prognose, MC.prognose),  color: 'var(--color-secondary)' },
+    { key: 'actual_month',    label: t('dashboard.stats.actualMonth'),       value: val(MH.werkelijk, MC.werkelijk), color: 'var(--color-success)' },
+    // De gaten (over het filter): open + niet ingevuld.
+    { key: 'open',            label: isH ? t('dashboard.stats.openHours') : t('dashboard.stats.openShifts'), value: val(H.geen_kandidaat, C.geen_kandidaat), color: 'var(--color-warning)' },
+    { key: 'unfilled',        label: t('dashboard.stats.unfilled'),          value: val(H.niet_ingevuld, C.niet_ingevuld), color: 'var(--color-danger)' },
+    // Klant-dekking (testklant al uitgesloten).
+    { key: 'customers_open',  label: t('dashboard.stats.customersWithOpen'), value: fmtN(customersWithOpen), color: 'var(--color-warning)' },
+    { key: 'active_customers', label: t('dashboard.stats.activeCustomers'),  value: fmtN(activeCustomers),   color: 'var(--color-secondary)' },
   ]
   const donutRow: DonutSpec[] = [...(leadingDonuts ?? [])]
 

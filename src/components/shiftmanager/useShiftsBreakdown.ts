@@ -48,12 +48,16 @@ export function useShiftsBreakdown(queryString: string) {
     placeholderData: keepPreviousData, staleTime: 60_000,
   })
 
-  const customerRows = (customerQ.data ?? []) as BreakdownRow[]
+  // Drop the ShiftManager test/self client (external_id '1') — shifts-breakdown
+  // doesn't exclude it yet (BE fix pending); until then filter it FE-side.
+  const noTest = (rows: BreakdownRow[]) => rows.filter(r => String(r.key) !== '1')
+  const customerRows = noTest((customerQ.data ?? []) as BreakdownRow[])
   const functionRows = (functionQ.data ?? []) as BreakdownRow[]
   return {
     customerRows, functionRows,
     customerDonut: toDonut(customerRows),
     functionDonut: toDonut(functionRows),
-    activeCustomers: (activeCustomersQ.data ?? []).length,
+    activeCustomers: noTest((activeCustomersQ.data ?? []) as BreakdownRow[]).length,
+    customersWithOpen: customerRows.length,
   }
 }

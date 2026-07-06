@@ -230,7 +230,12 @@
       "openShifts": "Openstaande diensten",
       "shiftsThisMonth": "Diensten huidige maand",
       "activeCustomers": "Actieve klanten",
-      "actualHours": "Werkelijke uren"
+      "actualHours": "Werkelijke uren",
+      "fillRate": "Invulgraad (deze maand)",
+      "forecastMonth": "Prognose deze maand",
+      "actualMonth": "Werkelijk deze maand",
+      "unfilled": "Niet ingevuld",
+      "customersWithOpen": "Klanten met open diensten"
     },
     "statSub": {
       "urgent": "{{n}} urgent",
