@@ -33,7 +33,7 @@ import type { Id, LookupOption } from '@/types/common'
 
 // Still-untyped JS drawer shells — declare the props this drawer passes (typed boundary).
 const EntityDrawer = EntityDrawerJs as ComponentType<{
-  entity: unknown; expanded?: boolean; onToggleExpand?: () => void; footer?: ReactNode
+  entity: unknown; expanded?: boolean; onToggleExpand?: () => void; footer?: ReactNode; initialTab?: string
   tabs?: Array<{ id: string; label: string; autoExpand?: boolean; render: () => ReactNode }>
   header?: (arg: { activeTab?: string; setActiveTab: (id: string) => void }) => ReactNode
 }>
@@ -74,9 +74,11 @@ interface CandidateDrawerProps {
   onRestore?: (id: Id) => void
   onHardDelete?: (id: Id) => void
   users?: AppUser[]
+  // Deep-link: open on this tab (table contact-cell → communication, funnel-chip → work).
+  initialTab?: string
 }
 
-export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onRestore, onHardDelete, users = [] }: CandidateDrawerProps) {
+export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onRestore, onHardDelete, users = [], initialTab }: CandidateDrawerProps) {
   const { settings: cvSettings } = useCvSettings() as { settings?: unknown }
   const { t } = useTranslation('candidates')
   const locale = useLocale() as string
@@ -391,6 +393,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     <>
     <EntityDrawer
       entity={c}
+      initialTab={initialTab}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
       footer={

@@ -45,6 +45,8 @@ interface CandidatesTableProps {
   loading?: boolean
   selectedId?: Id | null
   onSelect?: (row: Candidate) => void
+  // Cell deep-link: open the drawer on a specific tab (contact → communication, funnel → work).
+  onOpenTab?: (row: Candidate, tab: string) => void
   selectable?: boolean
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
@@ -59,7 +61,7 @@ interface CandidatesTableProps {
  * live in the generic DataTable. Reuse that table for other entity lists with
  * their own column set.
  */
-export default function CandidatesTable({ rows, loading, selectedId, onSelect, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false }: CandidatesTableProps) {
+export default function CandidatesTable({ rows, loading, selectedId, onSelect, onOpenTab, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false }: CandidatesTableProps) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // LookupsContext is still untyped JS — cast its API to the meta shapes used here.
@@ -139,12 +141,15 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
         const Icon = c.lastContactType ? (CONTACT_TYPE_ICON[c.lastContactType] ?? HelpCircle) : null
         // Tooltip + subtle "· by whom" once the backend returns last_contact_by (graceful null).
         const tip = c.lastContactBy ? `${label} · ${c.lastContactBy}` : label
+        // Danny 2026-07-06: clicking the date/icon jumps STRAIGHT to Communicatie → Notities.
         return (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12 }}>
+          <button onClick={e => { e.stopPropagation(); onOpenTab?.(c, 'communication') }} title={tip}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12,
+              background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>
             {formatDate(c.lastContactAt)}
-            {Icon && <Icon size={12} title={tip} style={{ flexShrink: 0, opacity: 0.6 }} />}
+            {Icon && <Icon size={12} style={{ flexShrink: 0, opacity: 0.6 }} />}
             {c.lastContactBy && <span style={{ color: 'var(--text-muted)', fontSize: 11, whiteSpace: 'nowrap' }}>· {c.lastContactBy}</span>}
-          </span>
+          </button>
         )
       },
     },
@@ -154,12 +159,14 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, s
       render: c => {
         if (!c.stage) return dash
         // Chip from the API's flat funnel_label/funnel_color; the lookup is the fallback.
+        // Clicking jumps to the Werk tab — the application/match behind this stage.
         const m = funnelMeta(c.stage)
         const label = c.stageLabel ?? m.label
-        if (!colorFunnel) return <span style={plainCell}>{label}</span>
+        const jump = (e: { stopPropagation: () => void }) => { e.stopPropagation(); onOpenTab?.(c, 'work') }
+        if (!colorFunnel) return <button onClick={jump} style={{ ...plainCell, background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>{label}</button>
         const color = c.stageColor ?? m.color
-        return <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
-          background: color + '1A', color, border: `1px solid ${color}55` }}>{label}</span>
+        return <button onClick={jump} style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5, cursor: 'pointer',
+          background: color + '1A', color, border: `1px solid ${color}55` }}>{label}</button>
       },
     },
     {

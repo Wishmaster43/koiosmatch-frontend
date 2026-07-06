@@ -28,18 +28,25 @@ interface EntityDrawerProps {
   onToggleExpand?: () => void
   widthCollapsed?: number
   widthExpanded?: number
+  // Open on this tab instead of the first one (deep-links from table cells).
+  initialTab?: string
 }
 
 export default function EntityDrawer({
   entity, header, tabs = [], footer,
   expanded, onToggleExpand,
   widthCollapsed = 580, widthExpanded = 880,
+  initialTab,
 }: EntityDrawerProps) {
-  const [activeTab, setActiveTab] = useState<string | undefined>(tabs[0]?.id)
+  const [activeTab, setActiveTab] = useState<string | undefined>(initialTab ?? tabs[0]?.id)
 
-  // Reset to the first tab whenever a different entity is shown (adjust during render).
+  // Reset whenever a different entity is shown (adjust during render); a deep-link
+  // (initialTab — e.g. table contact-cell → Communicatie) wins over the first tab.
   const [prevId, setPrevId] = useState<string | number | undefined>(entity?.id)
-  if (entity?.id !== prevId) { setPrevId(entity?.id); setActiveTab(tabs[0]?.id) }
+  if (entity?.id !== prevId) { setPrevId(entity?.id); setActiveTab(initialTab ?? tabs[0]?.id) }
+  // Same entity, new deep-link click → switch tabs; manual browsing stays untouched.
+  const [prevInitial, setPrevInitial] = useState(initialTab)
+  if (initialTab !== prevInitial) { setPrevInitial(initialTab); if (initialTab) setActiveTab(initialTab) }
 
   const active = tabs.find(t => t.id === activeTab) ?? tabs[0]
 

@@ -56,7 +56,7 @@ const CandidateDrawer = CandidateDrawerJs as ComponentType<{
   candidate: Candidate | null; onClose: () => void; expanded: boolean
   onToggleExpand: () => void; onUpdate: (id: Id, patch: Record<string, unknown>) => void
   onArchive?: (id: Id) => void; onRestore?: (id: Id) => void; onHardDelete?: (id: Id) => void
-  users: AppUser[]
+  users: AppUser[]; initialTab?: string
 }>
 const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: unknown[]; clearTitle?: string }>
 
@@ -273,7 +273,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // Open a candidate: hand the light row to the drawer, then fetch the full record.
   // 404 ('gone') = a stale row (reseed / deleted elsewhere) → drop it + tell the user.
-  const selectCandidate = (c: Candidate) => {
+  // Deep-link target tab (contact-cell → communication, funnel-chip → work); row click = default.
+  const [drawerTab, setDrawerTab] = useState<string | undefined>(undefined)
+  const selectCandidate = (c: Candidate, tab?: string) => {
+    setDrawerTab(tab)
     selectedIdRef.current = c.id
     setSelected(c); setDetail(null); setDrawerExpanded(false)
     // ARCHIVED rows: the detail endpoint 404s for soft-deleted records (ARCH-3, BE) —
@@ -469,6 +472,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
               loading={loading}
               selectedId={selected?.id}
               onSelect={selectCandidate}
+              onOpenTab={(c, tab) => selectCandidate(c, tab)}
               selectable
               selectedIds={selectedIds}
               onToggleRow={toggleRow}
@@ -500,6 +504,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           onRestore={restoreOne}
           onHardDelete={hardDeleteOne}
           users={users}
+          initialTab={drawerTab}
         />
       </div>
     </>
