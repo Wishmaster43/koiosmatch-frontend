@@ -11,7 +11,7 @@ export function buildShiftsFilterGroups({
   t, seriesLabel, period, selectedYears, selectedMonths, visible,
   selectedJobTypes, selectedCustomers, selectedLocations, filterOptions,
   fixedCustomers, fixedLocationIds,
-  setPeriod, toggleYear, setSelectedMonths, setVisible,
+  setPeriod, toggleYear, toggleMonth, setVisible,
   setSelectedJobTypes, setSelectedCustomers, setSelectedLocations,
 }: BuildShiftsFilterGroupsArgs): ShiftFilterGroup[] {
   const groups: ShiftFilterGroup[] = [
@@ -38,14 +38,10 @@ export function buildShiftsFilterGroups({
     groups.push({
       key:      "maanden",
       label:    t('charts.filters.months'),
-      selected: selectedMonths.length > 0
-        ? selectedMonths.map(String)
-        : Array.from({ length: 12 }, (_, i) => String(i + 1)),
+      // selectedMonths is always the real set now (default = all 12), so no empty-means-all fallback.
+      selected: selectedMonths.map(String),
       options:  Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: monthAbbr(i) })),
-      onToggle: (v) =>
-        setSelectedMonths((prev) =>
-          prev.includes(v) ? prev.filter((m) => m !== v) : [...prev, v]
-        ),
+      onToggle: toggleMonth,
     })
   }
 
@@ -55,8 +51,9 @@ export function buildShiftsFilterGroups({
     selected: visible,
     options:  SERIES.map((s) => ({ value: s.key, label: seriesLabel(s.key) })),
     onToggle: (v) =>
+      // Keep ≥1 series visible — never blank the chart.
       setVisible((prev) =>
-        prev.includes(v) ? prev.filter((k) => k !== v) : [...prev, v]
+        prev.includes(v) ? (prev.length > 1 ? prev.filter((k) => k !== v) : prev) : [...prev, v]
       ),
   })
 

@@ -47,7 +47,9 @@ export default function ShiftsChartsBlock({
 
   // ── Filter state ──────────────────────────────────────────────────────────
   const [selectedYears,      setSelectedYears]      = useState<number[]>([CURRENT_YEAR])
-  const [selectedMonths,     setSelectedMonths]     = useState<string[]>([])
+  // All 12 months selected by default (explicit set, never "empty means all"): the toggle
+  // then removes/adds one at a time and the chart always follows this set, chronologically.
+  const [selectedMonths,     setSelectedMonths]     = useState<string[]>(() => Array.from({ length: 12 }, (_, i) => String(i + 1)))
   const [period,             setPeriod]             = useState("month")
   const [visible,            setVisible]            = useState<string[]>(SERIES.map((s) => s.key))
   const [selectedJobTypes,   setSelectedJobTypes]   = useState<string[]>([])
@@ -101,6 +103,15 @@ export default function ShiftsChartsBlock({
       return [...prev, n].sort()
     })
 
+  // Add/remove a month — keep ≥1 selected and always numerically sorted, so the
+  // chart never collapses to one month and shows Mei·Juni·Juli regardless of click order.
+  const toggleMonth = (v: string) =>
+    setSelectedMonths((prev) =>
+      prev.includes(v)
+        ? (prev.length > 1 ? prev.filter((m) => m !== v) : prev)
+        : [...prev, v].sort((a, b) => Number(a) - Number(b))
+    )
+
   const periodLabel = t('charts.periodLabel', {
     years: selectedYears.join(", "),
     unit:  period === "quarter" ? t('charts.perQuarterUnit') : t('charts.perMonthUnit'),
@@ -111,7 +122,7 @@ export default function ShiftsChartsBlock({
     t, seriesLabel, period, selectedYears, selectedMonths, visible,
     selectedJobTypes, selectedCustomers, selectedLocations, filterOptions,
     fixedCustomers, fixedLocationIds,
-    setPeriod, toggleYear, setSelectedMonths, setVisible,
+    setPeriod, toggleYear, toggleMonth, setVisible,
     setSelectedJobTypes, setSelectedCustomers, setSelectedLocations,
   }), [t, seriesLabel, period, selectedYears, selectedMonths, visible, selectedJobTypes,
        selectedCustomers, selectedLocations, filterOptions, fixedCustomers, fixedLocationIds])

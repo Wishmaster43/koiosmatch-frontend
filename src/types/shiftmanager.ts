@@ -212,7 +212,7 @@ export interface BuildShiftsFilterGroupsArgs {
   fixedLocationIds: string[]
   setPeriod: (v: string) => void
   toggleYear: (v: string) => void
-  setSelectedMonths: (fn: (prev: string[]) => string[]) => void
+  toggleMonth: (v: string) => void
   setVisible: (fn: (prev: string[]) => string[]) => void
   setSelectedJobTypes: (fn: (prev: string[]) => string[]) => void
   setSelectedCustomers: (fn: (prev: string[]) => string[]) => void

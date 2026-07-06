@@ -52,7 +52,8 @@ export function useShiftsChartData({
 
     const params = new URLSearchParams()
     selectedYears.forEach((y) => params.append("years[]", String(y)))
-    selectedMonths.forEach((m) => params.append("months[]", m))
+    // Only send months[] for a real subset — all 12 selected == unfiltered (avoids a 12-param query).
+    if (selectedMonths.length < 12) selectedMonths.forEach((m) => params.append("months[]", m))
     selectedJobTypes.forEach((j) => params.append("job_type[]", j))
 
     // Fixed department / candidate (pre-scoped context).
@@ -95,10 +96,11 @@ export function useShiftsChartData({
 
   // Transform rows into chart data, per month or per quarter.
   const chartData = useMemo<ShiftsChartDatum[]>(() => {
-    const monthIndices =
-      selectedMonths.length > 0
-        ? selectedMonths.map((m) => parseInt(m, 10) - 1).filter((i) => i >= 0 && i < 12)
-        : Array.from({ length: 12 }, (_, i) => i)
+    // selectedMonths is the real set (default = all 12); always render chronologically.
+    const monthIndices = selectedMonths
+      .map((m) => parseInt(m, 10) - 1)
+      .filter((i) => i >= 0 && i < 12)
+      .sort((a, b) => a - b)
 
     if (period === "quarter") {
       return QUARTERS.map((q) => {

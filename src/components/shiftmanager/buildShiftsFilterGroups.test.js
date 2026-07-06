@@ -16,7 +16,7 @@ const baseArgs = {
   filterOptions: { job_types: ['Verzorgende IG'], locations: [{ id: 1, name: 'Loc A', customer: 'Klant X' }] },
   fixedCustomers: [],
   fixedLocationIds: [],
-  setPeriod: noop, toggleYear: noop, setSelectedMonths: noop, setVisible: noop,
+  setPeriod: noop, toggleYear: noop, toggleMonth: noop, setVisible: noop,
   setSelectedJobTypes: noop, setSelectedCustomers: noop, setSelectedLocations: noop,
 }
 const keysOf = (args) => buildShiftsFilterGroups(args).map(g => g.key)
@@ -25,6 +25,13 @@ describe('buildShiftsFilterGroups', () => {
   it('includes the months group only in month period', () => {
     expect(keysOf(baseArgs)).toContain('maanden')
     expect(keysOf({ ...baseArgs, period: 'quarter' })).not.toContain('maanden')
+  })
+
+  it('months group reflects the real selection (no empty-means-all fallback)', () => {
+    const g = buildShiftsFilterGroups({ ...baseArgs, selectedMonths: ['5', '6'] }).find(x => x.key === 'maanden')
+    expect(g.selected).toEqual(['5', '6'])
+    const empty = buildShiftsFilterGroups({ ...baseArgs, selectedMonths: [] }).find(x => x.key === 'maanden')
+    expect(empty.selected).toEqual([]) // was: all 12 — the fallback is gone
   })
 
   it('always has period · years · series', () => {
