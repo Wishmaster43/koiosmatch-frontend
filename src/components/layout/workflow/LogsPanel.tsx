@@ -57,7 +57,9 @@ export default function LogsPanel({ workflowId, onClose }: { workflowId?: string
         {!loading && runs.map((run, idx) => {
           const id = run.id ?? idx
           const isOpen = expanded === id
-          const steps = run.step_results ?? run.steps ?? []
+          // Prefer the enriched live-state rows (duration/summary/items); the legacy
+          // step_results shape (label+status only) is a fallback for old runs.
+          const steps = (run.steps?.length ? run.steps : run.step_results) ?? []
           return (
             <div key={id} style={{ borderBottom: '1px solid var(--border)' }}>
               {/* Row */}
