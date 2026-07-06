@@ -16,6 +16,9 @@ const AI_PACKAGES = ['reporting_sm_ai', 'reporting_hf_ai', 'reporting_sm_hf_ai',
 // Locale-aware display of a KPI value (nl-NL) with an em-dash fallback.
 const fmt = (v?: unknown) => v == null ? '—' : (typeof v === 'number' ? v.toLocaleString('nl-NL') : String(v))
 
+// Loosely-typed SM candidate row (mirrors external data).
+type Rec = Record<string, unknown>
+
 export default function ShiftmanagerDashboard() {
   const { t } = useTranslation('shiftmanager')
   const { candidates_per_page, new_candidates_target: target } = useKpiSettings()
@@ -41,50 +44,42 @@ export default function ShiftmanagerDashboard() {
     list.forEach(c => { const s = c.registration_date; if (typeof s !== 'string') return; const d = new Date(s); if (d.getFullYear() !== y) return; grouped[d.getMonth()] = (grouped[d.getMonth()] || 0) + 1 })
     const vals = Object.values(grouped)
     const avg = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0
-    // Scoped to ACTIVE candidates (Danny: "nooit gewerkt alleen van de actieve").
-    const nowMs           = now.getTime()
-    const neverWorked     = active.filter(c => (Number(c.number_of_times_worked) || 0) === 0)
-    const workedThisMonth = active.filter(c => inMonth(c.last_worked_shift))
-    const planned         = active.filter(c => { const s = c.last_planned_shift; return typeof s === 'string' && new Date(s).getTime() > nowMs })
-    return { newList, avg, active, neverWorked, workedThisMonth, planned, all: list }
+    // Mutually-exclusive activity buckets over ACTIVE candidates (for the one
+    // combined "Activiteit" donut — Danny: samenvoegen op slimme manier, uit
+    // last_worked_shift / last_planned_shift / number_of_times_worked).
+    const nowMs = now.getTime()
+    const isFuture = (s: unknown) => typeof s === 'string' && new Date(s).getTime() > nowMs
+    const bNever: Rec[] = [], bWorked: Rec[] = [], bPlanned: Rec[] = [], bIdle: Rec[] = []
+    for (const c of active) {
+      if ((Number(c.number_of_times_worked) || 0) === 0) bNever.push(c)
+      else if (inMonth(c.last_worked_shift)) bWorked.push(c)
+      else if (isFuture(c.last_planned_shift)) bPlanned.push(c)
+      else bIdle.push(c)
+    }
+    return { newList, avg, active, all: list, bNever, bWorked, bPlanned, bIdle }
   }, [candidates])
 
-  // Distribution donut by function/position — ACTIVE candidates only (Danny).
-  const functionDonut = useMemo(() => {
-    const counts: Record<string, number> = {}
-    ;(candidates as Array<Record<string, unknown>>)
-      .filter(c => String(c.status ?? '').toLowerCase() === 'actief')
-      .forEach(c => {
-        const p = String(c.position ?? '').trim() || t('dashboard.stats.unknownFunction')
-        counts[p] = (counts[p] || 0) + 1
-      })
-    const sorted  = Object.entries(counts).sort((a, b) => b[1] - a[1])
-    const palette = ['#1B60A9', '#19A5CA', '#F0AB00', '#16A34A', '#DC2626', '#7C3AED', '#94A3B8']
-    const data: Array<{ name: string; value: number; key: string; color: string }> =
-      sorted.slice(0, 6).map(([name, value], i) => ({ name, value, key: name, color: palette[i] }))
-    const rest = sorted.slice(6).reduce((s, [, v]) => s + v, 0)
-    if (rest) data.push({ name: t('dashboard.stats.otherFunctions'), value: rest, key: '__rest', color: palette[6] })
-    return data
-  }, [candidates, t])
+  // One combined "Activiteit" donut over ACTIVE candidates (Gewerkt deze maand /
+  // Ingepland / Nooit gewerkt / Geen recente activiteit) — replaces 3 separate tiles.
+  const activityBuckets = useMemo(() => ([
+    { key: 'worked',  label: t('dashboard.stats.workedThisMonth'), list: derived.bWorked,  color: '#16A34A' },
+    { key: 'planned', label: t('dashboard.stats.planned'),         list: derived.bPlanned, color: '#1B60A9' },
+    { key: 'never',   label: t('dashboard.stats.neverWorked'),     list: derived.bNever,   color: '#DC2626' },
+    { key: 'idle',    label: t('dashboard.stats.idle'),            list: derived.bIdle,    color: '#94A3B8' },
+  ]), [derived, t])
+  const activityDonut = activityBuckets.map(b => ({ name: b.label, value: b.list.length, key: b.key, color: b.color }))
 
-  // Distribution donut by status (deployability). Candidates aren't tied to one
-  // customer, so a per-klant donut belongs on the shift charts, not here.
-  const statusDonut = useMemo(() => {
-    const counts: Record<string, number> = {}
-    ;(candidates as Array<Record<string, unknown>>).forEach(c => {
-      const s = String(c.status ?? '').trim() || t('dashboard.stats.unknownFunction')
-      counts[s] = (counts[s] || 0) + 1
-    })
-    const palette = ['#16A34A', '#F0AB00', '#DC2626', '#1B60A9', '#7C3AED', '#94A3B8', '#64748B']
-    return Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 7)
-      .map(([name, value], i) => ({ name, value, key: name, color: palette[i] }))
-  }, [candidates, t])
-
-  // Drill-down: a candidate KPI opens the shared drawer — 'average' shows the
-  // per-month breakdown vs KPI target, other tiles list their subset.
+  // Drill-down: a candidate KPI/donut segment opens the shared drawer — 'average'
+  // shows the per-month breakdown vs KPI target, other picks list their subset.
   const [drill, setDrill] = useState<{ mode: string; title: string; candidates: ReportCandidate[] } | null>(null)
   const openDrill = (mode: string, title: string, list: Array<Record<string, unknown>>) =>
     setDrill({ mode, title, candidates: list as unknown as ReportCandidate[] })
+  // A click on an activity donut segment drills into that bucket's candidates.
+  const onActivityPick = (d: unknown) => {
+    const k = (d as { key?: string })?.key
+    const b = activityBuckets.find(x => x.key === k)
+    if (b) openDrill('nieuw', b.label, b.list)
+  }
 
   // KPI row — shared InsightsRow (same 96px footprint as every other entity page),
   // standardised to 9 tiles (Danny: "overal 9 stuks"); candidate tiles are click-to-drill.
@@ -93,23 +88,25 @@ export default function ShiftmanagerDashboard() {
   const newColor = derived.newList.length >= target ? 'var(--color-success)'
                  : derived.newList.length >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
   const kpis: KpiSpec[] = [
-    // avg reads after the title (Danny: "gem met - achter de titel ipv zo klein").
+    // 'New' is the candidate metric; avg reads after the title (Danny: "gem met - achter de titel").
     { key: 'new',              label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
-    { key: 'workedActive',     label: t('dashboard.stats.workedActive'),   value: `${derived.workedThisMonth.length}/${derived.active.length}`, color: 'var(--color-success)',   onClick: () => openDrill('nieuw', t('dashboard.stats.active'), derived.active) },
-    { key: 'planned',          label: t('dashboard.stats.planned'),        value: derived.planned.length,     color: 'var(--color-secondary)', onClick: () => openDrill('nieuw', t('dashboard.stats.planned'), derived.planned) },
-    { key: 'neverWorked',      label: t('dashboard.stats.neverWorked'),    value: derived.neverWorked.length, color: 'var(--color-danger)',    onClick: () => openDrill('nieuw', t('dashboard.stats.neverWorked'), derived.neverWorked) },
+    // Shift-hours stats — still graceful '—' until derived from the filtered shift data
+    // (SM-SHIFTS feed / SM-CHARTS2 aggregation); these read from /sm_reports/dashboard.
     { key: 'open_hours',       label: t('dashboard.stats.openHours'),      value: v('open_hours'),       color: 'var(--color-warning)' },
     { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'), value: v('hours_this_month'), color: 'var(--color-warning)' },
     { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),      value: pctVal('occupancy_pct'), color: 'var(--color-success)' },
+    { key: 'messages_sent',    label: t('dashboard.stats.messagesSent'),   value: v('messages_sent'),    color: 'var(--color-secondary)' },
+    { key: 'response_rate',    label: t('dashboard.stats.responseRate'),   value: pctVal('response_rate_pct'), color: 'var(--color-warning)' },
   ]
+  // One candidate-based activity donut (clickable segments). The per-functie / per-klant
+  // shift donuts come from the backend shift aggregation (SM-CHARTS2), not from candidates.
   const donuts: DonutSpec[] = [
-    { key: 'function', title: t('dashboard.charts.byFunction'), data: functionDonut, colors: functionDonut.map(d => d.color) },
-    { key: 'status',   title: t('dashboard.charts.byStatus'),   data: statusDonut,   colors: statusDonut.map(d => d.color) },
+    { key: 'activity', title: t('dashboard.charts.activity'), data: activityDonut, colors: activityDonut.map(d => d.color), onPick: onActivityPick },
   ]
 
   return (
     <div className="p-6">
-      {/* KPI row — config-driven, equal-footprint (2 donuts + 7 tiles = 9) */}
+      {/* KPI row — config-driven, equal-footprint (1 activity donut + 6 tiles) */}
       <InsightsRow donuts={donuts} kpis={kpis} padding="0 0 16px" />
 
       {/* Candidate KPI drill-down */}

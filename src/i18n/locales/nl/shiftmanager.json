@@ -217,7 +217,8 @@
       "workedActive": "Gewerkt / Actief",
       "planned": "Ingepland",
       "unknownFunction": "Onbekend",
-      "otherFunctions": "Overig"
+      "otherFunctions": "Overig",
+      "idle": "Geen recente activiteit"
     },
     "statSub": {
       "urgent": "{{n}} urgent",
@@ -227,7 +228,8 @@
     },
     "charts": {
       "byFunction": "Per functie",
-      "byStatus": "Per status"
+      "byStatus": "Per status",
+      "activity": "Activiteit"
     }
   },
   "locationsPage": {

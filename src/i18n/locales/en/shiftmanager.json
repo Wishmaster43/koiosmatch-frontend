@@ -217,7 +217,8 @@
       "workedActive": "Worked / Active",
       "planned": "Scheduled",
       "unknownFunction": "Unknown",
-      "otherFunctions": "Other"
+      "otherFunctions": "Other",
+      "idle": "No recent activity"
     },
     "statSub": {
       "urgent": "{{n}} urgent",
@@ -227,7 +228,8 @@
     },
     "charts": {
       "byFunction": "By role",
-      "byStatus": "By status"
+      "byStatus": "By status",
+      "activity": "Activity"
     }
   },
   "locationsPage": {
