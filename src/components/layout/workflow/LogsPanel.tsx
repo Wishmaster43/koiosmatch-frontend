@@ -106,6 +106,10 @@ export default function LogsPanel({ workflowId, onClose }: { workflowId?: string
                         {step.error != null && (
                           <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 4 }}>{String(step.error)}</div>
                         )}
+                        {/* One-line outcome, e.g. "460 gesynct · 2 overgeslagen". */}
+                        {typeof step.summary === 'string' && step.summary && (
+                          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)', marginTop: 4 }}>{step.summary}</div>
+                        )}
                         {total != null && (
                           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
                             {t('runs.drawer.output')}: {total}

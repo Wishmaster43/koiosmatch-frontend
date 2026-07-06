@@ -245,8 +245,9 @@ function EditorInner({ workflow, onClose, onSave }: {
           </div>
 
           {/* Right panel — widens when management tabs (Agents/Prompts/FAQ/etc.) are active */}
-          {/* Logs need room (per-step results + item lists) → same wide width. */}
-          <div style={{ width: (widePanelActive || showLogs) ? 560 : 280, flexShrink: 0, background: 'var(--surface)', borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'width 0.2s ease' }}>
+          {/* Roomy by default (config selects were truncating at 280); logs and the
+              management tabs get the full wide panel for per-step results. */}
+          <div style={{ width: (widePanelActive || showLogs) ? 640 : 380, flexShrink: 0, background: 'var(--surface)', borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'width 0.2s ease' }}>
             {showLogs
               ? <LogsPanel workflowId={workflow.id} onClose={() => setShowLogs(false)} />
               : <ConfigPanel node={selectedNode} onUpdate={updateNodeConfig} onDelete={deleteNode}

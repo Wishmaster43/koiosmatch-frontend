@@ -58,23 +58,33 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
     counts[c] = (counts[c] ?? 0) + 1
   })
 
-  const renderRow = ([type, meta]: ModuleMetaEntry) => {
+  // Compact tile (grid cell): icon + label. A row-per-module list didn't scale
+  // once the catalog grew (endless scrolling, Danny 2026-07-06).
+  const renderTile = ([type, meta]: ModuleMetaEntry) => {
     const Icon = meta.Icon as unknown as LucideIcon
     return (
       <button key={type} type="button"
         onClick={() => { onSelect(type, insertAfterEdgeId); onClose() }}
-        style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '9px 16px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-        onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-        onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-        <div style={{ width: 34, height: 34, borderRadius: '50%', background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Icon size={15} color={meta.color} />
+        title={modLabel(type, meta.label)}
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '12px 6px', background: 'none', border: '1px solid transparent', borderRadius: 10, cursor: 'pointer' }}
+        onMouseEnter={e => { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.style.borderColor = 'var(--border)' }}
+        onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'transparent' }}>
+        <div style={{ width: 40, height: 40, borderRadius: '50%', background: meta.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Icon size={17} color={meta.color} />
         </div>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{modLabel(type, meta.label)}</div>
+        <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', textAlign: 'center', lineHeight: 1.3, overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>
+          {modLabel(type, meta.label)}
         </div>
       </button>
     )
   }
+
+  // Responsive tile grid shared by every view.
+  const renderGrid = (entries: ModuleMetaEntry[]) => (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 4, padding: '4px 12px' }}>
+      {entries.map(renderTile)}
+    </div>
+  )
 
   // In "Alle" tab (or search), render with category dividers
   const renderGrouped = () => {
@@ -90,7 +100,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
       <div key={cat}>
         {i > 0 && <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />}
         <div style={{ padding: '6px 16px 2px', fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.08em', textTransform: 'uppercase' }}>{catLabel(cat)}</div>
-        {groups[cat].map(renderRow)}
+        {renderGrid(groups[cat])}
       </div>
     ))
   }
@@ -136,7 +146,7 @@ export default function ModulePicker({ insertAfterEdgeId, onSelect, onClose }: {
           )}
           {visible.length > 0 && (tab === 'Alle' || search)
             ? renderGrouped()
-            : visible.map(renderRow)
+            : renderGrid(visible)
           }
         </div>
       </div>
