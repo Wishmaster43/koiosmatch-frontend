@@ -350,6 +350,7 @@
     "load": "Filter laden…",
     "namePlaceholder": "Filtername",
     "save": "Speichern",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "setDefault": "Als Standard"
   }
 }

@@ -11,7 +11,7 @@
  *   fixedDepartmentId — department id string always included
  *   fixedCandidateId  — candidate id string always included
  */
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation }     from "react-i18next"
 import ShiftsDrillDownDrawer  from "./ShiftsDrillDownDrawer"
 import { useRightPanel }      from "@/context/RightPanelContext"
@@ -127,12 +127,20 @@ export default function ShiftsChartsBlock({
   // Save/load named filter sets — lives IN the right filter panel (localStorage
   // interim; swaps to /sm_reports/saved-filters when SM-FILT-SAVE lands). Scoped
   // per page via filterKey, so it only appears where it's registered.
-  const { saved, save, remove } = useSavedShiftFilters(`sm-saved-filters:${filterKey}`)
+  const { saved, save, remove, setDefault, defaultState } = useSavedShiftFilters(`sm-saved-filters:${filterKey}`)
   const applyFilterState = useCallback((s: ShiftFilterState) => {
     setSelectedYears(s.selectedYears); setSelectedMonths(s.selectedMonths); setPeriod(s.period)
     setVisible(s.visible); setSelectedJobTypes(s.selectedJobTypes)
     setSelectedCustomers(s.selectedCustomers); setSelectedLocations(s.selectedLocations)
   }, [])
+
+  // Apply the default saved filter once on mount (Danny: "wordt niet default geladen?").
+  const appliedDefaultRef = useRef(false)
+  useEffect(() => {
+    if (appliedDefaultRef.current || !defaultState) return
+    applyFilterState(defaultState)
+    appliedDefaultRef.current = true
+  }, [defaultState, applyFilterState])
 
   // ── Filter groups for the right sidebar ───────────────────────────────────
   // A saved-filters group is pinned on top; the SM groups opt out of the chip
@@ -142,7 +150,7 @@ export default function ShiftsChartsBlock({
     return [
       { key: `${filterKey}-saved`, type: 'saved-filters', label: t('savedFilters.title'),
         value: JSON.stringify(filterState), selected: saved.map(s => s.id),
-        saved, onSave: (name: string) => save(name, filterState), onLoad: applyFilterState, onDelete: remove },
+        saved, onSave: (name: string) => save(name, filterState), onLoad: applyFilterState, onDelete: remove, onSetDefault: setDefault },
       ...buildShiftsFilterGroups({
         t, seriesLabel, period, selectedYears, selectedMonths, visible,
         selectedJobTypes, selectedCustomers, selectedLocations, filterOptions,
@@ -153,7 +161,7 @@ export default function ShiftsChartsBlock({
     ]
   }, [t, seriesLabel, period, selectedYears, selectedMonths, visible, selectedJobTypes,
       selectedCustomers, selectedLocations, filterOptions, fixedCustomers, fixedLocationIds,
-      filterKey, saved, save, remove, applyFilterState])
+      filterKey, saved, save, remove, setDefault, applyFilterState])
 
   // Sync the groups into the right panel.
   const { registerFilters, unregisterFilters } = useRightPanel()

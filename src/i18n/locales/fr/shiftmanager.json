@@ -350,6 +350,7 @@
     "load": "Charger un filtre…",
     "namePlaceholder": "Nom du filtre",
     "save": "Enregistrer",
-    "delete": "Supprimer"
+    "delete": "Supprimer",
+    "setDefault": "Par défaut"
   }
 }

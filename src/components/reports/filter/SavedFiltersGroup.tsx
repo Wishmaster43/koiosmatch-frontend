@@ -6,18 +6,19 @@
  */
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Save, Trash2 } from 'lucide-react'
+import { Save, Trash2, Star } from 'lucide-react'
 import type { ReportFilterGroup } from '@/types/reports'
 
 // One saved set — state is opaque to this component.
-interface SavedSet { id: string; name: string; state: unknown }
+interface SavedSet { id: string; name: string; state: unknown; isDefault?: boolean }
 
 export default function SavedFiltersGroup({ group }: { group: ReportFilterGroup }) {
   const { t } = useTranslation('shiftmanager')
-  const saved    = (group.saved as SavedSet[] | undefined) ?? []
-  const onSave   = group.onSave   as ((name: string) => void) | undefined
-  const onLoad   = group.onLoad   as ((state: unknown) => void) | undefined
-  const onDelete = group.onDelete as ((id: string) => void) | undefined
+  const saved        = (group.saved as SavedSet[] | undefined) ?? []
+  const onSave       = group.onSave       as ((name: string) => void) | undefined
+  const onLoad       = group.onLoad       as ((state: unknown) => void) | undefined
+  const onDelete     = group.onDelete     as ((id: string) => void) | undefined
+  const onSetDefault = group.onSetDefault as ((id: string) => void) | undefined
 
   const [name, setName] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -51,12 +52,20 @@ export default function SavedFiltersGroup({ group }: { group: ReportFilterGroup 
         </button>
       </div>
 
-      {/* Saved sets: click to load, trash to delete */}
+      {/* Saved sets: star = default (auto-applied on load), click name to load, trash to delete */}
       {saved.map(s => (
         <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+          <button type="button" onClick={() => onSetDefault?.(s.id)}
+            title={t('savedFilters.setDefault')} aria-label={t('savedFilters.setDefault')} aria-pressed={!!s.isDefault}
+            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28,
+              border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
+              color: s.isDefault ? 'var(--color-warning)' : 'var(--text-muted)', cursor: 'pointer' }}>
+            <Star size={13} fill={s.isDefault ? 'var(--color-warning)' : 'none'} />
+          </button>
           <button type="button" onClick={() => onLoad?.(s.state)}
             style={{ flex: 1, minWidth: 0, textAlign: 'left', height: 28, padding: '0 8px', fontSize: 12,
               border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer',
+              fontWeight: s.isDefault ? 600 : 400,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'var(--surface)')}>

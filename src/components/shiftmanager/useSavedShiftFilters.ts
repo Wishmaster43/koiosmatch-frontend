@@ -17,7 +17,7 @@ export interface ShiftFilterState {
   selectedLocations: string[]
 }
 
-export interface SavedShiftFilter { id: string; name: string; state: ShiftFilterState }
+export interface SavedShiftFilter { id: string; name: string; state: ShiftFilterState; isDefault?: boolean }
 
 // Read the persisted list for a storage key (tolerant of corrupt/absent data).
 function read(key: string): SavedShiftFilter[] {
@@ -50,5 +50,15 @@ export function useSavedShiftFilters(storageKey: string) {
 
   const remove = useCallback((id: string) => persist(read(storageKey).filter(s => s.id !== id)), [persist, storageKey])
 
-  return { saved, save, remove }
+  // Mark one set as the default (toggle off if it already is); only one at a time.
+  const setDefault = useCallback((id: string) => {
+    const list = read(storageKey)
+    const wasDefault = list.find(s => s.id === id)?.isDefault
+    persist(list.map(s => ({ ...s, isDefault: s.id === id ? !wasDefault : false })))
+  }, [persist, storageKey])
+
+  // The default set's filter state (applied on load), or null.
+  const defaultState = saved.find(s => s.isDefault)?.state ?? null
+
+  return { saved, save, remove, setDefault, defaultState }
 }

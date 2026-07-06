@@ -350,6 +350,7 @@
     "load": "Laad filter…",
     "namePlaceholder": "Filternaam",
     "save": "Opslaan",
-    "delete": "Verwijder"
+    "delete": "Verwijder",
+    "setDefault": "Als default"
   }
 }

@@ -350,6 +350,7 @@
     "load": "Load filter…",
     "namePlaceholder": "Filter name",
     "save": "Save",
-    "delete": "Delete"
+    "delete": "Delete",
+    "setDefault": "Set as default"
   }
 }
