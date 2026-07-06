@@ -135,7 +135,9 @@
     "byCustomerTitle": "No candidate by customer",
     "byFunctionTitle": "Open shifts by role",
     "inHours": "In hours",
-    "inShifts": "In shifts"
+    "inShifts": "In shifts",
+    "colHours": "Hours",
+    "colShifts": "Shifts"
   },
   "customersReport": {
     "title": "Customers report",

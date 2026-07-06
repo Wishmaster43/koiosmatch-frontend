@@ -135,7 +135,9 @@
     "byCustomerTitle": "Sans candidat par client",
     "byFunctionTitle": "Services ouverts par fonction",
     "inHours": "En heures",
-    "inShifts": "En services"
+    "inShifts": "En services",
+    "colHours": "Heures",
+    "colShifts": "Services"
   },
   "customersReport": {
     "title": "Rapport clients",

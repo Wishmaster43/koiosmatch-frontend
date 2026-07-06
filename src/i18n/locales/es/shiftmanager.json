@@ -135,7 +135,9 @@
     "byCustomerTitle": "Sin candidato por cliente",
     "byFunctionTitle": "Turnos abiertos por función",
     "inHours": "En horas",
-    "inShifts": "En turnos"
+    "inShifts": "En turnos",
+    "colHours": "Horas",
+    "colShifts": "Turnos"
   },
   "customersReport": {
     "title": "Informe de clientes",

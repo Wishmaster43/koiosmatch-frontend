@@ -135,7 +135,9 @@
     "byCustomerTitle": "Geen kandidaat per klant",
     "byFunctionTitle": "Open diensten per functie",
     "inHours": "In uren",
-    "inShifts": "In diensten"
+    "inShifts": "In diensten",
+    "colHours": "Uren",
+    "colShifts": "Diensten"
   },
   "customersReport": {
     "title": "Klanten rapport",

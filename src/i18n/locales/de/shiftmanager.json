@@ -135,7 +135,9 @@
     "byCustomerTitle": "Kein Kandidat nach Kunde",
     "byFunctionTitle": "Offene Dienste nach Funktion",
     "inHours": "In Stunden",
-    "inShifts": "In Diensten"
+    "inShifts": "In Diensten",
+    "colHours": "Stunden",
+    "colShifts": "Dienste"
   },
   "customersReport": {
     "title": "Kundenbericht",

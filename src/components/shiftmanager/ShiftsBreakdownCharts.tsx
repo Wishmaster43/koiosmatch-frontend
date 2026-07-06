@@ -41,6 +41,34 @@ function HBars({ rows, unit, offset, empty }: { rows: BreakdownRow[]; unit: 'hou
   )
 }
 
+// Small numbers table under a chart: name · uren · diensten (top 8 by hours).
+function MiniTable({ rows, nameCol }: { rows: BreakdownRow[]; nameCol: string }) {
+  const { t } = useTranslation('shiftmanager')
+  const fmt = (v: unknown) => (Number(v) || 0).toLocaleString('nl-NL')
+  const top = [...rows].sort((a, b) => (Number(b.hours) || 0) - (Number(a.hours) || 0)).slice(0, 8)
+  if (top.length === 0) return null
+  const th: React.CSSProperties = { padding: '5px 8px', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
+  const td: React.CSSProperties = { padding: '5px 8px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)', fontVariantNumeric: 'tabular-nums' }
+  return (
+    <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: 10 }}>
+      <thead><tr>
+        <th style={{ ...th, textAlign: 'left' }}>{nameCol}</th>
+        <th style={{ ...th, textAlign: 'right' }}>{t('charts.colHours')}</th>
+        <th style={{ ...th, textAlign: 'right' }}>{t('charts.colShifts')}</th>
+      </tr></thead>
+      <tbody>
+        {top.map((r, i) => (
+          <tr key={r.key + i}>
+            <td style={{ ...td, textAlign: 'left' }}>{r.label || '—'}</td>
+            <td style={{ ...td, textAlign: 'right' }}>{fmt(r.hours)}</td>
+            <td style={{ ...td, textAlign: 'right' }}>{fmt(r.count)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
 export default function ShiftsBreakdownCharts({ customerRows, functionRows, unit, loading, error }: {
   customerRows: BreakdownRow[]
   functionRows: BreakdownRow[]
@@ -55,9 +83,11 @@ export default function ShiftsBreakdownCharts({ customerRows, functionRows, unit
     <div className="grid grid-cols-1 gap-4 mt-4 lg:grid-cols-2">
       <ChartCard title={t('charts.byCustomerTitle')} subtitle={sub} loading={loading} error={error}>
         <HBars rows={customerRows} unit={unit} offset={0} empty={t('charts.empty', { defaultValue: '—' })} />
+        <MiniTable rows={customerRows} nameCol={t('shiftsDrawer.byCustomer')} />
       </ChartCard>
       <ChartCard title={t('charts.byFunctionTitle')} subtitle={sub} loading={loading} error={error}>
         <HBars rows={functionRows} unit={unit} offset={3} empty={t('charts.empty', { defaultValue: '—' })} />
+        <MiniTable rows={functionRows} nameCol={t('shiftsDrawer.byFunction')} />
       </ChartCard>
     </div>
   )
