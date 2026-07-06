@@ -22,7 +22,6 @@ const LocationsReport        = lazy(() => import('@/pages/shiftmanager/Locations
 const DepartmentsDetailPage  = lazy(() => import('@/pages/shiftmanager/DepartmentsDetailPage'))
 const DepartmentsReport      = lazy(() => import('@/pages/shiftmanager/DepartmentsReport'))
 const ContactsDetailPage     = lazy(() => import('@/pages/shiftmanager/ContactsDetailPage'))
-const ContactPersonsPage     = lazy(() => import('@/pages/shiftmanager/ContactPersonsPage'))
 const CustomersPage          = lazy(() => import('@/pages/customers/CustomersPage'))
 const SmCustomersPage        = lazy(() => import('@/pages/shiftmanager/CustomersPage'))
 const ContactsPage           = lazy(() => import('@/pages/shiftmanager/ContactsPage'))
@@ -79,7 +78,6 @@ export const PAGE_TITLES: Record<string, string> = {
   'shiftmanager.customers':     'Shiftmanager — Customers',
   'shiftmanager.locations':     'Shiftmanager — Locations',
   'shiftmanager.departments':   'Shiftmanager — Departments',
-  'shiftmanager.contacts':      'Shiftmanager — Contacts',
   'shiftmanager.details':       'Shiftmanager — Details',
   'shiftmanager.customers-table':   'Shiftmanager — Klanten',
   'shiftmanager.locations-table':   'Shiftmanager — Locaties',
@@ -155,7 +153,6 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'shiftmanager.customers':   return <CustomerReport />
     case 'shiftmanager.locations':   return <LocationsReport />
     case 'shiftmanager.departments': return <DepartmentsReport />
-    case 'shiftmanager.contacts':    return <ContactPersonsPage />
     case 'shiftmanager.details':     return <ShiftmanagerDetailsPage />
     // Table pages (operational data tables)
     case 'shiftmanager.customers-table':   return <SmCustomersPage />

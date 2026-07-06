@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { ac, ContactAvatar } from './contactParts'
+import ContactsTable from './ContactsTable'
+import PaginationBar from '@/components/ui/PaginationBar'
 import ContactDrawer from './ContactDrawer'
 import { useSmContacts } from './hooks/useSmContacts'
 import type { SmContactRow } from '@/types/shiftmanager'
@@ -15,9 +15,9 @@ export default function ContactsPage() {
   const [search]                      = useState('')
   const [selected,    setSelected]    = useState<SmContactRow | null>(null)
   const [page,        setPage]        = useState(1)
+  const [pageSize,    setPageSize]    = useState(50)
   const [selCustomers,  setSelCustomers]  = useState<string[]>([])
   const [selPlanning, setSelPlanning] = useState<string[]>([])
-  const pageSize = 12
 
   const { registerFilters, unregisterFilters } = useRightPanel()
 
@@ -66,11 +66,6 @@ export default function ContactsPage() {
     { label: t('contactsPage.kpi.customers'),        value: customerOptions.length },
   ]
 
-  const headers = [
-    t('contactsPage.cols.name'), t('contactsPage.cols.customer'), t('contactsPage.cols.location'),
-    t('contactsPage.cols.email'), t('contactsPage.cols.phone'), t('contactsPage.cols.planning'),
-  ]
-
   return (
     <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
@@ -86,120 +81,14 @@ export default function ContactsPage() {
           ))}
         </div>
 
-        {/* Table */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 24px' }}>
-          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  {headers.map(h => (
-                    <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontSize: 11,
-                      fontWeight: 600, color: 'var(--text-muted)', letterSpacing: '0.04em',
-                      textTransform: 'uppercase', whiteSpace: 'nowrap' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {paged.map((c, i) => {
-                  const name  = [c.firstname, c.lastname].filter(Boolean).join(' ')
-                  const isSel = selected?.id === c.id
-                  return (
-                    <tr key={c.id} onClick={() => setSelected(isSel ? null : c)}
-                      style={{ borderBottom: i < paged.length - 1 ? '1px solid var(--border)' : 'none',
-                        cursor: 'pointer', transition: 'background 0.1s',
-                        background: isSel ? 'var(--color-primary-bg)' : 'transparent' }}
-                      onMouseEnter={e => { if (!isSel) e.currentTarget.style.background = 'var(--hover-bg)' }}
-                      onMouseLeave={e => { if (!isSel) e.currentTarget.style.background = 'transparent' }}>
-
-                      {/* Naam */}
-                      <td style={{ padding: '11px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-                          <ContactAvatar name={name} size={30} />
-                          <div>
-                            <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{name}</div>
-                            {c.function_title && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{c.function_title}</div>}
-                          </div>
-                        </div>
-                      </td>
-
-                      {/* Klant */}
-                      <td style={{ padding: '11px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                          <div style={{ width: 20, height: 20, borderRadius: 5, background: ac(c.customer),
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            fontSize: 8, fontWeight: 800, color: 'var(--surface)', flexShrink: 0 }}>
-                            {c.customer?.charAt(0)}
-                          </div>
-                          <span style={{ fontSize: 12, color: 'var(--text)', maxWidth: 140,
-                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.customer}</span>
-                        </div>
-                      </td>
-
-                      {/* Locatie */}
-                      <td style={{ padding: '11px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                          <MapPin size={11} color="var(--text-muted)" style={{ flexShrink: 0 }} />
-                          <span style={{ fontSize: 12, color: 'var(--text)', maxWidth: 160,
-                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.location}</span>
-                        </div>
-                      </td>
-
-                      {/* E-mail */}
-                      <td style={{ padding: '11px 14px' }}>
-                        <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()}
-                          style={{ fontSize: 12, color: 'var(--color-secondary)', textDecoration: 'none',
-                            display: 'flex', alignItems: 'center', gap: 4 }}>
-                          <Mail size={11} />{c.email}
-                        </a>
-                      </td>
-
-                      {/* Telefoon */}
-                      <td style={{ padding: '11px 14px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text)' }}>
-                          <Phone size={11} color="var(--text-muted)" />{c.mobile}
-                        </div>
-                      </td>
-
-                      {/* Planningscontact */}
-                      <td style={{ padding: '11px 14px' }}>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4,
-                          fontSize: 11, fontWeight: 500, padding: '3px 9px', borderRadius: 999,
-                          background: c.planning ? 'var(--color-success-bg)' : 'var(--hover-bg)',
-                          color:      c.planning ? 'var(--color-success)'  : 'var(--text-muted)',
-                          border:     `1px solid ${c.planning ? '#BBF7D0' : 'var(--border)'}` }}>
-                          {c.planning ? <><MessageCircle size={10} /> {t('contactsPage.yes')}</> : t('contactsPage.no')}
-                        </span>
-                      </td>
-                    </tr>
-                  )
-                })}
-                {paged.length === 0 && (
-                  <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center',
-                    color: 'var(--text-muted)', fontSize: 13 }}>{t('contactsPage.empty')}</td></tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            marginTop: 14, fontSize: 13, color: 'var(--text-muted)' }}>
-            <span>{t('contactsPage.count', { count: filtered.length })}</span>
-            {totalPages > 1 && (
-              <div style={{ display: 'flex', gap: 4 }}>
-                <button onClick={() => setPage(p => Math.max(1, p-1))} disabled={page === 1}
-                  style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid var(--border)',
-                    background: 'none', cursor: page > 1 ? 'pointer' : 'default',
-                    color: page > 1 ? 'var(--text)' : 'var(--text-muted)', fontSize: 16,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
-                <button onClick={() => setPage(p => Math.min(totalPages, p+1))} disabled={page === totalPages}
-                  style={{ width: 28, height: 28, borderRadius: 6, border: '1px solid var(--border)',
-                    background: 'none', cursor: page < totalPages ? 'pointer' : 'default',
-                    color: page < totalPages ? 'var(--text)' : 'var(--text-muted)', fontSize: 16,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
-              </div>
-            )}
-          </div>
+        {/* Table — shared DataTable (sticky header, sorting, soft-chip planning flag) */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
+          <ContactsTable rows={paged} selectedId={selected?.id}
+            onSelect={c => setSelected(prev => prev?.id === c.id ? null : c)} />
         </div>
+
+        <PaginationBar page={page} totalPages={totalPages} totalRows={filtered.length} pageSize={pageSize}
+          onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
       </div>
 
       <ContactDrawer contact={selected} onClose={() => setSelected(null)} />

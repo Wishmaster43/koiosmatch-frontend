@@ -75,7 +75,6 @@ const MODULE_NAV_ITEMS = [
       { id: 'shiftmanager.customers',   label: 'Klanten-SM' },
       { id: 'shiftmanager.locations',   label: 'Locaties-SM' },
       { id: 'shiftmanager.departments', label: 'Afdelingen-SM' },
-      { id: 'shiftmanager.contacts',    label: 'Contactpersonen-SM' },
       { id: 'shiftmanager.details',     label: 'Details-SM' },
       // Tabellen
       { id: 'shiftmanager.customers-table',   label: 'Klanten' },
