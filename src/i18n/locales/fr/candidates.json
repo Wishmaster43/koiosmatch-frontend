@@ -269,7 +269,8 @@
     "taskCreatedBy": "créée par {{name}}",
     "taskOpen": "Ouvrir la tâche",
     "tasksOpen": "Ouvertes",
-    "tasksHistory": "Historique"
+    "tasksHistory": "Historique",
+    "returnDateUnknownHint": "Laisser vide = pas encore connu"
   },
   "stage": {
     "lead": "Piste",

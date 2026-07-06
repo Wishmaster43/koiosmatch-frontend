@@ -276,7 +276,8 @@
     "taskCreatedBy": "created by {{name}}",
     "taskOpen": "Open task",
     "tasksOpen": "Open",
-    "tasksHistory": "History"
+    "tasksHistory": "History",
+    "returnDateUnknownHint": "Leave empty = not yet known"
   },
   "stage": {
     "lead": "Lead",

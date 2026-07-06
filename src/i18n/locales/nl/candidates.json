@@ -276,7 +276,8 @@
     "taskCreatedBy": "aangemaakt door {{name}}",
     "taskOpen": "Taak openen",
     "tasksOpen": "Open",
-    "tasksHistory": "Historie"
+    "tasksHistory": "Historie",
+    "returnDateUnknownHint": "Leeg laten = nog onbekend"
   },
   "stage": {
     "lead": "Lead",

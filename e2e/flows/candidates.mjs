@@ -47,7 +47,7 @@ export async function statusWithReason({ page, errors }) {
   await modal.waitFor({ state: 'visible', timeout: 6000 })
     .catch(() => expect(false, 'reden/datum-popup opende NIET (status-flags?)'))
   const box = page.locator('textarea').last()
-  if (await box.count()) await box.fill('smoke: griep')
+  if (await box.count()) await box.fill('Tijdelijk niet inzetbaar (demo)')
   const date = page.locator('input[type="date"]').last()
   if (await date.count()) await date.fill('2026-08-01')
   await page.locator('button:has-text("Opslaan")').last().click()
