@@ -52,10 +52,17 @@ export default function ShiftmanagerDashboard() {
       else if (isFuture(c.last_planned_shift)) bPlanned.push(c)
       else bIdle.push(c)
     }
-    // Inactief = specifiek de 'nietactief'-status (niet "alles behalve actief" — dat
-    // telde ook intake/overig mee → 337 onzin; Danny).
     const inactive = list.filter(c => String(c.status ?? '').toLowerCase() === 'nietactief')
-    return { newList, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle }
+    // Aandachtskandidaten — 2 haalbare regels (de 2 "werkt-minder-dan-normaal"-regels
+    // wachten op toekomstige per-kandidaat-uren → shifts-per-candidate):
+    //   (a) nieuw binnen het venster (default 30d; TODO Settings 4/6 wk) én nog niet ingepland;
+    //   (b) actief maar nog nooit ingelogd.
+    const attnWindowMs   = 30 * 86400000
+    const futurePlanned  = (c: Rec) => { const s = c.last_planned_shift; return typeof s === 'string' && new Date(s).getTime() > nowMs }
+    const newNotPlanned  = active.filter(c => { const r = c.registration_date; return typeof r === 'string' && (nowMs - new Date(r).getTime()) <= attnWindowMs && !futurePlanned(c) })
+    const neverLoggedIn  = active.filter(c => !c.last_login_at)
+    const attention      = [...new Set([...newNotPlanned, ...neverLoggedIn])]
+    return { newList, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle, newNotPlanned, neverLoggedIn, attention }
   }, [candidates])
 
   // One combined "Activiteit" donut over ACTIVE candidates (Gewerkt deze maand /
@@ -78,6 +85,15 @@ export default function ShiftmanagerDashboard() {
     const biggest = [...activityBuckets].sort((a, b) => b.list.length - a.list.length)[0]
     setDrill({ mode: 'nieuw', title: '', candidates: [], tabs: activityTabs, initialTab: biggest?.key })
   }
+  // Aandachtskandidaten drill: a tab per attention rule (Danny wants the count X/actief).
+  const openAttentionDrill = () => setDrill({
+    mode: 'nieuw', title: '', candidates: [],
+    tabs: [
+      { key: 'new_np',    label: t('dashboard.stats.attnNewNotPlanned'), candidates: derived.newNotPlanned as unknown as ReportCandidate[] },
+      { key: 'never_log', label: t('dashboard.stats.attnNeverLoggedIn'), candidates: derived.neverLoggedIn as unknown as ReportCandidate[] },
+    ],
+    initialTab: 'new_np',
+  })
 
   // Candidate cards (NOT filter-driven) — passed into ShiftsChartsBlock, which adds the
   // filter-driven shift cards → one combined 9-card row. Activiteit is a clearer channels
@@ -87,8 +103,9 @@ export default function ShiftmanagerDashboard() {
   // Only the two candidate cards on the dashboard; ShiftsChartsBlock adds the seven
   // shift cards → one 9-card row. (Totaal/Inactief eruit — Danny: "ruk".)
   const leadingKpis: KpiSpec[] = [
-    { key: 'activity', label: t('dashboard.stats.workedActive'), value: `${derived.bWorked.length}/${derived.active.length}`, color: 'var(--color-success)', onClick: openActivityDrill },
-    { key: 'new',      label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
+    { key: 'activity',  label: t('dashboard.stats.workedActive'), value: `${derived.bWorked.length}/${derived.active.length}`, color: 'var(--color-success)', onClick: openActivityDrill },
+    { key: 'new',       label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
+    { key: 'attention', label: t('dashboard.stats.attentionCandidates'), value: `${derived.attention.length}/${derived.active.length}`, color: derived.attention.length > 0 ? 'var(--color-danger)' : 'var(--color-success)', onClick: openAttentionDrill },
   ]
 
   return (

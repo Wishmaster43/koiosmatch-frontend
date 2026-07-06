@@ -235,7 +235,11 @@
       "forecastMonth": "Prévision ce mois",
       "actualMonth": "Réel ce mois",
       "unfilled": "Non pourvu",
-      "customersWithOpen": "Clients avec services ouverts"
+      "customersWithOpen": "Clients avec services ouverts",
+      "attentionCandidates": "Candidats à suivre",
+      "attnNewNotPlanned": "Nouveau & non planifié",
+      "attnNeverLoggedIn": "Actif & jamais connecté",
+      "openByFunction": "Ouvert par fonction"
     },
     "statSub": {
       "urgent": "{{n}} urgent",

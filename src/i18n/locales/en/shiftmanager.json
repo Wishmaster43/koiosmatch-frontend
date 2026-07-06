@@ -235,7 +235,11 @@
       "forecastMonth": "Forecast this month",
       "actualMonth": "Actual this month",
       "unfilled": "Unfilled",
-      "customersWithOpen": "Customers with open shifts"
+      "customersWithOpen": "Customers with open shifts",
+      "attentionCandidates": "Attention candidates",
+      "attnNewNotPlanned": "New & not planned",
+      "attnNeverLoggedIn": "Active & never logged in",
+      "openByFunction": "Open by role"
     },
     "statSub": {
       "urgent": "{{n}} urgent",

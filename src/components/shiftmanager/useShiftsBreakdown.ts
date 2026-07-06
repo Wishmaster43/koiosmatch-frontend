@@ -47,6 +47,12 @@ export function useShiftsBreakdown(queryString: string) {
     queryFn: fetchBreakdown(queryString, 'customer', 'totaal'),
     placeholderData: keepPreviousData, staleTime: 60_000,
   })
+  // Customers that have PLANNED shifts (prognose) → the "5" in "5 / 7 actieve klanten".
+  const plannedCustomersQ = useQuery({
+    queryKey: ['sm_reports', 'shifts-breakdown', 'customer', 'prognose', queryString],
+    queryFn: fetchBreakdown(queryString, 'customer', 'prognose'),
+    placeholderData: keepPreviousData, staleTime: 60_000,
+  })
 
   // Drop the ShiftManager test/self client (external_id '1') — shifts-breakdown
   // doesn't exclude it yet (BE fix pending); until then filter it FE-side.
@@ -57,7 +63,8 @@ export function useShiftsBreakdown(queryString: string) {
     customerRows, functionRows,
     customerDonut: toDonut(customerRows),
     functionDonut: toDonut(functionRows),
-    activeCustomers: noTest((activeCustomersQ.data ?? []) as BreakdownRow[]).length,
-    customersWithOpen: customerRows.length,
+    activeCustomers:    noTest((activeCustomersQ.data ?? []) as BreakdownRow[]).length,
+    plannedCustomers:   noTest((plannedCustomersQ.data ?? []) as BreakdownRow[]).length,
+    customersWithOpen:  customerRows.length,
   }
 }

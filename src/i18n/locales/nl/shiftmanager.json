@@ -235,7 +235,11 @@
       "forecastMonth": "Prognose deze maand",
       "actualMonth": "Werkelijk deze maand",
       "unfilled": "Niet ingevuld",
-      "customersWithOpen": "Klanten met open diensten"
+      "customersWithOpen": "Klanten met open diensten",
+      "attentionCandidates": "Aandachtskandidaten",
+      "attnNewNotPlanned": "Nieuw & niet ingepland",
+      "attnNeverLoggedIn": "Actief & nooit ingelogd",
+      "openByFunction": "Open per functie"
     },
     "statSub": {
       "urgent": "{{n}} urgent",
