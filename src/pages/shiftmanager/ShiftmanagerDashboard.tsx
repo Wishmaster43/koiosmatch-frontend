@@ -52,7 +52,9 @@ export default function ShiftmanagerDashboard() {
       else if (isFuture(c.last_planned_shift)) bPlanned.push(c)
       else bIdle.push(c)
     }
-    const inactive = list.filter(c => String(c.status ?? '').toLowerCase() !== 'actief')
+    // Inactief = specifiek de 'nietactief'-status (niet "alles behalve actief" — dat
+    // telde ook intake/overig mee → 337 onzin; Danny).
+    const inactive = list.filter(c => String(c.status ?? '').toLowerCase() === 'nietactief')
     return { newList, avg, active, inactive, all: list, bNever, bWorked, bPlanned, bIdle }
   }, [candidates])
 
@@ -83,8 +85,9 @@ export default function ShiftmanagerDashboard() {
   const newColor = derived.newList.length >= target ? 'var(--color-success)'
                  : derived.newList.length >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
   const leadingKpis: KpiSpec[] = [
-    { key: 'activity', label: t('dashboard.charts.activity'), value: derived.active.length, onClick: openActivityDrill,
-      channels: activityBuckets.map(b => ({ label: b.label, value: b.list.length, color: b.color })) },
+    // Headline = Gewerkt deze maand / Actief (19/124); the other buckets (Ingepland /
+    // Nooit gewerkt / Idle) live in the drill-down tabs (Danny).
+    { key: 'activity', label: t('dashboard.stats.workedActive'), value: `${derived.bWorked.length}/${derived.active.length}`, color: 'var(--color-success)', onClick: openActivityDrill },
     { key: 'new',      label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
     { key: 'total',    label: t('dashboard.stats.totalCandidates'), value: derived.all.length,      color: 'var(--color-primary)', onClick: () => openDrill('nieuw', t('dashboard.stats.totalCandidates'), derived.all) },
     { key: 'inactive', label: t('dashboard.stats.inactive'),        value: derived.inactive.length, color: 'var(--text-muted)',    onClick: () => openDrill('nieuw', t('dashboard.stats.inactive'), derived.inactive) },
