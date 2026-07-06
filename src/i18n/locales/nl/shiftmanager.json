@@ -206,7 +206,10 @@
       "messagesSent": "Berichten verstuurd",
       "responseRate": "Response rate",
       "newThisMonth": "Nieuw deze maand",
-      "avgTarget": "gem {{avg}} · doel {{target}}"
+      "avgTarget": "gem {{avg}} · doel {{target}}",
+      "active": "Actief",
+      "totalCandidates": "Kandidaten",
+      "neverWorked": "Nooit gewerkt"
     },
     "statSub": {
       "urgent": "{{n}} urgent",

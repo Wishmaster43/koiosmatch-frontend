@@ -206,7 +206,10 @@
       "messagesSent": "Mensajes enviados",
       "responseRate": "Tasa de respuesta",
       "newThisMonth": "Nuevos este mes",
-      "avgTarget": "prom {{avg}} · meta {{target}}"
+      "avgTarget": "prom {{avg}} · meta {{target}}",
+      "active": "Activos",
+      "totalCandidates": "Candidatos",
+      "neverWorked": "Nunca trabajó"
     },
     "statSub": {
       "urgent": "{{n}} urgente",

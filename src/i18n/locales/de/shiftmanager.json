@@ -206,7 +206,10 @@
       "messagesSent": "Gesendete Nachrichten",
       "responseRate": "Antwortrate",
       "newThisMonth": "Neu diesen Monat",
-      "avgTarget": "Ø {{avg}} · Ziel {{target}}"
+      "avgTarget": "Ø {{avg}} · Ziel {{target}}",
+      "active": "Aktiv",
+      "totalCandidates": "Kandidaten",
+      "neverWorked": "Nie gearbeitet"
     },
     "statSub": {
       "urgent": "{{n}} dringend",

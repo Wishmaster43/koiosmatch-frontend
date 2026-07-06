@@ -24,11 +24,11 @@ export default function ShiftmanagerDashboard() {
   // Data layer: SM candidates, shift KPIs, + (AI packages) recent runs/conversations.
   const { candidates, stats, runs, conversations } = useShiftmanagerDashboard(candidates_per_page, hasAI)
 
-  // "New this month" vs the running monthly average (active candidates only) —
-  // the one derived KPI; the rest come straight from /sm_reports/dashboard.
-  const monthly = useMemo(() => {
+  // Candidate-derived KPIs (real data — the shift/hours stats stay graceful "—"
+  // until the /sm_reports/dashboard feed lands, worklist SM-SHIFTS).
+  const derived = useMemo(() => {
     const now = new Date(); const m = now.getMonth(); const y = now.getFullYear()
-    const list = candidates as Array<{ status?: string; registration_date?: string }>
+    const list = candidates as Array<{ status?: string; registration_date?: string; number_of_times_worked?: number }>
     const active = list.filter(c => String(c.status ?? 'onbekend').toLowerCase() === 'actief')
     const inMonth = (s?: string) => { if (!s) return false; const d = new Date(s); return d.getMonth() === m && d.getFullYear() === y }
     const newCount = active.filter(c => inMonth(c.registration_date)).length
@@ -36,21 +36,26 @@ export default function ShiftmanagerDashboard() {
     active.forEach(c => { if (!c.registration_date) return; const d = new Date(c.registration_date); if (d.getFullYear() !== y) return; grouped[d.getMonth()] = (grouped[d.getMonth()] || 0) + 1 })
     const vals = Object.values(grouped)
     const avg = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0
-    return { newCount, avg }
+    const neverWorked = list.filter(c => (Number(c.number_of_times_worked) || 0) === 0).length
+    return { newCount, avg, total: list.length, active: active.length, neverWorked }
   }, [candidates])
 
-  // KPI row — shared InsightsRow (same 96px footprint as every other entity page).
+  // KPI row — shared InsightsRow (same 96px footprint as every other entity page),
+  // standardised to 9 tiles (Danny: "overal 9 stuks").
   const v      = (key: string) => fmt(stats?.[key])
   const pctVal = (key: string) => stats?.[key] != null ? `${stats?.[key]}%` : '—'
-  const newColor = monthly.newCount >= target ? 'var(--color-success)'
-                 : monthly.newCount >= monthly.avg ? 'var(--color-warning)' : 'var(--color-danger)'
+  const newColor = derived.newCount >= target ? 'var(--color-success)'
+                 : derived.newCount >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
   const kpis: KpiSpec[] = [
-    { key: 'new',              label: t('dashboard.stats.newThisMonth'),   value: monthly.newCount, sub: t('dashboard.stats.avgTarget', { avg: monthly.avg, target }), color: newColor },
-    { key: 'open_hours',       label: t('dashboard.stats.openHours'),      value: v('open_hours'),       color: 'var(--color-danger)' },
-    { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'), value: v('hours_this_month'), color: 'var(--color-warning)' },
-    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),      value: pctVal('occupancy_pct'), color: 'var(--color-success)' },
-    { key: 'messages_sent',    label: t('dashboard.stats.messagesSent'),   value: v('messages_sent'),    color: 'var(--color-secondary)' },
-    { key: 'response_rate',    label: t('dashboard.stats.responseRate'),   value: pctVal('response_rate_pct'), color: 'var(--color-warning)' },
+    { key: 'new',              label: t('dashboard.stats.newThisMonth'),     value: derived.newCount, sub: t('dashboard.stats.avgTarget', { avg: derived.avg, target }), color: newColor },
+    { key: 'active',           label: t('dashboard.stats.active'),           value: derived.active,      color: 'var(--color-success)' },
+    { key: 'total',            label: t('dashboard.stats.totalCandidates'),  value: derived.total,       color: 'var(--color-primary)' },
+    { key: 'neverWorked',      label: t('dashboard.stats.neverWorked'),      value: derived.neverWorked, color: 'var(--color-danger)' },
+    { key: 'open_hours',       label: t('dashboard.stats.openHours'),        value: v('open_hours'),       color: 'var(--color-warning)' },
+    { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'),   value: v('hours_this_month'), color: 'var(--color-warning)' },
+    { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),        value: pctVal('occupancy_pct'), color: 'var(--color-success)' },
+    { key: 'messages_sent',    label: t('dashboard.stats.messagesSent'),     value: v('messages_sent'),    color: 'var(--color-secondary)' },
+    { key: 'response_rate',    label: t('dashboard.stats.responseRate'),     value: pctVal('response_rate_pct'), color: 'var(--color-warning)' },
   ]
 
   return (
