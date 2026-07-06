@@ -33,7 +33,7 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
   const { industries } = useIndustries() as { industries: string[] }
   const { licenses } = useDriverLicenses() as { licenses: string[] }
   // Contract forms (colour per value) for the first chip row.
-  const { candidateTypes } = useLookups() as unknown as { candidateTypes: Array<{ value: string; label: string; color?: string }> }
+  const { candidateTypes, statusMeta } = useLookups() as unknown as { candidateTypes: Array<{ value: string; label: string; color?: string }>; statusMeta: (v?: string | null) => { label: string; color: string } }
   const pref = c.preferences
 
   // Chip/dropdown option lists from the tenant lookups (never hardcoded vocab).
@@ -96,10 +96,30 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
     remarks:         v.remarks,
   })
 
+  // Current unavailability window (status axis) — read-only next to "Inzetbaar vanaf"
+  // (Danny 2026-07-06): "niet beschikbaar sinds" + "weer beschikbaar" belong here too.
+  const fmtNl = (d?: string | null) => (d ? new Date(d).toLocaleDateString('nl-NL') : '')
+  const statusWindow = (c.statusChangedAt || c.statusReturnDate) && c.status && c.status !== 'available'
+    ? [
+        c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(c.status).label, date: fmtNl(c.statusChangedAt) }) : statusMeta(c.status).label,
+        c.statusReturnDate ? t('drawer.availableAgain', { date: fmtNl(c.statusReturnDate) }) : null,
+      ].filter(Boolean).join(' · ')
+    : null
+
   return (
-    // One grouped table; on Save, Contractvorm → candidateTypes, the rest → preferences.
-    <EditableFieldTable key={c.id} title={t('preferences.title')} fields={fields} value={value} labelWidth={160}
-      onSave={(v: Record<string, unknown>) => { onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApi(v)) }} />
+    <>
+      {statusWindow && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, padding: '7px 11px', fontSize: 12,
+          borderRadius: 8, color: statusMeta(c.status).color,
+          background: `color-mix(in srgb, ${statusMeta(c.status).color} 10%, transparent)`,
+          border: `1px solid color-mix(in srgb, ${statusMeta(c.status).color} 30%, transparent)` }}>
+          {statusWindow}
+        </div>
+      )}
+      {/* One grouped table; on Save, Contractvorm → candidateTypes, the rest → preferences. */}
+      <EditableFieldTable key={c.id} title={t('preferences.title')} fields={fields} value={value} labelWidth={160}
+        onSave={(v: Record<string, unknown>) => { onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApi(v)) }} />
+    </>
   )
 }
 
