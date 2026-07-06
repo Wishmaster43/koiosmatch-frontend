@@ -211,7 +211,8 @@
       "avgTarget": "gem {{avg}} · doel {{target}}",
       "active": "Actief",
       "totalCandidates": "Kandidaten",
-      "neverWorked": "Nooit gewerkt"
+      "neverWorked": "Nooit gewerkt",
+      "workedThisMonth": "Gewerkt deze maand"
     },
     "statSub": {
       "urgent": "{{n}} urgent",

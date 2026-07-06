@@ -211,7 +211,8 @@
       "avgTarget": "prom {{avg}} · meta {{target}}",
       "active": "Activos",
       "totalCandidates": "Candidatos",
-      "neverWorked": "Nunca trabajó"
+      "neverWorked": "Nunca trabajó",
+      "workedThisMonth": "Trabajó este mes"
     },
     "statSub": {
       "urgent": "{{n}} urgente",

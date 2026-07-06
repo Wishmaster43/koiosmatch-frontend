@@ -1,10 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CheckCircle, AlertCircle } from 'lucide-react'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useAuth } from '@/context/AuthContext'
 import InsightsRow      from '@/components/insights/InsightsRow'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
+import KpiDrillDownDrawer from '@/components/reports/KpiDrillDownDrawer'
+import type { ReportCandidate } from '@/types/reports'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
 import { useShiftmanagerDashboard } from './hooks/useShiftmanagerDashboard'
 
@@ -25,32 +27,40 @@ export default function ShiftmanagerDashboard() {
   const { candidates, stats, runs, conversations } = useShiftmanagerDashboard(candidates_per_page, hasAI)
 
   // Candidate-derived KPIs (real data — the shift/hours stats stay graceful "—"
-  // until the /sm_reports/dashboard feed lands, worklist SM-SHIFTS).
+  // until the /sm_reports/dashboard feed lands, worklist SM-SHIFTS). Keep the actual
+  // candidate lists so each tile can drill into them.
   const derived = useMemo(() => {
     const now = new Date(); const m = now.getMonth(); const y = now.getFullYear()
-    const list = candidates as Array<{ status?: string; registration_date?: string; number_of_times_worked?: number }>
+    const list = candidates as Array<Record<string, unknown>>
     const active = list.filter(c => String(c.status ?? 'onbekend').toLowerCase() === 'actief')
-    const inMonth = (s?: string) => { if (!s) return false; const d = new Date(s); return d.getMonth() === m && d.getFullYear() === y }
-    const newCount = active.filter(c => inMonth(c.registration_date)).length
+    const inMonth = (s: unknown) => { if (typeof s !== 'string' || !s) return false; const d = new Date(s); return d.getMonth() === m && d.getFullYear() === y }
+    const newList = active.filter(c => inMonth(c.registration_date))
     const grouped: Record<number, number> = {}
-    active.forEach(c => { if (!c.registration_date) return; const d = new Date(c.registration_date); if (d.getFullYear() !== y) return; grouped[d.getMonth()] = (grouped[d.getMonth()] || 0) + 1 })
+    active.forEach(c => { const s = c.registration_date; if (typeof s !== 'string') return; const d = new Date(s); if (d.getFullYear() !== y) return; grouped[d.getMonth()] = (grouped[d.getMonth()] || 0) + 1 })
     const vals = Object.values(grouped)
     const avg = vals.length ? Math.round(vals.reduce((a, b) => a + b, 0) / vals.length) : 0
-    const neverWorked = list.filter(c => (Number(c.number_of_times_worked) || 0) === 0).length
-    return { newCount, avg, total: list.length, active: active.length, neverWorked }
+    // Both scoped to ACTIVE candidates (Danny: "nooit gewerkt alleen van de actieve").
+    const neverWorked     = active.filter(c => (Number(c.number_of_times_worked) || 0) === 0)
+    const workedThisMonth = active.filter(c => inMonth(c.last_worked_shift))
+    return { newList, avg, active, neverWorked, workedThisMonth }
   }, [candidates])
 
+  // Drill-down: clicking a candidate KPI opens the shared drawer with that subset.
+  const [drill, setDrill] = useState<{ title: string; candidates: ReportCandidate[] } | null>(null)
+  const openDrill = (title: string, list: Array<Record<string, unknown>>) =>
+    setDrill({ title, candidates: list as unknown as ReportCandidate[] })
+
   // KPI row — shared InsightsRow (same 96px footprint as every other entity page),
-  // standardised to 9 tiles (Danny: "overal 9 stuks").
+  // standardised to 9 tiles (Danny: "overal 9 stuks"); candidate tiles are click-to-drill.
   const v      = (key: string) => fmt(stats?.[key])
   const pctVal = (key: string) => stats?.[key] != null ? `${stats?.[key]}%` : '—'
-  const newColor = derived.newCount >= target ? 'var(--color-success)'
-                 : derived.newCount >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
+  const newColor = derived.newList.length >= target ? 'var(--color-success)'
+                 : derived.newList.length >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
   const kpis: KpiSpec[] = [
-    { key: 'new',              label: t('dashboard.stats.newThisMonth'),     value: derived.newCount, sub: t('dashboard.stats.avgTarget', { avg: derived.avg, target }), color: newColor },
-    { key: 'active',           label: t('dashboard.stats.active'),           value: derived.active,      color: 'var(--color-success)' },
-    { key: 'total',            label: t('dashboard.stats.totalCandidates'),  value: derived.total,       color: 'var(--color-primary)' },
-    { key: 'neverWorked',      label: t('dashboard.stats.neverWorked'),      value: derived.neverWorked, color: 'var(--color-danger)' },
+    { key: 'new',              label: t('dashboard.stats.newThisMonth'),     value: derived.newList.length,         sub: t('dashboard.stats.avgTarget', { avg: derived.avg, target }), color: newColor,               onClick: () => openDrill(t('dashboard.stats.newThisMonth'), derived.newList) },
+    { key: 'active',           label: t('dashboard.stats.active'),           value: derived.active.length,          color: 'var(--color-success)',   onClick: () => openDrill(t('dashboard.stats.active'), derived.active) },
+    { key: 'workedThisMonth',  label: t('dashboard.stats.workedThisMonth'),  value: derived.workedThisMonth.length, color: 'var(--color-secondary)', onClick: () => openDrill(t('dashboard.stats.workedThisMonth'), derived.workedThisMonth) },
+    { key: 'neverWorked',      label: t('dashboard.stats.neverWorked'),      value: derived.neverWorked.length,     color: 'var(--color-danger)',    onClick: () => openDrill(t('dashboard.stats.neverWorked'), derived.neverWorked) },
     { key: 'open_hours',       label: t('dashboard.stats.openHours'),        value: v('open_hours'),       color: 'var(--color-warning)' },
     { key: 'hours_this_month', label: t('dashboard.stats.hoursThisMonth'),   value: v('hours_this_month'), color: 'var(--color-warning)' },
     { key: 'occupancy_pct',    label: t('dashboard.stats.occupancy'),        value: pctVal('occupancy_pct'), color: 'var(--color-success)' },
@@ -62,6 +72,11 @@ export default function ShiftmanagerDashboard() {
     <div className="p-6">
       {/* KPI row — config-driven, equal-footprint (mirrors the candidate blueprint) */}
       <InsightsRow kpis={kpis} padding="0 0 16px" />
+
+      {/* Candidate KPI drill-down */}
+      {drill && (
+        <KpiDrillDownDrawer mode="nieuw" title={drill.title} candidates={drill.candidates} onClose={() => setDrill(null)} />
+      )}
 
       {/* Two charts with shared filters */}
       <ShiftsChartsBlock filterKey="shiftmanager-dashboard" />

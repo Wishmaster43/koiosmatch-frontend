@@ -211,7 +211,8 @@
       "avgTarget": "moy {{avg}} · cible {{target}}",
       "active": "Actifs",
       "totalCandidates": "Candidats",
-      "neverWorked": "Jamais travaillé"
+      "neverWorked": "Jamais travaillé",
+      "workedThisMonth": "Travaillé ce mois-ci"
     },
     "statSub": {
       "urgent": "{{n}} urgent",
