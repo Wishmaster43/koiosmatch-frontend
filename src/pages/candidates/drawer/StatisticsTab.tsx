@@ -8,15 +8,16 @@ import type { Candidate } from '@/types/candidate'
 const StatsTab = StatsTabJs as ComponentType<{ kpisTitle?: unknown; kpis?: unknown[]; overview?: unknown; activity?: unknown }>
 
 /** Statistics tab — maps the candidate onto the generic StatsTab. */
-export default function StatisticsTab({ c }: { c: Candidate }) {
+export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (tab: string) => void }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   return (
     <StatsTab
       kpisTitle={t('drawer.tabs.statistics')}
       kpis={[
-        { label: t('statistics.placements'),  value: c.matches?.length ?? 0,        sub: t('statistics.total'),    color: 'var(--color-primary)' },
-        { label: t('statistics.applications'), value: (c.applications ?? []).length, sub: t('statistics.total'),    color: 'var(--color-secondary)' },
+        // Counts drill into the Werk tab, where the matches/applications actually live.
+        { label: t('statistics.placements'),  value: c.matches?.length ?? 0,        sub: t('statistics.total'),    color: 'var(--color-primary)', onClick: () => onJump?.('work') },
+        { label: t('statistics.applications'), value: (c.applications ?? []).length, sub: t('statistics.total'),    color: 'var(--color-secondary)', onClick: () => onJump?.('work') },
         // Tijdelijk verborgen (2026-06-27) — Diensten + Uren gewerkt terug zodra de planning-data live is.
         // { label: t('statistics.shifts'),       value: c.shiftsCount ?? 24,         sub: t('statistics.thisYear'), color: 'var(--color-success)' },
         // { label: t('statistics.hoursWorked'),  value: c.hoursWorked ?? 186,          sub: t('statistics.thisYear'), color: 'var(--color-warning)' },

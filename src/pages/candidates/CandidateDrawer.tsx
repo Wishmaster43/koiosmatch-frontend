@@ -270,7 +270,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   }
   const hf = (k: keyof HeaderForm) => headerForm?.[k] ?? ''
 
-  const renderTabContent = (activeTab: string) => {
+  const renderTabContent = (activeTab: string, setTab?: (id: string) => void) => {
     const mergedC = { ...c, ...(profileEdits ?? {}) }
     switch (activeTab) {
       case 'profile':       return <ProfilePanel c={mergedC} autoEditSignal={profileEditSignal} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
@@ -283,7 +283,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       case 'administration': return <ZzpTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { zzp: p })} />
       case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })} />
       case 'documents':   return <DocumentsSection c={c} />
-      case 'statistics':  return <StatisticsTab c={c} />
+      case 'statistics':  return <StatisticsTab c={c} onJump={setTab} />
       default:              return null
     }
   }
@@ -408,7 +408,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           </span>
         </div>
       }
-      tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.id === 'planning', render: () => renderTabContent(tab.id) }))}
+      tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), autoExpand: tab.id === 'planning', render: (setTab?: (id: string) => void) => renderTabContent(tab.id, setTab) }))}
       header={({ setActiveTab }) => (
         <EntityHeader
           label={t('drawer.entityLabel')}

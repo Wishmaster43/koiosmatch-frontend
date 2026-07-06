@@ -5,7 +5,7 @@
  *
  * Everything else is config:
  *   header: ReactNode | ({ activeTab, setActiveTab }) => ReactNode
- *   tabs:   Array<{ id, label, badge?, autoExpand?, render: () => ReactNode }>
+ *   tabs:   Array<{ id, label, badge?, autoExpand?, render: (setActiveTab?: (id: string) => void) => ReactNode }>
  *   footer: ReactNode
  *
  * `autoExpand` on a tab widens the drawer while that tab is active (e.g. planning)
@@ -16,7 +16,7 @@ import type { ReactNode } from 'react'
 import DrawerTabs from './DrawerTabs'
 import ErrorBoundary from '../ui/ErrorBoundary'
 
-export interface EntityTab { id: string; label: ReactNode; badge?: string | number; autoExpand?: boolean; render: () => ReactNode }
+export interface EntityTab { id: string; label: ReactNode; badge?: string | number; autoExpand?: boolean; render: (setActiveTab?: (id: string) => void) => ReactNode }
 type HeaderArg = { activeTab?: string; setActiveTab: (id: string) => void }
 
 interface EntityDrawerProps {
@@ -66,7 +66,7 @@ export default function EntityDrawer({
       {/* Scrollable tab content */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 16px' }}>
         {/* Local boundary so one crashing tab never blanks the whole drawer (§3); keyed per tab so it resets on switch. */}
-        <div style={{ marginBottom: 20 }}><ErrorBoundary key={activeTab} compact>{active?.render()}</ErrorBoundary></div>
+        <div style={{ marginBottom: 20 }}><ErrorBoundary key={activeTab} compact>{active?.render(setActiveTab)}</ErrorBoundary></div>
       </div>
 
       {/* Footer */}

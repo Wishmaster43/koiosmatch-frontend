@@ -10,7 +10,7 @@ type AnyProps = Record<string, unknown>
 // DetailTable is still untyped JS — accept any props at the boundary.
 const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>
 
-interface Kpi { label: string; value: ReactNode; sub?: ReactNode; color?: string }
+interface Kpi { label: string; value: ReactNode; sub?: ReactNode; color?: string; onClick?: () => void }
 interface Overview { title?: ReactNode; rows?: Array<[ReactNode, ReactNode]> }
 interface ActivityItem { text?: ReactNode; time?: ReactNode }
 interface Activity { title?: ReactNode; items: ActivityItem[]; emptyText?: ReactNode }
@@ -23,7 +23,9 @@ export default function StatsTab({ kpis = [], kpisTitle, overview, activity }: {
         {kpisTitle && <div style={{ ...sectionTitle, marginBottom: 6 }}>{kpisTitle}</div>}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {kpis.map(k => (
-          <div key={k.label} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', background: 'var(--surface)' }}>
+          <div key={k.label} onClick={k.onClick} role={k.onClick ? 'button' : undefined} tabIndex={k.onClick ? 0 : undefined}
+            onKeyDown={k.onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') k.onClick?.() } : undefined}
+            style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', background: 'var(--surface)', cursor: k.onClick ? 'pointer' : 'default' }}>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8 }}>{k.label}</div>
             <div style={{ fontSize: 26, fontWeight: 700, color: k.color, lineHeight: 1 }}>{k.value}</div>
             <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4 }}>{k.sub}</div>
