@@ -7,8 +7,7 @@ import { PieChart, Pie, Cell, Tooltip } from 'recharts'
 import type { ChartDatum, TipProps } from './chartTypes'
 import ErrorBoundary from '../ui/ErrorBoundary'
 
-// Exported: DonutCard's legend must assign the SAME palette per index as the ring.
-export const DEFAULT_COLORS = [
+const DEFAULT_COLORS = [
   'var(--color-primary)', '#10B981', '#3B8FD4', 'var(--color-warning)',
   'var(--color-danger)', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316', '#EC4899',
 ]
@@ -33,7 +32,7 @@ export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 5
   pickedKey?: string | null
 }) {
   const total = data.reduce((s, d) => s + d.value, 0)
-  const innerR = Math.round(size * 0.34)
+  const innerR = Math.round(size * 0.26)
   const outerR = Math.round(size * 0.5)
   // A segment counts as picked when the filter value matches its key OR its label.
   const isPicked = (d: ChartDatum) => {

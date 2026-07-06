@@ -9,7 +9,7 @@
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { FilterX } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
-import MiniDonutJs, { DEFAULT_COLORS } from '../charts/MiniDonut'
+import MiniDonutJs from '../charts/MiniDonut'
 
 type AnyProps = Record<string, unknown>
 // MiniDonut is still untyped JS — accept any props at the boundary.
@@ -49,53 +49,15 @@ function DonutCard({ title, data, colors, onPick, active, onClear, picked, clear
           <FilterX size={11} style={{ flexShrink: 0 }} />
         </button>
       )}
-      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, minWidth: 0 }}>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {data.length === 0
           ? <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
-          : (
-            <>
-              <MiniDonut data={data} colors={colors} size={54} onItemClick={(d: unknown) => onPick?.(d)} pickedKey={active ? picked : null} />
-              <DonutLegend data={data} colors={colors} onPick={onPick} picked={active ? picked : null} />
-            </>
-          )}
+          : <MiniDonut data={data} colors={colors} size={54} onItemClick={(d: unknown) => onPick?.(d)} pickedKey={active ? picked : null} />}
       </div>
     </div>
   )
 }
 
-// Clickable legend next to the ring — a 54px sector is a tiny click target (Danny:
-// "kan er niet op klikken"); the labels ARE the click surface now. Colours follow
-// the ring's palette-by-original-index; top 4 by value show, the rest fold into +n.
-function DonutLegend({ data, colors, onPick, picked }: {
-  data: unknown[]; colors?: string[]; onPick?: (d: unknown) => void; picked?: string | null
-}) {
-  const palette = colors ?? DEFAULT_COLORS
-  const items = (data as Array<{ name?: string; key?: string; color?: string; value?: number }>)
-    .map((d, i) => ({ ...d, fill: d.color || palette[i % palette.length] }))
-    .sort((a, b) => (b.value ?? 0) - (a.value ?? 0))
-  const shown = items.slice(0, 4)
-  return (
-    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
-      {shown.map(item => {
-        const isPicked = picked != null && (item.key === picked || item.name === picked)
-        const dimmed = picked != null && !isPicked
-        return (
-          <button key={String(item.key ?? item.name)} onClick={() => onPick?.(item)} title={`${item.name} · ${item.value}`}
-            style={{ display: 'flex', alignItems: 'center', gap: 5, padding: 0, background: 'none', border: 'none',
-              cursor: onPick ? 'pointer' : 'default', minWidth: 0, opacity: dimmed ? 0.35 : 1, textAlign: 'left' }}>
-            <span aria-hidden style={{ width: 7, height: 7, borderRadius: 99, background: item.fill, flexShrink: 0 }} />
-            <span style={{ flex: 1, fontSize: 10, color: 'var(--text)', fontWeight: isPicked ? 600 : 400,
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-            <span style={{ fontSize: 9.5, color: 'var(--text-muted)', fontFamily: 'JetBrains Mono, monospace' }}>{item.value}</span>
-          </button>
-        )
-      })}
-      {items.length > 4 && (
-        <span style={{ fontSize: 9, color: 'var(--text-muted)', paddingLeft: 12 }}>+{items.length - 4}</span>
-      )}
-    </div>
-  )
-}
 
 function KpiCard({ label, value, sub, color, onClick, active, channels }: Omit<KpiSpec, 'key'>) {
   const clickable = typeof onClick === 'function'

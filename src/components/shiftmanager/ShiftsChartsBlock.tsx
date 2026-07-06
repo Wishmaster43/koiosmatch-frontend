@@ -152,10 +152,10 @@ export default function ShiftsChartsBlock({
       {/* Same data as a table under each chart (hours + shifts per month, with totals). */}
       <div className="grid grid-cols-1 gap-4 mt-4 lg:grid-cols-2">
         <ChartCard title={t('charts.hoursTable')} subtitle={periodLabel} loading={loading} error={error}>
-          <ShiftsDataTable data={chartData} bars={hoursBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} />
+          <ShiftsDataTable data={chartData} bars={hoursBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} onCellClick={handleBarClick} />
         </ChartCard>
         <ChartCard title={t('charts.shiftsTable')} subtitle={periodLabel} loading={loading} error={error}>
-          <ShiftsDataTable data={chartData} bars={shiftBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} />
+          <ShiftsDataTable data={chartData} bars={shiftBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} onCellClick={handleBarClick} />
         </ChartCard>
       </div>
 

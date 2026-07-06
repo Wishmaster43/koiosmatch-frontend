@@ -42,7 +42,8 @@
       "Bash(grep -rnE \"details.candidates|CandidateDetailDrawer|sm_candidates/\\\\$\\\\{|selectCandidate|openCandidate\" src/pages/shiftmanager)",
       "Bash(git commit -q src/pages/shiftmanager/hooks/useShiftmanagerDashboard.ts src/components/reports/KpiDrillDownDrawer.tsx -m 'fix\\(sm-dashboard\\): drill shows real names + rows open the candidate *)",
       "Bash(SMOKE_COOKIE=1 node /tmp/probeVacDonut.mjs)",
-      "Bash(SMOKE_COOKIE=1 node /tmp/probeLegend.mjs)"
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeLegend.mjs)",
+      "Bash(SMOKE_COOKIE=1 node /tmp/probeCalm.mjs)"
     ],
     "additionalDirectories": [
       "/Users/danny/Herd/koiosmatch-api/docs"

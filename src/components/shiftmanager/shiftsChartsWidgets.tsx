@@ -87,24 +87,46 @@ export function YearIndicator({ years }: { years: number[] }) {
 
 // Data table under a chart: one row per bucket (month/quarter), one column per
 // series (in SERIES order), a totals row, nl-NL thousands separators.
-export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear }: {
+export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear, onCellClick }: {
   data: ShiftsChartDatum[]
   bars: ShiftBar[]
   monthLabel: ReactNode
   totalLabel: ReactNode
   multiYear: boolean
+  // Same drill-down as a chart bar: a cell click opens (row = datum, bar = series).
+  onCellClick?: (row: ShiftsChartDatum, bar: ShiftBar) => void
 }) {
   const { t } = useTranslation('shiftmanager')
   const [pct, setPct] = useState(false)
   const fmt = (v: unknown) => (Number(v) || 0).toLocaleString('nl-NL')
   const totals = bars.map(b => data.reduce((s, r) => s + (Number(r[b.dataKey]) || 0), 0))
-  // Cell value: absolute, or the bucket's share of that series' total across the shown period (%).
-  const cell = (v: unknown, colTotal: number) => pct ? (colTotal ? `${Math.round((Number(v) || 0) / colTotal * 100)}%` : '—') : fmt(v)
+  // Per year the "Totaal" series is the 100% baseline; every other series is a share of it
+  // (Danny: "Totaal = 100%, de rest is afleiding daarvan"). Map year → its Totaal column.
+  const totaalKeyByYear   = new Map<number, string>()
+  const totaalTotalByYear = new Map<number, number>()
+  bars.forEach((b, i) => {
+    if (b.seriesKey.replace('_uren', '') === 'totaal') {
+      totaalKeyByYear.set(b.year, b.dataKey)
+      totaalTotalByYear.set(b.year, totals[i])
+    }
+  })
+  // Cell text: absolute value, or a percentage of that row's Totaal series (same year).
+  const cell = (row: ShiftsChartDatum, b: ShiftBar) => {
+    if (!pct) return fmt(row[b.dataKey])
+    const denom = Number(row[totaalKeyByYear.get(b.year) ?? '']) || 0
+    return denom ? `${Math.round((Number(row[b.dataKey]) || 0) / denom * 100)}%` : '—'
+  }
+  const totalCell = (b: ShiftBar, colTotal: number) => {
+    if (!pct) return fmt(colTotal)
+    const denom = totaalTotalByYear.get(b.year) ?? 0
+    return denom ? `${Math.round(colTotal / denom * 100)}%` : '—'
+  }
   const th: CSSProperties = { padding: '7px 10px', fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
   const td: CSSProperties = { padding: '7px 10px', fontSize: 12, color: 'var(--text)', borderBottom: '1px solid var(--hover-bg)', fontVariantNumeric: 'tabular-nums' }
+  const clickable = !!onCellClick
   return (
     <div>
-      {/* Waarden / % switch — % shows each month's share of that column's total. */}
+      {/* Waarden / % switch — % = each series as a share of that row's Totaal (Totaal = 100%). */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
         <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
           {([[false, t('charts.asValues')], [true, t('charts.asPct')]] as const).map(([val, label]) => (
@@ -132,12 +154,24 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear 
             {data.map((row, ri) => (
               <tr key={String(row.label) + ri}>
                 <td style={{ ...td, fontWeight: 500, textAlign: 'left' }}>{String(row.label)}</td>
-                {bars.map((b, j) => <td key={b.dataKey} style={{ ...td, textAlign: 'right' }}>{cell(row[b.dataKey], totals[j])}</td>)}
+                {bars.map((b) => (
+                  <td key={b.dataKey}
+                    onClick={clickable ? () => onCellClick!(row, b) : undefined}
+                    onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCellClick!(row, b) } } : undefined}
+                    role={clickable ? 'button' : undefined}
+                    tabIndex={clickable ? 0 : undefined}
+                    title={clickable ? `${b.name} — ${String(row.label)}` : undefined}
+                    style={{ ...td, textAlign: 'right', cursor: clickable ? 'pointer' : undefined }}
+                    onMouseEnter={clickable ? (e) => (e.currentTarget.style.background = 'var(--hover-bg)') : undefined}
+                    onMouseLeave={clickable ? (e) => (e.currentTarget.style.background = 'none') : undefined}>
+                    {cell(row, b)}
+                  </td>
+                ))}
               </tr>
             ))}
             <tr>
               <td style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'left' }}>{totalLabel}</td>
-              {totals.map((v, i) => <td key={i} style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'right' }}>{pct ? (v ? '100%' : '—') : fmt(v)}</td>)}
+              {bars.map((b, i) => <td key={b.dataKey} style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'right' }}>{totalCell(b, totals[i])}</td>)}
             </tr>
           </tbody>
         </table>
