@@ -494,14 +494,28 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
             )}
           </div>
 
-          {/* Map view (STRAAL-1) — lazy so Leaflet loads only when opened. */}
+          {/* Map view (STRAAL-1 v2, Danny 2026-07-06): map LEFT, the filtered candidate
+              table RIGHT — one radius search drives both panes. Lazy Leaflet load. */}
           {view === 'map' ? (
-            <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
-              <CandidatesMapView rows={filtered} center={mapCenter} radiusKm={mapRadius}
-                onCenterChange={(lat, lng) => setMapCenter({ lat, lng })}
-                onRadiusChange={setMapRadius}
-                onPick={(id) => selectCandidate({ id } as Candidate)} />
-            </Suspense>
+            <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
+              <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
+                <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
+                  <CandidatesMapView rows={filtered} center={mapCenter} radiusKm={mapRadius} padded={false}
+                    onCenterChange={(lat, lng) => setMapCenter({ lat, lng })}
+                    onRadiusChange={setMapRadius}
+                    onPick={(id) => selectCandidate({ id } as Candidate)} />
+                </Suspense>
+              </div>
+              {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
+              <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
+                  <CandidatesTable rows={filtered} loading={loading} selectedId={selected?.id}
+                    onSelect={selectCandidate} onOpenTab={(c, tab) => selectCandidate(c, tab)} />
+                </div>
+                <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                  onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
+              </div>
+            </div>
           ) : (
           <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', padding: '0 24px 16px' }}>
             {error && (

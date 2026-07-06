@@ -23,7 +23,7 @@ export default function RadiusMap({ center, radiusKm, points, onCenterChange, on
   points: MapPoint[]
   onCenterChange?: (lat: number, lng: number) => void
   onPickPoint?: (id: Id) => void
-  height?: number
+  height?: number | string
 }) {
   return (
     <div style={{ height, borderRadius: 12, overflow: 'hidden', border: '1px solid var(--border)' }}>

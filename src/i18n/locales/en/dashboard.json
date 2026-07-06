@@ -118,5 +118,7 @@
     "stale6m": "Not contacted >6m",
     "neverContacted": "Never contacted",
     "noFollowup": "No follow-up"
-  }
+  },
+  "lastSync": "Last sync {{source}}",
+  "neverSynced": "never"
 }

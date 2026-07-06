@@ -58,5 +58,7 @@ export interface DashData {
   ai_runs?: AiRun[]
   conversations?: Conversation[]
   filters?: { locations?: Array<{ id: string | number; name: string }>; statuses?: Array<{ value: string; label: string }> }
+  // Source freshness: when each planning connection last synced its mirror.
+  sync_sources?: Array<{ system: string; label: string; last_synced_at?: string | null }>
   [k: string]: unknown
 }

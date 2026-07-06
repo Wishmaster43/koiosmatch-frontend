@@ -118,5 +118,7 @@
     "stale6m": "Nicht kontaktiert >6M",
     "neverContacted": "Nie kontaktiert",
     "noFollowup": "Keine Nachverfolgung"
-  }
+  },
+  "lastSync": "Letzte Synchronisierung {{source}}",
+  "neverSynced": "noch nie"
 }

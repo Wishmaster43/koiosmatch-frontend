@@ -84,17 +84,49 @@ export default function LogsPanel({ workflowId, onClose }: { workflowId?: string
                 )}
               </button>
 
-              {/* Expanded step results — real shape only, nothing fabricated */}
+              {/* Expanded step results — duration + what the step handled (capped list) */}
               {isOpen && steps.length > 0 && (
-                <div style={{ padding: '0 16px 12px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  {steps.map((step, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                      <span style={{ fontSize: 11, fontWeight: 500, color: 'var(--text)' }}>
-                        {step.label ?? step.type ?? t('runs.drawer.step', { n: i + 1 })}
-                      </span>
-                      <StatusBadge status={step.status ?? (step.ok ? 'success' : 'failed')} />
-                    </div>
-                  ))}
+                <div style={{ padding: '0 16px 12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {steps.map((step, i) => {
+                    const items = Array.isArray(step.items) ? step.items as Array<{ name?: string; meta?: string | null }> : []
+                    const total = (step.items_total as number | undefined) ?? null
+                    return (
+                      <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
+                            {step.label ?? step.type ?? t('runs.drawer.step', { n: i + 1 })}
+                          </span>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                            {step.duration_ms != null && (
+                              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDuration(step.duration_ms)}</span>
+                            )}
+                            <StatusBadge status={step.status ?? (step.ok ? 'success' : 'failed')} />
+                          </span>
+                        </div>
+                        {step.error != null && (
+                          <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 4 }}>{String(step.error)}</div>
+                        )}
+                        {total != null && (
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
+                            {t('runs.drawer.output')}: {total}
+                          </div>
+                        )}
+                        {items.length > 0 && (
+                          <div style={{ maxHeight: 220, overflowY: 'auto', marginTop: 6, border: '1px solid var(--border)', borderRadius: 6 }}>
+                            {items.map((it, j) => (
+                              <div key={j} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '4px 8px', borderBottom: j < items.length - 1 ? '1px solid var(--hover-bg)' : 'none' }}>
+                                <span style={{ fontSize: 11, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.name ?? '—'}</span>
+                                {it.meta && <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{it.meta}</span>}
+                              </div>
+                            ))}
+                            {total != null && total > items.length && (
+                              <div style={{ padding: '4px 8px', fontSize: 10, color: 'var(--text-muted)' }}>+ {total - items.length}…</div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>

@@ -118,5 +118,7 @@
     "stale6m": "Niet gecontacteerd >6m",
     "neverContacted": "Nooit gecontacteerd",
     "noFollowup": "Geen opvolging"
-  }
+  },
+  "lastSync": "Laatste sync {{source}}",
+  "neverSynced": "nog nooit"
 }

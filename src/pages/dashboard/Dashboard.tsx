@@ -367,6 +367,19 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   return (
     <div style={{ padding: 24, overflowY: 'auto', height: '100%', boxSizing: 'border-box' }}>
 
+      {/* Bron-versheid — wanneer elke koppeling voor het laatst gesynct is. */}
+      {(dash?.sync_sources ?? []).length > 0 && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 16, marginBottom: 8, flexWrap: 'wrap' }}>
+          {(dash?.sync_sources ?? []).map(s => (
+            <span key={s.system} style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              {t('lastSync', { source: s.label })}: {s.last_synced_at
+                ? new Date(s.last_synced_at).toLocaleString(undefined, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                : t('neverSynced')}
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* KPI-strip — live data */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
         {kpis.map(k => <KpiCard key={k.label} {...k} />)}

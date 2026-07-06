@@ -9,13 +9,14 @@ import { useLookups } from '@/context/LookupsContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
-export default function CandidatesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onPick }: {
+export default function CandidatesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onPick, padded }: {
   rows: Candidate[]
   center: { lat: number; lng: number }
   radiusKm: number
   onCenterChange: (lat: number, lng: number) => void
   onRadiusChange: (km: number) => void
   onPick: (id: Id) => void
+  padded?: boolean
 }) {
   const { t } = useTranslation(['candidates', 'common'])
   const { statusMeta } = useLookups() as unknown as { statusMeta: (v?: string | null) => { color: string } }
@@ -30,7 +31,7 @@ export default function CandidatesMapView({ rows, center, radiusKm, onCenterChan
     }))
 
   return (
-    <RadiusMapPanel points={points} center={center} radiusKm={radiusKm}
+    <RadiusMapPanel points={points} center={center} radiusKm={radiusKm} padded={padded}
       onCenterChange={onCenterChange} onRadiusChange={onRadiusChange} onPick={onPick}
       pointsLabel={t('candidates:map.pointCount', { count: points.length })} />
   )
