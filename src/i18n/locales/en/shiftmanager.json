@@ -230,7 +230,8 @@
     "charts": {
       "byFunction": "By role",
       "byStatus": "By status",
-      "activity": "Activity"
+      "activity": "Activity",
+      "byCustomer": "By customer"
     }
   },
   "locationsPage": {

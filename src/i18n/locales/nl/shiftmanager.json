@@ -230,7 +230,8 @@
     "charts": {
       "byFunction": "Per functie",
       "byStatus": "Per status",
-      "activity": "Activiteit"
+      "activity": "Activiteit",
+      "byCustomer": "Per klant"
     }
   },
   "locationsPage": {

@@ -92,7 +92,6 @@ export default function ShiftmanagerDashboard() {
     // 'New' is the candidate metric; avg reads after the title (Danny: "gem met - achter de titel").
     { key: 'new',              label: `${t('dashboard.stats.newThisMonth')} — ${t('dashboard.stats.avgOnly', { avg: derived.avg })}`, value: `${derived.newList.length}/${target}`, color: newColor, onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
     { key: 'total',            label: t('dashboard.stats.totalCandidates'), value: derived.all.length,      color: 'var(--color-primary)', onClick: () => openDrill('nieuw', t('dashboard.stats.totalCandidates'), derived.all) },
-    { key: 'inactive',         label: t('dashboard.stats.inactive'),        value: derived.inactive.length, color: 'var(--text-muted)',    onClick: () => openDrill('nieuw', t('dashboard.stats.inactive'), derived.inactive) },
     // Shift-hours stats — still graceful '—' until derived from the filtered shift data
     // (SM-SHIFTS feed / SM-CHARTS2 aggregation); these read from /sm_reports/dashboard.
     { key: 'open_hours',       label: t('dashboard.stats.openHours'),      value: v('open_hours'),       color: 'var(--color-warning)' },
@@ -101,10 +100,12 @@ export default function ShiftmanagerDashboard() {
     { key: 'messages_sent',    label: t('dashboard.stats.messagesSent'),   value: v('messages_sent'),    color: 'var(--color-secondary)' },
     { key: 'response_rate',    label: t('dashboard.stats.responseRate'),   value: pctVal('response_rate_pct'), color: 'var(--color-warning)' },
   ]
-  // One candidate-based activity donut (clickable segments). The per-functie / per-klant
-  // shift donuts come from the backend shift aggregation (SM-CHARTS2), not from candidates.
+  // Two donuts: a candidate-based activity donut (clickable) + the per-klant shift
+  // donut (customer from the order → name). The klant data comes from the backend
+  // shift aggregation (SM-CHARTS2); until it lands the donut is a graceful "—" slot.
   const donuts: DonutSpec[] = [
-    { key: 'activity', title: t('dashboard.charts.activity'), data: activityDonut, colors: activityDonut.map(d => d.color), onPick: onActivityPick },
+    { key: 'activity', title: t('dashboard.charts.activity'),   data: activityDonut, colors: activityDonut.map(d => d.color), onPick: onActivityPick },
+    { key: 'customer', title: t('dashboard.charts.byCustomer'), data: [] },
   ]
 
   return (
