@@ -22,6 +22,7 @@ import { buildShiftsFilterGroups } from "./buildShiftsFilterGroups"
 import { useSavedShiftFilters } from "./useSavedShiftFilters"
 import type { ShiftFilterState } from "./useSavedShiftFilters"
 import { useShiftsBreakdown } from "./useShiftsBreakdown"
+import { useSmLastSync } from "./useSmLastSync"
 import ShiftsBreakdownCharts from "./ShiftsBreakdownCharts"
 import InsightsRow from "@/components/insights/InsightsRow"
 import type { KpiSpec, DonutSpec } from "@/components/insights/InsightsRow"
@@ -82,6 +83,7 @@ export default function ShiftsChartsBlock({
   // KPI row on the dashboard). Everything follows the applied filter. The Uren/Diensten
   // toggle switches the open + this-month tiles and the two breakdown charts (Danny).
   const showKpiRow = !!leadingKpis
+  const lastSync = useSmLastSync(showKpiRow)
   const [shiftUnit, setShiftUnit] = useState<'hours' | 'count'>('hours')
   const { customerRows, functionRows, activeCustomers } = useShiftsBreakdown(queryString)
   const fmtN = (n: number) => Math.round(n).toLocaleString('nl-NL')
@@ -209,8 +211,11 @@ export default function ShiftsChartsBlock({
       {/* Combined, filter-driven KPI row (dashboard only): candidate cards + shift cards */}
       {showKpiRow && (
         <>
-          {/* Uren / Diensten toggle — drives the switchable tiles + breakdown charts */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 0 8px' }}>
+          {/* Data freshness (left) + Uren/Diensten toggle (right) */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0 8px' }}>
+            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+              {lastSync && t('charts.lastSync', { time: new Date(lastSync).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) })}
+            </span>
             <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
               {(['hours', 'count'] as const).map(u => (
                 <button key={u} type="button" onClick={() => setShiftUnit(u)}

@@ -137,7 +137,8 @@
     "inHours": "In hours",
     "inShifts": "In shifts",
     "colHours": "Hours",
-    "colShifts": "Shifts"
+    "colShifts": "Shifts",
+    "lastSync": "Last sync: {{time}}"
   },
   "customersReport": {
     "title": "Customers report",

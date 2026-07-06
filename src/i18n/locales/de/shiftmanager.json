@@ -137,7 +137,8 @@
     "inHours": "In Stunden",
     "inShifts": "In Diensten",
     "colHours": "Stunden",
-    "colShifts": "Dienste"
+    "colShifts": "Dienste",
+    "lastSync": "Letzte Sync: {{time}}"
   },
   "customersReport": {
     "title": "Kundenbericht",
