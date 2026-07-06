@@ -13,6 +13,13 @@ import type { Workflow } from '@/types/workflow'
 // One workflow card/row's shared props.
 interface WorkflowCardProps { workflow: Workflow; onRun: (id?: string | number) => void | Promise<void>; onEdit: () => void }
 
+// Readable local date-time for the last-run line (the API sends an ISO/UTC string).
+const fmtRunTime = (iso?: unknown): string => {
+  if (typeof iso !== 'string' || !iso) return ''
+  const d = new Date(iso)
+  return isNaN(d.getTime()) ? iso : d.toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+}
+
 // Status badge colours; label = t('status.<key>').
 const STATUS_STYLES: Record<string, { bg: string; color: string; dot: string }> = {
   active:   { bg: 'var(--color-success-bg)', color: 'var(--color-success)', dot: 'var(--color-success)' },
@@ -90,8 +97,8 @@ export function WorkflowRow({ workflow, onRun, onEdit }: WorkflowCardProps) {
               : <AlertCircle size={12} color="var(--color-danger)" />}
             <span className="text-xs text-[var(--text-muted)] truncate">
               {workflow.last_run.ok
-                ? `${workflow.last_run.time} · ${t('page.candidates', { n: workflow.last_run.candidates })}`
-                : `${workflow.last_run.time} · ${workflow.last_run.error}`}
+                ? `${fmtRunTime(workflow.last_run.time)} · ${t('page.candidates', { n: workflow.last_run.candidates })}`
+                : `${fmtRunTime(workflow.last_run.time)} · ${workflow.last_run.error}`}
             </span>
           </>
         ) : (
@@ -171,8 +178,8 @@ export default function WorkflowCard({ workflow, onRun, onEdit }: WorkflowCardPr
               }
               <span className="text-xs text-[var(--text-muted)]">
                 {workflow.last_run.ok
-                  ? `${workflow.last_run.time} · ${t('page.candidates', { n: workflow.last_run.candidates })}`
-                  : `${workflow.last_run.time} · ${workflow.last_run.error}`
+                  ? `${fmtRunTime(workflow.last_run.time)} · ${t('page.candidates', { n: workflow.last_run.candidates })}`
+                  : `${fmtRunTime(workflow.last_run.time)} · ${workflow.last_run.error}`
                 }
               </span>
             </>
