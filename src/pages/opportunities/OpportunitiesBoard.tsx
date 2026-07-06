@@ -3,6 +3,7 @@ import type { DragEvent } from 'react'
 import Avatar from '@/components/ui/Avatar'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
+import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 
 interface StageCol { value: string | number; label: string; color?: string }
 
@@ -68,6 +69,8 @@ function BoardColumn({ stage, items, onDragStart, onDrop, onDragOver, onSelect, 
 export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, onSelect }: {
   rows: Opportunity[]; stages: StageCol[]; onMove: (id: Id, stageValue: string | number) => void; selectedId?: Id | null; onSelect: (o: Opportunity) => void
 }) {
+  // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
+  const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
   const dragging = useRef<Id | null>(null)
 
   const onDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => {
@@ -81,7 +84,7 @@ export default function OpportunitiesBoard({ rows, stages, onMove, selectedId, o
   }
 
   return (
-    <div style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', padding: '0 20px 20px',
+    <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflowX: 'auto', overflowY: 'auto', padding: '0 20px 20px',
       display: 'flex', gap: 12, alignItems: 'flex-start' }}>
       {stages.map(s => (
         <BoardColumn key={s.value} stage={s}

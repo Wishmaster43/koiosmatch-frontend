@@ -200,5 +200,8 @@
   },
   "page": {
     "searchPlaceholder": "Rechercher des candidatures"
+  },
+  "board": {
+    "movedHidden": "Déplacée — la carte sort du filtre actuel"
   }
 }

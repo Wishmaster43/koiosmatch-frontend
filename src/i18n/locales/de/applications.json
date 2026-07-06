@@ -200,5 +200,8 @@
   },
   "page": {
     "searchPlaceholder": "Bewerbungen suchen"
+  },
+  "board": {
+    "movedHidden": "Verschoben — die Karte fällt außerhalb des aktuellen Filters"
   }
 }

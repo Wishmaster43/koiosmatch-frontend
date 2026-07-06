@@ -7,6 +7,7 @@ import type { DragEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Phone, Mail, MessageCircle, Users } from 'lucide-react'
 import type { Campaign } from './hooks/useOutreachCampaigns'
+import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 
 // Icon + colour per outreach channel (soft-chip convention).
 const CHANNEL_META: Record<string, { icon: typeof Phone; color: string }> = {
@@ -25,6 +26,8 @@ interface Props {
 }
 
 export default function OutreachBoard({ rows, columns, onMove, onOpen }: Props) {
+  // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
+  const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
   const { t } = useTranslation('outreach')
   const [dragOver, setDragOver] = useState<string | null>(null)
 
@@ -36,7 +39,7 @@ export default function OutreachBoard({ rows, columns, onMove, onOpen }: Props) 
   }
 
   return (
-    <div style={{ flex: 1, overflow: 'auto', padding: '12px 24px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+    <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflow: 'auto', padding: '12px 24px', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
       {columns.map((col) => {
         const cards = rows.filter((r) => (r.status ?? 'draft') === col.key)
         return (

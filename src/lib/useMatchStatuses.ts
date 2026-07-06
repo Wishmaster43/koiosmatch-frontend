@@ -5,7 +5,7 @@
  * mirrors the backend seed. The is_closed FLAG (never the slug) drives the
  * behaviour: a closed status ends the match (ended_at + out of the open count).
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import api from './api'
 
 export interface MatchStatus { value: string; label: string; color?: string; is_closed: boolean }
@@ -39,8 +39,9 @@ export function useMatchStatuses() {
   }, [])
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
-  const metaOf = (v?: string | null): MatchStatus | undefined =>
-    statuses.find(s => s.value === v || s.label === v)
+  // useCallback: consumers hang this in memo/effect deps — it must be stable.
+  const metaOf = useCallback((v?: string | null): MatchStatus | undefined =>
+    statuses.find(s => s.value === v || s.label === v), [statuses])
 
   return { statuses, metaOf }
 }

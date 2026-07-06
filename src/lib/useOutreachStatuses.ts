@@ -6,7 +6,7 @@
  * statuses stamp contacted_at — tenant-added statuses behave by their flag.
  * The FIRST status in the tenant order is the initial ("todo") state.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import api from './api'
 
 export interface OutreachStatus { value: string; label: string; color?: string; is_reached: boolean }
@@ -42,8 +42,9 @@ export function useOutreachStatuses() {
   }, [])
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
-  const metaOf = (v?: string | null): OutreachStatus | undefined =>
-    statuses.find(s => s.value === v || s.label === v)
+  // useCallback: consumers hang this in memo/effect deps — it must be stable.
+  const metaOf = useCallback((v?: string | null): OutreachStatus | undefined =>
+    statuses.find(s => s.value === v || s.label === v), [statuses])
   // The initial ("todo") state = the first status in the tenant order.
   const initial = statuses[0]
 

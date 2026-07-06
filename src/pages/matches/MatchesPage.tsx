@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus, LayoutList, Kanban, Archive } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { useLookups } from '@/context/LookupsContext'
+import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import api from '@/lib/api'
 import { notify } from '@/lib/notify'
 import InsightsRow from '@/components/insights/InsightsRow'
@@ -39,8 +39,9 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
   const { rows, loading, error, addMatch, updateMatch } = useMatches(showArchived)
   const { registerFilters, unregisterFilters } = useRightPanel()
-  // Funnel stages drive the board columns (tenant lookup + seed fallback; §3B).
-  const { funnelTypes } = useLookups()
+  // Match statuses drive the board columns + donut (R-1b lookup; the funnel is
+  // an APPLICATION axis — the match resource no longer carries a stage).
+  const { statuses: matchStatuses, metaOf: matchStatusMeta } = useMatchStatuses()
   const [page,        setPage]        = useState(1)
   const [pageSize,    setPageSize]    = useState(() => user?.default_per_page ?? 50)
   const [stageFilter, setStageFilter] = usePageMemory<string[]>('matches.stage', [])
@@ -60,12 +61,16 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v])
   }
 
-  // Aggregate stage data for the donut.
+  // Aggregate status data for the donut (label/colour from the lookup).
   const stageData = useMemo(() => {
-    const m: Record<string, { name: string; key: string; color: string; value: number }> = {}
-    rows.forEach(r => { if (r.stage) (m[r.stage] ??= { name: r.stage, key: r.stage, color: r.stageColor, value: 0 }).value++ })
+    const m: Record<string, { name: string; key: string; color?: string; value: number }> = {}
+    rows.forEach(r => {
+      if (!r.status) return
+      const meta = matchStatusMeta(r.status)
+      ;(m[r.status] ??= { name: meta?.label ?? r.status, key: r.status, color: meta?.color, value: 0 }).value++
+    })
     return Object.values(m)
-  }, [rows])
+  }, [rows, matchStatusMeta])
 
   const ownerData = useMemo(() => {
     // No explicit colour: the donut assigns its palette per owner (one grey for ALL
@@ -82,7 +87,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // Right-panel filters: status (stage) + owner. The same stageFilter/ownerFilter
   // drive the donuts, so both stay in sync. (Archived lives in the toolbar segment.)
   const filterGroups = useMemo(() => [
-    { key: 'stage', label: t('filters.stage'), selected: stageFilter,
+    { key: 'stage', label: t('filters.status'), selected: stageFilter,
       options: stageData.map(d => ({ value: d.key, label: d.name, count: d.value })),
       onToggle: tog(setStageFilter) },
     { key: 'owner', label: t('filters.owner'), selected: ownerFilter,
@@ -104,7 +109,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const filteredAll = useMemo(() => {
     const q = query.trim().toLowerCase()
     return rows.filter(r => {
-      if (stageFilter.length && !stageFilter.includes(r.stage)) return false
+      if (stageFilter.length && !stageFilter.includes(r.status)) return false
       if (kpiScored && typeof r.score !== 'number') return false
       if (ownerFilter.length && !ownerFilter.includes(r.owner)) return false
       if (q && ![r.candidate, r.vacancy, r.client].some(v => String(v ?? '').toLowerCase().includes(q))) return false
@@ -116,14 +121,15 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
   const paged     = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
 
-  // KPI: count active (non-rejected/non-done) and hired matches.
-  const activeCount = rows.filter(r => !['rejected', 'closed'].includes(r.stage?.toLowerCase())).length
-  const hiredCount  = rows.filter(r => ['hired', 'aangenomen'].includes(r.stage?.toLowerCase())).length
+  // KPI: open vs closed via the is_closed FLAG (never the slug — R-1b).
+  const isClosed    = (r: MatchRow) => Boolean(matchStatusMeta(r.status)?.is_closed)
+  const activeCount = rows.filter(r => !isClosed(r)).length
+  const closedCount = rows.filter(isClosed).length
   const avgScore    = rows.length ? Math.round(rows.reduce((s, r) => s + (r.score ?? 0), 0) / rows.length) : null
 
   // Donuts drive the stage/owner filters; each clears its own selection.
   const insightDonuts: DonutSpec[] = [
-    { key: 'stage', title: t('insights.stage'), data: stageData, onPick: pickOne(setStageFilter),
+    { key: 'stage', title: t('insights.status'), data: stageData, onPick: pickOne(setStageFilter),
       active: stageFilter.length > 0, onClear: () => setStageFilter([]) },
     { key: 'owner', title: t('insights.owner'), data: ownerData, onPick: pickOne(setOwnerFilter),
       active: ownerFilter.length > 0, onClear: () => setOwnerFilter([]) },
@@ -140,8 +146,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // KPI clicks drive the existing stage filter (chip + clear come for free);
   // clicking the active card again clears (mirror of the kansen cards).
   const eqSet = (a: string[], b: string[]) => a.length === b.length && [...a].sort().join('|') === [...b].sort().join('|')
-  const activeStages = [...new Set(rows.filter(r => !['rejected', 'closed'].includes(r.stage?.toLowerCase())).map(r => r.stage))]
-  const hiredStages  = [...new Set(rows.filter(r => ['hired', 'aangenomen'].includes(r.stage?.toLowerCase())).map(r => r.stage))]
+  const activeStages = [...new Set(rows.filter(r => !isClosed(r)).map(r => r.status).filter(Boolean))]
+  const closedStages = [...new Set(rows.filter(isClosed).map(r => r.status).filter(Boolean))]
   const toggleStages = (labels: string[]) => { if (labels.length) setStageFilter(p => (eqSet(p, labels) ? [] : labels)) }
   const insightKpis: KpiSpec[] = [
     { key: 'total',    label: t('kpi.total'),    value: rows.length, color: 'var(--color-primary)',
@@ -149,8 +155,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       active: stageFilter.length === 0 && ownerFilter.length === 0 && !kpiScored },
     { key: 'active',   label: t('kpi.active'),   value: activeCount, color: 'var(--color-primary)',
       onClick: () => toggleStages(activeStages), active: stageFilter.length > 0 && eqSet(stageFilter, activeStages) },
-    { key: 'hired',    label: t('kpi.hired'),    value: hiredCount,  color: 'var(--color-success)',
-      onClick: () => toggleStages(hiredStages), active: stageFilter.length > 0 && eqSet(stageFilter, hiredStages) },
+    { key: 'closed',   label: t('kpi.closed'),   value: closedCount, color: 'var(--color-success)',
+      onClick: () => toggleStages(closedStages), active: stageFilter.length > 0 && eqSet(stageFilter, closedStages) },
     { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary)',
       onClick: () => setKpiScored(v => !v), active: kpiScored },
   ]
@@ -170,17 +176,18 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   }, [pendingOpenId, rows])
   const [drawerExpanded, setDrawerExpanded] = useState(false)
 
-  // View toggle: table ⇄ board (planboard). Board columns = the tenant funnel
-  // stages (seed fallback) so there are always columns to drag between (§3B).
+  // View toggle: table ⇄ board (planboard). Board columns = the tenant match
+  // statuses (R-1b lookup + seed fallback) so there are always columns to drag.
   const [view, setView] = usePageMemory<'table' | 'board'>('matches.view', 'table')
   const stageColumns: BoardColumn[] = useMemo(
-    () => funnelTypes.map(f => ({ key: f.value, label: f.label, color: f.color })), [funnelTypes])
+    () => matchStatuses.map(st => ({ key: st.value, label: st.label, color: st.color ?? '#6B7280' })), [matchStatuses])
 
-  // Drag a card to another column → change the match's stage (optimistic + persist).
-  const handleMove = (id: Id, stageKey: string) => {
-    const col = stageColumns.find(c => c.key === stageKey)
-    updateMatch(id, { stage: stageKey, stageColor: col?.color ?? '#6E8FD6' })
-    api.patch(`/matches/${id}`, { stage: stageKey }).catch(() => notify('error', t('bulk.mutateError')))
+  // Drag a card to another column → change the match's STATUS (optimistic + persist;
+  // the is_closed flag server-side ends the match when applicable).
+  const handleMove = (id: Id, statusKey: string) => {
+    updateMatch(id, { status: statusKey })
+    setSelected(p => (p && p.id === id ? { ...p, status: statusKey } : p))
+    api.patch(`/matches/${id}`, { status: statusKey }).catch(() => notify('error', t('bulk.mutateError')))
   }
 
   return (

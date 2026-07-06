@@ -4,6 +4,7 @@ import Avatar from '@/components/ui/Avatar'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
+import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 
 export interface BoardPhase { key: string; label: string; color: string }
 
@@ -94,6 +95,8 @@ function BoardColumn({ phase, items, onDragStart, onDrop, onDragOver, onSelect, 
 export default function ApplicationsBoard({ rows, phases, onMove, onSelect, selectedId }: {
   rows: Application[]; phases: BoardPhase[]; onMove: (id: Id, phaseKey: string) => void; onSelect: (app: Application) => void; selectedId?: Id | null
 }) {
+  // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
+  const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
   const dragId = useRef<Id | null>(null)
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => { dragId.current = id ?? null; e.dataTransfer.effectAllowed = 'move' }
@@ -104,7 +107,7 @@ export default function ApplicationsBoard({ rows, phases, onMove, onSelect, sele
   }
 
   return (
-    <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 20px' }}>
+    <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflow: 'auto', padding: '0 24px 20px' }}>
       <div style={{ display: 'flex', gap: 16, minWidth: 'max-content', paddingBottom: 8 }}>
         {phases.map(phase => (
           <BoardColumn key={phase.key} phase={phase}

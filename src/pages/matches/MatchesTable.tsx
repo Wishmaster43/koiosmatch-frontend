@@ -4,6 +4,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
+import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import ScorePill from './ScorePill'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
@@ -31,6 +32,8 @@ export default function MatchesTable({
   selectedId, selectable, selectedIds, onToggleRow, onToggleAll,
 }: MatchesTableProps) {
   const { t } = useTranslation('matches')
+  // Match lifecycle lookup (R-1b) — resolves the status chip label/colour.
+  const { metaOf: statusMeta } = useMatchStatuses()
 
   const columns: Column<MatchRow>[] = [
     { key: 'candidate', header: t('cols.candidate'), sortable: true,
@@ -44,8 +47,11 @@ export default function MatchesTable({
     { key: 'client',  header: t('cols.client'),  sortable: true, cellStyle: { color: 'var(--text-muted)' } },
     { key: 'score',   header: t('cols.score'), align: 'right', sortable: true,
       sortValue: r => r.score ?? -1, render: r => <ScorePill value={r.score} /> },
-    { key: 'stage',   header: t('cols.stage'),
-      render: r => r.stage ? <StatusPill label={r.stage} color={r.stageColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span> },
+    { key: 'stage',   header: t('cols.status'),
+      // Status axis (R-1b): resolve label+colour from the lookup; stage fell out of the resource.
+      render: r => { const m = statusMeta(r.status); return m
+        ? <StatusPill label={m.label} color={m.color} />
+        : (r.stage ? <StatusPill label={r.stage} color={r.stageColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>) } },
     { key: 'owner',   header: t('cols.owner'), sortable: true, cellStyle: { color: 'var(--text-muted)' } },
     { key: 'date',    header: t('cols.date'),  sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
   ]

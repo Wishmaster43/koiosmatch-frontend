@@ -10,18 +10,21 @@
     "score": "Match",
     "stage": "Stage",
     "owner": "Owner",
-    "date": "Created"
+    "date": "Created",
+    "status": "Status"
   },
   "insights": {
     "stage": "Stage",
     "owner": "Owner",
-    "clearFilter": "Clear filter"
+    "clearFilter": "Clear filter",
+    "status": "Status"
   },
   "kpi": {
     "total": "Total",
     "active": "Active",
     "hired": "Hired",
-    "avgScore": "Avg score"
+    "avgScore": "Avg score",
+    "closed": "Closed"
   },
   "add": {
     "button": "New match",
@@ -73,7 +76,8 @@
   },
   "filters": {
     "stage": "Stage",
-    "owner": "Owner"
+    "owner": "Owner",
+    "status": "Status"
   },
   "view": {
     "matches": "Matches",

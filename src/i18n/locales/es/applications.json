@@ -200,5 +200,8 @@
   },
   "page": {
     "searchPlaceholder": "Buscar candidaturas"
+  },
+  "board": {
+    "movedHidden": "Movida — la tarjeta queda fuera del filtro actual"
   }
 }

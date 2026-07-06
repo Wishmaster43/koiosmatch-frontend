@@ -238,8 +238,12 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
 
   // Kanban move: set the new phase + bucket; label/colour re-resolve from the lookup.
   const handleMove = (id: Id, phaseKey: string) => {
-    setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey, bucket: bucketOfPhase(phaseKey) } : a))
-    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, phaseKey, bucket: bucketOfPhase(phaseKey) } as ApplicationDetail) : prev))
+    const newBucket = bucketOfPhase(phaseKey)
+    setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey, bucket: newBucket } : a))
+    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, phaseKey, bucket: newBucket } as ApplicationDetail) : prev))
+    // The move can push the card out of the ACTIVE bucket tab — say so instead of
+    // letting it vanish silently (Danny: "kaarten verdwijnen" op het planboard).
+    if (newBucket !== bucket) notifySuccess(t('board.movedHidden'))
     api.patch(`/applications/${id}`, { phase_key: phaseKey }).catch(() => notifyError(t('common:actionFailed')))
   }
 

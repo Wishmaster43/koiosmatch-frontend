@@ -10,18 +10,21 @@
     "score": "Match",
     "stage": "Fase",
     "owner": "Responsable",
-    "date": "Creado"
+    "date": "Creado",
+    "status": "Estado"
   },
   "insights": {
     "stage": "Fase",
     "owner": "Responsable",
-    "clearFilter": "Borrar filtro"
+    "clearFilter": "Borrar filtro",
+    "status": "Estado"
   },
   "kpi": {
     "total": "Total",
     "active": "Activo",
     "hired": "Contratado",
-    "avgScore": "Puntuación media"
+    "avgScore": "Puntuación media",
+    "closed": "Cerrados"
   },
   "add": {
     "button": "Nuevo match",
@@ -73,7 +76,8 @@
   },
   "filters": {
     "stage": "Fase",
-    "owner": "Responsable"
+    "owner": "Responsable",
+    "status": "Estado"
   },
   "view": {
     "matches": "Matches",

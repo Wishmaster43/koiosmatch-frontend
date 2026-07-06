@@ -5,6 +5,7 @@ import Avatar from '@/components/ui/Avatar'
 import ScorePill from './ScorePill'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
+import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 
 export interface BoardColumn { key: string; label: string; color: string }
 
@@ -76,20 +77,22 @@ function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSel
 }
 
 /**
- * MatchesBoard — kanban view, one column per funnel STAGE. Presentational: the
- * page owns the data and the stage mutation (onMove). Dragging a card to another
- * column changes its stage (Danny's decision 2026-07-01). Mirrors TasksBoard.
+ * MatchesBoard — kanban view, one column per match STATUS (R-1b lookup; the old
+ * funnel-stage columns emptied out when the resource moved to `status`).
+ * Presentational: the page owns the data and the status mutation (onMove).
  */
 export default function MatchesBoard({ rows, columns, onMove, onSelect, selectedId }: {
   rows: MatchRow[]; columns: BoardColumn[]; onMove: (id: Id, stageKey: string) => void
   onSelect: (m: MatchRow) => void; selectedId?: Id | null
 }) {
+  // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
+  const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
   const { t } = useTranslation('matches')
   const dragId = useRef<Id | null>(null)
 
-  // A match's stage may arrive as the funnel value or its label — match either.
+  // A match's status may arrive as the lookup value or its label — match either.
   const norm = (s?: string) => String(s ?? '').trim().toLowerCase()
-  const inColumn = (r: MatchRow, c: BoardColumn) => norm(r.stage) === norm(c.key) || norm(r.stage) === norm(c.label)
+  const inColumn = (r: MatchRow, c: BoardColumn) => norm(r.status) === norm(c.key) || norm(r.status) === norm(c.label)
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, id: Id | undefined) => { dragId.current = id ?? null; e.dataTransfer.effectAllowed = 'move' }
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move' }
@@ -99,7 +102,7 @@ export default function MatchesBoard({ rows, columns, onMove, onSelect, selected
   }
 
   return (
-    <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 20px' }}>
+    <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflow: 'auto', padding: '0 24px 20px' }}>
       <div style={{ display: 'flex', gap: 16, minWidth: 'max-content', paddingBottom: 8 }}>
         {columns.map(column => (
           <BoardColumnView key={column.key} column={column}

@@ -10,18 +10,21 @@
     "score": "Match",
     "stage": "Phase",
     "owner": "Inhaber",
-    "date": "Erstellt"
+    "date": "Erstellt",
+    "status": "Status"
   },
   "insights": {
     "stage": "Phase",
     "owner": "Inhaber",
-    "clearFilter": "Filter zurücksetzen"
+    "clearFilter": "Filter zurücksetzen",
+    "status": "Status"
   },
   "kpi": {
     "total": "Gesamt",
     "active": "Aktiv",
     "hired": "Eingestellt",
-    "avgScore": "Ø Score"
+    "avgScore": "Ø Score",
+    "closed": "Abgeschlossen"
   },
   "add": {
     "button": "Neuer Match",
@@ -73,7 +76,8 @@
   },
   "filters": {
     "stage": "Phase",
-    "owner": "Inhaber"
+    "owner": "Inhaber",
+    "status": "Status"
   },
   "view": {
     "matches": "Matches",

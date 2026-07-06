@@ -6,6 +6,7 @@ import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import type { Task } from '@/types/task'
 import type { Id } from '@/types/common'
+import { useDragAutoScroll } from '@/lib/useDragAutoScroll'
 
 export interface BoardColumn { key: string | number; label: string; color: string }
 type FormatDate = (v?: string | number | Date | null) => string
@@ -99,6 +100,8 @@ function BoardColumnView({ column, items, onDragStart, onDrop, onDragOver, onSel
 export default function TasksBoard({ rows, columns, onMove, onSelect, selectedId }: {
   rows: Task[]; columns: BoardColumn[]; onMove: (id: Id, statusKey: string | number) => void; onSelect: (t: Task) => void; selectedId?: Id | null
 }) {
+  // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
+  const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
   const { t } = useTranslation('tasks')
   const { formatDate } = useDateFormat()
   const dragId = useRef<Id | null>(null)
@@ -111,7 +114,7 @@ export default function TasksBoard({ rows, columns, onMove, onSelect, selectedId
   }
 
   return (
-    <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 20px' }}>
+    <div ref={boardScrollRef} onDragOver={boardAutoScroll} style={{ flex: 1, overflow: 'auto', padding: '0 24px 20px' }}>
       <div style={{ display: 'flex', gap: 16, minWidth: 'max-content', paddingBottom: 8 }}>
         {columns.map(column => (
           <BoardColumnView key={column.key} column={column}

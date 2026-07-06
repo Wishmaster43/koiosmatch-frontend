@@ -182,5 +182,8 @@
   },
   "page": {
     "searchPlaceholder": "Zoek naar sollicitaties"
+  },
+  "board": {
+    "movedHidden": "Verplaatst — de kaart valt buiten het huidige filter"
   }
 }

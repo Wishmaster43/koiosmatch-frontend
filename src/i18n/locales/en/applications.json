@@ -182,5 +182,8 @@
   },
   "page": {
     "searchPlaceholder": "Search applications"
+  },
+  "board": {
+    "movedHidden": "Moved — the card falls outside the current filter"
   }
 }

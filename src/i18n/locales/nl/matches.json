@@ -10,18 +10,21 @@
     "score": "Match",
     "stage": "Fase",
     "owner": "Eigenaar",
-    "date": "Aangemaakt"
+    "date": "Aangemaakt",
+    "status": "Status"
   },
   "insights": {
     "stage": "Fase",
     "owner": "Eigenaar",
-    "clearFilter": "Filter wissen"
+    "clearFilter": "Filter wissen",
+    "status": "Status"
   },
   "kpi": {
     "total": "Totaal",
     "active": "Actief",
     "hired": "Aangenomen",
-    "avgScore": "Gem. score"
+    "avgScore": "Gem. score",
+    "closed": "Afgesloten"
   },
   "add": {
     "button": "Nieuwe match",
@@ -73,7 +76,8 @@
   },
   "filters": {
     "stage": "Fase",
-    "owner": "Eigenaar"
+    "owner": "Eigenaar",
+    "status": "Status"
   },
   "view": {
     "matches": "Matches",

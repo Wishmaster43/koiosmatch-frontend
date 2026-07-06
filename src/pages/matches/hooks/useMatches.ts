@@ -19,7 +19,9 @@ function mapMatch(m: RawMatch): MatchRow {
     vacancy:    m.vacancy_title ?? m.vacancy?.title ?? '—',
     client:     m.client_name ?? m.client?.name ?? m.customer?.name ?? '—',
     score:      m.score ?? m.match_score ?? null,
-    stage:      m.stage_label ?? m.stage ?? m.status ?? '',
+    // Funnel stage only — the old `?? m.status` fallback painted "open" into the
+    // stage axis once the R-1b resource replaced stage with status (broken board).
+    stage:      m.stage_label ?? m.stage ?? '',
     status:     m.status ?? '',
     stageColor: m.stage_color ?? '#6E8FD6',
     owner:      m.owner?.name ?? m.owner_name ?? '',
