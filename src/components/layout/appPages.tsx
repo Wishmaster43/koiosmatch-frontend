@@ -133,7 +133,7 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'candidates':             return <CandidatesPage intent={navIntent} />
     case 'applications':           return <ApplicationsPage intent={navIntent} />
     case 'vacancies':              return <VacanciesPage intent={navIntent} />
-    case 'matches':                return <MatchesPage />
+    case 'matches':                return <MatchesPage intent={navIntent} />
     case 'opportunities':          return <OpportunitiesPage intent={navIntent} />
     case 'tasks':                  return <TasksPage intent={navIntent} />
     case 'outreach':               return <OutreachPage />

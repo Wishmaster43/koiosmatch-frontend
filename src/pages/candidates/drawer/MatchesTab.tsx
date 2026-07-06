@@ -3,6 +3,7 @@ import { Link2, ExternalLink } from 'lucide-react'
 import SectionCard from '@/components/ui/SectionCard'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
+import { useNavigation } from '@/context/NavigationContext'
 import type { ReactNode } from 'react'
 import type { Candidate } from '@/types/candidate'
 
@@ -21,6 +22,7 @@ function ScorePill({ value }: { value?: number | null }) {
  */
 export default function MatchesTab({ c }: { c: Candidate }) {
   const { t } = useTranslation('candidates')
+  const { openEntity } = useNavigation()
   const matches = c.matches ?? []
 
   return (
@@ -34,6 +36,12 @@ export default function MatchesTab({ c }: { c: Candidate }) {
             <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
               <EntityLink page="vacancies" id={m.vacancyId} title={m.vacancyTitle || m.client || '—'}>{m.vacancyTitle || m.client || '—'}</EntityLink>
             </span>
+            {m.id != null && (
+              <button onClick={() => openEntity('matches', m.id)} title={t('matchesView.openMatch')} aria-label={t('matchesView.openMatch')}
+                style={{ display: 'flex', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', padding: 2 }}>
+                <ExternalLink size={12} />
+              </button>
+            )}
             {m.helloflex_contract_guid ? (
               <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary)' }}><Link2 size={13} /></span>
             ) : null}

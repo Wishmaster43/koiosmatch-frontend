@@ -677,6 +677,7 @@
       "pending": "Pending",
       "active": "Active",
       "ended": "Ended"
-    }
+    },
+    "openMatch": "Open match"
   }
 }

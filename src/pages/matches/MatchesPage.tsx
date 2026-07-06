@@ -19,13 +19,14 @@ import AddMatchModal from './AddMatchModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import HeaderSearch from '@/components/ui/HeaderSearch'
+import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useMatches } from './hooks/useMatches'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
 // MatchesPage — loads matches, shows an insights strip and paginates the table.
-export default function MatchesPage() {
+export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('matches')
   const auth = useAuth()
   const user = auth?.user
@@ -147,6 +148,15 @@ export default function MatchesPage() {
   const [addOpen, setAddOpen] = useState(false)
   // Read-only drill-down: the clicked row opens the MatchDrawer beside the table.
   const [selected, setSelected] = useState<MatchRow | null>(null)
+  // Cross-entity open ({ open: id }): the drawer needs the ROW, so park the id until
+  // the rows are loaded, then select the matching one (candidate drawer → match).
+  const [pendingOpenId, setPendingOpenId] = useState<Id | null>(null)
+  useOpenFromIntent(intent, (id) => setPendingOpenId(id))
+  useEffect(() => {
+    if (pendingOpenId == null || !rows.length) return
+    const row = rows.find(r => String(r.id) === String(pendingOpenId))
+    if (row) { setSelected(row); setPendingOpenId(null) }
+  }, [pendingOpenId, rows])
   const [drawerExpanded, setDrawerExpanded] = useState(false)
 
   // View toggle: table ⇄ board (planboard). Board columns = the tenant funnel

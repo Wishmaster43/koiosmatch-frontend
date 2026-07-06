@@ -670,7 +670,8 @@
       "pending": "Pendiente",
       "active": "Activo",
       "ended": "Finalizado"
-    }
+    },
+    "openMatch": "Abrir match"
   },
   "koios": {
     "actions": {

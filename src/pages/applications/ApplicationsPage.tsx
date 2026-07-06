@@ -212,6 +212,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Open an application drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => selectApplication({ id } as Application))
 
+  // Remember the open drawer across page switches; coming back reopens it (memory-only).
+  const [rememberedId, setRememberedId] = usePageMemory<Id | null>('apps.openId', null)
+  useEffect(() => {{ setRememberedId(selected?.id ?? null) }}, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {{ if (rememberedId && !selected) (id => selectApplication({ id } as Application))(rememberedId) }}, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Seed the funnel-stage filter from a dashboard chart click (funnel / funnel-conversion).
   // Mirrors the candidate status/recruiter drill-down: the InsightsRow then shows the active chip.
   useEffect(() => {

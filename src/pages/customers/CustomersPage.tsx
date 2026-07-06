@@ -96,6 +96,11 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   // Open a customer drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => selectCustomer({ id } as Parameters<typeof selectCustomer>[0]))
 
+  // Remember the open drawer across page switches; coming back reopens it (memory-only).
+  const [rememberedId, setRememberedId] = usePageMemory<Id | null>('cust.openId', null)
+  useEffect(() => {{ setRememberedId(selected?.id ?? null) }}, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {{ if (rememberedId && !selected) (id => selectCustomer({ id } as Parameters<typeof selectCustomer>[0]))(rememberedId) }}, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Option lists (stats first, page-derived as fallback) ──
   const optsFrom = (values: string[]): Opt[] => {
     const counts: Record<string, number> = {}

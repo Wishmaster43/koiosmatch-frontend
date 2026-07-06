@@ -108,6 +108,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // Open a vacancy drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => selectVacancy({ id } as Parameters<typeof selectVacancy>[0]))
 
+  // Remember the open drawer across page switches; coming back reopens it (memory-only).
+  const [rememberedId, setRememberedId] = usePageMemory<Id | null>('vac.openId', null)
+  useEffect(() => {{ setRememberedId(selected?.id ?? null) }}, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {{ if (rememberedId && !selected) (id => selectVacancy({ id } as Parameters<typeof selectVacancy>[0]))(rememberedId) }}, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Donut data (status / owner / client) — stats first, page-derived fallback ──
   const statusData = useMemo<Aggregate[]>(() => {
     if (s?.by_status) {

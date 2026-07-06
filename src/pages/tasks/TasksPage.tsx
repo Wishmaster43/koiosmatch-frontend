@@ -210,6 +210,11 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // Open a task drawer when arriving via a cross-entity link ({ open: id }, candidate → task).
   useOpenFromIntent(intent, (id) => selectTask({ id } as Task))
 
+  // Remember the open drawer across page switches; coming back reopens it (memory-only).
+  const [rememberedId, setRememberedId] = usePageMemory<Id | null>('tasks.openId', null)
+  useEffect(() => {{ setRememberedId(selected?.id ?? null) }}, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {{ if (rememberedId && !selected) (id => selectTask({ id } as Task))(rememberedId) }}, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // Edit one or more fields (drawer or kanban drag). `patch` is LOCAL-shaped.
   const handleUpdate = (id: Id | undefined, patch: Record<string, unknown>) => {
     setTasks(prev => prev.map(x => x.id === id ? ({ ...x, ...patch } as Task) : x))

@@ -677,6 +677,7 @@
       "pending": "In behandeling",
       "active": "Actief",
       "ended": "Beëindigd"
-    }
+    },
+    "openMatch": "Match openen"
   }
 }
