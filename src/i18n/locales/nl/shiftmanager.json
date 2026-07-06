@@ -120,7 +120,9 @@
     "hoursTable": "Uren per maand",
     "shiftsTable": "Diensten per maand",
     "periodCol": "Periode",
-    "totalRow": "Totaal"
+    "totalRow": "Totaal",
+    "asValues": "Waarden",
+    "asPct": "%"
   },
   "customersReport": {
     "title": "Klanten rapport",

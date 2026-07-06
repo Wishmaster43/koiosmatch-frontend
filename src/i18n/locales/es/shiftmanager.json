@@ -120,7 +120,9 @@
     "hoursTable": "Horas por mes",
     "shiftsTable": "Turnos por mes",
     "periodCol": "Período",
-    "totalRow": "Total"
+    "totalRow": "Total",
+    "asValues": "Valores",
+    "asPct": "%"
   },
   "customersReport": {
     "title": "Informe de clientes",

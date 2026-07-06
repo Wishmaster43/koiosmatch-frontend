@@ -120,7 +120,9 @@
     "hoursTable": "Stunden pro Monat",
     "shiftsTable": "Dienste pro Monat",
     "periodCol": "Zeitraum",
-    "totalRow": "Gesamt"
+    "totalRow": "Gesamt",
+    "asValues": "Werte",
+    "asPct": "%"
   },
   "customersReport": {
     "title": "Kundenbericht",

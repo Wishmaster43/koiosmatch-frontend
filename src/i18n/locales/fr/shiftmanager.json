@@ -120,7 +120,9 @@
     "hoursTable": "Heures par mois",
     "shiftsTable": "Services par mois",
     "periodCol": "Période",
-    "totalRow": "Total"
+    "totalRow": "Total",
+    "asValues": "Valeurs",
+    "asPct": "%"
   },
   "customersReport": {
     "title": "Rapport clients",
