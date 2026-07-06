@@ -26,7 +26,7 @@ interface SearchSelectProps {
 }
 
 export default function SearchSelect({
-  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 240, onSearch,
+  triggerLabel, options = [], selected = [], onToggle, searchable = true, width = 280, onSearch,
 }: SearchSelectProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
@@ -60,7 +60,8 @@ export default function SearchSelect({
         <Plus size={11} /> {triggerLabel}
       </button>
       {open && (
-        <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 200, marginTop: 4, width,
+        // minWidth + viewport cap: the menu grows with long option labels instead of truncating.
+        <div style={{ position: 'absolute', top: '100%', left: 0, zIndex: 200, marginTop: 4, minWidth: width, maxWidth: 'min(420px, 90vw)',
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
           boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden' }}>
           {searchable && (

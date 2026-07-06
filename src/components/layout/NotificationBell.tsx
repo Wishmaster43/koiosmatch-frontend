@@ -65,7 +65,7 @@ export default function NotificationBell() {
 
       {open && (
         <div role="menu" style={{
-          position: 'absolute', right: 0, top: 38, width: 320, maxHeight: 420, overflowY: 'auto', zIndex: 50,
+          position: 'absolute', right: 0, top: 38, width: 360, maxHeight: 420, overflowY: 'auto', zIndex: 50,
           background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
           boxShadow: '0 8px 28px rgba(0,0,0,0.16)',
         }}>

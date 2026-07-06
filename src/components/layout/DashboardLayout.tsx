@@ -276,7 +276,7 @@ export default function DashboardLayout() {
           {rightPanelOpen && hasFilters && (
             <div
               className="km-right-panel flex-shrink-0 overflow-y-auto"
-              style={{ width: 320, borderLeft: '1px solid var(--border)', background: 'var(--surface)' }}
+              style={{ width: 360, borderLeft: '1px solid var(--border)', background: 'var(--surface)' }}
             >
               <ReportFilterSidebar
                 title="Filters"

@@ -32,7 +32,7 @@ function PickerPopover({ variables, onInsert, onClose }: {
       <div style={{ position: 'fixed', inset: 0, zIndex: 20 }} onClick={onClose} />
 
       <div role="dialog" aria-label={t('vars.title')}
-        style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, width: 270, maxHeight: 320,
+        style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, minWidth: 340, maxWidth: '90vw', maxHeight: 320,
                  display: 'flex', flexDirection: 'column', background: 'var(--surface)', zIndex: 21,
                  border: '1px solid var(--border)', borderRadius: 10, boxShadow: '0 8px 24px rgba(0,0,0,0.14)', overflow: 'hidden' }}>
 

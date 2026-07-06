@@ -73,7 +73,7 @@ interface ActionMenuProps {
   disabled?: boolean
 }
 
-export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 248, align = 'left', disabled = false }: ActionMenuProps) {
+export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 280, align = 'left', disabled = false }: ActionMenuProps) {
   const { t } = useTranslation('common')
   const [open, setOpen] = useState(false)
   // Drill-in stack: each entry is the node we descended into (last = current level).
@@ -161,7 +161,7 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
 
       {open && (
         <div role="menu" aria-label={label}
-          style={{ position: 'absolute', top: '100%', zIndex: 200, marginTop: 4, width: menuWidth,
+          style={{ position: 'absolute', top: '100%', zIndex: 200, marginTop: 4, minWidth: menuWidth, maxWidth: 'min(420px, 90vw)',
             background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
             boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden',
             ...(align === 'right' ? { right: 0 } : { left: 0 }) }}>
