@@ -335,5 +335,12 @@
     "tipDetails": "Klik voor details",
     "tipAverage": "Klik voor uitleg berekening",
     "tipKpi": "Klik voor KPI voortgang"
+  },
+  "savedFilters": {
+    "title": "Opgeslagen filters",
+    "load": "Laad filter…",
+    "namePlaceholder": "Filternaam",
+    "save": "Opslaan",
+    "delete": "Verwijder"
   }
 }

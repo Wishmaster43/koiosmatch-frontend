@@ -19,6 +19,9 @@ import { SERIES, CURRENT_YEAR } from "./shiftsChartsConfig"
 import { BarChartWidget, YearIndicator, ChartCard, ShiftsDataTable } from "./shiftsChartsWidgets"
 import { useShiftsChartData } from "./useShiftsChartData"
 import { buildShiftsFilterGroups } from "./buildShiftsFilterGroups"
+import SavedFiltersBar from "./SavedFiltersBar"
+import { useSavedShiftFilters } from "./useSavedShiftFilters"
+import type { ShiftFilterState } from "./useSavedShiftFilters"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 
 export default function ShiftsChartsBlock({
@@ -139,9 +142,22 @@ export default function ShiftsChartsBlock({
     return () => unregisterFilters(filterKey)
   }, [filterKey, filterGroups, registerFilters, unregisterFilters])
 
+  // Save/load named filter sets (localStorage interim; backend later — SM-FILT-SAVE).
+  const filterState: ShiftFilterState = {
+    selectedYears, selectedMonths, period, visible, selectedJobTypes, selectedCustomers, selectedLocations,
+  }
+  const applyFilterState = (s: ShiftFilterState) => {
+    setSelectedYears(s.selectedYears); setSelectedMonths(s.selectedMonths); setPeriod(s.period)
+    setVisible(s.visible); setSelectedJobTypes(s.selectedJobTypes)
+    setSelectedCustomers(s.selectedCustomers); setSelectedLocations(s.selectedLocations)
+  }
+  const { saved, save, remove } = useSavedShiftFilters(`sm-saved-filters:${filterKey}`)
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
+      <SavedFiltersBar saved={saved} onSave={(name) => save(name, filterState)} onLoad={applyFilterState} onDelete={remove} />
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard title={t('charts.hours')} subtitle={periodLabel} loading={loading} error={error}>
           <YearIndicator years={selectedYears} />

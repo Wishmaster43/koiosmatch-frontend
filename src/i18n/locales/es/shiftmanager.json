@@ -335,5 +335,12 @@
     "tipDetails": "Haz clic para ver detalles",
     "tipAverage": "Haz clic para la explicación del cálculo",
     "tipKpi": "Haz clic para el progreso del KPI"
+  },
+  "savedFilters": {
+    "title": "Filtros guardados",
+    "load": "Cargar filtro…",
+    "namePlaceholder": "Nombre del filtro",
+    "save": "Guardar",
+    "delete": "Eliminar"
   }
 }
