@@ -212,7 +212,8 @@
       "active": "Active",
       "totalCandidates": "Candidates",
       "neverWorked": "Never worked",
-      "workedThisMonth": "Worked this month"
+      "workedThisMonth": "Worked this month",
+      "avgOnly": "avg {{avg}}"
     },
     "statSub": {
       "urgent": "{{n}} urgent",

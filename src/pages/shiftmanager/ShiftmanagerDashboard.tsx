@@ -58,7 +58,7 @@ export default function ShiftmanagerDashboard() {
   const newColor = derived.newList.length >= target ? 'var(--color-success)'
                  : derived.newList.length >= derived.avg ? 'var(--color-warning)' : 'var(--color-danger)'
   const kpis: KpiSpec[] = [
-    { key: 'new',              label: t('dashboard.stats.newThisMonth'),     value: derived.newList.length,         sub: t('dashboard.stats.avgTarget', { avg: derived.avg, target }), color: newColor,               onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
+    { key: 'new',              label: t('dashboard.stats.newThisMonth'),     value: `${derived.newList.length}/${target}`, sub: t('dashboard.stats.avgOnly', { avg: derived.avg }), color: newColor,        onClick: () => openDrill('average', t('monthlyKpi.averageCalc'), derived.all) },
     { key: 'active',           label: t('dashboard.stats.active'),           value: derived.active.length,          color: 'var(--color-success)',   onClick: () => openDrill('nieuw', t('dashboard.stats.active'), derived.active) },
     { key: 'workedThisMonth',  label: t('dashboard.stats.workedThisMonth'),  value: derived.workedThisMonth.length, color: 'var(--color-secondary)', onClick: () => openDrill('nieuw', t('dashboard.stats.workedThisMonth'), derived.workedThisMonth) },
     { key: 'neverWorked',      label: t('dashboard.stats.neverWorked'),      value: derived.neverWorked.length,     color: 'var(--color-danger)',    onClick: () => openDrill('nieuw', t('dashboard.stats.neverWorked'), derived.neverWorked) },

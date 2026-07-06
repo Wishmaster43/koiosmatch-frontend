@@ -212,7 +212,8 @@
       "active": "Actief",
       "totalCandidates": "Kandidaten",
       "neverWorked": "Nooit gewerkt",
-      "workedThisMonth": "Gewerkt deze maand"
+      "workedThisMonth": "Gewerkt deze maand",
+      "avgOnly": "gem {{avg}}"
     },
     "statSub": {
       "urgent": "{{n}} urgent",
