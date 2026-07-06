@@ -18,10 +18,12 @@ export interface OpportunityTask {
   [k: string]: unknown
 }
 
-export function useOpportunityTasks(id?: Id): { items: OpportunityTask[]; loading: boolean; error: boolean } {
+export function useOpportunityTasks(id?: Id): { items: OpportunityTask[]; loading: boolean; error: boolean; reload: () => void } {
   const [items,   setItems]   = useState<OpportunityTask[]>([])
   const [loading, setLoading] = useState(false)
   const [error,   setError]   = useState(false)
+  // Bump to refetch (e.g. after "+ Nieuwe taak" from the tab).
+  const [epoch, setEpoch] = useState(0)
 
   useEffect(() => {
     if (!id) { setItems([]); return }
@@ -36,7 +38,7 @@ export function useOpportunityTasks(id?: Id): { items: OpportunityTask[]; loadin
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()
-  }, [id])
+  }, [id, epoch])
 
-  return { items, loading, error }
+  return { items, loading, error, reload: () => setEpoch(e => e + 1) }
 }

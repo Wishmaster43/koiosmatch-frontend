@@ -125,6 +125,10 @@
   "tasks": {
     "loading": "Cargando tareas…",
     "error": "No se pudieron cargar las tareas.",
-    "empty": "Aún no hay tareas vinculadas."
+    "empty": "Aún no hay tareas vinculadas.",
+    "newTask": "Nueva tarea",
+    "open": "Abiertas",
+    "history": "Historial",
+    "openTask": "Abrir tarea"
   }
 }

@@ -67,7 +67,11 @@
   "tasks": {
     "loading": "Taken laden…",
     "error": "Taken konden niet geladen worden.",
-    "empty": "Nog geen gekoppelde taken."
+    "empty": "Nog geen gekoppelde taken.",
+    "newTask": "Nieuwe taak",
+    "open": "Open",
+    "history": "Historie",
+    "openTask": "Taak openen"
   },
   "details": {
     "stage": "Fase",

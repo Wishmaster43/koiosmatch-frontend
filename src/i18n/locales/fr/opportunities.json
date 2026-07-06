@@ -125,6 +125,10 @@
   "tasks": {
     "loading": "Chargement des tâches…",
     "error": "Impossible de charger les tâches.",
-    "empty": "Aucune tâche liée pour l’instant."
+    "empty": "Aucune tâche liée pour l’instant.",
+    "newTask": "Nouvelle tâche",
+    "open": "Ouvertes",
+    "history": "Historique",
+    "openTask": "Ouvrir la tâche"
   }
 }

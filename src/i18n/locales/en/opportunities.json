@@ -67,7 +67,11 @@
   "tasks": {
     "loading": "Loading tasks…",
     "error": "Tasks could not be loaded.",
-    "empty": "No linked tasks yet."
+    "empty": "No linked tasks yet.",
+    "newTask": "New task",
+    "open": "Open",
+    "history": "History",
+    "openTask": "Open task"
   },
   "details": {
     "stage": "Stage",

@@ -27,7 +27,7 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
  * candidate/customer/contact pickers) — nothing hardcoded. On save it POSTs the
  * task with its polymorphic `links[]` and hands the created row back to the page.
  */
-export default function AddTaskModal({ onClose, onCreated, initial }: { onClose: () => void; onCreated?: (raw: unknown) => void; initial?: Partial<TaskForm> }) {
+export default function AddTaskModal({ onClose, onCreated, initial, extraLinks }: { onClose: () => void; onCreated?: (raw: unknown) => void; initial?: Partial<TaskForm>; extraLinks?: Array<{ type: string; id: string }> }) {
   const { t } = useTranslation('tasks')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { types, statuses, priorities, defaultPriority } = useTaskLookups()
@@ -71,7 +71,9 @@ export default function AddTaskModal({ onClose, onCreated, initial }: { onClose:
     if (Object.keys(e).length) { setErrors(e); return }
 
     // Build the polymorphic links from the chosen entities.
+    // extraLinks = fixed pre-links from the opening surface (e.g. the opportunity).
     const links = [
+      ...(extraLinks ?? []),
       form.candidateId && { type: 'candidate', id: form.candidateId },
       form.customerId  && { type: 'customer',  id: form.customerId },
       form.contactId   && { type: 'contact',   id: form.contactId },

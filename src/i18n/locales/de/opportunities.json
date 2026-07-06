@@ -125,6 +125,10 @@
   "tasks": {
     "loading": "Aufgaben werden geladen…",
     "error": "Aufgaben konnten nicht geladen werden.",
-    "empty": "Noch keine verknüpften Aufgaben."
+    "empty": "Noch keine verknüpften Aufgaben.",
+    "newTask": "Neue Aufgabe",
+    "open": "Offen",
+    "history": "Historie",
+    "openTask": "Aufgabe öffnen"
   }
 }
