@@ -3,7 +3,7 @@
  * multi-year indicator and the card wrapper (title + loading/error/empty
  * states). Dumb: they receive data + handlers, no fetching or business logic.
  */
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import type { ReactNode, CSSProperties } from "react"
 import {
   ResponsiveContainer, BarChart, Bar,
@@ -87,7 +87,7 @@ export function YearIndicator({ years }: { years: number[] }) {
 
 // Data table under a chart: one row per bucket (month/quarter), one column per
 // series (in SERIES order), a totals row, nl-NL thousands separators.
-export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear, onCellClick }: {
+export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear, onCellClick, pct = false }: {
   data: ShiftsChartDatum[]
   bars: ShiftBar[]
   monthLabel: ReactNode
@@ -95,9 +95,9 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
   multiYear: boolean
   // Same drill-down as a chart bar: a cell click opens (row = datum, bar = series).
   onCellClick?: (row: ShiftsChartDatum, bar: ShiftBar) => void
+  // Waarden ↔ % (controlled — the toggle lives on the card title row for more space).
+  pct?: boolean
 }) {
-  const { t } = useTranslation('shiftmanager')
-  const [pct, setPct] = useState(false)
   const fmt = (v: unknown) => (Number(v) || 0).toLocaleString('nl-NL')
   const totals = bars.map(b => data.reduce((s, r) => s + (Number(r[b.dataKey]) || 0), 0))
   // Per year the "Totaal" series is the 100% baseline; every other series is a share of it
@@ -126,17 +126,6 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
   const clickable = !!onCellClick
   return (
     <div>
-      {/* Waarden / % switch — % = each series as a share of that row's Totaal (Totaal = 100%). */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-        <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-          {([[false, t('charts.asValues')], [true, t('charts.asPct')]] as const).map(([val, label]) => (
-            <button key={String(val)} type="button" onClick={() => setPct(val)}
-              style={{ padding: '4px 10px', fontSize: 11, fontWeight: pct === val ? 600 : 400, border: 'none', cursor: 'pointer',
-                background: pct === val ? 'var(--color-primary-bg)' : 'transparent',
-                color: pct === val ? 'var(--color-primary)' : 'var(--text-muted)' }}>{label}</button>
-          ))}
-        </div>
-      </div>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
@@ -180,10 +169,26 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
   )
 }
 
+// Small "Waarden | %" segmented toggle — rendered on a card's title row (action slot).
+export function PctToggle({ pct, onChange }: { pct: boolean; onChange: (v: boolean) => void }) {
+  const { t } = useTranslation('shiftmanager')
+  return (
+    <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+      {([[false, t('charts.asValues')], [true, t('charts.asPct')]] as const).map(([val, label]) => (
+        <button key={String(val)} type="button" onClick={() => onChange(val)}
+          style={{ padding: '3px 10px', fontSize: 11, fontWeight: pct === val ? 600 : 400, border: 'none', cursor: 'pointer',
+            background: pct === val ? 'var(--color-primary-bg)' : 'transparent',
+            color: pct === val ? 'var(--color-primary)' : 'var(--text-muted)' }}>{label}</button>
+      ))}
+    </div>
+  )
+}
+
 // Card shell with title/subtitle and the loading/error/content states.
-export function ChartCard({ title, subtitle, loading, error, children }: {
+export function ChartCard({ title, subtitle, action, loading, error, children }: {
   title: ReactNode
   subtitle?: ReactNode
+  action?: ReactNode
   loading?: boolean
   error?: string | null
   children?: ReactNode
@@ -192,10 +197,13 @@ export function ChartCard({ title, subtitle, loading, error, children }: {
   return (
     <div className="overflow-hidden bg-[var(--surface)] border shadow-sm rounded-2xl border-slate-200">
       <div className="p-5">
-        {/* Title + subtitle on one line so the content sits higher (Danny) */}
-        <div className="flex items-baseline gap-2 mb-3">
-          <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-          {subtitle && <span className="text-xs text-slate-500">· {subtitle}</span>}
+        {/* Title + subtitle on one line; optional action (e.g. Waarden|%) on the right (Danny). */}
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <div className="flex items-baseline gap-2 min-w-0">
+            <h3 className="text-base font-semibold text-slate-900">{title}</h3>
+            {subtitle && <span className="text-xs text-slate-500">· {subtitle}</span>}
+          </div>
+          {action}
         </div>
         {loading && (
           <div className="flex items-center justify-center h-64 text-slate-400">{t('charts.loading')}</div>

@@ -16,7 +16,7 @@ import { useTranslation }     from "react-i18next"
 import ShiftsDrillDownDrawer  from "./ShiftsDrillDownDrawer"
 import { useRightPanel }      from "@/context/RightPanelContext"
 import { SERIES, CURRENT_YEAR } from "./shiftsChartsConfig"
-import { BarChartWidget, YearIndicator, ChartCard, ShiftsDataTable } from "./shiftsChartsWidgets"
+import { BarChartWidget, YearIndicator, ChartCard, ShiftsDataTable, PctToggle } from "./shiftsChartsWidgets"
 import { useShiftsChartData } from "./useShiftsChartData"
 import { buildShiftsFilterGroups } from "./buildShiftsFilterGroups"
 import { useSavedShiftFilters } from "./useSavedShiftFilters"
@@ -85,6 +85,9 @@ export default function ShiftsChartsBlock({
   const showKpiRow = !!leadingKpis
   const lastSync = useSmLastSync(showKpiRow)
   const [shiftUnit, setShiftUnit] = useState<'hours' | 'count'>('hours')
+  // Waarden/% per data-table (on the card title row now — more space for the table).
+  const [hoursPct,  setHoursPct]  = useState(false)
+  const [shiftsPct, setShiftsPct] = useState(false)
   const { customerRows, functionRows, activeCustomers, plannedCustomers } = useShiftsBreakdown(queryString)
   const fmtN = (n: number) => Math.round(n).toLocaleString('nl-NL')
   const isH = shiftUnit === 'hours'
@@ -261,11 +264,13 @@ export default function ShiftsChartsBlock({
 
       {/* Same data as a table under each chart (hours + shifts per month, with totals). */}
       <div className="grid grid-cols-1 gap-4 mt-4 lg:grid-cols-2">
-        <ChartCard title={t('charts.hoursTable')} subtitle={periodLabel} loading={loading} error={error}>
-          <ShiftsDataTable data={chartData} bars={hoursBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} onCellClick={handleBarClick} />
+        <ChartCard title={t('charts.hoursTable')} subtitle={periodLabel} loading={loading} error={error}
+          action={<PctToggle pct={hoursPct} onChange={setHoursPct} />}>
+          <ShiftsDataTable data={chartData} bars={hoursBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} onCellClick={handleBarClick} pct={hoursPct} />
         </ChartCard>
-        <ChartCard title={t('charts.shiftsTable')} subtitle={periodLabel} loading={loading} error={error}>
-          <ShiftsDataTable data={chartData} bars={shiftBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} onCellClick={handleBarClick} />
+        <ChartCard title={t('charts.shiftsTable')} subtitle={periodLabel} loading={loading} error={error}
+          action={<PctToggle pct={shiftsPct} onChange={setShiftsPct} />}>
+          <ShiftsDataTable data={chartData} bars={shiftBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} onCellClick={handleBarClick} pct={shiftsPct} />
         </ChartCard>
       </div>
 
