@@ -188,6 +188,20 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>{t('config.routerDesc')}</p>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>{t('config.routerNote')}</p>
               </div>
+            ) : config && Object.keys(config).length > 0 ? (
+              // Unknown module type (not in the FE registry): show its stored config
+              // read-only so opening it is never blank. Editable config needs the
+              // module in src/modules/ (or a BE-driven schema).
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {Object.entries(config).map(([k, v]) => (
+                  <div key={k}>
+                    <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>{k}</label>
+                    <div style={{ fontSize: 13, color: 'var(--text)', wordBreak: 'break-word' }}>
+                      {typeof v === 'object' ? JSON.stringify(v) : String(v ?? '—')}
+                    </div>
+                  </div>
+                ))}
+              </div>
             ) : (
               <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('config.noConfig')}</p>
             )
