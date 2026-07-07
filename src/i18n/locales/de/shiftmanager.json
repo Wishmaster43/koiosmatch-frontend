@@ -14,7 +14,8 @@
     "matrixTitle": "Pro Kandidat pro Monat",
     "candidate": "Kandidat",
     "total": "Gesamt",
-    "metric": { "prognose_hours": "Prognose Stunden", "prognose_shifts": "Prognose Einsätze", "werkelijk_hours": "Tatsächliche Stunden", "werkelijk_shifts": "Tatsächliche Einsätze" }
+    "metric": { "prognose_hours": "Prognose Stunden", "prognose_shifts": "Prognose Einsätze", "werkelijk_hours": "Tatsächliche Stunden", "werkelijk_shifts": "Tatsächliche Einsätze" },
+    "allForms": "Alle"
   },
   "orders": {
     "title": "Details — Einsätze",

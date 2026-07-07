@@ -14,7 +14,8 @@
     "matrixTitle": "Per candidate per month",
     "candidate": "Candidate",
     "total": "Total",
-    "metric": { "prognose_hours": "Forecast hours", "prognose_shifts": "Forecast shifts", "werkelijk_hours": "Actual hours", "werkelijk_shifts": "Actual shifts" }
+    "metric": { "prognose_hours": "Forecast hours", "prognose_shifts": "Forecast shifts", "werkelijk_hours": "Actual hours", "werkelijk_shifts": "Actual shifts" },
+    "allForms": "All"
   },
   "orders": {
     "title": "Details — Shifts",

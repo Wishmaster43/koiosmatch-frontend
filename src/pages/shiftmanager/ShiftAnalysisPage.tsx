@@ -30,7 +30,9 @@ function InfoBlock({ text }: { text: string }) {
 
 export default function ShiftAnalysisPage() {
   const { t, i18n } = useTranslation('shiftmanager')
-  const { rows, monthColumns, matrixRows, plannedPerMonth, loading, error, unavailable } = useShiftAnalysis()
+  // Contract-form filter (Danny's Excel is UZK-only) — null = all forms.
+  const [contractForm, setContractForm] = useState<string | null>('UZK')
+  const { rows, monthColumns, matrixRows, plannedPerMonth, contractForms, loading, error, unavailable } = useShiftAnalysis(contractForm)
   const [metric, setMetric] = useState<MetricKey>('prognose_hours')
 
   // Alarm counts drive the KPI cards.
@@ -46,6 +48,8 @@ export default function ShiftAnalysisPage() {
     [plannedPerMonth, i18n.language],
   )
   const metricTabs = METRIC_KEYS.map(k => ({ key: k, label: t(`shiftAnalysis.metric.${k}`) }))
+  // Contract-form chips: "Alle" + one per form found in the feed.
+  const contractTabs = [{ key: '__all', label: t('shiftAnalysis.allForms') }, ...contractForms.map(f => ({ key: f, label: f }))]
 
   return (
     <div className="p-6">
@@ -69,6 +73,14 @@ export default function ShiftAnalysisPage() {
         <InfoBlock text={t('shiftAnalysis.unavailable')} />
       ) : (
         <>
+          {/* Contract-form filter (default UZK) — filters the whole page */}
+          {contractForms.length > 0 && (
+            <div className="mb-4">
+              <DrillTabs tabs={contractTabs} active={contractForm ?? '__all'}
+                onChange={k => setContractForm(k === '__all' ? null : k)} />
+            </div>
+          )}
+
           {/* Alarm KPI row */}
           <div className="grid gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
             <KpiCard label={t('shiftAnalysis.kpi.wegvallend')} value={counts.wegvallend}

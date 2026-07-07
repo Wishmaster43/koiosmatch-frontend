@@ -14,7 +14,8 @@
     "matrixTitle": "Per kandidaat per maand",
     "candidate": "Kandidaat",
     "total": "Totaal",
-    "metric": { "prognose_hours": "Prognose uren", "prognose_shifts": "Prognose diensten", "werkelijk_hours": "Werkelijke uren", "werkelijk_shifts": "Werkelijke diensten" }
+    "metric": { "prognose_hours": "Prognose uren", "prognose_shifts": "Prognose diensten", "werkelijk_hours": "Werkelijke uren", "werkelijk_shifts": "Werkelijke diensten" },
+    "allForms": "Alle"
   },
   "orders": {
     "title": "Details — Diensten",

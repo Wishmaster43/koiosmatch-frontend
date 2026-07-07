@@ -14,7 +14,8 @@
     "matrixTitle": "Por candidato por mes",
     "candidate": "Candidato",
     "total": "Total",
-    "metric": { "prognose_hours": "Horas previstas", "prognose_shifts": "Turnos previstos", "werkelijk_hours": "Horas reales", "werkelijk_shifts": "Turnos reales" }
+    "metric": { "prognose_hours": "Horas previstas", "prognose_shifts": "Turnos previstos", "werkelijk_hours": "Horas reales", "werkelijk_shifts": "Turnos reales" },
+    "allForms": "Todos"
   },
   "orders": {
     "title": "Detalles — Turnos",

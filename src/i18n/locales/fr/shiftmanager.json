@@ -14,7 +14,8 @@
     "matrixTitle": "Par candidat par mois",
     "candidate": "Candidat",
     "total": "Total",
-    "metric": { "prognose_hours": "Heures prévues", "prognose_shifts": "Missions prévues", "werkelijk_hours": "Heures réelles", "werkelijk_shifts": "Missions réelles" }
+    "metric": { "prognose_hours": "Heures prévues", "prognose_shifts": "Missions prévues", "werkelijk_hours": "Heures réelles", "werkelijk_shifts": "Missions réelles" },
+    "allForms": "Tous"
   },
   "orders": {
     "title": "Détails — Missions",

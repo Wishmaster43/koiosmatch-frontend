@@ -37,7 +37,7 @@ export type MetricKey = keyof MatrixCell
 export const METRIC_KEYS: MetricKey[] = ['prognose_hours', 'prognose_shifts', 'werkelijk_hours', 'werkelijk_shifts']
 
 // One candidate row for the per-month matrix.
-export interface MatrixRow { id: string; name: string; position?: string; months: Record<string, MatrixCell> }
+export interface MatrixRow { id: string; name: string; position?: string; contract_form?: string; months: Record<string, MatrixCell> }
 
 // One raw candidate month series from the backend feed.
 interface RawRow {
@@ -45,6 +45,7 @@ interface RawRow {
   name?: string
   position?: string
   city?: string
+  contract_form?: string
   registration_date?: string | null
   number_of_times_worked?: number | null
   months?: Record<string, MatrixCell>
@@ -86,7 +87,7 @@ function toRow(r: RawRow, nowKey: string, nowMs: number): ShiftAnalysisRow {
   }
 }
 
-export function useShiftAnalysis() {
+export function useShiftAnalysis(contractForm?: string | null) {
   // retry:false so an unavailable feed resolves fast to the empty-state.
   const { data, isLoading, error } = useQuery({
     queryKey: ['sm_shift_analysis'],
@@ -96,22 +97,27 @@ export function useShiftAnalysis() {
   const unavailable = error ? isServiceUnavailable(error) : false
 
   const derived = useMemo(() => {
-    const raw = (Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : []) as RawRow[]
+    const rawAll = (Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : []) as RawRow[]
     const now = new Date()
     const nowKey = currentMonthKey(now)
     const nowMs = now.getTime()
 
+    // Distinct contract forms (from the full set) for the filter chips.
+    const contractForms = [...new Set(rawAll.map(r => r.contract_form).filter((x): x is string => Boolean(x)))].sort()
+    // Apply the contract-form filter (default UZK on the page) before deriving anything.
+    const raw = contractForm ? rawAll.filter(r => r.contract_form === contractForm) : rawAll
+
     // Alarm rows (KPI + attention) — one per candidate.
     const rows = raw.map(r => toRow(r, nowKey, nowMs))
 
-    // Month columns = the sorted union of month keys across all candidates.
+    // Month columns = the sorted union of month keys across all (filtered) candidates.
     const monthSet = new Set<string>()
     raw.forEach(r => Object.keys(r.months ?? {}).forEach(k => monthSet.add(k)))
     const monthColumns = [...monthSet].sort()
 
     // Matrix rows keep the raw per-month cells so the table can pick any metric.
     const matrixRows: MatrixRow[] = raw.map(r => ({
-      id: String(r.candidate_id ?? ''), name: r.name ?? '', position: r.position, months: r.months ?? {},
+      id: String(r.candidate_id ?? ''), name: r.name ?? '', position: r.position, contract_form: r.contract_form, months: r.months ?? {},
     }))
 
     // Geplande UZK per maand = # candidates with a planned shift that month.
@@ -120,8 +126,8 @@ export function useShiftAnalysis() {
       count: raw.filter(r => (Number(r.months?.[m]?.prognose_shifts) || 0) > 0).length,
     }))
 
-    return { rows, monthColumns, matrixRows, plannedPerMonth }
-  }, [data])
+    return { rows, monthColumns, matrixRows, plannedPerMonth, contractForms }
+  }, [data, contractForm])
 
   return { ...derived, loading: isLoading, error: !!error && !unavailable, unavailable }
 }
