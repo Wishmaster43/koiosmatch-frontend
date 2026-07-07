@@ -11,7 +11,7 @@ export default {
   bg:    '#FDECEC',
   // Only fields the sync actually reads (search/status were dead leftovers).
   schema: [
-    { key: 'connection_id', label: 'Bron (API / tenant)', type: 'lookup_select', endpoint: '/planning-connections' },
+    { key: 'connection_id', label: 'ShiftManager-account', type: 'lookup_select', endpoint: '/planning-connections' },
     { key: 'limit',  label: 'Max. items',  type: 'number', default: 500, placeholder: '500' },
   ],
 }
