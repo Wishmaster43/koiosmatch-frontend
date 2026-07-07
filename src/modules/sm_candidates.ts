@@ -15,6 +15,6 @@ export default {
     { key: 'search',   label: 'Zoeken',           type: 'text',   placeholder: 'naam of e-mail' },
     { key: 'status',   label: 'Status',           type: 'select', options: ['alle', 'actief', 'inactief', 'beschikbaar'], default: 'alle' },
     { key: 'limit',    label: 'Max. items',       type: 'number', default: 500, placeholder: '500' },
-    { key: 'order_by', label: 'Sortering',        type: 'select', options: ['naam', 'inschrijfdatum', 'laatste_dienst'] },
+    { key: 'order_by', label: 'Sortering',        type: 'select', options: ['naam', 'inschrijfdatum'], default: 'naam' },
   ],
 }

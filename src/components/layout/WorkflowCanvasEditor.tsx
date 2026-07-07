@@ -36,7 +36,7 @@ function EditorInner({ workflow, onClose, onSave }: {
   const {
     edges, onNodesChange, onEdgesChange, onConnect, nodesWithFirst, selectedNode, setSelectedNodeId,
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
-    saved, running, runError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
+    saved, running, runError, showSchedule, setShowSchedule, setWidePanelActive, showLogs, setShowLogs,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
@@ -245,9 +245,9 @@ function EditorInner({ workflow, onClose, onSave }: {
           </div>
 
           {/* Right panel — widens when management tabs (Agents/Prompts/FAQ/etc.) are active */}
-          {/* Roomy by default (config selects were truncating at 280); logs and the
-              management tabs get the full wide panel for per-step results. */}
-          <div style={{ width: (widePanelActive || showLogs) ? 640 : 380, flexShrink: 0, background: 'var(--surface)', borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'width 0.2s ease' }}>
+          {/* One width for config AND logs (Danny 2026-07-07): the narrow config
+              panel truncated selects and felt cramped next to the wide logs. */}
+          <div style={{ width: 640, flexShrink: 0, background: 'var(--surface)', borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
             {showLogs
               ? <LogsPanel workflowId={workflow.id} onClose={() => setShowLogs(false)} />
               : <ConfigPanel node={selectedNode} onUpdate={updateNodeConfig} onDelete={deleteNode}
