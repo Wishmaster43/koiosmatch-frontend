@@ -68,7 +68,7 @@ export default function ShiftsChartsBlock({
   const [selectedJobTypes,   setSelectedJobTypes]   = useState<string[]>([])
   const [selectedCustomers,  setSelectedCustomers]  = useState<string[]>([])
   const [selectedLocations,  setSelectedLocations]  = useState<string[]>([])
-  const [drill,              setDrill]              = useState<{ baseQuery: string; metric: string; label: string; yearSuffix: string } | null>(null)
+  const [drill,              setDrill]              = useState<{ baseQuery: string; metric: string; year: number; yearSuffix: string; initialPeriod: string } | null>(null)
 
   // ── Data layer ──────────────────────────────────────────────────────────────
   const { loading, error, filterOptions, chartData, shiftBars, hoursBars, multiYear, queryString, hourStats } =
@@ -131,21 +131,15 @@ export default function ShiftsChartsBlock({
   }, [filterOptions.locations])
 
   // ── Drill-down ────────────────────────────────────────────────────────────
+  // A period key encodes the month/quarter of a chart datum (year lives on the drill).
+  const periodKeyOf = (d: ShiftsChartDatum) => period === "quarter" ? `Q:${d._quarter ?? d.label}` : `M:${d._monthIndex ?? 1}`
+
   const handleBarClick = (datum: ShiftsChartDatum, barMeta: ShiftBar) => {
     const { year, seriesKey } = barMeta
     const baseMetric = seriesKey.replace("_uren", "")
-    const params     = new URLSearchParams()
-
-    if (period === "quarter") {
-      params.set("quarter", String(datum._quarter ?? datum.label))
-      params.set("year", String(year))
-    } else {
-      const mm = String(datum._monthIndex ?? 1).padStart(2, "0")
-      params.set("month", `${year}-${mm}`)
-    }
-
-    // NB: metric is NOT baked in — the drawer appends the chosen series, so you can
-    // switch Totaal / Niet ingevuld / … in the drawer without reopening (Danny).
+    // baseQuery = filters only. NEITHER metric NOR period is baked in — the drawer
+    // appends the chosen series (chips) and pages the month itself (Danny: één standaard).
+    const params = new URLSearchParams()
     selectedJobTypes.forEach((j) => params.append("job_type[]", j))
     selectedLocations.forEach((l) => params.append("location_id[]", l))
     fixedLocationIds.forEach((l)  => params.append("location_id[]", l))
@@ -153,7 +147,7 @@ export default function ShiftsChartsBlock({
     if (fixedCandidateId)  params.append("candidate_id[]",  fixedCandidateId)
 
     const yearSuffix = multiYear ? ` '${String(year).slice(2)}` : ""
-    setDrill({ baseQuery: params.toString(), metric: baseMetric, label: datum.label, yearSuffix })
+    setDrill({ baseQuery: params.toString(), metric: baseMetric, year, yearSuffix, initialPeriod: periodKeyOf(datum) })
   }
 
   // Add/remove a year, keeping at least one selected.
@@ -279,16 +273,27 @@ export default function ShiftsChartsBlock({
         <ShiftsBreakdownCharts customerRows={customerRows} functionRows={functionRows} unit={shiftUnit} loading={loading} error={error} />
       )}
 
-      {drill && (
-        <ShiftsDrillDownDrawer
-          metric={drill.metric}
-          metricOptions={SERIES.map(s => ({ value: s.key, label: seriesLabel(s.key) }))}
-          buildUrl={(m) => `/sm_reports/shifts-per-month/detail?${drill.baseQuery}&metric=${m}`}
-          titleFor={(m) => `${seriesLabel(m)}${drill.yearSuffix} — ${drill.label}`}
-          onClose={() => setDrill(null)}
-          locationMeta={locationMeta}
-        />
-      )}
+      {drill && (() => {
+        // Periods to page through = the selected buckets (months/quarters), in filter order.
+        const periods = chartData.map(d => ({ key: periodKeyOf(d), label: String(d.label) }))
+        // period key → detail query params for the drill's year.
+        const periodParam = (key: string) => key.startsWith('Q:')
+          ? `quarter=${encodeURIComponent(key.slice(2))}&year=${drill.year}`
+          : `month=${drill.year}-${String(Number(key.slice(2))).padStart(2, '0')}`
+        return (
+          <ShiftsDrillDownDrawer
+            metric={drill.metric}
+            metricOptions={SERIES.map(s => ({ value: s.key, label: seriesLabel(s.key) }))}
+            periods={periods}
+            initialPeriod={drill.initialPeriod}
+            buildUrl={(m, pk) => `/sm_reports/shifts-per-month/detail?${drill.baseQuery}${drill.baseQuery ? '&' : ''}${periodParam(pk)}&metric=${m}`}
+            titleFor={(m, pk) => `${seriesLabel(m)}${drill.yearSuffix} — ${periods.find(p => p.key === pk)?.label ?? ''}`}
+            countFor={(m, pk) => { const d = chartData.find(x => periodKeyOf(x) === pk); return d ? Number(d[`${drill.year}_${m}`] || 0) : 0 }}
+            onClose={() => setDrill(null)}
+            locationMeta={locationMeta}
+          />
+        )
+      })()}
     </>
   )
 }

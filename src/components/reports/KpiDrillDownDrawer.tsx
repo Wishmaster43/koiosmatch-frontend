@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useKpiSettings } from '@/lib/useKpiSettings'
 import CandidateDetailDrawer from './CandidateDetailDrawer'
+import DrillTabs from '@/components/ui/DrillTabs'
 import type { ReportCandidate } from '@/types/reports'
 
 // Locale-aware full month name for index 0–11.
@@ -347,21 +348,11 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
           </div>
         </div>
 
-        {/* Bucket switcher — flip between the candidate subsets without reopening */}
-        {tabs && tabs.length > 1 && (
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, padding: '10px 14px', borderBottom: '1px solid var(--hover-bg)', flexShrink: 0 }}>
-            {tabs.map(tb => {
-              const on = tb.key === activeTab
-              return (
-                <button key={tb.key} type="button" onClick={() => setActiveTab(tb.key)}
-                  style={{ padding: '4px 10px', fontSize: 12, fontWeight: on ? 600 : 400, borderRadius: 999, cursor: 'pointer',
-                    border: `1px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`,
-                    background: on ? 'var(--color-primary-bg)' : 'var(--surface)',
-                    color: on ? 'var(--color-primary)' : 'var(--text-muted)' }}>
-                  {tb.label} <span style={{ opacity: 0.7 }}>{tb.candidates.length}</span>
-                </button>
-              )
-            })}
+        {/* Bucket switcher — the shared DrillTabs standard (chips + count badge) */}
+        {tabs && tabs.length > 1 && activeTab && (
+          <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--hover-bg)', flexShrink: 0 }}>
+            <DrillTabs tabs={tabs.map(tb => ({ key: tb.key, label: tb.label, count: tb.candidates.length }))}
+              active={activeTab} onChange={setActiveTab} />
           </div>
         )}
 

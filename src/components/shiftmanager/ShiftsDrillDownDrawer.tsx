@@ -10,6 +10,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useDrillDownShifts } from './hooks/useDrillDownShifts'
+import DrillTabs from '@/components/ui/DrillTabs'
 import ShiftsDrillDownTotals from './ShiftsDrillDownTotals'
 import type { LocationMeta } from './ShiftsDrillDownTotals'
 import type { ShiftInvite } from '@/types/shiftmanager'
@@ -104,11 +105,14 @@ function CandidateBlock({ invite }: { invite: ShiftInvite }) {
   )
 }
 
-export default function ShiftsDrillDownDrawer({ metric, metricOptions, buildUrl, titleFor, onClose, locationMeta }: {
-  metric: string                                       // initial series (totaal / geen_kandidaat / …)
-  metricOptions: { value: string; label: string }[]    // switchable series list
-  buildUrl: (metric: string) => string                 // detail URL for a chosen series
-  titleFor: (metric: string) => string                 // drawer title for a chosen series
+export default function ShiftsDrillDownDrawer({ metric, metricOptions, periods, initialPeriod, buildUrl, titleFor, countFor, onClose, locationMeta }: {
+  metric: string                                              // initial series (totaal / geen_kandidaat / …)
+  metricOptions: { value: string; label: string }[]           // switchable series (chips)
+  periods: { key: string; label: string }[]                   // selectable periods (months) to page through
+  initialPeriod: string                                       // the clicked period
+  buildUrl: (metric: string, period: string) => string        // detail URL for a series + period
+  titleFor: (metric: string, period: string) => string        // drawer title
+  countFor: (metric: string, period: string) => number        // chip badge (from the already-loaded chartData)
   onClose: () => void
   // Location id → { name, customer } so the totals view can show real customer names.
   locationMeta?: LocationMeta
@@ -118,11 +122,14 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, buildUrl,
   const [search, setSearch] = useState('')
   // Default to grouped totals (Danny: "geen orderlijsten maar totalen"); Details stays reachable.
   const [view, setView] = useState<'totals' | 'details'>('totals')
-  // The series (Totaal / Niet ingevuld / Geen kandidaat / Prognose / Werkelijk) can be
-  // switched right here — refetches the same period for the chosen series (Danny).
+  // Series switcher (chips) + month pager (‹ aug › / ← →) — the standard for every drill.
   const [currentMetric, setCurrentMetric] = useState(metric)
-  const title = titleFor(currentMetric)
-  const { shifts, loading, error } = useDrillDownShifts(buildUrl(currentMetric))
+  const [currentPeriod, setCurrentPeriod] = useState(initialPeriod)
+  const title = titleFor(currentMetric, currentPeriod)
+  const { shifts, loading, error } = useDrillDownShifts(buildUrl(currentMetric, currentPeriod))
+  const periodIdx = periods.findIndex(p => p.key === currentPeriod)
+  const goPeriod = (delta: number) => { const i = periodIdx + delta; if (i >= 0 && i < periods.length) setCurrentPeriod(periods[i].key) }
+  const metricTabs = metricOptions.map(o => ({ key: o.value, label: o.label, count: countFor(o.value, currentPeriod) }))
 
   const filtered = shifts.filter(s => {
     if (!search) return true
@@ -138,27 +145,38 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, buildUrl,
     )
   })
 
+  // Small pager button (prev/next period).
+  const pagerBtn = (label: string, onClick: () => void, disabled: boolean) => (
+    <button type="button" onClick={onClick} disabled={disabled} aria-label={label}
+      style={{ width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 15,
+               border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)',
+               color: disabled ? 'var(--border)' : 'var(--text-muted)', cursor: disabled ? 'default' : 'pointer' }}>
+      {label === 'prev' ? '‹' : '›'}
+    </button>
+  )
+
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.25)' }} onClick={onClose} />
 
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={title} tabIndex={-1}
+        onKeyDown={e => { if (e.target instanceof HTMLInputElement) return; if (e.key === 'ArrowLeft') goPeriod(-1); else if (e.key === 'ArrowRight') goPeriod(1) }}
         className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 620, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
-        {/* Header */}
+        {/* Header: title + month pager + count */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between',
                       padding: '14px 18px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           <div>
             <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text)' }}>{title}</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
-              {/* Series switcher — jump between Totaal/Niet ingevuld/… for the same period */}
-              <select value={currentMetric} onChange={e => setCurrentMetric(e.target.value)}
-                aria-label={t('shiftsDrawer.metricLabel')}
-                style={{ fontSize: 12, padding: '3px 6px', borderRadius: 6, border: '1px solid var(--border)',
-                         background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer', outline: 'none' }}>
-                {metricOptions.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-              </select>
+              {periods.length > 1 && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  {pagerBtn('prev', () => goPeriod(-1), periodIdx <= 0)}
+                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)', minWidth: 42, textAlign: 'center' }}>{periods[periodIdx]?.label}</span>
+                  {pagerBtn('next', () => goPeriod(1), periodIdx >= periods.length - 1)}
+                </div>
+              )}
               <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                 {loading ? t('shiftsDrawer.loading') : t('shiftsDrawer.count', { count: shifts.length })}
               </span>
@@ -172,6 +190,11 @@ export default function ShiftsDrillDownDrawer({ metric, metricOptions, buildUrl,
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             <X size={15} />
           </button>
+        </div>
+
+        {/* Series chips (the standard switcher) — badge = count in the current period */}
+        <div style={{ flexShrink: 0, padding: '8px 14px', borderBottom: '1px solid var(--hover-bg)' }}>
+          <DrillTabs tabs={metricTabs} active={currentMetric} onChange={setCurrentMetric} />
         </div>
 
         {/* View toggle (Totalen | Details) + search — search only applies to the details list */}
