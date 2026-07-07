@@ -11,11 +11,18 @@ import api from '@/lib/api'
 import { StatusBadge, formatDT, formatDuration } from '@/components/reports/runFormat'
 import type { RunRow } from '@/types/reports'
 
-export default function LogsPanel({ workflowId, onClose }: { workflowId?: string | number; onClose: () => void }) {
+export default function LogsPanel({ workflowId, liveRun, onClose }: { workflowId?: string | number; liveRun?: RunRow | null; onClose: () => void }) {
   const { t } = useTranslation('reports')
   const [runs,     setRuns]     = useState<RunRow[]>([])
   const [loading,  setLoading]  = useState(true)
   const [expanded, setExpanded] = useState<string | number | null>(null)
+
+  // WF-R3: surface the live run (polled) at the top, with its steps auto-expanded,
+  // so the panel updates in real-time while the run executes.
+  const displayRuns = liveRun?.id != null
+    ? [liveRun, ...runs.filter(r => (r.id ?? '') !== liveRun.id)]
+    : runs
+  useEffect(() => { if (liveRun?.id != null) setExpanded(liveRun.id) }, [liveRun?.id])
 
   // Load this workflow's real executions; empty on failure, never fabricated.
   useEffect(() => {
@@ -51,10 +58,10 @@ export default function LogsPanel({ workflowId, onClose }: { workflowId?: string
         {loading && (
           <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('runs.loading')}</div>
         )}
-        {!loading && runs.length === 0 && (
+        {!loading && displayRuns.length === 0 && (
           <div style={{ padding: 24, textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('runs.empty')}</div>
         )}
-        {!loading && runs.map((run, idx) => {
+        {!loading && displayRuns.map((run, idx) => {
           const id = run.id ?? idx
           const isOpen = expanded === id
           // Prefer the enriched live-state rows (duration/summary/items); the legacy

@@ -5,10 +5,11 @@
  * filter) + save/run. Extracted from the component so the editor stays declarative
  * (logic in a hook, §3). Returns the state + handlers the JSX consumes.
  */
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { addEdge, useNodesState, useEdgesState } from '@xyflow/react'
 import type { Connection } from '@xyflow/react'
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow, flowToSteps } from './serialization'
+import { useWorkflowRun } from './useWorkflowRun'
 import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, ScheduleConfig,
   WorkflowVarField, WorkflowVarGroup } from '@/types/workflow'
 
@@ -62,6 +63,9 @@ export function useWorkflowEditor({ workflow, onSave }: {
   const [running,        setRunning]        = useState(false)
   const [runError,       setRunError]       = useState<string | null>(null)
   const [runningNodeId,  setRunningNodeId]  = useState<string | null>(null)
+  // WF-R3: the id of the run we're polling live (set by handleRun), and its steps.
+  const [activeRunId,    setActiveRunId]    = useState<string | number | null>(null)
+  const liveRun = useWorkflowRun(activeRunId)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [pickerState,    setPickerState]    = useState<{ edgeId?: string; append?: boolean } | null>(null)
   const [showSchedule,   setShowSchedule]   = useState(false)
@@ -265,25 +269,13 @@ export function useWorkflowEditor({ workflow, onSave }: {
       // Actually execute the SAVED workflow server-side (the engine runs the
       // steps on the queue). This button used to only animate — never ran.
       const { default: api } = await import('@/lib/api')
-      await api.post(`/workflows/${workflow.id}/run`)
+      // Start the queued run and keep its id so we can poll the REAL per-step status
+      // (WF-R3) — replaces the old fixed 800ms fake walk. Shape: { run: { id } }.
+      const res = await api.post(`/workflows/${workflow.id}/run`)
+      const runId = (res.data?.run?.id ?? res.data?.data?.id ?? res.data?.id) as string | number | undefined
+      if (runId != null) setActiveRunId(runId)
 
-      // Visual walk of the graph while the queued run progresses.
-      const orderedNodes: string[] = []
-      const visited = new Set<string>()
-      const startId = nodes.filter(n => !edges.some(e => e.target === n.id))
-                           .sort((a, b) => a.position.x - b.position.x)[0]?.id
-      let current: string | undefined = startId
-      while (current && !visited.has(current)) {
-        orderedNodes.push(current)
-        visited.add(current)
-        current = edges.find(e => e.source === current)?.target
-      }
-      for (const nid of orderedNodes) {
-        setRunningNodeId(nid)
-        await new Promise(r => setTimeout(r, 800))
-      }
-
-      // Show the run history so the real (server-side) result is visible.
+      // Show the run history / live viewer (the polled run drives node colours).
       setShowLogs(true)
     } catch (err) {
       // Surface the backend reason (e.g. "Workflow is niet actief" on a draft);
@@ -294,7 +286,7 @@ export function useWorkflowEditor({ workflow, onSave }: {
       setRunningNodeId(null)
       setRunning(false)
     }
-  }, [nodes, edges, workflow.id])
+  }, [workflow.id])
 
   // Variables a node may reference: the output fields of every upstream module.
   // Walks edges backward (BFS), orders ancestors left-to-right, and derives
@@ -345,15 +337,32 @@ export function useWorkflowEditor({ workflow, onSave }: {
     ? startNodeId
     : autoFirstNodeId
 
+  // WF-R3: map the polled run's steps (step_id → status) onto the nodes so the
+  // canvas shows real per-step progress (running/success/failed) live.
+  const stepStatus = useMemo(() => {
+    const m: Record<string, string> = {}
+    ;(liveRun?.steps ?? []).forEach(s => {
+      const id = s.step_id != null ? String(s.step_id) : undefined
+      if (id && s.status) m[id] = String(s.status)
+    })
+    return m
+  }, [liveRun])
+
   const nodesWithFirst = nodes.map(n => ({
     ...n,
-    data: { ...n.data, isFirst: n.id === firstNodeId, isRunning: n.id === runningNodeId },
+    data: {
+      ...n.data,
+      isFirst: n.id === firstNodeId,
+      isRunning: n.id === runningNodeId || stepStatus[n.id] === 'running',
+      status: stepStatus[n.id],
+    },
   }))
 
   return {
     edges, onNodesChange, onEdgesChange, onConnect, nodesWithFirst, selectedNode, setSelectedNodeId,
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
     saved, running, runError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
+    liveRun, activeRunId,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,

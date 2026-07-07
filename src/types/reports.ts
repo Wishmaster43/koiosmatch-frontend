@@ -56,6 +56,13 @@ export interface ReportFilterGroup {
 // bundles the step received and produced (shown expandable in the run drawer).
 export interface RunStep {
   // WF-R3 live-run fields (present on runs from the queued engine).
+  step_id?: string | number
+  step_order?: number
+  module_type?: string
+  started_at?: string | null
+  finished_at?: string | null
+  summary?: string
+  items?: number
   attempts?: number
   error?: string | null
   error_message?: string | null

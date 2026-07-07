@@ -37,6 +37,7 @@ function EditorInner({ workflow, onClose, onSave }: {
     edges, onNodesChange, onEdgesChange, onConnect, nodesWithFirst, selectedNode, setSelectedNodeId,
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
     saved, running, runError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
+    liveRun,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
@@ -249,7 +250,7 @@ function EditorInner({ workflow, onClose, onSave }: {
               management tabs need the full width for their tables/item lists (640). */}
           <div style={{ width: (showLogs || widePanelActive) ? 640 : 440, flexShrink: 0, background: 'var(--surface)', borderLeft: '1px solid var(--border)', display: 'flex', flexDirection: 'column', overflow: 'hidden', transition: 'width 0.2s ease' }}>
             {showLogs
-              ? <LogsPanel workflowId={workflow.id} onClose={() => setShowLogs(false)} />
+              ? <LogsPanel workflowId={workflow.id} liveRun={liveRun} onClose={() => setShowLogs(false)} />
               : <ConfigPanel node={selectedNode} onUpdate={updateNodeConfig} onDelete={deleteNode}
                   variables={upstreamVariables}
                   onTabChange={tab => setWidePanelActive(MANAGE_TABS.includes(tab))} />

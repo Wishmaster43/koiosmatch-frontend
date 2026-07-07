@@ -35,6 +35,10 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
     ?? { label: data.type ?? 'Onbekend', Icon: HelpCircle, color: '#64748B', bg: '#F1F5F9', category: 'Onbekend' }
   // The registry types Icon narrowly (size only); lucide icons also take `color`.
   const Icon = meta.Icon as unknown as LucideIcon
+  // WF-R3 live per-step status → node ring + badge colour.
+  const status = data.status as string | undefined
+  const failed = status === 'failed'
+  const done   = status === 'success'
 
   const handleRun = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation()
@@ -99,9 +103,11 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         <div style={{
           width: 72, height: 72, borderRadius: '50%',
           background: meta.bg,
-          border: data.isRunning ? `3px solid ${meta.color}` : selected ? `3px solid ${meta.color}` : `2px solid ${meta.color}40`,
+          border: failed ? '3px solid var(--color-danger)' : done ? '3px solid var(--color-success)'
+            : data.isRunning ? `3px solid ${meta.color}` : selected ? `3px solid ${meta.color}` : `2px solid ${meta.color}40`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: data.isRunning
+          boxShadow: failed ? '0 0 0 4px var(--color-danger-bg)' : done ? '0 0 0 4px var(--color-success-bg)'
+            : data.isRunning
             ? `0 0 0 6px ${meta.color}30, 0 0 20px ${meta.color}50`
             : selected ? `0 0 0 4px ${meta.color}20` : '0 2px 8px rgba(0,0,0,0.08)',
           transition: 'border 0.2s, box-shadow 0.2s',
@@ -126,15 +132,15 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         >
           {busy ? <Loader2 size={10} className="animate-spin" /> : <Play size={10} />}
         </button>
-        {/* Output badge */}
-        {!!data.output && (
+        {/* Status badge — live run (success/failed) or a stored test-run output */}
+        {(done || failed || !!data.output) && (
           <div style={{
             position: 'absolute', top: -4, right: -4,
             width: 16, height: 16, borderRadius: '50%',
-            background: 'var(--color-success)', border: '2px solid white',
+            background: failed ? 'var(--color-danger)' : 'var(--color-success)', border: '2px solid white',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
-            <CheckCircle size={9} color="white" />
+            {failed ? <X size={9} color="white" /> : <CheckCircle size={9} color="white" />}
           </div>
         )}
       </div>
