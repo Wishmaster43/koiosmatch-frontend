@@ -133,11 +133,18 @@ function CandidateList({ candidates, dateField, dateLabel, onSelect }: { candida
 
 // ── Average explanation ───────────────────────────────────────────────────────
 
-function AverageBreakdown({ candidates, KPI_TARGET }: { candidates: ReportCandidate[]; KPI_TARGET: number }) {
+function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: ReportCandidate[]; KPI_TARGET: number; onSelect?: (c: ReportCandidate) => void }) {
   const { t } = useTranslation('reports')
   const now          = new Date()
   const currentMonth = now.getMonth()
   const currentYear  = now.getFullYear()
+  // Click a month (or the 'Nieuw' block) to list that month's candidates below (Danny).
+  const [selMonth, setSelMonth] = useState(currentMonth)
+  const monthCandidates = candidates.filter(c => {
+    if (!c.registration_date) return false
+    const d = new Date(c.registration_date)
+    return d.getFullYear() === currentYear && d.getMonth() === selMonth
+  })
 
   // Build a per-month table for the current year
   const perMonth = Array.from({ length: 12 }, (_, i) => {
@@ -176,18 +183,24 @@ function AverageBreakdown({ candidates, KPI_TARGET }: { candidates: ReportCandid
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 16 }}>
         {[
           { label: t('drilldown.newThisMonth'), value: perMonth[currentMonth].count,
-            color: perMonth[currentMonth].count >= KPI_TARGET ? 'var(--color-success)' : perMonth[currentMonth].count >= avg ? 'var(--color-warning)' : 'var(--color-danger)' },
+            color: perMonth[currentMonth].count >= KPI_TARGET ? 'var(--color-success)' : perMonth[currentMonth].count >= avg ? 'var(--color-warning)' : 'var(--color-danger)',
+            onClick: () => setSelMonth(currentMonth) },
           { label: t('drilldown.avgPerMonthLabel'),  value: avg,   color: 'var(--text)' },
           { label: t('drilldown.kpiTargetLabel'),    value: KPI_TARGET, color: 'var(--color-primary)' },
-        ].map(b => (
-          <div key={b.label} style={{ textAlign: 'center', padding: '10px 8px', borderRadius: 8,
-                                      background: 'var(--hover-bg)', border: '1px solid var(--border)' }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: b.color, letterSpacing: '-0.5px' }}>
-              {b.value}
+        ].map(b => {
+          const clickable = 'onClick' in b && typeof b.onClick === 'function'
+          return (
+            <div key={b.label} onClick={clickable ? b.onClick : undefined}
+              role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : undefined}
+              style={{ textAlign: 'center', padding: '10px 8px', borderRadius: 8, cursor: clickable ? 'pointer' : 'default',
+                background: 'var(--hover-bg)', border: `1px solid ${clickable && selMonth === currentMonth ? 'var(--color-primary)' : 'var(--border)'}` }}>
+              <div style={{ fontSize: 22, fontWeight: 700, color: b.color, letterSpacing: '-0.5px' }}>
+                {b.value}
+              </div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{b.label}</div>
             </div>
-            <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 2 }}>{b.label}</div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Month-by-month table */}
@@ -200,12 +213,16 @@ function AverageBreakdown({ candidates, KPI_TARGET }: { candidates: ReportCandid
           const pct    = Math.round((m.count / maxCount) * 100)
           const atKpi  = m.count >= KPI_TARGET
           const barColor = atKpi ? 'var(--color-success)' : m.count >= avg ? 'var(--color-warning)' : 'var(--color-danger)'
+          const sel = selMonth === m.month
           return (
-            <div key={m.month} style={{
-              padding: '7px 10px', borderRadius: 7,
-              background: m.isCurrent ? '#F0F9FF' : 'var(--hover-bg)',
-              border: `1px solid ${m.isCurrent ? '#BAE6FD' : 'var(--border)'}`,
-            }}>
+            <div key={m.month} onClick={() => setSelMonth(m.month)}
+              role="button" tabIndex={0}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelMonth(m.month) } }}
+              style={{
+                padding: '7px 10px', borderRadius: 7, cursor: 'pointer',
+                background: sel ? 'var(--color-primary-bg)' : m.isCurrent ? '#F0F9FF' : 'var(--hover-bg)',
+                border: `1px solid ${sel ? 'var(--color-primary)' : m.isCurrent ? '#BAE6FD' : 'var(--border)'}`,
+              }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                 <span style={{ width: 70, fontSize: 12, color: m.isCurrent ? '#0369A1' : 'var(--text)',
                                 fontWeight: m.isCurrent ? 600 : 400 }}>
@@ -236,6 +253,44 @@ function AverageBreakdown({ candidates, KPI_TARGET }: { candidates: ReportCandid
                     fontSize: 11, color: 'var(--text-muted)' }}>
         <Target size={11} color="var(--color-primary)" />
         {t('drilldown.kpiGoalFoot', { target: KPI_TARGET })}
+      </div>
+
+      {/* Candidates of the selected month — click a month above to switch */}
+      <div style={{ marginTop: 16 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase',
+                      letterSpacing: '0.05em', marginBottom: 8 }}>
+          {monthName(selMonth)} {currentYear} · {monthCandidates.length}
+        </div>
+        {monthCandidates.length === 0 ? (
+          <div style={{ fontSize: 12, color: 'var(--text-muted)', fontStyle: 'italic', padding: '6px 2px' }}>{t('candidates.empty')}</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {monthCandidates.map((c, i) => {
+              const name = `${c.firstname ?? ''} ${c.lastname ?? ''}`.trim() || t('candidateDrawer.unknownName')
+              const ini  = `${c.firstname?.[0] ?? ''}${c.lastname?.[0] ?? ''}`.toUpperCase()
+              return (
+                <div key={c.id ?? i}
+                  role={onSelect ? 'button' : undefined} tabIndex={onSelect ? 0 : undefined}
+                  onClick={onSelect ? () => onSelect(c) : undefined}
+                  onKeyDown={onSelect ? e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(c) } } : undefined}
+                  style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '7px 8px', borderRadius: 6, cursor: onSelect ? 'pointer' : 'default' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+                  <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0, background: 'var(--color-primary-bg)',
+                                color: 'var(--color-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600 }}>
+                    {ini || '?'}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                      {c.position}{c.position && c.registration_date && ' · '}{c.registration_date && formatDate(c.registration_date)}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -312,7 +367,7 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
 
         {/* Content */}
         {mode === 'average' ? (
-          <AverageBreakdown candidates={candidates} KPI_TARGET={KPI_TARGET} />
+          <AverageBreakdown candidates={candidates} KPI_TARGET={KPI_TARGET} onSelect={setSelected} />
         ) : (
           <CandidateList
             candidates={shown}
