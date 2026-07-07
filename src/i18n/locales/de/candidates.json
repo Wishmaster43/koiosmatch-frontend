@@ -351,7 +351,21 @@
     "hoursPerWeek": "Stunden pro Woche",
     "vacancy": "Stelle",
     "of": "von",
-    "openVacancy": "Stelle öffnen"
+    "openVacancy": "Stelle öffnen",
+    "addApplication": "Bewerben",
+    "planIntake": "Intake planen",
+    "pickVacancy": "Stelle wählen",
+    "phase": "Phase",
+    "createApplication": "Bewerbung anlegen",
+    "applicationCreated": "Bewerbung angelegt",
+    "applicationFailed": "Anlegen der Bewerbung fehlgeschlagen",
+    "intakeWhen": "Datum und Uhrzeit",
+    "vacancyOptional": "Stelle (optional)",
+    "noVacancy": "Keine Stelle",
+    "intakeVacancyHint": "Leer lassen für ein Intake ohne Stelle.",
+    "createIntake": "Intake planen",
+    "intakePlanned": "Intake geplant",
+    "intakeFailed": "Intake planen fehlgeschlagen"
   },
   "communication": {
     "newNote": "Neue Notiz",

@@ -351,7 +351,21 @@
     "hoursPerWeek": "Heures par semaine",
     "vacancy": "Offre",
     "of": "sur",
-    "openVacancy": "Ouvrir le poste"
+    "openVacancy": "Ouvrir le poste",
+    "addApplication": "Postuler",
+    "planIntake": "Planifier un entretien",
+    "pickVacancy": "Choisir un poste",
+    "phase": "Phase",
+    "createApplication": "Créer la candidature",
+    "applicationCreated": "Candidature créée",
+    "applicationFailed": "Échec de la création de la candidature",
+    "intakeWhen": "Date et heure",
+    "vacancyOptional": "Poste (facultatif)",
+    "noVacancy": "Aucun poste",
+    "intakeVacancyHint": "Laisser vide pour un entretien sans poste.",
+    "createIntake": "Planifier",
+    "intakePlanned": "Entretien planifié",
+    "intakeFailed": "Échec de la planification"
   },
   "communication": {
     "newNote": "Nouvelle note",

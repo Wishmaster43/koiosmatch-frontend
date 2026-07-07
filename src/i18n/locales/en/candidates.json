@@ -358,7 +358,21 @@
     "hoursPerWeek": "Hours per week",
     "vacancy": "Vacancy",
     "of": "of",
-    "openVacancy": "Open vacancy"
+    "openVacancy": "Open vacancy",
+    "addApplication": "Apply",
+    "planIntake": "Plan intake",
+    "pickVacancy": "Pick a vacancy",
+    "phase": "Phase",
+    "createApplication": "Create application",
+    "applicationCreated": "Application created",
+    "applicationFailed": "Creating application failed",
+    "intakeWhen": "Date and time",
+    "vacancyOptional": "Vacancy (optional)",
+    "noVacancy": "No vacancy",
+    "intakeVacancyHint": "Leave empty for an intake without a vacancy.",
+    "createIntake": "Plan intake",
+    "intakePlanned": "Intake planned",
+    "intakeFailed": "Planning intake failed"
   },
   "communication": {
     "newNote": "New note",

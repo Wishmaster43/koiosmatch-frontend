@@ -351,7 +351,21 @@
     "hoursPerWeek": "Horas por semana",
     "vacancy": "Vacante",
     "of": "de",
-    "openVacancy": "Abrir vacante"
+    "openVacancy": "Abrir vacante",
+    "addApplication": "Postular",
+    "planIntake": "Planificar intake",
+    "pickVacancy": "Elige una vacante",
+    "phase": "Fase",
+    "createApplication": "Crear postulación",
+    "applicationCreated": "Postulación creada",
+    "applicationFailed": "Error al crear la postulación",
+    "intakeWhen": "Fecha y hora",
+    "vacancyOptional": "Vacante (opcional)",
+    "noVacancy": "Sin vacante",
+    "intakeVacancyHint": "Déjalo vacío para un intake sin vacante.",
+    "createIntake": "Planificar intake",
+    "intakePlanned": "Intake planificado",
+    "intakeFailed": "Error al planificar el intake"
   },
   "communication": {
     "newNote": "Nueva nota",

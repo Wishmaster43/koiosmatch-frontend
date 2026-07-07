@@ -358,7 +358,21 @@
     "hoursPerWeek": "Uren per week",
     "vacancy": "Vacature",
     "of": "van",
-    "openVacancy": "Vacature openen"
+    "openVacancy": "Vacature openen",
+    "addApplication": "Solliciteren",
+    "planIntake": "Intake plannen",
+    "pickVacancy": "Kies een vacature",
+    "phase": "Fase",
+    "createApplication": "Sollicitatie aanmaken",
+    "applicationCreated": "Sollicitatie aangemaakt",
+    "applicationFailed": "Sollicitatie aanmaken mislukt",
+    "intakeWhen": "Datum en tijd",
+    "vacancyOptional": "Vacature (optioneel)",
+    "noVacancy": "Geen vacature",
+    "intakeVacancyHint": "Laat leeg voor een intake zonder vacature.",
+    "createIntake": "Intake plannen",
+    "intakePlanned": "Intake gepland",
+    "intakeFailed": "Intake plannen mislukt"
   },
   "communication": {
     "newNote": "Nieuwe notitie",
