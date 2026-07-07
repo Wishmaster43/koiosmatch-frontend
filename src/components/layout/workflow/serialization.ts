@@ -11,9 +11,14 @@ import type { WorkflowStep, FlowNode, FlowEdge } from '@/types/workflow'
 // Stable-ish id for a freshly created node.
 export const uid = () => 'n_' + Math.random().toString(36).slice(2, 8)
 
-// Build a ReactFlow edge between two node ids (our "addable" edge type).
-export const mkEdge = (src?: string | number | null, tgt?: string | number | null): FlowEdge =>
-  ({ id: `e_${src}_${tgt}`, source: String(src), target: String(tgt), type: 'addable' })
+// Build a ReactFlow edge between two node ids (our "addable" edge type). Handles
+// default to 'out'/'in'; a router branch passes its own port id as sourceHandle so
+// each outgoing branch stays distinct (matches the BE source_handle contract).
+export const mkEdge = (
+  src?: string | number | null, tgt?: string | number | null,
+  sourceHandle: string = 'out', targetHandle: string = 'in',
+): FlowEdge =>
+  ({ id: `e_${src}_${sourceHandle}_${tgt}`, source: String(src), target: String(tgt), sourceHandle, targetHandle, type: 'addable' })
 
 // Canvas node footprint (used for layout + when inserting new nodes).
 export const NODE_W = 90
@@ -34,7 +39,7 @@ export function stepsToFlow(steps: WorkflowStep[]): { nodes: FlowNode[]; edges: 
   const hasGraph = steps.some(s => Array.isArray(s.next) && s.next.length)
   const edges: FlowEdge[] = hasGraph
     ? steps.flatMap(s => (s.next ?? []).map(n => ({
-        ...mkEdge(s.id, n.target),
+        ...mkEdge(s.id, n.target, n.source_handle ?? 'out', n.target_handle ?? 'in'),
         data: n.filters ? { filters: n.filters } : undefined,
       })))
     : steps.slice(0, -1).map((s, i) => mkEdge(s.id, steps[i + 1].id))
@@ -67,8 +72,10 @@ export function flowToSteps(nodes: FlowNode[], edges: FlowEdge[]): WorkflowStep[
     config:   n.data.config,
     position: n.position,
     next:     edges.filter(e => e.source === n.id && validIds.has(e.target)).map(e => ({
-      target:  e.target,
-      filters: e.data?.filters ?? null,
+      target:        e.target,
+      filters:       e.data?.filters ?? null,
+      source_handle: (e.sourceHandle as string | undefined) ?? 'out',
+      target_handle: (e.targetHandle as string | undefined) ?? 'in',
     })),
   }))
 }

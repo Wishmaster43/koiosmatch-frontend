@@ -5,7 +5,7 @@
  */
 
 // One outgoing edge of a step: a target step id + an optional edge filter.
-export interface StepConnection { target?: string | number | null; filters?: unknown }
+export interface StepConnection { target?: string | number | null; filters?: unknown; source_handle?: string; target_handle?: string }
 
 // A normalized step in the editor graph.
 export interface WorkflowStep {
@@ -75,6 +75,10 @@ export interface FlowEdge {
   id: string
   source: string
   target: string
+  // React Flow handle ids — must match a <Handle id=…> on the node, else the edge is
+  // dropped. 'out'/'in' by default; a router sets its branch-key as sourceHandle.
+  sourceHandle?: string
+  targetHandle?: string
   type?: string
   data?: { filters?: unknown }
   [k: string]: unknown

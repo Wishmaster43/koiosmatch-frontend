@@ -92,7 +92,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
         </div>
       )}
       {!data.isFirst && (
-        <Handle type="target" position={Position.Left}
+        <Handle type="target" id="in" position={Position.Left}
           style={{ width: 10, height: 10, background: 'var(--border)', border: '2px solid white', top: '38%' }} />
       )}
       <div style={{ position: 'relative' }}>
@@ -146,7 +146,7 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
           </div>
         )}
       </div>
-      <Handle type="source" position={Position.Right}
+      <Handle type="source" id="out" position={Position.Right}
         style={{ width: 10, height: 10, background: 'var(--border)', border: '2px solid white', top: '38%' }} />
     </div>
   )
