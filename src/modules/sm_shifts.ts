@@ -1,4 +1,4 @@
-// sm_shifts module — fetch shifts (diensten) from ShiftManager.
+// sm_shifts module — sync shifts (diensten) from ShiftManager into the mirror.
 import ShiftManagerMark from '../components/ui/ShiftManagerMark'
 
 export default {
@@ -9,13 +9,11 @@ export default {
   Icon:  ShiftManagerMark,
   color: '#E11D2A',
   bg:    '#FDECEC',
+  // Only fields the sync actually reads (client/status were dead leftovers).
   schema: [
-    // Which ShiftManager link to sync from (tenant-scoped options from the API).
     { key: 'connection_id', label: 'Bron (API / tenant)', type: 'lookup_select', endpoint: '/planning-connections' },
-    { key: 'client',    label: 'Klant',         type: 'text',   placeholder: 'klantnaam' },
-    { key: 'status',    label: 'Status',        type: 'select', options: ['alle', 'open', 'bezet', 'geannuleerd', 'voltooid'] },
-    { key: 'date_from', label: 'Datum van',     type: 'date' },
-    { key: 'date_to',   label: 'Datum t/m',     type: 'date' },
-    { key: 'limit',     label: 'Max. items',    type: 'number', default: 500, placeholder: '500' },
+    { key: 'date_from', label: 'Datum van',  type: 'date' },
+    { key: 'date_to',   label: 'Datum t/m',  type: 'date' },
+    { key: 'limit',     label: 'Max. items', type: 'number', default: 500, placeholder: '500' },
   ],
 }
