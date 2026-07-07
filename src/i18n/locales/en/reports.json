@@ -267,7 +267,8 @@
       "noShows": "No-shows"
     },
     "timesWorked": "worked {{n}}×",
-    "lastLogin": "Last login"
+    "lastLogin": "Last login",
+    "viewDetails": "Open candidates table"
   },
   "messages": {
     "title": "Details — Messages",

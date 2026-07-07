@@ -46,14 +46,23 @@ function calcMonthStats(candidates: ReportCandidate[]) {
   return { currentMonthCount, avg, delta }
 }
 
-export default function CandidatesKpiRow({ candidates = [], loading = false, onDrillDown }: {
-  candidates?: ReportCandidate[]; loading?: boolean; onDrillDown?: (label: string, items: ReportCandidate[]) => void
+export default function CandidatesKpiRow({ candidates = [], loading = false, onDrillDown, onStatusFilter }: {
+  candidates?: ReportCandidate[]; loading?: boolean
+  onDrillDown?: (label: string, items: ReportCandidate[]) => void
+  // When set, the single-status cards (active/inactive/intake) filter the table
+  // in place instead of opening a drill-down (the candidates-table page).
+  onStatusFilter?: (status: string) => void
 }) {
   const { t } = useTranslation('reports')
   const drill = (label: string, filterFn: (c: ReportCandidate[]) => ReportCandidate[]) => {
     if (!onDrillDown) return undefined
     return () => onDrillDown(label, filterFn(candidates))
   }
+  // A single-status card either filters the table (onStatusFilter) or drills down.
+  const statusClick = (status: string, label: string) =>
+    onStatusFilter
+      ? () => onStatusFilter(status)
+      : drill(label, c => c.filter(x => (x.status || '').toLowerCase() === status))
 
   const aandachtItems  = calcAandacht(candidates)
   const actiefTotal    = count(candidates, 'actief')
@@ -86,7 +95,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
         iconBg="var(--color-success-bg)"
         iconColor="var(--color-success)"
         loading={loading}
-        onClick={drill(t('kpiRow.drillActive'), c => c.filter(x => (x.status || '').toLowerCase() === 'actief'))}
+        onClick={statusClick('actief', t('kpiRow.drillActive'))}
       />
 
       {/* Inactive */}
@@ -97,7 +106,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
         iconBg="var(--color-warning-bg)"
         iconColor="#C2410C"
         loading={loading}
-        onClick={drill(t('kpiRow.drillInactive'), c => c.filter(x => (x.status || '').toLowerCase() === 'nietactief'))}
+        onClick={statusClick('nietactief', t('kpiRow.drillInactive'))}
       />
 
       {/* Intake */}
@@ -108,7 +117,7 @@ export default function CandidatesKpiRow({ candidates = [], loading = false, onD
         iconBg="#FAF5FF"
         iconColor="#7C3AED"
         loading={loading}
-        onClick={drill(t('kpiRow.drillIntake'), c => c.filter(x => (x.status || '').toLowerCase() === 'intake'))}
+        onClick={statusClick('intake', t('kpiRow.drillIntake'))}
       />
 
       {/* New this month vs average */}

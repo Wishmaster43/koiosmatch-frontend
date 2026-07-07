@@ -3,12 +3,14 @@
  * chart/KPI data point (searchable). Reused by several reports.
  * StatusBadge below = the colored status pill.
  */
-import { X, Search, Phone, Mail, Calendar, Briefcase, Clock, CalendarCheck } from 'lucide-react'
+import { X, Search, Phone, Mail, Calendar, Briefcase, Clock, CalendarCheck, Maximize2, Minimize2, ArrowRight } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import DrillTabs from '@/components/ui/DrillTabs'
+import { navigateToPage } from '@/lib/navigate'
 import type { ReportCandidate } from '@/types/reports'
 
 // Colored status pill (actief / nietactief / extern / ...) for a record.
@@ -52,12 +54,19 @@ function InfoRow({ icon: Icon, label, value, highlight }: { icon: LucideIcon; la
   )
 }
 
-export default function DrillDownDrawer({ title, subtitle, candidates = [], onClose }: { title?: ReactNode; subtitle?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void }) {
+export default function DrillDownDrawer({ title, subtitle, candidates = [], onClose, tabs, initialTab }: { title?: ReactNode; subtitle?: ReactNode; candidates?: ReportCandidate[]; onClose: () => void; tabs?: { key: string; label: ReactNode; candidates: ReportCandidate[]; title?: string }[]; initialTab?: string }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('reports')
   const [search, setSearch] = useState('')
+  // Widen the panel to a two-column-friendly size (same affordance as the candidate drawer).
+  const [expanded, setExpanded] = useState(false)
+  // Optional bucket switcher (the shared DrillTabs standard) — e.g. the dashboard's
+  // Gewerkt/Ingepland/Nooit gewerkt/Idle. Falls back to the flat `candidates` list.
+  const [activeTab, setActiveTab] = useState(initialTab ?? tabs?.[0]?.key)
+  const currentTab = tabs?.find(tb => tb.key === activeTab)
+  const shown = currentTab?.candidates ?? candidates
 
-  const filtered = candidates.filter(c => {
+  const filtered = shown.filter(c => {
     if (!search) return true
     const q = search.toLowerCase()
     return (
@@ -76,26 +85,44 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
       {/* Drawer */}
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={typeof title === 'string' ? title : undefined} tabIndex={-1}
         className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
-        style={{ width: 560, boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
+        style={{ width: expanded ? 900 : 560, transition: 'width 0.2s ease', boxShadow: '-4px 0 30px rgba(0,0,0,0.12)' }}>
 
         {/* Header */}
         <div className="flex items-start justify-between flex-shrink-0"
           style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
           <div>
-            <div className="font-semibold text-[var(--text)]" style={{ fontSize: 15 }}>{title}</div>
+            <div className="font-semibold text-[var(--text)]" style={{ fontSize: 15 }}>{currentTab?.label ?? title}</div>
             <div className="text-sm text-[var(--text-muted)] mt-0.5">
-              {t('drilldown.candidatesCount', { count: candidates.length })}
+              {t('drilldown.candidatesCount', { count: shown.length })}
               {subtitle && <span className="ml-1 text-[var(--text-muted)]">· {subtitle}</span>}
             </div>
           </div>
-          <button onClick={onClose} aria-label={t('common:close')}
-            className="flex items-center justify-center flex-shrink-0 rounded-lg"
-            style={{ width: 30, height: 30, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', marginLeft: 12 }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-            <X size={16} />
-          </button>
+          {/* Expand/collapse + close — mirrors the candidate drawer header actions */}
+          <div className="flex items-center flex-shrink-0" style={{ marginLeft: 12 }}>
+            <button onClick={() => setExpanded(v => !v)} aria-label={expanded ? t('common:collapse') : t('common:expand')}
+              className="flex items-center justify-center rounded-lg"
+              style={{ width: 30, height: 30, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+              {expanded ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
+            </button>
+            <button onClick={onClose} aria-label={t('common:close')}
+              className="flex items-center justify-center rounded-lg"
+              style={{ width: 30, height: 30, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+              <X size={16} />
+            </button>
+          </div>
         </div>
+
+        {/* Bucket switcher (shared DrillTabs) — badge = count per bucket */}
+        {tabs && tabs.length > 1 && activeTab && (
+          <div className="flex-shrink-0 px-4 py-3" style={{ borderBottom: '1px solid var(--hover-bg)' }}>
+            <DrillTabs tabs={tabs.map(tb => ({ key: tb.key, label: tb.label, count: tb.candidates.length, title: tb.title }))}
+              active={activeTab} onChange={setActiveTab} />
+          </div>
+        )}
 
         {/* Search bar */}
         <div className="flex-shrink-0 px-4 py-3" style={{ borderBottom: '1px solid var(--hover-bg)' }}>
@@ -178,12 +205,21 @@ export default function DrillDownDrawer({ title, subtitle, candidates = [], onCl
         <div className="flex items-center justify-between flex-shrink-0 px-4 py-3"
           style={{ borderTop: '1px solid var(--border)', background: 'var(--hover-bg)' }}>
           <span className="text-xs text-[var(--text-muted)]">
-            {t('drilldown.shownOf', { shown: filtered.length, total: candidates.length })}
+            {t('drilldown.shownOf', { shown: filtered.length, total: shown.length })}
           </span>
-          <button onClick={onClose} className="text-xs rounded-lg px-3 py-1.5"
-            style={{ background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}>
-            {t('dr.close')}
-          </button>
+          <div className="flex items-center gap-2">
+            {/* Jump to the standalone candidates table (closes the drawer first). */}
+            <button onClick={() => { onClose(); navigateToPage('shiftmanager.candidates-table') }}
+              className="flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5"
+              style={{ background: 'var(--color-primary)', border: '1px solid var(--color-primary)', cursor: 'pointer', color: '#fff' }}>
+              {t('drilldown.viewDetails')}
+              <ArrowRight size={13} />
+            </button>
+            <button onClick={onClose} className="text-xs rounded-lg px-3 py-1.5"
+              style={{ background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}>
+              {t('dr.close')}
+            </button>
+          </div>
         </div>
       </div>
     </>

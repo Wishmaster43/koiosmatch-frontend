@@ -267,7 +267,8 @@
       "noShows": "No-shows"
     },
     "timesWorked": "{{n}}× gewerkt",
-    "lastLogin": "Laatst ingelogd"
+    "lastLogin": "Laatst ingelogd",
+    "viewDetails": "Naar kandidaten-tabel"
   },
   "messages": {
     "title": "Details — Berichten",

@@ -70,17 +70,23 @@ const MODULE_NAV_ITEMS = [
   {
     id: 'shiftmanager', label: 'Shiftmanager', icon: BarChart3,
     children: [
-      // Rapporten
-      { id: 'shiftmanager.candidates',  label: 'Kandidaten-SM' },
-      { id: 'shiftmanager.customers',   label: 'Klanten-SM' },
-      { id: 'shiftmanager.locations',   label: 'Locaties-SM' },
-      { id: 'shiftmanager.departments', label: 'Afdelingen-SM' },
-      { id: 'shiftmanager.details',     label: 'Details-SM' },
-      // Tabellen
+      // Rapporten (analytics)
+      { id: 'shiftmanager.dashboard',        label: 'Dashboard' },
+      { id: 'shiftmanager.customers',        label: 'Klanten-SM' },
+      { id: 'shiftmanager.locations',        label: 'Locaties-SM' },
+      { id: 'shiftmanager.departments',      label: 'Afdelingen-SM' },
+      { id: 'shiftmanager.candidates',       label: 'Kandidaten-SM' },
+      { id: 'shiftmanager.candidate-shifts', label: 'Kandidaten-Shifts' },
+      // Tabellen (operationele data)
       { id: 'shiftmanager.customers-table',   label: 'Klanten' },
       { id: 'shiftmanager.locations-table',   label: 'Locaties' },
       { id: 'shiftmanager.departments-table', label: 'Afdelingen' },
+      { id: 'shiftmanager.candidates-table',  label: 'Kandidaten' },
       { id: 'shiftmanager.contacts-table',    label: 'Contactpersonen' },
+      { id: 'shiftmanager.orders-table',      label: 'Diensten' },
+      // Communicatie / AI (los, module-gated)
+      { id: 'shiftmanager.runs-table',        label: 'Uitvoeringen' },
+      { id: 'shiftmanager.details',           label: 'WhatsApp' },
     ],
   },
   {

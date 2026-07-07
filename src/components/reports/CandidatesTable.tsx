@@ -156,13 +156,21 @@ function SortIcon({ active, dir }: { active: boolean; dir: 'asc' | 'desc' }) {
     : <ChevronDown size={11} style={{ color: 'var(--color-primary)' }} />
 }
 
-export default function CandidatesTable({ candidates = [], loading = false }: { candidates?: ReportCandidate[]; loading?: boolean }) {
+export default function CandidatesTable({ candidates = [], loading = false, statusFilter, setStatusFilter }: {
+  candidates?: ReportCandidate[]; loading?: boolean
+  // Optional controlled status filter — lets a KPI row above the table drive it
+  // (candidates-table page). Uncontrolled default = Actief when not provided.
+  statusFilter?: Array<string | number>
+  setStatusFilter?: Dispatch<SetStateAction<Array<string | number>>>
+}) {
   const { t } = useTranslation('reports')
   const columns = useMemo(() => buildColumns(t), [t])
   const [search, setSearch]                       = useState('')
   const { registerFilters, unregisterFilters }    = useRightPanel()
   const [selectedYears, setSelectedYears]         = useState<Array<string | number>>([])
-  const [selectedStatuses, setSelectedStatuses]   = useState<Array<string | number>>(['actief'])
+  const [internalStatuses, setInternalStatuses]   = useState<Array<string | number>>(['actief'])
+  const selectedStatuses    = statusFilter ?? internalStatuses
+  const setSelectedStatuses = setStatusFilter ?? setInternalStatuses
   const [selectedPositions, setSelectedPositions] = useState<Array<string | number>>([])
   const [selectedKenmerken, setSelectedKenmerken] = useState<Array<string | number>>([])
   const [sort, setSort]                           = useState<SortState>({ key: 'name', dir: 'asc' })
@@ -239,7 +247,7 @@ export default function CandidatesTable({ candidates = [], loading = false }: { 
       options: kenmerkOptions.map(k => ({ value: k, label: k })),
       selected: selectedKenmerken, onToggle: toggle(setSelectedKenmerken) },
   ], [t, yearOptions, statusOptions, positionOptions, kenmerkOptions,
-      selectedYears, selectedStatuses, selectedPositions, selectedKenmerken])
+      selectedYears, selectedStatuses, selectedPositions, selectedKenmerken, setSelectedStatuses])
 
   useEffect(() => {
     registerFilters('candidates-table', filterGroups)

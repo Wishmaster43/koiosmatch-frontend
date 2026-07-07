@@ -267,7 +267,8 @@
       "noShows": "Ausencias"
     },
     "timesWorked": "trabajó {{n}}×",
-    "lastLogin": "Último acceso"
+    "lastLogin": "Último acceso",
+    "viewDetails": "Ver tabla de candidatos"
   },
   "messages": {
     "title": "Detalles — Mensajes",

@@ -5,6 +5,7 @@ import { useKpiSettings } from '@/lib/useKpiSettings'
 import { useAuth } from '@/context/AuthContext'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
 import KpiDrillDownDrawer from '@/components/reports/KpiDrillDownDrawer'
+import DrillDownDrawer from '@/components/reports/DrillDownDrawer'
 import { calcAandacht } from '@/components/reports/candidateAttention'
 import type { ReportCandidate } from '@/types/reports'
 import ShiftsChartsBlock from '@/components/shiftmanager/ShiftsChartsBlock'
@@ -66,19 +67,19 @@ export default function ShiftmanagerDashboard() {
   // One combined "Activiteit" donut over ACTIVE candidates (Gewerkt deze maand /
   // Ingepland / Nooit gewerkt / Geen recente activiteit) — replaces 3 separate tiles.
   const activityBuckets = useMemo(() => ([
-    { key: 'worked',  label: t('dashboard.stats.workedThisMonth'), list: derived.bWorked,  color: '#16A34A' },
-    { key: 'planned', label: t('dashboard.stats.planned'),         list: derived.bPlanned, color: '#1B60A9' },
-    { key: 'never',   label: t('dashboard.stats.neverWorked'),     list: derived.bNever,   color: '#DC2626' },
-    { key: 'idle',    label: t('dashboard.stats.idle'),            list: derived.bIdle,    color: '#94A3B8' },
+    { key: 'worked',  label: t('dashboard.stats.workedThisMonth'), title: t('dashboard.stats.workedThisMonthHint'), list: derived.bWorked,  color: '#16A34A' },
+    { key: 'planned', label: t('dashboard.stats.planned'),         title: t('dashboard.stats.plannedHint'),         list: derived.bPlanned, color: '#1B60A9' },
+    { key: 'never',   label: t('dashboard.stats.neverWorked'),     title: t('dashboard.stats.neverWorkedHint'),     list: derived.bNever,   color: '#DC2626' },
+    { key: 'idle',    label: t('dashboard.stats.idle'),            title: t('dashboard.stats.idleHint'),            list: derived.bIdle,    color: '#94A3B8' },
   ]), [derived, t])
   // Drill-down: a candidate KPI opens the shared drawer — 'average' shows the per-month
   // breakdown vs KPI target, other picks list their subset.
-  const [drill, setDrill] = useState<{ mode: string; title: string; candidates: ReportCandidate[]; tabs?: { key: string; label: string; candidates: ReportCandidate[] }[]; initialTab?: string } | null>(null)
+  const [drill, setDrill] = useState<{ mode: string; title: string; candidates: ReportCandidate[]; tabs?: { key: string; label: string; candidates: ReportCandidate[]; title?: string }[]; initialTab?: string } | null>(null)
   const openDrill = (mode: string, title: string, list: Array<Record<string, unknown>>) =>
     setDrill({ mode, title, candidates: list as unknown as ReportCandidate[] })
   // The Activiteit card opens the drill with a tab per bucket (Danny: "kunnen switchen"),
   // starting on the biggest bucket.
-  const activityTabs = activityBuckets.map(b => ({ key: b.key, label: b.label, candidates: b.list as unknown as ReportCandidate[] }))
+  const activityTabs = activityBuckets.map(b => ({ key: b.key, label: b.label, title: b.title, candidates: b.list as unknown as ReportCandidate[] }))
   const openActivityDrill = () => {
     const biggest = [...activityBuckets].sort((a, b) => b.list.length - a.list.length)[0]
     setDrill({ mode: 'nieuw', title: '', candidates: [], tabs: activityTabs, initialTab: biggest?.key })
@@ -101,9 +102,11 @@ export default function ShiftmanagerDashboard() {
 
   return (
     <div className="p-6">
-      {/* Candidate KPI drill-down */}
-      {drill && (
-        <KpiDrillDownDrawer mode={drill.mode} title={drill.title} candidates={drill.candidates} tabs={drill.tabs} initialTab={drill.initialTab} onClose={() => setDrill(null)} />
+      {/* Candidate KPI drill-down — 'average' keeps the per-month breakdown drawer;
+          every list drill uses the rich DrillDownDrawer (full candidate cards) + tabs. */}
+      {drill && (drill.mode === 'average'
+        ? <KpiDrillDownDrawer mode="average" title={drill.title} candidates={drill.candidates} onClose={() => setDrill(null)} />
+        : <DrillDownDrawer title={drill.title} candidates={drill.candidates} tabs={drill.tabs} initialTab={drill.initialTab} onClose={() => setDrill(null)} />
       )}
 
       {/* Combined KPI row + charts — ShiftsChartsBlock owns the row so the shift cards follow the applied filter */}

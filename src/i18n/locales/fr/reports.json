@@ -267,7 +267,8 @@
       "noShows": "Absences"
     },
     "timesWorked": "travaillé {{n}}×",
-    "lastLogin": "Dernière connexion"
+    "lastLogin": "Dernière connexion",
+    "viewDetails": "Vers la liste des candidats"
   },
   "messages": {
     "title": "Détails — Messages",

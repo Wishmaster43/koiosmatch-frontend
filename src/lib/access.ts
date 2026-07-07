@@ -105,6 +105,10 @@ const GATED_PAGES = [
 const SUB_PAGE_GATES: Record<string, string> = {
   'details.runs':     'aiagents',
   'details.messages': 'whatsapp',
+  // SM standalone AI/WhatsApp pages: Uitvoeringen needs aiagents, the SM messages
+  // page (shiftmanager.details, now WhatsApp-only) needs whatsapp.
+  'shiftmanager.runs-table': 'aiagents',
+  'shiftmanager.details':    'whatsapp',
 }
 
 // Pages that can additionally be restricted at the user/role level via page.* permissions.

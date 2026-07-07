@@ -6,7 +6,7 @@
  */
 import type { ReactNode } from 'react'
 
-export interface DrillTab { key: string; label: ReactNode; count?: number }
+export interface DrillTab { key: string; label: ReactNode; count?: number; title?: string }
 
 export default function DrillTabs({ tabs, active, onChange }: {
   tabs: DrillTab[]
@@ -18,7 +18,7 @@ export default function DrillTabs({ tabs, active, onChange }: {
       {tabs.map(tb => {
         const on = tb.key === active
         return (
-          <button key={tb.key} type="button" onClick={() => onChange(tb.key)} aria-pressed={on}
+          <button key={tb.key} type="button" onClick={() => onChange(tb.key)} aria-pressed={on} title={tb.title}
             style={{ padding: '4px 10px', fontSize: 12, fontWeight: on ? 600 : 400, borderRadius: 999, cursor: 'pointer',
               border: `1px solid ${on ? 'var(--color-primary)' : 'var(--border)'}`,
               background: on ? 'var(--color-primary-bg)' : 'var(--surface)',

@@ -267,7 +267,8 @@
       "noShows": "No-Shows"
     },
     "timesWorked": "{{n}}× gearbeitet",
-    "lastLogin": "Zuletzt angemeldet"
+    "lastLogin": "Zuletzt angemeldet",
+    "viewDetails": "Zur Kandidatentabelle"
   },
   "messages": {
     "title": "Details — Nachrichten",

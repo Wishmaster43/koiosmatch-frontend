@@ -32,8 +32,8 @@ const UsersPage              = lazy(() => import('@/pages/users/UsersPage'))
 const WhatsAppPage           = lazy(() => import('@/pages/whatsapp/WhatsAppPage'))
 const RunsDetailPage         = lazy(() => import('@/pages/ai/RunsDetailPage'))
 const MessagesDetailPage     = lazy(() => import('@/pages/ai/MessagesDetailPage'))
-const ShiftmanagerDetailsPage = lazy(() => import('@/pages/shiftmanager/ShiftmanagerDetailsPage'))
 const ShiftmanagerDashboard  = lazy(() => import('@/pages/shiftmanager/ShiftmanagerDashboard'))
+const ShiftAnalysisPage      = lazy(() => import('@/pages/shiftmanager/ShiftAnalysisPage'))
 const PlanningPage           = lazy(() => import('@/pages/planning/PlanningPage'))
 const ApplicationsPage       = lazy(() => import('@/pages/applications/ApplicationsPage'))
 const VacanciesPage          = lazy(() => import('@/pages/vacancies/VacanciesPage'))
@@ -75,14 +75,18 @@ export const PAGE_TITLES: Record<string, string> = {
   shiftmanager:                 'Shiftmanager',
   'shiftmanager.dashboard':     'Shiftmanager — Dashboard',
   'shiftmanager.candidates':    'Shiftmanager — Candidates',
+  'shiftmanager.candidate-shifts': 'Shiftmanager — Kandidaten-Shifts',
   'shiftmanager.customers':     'Shiftmanager — Customers',
   'shiftmanager.locations':     'Shiftmanager — Locations',
   'shiftmanager.departments':   'Shiftmanager — Departments',
-  'shiftmanager.details':       'Shiftmanager — Details',
+  'shiftmanager.details':       'Shiftmanager — Berichten',
+  'shiftmanager.candidates-table':  'Shiftmanager — Kandidaten',
   'shiftmanager.customers-table':   'Shiftmanager — Klanten',
   'shiftmanager.locations-table':   'Shiftmanager — Locaties',
   'shiftmanager.departments-table': 'Shiftmanager — Afdelingen',
   'shiftmanager.contacts-table':    'Shiftmanager — Contactpersonen',
+  'shiftmanager.orders-table':      'Shiftmanager — Diensten',
+  'shiftmanager.runs-table':        'Shiftmanager — Uitvoeringen',
 
   // Shiftmanager detail drill-downs (navigated to from SM reports)
   'details.candidates':         'SM Details — Candidates',
@@ -150,15 +154,20 @@ export function renderPage(activePage: string, { navIntent, goTo, dashView }: { 
     case 'shiftmanager.dashboard':   return <ShiftmanagerDashboard />
     // Reports
     case 'shiftmanager.candidates':  return <CandidatesReport initialTab="candidates" />
+    case 'shiftmanager.candidate-shifts': return <ShiftAnalysisPage />
     case 'shiftmanager.customers':   return <CustomerReport />
     case 'shiftmanager.locations':   return <LocationsReport />
     case 'shiftmanager.departments': return <DepartmentsReport />
-    case 'shiftmanager.details':     return <ShiftmanagerDetailsPage />
+    // SM messages (WhatsApp) — the Details route is now this single page
+    case 'shiftmanager.details':     return <MessagesDetailPage />
     // Table pages (operational data tables)
+    case 'shiftmanager.candidates-table':  return <CandidatesDetailPage />
     case 'shiftmanager.customers-table':   return <SmCustomersPage />
     case 'shiftmanager.locations-table':   return <LocationsPage />
     case 'shiftmanager.departments-table': return <DepartmentsPage />
     case 'shiftmanager.contacts-table':    return <ContactsPage />
+    case 'shiftmanager.runs-table':        return <RunsDetailPage />
+    case 'shiftmanager.orders-table':      return <OrdersReport />
 
     // Shiftmanager drill-down detail routes (navigated to from SM reports)
     case 'details.candidates':  return <CandidatesDetailPage />
