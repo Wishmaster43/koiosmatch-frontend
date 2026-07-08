@@ -19,12 +19,12 @@ export default {
     // numbers + approved templates (the endpoint also returns each template's
     // components for the future per-{{n}} mapping UI).
     { key: 'phone_number_id',     label: 'Afzender',               type: 'lookup_select', endpoint: '/whatsapp-phone-numbers' },
-    { key: 'template_name',       label: 'Template',               type: 'lookup_select', endpoint: '/whatsapp-templates' },
-    // Ordered template variables, ONE PER LINE → {{1}},{{2}},… Each line is a {{veld}}
-    // from the pipeline bundle (sm_schedules delivers firstname/job_type/adres/datum_nl/…).
-    { key: 'header_variables',    label: 'Header-variabelen (één per regel)', type: 'textarea', placeholder: '{{header_nl}}' },
-    { key: 'variables',           label: 'Body-variabelen (één per regel)',   type: 'textarea',
-      placeholder: '{{firstname}}\n{{job_type}}\n{{subject}}\n{{adres}}\n{{plaats}}\n{{datum_nl}}\n{{starttijd_nl}}\n{{eindtijd_nl}}' },
+    // Template picker + per-{{n}} variable mapping + live preview (WhatsappTemplateField).
+    // Persists template_name/header_variables/variables/language in the same shape as the
+    // old lookup_select + two textareas (ONE PER LINE → {{1}},{{2}},…); only shown for the
+    // 'template' format, mirroring session_text's own showIf below.
+    { key: 'template_name',       label: 'Template',               type: 'whatsapp_template',
+      showIf: { key: 'message_type', value: 'template' } },
     { key: 'language',            label: 'Taal',                   type: 'text',    placeholder: 'nl' },
     // Free-form session text — only shown (and sent) for the 'session' format.
     { key: 'session_text',        label: 'Berichttekst (sessie)',  type: 'textarea',

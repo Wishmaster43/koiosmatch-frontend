@@ -14,9 +14,11 @@ import {
 } from './fieldControls'
 import { TextFieldWithVars } from './VariablePicker'
 import { optionLabel } from './moduleI18n'
+import WhatsappTemplateField from './WhatsappTemplateField'
 
-export function FieldInput({ field, value, onChange, variables }: {
+export function FieldInput({ field, value, onChange, variables, config }: {
   field: WorkflowField; value?: unknown; onChange: OnChange; variables?: WorkflowVarGroup[]
+  config?: Record<string, unknown>
 }) {
   const { t } = useTranslation('workflows')
   if (field.type === 'webhook_select') {
@@ -33,6 +35,11 @@ export function FieldInput({ field, value, onChange, variables }: {
   }
   if (field.type === 'response_structure') {
     return <ResponseStructureField value={value} onChange={onChange} fieldKey={field.key} />
+  }
+  if (field.type === 'whatsapp_template') {
+    // Needs the full node config (not just this field's own value) to read the
+    // sibling header_variables/variables/language keys it also writes to.
+    return <WhatsappTemplateField value={value} onChange={onChange} config={config} variables={variables ?? []} />
   }
   if (field.type === 'boolean') {
     return (
