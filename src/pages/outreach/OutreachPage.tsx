@@ -107,7 +107,8 @@ export default function OutreachPage() {
   const insightKpis: KpiSpec[] = [
     { key: 'total',   label: t('kpi.total'),   value: campaigns.length,                                          sub: t('kpi.totalSub'),
       onClick: () => { setSelectedStatus([]); setSelectedChannel([]); setKpiTargets(false) },
-      active: selectedStatus.length === 0 && selectedChannel.length === 0 && !kpiTargets },
+      // Reset-to-all tile — clickable, but never highlighted (no filter = nothing active).
+      active: false },
     { key: 'active',  label: t('kpi.active'),  value: campaigns.filter((c) => statusKey(c) === 'active').length, sub: t('kpi.activeSub'), color: '#16A34A',
       onClick: () => pickStatus('active'), active: selectedStatus.length === 1 && selectedStatus[0] === 'active' },
     { key: 'targets', label: t('kpi.targets'), value: campaigns.reduce((n, c) => n + targetsOf(c), 0),           sub: t('kpi.targetsSub'), color: 'var(--color-primary)',
