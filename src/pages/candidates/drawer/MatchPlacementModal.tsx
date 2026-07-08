@@ -53,6 +53,10 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
   const [locationId, setLocationId] = useState('')
   const [departmentId, setDepartmentId] = useState('')
   const [contactId, setContactId] = useState('')
+  // Inline contact-create (Danny): when a customer has no matching contact, add one
+  // and couple it to the picked location right here (POST /customers/{id}/contacts).
+  const [creatingContact, setCreatingContact] = useState(false)
+  const [nc, setNc] = useState({ first_name: '', last_name: '', email: '', phone: '' })
   const [func, setFunc] = useState('')
   const [vacancyId, setVacancyId] = useState('')
   const [ownerId, setOwnerId] = useState('')
@@ -131,6 +135,23 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
 
   const opt = (arr: Array<{ id?: Id; name?: string }>) => arr.map(x => ({ value: String(x.id), label: x.name ?? '—' }))
 
+  // Create a contact for the current customer, coupled to the picked location, then
+  // refetch the cascade and select the new contact.
+  const saveContact = async () => {
+    if (!customerId || !nc.first_name.trim() || !nc.last_name.trim()) return
+    try {
+      const r = await api.post(`/customers/${customerId}/contacts`, { ...nc, location_id: locationId || undefined })
+      const created = (r.data?.data ?? r.data) as { id?: Id }
+      const fresh = await api.get(`/customers/${customerId}`)
+      setDetail((fresh.data?.data ?? fresh.data) as CustomerDetail)
+      if (created?.id) setContactId(String(created.id))
+      setCreatingContact(false); setNc({ first_name: '', last_name: '', email: '', phone: '' })
+      notifySuccess(t('placement.contactCreated'))
+    } catch {
+      notifyError(t('placement.contactFailed'))
+    }
+  }
+
   return (
     <>
       <div style={overlay} onClick={onClose} />
@@ -158,9 +179,29 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
             <F label={t('placement.department')}>
               <SelectMenu value={departmentId || null} onChange={setDepartmentId} placeholder={t('placement.optional')} options={opt(departments)} />
             </F>
-            <F label={t('placement.contact')}>
-              <SelectMenu value={contactId || null} onChange={setContactId} placeholder={customerId ? t('placement.pickContact') : t('placement.pickCustomerFirst')} options={opt(contacts)} />
-            </F>
+            <div>
+              <div style={{ ...lbl, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{t('placement.contact')}</span>
+                {customerId && !creatingContact && (
+                  <button onClick={() => setCreatingContact(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', fontSize: 11, fontWeight: 600, padding: 0 }}>+ {t('placement.newContact')}</button>
+                )}
+              </div>
+              {creatingContact ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, border: '1px solid var(--border)', borderRadius: 8, padding: 8, background: 'var(--bg)' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    <input value={nc.first_name} onChange={e => setNc(p => ({ ...p, first_name: e.target.value }))} placeholder={t('placement.firstName')} style={{ ...input, height: 30 }} />
+                    <input value={nc.last_name} onChange={e => setNc(p => ({ ...p, last_name: e.target.value }))} placeholder={t('placement.lastName')} style={{ ...input, height: 30 }} />
+                  </div>
+                  <input value={nc.email} onChange={e => setNc(p => ({ ...p, email: e.target.value }))} placeholder={t('placement.email')} style={{ ...input, height: 30 }} />
+                  <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
+                    <button onClick={() => { setCreatingContact(false); setNc({ first_name: '', last_name: '', email: '', phone: '' }) }} style={{ height: 28, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
+                    <button onClick={saveContact} disabled={!nc.first_name.trim() || !nc.last_name.trim()} style={{ height: 28, padding: '0 12px', fontSize: 12, fontWeight: 600, border: 'none', borderRadius: 6, background: 'var(--color-primary)', color: '#fff', cursor: 'pointer', opacity: (nc.first_name.trim() && nc.last_name.trim()) ? 1 : 0.4 }}>{t('common:save')}</button>
+                  </div>
+                </div>
+              ) : (
+                <SelectMenu value={contactId || null} onChange={setContactId} placeholder={customerId ? t('placement.pickContact') : t('placement.pickCustomerFirst')} options={opt(contacts)} />
+              )}
+            </div>
           </div>
           <div style={row2}>
             <F label={t('placement.function')}>

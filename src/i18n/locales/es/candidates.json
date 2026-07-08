@@ -782,6 +782,12 @@
     "remarks": "Observaciones",
     "create": "Crear colocación",
     "created": "Colocación creada",
-    "failed": "Error al crear"
+    "failed": "Error al crear",
+    "newContact": "nuevo",
+    "contactCreated": "Contacto creado",
+    "contactFailed": "Error al crear",
+    "firstName": "Nombre",
+    "lastName": "Apellido",
+    "email": "Email"
   }
 }

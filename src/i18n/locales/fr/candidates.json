@@ -782,6 +782,12 @@
     "remarks": "Remarques",
     "create": "Créer la mission",
     "created": "Mission créée",
-    "failed": "Échec de la création"
+    "failed": "Échec de la création",
+    "newContact": "nouveau",
+    "contactCreated": "Contact créé",
+    "contactFailed": "Échec de la création",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "email": "E-mail"
   }
 }

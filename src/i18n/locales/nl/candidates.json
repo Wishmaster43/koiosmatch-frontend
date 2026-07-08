@@ -782,6 +782,12 @@
     "remarks": "Opmerkingen",
     "create": "Plaatsing aanmaken",
     "created": "Plaatsing aangemaakt",
-    "failed": "Plaatsing aanmaken mislukt"
+    "failed": "Plaatsing aanmaken mislukt",
+    "newContact": "nieuw",
+    "contactCreated": "Contactpersoon aangemaakt",
+    "contactFailed": "Contactpersoon aanmaken mislukt",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
+    "email": "E-mail"
   }
 }

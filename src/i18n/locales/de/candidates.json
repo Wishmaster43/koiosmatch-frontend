@@ -782,6 +782,12 @@
     "remarks": "Anmerkungen",
     "create": "Platzierung anlegen",
     "created": "Platzierung angelegt",
-    "failed": "Anlegen fehlgeschlagen"
+    "failed": "Anlegen fehlgeschlagen",
+    "newContact": "neu",
+    "contactCreated": "Ansprechpartner angelegt",
+    "contactFailed": "Anlegen fehlgeschlagen",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "email": "E-Mail"
   }
 }

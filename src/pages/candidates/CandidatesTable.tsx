@@ -118,8 +118,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       key: 'phase', header: t('columns.phase'), sortable: true, sortValue: c => phaseMeta(c.phase).label,
       render: c => { if (!c.phase) return dash; const m = phaseMeta(c.phase)
         if (!colorPhase) return <span style={plainCell}>{m.label}</span>
-        return <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
-          background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span> },
+        return <SoftChip label={m.label} color={m.color} /> },
     },
     {
       // Deployability ("status": Beschikbaar/Geplaatst/…) — model v2 axis.
@@ -166,8 +165,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         const jump = (e: { stopPropagation: () => void }) => { e.stopPropagation(); onOpenTab?.(c, 'work') }
         if (!colorFunnel) return <button onClick={jump} style={{ ...plainCell, background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>{label}</button>
         const color = c.stageColor ?? m.color
-        return <button onClick={jump} style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5, cursor: 'pointer',
-          background: color + '1A', color, border: `1px solid ${color}55` }}>{label}</button>
+        return <button onClick={jump} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}><SoftChip label={label} color={color} /></button>
       },
     },
     {
@@ -180,10 +178,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         const shown = list.slice(0, 2)
         return (
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            {shown.map(v => { const m = typeMeta(v); return (
-              <span key={v} style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
-                background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span>
-            )})}
+            {shown.map(v => { const m = typeMeta(v); return <SoftChip key={v} label={m.label} color={m.color} /> })}
             {list.length > shown.length && (
               <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{list.length - shown.length}</span>
             )}
@@ -200,13 +195,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         const shown = pools.slice(0, 2)
         return (
           <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-            {shown.map((p, i) => {
-              const color = p.color || '#6B7280'
-              return <span key={p.id ?? p.name ?? i} title={p.name}
-                style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99,
-                  background: color + '1A', color, border: `1px solid ${color}55`,
-                  maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</span>
-            })}
+            {shown.map((p, i) => <SoftChip key={p.id ?? p.name ?? i} label={p.name} color={p.color || '#6B7280'} title={p.name} />)}
             {pools.length > shown.length && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{pools.length - shown.length}</span>}
           </div>
         )

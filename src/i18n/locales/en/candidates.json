@@ -782,6 +782,12 @@
     "remarks": "Remarks",
     "create": "Create placement",
     "created": "Placement created",
-    "failed": "Creating placement failed"
+    "failed": "Creating placement failed",
+    "newContact": "new",
+    "contactCreated": "Contact created",
+    "contactFailed": "Creating contact failed",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "email": "Email"
   }
 }
