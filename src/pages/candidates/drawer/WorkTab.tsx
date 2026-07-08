@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, Plus, CalendarPlus, Calendar, Clock, User, Building2, Video, Phone } from 'lucide-react'
+import { ExternalLink, Plus, CalendarPlus, Calendar, Clock, User, Building2, Video, Phone, Pencil } from 'lucide-react'
 import MatchesTab from './MatchesTab'
 import StatusPill from '@/components/ui/StatusPill'
 import AddApplicationModal from './AddApplicationModal'
 import PlanIntakeModal from './PlanIntakeModal'
+import type { ExistingAppointment } from './PlanIntakeModal'
 import AddMatchModal from './AddMatchModal'
 import api from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
@@ -13,7 +14,7 @@ import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
 // A linked appointment as returned by /candidates/{id}/appointments.
-interface Appt { id: Id; application_id?: Id | null; type?: string; scheduled_at?: string; duration_min?: number | null; modality?: string; owner?: { name?: string }; location_name?: string; status?: string }
+interface Appt { id: Id; application_id?: Id | null; type?: string; scheduled_at?: string; duration_min?: number | null; modality?: string; owner?: { id?: Id; name?: string }; location_name?: string; status?: string }
 
 // One application row as nested under the candidate (read defensively). The
 // funnel stage (label + colour) used to live in the header chips — shown here now.
@@ -34,6 +35,8 @@ export default function WorkTab({ c }: { c: Candidate }) {
   const [appts, setAppts] = useState<Appt[]>([])
   const [page, setPage] = useState(1)
   const [modal, setModal] = useState<null | 'apply' | 'intake' | 'match'>(null)
+  // The appointment being edited (pencil on the appointment line) → prefilled intake modal.
+  const [editAppt, setEditAppt] = useState<ExistingAppointment | null>(null)
   // Reset the local list when the drawer switches to another candidate / fuller detail.
   useEffect(() => { setApps((c.applications ?? []) as unknown as AppRow[]); setPage(1) }, [c.id, c.applications])
   // Load the candidate's appointments once per candidate (separate structured entity).
@@ -127,6 +130,12 @@ export default function WorkTab({ c }: { c: Candidate }) {
                     {appt.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {timeRange(appt)}{appt.duration_min ? ` · ${appt.duration_min} min` : ''}</span>}
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ModalityIcon m={appt.modality} /> {t(`work.modality${appt.modality === 'remote' ? 'Remote' : appt.modality === 'phone' ? 'Phone' : 'Office'}`)}{appt.location_name ? ` · ${appt.location_name}` : ''}</span>
                     {appt.owner?.name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={11} /> {appt.owner.name}</span>}
+                    {/* Pencil: edit this intake appointment (Danny) — prefilled modal → PATCH. */}
+                    <button onClick={() => setEditAppt({ id: appt.id, scheduled_at: appt.scheduled_at, duration_min: appt.duration_min, modality: appt.modality, type: appt.type, owner_id: (appt.owner as { id?: Id })?.id, vacancy_id: s.id ?? null })}
+                      title={t('work.editIntake')} aria-label={t('work.editIntake')}
+                      style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}>
+                      <Pencil size={11} />
+                    </button>
                   </div>
                 )}
               </div>
@@ -146,6 +155,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
       {modal === 'apply'  && <AddApplicationModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {modal === 'match'  && <AddMatchModal       candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
+      {editAppt && <PlanIntakeModal candidateId={c.id} existing={editAppt} onClose={() => setEditAppt(null)} onCreated={reload} />}
     </div>
   )
 }

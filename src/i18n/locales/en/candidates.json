@@ -387,7 +387,9 @@
     "addMatch": "Match",
     "createMatch": "Create match",
     "matchCreated": "Match created",
-    "matchFailed": "Creating match failed"
+    "matchFailed": "Creating match failed",
+    "editIntake": "Edit intake",
+    "intakeUpdated": "Intake updated"
   },
   "communication": {
     "newNote": "New note",

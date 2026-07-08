@@ -380,7 +380,9 @@
     "addMatch": "Match",
     "createMatch": "Créer un match",
     "matchCreated": "Match créé",
-    "matchFailed": "Échec de la création du match"
+    "matchFailed": "Échec de la création du match",
+    "editIntake": "Modifier l'entretien",
+    "intakeUpdated": "Entretien mis à jour"
   },
   "communication": {
     "newNote": "Nouvelle note",

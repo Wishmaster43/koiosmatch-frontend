@@ -35,24 +35,31 @@ function defaultWhen(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-export default function PlanIntakeModal({ candidateId, onClose, onCreated }: {
+export interface ExistingAppointment { id: Id; scheduled_at?: string; duration_min?: number | null; modality?: string; owner_id?: Id; type?: string; vacancy_id?: Id | null }
+
+export default function PlanIntakeModal({ candidateId, onClose, onCreated, existing }: {
   candidateId: Id
   onClose: () => void
   onCreated: () => void
+  // When present the modal EDITS this appointment (prefill + PATCH) instead of creating.
+  existing?: ExistingAppointment
 }) {
   const { t } = useTranslation(['candidates', 'common'])
   const { intakeTypes, metaOf } = useAppointmentTypes()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   const vacancyOptions = useVacancyOptions(true)
 
-  const [type, setType] = useState(() => intakeTypes[0]?.value ?? '')
-  const [when, setWhen] = useState(defaultWhen)
-  // Duration + modality prefill from the chosen type, but stay overridable.
-  const [duration, setDuration] = useState<number>(() => intakeTypes[0]?.default_duration_min ?? 30)
-  const [modality, setModality] = useState<Modality>(() => intakeTypes[0]?.default_modality ?? 'office')
-  const [ownerId, setOwnerId] = useState('')
-  const [vacancyId, setVacancyId] = useState('')
+  // datetime-local wants "YYYY-MM-DDTHH:MM" — trim an ISO string to that shape.
+  const toLocalInput = (iso?: string) => iso ? iso.slice(0, 16) : ''
+  const [type, setType] = useState(() => existing?.type ?? intakeTypes[0]?.value ?? '')
+  const [when, setWhen] = useState(() => existing?.scheduled_at ? toLocalInput(existing.scheduled_at) : defaultWhen())
+  // Duration + modality prefill from the existing appointment, else from the type.
+  const [duration, setDuration] = useState<number>(() => existing?.duration_min ?? intakeTypes[0]?.default_duration_min ?? 30)
+  const [modality, setModality] = useState<Modality>(() => (existing?.modality as Modality) ?? intakeTypes[0]?.default_modality ?? 'office')
+  const [ownerId, setOwnerId] = useState(() => existing?.owner_id ? String(existing.owner_id) : '')
+  const [vacancyId, setVacancyId] = useState(() => existing?.vacancy_id ? String(existing.vacancy_id) : '')
   const [saving, setSaving] = useState(false)
+  const editing = !!existing
 
   // Selecting a type re-proposes its duration + modality (the user can still change them).
   const pickType = (v: string) => {
@@ -71,13 +78,15 @@ export default function PlanIntakeModal({ candidateId, onClose, onCreated }: {
   const submit = async () => {
     if (!when) return
     setSaving(true)
+    const body = {
+      scheduled_at: when, type: type || 'intake', duration_min: duration, modality,
+      ...(ownerId ? { owner_id: ownerId } : {}),
+      ...(vacancyId ? { vacancy_id: vacancyId } : {}),
+    }
     try {
-      await api.post(`/candidates/${candidateId}/appointments`, {
-        scheduled_at: when, type: type || 'intake', duration_min: duration, modality,
-        ...(ownerId ? { owner_id: ownerId } : {}),
-        ...(vacancyId ? { vacancy_id: vacancyId } : {}),
-      })
-      notifySuccess(t('work.intakePlanned'))
+      if (editing) await api.patch(`/candidates/${candidateId}/appointments/${existing.id}`, body)
+      else         await api.post(`/candidates/${candidateId}/appointments`, body)
+      notifySuccess(t(editing ? 'work.intakeUpdated' : 'work.intakePlanned'))
       onCreated(); onClose()
     } catch {
       notifyError(t('work.intakeFailed'))
@@ -89,7 +98,7 @@ export default function PlanIntakeModal({ candidateId, onClose, onCreated }: {
       <div style={overlay} onClick={onClose} />
       <div style={panel} role="dialog" aria-modal="true">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('work.planIntake')}</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t(editing ? 'work.editIntake' : 'work.planIntake')}</span>
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
         </div>
 
@@ -138,7 +147,7 @@ export default function PlanIntakeModal({ candidateId, onClose, onCreated }: {
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
           <button onClick={submit} disabled={saving || !when}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: when ? 'pointer' : 'default', opacity: when ? 1 : 0.4 }}>
-            {saving ? t('common:saving') : t('work.createIntake')}
+            {saving ? t('common:saving') : t(editing ? 'common:save' : 'work.createIntake')}
           </button>
         </div>
       </div>

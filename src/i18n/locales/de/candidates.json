@@ -380,7 +380,9 @@
     "addMatch": "Match",
     "createMatch": "Match anlegen",
     "matchCreated": "Match angelegt",
-    "matchFailed": "Anlegen des Matches fehlgeschlagen"
+    "matchFailed": "Anlegen des Matches fehlgeschlagen",
+    "editIntake": "Intake bearbeiten",
+    "intakeUpdated": "Intake aktualisiert"
   },
   "communication": {
     "newNote": "Neue Notiz",

@@ -380,7 +380,9 @@
     "addMatch": "Match",
     "createMatch": "Crear match",
     "matchCreated": "Match creado",
-    "matchFailed": "Error al crear el match"
+    "matchFailed": "Error al crear el match",
+    "editIntake": "Editar intake",
+    "intakeUpdated": "Intake actualizado"
   },
   "communication": {
     "newNote": "Nueva nota",

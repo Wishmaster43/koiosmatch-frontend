@@ -2,6 +2,8 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import StatsTabJs from '@/components/drawer/tabs/StatsTab'
 import { useDateFormat } from '@/lib/datetime'
+import { useLookups } from '@/context/LookupsContext'
+import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import type { Candidate } from '@/types/candidate'
 
 // StatsTab is still untyped JS — declare the props this tab passes.
@@ -11,6 +13,10 @@ const StatsTab = StatsTabJs as ComponentType<{ kpisTitle?: unknown; kpis?: unkno
 export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (tab: string) => void }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
+  // Resolve the status + contact-type SLUGS to their tenant labels — the overview
+  // showed the raw English slug ("available") instead of "Beschikbaar" (Danny).
+  const { statusMeta } = useLookups() as unknown as { statusMeta: (v?: string | null) => { label: string } }
+  const { labelOf: lastContactLabel } = useLastContactTypes()
   return (
     <StatsTab
       kpisTitle={t('drawer.tabs.statistics')}
@@ -25,9 +31,9 @@ export default function StatisticsTab({ c, onJump }: { c: Candidate; onJump?: (t
       overview={{
         title: t('statistics.statusOverview'),
         rows: [
-          [t('statistics.status'),      c.status ?? '-'],
+          [t('statistics.status'),      c.status ? statusMeta(c.status).label : '-'],
           [t('statistics.lastContact'), c.lastContactDate ? formatDate(c.lastContactDate) : '-'],
-          [t('statistics.contactType'), c.lastContactType ?? '-'],
+          [t('statistics.contactType'), c.lastContactType ? lastContactLabel(c.lastContactType) : '-'],
           [t('statistics.memberSince'), c.created ? formatDate(c.created) : '-'],
           [t('statistics.branch'),      (c.branches ?? []).map(b => b.name).filter(Boolean).join(', ') || '-'],
         ],

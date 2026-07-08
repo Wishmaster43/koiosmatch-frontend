@@ -387,7 +387,9 @@
     "addMatch": "Match",
     "createMatch": "Match aanmaken",
     "matchCreated": "Match aangemaakt",
-    "matchFailed": "Match aanmaken mislukt"
+    "matchFailed": "Match aanmaken mislukt",
+    "editIntake": "Intake wijzigen",
+    "intakeUpdated": "Intake bijgewerkt"
   },
   "communication": {
     "newNote": "Nieuwe notitie",
