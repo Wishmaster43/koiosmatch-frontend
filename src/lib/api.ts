@@ -25,7 +25,10 @@ import { notifyError } from './notify'
  */
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api',
-  timeout: 120000,
+  // Default timeout: 20s (C-CHIP #5). Known long-running paths get 120s via the
+  // request interceptor below — a hung CRUD call should fail fast, a sync/report
+  // may legitimately take a while.
+  timeout: 20000,
   // Cookie auth: send the httpOnly auth cookie + auto-attach the CSRF token from
   // the XSRF-TOKEN cookie. Off by default so current CORS/Bearer flow is unchanged.
   withCredentials: COOKIE_AUTH,
@@ -69,6 +72,10 @@ if (COOKIE_AUTH) {
  * the header otherwise. SECURITY (#2): the token lives in localStorage and is
  * therefore readable by any JS on the page — an httpOnly cookie would be safer.
  */
+// Long-running endpoints (sync jobs, reports/aggregations, workflow runs, AI,
+// uploads) keep the old 120s safety net; everything else fails fast at 20s.
+const SLOW_PATHS = /\/(sm_reports|sm_sync|reports|workflows\/[^/]+\/(run|execute)|ai\/|exports?|imports?|documents|avatar)/
+
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token  = localStorage.getItem('auth_token')
   const tenant = localStorage.getItem('active_tenant')
@@ -78,6 +85,8 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (!COOKIE_AUTH && token) config.headers.Authorization = `Bearer ${token}`
   if (COOKIE_AUTH) config.headers['X-Auth-Mode'] = 'cookie'
   if (tenant) config.headers['X-Tenant'] = tenant
+  // Timeout differentiation (C-CHIP #5) — only when the caller didn't set one.
+  if (config.timeout === 20000 && SLOW_PATHS.test(config.url ?? '')) config.timeout = 120000
   return config
 })
 

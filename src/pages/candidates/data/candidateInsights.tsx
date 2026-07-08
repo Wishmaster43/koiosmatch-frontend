@@ -1,0 +1,64 @@
+/**
+ * candidateInsights — pure builder for the candidates page KPI strip (§3A
+ * config-driven InsightsRow; §0.3 split from CandidatesPage). Three donuts
+ * (status / funnel / recruiter, click-to-filter) + the attention KPI cards.
+ * No hooks, no state — everything arrives as arguments.
+ */
+import type { TFunction } from 'i18next'
+import type { Id } from '@/types/common'
+
+// Recharts hands the clicked segment back at top level AND under `.payload`.
+type PickArg = { key?: unknown; name?: unknown; payload?: { key?: unknown } }
+const pickKey = (d: PickArg) => d?.key ?? d?.payload?.key ?? d?.name
+
+// Loose datum shape — the option hooks may emit undefined name/value for empty
+// buckets, and owner keys are Ids (string | number).
+interface DonutDatum { name?: string; value?: number; key?: Id; color?: string }
+
+interface Args {
+  t: TFunction
+  statusData: DonutDatum[]; funnelData: DonutDatum[]; rcData: DonutDatum[]
+  pickStatus: (v: string) => void; pickFunnel: (v: string) => void; pickOwner: (v: string) => void
+  selectedStatus: string[]; setSelectedStatus: (v: string[]) => void
+  selectedFunnel: string[]; setSelectedFunnel: (v: string[]) => void
+  selectedOwner: Id[]; setSelectedOwner: (v: Id[]) => void
+  attentionFilter: string | null
+  toggleAttention: (key: string) => void
+  staleMonths: number
+  counts: { stale: number; neverContacted: number; noFollowup: number; intake: number; activeConv: number; tasks: number }
+}
+
+export function buildCandidateInsights({
+  t, statusData, funnelData, rcData, pickStatus, pickFunnel, pickOwner,
+  selectedStatus, setSelectedStatus, selectedFunnel, setSelectedFunnel,
+  selectedOwner, setSelectedOwner, attentionFilter, toggleAttention, staleMonths, counts,
+}: Args) {
+  // One strip: 3 donuts + KPI cards, all equal footprint (§3A).
+  const donuts = [
+    { key: 'status', title: t('analytics.statusTitle'), data: statusData, onPick: (d: PickArg) => pickStatus(pickKey(d) as string),
+      active: selectedStatus.length > 0, onClear: () => setSelectedStatus([]) },
+    { key: 'funnel', title: t('analytics.funnelTitle'), data: funnelData, onPick: (d: PickArg) => pickFunnel(pickKey(d) as string),
+      active: selectedFunnel.length > 0, onClear: () => setSelectedFunnel([]) },
+    { key: 'rc',     title: t('analytics.rcTitle'),     data: rcData,     onPick: (d: PickArg) => pickOwner(pickKey(d) as string),
+      active: selectedOwner.length > 0, onClear: () => setSelectedOwner([]) },
+  ]
+  const kpis = [
+    { key: 'stale',      label: t('analytics.staleMonths', { months: staleMonths }), value: counts.stale, sub: t('analytics.stale6mSub'), color: 'var(--color-warning)',
+      onClick: () => toggleAttention('stale6m'),    active: attentionFilter === 'stale6m' },
+    { key: 'neverContacted', label: t('analytics.neverContacted'), value: counts.neverContacted, sub: t('analytics.neverContactedSub'), color: '#0EA5E9',
+      onClick: () => toggleAttention('neverContacted'), active: attentionFilter === 'neverContacted' },
+    { key: 'noFollowup', label: t('analytics.noFollowup'), value: counts.noFollowup, sub: t('analytics.noFollowupSub'), color: 'var(--color-danger)',
+      onClick: () => toggleAttention('noFollowup'), active: attentionFilter === 'noFollowup' },
+    // Click filters on the SAME definition as the stat (planned intake appointments) via
+    // the intake_planned param (INTAKE-1) — the old funnel-stage set never matched the count.
+    { key: 'intake',     label: t('kpi.intake'),           value: counts.intake,     sub: t('kpi.intakeSub'),           color: '#8B5CF6',
+      onClick: () => toggleAttention('intakePlanned'), active: attentionFilter === 'intakePlanned' },
+    // "Actieve gesprekken" = contact in de laatste 14 dagen; the card filters the LIST
+    // to exactly those candidates (Danny 2026-07-06 — no WhatsApp jump).
+    { key: 'conversations', label: t('analytics.conversations'), value: counts.activeConv, color: 'var(--color-success)',
+      onClick: () => toggleAttention('activeConv'), active: attentionFilter === 'activeConv' },
+    { key: 'tasks', label: t('kpi.tasks'), value: counts.tasks, sub: t('kpi.tasksSub'), color: '#0D9488',
+      onClick: () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },
+  ]
+  return { donuts, kpis }
+}

@@ -14,7 +14,6 @@ import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useGenders } from '@/lib/useGenders'
 import { useUsers } from '@/lib/queries'
-import api from '@/lib/api'
 import CandidateDrawerJs from './CandidateDrawer'
 import DeletionPreviewModal from './drawer/DeletionPreviewModal'
 import AddCandidateModal from './AddCandidateModal'
@@ -34,7 +33,8 @@ import { buildCandidateFilterGroups } from './data/candidateFilterGroups'
 import { useCandidatesData } from './hooks/useCandidatesData'
 import { useCandidateOptions } from './hooks/useCandidateOptions'
 import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
-import { useCandidateRecord } from './hooks/useCandidateMutations'
+import { useCandidateDrawerActions } from './hooks/useCandidateDrawerActions'
+import { buildCandidateInsights } from './data/candidateInsights'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -74,15 +74,11 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const [page,           setPage]           = usePageMemory('cand.page', 1)
   // Initialise from the user's profile preference (Profile → Records per page).
   const [pageSize,       setPageSize]       = useState<number>(() => user?.default_per_page ?? 50)
-  const [selected,       setSelected]       = useState<Candidate | null>(null)
-  const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [addOpen,        setAddOpen]        = useState(false)
   // STRAAL-1: table ⇄ map view; the map searches server-side within centre+radius.
   const [view,           setView]           = usePageMemory<'table' | 'map'>('cand.viewMode', 'table')
   const [mapCenter,      setMapCenter]      = usePageMemory('cand.mapCenter', { lat: 52.09, lng: 5.12 })
   const [mapRadius,      setMapRadius]      = usePageMemory('cand.mapRadius', 30)
-  const [detail,         setDetail]         = useState<Candidate | null>(null)
-  const selectedIdRef = useRef<Id | null>(null)
 
   // Bulk-selectie (checkboxes) — id-set; gewist bij filter/pagina-wissel.
   const [selectedIds,      setSelectedIds]      = useState<Set<Id>>(() => new Set())
@@ -211,92 +207,14 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     return base
   }, [candidates, attentionFilter, showArchived, showTrash, staleMonths])
 
-  // Full-record load + edit persistence (fetch/PATCH live in the hook, §3).
-  const { fetchDetail, patchCandidate } = useCandidateRecord()
-
-  // Open a candidate: hand the light row to the drawer, then fetch the full record.
-  // 404 ('gone') = a stale row (reseed / deleted elsewhere) → drop it + tell the user.
-  // Deep-link target tab (contact-cell → communication, funnel-chip → work); row click = default.
-  const [drawerTab, setDrawerTab] = useState<string | undefined>(undefined)
-  const selectCandidate = (c: Candidate, tab?: string) => {
-    setDrawerTab(tab)
-    selectedIdRef.current = c.id
-    setSelected(c); setDetail(null); setDrawerExpanded(false)
-    // ARCHIVED rows: the detail endpoint 404s for soft-deleted records (ARCH-3, BE) —
-    // open the drawer on the row data (banner + restore) instead of "bestaat niet meer".
-    if (c.archived) return
-    fetchDetail(c.id).then(full => {
-      if (selectedIdRef.current !== c.id) return
-      if (full === 'gone') {
-        setCandidates(p => p.filter(x => x.id !== c.id))
-        setTotal(v => Math.max(0, v - 1))
-        closeDrawer()
-        setActionMsg({ type: 'error', text: t('drawer.recordGone') })
-        return
-      }
-      if (full) setDetail(full)
-    })
-  }
-  const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
-
-  // Archive ONE candidate from the drawer (soft-delete → Gearchiveerd view). Reuses the
-  // bulk endpoint with a single id; the backend re-checks live links (§3B) and 409s.
-  const archiveOne = async (id: Id) => {
-    try {
-      await api.post('/candidates/bulk/archive', { candidate_ids: [id] })
-      setCandidates(p => p.filter(x => x.id !== id))
-      setTotal(v => Math.max(0, v - 1))
-      closeDrawer()
-      setActionMsg({ type: 'success', text: t('drawer.archived') })
-    } catch {
-      setActionMsg({ type: 'error', text: t('drawer.archiveFailed') })
-    }
-  }
-  // Restore an ARCHIVED candidate (undo the soft-delete) — mirrors archive via the bulk route.
-  const restoreOne = async (id: Id) => {
-    try {
-      await api.post('/candidates/bulk/restore', { candidate_ids: [id] })
-      setCandidates(p => p.filter(x => x.id !== id))
-      setTotal(v => Math.max(0, v - 1))
-      closeDrawer()
-      setActionMsg({ type: 'success', text: t('drawer.restored') })
-    } catch {
-      setActionMsg({ type: 'error', text: t('drawer.restoreFailed') })
-    }
-  }
-  // Move an ARCHIVED candidate to the trash (ERASE-1 stage 2, reversible). The status
-  // becomes 'pending_erase'; a hard delete is a separate, admin-only, irreversible step.
-  const markDeletionOne = async (id: Id) => {
-    try {
-      await api.post(`/candidates/${id}/mark-deletion`, {})
-      setCandidates(p => p.filter(x => x.id !== id))
-      setTotal(v => Math.max(0, v - 1))
-      closeDrawer()
-      setActionMsg({ type: 'success', text: t('erase.markedForDeletion') })
-    } catch {
-      setActionMsg({ type: 'error', text: t('erase.markFailed') })
-    }
-  }
-  // PERMANENT delete — opens the deletion-preview popup first; onConfirm force-deletes.
-  const [eraseTarget, setEraseTarget] = useState<{ id: Id; name: string } | null>(null)
-  const hardDeleteOne = (id: Id) => {
-    const cand = candidates.find(x => x.id === id)
-    setEraseTarget({ id, name: cand?.name ?? '' })
-  }
-  const confirmHardDelete = async () => {
-    if (!eraseTarget) return
-    const id = eraseTarget.id
-    try {
-      await api.delete(`/candidates/${id}/force`)
-      setCandidates(p => p.filter(x => x.id !== id))
-      setTotal(v => Math.max(0, v - 1))
-      setEraseTarget(null); closeDrawer()
-      setActionMsg({ type: 'success', text: t('drawer.hardDeleted') })
-    } catch {
-      setEraseTarget(null)
-      setActionMsg({ type: 'error', text: t('drawer.hardDeleteFailed') })
-    }
-  }
+  // Drawer open/close + single-record lifecycle mutations (§0.3 split → hook).
+  const {
+    selected, setSelected, detail, setDetail, drawerExpanded, setDrawerExpanded, drawerTab,
+    selectCandidate, closeDrawer, patchCandidate,
+    archiveOne, restoreOne, markDeletionOne,
+    eraseTarget, setEraseTarget, hardDeleteOne, confirmHardDelete,
+  } = useCandidateDrawerActions({ candidates, setCandidates, setTotal,
+    notifyMsg: m => setActionMsg(m as ActionMsg), t })
   // Open a candidate drawer when arriving via a dashboard/cross-entity link ({ open: id }).
   useOpenFromIntent(intent, (id) => selectCandidate({ id } as Candidate))
 
@@ -330,38 +248,14 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
   } = useCandidateBulkActions({ candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes })
 
-  // Recharts hands the clicked segment back at top level AND under `.payload`.
-  const pickKey = (d: { key?: unknown; name?: unknown; payload?: { key?: unknown } }) => d?.key ?? d?.payload?.key ?? d?.name
-
-  // ── One strip: 3 donuts + KPI cards, all equal size ──
-  const insightDonuts = [
-    { key: 'status', title: t('analytics.statusTitle'), data: statusData, onPick: (d: { key?: unknown; name?: unknown; payload?: { key?: unknown } }) => pickStatus(pickKey(d) as string),
-      active: selectedStatus.length > 0, onClear: () => setSelectedStatus([]) },
-    { key: 'funnel', title: t('analytics.funnelTitle'), data: funnelData, onPick: (d: { key?: unknown; name?: unknown; payload?: { key?: unknown } }) => pickFunnel(pickKey(d) as string),
-      active: selectedFunnel.length > 0, onClear: () => setSelectedFunnel([]) },
-    { key: 'rc',     title: t('analytics.rcTitle'),     data: rcData,     onPick: (d: { key?: unknown; name?: unknown; payload?: { key?: unknown } }) => pickOwner(pickKey(d) as string),
-      active: selectedOwner.length > 0, onClear: () => setSelectedOwner([]) },
-  ]
-  const insightKpis = [
-    { key: 'stale',      label: t('analytics.staleMonths', { months: staleMonths }), value: staleCount, sub: t('analytics.stale6mSub'), color: 'var(--color-warning)',
-      onClick: () => toggleAttention('stale6m'),    active: attentionFilter === 'stale6m' },
-    { key: 'neverContacted', label: t('analytics.neverContacted'), value: neverContactedCount, sub: t('analytics.neverContactedSub'), color: '#0EA5E9',
-      onClick: () => toggleAttention('neverContacted'), active: attentionFilter === 'neverContacted' },
-    { key: 'noFollowup', label: t('analytics.noFollowup'), value: noFollowupCount, sub: t('analytics.noFollowupSub'), color: 'var(--color-danger)',
-      onClick: () => toggleAttention('noFollowup'), active: attentionFilter === 'noFollowup' },
-    { key: 'intake',     label: t('kpi.intake'),           value: intakeCount,     sub: t('kpi.intakeSub'),           color: '#8B5CF6',
-      // Click filters on the SAME definition as the stat (planned intake appointments) via
-      // the intake_planned param (INTAKE-1) — the old funnel-stage set never matched the count.
-      onClick: () => toggleAttention('intakePlanned'), active: attentionFilter === 'intakePlanned' },
-    // Channel breakdown is hidden until real WhatsApp/e-mail data exists (BE KPI-1) — no '–' placeholders.
-    // "Actieve gesprekken" = contact in de laatste 14 dagen (zelfde proxy als de teller):
-    // de kaart filtert de LIJST op precies die kandidaten (Danny 2026-07-06 — geen
-    // WhatsApp-sprong meer: daar staan de gesprekken zelf nog niet).
-    { key: 'conversations', label: t('analytics.conversations'), value: activeConvCount, color: 'var(--color-success)',
-      onClick: () => toggleAttention('activeConv'), active: attentionFilter === 'activeConv' },
-    { key: 'tasks', label: t('kpi.tasks'), value: tasksCount, sub: t('kpi.tasksSub'), color: '#0D9488',
-      onClick: () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },
-  ]
+  // KPI strip config (3 donuts + attention cards) — pure builder (§0.3 split).
+  const { donuts: insightDonuts, kpis: insightKpis } = buildCandidateInsights({
+    t, statusData, funnelData, rcData, pickStatus, pickFunnel, pickOwner,
+    selectedStatus, setSelectedStatus, selectedFunnel, setSelectedFunnel,
+    selectedOwner, setSelectedOwner, attentionFilter, toggleAttention, staleMonths,
+    counts: { stale: staleCount, neverContacted: neverContactedCount, noFollowup: noFollowupCount,
+      intake: intakeCount, activeConv: activeConvCount, tasks: tasksCount },
+  })
 
   return (
     <>
