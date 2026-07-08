@@ -604,6 +604,16 @@ Be honest. If something is not done, say so — do not pretend.
 - Prefer small reusable components over large ones.
 - Use the candidate's own UUID `id` for internal references, never ShiftManager's
   `external_id`.
+- **Subagent model policy (cost, Danny 2026-07-08):** build/implementation agents run on
+  **Sonnet** (`refactorer` in `.claude/agents/`); simple search/scan/verify agents on
+  **Haiku** (`sweeper`). The **manager session runs Fable 5 (high reasoning)** and ALWAYS
+  does the CONTROL itself: it reviews every subagent deliverable, runs `tsc --noEmit` +
+  the tests + the smoke suite, and does the committing — subagents never
+  `git add/commit/push` on their own. Delicate work (auth, API contracts, data model)
+  stays with the manager.
+- **Session names (Danny 2026-07-08):** this frontend manager session is **CMFE**; the
+  backend manager session (koiosmatch-api) is **CMBE**. One manager per repo; cross-repo
+  coordination goes through the shared docs in koiosmatch-api/docs/.
 
 ---
 
