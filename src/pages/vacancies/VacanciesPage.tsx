@@ -84,7 +84,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const filterParams = useMemo(() => {
     const p: Record<string, unknown> = {}
     if (globalSearch.trim())    p.search      = globalSearch.trim()
-    if (statusBucket !== 'all') p.status      = [statusBucket]
+    // '__none' = the "Geen status" donut segment → server-side no_status filter (VAC-NOSTATUS-1).
+    if (statusBucket === '__none')   p.no_status = 1
+    else if (statusBucket !== 'all') p.status    = [statusBucket]
     if (selectedOwner.length)   p.owner_id    = selectedOwner
     if (selectedClient.length)  p.customer_id = selectedClient
     if (showArchived)           p.include_archived = 1
@@ -190,7 +192,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // ── Insights strip: 3 donuts + funnel-phase KPI cards ──
   const insightDonuts: DonutSpec[] = [
     { key: 'status', title: t('insights.statusTitle'), data: statusData,
-      onPick: d => { const k = pickKey(d); if (k === '__none') return; setStatusBucket(prev => (prev === k ? 'all' : (k ?? 'all'))) },
+      onPick: d => { const k = pickKey(d); setStatusBucket(prev => (prev === k ? 'all' : (k ?? 'all'))) },
       active: statusBucket !== 'all', onClear: () => setStatusBucket('all') },
     { key: 'owner',  title: t('insights.ownerTitle'),  data: ownerData,  onPick: d => pickOne(setSelectedOwner)(pickKey(d)),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
     { key: 'client', title: t('insights.clientTitle'), data: clientData, onPick: d => pickOne(setSelectedClient)(pickKey(d)), active: selectedClient.length > 0, onClear: () => setSelectedClient([]) },
