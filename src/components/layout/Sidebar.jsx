@@ -120,6 +120,7 @@ function SubNavItem({ item, active, onNavigate }) {
 }
 
 function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate }) {
+  const { t } = useTranslation('common')
   const [hovered, setHovered] = useState(false)
 
   const hasChildren = !!item.children?.length
@@ -161,7 +162,7 @@ function NavItem({ item, activePage, expanded, openItems, toggleOpen, onNavigate
                 fontSize: 9, fontWeight: 600, letterSpacing: '0.04em', padding: '2px 5px',
                 background: 'var(--hover-bg)', color: 'var(--text-muted)', borderRadius: 4, flexShrink: 0,
               }}>
-                binnenkort
+                {t('comingSoon')}
               </span>
             )}
             {hasChildren ? (

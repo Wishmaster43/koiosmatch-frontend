@@ -160,5 +160,9 @@
     "clickHint": "Cliquez sur la carte pour déplacer le centre",
     "view": "Carte",
     "pointCount": "{{count}} points sur la carte"
-  }
+  },
+  "noAccess": "Accès refusé",
+  "noAccessDesc": "Vous n'avez pas les droits pour cette page.",
+  "noAgencies": "Aucune agence trouvée",
+  "comingSoon": "bientôt"
 }

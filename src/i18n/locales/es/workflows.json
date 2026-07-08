@@ -544,5 +544,23 @@
     "bevat niet": "no contiene",
     "is leeg": "está vacío",
     "is gevuld": "tiene valor"
+  },
+  "agentTest": {
+    "title": "Variables de prueba",
+    "add": "Añadir",
+    "empty": "Sin variables — aquí puedes sobrescribir entradas de módulos anteriores.",
+    "name": "nombre",
+    "value": "valor",
+    "intro": "Envía un mensaje para probar el agente",
+    "you": "Tú",
+    "agent": "Agente",
+    "thinking": "El agente está pensando...",
+    "tokens": "{{count}} tokens",
+    "tokensTotal": "{{count}} tokens en total",
+    "clear": "Borrar chat",
+    "inputPlaceholder": "Envía un mensaje... (Enter = enviar, Mayús+Enter = nueva línea)",
+    "send": "Enviar",
+    "noConnection": "⚠️ Sin conexión con el agente. Comprueba que el backend esté funcionando.",
+    "removeVariable": "Eliminar variable"
   }
 }

@@ -9,11 +9,13 @@
  * A cookie can ONLY be set by the backend, so this is a coordinated flip:
  *   1. Backend serves the CSRF cookie endpoint + sets the httpOnly auth cookie
  *      on login and accepts the cookie (stateful) on every request.
- *   2. Set VITE_COOKIE_AUTH=true here. The frontend then sends credentials,
- *      primes CSRF before login, and stops touching the token entirely.
- * Until both are done, keep this OFF (default) — behaviour is unchanged.
+ *   2. Set VITE_COOKIE_AUTH here: both sides are live, so cookie is the DEFAULT.
+ *
+ * FAIL-SAFE default (audit H1, 2026-07-08): a missing/typo'd env var must never
+ * silently fall back to the XSS-readable Bearer mode — only an explicit
+ * VITE_COOKIE_AUTH=false (legacy escape hatch, remove with H3) selects Bearer.
  */
-export const COOKIE_AUTH = import.meta.env.VITE_COOKIE_AUTH === 'true'
+export const COOKIE_AUTH = import.meta.env.VITE_COOKIE_AUTH !== 'false'
 
 /**
  * Endpoint that sets the CSRF cookie (Laravel Sanctum default: GET

@@ -178,11 +178,11 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
 
             {loading && (
               <div className="flex items-center justify-center gap-2 py-3" style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                <Loader2 size={13} className="animate-spin" /> Laden…
+                <Loader2 size={13} className="animate-spin" /> {t('loading')}
               </div>
             )}
             {!loading && results.length === 0 && (
-              <div style={{ padding: '12px 10px', fontSize: 12, color: 'var(--text-muted)' }}>Geen bureaus gevonden</div>
+              <div style={{ padding: '12px 10px', fontSize: 12, color: 'var(--text-muted)' }}>{t('noAgencies')}</div>
             )}
           </div>
         </div>

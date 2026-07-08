@@ -5,6 +5,7 @@
  * the response in a chat UI with token + latency stats.
  */
 import { useState, useRef, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Send, Trash2, Plus, X, Loader2, Bot, User, Zap } from 'lucide-react'
 import api from '@/lib/api'
 
@@ -26,6 +27,7 @@ function fmtMs(ms: number) {
 export default function AgentTestPanel({ config }: {
   config?: Record<string, unknown>
 }) {
+  const { t } = useTranslation('workflows')
   const [messages,   setMessages]   = useState<Message[]>([])
   const [input,      setInput]      = useState('')
   const [variables,  setVariables]  = useState<Variable[]>([])
@@ -72,7 +74,7 @@ export default function AgentTestPanel({ config }: {
       // Show a friendly error bubble instead of crashing
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: '⚠️ Geen verbinding met de agent. Controleer of de backend draait (C-28).',
+        content: t('agentTest.noConnection'),
       }])
     } finally {
       setLoading(false)
@@ -88,27 +90,27 @@ export default function AgentTestPanel({ config }: {
       <div style={{ padding: '10px 14px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            Test-variabelen
+            {t('agentTest.title')}
           </span>
           <button onClick={addVariable}
             style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0' }}>
-            <Plus size={11} /> Toevoegen
+            <Plus size={11} /> {t('agentTest.add')}
           </button>
         </div>
         {variables.length === 0 && (
           <p style={{ fontSize: 11, color: 'var(--text-muted)', margin: 0 }}>
-            Geen variabelen — inputs uit eerdere modules kun je hier overschrijven.
+            {t('agentTest.empty')}
           </p>
         )}
         {variables.map((v, i) => (
           <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 4, alignItems: 'center' }}>
             <input value={v.key} onChange={e => updateVariable(i, 'key', e.target.value)}
-              placeholder="naam"
+              placeholder={t('agentTest.name')}
               style={{ flex: 1, padding: '4px 8px', fontSize: 11, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }} />
             <input value={v.value} onChange={e => updateVariable(i, 'value', e.target.value)}
-              placeholder="waarde"
+              placeholder={t('agentTest.value')}
               style={{ flex: 2, padding: '4px 8px', fontSize: 11, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }} />
-            <button onClick={() => removeVariable(i)}
+            <button onClick={() => removeVariable(i)} aria-label={t('agentTest.removeVariable')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
               <X size={11} />
             </button>
@@ -122,7 +124,7 @@ export default function AgentTestPanel({ config }: {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 10, opacity: 0.5 }}>
             <Bot size={32} color="var(--text-muted)" />
             <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', margin: 0 }}>
-              Stuur een bericht om de agent te testen
+              {t('agentTest.intro')}
             </p>
           </div>
         )}
@@ -136,7 +138,7 @@ export default function AgentTestPanel({ config }: {
                   : <Bot size={11} color="var(--color-success)" />}
               </div>
               <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                {msg.role === 'user' ? 'Jij' : (msg.model ?? 'Agent')}
+                {msg.role === 'user' ? t('agentTest.you') : (msg.model ?? t('agentTest.agent'))}
               </span>
             </div>
             {/* Bubble */}
@@ -151,7 +153,7 @@ export default function AgentTestPanel({ config }: {
             {/* Stats under assistant bubble */}
             {msg.role === 'assistant' && (msg.tokens || msg.duration_ms) && (
               <div style={{ display: 'flex', gap: 8, fontSize: 10, color: 'var(--text-muted)', paddingLeft: 4 }}>
-                {msg.tokens && <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}><Zap size={9} />{msg.tokens} tokens</span>}
+                {msg.tokens && <span style={{ display: 'flex', alignItems: 'center', gap: 2 }}><Zap size={9} />{t('agentTest.tokens', { count: msg.tokens })}</span>}
                 {msg.duration_ms && <span>{fmtMs(msg.duration_ms)}</span>}
               </div>
             )}
@@ -160,7 +162,7 @@ export default function AgentTestPanel({ config }: {
         {loading && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 12 }}>
             <Loader2 size={13} className="animate-spin" />
-            Agent denkt na...
+            {t('agentTest.thinking')}
           </div>
         )}
         <div ref={bottomRef} />
@@ -170,13 +172,13 @@ export default function AgentTestPanel({ config }: {
       {totalTokens > 0 && (
         <div style={{ padding: '4px 14px', borderTop: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <span style={{ fontSize: 10, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Zap size={9} /> {totalTokens} tokens totaal
+            <Zap size={9} /> {t('agentTest.tokensTotal', { count: totalTokens })}
           </span>
           <button onClick={clearChat}
             style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
             onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-danger)')}
             onMouseLeave={e => (e.currentTarget.style.color = 'var(--text-muted)')}>
-            <Trash2 size={10} /> Chat wissen
+            <Trash2 size={10} /> {t('agentTest.clear')}
           </button>
         </div>
       )}
@@ -187,11 +189,11 @@ export default function AgentTestPanel({ config }: {
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage() } }}
-          placeholder="Stuur een bericht... (Enter = versturen, Shift+Enter = nieuwe regel)"
+          placeholder={t('agentTest.inputPlaceholder')}
           rows={2}
           style={{ flex: 1, padding: '7px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', resize: 'none', background: 'var(--surface)', color: 'var(--text)', lineHeight: 1.5, fontFamily: 'inherit' }}
         />
-        <button onClick={sendMessage} disabled={!input.trim() || loading}
+        <button onClick={sendMessage} disabled={!input.trim() || loading} aria-label={t('agentTest.send')}
           style={{ width: 36, height: 36, borderRadius: 8, background: input.trim() && !loading ? 'var(--color-primary)' : 'var(--border)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: input.trim() && !loading ? 'pointer' : 'not-allowed', alignSelf: 'flex-end', flexShrink: 0 }}>
           <Send size={14} color="white" />
         </button>

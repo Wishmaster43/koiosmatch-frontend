@@ -160,5 +160,9 @@
     "clickHint": "Klik op de kaart om het middelpunt te verplaatsen",
     "view": "Kaart",
     "pointCount": "{{count}} punten op de kaart"
-  }
+  },
+  "noAccess": "Geen toegang",
+  "noAccessDesc": "Je hebt geen rechten voor deze pagina.",
+  "noAgencies": "Geen bureaus gevonden",
+  "comingSoon": "binnenkort"
 }
