@@ -31,14 +31,15 @@ export function useLastContactTypes() {
     }).catch(() => {})
   }, [])
 
-  // Resolve a stored value/slug to its label (R-2: tenant icon prefixes it).
+  // Resolve a stored value/slug to its label. NEVER prefix `icon` as text: the
+  // backend sends lucide icon NAMES ("building"), which rendered as literal words
+  // in the drawer footer ("building Afspraak") — same bug class as the intake
+  // modal (2026-07-08). Icons render as components where a surface wants them.
   const labelOf = (value?: string | null): string => {
     const v = norm(value)
     if (!v) return ''
     const hit = types.find(x => norm(x.value) === v || norm(x.label) === v)
-    if (!hit) return value ?? ''
-    const icon = typeof hit.icon === 'string' && hit.icon ? `${hit.icon} ` : ''
-    return `${icon}${hit.label}`
+    return hit?.label ?? value ?? ''
   }
 
   return { types, labelOf }

@@ -117,8 +117,9 @@ export default function AddTaskModal({ onClose, onCreated, initial, extraLinks }
           {/* Main form */}
           <div style={{ flex: 1, padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
             <Field label={t('modal.type')} required>
+              {/* Label only — `icon` holds a lucide NAME, never prefix it as text (2026-07-08). */}
               <SelectField value={form.type} onChange={v => set('type', v)} placeholder={t('modal.typePlaceholder')}
-                options={types.map(x => ({ value: x.value, label: x.icon ? `${x.icon} ${x.label}` : x.label }))} style={errors.type ? { borderColor: 'var(--color-danger)' } : {}} />
+                options={types.map(x => ({ value: x.value, label: x.label }))} style={errors.type ? { borderColor: 'var(--color-danger)' } : {}} />
             </Field>
             <Field label={t('modal.titleLabel')} required>
               <TextField value={form.title} onChange={v => set('title', v)} placeholder={t('modal.titlePlaceholder')} error={errors.title} />
