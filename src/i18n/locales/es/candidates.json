@@ -709,5 +709,34 @@
   },
   "map": {
     "pointCount": "{{count}} candidatos en el mapa"
+  },
+  "erase": {
+    "trashView": "Papelera",
+    "markDelete": "Mover a la papelera",
+    "markConfirm": "¿Mover \"{{name}}\" a la papelera? Reversible.",
+    "markedForDeletion": "Movido a la papelera",
+    "markFailed": "Error al mover",
+    "deleteForever": "Eliminar definitivamente",
+    "inTrash": "En la papelera",
+    "inTrashSince": "En la papelera desde {{date}}",
+    "confirmTitle": "¿Eliminar definitivamente?",
+    "confirmBody": "\"{{name}}\" y todos los datos vinculados se eliminarán permanentemente:",
+    "nothingLinked": "Sin datos vinculados.",
+    "irreversible": "Esto no se puede deshacer.",
+    "confirmButton": "Eliminar definitivamente",
+    "item": {
+      "applications": "Postulaciones",
+      "matches": "Matches",
+      "appointments": "Citas",
+      "notes": "Notas",
+      "documents": "Documentos",
+      "tasks": "Tareas",
+      "timeline_events": "Eventos",
+      "conversations": "Conversaciones"
+    }
+  },
+  "lifecycle": {
+    "archived": "Archivado",
+    "pendingErase": "Eliminado"
   }
 }

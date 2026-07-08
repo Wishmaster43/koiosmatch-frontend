@@ -709,5 +709,34 @@
   },
   "map": {
     "pointCount": "{{count}} kandidaten op de kaart"
+  },
+  "erase": {
+    "trashView": "Prullenbak",
+    "markDelete": "Naar prullenbak",
+    "markConfirm": "\"{{name}}\" naar de prullenbak verplaatsen? Dit is herstelbaar.",
+    "markedForDeletion": "Naar prullenbak verplaatst",
+    "markFailed": "Verplaatsen mislukt",
+    "deleteForever": "Definitief verwijderen",
+    "inTrash": "In prullenbak",
+    "inTrashSince": "In prullenbak sinds {{date}}",
+    "confirmTitle": "Definitief verwijderen?",
+    "confirmBody": "\"{{name}}\" en alle gekoppelde gegevens worden permanent verwijderd:",
+    "nothingLinked": "Geen gekoppelde gegevens.",
+    "irreversible": "Dit kan niet ongedaan worden gemaakt.",
+    "confirmButton": "Definitief verwijderen",
+    "item": {
+      "applications": "Sollicitaties",
+      "matches": "Matches",
+      "appointments": "Afspraken",
+      "notes": "Notities",
+      "documents": "Documenten",
+      "tasks": "Taken",
+      "timeline_events": "Tijdlijn-items",
+      "conversations": "Gesprekken"
+    }
+  },
+  "lifecycle": {
+    "archived": "Gearchiveerd",
+    "pendingErase": "Verwijderd"
   }
 }

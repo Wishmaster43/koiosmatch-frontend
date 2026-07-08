@@ -8,7 +8,7 @@
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, AlertTriangle, X, Ban, Archive, Map as MapIcon } from 'lucide-react'
+import { CheckCircle2, AlertTriangle, X, Ban, Archive, Trash2, Map as MapIcon } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -16,6 +16,7 @@ import { useGenders } from '@/lib/useGenders'
 import { useUsers } from '@/lib/queries'
 import api from '@/lib/api'
 import CandidateDrawerJs from './CandidateDrawer'
+import DeletionPreviewModal from './drawer/DeletionPreviewModal'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesTable from './CandidatesTable'
 import CandidatesBulkBar from './CandidatesBulkBar'
@@ -54,7 +55,7 @@ interface AppUser { id: Id; name: string; [k: string]: unknown }
 const CandidateDrawer = CandidateDrawerJs as ComponentType<{
   candidate: Candidate | null; onClose: () => void; expanded: boolean
   onToggleExpand: () => void; onUpdate: (id: Id, patch: Record<string, unknown>) => void
-  onArchive?: (id: Id) => void; onRestore?: (id: Id) => void; onHardDelete?: (id: Id) => void
+  onArchive?: (id: Id) => void; onMarkDeletion?: (id: Id) => void; onRestore?: (id: Id) => void; onHardDelete?: (id: Id) => void
   users: AppUser[]; initialTab?: string
 }>
 const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: unknown[]; clearTitle?: string }>
@@ -97,7 +98,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // ALL filter state + derived filterParams live in one hook (§0.3 size split).
   const {
-    showArchived, setShowArchived,
+    showArchived, setShowArchived, showTrash, setShowTrash,
     selectedStatus, setSelectedStatus, selectedFunnel, setSelectedFunnel,
     selectedType, setSelectedType, selectedOwner, setSelectedOwner,
     selectedGeslacht, setSelectedGeslacht, selectedProvince, setSelectedProvince,
@@ -196,15 +197,19 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
 
   // The only client-side refinement left is the attention tile (no server filter yet).
   const filtered = useMemo(() => {
-    // Archived view shows only archived rows; otherwise archived (soft-deleted) hidden.
-    const base = candidates.filter(c => (showArchived ? c.archived : !c.archived))
+    // Three lifecycle views (ERASE-1): trash = pending_erase, archived = archived,
+    // default = active. include_archived returns archived + trash together, so split here.
+    const base = candidates.filter(c =>
+      showTrash    ? c.lifecycle === 'pending_erase'
+      : showArchived ? c.lifecycle === 'archived'
+      : !c.archived)
     // stale/never keep a page-local refine (correct predicates); no-follow-up has no correct client
     // predicate → it's server-side only (the no_followup param), so don't page-filter it here.
     if (attentionFilter === 'stale6m')        return base.filter(c => isStale(c, staleMonths))
     if (attentionFilter === 'neverContacted') return base.filter(isNeverContacted)
     if (attentionFilter === 'activeConv')     return base.filter(c => c.lastContactAt && new Date(c.lastContactAt).getTime() > convCutoff)
     return base
-  }, [candidates, attentionFilter, showArchived, staleMonths])
+  }, [candidates, attentionFilter, showArchived, showTrash, staleMonths])
 
   // Full-record load + edit persistence (fetch/PATCH live in the hook, §3).
   const { fetchDetail, patchCandidate } = useCandidateRecord()
@@ -259,16 +264,36 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       setActionMsg({ type: 'error', text: t('drawer.restoreFailed') })
     }
   }
-  // PERMANENTLY delete an archived candidate — admin-only (UI-gated in the drawer; the
-  // backend re-checks the role and that nothing live hangs off the record — §3B/§7).
-  const hardDeleteOne = async (id: Id) => {
+  // Move an ARCHIVED candidate to the trash (ERASE-1 stage 2, reversible). The status
+  // becomes 'pending_erase'; a hard delete is a separate, admin-only, irreversible step.
+  const markDeletionOne = async (id: Id) => {
+    try {
+      await api.post(`/candidates/${id}/mark-deletion`, {})
+      setCandidates(p => p.filter(x => x.id !== id))
+      setTotal(v => Math.max(0, v - 1))
+      closeDrawer()
+      setActionMsg({ type: 'success', text: t('erase.markedForDeletion') })
+    } catch {
+      setActionMsg({ type: 'error', text: t('erase.markFailed') })
+    }
+  }
+  // PERMANENT delete — opens the deletion-preview popup first; onConfirm force-deletes.
+  const [eraseTarget, setEraseTarget] = useState<{ id: Id; name: string } | null>(null)
+  const hardDeleteOne = (id: Id) => {
+    const cand = candidates.find(x => x.id === id)
+    setEraseTarget({ id, name: cand?.name ?? '' })
+  }
+  const confirmHardDelete = async () => {
+    if (!eraseTarget) return
+    const id = eraseTarget.id
     try {
       await api.delete(`/candidates/${id}/force`)
       setCandidates(p => p.filter(x => x.id !== id))
       setTotal(v => Math.max(0, v - 1))
-      closeDrawer()
+      setEraseTarget(null); closeDrawer()
       setActionMsg({ type: 'success', text: t('drawer.hardDeleted') })
     } catch {
+      setEraseTarget(null)
       setActionMsg({ type: 'error', text: t('drawer.hardDeleteFailed') })
     }
   }
@@ -391,8 +416,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
                   {/* Shared quick-view toggles (§4 soft convention) — one component everywhere. */}
                   <QuickViewToggle active={blacklistActive} onToggle={toggleBlacklist}
                     label={t('page.blacklistView')} color="var(--color-danger)" icon={Ban} />
-                  <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
+                  <QuickViewToggle active={showArchived} onToggle={() => { setShowArchived(v => !v); setShowTrash(false) }}
                     label={t('page.archivedView')} icon={Archive} />
+                  <QuickViewToggle active={showTrash} onToggle={() => { setShowTrash(v => !v); setShowArchived(false) }}
+                    label={t('erase.trashView')} color="var(--color-danger)" icon={Trash2} />
                   {/* STRAAL-1: table ⇄ map (radius search) — same shared toggle look. */}
                   <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
                     label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
@@ -465,11 +492,18 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           onToggleExpand={() => setDrawerExpanded(v => !v)}
           onUpdate={updateCandidate}
           onArchive={archiveOne}
+          onMarkDeletion={markDeletionOne}
           onRestore={restoreOne}
           onHardDelete={hardDeleteOne}
           users={users}
           initialTab={drawerTab}
         />
+
+        {/* Deletion-preview confirm popup (ERASE-1) — shows the blast radius before force-delete. */}
+        {eraseTarget && (
+          <DeletionPreviewModal candidateId={eraseTarget.id} candidateName={eraseTarget.name}
+            onClose={() => setEraseTarget(null)} onConfirm={confirmHardDelete} />
+        )}
       </div>
     </>
   )

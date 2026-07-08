@@ -709,5 +709,34 @@
   },
   "map": {
     "pointCount": "{{count}} candidats sur la carte"
+  },
+  "erase": {
+    "trashView": "Corbeille",
+    "markDelete": "Mettre à la corbeille",
+    "markConfirm": "Mettre \"{{name}}\" à la corbeille ? Réversible.",
+    "markedForDeletion": "Mis à la corbeille",
+    "markFailed": "Échec du déplacement",
+    "deleteForever": "Supprimer définitivement",
+    "inTrash": "Dans la corbeille",
+    "inTrashSince": "Dans la corbeille depuis {{date}}",
+    "confirmTitle": "Supprimer définitivement ?",
+    "confirmBody": "\"{{name}}\" et toutes les données liées seront supprimés définitivement :",
+    "nothingLinked": "Aucune donnée liée.",
+    "irreversible": "Cette action est irréversible.",
+    "confirmButton": "Supprimer définitivement",
+    "item": {
+      "applications": "Candidatures",
+      "matches": "Matchs",
+      "appointments": "Rendez-vous",
+      "notes": "Notes",
+      "documents": "Documents",
+      "tasks": "Tâches",
+      "timeline_events": "Événements",
+      "conversations": "Conversations"
+    }
+  },
+  "lifecycle": {
+    "archived": "Archivé",
+    "pendingErase": "Supprimé"
   }
 }

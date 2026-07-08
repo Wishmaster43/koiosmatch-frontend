@@ -73,6 +73,7 @@ interface CandidateDrawerProps {
   // Soft-delete → archived (Gearchiveerd view); backend re-checks live links (§3B).
   onArchive?: (id: Id) => void
   // Archived candidates only: bring back (restore) or permanently delete (admin-only, ARCH-2).
+  onMarkDeletion?: (id: Id) => void
   onRestore?: (id: Id) => void
   onHardDelete?: (id: Id) => void
   users?: AppUser[]
@@ -80,7 +81,7 @@ interface CandidateDrawerProps {
   initialTab?: string
 }
 
-export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onRestore, onHardDelete, users = [], initialTab }: CandidateDrawerProps) {
+export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onMarkDeletion, onRestore, onHardDelete, users = [], initialTab }: CandidateDrawerProps) {
   const { settings: cvSettings } = useCvSettings() as { settings?: unknown }
   const { t } = useTranslation('candidates')
   const locale = useLocale() as string
@@ -417,32 +418,42 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         >
           {/* Archived banner (Danny 2026-07-03): when/by whom/why + restore + hard delete
               (admin-only; the backend re-checks and 403s/409s — §7 UI gating is UX only). */}
-          {c.archived && (
+          {c.archived && (() => {
+            const inTrash = c.lifecycle === 'pending_erase'
+            return (
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '7px 10px', borderRadius: 8, fontSize: 12,
               color: 'var(--color-danger)', background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)',
               border: '1px solid color-mix(in srgb, var(--color-danger) 28%, transparent)' }}>
               <span style={{ flex: 1, minWidth: 0 }}>
-                {[
-                  c.archivedAt ? t('drawer.archivedOn', { date: formatDate(c.archivedAt) }) : t('drawer.archivedFlag'),
-                  c.archivedBy ? t('drawer.byWho', { name: c.archivedBy }) : null,
-                  c.archiveReason,
-                ].filter(Boolean).join(' · ')}
+                {inTrash
+                  ? [c.pendingEraseAt ? t('erase.inTrashSince', { date: formatDate(c.pendingEraseAt) }) : t('erase.inTrash'), c.archivedBy ? t('drawer.byWho', { name: c.archivedBy }) : null].filter(Boolean).join(' · ')
+                  : [c.archivedAt ? t('drawer.archivedOn', { date: formatDate(c.archivedAt) }) : t('drawer.archivedFlag'), c.archivedBy ? t('drawer.byWho', { name: c.archivedBy }) : null, c.archiveReason].filter(Boolean).join(' · ')}
               </span>
+              {/* Herstellen (both states) */}
               {onRestore && (
                 <button onClick={() => onRestore(c.id)} title={t('drawer.restore')} aria-label={t('drawer.restore')}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-primary)' }}>
                   <RotateCcw size={14} />
                 </button>
               )}
-              {onHardDelete && canHardDelete && (
-                <button onClick={() => { if (confirm(t('drawer.hardDeleteConfirm', { name: c.name }))) onHardDelete(c.id) }}
-                  title={t('drawer.hardDelete')} aria-label={t('drawer.hardDelete')}
+              {/* Archived → move to trash (reversible); Trash → permanent delete (admin, preview popup). */}
+              {!inTrash && onMarkDeletion && (
+                <button onClick={() => { if (confirm(t('erase.markConfirm', { name: c.name }))) onMarkDeletion(c.id) }}
+                  title={t('erase.markDelete')} aria-label={t('erase.markDelete')}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-danger)' }}>
                   <Trash2 size={14} />
                 </button>
               )}
+              {inTrash && onHardDelete && canHardDelete && (
+                <button onClick={() => onHardDelete(c.id)}
+                  title={t('drawer.hardDelete')} aria-label={t('drawer.hardDelete')}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--color-danger)', border: 'none', borderRadius: 6, cursor: 'pointer', padding: '3px 8px', color: '#fff', fontSize: 11, fontWeight: 600 }}>
+                  <Trash2 size={12} /> {t('erase.deleteForever')}
+                </button>
+              )}
             </div>
-          )}
+            )
+          })()}
         </EntityHeader>
       )}
     />

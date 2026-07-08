@@ -3,6 +3,7 @@ import type { ComponentType, CSSProperties } from 'react'
 import { Target, Phone, CalendarPlus, Sparkles, Mail, MessageCircle, PhoneCall, Building2, Video, FileText, HelpCircle } from 'lucide-react' // HelpCircle = fallback for unknown contact channel
 import DataTable from '@/components/ui/DataTable'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
+import SoftChip from '@/components/ui/SoftChip'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
@@ -123,8 +124,13 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
     {
       // Deployability ("status": Beschikbaar/Geplaatst/…) — model v2 axis.
       key: 'status', header: t('columns.deployability'), sortable: true, sortValue: c => c.status ? statusMeta(c.status).label : '',
-      // The entry-phase/no-status dash rule lives inside the shared chip (C-CHIP).
-      render: c => <CandidateStatusChip status={c.status} phase={c.phase} plain={!colorStatus} />,
+      // Lifecycle wins in the archived/trash views (ERASE-1): show a Gearchiveerd/
+      // Verwijderd chip instead of the deployability status. Otherwise the shared chip.
+      render: c => c.lifecycle === 'pending_erase'
+        ? <SoftChip label={t('lifecycle.pendingErase')} color="var(--color-danger)" />
+        : c.lifecycle === 'archived'
+          ? <SoftChip label={t('lifecycle.archived')} color="var(--text-muted)" />
+          : <CandidateStatusChip status={c.status} phase={c.phase} plain={!colorStatus} />,
     },
     { key: 'created', header: t('columns.createdAt'), nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.created, render: c => formatDate(c.created) },
     {

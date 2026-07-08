@@ -147,6 +147,10 @@ export interface Candidate {
   summary: string
   tags: string[]
   archived: boolean
+  // ERASE-1 lifecycle: 'active' | 'archived' | 'pending_erase' (trash). Drives the
+  // status-column chip + which delete/restore actions the drawer shows.
+  lifecycle: string
+  pendingEraseAt: string | null
   // Archive audit (ARCH-2): when / by whom / why — feeds the drawer's archived banner.
   archivedAt: string | null
   archivedBy: string | null
@@ -219,6 +223,7 @@ export interface ApiCandidate {
   funnel_type?: string
   stage?: string
   lifecycle?: string
+  pending_erase_at?: string | null
   funnel_label?: string | null
   funnel_color?: string | null
   funnel_vacancy_id?: string | number

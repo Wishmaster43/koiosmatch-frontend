@@ -130,6 +130,10 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     // "Gearchiveerd" view opts in via ?include_archived=1. When/by whom/why feed the
     // drawer's archived banner (ARCH-2) — graceful null until the backend delivers.
     archived:        !!(c.deleted_at ?? c.archived),
+    // ERASE-1 two-stage lifecycle: 'active' | 'archived' | 'pending_erase' (trash).
+    // Derived server-side from deleted_at + pending_erase_at (one source, no drift).
+    lifecycle:       (c.lifecycle as string) ?? (c.pending_erase_at ? 'pending_erase' : (c.deleted_at || c.archived) ? 'archived' : 'active'),
+    pendingEraseAt:  (c.pending_erase_at as string | null | undefined) ?? null,
     archivedAt:      (c.deleted_at as string | null | undefined) ?? (c.archived_at as string | null | undefined) ?? null,
     archivedBy:      (typeof c.deleted_by === 'object'
       ? (c.deleted_by as { name?: string } | null)?.name ?? null

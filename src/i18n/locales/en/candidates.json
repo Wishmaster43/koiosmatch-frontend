@@ -709,5 +709,34 @@
   },
   "map": {
     "pointCount": "{{count}} candidates on the map"
+  },
+  "erase": {
+    "trashView": "Trash",
+    "markDelete": "Move to trash",
+    "markConfirm": "Move \"{{name}}\" to the trash? This is reversible.",
+    "markedForDeletion": "Moved to trash",
+    "markFailed": "Move failed",
+    "deleteForever": "Delete permanently",
+    "inTrash": "In trash",
+    "inTrashSince": "In trash since {{date}}",
+    "confirmTitle": "Delete permanently?",
+    "confirmBody": "\"{{name}}\" and all linked data will be permanently deleted:",
+    "nothingLinked": "No linked data.",
+    "irreversible": "This cannot be undone.",
+    "confirmButton": "Delete permanently",
+    "item": {
+      "applications": "Applications",
+      "matches": "Matches",
+      "appointments": "Appointments",
+      "notes": "Notes",
+      "documents": "Documents",
+      "tasks": "Tasks",
+      "timeline_events": "Timeline events",
+      "conversations": "Conversations"
+    }
+  },
+  "lifecycle": {
+    "archived": "Archived",
+    "pendingErase": "Deleted"
   }
 }

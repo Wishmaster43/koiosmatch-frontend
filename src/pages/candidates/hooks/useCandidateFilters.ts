@@ -27,6 +27,8 @@ interface UseCandidateFiltersArgs {
 export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius, setMapCenter, setMapRadius }: UseCandidateFiltersArgs) {
   // Archived (soft-deleted) view toggle — opts the list into ?include_archived=1.
   const [showArchived, setShowArchived] = usePageMemory('cand.archived', false)
+  // Prullenbak (ERASE-1 pending_erase) view — same server include, filtered by lifecycle.
+  const [showTrash, setShowTrash] = usePageMemory('cand.trash', false)
   // Server-side filter dimensions (the API supports these). Owner holds owner_ids.
   const [selectedStatus,   setSelectedStatus]   = usePageMemory<string[]>('cand.status', [])
   const [selectedFunnel,   setSelectedFunnel]   = usePageMemory<string[]>('cand.funnel', [])
@@ -59,7 +61,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
   const clearGeo = () => { setGeoFilter(null); setGeoHint(null) }
 
   // Anything narrowing the default view → the shared clear-button shows; one click resets.
-  const anyFilterActive = Boolean(globalSearch.trim() || attentionFilter || dateRange || showArchived || geoFilter
+  const anyFilterActive = Boolean(globalSearch.trim() || attentionFilter || dateRange || showArchived || showTrash || geoFilter
     || selectedStatus.length || selectedFunnel.length || selectedType.length || selectedOwner.length
     || selectedGeslacht.length || selectedProvince.length || selectedTitle.length || selectedLocation.length
     || selectedPool.length || selectedCity.length || selectedSource.length)
@@ -67,7 +69,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1)
-    setGlobalSearch(''); setAttentionFilter(null); setDateRange(null); setShowArchived(false)
+    setGlobalSearch(''); setAttentionFilter(null); setDateRange(null); setShowArchived(false); setShowTrash(false)
     setSelectedStatus([]); setSelectedFunnel([]); setSelectedType([]); setSelectedOwner([])
     setSelectedGeslacht([]); setSelectedProvince([]); setSelectedTitle([]); setSelectedLocation([])
     setSelectedPool([]); setSelectedCity([]); setSelectedSource([]); clearGeo()
@@ -93,7 +95,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
     if (selectedPool.length)     p.pool           = selectedPool
     if (selectedCity.length)     p.city           = selectedCity
     if (selectedSource.length)   p.source         = selectedSource
-    if (showArchived)            p.include_archived = 1
+    if (showArchived || showTrash) p.include_archived = 1
     // "> N months no contact" filters server-wide via last_contact_between at the configured
     // threshold; never-contacted + no-follow-up send server params too (BE KPI-2a).
     if (attentionFilter === 'stale6m') {
@@ -107,11 +109,11 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
     // Period-click date range; set last so it wins over stale6m if both target last_contact.
     if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     return p
-  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, selectedPool, selectedCity, selectedSource, showArchived, attentionFilter, dateRange, staleMonths, view, mapCenter, mapRadius, geoFilter])
+  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, selectedPool, selectedCity, selectedSource, showArchived, showTrash, attentionFilter, dateRange, staleMonths, view, mapCenter, mapRadius, geoFilter])
   const filterKey = JSON.stringify(filterParams)
 
   return {
-    showArchived, setShowArchived,
+    showArchived, setShowArchived, showTrash, setShowTrash,
     selectedStatus, setSelectedStatus, selectedFunnel, setSelectedFunnel,
     selectedType, setSelectedType, selectedOwner, setSelectedOwner,
     selectedGeslacht, setSelectedGeslacht, selectedProvince, setSelectedProvince,

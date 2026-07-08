@@ -709,5 +709,34 @@
   },
   "map": {
     "pointCount": "{{count}} Kandidaten auf der Karte"
+  },
+  "erase": {
+    "trashView": "Papierkorb",
+    "markDelete": "In den Papierkorb",
+    "markConfirm": "\"{{name}}\" in den Papierkorb verschieben? Umkehrbar.",
+    "markedForDeletion": "In den Papierkorb verschoben",
+    "markFailed": "Verschieben fehlgeschlagen",
+    "deleteForever": "Endgültig löschen",
+    "inTrash": "Im Papierkorb",
+    "inTrashSince": "Im Papierkorb seit {{date}}",
+    "confirmTitle": "Endgültig löschen?",
+    "confirmBody": "\"{{name}}\" und alle verknüpften Daten werden dauerhaft gelöscht:",
+    "nothingLinked": "Keine verknüpften Daten.",
+    "irreversible": "Dies kann nicht rückgängig gemacht werden.",
+    "confirmButton": "Endgültig löschen",
+    "item": {
+      "applications": "Bewerbungen",
+      "matches": "Matches",
+      "appointments": "Termine",
+      "notes": "Notizen",
+      "documents": "Dokumente",
+      "tasks": "Aufgaben",
+      "timeline_events": "Timeline-Einträge",
+      "conversations": "Gespräche"
+    }
+  },
+  "lifecycle": {
+    "archived": "Archiviert",
+    "pendingErase": "Gelöscht"
   }
 }
