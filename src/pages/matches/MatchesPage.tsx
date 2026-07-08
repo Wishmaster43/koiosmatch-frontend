@@ -48,7 +48,10 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // KPI attention toggle (Gem. score → only scored matches).
   const [kpiScored, setKpiScored] = usePageMemory('matches.scored', false)
   const [ownerFilter, setOwnerFilter] = usePageMemory<string[]>('matches.owner', [])
+  const [clientFilter, setClientFilter] = usePageMemory<string[]>('matches.client', [])
   const [query,       setQuery]       = usePageMemory('matches.search', '')
+  // Start of the current month, captured once (purity — feeds the "Nieuw" KPI).
+  const [monthStart] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0); return d.getTime() })
   // Bulk selection (checkboxes); accumulates across pages, clears on filter change.
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
   const { toggleRow, toggleAll, bulkCoupleHelloFlex, bulkCoupleShiftManager } =
@@ -80,6 +83,13 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     return Object.values(m)
   }, [rows])
 
+  // Client distribution (3rd donut) — palette per client (Danny: 9 KPIs everywhere).
+  const clientData = useMemo(() => {
+    const m: Record<string, { name: string; key: string; value: number }> = {}
+    rows.forEach(r => { if (r.client && r.client !== '—') (m[r.client] ??= { name: r.client, key: r.client, value: 0 }).value++ })
+    return Object.values(m)
+  }, [rows])
+
   // Multi-select toggle for the right-panel filter groups (add/remove a value).
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string | number) =>
     set(p => p.includes(String(v)) ? p.filter(x => x !== String(v)) : [...p, String(v)])
@@ -93,7 +103,10 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     { key: 'owner', label: t('filters.owner'), selected: ownerFilter,
       options: ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })),
       onToggle: tog(setOwnerFilter) },
-  ], [t, stageFilter, ownerFilter, stageData, ownerData])
+    { key: 'client', label: t('insights.client'), selected: clientFilter,
+      options: clientData.map(d => ({ value: d.key, label: d.name, count: d.value })),
+      onToggle: tog(setClientFilter) },
+  ], [t, stageFilter, ownerFilter, clientFilter, stageData, ownerData, clientData])
 
   // Register/unregister the filters in the right panel.
   useEffect(() => {
@@ -112,10 +125,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       if (stageFilter.length && !stageFilter.includes(r.status)) return false
       if (kpiScored && typeof r.score !== 'number') return false
       if (ownerFilter.length && !ownerFilter.includes(r.owner)) return false
+      if (clientFilter.length && !clientFilter.includes(r.client)) return false
       if (q && ![r.candidate, r.vacancy, r.client].some(v => String(v ?? '').toLowerCase().includes(q))) return false
       return true
     })
-  }, [rows, stageFilter, ownerFilter, kpiScored, query])
+  }, [rows, stageFilter, ownerFilter, clientFilter, kpiScored, query])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
@@ -126,6 +140,9 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const activeCount = rows.filter(r => !isClosed(r)).length
   const closedCount = rows.filter(isClosed).length
   const avgScore    = rows.length ? Math.round(rows.reduce((s, r) => s + (r.score ?? 0), 0) / rows.length) : null
+  // New this month + matches still lacking a score (both derived from the rows).
+  const newThisMonthCount = rows.filter(r => r.date && new Date(r.date).getTime() >= monthStart).length
+  const unscoredCount     = rows.filter(r => typeof r.score !== 'number').length
 
   // Donuts drive the stage/owner filters; each clears its own selection.
   const insightDonuts: DonutSpec[] = [
@@ -133,14 +150,16 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       active: stageFilter.length > 0, onClear: () => setStageFilter([]) },
     { key: 'owner', title: t('insights.owner'), data: ownerData, onPick: pickOne(setOwnerFilter),
       active: ownerFilter.length > 0, onClear: () => setOwnerFilter([]) },
+    { key: 'client', title: t('insights.client'), data: clientData, onPick: pickOne(setClientFilter),
+      active: clientFilter.length > 0, onClear: () => setClientFilter([]) },
   ]
 
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(query.trim() || showArchived || kpiScored || stageFilter.length || ownerFilter.length)
+  const anyFilterActive = Boolean(query.trim() || showArchived || kpiScored || stageFilter.length || ownerFilter.length || clientFilter.length)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setQuery(''); setShowArchived(false); setKpiScored(false)
-    setStageFilter([]); setOwnerFilter([])
+    setStageFilter([]); setOwnerFilter([]); setClientFilter([])
   }
 
   // KPI clicks drive the existing stage filter (chip + clear come for free);
@@ -150,13 +169,18 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const closedStages = [...new Set(rows.filter(isClosed).map(r => r.status).filter(Boolean))]
   const toggleStages = (labels: string[]) => { if (labels.length) setStageFilter(p => (eqSet(p, labels) ? [] : labels)) }
   const insightKpis: KpiSpec[] = [
+    // Totaal is the neutral card: clicking clears, but it never shows as "aan"
+    // (the default highlight read as an active filter — Danny 2026-07-06).
     { key: 'total',    label: t('kpi.total'),    value: rows.length, color: 'var(--color-primary)',
-      onClick: () => { setStageFilter([]); setOwnerFilter([]); setKpiScored(false) },
-      active: stageFilter.length === 0 && ownerFilter.length === 0 && !kpiScored },
+      onClick: () => { setStageFilter([]); setOwnerFilter([]); setKpiScored(false) } },
     { key: 'active',   label: t('kpi.active'),   value: activeCount, color: 'var(--color-primary)',
       onClick: () => toggleStages(activeStages), active: stageFilter.length > 0 && eqSet(stageFilter, activeStages) },
     { key: 'closed',   label: t('kpi.closed'),   value: closedCount, color: 'var(--color-success)',
       onClick: () => toggleStages(closedStages), active: stageFilter.length > 0 && eqSet(stageFilter, closedStages) },
+    { key: 'newThisMonth', label: t('kpi.newThisMonth'), value: newThisMonthCount, color: 'var(--color-primary)',
+      onClick: () => { setStageFilter([]); setOwnerFilter([]); setClientFilter([]); setKpiScored(false) } },
+    { key: 'unscored', label: t('kpi.unscored'), value: unscoredCount, color: 'var(--color-warning)',
+      onClick: () => setKpiScored(false) },
     { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore != null ? `${avgScore}%` : '—', color: 'var(--color-primary)',
       onClick: () => setKpiScored(v => !v), active: kpiScored },
   ]

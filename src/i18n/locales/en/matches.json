@@ -17,14 +17,17 @@
     "stage": "Stage",
     "owner": "Owner",
     "clearFilter": "Clear filter",
-    "status": "Status"
+    "status": "Status",
+    "client": "Client"
   },
   "kpi": {
     "total": "Total",
     "active": "Active",
     "hired": "Hired",
     "avgScore": "Avg score",
-    "closed": "Closed"
+    "closed": "Closed",
+    "newThisMonth": "New this month",
+    "unscored": "Unscored"
   },
   "add": {
     "button": "New match",

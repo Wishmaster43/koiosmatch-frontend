@@ -17,14 +17,17 @@
     "stage": "Fase",
     "owner": "Responsable",
     "clearFilter": "Borrar filtro",
-    "status": "Estado"
+    "status": "Estado",
+    "client": "Cliente"
   },
   "kpi": {
     "total": "Total",
     "active": "Activo",
     "hired": "Contratado",
     "avgScore": "Puntuación media",
-    "closed": "Cerrados"
+    "closed": "Cerrados",
+    "newThisMonth": "Nuevo este mes",
+    "unscored": "Sin puntuación"
   },
   "add": {
     "button": "Nuevo match",

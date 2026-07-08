@@ -17,14 +17,17 @@
     "stage": "Fase",
     "owner": "Eigenaar",
     "clearFilter": "Filter wissen",
-    "status": "Status"
+    "status": "Status",
+    "client": "Klant"
   },
   "kpi": {
     "total": "Totaal",
     "active": "Actief",
     "hired": "Aangenomen",
     "avgScore": "Gem. score",
-    "closed": "Afgesloten"
+    "closed": "Afgesloten",
+    "newThisMonth": "Nieuw deze maand",
+    "unscored": "Zonder score"
   },
   "add": {
     "button": "Nieuwe match",
