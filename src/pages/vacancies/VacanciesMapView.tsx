@@ -8,13 +8,15 @@ import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
 import type { Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
-export default function VacanciesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onPick }: {
+export default function VacanciesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onPick, padded }: {
   rows: Vacancy[]
   center: { lat: number; lng: number }
   radiusKm: number
   onCenterChange: (lat: number, lng: number) => void
   onRadiusChange: (km: number) => void
   onPick: (id: Id) => void
+  // Off when the host embeds the panel in the split (map | table) layout.
+  padded?: boolean
 }) {
   const { t } = useTranslation(['vacancies', 'common'])
 
@@ -28,7 +30,7 @@ export default function VacanciesMapView({ rows, center, radiusKm, onCenterChang
     }))
 
   return (
-    <RadiusMapPanel points={points} center={center} radiusKm={radiusKm}
+    <RadiusMapPanel points={points} center={center} radiusKm={radiusKm} padded={padded}
       onCenterChange={onCenterChange} onRadiusChange={onRadiusChange} onPick={onPick}
       pointsLabel={t('vacancies:map.pointCount', { count: points.length })} />
   )

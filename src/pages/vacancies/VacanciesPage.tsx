@@ -250,14 +250,13 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginLeft: 'auto' }}>
-              {/* Map quick-view — self-lights once the API sends coordinates (STRAAL-2). */}
-              {(view === 'map' || vacancies.some(v => typeof v.lat === 'number')) && (
-                <QuickViewToggle active={view === 'map'} onToggle={() => setView(x => (x === 'map' ? 'table' : 'map'))}
-                  label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
-              )}
               {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
               <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
                 label={t('page.archivedView')} icon={Archive} />
+              {/* STRAAL-1: table ⇄ map (radius search) — always shown, mirroring the
+                  candidate blueprint (the API ships lat/lng + distance_km now). */}
+              <QuickViewToggle active={view === 'map'} onToggle={() => setView(x => (x === 'map' ? 'table' : 'map'))}
+                label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
               {buckets.map(b => (
                 <button key={b.value} onClick={() => setStatusBucket(b.value)}
                   style={{ padding: '5px 14px', fontSize: 13, fontWeight: statusBucket === b.value ? 600 : 400, borderRadius: 7, cursor: 'pointer',
@@ -286,12 +285,29 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
             </div>
           )}
 
+          {/* Map view (STRAAL-1 v2, mirrors candidates): map LEFT, the filtered vacancy
+              table RIGHT — one radius search drives both panes. Lazy Leaflet load. */}
           {view === 'map' ? (
-            <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
-              <VacanciesMapView rows={vacancies} center={mapCenter} radiusKm={mapRadius}
-                onCenterChange={(lat, lng) => setMapCenter({ lat, lng })} onRadiusChange={setMapRadius}
-                onPick={id => selectVacancy({ id } as Parameters<typeof selectVacancy>[0])} />
-            </Suspense>
+            <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
+              <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
+                <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
+                  <VacanciesMapView rows={vacancies} padded={false} center={mapCenter} radiusKm={mapRadius}
+                    onCenterChange={(lat, lng) => setMapCenter({ lat, lng })} onRadiusChange={setMapRadius}
+                    onPick={id => selectVacancy({ id } as Parameters<typeof selectVacancy>[0])} />
+                </Suspense>
+              </div>
+              {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
+              <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
+                  {error && (
+                    <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
+                  )}
+                  <VacanciesTable rows={vacancies} loading={loading} selectedId={selected?.id} onSelect={selectVacancy} />
+                </div>
+                <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                  onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
+              </div>
+            </div>
           ) : (
             <>
               {/* Table */}

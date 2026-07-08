@@ -8,7 +8,7 @@ import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
-export default function CustomersMapView({ rows, statusColor, center, radiusKm, onCenterChange, onRadiusChange, onPick }: {
+export default function CustomersMapView({ rows, statusColor, center, radiusKm, onCenterChange, onRadiusChange, onPick, padded }: {
   rows: Customer[]
   // Status → colour resolver from the page's lookup (stable per render is fine here).
   statusColor: (v: Customer['status']) => string | undefined
@@ -17,6 +17,8 @@ export default function CustomersMapView({ rows, statusColor, center, radiusKm, 
   onCenterChange: (lat: number, lng: number) => void
   onRadiusChange: (km: number) => void
   onPick: (id: Id) => void
+  // Off when the host embeds the panel in the split (map | table) layout.
+  padded?: boolean
 }) {
   const { t } = useTranslation(['customers', 'common'])
 
@@ -30,7 +32,7 @@ export default function CustomersMapView({ rows, statusColor, center, radiusKm, 
     }))
 
   return (
-    <RadiusMapPanel points={points} center={center} radiusKm={radiusKm}
+    <RadiusMapPanel points={points} center={center} radiusKm={radiusKm} padded={padded}
       onCenterChange={onCenterChange} onRadiusChange={onRadiusChange} onPick={onPick}
       pointsLabel={t('customers:map.pointCount', { count: points.length })} />
   )

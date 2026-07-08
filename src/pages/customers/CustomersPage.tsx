@@ -27,6 +27,7 @@ import { useCustomersData } from './hooks/useCustomersData'
 import { useCustomerRecord } from './hooks/useCustomerRecord'
 import { useCustomerBulkActions } from './hooks/useCustomerBulkActions'
 import type { Id } from '@/types/common'
+import type { Customer } from '@/types/customer'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
 const CustomersMapView = lazy(() => import('./CustomersMapView'))
@@ -40,6 +41,17 @@ const pickKey = (d: unknown): string | undefined => {
   return o?.key ?? o?.payload?.key ?? o?.name
 }
 const toggleOneValue = (set: Dispatch<SetStateAction<string[]>>, value: string) => set(p => (p.length === 1 && p[0] === value) ? [] : [value])
+
+// KPI-card filter predicates (pure row checks) — rows with ≥1 of the counted thing,
+// or, for "zonder contactpersoon", exactly 0 (Danny: every card must DO something).
+const KPI_PRED: Record<string, (c: Customer) => boolean> = {
+  locations:   c => c.locationsCount > 0,
+  departments: c => c.departmentsCount > 0,
+  contacts:    c => c.contactsCount > 0,
+  openVac:     c => c.openVacanciesCount > 0,
+  active:      c => c.activeMatchesCount > 0,
+  noContact:   c => c.contactsCount === 0,
+}
 
 export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation(['customers', 'common'])
@@ -188,14 +200,12 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
     setSelectedStatus([]); setSelectedOwner([]); setSelectedCity([]); setSelectedIndustry([]); setGeoFilter(null); setGeoHint(null); setPage(1)
   }
 
-  const KPI_PRED: Record<string, (c: (typeof customers)[number]) => boolean> = {
-    locations:   c => c.locationsCount > 0,
-    departments: c => c.departmentsCount > 0,
-    contacts:    c => c.contactsCount > 0,
-    openVac:     c => c.openVacanciesCount > 0,
-    active:      c => c.activeMatchesCount > 0,
-    noContact:   c => c.contactsCount === 0,
-  }
+  // One visible-rows list for BOTH the table and the map pane (STRAAL-1 split view):
+  // archived quick-view + the client-side KPI refine narrow whatever the server returned.
+  const visibleRows = useMemo(() =>
+    customers.filter(c => (showArchived ? c.archived : !c.archived)).filter(c => !kpiFilter || KPI_PRED[kpiFilter]?.(c)),
+  [customers, showArchived, kpiFilter])
+
   const totalLocations   = stats?.locations   ?? customers.reduce((s, c) => s + c.locationsCount, 0)
   const totalDepartments = stats?.departments ?? customers.reduce((s, c) => s + c.departmentsCount, 0)
   const totalContacts    = stats?.contacts    ?? customers.reduce((s, c) => s + c.contactsCount, 0)
@@ -258,31 +268,50 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                 <HeaderSearch key={searchEpoch} onSearch={setGlobalSearch} defaultValue={globalSearch}
                   placeholder={t('page.searchPlaceholder')} width={300} />
                 <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
-                {/* Map + archived quick-views on the right — shared toggles (§4). */}
+                {/* Archived + map quick-views on the right — shared toggles (§4), map last
+                    to mirror the candidate blueprint's toggle order (§3A). */}
                 <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
-                  <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
-                    label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
                   <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
                     label={t('page.archivedView')} icon={Archive} />
+                  <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
+                    label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
                 </div>
               </>
             )}
           </div>
 
+          {/* Map view (STRAAL-1 v2, mirrors candidates): map LEFT, the filtered customer
+              table RIGHT — one radius search drives both panes. Lazy Leaflet load. */}
           {view === 'map' ? (
-            <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
-              <CustomersMapView rows={customers.filter(c => (showArchived ? c.archived : !c.archived))}
-                statusColor={v => statusMeta(String(v)).color} center={mapCenter} radiusKm={mapRadius}
-                onCenterChange={(lat, lng) => setMapCenter({ lat, lng })} onRadiusChange={setMapRadius}
-                onPick={id => selectCustomer({ id } as Parameters<typeof selectCustomer>[0])} />
-            </Suspense>
+            <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
+              <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
+                <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
+                  <CustomersMapView rows={visibleRows} padded={false}
+                    statusColor={v => statusMeta(String(v)).color} center={mapCenter} radiusKm={mapRadius}
+                    onCenterChange={(lat, lng) => setMapCenter({ lat, lng })} onRadiusChange={setMapRadius}
+                    onPick={id => selectCustomer({ id } as Parameters<typeof selectCustomer>[0])} />
+                </Suspense>
+              </div>
+              {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
+              <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
+                  {error && (
+                    <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
+                  )}
+                  <CustomersTable rows={visibleRows} loading={loading} selectedId={selected?.id}
+                    onSelect={selectCustomer} statusMeta={statusMeta} />
+                </div>
+                <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                  onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
+              </div>
+            </div>
           ) : (
             <>
               <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 24px 16px' }}>
                 {error && (
                   <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
                 )}
-                <CustomersTable rows={customers.filter(c => (showArchived ? c.archived : !c.archived)).filter(c => !kpiFilter || KPI_PRED[kpiFilter]?.(c))} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
+                <CustomersTable rows={visibleRows} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
                   statusMeta={statusMeta} selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
                   stickyHeader scrollParentRef={tableScrollRef} />
               </div>
