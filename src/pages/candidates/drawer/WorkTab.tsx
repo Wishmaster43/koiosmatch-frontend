@@ -6,7 +6,7 @@ import StatusPill from '@/components/ui/StatusPill'
 import AddApplicationModal from './AddApplicationModal'
 import PlanIntakeModal from './PlanIntakeModal'
 import type { ExistingAppointment } from './PlanIntakeModal'
-import AddMatchModal from './AddMatchModal'
+import MatchPlacementModal from './MatchPlacementModal'
 import api from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from './constants'
@@ -154,7 +154,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
 
       {modal === 'apply'  && <AddApplicationModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
-      {modal === 'match'  && <AddMatchModal       candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
+      {modal === 'match'  && <MatchPlacementModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {editAppt && <PlanIntakeModal candidateId={c.id} existing={editAppt} onClose={() => setEditAppt(null)} onCreated={reload} />}
     </div>
   )
