@@ -494,7 +494,12 @@
     "supportedApps": "Applications prises en charge",
     "errSetup": "Impossible de démarrer la configuration MFA.",
     "errInvalidRetry": "Code invalide. Veuillez réessayer.",
-    "errInvalid": "Code invalide."
+    "errInvalid": "Code invalide.",
+    "retry": "Réessayer",
+    "enforceSection": "Politique de l'organisation",
+    "enforceTitle": "MFA obligatoire pour tout le monde",
+    "enforceDesc": "Chaque utilisateur de cette organisation doit configurer l'authentification à deux facteurs avant de pouvoir continuer à travailler.",
+    "enforceError": "Échec de l'enregistrement. Veuillez réessayer."
   },
   "email": {
     "title": "Paramètres e-mail",

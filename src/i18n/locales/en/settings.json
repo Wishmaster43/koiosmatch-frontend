@@ -653,7 +653,12 @@
     "supportedApps": "Supported apps",
     "errSetup": "Could not start MFA setup.",
     "errInvalidRetry": "Invalid code. Please try again.",
-    "errInvalid": "Invalid code."
+    "errInvalid": "Invalid code.",
+    "retry": "Try again",
+    "enforceSection": "Organisation policy",
+    "enforceTitle": "Require MFA for everyone",
+    "enforceDesc": "Every user in this organisation must set up two-factor authentication before they can continue working.",
+    "enforceError": "Saving failed. Please try again."
   },
   "email": {
     "title": "Email settings",

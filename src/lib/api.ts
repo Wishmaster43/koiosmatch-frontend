@@ -5,6 +5,7 @@ import axios, {
 } from 'axios'
 import type { ListResult, PaginationMeta } from '../types/api'
 import { CSRF_COOKIE_URL } from './authMode'
+import { isMfaEnrollmentError } from './mfaGate'
 import { notifyError } from './notify'
 
 /**
@@ -160,6 +161,15 @@ api.interceptors.response.use(
     // visible (this is why saves "silently" don't persist). GET stays quiet (loads degrade).
     if (import.meta.env.DEV && method !== 'get' && status && status !== 401 && !benignTenants403 && !benignUnavailable) {
       notifyError(`API ${method.toUpperCase()} ${safeUrl} → ${status}`)
+    }
+
+    // MFA enforcement (MFA-ENF): a 403 with code mfa_enrollment_required means the
+    // tenant admin flipped mfa.enforced while this user was logged in without MFA.
+    // Signal AuthContext to refresh /auth/me so the enrollment gate takes over
+    // immediately (instead of at the next boot). Once per session is enough.
+    if (isMfaEnrollmentError(error) && !sessionStorage.getItem('km_mfa_gate')) {
+      sessionStorage.setItem('km_mfa_gate', '1')
+      window.dispatchEvent(new CustomEvent('km:mfa-enrollment-required'))
     }
 
     const isAuthCall = url.includes('/auth/login') || url.includes('/auth/me')

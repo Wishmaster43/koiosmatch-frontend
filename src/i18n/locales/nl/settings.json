@@ -653,7 +653,12 @@
     "supportedApps": "Ondersteunde apps",
     "errSetup": "Kon MFA setup niet starten.",
     "errInvalidRetry": "Ongeldige code. Probeer opnieuw.",
-    "errInvalid": "Ongeldige code."
+    "errInvalid": "Ongeldige code.",
+    "retry": "Opnieuw proberen",
+    "enforceSection": "Organisatiebeleid",
+    "enforceTitle": "MFA verplicht voor iedereen",
+    "enforceDesc": "Elke gebruiker in deze organisatie moet twee-factor verificatie instellen voordat hij verder kan werken.",
+    "enforceError": "Opslaan mislukt. Probeer het opnieuw."
   },
   "email": {
     "title": "E-mail instellingen",

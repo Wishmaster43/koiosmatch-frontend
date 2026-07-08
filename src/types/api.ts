@@ -43,6 +43,8 @@ export interface User {
   roles?: Array<string | { name: string; permissions?: Named[]; dashboard_type?: string }>
   permissions?: Named[]
   mfa_enabled?: boolean
+  // True when the tenant enforces MFA (mfa.enforced) and this user must enroll first.
+  mfa_setup_required?: boolean
   tenant?: Tenant
   accessible_pages?: string[]
 }

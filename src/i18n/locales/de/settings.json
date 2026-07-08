@@ -494,7 +494,12 @@
     "supportedApps": "Unterstützte Apps",
     "errSetup": "MFA-Einrichtung konnte nicht gestartet werden.",
     "errInvalidRetry": "Ungültiger Code. Bitte erneut versuchen.",
-    "errInvalid": "Ungültiger Code."
+    "errInvalid": "Ungültiger Code.",
+    "retry": "Erneut versuchen",
+    "enforceSection": "Organisationsrichtlinie",
+    "enforceTitle": "MFA für alle verpflichtend",
+    "enforceDesc": "Jeder Benutzer dieser Organisation muss die Zwei-Faktor-Authentifizierung einrichten, bevor er weiterarbeiten kann.",
+    "enforceError": "Speichern fehlgeschlagen. Bitte erneut versuchen."
   },
   "email": {
     "title": "E-Mail-Einstellungen",

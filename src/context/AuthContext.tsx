@@ -152,6 +152,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('km:auth-expired', onExpired)
   }, [])
 
+  // MFA enforcement mid-session (MFA-ENF): api.ts fires this on the first 403 with
+  // code mfa_enrollment_required. Re-fetching /auth/me sets mfa_setup_required on
+  // the user, which flips App.tsx's ProtectedRoute into the enrollment gate.
+  useEffect(() => {
+    const onMfaRequired = () => {
+      api.get('/auth/me').then(res => applyAuthResponse(res.data)).catch(() => {})
+    }
+    window.addEventListener('km:mfa-enrollment-required', onMfaRequired)
+    return () => window.removeEventListener('km:mfa-enrollment-required', onMfaRequired)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Startup: restore session ─────────────────────────────────────────────────
   // The httpOnly cookie is invisible to JS; the NEUTRAL km_session flag (never
   // the profile — D1 keeps PII out of localStorage) is the "there was a session"
@@ -284,6 +295,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('active_tenant')
     localStorage.removeItem('accessible_pages')
     localStorage.removeItem('km_session')
+    // Allow the MFA-gate signal to fire again in a fresh session (see api.ts).
+    sessionStorage.removeItem('km_mfa_gate')
     setUser(null)
     setActiveTenantState(null)
     setTenants([])

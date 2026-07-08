@@ -494,7 +494,12 @@
     "supportedApps": "Apps compatibles",
     "errSetup": "No se pudo iniciar la configuración de MFA.",
     "errInvalidRetry": "Código no válido. Inténtalo de nuevo.",
-    "errInvalid": "Código no válido."
+    "errInvalid": "Código no válido.",
+    "retry": "Intentar de nuevo",
+    "enforceSection": "Política de la organización",
+    "enforceTitle": "MFA obligatorio para todos",
+    "enforceDesc": "Cada usuario de esta organización debe configurar la autenticación de dos factores antes de poder seguir trabajando.",
+    "enforceError": "No se pudo guardar. Inténtalo de nuevo."
   },
   "email": {
     "title": "Configuración de correo",
