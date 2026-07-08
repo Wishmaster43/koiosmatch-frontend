@@ -3,6 +3,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
+import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -98,13 +99,12 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
         </span>
       ) },
     { key: 'client', header: t('cols.client'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
-    // Candidate lifecycle status — soft pill (or plain text when the toggle is off).
+    // Candidate deployability status — the ONE shared chip (C-CHIP): slug drives the
+    // model-v2 rules (Lead→dash, blacklist), with the pre-resolved label/colour as
+    // fallback until the /applications resource exposes the slug (BE gap filed).
     { key: 'status', header: t('cols.status'), sortable: true, sortValue: r => r.candidateStatusLabel,
-      render: r => !r.candidateStatusLabel
-        ? <span style={{ color: 'var(--text-muted)' }}>—</span>
-        : colorStatus
-          ? <StatusPill label={r.candidateStatusLabel} color={r.candidateStatusColor} />
-          : <span style={plainCell}>{r.candidateStatusLabel}</span> },
+      render: r => <CandidateStatusChip status={r.candidateStatus} phase={r.candidatePhase}
+        fallbackLabel={r.candidateStatusLabel} fallbackColor={r.candidateStatusColor} plain={!colorStatus} /> },
   ]
 
   return (

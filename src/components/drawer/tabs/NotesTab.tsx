@@ -5,13 +5,14 @@
  */
 import { useState } from 'react'
 import type { CSSProperties, ReactNode, ComponentType } from 'react'
-import { Plus, Edit2, Save, X, Mail, PhoneCall, MessageCircle, Building2, Video, FileText } from 'lucide-react'
+import { Plus, Edit2, Save, X, Mail, PhoneCall, MessageCircle, Building2, Video, FileText, History } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import SafeHtml from '@/components/ui/SafeHtml'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SectionCard, { sectionBlock } from '@/components/ui/SectionCard'
 import { useDateFormat } from '@/lib/datetime'
 import { initialsOf } from '@/lib/initials'
+import { SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
 
 interface NoteType { value: string; label: string; color?: string }
 interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; [k: string]: unknown }
@@ -75,6 +76,9 @@ export default function NotesTab({
   const noteEditor = (n: NoteItem) =>
     (typeof n.updated_by === 'object' ? n.updated_by?.name : n.updated_by) ?? n.edited_by ?? ''
   const noteEdited = (n: NoteItem) => Boolean(noteEditor(n) && n.updated_at && n.updated_at !== n.created_at)
+  // System notes (backend-written status/phase changes) render as a calm event row —
+  // no avatar, no edit pencil, just the "Statuswissel" chip + who/when (N-1-FE).
+  const isSystemNote = (n: NoteItem) => Boolean(n.is_system) || SYSTEM_NOTE_TYPES.has(String(n.type ?? ''))
 
   const reset = () => { setAdding(false); setEditingIdx(null); setBody(''); setTitle(''); setType(noteTypes[0]?.value ?? ''); setChannel(''); setExpanded(false) }
   const openEdit = (i: number) => {
@@ -182,6 +186,19 @@ export default function NotesTab({
           ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.notesEmpty}</div>
           : notes.map((n, i) => {
               const who = noteAuthor(n)
+              // System event (status/phase change) — calm one-line row, no avatar/pencil.
+              if (isSystemNote(n)) return (
+                <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 10, alignItems: 'center' }}>
+                  <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', color: 'var(--text-muted)' }}>
+                    <History size={13} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px' }}>
+                    {n.type && renderTypeChip(n.type)}
+                    <SafeHtml style={{ fontSize: 12, color: 'var(--text)', flex: 1, minWidth: 0 }} html={n.text ?? n.body ?? ''} />
+                    <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{who ? `${who} · ` : ''}{noteWhen(n)}</span>
+                  </div>
+                </div>
+              )
               return (
               <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
                 <Avatar initials={who ? initialsOf(who) : authorInitials} size={26} />

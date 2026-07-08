@@ -22,7 +22,14 @@ export const DEFAULT_NOTE_TYPES: LookupOption[] = [
   { value: 'appointment', label: 'Afspraak' },
   { value: 'followup',    label: 'Follow-up' },
   { value: 'warning',     label: 'Waarschuwing' },
+  // System note the backend writes on every status/phase change (N-1) — seeded here
+  // with a neutral slate so the "Statuswissel" chip resolves even before /note-types loads.
+  { value: 'status_change', label: 'Statuswissel', color: '#64748B' },
 ]
+
+// Note types the backend writes automatically (not hand-authored) — rendered as a
+// calm system-event row in the thread, never with an edit pencil (N-1-FE).
+export const SYSTEM_NOTE_TYPES = new Set(['status_change'])
 
 const norm = (s?: unknown) => (s ?? '').toString().trim().toLowerCase()
 

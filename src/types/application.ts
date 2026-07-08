@@ -30,6 +30,10 @@ export interface Application {
   owner: ApplicationOwner
   candidateStatusLabel: string
   candidateStatusColor: string
+  // Raw candidate status/phase slugs (when the API exposes them) — let the shared
+  // CandidateStatusChip apply the model-v2 rules; empty falls back to label/colour.
+  candidateStatus: string
+  candidatePhase: string
   created: string
   isNew: boolean
   // Detached (soft-deleted) — the row is kept server-side but hidden from the
@@ -73,6 +77,7 @@ export interface ApplicationDetail extends Application {
 /** A raw candidate as the API nests it under an application. */
 export interface ApiAppCandidate {
   id?: Id; name?: string; first_name?: string; last_name?: string
+  status?: string; phase?: string
   status_label?: string; status_color?: string
   function_title?: string; title?: string
   gender?: string; nationality?: string; date_of_birth?: string; dob?: string
@@ -117,6 +122,8 @@ export interface ApiApplication {
   owner?: { id?: Id; name?: string; avatar_color?: string | null }
   owner_id?: Id
   owner_name?: string
+  candidate_status?: string
+  candidate_phase?: string
   candidate_status_label?: string
   candidate_status_color?: string
   created_at?: string

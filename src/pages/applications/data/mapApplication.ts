@@ -44,6 +44,9 @@ export function mapApplication(a: ApiApplication = {}): Application {
     },
     candidateStatusLabel: a.candidate_status_label ?? cand.status_label ?? '',
     candidateStatusColor: a.candidate_status_color ?? cand.status_color ?? '#9CA3AF',
+    // Slugs when present (drives the shared chip's model-v2 rules); empty otherwise.
+    candidateStatus: (a.candidate_status ?? cand.status ?? '') as string,
+    candidatePhase: (a.candidate_phase ?? cand.phase ?? '') as string,
     created: a.created_at ?? a.applied_at ?? '',
     isNew: Boolean(a.is_new ?? false),
     // Detached rows arrive only with `?include_archived=1`; flag via deleted_at.
