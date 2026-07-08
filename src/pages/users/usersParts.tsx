@@ -25,12 +25,16 @@ type TFunc = (key: string, opts?: Record<string, unknown>) => string
 // Resolve a role reference to its name (a bare-string role is its own name).
 export const roleName = (r: RoleRef): string | undefined => typeof r === 'string' ? r : r.name
 
-// Role → colour + icon. Label = t('users.roles.<name>') (default → user).
-const ROLE_META: Record<string, { color: string; bg: string; icon: LucideIcon }> = {
-  super_admin:   { color: '#7C3AED', bg: '#F5F3FF', icon: ShieldCheck },
-  tenant_admin:  { color: '#1D4ED8', bg: 'var(--color-secondary-bg)', icon: Shield },
-  planner:       { color: '#065F46', bg: '#ECFDF5', icon: User },
-  default:       { color: '#6B7280', bg: '#F9FAFB', icon: User },
+// Super-admin accent colour — data (role palette), also used by the "system" badge.
+export const SUPER_ADMIN_COLOR = '#7C3AED'
+
+// Role → fallback colour + icon (data palette; a backend-supplied role colour wins).
+// Label = t('users.roles.<name>') (default → user).
+const ROLE_META: Record<string, { color: string; icon: LucideIcon }> = {
+  super_admin:   { color: SUPER_ADMIN_COLOR, icon: ShieldCheck },
+  tenant_admin:  { color: '#1D4ED8', icon: Shield },
+  planner:       { color: '#065F46', icon: User },
+  default:       { color: '#6B7280', icon: User },
 }
 const roleLabel = (t: TFunc, name: string) => t(`users.roles.${name === 'default' ? 'user' : name}`, { defaultValue: name })
 
@@ -96,15 +100,15 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
         <RoleBadge role="default" />
       )}
 
-      {/* Change role button */}
+      {/* Change role button — design tokens so it themes per tenant/dark mode */}
       <button ref={btnRef} onClick={toggle} disabled={saving}
         title={t('changeRole')} aria-label={t('changeRole')}
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
-                 width: 22, height: 22, borderRadius: 6, border: '1px solid #E5E7EB',
-                 background: open ? '#F3F4F6' : 'white', cursor: 'pointer',
-                 color: '#9CA3AF', marginLeft: 2 }}
+                 width: 22, height: 22, borderRadius: 6, border: '1px solid var(--border)',
+                 background: open ? 'var(--hover-bg)' : 'var(--surface)', cursor: 'pointer',
+                 color: 'var(--text-muted)', marginLeft: 2 }}
         onMouseEnter={e => (e.currentTarget.style.color = 'var(--color-primary)')}
-        onMouseLeave={e => !open && (e.currentTarget.style.color = '#9CA3AF')}>
+        onMouseLeave={e => !open && (e.currentTarget.style.color = 'var(--text-muted)')}>
         {saving
           ? <Loader2 size={11} style={{ animation: 'spin 1s linear infinite' }} />
           : <ChevronDown size={11} />}
@@ -114,14 +118,14 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
         <>
           <div onClick={() => setOpen(false)} style={{ position: 'fixed', inset: 0, zIndex: 60 }} />
           <div style={{ position: 'fixed', top: menuPos.top, left: menuPos.left, zIndex: 61,
-                         background: 'white', border: '1px solid #E5E7EB', borderRadius: 10,
+                         background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
                          boxShadow: '0 4px 20px rgba(0,0,0,0.1)', minWidth: 160, overflow: 'hidden' }}>
-            <div style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, color: '#9CA3AF',
-                           textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid #F3F4F6' }}>
+            <div style={{ padding: '6px 10px', fontSize: 10, fontWeight: 700, color: 'var(--text-muted)',
+                           textTransform: 'uppercase', letterSpacing: '0.06em', borderBottom: '1px solid var(--border)' }}>
               {t('changeRole')}
             </div>
             {availableRoles.length === 0 && (
-              <div style={{ padding: '10px 12px', fontSize: 12, color: '#9CA3AF' }}>{t('noRoles')}</div>
+              <div style={{ padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>{t('noRoles')}</div>
             )}
             {availableRoles.map(role => {
               const meta    = ROLE_META[role.name] ?? ROLE_META.default
@@ -130,11 +134,11 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
                 <button key={role.id} onClick={() => assign(role.id)}
                   style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8,
                            padding: '9px 12px', border: 'none', textAlign: 'left', cursor: 'pointer',
-                           background: isCurrent ? '#F9FAFB' : 'white',
-                           fontSize: 13, color: isCurrent ? 'var(--color-primary)' : '#374151',
+                           background: isCurrent ? 'var(--hover-bg)' : 'transparent',
+                           fontSize: 13, color: isCurrent ? 'var(--color-primary)' : 'var(--text)',
                            fontWeight: isCurrent ? 600 : 400 }}
-                  onMouseEnter={e => { if (!isCurrent) e.currentTarget.style.background = '#F9FAFB' }}
-                  onMouseLeave={e => { if (!isCurrent) e.currentTarget.style.background = 'white' }}>
+                  onMouseEnter={e => { if (!isCurrent) e.currentTarget.style.background = 'var(--hover-bg)' }}
+                  onMouseLeave={e => { if (!isCurrent) e.currentTarget.style.background = 'transparent' }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%',
                                  background: meta.color, flexShrink: 0 }} />
                   {roleLabel(t, role.name)}
