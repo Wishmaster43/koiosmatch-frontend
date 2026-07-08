@@ -98,14 +98,13 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { hasModule, isSuperAdmin, hasRole } = useAuth() as unknown as { hasModule: (m: string) => boolean; isSuperAdmin: () => boolean; hasRole: (r: string) => boolean }
   // Hard delete is admin-only (Danny 2026-07-03) — the backend re-checks (§7: UI gating is UX).
   const canHardDelete = isSuperAdmin() || hasRole('admin')
-  // Conditional tabs: Match only when the candidate has (had) a match or
-  // application; Freelance (zzp) only when flagged ZZP; Planning behind its module.
-  const hasMatchOrApplication = !!(c?.matches?.length || c?.applications?.length)
   // Freelance (ZZP) tab shows when the candidate holds the freelance/ZZP type.
   const isFreelancer = (c?.candidateTypes ?? []).some(v => ZZP_TYPE_SLUGS.includes(v))
   const tabs = TABS.filter(tab => {
     if (tab.id === 'planning')       return hasModule('plan')
-    if (tab.id === 'work')           return hasMatchOrApplication
+    // Match tab is ALWAYS shown (2026-07-08): it holds the "+ Solliciteren" /
+    // "+ Intake plannen" actions, so a Lead with no application yet still needs it —
+    // hiding it until an application existed made the entry point unreachable.
     if (tab.id === 'administration') return isFreelancer
     return true
   })
