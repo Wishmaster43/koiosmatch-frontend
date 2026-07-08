@@ -5,7 +5,7 @@
  */
 
 // One outgoing edge of a step: a target step id + an optional edge filter.
-export interface StepConnection { target?: string | number | null; filters?: unknown; source_handle?: string; target_handle?: string }
+export interface StepConnection { target?: string | number | null; filters?: unknown; source_handle?: string; target_handle?: string; label?: string | null }
 
 // A normalized step in the editor graph.
 export interface WorkflowStep {
@@ -80,7 +80,8 @@ export interface FlowEdge {
   sourceHandle?: string
   targetHandle?: string
   type?: string
-  data?: { filters?: unknown }
+  // filters = the route condition; label = the route name (Router, Make-style).
+  data?: { filters?: unknown; label?: string }
   [k: string]: unknown
 }
 

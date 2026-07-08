@@ -40,7 +40,7 @@ export function stepsToFlow(steps: WorkflowStep[]): { nodes: FlowNode[]; edges: 
   const edges: FlowEdge[] = hasGraph
     ? steps.flatMap(s => (s.next ?? []).map(n => ({
         ...mkEdge(s.id, n.target, n.source_handle ?? 'out', n.target_handle ?? 'in'),
-        data: n.filters ? { filters: n.filters } : undefined,
+        data: (n.filters || n.label) ? { filters: n.filters, label: n.label ?? undefined } : undefined,
       })))
     : steps.slice(0, -1).map((s, i) => mkEdge(s.id, steps[i + 1].id))
   // Drop dangling edges (an endpoint that isn't a node — e.g. a stale client id
@@ -74,6 +74,7 @@ export function flowToSteps(nodes: FlowNode[], edges: FlowEdge[]): WorkflowStep[
     next:     edges.filter(e => e.source === n.id && validIds.has(e.target)).map(e => ({
       target:        e.target,
       filters:       e.data?.filters ?? null,
+      label:         e.data?.label ?? null,
       source_handle: (e.sourceHandle as string | undefined) ?? 'out',
       target_handle: (e.targetHandle as string | undefined) ?? 'in',
     })),
