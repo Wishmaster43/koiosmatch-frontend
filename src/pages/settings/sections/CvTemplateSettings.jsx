@@ -35,6 +35,7 @@ const PREVIEW_CANDIDATE = {
 }
 
 // Live HTML mock of the PDF; `t` is the candidates translate fn (cv.* labels).
+// Print palette + accent defaults/presets are fixed CV data (mirrors the always-light PDF, independent of app theme) — hexes stay literal by design.
 function CvHtmlPreview({ settings, t }) {
   const color1  = settings.primaryColor   ?? '#19A5CA'
   const color2  = settings.secondaryColor ?? '#1B60A9'
@@ -292,7 +293,7 @@ export default function CvTemplateSettings() {
               <div key={sec.id} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 0',
                 borderBottom: idx < settings.sections.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <button onClick={() => handleSectionToggle(sec.id)}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', color: sec.enabled ? 'var(--color-primary)' : '#D1D5DB', flexShrink: 0 }}>
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', color: sec.enabled ? 'var(--color-primary)' : 'color-mix(in srgb, var(--text-muted) 55%, transparent)', flexShrink: 0 }}>
                   {sec.enabled ? <ToggleRight size={22} /> : <ToggleLeft size={22} />}
                 </button>
                 <span style={{ flex: 1, fontSize: 12, color: sec.enabled ? 'var(--text)' : 'var(--text-muted)', fontWeight: sec.enabled ? 500 : 400 }}>
@@ -301,12 +302,12 @@ export default function CvTemplateSettings() {
                 <div style={{ display: 'flex', gap: 2 }}>
                   <button onClick={() => handleSectionMove(sec.id, -1)} disabled={idx === 0}
                     style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, cursor: idx === 0 ? 'not-allowed' : 'pointer',
-                      padding: '2px 5px', color: idx === 0 ? '#D1D5DB' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                      padding: '2px 5px', color: idx === 0 ? 'color-mix(in srgb, var(--text-muted) 55%, transparent)' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
                     <ChevronUp size={11} />
                   </button>
                   <button onClick={() => handleSectionMove(sec.id, 1)} disabled={idx === settings.sections.length - 1}
                     style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 4, cursor: idx === settings.sections.length - 1 ? 'not-allowed' : 'pointer',
-                      padding: '2px 5px', color: idx === settings.sections.length - 1 ? '#D1D5DB' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                      padding: '2px 5px', color: idx === settings.sections.length - 1 ? 'color-mix(in srgb, var(--text-muted) 55%, transparent)' : 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
                     <ChevronDown size={11} />
                   </button>
                 </div>

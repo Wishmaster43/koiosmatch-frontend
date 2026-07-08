@@ -20,8 +20,9 @@ function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('reports')
   const styles: Record<string, { bg: string; color: string }> = {
     actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
-    nietactief: { bg: 'var(--color-warning-bg)', color: '#C2410C' },
-    extern:     { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
+    nietactief: { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
+    extern:     { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
+    // Intake keeps a literal violet hue — no violet design token exists yet.
     intake:     { bg: '#FAF5FF', color: '#7C3AED' },
     verwijderd: { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)' },
   }
@@ -171,9 +172,9 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
 
       {/* Formula explanation */}
       <div style={{ display: 'flex', gap: 8, padding: '10px 12px', borderRadius: 8,
-                    background: '#F0F7FF', border: '1px solid #BFDBFE', marginBottom: 16 }}>
+                    background: 'var(--color-secondary-bg)', border: '1px solid color-mix(in srgb, var(--color-secondary) 30%, transparent)', marginBottom: 16 }}>
         <Info size={14} color="var(--color-secondary)" style={{ flexShrink: 0, marginTop: 1 }} />
-        <div style={{ fontSize: 12, color: '#1D4ED8', lineHeight: 1.5 }}>
+        <div style={{ fontSize: 12, color: 'var(--color-secondary)', lineHeight: 1.5 }}>
           <strong>{t('drilldown.calcLabel')}</strong>{' '}
           {t('drilldown.calcBody', { year: currentYear, month: monthName(currentMonth).toLowerCase(), total: totalNew, months: monthsWithData.length, avg })}
           <br />{t('drilldown.kpiGoal', { target: KPI_TARGET })}
@@ -221,14 +222,14 @@ function AverageBreakdown({ candidates, KPI_TARGET, onSelect }: { candidates: Re
               onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelMonth(m.month) } }}
               style={{
                 padding: '7px 10px', borderRadius: 7, cursor: 'pointer',
-                background: sel ? 'var(--color-primary-bg)' : m.isCurrent ? '#F0F9FF' : 'var(--hover-bg)',
-                border: `1px solid ${sel ? 'var(--color-primary)' : m.isCurrent ? '#BAE6FD' : 'var(--border)'}`,
+                background: sel ? 'var(--color-primary-bg)' : m.isCurrent ? 'var(--color-info-bg)' : 'var(--hover-bg)',
+                border: `1px solid ${sel ? 'var(--color-primary)' : m.isCurrent ? 'color-mix(in srgb, var(--color-info) 30%, transparent)' : 'var(--border)'}`,
               }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                <span style={{ width: 70, fontSize: 12, color: m.isCurrent ? '#0369A1' : 'var(--text)',
+                <span style={{ width: 70, fontSize: 12, color: m.isCurrent ? 'var(--color-info)' : 'var(--text)',
                                 fontWeight: m.isCurrent ? 600 : 400 }}>
                   {m.label.slice(0, 3)}
-                  {m.isCurrent && <span style={{ fontSize: 10, marginLeft: 4, color: '#0369A1' }}>▶</span>}
+                  {m.isCurrent && <span style={{ fontSize: 10, marginLeft: 4, color: 'var(--color-info)' }}>▶</span>}
                 </span>
                 <div style={{ flex: 1, height: 6, background: 'var(--border)', borderRadius: 999, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${pct}%`, background: barColor,
@@ -331,7 +332,7 @@ export default function KpiDrillDownDrawer({ mode, title, candidates = [], onClo
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             {mode !== 'average' && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px',
-                            borderRadius: 6, background: '#F0F7FF', border: '1px solid #BFDBFE' }}>
+                            borderRadius: 6, background: 'var(--color-secondary-bg)', border: '1px solid color-mix(in srgb, var(--color-secondary) 30%, transparent)' }}>
                 <TrendingUp size={11} color="var(--color-secondary)" />
                 <span style={{ fontSize: 11, color: 'var(--color-secondary)', fontWeight: 500 }}>
                   {t('drilldown.kpiPerMonth', { target: KPI_TARGET })}

@@ -6,16 +6,17 @@ import { useTranslation } from 'react-i18next'
 
 // Log type → badge colour. Label = t('audit.logName.<key>').
 export const LOG_NAME_META = {
-  auth:      { bg: 'var(--color-secondary-bg)', color: '#1D4ED8' },
-  http:      { bg: '#F1F5F9', color: '#475569' },
+  auth:      { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
+  http:      { bg: 'var(--hover-bg)', color: 'var(--text-muted)' },
   sync:      { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
+  // roles/modules/ai keep literal violet hues — no violet design token exists yet (follow-up: add one).
   roles:     { bg: '#F5F3FF', color: '#6D28D9' },
-  settings:  { bg: '#ECFDF5', color: '#059669' },
-  users:     { bg: 'var(--color-warning-bg)', color: '#C2410C' },
-  apps:      { bg: 'var(--color-warning-bg)', color: '#B45309' },
+  settings:  { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
+  users:     { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
+  apps:      { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
   modules:   { bg: '#F5F3FF', color: '#7C3AED' },
-  workflows: { bg: '#ECFDF5', color: '#0F766E' },
-  webhooks:  { bg: '#F0F9FF', color: '#0369A1' },
+  workflows: { bg: 'var(--color-primary-bg)', color: 'var(--color-primary)' },
+  webhooks:  { bg: 'var(--color-info-bg)', color: 'var(--color-info)' },
   ai:        { bg: '#FDF4FF', color: '#9333EA' },
 }
 

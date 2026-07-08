@@ -21,13 +21,13 @@ const pickLabel = (l, lang, key) => l ? (l[lang] ?? l[lang.split('-')[0]] ?? l.e
 const toField = (d, lang) => ({ ...d, label: pickLabel(d.label_i18n, lang, d.key), has_data: !!d.in_use })
 
 const cardStyle = {
-  background: 'white', border: '1px solid #F3F4F6', borderRadius: 10, padding: '14px 16px', marginBottom: 8,
+  background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '14px 16px', marginBottom: 8,
 }
 const inputStyle = {
   padding: '6px 10px', fontSize: 13, borderRadius: 6, border: '1px solid var(--border)',
   background: 'var(--input-bg)', color: 'var(--text)', outline: 'none', width: '100%', boxSizing: 'border-box',
 }
-const labelStyle = { fontSize: 11, fontWeight: 600, color: '#9CA3AF', display: 'block', marginBottom: 4 }
+const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
 
 export default function CandidateCustomFieldsSettings() {
   const { t, i18n } = useTranslation('settings')
@@ -123,7 +123,7 @@ export default function CandidateCustomFieldsSettings() {
 
   const setEF = (id, k, v) => setEditForms(p => ({ ...p, [id]: { ...(p[id] ?? {}), [k]: v } }))
 
-  if (loading) return <div style={{ padding: 24, color: '#9CA3AF', fontSize: 13 }}>{t('common.loading')}</div>
+  if (loading) return <div style={{ padding: 24, color: 'var(--text-muted)', fontSize: 13 }}>{t('common.loading')}</div>
 
   return (
     <div style={{ maxWidth: 640 }}>
@@ -145,11 +145,11 @@ export default function CandidateCustomFieldsSettings() {
               {/* Reorder arrows */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 <button onClick={() => reorder(field.id, -1)} disabled={idx === 0}
-                  style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'default' : 'pointer', color: '#D1D5DB', padding: 0, lineHeight: 1 }}>
+                  style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'default' : 'pointer', color: 'color-mix(in srgb, var(--text-muted) 55%, transparent)', padding: 0, lineHeight: 1 }}>
                   <ChevronUp size={13} />
                 </button>
                 <button onClick={() => reorder(field.id, 1)} disabled={idx === fields.length - 1}
-                  style={{ background: 'none', border: 'none', cursor: idx === fields.length - 1 ? 'default' : 'pointer', color: '#D1D5DB', padding: 0, lineHeight: 1 }}>
+                  style={{ background: 'none', border: 'none', cursor: idx === fields.length - 1 ? 'default' : 'pointer', color: 'color-mix(in srgb, var(--text-muted) 55%, transparent)', padding: 0, lineHeight: 1 }}>
                   <ChevronDown size={13} />
                 </button>
               </div>
@@ -157,29 +157,29 @@ export default function CandidateCustomFieldsSettings() {
               {/* Label + meta */}
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{field.label}</div>
-                <div style={{ fontSize: 11, color: '#9CA3AF' }}>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                   <code style={{ fontFamily: 'JetBrains Mono, monospace' }}>{field.key}</code>
                   {' · '}{t(`candidateCustomFields.types.${field.type}`)}
-                  {field.has_data && <span style={{ color: '#F59E0B', marginLeft: 6 }}>· {t('candidateCustomFields.hasData')}</span>}
+                  {field.has_data && <span style={{ color: 'var(--color-warning)', marginLeft: 6 }}>· {t('candidateCustomFields.hasData')}</span>}
                 </div>
               </div>
 
               {/* Active toggle */}
               <button onClick={() => toggleActive(field)} title={field.active ? t('candidateCustomFields.deactivate') : t('candidateCustomFields.activate')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: field.active ? 'var(--color-primary)' : '#9CA3AF', padding: 4 }}>
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: field.active ? 'var(--color-primary)' : 'var(--text-muted)', padding: 4 }}>
                 {field.active ? <Eye size={14} /> : <EyeOff size={14} />}
               </button>
 
               {/* Expand / collapse */}
               <button onClick={() => setExpanded(isOpen ? null : field.id)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF', padding: 4 }}>
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
                 {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
               </button>
             </div>
 
             {/* Expanded edit form */}
             {isOpen && (
-              <div style={{ marginTop: 14, borderTop: '1px solid #F3F4F6', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <div style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {/* Label */}
                 <div>
                   <label style={labelStyle}>{t('candidateCustomFields.label')}</label>
@@ -188,13 +188,13 @@ export default function CandidateCustomFieldsSettings() {
 
                 {/* Key (immutable) */}
                 <div>
-                  <label style={labelStyle}>{t('candidateCustomFields.key')} <span style={{ color: '#9CA3AF', fontWeight: 400 }}>({t('candidateCustomFields.immutable')})</span></label>
+                  <label style={labelStyle}>{t('candidateCustomFields.key')} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({t('candidateCustomFields.immutable')})</span></label>
                   <input value={field.key} disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
                 </div>
 
                 {/* Type — disabled if has_data */}
                 <div>
-                  <label style={labelStyle}>{t('candidateCustomFields.type')} {field.has_data && <span style={{ color: '#F59E0B', fontWeight: 400 }}>({t('candidateCustomFields.hasData')})</span>}</label>
+                  <label style={labelStyle}>{t('candidateCustomFields.type')} {field.has_data && <span style={{ color: 'var(--color-warning)', fontWeight: 400 }}>({t('candidateCustomFields.hasData')})</span>}</label>
                   <select value={currentType} onChange={e => setEF(field.id, 'type', e.target.value)}
                     disabled={field.has_data} style={{ ...inputStyle, cursor: field.has_data ? 'not-allowed' : 'pointer', opacity: field.has_data ? 0.5 : 1 }}>
                     {FIELD_TYPES.map(tp => <option key={tp} value={tp}>{t(`candidateCustomFields.types.${tp}`)}</option>)}
@@ -207,7 +207,7 @@ export default function CandidateCustomFieldsSettings() {
                     <label style={labelStyle}>{t('candidateCustomFields.options')}</label>
                     <input value={ef.options ?? (field.options ?? []).join(', ')} onChange={e => setEF(field.id, 'options', e.target.value)}
                       placeholder={t('candidateCustomFields.optionsPlaceholder')} style={inputStyle} />
-                    <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3 }}>{t('candidateCustomFields.optionsHint')}</p>
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('candidateCustomFields.optionsHint')}</p>
                   </div>
                 )}
 
@@ -216,13 +216,13 @@ export default function CandidateCustomFieldsSettings() {
                   <button onClick={() => handleDelete(field)} disabled={field.has_data || saving === field.id}
                     title={field.has_data ? t('candidateCustomFields.deleteBlocked') : t('candidateCustomFields.delete')}
                     style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12,
-                             borderRadius: 6, border: '1px solid #FCA5A5', background: field.has_data ? '#F9FAFB' : '#FEF2F2',
-                             color: field.has_data ? '#9CA3AF' : '#EF4444', cursor: field.has_data ? 'not-allowed' : 'pointer' }}>
+                             borderRadius: 6, border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', background: field.has_data ? 'var(--hover-bg)' : 'var(--color-danger-bg)',
+                             color: field.has_data ? 'var(--text-muted)' : 'var(--color-danger)', cursor: field.has_data ? 'not-allowed' : 'pointer' }}>
                     <Trash2 size={12} /> {t('candidateCustomFields.delete')}
                   </button>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button onClick={() => setExpanded(null)}
-                      style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'white', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                      style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
                       {t('common.cancel')}
                     </button>
                     <button onClick={() => handleSave(field)} disabled={saving === field.id}
@@ -265,12 +265,12 @@ export default function CandidateCustomFieldsSettings() {
                 <label style={labelStyle}>{t('candidateCustomFields.options')}</label>
                 <input value={newForm.options} onChange={e => setNewForm(p => ({ ...p, options: e.target.value }))}
                   placeholder={t('candidateCustomFields.optionsPlaceholder')} style={inputStyle} />
-                <p style={{ fontSize: 11, color: '#9CA3AF', marginTop: 3 }}>{t('candidateCustomFields.optionsHint')}</p>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('candidateCustomFields.optionsHint')}</p>
               </div>
             )}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
               <button onClick={() => setAdding(false)}
-                style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'white', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
                 {t('common.cancel')}
               </button>
               <button onClick={handleCreate} disabled={!newForm.label.trim() || saving === 'new'}
@@ -283,7 +283,7 @@ export default function CandidateCustomFieldsSettings() {
       ) : (
         <button onClick={() => setAdding(true)}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 13, borderRadius: 8,
-                   border: '1px dashed #D1D5DB', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', width: '100%', justifyContent: 'center' }}>
+                   border: '1px dashed var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', width: '100%', justifyContent: 'center' }}>
           <Plus size={14} /> {t('candidateCustomFields.add')}
         </button>
       )}
