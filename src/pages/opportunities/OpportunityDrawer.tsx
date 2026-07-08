@@ -43,7 +43,7 @@ export default function OpportunityDrawer({
   opportunity: o, onClose, expanded, onToggleExpand, onUpdate, stages = [], users = [],
 }: OpportunityDrawerProps) {
   const { t } = useTranslation('opportunities')
-  const { formatDate } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
 
   // Inline title edit — reset when a different opportunity is shown (render-time pattern).
   const [editing,    setEditing]    = useState(false)
@@ -106,7 +106,7 @@ export default function OpportunityDrawer({
       entity={o}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDate(o.date) || '—' })}</span>}
+      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDateTime(o.date) })}</span>}
       tabs={tabs}
       header={() => (
         <EntityHeader

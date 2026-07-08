@@ -53,7 +53,7 @@ interface VacancyDrawerProps {
 export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, users = [] }: VacancyDrawerProps) {
   const { t } = useTranslation('vacancies')
   const { statuses } = useVacancyLookups()
-  const { formatDate } = useDateFormat()
+  const { formatDateTime } = useDateFormat()
   // The Extra tab only shows when the tenant has defined vacancy custom fields.
   const { fields: customFieldDefs } = useVacancyCustomFields()
   const visibleTabs = TABS.filter(tab => tab.id !== 'extra' || customFieldDefs.length > 0)
@@ -80,7 +80,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
       entity={v}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDate(v.created) || '—' })}</span>}
+      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDateTime(v.created) })}</span>}
       tabs={visibleTabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: () => tab.render(v, onUpdate) }))}
       header={() => (
         <>

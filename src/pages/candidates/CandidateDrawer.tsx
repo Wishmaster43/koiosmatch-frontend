@@ -85,7 +85,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { settings: cvSettings } = useCvSettings() as { settings?: unknown }
   const { t } = useTranslation('candidates')
   const locale = useLocale() as string
-  const { formatDate } = useDateFormat() as { formatDate: (d?: string | null, opts?: Intl.DateTimeFormatOptions) => string }
+  const { formatDate, formatDateTime } = useDateFormat() as { formatDate: (d?: string | null, opts?: Intl.DateTimeFormatOptions) => string; formatDateTime: (d?: string | null) => string }
   const { labelOf: lastContactLabel } = useLastContactTypes()
   // Only the status lookup is needed here now — candidate-type chips moved to the
   // Preferences tab, last-contact to Communication, funnel chips dropped (shown in Match).
@@ -372,7 +372,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       footer={
         // Created-at on the left, last-contact (date · channel) on the right.
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
-          <span>{t('drawer.createdAt', { date: c.created ? formatDate(c.created, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—' })}</span>
+          <span>{t('drawer.createdAt', { date: formatDateTime(c.created) })}</span>
           <span>
             {t('drawer.lastContact')}:{' '}
             {(c.lastContactDate || c.lastContactType) ? (

@@ -22,7 +22,7 @@
     "published": "Gepubliceerd",
     "owner": "Eigenaar",
     "client": "Klant",
-    "createdAt": "Gemaakt op"
+    "createdAt": "Aangemaakt"
   },
   "publishedState": {
     "yes": "Gepubliceerd",
@@ -94,7 +94,7 @@
   },
   "drawer": {
     "entityLabel": "Vacature",
-    "createdAt": "Gemaakt op {{date}}",
+    "createdAt": "Aangemaakt op {{date}}",
     "edit": "Bewerken",
     "status": "Status",
     "owner": "Recruiter",

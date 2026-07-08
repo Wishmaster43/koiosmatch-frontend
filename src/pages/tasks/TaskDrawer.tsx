@@ -44,7 +44,7 @@ interface TaskDrawerProps {
  */
 export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddComment, onAddLink, onRemoveLink }: TaskDrawerProps) {
   const { t } = useTranslation('tasks')
-  const { formatDate } = useDateFormat()
+  const { formatDateTime } = useDateFormat()
   const { statuses, priorities, doneStatusValues } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   if (!task) return null
@@ -91,7 +91,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
       entity={task}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: task.createdAt ? formatDate(task.createdAt) : '—' })}</span>}
+      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDateTime(task.createdAt) })}</span>}
       tabs={TAB_IDS.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: () => renderTab(id) }))}
       header={() => (
         <EntityHeader
