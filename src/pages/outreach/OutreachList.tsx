@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { RefreshCw, Phone, Mail, MessageCircle } from 'lucide-react'
 import DataTable, { type Column } from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
+import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 
@@ -50,12 +51,7 @@ export default function OutreachList({ campaigns, loading, error, onReload, onOp
       render: (r: Campaign) => {
         const m = CHANNEL_META[r.channel ?? 'call'] ?? CHANNEL_META.call
         const Icon = m.icon
-        return (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
-            padding: '2px 8px', borderRadius: 99, background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>
-            <Icon size={12} /> {t(`channel.${r.channel}`, { defaultValue: r.channel ?? '—' })}
-          </span>
-        )
+        return <SoftChip color={m.color} label={<><Icon size={12} /> {t(`channel.${r.channel}`, { defaultValue: r.channel ?? '—' })}</>} />
       } },
     { key: 'status', header: t('col.status'),
       render: (r: Campaign) => <StatusBadge status={r.status ?? 'draft'} map={statusMap} /> },

@@ -3,6 +3,7 @@ import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocale, useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
+import SoftChip from '@/components/ui/SoftChip'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import { initialsOf } from '@/lib/initials'
@@ -50,10 +51,9 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
       ) },
     { key: 'client', header: t('cols.client'), sortable: true, cellStyle: { color: 'var(--text-muted)' } },
     { key: 'stage',  header: t('cols.stage'), sortable: true, sortValue: r => r.stage,
-      // Soft-chip convention (matches the candidate table): color+1A bg, color text, color+55 border.
+      // Shared soft-chip (C-CHIP) — identical look across every entity table.
       render: r => r.stage
-        ? <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 7px', borderRadius: 5,
-            background: r.stageColor + '1A', color: r.stageColor, border: `1px solid ${r.stageColor}55` }}>{r.stage}</span>
+        ? <SoftChip label={r.stage} color={r.stageColor} />
         : <span style={{ color: 'var(--text-muted)' }}>—</span> },
     // Value column follows the tenant setting: euro amount or hours.
     { key: 'value',  header: t('cols.value'), align: 'right', sortable: true,

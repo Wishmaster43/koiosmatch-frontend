@@ -3513,6 +3513,45 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/skill-levels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET /skill-levels — active levels, each with an in_use flag. */
+        get: operations["getSkillLevels"];
+        put?: never;
+        /** POST /skill-levels — create a level. */
+        post: operations["postSkillLevels"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/skill-levels/{level}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc */
+                level: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /skill-levels/{level} — rename (resolved on the tenant connection). */
+        put: operations["putSkillLevelsLevel"];
+        post?: never;
+        /** DELETE /skill-levels/{level} — refused (409) while any candidate skill uses it. */
+        delete: operations["deleteSkillLevelsLevel"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/genders": {
         parameters: {
             query?: never;
@@ -3877,6 +3916,68 @@ export interface paths {
         post?: never;
         /** DELETE /{id} — 409 while still referenced. */
         delete: operations["deleteNoteTypesId"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/appointment-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** GET — active, ordered, each row carrying an `in_use` flag. */
+        get: operations["getAppointmentTypes"];
+        put?: never;
+        /** POST — create (value is the immutable slug). */
+        post: operations["postAppointmentTypes"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/appointment-types/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * PUT /reorder  body: { ids: [.
+         * @description ..] }
+         */
+        put: operations["putAppointmentTypesReorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/appointment-types/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the appointment type.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        /** PUT /{id} — value (slug) is immutable; only label/color/sort_order/active change. */
+        put: operations["putAppointmentTypesId"];
+        post?: never;
+        /** DELETE /{id} — 409 while still referenced. */
+        delete: operations["deleteAppointmentTypesId"];
         options?: never;
         head?: never;
         patch?: never;
@@ -8940,12 +9041,12 @@ export interface operations {
                     location_id?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     to?: string;
                     /**
@@ -9021,7 +9122,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     scheduled_at: string;
                     /**
@@ -9029,6 +9130,11 @@ export interface operations {
                      * @example 22
                      */
                     duration_min?: number | null;
+                    /**
+                     * @example phone
+                     * @enum {string|null}
+                     */
+                    modality?: "office" | "remote" | "phone" | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
                      * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
@@ -9040,7 +9146,7 @@ export interface operations {
                      */
                     location_id?: string | null;
                     /**
-                     * @example planned
+                     * @example no_show
                      * @enum {string}
                      */
                     status?: "planned" | "completed" | "no_show" | "cancelled";
@@ -9136,7 +9242,7 @@ export interface operations {
                     type?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     scheduled_at?: string;
                     /**
@@ -9144,6 +9250,11 @@ export interface operations {
                      * @example 22
                      */
                     duration_min?: number | null;
+                    /**
+                     * @example remote
+                     * @enum {string|null}
+                     */
+                    modality?: "office" | "remote" | "phone" | null;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
                      * @example 6b72fe4a-5b40-307c-bc24-f79acf9a1bb9
@@ -9155,7 +9266,7 @@ export interface operations {
                      */
                     location_id?: string | null;
                     /**
-                     * @example completed
+                     * @example cancelled
                      * @enum {string}
                      */
                     status?: "planned" | "completed" | "no_show" | "cancelled";
@@ -9272,7 +9383,7 @@ export interface operations {
                      */
                     name: string;
                     /**
-                     * @example pro
+                     * @example enterprise
                      * @enum {string}
                      */
                     plan: "flex" | "pro" | "enterprise";
@@ -9500,7 +9611,7 @@ export interface operations {
                      */
                     password: string;
                     /**
-                     * @example planner
+                     * @example tenant_admin
                      * @enum {string}
                      */
                     role: "tenant_admin" | "planner" | "readonly";
@@ -9660,7 +9771,7 @@ export interface operations {
                      */
                     password?: string;
                     /**
-                     * @example planner
+                     * @example tenant_admin
                      * @enum {string}
                      */
                     role?: "tenant_admin" | "planner" | "readonly";
@@ -10145,7 +10256,7 @@ export interface operations {
                     /** @example architecto */
                     webhook_verify_token?: string | null;
                     /**
-                     * @example 360dialog
+                     * @example meta
                      * @enum {string}
                      */
                     provider?: "meta" | "360dialog";
@@ -10220,7 +10331,7 @@ export interface operations {
                     /** @example architecto */
                     webhook_verify_token?: string;
                     /**
-                     * @example 360dialog
+                     * @example meta
                      * @enum {string}
                      */
                     provider?: "meta" | "360dialog";
@@ -10709,7 +10820,7 @@ export interface operations {
                     state_ai_flexplanner?: string;
                     /** @example 16 */
                     failed_attempts?: number;
-                    /** @example false */
+                    /** @example true */
                     escalated?: boolean;
                 };
             };
@@ -10781,7 +10892,7 @@ export interface operations {
                     /** @example architecto */
                     context_wamid?: string | null;
                     /**
-                     * @example inbound
+                     * @example outbound
                      * @enum {string}
                      */
                     direction: "inbound" | "outbound";
@@ -10793,7 +10904,7 @@ export interface operations {
                     message_content?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     sent_at?: string;
                 };
@@ -10830,7 +10941,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example read
+                     * @example delivered
                      * @enum {string}
                      */
                     status: "delivered" | "read";
@@ -11092,7 +11203,7 @@ export interface operations {
                     message_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:53
+                     * @example 2026-07-08T11:04:30
                      */
                     sent_at?: string | null;
                 };
@@ -11123,7 +11234,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example out
+                     * @example inbound
                      * @enum {string}
                      */
                     direction?: "in" | "out" | "inbound" | "outbound";
@@ -11993,7 +12104,7 @@ export interface operations {
                      */
                     body: string;
                     /**
-                     * @example appointment
+                     * @example followup
                      * @enum {string|null}
                      */
                     type?: "general" | "intake" | "feedback" | "appointment" | "followup" | "warning" | null;
@@ -12902,7 +13013,7 @@ export interface operations {
                      */
                     contract_guid: string;
                     /**
-                     * @example active
+                     * @example ended
                      * @enum {string}
                      */
                     status: "sent" | "active" | "ended";
@@ -13054,7 +13165,7 @@ export interface operations {
                      */
                     admin_url?: string | null;
                     /**
-                     * @example api_key
+                     * @example bearer_token
                      * @enum {string}
                      */
                     auth_type?: "bearer_token" | "oauth2" | "api_key" | "company_token";
@@ -13225,7 +13336,7 @@ export interface operations {
                      * @example Et animi quos velit et fugiat.
                      */
                     description?: string | null;
-                    /** @example false */
+                    /** @example true */
                     require_signature?: boolean;
                 };
             };
@@ -13338,7 +13449,7 @@ export interface operations {
                     url: string;
                     /**
                      * @example [
-                     *       "candidate.status_changed"
+                     *       "match.created"
                      *     ]
                      */
                     events?: ("candidate.created" | "candidate.status_changed" | "application.created" | "application.stage_changed" | "match.created" | "vacancy.created" | "vacancy.status_changed" | "task.created" | "appointment.created" | "message.received" | "message.sent")[];
@@ -13417,7 +13528,7 @@ export interface operations {
                     url?: string;
                     /**
                      * @example [
-                     *       "task.created"
+                     *       "vacancy.status_changed"
                      *     ]
                      */
                     events?: ("candidate.created" | "candidate.status_changed" | "application.created" | "application.stage_changed" | "match.created" | "vacancy.created" | "vacancy.status_changed" | "task.created" | "appointment.created" | "message.received" | "message.sent")[];
@@ -13562,7 +13673,7 @@ export interface operations {
                      */
                     friendly_name: string;
                     /**
-                     * @example additional
+                     * @example primary
                      * @enum {string}
                      */
                     type: "primary" | "additional";
@@ -13594,7 +13705,7 @@ export interface operations {
                     allowed_ips?: string[];
                     /**
                      * @example [
-                     *       "read_write"
+                     *       "read"
                      *     ]
                      */
                     scopes?: ("read" | "read_write")[];
@@ -13792,7 +13903,7 @@ export interface operations {
                     /** @example architecto */
                     entity_type: string;
                     /**
-                     * @example elanza_id
+                     * @example hf_id
                      * @enum {string}
                      */
                     field: "sm_id" | "hf_id" | "aelio_id" | "elanza_id" | "intus_id";
@@ -13989,7 +14100,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -14074,7 +14185,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -14754,7 +14865,7 @@ export interface operations {
                     phone?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     date_of_birth?: string | null;
                     /**
@@ -14826,7 +14937,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     available_again_date?: string | null;
                     /**
@@ -14845,7 +14956,7 @@ export interface operations {
                     consent?: {
                         /** @example false */
                         whatsapp_opt_in?: boolean;
-                        /** @example true */
+                        /** @example false */
                         email_opt_in?: boolean;
                         /** @example true */
                         newsletter_opt_in?: boolean;
@@ -15004,7 +15115,7 @@ export interface operations {
                     phone?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     date_of_birth?: string | null;
                     /**
@@ -15076,7 +15187,7 @@ export interface operations {
                     status_reason?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     available_again_date?: string | null;
                     /**
@@ -15093,7 +15204,7 @@ export interface operations {
                     candidate_types?: string[];
                     /** @example null */
                     consent?: {
-                        /** @example true */
+                        /** @example false */
                         whatsapp_opt_in?: boolean;
                         /** @example false */
                         email_opt_in?: boolean;
@@ -16360,6 +16471,120 @@ export interface operations {
             };
         };
     };
+    getSkillLevels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postSkillLevels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 100 characters.
+                     * @example b
+                     */
+                    name: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putSkillLevelsLevel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc */
+                level: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must not be greater than 100 characters.
+                     * @example b
+                     */
+                    name?: string;
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteSkillLevelsLevel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc */
+                level: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getGenders: {
         parameters: {
             query?: never;
@@ -16484,7 +16709,7 @@ export interface operations {
                      * @example n
                      */
                     color?: string | null;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -16716,7 +16941,7 @@ export interface operations {
                      * @example 39
                      */
                     position?: number;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -17159,6 +17384,140 @@ export interface operations {
             };
         };
     };
+    getAppointmentTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    postAppointmentTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putAppointmentTypesReorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    /**
+                     * @description Must be a valid UUID.
+                     * @example [
+                     *       "6ff8f7f6-1eb3-3525-be4a-3932c805afed"
+                     *     ]
+                     */
+                    ids?: string[];
+                };
+            };
+        };
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    putAppointmentTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the appointment type.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
+    deleteAppointmentTypesId: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /**
+                 * @description The ID of the appointment type.
+                 * @example BcECdBDA-CdED-bFEA-CbCE-BcCdeBfbbebc
+                 */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example Unauthenticated. */
+                        message?: string;
+                    };
+                };
+            };
+        };
+    };
     getDocumentTypes: {
         parameters: {
             query?: never;
@@ -17343,7 +17702,7 @@ export interface operations {
                     /** @example Eius et animi quos velit et. */
                     description?: string | null;
                     /**
-                     * @example static
+                     * @example ai
                      * @enum {string}
                      */
                     type?: "static" | "dynamic" | "ai";
@@ -17427,7 +17786,7 @@ export interface operations {
                     /** @example Eius et animi quos velit et. */
                     description?: string | null;
                     /**
-                     * @example ai
+                     * @example static
                      * @enum {string}
                      */
                     type?: "static" | "dynamic" | "ai";
@@ -17624,7 +17983,7 @@ export interface operations {
                     currency?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     expected_close_at?: string | null;
                     /**
@@ -17649,7 +18008,7 @@ export interface operations {
                     hours_period?: "week" | "month" | "total" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     start_date?: string | null;
                     /**
@@ -17801,7 +18160,7 @@ export interface operations {
                     currency?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     expected_close_at?: string | null;
                     /**
@@ -17826,7 +18185,7 @@ export interface operations {
                     hours_period?: "week" | "month" | "total" | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     start_date?: string | null;
                     /**
@@ -18405,7 +18764,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     order?: number;
-                    /** @example true */
+                    /** @example false */
                     active?: boolean;
                 };
             };
@@ -18627,62 +18986,62 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example z
+                     * @example b
                      */
                     name?: string;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example p
+                     * @example n
                      */
                     street?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example o
+                     * @example g
                      */
                     house_number?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example v
+                     * @example z
                      */
                     house_number_suffix?: string | null;
                     /**
                      * @description Must not be greater than 16 characters.
-                     * @example dlmsnclesysnvgme
+                     * @example miyvdljnikhwaykc
                      */
                     postal_code?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example f
+                     * @example m
                      */
                     city?: string | null;
                     /**
                      * @description Must not be greater than 120 characters.
-                     * @example u
+                     * @example y
                      */
                     country?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example o
+                     * @example u
                      */
                     coc_number?: string | null;
                     /**
                      * @description Must not be greater than 32 characters.
-                     * @example e
+                     * @example w
                      */
                     vat_number?: string | null;
                     /**
                      * @description Must not be greater than 255 characters.
-                     * @example r
+                     * @example p
                      */
                     contact_name?: string | null;
                     /**
                      * @description Must not be greater than 64 characters.
-                     * @example x
+                     * @example w
                      */
                     phone?: string | null;
                     /**
                      * @description Must be a valid email address. Must not be greater than 255 characters.
-                     * @example emil31@example.org
+                     * @example emelie.baumbach@example.net
                      */
                     email?: string | null;
                 };
@@ -18821,13 +19180,13 @@ export interface operations {
                      * @example m
                      */
                     city?: string | null;
-                    /** @example false */
+                    /** @example true */
                     hide_company_name?: boolean;
                     /** @example true */
                     has_career_page?: boolean;
-                    /** @example false */
+                    /** @example true */
                     show_in_my_vacancies?: boolean;
-                    /** @example false */
+                    /** @example true */
                     exclude_from_sourcing?: boolean;
                     /**
                      * @description Must not be greater than 255 characters.
@@ -20212,7 +20571,7 @@ export interface operations {
                      *     ]
                      */
                     faq_ids?: string[];
-                    /** @example false */
+                    /** @example true */
                     use_knowledge?: boolean;
                     /**
                      * @description Must be at least 1. Must not be greater than 50.
@@ -20254,7 +20613,7 @@ export interface operations {
                     /** @example null */
                     history?: ({
                         /**
-                         * @example user
+                         * @example assistant
                          * @enum {string}
                          */
                         role: "user" | "assistant";
@@ -21319,7 +21678,7 @@ export interface operations {
                     hours_per_week?: number | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     start_date: string;
                     /**
@@ -21533,7 +21892,7 @@ export interface operations {
                      */
                     name: string;
                     /**
-                     * @example email
+                     * @example call
                      * @enum {string}
                      */
                     channel: "call" | "email" | "whatsapp";
@@ -21620,7 +21979,7 @@ export interface operations {
                      */
                     name?: string;
                     /**
-                     * @example call
+                     * @example whatsapp
                      * @enum {string}
                      */
                     channel?: "call" | "email" | "whatsapp";
@@ -21757,7 +22116,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example todo
+                     * @example contacted
                      * @enum {string}
                      */
                     status: "todo" | "contacted" | "skipped" | "answered";
@@ -22245,22 +22604,22 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example day
+                     * @example month
                      * @enum {string}
                      */
                     bucket?: "day" | "week" | "month";
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     to?: string;
                     /**
-                     * @example source
+                     * @example function
                      * @enum {string}
                      */
                     group_by?: "recruiter" | "location" | "source" | "function" | "region";
@@ -22441,12 +22800,12 @@ export interface operations {
                 "application/json": {
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     to?: string;
                 };
@@ -22869,15 +23228,15 @@ export interface operations {
                     function?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     to?: string;
-                    /** @example false */
+                    /** @example true */
                     open_only?: boolean;
                     /**
                      * @description Must be between 1 and 200.
@@ -23031,12 +23390,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     to?: string;
                     /**
@@ -23163,12 +23522,12 @@ export interface operations {
                     status?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     from?: string;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     to?: string;
                     /**
@@ -24370,7 +24729,7 @@ export interface operations {
                     /** @example architecto */
                     note?: string | null;
                     /**
-                     * @example whatsapp
+                     * @example email
                      * @enum {string|null}
                      */
                     channel?: "email" | "whatsapp" | null;
@@ -24438,7 +24797,7 @@ export interface operations {
             content: {
                 "application/json": {
                     /**
-                     * @example warning
+                     * @example general
                      * @enum {string}
                      */
                     type?: "general" | "intake" | "feedback" | "appointment" | "followup" | "warning";
@@ -25109,9 +25468,9 @@ export interface operations {
                      * @example z
                      */
                     icon?: string | null;
-                    /** @example 5 */
+                    /** @example 16 */
                     sort_order?: number;
-                    /** @example false */
+                    /** @example true */
                     active?: boolean;
                 };
             };
@@ -25179,7 +25538,7 @@ export interface operations {
                     color?: string | null;
                     /** @example 16 */
                     sort_order?: number;
-                    /** @example true */
+                    /** @example false */
                     is_default?: boolean;
                     /** @example true */
                     active?: boolean;
@@ -25587,7 +25946,7 @@ export interface operations {
                     location_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     due_date?: string | null;
                     /**
@@ -25608,7 +25967,7 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example opportunity
+                         * @example match
                          * @enum {string}
                          */
                         type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "department" | "contact" | "workflow";
@@ -25738,7 +26097,7 @@ export interface operations {
                     location_id?: string | null;
                     /**
                      * @description Must be a valid date.
-                     * @example 2026-07-08T08:23:54
+                     * @example 2026-07-08T11:04:31
                      */
                     due_date?: string | null;
                     /**
@@ -25759,7 +26118,7 @@ export interface operations {
                     links?: {
                         /**
                          * @description This field is required when <code>links</code> is present.
-                         * @example application
+                         * @example opportunity
                          * @enum {string}
                          */
                         type?: "candidate" | "application" | "vacancy" | "match" | "customer" | "opportunity" | "location" | "department" | "contact" | "workflow";
@@ -26688,7 +27047,7 @@ export interface operations {
                      * @example 0
                      */
                     experience_years?: number | null;
-                    /** @example false */
+                    /** @example true */
                     published?: boolean;
                     /**
                      * @description Must be a valid UUID. Must match an existing stored value.
