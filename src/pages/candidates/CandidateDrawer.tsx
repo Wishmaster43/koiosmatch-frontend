@@ -1,28 +1,25 @@
+/**
+ * CandidateDrawer — thin container (§3A): wires data + mutations and declares
+ * the header config + tab list. The phase/status axis lives in
+ * useCandidateStatus, header edit in useCandidateHeaderEdit, and the header
+ * visuals in drawer/CandidateHeaderBits; each tab is its own component.
+ */
 import { useState } from 'react'
 import type { ComponentType, ReactNode } from 'react'
-import { Download, Edit2, RotateCcw, Save, Trash2, UserCheck, X } from 'lucide-react'
-import { pdf } from '@react-pdf/renderer'
-import { CvDocument } from './CandidateCvTemplate'
-import type { CvCandidate } from './CandidateCvTemplate'
-import { useCvSettings } from '@/lib/useCvSettings'
+import { Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { useLocale, useDateFormat } from '@/lib/datetime'
+import { useDateFormat } from '@/lib/datetime'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import EntityDrawerJs from '@/components/drawer/EntityDrawer'
 import EntityHeaderJs from '@/components/drawer/EntityHeader'
-import CreatableSelect from '@/components/ui/CreatableSelect'
-import { useLookups } from '@/context/LookupsContext'
 import { useGenders } from '@/lib/useGenders'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
-import { useFunctions } from '@/lib/useFunctions'
-import { useCreateMatch } from './hooks/useCreateMatch'
-import { useVacancyOptions } from './hooks/useVacancyOptions'
 import { useAuth } from '@/context/AuthContext'
+import { useCandidateStatus } from './hooks/useCandidateStatus'
+import { useCandidateHeaderEdit } from './hooks/useCandidateHeaderEdit'
 import ProfilePanel from './drawer/ProfilePanel'
 import BackgroundTab from './drawer/BackgroundTab'
 import WorkTab from './drawer/WorkTab'
-import { buildStatusInfoLine, makeRequiredComplete } from './drawer/candidateStatusInfo'
-import type { StatusFlags } from './drawer/candidateStatusInfo'
 import PlanningPanel from './drawer/PlanningPanel'
 import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'
 import CommunicationTab from './drawer/CommunicationTab'
@@ -30,8 +27,9 @@ import DocumentsSection from './drawer/DocumentsSection'
 import StatisticsTab from './drawer/StatisticsTab'
 import ChangelogPopover from './drawer/ChangelogPopover'
 import CandidateStatusModals from './drawer/CandidateStatusModals'
+import { CandidateTitle, CandidateHeaderActions, ArchivedBanner } from './drawer/CandidateHeaderBits'
 import type { Candidate } from '@/types/candidate'
-import type { Id, LookupOption } from '@/types/common'
+import type { Id } from '@/types/common'
 
 // Still-untyped JS drawer shells — declare the props this drawer passes (typed boundary).
 const EntityDrawer = EntityDrawerJs as ComponentType<{
@@ -46,18 +44,17 @@ const EntityHeader = EntityHeaderJs as ComponentType<{
   meta?: unknown; metaExtra?: ReactNode; tags?: unknown; tagsLabel?: string; children?: ReactNode
 }>
 interface AppUser { id: Id; name: string; [k: string]: unknown }
-interface HeaderForm { firstname: string; lastname: string; middleName: string; title: string }
 
 const TABS = [
-  { id: 'profile',       tKey: 'profile'       },
-  { id: 'background',   tKey: 'background'    },
-  { id: 'work',          tKey: 'match'         },
-  { id: 'planning',      tKey: 'planning'      },
+  { id: 'profile',        tKey: 'profile'       },
+  { id: 'background',     tKey: 'background'    },
+  { id: 'work',           tKey: 'match'         },
+  { id: 'planning',       tKey: 'planning'      },
   { id: 'preferences',    tKey: 'preferences'   },
   { id: 'administration', tKey: 'zzp'           },
   { id: 'communication',  tKey: 'communication' },
-  { id: 'documents',   tKey: 'documents'     },
-  { id: 'statistics',  tKey: 'statistics'    },
+  { id: 'documents',      tKey: 'documents'     },
+  { id: 'statistics',     tKey: 'statistics'    },
 ]
 
 // Contract-type slugs (stable, backend-matching) that mark a freelancer — drives
@@ -82,190 +79,71 @@ interface CandidateDrawerProps {
 }
 
 export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onMarkDeletion, onRestore, onHardDelete, users = [], initialTab }: CandidateDrawerProps) {
-  const { settings: cvSettings } = useCvSettings() as { settings?: unknown }
   const { t } = useTranslation('candidates')
-  const locale = useLocale() as string
   const { formatDate, formatDateTime } = useDateFormat() as { formatDate: (d?: string | null, opts?: Intl.DateTimeFormatOptions) => string; formatDateTime: (d?: string | null) => string }
   const { labelOf: lastContactLabel } = useLastContactTypes()
-  // Only the status lookup is needed here now — candidate-type chips moved to the
-  // Preferences tab, last-contact to Communication, funnel chips dropped (shown in Match).
-  const { phases, statuses, phaseMeta, statusMeta } = useLookups() as unknown as { phases: LookupOption[]; statuses: LookupOption[]; phaseMeta: (v?: string | null) => { label: string; color: string }; statusMeta: (v?: string | null) => { label: string; color: string } }
   const { colorOf: genderColor } = useGenders() as { colorOf: (g?: string) => string | undefined }
   // Avatar colour follows the same tenant setting as the table: neutral grey by
   // default, per-gender only when enabled (Settings → Candidate → Table display).
   const allSettings = useAllSettings()
   const coloredByGender = getBoolSetting(allSettings, 'candidate_avatar_colored_by_gender', false)
   const avatarColor = coloredByGender ? (genderColor(c?.gender) ?? '#9CA3AF') : '#9CA3AF'
-  const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
-  const { createMatch, creating: creatingMatch } = useCreateMatch(c?.id ?? '')
   const { hasModule, isSuperAdmin, hasRole } = useAuth() as unknown as { hasModule: (m: string) => boolean; isSuperAdmin: () => boolean; hasRole: (r: string) => boolean }
   // Hard delete is admin-only (Danny 2026-07-03) — the backend re-checks (§7: UI gating is UX).
   const canHardDelete = isSuperAdmin() || hasRole('admin')
-  // Freelance (ZZP) tab shows when the candidate holds the freelance/ZZP type.
-  const isFreelancer = (c?.candidateTypes ?? []).some(v => ZZP_TYPE_SLUGS.includes(v))
-  const tabs = TABS.filter(tab => {
-    if (tab.id === 'planning')       return hasModule('plan')
-    // Match tab is ALWAYS shown (2026-07-08): it holds the "+ Solliciteren" /
-    // "+ Intake plannen" actions, so a Lead with no application yet still needs it —
-    // hiding it until an application existed made the entry point unreachable.
-    if (tab.id === 'administration') return isFreelancer
-    return true
-  })
-  // Cross-cutting state used by the header; tab-specific state lives in each tab.
-  const [cvGenerating,  setCvGenerating]  = useState(false)
-  const [recruiter,     setRecruiter]     = useState<(AppUser & { initials: string }) | null>(null)
-  const [phase,         setPhase]         = useState<string | null>(null)
-  const [status,        setStatus]        = useState<string | null>(null)
-  // "Geplaatst" requires a linked Match — pick an existing one (dropdown) or create a
-  // new one by choosing a vacancy (G-2 POST /matches). `matchChoice` = picked existing
-  // match id; `newMatchVacancyId` = the vacancy to create a fresh match against.
-  const [matchPrompt,       setMatchPrompt]       = useState(false)
-  const [matchChoice,       setMatchChoice]       = useState<string | null>(null)
-  const [newMatchVacancyId, setNewMatchVacancyId] = useState('')
-  // Vacancy picker options — only fetched while the placed prompt is open.
-  const vacancyOptions = useVacancyOptions(matchPrompt)
-  // Convert guard (blocks an accidental CV click right after) + a signal that opens Profile edit.
-  const [converting,    setConverting]    = useState(false)
-  const [profileEditSignal, setProfileEditSignal] = useState(0)
-  // Status change that needs a reason and/or a return date (driven by the status lookup flags).
-  const [statusModal,   setStatusModal]   = useState<{ target: string; reason: string; date: string; needReason: boolean; needDate: boolean; isBlacklist?: boolean } | null>(null)
-  const [tags,          setTags]          = useState<string[] | null>(null)
-  // Header (name + function) edit — independent from the Profile-tab fields.
-  const [headerEditing, setHeaderEditing] = useState(false)
-  const [profileEdits,  setProfileEdits]  = useState<Record<string, unknown> | null>(null)
-  const [photoUrl,      setPhotoUrl]      = useState<string | null>(null)
-  // Header name + function fields (controlled while editing).
-  const [headerForm,    setHeaderForm]    = useState<HeaderForm | null>(null)
 
-  // Reset the header overrides when a different candidate is shown — done by
-  // adjusting state during render (React's recommended pattern) so there's no effect.
+  // Cross-cutting drawer state; the phase/status axis + header edit live in their hooks.
+  const [recruiter,         setRecruiter]         = useState<(AppUser & { initials: string }) | null>(null)
+  const [profileEditSignal, setProfileEditSignal] = useState(0)
+  const [tags,              setTags]              = useState<string[] | null>(null)
+  const [profileEdits,      setProfileEdits]      = useState<Record<string, unknown> | null>(null)
+  const [photoUrl,          setPhotoUrl]          = useState<string | null>(null)
+
+  // Phase/status axis (convert, requires_match/reason prompts, info line) — §0.3 hook.
+  const status = useCandidateStatus({ c, onUpdate,
+    onConvertIncomplete: setTab => { setTab?.('profile'); setProfileEditSignal(s => s + 1) } })
+  // Header name/function edit — §0.3 hook.
+  const headerEdit = useCandidateHeaderEdit(c, onUpdate)
+
+  // Reset the local overrides when a different candidate is shown (render-time adjust).
   const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
   if (c?.id !== prevId) {
     setPrevId(c?.id)
-    setRecruiter(null); setPhase(null); setStatus(null); setMatchPrompt(false); setMatchChoice(null); setStatusModal(null); setConverting(false)
-    setTags(null); setHeaderEditing(false); setProfileEdits(null); setPhotoUrl(null); setHeaderForm(null)
+    setRecruiter(null); setTags(null); setProfileEdits(null); setPhotoUrl(null)
   }
 
   if (!c) return null
 
-  const currentPhase   = phase ?? c.phase
-  const changePhase = (v: string) => { setPhase(v); onUpdate?.(c.id, { phase: v }) }
-  // Fase: colour-coded read-only badge (no picker); "convert" advances the entry (first) phase.
-  const phaseInfo    = phaseMeta(currentPhase)
-  const phaseIdx     = phases.findIndex(p => p.value === currentPhase)
-  const nextPhase    = phaseIdx >= 0 ? phases[phaseIdx + 1] : undefined
-  const isEntryPhase = phaseIdx === 0
-  // Required-field completeness for a phase — pure helper (§0.3 split).
-  const requiredComplete = makeRequiredComplete(c, allSettings)
-  // Convert to the next phase; jump to Profile-edit unless the new phase's required fields are already complete.
-  const doConvert = (setActiveTab?: (id: string) => void) => {
-    if (!nextPhase) return
-    changePhase(nextPhase.value)
-    setConverting(true); setTimeout(() => setConverting(false), 1000)
-    if (!requiredComplete(nextPhase.value)) { setActiveTab?.('profile'); setProfileEditSignal(s => s + 1) }
-  }
-  const currentStatus  = status ?? c.status
-  // Deployability (status) only applies once someone is a Kandidaat — a Lead isn't
-  // deployable yet. So hide the Status picker in the entry (Lead) phase.
-  const showStatus = !!currentPhase && !isEntryPhase
-  // Human-readable status detail line — shows once the backend returns the audit
-  // fields (reason + the change-log date `statusChangedAt`). Empty until then.
-  // Flag-driven (§3B): any is_blacklist status shows its lookup-backed reason; any
-  // requires_reason/expects_return_date status shows reason + "available again" date.
-  const statusFlags = statuses.find(s => s.value === currentStatus) as StatusFlags
-  // Human-readable status detail line (reason + since-date) — pure helper (§0.3 split).
-  const statusInfoLine = buildStatusInfoLine({ c, statusFlags, currentStatus, statusMeta, t, formatDate })
-  // Edit the reason/return date of the CURRENT status: reopen the prompt prefilled.
-  // Same PATCH path; the guard skips unchanged statuses, so this is a clean edit.
-  const openStatusEdit = () => {
-    if (!statusFlags) return
-    setStatusModal({
-      target: currentStatus,
-      reason: (statusFlags.is_blacklist ? c.blacklistReason : c.statusReason) ?? '',
-      date: (c.statusReturnDate ?? '').slice(0, 10),
-      needReason: !!statusFlags.requires_reason,
-      needDate: !!statusFlags.expects_return_date,
-      isBlacklist: !!statusFlags.is_blacklist,
-    })
-  }
-  // Status (deployability) change, driven by the status lookup flags:
-  // requires_match → must link a Match; requires_reason/expects_return_date → ask first.
-  const changeStatus = (v: string) => {
-    const it = statuses.find(s => s.value === v) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown; is_blacklist?: unknown }) | undefined
-    if (it?.requires_match) { setMatchChoice(null); setMatchPrompt(true); return }
-    if (Boolean(it?.requires_reason) || Boolean(it?.expects_return_date)) {
-      setStatusModal({ target: v, reason: '', date: '', needReason: Boolean(it?.requires_reason), needDate: Boolean(it?.expects_return_date), isBlacklist: Boolean(it?.is_blacklist) })
-      return
-    }
-    setStatus(v); onUpdate?.(c.id, { status: v })
-  }
-  // Confirm a reason/return-date status change. Blacklist carries the lookup-backed
-  // blacklist_reason (BE guard validates it); other statuses use free-text status_reason.
-  const confirmStatus = () => {
-    if (!statusModal) return
-    setStatus(statusModal.target)
-    // Camel UI keys: the optimistic merge writes the row fields the header/table read
-    // (statusReason/…), so the reason/date shows IMMEDIATELY — buildCandidatePatch maps
-    // them onto the API keys. statusChangedAt only on a real transition (BE stamps too).
-    const reasonPatch = statusModal.isBlacklist
-      ? { blacklistReason: statusModal.reason || null }
-      : { statusReason: statusModal.reason || null }
-    const changed = statusModal.target !== c.status
-    onUpdate?.(c.id, { status: statusModal.target, ...reasonPatch, statusReturnDate: statusModal.date || null,
-      ...(changed ? { statusChangedAt: new Date().toISOString() } : {}) })
-    // N-1: the status note is written CENTRALLY by the backend guard on the PATCH
-    // (an FE-written status_change note is actively rejected with a 422) — every
-    // surface gets the note in the thread without client involvement.
-    setStatusModal(null)
-  }
-  // Confirm the "Placed" prompt: use the picked match, or create one against the chosen vacancy.
-  const confirmPlacedMatch = async () => {
-    let mid = matchChoice
-    if (!mid && newMatchVacancyId) mid = await createMatch(newMatchVacancyId)
-    if (!mid) return
-    setStatus('placed'); onUpdate?.(c.id, { status: 'placed', match_id: mid })
-    setMatchPrompt(false); setMatchChoice(null); setNewMatchVacancyId('')
-  }
-  const currentTags    = tags ?? c.tags ?? []
-
-  // Enter header edit: capture the fields so they're controlled + saveable.
-  const startHeaderEdit = () => {
-    setHeaderForm({
-      firstname:  c.firstname  ?? c.name?.split(' ')[0] ?? '',
-      lastname:   c.lastname   ?? c.name?.split(' ').slice(-1)[0] ?? '',
-      middleName: c.middleName ?? '',
-      title:      c.title ?? '',
-    })
-    setHeaderEditing(true)
-  }
-  const setHF = (k: keyof HeaderForm, v: string) => setHeaderForm(f => f ? { ...f, [k]: v } : f)
-  const saveHeader = () => {
-    if (headerForm) {
-      const name = [headerForm.firstname, headerForm.middleName, headerForm.lastname].filter(Boolean).join(' ')
-      onUpdate?.(c.id, { ...headerForm, name })
-    }
-    setHeaderEditing(false)
-  }
-  const hf = (k: keyof HeaderForm) => headerForm?.[k] ?? ''
+  // Freelance (ZZP) tab shows when the candidate holds the freelance/ZZP type.
+  const isFreelancer = (c.candidateTypes ?? []).some(v => ZZP_TYPE_SLUGS.includes(v))
+  const tabs = TABS.filter(tab => {
+    if (tab.id === 'planning')       return hasModule('plan')
+    // Match tab is ALWAYS shown (2026-07-08): it holds the "+ Solliciteren" /
+    // "+ Intake plannen" actions, so a Lead with no application yet still needs it.
+    if (tab.id === 'administration') return isFreelancer
+    return true
+  })
+  const currentTags = tags ?? c.tags ?? []
 
   const renderTabContent = (activeTab: string, setTab?: (id: string) => void) => {
     const mergedC = { ...c, ...(profileEdits ?? {}) }
     switch (activeTab) {
-      case 'profile':       return <ProfilePanel c={mergedC} autoEditSignal={profileEditSignal} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
-      case 'background':   return <BackgroundTab c={mergedC} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
-      case 'work':          return <WorkTab c={c} />
-      case 'planning':      return <PlanningPanel c={c} />
+      case 'profile':        return <ProfilePanel c={mergedC} autoEditSignal={profileEditSignal} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
+      case 'background':     return <BackgroundTab c={mergedC} onEditSave={(v: Record<string, unknown>) => { setProfileEdits(v); onUpdate?.(c.id, v) }} />
+      case 'work':           return <WorkTab c={c} />
+      case 'planning':       return <PlanningPanel c={c} />
       case 'preferences':    return <PreferencesTab c={c}
         onSave={(p: unknown) => onUpdate?.(c.id, { preferences: { ...(c.preferences ?? {}), ...(p as Record<string, unknown>) } })}
         onTypesChange={(types: string[]) => onUpdate?.(c.id, { candidateTypes: types })} />
       case 'administration': return <ZzpTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { zzp: p })} />
       case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })} />
-      case 'documents':   return <DocumentsSection c={c} />
-      case 'statistics':  return <StatisticsTab c={c} onJump={setTab} />
-      default:              return null
+      case 'documents':      return <DocumentsSection c={c} />
+      case 'statistics':     return <StatisticsTab c={c} onJump={setTab} />
+      default:               return null
     }
   }
 
+  // Owner picker options — the current owner first, then every selectable user.
   const ownerInitialsOf = (name?: string) => name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() ?? '??'
   const ownerOptions = [
     ...(recruiter ? [] : [{ value: '__current', label: c.owner || '-', initials: c.ownerInitials }]),
@@ -277,90 +155,6 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     const u = users.find(x => x.id === id)
     if (u) setRecruiter({ ...u, initials: ownerInitialsOf(u.name) })
   }
-
-  const renderTitle = () => headerEditing ? (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: 6 }}>
-        <input placeholder={t('modal.fields.firstName')} value={hf('firstname')} onChange={e => setHF('firstname', e.target.value)}
-          style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', padding: '6px 10px', fontSize: 13, fontWeight: 600, borderRadius: 6, border: '1px solid var(--border)', outline: 'none' }} />
-        <input placeholder={t('modal.fields.lastName')} value={hf('lastname')} onChange={e => setHF('lastname', e.target.value)}
-          style={{ width: '100%', minWidth: 0, boxSizing: 'border-box', padding: '6px 10px', fontSize: 13, fontWeight: 600, borderRadius: 6, border: '1px solid var(--border)', outline: 'none' }} />
-      </div>
-      <input placeholder={t('modal.fields.middleName')} value={hf('middleName')} onChange={e => setHF('middleName', e.target.value)}
-        style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text-muted)' }} />
-      <CreatableSelect value={hf('title')} options={functions} onChange={v => setHF('title', v)}
-        allowCreate={allowFreeEntry} placeholder={t('columns.function')} menuWidth={260} />
-    </div>
-  ) : (
-    <>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
-        {/* Fase = colour-coded read-only badge (no picker); convert lives in the header actions. */}
-        {currentPhase && (
-          <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 999,
-            background: phaseInfo.color + '1A', color: phaseInfo.color, border: `1px solid ${phaseInfo.color}55` }}>{phaseInfo.label}</span>
-        )}
-      </div>
-      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.title || '—'}</div>
-      {statusInfoLine && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{statusInfoLine}</span>
-          {/* Pencil: edit the reason / return date without changing the status. */}
-          <button onClick={openStatusEdit} title={t('drawer.editStatusInfo')} aria-label={t('drawer.editStatusInfo')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 1, display: 'flex', color: 'var(--text-muted)' }}>
-            <Edit2 size={10} />
-          </button>
-        </div>
-      )}
-    </>
-  )
-
-  const headerActions = (setActiveTab?: (id: string) => void) => (
-    <>
-      {/* Entry phase (Lead) → prominent convert (CV is illogical for a lead); else → download CV. */}
-      {(isEntryPhase && nextPhase) ? (
-        <button onClick={() => doConvert(setActiveTab)}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white' }}>
-          <UserCheck size={11} />{t('drawer.convertTo', { phase: nextPhase.label })}
-        </button>
-      ) : (
-        <button disabled={cvGenerating || converting}
-          onClick={async () => {
-            setCvGenerating(true)
-            try {
-              const blob = await pdf(<CvDocument c={c as unknown as CvCandidate} settings={cvSettings as never} locale={locale} t={t} />).toBlob()
-              const url = URL.createObjectURL(blob)
-              const a = document.createElement('a')
-              a.href = url; a.download = `CV - ${c?.name ?? 'candidate'}.pdf`
-              document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url)
-            } finally { setCvGenerating(false) }
-          }}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: (cvGenerating || converting) ? 'not-allowed' : 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white', opacity: (cvGenerating || converting) ? 0.7 : 1 }}>
-          <Download size={11} />{cvGenerating ? t('drawer.generating') : t('drawer.downloadCv')}
-        </button>
-      )}
-      {headerEditing ? (
-        <>
-          <button onClick={saveHeader} title={t('common:save')}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0,
-              background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
-            <Save size={14} />
-          </button>
-          <button onClick={() => setHeaderEditing(false)} title={t('common:cancel')}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0,
-              background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
-            <X size={14} />
-          </button>
-        </>
-      ) : (
-        <button onClick={startHeaderEdit} title={t('drawer.edit')}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0,
-            background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
-          <Edit2 size={13} />
-        </button>
-      )}
-    </>
-  )
 
   return (
     <>
@@ -395,7 +189,11 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           avatar={{ initials: c.initials, photo: photoUrl ?? c.photo, color: avatarColor, soft: true }}
           onPhotoChange={setPhotoUrl}
           photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
-          renderTitle={renderTitle}
+          renderTitle={() => (
+            <CandidateTitle c={c} editing={headerEdit.headerEditing} hf={headerEdit.hf} setHF={headerEdit.setHF}
+              phaseInfo={status.phaseInfo} showPhase={!!status.currentPhase}
+              statusInfoLine={status.statusInfoLine} onEditStatusInfo={status.openStatusEdit} />
+          )}
           titleActions={<>
             <ChangelogPopover c={c} />
             {/* Soft-delete → Gearchiveerd (§3B: soft-delete only; backend re-checks live links). */}
@@ -407,70 +205,42 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
               </button>
             )}
           </>}
-          actions={headerActions(setActiveTab)}
+          actions={
+            <CandidateHeaderActions c={c} isEntryPhase={status.isEntryPhase} nextPhase={status.nextPhase}
+              converting={status.converting} onConvert={() => status.doConvert(setActiveTab)}
+              headerEditing={headerEdit.headerEditing} onStartEdit={headerEdit.startHeaderEdit}
+              onSaveEdit={headerEdit.saveHeader} onCancelEdit={() => headerEdit.setHeaderEditing(false)} />
+          }
           meta={[
             // Status only for a Kandidaat (not a Lead) — a Lead isn't deployable yet.
-            ...(showStatus ? [{ key: 'status', label: t('drawer.deployability'), value: currentStatus, options: statuses.map(s => ({ value: s.value, label: s.label })), onChange: changeStatus, menuWidth: 170, width: 160 }] : []),
+            ...(status.showStatus ? [{ key: 'status', label: t('drawer.deployability'), value: status.currentStatus, options: status.statuses.map(s => ({ value: s.value, label: s.label })), onChange: status.changeStatus, menuWidth: 170, width: 160 }] : []),
             { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions, onChange: onOwnerChange, menuWidth: 200, width: 190 },
           ]}
           tags={{ items: currentTags, onAdd: (tag: string) => setTags([...currentTags, tag]), onRemove: (tag: string) => setTags(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
           tagsLabel={t('drawer.tags')}
         >
-          {/* Archived banner (Danny 2026-07-03): when/by whom/why + restore + hard delete
-              (admin-only; the backend re-checks and 403s/409s — §7 UI gating is UX only). */}
-          {c.archived && (() => {
-            const inTrash = c.lifecycle === 'pending_erase'
-            return (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, padding: '7px 10px', borderRadius: 8, fontSize: 12,
-              color: 'var(--color-danger)', background: 'color-mix(in srgb, var(--color-danger) 8%, transparent)',
-              border: '1px solid color-mix(in srgb, var(--color-danger) 28%, transparent)' }}>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                {inTrash
-                  ? [c.pendingEraseAt ? t('erase.inTrashSince', { date: formatDate(c.pendingEraseAt) }) : t('erase.inTrash'), c.archivedBy ? t('drawer.byWho', { name: c.archivedBy }) : null].filter(Boolean).join(' · ')
-                  : [c.archivedAt ? t('drawer.archivedOn', { date: formatDate(c.archivedAt) }) : t('drawer.archivedFlag'), c.archivedBy ? t('drawer.byWho', { name: c.archivedBy }) : null, c.archiveReason].filter(Boolean).join(' · ')}
-              </span>
-              {/* Herstellen (both states) */}
-              {onRestore && (
-                <button onClick={() => onRestore(c.id)} title={t('drawer.restore')} aria-label={t('drawer.restore')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-primary)' }}>
-                  <RotateCcw size={14} />
-                </button>
-              )}
-              {/* Archived → move to trash (reversible); Trash → permanent delete (admin, preview popup). */}
-              {!inTrash && onMarkDeletion && (
-                <button onClick={() => { if (confirm(t('erase.markConfirm', { name: c.name }))) onMarkDeletion(c.id) }}
-                  title={t('erase.markDelete')} aria-label={t('erase.markDelete')}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-danger)' }}>
-                  <Trash2 size={14} />
-                </button>
-              )}
-              {inTrash && onHardDelete && canHardDelete && (
-                <button onClick={() => onHardDelete(c.id)}
-                  title={t('drawer.hardDelete')} aria-label={t('drawer.hardDelete')}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'var(--color-danger)', border: 'none', borderRadius: 6, cursor: 'pointer', padding: '3px 8px', color: '#fff', fontSize: 11, fontWeight: 600 }}>
-                  <Trash2 size={12} /> {t('erase.deleteForever')}
-                </button>
-              )}
-            </div>
-            )
-          })()}
+          {/* Archived banner (Danny 2026-07-03): when/by whom/why + restore + hard delete. */}
+          {c.archived && (
+            <ArchivedBanner c={c} canHardDelete={canHardDelete}
+              onRestore={onRestore} onMarkDeletion={onMarkDeletion} onHardDelete={onHardDelete} />
+          )}
         </EntityHeader>
       )}
     />
     <CandidateStatusModals
-      matchPrompt={matchPrompt}
-      onCloseMatch={() => setMatchPrompt(false)}
+      matchPrompt={status.matchPrompt}
+      onCloseMatch={() => status.setMatchPrompt(false)}
       matches={(c.matches ?? []) as { id?: string | number; vacancyTitle?: string; client?: string }[]}
-      matchChoice={matchChoice}
-      setMatchChoice={setMatchChoice}
-      newMatchVacancyId={newMatchVacancyId}
-      setNewMatchVacancyId={setNewMatchVacancyId}
-      vacancyOptions={vacancyOptions}
-      creatingMatch={creatingMatch}
-      onConfirmMatch={confirmPlacedMatch}
-      statusModal={statusModal}
-      setStatusModal={setStatusModal}
-      onConfirmStatus={confirmStatus}
+      matchChoice={status.matchChoice}
+      setMatchChoice={status.setMatchChoice}
+      newMatchVacancyId={status.newMatchVacancyId}
+      setNewMatchVacancyId={status.setNewMatchVacancyId}
+      vacancyOptions={status.vacancyOptions}
+      creatingMatch={status.creatingMatch}
+      onConfirmMatch={status.confirmPlacedMatch}
+      statusModal={status.statusModal}
+      setStatusModal={status.setStatusModal}
+      onConfirmStatus={status.confirmStatus}
     />
     </>
   )
