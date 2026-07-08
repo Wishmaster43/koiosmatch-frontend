@@ -4,7 +4,7 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from 'axios'
 import type { ListResult, PaginationMeta } from '../types/api'
-import { COOKIE_AUTH, CSRF_COOKIE_URL } from './authMode'
+import { CSRF_COOKIE_URL } from './authMode'
 import { notifyError } from './notify'
 
 /**
@@ -29,10 +29,10 @@ const api = axios.create({
   // request interceptor below — a hung CRUD call should fail fast, a sync/report
   // may legitimately take a while.
   timeout: 20000,
-  // Cookie auth: send the httpOnly auth cookie + auto-attach the CSRF token from
-  // the XSRF-TOKEN cookie. Off by default so current CORS/Bearer flow is unchanged.
-  withCredentials: COOKIE_AUTH,
-  withXSRFToken: COOKIE_AUTH,
+  // Cookie auth (the only mode — H3): send the httpOnly auth cookie and
+  // auto-attach the CSRF token from the XSRF-TOKEN cookie on every request.
+  withCredentials: true,
+  withXSRFToken: true,
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN',
   headers: {
@@ -43,47 +43,39 @@ const api = axios.create({
 
 /**
  * Prime the CSRF cookie before a state-changing auth call (login/logout).
- * No-op in Bearer mode. Uses a bare axios call because the CSRF endpoint lives
- * at the app root, not under the /api baseURL.
+ * Uses a bare axios call because the CSRF endpoint lives at the app root,
+ * not under the /api baseURL.
  */
 export async function primeCsrf(): Promise<void> {
-  if (!COOKIE_AUTH) return
   await axios.get(CSRF_COOKIE_URL, { withCredentials: true })
 }
 
-// D1: in cookie mode a LEGACY bearer token left behind by the old flow is a live
+// D1/H3: a LEGACY bearer token left behind by the removed Bearer flow is a live
 // XSS-readable credential (it may still be valid server-side) — purge it at boot.
-// The cached profile/pages are PII in localStorage (Danny 2026-07-04) — purge too;
-// cookie mode keeps the profile in memory only (km_session is the neutral hint).
-// Also swept: auth-shaped keys from OLDER apps that shared this origin (localhost
-// dev port) — `token` (a legacy JWT), `user`, `yesway_admin_token`. Not ours, but
-// they read as "auth in localStorage" and have no business surviving here.
-if (COOKIE_AUTH) {
-  for (const key of ['auth_token', 'auth_user', 'accessible_pages', 'token', 'user', 'yesway_admin_token']) {
-    localStorage.removeItem(key)
-  }
+// The cached profile/pages were PII in localStorage (Danny 2026-07-04) — purge too;
+// the profile lives in memory only (km_session is the neutral hint). Also swept:
+// auth-shaped keys from OLDER apps that shared this origin (localhost dev port).
+for (const key of ['auth_token', 'auth_user', 'accessible_pages', 'token', 'user', 'yesway_admin_token']) {
+  localStorage.removeItem(key)
 }
 
 /**
- * Request interceptor — attaches the saved auth token + active tenant.
+ * Request interceptor — attaches the auth-mode + active-tenant headers.
  *
- * SECURITY (#1): X-Tenant is browser-controlled. The BACKEND must verify the
+ * SECURITY: X-Tenant is browser-controlled. The BACKEND must verify the
  * logged-in user may use that tenant (only super_admin may switch) and ignore
- * the header otherwise. SECURITY (#2): the token lives in localStorage and is
- * therefore readable by any JS on the page — an httpOnly cookie would be safer.
+ * the header otherwise. Auth itself rides the httpOnly cookie — no Authorization
+ * header exists anymore (H3).
  */
 // Long-running endpoints (sync jobs, reports/aggregations, workflow runs, AI,
 // uploads) keep the old 120s safety net; everything else fails fast at 20s.
 const SLOW_PATHS = /\/(sm_reports|sm_sync|reports|workflows\/[^/]+\/(run|execute)|ai\/|exports?|imports?|documents|avatar)/
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token  = localStorage.getItem('auth_token')
   const tenant = localStorage.getItem('active_tenant')
-  // In cookie mode the httpOnly cookie carries auth — never attach a Bearer header.
-  // X-Auth-Mode tells the backend to return token:null on login (no bearer credential
-  // over the wire at all — D1 aftercare, agreed with BE 2026-07-04).
-  if (!COOKIE_AUTH && token) config.headers.Authorization = `Bearer ${token}`
-  if (COOKIE_AUTH) config.headers['X-Auth-Mode'] = 'cookie'
+  // X-Auth-Mode tells the backend to return token:null on login (no bearer
+  // credential over the wire at all — D1 aftercare, agreed with BE 2026-07-04).
+  config.headers['X-Auth-Mode'] = 'cookie'
   if (tenant) config.headers['X-Tenant'] = tenant
   // Timeout differentiation (C-CHIP #5) — only when the caller didn't set one.
   if (config.timeout === 20000 && SLOW_PATHS.test(config.url ?? '')) config.timeout = 120000

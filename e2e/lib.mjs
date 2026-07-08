@@ -1,6 +1,7 @@
 /**
  * e2e/lib — shared harness for the smoke suite: boots a logged-in page against the
- * REAL app + API (Bearer mode), and collects console/page/network errors per flow.
+ * REAL app + API (cookie auth — the only mode, H3), and collects console/page/
+ * network errors per flow.
  * The suite exists because unit tests on both sides stay green while the seam breaks
  * (2026-07-03 audit): these flows click the actual product before Danny does.
  * Dev-tool only — never bundled with the app.
@@ -11,21 +12,10 @@ export const API = process.env.SMOKE_API ?? 'http://koiosmatch-api.test/api'
 export const APP = process.env.SMOKE_APP ?? 'http://localhost:5173'
 export const CREDS = { email: process.env.SMOKE_EMAIL ?? 'danny@koios.nl', password: process.env.SMOKE_PASSWORD ?? 'password123' }
 
-// Login via the API and return { token, user } — fails loudly when auth is broken.
-export async function apiLogin() {
-  const res = await fetch(`${API}/auth/login`, {
-    method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify(CREDS),
-  }).then(r => r.json())
-  if (!res.token) throw new Error(`API login failed: ${JSON.stringify(res).slice(0, 200)}`)
-  return res
-}
-
 // One booted context: browser + page with auth seeded and error collectors attached.
-// Cookie mode (D1): SMOKE_COOKIE=1 logs in through the REAL UI form — there is no token
-// in JS to seed anymore, which is exactly what the flip proves.
+// Cookie-only (H3, 2026-07-08): the Bearer flow was removed from the app, so the
+// suite ALWAYS logs in through the REAL UI form — there is no token in JS to seed.
 export async function boot({ tenant = 'demo' } = {}) {
-  const cookieMode = process.env.SMOKE_COOKIE === '1'
   const browser = await chromium.launch()
   const page = await browser.newPage()
   const errors = []
@@ -54,27 +44,17 @@ export async function boot({ tenant = 'demo' } = {}) {
     }
   })
 
-  let login = null
-  if (cookieMode) {
-    await page.goto(`${APP}/`, { waitUntil: 'networkidle' })
-    await page.fill('#login-email', CREDS.email)
-    await page.fill('input[type="password"]', CREDS.password)
-    await page.click('button[type="submit"]')
-    await page.waitForTimeout(2500)
-    // Sanity: the shell rendered (logout button) and no token leaked into storage.
-    const token = await page.evaluate(() => localStorage.getItem('auth_token'))
-    if (token) errors.push('[d1] auth_token staat in localStorage terwijl cookie-mode aan is!')
-  } else {
-    login = await apiLogin()
-    await page.addInitScript(([token, user, t]) => {
-      localStorage.setItem('auth_token', token)
-      localStorage.setItem('auth_user', JSON.stringify(user))
-      localStorage.setItem('active_tenant', t)
-    }, [login.token, login.user, tenant])
-    await page.goto(`${APP}/`, { waitUntil: 'networkidle' })
-    await page.waitForTimeout(1200)
-  }
-  return { browser, page, errors, login }
+  // Log in through the real UI form; pre-seed only the (non-credential) tenant choice.
+  await page.addInitScript(t => localStorage.setItem('active_tenant', t), tenant)
+  await page.goto(`${APP}/`, { waitUntil: 'networkidle' })
+  await page.fill('#login-email', CREDS.email)
+  await page.fill('input[type="password"]', CREDS.password)
+  await page.click('button[type="submit"]')
+  await page.waitForTimeout(2500)
+  // D1/H3 guard: no credential may ever appear in localStorage.
+  const token = await page.evaluate(() => localStorage.getItem('auth_token'))
+  if (token) errors.push('[d1] auth_token staat in localStorage — het Bearer-pad is gesloopt, dit mag NOOIT!')
+  return { browser, page, errors }
 }
 
 // Navigate via the sidebar (hash boot is flaky headless; the sidebar is the real UX path).

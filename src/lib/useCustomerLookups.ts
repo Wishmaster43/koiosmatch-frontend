@@ -8,7 +8,6 @@
  */
 import { useState, useEffect } from 'react'
 import api from './api'
-import { COOKIE_AUTH } from './authMode'
 import { normalizeOptions } from './lookupUtils'
 import type { LookupOption } from '@/types/common'
 
@@ -27,7 +26,6 @@ export function useCustomerLookups() {
 
   // Load the tenant config once; cookie mode has no JS-visible token so just try.
   useEffect(() => {
-    if (!COOKIE_AUTH && !localStorage.getItem('auth_token')) { setLoading(false); return }
     api.get('/settings/customer-lookups')
       .then(res => { const d = res.data?.data ?? res.data ?? {}; setStatuses(normalizeOptions(d.statuses, DEFAULT_CUSTOMER_STATUSES, '#6B7280') ?? DEFAULT_CUSTOMER_STATUSES) })
       .catch(() => {})

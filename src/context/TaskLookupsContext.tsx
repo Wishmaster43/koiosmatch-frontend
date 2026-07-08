@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
 import api from '../lib/api'
-import { COOKIE_AUTH } from '../lib/authMode'
 
 /**
  * TaskLookupsContext — the tenant-configurable task (activity) lookups.
@@ -83,7 +82,6 @@ export function TaskLookupsProvider({ children }: { children: ReactNode }) {
 
   // Fetch each lookup once; a 404/empty keeps the seed fallback so the UI never breaks.
   useEffect(() => {
-    if (!COOKIE_AUTH && !localStorage.getItem('auth_token')) { setLoading(false); return }
     const load = (url: string, fallback: TaskLookupItem[], set: Dispatch<SetStateAction<TaskLookupItem[]>>) =>
       api.get(url).then(r => set(normalize(r.data?.data ?? r.data, fallback))).catch(() => {})
     Promise.allSettled([

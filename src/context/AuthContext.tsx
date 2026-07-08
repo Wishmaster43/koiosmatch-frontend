@@ -1,7 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import api, { primeCsrf } from '../lib/api'
-import { COOKIE_AUTH } from '../lib/authMode'
 import { hasModule as tenantHasModule } from '../lib/modules'
 import { queryClient } from '../lib/queryClient'
 import type { Tenant, User } from '../types/api'
@@ -51,12 +50,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [tenants,       setTenants]           = useState<Tenant[]>([])
   const [activeTenant,  setActiveTenantState] = useState<Tenant | null>(null)
   // Pages the backend says this user may open (single source of truth for
-  // gated pages — see lib/access.js). Seeded from cache to avoid flash on boot —
-  // bearer mode only: cookie mode keeps NOTHING auth-shaped in localStorage (D1).
-  const [accessiblePages, setAccessiblePages] = useState<string[]>(() => {
-    if (COOKIE_AUTH) return []
-    try { return JSON.parse(localStorage.getItem('accessible_pages') ?? '[]') as string[] } catch { return [] }
-  })
+  // gated pages — see lib/access.js). Memory only: the cookie flow keeps
+  // NOTHING auth-shaped in localStorage (D1; the Bearer flow was removed — H3).
+  const [accessiblePages, setAccessiblePages] = useState<string[]>([])
 
   /**
    * Applies an /auth/me or login response: stores user + accessible_pages.
@@ -68,15 +64,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const pages = d?.accessible_pages ?? u?.accessible_pages ?? []
     setUser(u)
     setAccessiblePages(pages)
-    if (COOKIE_AUTH) {
-      // D1 (Danny 2026-07-04): the profile stays in MEMORY only — no user PII,
-      // roles or pages in localStorage. A neutral flag is the "there was a
-      // session" boot hint, so the login screen still shows zero 401s.
-      localStorage.setItem('km_session', '1')
-    } else {
-      localStorage.setItem('auth_user', JSON.stringify(u))
-      localStorage.setItem('accessible_pages', JSON.stringify(pages))
-    }
+    // D1 (Danny 2026-07-04): the profile stays in MEMORY only — no user PII,
+    // roles or pages in localStorage. A neutral flag is the "there was a
+    // session" boot hint, so the login screen still shows zero 401s.
+    localStorage.setItem('km_session', '1')
 
     // If the response carries a tenant (non-super-admin or /auth/me), keep the
     // active tenant state in sync so tenant.package + tenant.modules stay fresh.
@@ -162,29 +153,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // ── Startup: restore session ─────────────────────────────────────────────────
-  // Bearer mode: need a cached token to bother calling /auth/me.
-  // Cookie mode: there is no JS-visible token — always try /auth/me (the httpOnly
-  // cookie authenticates it; a 401 just means "not logged in").
+  // The httpOnly cookie is invisible to JS; the NEUTRAL km_session flag (never
+  // the profile — D1 keeps PII out of localStorage) is the "there was a session"
+  // hint — without it (first visit / after logout) skip the probe entirely, so
+  // the login screen shows ZERO 401s.
   useEffect(() => {
-    const token = localStorage.getItem('auth_token')
-    const saved = localStorage.getItem('auth_user')
-
-    if (!COOKIE_AUTH && (!token || !saved)) {
+    if (localStorage.getItem('km_session') !== '1') {
       setLoading(false)
       return
-    }
-    // Cookie mode: the httpOnly cookie is invisible to JS; the NEUTRAL km_session
-    // flag (never the profile — D1 keeps PII out of localStorage) is the "there
-    // was a session" hint — without it (first visit / after logout) skip the
-    // probe entirely, so the login screen shows ZERO 401s.
-    if (COOKIE_AUTH && localStorage.getItem('km_session') !== '1') {
-      setLoading(false)
-      return
-    }
-
-    // Bearer mode only: pre-seed the user from cache to avoid a paint flash.
-    if (!COOKIE_AUTH && saved) {
-      try { setUser(JSON.parse(saved) as AuthUser) } catch { localStorage.removeItem('auth_user') }
     }
 
     api.get('/auth/me')
@@ -222,11 +198,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { mfaRequired: true, mfaToken: res.data.mfa_token }
     }
 
-    const { token, tenant } = res.data
-    // Bearer mode stores the token. In COOKIE mode the session cookie carries auth —
-    // NEVER store a body token (the API still sends one; storing it would put an
-    // XSS-readable credential right back in localStorage — Danny's 2026-07-04 catch).
-    if (!COOKIE_AUTH && token) localStorage.setItem('auth_token', token)
+    const { tenant } = res.data
+    // The httpOnly session cookie carries auth — a body token is NEVER stored
+    // (X-Auth-Mode makes the API send token:null; storing one would put an
+    // XSS-readable credential in localStorage — Danny's 2026-07-04 catch, H3).
     const u = applyAuthResponse(res.data)
 
     if (tenant?.id) {
@@ -259,9 +234,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const verifyMfa = async (mfaToken: string, code: string): Promise<AuthUser> => {
     const res = await api.post('/auth/mfa/verify', { mfa_token: mfaToken, code })
-    const { token, tenant } = res.data
-    // Same rule as login(): cookie mode never stores the body token (see above).
-    if (!COOKIE_AUTH && token) localStorage.setItem('auth_token', token)
+    const { tenant } = res.data
+    // Same rule as login(): a body token is never stored (see above, H3).
     const u = applyAuthResponse(res.data)
 
     if (tenant?.id) {
