@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileText, Unlink, ArchiveRestore } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
+import { useDateFormat } from '@/lib/datetime'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ApplicationTab from './drawer/ApplicationTab'
@@ -40,6 +41,7 @@ interface ApplicationDrawerProps {
  */
 export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, users, onDetach, onRestore, canManage }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
+  const { formatDateTime } = useDateFormat()
   // Funnel phases (Settings lookup) for the header phase picker; never hardcoded.
   const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string }> }
   if (!a) return null
@@ -81,7 +83,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       onToggleExpand={onToggleExpand}
       footer={(
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: a.created || '—' })}</span>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDateTime(a.created) })}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Detached → restore (primary); active → detach (danger, gated). */}
             {a.archived ? (

@@ -22,7 +22,14 @@ export function useDateFormat() {
     const d = new Date(value)
     return isNaN(d.getTime()) ? String(value) : d.toLocaleDateString(locale, opts)
   }
-  return { locale, formatDate }
+  // DD-MM-YYYY HH:mm — the app-wide standard for drill-downs / detail views (never raw ISO).
+  const formatDateTime = (value: DateInput): string => {
+    if (!value) return '—'
+    const d = new Date(value)
+    return isNaN(d.getTime()) ? String(value)
+      : d.toLocaleString(locale, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+  }
+  return { locale, formatDate, formatDateTime }
 }
 
 // Age in whole years from a birthdate; accounts for whether the birthday already
