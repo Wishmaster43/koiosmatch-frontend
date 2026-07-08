@@ -18,7 +18,8 @@
     "priority": "Priorité",
     "links": "Lien",
     "assignee": "Assignée à",
-    "due": "Échéance"
+    "due": "Échéance",
+    "created": "Créé"
   },
   "kpi": {
     "open": "Ouvertes",

@@ -18,7 +18,8 @@
     "priority": "Prioriteit",
     "links": "Koppeling",
     "assignee": "Toegewezen aan",
-    "due": "Vervaldatum"
+    "due": "Vervaldatum",
+    "created": "Aangemaakt"
   },
   "kpi": {
     "open": "Open",

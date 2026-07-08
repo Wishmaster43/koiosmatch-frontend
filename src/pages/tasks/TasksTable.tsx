@@ -82,6 +82,8 @@ export default function TasksTable({
       render: r => r.due
         ? <span style={{ fontSize: 12, color: isOverdue(r) ? 'var(--color-danger)' : 'var(--text-muted)', fontWeight: isOverdue(r) ? 600 : 400 }}>{formatDate(r.due)}</span>
         : dash },
+    { key: 'createdAt', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.createdAt || '',
+      cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => formatDate(r.createdAt) },
   ]
 
   return (

@@ -18,7 +18,8 @@
     "priority": "Priorität",
     "links": "Verknüpfung",
     "assignee": "Zugewiesen an",
-    "due": "Fälligkeitsdatum"
+    "due": "Fälligkeitsdatum",
+    "created": "Erstellt"
   },
   "kpi": {
     "open": "Offen",
