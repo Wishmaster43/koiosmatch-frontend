@@ -90,6 +90,28 @@ export const AVAILABLE_APPS: AppDef[] = [
     border:      '#FDE68A',
     monthly:     true,
   },
+  // AI-agent apps (Danny 2026-07-08): these gate the matching workflow-folder
+  // visibility server-side (FolderVisibility) — toggle off = folder + workflows hidden.
+  {
+    id:          'ai_planner',
+    label:       'AI Planner',
+    description: 'AI-planner: diensten aanbieden, reminders, gewerkte diensten en statuswijzigingen. Toont de map "AI Planner" in Workflows.',
+    icon:        '🤖',
+    color:       '#7C3AED',
+    bg:          '#F5F3FF',
+    border:      '#DDD6FE',
+    monthly:     true,
+  },
+  {
+    id:          'ai_recruiter',
+    label:       'AI Recruiter',
+    description: 'AI-recruiter: kennismaking en automatische reacties op kandidaat-berichten. Toont de map "AI Recruiter" in Workflows.',
+    icon:        '🎯',
+    color:       '#DB2777',
+    bg:          '#FDF2F8',
+    border:      '#FBCFE8',
+    monthly:     true,
+  },
 ]
 
 export function AppsProvider({ children }: { children: ReactNode }) {

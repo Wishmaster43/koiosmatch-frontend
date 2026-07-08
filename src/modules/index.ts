@@ -2,6 +2,7 @@ import webhook           from './webhook'
 import sm_candidates     from './sm_candidates'
 import sm_customers      from './sm_customers'
 import sm_shifts         from './sm_shifts'
+import sm_schedules      from './sm_schedules'
 import hf_candidates     from './hf_candidates'
 import hf_customers      from './hf_customers'
 import hf_shifts         from './hf_shifts'
@@ -69,6 +70,7 @@ const MODULES: ModuleDef[] = [
   sm_candidates,
   sm_customers,
   sm_shifts,
+  sm_schedules,
   hf_candidates,
   hf_customers,
   hf_shifts,

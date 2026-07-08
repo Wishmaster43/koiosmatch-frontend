@@ -8,8 +8,9 @@ import { useQuery } from '@tanstack/react-query'
 import api from '@/lib/api'
 import type { RunRow } from '@/types/reports'
 
-// Statuses that mean the run is finished — polling stops here.
-const TERMINAL = new Set(['success', 'failed', 'error', 'cancelled', 'completed'])
+// Statuses that mean the run is finished — polling stops here. Exported so the
+// editor can seed node outputs from the finished run's steps.
+export const TERMINAL = new Set(['success', 'failed', 'error', 'cancelled', 'completed'])
 
 export function useWorkflowRun(runId: string | number | null | undefined) {
   const { data } = useQuery<RunRow>({

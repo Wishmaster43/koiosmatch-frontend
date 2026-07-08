@@ -8,8 +8,10 @@
 
 import type { WorkflowStep, FlowNode, FlowEdge } from '@/types/workflow'
 
-// Stable-ish id for a freshly created node.
-export const uid = () => 'n_' + Math.random().toString(36).slice(2, 8)
+// Stable id for a freshly created node. A REAL uuid: the backend honours the
+// editor's step id on create but validates it as uuid (steps.*.id) — a non-uuid
+// id made every save with a new node fail ("must be a valid UUID").
+export const uid = () => crypto.randomUUID()
 
 // Build a ReactFlow edge between two node ids (our "addable" edge type). Handles
 // default to 'out'/'in'; a router branch passes its own port id as sourceHandle so

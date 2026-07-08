@@ -4,7 +4,32 @@
     "search": "Zoek veld…",
     "noUpstream": "Geen eerdere modules om naar te verwijzen",
     "wholeOutput": "Volledige output",
-    "notRun": "niet gerund"
+    "notRun": "niet gerund",
+    "notRunHint": "Voer de module uit (▶) om de velden te zien"
+  },
+  "tree": {
+    "search": "Zoeken in output…",
+    "bundle": "Bundle {{n}}",
+    "empty": "Geen output",
+    "more": "+ {{n}} meer",
+    "capped": "{{shown}} van {{total}} getoond",
+    "items": "{{n}} items",
+    "collapse": "Inklappen",
+    "expand": "Uitklappen"
+  },
+  "wa": {
+    "template": "Template",
+    "templateLoading": "Templates ophalen…",
+    "templateEmpty": "Geen goedgekeurde templates gevonden. Controleer de WhatsApp-koppeling.",
+    "templateUnknown": "Onbekende template — vul de variabelen handmatig in (één per regel).",
+    "headerVars": "Header-variabelen",
+    "bodyVars": "Body-variabelen",
+    "headerVarsRaw": "Header-variabelen (één per regel)",
+    "bodyVarsRaw": "Body-variabelen (één per regel)",
+    "slotLabel": "Variabele {{n}}",
+    "preview": "Voorbeeld",
+    "previewHint": "Zo ontvangt de kandidaat het bericht; [veld] wordt per kandidaat ingevuld.",
+    "emptySlot": "nog niet ingevuld"
   },
   "filters": {
     "status": "Status",

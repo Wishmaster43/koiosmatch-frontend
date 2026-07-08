@@ -9,6 +9,9 @@ import { useState, useCallback, useEffect, useMemo } from 'react'
 import { addEdge, useNodesState, useEdgesState } from '@xyflow/react'
 import type { Connection } from '@xyflow/react'
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow, flowToSteps } from './serialization'
+// NOTE (takeover 2026-07-09): the stopped lane was about to seed node outputs from a
+// finished run here (needs notifyError, TERMINAL from useWorkflowRun, RunRow/RunStep
+// types) — open follow-up "run-viewer output-seeding"; re-add those imports then.
 import { useWorkflowRun } from './useWorkflowRun'
 import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, ScheduleConfig,
   WorkflowVarField, WorkflowVarGroup } from '@/types/workflow'
