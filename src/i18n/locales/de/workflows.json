@@ -354,6 +354,8 @@
   },
   "canvas": {
     "filterTitle": "Filter festlegen",
+    "routeName": "Routenname",
+    "routeNamePlaceholder": "z. B. Tagschicht",
     "logicAllHint": "Alle Bedingungen müssen zutreffen",
     "logicAnyHint": "Mindestens eine Bedingung muss zutreffen",
     "outputTitle": "Ausgabe",

@@ -354,6 +354,8 @@
   },
   "canvas": {
     "filterTitle": "Filter instellen",
+    "routeName": "Route naam",
+    "routeNamePlaceholder": "bijv. Dagdienst",
     "logicAllHint": "Alle condities moeten kloppen",
     "logicAnyHint": "Minimaal één conditie moet kloppen",
     "outputTitle": "Output",

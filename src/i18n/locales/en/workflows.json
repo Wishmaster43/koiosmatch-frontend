@@ -354,6 +354,8 @@
   },
   "canvas": {
     "filterTitle": "Set filter",
+    "routeName": "Route name",
+    "routeNamePlaceholder": "e.g. Day shift",
     "logicAllHint": "All conditions must match",
     "logicAnyHint": "At least one condition must match",
     "outputTitle": "Output",

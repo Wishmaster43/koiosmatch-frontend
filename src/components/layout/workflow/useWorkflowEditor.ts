@@ -97,8 +97,8 @@ export function useWorkflowEditor({ workflow, onSave }: {
     setFilterState({ edgeId })
   }, [])
 
-  const saveEdgeFilter = useCallback((edgeId: string, filters: EdgeFilters) => {
-    setEdges(eds => eds.map(e => e.id === edgeId ? { ...e, data: { ...e.data, filters } } : e))
+  const saveEdgeFilter = useCallback((edgeId: string, filters: EdgeFilters, label: string) => {
+    setEdges(eds => eds.map(e => e.id === edgeId ? { ...e, data: { ...e.data, filters, label: label || undefined } } : e))
   }, [setEdges])
 
   const handleNodeRun = useCallback(async (nodeId: string, data: FlowNodeData) => {

@@ -354,6 +354,8 @@
   },
   "canvas": {
     "filterTitle": "Configurar filtro",
+    "routeName": "Nombre de ruta",
+    "routeNamePlaceholder": "p. ej. Turno de día",
     "logicAllHint": "Todas las condiciones deben cumplirse",
     "logicAnyHint": "Al menos una condición debe cumplirse",
     "outputTitle": "Salida",

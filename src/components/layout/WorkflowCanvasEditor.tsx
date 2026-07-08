@@ -284,8 +284,9 @@ function EditorInner({ workflow, onClose, onSave }: {
         {filterState && (
           <EdgeFilterPanel
             filters={edges.find(e => e.id === filterState.edgeId)?.data?.filters as EdgeFilters | null | undefined}
+            label={edges.find(e => e.id === filterState.edgeId)?.data?.label as string | undefined}
             onClose={() => setFilterState(null)}
-            onSave={(filters) => saveEdgeFilter(filterState.edgeId, filters)}
+            onSave={(filters, label) => saveEdgeFilter(filterState.edgeId, filters, label)}
           />
         )}
         {outputState && (

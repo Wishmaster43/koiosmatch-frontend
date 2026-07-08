@@ -160,11 +160,12 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
 
 // ── Edge filter panel ─────────────────────────────────────────────────────────
 
-export function EdgeFilterPanel({ filters, onClose, onSave }: {
-  filters?: EdgeFilters | null; onClose: () => void; onSave: (f: EdgeFilters) => void
+export function EdgeFilterPanel({ filters, label, onClose, onSave }: {
+  filters?: EdgeFilters | null; label?: string; onClose: () => void; onSave: (f: EdgeFilters, label: string) => void
 }) {
   const [conds, setConds] = useState<FilterCondition[]>(filters?.conditions ?? [])
   const [logic, setLogic] = useState(filters?.logic ?? 'AND')
+  const [name, setName]   = useState(label ?? '')
   const { t } = useTranslation('workflows')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
@@ -184,6 +185,16 @@ export function EdgeFilterPanel({ filters, onClose, onSave }: {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('canvas.filterTitle')}</div>
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
+        </div>
+
+        {/* Route naam — the Router branch name (Make-style); shown on the edge */}
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
+            {t('canvas.routeName')}
+          </label>
+          <input value={name} onChange={e => setName(e.target.value)}
+            placeholder={t('canvas.routeNamePlaceholder')} aria-label={t('canvas.routeName')}
+            style={{ width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', boxSizing: 'border-box' }} />
         </div>
 
         {/* AND / OR toggle */}
@@ -236,7 +247,7 @@ export function EdgeFilterPanel({ filters, onClose, onSave }: {
 
         <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
           <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>{t('common:cancel')}</button>
-          <button onClick={() => { onSave({ logic, conditions: conds }); onClose() }}
+          <button onClick={() => { onSave({ logic, conditions: conds }, name.trim()); onClose() }}
             style={{ padding: '8px 16px', fontSize: 13, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>
             {t('common:save')}
           </button>
@@ -289,7 +300,7 @@ export function OutputPanel({ output, onClose }: { output?: unknown; onClose: ()
 
 function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }: {
   id: string; sourceX: number; sourceY: number; targetX: number; targetY: number
-  selected?: boolean; data?: { filters?: EdgeFilters }
+  selected?: boolean; data?: { filters?: EdgeFilters; label?: string }
 }) {
   const onAdd    = useContext(EdgeAddContext)
   const onDelete = useContext(EdgeDeleteContext)
@@ -310,6 +321,12 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
           pointerEvents: 'all',
           display: 'flex', gap: 4, alignItems: 'center',
         }}>
+          {/* Route name (Router branch) */}
+          {data?.label && (
+            <div style={{ fontSize: 9, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', borderRadius: 999, padding: '1px 6px', fontWeight: 700, maxWidth: 130, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {data.label}
+            </div>
+          )}
           {hasFilters && (
             <div style={{ fontSize: 9, background: '#7C3AED', color: 'white', borderRadius: 999, padding: '1px 6px', fontWeight: 700 }}>
               {data?.filters?.conditions?.length ?? 0} filter{(data?.filters?.conditions?.length ?? 0) > 1 ? 's' : ''}

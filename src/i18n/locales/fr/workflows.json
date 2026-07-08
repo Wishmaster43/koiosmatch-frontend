@@ -354,6 +354,8 @@
   },
   "canvas": {
     "filterTitle": "Définir le filtre",
+    "routeName": "Nom de la route",
+    "routeNamePlaceholder": "p. ex. Service de jour",
     "logicAllHint": "Toutes les conditions doivent correspondre",
     "logicAnyHint": "Au moins une condition doit correspondre",
     "outputTitle": "Sortie",
