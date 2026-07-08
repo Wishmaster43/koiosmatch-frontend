@@ -788,6 +788,9 @@
     "contactFailed": "Creating contact failed",
     "firstName": "First name",
     "lastName": "Last name",
-    "email": "Email"
+    "email": "Email",
+    "billingEmailMain": "Billing email",
+    "billingEmailExtra": "Extra email",
+    "addBillingEmail": "add email"
   }
 }

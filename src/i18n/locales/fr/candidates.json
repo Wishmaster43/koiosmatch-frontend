@@ -788,6 +788,9 @@
     "contactFailed": "Échec de la création",
     "firstName": "Prénom",
     "lastName": "Nom",
-    "email": "E-mail"
+    "email": "E-mail",
+    "billingEmailMain": "E-mail de facturation",
+    "billingEmailExtra": "E-mail supplémentaire",
+    "addBillingEmail": "ajouter un e-mail"
   }
 }

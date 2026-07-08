@@ -788,6 +788,9 @@
     "contactFailed": "Anlegen fehlgeschlagen",
     "firstName": "Vorname",
     "lastName": "Nachname",
-    "email": "E-Mail"
+    "email": "E-Mail",
+    "billingEmailMain": "Rechnungs-E-Mail",
+    "billingEmailExtra": "Weitere E-Mail",
+    "addBillingEmail": "E-Mail hinzufügen"
   }
 }

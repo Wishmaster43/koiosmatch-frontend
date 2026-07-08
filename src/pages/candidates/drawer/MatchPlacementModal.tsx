@@ -74,7 +74,7 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
   const [purchase, setPurchase] = useState('')
   const [sell, setSell] = useState('')
   const [costCenter, setCostCenter] = useState('')
-  const [billingEmail, setBillingEmail] = useState('')
+  const [billingEmails, setBillingEmails] = useState<string[]>([''])
   const [remarks, setRemarks] = useState('')
   const [saving, setSaving] = useState(false)
 
@@ -119,7 +119,7 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
       purchase_rate: purchase ? Number(purchase) : null,
       sell_rate: sell ? Number(sell) : null,
       cost_center: costCenter || null,
-      billing_email: billingEmail || null,
+      billing_emails: billingEmails.map(e => e.trim()).filter(Boolean),
       remarks: remarks || null,
       ...(vacancyId ? { vacancy_id: vacancyId } : {}),
       ...(ownerId ? { owner_id: ownerId } : {}),
@@ -256,7 +256,22 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
           </div>
           <div style={row2}>
             <F label={t('placement.costCenter')}><input value={costCenter} onChange={e => setCostCenter(e.target.value)} style={input} placeholder="KP-…" /></F>
-            <F label={t('placement.billingEmail')}><input type="email" value={billingEmail} onChange={e => setBillingEmail(e.target.value)} style={input} /></F>
+            <F label={t('placement.billingEmail')}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {billingEmails.map((em, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <input type="email" value={em} placeholder={i === 0 ? t('placement.billingEmailMain') : t('placement.billingEmailExtra')}
+                      onChange={e => setBillingEmails(p => p.map((x, j) => j === i ? e.target.value : x))} style={input} />
+                    {billingEmails.length > 1 && (
+                      <button onClick={() => setBillingEmails(p => p.filter((_, j) => j !== i))} aria-label={t('common:close')}
+                        style={{ flexShrink: 0, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={13} /></button>
+                    )}
+                  </div>
+                ))}
+                <button onClick={() => setBillingEmails(p => [...p, ''])}
+                  style={{ alignSelf: 'flex-start', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', fontSize: 12, fontWeight: 600, padding: 0 }}>+ {t('placement.addBillingEmail')}</button>
+              </div>
+            </F>
           </div>
           <F label={t('placement.remarks')}>
             <textarea value={remarks} onChange={e => setRemarks(e.target.value)} rows={2}

@@ -788,6 +788,9 @@
     "contactFailed": "Contactpersoon aanmaken mislukt",
     "firstName": "Voornaam",
     "lastName": "Achternaam",
-    "email": "E-mail"
+    "email": "E-mail",
+    "billingEmailMain": "Facturatie-e-mail",
+    "billingEmailExtra": "Extra e-mail",
+    "addBillingEmail": "e-mail toevoegen"
   }
 }
