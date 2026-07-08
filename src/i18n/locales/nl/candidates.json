@@ -340,7 +340,9 @@
     "currentJob": "Huidige functie",
     "inProgress": "Nog in opleiding",
     "expectedEnd": "Verwachte einddatum",
-    "present": "heden"
+    "present": "heden",
+    "alwaysValid": "Altijd geldig (geen einddatum)",
+    "diplomaDate": "Diploma-/afgiftedatum"
   },
   "work": {
     "client": "Klant",
@@ -381,7 +383,11 @@
     "modalityRemote": "Op afstand",
     "modalityPhone": "Telefonisch",
     "owner": "Recruiter",
-    "pickOwner": "Kies recruiter"
+    "pickOwner": "Kies recruiter",
+    "addMatch": "Match",
+    "createMatch": "Match aanmaken",
+    "matchCreated": "Match aangemaakt",
+    "matchFailed": "Match aanmaken mislukt"
   },
   "communication": {
     "newNote": "Nieuwe notitie",

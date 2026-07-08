@@ -333,7 +333,9 @@
     "currentJob": "Puesto actual",
     "inProgress": "Aún en formación",
     "expectedEnd": "Fecha de fin prevista",
-    "present": "actualidad"
+    "present": "actualidad",
+    "alwaysValid": "Siempre válido (sin caducidad)",
+    "diplomaDate": "Fecha de diploma / emisión"
   },
   "work": {
     "client": "Cliente",
@@ -374,7 +376,11 @@
     "modalityRemote": "Remoto",
     "modalityPhone": "Teléfono",
     "owner": "Reclutador",
-    "pickOwner": "Elige reclutador"
+    "pickOwner": "Elige reclutador",
+    "addMatch": "Match",
+    "createMatch": "Crear match",
+    "matchCreated": "Match creado",
+    "matchFailed": "Error al crear el match"
   },
   "communication": {
     "newNote": "Nueva nota",

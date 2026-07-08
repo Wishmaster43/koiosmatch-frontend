@@ -340,7 +340,9 @@
     "currentJob": "Current job",
     "inProgress": "Still studying",
     "expectedEnd": "Expected end date",
-    "present": "present"
+    "present": "present",
+    "alwaysValid": "Always valid (no expiry)",
+    "diplomaDate": "Diploma / issue date"
   },
   "work": {
     "client": "Client",
@@ -381,7 +383,11 @@
     "modalityRemote": "Remote",
     "modalityPhone": "Phone",
     "owner": "Recruiter",
-    "pickOwner": "Pick recruiter"
+    "pickOwner": "Pick recruiter",
+    "addMatch": "Match",
+    "createMatch": "Create match",
+    "matchCreated": "Match created",
+    "matchFailed": "Creating match failed"
   },
   "communication": {
     "newNote": "New note",

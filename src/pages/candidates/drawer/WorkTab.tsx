@@ -5,6 +5,7 @@ import MatchesTab from './MatchesTab'
 import StatusPill from '@/components/ui/StatusPill'
 import AddApplicationModal from './AddApplicationModal'
 import PlanIntakeModal from './PlanIntakeModal'
+import AddMatchModal from './AddMatchModal'
 import api from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from './constants'
@@ -32,7 +33,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
   // Appointments (who/when/where) keyed by application_id — shown under each row.
   const [appts, setAppts] = useState<Appt[]>([])
   const [page, setPage] = useState(1)
-  const [modal, setModal] = useState<null | 'apply' | 'intake'>(null)
+  const [modal, setModal] = useState<null | 'apply' | 'intake' | 'match'>(null)
   // Reset the local list when the drawer switches to another candidate / fuller detail.
   useEffect(() => { setApps((c.applications ?? []) as unknown as AppRow[]); setPage(1) }, [c.id, c.applications])
   // Load the candidate's appointments once per candidate (separate structured entity).
@@ -88,6 +89,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
             {t('sections.applications')} <span style={{ fontWeight: 400 }}>{apps.length}</span>
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
+            <button onClick={() => setModal('match')} style={actionBtn}><Plus size={12} /> {t('work.addMatch')}</button>
             <button onClick={() => setModal('apply')} style={actionBtn}><Plus size={12} /> {t('work.addApplication')}</button>
             <button onClick={() => setModal('intake')} style={actionBtn}><CalendarPlus size={12} /> {t('work.planIntake')}</button>
           </div>
@@ -143,6 +145,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
 
       {modal === 'apply'  && <AddApplicationModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
+      {modal === 'match'  && <AddMatchModal       candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
     </div>
   )
 }

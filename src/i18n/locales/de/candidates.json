@@ -333,7 +333,9 @@
     "currentJob": "Aktuelle Stelle",
     "inProgress": "Noch in Ausbildung",
     "expectedEnd": "Voraussichtliches Enddatum",
-    "present": "heute"
+    "present": "heute",
+    "alwaysValid": "Immer gültig (kein Ablauf)",
+    "diplomaDate": "Diplom-/Ausstellungsdatum"
   },
   "work": {
     "client": "Kunde",
@@ -374,7 +376,11 @@
     "modalityRemote": "Remote",
     "modalityPhone": "Telefon",
     "owner": "Recruiter",
-    "pickOwner": "Recruiter wählen"
+    "pickOwner": "Recruiter wählen",
+    "addMatch": "Match",
+    "createMatch": "Match anlegen",
+    "matchCreated": "Match angelegt",
+    "matchFailed": "Anlegen des Matches fehlgeschlagen"
   },
   "communication": {
     "newNote": "Neue Notiz",

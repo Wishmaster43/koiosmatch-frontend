@@ -24,25 +24,33 @@ export interface FieldDef {
   type?: string
   half?: boolean
   separator?: boolean
+  // Conditional visibility/enablement driven by another field's boolean value:
+  // hideWhen removes the field entirely, disabledWhen greys it out (read-only).
+  hideWhen?: string
+  disabledWhen?: string
 }
 
 type FormValues = Record<string, unknown>
 
-function FieldInput({ f, value, onChange, values }: {
-  f: FieldDef; value: unknown; onChange: (v: string | boolean) => void; values: FormValues
+function FieldInput({ f, value, onChange, values, disabled }: {
+  f: FieldDef; value: unknown; onChange: (v: string | boolean) => void; values: FormValues; disabled?: boolean
 }) {
   // A field's label can switch based on another field (altLabelWhen) — e.g. an
   // education end date becomes "Verwachte einddatum" when "Nog in opleiding" is on.
   const label = (f.altLabelWhen && values?.[f.altLabelWhen]) ? f.altLabel : f.label
   const labelText = typeof label === 'string' ? label : undefined
+  // Disabled = greyed + non-interactive (e.g. end date on a current job / always-valid cert).
+  const wrap = (node: ReactNode) => disabled
+    ? <div style={{ opacity: 0.45, pointerEvents: 'none' }}>{node}</div>
+    : node
   if (f.checkbox) return (
     <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--text)', cursor: 'pointer' }}>
       <input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked)} style={{ cursor: 'pointer' }} />
       {f.label}
     </label>
   )
-  if (f.textarea) return <TextArea placeholder={labelText} value={value as string | undefined} onChange={onChange} rows={2} />
-  if (f.date)     return <DateField placeholder={labelText} value={value as string | undefined} onChange={onChange} />
+  if (f.textarea) return wrap(<TextArea placeholder={labelText} value={value as string | undefined} onChange={onChange} rows={2} />)
+  if (f.date)     return wrap(<DateField placeholder={labelText} value={value as string | undefined} onChange={onChange} />)
   if (f.options)  return (
     <select value={(value as string) ?? ''} onChange={e => onChange(e.target.value)}
       style={{ width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }}>
@@ -54,7 +62,7 @@ function FieldInput({ f, value, onChange, values }: {
       })}
     </select>
   )
-  return <TextField placeholder={labelText} value={value as string | undefined} onChange={onChange} type={f.type} />
+  return wrap(<TextField placeholder={labelText} value={value as string | undefined} onChange={onChange} type={f.type} />)
 }
 
 // `initial` (optional) prefills the fields → same form for adding and editing.
@@ -66,23 +74,26 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
   const set = (k: string, v: string | boolean) => setValues(p => ({ ...p, [k]: v }))
   const iconBtn: CSSProperties = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 7, cursor: 'pointer' }
 
+  // Fields whose hideWhen condition is active drop out entirely (pairing runs on what's left).
+  const dis = (f: FieldDef) => !!(f.disabledWhen && values[f.disabledWhen])
+  const visibleFields = fields.filter(f => !(f.hideWhen && values[f.hideWhen]))
   const rows: ReactNode[] = []
-  for (let i = 0; i < fields.length; i++) {
-    const f = fields[i]
-    const next = fields[i + 1]
+  for (let i = 0; i < visibleFields.length; i++) {
+    const f = visibleFields[i]
+    const next = visibleFields[i + 1]
     if ((f.half && next?.half) || f.separator) {
       rows.push(
         <div key={f.key} style={f.separator
           ? { display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, alignItems: 'center' }
           : { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-          <FieldInput f={f}    value={values[f.key]}    onChange={v => set(f.key, v)} values={values} />
+          <FieldInput f={f}    value={values[f.key]}    onChange={v => set(f.key, v)} values={values} disabled={dis(f)} />
           {f.separator && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('to')}</span>}
-          {next && <FieldInput f={next} value={values[next.key]} onChange={v => set(next.key, v)} values={values} />}
+          {next && <FieldInput f={next} value={values[next.key]} onChange={v => set(next.key, v)} values={values} disabled={dis(next)} />}
         </div>
       )
       i++
     } else {
-      rows.push(<FieldInput key={f.key} f={f} value={values[f.key]} onChange={v => set(f.key, v)} values={values} />)
+      rows.push(<FieldInput key={f.key} f={f} value={values[f.key]} onChange={v => set(f.key, v)} values={values} disabled={dis(f)} />)
     }
   }
 

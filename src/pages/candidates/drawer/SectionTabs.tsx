@@ -6,6 +6,7 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import AddableSectionJs from '@/components/forms/AddableSection'
 import { useDateFormat } from '@/lib/datetime'
+import { useSkillLevels } from '@/lib/useSkillLevels'
 import type { Id } from '@/types/common'
 
 // Relation items vary by backend version — kept loose at the prop boundary and
@@ -31,7 +32,7 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
     { key: 'company',  label: t('addFields.company'),        half: true },
     { key: 'location', label: t('addFields.location') },
     { key: 'start',    label: t('addFields.startDate'), half: true, date: true },
-    { key: 'end',      label: t('addFields.endDate'),   half: true, date: true },
+    { key: 'end',      label: t('addFields.endDate'),   half: true, date: true, disabledWhen: 'current' },
     { key: 'current',  label: t('addFields.currentJob'), checkbox: true },
     { key: 'desc',     label: t('addFields.description'), textarea: true },
   ]
@@ -73,7 +74,7 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
     { key: 'end',       label: t('addFields.endDate'),   half: true, date: true,
       altLabel: t('addFields.expectedEnd'), altLabelWhen: 'inProgress' },
     { key: 'inProgress', label: t('addFields.inProgress'), checkbox: true },
-    { key: 'issued',    label: t('addFields.issueDate'), date: true },
+    { key: 'issued',    label: t('addFields.diplomaDate'), date: true, hideWhen: 'inProgress' },
     { key: 'desc',      label: t('addFields.description'), textarea: true },
   ]
   return (
@@ -113,7 +114,8 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
     { key: 'name',    label: t('addFields.certName'),     half: true },
     { key: 'org',     label: t('addFields.organisation'), half: true },
     { key: 'issued',  label: t('addFields.issueDate'), separator: true, date: true },
-    { key: 'expires', label: t('addFields.expiryDate'), date: true },
+    { key: 'expires', label: t('addFields.expiryDate'), date: true, disabledWhen: 'noExpiry' },
+    { key: 'noExpiry', label: t('addFields.alwaysValid'), checkbox: true },
     { key: 'license', label: t('addFields.licenseNumber') },
     { key: 'desc',    label: t('addFields.description'), textarea: true },
   ]
@@ -142,9 +144,11 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
 
 export function SkillsTab({ items = [], onAdd, onEdit, onRemove }: RelTabProps) {
   const { t } = useTranslation('candidates')
+  // Level is a tenant lookup dropdown (SKILL-LVL-1), mirroring the languages editor.
+  const { levels } = useSkillLevels()
   const fields = [
     { key: 'name',  label: t('addFields.skill') },
-    { key: 'level', label: t('addFields.skillLevel') },
+    { key: 'level', label: t('addFields.skillLevel'), options: levels },
   ]
   // Skills render as a vertical list (one per row) so edit/remove read clearly.
   return (

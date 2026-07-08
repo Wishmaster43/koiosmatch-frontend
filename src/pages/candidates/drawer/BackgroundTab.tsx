@@ -32,11 +32,11 @@ const TO_API: Record<string, (v: RelItem) => Record<string, unknown>> = {
   }),
   educations: v => ({
     title: v.title, school: v.school, start_date: v.start,
-    end_date: v.end, in_progress: !!v.inProgress, description: v.desc, issue_date: v.issued,
+    end_date: v.end, in_progress: !!v.inProgress, description: v.desc, issue_date: v.inProgress ? null : v.issued,
   }),
   certifications: v => ({
     name: v.name, organisation: v.org, issue_date: v.issued,
-    expiry_date: v.expires, license_number: v.license, description: v.desc,
+    expiry_date: v.noExpiry ? null : v.expires, license_number: v.license, description: v.desc,
   }),
   skills: v => ({ name: v.name, level: v.level }),
 }
