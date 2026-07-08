@@ -2,26 +2,39 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check } from 'lucide-react'
 import api from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
 
 /**
  * VacancyMatchingSettings — the GLOBAL matching strictness (how critical the AI
- * matcher is overall). The per-vacancy dimension importance (qualifications,
+ * matcher is overall) plus the placement APPROVAL mode (per-tenant: off = every
+ * placement is always OK). The per-vacancy dimension importance (qualifications,
  * location, …) lives on each vacancy itself, not here. Persists to /settings/matching.
  */
 // The backend strictness is an enum; the slider is a 3-step index onto it.
 const LEVELS = ['lenient', 'balanced', 'strict']
+// Approval-mode enum (backend slugs are Dutch by contract; i18n keys stay English).
+const MODES = [
+  { value: 'uit', key: 'off' },
+  { value: 'bij_afwijking', key: 'deviation' },
+  { value: 'altijd', key: 'always' },
+]
 
 export default function VacancyMatchingSettings() {
   const { t } = useTranslation('settings')
   const [level, setLevel] = useState(1) // index into LEVELS (1 = balanced default)
+  const [approval, setApproval] = useState('bij_afwijking') // backend default
   const [saving, setSaving] = useState(false)
   const [saved, setSaved]   = useState(false)
 
-  // Load the saved strictness enum → slider index (fail soft to balanced).
+  // Load the saved strictness enum → slider index + approval mode (fail soft to defaults).
   useEffect(() => {
     api.get('/settings/matching')
-      .then(r => { const i = LEVELS.indexOf((r.data?.data ?? r.data)?.strictness); if (i >= 0) setLevel(i) })
+      .then(r => {
+        const d = (r.data?.data ?? r.data) ?? {}
+        const i = LEVELS.indexOf(d.strictness); if (i >= 0) setLevel(i)
+        if (MODES.some(m => m.value === d.approval_mode)) setApproval(d.approval_mode)
+      })
       .catch(() => {})
   }, [])
 
@@ -29,6 +42,15 @@ export default function VacancyMatchingSettings() {
     setSaving(true)
     try { await api.put('/settings/matching', { strictness: LEVELS[level] }); setSaved(true); setTimeout(() => setSaved(false), 2000) }
     catch { /* noop */ } finally { setSaving(false) }
+  }
+
+  // Approval mode saves on click (partial PUT) — optimistic, revert + toast on failure.
+  const setApprovalMode = async (mode) => {
+    const prev = approval
+    if (mode === prev) return
+    setApproval(mode)
+    try { await api.put('/settings/matching', { approval_mode: mode }) }
+    catch { setApproval(prev); notifyError(t('matching.approval.saveFailed')) }
   }
 
   return (
@@ -52,6 +74,34 @@ export default function VacancyMatchingSettings() {
       </div>
 
       <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 22 }}>{t('matching.perVacancyHint')}</p>
+
+      {/* Placement approval — three-option radio; native inputs keep keyboard support. */}
+      <div style={{ marginTop: 28, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
+        <h3 style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('matching.approval.title')}</h3>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('matching.approval.subtitle')}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+          {MODES.map(({ value, key }) => {
+            const active = approval === value
+            return (
+              <label key={value} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px',
+                borderRadius: 8, cursor: 'pointer',
+                border: `1px solid ${active ? 'color-mix(in srgb, var(--color-primary) 45%, transparent)' : 'var(--border)'}`,
+                background: active ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'var(--bg)' }}>
+                <input type="radio" name="approval_mode" value={value} checked={active}
+                  onChange={() => setApprovalMode(value)} style={{ marginTop: 2, accentColor: 'var(--color-primary)' }} />
+                <span style={{ minWidth: 0 }}>
+                  <span style={{ display: 'block', fontSize: 12.5, fontWeight: active ? 600 : 500, color: 'var(--text)' }}>
+                    {t(`matching.approval.${key}`)}
+                  </span>
+                  <span style={{ display: 'block', fontSize: 11.5, color: 'var(--text-muted)', marginTop: 1 }}>
+                    {t(`matching.approval.${key}Desc`)}
+                  </span>
+                </span>
+              </label>
+            )
+          })}
+        </div>
+      </div>
     </div>
   )
 }

@@ -381,7 +381,8 @@
     "cocNumber": "Número CIF/NIF",
     "contactName": "Persona de contacto",
     "phone": "Teléfono",
-    "email": "Correo electrónico"
+    "email": "Correo electrónico",
+    "mapNoCoords": "Aún no hay ubicaciones con coordenadas: introduce la dirección de una ubicación y aparecerá automáticamente en el mapa."
   },
   "memory": {
     "title": "Memoria",
@@ -1309,7 +1310,18 @@
     "strict": "Estricto",
     "save": "Guardar",
     "saved": "Guardado",
-    "perVacancyHint": "Lo que importa por vacante (cualificaciones, ubicación, …) se configura en la propia vacante."
+    "perVacancyHint": "Lo que importa por vacante (cualificaciones, ubicación, …) se configura en la propia vacante.",
+    "approval": {
+      "title": "Aprobación",
+      "subtitle": "Cuándo una colocación necesita aprobación previa.",
+      "off": "Desactivado",
+      "offDesc": "Nunca requiere aprobación — cada colocación pasa directamente.",
+      "deviation": "En caso de desviación",
+      "deviationDesc": "Aprobación solo cuando la colocación se desvía de lo acordado.",
+      "always": "Siempre",
+      "alwaysDesc": "Cada colocación necesita primero aprobación.",
+      "saveFailed": "Error al guardar — se restableció la selección."
+    }
   },
   "languageSettings": {
     "languagesTitle": "Idiomas",

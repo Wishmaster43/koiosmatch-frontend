@@ -4,7 +4,8 @@
     "search": "Buscar campo…",
     "noUpstream": "No hay módulos anteriores a los que hacer referencia",
     "wholeOutput": "Salida completa",
-    "notRun": "sin ejecutar"
+    "notRun": "sin ejecutar",
+    "notRunHint": "Ejecuta el módulo (▶) para ver los campos"
   },
   "editor": {
     "tabDiagram": "Diagrama",
@@ -562,5 +563,29 @@
     "send": "Enviar",
     "noConnection": "⚠️ Sin conexión con el agente. Comprueba que el backend esté funcionando.",
     "removeVariable": "Eliminar variable"
+  },
+  "tree": {
+    "search": "Buscar en la salida…",
+    "bundle": "Lote {{n}}",
+    "empty": "Sin salida",
+    "more": "+ {{n}} más",
+    "capped": "{{shown}} de {{total}} mostrados",
+    "items": "{{n}} elementos",
+    "collapse": "Contraer",
+    "expand": "Expandir"
+  },
+  "wa": {
+    "template": "Plantilla",
+    "templateLoading": "Cargando plantillas…",
+    "templateEmpty": "No se encontraron plantillas aprobadas. Comprueba la conexión de WhatsApp.",
+    "templateUnknown": "Plantilla desconocida — rellena las variables manualmente (una por línea).",
+    "headerVars": "Variables de encabezado",
+    "bodyVars": "Variables del cuerpo",
+    "headerVarsRaw": "Variables de encabezado (una por línea)",
+    "bodyVarsRaw": "Variables del cuerpo (una por línea)",
+    "slotLabel": "Variable {{n}}",
+    "preview": "Vista previa",
+    "previewHint": "Así recibe el candidato el mensaje; [campo] se rellena por candidato.",
+    "emptySlot": "aún sin rellenar"
   }
 }

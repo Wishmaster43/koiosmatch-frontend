@@ -791,6 +791,10 @@
     "email": "E-Mail",
     "billingEmailMain": "Rechnungs-E-Mail",
     "billingEmailExtra": "Weitere E-Mail",
-    "addBillingEmail": "E-Mail hinzufügen"
+    "addBillingEmail": "E-Mail hinzufügen",
+    "branchMismatch": "Niederlassung weicht ab",
+    "branchMismatchDesc": "Die Niederlassung des Kandidaten ({{candidate}}) weicht von der des Kunden ({{customer}}) ab.",
+    "branchKeep": "Nein — nur diese Platzierung bei dieser Niederlassung",
+    "branchMove": "Ja — Kandidat ebenfalls zu dieser Niederlassung verschieben"
   }
 }

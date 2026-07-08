@@ -4,7 +4,8 @@
     "search": "Search field…",
     "noUpstream": "No earlier modules to reference",
     "wholeOutput": "Whole output",
-    "notRun": "not run"
+    "notRun": "not run",
+    "notRunHint": "Run the module (▶) to see the fields"
   },
   "filters": {
     "status": "Status",
@@ -562,5 +563,29 @@
     "send": "Send",
     "noConnection": "⚠️ No connection to the agent. Check that the backend is running.",
     "removeVariable": "Remove variable"
+  },
+  "tree": {
+    "search": "Search output…",
+    "bundle": "Bundle {{n}}",
+    "empty": "No output",
+    "more": "+ {{n}} more",
+    "capped": "{{shown}} of {{total}} shown",
+    "items": "{{n}} items",
+    "collapse": "Collapse",
+    "expand": "Expand"
+  },
+  "wa": {
+    "template": "Template",
+    "templateLoading": "Fetching templates…",
+    "templateEmpty": "No approved templates found. Check the WhatsApp connection.",
+    "templateUnknown": "Unknown template — fill in the variables manually (one per line).",
+    "headerVars": "Header variables",
+    "bodyVars": "Body variables",
+    "headerVarsRaw": "Header variables (one per line)",
+    "bodyVarsRaw": "Body variables (one per line)",
+    "slotLabel": "Variable {{n}}",
+    "preview": "Preview",
+    "previewHint": "This is how the candidate receives the message; [field] is filled in per candidate.",
+    "emptySlot": "not filled in yet"
   }
 }

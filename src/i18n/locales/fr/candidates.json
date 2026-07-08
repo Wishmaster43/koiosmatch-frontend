@@ -791,6 +791,10 @@
     "email": "E-mail",
     "billingEmailMain": "E-mail de facturation",
     "billingEmailExtra": "E-mail supplémentaire",
-    "addBillingEmail": "ajouter un e-mail"
+    "addBillingEmail": "ajouter un e-mail",
+    "branchMismatch": "Agence différente",
+    "branchMismatchDesc": "L'agence du candidat ({{candidate}}) diffère de celle du client ({{customer}}).",
+    "branchKeep": "Non — uniquement ce placement dans cette agence",
+    "branchMove": "Oui — transférer aussi le candidat vers cette agence"
   }
 }

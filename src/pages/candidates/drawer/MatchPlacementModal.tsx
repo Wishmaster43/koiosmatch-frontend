@@ -28,7 +28,16 @@ const sectionTitle: React.CSSProperties = { fontSize: 11, fontWeight: 700, textT
 const row2: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
 
 interface UserLike { id?: Id; name?: string }
-interface CustomerDetail { locations?: Array<{ id?: Id; name?: string; departments?: Array<{ id?: Id; name?: string }> }>; contacts?: Array<{ id?: Id; name?: string }> }
+// Fase-3 fields: branch (vestiging) + cost-centre/billing takeover defaults per
+// customer and per location — the location default wins once a location is picked.
+interface CustomerDetail {
+  branch_id?: Id | null
+  branch?: { id?: Id; name?: string } | null
+  cost_center?: string | null
+  billing_email?: string | null
+  locations?: Array<{ id?: Id; name?: string; cost_center?: string | null; billing_email?: string | null; departments?: Array<{ id?: Id; name?: string }> }>
+  contacts?: Array<{ id?: Id; name?: string }>
+}
 
 // A labelled field wrapper.
 function F({ label, children }: { label: string; children: React.ReactNode }) {
@@ -78,16 +87,54 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
   const [remarks, setRemarks] = useState('')
   const [saving, setSaving] = useState(false)
 
-  // Fetch the customer's locations/contacts when a customer is picked (cascade).
+  // Vestiging-mismatch (fase 3): the candidate's own branch vs the customer's.
+  // 'placement' = only this placement keeps the customer's branch (default);
+  // 'candidate' = also move the candidate's branch to the customer's.
+  const [candBranch, setCandBranch] = useState<{ id: Id | null; name: string } | null>(null)
+  const [mismatchChoice, setMismatchChoice] = useState<'placement' | 'candidate'>('placement')
+
+  // Load the candidate's branch once — needed for the mismatch check.
+  useEffect(() => {
+    let alive = true
+    api.get(`/candidates/${candidateId}`)
+      .then(r => {
+        if (!alive) return
+        const d = (r.data?.data ?? r.data) as { branch_id?: Id | null; location?: { name?: string } | null }
+        setCandBranch({ id: d?.branch_id ?? null, name: d?.location?.name ?? '' })
+      })
+      .catch(() => { if (alive) setCandBranch(null) })
+    return () => { alive = false }
+  }, [candidateId])
+
+  // Fetch the customer's locations/contacts when a customer is picked (cascade),
+  // and prefill the takeover defaults (cost centre + billing email) from the
+  // customer — only into still-empty fields, never over the recruiter's input.
   useEffect(() => {
     if (!customerId) { setDetail(null); return }
     let alive = true
     setLocationId(''); setDepartmentId(''); setContactId('')
     api.get(`/customers/${customerId}`)
-      .then(r => { if (alive) setDetail((r.data?.data ?? r.data) as CustomerDetail) })
+      .then(r => {
+        if (!alive) return
+        const d = (r.data?.data ?? r.data) as CustomerDetail
+        setDetail(d)
+        if (d?.cost_center) setCostCenter(prev => prev || d.cost_center!)
+        if (d?.billing_email) setBillingEmails(prev => (prev.length === 1 && !prev[0].trim()) ? [d.billing_email!] : prev)
+      })
       .catch(() => { if (alive) setDetail(null) })
     return () => { alive = false }
   }, [customerId])
+
+  // Location default wins over the customer default once a location is picked.
+  useEffect(() => {
+    if (!locationId || !detail) return
+    const loc = (detail.locations ?? []).find(l => String(l.id) === locationId)
+    if (loc?.cost_center) setCostCenter(loc.cost_center)
+    if (loc?.billing_email) setBillingEmails(prev => (prev.length === 1 && !prev[0].trim()) ? [loc.billing_email!] : prev)
+  }, [locationId]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Mismatch only counts when BOTH sides actually carry a branch (§3B: nullable).
+  const branchMismatch = Boolean(candBranch?.id && detail?.branch_id && String(candBranch.id) !== String(detail.branch_id))
 
   const locations   = detail?.locations ?? []
   const departments = locations.find(l => String(l.id) === locationId)?.departments ?? []
@@ -126,6 +173,11 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
     }
     try {
       await api.post('/matches', body)
+      // Mismatch resolution: recruiter chose to move the candidate's branch along.
+      // Best-effort AFTER the placement (its failure must not lose the match).
+      if (branchMismatch && mismatchChoice === 'candidate' && detail?.branch_id) {
+        await api.patch(`/candidates/${candidateId}`, { location_id: detail.branch_id }).catch(() => {})
+      }
       notifySuccess(t('placement.created'))
       onCreated(); onClose()
     } catch {
@@ -217,6 +269,25 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
             <SelectMenu value={vacancyId || null} onChange={setVacancyId} placeholder={t('placement.noVacancy')}
               options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
           </F>
+
+          {/* Vestiging-mismatch (fase 3): candidate branch ≠ customer branch → calm
+              inline choice. Default: only this placement; opt-in: move the candidate. */}
+          {branchMismatch && (
+            <div role="group" aria-label={t('placement.branchMismatch')}
+              style={{ display: 'flex', flexDirection: 'column', gap: 6, padding: '9px 11px', borderRadius: 8, fontSize: 12,
+                color: 'var(--color-warning)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--color-warning) 35%, transparent)' }}>
+              <span style={{ fontWeight: 600 }}>
+                {t('placement.branchMismatchDesc', { candidate: candBranch?.name || '—', customer: detail?.branch?.name || '—' })}
+              </span>
+              {(['placement', 'candidate'] as const).map(v => (
+                <label key={v} style={{ display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer', color: 'var(--text)' }}>
+                  <input type="radio" name="branch-mismatch" checked={mismatchChoice === v} onChange={() => setMismatchChoice(v)} />
+                  {t(v === 'placement' ? 'placement.branchKeep' : 'placement.branchMove')}
+                </label>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* ── Contract ── */}

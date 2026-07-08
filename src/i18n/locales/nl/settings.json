@@ -400,7 +400,8 @@
     "cocNumber": "KvK-nummer",
     "contactName": "Contactpersoon",
     "phone": "Telefoon",
-    "email": "E-mailadres"
+    "email": "E-mailadres",
+    "mapNoCoords": "Nog geen vestigingen met coördinaten — vul het adres van een locatie in, dan verschijnt die automatisch op de kaart."
   },
   "memory": {
     "title": "Geheugen",
@@ -611,7 +612,18 @@
     "strict": "Streng",
     "save": "Opslaan",
     "saved": "Opgeslagen",
-    "perVacancyHint": "Wat per vacature belangrijk is (kwalificaties, locatie, …) stel je op de vacature zelf in."
+    "perVacancyHint": "Wat per vacature belangrijk is (kwalificaties, locatie, …) stel je op de vacature zelf in.",
+    "approval": {
+      "title": "Goedkeuring",
+      "subtitle": "Wanneer een plaatsing eerst goedgekeurd moet worden.",
+      "off": "Uit",
+      "offDesc": "Nooit goedkeuring nodig — elke plaatsing gaat direct door.",
+      "deviation": "Bij afwijking",
+      "deviationDesc": "Alleen goedkeuring wanneer de plaatsing afwijkt van de gemaakte afspraken.",
+      "always": "Altijd",
+      "alwaysDesc": "Elke plaatsing heeft eerst goedkeuring nodig.",
+      "saveFailed": "Opslaan mislukt — de keuze is teruggezet."
+    }
   },
   "cvTemplate": {
     "title": "CV-sjabloon",

@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Phone, X, RotateCcw, ListChecks, Handshake } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
+import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
 import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
@@ -86,13 +87,19 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <Avatar initials={initialsOf(candidateName(tg))} size={26} />
               <div style={{ flex: 1, minWidth: 0 }}>
-                {/* Name → jump to the candidate drawer (cross-entity intent). */}
-                <button onClick={() => tg.candidate?.id && openEntity('candidates', tg.candidate.id)}
-                  title={t('drawer.action.openCandidate')}
-                  style={{ display: 'block', maxWidth: '100%', padding: 0, background: 'none', border: 'none', cursor: tg.candidate?.id ? 'pointer' : 'default',
-                    fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>
-                  {candidateName(tg)}
-                </button>
+                {/* Name → jump to the candidate drawer (cross-entity intent) + the shared
+                    deployability chip (C-CHIP) — it handles Lead→dash and lookup colours. */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                  <button onClick={() => tg.candidate?.id && openEntity('candidates', tg.candidate.id)}
+                    title={t('drawer.action.openCandidate')}
+                    style={{ display: 'block', minWidth: 0, padding: 0, background: 'none', border: 'none', cursor: tg.candidate?.id ? 'pointer' : 'default',
+                      fontSize: 12, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textAlign: 'left' }}>
+                    {candidateName(tg)}
+                  </button>
+                  <span style={{ fontSize: 11, flexShrink: 0 }}>
+                    <CandidateStatusChip status={tg.candidate?.status} phase={tg.candidate?.phase} />
+                  </span>
+                </div>
                 {tg.contacted_at && (
                   <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDate(tg.contacted_at)}</div>
                 )}

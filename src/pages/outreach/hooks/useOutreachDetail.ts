@@ -14,7 +14,11 @@ export interface OutreachTarget {
   outcome?: string | null
   note?: string | null
   contacted_at?: string | null
-  candidate?: { id?: string; name?: string; first_name?: string; last_name?: string } | null
+  // status/phase = deployability + lifecycle slugs (C-CHIP) for the shared CandidateStatusChip.
+  candidate?: {
+    id?: string; name?: string; first_name?: string; last_name?: string
+    status?: string | null; phase?: string | null
+  } | null
   [key: string]: unknown
 }
 export interface CampaignDetail extends Campaign { targets?: OutreachTarget[] }

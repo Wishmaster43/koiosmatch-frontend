@@ -4,7 +4,8 @@
     "search": "Rechercher un champ…",
     "noUpstream": "Aucun module précédent à référencer",
     "wholeOutput": "Sortie complète",
-    "notRun": "non exécuté"
+    "notRun": "non exécuté",
+    "notRunHint": "Exécutez le module (▶) pour voir les champs"
   },
   "editor": {
     "tabDiagram": "Diagramme",
@@ -562,5 +563,29 @@
     "send": "Envoyer",
     "noConnection": "⚠️ Pas de connexion à l'agent. Vérifiez que le backend fonctionne.",
     "removeVariable": "Supprimer la variable"
+  },
+  "tree": {
+    "search": "Rechercher dans la sortie…",
+    "bundle": "Lot {{n}}",
+    "empty": "Aucune sortie",
+    "more": "+ {{n}} de plus",
+    "capped": "{{shown}} sur {{total}} affichés",
+    "items": "{{n}} éléments",
+    "collapse": "Replier",
+    "expand": "Déplier"
+  },
+  "wa": {
+    "template": "Modèle",
+    "templateLoading": "Chargement des modèles…",
+    "templateEmpty": "Aucun modèle approuvé trouvé. Vérifiez la connexion WhatsApp.",
+    "templateUnknown": "Modèle inconnu — remplissez les variables manuellement (une par ligne).",
+    "headerVars": "Variables d'en-tête",
+    "bodyVars": "Variables du corps",
+    "headerVarsRaw": "Variables d'en-tête (une par ligne)",
+    "bodyVarsRaw": "Variables du corps (une par ligne)",
+    "slotLabel": "Variable {{n}}",
+    "preview": "Aperçu",
+    "previewHint": "Voici comment le candidat reçoit le message ; [champ] est rempli par candidat.",
+    "emptySlot": "pas encore rempli"
   }
 }

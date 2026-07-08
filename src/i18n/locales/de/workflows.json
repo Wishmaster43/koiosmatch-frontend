@@ -4,7 +4,8 @@
     "search": "Feld suchen…",
     "noUpstream": "Keine vorherigen Module zum Referenzieren",
     "wholeOutput": "Gesamte Ausgabe",
-    "notRun": "nicht ausgeführt"
+    "notRun": "nicht ausgeführt",
+    "notRunHint": "Modul ausführen (▶), um die Felder zu sehen"
   },
   "editor": {
     "tabDiagram": "Diagramm",
@@ -562,5 +563,29 @@
     "send": "Senden",
     "noConnection": "⚠️ Keine Verbindung zum Agent. Prüfe, ob das Backend läuft.",
     "removeVariable": "Variable entfernen"
+  },
+  "tree": {
+    "search": "Output durchsuchen…",
+    "bundle": "Bundle {{n}}",
+    "empty": "Keine Ausgabe",
+    "more": "+ {{n}} weitere",
+    "capped": "{{shown}} von {{total}} angezeigt",
+    "items": "{{n}} Einträge",
+    "collapse": "Einklappen",
+    "expand": "Ausklappen"
+  },
+  "wa": {
+    "template": "Vorlage",
+    "templateLoading": "Vorlagen werden geladen…",
+    "templateEmpty": "Keine genehmigten Vorlagen gefunden. Prüfe die WhatsApp-Verbindung.",
+    "templateUnknown": "Unbekannte Vorlage — Variablen manuell eintragen (eine pro Zeile).",
+    "headerVars": "Header-Variablen",
+    "bodyVars": "Body-Variablen",
+    "headerVarsRaw": "Header-Variablen (eine pro Zeile)",
+    "bodyVarsRaw": "Body-Variablen (eine pro Zeile)",
+    "slotLabel": "Variable {{n}}",
+    "preview": "Vorschau",
+    "previewHint": "So erhält der Kandidat die Nachricht; [Feld] wird pro Kandidat ausgefüllt.",
+    "emptySlot": "noch nicht ausgefüllt"
   }
 }

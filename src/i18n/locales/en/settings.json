@@ -400,7 +400,8 @@
     "cocNumber": "Chamber of Commerce no.",
     "contactName": "Contact person",
     "phone": "Phone",
-    "email": "Email"
+    "email": "Email",
+    "mapNoCoords": "No locations with coordinates yet — fill in a location's address and it will appear on the map automatically."
   },
   "memory": {
     "title": "Memory",
@@ -611,7 +612,18 @@
     "strict": "Strict",
     "save": "Save",
     "saved": "Saved",
-    "perVacancyHint": "What matters per vacancy (qualifications, location, …) is set on the vacancy itself."
+    "perVacancyHint": "What matters per vacancy (qualifications, location, …) is set on the vacancy itself.",
+    "approval": {
+      "title": "Approval",
+      "subtitle": "When a placement needs approval before it goes ahead.",
+      "off": "Off",
+      "offDesc": "Never requires approval — every placement goes through immediately.",
+      "deviation": "On deviation",
+      "deviationDesc": "Approval only when the placement deviates from the agreed terms.",
+      "always": "Always",
+      "alwaysDesc": "Every placement requires approval first.",
+      "saveFailed": "Saving failed — your choice was reverted."
+    }
   },
   "cvTemplate": {
     "title": "CV template",

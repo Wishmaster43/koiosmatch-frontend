@@ -791,6 +791,10 @@
     "email": "Email",
     "billingEmailMain": "Email de facturación",
     "billingEmailExtra": "Email adicional",
-    "addBillingEmail": "añadir email"
+    "addBillingEmail": "añadir email",
+    "branchMismatch": "La sede difiere",
+    "branchMismatchDesc": "La sede del candidato ({{candidate}}) difiere de la del cliente ({{customer}}).",
+    "branchKeep": "No — solo esta colocación en esta sede",
+    "branchMove": "Sí — trasladar también al candidato a esta sede"
   }
 }

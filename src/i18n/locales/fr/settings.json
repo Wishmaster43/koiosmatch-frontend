@@ -381,7 +381,8 @@
     "cocNumber": "N° RCS",
     "contactName": "Personne de contact",
     "phone": "Téléphone",
-    "email": "E-mail"
+    "email": "E-mail",
+    "mapNoCoords": "Aucun emplacement avec des coordonnées pour l'instant — renseignez l'adresse d'un emplacement et il apparaîtra automatiquement sur la carte."
   },
   "memory": {
     "title": "Mémoire",
@@ -1309,7 +1310,18 @@
     "strict": "Strict",
     "save": "Enregistrer",
     "saved": "Enregistré",
-    "perVacancyHint": "Ce qui compte par poste (qualifications, localisation, …) se règle sur le poste lui-même."
+    "perVacancyHint": "Ce qui compte par poste (qualifications, localisation, …) se règle sur le poste lui-même.",
+    "approval": {
+      "title": "Approbation",
+      "subtitle": "Quand un placement doit d’abord être approuvé.",
+      "off": "Désactivé",
+      "offDesc": "Jamais d’approbation requise — chaque placement passe directement.",
+      "deviation": "En cas d’écart",
+      "deviationDesc": "Approbation uniquement lorsque le placement s’écarte des accords convenus.",
+      "always": "Toujours",
+      "alwaysDesc": "Chaque placement nécessite d’abord une approbation.",
+      "saveFailed": "Échec de l’enregistrement — le choix a été rétabli."
+    }
   },
   "languageSettings": {
     "languagesTitle": "Langues",

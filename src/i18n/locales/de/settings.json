@@ -381,7 +381,8 @@
     "cocNumber": "Handelsregisternr.",
     "contactName": "Ansprechpartner",
     "phone": "Telefon",
-    "email": "E-Mail"
+    "email": "E-Mail",
+    "mapNoCoords": "Noch keine Standorte mit Koordinaten — geben Sie die Adresse eines Standorts ein, dann erscheint er automatisch auf der Karte."
   },
   "memory": {
     "title": "Speicher",
@@ -1309,7 +1310,18 @@
     "strict": "Streng",
     "save": "Speichern",
     "saved": "Gespeichert",
-    "perVacancyHint": "Was je Stelle wichtig ist (Qualifikationen, Standort, …), stellst du an der Stelle selbst ein."
+    "perVacancyHint": "Was je Stelle wichtig ist (Qualifikationen, Standort, …), stellst du an der Stelle selbst ein.",
+    "approval": {
+      "title": "Genehmigung",
+      "subtitle": "Wann eine Platzierung zuerst genehmigt werden muss.",
+      "off": "Aus",
+      "offDesc": "Nie eine Genehmigung nötig — jede Platzierung geht direkt durch.",
+      "deviation": "Bei Abweichung",
+      "deviationDesc": "Genehmigung nur, wenn die Platzierung von den Vereinbarungen abweicht.",
+      "always": "Immer",
+      "alwaysDesc": "Jede Platzierung braucht zuerst eine Genehmigung.",
+      "saveFailed": "Speichern fehlgeschlagen — die Auswahl wurde zurückgesetzt."
+    }
   },
   "languageSettings": {
     "languagesTitle": "Sprachen",

@@ -791,6 +791,10 @@
     "email": "Email",
     "billingEmailMain": "Billing email",
     "billingEmailExtra": "Extra email",
-    "addBillingEmail": "add email"
+    "addBillingEmail": "add email",
+    "branchMismatch": "Branch differs",
+    "branchMismatchDesc": "The candidate's branch ({{candidate}}) differs from the customer's branch ({{customer}}).",
+    "branchKeep": "No — only this placement at this branch",
+    "branchMove": "Yes — also move the candidate to this branch"
   }
 }

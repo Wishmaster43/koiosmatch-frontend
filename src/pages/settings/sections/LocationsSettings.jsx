@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, X } from 'lucide-react'
+import { Plus, X, Map as MapIcon } from 'lucide-react'
 import api from '@/lib/api'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
+
+// STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
+const LocationsMapView = lazy(() => import('./LocationsMapView'))
 
 // Structured address — kept as separate fields so it can be matched/validated and
 // composed consistently. Falls back to a legacy `address`/`full_address` string.
@@ -23,9 +27,11 @@ function formatAddress(loc) {
 }
 
 export default function LocationsSettings() {
-  const { t } = useTranslation('settings')
+  const { t } = useTranslation(['settings', 'common'])
   const [locations, setLocations] = useState([])
   const [loading,   setLoading]   = useState(true)
+  // STRAAL-1: table ↔ map quick-view (office network on the shared radius map).
+  const [view,      setView]      = useState('table')
   const [showModal, setShowModal] = useState(false)
   const [form,      setForm]      = useState(EMPTY_FORM)
   const [saving,    setSaving]    = useState(false)
@@ -60,15 +66,25 @@ export default function LocationsSettings() {
           <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('locations.title')}</h2>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('locations.subtitle')}</p>
         </div>
-        <button onClick={() => setShowModal(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
-                   fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
-                   background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
-          <Plus size={13} /> {t('locations.create')}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* Map quick-view via the ONE shared toggle (§4 — never hand-rolled). */}
+          <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
+            label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
+          <button onClick={() => setShowModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
+                     fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
+                     background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+            <Plus size={13} /> {t('locations.create')}
+          </button>
+        </div>
       </div>
 
-      {loading ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p> : (
+      {loading ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p> : view === 'map' ? (
+        // Office-network map (STRAAL-1) — lazy so Leaflet ships only when opened.
+        <Suspense fallback={<p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common:map.loading')}</p>}>
+          <LocationsMapView locations={locations} />
+        </Suspense>
+      ) : (
         <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>

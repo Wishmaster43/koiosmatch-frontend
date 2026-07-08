@@ -791,6 +791,10 @@
     "email": "E-mail",
     "billingEmailMain": "Facturatie-e-mail",
     "billingEmailExtra": "Extra e-mail",
-    "addBillingEmail": "e-mail toevoegen"
+    "addBillingEmail": "e-mail toevoegen",
+    "branchMismatch": "Vestiging wijkt af",
+    "branchMismatchDesc": "Kandidaat-vestiging ({{candidate}}) wijkt af van de klant-vestiging ({{customer}}).",
+    "branchKeep": "Nee — alleen deze plaatsing bij deze vestiging",
+    "branchMove": "Ja — zet ook de kandidaat over naar deze vestiging"
   }
 }
