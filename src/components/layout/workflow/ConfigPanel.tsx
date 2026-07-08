@@ -14,6 +14,7 @@ import { AgentsTab, PromptsTab, FAQTab, KnowledgeTab, ToolsTab } from '@/compone
 import { FieldInput } from './fields'
 import { categorySlug, fieldLabel } from './moduleI18n'
 import AgentTestPanel from './AgentTestPanel'
+import OutputTree from './OutputTree'
 import type { FlowNode, WorkflowField, WorkflowVarGroup } from '@/types/workflow'
 
 // '__wide__' is a sentinel that signals the editor to widen the right panel
@@ -81,7 +82,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
             {fieldLabel(t, field.label as string | undefined)}
             {!!(field as WorkflowField & { required?: boolean }).required && <span style={{ color: 'var(--color-danger)', marginLeft: 3 }}>*</span>}
           </label>
-          <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables}
+          <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
             onChange={(key, val) => onUpdate(node.id, key, val)} />
           {field.hint ? <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{field.hint as string}</div> : null}
         </div>
@@ -148,7 +149,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                 <Play size={24} color="var(--border)" />
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>{t('config.noOutput')}</p>
               </div>
-            : <div style={{ padding: 12 }}><pre style={{ fontSize: 11, lineHeight: 1.6, color: '#E2E8F0', background: '#1E293B', borderRadius: 8, padding: 12, overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{JSON.stringify(output, null, 2)}</pre></div>}
+            : <div style={{ padding: 12 }}><OutputTree data={output} /></div>}
         </div>
       )}
 
@@ -217,7 +218,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
               </div>
             : <div style={{ padding: 12 }}>
                 {Array.isArray(output) && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, fontWeight: 500 }}>{output.length} {output.length === 1 ? t('config.item') : t('config.items')}</div>}
-                <pre style={{ fontSize: 11, lineHeight: 1.6, color: '#E2E8F0', background: '#1E293B', borderRadius: 8, padding: 12, overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{JSON.stringify(output, null, 2)}</pre>
+                <OutputTree data={output} />
               </div>}
         </div>
       )}
