@@ -4,6 +4,7 @@ import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
+import { useDateFormat } from '@/lib/datetime'
 import { mapApplication } from './data/mapApplication'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import { initialsOf } from '@/lib/initials'
@@ -35,6 +36,7 @@ function PickField({ label, ...rest }: { label: ReactNode } & AnyProps) {
 export default function AddApplicationModal({ onClose, onCreated }: { onClose: () => void; onCreated: (app: Application) => void }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('applications')
+  const { formatDate } = useDateFormat()
   const [candidates, setCandidates] = useState<PickOption[]>([])
   const [vacancies, setVacancies]   = useState<PickOption[]>([])
   const [candidateId, setCandidateId] = useState('')
@@ -66,7 +68,7 @@ export default function AddApplicationModal({ onClose, onCreated }: { onClose: (
         vacancyId, vacancyTitle: vac?.label ?? '—', client: vac?.client ?? '—',
         score: null, task: '', phaseKey: 'applied', bucket: 'active', source: 'Handmatig',
         owner: { name: '', initials: '', color: null }, candidateStatusLabel: '', candidateStatusColor: '#9CA3AF',
-        created: new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }), isNew: true,
+        created: formatDate(new Date(), { day: 'numeric', month: 'short', year: 'numeric' }), isNew: true,
       } as Application)
     } finally { setSaving(false) }
   }

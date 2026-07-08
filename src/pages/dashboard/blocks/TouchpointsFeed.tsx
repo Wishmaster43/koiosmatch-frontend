@@ -6,6 +6,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { interactive } from '@/lib/a11y'
+import { useDateFormat } from '@/lib/datetime'
 import { Cake, CalendarPlus, RotateCcw, Clock } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { Touchpoint } from '@/types/dashboard'
@@ -18,17 +19,18 @@ const META: Record<string, { Icon: LucideIcon; key: string; color: string }> = {
   followup_due:  { Icon: Clock,        key: 'followupDue',   color: 'var(--color-warning)' },
 }
 
-const fmtDate = (iso?: string) => {
-  if (!iso) return ''
-  const d = new Date(iso)
-  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })
-}
-
 export default function TouchpointsFeed({ items, onOpen }: {
   items: Touchpoint[]
   onOpen?: (id: string | number) => void
 }) {
   const { t } = useTranslation('dashboard')
+  const { formatDate } = useDateFormat()
+  // Locale-aware "8 jul"; empty (not '—') for a missing/invalid date so the row stays clean.
+  const fmtDate = (iso?: string) => {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return isNaN(d.getTime()) ? '' : formatDate(d, { day: 'numeric', month: 'short' })
+  }
   if (!items.length) return null
 
   return (

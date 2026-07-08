@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { X, Phone, Mail, MapPin, Calendar, Clock, Briefcase, MessageSquare, History } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReportCandidate, GlobalRate } from '@/types/reports'
+import { useLocale } from '@/lib/datetime'
 
 // Colored status pill (actief / nietactief / extern / ...) for the candidate.
 function StatusBadge({ status }: { status?: string }) {
@@ -75,19 +76,20 @@ function TagList({ items, color = 'var(--color-primary)', bg = 'var(--color-prim
   )
 }
 
-function fmtDate(v?: string | null) {
+// Pure helpers — locale comes from the caller (useLocale); null hides the InfoRow.
+function fmtDate(v: string | null | undefined, locale: string) {
   if (!v) return null
   const d = new Date(v)
   if (isNaN(d.getTime())) return null
-  return d.toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-function fmtDateTime(v?: string | null) {
+function fmtDateTime(v: string | null | undefined, locale: string) {
   if (!v) return null
   const d = new Date(v)
   if (isNaN(d.getTime())) return null
-  return d.toLocaleDateString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric',
-                                          hour: '2-digit', minute: '2-digit' })
+  return d.toLocaleDateString(locale, { day: '2-digit', month: 'short', year: 'numeric',
+                                        hour: '2-digit', minute: '2-digit' })
 }
 
 /* ── Tabs ── */
@@ -126,6 +128,7 @@ function TabBar({ active, onChange }: { active: string; onChange: (id: string) =
 
 function TabAlgemeen({ c, kenmerken, rates }: { c: ReportCandidate; kenmerken: ReactNode[]; rates: GlobalRate[] }) {
   const { t } = useTranslation('reports')
+  const locale = useLocale()
   return (
     <div className="flex-1 overflow-auto" style={{ padding: '20px 24px' }}>
 
@@ -136,12 +139,12 @@ function TabAlgemeen({ c, kenmerken, rates }: { c: ReportCandidate; kenmerken: R
       </Section>
 
       <Section title={t('candidateDrawer.sections.timeline')}>
-        <InfoRow icon={Calendar}  label={t('candidateDrawer.fields.registrationDate')} value={fmtDate(c.registration_date)} />
-        <InfoRow icon={Clock}     label={t('candidateDrawer.fields.lastLogin')}        value={fmtDateTime(c.last_login_at)} />
-        <InfoRow icon={Calendar}  label={t('candidateDrawer.fields.plannedShift')}     value={fmtDateTime(c.last_planned_shift)} />
-        <InfoRow icon={Briefcase} label={t('candidateDrawer.fields.lastShift')}        value={fmtDateTime(c.last_worked_shift)} />
+        <InfoRow icon={Calendar}  label={t('candidateDrawer.fields.registrationDate')} value={fmtDate(c.registration_date, locale)} />
+        <InfoRow icon={Clock}     label={t('candidateDrawer.fields.lastLogin')}        value={fmtDateTime(c.last_login_at, locale)} />
+        <InfoRow icon={Calendar}  label={t('candidateDrawer.fields.plannedShift')}     value={fmtDateTime(c.last_planned_shift, locale)} />
+        <InfoRow icon={Briefcase} label={t('candidateDrawer.fields.lastShift')}        value={fmtDateTime(c.last_worked_shift, locale)} />
         {c.end_date_employment && (
-          <InfoRow icon={Calendar} label={t('candidateDrawer.fields.endEmployment')} value={fmtDate(c.end_date_employment)} />
+          <InfoRow icon={Calendar} label={t('candidateDrawer.fields.endEmployment')} value={fmtDate(c.end_date_employment, locale)} />
         )}
       </Section>
 

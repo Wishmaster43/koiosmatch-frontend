@@ -9,7 +9,7 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
 import { useLookups } from '@/context/LookupsContext'
-import { useLocale } from '@/lib/datetime'
+import { useDateFormat } from '@/lib/datetime'
 import { useFunctions } from '@/lib/useFunctions'
 import { useIndustries } from '@/lib/useIndustries'
 import { useDriverLicenses } from '@/lib/useDriverLicenses'
@@ -28,7 +28,7 @@ const DAY_SLUGS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
 export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onSave?: (v: Record<string, unknown>) => void; onTypesChange?: (types: string[]) => void }) {
   const { t } = useTranslation('candidates')
-  const locale = useLocale() as string
+  const { locale, formatDate } = useDateFormat()
   const { functions, allowFreeEntry } = useFunctions() as { functions: string[]; allowFreeEntry: boolean }
   const { industries } = useIndustries() as { industries: string[] }
   const { licenses } = useDriverLicenses() as { licenses: string[] }
@@ -98,11 +98,11 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
 
   // Current unavailability window (status axis) — read-only next to "Inzetbaar vanaf"
   // (Danny 2026-07-06): "niet beschikbaar sinds" + "weer beschikbaar" belong here too.
-  const fmtNl = (d?: string | null) => (d ? new Date(d).toLocaleDateString('nl-NL') : '')
+  const fmt = (d?: string | null) => (d ? formatDate(d) : '')
   const statusWindow = (c.statusChangedAt || c.statusReturnDate) && c.status && c.status !== 'available'
     ? [
-        c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(c.status).label, date: fmtNl(c.statusChangedAt) }) : statusMeta(c.status).label,
-        c.statusReturnDate ? t('drawer.availableAgain', { date: fmtNl(c.statusReturnDate) }) : null,
+        c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(c.status).label, date: fmt(c.statusChangedAt) }) : statusMeta(c.status).label,
+        c.statusReturnDate ? t('drawer.availableAgain', { date: fmt(c.statusReturnDate) }) : null,
       ].filter(Boolean).join(' · ')
     : null
 

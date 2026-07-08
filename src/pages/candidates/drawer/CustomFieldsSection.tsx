@@ -8,6 +8,7 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import { useCandidateCustomFields } from '@/lib/useCandidateCustomFields'
+import { useDateFormat } from '@/lib/datetime'
 import type { Candidate } from '@/types/candidate'
 import type { CandidateCustomFieldDef } from '@/types/candidate'
 
@@ -16,14 +17,12 @@ interface Props {
   onEditSave?: (patch: Record<string, unknown>) => void
 }
 
-// Format a raw value for display (boolean → yes/no, date → DD-MM-YYYY, else string).
-function displayValue(def: CandidateCustomFieldDef, raw: unknown, t: (k: string) => string): string {
+// Format a raw value for display (boolean → yes/no, date → locale date, else string).
+// Pure helper — the locale-aware formatter comes from the caller (useDateFormat).
+function displayValue(def: CandidateCustomFieldDef, raw: unknown, t: (k: string) => string, formatDate: (v: string) => string): string {
   if (raw === null || raw === undefined || raw === '') return '—'
   if (def.type === 'boolean') return raw ? t('common:yes') : t('common:no')
-  if (def.type === 'date' && typeof raw === 'string') {
-    const d = new Date(raw)
-    return isNaN(d.getTime()) ? String(raw) : d.toLocaleDateString('nl-NL')
-  }
+  if (def.type === 'date' && typeof raw === 'string') return formatDate(raw)
   return String(raw)
 }
 
@@ -68,6 +67,7 @@ const valueStyle: CSSProperties = { fontSize: 13, color: 'var(--text)', marginTo
 
 export default function CustomFieldsSection({ c, onEditSave }: Props) {
   const { t } = useTranslation('candidates')
+  const { formatDate } = useDateFormat()
   const { fields, loading } = useCandidateCustomFields()
   const [editing, setEditing] = useState(false)
   const [draft,   setDraft]   = useState<Record<string, unknown>>({})
@@ -120,7 +120,7 @@ export default function CustomFieldsSection({ c, onEditSave }: Props) {
             {editing ? (
               <FieldInput def={def} value={draft[def.key] ?? c.customFields?.[def.key]} onChange={v => setVal(def.key, v)} />
             ) : (
-              <div style={valueStyle}>{displayValue(def, c.customFields?.[def.key], t)}</div>
+              <div style={valueStyle}>{displayValue(def, c.customFields?.[def.key], t, formatDate)}</div>
             )}
           </div>
         ))}
