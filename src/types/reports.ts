@@ -63,6 +63,8 @@ export interface RunStep {
   finished_at?: string | null
   summary?: string
   items?: number
+  // Router step: the per-route distribution (Fase 2) — "→ Dagdienst: 12/40".
+  routing?: Array<{ to_label?: string; matched?: number; total?: number; filtered?: number }>
   attempts?: number
   error?: string | null
   error_message?: string | null

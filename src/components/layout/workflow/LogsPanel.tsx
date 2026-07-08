@@ -119,6 +119,16 @@ export default function LogsPanel({ workflowId, liveRun, onClose }: { workflowId
                         {typeof step.summary === 'string' && step.summary && (
                           <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)', marginTop: 4 }}>{step.summary}</div>
                         )}
+                        {/* Router step: per-route distribution — "→ Dagdienst: 12/40". */}
+                        {Array.isArray(step.routing) && step.routing.length > 0 && (
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 6 }}>
+                            {step.routing.map((r, ri) => (
+                              <div key={ri} style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                                → <span style={{ fontWeight: 600, color: 'var(--text)' }}>{r.to_label ?? '—'}</span>: {r.matched ?? 0}/{r.total ?? 0}
+                              </div>
+                            ))}
+                          </div>
+                        )}
                         {total != null && (
                           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
                             {t('runs.drawer.output')}: {total}
