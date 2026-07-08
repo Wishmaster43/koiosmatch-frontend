@@ -119,9 +119,16 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
       ? { blacklistReason: statusModal.reason || null }
       : { statusReason: statusModal.reason || null }
     const changed = statusModal.target !== c.status
+    // STATUS-DATE-SYNC-1: the server makes the return date THE availability-from
+    // (one truth). Mirror that optimistically so the Voorkeuren "Inzetbaar vanaf"
+    // field updates within the same drawer session (verified gap 2026-07-08:
+    // banner showed the new date while the field still held the old one).
+    const prefPatch = statusModal.date
+      ? { preferences: { ...((c.preferences as Record<string, unknown>) ?? {}), available_from: statusModal.date } }
+      : {}
     // N-1: the status note is written CENTRALLY by the backend guard on this PATCH.
     onUpdate?.(c.id, { status: statusModal.target, ...reasonPatch, statusReturnDate: statusModal.date || null,
-      ...(changed ? { statusChangedAt: new Date().toISOString() } : {}) })
+      ...prefPatch, ...(changed ? { statusChangedAt: new Date().toISOString() } : {}) })
     setStatusModal(null)
   }
 
