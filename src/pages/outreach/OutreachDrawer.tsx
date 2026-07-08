@@ -5,6 +5,7 @@
  * config + a single Targets tab; all row markup lives in drawer/TargetsTab.
  */
 import { useTranslation } from 'react-i18next'
+import { useDateFormat } from '@/lib/datetime'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
@@ -18,13 +19,15 @@ const STATUS_COLOR: Record<string, string> = {
   draft: '#94A3B8', active: '#19A5CA', done: '#16A34A',
 }
 
-export default function OutreachDrawer({ id, onClose, expanded = false, onToggleExpand }: {
+export default function OutreachDrawer({ id, createdAt, onClose, expanded = false, onToggleExpand }: {
   id: string | null
+  createdAt?: string
   onClose: () => void
   expanded?: boolean
   onToggleExpand?: () => void
 }) {
   const { t } = useTranslation('outreach')
+  const { formatDateTime } = useDateFormat()
   const { detail, loading, error, setTargetStatus, setTargetOutcome } = useOutreachDetail(id)
   if (!id) return null
 
@@ -45,6 +48,7 @@ export default function OutreachDrawer({ id, onClose, expanded = false, onToggle
       entity={{ id }}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
+      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDateTime(createdAt) })}</span>}
       header={
         <EntityHeader
           label={t('drawer.label')}

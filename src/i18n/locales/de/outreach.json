@@ -75,6 +75,7 @@
   },
   "drawer": {
     "label": "Anrufliste",
+    "createdAt": "Erstellt am {{date}}",
     "tabs": {
       "targets": "Anrufliste"
     },

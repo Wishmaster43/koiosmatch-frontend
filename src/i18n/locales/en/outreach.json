@@ -75,6 +75,7 @@
   },
   "drawer": {
     "label": "Call list",
+    "createdAt": "Created on {{date}}",
     "tabs": {
       "targets": "Call list"
     },

@@ -215,7 +215,7 @@ export default function OutreachPage() {
         )}
       </div>
       {/* Per-bellijst drill-down (the call list itself) — row click opens it. */}
-      <OutreachDrawer id={openId} onClose={() => setOpenId(null)}
+      <OutreachDrawer id={openId} createdAt={campaigns.find(c => String(c.id) === String(openId))?.created_at} onClose={() => setOpenId(null)}
         expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(e => !e)} />
     </div>
   )

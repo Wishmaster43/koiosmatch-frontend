@@ -75,6 +75,7 @@
   },
   "drawer": {
     "label": "Liste d'appel",
+    "createdAt": "Créé le {{date}}",
     "tabs": {
       "targets": "Liste d'appel"
     },

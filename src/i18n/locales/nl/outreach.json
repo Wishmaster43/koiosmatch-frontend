@@ -75,6 +75,7 @@
   },
   "drawer": {
     "label": "Bellijst",
+    "createdAt": "Aangemaakt op {{date}}",
     "tabs": {
       "targets": "Bellijst"
     },
