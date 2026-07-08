@@ -57,4 +57,16 @@ export default defineConfig([
     },
     rules: projectRules,
   },
+  // Hex-stop guard (CLAUDE.md §4): colours come from design tokens, not ad-hoc hex.
+  // Warn-level on purpose — legitimate DATA hexes (seed palettes) must not break the
+  // pre-commit/CI gate, which only fails on errors ("eslint ." without --max-warnings).
+  {
+    files: ['src/**/*.{js,jsx,ts,tsx}'],
+    rules: {
+      'no-restricted-syntax': ['warn', {
+        selector: 'Literal[value=/#[0-9A-Fa-f]{6}/]',
+        message: 'Ad-hoc hex colour — use a design token (var(--color-*)/color-mix), or add an eslint-disable-next-line with a reason if this hex is DATA (seed/palette).',
+      }],
+    },
+  },
 ])

@@ -25,8 +25,8 @@ type TFunc = (key: string, opts?: Record<string, unknown>) => string
 // Resolve a role reference to its name (a bare-string role is its own name).
 export const roleName = (r: RoleRef): string | undefined => typeof r === 'string' ? r : r.name
 
-// Super-admin accent colour — data (role palette), also used by the "system" badge.
-export const SUPER_ADMIN_COLOR = '#7C3AED'
+// Super-admin accent colour — the shared violet token, also used by the "system" badge.
+export const SUPER_ADMIN_COLOR = 'var(--color-violet)'
 
 // Role → fallback colour + icon (data palette; a backend-supplied role colour wins).
 // Label = t('users.roles.<name>') (default → user).

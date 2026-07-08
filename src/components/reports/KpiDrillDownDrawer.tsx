@@ -22,8 +22,7 @@ function StatusBadge({ status }: { status?: string }) {
     actief:     { bg: 'var(--color-success-bg)', color: 'var(--color-success)' },
     nietactief: { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)' },
     extern:     { bg: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' },
-    // Intake keeps a literal violet hue — no violet design token exists yet.
-    intake:     { bg: '#FAF5FF', color: '#7C3AED' },
+    intake:     { bg: 'var(--color-violet-bg)', color: 'var(--color-violet)' },
     verwijderd: { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)' },
   }
   const key = (status || '').toLowerCase()

@@ -24,6 +24,9 @@
   --color-danger-bg:     #FEE2E2;
   --color-info:          #0EA5E9;
   --color-info-bg:       #E0F2FE;
+  /* Violet — system/AI-ish accents (super-admin, roles/modules/ai audit badges, intake). */
+  --color-violet:        #7C3AED;
+  --color-violet-bg:     #EDE9FE;
   --sidebar-bg: #FFFFFF;
   --sidebar-text: #111827;
   --sidebar-muted: #9CA3AF;
@@ -70,6 +73,7 @@
   --color-warning-bg:   rgba(217, 119, 6, 0.20);
   --color-danger-bg:    rgba(220, 38, 38, 0.22);
   --color-info-bg:      rgba(14, 165, 233, 0.18);
+  --color-violet-bg:    rgba(124, 58, 237, 0.20);
   --color-accent-bg:    rgba(240, 171, 0, 0.18);
 }
 
