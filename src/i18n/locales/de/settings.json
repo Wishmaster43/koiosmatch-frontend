@@ -154,7 +154,9 @@
     "kpis_calllists": "Anruflisten",
     "kpis_matches": "Matches",
     "email_log": "E-Mail-Protokoll",
-    "whatsapp_log": "Nachrichtenprotokoll"
+    "whatsapp_log": "Nachrichtenprotokoll",
+    "appointment_types": "Terminarten",
+    "candidate_skill_levels": "Kompetenzstufen"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1438,5 +1440,22 @@
     "message": "Nachricht",
     "searchPlaceholder": "Nach Kontakt oder Nachricht suchen…",
     "empty": "Noch keine WhatsApp-Nachrichten."
+  },
+  "appointmentTypes": {
+    "title": "Terminarten",
+    "subtitle": "Art · Standarddauer · Ort · Intake-Flag für den Intake-Planer.",
+    "add": "Art hinzufügen",
+    "duration": "Standarddauer",
+    "modality": "Standardort",
+    "office": "Büro",
+    "remote": "Remote",
+    "phone": "Telefon",
+    "isIntake": "Ist ein Intake",
+    "isIntakeDesc": "Arten mit diesem Flag gelten als Intake."
+  },
+  "skillLevels": {
+    "title": "Kompetenzstufen",
+    "subtitle": "Stufen für das Fähigkeiten-Dropdown.",
+    "add": "Stufe hinzufügen"
   }
 }

@@ -106,7 +106,7 @@ export default function PlanIntakeModal({ candidateId, onClose, onCreated, exist
         <div style={{ marginBottom: 14 }}>
           <div style={fieldLabel}>{t('work.appointmentType')}</div>
           <SelectMenu value={type || null} onChange={pickType} placeholder={t('work.pickType')}
-            options={intakeTypes.map(x => ({ value: x.value, label: x.icon ? `${x.icon} ${x.label}` : x.label }))} />
+            options={intakeTypes.map(x => ({ value: x.value, label: x.label }))} />
         </div>
 
         {/* Date/time (default = today, rounded up to the quarter) + duration override. */}

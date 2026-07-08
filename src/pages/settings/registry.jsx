@@ -42,6 +42,8 @@ import { VacancyStatusSettings, VacancyPhaseSettings, VacancyFieldsSettings, Vac
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
 import { MatchStatusSettings } from './sections/MatchSettings'
+import { AppointmentTypeSettings } from './sections/AppointmentTypeSettings'
+import { SkillLevelSettings } from './sections/SkillLevelSettings'
 import { OutreachStatusSettings } from './sections/OutreachSettings'
 import RejectionSettings from './sections/RejectionSettings'
 import CandidateCustomFieldsSettings from './sections/CandidateCustomFieldsSettings'
@@ -130,6 +132,7 @@ export const NAV_GROUPS = [
       { id: 'document_types', icon: FileText, component: DocumentTypesSettings },
       { id: 'driver_licenses', icon: Car, component: DriverLicenseSettings },
       { id: 'candidate_display', icon: Palette, schema: candidateDisplay },
+      { id: 'candidate_skill_levels', icon: BarChart2, component: SkillLevelSettings },
       { id: 'candidate_custom_fields', icon: ListChecks, component: CandidateCustomFieldsSettings },
       { id: 'candidate_required_fields', icon: Flag, component: CandidateRequiredFieldsSettings },
     ],
@@ -191,6 +194,7 @@ export const NAV_GROUPS = [
     key: 'matches', icon: Sparkles,
     items: [
       { id: 'match_statuses', icon: Tags, component: MatchStatusSettings },
+      { id: 'appointment_types', icon: CalendarCheck, component: AppointmentTypeSettings },
     ],
   },
   {

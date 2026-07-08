@@ -14,9 +14,9 @@ import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControl
 // flagField (optioneel): { key, label, description } — boolean gedragsvlag (R-1b:
 // is_closed/is_reached); checkbox in de modal + badge in de rij. De VLAG bepaalt
 // het gedrag, nooit het slug — zo werken tenant-eigen statussen op de schrijfpaden.
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, withIcon = false, allowAdd = true, showRank = false }) {
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, numberField = null, withIcon = false, allowAdd = true, showRank = false }) {
   const { t } = useTranslation('settings')
-  const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(flagField ? { [flagField.key]: false } : {}) })
+  const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(numberField ? { [numberField.key]: numberField.default } : {}), ...(flagField ? { [flagField.key]: false } : {}) })
   // Lookups differ in their display field: name (phases/status) vs label/value (genders/languages).
   const labelOf = (i) => i.name ?? i.label ?? i.value ?? ''
   // An item is protected when the backend marks it as referenced by existing data.
@@ -41,6 +41,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     setDraft({ name: labelOf(item), color: item.color ?? '#3B8FD4',
       ...(withIcon ? { icon: item.icon ?? '' } : {}),
       ...(extraField ? { [extraField.key]: item[extraField.key] ?? extraField.default } : {}),
+      ...(numberField ? { [numberField.key]: item[numberField.key] ?? numberField.default } : {}),
       ...(flagField ? { [flagField.key]: Boolean(item[flagField.key]) } : {}) })
     setShowModal(true)
   }
@@ -166,6 +167,11 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                   {flagField.label}
                 </span>
               )}
+              {numberField && item[numberField.key] != null && (
+                <span style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', background: 'var(--border)', padding: '2px 7px', borderRadius: 999, whiteSpace: 'nowrap' }}>
+                  {item[numberField.key]}{numberField.suffix ? ` ${numberField.suffix}` : ''}
+                </span>
+              )}
               {extraField && item[extraField.key] && (
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--border)', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>
                   {extraField.options.find(o => o.value === item[extraField.key])?.label ?? item[extraField.key]}
@@ -217,6 +223,14 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                   onChange={e => setDraft(d => ({ ...d, icon: e.target.value }))}
                   placeholder={t('statusList.iconPlaceholder')}
                   style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
+              </div>
+            )}
+            {numberField && (
+              <div style={{ marginBottom: 14 }}>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{numberField.label}</div>
+                <input type="number" min={numberField.min ?? 1} max={numberField.max ?? 999} value={draft[numberField.key] ?? ''}
+                  onChange={e => setDraft(d => ({ ...d, [numberField.key]: Number(e.target.value) || 0 }))}
+                  style={{ width: 120, height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box' }} />
               </div>
             )}
             {extraField && (

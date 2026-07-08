@@ -154,7 +154,9 @@
     "kpis_calllists": "Listes d'appels",
     "kpis_matches": "Correspondances",
     "email_log": "Journal e-mail",
-    "whatsapp_log": "Journal des messages"
+    "whatsapp_log": "Journal des messages",
+    "appointment_types": "Types de rendez-vous",
+    "candidate_skill_levels": "Niveaux de compétence"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -1438,5 +1440,22 @@
     "message": "Message",
     "searchPlaceholder": "Rechercher contact ou message…",
     "empty": "Aucun message WhatsApp."
+  },
+  "appointmentTypes": {
+    "title": "Types de rendez-vous",
+    "subtitle": "Type · durée par défaut · lieu · indicateur intake.",
+    "add": "Ajouter un type",
+    "duration": "Durée par défaut",
+    "modality": "Lieu par défaut",
+    "office": "Bureau",
+    "remote": "À distance",
+    "phone": "Téléphone",
+    "isIntake": "Est un entretien",
+    "isIntakeDesc": "Les types avec cet indicateur comptent comme un entretien."
+  },
+  "skillLevels": {
+    "title": "Niveaux de compétence",
+    "subtitle": "Niveaux pour la liste des compétences.",
+    "add": "Ajouter un niveau"
   }
 }

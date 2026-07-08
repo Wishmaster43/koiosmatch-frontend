@@ -154,7 +154,9 @@
     "kpis_calllists": "Listas de llamadas",
     "kpis_matches": "Coincidencias",
     "email_log": "Registro de correo",
-    "whatsapp_log": "Registro de mensajes"
+    "whatsapp_log": "Registro de mensajes",
+    "appointment_types": "Tipos de cita",
+    "candidate_skill_levels": "Niveles de habilidad"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1438,5 +1440,22 @@
     "message": "Mensaje",
     "searchPlaceholder": "Buscar contacto o mensaje…",
     "empty": "Aún no hay mensajes de WhatsApp."
+  },
+  "appointmentTypes": {
+    "title": "Tipos de cita",
+    "subtitle": "Tipo · duración por defecto · lugar · indicador intake.",
+    "add": "Añadir tipo",
+    "duration": "Duración por defecto",
+    "modality": "Lugar por defecto",
+    "office": "Oficina",
+    "remote": "Remoto",
+    "phone": "Teléfono",
+    "isIntake": "Es un intake",
+    "isIntakeDesc": "Los tipos con este indicador cuentan como intake."
+  },
+  "skillLevels": {
+    "title": "Niveles de habilidad",
+    "subtitle": "Niveles para el desplegable de habilidades.",
+    "add": "Añadir nivel"
   }
 }

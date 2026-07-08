@@ -154,7 +154,9 @@
     "kpis_calllists": "Call lists",
     "kpis_matches": "Matches",
     "email_log": "Email log",
-    "whatsapp_log": "Message log"
+    "whatsapp_log": "Message log",
+    "appointment_types": "Appointment types",
+    "candidate_skill_levels": "Skill levels"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1438,5 +1440,22 @@
     "message": "Message",
     "searchPlaceholder": "Search contact or message…",
     "empty": "No WhatsApp messages yet."
+  },
+  "appointmentTypes": {
+    "title": "Appointment types",
+    "subtitle": "Type · default duration · location · intake flag for the intake planner.",
+    "add": "Add type",
+    "duration": "Default duration",
+    "modality": "Default location",
+    "office": "Office",
+    "remote": "Remote",
+    "phone": "Phone",
+    "isIntake": "Is an intake",
+    "isIntakeDesc": "Types with this flag count as an intake (drives \"intake planned\")."
+  },
+  "skillLevels": {
+    "title": "Skill levels",
+    "subtitle": "Levels for the candidate skills dropdown.",
+    "add": "Add level"
   }
 }

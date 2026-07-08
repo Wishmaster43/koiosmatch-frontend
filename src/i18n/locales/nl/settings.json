@@ -154,7 +154,9 @@
     "kpis_calllists": "Bellijsten",
     "kpis_matches": "Matches",
     "email_log": "E-mail-log",
-    "whatsapp_log": "Berichtenlog"
+    "whatsapp_log": "Berichtenlog",
+    "appointment_types": "Afspraaktypes",
+    "candidate_skill_levels": "Vaardigheidsniveaus"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1438,5 +1440,22 @@
     "message": "Bericht",
     "searchPlaceholder": "Zoek op contact of bericht…",
     "empty": "Nog geen WhatsApp-berichten."
+  },
+  "appointmentTypes": {
+    "title": "Afspraaktypes",
+    "subtitle": "Type · standaardduur · locatie · intake-vlag voor de intake-planner.",
+    "add": "Type toevoegen",
+    "duration": "Standaardduur",
+    "modality": "Standaardlocatie",
+    "office": "Kantoor",
+    "remote": "Op afstand",
+    "phone": "Telefonisch",
+    "isIntake": "Is een intake",
+    "isIntakeDesc": "Types met deze vlag gelden als intake (drijft \"intake gepland\")."
+  },
+  "skillLevels": {
+    "title": "Vaardigheidsniveaus",
+    "subtitle": "Niveaus voor het vaardigheden-dropdown bij de kandidaat.",
+    "add": "Niveau toevoegen"
   }
 }
