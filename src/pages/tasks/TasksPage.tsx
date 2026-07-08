@@ -26,6 +26,7 @@ import AddTaskModal from './AddTaskModal'
 import { mapTask, mapTaskDetail } from './data/mapTask'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { useTaskFilters } from './hooks/useTaskFilters'
 import type { Task, TaskDetail, ApiTask } from '@/types/task'
 import type { Id } from '@/types/common'
 
@@ -71,31 +72,22 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const [loading,  setLoading]  = useState(true)
   const [error,    setError]    = useState(false)
   const [view,     setView]     = usePageMemory('tasks.view', 'table')   // 'table' | 'board'
-  const [showArchived, setShowArchived] = usePageMemory('tasks.archived', false)
   const [archivedTasks, setArchivedTasks] = useState<Task[]>([])
   const [page,     setPage]     = usePageMemory('tasks.page', 1)
   const [pageSize, setPageSize] = useState(() => user?.default_per_page ?? 50)
   const [selected, setSelected] = useState<TaskDetail | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [addOpen,  setAddOpen]  = useState(false)
-  const [query,    setQuery]    = usePageMemory('tasks.search', '')  // shared header search (client-side, R-5)
   // Bulk-selection (checkboxes) — id-set, cleared on filter/page change.
   const [selectedIds, setSelectedIds] = useState<Set<Id>>(() => new Set())
-  const [selectedStatus,   setSelectedStatus]   = usePageMemory<string[]>('tasks.status', [])
-  const [selectedPriority, setSelectedPriority] = usePageMemory<string[]>('tasks.priority', [])
-  const [selectedType,     setSelectedType]     = usePageMemory<string[]>('tasks.type', [])
-  const [selectedAssignee, setSelectedAssignee] = useState<string[]>([])
-  // KPI tile filter (one at a time): null | 'open' | 'overdue' | 'dueToday' | 'completed'.
-  const [kpiFilter, setKpiFilter] = useState<string | null>(null)
-
-  // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(query.trim() || showArchived || kpiFilter
-    || selectedStatus.length || selectedPriority.length || selectedType.length || selectedAssignee.length)
-  const [searchEpoch, setSearchEpoch] = useState(0)
-  const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setQuery(''); setShowArchived(false); setKpiFilter(null)
-    setSelectedStatus([]); setSelectedPriority([]); setSelectedType([]); setSelectedAssignee([]); setPage(1)
-  }
+  // ALL filter state + the row predicate live in one hook (§0.3 size split).
+  const {
+    showArchived, setShowArchived, query, setQuery,
+    selectedStatus, setSelectedStatus, selectedPriority, setSelectedPriority,
+    selectedType, setSelectedType, selectedAssignee, setSelectedAssignee,
+    kpiFilter, setKpiFilter,
+    anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
+  } = useTaskFilters()
 
   // Seed filters from a navigation intent (dashboard KPI/chart click).
   useEffect(() => {
@@ -176,31 +168,11 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     return () => unregisterFilters('tasks-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  // KPI tile predicate (open/overdue/dueToday/completed).
-  const matchesKpi = (x: Task): boolean => {
-    if (!kpiFilter) return true
-    const due = x.due ? new Date(x.due) : null
-    if (kpiFilter === 'completed') return x.statusIsDone
-    if (kpiFilter === 'open')      return !x.statusIsDone
-    if (kpiFilter === 'overdue')   return !!(due && !x.statusIsDone && due < todayStart())
-    if (kpiFilter === 'dueToday')  return !!(due && !x.statusIsDone && due.toDateString() === todayStart().toDateString())
-    return true
-  }
-
   // Reset to the first page + clear the selection whenever a filter/KPI tile changes.
   useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter, showArchived, query])
 
-  // The visible rows: status/priority/type/assignee filters + the active KPI tile.
-  const filteredAll = useMemo(() => {
-    return all.filter(x => {
-      if (selectedStatus.length   && !selectedStatus.includes(String(x.statusKey)))       return false
-      if (selectedPriority.length && !selectedPriority.includes(String(x.priorityKey)))   return false
-      if (selectedType.length     && !selectedType.includes(String(x.typeKey)))           return false
-      if (selectedAssignee.length && !selectedAssignee.includes(x.assignee?.name ?? ''))  return false
-      if (query.trim() && !`${(x as { title?: string }).title ?? ''} ${x.assignee?.name ?? ''} ${(x as { description?: string }).description ?? ''}`.toLowerCase().includes(query.trim().toLowerCase())) return false
-      return matchesKpi(x)
-    })
-  }, [all, selectedStatus, selectedPriority, selectedType, selectedAssignee, kpiFilter, query]) // eslint-disable-line react-hooks/exhaustive-deps
+  // The visible rows: the hook predicate (panel filters + search + KPI tile).
+  const filteredAll = useMemo(() => all.filter(matchesFilters), [all, matchesFilters])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))

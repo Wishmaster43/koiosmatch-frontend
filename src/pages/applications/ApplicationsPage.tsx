@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { useApplicationFilters, OWNER_NONE } from './hooks/useApplicationFilters'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import ApplicationsTable from './ApplicationsTable'
@@ -35,7 +36,6 @@ interface Aggregate { name: string; key: string; color?: string; value: number }
 
 const BUCKETS = ['active', 'matched', 'rejected']
 // Sentinel filter key for rows without an owner (owner_id is nullable).
-const OWNER_NONE = '__none'
 
 // Donut click → set exactly one filter value (or clear when clicking it again).
 const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
@@ -62,22 +62,21 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const [loading,      setLoading]      = useState(true)
   const [error,        setError]        = useState(false)
   const [view,         setView]         = usePageMemory('apps.view', 'table')   // 'table' | 'board'
-  const [bucket,       setBucket]       = usePageMemory('apps.bucket', 'active')
   const [page,         setPage]         = usePageMemory('apps.page', 1)
   const [pageSize,     setPageSize]     = useState(() => user?.default_per_page ?? 50)
   const [selected,     setSelected]     = useState<ApplicationDetail | null>(null)
   const [expanded,     setExpanded]     = useState(false)
-  const [selectedPhase,  setSelectedPhase]  = usePageMemory<string[]>('apps.phase', [])
   // KPI-card attention toggle: null | 'new' | 'scored' | 'aiTasks' (one at a time).
-  const [attention, setAttention] = usePageMemory<string | null>('apps.attention', null)
   const toggleAttention = (k: string) => setAttention(p => (p === k ? null : k))
-  const [selectedOwner,  setSelectedOwner]  = usePageMemory<string[]>('apps.owner', [])
-  const [selectedSource, setSelectedSource] = usePageMemory<string[]>('apps.source', [])
-  const [selectedVac,    setSelectedVac]    = usePageMemory<string[]>('apps.vac', [])
   const [addOpen,        setAddOpen]        = useState(false)
   const [stats,          setStats]          = useState<AppStats | null>(null)
-  const [showArchived,   setShowArchived]   = usePageMemory('apps.archived', false)
-  const [query,          setQuery]          = usePageMemory('apps.search', '')
+  // ALL filter state + the row predicate live in one hook (§0.3 size split).
+  const {
+    bucket, setBucket, selectedPhase, setSelectedPhase, attention, setAttention,
+    selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
+    selectedVac, setSelectedVac, showArchived, setShowArchived, query, setQuery,
+    anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
+  } = useApplicationFilters()
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
 
   // Clear the selection whenever the visible set changes (bucket/filters/paging).
@@ -169,29 +168,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Reset to the first page whenever the bucket or any filter changes.
   useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived, query])
 
-  // The visible rows: bucket + phase/owner/source/vacancy filters, decorated.
-  const filteredAll = useMemo(() => {
-    return applications.filter(a => {
-      // Detached rows only surface in the dedicated archived view (any bucket).
-      if (showArchived) return Boolean(a.archived)
-      if (a.archived) return false
-      if (a.bucket !== bucket) return false
-      if (selectedPhase.length  && !selectedPhase.includes(a.phaseKey))         return false
-      if (selectedOwner.length  && !selectedOwner.includes(a.owner?.name || OWNER_NONE)) return false
-      if (selectedSource.length && !selectedSource.includes(a.source))          return false
-      if (selectedVac.length    && !selectedVac.includes(String(a.vacancyId)))  return false
-      // KPI attention filters (mirror the card definitions above).
-      if (attention === 'new'     && !(a.isNew && a.bucket === 'active'))       return false
-      if (attention === 'scored'  && !(typeof a.score === 'number' && a.bucket !== 'rejected')) return false
-      if (attention === 'aiTasks' && !(a.task && a.bucket === 'active'))        return false
-      // Free-text search across candidate · vacancy · source (client-side; mirrors candidates).
-      if (query.trim()) {
-        const q = query.trim().toLowerCase()
-        if (!`${a.candidateName ?? ''} ${a.vacancyTitle ?? ''} ${a.source ?? ''}`.toLowerCase().includes(q)) return false
-      }
-      return true
-    }).map(decorate)
-  }, [applications, bucket, showArchived, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, query, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
+  // The visible rows: the hook predicate (bucket/filters/attention/search) + decorate.
+  const filteredAll = useMemo(() => applications.filter(matchesFilters).map(decorate),
+    [applications, matchesFilters, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Clientside pagination slice (the endpoint returns all rows at once).
   const totalRows  = filteredAll.length
@@ -219,14 +198,6 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   useEffect(() => {{ if (rememberedId && !selected) (id => selectApplication({ id } as Application))(rememberedId) }}, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Shared clear-all (page memory keeps filters sticky): anything off-default resets.
-  const anyFilterActive = Boolean(query.trim() || attention || showArchived || bucket !== 'active'
-    || selectedPhase.length || selectedOwner.length || selectedSource.length || selectedVac.length)
-  const [searchEpoch, setSearchEpoch] = useState(0)
-  const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setQuery(''); setAttention(null); setShowArchived(false); setBucket('active')
-    setSelectedPhase([]); setSelectedOwner([]); setSelectedSource([]); setSelectedVac([]); setPage(1)
-  }
-
   // Seed the funnel-stage filter from a dashboard chart click (funnel / funnel-conversion).
   // Mirrors the candidate status/recruiter drill-down: the InsightsRow then shows the active chip.
   useEffect(() => {
@@ -346,10 +317,12 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
 
   // KPI cards — mirror the candidate strip: count + sub-line, click-to-filter where it maps.
   const insightKpis: KpiSpec[] = [
+    // TOTAAL ACTIEF spans two buckets — clicking shows BOTH (active + matched), so the
+    // list always matches the number on the card (Danny: "waar zijn ze allemaal?").
     { key: 'totalActive', label: t('kpi.totalActive'), value: bucketCount('active') + bucketCount('matched'),
       sub: t('kpi.totalActiveSub'), color: 'var(--color-primary)',
-      onClick: () => { setShowArchived(false); setBucket('active'); setAttention(null) },
-      active: !showArchived && bucket === 'active' && attention === null },
+      onClick: () => { setShowArchived(false); setBucket(bucket === 'allActive' ? 'active' : 'allActive'); setAttention(null) },
+      active: bucket === 'allActive' },
     { key: 'new', label: t('kpi.new'), value: applications.filter(a => a.isNew && a.bucket === 'active').length,
       sub: t('kpi.newSub'), color: 'var(--color-warning)',
       onClick: () => { setShowArchived(false); setBucket('active'); toggleAttention('new') }, active: attention === 'new' },
@@ -357,7 +330,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
       color: 'var(--color-success)', onClick: () => { setShowArchived(false); setBucket('matched') }, active: !showArchived && bucket === 'matched' },
     { key: 'rejected', label: t('kpi.rejected'), value: bucketCount('rejected'), sub: t('kpi.rejectedSub'),
       color: 'var(--color-danger)', onClick: () => { setShowArchived(false); setBucket('rejected') }, active: !showArchived && bucket === 'rejected' },
-    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore, sub: t('kpi.avgScoreSub'), color: '#8B5CF6',
+    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore, sub: t('kpi.avgScoreSub'), color: 'var(--color-secondary)',
       onClick: () => { setShowArchived(false); toggleAttention('scored') }, active: attention === 'scored' },
     { key: 'aiTasks', label: t('kpi.aiTasks'), value: aiTaskCount, sub: t('kpi.aiTasksSub'), color: '#0D9488',
       onClick: () => { setShowArchived(false); setBucket('active'); toggleAttention('aiTasks') }, active: attention === 'aiTasks' },

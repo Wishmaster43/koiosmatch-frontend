@@ -13,7 +13,7 @@ import EntityHeaderJs from '@/components/drawer/EntityHeader'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useLookups } from '@/context/LookupsContext'
 import { useGenders } from '@/lib/useGenders'
-import { useAllSettings, getBoolSetting, getJsonSetting } from '@/lib/settings/useAllSettings'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useFunctions } from '@/lib/useFunctions'
 import { useCreateMatch } from './hooks/useCreateMatch'
 import { useVacancyOptions } from './hooks/useVacancyOptions'
@@ -21,6 +21,8 @@ import { useAuth } from '@/context/AuthContext'
 import ProfilePanel from './drawer/ProfilePanel'
 import BackgroundTab from './drawer/BackgroundTab'
 import WorkTab from './drawer/WorkTab'
+import { buildStatusInfoLine, makeRequiredComplete } from './drawer/candidateStatusInfo'
+import type { StatusFlags } from './drawer/candidateStatusInfo'
 import PlanningPanel from './drawer/PlanningPanel'
 import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'
 import CommunicationTab from './drawer/CommunicationTab'
@@ -152,17 +154,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const phaseIdx     = phases.findIndex(p => p.value === currentPhase)
   const nextPhase    = phaseIdx >= 0 ? phases[phaseIdx + 1] : undefined
   const isEntryPhase = phaseIdx === 0
-  // Required-field completeness for a phase (Settings → Verplichte velden), mapped to candidate fields.
-  const REQ_GET: Record<string, () => unknown> = {
-    first_name: () => c.name, last_name: () => c.name, email: () => c.email, phone: () => c.phone,
-    function_title: () => c.title, date_of_birth: () => c.dob, gender: () => c.gender,
-    street: () => c.street, postal_code: () => c.postalCode, city: () => c.city,
-  }
-  const requiredComplete = (phaseVal: string) => {
-    const cfg = getJsonSetting<Record<string, string[]>>(allSettings, 'candidate_required_fields',
-      { lead: ['first_name', 'last_name'], candidate: ['first_name', 'last_name', 'email', 'phone', 'function_title'] })
-    return (cfg[phaseVal] ?? []).every(k => { const g = REQ_GET[k]; return g ? String(g() ?? '').trim() !== '' : true })
-  }
+  // Required-field completeness for a phase — pure helper (§0.3 split).
+  const requiredComplete = makeRequiredComplete(c, allSettings)
   // Convert to the next phase; jump to Profile-edit unless the new phase's required fields are already complete.
   const doConvert = (setActiveTab?: (id: string) => void) => {
     if (!nextPhase) return
@@ -178,29 +171,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   // fields (reason + the change-log date `statusChangedAt`). Empty until then.
   // Flag-driven (§3B): any is_blacklist status shows its lookup-backed reason; any
   // requires_reason/expects_return_date status shows reason + "available again" date.
-  const statusFlags = statuses.find(s => s.value === currentStatus) as (LookupOption & { requires_reason?: boolean; expects_return_date?: boolean; is_blacklist?: boolean }) | undefined
-  const statusInfoLine: string | null = (() => {
-    const st = currentStatus
-    if (!st || !statusFlags) return null
-    // "By whom" the status was set — shows once the backend returns status_changed_by (H2).
-    const byWho = c.statusChangedBy ? t('drawer.byWho', { name: c.statusChangedBy }) : null
-    if (statusFlags.is_blacklist && (c.blacklistReason || c.statusChangedAt)) {
-      return [
-        c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(st).label, date: formatDate(c.statusChangedAt) }) : t('drawer.blacklisted'),
-        c.blacklistReason,
-        byWho,
-      ].filter(Boolean).join(' · ')
-    }
-    if ((statusFlags.requires_reason || statusFlags.expects_return_date) && (c.statusReason || c.statusReturnDate || c.statusChangedAt)) {
-      return [
-        c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(st).label, date: formatDate(c.statusChangedAt) }) : statusMeta(st).label,
-        c.statusReason,
-        c.statusReturnDate ? t('drawer.availableAgain', { date: formatDate(c.statusReturnDate) }) : null,
-        byWho,
-      ].filter(Boolean).join(' · ')
-    }
-    return null
-  })()
+  const statusFlags = statuses.find(s => s.value === currentStatus) as StatusFlags
+  // Human-readable status detail line (reason + since-date) — pure helper (§0.3 split).
+  const statusInfoLine = buildStatusInfoLine({ c, statusFlags, currentStatus, statusMeta, t, formatDate })
   // Edit the reason/return date of the CURRENT status: reopen the prompt prefilled.
   // Same PATCH path; the guard skips unchanged statuses, so this is a clean edit.
   const openStatusEdit = () => {

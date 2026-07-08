@@ -32,7 +32,7 @@ export function buildDashboardKpis({ t, att, num, eur, opp, valueInHours, candid
     stale:             { id: 'stale', label: t('kpi.notContacted6m'), value: num(att.stale_6m), sub: t('kpi.attentionNeeded'), color: 'var(--color-warning)', bg: 'var(--color-warning-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'stale6m' }) },
     never:             { id: 'never', label: t('kpi.neverContacted'), value: num(att.never_contacted), sub: t('kpi.attentionNeeded'), color: 'var(--color-danger)', bg: 'var(--color-danger-bg)', Icon: AlertCircle, onClick: () => onNavigate?.('candidates', { attention: 'neverContacted' }) },
     tasks:             { id: 'tasks', label: t('kpi.openTasks'), value: num(att.tasks), sub: t('kpi.linkedToCandidates'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: CheckCircle, onClick: () => onNavigate?.('tasks', { kpi: 'open' }) },
-    opps:              { id: 'opps', label: t('kpi.opportunities'), value: num(opp?.total), sub: t('kpi.openOpportunities'), color: '#8B5CF6', bg: '#F3E8FF', Icon: Target, onClick: () => onNavigate?.('opportunities', {}) },
+    opps:              { id: 'opps', label: t('kpi.opportunities'), value: num(opp?.total), sub: t('kpi.openOpportunities'), color: 'var(--color-secondary)', bg: 'var(--color-secondary-bg)', Icon: Target, onClick: () => onNavigate?.('opportunities', {}) },
     // Deal magnitude follows the tenant setting (euro vs hours) — same rule as the
     // opportunities page. Hours mode shows the hours sum once the feed carries it (DASH-HOURS).
     pipeline:          { id: 'pipeline', label: valueInHours ? t('kpi.pipelineHours') : t('kpi.pipelineValue'),
