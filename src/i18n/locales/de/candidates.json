@@ -365,7 +365,16 @@
     "intakeVacancyHint": "Leer lassen für ein Intake ohne Stelle.",
     "createIntake": "Intake planen",
     "intakePlanned": "Intake geplant",
-    "intakeFailed": "Intake planen fehlgeschlagen"
+    "intakeFailed": "Intake planen fehlgeschlagen",
+    "appointmentType": "Termintyp",
+    "pickType": "Typ wählen",
+    "duration": "Dauer (Min.)",
+    "modality": "Ort",
+    "modalityOffice": "Büro",
+    "modalityRemote": "Remote",
+    "modalityPhone": "Telefon",
+    "owner": "Recruiter",
+    "pickOwner": "Recruiter wählen"
   },
   "communication": {
     "newNote": "Neue Notiz",

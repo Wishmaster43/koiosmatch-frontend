@@ -1,17 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ExternalLink, Plus, CalendarPlus } from 'lucide-react'
+import { ExternalLink, Plus, CalendarPlus, Calendar, Clock, User, Building2, Video, Phone } from 'lucide-react'
 import MatchesTab from './MatchesTab'
 import StatusPill from '@/components/ui/StatusPill'
 import AddApplicationModal from './AddApplicationModal'
 import PlanIntakeModal from './PlanIntakeModal'
 import api from '@/lib/api'
+import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from './constants'
 import type { Candidate } from '@/types/candidate'
+import type { Id } from '@/types/common'
+
+// A linked appointment as returned by /candidates/{id}/appointments.
+interface Appt { id: Id; application_id?: Id | null; type?: string; scheduled_at?: string; duration_min?: number | null; modality?: string; owner?: { name?: string }; location_name?: string; status?: string }
 
 // One application row as nested under the candidate (read defensively). The
 // funnel stage (label + colour) used to live in the header chips — shown here now.
-interface AppRow { logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: string }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageColor?: string }
+interface AppRow { id?: string; logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: string }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageColor?: string }
 
 // The vacancy link, when the API exposes a URL; otherwise falls back to plain text.
 const vacancyUrlOf = (s: AppRow) => s.vacancy?.url ?? s.url ?? null
@@ -19,22 +24,51 @@ const vacancyUrlOf = (s: AppRow) => s.vacancy?.url ?? s.url ?? null
 /** Work tab — matches + paginated applications, with the two candidate actions
  *  (§3B two-action model): couple to a vacancy, or plan an intake. */
 export default function WorkTab({ c }: { c: Candidate }) {
-  const { t } = useTranslation('candidates')
+  const { t } = useTranslation(['candidates', 'common'])
+  const { formatDate } = useDateFormat()
   // Local copy of the applications so a create shows immediately (re-fetched from
   // the candidate detail after a POST — the BE may add a vacancy-less intake row).
   const [apps, setApps] = useState<AppRow[]>((c.applications ?? []) as unknown as AppRow[])
+  // Appointments (who/when/where) keyed by application_id — shown under each row.
+  const [appts, setAppts] = useState<Appt[]>([])
   const [page, setPage] = useState(1)
   const [modal, setModal] = useState<null | 'apply' | 'intake'>(null)
   // Reset the local list when the drawer switches to another candidate / fuller detail.
   useEffect(() => { setApps((c.applications ?? []) as unknown as AppRow[]); setPage(1) }, [c.id, c.applications])
+  // Load the candidate's appointments once per candidate (separate structured entity).
+  useEffect(() => {
+    let alive = true
+    api.get(`/candidates/${c.id}/appointments`, { quiet404: true })
+      .then(r => { if (alive) setAppts((r.data?.data ?? r.data ?? []) as Appt[]) })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [c.id])
 
-  // Re-fetch the candidate after a create; the WorkTab shows the fresh applications.
+  // Re-fetch applications + appointments after a create so both show immediately.
   const reload = async () => {
     try {
-      const r = await api.get(`/candidates/${c.id}`)
-      const fresh = (r.data?.data ?? r.data) as { applications?: AppRow[] }
+      const [detail, ap] = await Promise.all([
+        api.get(`/candidates/${c.id}`),
+        api.get(`/candidates/${c.id}/appointments`, { quiet404: true }),
+      ])
+      const fresh = (detail.data?.data ?? detail.data) as { applications?: AppRow[] }
       setApps((fresh?.applications ?? []) as AppRow[]); setPage(1)
-    } catch { /* keep the current list on a failed refresh */ }
+      setAppts((ap.data?.data ?? ap.data ?? []) as Appt[])
+    } catch { /* keep the current lists on a failed refresh */ }
+  }
+
+  // Icon per modality (office/remote/phone) for the appointment line.
+  const ModalityIcon = ({ m }: { m?: string }) => m === 'remote' ? <Video size={11} /> : m === 'phone' ? <Phone size={11} /> : <Building2 size={11} />
+  // The appointment linked to an application row (by application_id).
+  const apptFor = (appId?: Id | null) => appId != null ? appts.find(a => String(a.application_id) === String(appId)) : undefined
+  // "09:00–09:30" from scheduled_at + duration_min.
+  const timeRange = (a: Appt) => {
+    if (!a.scheduled_at) return ''
+    const start = new Date(a.scheduled_at)
+    const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+    if (!a.duration_min) return hhmm(start)
+    const end = new Date(start.getTime() + a.duration_min * 60000)
+    return `${hhmm(start)}–${hhmm(end)}`
   }
 
   const PER = 5
@@ -67,19 +101,31 @@ export default function WorkTab({ c }: { c: Candidate }) {
               // Vacancy-less intake applications have no title → show a dash (CONSIST-2).
               const label = s.vacature ?? s.vacancy?.title ?? s.title ?? '—'
               const url = vacancyUrlOf(s)
+              const appt = apptFor(s.id)
               return (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderBottom: i < slice.length - 1 ? '1px solid var(--border)' : 'none', fontSize: 12, color: 'var(--text)' }}>
-                {(s.logo_url ?? s.vacancy?.logo_url) && <img src={s.logo_url ?? s.vacancy?.logo_url} alt="" style={{ width: 24, height: 24, borderRadius: 4, objectFit: 'contain', flexShrink: 0 }} />}
-                {/* Vacancy name links out to the vacancy when the API gives a URL. */}
-                {url
-                  ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--color-primary)', textDecoration: 'none' }}>{label}</a>
-                  : <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>}
-                {s.stageLabel && <StatusPill label={s.stageLabel} color={s.stageColor} />}
-                {url && (
-                  <a href={url} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 5, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', flexShrink: 0 }}>
-                    <ExternalLink size={12} />
-                  </a>
+              <div key={i} style={{ borderBottom: i < slice.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', fontSize: 12, color: 'var(--text)' }}>
+                  {(s.logo_url ?? s.vacancy?.logo_url) && <img src={s.logo_url ?? s.vacancy?.logo_url} alt="" style={{ width: 24, height: 24, borderRadius: 4, objectFit: 'contain', flexShrink: 0 }} />}
+                  {/* Vacancy name links out to the vacancy when the API gives a URL. */}
+                  {url
+                    ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--color-primary)', textDecoration: 'none' }}>{label}</a>
+                    : <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>}
+                  {s.stageLabel && <StatusPill label={s.stageLabel} color={s.stageColor} />}
+                  {url && (
+                    <a href={url} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 5, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', flexShrink: 0 }}>
+                      <ExternalLink size={12} />
+                    </a>
+                  )}
+                </div>
+                {/* Linked appointment: date · start–end · modality · owner (CONSIST-2 / APPT). */}
+                {appt && (
+                  <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, padding: '0 12px 10px 12px', fontSize: 11, color: 'var(--text-muted)' }}>
+                    {appt.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Calendar size={11} /> {formatDate(appt.scheduled_at)}</span>}
+                    {appt.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {timeRange(appt)}{appt.duration_min ? ` · ${appt.duration_min} min` : ''}</span>}
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ModalityIcon m={appt.modality} /> {t(`work.modality${appt.modality === 'remote' ? 'Remote' : appt.modality === 'phone' ? 'Phone' : 'Office'}`)}{appt.location_name ? ` · ${appt.location_name}` : ''}</span>
+                    {appt.owner?.name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={11} /> {appt.owner.name}</span>}
+                  </div>
                 )}
               </div>
             )})

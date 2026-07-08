@@ -372,7 +372,16 @@
     "intakeVacancyHint": "Laat leeg voor een intake zonder vacature.",
     "createIntake": "Intake plannen",
     "intakePlanned": "Intake gepland",
-    "intakeFailed": "Intake plannen mislukt"
+    "intakeFailed": "Intake plannen mislukt",
+    "appointmentType": "Type afspraak",
+    "pickType": "Kies een type",
+    "duration": "Duur (min)",
+    "modality": "Locatie",
+    "modalityOffice": "Kantoor",
+    "modalityRemote": "Op afstand",
+    "modalityPhone": "Telefonisch",
+    "owner": "Recruiter",
+    "pickOwner": "Kies recruiter"
   },
   "communication": {
     "newNote": "Nieuwe notitie",

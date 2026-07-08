@@ -372,7 +372,16 @@
     "intakeVacancyHint": "Leave empty for an intake without a vacancy.",
     "createIntake": "Plan intake",
     "intakePlanned": "Intake planned",
-    "intakeFailed": "Planning intake failed"
+    "intakeFailed": "Planning intake failed",
+    "appointmentType": "Appointment type",
+    "pickType": "Pick a type",
+    "duration": "Duration (min)",
+    "modality": "Location",
+    "modalityOffice": "Office",
+    "modalityRemote": "Remote",
+    "modalityPhone": "Phone",
+    "owner": "Recruiter",
+    "pickOwner": "Pick recruiter"
   },
   "communication": {
     "newNote": "New note",

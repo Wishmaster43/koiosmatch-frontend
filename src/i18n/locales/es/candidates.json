@@ -365,7 +365,16 @@
     "intakeVacancyHint": "Déjalo vacío para un intake sin vacante.",
     "createIntake": "Planificar intake",
     "intakePlanned": "Intake planificado",
-    "intakeFailed": "Error al planificar el intake"
+    "intakeFailed": "Error al planificar el intake",
+    "appointmentType": "Tipo de cita",
+    "pickType": "Elige un tipo",
+    "duration": "Duración (min)",
+    "modality": "Ubicación",
+    "modalityOffice": "Oficina",
+    "modalityRemote": "Remoto",
+    "modalityPhone": "Teléfono",
+    "owner": "Reclutador",
+    "pickOwner": "Elige reclutador"
   },
   "communication": {
     "newNote": "Nueva nota",

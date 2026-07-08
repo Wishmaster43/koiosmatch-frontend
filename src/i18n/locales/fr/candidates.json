@@ -365,7 +365,16 @@
     "intakeVacancyHint": "Laisser vide pour un entretien sans poste.",
     "createIntake": "Planifier",
     "intakePlanned": "Entretien planifié",
-    "intakeFailed": "Échec de la planification"
+    "intakeFailed": "Échec de la planification",
+    "appointmentType": "Type de rendez-vous",
+    "pickType": "Choisir un type",
+    "duration": "Durée (min)",
+    "modality": "Lieu",
+    "modalityOffice": "Bureau",
+    "modalityRemote": "À distance",
+    "modalityPhone": "Téléphone",
+    "owner": "Recruteur",
+    "pickOwner": "Choisir le recruteur"
   },
   "communication": {
     "newNote": "Nouvelle note",
