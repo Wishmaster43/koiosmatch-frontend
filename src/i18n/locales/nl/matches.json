@@ -57,6 +57,19 @@
       "status": "Status"
     }
   },
+  "approval": {
+    "status": {
+      "pending": "In afwachting",
+      "approved": "Goedgekeurd",
+      "rejected": "Afgewezen"
+    },
+    "approve": "Goedkeuren",
+    "reject": "Afwijzen",
+    "reasonPlaceholder": "Reden van afwijzing…",
+    "confirmReject": "Afwijzing bevestigen",
+    "alreadyReviewed": "Deze match is al beoordeeld.",
+    "error": "De beoordeling kon niet worden toegepast."
+  },
   "changelog": {
     "loading": "Geschiedenis laden…",
     "error": "Wijzigingslog kon niet geladen worden.",

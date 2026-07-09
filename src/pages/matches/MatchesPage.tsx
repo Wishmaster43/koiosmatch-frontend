@@ -300,6 +300,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
           if (!selected?.id) return
           updateMatch(selected.id, { status }); setSelected(p => (p ? { ...p, status } : p))
           api.patch(`/matches/${selected.id}`, { status }).catch(() => notify('error', t('bulk.mutateError')))
+        }}
+        // Approval workflow (§7 — UI-only gate; the backend re-checks matches.update).
+        canApprove={hasPermission('matches.update')}
+        onApprovalChange={(id, patch) => {
+          updateMatch(id, patch); setSelected(p => (p && p.id === id ? { ...p, ...patch } : p))
         }} />
 
       {/* Direct-match creation modal */}

@@ -795,6 +795,14 @@
     "branchMismatch": "Branch differs",
     "branchMismatchDesc": "The candidate's branch ({{candidate}}) differs from the customer's branch ({{customer}}).",
     "branchKeep": "No — only this placement at this branch",
-    "branchMove": "Yes — also move the candidate to this branch"
+    "branchMove": "Yes — also move the candidate to this branch",
+    "rateProposal": {
+      "agreement": "Suggested (rate agreement): {{purchase}} purchase / {{sell}} sell",
+      "conversionFactor": "Suggested (conversion factor): {{purchase}} purchase / {{sell}} sell",
+      "purchaseOnly": "Suggested — only the purchase rate is known: {{purchase}}",
+      "deviationWarning": "The rate agreement proposes {{proposalPurchase}} purchase / {{proposalSell}} sell — you entered {{enteredPurchase}} / {{enteredSell}}. Are you sure?",
+      "deviationConfirm": "Yes, place anyway",
+      "deviationCancel": "Adjust rates"
+    }
   }
 }

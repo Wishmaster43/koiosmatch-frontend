@@ -26,6 +26,10 @@ function mapMatch(m: RawMatch): MatchRow {
     stageColor: m.stage_color ?? '#6E8FD6',
     owner:      m.owner?.name ?? m.owner_name ?? '',
     date:       m.created_at ?? m.matched_at ?? '',
+    // Approval workflow (MATCH-APPROVAL-1) — the list carries the status; the
+    // rejection reason is detail-only (useMatchApproval fetches it lazily).
+    approval_status:          m.approval_status ?? '',
+    approval_rejected_reason: m.approval_rejected_reason ?? '',
   }
 }
 

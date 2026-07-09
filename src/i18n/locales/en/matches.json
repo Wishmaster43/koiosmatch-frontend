@@ -57,6 +57,19 @@
       "status": "Status"
     }
   },
+  "approval": {
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "approve": "Approve",
+    "reject": "Reject",
+    "reasonPlaceholder": "Reason for rejection…",
+    "confirmReject": "Confirm rejection",
+    "alreadyReviewed": "This match was already reviewed.",
+    "error": "Couldn't apply the review."
+  },
   "changelog": {
     "loading": "Loading history…",
     "error": "Couldn't load the changelog.",

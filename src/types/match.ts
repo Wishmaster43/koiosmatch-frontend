@@ -24,6 +24,10 @@ export interface RawMatch {
   owner_name?: string
   created_at?: string
   matched_at?: string
+  // Approval workflow (MATCH-APPROVAL-1) — list carries the status; the rejection
+  // reason is detail-only (fetched lazily, see useMatchApproval).
+  approval_status?: string
+  approval_rejected_reason?: string
   [k: string]: unknown
 }
 
@@ -41,5 +45,9 @@ export interface MatchRow {
   stageColor: string
   owner: string
   date: string
+  // Approval workflow — 'pending' | 'approved' | 'rejected'; reason is detail-only
+  // (empty on the list row until useMatchApproval lazily fetches it for a rejected match).
+  approval_status?: string
+  approval_rejected_reason?: string
   [k: string]: unknown
 }

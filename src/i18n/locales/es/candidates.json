@@ -795,6 +795,14 @@
     "branchMismatch": "La sede difiere",
     "branchMismatchDesc": "La sede del candidato ({{candidate}}) difiere de la del cliente ({{customer}}).",
     "branchKeep": "No — solo esta colocación en esta sede",
-    "branchMove": "Sí — trasladar también al candidato a esta sede"
+    "branchMove": "Sí — trasladar también al candidato a esta sede",
+    "rateProposal": {
+      "agreement": "Propuesta (acuerdo de tarifa): {{purchase}} compra / {{sell}} venta",
+      "conversionFactor": "Propuesta (factor de conversión): {{purchase}} compra / {{sell}} venta",
+      "purchaseOnly": "Propuesta — solo se conoce la tarifa de compra: {{purchase}}",
+      "deviationWarning": "El acuerdo de tarifa propone {{proposalPurchase}} compra / {{proposalSell}} venta — has introducido {{enteredPurchase}} / {{enteredSell}}. ¿Estás seguro/a?",
+      "deviationConfirm": "Sí, colocar de todos modos",
+      "deviationCancel": "Ajustar tarifas"
+    }
   }
 }

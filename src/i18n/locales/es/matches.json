@@ -57,6 +57,19 @@
       "status": "Estado"
     }
   },
+  "approval": {
+    "status": {
+      "pending": "Pendiente",
+      "approved": "Aprobado",
+      "rejected": "Rechazado"
+    },
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "reasonPlaceholder": "Motivo del rechazo…",
+    "confirmReject": "Confirmar rechazo",
+    "alreadyReviewed": "Este match ya fue revisado.",
+    "error": "No se pudo aplicar la revisión."
+  },
   "changelog": {
     "loading": "Cargando historial…",
     "error": "No se pudo cargar el historial.",

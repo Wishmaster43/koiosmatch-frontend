@@ -35,6 +35,11 @@ export default function MatchesTable({
   // Match lifecycle lookup (R-1b) — resolves the status chip label/colour.
   const { metaOf: statusMeta } = useMatchStatuses()
 
+  // MATCH-APPROVAL-1: no dedicated approval_status column here on purpose — the
+  // row already carries one status-shaped chip (the "stage" column above) and adding
+  // a second soft chip would crowd a 7-column table with two overlapping "status"
+  // reads. The approval badge lives in the drawer title instead (§3A calm header);
+  // revisit only if Danny asks for it at the list level too.
   const columns: Column<MatchRow>[] = [
     { key: 'candidate', header: t('cols.candidate'), sortable: true,
       render: r => (

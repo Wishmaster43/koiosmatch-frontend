@@ -795,6 +795,14 @@
     "branchMismatch": "Niederlassung weicht ab",
     "branchMismatchDesc": "Die Niederlassung des Kandidaten ({{candidate}}) weicht von der des Kunden ({{customer}}) ab.",
     "branchKeep": "Nein — nur diese Platzierung bei dieser Niederlassung",
-    "branchMove": "Ja — Kandidat ebenfalls zu dieser Niederlassung verschieben"
+    "branchMove": "Ja — Kandidat ebenfalls zu dieser Niederlassung verschieben",
+    "rateProposal": {
+      "agreement": "Vorschlag (Preisvereinbarung): {{purchase}} Einkauf / {{sell}} Verkauf",
+      "conversionFactor": "Vorschlag (Umrechnungsfaktor): {{purchase}} Einkauf / {{sell}} Verkauf",
+      "purchaseOnly": "Vorschlag — nur Einkaufstarif bekannt: {{purchase}}",
+      "deviationWarning": "Die Preisvereinbarung schlägt {{proposalPurchase}} Einkauf / {{proposalSell}} Verkauf vor — du hast {{enteredPurchase}} / {{enteredSell}} eingegeben. Bist du sicher?",
+      "deviationConfirm": "Ja, trotzdem platzieren",
+      "deviationCancel": "Tarife anpassen"
+    }
   }
 }

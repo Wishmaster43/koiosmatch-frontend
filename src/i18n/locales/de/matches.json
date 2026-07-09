@@ -57,6 +57,19 @@
       "status": "Status"
     }
   },
+  "approval": {
+    "status": {
+      "pending": "Ausstehend",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt"
+    },
+    "approve": "Genehmigen",
+    "reject": "Ablehnen",
+    "reasonPlaceholder": "Ablehnungsgrund…",
+    "confirmReject": "Ablehnung bestätigen",
+    "alreadyReviewed": "Dieser Match wurde bereits geprüft.",
+    "error": "Die Prüfung konnte nicht angewendet werden."
+  },
   "changelog": {
     "loading": "Verlauf wird geladen…",
     "error": "Änderungsprotokoll konnte nicht geladen werden.",

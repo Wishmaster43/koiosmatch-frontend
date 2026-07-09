@@ -4,8 +4,9 @@
  * POSTs to /matches with the contract/financial layer. The customer→location→
  * department→contact cascade, function + contract-type dropdowns, dates/hours and
  * the purchase/sell/margin block all work now; /matches tolerates the extra fields
- * (ignored until the backend model lands, then persisted). Rates propose nothing
- * yet (CAO/price-agreement is fase 2) — the margin is shown live.
+ * (ignored until the backend model lands, then persisted). Rates propose from a
+ * price agreement / conversion factor once customer + function are picked
+ * (MATCH-PLACEMENT-2, useRateProposal) — the margin is shown live.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -18,6 +19,8 @@ import { useCustomerOptions } from '@/pages/vacancies/hooks/useCustomerOptions'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
 import { useFunctions } from '@/lib/useFunctions'
 import { useContractTypes } from '@/lib/useContractTypes'
+import { useRateProposal } from '../hooks/useRateProposal'
+import { RateProposalHint, RateDeviationWarning } from './RateProposalNotice'
 import type { Id } from '@/types/common'
 
 const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 60 }
@@ -86,6 +89,12 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
   const [billingEmails, setBillingEmails] = useState<string[]>([''])
   const [remarks, setRemarks] = useState('')
   const [saving, setSaving] = useState(false)
+
+  // Rate proposal (MATCH-PLACEMENT-2): debounced lookup keyed on customer + function
+  // (+ optional cao/scale/step). Prefills empty rate fields + drives the deviation
+  // guard below; the hook owns all of that logic (kept out of this file, §0.3).
+  const { proposal, deviatesFromProposal, confirmDeviation, setConfirmDeviation } =
+    useRateProposal({ customerId, functionTitle: func, cao, scale, step, purchase, sell, setPurchase, setSell })
 
   // Vestiging-mismatch (fase 3): the candidate's own branch vs the customer's.
   // 'placement' = only this placement keeps the customer's branch (default);
@@ -183,6 +192,13 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
     } catch {
       notifyError(t('placement.failed'))
     } finally { setSaving(false) }
+  }
+
+  // First click on a deviating submit shows the inline confirm instead of posting;
+  // the second click (confirm already true) goes through — "one extra click", no hard block.
+  const handleSubmitClick = () => {
+    if (deviatesFromProposal && !confirmDeviation) { setConfirmDeviation(true); return }
+    submit()
   }
 
   const opt = (arr: Array<{ id?: Id; name?: string }>) => arr.map(x => ({ value: String(x.id), label: x.name ?? '—' }))
@@ -318,6 +334,8 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
             <F label={t('placement.purchaseRate')}><input type="number" step="0.01" value={purchase} onChange={e => setPurchase(e.target.value)} style={input} placeholder="22,18" /></F>
             <F label={t('placement.sellRate')}><input type="number" step="0.01" value={sell} onChange={e => setSell(e.target.value)} style={input} placeholder="62,10" /></F>
           </div>
+          {/* Rate proposal hint — only fills EMPTY fields above (never overwrites input). */}
+          <RateProposalHint proposal={proposal} />
           {/* Margin shown live — derived, never entered. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, padding: '8px 12px', borderRadius: 8,
             background: 'var(--surface-2, var(--bg))', border: '1px solid var(--border)',
@@ -350,11 +368,17 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
           </F>
         </div>
 
+        {/* Deviation guard (Danny's "weet je het zeker?"): the entered rates differ from a
+            FOUND agreement proposal — calm inline confirm, one extra click, no hard block. */}
+        {deviatesFromProposal && confirmDeviation && (
+          <RateDeviationWarning proposal={proposal} purchase={purchase} sell={sell} onCancel={() => setConfirmDeviation(false)} />
+        )}
+
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
-          <button onClick={submit} disabled={saving || !customerId || !func}
+          <button onClick={handleSubmitClick} disabled={saving || !customerId || !func}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 600, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: (customerId && func) ? 'pointer' : 'default', opacity: (customerId && func) ? 1 : 0.4 }}>
-            {saving ? t('common:saving') : t('placement.create')}
+            {saving ? t('common:saving') : (deviatesFromProposal && confirmDeviation ? t('placement.rateProposal.deviationConfirm') : t('placement.create'))}
           </button>
         </div>
       </div>

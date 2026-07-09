@@ -57,6 +57,19 @@
       "status": "Statut"
     }
   },
+  "approval": {
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuvé",
+      "rejected": "Rejeté"
+    },
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "reasonPlaceholder": "Motif du rejet…",
+    "confirmReject": "Confirmer le rejet",
+    "alreadyReviewed": "Ce match a déjà été évalué.",
+    "error": "Impossible d'appliquer l'évaluation."
+  },
   "changelog": {
     "loading": "Chargement de l'historique…",
     "error": "Impossible de charger l'historique.",

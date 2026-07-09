@@ -795,6 +795,14 @@
     "branchMismatch": "Agence différente",
     "branchMismatchDesc": "L'agence du candidat ({{candidate}}) diffère de celle du client ({{customer}}).",
     "branchKeep": "Non — uniquement ce placement dans cette agence",
-    "branchMove": "Oui — transférer aussi le candidat vers cette agence"
+    "branchMove": "Oui — transférer aussi le candidat vers cette agence",
+    "rateProposal": {
+      "agreement": "Suggestion (accord tarifaire) : {{purchase}} achat / {{sell}} vente",
+      "conversionFactor": "Suggestion (facteur de conversion) : {{purchase}} achat / {{sell}} vente",
+      "purchaseOnly": "Suggestion — seul le tarif d'achat est connu : {{purchase}}",
+      "deviationWarning": "L'accord tarifaire propose {{proposalPurchase}} achat / {{proposalSell}} vente — vous avez saisi {{enteredPurchase}} / {{enteredSell}}. Êtes-vous sûr(e) ?",
+      "deviationConfirm": "Oui, placer quand même",
+      "deviationCancel": "Ajuster les tarifs"
+    }
   }
 }
