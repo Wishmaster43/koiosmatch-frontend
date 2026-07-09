@@ -51,7 +51,8 @@
     "itemName": "Item name",
     "typeLabel": "Type",
     "itemNamePlaceholder": "item_name",
-    "addItem": "Add item"
+    "addItem": "Add item",
+    "operator": "Operator"
   },
   "schedule": {
     "header": "Schedule",
@@ -364,7 +365,25 @@
     "response": "Response",
     "dragStart": "Drag to move the start point",
     "runModule": "Run module",
-    "deleteEdge": "Remove connection"
+    "deleteEdge": "Remove connection",
+    "filterCount_one": "{{count}} filter",
+    "filterCount_other": "{{count}} filters",
+    "orDivider": "OR",
+    "andLabel": "AND",
+    "addGroup": "Add OR group",
+    "groupLabel": "Group {{n}}",
+    "removeGroup": "Remove group",
+    "deleteCondition": "Remove condition",
+    "filterDateHint": "Date (YYYY-MM-DD) or relative: now, now-90d, now+2d",
+    "filterClockHint": "Time (HH:mm, e.g. 13:00) for daypart windows, or a number",
+    "opContains": "contains",
+    "opNotContains": "does not contain",
+    "opEmpty": "is empty",
+    "opNotEmpty": "is filled",
+    "opDateGte": "on or after (date)",
+    "opDateGt": "after (date)",
+    "opDateLte": "on or before (date)",
+    "opDateLt": "before (date)"
   },
   "picker": {
     "title": "Choose a module",
@@ -387,7 +406,10 @@
     "noConfig": "No configuration required.",
     "noOutput": "No execution data yet. Press ▶ on the module to test.",
     "item": "item",
-    "items": "items"
+    "items": "items",
+    "tabStandard": "Standard",
+    "tabAdvanced": "Advanced",
+    "tabTest": "Test"
   },
   "fieldLabels": {
     "AI-kandidaatvoorstellen": "AI candidate suggestions",

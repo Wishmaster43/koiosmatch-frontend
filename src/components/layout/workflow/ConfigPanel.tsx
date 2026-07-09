@@ -114,14 +114,14 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
       {/* Tab bar — ai_agent gets 4 dedicated tabs; all others get 2 */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', flexShrink: 0, padding: '8px 16px 0', overflowX: 'auto' }}>
         {(isAgent ? [
-          { id: 'standaard',   label: 'Standaard' },
-          { id: 'geavanceerd', label: 'Geavanceerd' },
-          { id: 'testen',      label: '▶ Testen' },
-          { id: 'uitvoering',  label: output ? `Uitvoering (${Array.isArray(output) ? output.length : 1})` : 'Uitvoering' },
+          // ai_agent tabs — through i18n like everything else (§5; was hardcoded Dutch).
+          { id: 'standaard',   label: t('config.tabStandard') },
+          { id: 'geavanceerd', label: t('config.tabAdvanced') },
+          { id: 'testen',      label: `▶ ${t('config.tabTest')}` },
+          { id: 'uitvoering',  label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
         ] : [
           { id: 'instellingen', label: t('config.tabSettings') },
           { id: 'uitvoering',   label: output ? `${t('config.tabExecution')} (${Array.isArray(output) ? output.length : 1})` : t('config.tabExecution') },
-          ...(type === 'ai_agent' ? [] : []),
         ]).map(tab => (
           <button key={tab.id} type="button" onClick={() => switchTab(tab.id)}
             style={{

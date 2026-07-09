@@ -47,7 +47,8 @@
     "itemName": "Element-Name",
     "typeLabel": "Typ",
     "itemNamePlaceholder": "element_name",
-    "addItem": "Element hinzufügen"
+    "addItem": "Element hinzufügen",
+    "operator": "Operator"
   },
   "schedule": {
     "header": "Planen",
@@ -364,7 +365,25 @@
     "response": "Antwort",
     "dragStart": "Ziehen, um den Startpunkt zu verschieben",
     "runModule": "Modul ausführen",
-    "deleteEdge": "Verbindung entfernen"
+    "deleteEdge": "Verbindung entfernen",
+    "filterCount_one": "{{count}} Filter",
+    "filterCount_other": "{{count}} Filter",
+    "orDivider": "ODER",
+    "andLabel": "UND",
+    "addGroup": "ODER-Gruppe hinzufügen",
+    "groupLabel": "Gruppe {{n}}",
+    "removeGroup": "Gruppe entfernen",
+    "deleteCondition": "Bedingung entfernen",
+    "filterDateHint": "Datum (JJJJ-MM-TT) oder relativ: now, now-90d, now+2d",
+    "filterClockHint": "Uhrzeit (SS:MM, z. B. 13:00) für Tagesabschnitts-Fenster, oder eine Zahl",
+    "opContains": "enthält",
+    "opNotContains": "enthält nicht",
+    "opEmpty": "ist leer",
+    "opNotEmpty": "ist ausgefüllt",
+    "opDateGte": "am oder nach (Datum)",
+    "opDateGt": "nach (Datum)",
+    "opDateLte": "am oder vor (Datum)",
+    "opDateLt": "vor (Datum)"
   },
   "picker": {
     "title": "Modul auswählen",
@@ -387,7 +406,10 @@
     "noConfig": "Keine Konfiguration erforderlich.",
     "noOutput": "Noch keine Ausführungsdaten. Drücken Sie ▶ am Modul zum Testen.",
     "item": "Element",
-    "items": "Elemente"
+    "items": "Elemente",
+    "tabStandard": "Standard",
+    "tabAdvanced": "Erweitert",
+    "tabTest": "Testen"
   },
   "fieldLabels": {
     "AI-kandidaatvoorstellen": "KI-Kandidatenvorschläge",

@@ -47,7 +47,8 @@
     "itemName": "Nom de l'élément",
     "typeLabel": "Type",
     "itemNamePlaceholder": "nom_element",
-    "addItem": "Ajouter un élément"
+    "addItem": "Ajouter un élément",
+    "operator": "Opérateur"
   },
   "schedule": {
     "header": "Planifier",
@@ -364,7 +365,25 @@
     "response": "Réponse",
     "dragStart": "Glisser pour déplacer le point de départ",
     "runModule": "Exécuter le module",
-    "deleteEdge": "Supprimer la connexion"
+    "deleteEdge": "Supprimer la connexion",
+    "filterCount_one": "{{count}} filtre",
+    "filterCount_other": "{{count}} filtres",
+    "orDivider": "OU",
+    "andLabel": "ET",
+    "addGroup": "Ajouter un groupe OU",
+    "groupLabel": "Groupe {{n}}",
+    "removeGroup": "Supprimer le groupe",
+    "deleteCondition": "Supprimer la condition",
+    "filterDateHint": "Date (AAAA-MM-JJ) ou relative : now, now-90d, now+2d",
+    "filterClockHint": "Heure (HH:mm, ex. 13:00) pour les créneaux horaires, ou un nombre",
+    "opContains": "contient",
+    "opNotContains": "ne contient pas",
+    "opEmpty": "est vide",
+    "opNotEmpty": "est rempli",
+    "opDateGte": "à partir de (date)",
+    "opDateGt": "après (date)",
+    "opDateLte": "au plus tard le (date)",
+    "opDateLt": "avant (date)"
   },
   "picker": {
     "title": "Choisir un module",
@@ -387,7 +406,10 @@
     "noConfig": "Aucune configuration requise.",
     "noOutput": "Pas encore de données d'exécution. Appuyez sur ▶ sur le module pour tester.",
     "item": "élément",
-    "items": "éléments"
+    "items": "éléments",
+    "tabStandard": "Standard",
+    "tabAdvanced": "Avancé",
+    "tabTest": "Tester"
   },
   "fieldLabels": {
     "AI-kandidaatvoorstellen": "Suggestions IA de candidats",

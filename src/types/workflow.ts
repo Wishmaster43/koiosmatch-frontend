@@ -89,6 +89,12 @@ export interface FlowEdge {
 export interface FilterCondition { field?: string; operator?: string; value?: string }
 export interface EdgeFilters { logic?: string; conditions?: FilterCondition[] }
 
+// One AND-group of conditions inside a router edge's OR'ed group set. A single
+// group is the legacy `EdgeFilters` shape (backward compatible); ≥2 groups
+// persist as the backend FilterEvaluator's nested `[[…],[…]]` OR-group contract
+// (see EdgeFilterPanel.tsx / serialization.ts for the exact conversion).
+export type FilterConditionGroup = FilterCondition[]
+
 export interface ScheduleConfig {
   schedule_type?: string
   interval_value?: number

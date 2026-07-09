@@ -18,13 +18,14 @@ import { useTranslation } from 'react-i18next'
 import { MODULE_META } from '@/modules/index'
 import { ScheduleModal, scheduleLabel } from './workflow/ScheduleModal'
 import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './workflow/contexts'
-import { EdgeFilterPanel, OutputPanel, NODE_TYPES, EDGE_TYPES } from './workflow/canvas'
+import { OutputPanel, NODE_TYPES, EDGE_TYPES } from './workflow/canvas'
+import { EdgeFilterPanel } from './workflow/EdgeFilterPanel'
 import ModulePicker from './workflow/ModulePicker'
 import ConfigPanel, { MANAGE_TABS } from './workflow/ConfigPanel'
 import LogsPanel from './workflow/LogsPanel'
 import WorkflowHistoryView from './workflow/WorkflowHistoryView'
 import { useWorkflowEditor } from './workflow/useWorkflowEditor'
-import type { Workflow, EdgeFilters } from '@/types/workflow'
+import type { Workflow } from '@/types/workflow'
 
 // ── Inner editor ──────────────────────────────────────────────────────────────
 
@@ -283,7 +284,7 @@ function EditorInner({ workflow, onClose, onSave }: {
         )}
         {filterState && (
           <EdgeFilterPanel
-            filters={edges.find(e => e.id === filterState.edgeId)?.data?.filters as EdgeFilters | null | undefined}
+            filters={edges.find(e => e.id === filterState.edgeId)?.data?.filters}
             label={edges.find(e => e.id === filterState.edgeId)?.data?.label as string | undefined}
             onClose={() => setFilterState(null)}
             onSave={(filters, label) => saveEdgeFilter(filterState.edgeId, filters, label)}

@@ -1,21 +1,22 @@
 /**
  * Workflow canvas pieces — how nodes and edges look/behave on the ReactFlow
- * canvas: the module node, the click-to-add edge, the per-edge filter panel and
- * the node output panel. NODE_TYPES/EDGE_TYPES are the stable maps ReactFlow needs.
- * Extracted from WorkflowCanvasEditor.
+ * canvas: the module node, the click-to-add edge, and the node output panel.
+ * NODE_TYPES/EDGE_TYPES are the stable maps ReactFlow needs. Extracted from
+ * WorkflowCanvasEditor. The per-edge filter panel lives in its own file,
+ * EdgeFilterPanel.tsx, next to this one.
  */
 import { useState, useContext, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { MouseEvent, DragEvent } from 'react'
 import { Handle, Position, BaseEdge, EdgeLabelRenderer, getStraightPath } from '@xyflow/react'
-import { CheckCircle, Filter, HelpCircle, Loader2, Play, Plus, Trash2, X } from 'lucide-react'
+import { CheckCircle, Filter, HelpCircle, Loader2, Play, Plus, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { MODULE_META } from '@/modules/index'
-import { NODE_W, NODE_H } from './serialization'
-import { OPERATORS } from './constants'
+import { NODE_W, NODE_H, countEdgeFilterConditions } from './serialization'
 import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './contexts'
-import type { FlowNodeData, EdgeFilters, FilterCondition } from '@/types/workflow'
+import OutputTree from './OutputTree'
+import type { FlowNodeData, EdgeFilters } from '@/types/workflow'
 
 // ── Custom node ───────────────────────────────────────────────────────────────
 
@@ -158,114 +159,14 @@ function ModuleNode({ id, data, selected }: { id: string; data: FlowNodeData; se
   )
 }
 
-// ── Edge filter panel ─────────────────────────────────────────────────────────
-
-export function EdgeFilterPanel({ filters, label, onClose, onSave }: {
-  filters?: EdgeFilters | null; label?: string; onClose: () => void; onSave: (f: EdgeFilters, label: string) => void
-}) {
-  const [conds, setConds] = useState<FilterCondition[]>(filters?.conditions ?? [])
-  const [logic, setLogic] = useState(filters?.logic ?? 'AND')
-  const [name, setName]   = useState(label ?? '')
-  const { t } = useTranslation('workflows')
-  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-
-  const addCond = () => setConds(c => [...c, { field: '', operator: '=', value: '' }])
-  const delCond = (i: number) => setConds(c => c.filter((_, j) => j !== i))
-  const updCond = (i: number, key: keyof FilterCondition, val: string) => setConds(c => c.map((row, j) => j === i ? { ...row, [key]: val } : row))
-
-  return (
-    <div style={{
-      position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'rgba(0,0,0,0.3)',
-    }} onClick={onClose}>
-      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('canvas.filterTitle')} tabIndex={-1} style={{
-        background: 'var(--surface)', borderRadius: 14, padding: 24, width: 520, maxHeight: '80vh', overflow: 'auto',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
-      }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('canvas.filterTitle')}</div>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
-        </div>
-
-        {/* Route naam — the Router branch name (Make-style); shown on the edge */}
-        <div style={{ marginBottom: 16 }}>
-          <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-            {t('canvas.routeName')}
-          </label>
-          <input value={name} onChange={e => setName(e.target.value)}
-            placeholder={t('canvas.routeNamePlaceholder')} aria-label={t('canvas.routeName')}
-            style={{ width: '100%', padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', boxSizing: 'border-box' }} />
-        </div>
-
-        {/* AND / OR toggle */}
-        <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
-          {['AND', 'OR'].map(l => (
-            <button key={l} onClick={() => setLogic(l)} style={{
-              padding: '4px 14px', fontSize: 12, fontWeight: 600, borderRadius: 999, border: 'none', cursor: 'pointer',
-              background: logic === l ? 'var(--color-primary)' : 'var(--border)',
-              color: logic === l ? 'white' : 'var(--text-muted)',
-            }}>{l}</button>
-          ))}
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', alignSelf: 'center', marginLeft: 4 }}>
-            {logic === 'AND' ? t('canvas.logicAllHint') : t('canvas.logicAnyHint')}
-          </span>
-        </div>
-
-        {/* Condities */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-          {conds.map((c, i) => (
-            <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              {i > 0 && (
-                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', width: 28, textAlign: 'center', flexShrink: 0 }}>{logic}</div>
-              )}
-              {i === 0 && <div style={{ width: 28, flexShrink: 0 }} />}
-              <input value={c.field} onChange={e => updCond(i, 'field', e.target.value)}
-                placeholder={t('fields.fieldPlaceholder')} aria-label={t('fields.fieldPlaceholder')}
-                style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
-              <select value={c.operator} onChange={e => updCond(i, 'operator', e.target.value)}
-                aria-label={t('fields.operator', { defaultValue: 'Operator' })}
-                style={{ padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)' }}>
-                {OPERATORS.map(op => <option key={op} value={op}>{op}</option>)}
-              </select>
-              {!['is leeg', 'is gevuld'].includes(c.operator ?? '') && (
-                <input value={c.value} onChange={e => updCond(i, 'value', e.target.value)}
-                  placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}
-                  style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
-              )}
-              <button onClick={() => delCond(i)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: 4 }}><Trash2 size={12} /></button>
-            </div>
-          ))}
-        </div>
-
-        <button onClick={addCond} style={{
-          display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: 'var(--color-primary)',
-          background: 'none', border: '1px dashed var(--color-primary)', borderRadius: 8,
-          padding: '6px 12px', cursor: 'pointer', marginBottom: 20, width: '100%', justifyContent: 'center',
-        }}>
-          <Plus size={12} /> {t('fields.addCondition')}
-        </button>
-
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
-          <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>{t('common:cancel')}</button>
-          <button onClick={() => { onSave({ logic, conditions: conds }, name.trim()); onClose() }}
-            style={{ padding: '8px 16px', fontSize: 13, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', fontWeight: 600 }}>
-            {t('common:save')}
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── JSON output viewer ────────────────────────────────────────────────────────
+// ── Node output viewer ────────────────────────────────────────────────────────
+// Renders a test-run/live-run output as an expandable field tree (OutputTree)
+// instead of a raw JSON blob — same viewer the ConfigPanel "Uitvoering" tab uses,
+// so a module's output looks identical everywhere it's inspected.
 
 export function OutputPanel({ output, onClose }: { output?: unknown; onClose: () => void }) {
-  const [search, setSearch] = useState('')
   const { t } = useTranslation('workflows')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-  const json = JSON.stringify(output, null, 2)
-  const lines = json.split('\n')
-  const filtered = search ? lines.filter(l => l.toLowerCase().includes(search.toLowerCase())) : lines
 
   return (
     <div style={{
@@ -273,24 +174,17 @@ export function OutputPanel({ output, onClose }: { output?: unknown; onClose: ()
       background: 'rgba(0,0,0,0.4)',
     }} onClick={onClose}>
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('canvas.outputTitle')} tabIndex={-1} style={{
-        background: '#1E1E2E', borderRadius: 14, width: 680, maxHeight: '80vh',
+        background: 'var(--surface)', borderRadius: 14, width: 680, maxHeight: '80vh',
         display: 'flex', flexDirection: 'column', overflow: 'hidden',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
       }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid #2D2D3F' }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: '#E2E8F0' }}>{t('canvas.outputTitle')} — {Array.isArray(output) ? t('canvas.records', { n: output.length }) : t('canvas.response')}</div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder={t('picker.search')} aria-label={t('picker.search')}
-              style={{ padding: '5px 10px', fontSize: 12, background: '#2D2D3F', border: '1px solid #3D3D4F', borderRadius: 6, color: '#E2E8F0', outline: 'none', width: 160 }} />
-            <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
+          <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{t('canvas.outputTitle')} — {Array.isArray(output) ? t('canvas.records', { n: output.length }) : t('canvas.response')}</div>
+          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
         </div>
-        <pre style={{
-          flex: 1, overflowY: 'auto', margin: 0, padding: '16px 20px',
-          fontSize: 12, lineHeight: 1.7, color: '#A8D9A8', fontFamily: 'monospace',
-        }}>
-          {filtered.join('\n')}
-        </pre>
+        <div style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+          <OutputTree data={output} />
+        </div>
       </div>
     </div>
   )
@@ -309,7 +203,10 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
   const [path]   = getStraightPath({ sourceX, sourceY, targetX, targetY })
   const midX = (sourceX + targetX) / 2
   const midY = (sourceY + targetY) / 2
-  const hasFilters = (data?.filters?.conditions?.length ?? 0) > 0
+  // Counts conditions across BOTH persisted shapes: the legacy flat
+  // `{conditions,logic}` object and the newer nested OR-group array.
+  const filterCount = countEdgeFilterConditions(data?.filters)
+  const hasFilters = filterCount > 0
   const stroke = hasFilters ? '#7C3AED' : (selected ? 'var(--color-primary)' : 'var(--border)')
   return (
     <>
@@ -329,7 +226,7 @@ function AddableEdge({ id, sourceX, sourceY, targetX, targetY, selected, data }:
           )}
           {hasFilters && (
             <div style={{ fontSize: 9, background: '#7C3AED', color: 'white', borderRadius: 999, padding: '1px 6px', fontWeight: 700 }}>
-              {data?.filters?.conditions?.length ?? 0} filter{(data?.filters?.conditions?.length ?? 0) > 1 ? 's' : ''}
+              {t('canvas.filterCount', { count: filterCount })}
             </div>
           )}
           <button onClick={() => onAdd && onAdd(id)} title={t('editor.addModule')} aria-label={t('editor.addModule')}

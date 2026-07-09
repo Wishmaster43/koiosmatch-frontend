@@ -6,7 +6,7 @@
  * separate from the editor so the graph round-trip is easy to test and reason about.
  */
 
-import type { WorkflowStep, FlowNode, FlowEdge } from '@/types/workflow'
+import type { WorkflowStep, FlowNode, FlowEdge, FilterCondition, FilterConditionGroup, EdgeFilters } from '@/types/workflow'
 
 // Stable id for a freshly created node. A REAL uuid: the backend honours the
 // editor's step id on create but validates it as uuid (steps.*.id) — a non-uuid
@@ -81,4 +81,45 @@ export function flowToSteps(nodes: FlowNode[], edges: FlowEdge[]): WorkflowStep[
       target_handle: (e.targetHandle as string | undefined) ?? 'in',
     })),
   }))
+}
+
+// ── Edge filter groups (Router OR-groups) ─────────────────────────────────────
+// The backend FilterEvaluator accepts a connection's `filters` in two shapes: a
+// flat AND list (optionally wrapped as `{conditions, logic}` — the original
+// contract) or a nested `[[…],[…]]` list where each inner array is its own
+// AND-group and the groups themselves are OR'ed. These helpers translate
+// between that persisted value and the editor's normalized `groups` state
+// (always a list of AND-groups, even when there is only one).
+
+// Any accepted persisted shape (or nothing yet) → normalized AND-groups. A
+// flat `{conditions,logic}` object or a bare flat array become ONE group; a
+// nested array-of-arrays (wrapped or not) becomes N groups; nullish/empty
+// input starts as one empty group so the panel always has a group to render.
+export function parseEdgeFilterGroups(raw: unknown): FilterConditionGroup[] {
+  const inner = Array.isArray(raw)
+    ? raw
+    : (raw && typeof raw === 'object' && Array.isArray((raw as { conditions?: unknown }).conditions))
+      ? (raw as { conditions: unknown[] }).conditions
+      : null
+  if (!inner || inner.length === 0) return [[]]
+  return Array.isArray(inner[0]) ? (inner as FilterConditionGroup[]) : [inner as FilterCondition[]]
+}
+
+// Normalized groups → the value persisted on the connection. Wholly-empty
+// groups are dropped first (an empty AND-group always matches in the
+// evaluator, which would silently open the whole branch). ≤1 remaining group
+// keeps the exact legacy `{conditions, logic}` shape — backward compatible with
+// every saved workflow and with the backend's flat-list path; ≥2 groups emit
+// the raw nested shape the backend reads just as directly (FilterEvaluator::groups).
+export function edgeFilterGroupsToFilters(groups: FilterConditionGroup[]): EdgeFilters | FilterConditionGroup[] {
+  const nonEmpty = groups.filter(g => g.length > 0)
+  if (nonEmpty.length <= 1) return { conditions: nonEmpty[0] ?? [], logic: 'AND' }
+  return nonEmpty
+}
+
+// Total condition count across either shape — drives the edge's filter badge
+// and its "has filters" highlight regardless of how many groups it holds.
+export function countEdgeFilterConditions(raw: unknown): number {
+  if (raw == null) return 0
+  return parseEdgeFilterGroups(raw).reduce((sum, g) => sum + g.length, 0)
 }

@@ -75,7 +75,8 @@
     "itemName": "Item naam",
     "typeLabel": "Type",
     "itemNamePlaceholder": "item_naam",
-    "addItem": "Item toevoegen"
+    "addItem": "Item toevoegen",
+    "operator": "Operator"
   },
   "schedule": {
     "header": "Inplannen",
@@ -388,7 +389,25 @@
     "response": "Response",
     "dragStart": "Sleep om startpunt te verplaatsen",
     "runModule": "Module uitvoeren",
-    "deleteEdge": "Verbinding verbreken"
+    "deleteEdge": "Verbinding verbreken",
+    "filterCount_one": "{{count}} filter",
+    "filterCount_other": "{{count}} filters",
+    "orDivider": "OF",
+    "andLabel": "EN",
+    "addGroup": "OF-groep toevoegen",
+    "groupLabel": "Groep {{n}}",
+    "removeGroup": "Groep verwijderen",
+    "deleteCondition": "Conditie verwijderen",
+    "filterDateHint": "Datum (JJJJ-MM-DD) of relatief: now, now-90d, now+2d",
+    "filterClockHint": "Tijd (UU:MM, bv. 13:00) voor dagdeel-vensters, of een getal",
+    "opContains": "bevat",
+    "opNotContains": "bevat niet",
+    "opEmpty": "is leeg",
+    "opNotEmpty": "is gevuld",
+    "opDateGte": "op of na (datum)",
+    "opDateGt": "na (datum)",
+    "opDateLte": "op of voor (datum)",
+    "opDateLt": "voor (datum)"
   },
   "picker": {
     "title": "Module kiezen",
@@ -411,7 +430,10 @@
     "noConfig": "Geen configuratie vereist.",
     "noOutput": "Nog geen uitvoerdata. Druk op ▶ bij de module om te testen.",
     "item": "item",
-    "items": "items"
+    "items": "items",
+    "tabStandard": "Standaard",
+    "tabAdvanced": "Geavanceerd",
+    "tabTest": "Testen"
   },
   "fieldLabels": {
     "AI-kandidaatvoorstellen": "AI-kandidaatvoorstellen",
