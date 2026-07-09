@@ -623,6 +623,12 @@
       "always": "Altijd",
       "alwaysDesc": "Elke plaatsing heeft eerst goedkeuring nodig.",
       "saveFailed": "Opslaan mislukt — de keuze is teruggezet."
+    },
+    "conversionFactor": {
+      "title": "Omrekenfactor inkoop→verkoop",
+      "subtitle": "Valt terug op inkooptarief × deze factor wanneer geen prijsafspraak past bij functie/CAO/schaal/trede.",
+      "placeholder": "Bijv. 1,35",
+      "saveFailed": "Opslaan mislukt — de waarde is teruggezet."
     }
   },
   "cvTemplate": {

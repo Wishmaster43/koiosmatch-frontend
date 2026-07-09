@@ -70,6 +70,7 @@
       "opportunities": "Kansen",
       "planning": "Planning",
       "statistics": "Statistieken",
+      "priceAgreements": "Prijsafspraken",
       "documents": "Documenten",
       "notes": "Notities"
     },
@@ -216,6 +217,30 @@
     "name": "Naam",
     "type": "Type",
     "size": "Grootte"
+  },
+  "priceAgreements": {
+    "add": "Prijsafspraak toevoegen",
+    "any": "Alle",
+    "function": "Functie",
+    "cao": "CAO",
+    "scale": "Schaal",
+    "step": "Trede",
+    "purchaseRate": "Inkooptarief",
+    "saleRate": "Verkooptarief",
+    "validFrom": "Geldig vanaf",
+    "validUntil": "Geldig tot",
+    "indefinite": "voor onbepaalde tijd",
+    "remarks": "Opmerkingen",
+    "margin": "marge",
+    "delete": "Verwijderen",
+    "confirmDelete": "Deze prijsafspraak verwijderen?",
+    "deleteFailed": "Verwijderen is mislukt.",
+    "deleteInUse": "Verwijderen is niet mogelijk — deze afspraak wordt nog gebruikt.",
+    "saveFailed": "Opslaan is mislukt.",
+    "loading": "Prijsafspraken laden…",
+    "loadError": "Prijsafspraken laden is mislukt.",
+    "retry": "Opnieuw proberen",
+    "empty": "Nog geen prijsafspraken."
   },
   "notes": {
     "notes": "Notities",

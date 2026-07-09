@@ -70,6 +70,7 @@
       "opportunities": "Oportunidades",
       "planning": "Planificación",
       "statistics": "Estadísticas",
+      "priceAgreements": "Acuerdos de tarifas",
       "documents": "Documentos",
       "notes": "Notas"
     },
@@ -216,6 +217,30 @@
     "name": "Nombre",
     "type": "Tipo",
     "size": "Tamaño"
+  },
+  "priceAgreements": {
+    "add": "Añadir acuerdo de tarifas",
+    "any": "Todos",
+    "function": "Función",
+    "cao": "Convenio colectivo",
+    "scale": "Escala",
+    "step": "Nivel",
+    "purchaseRate": "Tarifa de compra",
+    "saleRate": "Tarifa de venta",
+    "validFrom": "Válido desde",
+    "validUntil": "Válido hasta",
+    "indefinite": "por tiempo indefinido",
+    "remarks": "Observaciones",
+    "margin": "margen",
+    "delete": "Eliminar",
+    "confirmDelete": "¿Eliminar este acuerdo de tarifas?",
+    "deleteFailed": "Error al eliminar.",
+    "deleteInUse": "No se puede eliminar — este acuerdo todavía está en uso.",
+    "saveFailed": "Error al guardar.",
+    "loading": "Cargando acuerdos de tarifas…",
+    "loadError": "Error al cargar los acuerdos de tarifas.",
+    "retry": "Reintentar",
+    "empty": "Todavía no hay acuerdos de tarifas."
   },
   "notes": {
     "notes": "Notas",

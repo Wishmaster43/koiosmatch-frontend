@@ -70,6 +70,7 @@
       "opportunities": "Opportunités",
       "planning": "Planning",
       "statistics": "Statistiques",
+      "priceAgreements": "Accords tarifaires",
       "documents": "Documents",
       "notes": "Notes"
     },
@@ -216,6 +217,30 @@
     "name": "Nom",
     "type": "Type",
     "size": "Taille"
+  },
+  "priceAgreements": {
+    "add": "Ajouter un accord tarifaire",
+    "any": "Tous",
+    "function": "Fonction",
+    "cao": "Convention collective",
+    "scale": "Échelon",
+    "step": "Niveau",
+    "purchaseRate": "Tarif d'achat",
+    "saleRate": "Tarif de vente",
+    "validFrom": "Valide à partir du",
+    "validUntil": "Valide jusqu'au",
+    "indefinite": "durée indéterminée",
+    "remarks": "Remarques",
+    "margin": "marge",
+    "delete": "Supprimer",
+    "confirmDelete": "Supprimer cet accord tarifaire ?",
+    "deleteFailed": "La suppression a échoué.",
+    "deleteInUse": "Suppression impossible — cet accord est encore utilisé.",
+    "saveFailed": "L'enregistrement a échoué.",
+    "loading": "Chargement des accords tarifaires…",
+    "loadError": "Le chargement des accords tarifaires a échoué.",
+    "retry": "Réessayer",
+    "empty": "Aucun accord tarifaire pour le moment."
   },
   "notes": {
     "notes": "Notes",

@@ -70,6 +70,7 @@
       "opportunities": "Chancen",
       "planning": "Planung",
       "statistics": "Statistiken",
+      "priceAgreements": "Preisvereinbarungen",
       "documents": "Dokumente",
       "notes": "Notizen"
     },
@@ -216,6 +217,30 @@
     "name": "Name",
     "type": "Typ",
     "size": "Größe"
+  },
+  "priceAgreements": {
+    "add": "Preisvereinbarung hinzufügen",
+    "any": "Alle",
+    "function": "Funktion",
+    "cao": "Tarifvertrag",
+    "scale": "Gruppe",
+    "step": "Stufe",
+    "purchaseRate": "Einkaufstarif",
+    "saleRate": "Verkaufstarif",
+    "validFrom": "Gültig ab",
+    "validUntil": "Gültig bis",
+    "indefinite": "unbefristet",
+    "remarks": "Bemerkungen",
+    "margin": "Marge",
+    "delete": "Löschen",
+    "confirmDelete": "Diese Preisvereinbarung löschen?",
+    "deleteFailed": "Löschen fehlgeschlagen.",
+    "deleteInUse": "Löschen nicht möglich — diese Vereinbarung wird noch verwendet.",
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "loading": "Preisvereinbarungen werden geladen…",
+    "loadError": "Laden der Preisvereinbarungen fehlgeschlagen.",
+    "retry": "Erneut versuchen",
+    "empty": "Noch keine Preisvereinbarungen."
   },
   "notes": {
     "notes": "Notizen",

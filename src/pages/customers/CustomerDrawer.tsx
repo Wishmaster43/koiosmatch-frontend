@@ -27,6 +27,7 @@ import OpportunitiesTab from './drawer/OpportunitiesTab'
 import PlanningTab from './drawer/PlanningTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import DocumentsTab from './drawer/DocumentsTab'
+import PriceAgreementsTab from './drawer/PriceAgreementsTab'
 import type { Customer } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -39,6 +40,7 @@ const TABS = [
   { id: 'opportunities', tKey: 'opportunities' },
   { id: 'planning',      tKey: 'planning' },
   { id: 'statistics',    tKey: 'statistics' },
+  { id: 'priceAgreements', tKey: 'priceAgreements' },
   { id: 'documents',     tKey: 'documents' },
   { id: 'notes',         tKey: 'notes' },
 ]
@@ -116,6 +118,7 @@ export default function CustomerDrawer({
       case 'opportunities': return <OpportunitiesTab customerId={c.id} />
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
       case 'statistics':    return <StatisticsTab c={c} />
+      case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} />
       case 'documents':     return <DocumentsTab customerId={c.id} />
       case 'notes':         return (
         <NotesTab

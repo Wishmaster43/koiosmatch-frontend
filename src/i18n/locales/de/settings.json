@@ -1321,6 +1321,12 @@
       "always": "Immer",
       "alwaysDesc": "Jede Platzierung braucht zuerst eine Genehmigung.",
       "saveFailed": "Speichern fehlgeschlagen — die Auswahl wurde zurückgesetzt."
+    },
+    "conversionFactor": {
+      "title": "Umrechnungsfaktor Einkauf→Verkauf",
+      "subtitle": "Fällt auf Einkaufstarif × diesen Faktor zurück, wenn keine Preisvereinbarung zu Funktion/Tarifvertrag/Gruppe/Stufe passt.",
+      "placeholder": "Z. B. 1,35",
+      "saveFailed": "Speichern fehlgeschlagen — der Wert wurde zurückgesetzt."
     }
   },
   "languageSettings": {

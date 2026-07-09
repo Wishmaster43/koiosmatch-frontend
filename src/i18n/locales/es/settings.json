@@ -1321,6 +1321,12 @@
       "always": "Siempre",
       "alwaysDesc": "Cada colocación necesita primero aprobación.",
       "saveFailed": "Error al guardar — se restableció la selección."
+    },
+    "conversionFactor": {
+      "title": "Factor de conversión compra→venta",
+      "subtitle": "Recurre a la tarifa de compra × este factor cuando ningún acuerdo de tarifas coincide con la función/convenio colectivo/escala/nivel.",
+      "placeholder": "P. ej. 1,35",
+      "saveFailed": "Error al guardar — se restableció el valor."
     }
   },
   "languageSettings": {

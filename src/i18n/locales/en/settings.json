@@ -623,6 +623,12 @@
       "always": "Always",
       "alwaysDesc": "Every placement requires approval first.",
       "saveFailed": "Saving failed — your choice was reverted."
+    },
+    "conversionFactor": {
+      "title": "Purchase→sale conversion factor",
+      "subtitle": "Falls back to purchase rate × this factor when no price agreement matches the function/CAO/scale/step.",
+      "placeholder": "E.g. 1.35",
+      "saveFailed": "Saving failed — the value was reverted."
     }
   },
   "cvTemplate": {

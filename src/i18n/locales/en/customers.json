@@ -70,6 +70,7 @@
       "opportunities": "Opportunities",
       "planning": "Planning",
       "statistics": "Statistics",
+      "priceAgreements": "Price agreements",
       "documents": "Documents",
       "notes": "Notes"
     },
@@ -216,6 +217,30 @@
     "name": "Name",
     "type": "Type",
     "size": "Size"
+  },
+  "priceAgreements": {
+    "add": "Add price agreement",
+    "any": "Any",
+    "function": "Function",
+    "cao": "CAO",
+    "scale": "Scale",
+    "step": "Step",
+    "purchaseRate": "Purchase rate",
+    "saleRate": "Sale rate",
+    "validFrom": "Valid from",
+    "validUntil": "Valid until",
+    "indefinite": "indefinitely",
+    "remarks": "Remarks",
+    "margin": "margin",
+    "delete": "Delete",
+    "confirmDelete": "Delete this price agreement?",
+    "deleteFailed": "Deleting failed.",
+    "deleteInUse": "Can't delete — this agreement is still in use.",
+    "saveFailed": "Saving failed.",
+    "loading": "Loading price agreements…",
+    "loadError": "Loading price agreements failed.",
+    "retry": "Retry",
+    "empty": "No price agreements yet."
   },
   "notes": {
     "notes": "Notes",
