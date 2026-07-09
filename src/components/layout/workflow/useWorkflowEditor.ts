@@ -34,6 +34,40 @@ export function flattenSample(obj: unknown, prefix = '', depth = 0): Array<{ pat
   return out
 }
 
+// Build the insertable variable fields for one node's output (pure; unit-tested).
+// Bundle expansion (CMBE 2026-07-09, Danny blocked on picking): a LIST output field
+// (candidates [8]) runs PER ITEM in send-modules, so item[0]'s keys are the valid
+// placeholders — exposed as flat {{field}} tokens (dot-paths like user.email via
+// flattenSample). The list summary row is dropped; duplicate names dedupe by token.
+// Scalar fields keep the node-scoped {{node.field}} token; no run → whole-output token.
+export function buildVarFields(nodeId: string, out: unknown): WorkflowVarField[] {
+  const hasRun = out != null
+  const flat = hasRun ? flattenSample(out) : []
+  const bundleFields: WorkflowVarField[] = []
+  const bundleKeys = new Set<string>()
+  if (hasRun && out && typeof out === 'object') {
+    const entries: Array<[string, unknown]> = Array.isArray(out) ? [['', out]] : Object.entries(out as Record<string, unknown>)
+    const seenTokens = new Set<string>()
+    for (const [k, v] of entries) {
+      if (!Array.isArray(v) || !v.length || typeof v[0] !== 'object' || v[0] == null) continue
+      bundleKeys.add(k)
+      for (const f of flattenSample(v[0])) {
+        const token = `{{${f.path}}}`
+        if (seenTokens.has(token)) continue
+        seenTokens.add(token)
+        bundleFields.push({ token, label: f.path, sample: f.sample })
+      }
+    }
+  }
+  // A top-level array IS one bundle — no scalar duplicates then.
+  const scalarFields = Array.isArray(out) ? [] : flat
+    .filter(f => !bundleKeys.has(f.path))
+    .map(f => ({ token: `{{${nodeId}.${f.path}}}`, label: f.path, sample: f.sample }))
+  return (hasRun && (bundleFields.length || scalarFields.length))
+    ? [...bundleFields, ...scalarFields]
+    : [{ token: `{{${nodeId}}}`, label: '' }]
+}
+
 export function useWorkflowEditor({ workflow, onSave }: {
   workflow: Workflow
   onSave: (updated: Workflow, closeAfter?: boolean) => void
@@ -317,21 +351,13 @@ export function useWorkflowEditor({ workflow, onSave }: {
       .map(id => nodes.find(n => n.id === id))
       .filter((n): n is FlowNode => !!n)
       .sort((a, b) => a.position.x - b.position.x)
-      .map(n => {
-        const hasRun = n.data.output != null
-        const flat = hasRun ? flattenSample(n.data.output) : []
-        // Real fields when the module ran; otherwise a single whole-output token.
-        const fields: WorkflowVarField[] = hasRun && flat.length
-          ? flat.map(f => ({ token: `{{${n.id}.${f.path}}}`, label: f.path, sample: f.sample }))
-          : [{ token: `{{${n.id}}}`, label: '' }]
-        return {
-          nodeId: n.id,
-          moduleType: n.data.type ?? '',
-          customName: (n.data.config as Record<string, unknown> | undefined)?.naam as string | undefined,
-          hasRun,
-          fields,
-        }
-      })
+      .map(n => ({
+        nodeId: n.id,
+        moduleType: n.data.type ?? '',
+        customName: (n.data.config as Record<string, unknown> | undefined)?.naam as string | undefined,
+        hasRun: n.data.output != null,
+        fields: buildVarFields(n.id, n.data.output),
+      }))
   }, [nodes, edges])
 
   const selectedNode = nodes.find(n => n.id === selectedNodeId) ?? null
