@@ -3,6 +3,9 @@ import sm_candidates     from './sm_candidates'
 import sm_customers      from './sm_customers'
 import sm_shifts         from './sm_shifts'
 import sm_schedules      from './sm_schedules'
+import sm_employees      from './sm_employees'
+import sm_employee_update from './sm_employee_update'
+import message_lookup    from './message_lookup'
 import hf_candidates     from './hf_candidates'
 import hf_customers      from './hf_customers'
 import hf_shifts         from './hf_shifts'
@@ -71,6 +74,9 @@ const MODULES: ModuleDef[] = [
   sm_customers,
   sm_shifts,
   sm_schedules,
+  sm_employees,
+  sm_employee_update,
+  message_lookup,
   hf_candidates,
   hf_customers,
   hf_shifts,
