@@ -7,8 +7,8 @@
 import { useState, useEffect } from 'react'
 import { Loader2, Plus, X, Check, Copy } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import { OPERATORS } from './constants'
-import { fieldLabel, optionLabel } from './moduleI18n'
+import { OPERATOR_OPTIONS, VALUELESS_OPERATORS, normalizeOperator } from './constants'
+import { fieldLabel } from './moduleI18n'
 import type { WorkflowField, EdgeFilters, FilterCondition } from '@/types/workflow'
 
 // Shared change handler: writes one field's value into the node config.
@@ -228,7 +228,7 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
       )}
       {/* Condition rows */}
       {conds.map((c, i) => {
-        const needsValue = !['is leeg', 'is gevuld'].includes(c.operator ?? '')
+        const needsValue = !VALUELESS_OPERATORS.includes(normalizeOperator(c.operator))
         return (
           <div key={i} style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
             <select value={c.field} onChange={e => upd(i, 'field', e.target.value)}
@@ -238,10 +238,10 @@ export function FiltersField({ field, value, onChange }: { field: WorkflowField;
               {opts.map(o => { const v = typeof o === 'object' ? o.value : o; const l = typeof o === 'object' ? o.label : o; return <option key={v} value={v}>{fieldLabel(t, l as string)}</option> })}
               {/* (field option list) */}
             </select>
-            <select value={c.operator} onChange={e => upd(i, 'operator', e.target.value)}
+            <select value={normalizeOperator(c.operator)} onChange={e => upd(i, 'operator', e.target.value)}
               aria-label={t('fields.operator', { defaultValue: 'Operator' })}
               style={{ padding: '5px 4px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)', cursor: 'pointer' }}>
-              {OPERATORS.map(op => <option key={op} value={op}>{optionLabel(t, op)}</option>)}
+              {OPERATOR_OPTIONS.map(op => <option key={op.value} value={op.value}>{op.symbol ?? t(op.labelKey!)}</option>)}
             </select>
             {needsValue && (
               <input value={c.value ?? ''} onChange={e => upd(i, 'value', e.target.value)} placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}

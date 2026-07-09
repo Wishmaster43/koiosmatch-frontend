@@ -10,30 +10,13 @@ import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { parseEdgeFilterGroups, edgeFilterGroupsToFilters } from './serialization'
+import { OPERATOR_OPTIONS, VALUELESS_OPERATORS } from './constants'
 import type { FilterCondition, FilterConditionGroup, EdgeFilters } from '@/types/workflow'
 
 // Backend-matching operator codes (mirrors FilterEvaluator::passes 1:1). Math
 // symbols render as-is (language-agnostic, no translation needed); the
 // word-based operators translate. VALUES here are the literal strings the
 // backend switches on — never rename one without updating FilterEvaluator.php.
-const OPERATOR_OPTIONS: Array<{ value: string; symbol?: string; labelKey?: string }> = [
-  { value: '=', symbol: '=' },
-  { value: '!=', symbol: '≠' },
-  { value: '>', symbol: '>' },
-  { value: '>=', symbol: '≥' },
-  { value: '<', symbol: '<' },
-  { value: '<=', symbol: '≤' },
-  { value: 'contains', labelKey: 'canvas.opContains' },
-  { value: 'not_contains', labelKey: 'canvas.opNotContains' },
-  { value: 'empty', labelKey: 'canvas.opEmpty' },
-  { value: 'not_empty', labelKey: 'canvas.opNotEmpty' },
-  { value: 'date_gte', labelKey: 'canvas.opDateGte' },
-  { value: 'date_gt', labelKey: 'canvas.opDateGt' },
-  { value: 'date_lte', labelKey: 'canvas.opDateLte' },
-  { value: 'date_lt', labelKey: 'canvas.opDateLt' },
-]
-// Operators that never need a value (backend reads presence/absence only).
-const VALUELESS_OPERATORS = ['empty', 'not_empty']
 
 // A short syntax reminder for the newer date/time operators — undefined (no
 // hint row rendered) for the plain equality/text operators.
