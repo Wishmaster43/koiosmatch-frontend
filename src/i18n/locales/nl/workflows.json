@@ -257,11 +257,20 @@
     "draft": "Concept",
     "inactive": "Inactief"
   },
+  "list": {
+    "updated": "Bijgewerkt {{date}}",
+    "moreSteps": "+{{n}}",
+    "triggerScheduled": "Gepland",
+    "triggerWebhook": "Webhook",
+    "triggerManual": "Handmatig",
+    "setActive": "Zet op actief",
+    "setInactive": "Zet op inactief",
+    "editWorkflow": "Workflow bewerken"
+  },
   "page": {
     "notRun": "Nog niet uitgevoerd",
     "running": "Bezig...",
     "run": "Uitvoeren",
-    "candidates": "{{n}} kandidaten",
     "folders": "Folders",
     "newFolder": "Nieuwe folder",
     "folderNamePrompt": "Mapnaam:",
@@ -274,10 +283,6 @@
     "archivedView": "Toon gearchiveerde workflows",
     "viewGrid": "Kaarten",
     "viewList": "Lijst",
-    "colName": "Naam",
-    "colStatus": "Status",
-    "colModules": "Modules",
-    "colLastRun": "Laatste run",
     "loading": "Laden...",
     "empty": "Geen workflows in deze map. Sleep er een naartoe of maak een nieuwe aan.",
     "addModuleAlert": "Voeg minimaal één module toe aan de workflow voordat je opslaat.",

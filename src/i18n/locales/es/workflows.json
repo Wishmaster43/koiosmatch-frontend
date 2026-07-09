@@ -209,11 +209,20 @@
     "draft": "Borrador",
     "inactive": "Inactivo"
   },
+  "list": {
+    "updated": "Actualizado {{date}}",
+    "moreSteps": "+{{n}}",
+    "triggerScheduled": "Programado",
+    "triggerWebhook": "Webhook",
+    "triggerManual": "Manual",
+    "setActive": "Marcar como activo",
+    "setInactive": "Marcar como inactivo",
+    "editWorkflow": "Editar workflow"
+  },
   "page": {
     "notRun": "Aún no ejecutado",
     "running": "Procesando...",
     "run": "Ejecutar",
-    "candidates": "{{n}} candidatos",
     "folders": "Carpetas",
     "newFolder": "Nueva carpeta",
     "folderNamePrompt": "Nombre de la carpeta:",
@@ -226,10 +235,6 @@
     "archivedView": "Mostrar workflows archivados",
     "viewGrid": "Tarjetas",
     "viewList": "Lista",
-    "colName": "Nombre",
-    "colStatus": "Estado",
-    "colModules": "Módulos",
-    "colLastRun": "Última ejecución",
     "loading": "Cargando...",
     "empty": "No hay workflows en esta carpeta. Arrastra uno aquí o crea uno nuevo.",
     "addModuleAlert": "Añade al menos un módulo al workflow antes de guardar.",

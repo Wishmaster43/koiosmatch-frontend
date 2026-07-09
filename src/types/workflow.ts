@@ -26,11 +26,16 @@ export interface Workflow {
   id?: string | number
   name?: string
   trigger?: string
+  trigger_type?: string       // 'scheduled' | 'webhook' | 'manual' — drives the list-row trigger icon
   status?: string
   archived?: boolean          // soft-deleted; hidden unless the Archived view is on
+  folder_id?: string | number | null
   steps: WorkflowStep[]
   last_run?: WorkflowLastRun | null
   schedule?: unknown
+  created_at?: string
+  updated_at?: string         // shown (formatted) in the list-row meta line
+  runs_count?: number
   [k: string]: unknown
 }
 
@@ -53,10 +58,14 @@ export interface RawWorkflow {
   trigger_type?: string
   status?: unknown
   active?: boolean
+  folder_id?: string | number | null
   steps?: unknown[]
   workflow_steps?: unknown[]
   last_run?: WorkflowLastRun | null
   latest_run?: { created_at?: string; status?: string }
+  created_at?: string
+  updated_at?: string
+  runs_count?: number
   [k: string]: unknown
 }
 

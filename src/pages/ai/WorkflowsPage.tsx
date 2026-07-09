@@ -19,8 +19,14 @@ import { useAuth } from '@/context/AuthContext'
 import { Zap, Plus, Loader2, Folder, FolderPlus, Trash2, LayoutGrid, List, Archive } from 'lucide-react'
 import WorkflowCanvasEditor from '@/components/layout/WorkflowCanvasEditor'
 import { normalizeWorkflow, denormalizeWorkflow } from './data/workflowMap'
-import WorkflowCard, { WorkflowRow } from './WorkflowCard'
+import WorkflowCard from './WorkflowCard'
+import WorkflowListRow from './WorkflowListRow'
 import type { Workflow } from '@/types/workflow'
+
+// Non-PII UI preference (which view the list opens in) — survives reloads (AW-list).
+const VIEW_MODE_KEY = 'wf.viewMode'
+type ViewMode = 'grid' | 'list'
+const readStoredViewMode = (): ViewMode => (localStorage.getItem(VIEW_MODE_KEY) === 'grid' ? 'grid' : 'list')
 
 // A workflow folder (left sidebar grouping).
 interface WorkflowFolder { id: string | number; name: string; [k: string]: unknown }
@@ -38,8 +44,13 @@ export default function WorkflowsPage() {
   const [selectedFolder,  setSelectedFolder]  = useState<FolderId>(null)   // null = alle, 'unassigned' = geen folder, uuid = folder
   const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null)
   const [dragOverFolder,  setDragOverFolder]  = useState<FolderId>(null)
-  const [viewMode,        setViewMode]        = useState('grid')  // 'grid' | 'list'
+  // List is the Make.com-style default; the choice persists across reloads (localStorage, non-PII).
+  const [viewMode,        setViewModeState]   = useState<ViewMode>(readStoredViewMode)
   const [showArchived,    setShowArchived]    = useState(false)   // archived (soft-deleted) off by default
+  const setViewMode = (mode: ViewMode) => {
+    setViewModeState(mode)
+    localStorage.setItem(VIEW_MODE_KEY, mode)
+  }
   const dragWf = useRef<string | number | null>(null)
 
   // Right-panel filters (status + module type) — registering them shows the topbar
@@ -95,6 +106,18 @@ export default function WorkflowsPage() {
 
   const handleRun = async (id?: string | number) => {
     await api.post(`/workflows/${id}/run`).catch(() => api.post(`/workflows/${id}/execute`)).catch(() => notifyError(t('common:actionFailed')))
+  }
+
+  // Active/draft toggle (list-row switch) — same semantics as the editor's status
+  // button (active <-> inactive); optimistic, rolled back on failure (mirrors moveToFolder).
+  const handleToggleStatus = (wf: Workflow) => {
+    const nextStatus = wf.status === 'active' ? 'inactive' : 'active'
+    setWorkflows(prev => prev.map(w => w.id === wf.id ? { ...w, status: nextStatus } : w))
+    const payload = { ...denormalizeWorkflow({ ...wf, status: nextStatus }), folder_id: wf.folder_id ?? null }
+    api.put(`/workflows/${wf.id}`, payload).catch(() => {
+      setWorkflows(prev => prev.map(w => w.id === wf.id ? { ...w, status: wf.status } : w))
+      notifyError(t('common:actionFailed'))
+    })
   }
 
   const handleSave = async (updated: Workflow, closeAfter = true) => {
@@ -244,10 +267,10 @@ export default function WorkflowsPage() {
               <Archive size={14} /> {t('page.archived')}
             </button>
 
-            {/* View mode toggle */}
+            {/* View mode toggle — icon-pair, persisted (list is the Make.com-style default) */}
             <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
-              {[{ mode: 'grid', Icon: LayoutGrid, label: t('page.viewGrid') }, { mode: 'list', Icon: List, label: t('page.viewList') }].map(({ mode, Icon, label }) => (
-                <button key={mode} onClick={() => setViewMode(mode)} title={label} aria-label={label}
+              {([{ mode: 'list', Icon: List, label: t('page.viewList') }, { mode: 'grid', Icon: LayoutGrid, label: t('page.viewGrid') }] as const).map(({ mode, Icon, label }) => (
+                <button key={mode} onClick={() => setViewMode(mode)} title={label} aria-label={label} aria-pressed={viewMode === mode}
                   style={{ padding: '6px 10px', background: viewMode === mode ? 'var(--color-primary-bg)' : 'var(--surface)', color: viewMode === mode ? 'var(--color-primary)' : 'var(--text-muted)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                   <Icon size={14} />
                 </button>
@@ -278,22 +301,18 @@ export default function WorkflowsPage() {
             )}
           </div>
         ) : (
-          /* List/table view — column table with a header that stays put while rows scroll (R-3). */
-          <div style={{ border: '1px solid var(--border)', borderRadius: 12 }}>
-            {/* Column header — sticky so it never scrolls out of view (no overflow:hidden ancestor). */}
-            <div className="flex items-center gap-3 px-4 py-2" style={{ background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)', position: 'sticky', top: 0, zIndex: 1, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}>
-              <div style={{ width: 30, flexShrink: 0 }} />
-              <div style={{ width: 220, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t('page.colName')}</div>
-              <div style={{ width: 80, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t('page.colStatus')}</div>
-              <div style={{ flex: 1, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t('page.colModules')}</div>
-              <div style={{ width: 220, flexShrink: 0, fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t('page.colLastRun')}</div>
-              <div style={{ width: 100, flexShrink: 0 }} />
-            </div>
+          /* Make.com-style list — one row per workflow, no column chrome (R-3/AW-list). */
+          <div style={{ border: '1px solid var(--border)', borderRadius: 12, overflow: 'hidden' }}>
             {visibleWorkflows.map(wf => (
               <div key={wf.id} draggable
                 onDragStart={() => { dragWf.current = wf.id ?? null }}
                 onDragEnd={() => { dragWf.current = null }}>
-                <WorkflowRow workflow={wf} onRun={handleRun} onEdit={() => setEditingWorkflow(wf)} />
+                <WorkflowListRow workflow={wf}
+                  folderName={folders.find(f => f.id === wf.folder_id)?.name}
+                  onRun={handleRun}
+                  onEdit={() => setEditingWorkflow(wf)}
+                  onToggleStatus={() => handleToggleStatus(wf)}
+                />
               </div>
             ))}
             {visibleWorkflows.length === 0 && (
