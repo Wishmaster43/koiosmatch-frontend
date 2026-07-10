@@ -3,7 +3,7 @@ import { BookOpen } from 'lucide-react'
 
 export default {
   type:  'knowledge_search',
-  app:   'ai_agent',
+  module: 'aiagents',
   category: 'AI',
   label: 'Kennisbank Zoeken',
   Icon:  BookOpen,

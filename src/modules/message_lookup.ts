@@ -4,7 +4,6 @@ import { MessageCircle } from 'lucide-react'
 
 export default {
   type:  'message_lookup',
-  app:   'core',
   category: 'Communicatie',
   label: 'Berichtstatus',
   Icon:  MessageCircle,
