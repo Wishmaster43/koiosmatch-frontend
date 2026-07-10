@@ -430,6 +430,7 @@
     "Authenticatie": "Authentifizierung",
     "Bericht": "Nachricht",
     "Bericht naar sollicitant": "Nachricht an Bewerber",
+    "Berichttype (classificatie)": "Nachrichtentyp (Klassifizierung)",
     "Berichttype (prioriteit)": "Nachrichtentyp (Priorität)",
     "Beschikbaarheid": "Verfügbarkeit",
     "Body type": "Body-Typ",
@@ -613,6 +614,19 @@
     "slotLabel": "Variable {{n}}",
     "preview": "Vorschau",
     "previewHint": "So erhält der Kandidat die Nachricht; [Feld] wird pro Kandidat ausgefüllt.",
-    "emptySlot": "noch nicht ausgefüllt"
+    "emptySlot": "noch nicht ausgefüllt",
+    "fanout": {
+      "title": "WhatsApp-Warteschlange",
+      "sent": "gesendet",
+      "skipped": "übersprungen",
+      "failed": "fehlgeschlagen",
+      "total": "gesamt",
+      "status": {
+        "queued": "In Warteschlange",
+        "processing": "Wird verarbeitet",
+        "finished": "Abgeschlossen",
+        "failed": "Fehlgeschlagen"
+      }
+    }
   }
 }

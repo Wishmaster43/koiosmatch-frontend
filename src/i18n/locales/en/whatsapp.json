@@ -2,6 +2,7 @@
   "tabs": {
     "overview": "Overview",
     "messages": "Messages",
+    "queue": "Queue",
     "escalations": "Escalations"
   },
   "drill": {
@@ -58,5 +59,19 @@
     "title": "No WhatsApp connection",
     "desc": "No WhatsApp Business connection has been set up for this tenant yet. Configure a connection via the backend to see messages and statistics here.",
     "errorLabel": "Backend error"
+  },
+  "queue": {
+    "active": "Active",
+    "finished": "Finished",
+    "loading": "Loading queue…",
+    "empty": "No messages in the queue today.",
+    "notAvailable": "Queue not available yet",
+    "notAvailableDesc": "This feature will be provided by the backend soon.",
+    "error": "The queue could not be loaded.",
+    "priority": "Priority",
+    "tempo": "Tempo",
+    "sent": "sent",
+    "skipped": "skipped",
+    "failed": "failed"
   }
 }

@@ -22,6 +22,7 @@ import RightDrawer from '@/components/ui/RightDrawer'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
 import { MessageFeed, EscalationList, ActivityChart } from './components'
+import QueueTab from './QueueTab'
 
 // ─── main page ───────────────────────────────────────────────────────────────
 
@@ -60,12 +61,13 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
     return true
   }), [messages, selectedStatus, selectedDirection])
 
-  // Active tab (personal-WhatsApp queue removed 2026-07-04 — Business API only).
-  const [tab, setTab] = useState<'overview' | 'messages' | 'escalations'>('overview')
-  // Open a specific tab when arriving via a dashboard link (messages / escalations).
+  // Active tab (personal-WhatsApp queue removed 2026-07-04 — Business API only;
+  // 'queue' below is the WABA/Business batch queue, R3a — a different feature).
+  const [tab, setTab] = useState<'overview' | 'messages' | 'queue' | 'escalations'>('overview')
+  // Open a specific tab when arriving via a dashboard link (messages / queue / escalations).
   useEffect(() => {
     const wanted = (intent as { tab?: string } | undefined)?.tab
-    if (wanted && ['overview', 'messages', 'escalations'].includes(wanted)) setTab(wanted as typeof tab)
+    if (wanted && ['overview', 'messages', 'queue', 'escalations'].includes(wanted)) setTab(wanted as typeof tab)
   }, [intent])
   // Which KPI's right drill-down drawer is open (null = closed).
   const [drill, setDrill] = useState<null | 'today' | 'contacted' | 'filled' | 'escal'>(null)
@@ -90,8 +92,9 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
     return Object.entries(c).map(([r, value]) => ({ name: t(`reasons.${r}`, { defaultValue: r }), value }))
   }, [escalations, t])
 
-  // WhatsApp Business connection down — shown inside the WABA-dependent tabs only,
-  // so the privé Wachtrij (independent) stays reachable.
+  // WhatsApp Business connection down — shown inside the tabs that read /whatsapp/*
+  // only. The Wachtrij tab queries its own /whatsapp-queue endpoint and handles its
+  // own not-available/error states, so it stays reachable independent of this flag.
   const wabaDown = noConnection && !loading.stats
   const NoConn = (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 320 }}>
@@ -124,7 +127,7 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
       {/* Tabs + verversen op één lijn; badge = wachtrij-achterstand */}
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', borderBottom: '1px solid var(--border)', marginBottom: 20 }}>
         <div role="tablist" style={{ display: 'flex', gap: 4 }}>
-        {([['overview', t('tabs.overview')], ['messages', t('tabs.messages')], ['escalations', t('tabs.escalations')]] as const).map(([id, label]) => {
+        {([['overview', t('tabs.overview')], ['messages', t('tabs.messages')], ['queue', t('tabs.queue')], ['escalations', t('tabs.escalations')]] as const).map(([id, label]) => {
           const active = id === tab
           const badge = id === 'escalations' ? escalations.length : 0
           const badgeDanger = id === 'escalations'
@@ -169,7 +172,8 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
       {/* Berichten — de feed */}
       {tab === 'messages' && (wabaDown ? NoConn : <MessageFeed messages={filteredMessages} loading={loading.messages} />)}
 
-      {/* Wachtrij — privé outbox (backend C-43) */}
+      {/* Wachtrij — today's WABA/Business batches (R3a); its own hook handles polling. */}
+      {tab === 'queue' && <QueueTab />}
 
       {/* Escalaties */}
       {tab === 'escalations' && (wabaDown ? NoConn : <EscalationList escalations={escalations} loading={loading.escalations} />)}

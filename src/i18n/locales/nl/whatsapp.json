@@ -2,6 +2,7 @@
   "tabs": {
     "overview": "Overzicht",
     "messages": "Berichten",
+    "queue": "Wachtrij",
     "escalations": "Escalaties"
   },
   "drill": {
@@ -58,5 +59,19 @@
     "title": "Geen WhatsApp-verbinding",
     "desc": "Er is nog geen WhatsApp Business-koppeling ingesteld voor deze tenant. Configureer een verbinding via de backend om berichten en statistieken hier te zien.",
     "errorLabel": "Foutmelding backend"
+  },
+  "queue": {
+    "active": "Actief",
+    "finished": "Afgerond",
+    "loading": "Wachtrij laden…",
+    "empty": "Geen berichten in de wachtrij vandaag.",
+    "notAvailable": "Wachtrij nog niet beschikbaar",
+    "notAvailableDesc": "Deze functie wordt binnenkort door de backend geleverd.",
+    "error": "Wachtrij kon niet worden geladen.",
+    "priority": "Prioriteit",
+    "tempo": "Tempo",
+    "sent": "verzonden",
+    "skipped": "overgeslagen",
+    "failed": "mislukt"
   }
 }

@@ -430,6 +430,7 @@
     "Authenticatie": "Authentification",
     "Bericht": "Message",
     "Bericht naar sollicitant": "Message au candidat",
+    "Berichttype (classificatie)": "Type de message (classification)",
     "Berichttype (prioriteit)": "Type de message (priorité)",
     "Beschikbaarheid": "Disponibilité",
     "Body type": "Type de corps",
@@ -613,6 +614,19 @@
     "slotLabel": "Variable {{n}}",
     "preview": "Aperçu",
     "previewHint": "Voici comment le candidat reçoit le message ; [champ] est rempli par candidat.",
-    "emptySlot": "pas encore rempli"
+    "emptySlot": "pas encore rempli",
+    "fanout": {
+      "title": "File WhatsApp",
+      "sent": "envoyés",
+      "skipped": "ignorés",
+      "failed": "échoués",
+      "total": "total",
+      "status": {
+        "queued": "En file",
+        "processing": "En cours",
+        "finished": "Terminé",
+        "failed": "Échoué"
+      }
+    }
   }
 }

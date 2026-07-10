@@ -2,6 +2,7 @@
   "tabs": {
     "overview": "Resumen",
     "messages": "Mensajes",
+    "queue": "Cola",
     "escalations": "Escalaciones"
   },
   "drill": {
@@ -58,5 +59,19 @@
   "msgDirection": {
     "inbound": "Entrante",
     "outbound": "Saliente"
+  },
+  "queue": {
+    "active": "Activo",
+    "finished": "Finalizado",
+    "loading": "Cargando la cola…",
+    "empty": "No hay mensajes en la cola hoy.",
+    "notAvailable": "Cola aún no disponible",
+    "notAvailableDesc": "Esta función estará disponible pronto en el backend.",
+    "error": "No se pudo cargar la cola.",
+    "priority": "Prioridad",
+    "tempo": "Tempo",
+    "sent": "enviados",
+    "skipped": "omitidos",
+    "failed": "fallidos"
   }
 }

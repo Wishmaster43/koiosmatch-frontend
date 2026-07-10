@@ -430,6 +430,7 @@
     "Authenticatie": "Authentication",
     "Bericht": "Message",
     "Bericht naar sollicitant": "Message to applicant",
+    "Berichttype (classificatie)": "Message type (classification)",
     "Berichttype (prioriteit)": "Message type (priority)",
     "Beschikbaarheid": "Availability",
     "Body type": "Body type",
@@ -613,6 +614,19 @@
     "slotLabel": "Variable {{n}}",
     "preview": "Preview",
     "previewHint": "This is how the candidate receives the message; [field] is filled in per candidate.",
-    "emptySlot": "not filled in yet"
+    "emptySlot": "not filled in yet",
+    "fanout": {
+      "title": "WhatsApp queue",
+      "sent": "sent",
+      "skipped": "skipped",
+      "failed": "failed",
+      "total": "total",
+      "status": {
+        "queued": "Queued",
+        "processing": "Processing",
+        "finished": "Finished",
+        "failed": "Failed"
+      }
+    }
   }
 }

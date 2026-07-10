@@ -430,6 +430,7 @@
     "Authenticatie": "Autenticación",
     "Bericht": "Mensaje",
     "Bericht naar sollicitant": "Mensaje al solicitante",
+    "Berichttype (classificatie)": "Tipo de mensaje (clasificación)",
     "Berichttype (prioriteit)": "Tipo de mensaje (prioridad)",
     "Beschikbaarheid": "Disponibilidad",
     "Body type": "Tipo de cuerpo",
@@ -613,6 +614,19 @@
     "slotLabel": "Variable {{n}}",
     "preview": "Vista previa",
     "previewHint": "Así recibe el candidato el mensaje; [campo] se rellena por candidato.",
-    "emptySlot": "aún sin rellenar"
+    "emptySlot": "aún sin rellenar",
+    "fanout": {
+      "title": "Cola de WhatsApp",
+      "sent": "enviados",
+      "skipped": "omitidos",
+      "failed": "fallidos",
+      "total": "total",
+      "status": {
+        "queued": "En cola",
+        "processing": "Procesando",
+        "finished": "Finalizado",
+        "failed": "Fallido"
+      }
+    }
   }
 }

@@ -29,7 +29,20 @@
     "slotLabel": "Variabele {{n}}",
     "preview": "Voorbeeld",
     "previewHint": "Zo ontvangt de kandidaat het bericht; [veld] wordt per kandidaat ingevuld.",
-    "emptySlot": "nog niet ingevuld"
+    "emptySlot": "nog niet ingevuld",
+    "fanout": {
+      "title": "WhatsApp-wachtrij",
+      "sent": "verzonden",
+      "skipped": "overgeslagen",
+      "failed": "mislukt",
+      "total": "totaal",
+      "status": {
+        "queued": "In wachtrij",
+        "processing": "Bezig",
+        "finished": "Afgerond",
+        "failed": "Mislukt"
+      }
+    }
   },
   "filters": {
     "status": "Status",
@@ -454,6 +467,7 @@
     "Authenticatie": "Authenticatie",
     "Bericht": "Bericht",
     "Bericht naar sollicitant": "Bericht naar sollicitant",
+    "Berichttype (classificatie)": "Berichttype (classificatie)",
     "Berichttype (prioriteit)": "Berichttype (prioriteit)",
     "Beschikbaarheid": "Beschikbaarheid",
     "Body type": "Body type",

@@ -15,6 +15,7 @@ import { FieldInput } from './fields'
 import { categorySlug, fieldLabel } from './moduleI18n'
 import AgentTestPanel from './AgentTestPanel'
 import OutputTree from './OutputTree'
+import FanoutSummary, { type WaFanout } from './FanoutSummary'
 import type { FlowNode, WorkflowField, WorkflowVarGroup } from '@/types/workflow'
 
 // '__wide__' is a sentinel that signals the editor to widen the right panel
@@ -60,6 +61,12 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
   const Icon   = meta?.Icon as unknown as LucideIcon | undefined
   const output = node.data.output
   const config = node.data.config as Record<string, unknown> | undefined
+  // WhatsApp fanout summary (R3a/CMBE 2026-07-09): present only when this step's
+  // output embeds `whatsapp_fanout` — a whatsapp_send step that fanned out into a
+  // WABA batch (see the Wachtrij tab on the WhatsApp page for the live batch).
+  const fanout = (output && typeof output === 'object' && !Array.isArray(output)
+    ? (output as Record<string, unknown>).whatsapp_fanout
+    : undefined) as WaFanout | undefined
 
   // Helper: filter schema fields by tab and showIf
   const fieldsForTab = (tab: string) => schema.filter(field => {
@@ -149,7 +156,10 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                 <Play size={24} color="var(--border)" />
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>{t('config.noOutput')}</p>
               </div>
-            : <div style={{ padding: 12 }}><OutputTree data={output} /></div>}
+            : <div style={{ padding: 12 }}>
+                {fanout && <FanoutSummary fanout={fanout} />}
+                <OutputTree data={output} />
+              </div>}
         </div>
       )}
 
@@ -217,6 +227,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                 <p style={{ fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', lineHeight: 1.5 }}>{t('config.noOutput')}</p>
               </div>
             : <div style={{ padding: 12 }}>
+                {fanout && <FanoutSummary fanout={fanout} />}
                 {Array.isArray(output) && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 8, fontWeight: 500 }}>{output.length} {output.length === 1 ? t('config.item') : t('config.items')}</div>}
                 <OutputTree data={output} />
               </div>}

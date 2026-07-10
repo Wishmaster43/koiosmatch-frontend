@@ -37,3 +37,25 @@ export interface WaStats {
   open_escalations?: number
   [k: string]: unknown
 }
+
+// One WABA batch row in the "Wachtrij" tab — today's batches (GET /whatsapp-queue, R3a).
+// `status` is a free-text backend value; a batch is "active" while it has no
+// finished_at (see isBatchActive in useWhatsAppQueue).
+export interface WaQueueBatch {
+  batch_id: string
+  workflow_name?: string
+  total: number
+  queued?: number
+  sent?: number
+  skipped?: number
+  failed?: number
+  phone_number_id?: string
+  tempo?: string | number
+  message_type_label?: string
+  priority?: string | number
+  queue?: string
+  status?: string
+  created_at?: string
+  finished_at?: string | null
+  [k: string]: unknown
+}

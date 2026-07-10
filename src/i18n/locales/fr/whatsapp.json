@@ -2,6 +2,7 @@
   "tabs": {
     "overview": "Aperçu",
     "messages": "Messages",
+    "queue": "File d'attente",
     "escalations": "Escalades"
   },
   "drill": {
@@ -58,5 +59,19 @@
   "msgDirection": {
     "inbound": "Entrant",
     "outbound": "Sortant"
+  },
+  "queue": {
+    "active": "Actif",
+    "finished": "Terminé",
+    "loading": "Chargement de la file…",
+    "empty": "Aucun message dans la file aujourd'hui.",
+    "notAvailable": "File pas encore disponible",
+    "notAvailableDesc": "Cette fonctionnalité sera bientôt fournie par le backend.",
+    "error": "La file n'a pas pu être chargée.",
+    "priority": "Priorité",
+    "tempo": "Tempo",
+    "sent": "envoyés",
+    "skipped": "ignorés",
+    "failed": "échoués"
   }
 }
