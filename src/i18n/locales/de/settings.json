@@ -156,7 +156,8 @@
     "email_log": "E-Mail-Protokoll",
     "whatsapp_log": "Nachrichtenprotokoll",
     "appointment_types": "Terminarten",
-    "candidate_skill_levels": "Kompetenzstufen"
+    "candidate_skill_levels": "Kompetenzstufen",
+    "wa_message_types": "Nachrichtentypen"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1480,5 +1481,10 @@
     "title": "Kompetenzstufen",
     "subtitle": "Stufen für das Fähigkeiten-Dropdown.",
     "add": "Stufe hinzufügen"
+  },
+  "waMessageTypes": {
+    "title": "Nachrichtentypen",
+    "subtitle": "Deine Klassifizierung ausgehender WhatsApp-Nachrichten (z. B. Bewerbung, Erinnerung). Die Reihenfolge bestimmt die Warteschlangen-Priorität.",
+    "add": "Nachrichtentyp hinzufügen"
   }
 }

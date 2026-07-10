@@ -156,7 +156,8 @@
     "email_log": "E-mail-log",
     "whatsapp_log": "Berichtenlog",
     "appointment_types": "Afspraaktypes",
-    "candidate_skill_levels": "Vaardigheidsniveaus"
+    "candidate_skill_levels": "Vaardigheidsniveaus",
+    "wa_message_types": "Berichttypen"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1480,5 +1481,10 @@
     "title": "Vaardigheidsniveaus",
     "subtitle": "Niveaus voor het vaardigheden-dropdown bij de kandidaat.",
     "add": "Niveau toevoegen"
+  },
+  "waMessageTypes": {
+    "title": "Berichttypen",
+    "subtitle": "Jouw classificatie van uitgaande WhatsApp-berichten (bv. Sollicitatie, Herinnering). De volgorde bepaalt de wachtrij-prioriteit.",
+    "add": "Berichttype toevoegen"
   }
 }

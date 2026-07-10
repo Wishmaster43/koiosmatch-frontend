@@ -156,7 +156,8 @@
     "email_log": "Email log",
     "whatsapp_log": "Message log",
     "appointment_types": "Appointment types",
-    "candidate_skill_levels": "Skill levels"
+    "candidate_skill_levels": "Skill levels",
+    "wa_message_types": "Message types"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1480,5 +1481,10 @@
     "title": "Skill levels",
     "subtitle": "Levels for the candidate skills dropdown.",
     "add": "Add level"
+  },
+  "waMessageTypes": {
+    "title": "Message types",
+    "subtitle": "Your classification of outbound WhatsApp messages (e.g. Application, Reminder). The order sets the queue priority.",
+    "add": "Add message type"
   }
 }

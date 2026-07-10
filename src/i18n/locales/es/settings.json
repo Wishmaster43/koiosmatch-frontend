@@ -156,7 +156,8 @@
     "email_log": "Registro de correo",
     "whatsapp_log": "Registro de mensajes",
     "appointment_types": "Tipos de cita",
-    "candidate_skill_levels": "Niveles de habilidad"
+    "candidate_skill_levels": "Niveles de habilidad",
+    "wa_message_types": "Tipos de mensajes"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1480,5 +1481,10 @@
     "title": "Niveles de habilidad",
     "subtitle": "Niveles para el desplegable de habilidades.",
     "add": "Añadir nivel"
+  },
+  "waMessageTypes": {
+    "title": "Tipos de mensajes",
+    "subtitle": "Tu clasificación de los mensajes de WhatsApp salientes (p. ej. Solicitud, Recordatorio). El orden determina la prioridad de la cola.",
+    "add": "Añadir tipo de mensaje"
   }
 }

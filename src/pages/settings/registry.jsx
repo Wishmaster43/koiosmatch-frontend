@@ -63,6 +63,7 @@ import ImporterenSettings from './sections/ImporterenSettings'
 import ApiKeysSettings from './sections/apikeys'
 import EmailLog from './sections/EmailLog'
 import WhatsAppLog from './sections/WhatsAppLog'
+import { WaMessageTypeSettings } from './sections/WaMessageTypeSettings'
 import KoiosSettings from './sections/koios'
 import NotificationsSettings from './sections/NotificationsSettings'
 // Planning settings — gated on the 'plan' module (requiresPage: 'planning'); hidden until it is on.
@@ -241,6 +242,8 @@ export const NAV_GROUPS = [
     items: [
       { id: 'whatsapp', icon: MessageCircle, component: WhatsAppSettings, requiresPage: 'whatsapp' },
       { id: 'whatsapp_log', icon: ClipboardList, component: WhatsAppLog },
+      // Message-type classification (priority_type on whatsapp_send; queue ordering).
+      { id: 'wa_message_types', icon: MessageCircle, component: WaMessageTypeSettings },
     ],
   },
   {
