@@ -417,7 +417,7 @@
     "status": "Estado",
     "lastContact": "Último contacto",
     "contactType": "Tipo de contacto",
-    "memberSince": "Miembro desde",
+    "memberSince": "Creado el",
     "branch": "Sucursal",
     "recentActivity": "Actividad reciente",
     "noActivity": "Aún no hay actividad."

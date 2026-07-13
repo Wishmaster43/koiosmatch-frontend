@@ -424,7 +424,7 @@
     "status": "Status",
     "lastContact": "Laatste contact",
     "contactType": "Soort contact",
-    "memberSince": "Lid sinds",
+    "memberSince": "Aangemaakt op",
     "branch": "Vestiging",
     "recentActivity": "Recente activiteit",
     "noActivity": "Nog geen activiteiten."

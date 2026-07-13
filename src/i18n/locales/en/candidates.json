@@ -424,7 +424,7 @@
     "status": "Status",
     "lastContact": "Last contact",
     "contactType": "Contact type",
-    "memberSince": "Member since",
+    "memberSince": "Created on",
     "branch": "Branch",
     "recentActivity": "Recent activity",
     "noActivity": "No activity yet."
