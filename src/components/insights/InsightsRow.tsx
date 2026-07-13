@@ -48,17 +48,17 @@ function DonutCard({ title, data, colors, onPick, active, onClear, picked, clear
           <span style={{ ...TITLE, color: 'var(--text)', flexShrink: 0 }}>{formatNumber(total)}</span>
         )}
       </div>
-      {/* Active filter: a VISIBLE "value ✕" chip (not just a tiny icon) — clicking clears. */}
+      {/* Active filter: icon-only clear button (Danny 13/7 — no text at filters);
+          the picked value lives in the tooltip, the dimmed segments show the pick. */}
       {active && onClear && (
-        <button onClick={onClear} title={clearTitle}
-          style={{ position: 'absolute', bottom: 5, right: 6, maxWidth: '70%', height: 20, borderRadius: 999,
-            display: 'flex', alignItems: 'center', gap: 4, padding: '0 7px', cursor: 'pointer',
-            background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: 'none',
-            fontSize: 10, fontWeight: 600 }}
+        <button onClick={onClear} title={picked ? `${picked} — ${clearTitle ?? ''}` : clearTitle}
+          aria-label={picked ? `${picked} — ${clearTitle ?? ''}` : clearTitle}
+          style={{ position: 'absolute', bottom: 5, right: 6, width: 22, height: 22, borderRadius: 999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
+            background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: 'none', zIndex: 1 }}
           onMouseEnter={e => { e.currentTarget.style.background = 'var(--color-primary)'; e.currentTarget.style.color = '#fff' }}
           onMouseLeave={e => { e.currentTarget.style.background = 'var(--color-primary-bg)'; e.currentTarget.style.color = 'var(--color-primary)' }}>
-          {picked && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{picked}</span>}
-          <FilterX size={11} style={{ flexShrink: 0 }} />
+          <FilterX size={12} />
         </button>
       )}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
