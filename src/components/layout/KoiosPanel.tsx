@@ -1,10 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Plus, Bot, Sparkles, AtSign, Paperclip, ArrowUp } from 'lucide-react'
+import { X, Plus, Bot, Sparkles, AtSign, Paperclip, ArrowUp, Maximize2, Minimize2 } from 'lucide-react'
 import { useLocale } from '@/lib/datetime'
 import { useKoiosChat } from './koios/useKoiosChat'
 import { useKoiosSettings } from './koios/useKoiosSettings'
+import { useKoiosExpanded } from './koios/useKoiosExpanded'
 import KoiosSteps from './koios/KoiosSteps'
 import KoiosUsage from './koios/KoiosUsage'
 import KoiosModelPicker from './koios/KoiosModelPicker'
@@ -22,6 +23,10 @@ const MENTIONS = [
 
 // gradient used for the assistant avatar + user bubble.
 const GRADIENT = 'linear-gradient(135deg,var(--color-primary),#8B5CF6)'
+
+// Panel width: normal vs. expanded, mirroring EntityDrawer's own proportions.
+const WIDTH_COLLAPSED = 300
+const WIDTH_EXPANDED = 560
 
 // Resolve a message to its display text + whether it's a calm system notice
 // (notices carry no steps/usage). Keeps the JSX below readable.
@@ -112,6 +117,8 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
   const { messages, loading, model, setModel, send, reset } = useKoiosChat()
   // Settings (selectable models + connection status), loaded on first open.
   const { settings } = useKoiosSettings(open)
+  // Wide/normal toggle, persisted across reloads (mirrors the drawer's expand state).
+  const { expanded, toggle: toggleExpanded } = useKoiosExpanded()
   // Connection status (optimistic until loaded; only `false` flips to "offline").
   const connected = settings?.status?.claude_configured !== false
   const mentions = MENTIONS.map(m => ({ ...m, label: t(`nav.${m.navKey}`) }))
@@ -186,8 +193,9 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
   if (!open) return null
 
   return (
-    <div style={{ width: 300, flexShrink: 0, borderRight: '1px solid var(--sidebar-border)',
-      background: 'var(--sidebar-bg)', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ width: expanded ? WIDTH_EXPANDED : WIDTH_COLLAPSED, flexShrink: 0,
+      borderRight: '1px solid var(--sidebar-border)', background: 'var(--sidebar-bg)', height: '100%',
+      display: 'flex', flexDirection: 'column', transition: 'width 0.2s ease' }}>
 
       {/* ── Header ── */}
       <div style={{ height: 56, borderBottom: '1px solid var(--sidebar-border)', flexShrink: 0,
@@ -213,6 +221,13 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
           onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.22)'}
           onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}>
           <Plus size={10} /> {t('koios.newChatShort')}
+        </button>
+        <button onClick={toggleExpanded} aria-label={t(expanded ? 'collapse' : 'expand')} aria-expanded={expanded}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sidebar-muted)',
+            padding: 4, display: 'flex', borderRadius: 6, transition: 'background 0.1s' }}
+          onMouseEnter={e => e.currentTarget.style.background = 'var(--sidebar-hover)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+          {expanded ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
         </button>
         <button onClick={onClose} aria-label={t('common:close', { defaultValue: 'Sluiten' })}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sidebar-muted)',
