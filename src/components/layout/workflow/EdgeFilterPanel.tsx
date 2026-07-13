@@ -4,19 +4,26 @@
  * FilterEvaluator's `[[…],[…]]` OR-group contract) plus the route (branch) name
  * shown on the edge. Extracted from canvas.tsx once OR-groups + date/time
  * operators pushed that file past the ~400-line split trigger.
+ *
+ * FILTER-VELD-1 (Danny 2026-07-13, Make-parity): the field input is now a
+ * numbered, per-module Make-style picker instead of free text — it walks the
+ * edge SOURCE node's upstream chain (via the persisted graph) and lists every
+ * ancestor module's catalogued bundle fields up to the nearest `emits: replace`
+ * boundary. `sourceNodeId`/`nodes`/`edges`/`catalog` are optional so the panel
+ * still renders (picker just empty, CreatableSelect's free-entry path covers it)
+ * if a caller can't supply the graph.
  */
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, X } from 'lucide-react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { parseEdgeFilterGroups, edgeFilterGroupsToFilters } from './serialization'
-import { OPERATOR_OPTIONS, VALUELESS_OPERATORS } from './constants'
-import type { FilterCondition, FilterConditionGroup, EdgeFilters } from '@/types/workflow'
-
-// Backend-matching operator codes (mirrors FilterEvaluator::passes 1:1). Math
-// symbols render as-is (language-agnostic, no translation needed); the
-// word-based operators translate. VALUES here are the literal strings the
-// backend switches on — never rename one without updating FilterEvaluator.php.
+import { VALUELESS_OPERATORS } from './constants'
+import { collectUpstreamFilterFields, toFilterFieldOptions, type ModuleCatalog } from './filterFieldCatalog'
+import { FilterFieldPicker } from './FilterFieldPicker'
+import { OperatorSelect } from './OperatorSelect'
+import { MODULE_META } from '@/modules/index'
+import type { FilterCondition, FilterConditionGroup, EdgeFilters, FlowNode, FlowEdge } from '@/types/workflow'
 
 // A short syntax reminder for the newer date/time operators — undefined (no
 // hint row rendered) for the plain equality/text operators.
@@ -26,14 +33,29 @@ function operatorHint(t: (key: string) => string, operator?: string): string | u
   return undefined
 }
 
-export function EdgeFilterPanel({ filters, label, onClose, onSave }: {
-  filters?: unknown; label?: string; onClose: () => void; onSave: (f: EdgeFilters, label: string) => void
+export function EdgeFilterPanel({ filters, label, sourceNodeId, nodes = [], edges = [], catalog = {}, onClose, onSave }: {
+  filters?: unknown; label?: string
+  sourceNodeId?: string
+  nodes?: FlowNode[]
+  edges?: FlowEdge[]
+  catalog?: ModuleCatalog
+  onClose: () => void; onSave: (f: EdgeFilters, label: string) => void
 }) {
   // `groups` is always ≥1 AND-group; ≥2 groups are OR'ed (the new capability).
   const [groups, setGroups] = useState<FilterConditionGroup[]>(() => parseEdgeFilterGroups(filters))
   const [name, setName] = useState(label ?? '')
   const { t } = useTranslation('workflows')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+
+  // Make-style numbered field options: walk the edge source's upstream chain
+  // once per graph change, then flatten to "N. <module label> · <field>" options.
+  const fieldOptions = useMemo(() => {
+    if (!sourceNodeId) return []
+    const graphNodes = nodes.map(n => ({ id: n.id, type: n.data.type ?? '', config: n.data.config }))
+    const graphEdges = edges.map(e => ({ source: e.source, target: e.target }))
+    const groupsUpstream = collectUpstreamFilterFields(sourceNodeId, graphNodes, graphEdges, catalog)
+    return toFilterFieldOptions(groupsUpstream, type => t('modules.' + type, { defaultValue: MODULE_META[type]?.label ?? type }))
+  }, [sourceNodeId, nodes, edges, catalog, t])
 
   // Group-level mutations — add/remove a whole OR'ed AND-group.
   const addGroup = () => setGroups(gs => [...gs, []])
@@ -62,7 +84,7 @@ export function EdgeFilterPanel({ filters, label, onClose, onSave }: {
       background: 'rgba(0,0,0,0.3)',
     }} onClick={onClose}>
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('canvas.filterTitle')} tabIndex={-1} style={{
-        background: 'var(--surface)', borderRadius: 14, padding: 24, width: 560, maxHeight: '80vh', overflow: 'auto',
+        background: 'var(--surface)', borderRadius: 14, padding: 24, width: 660, maxWidth: '96vw', maxHeight: '80vh', overflow: 'auto',
         boxShadow: '0 20px 60px rgba(0,0,0,0.2)',
       }} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -108,19 +130,20 @@ export function EdgeFilterPanel({ filters, label, onClose, onSave }: {
                 {group.map((c, ci) => {
                   const hint = operatorHint(t, c.operator)
                   return (
-                    <div key={ci}>
+                    <div key={ci} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {/* Row 1 — the Make-style field+"Toon als" picker gets its own full-width
+                          row (it packs two controls); cramming it beside operator/value/delete
+                          left it truncated to a sliver on narrower panels. */}
                       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                         {ci > 0
                           ? <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', width: 28, textAlign: 'center', flexShrink: 0 }}>{t('canvas.andLabel')}</div>
                           : <div style={{ width: 28, flexShrink: 0 }} />}
-                        <input value={c.field} onChange={e => updCond(gi, ci, 'field', e.target.value)}
-                          placeholder={t('fields.fieldPlaceholder')} aria-label={t('fields.fieldPlaceholder')}
-                          style={{ flex: 1, padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none' }} />
-                        <select value={c.operator} onChange={e => updCond(gi, ci, 'operator', e.target.value)}
-                          aria-label={t('fields.operator')}
-                          style={{ padding: '6px 8px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 6, outline: 'none', background: 'var(--surface)' }}>
-                          {OPERATOR_OPTIONS.map(op => <option key={op.value} value={op.value}>{op.symbol ?? t(op.labelKey!)}</option>)}
-                        </select>
+                        <FilterFieldPicker value={c.field ?? ''} options={fieldOptions}
+                          onChange={v => updCond(gi, ci, 'field', v)} />
+                      </div>
+                      {/* Row 2 — operator + value + delete */}
+                      <div style={{ display: 'flex', gap: 6, alignItems: 'center', paddingLeft: 34 }}>
+                        <OperatorSelect value={c.operator} onChange={v => updCond(gi, ci, 'operator', v)} />
                         {!VALUELESS_OPERATORS.includes(c.operator ?? '') && (
                           <input value={c.value} onChange={e => updCond(gi, ci, 'value', e.target.value)}
                             placeholder={t('fields.valuePlaceholder')} aria-label={t('fields.valuePlaceholder')}

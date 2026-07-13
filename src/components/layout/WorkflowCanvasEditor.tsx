@@ -25,6 +25,7 @@ import ConfigPanel, { MANAGE_TABS } from './workflow/ConfigPanel'
 import LogsPanel from './workflow/LogsPanel'
 import WorkflowHistoryView from './workflow/WorkflowHistoryView'
 import { useWorkflowEditor } from './workflow/useWorkflowEditor'
+import { useModuleCatalog } from './workflow/useModuleCatalog'
 import type { Workflow } from '@/types/workflow'
 
 // ── Inner editor ──────────────────────────────────────────────────────────────
@@ -49,6 +50,11 @@ function EditorInner({ workflow, onClose, onSave }: {
   const [view, setView] = useState<'diagram' | 'history'>('diagram')
   // Output fields of upstream modules the selected node may reference as tokens.
   const upstreamVariables = getUpstreamVariables(selectedNode?.id)
+  // Backend bundle-shape catalog (output_fields + emits per module type) for the
+  // Make-style filter field picker (FILTER-VELD-1) — fetched once, shared by every
+  // EdgeFilterPanel open in this session.
+  const { catalog: moduleCatalog } = useModuleCatalog()
+  const filterEdge = edges.find(e => e.id === filterState?.edgeId)
 
   return (
     <StartContext.Provider value={{ startNodeId: firstNodeId ?? null, setStartNodeId }}>
@@ -284,8 +290,12 @@ function EditorInner({ workflow, onClose, onSave }: {
         )}
         {filterState && (
           <EdgeFilterPanel
-            filters={edges.find(e => e.id === filterState.edgeId)?.data?.filters}
-            label={edges.find(e => e.id === filterState.edgeId)?.data?.label as string | undefined}
+            filters={filterEdge?.data?.filters}
+            label={filterEdge?.data?.label as string | undefined}
+            sourceNodeId={filterEdge?.source}
+            nodes={nodesWithFirst}
+            edges={edges}
+            catalog={moduleCatalog}
             onClose={() => setFilterState(null)}
             onSave={(filters, label) => saveEdgeFilter(filterState.edgeId, filters, label)}
           />
