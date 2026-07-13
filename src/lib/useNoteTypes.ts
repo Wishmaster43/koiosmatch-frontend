@@ -60,5 +60,9 @@ export function useNoteTypes() {
   const labelOf = (value?: string | null): string => find(value)?.label ?? value ?? ''
   const colorOf = (value?: string | null): string | undefined => find(value)?.color
 
-  return { types, labelOf, colorOf }
+  // Composer options: system-written categories (Statuswissel) are never offered
+  // as a writable type — the seeded lookup DOES contain them for display resolution.
+  const writableTypes = types.filter(nt => !SYSTEM_NOTE_TYPES.has(nt.value))
+
+  return { types, writableTypes, labelOf, colorOf }
 }

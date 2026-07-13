@@ -17,7 +17,7 @@ const EDITOR_LABELS = {
  */
 export default function NotesTab({ opportunity: o }: { opportunity: Opportunity }) {
   const { t } = useTranslation(['opportunities', 'common'])
-  const { types: noteTypes } = useNoteTypes()
+  const { writableTypes: noteTypes } = useNoteTypes()
   const { items: notes, addNote } = useOpportunityNotes(o?.id)
 
   return (

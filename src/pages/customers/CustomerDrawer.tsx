@@ -69,7 +69,7 @@ export default function CustomerDrawer({
   const hasModule = auth?.hasModule ?? (() => false)
   const { formatDate } = useDateFormat()
   // Note types from the tenant lookup; author = the signed-in user (both mirror the candidate).
-  const { types: noteTypes } = useNoteTypes()
+  const { writableTypes: noteTypes } = useNoteTypes()
   const authorInitials = initialsOf(auth?.user?.name ?? '')
 
   // Header overrides — reset when a different customer is shown (during render).
