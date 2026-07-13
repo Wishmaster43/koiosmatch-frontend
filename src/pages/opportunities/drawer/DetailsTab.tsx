@@ -1,25 +1,9 @@
-import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useDateFormat } from '@/lib/datetime'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
-import DetailTableJs from '@/components/ui/DetailTable'
 import type { Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
-
-type AnyProps = Record<string, unknown>
-const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>
-
-// Titled card wrapper — one per related field group.
-function Card({ title, children }: { title: ReactNode; children: ReactNode }) {
-  return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 6 }}>{title}</div>
-      <div style={{ border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>{children}</div>
-    </div>
-  )
-}
 
 interface DetailsTabProps {
   opportunity: Opportunity
@@ -34,7 +18,6 @@ interface DetailsTabProps {
  */
 export default function DetailsTab({ opportunity: o, onUpdate }: DetailsTabProps) {
   const { t } = useTranslation('opportunities')
-  const { formatDate } = useDateFormat()
   const { serviceTypes }   = useOpportunityServiceTypes()
   const { agreementTypes } = useOpportunityAgreementTypes()
 
@@ -89,18 +72,11 @@ export default function DetailsTab({ opportunity: o, onUpdate }: DetailsTabProps
     })
   }
 
-  // Customer hierarchy (klant/locatie/afdeling/contact) lives in the Klant tab now.
-  const organisation = [
-    [t('details.stage'),   o.stage || '—'],
-    [t('details.owner'),   o.owner || '—'],
-    [t('details.created'), formatDate(o.date)],
-  ]
-
   return (
     <div>
       <EditableFieldTable title={t('details.groups.deal')} fields={dealFields} value={dealValue}
         onSave={onUpdate ? saveDeal : undefined} />
-      <Card title={t('details.groups.organisation')}><DetailTable rows={organisation} lastBorder={false} /></Card>
+      {/* Organisation card dropped (Danny 2026-07-13): fase/eigenaar/aangemaakt all live in the drawer header already. */}
     </div>
   )
 }

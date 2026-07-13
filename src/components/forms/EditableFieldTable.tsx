@@ -31,6 +31,8 @@ export interface FieldRow {
   inputType?: string
   group?: string
   allowCreate?: boolean
+  // Numbers/IDs render in JetBrains Mono (§4) — e.g. rates, cost codes.
+  mono?: boolean
 }
 
 type Values = Record<string, unknown>
@@ -146,6 +148,13 @@ export default function EditableFieldTable({
           })}
         </div>
       )
+    }
+    // Selects read as the OPTION LABEL, never the stored slug (Danny 2026-07-13:
+    // "Dienst: zorg_detachering" — the lookup label is "Zorg-detachering").
+    if (f.type === 'select') {
+      const o = (f.options ?? []).find(op => (typeof op === 'object' ? op.value : op) === v)
+      const label = o ? (typeof o === 'object' ? o.label : o) : v
+      return <span style={{ fontSize: 12, color: label ? 'var(--text)' : 'var(--text-muted)' }}>{(label as ReactNode) || '-'}</span>
     }
     // Richtext reads as sanitised HTML (same as notes / profile text).
     if (f.type === 'richtext') {
