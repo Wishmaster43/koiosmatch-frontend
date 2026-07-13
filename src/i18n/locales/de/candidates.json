@@ -239,7 +239,6 @@
     "statusSince": "{{status}} seit {{date}}",
     "availableAgain": "wieder verfügbar {{date}}",
     "blacklistedBy": "Auf Blacklist von {{who}}",
-    "blacklisted": "Auf Blacklist",
     "placedPickPlaceholder": "Match wählen…",
     "placedOrNew": "Oder neu erstellen",
     "placedNewPlaceholder": "Stelle auswählen…",
@@ -253,7 +252,6 @@
     "tasksLoading": "Aufgaben laden…",
     "tasksError": "Aufgaben konnten nicht geladen werden.",
     "tasksEmpty": "Keine offenen Aufgaben für diesen Kandidaten.",
-    "editStatusInfo": "Grund oder Datum ändern",
     "byWho": "von {{name}}",
     "recordGone": "Dieser Kandidat existiert nicht mehr — Zeile aus der Liste entfernt.",
     "archivedOn": "Archiviert am {{date}}",
@@ -384,7 +382,10 @@
     "matchCreated": "Match angelegt",
     "matchFailed": "Anlegen des Matches fehlgeschlagen",
     "editIntake": "Intake bearbeiten",
-    "intakeUpdated": "Intake aktualisiert"
+    "intakeUpdated": "Intake aktualisiert",
+    "planAppointment": "Termin planen",
+    "editAppointment": "Termin bearbeiten",
+    "createAppointment": "Termin planen"
   },
   "communication": {
     "newNote": "Neue Notiz",

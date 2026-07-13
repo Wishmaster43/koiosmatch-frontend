@@ -146,7 +146,9 @@
     "title": "Titel",
     "titlePlaceholder": "Optionaler Titel…",
     "save": "Speichern",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "durationMin": "{{count}} Min.",
+    "loadError": "Termine laden ist fehlgeschlagen."
   },
   "notes": {
     "title": "Notizen",

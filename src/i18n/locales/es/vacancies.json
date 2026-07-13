@@ -200,7 +200,8 @@
     "phase": "Fase",
     "source": "Origen",
     "byPhase": "Por fase",
-    "candidate": "Candidato"
+    "candidate": "Candidato",
+    "planIntake": "Planificar intake"
   },
   "statistics": {
     "title": "Conversión",

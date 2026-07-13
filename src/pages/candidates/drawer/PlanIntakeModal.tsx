@@ -1,5 +1,8 @@
 /**
- * PlanIntakeModal — "+ Intake plannen" from the candidate Match tab. Picking an
+ * PlanIntakeModal — THE shared appointment modal: "+ Intake plannen" from the
+ * candidate Match tab, but also reused from the application drawer's Afspraken
+ * tab and the vacancy drawer's applicant list (one create+edit experience
+ * everywhere — no more per-surface hand-rolled composers). Picking an
  * appointment TYPE proposes its duration + modality (overridable); the default
  * time is today rounded UP to the next quarter (nobody books 08:03 — it becomes
  * 08:15). The vacancy is OPTIONAL — empty makes the backend create the Intake
@@ -11,9 +14,11 @@ import { X } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import SelectMenu from '@/components/ui/SelectMenu'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useUsers } from '@/lib/queries'
 import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
 import type { Modality } from '@/lib/useAppointmentTypes'
+import { useLocations } from '@/lib/useLocations'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
 import type { Id } from '@/types/common'
 
@@ -35,37 +40,57 @@ function defaultWhen(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-export interface ExistingAppointment { id: Id; scheduled_at?: string; duration_min?: number | null; modality?: string; owner_id?: Id; type?: string; vacancy_id?: Id | null }
+export interface ExistingAppointment { id: Id; scheduled_at?: string; duration_min?: number | null; modality?: string; owner_id?: Id; type?: string; vacancy_id?: Id | null; location_id?: Id | null }
 
-export default function PlanIntakeModal({ candidateId, onClose, onCreated, existing }: {
+export default function PlanIntakeModal({
+  candidateId, onClose, onCreated, existing, applicationId = null, defaultVacancyId = null, mode = 'intake',
+}: {
   candidateId: Id
   onClose: () => void
   onCreated: () => void
   // When present the modal EDITS this appointment (prefill + PATCH) instead of creating.
   existing?: ExistingAppointment
+  // Links a newly-created appointment to this application (create only — an edit keeps its original link).
+  applicationId?: Id | null
+  // Prefills the vacancy select when there is no existing appointment (booking from a vacancy/application).
+  defaultVacancyId?: Id | null
+  // Generic copy ("Afspraak…") for non-candidate-drawer callers; default keeps the original intake wording.
+  mode?: 'intake' | 'appointment'
 }) {
   const { t } = useTranslation(['candidates', 'common'])
-  const { intakeTypes, metaOf } = useAppointmentTypes()
+  const { types, intakeTypes, metaOf } = useAppointmentTypes()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   const vacancyOptions = useVacancyOptions(true)
+  const locationOptions = useLocations()
+  // The candidate-drawer intake flow only offers intake-flagged types (unchanged);
+  // the generic "appointment" mode (application/vacancy drawers) offers ALL tenant
+  // types — most configured types (follow-up, phone call, …) are NOT flagged intake,
+  // so restricting to intakeTypes there would make them unreachable.
+  const typeOptions = mode === 'appointment' ? types : intakeTypes
 
   // datetime-local wants "YYYY-MM-DDTHH:MM" — trim an ISO string to that shape.
   const toLocalInput = (iso?: string) => iso ? iso.slice(0, 16) : ''
-  const [type, setType] = useState(() => existing?.type ?? intakeTypes[0]?.value ?? '')
+  const [type, setType] = useState(() => existing?.type ?? typeOptions[0]?.value ?? '')
   const [when, setWhen] = useState(() => existing?.scheduled_at ? toLocalInput(existing.scheduled_at) : defaultWhen())
   // Duration + modality prefill from the existing appointment, else from the type.
-  const [duration, setDuration] = useState<number>(() => existing?.duration_min ?? intakeTypes[0]?.default_duration_min ?? 30)
-  const [modality, setModality] = useState<Modality>(() => (existing?.modality as Modality) ?? intakeTypes[0]?.default_modality ?? 'office')
+  const [duration, setDuration] = useState<number>(() => existing?.duration_min ?? typeOptions[0]?.default_duration_min ?? 30)
+  const [modality, setModality] = useState<Modality>(() => (existing?.modality as Modality) ?? typeOptions[0]?.default_modality ?? 'office')
+  // A real tenant location (vs. the plain office/remote/phone presets) — empty = none picked.
+  const [locationId, setLocationId] = useState(() => existing?.location_id ? String(existing.location_id) : '')
   const [ownerId, setOwnerId] = useState(() => existing?.owner_id ? String(existing.owner_id) : '')
-  const [vacancyId, setVacancyId] = useState(() => existing?.vacancy_id ? String(existing.vacancy_id) : '')
+  const [vacancyId, setVacancyId] = useState(() => {
+    if (existing?.vacancy_id) return String(existing.vacancy_id)
+    return defaultVacancyId ? String(defaultVacancyId) : ''
+  })
   const [saving, setSaving] = useState(false)
   const editing = !!existing
 
-  // Selecting a type re-proposes its duration + modality (the user can still change them).
+  // Selecting a type re-proposes its duration + modality (the user can still change them);
+  // a stale location pick no longer matches a re-proposed remote/phone modality, so clear it.
   const pickType = (v: string) => {
     setType(v)
     const m = metaOf(v)
-    if (m) { setDuration(m.default_duration_min); setModality(m.default_modality) }
+    if (m) { setDuration(m.default_duration_min); setModality(m.default_modality); setLocationId('') }
   }
 
   const modalityOptions: Array<{ value: Modality; label: string }> = [
@@ -74,14 +99,27 @@ export default function PlanIntakeModal({ candidateId, onClose, onCreated, exist
     { value: 'phone',  label: t('work.modalityPhone') },
   ]
 
-  // Book the intake; vacancy_id optional (BE auto-creates the intake application).
+  // ONE "where" select = the 3 modality presets + the tenant's real locations. Picking a
+  // location sets modality:office + location_id; picking a preset clears the location.
+  const LOC_PREFIX = 'loc:'
+  const whereValue = locationId ? `${LOC_PREFIX}${locationId}` : modality
+  const whereOptions = [...modalityOptions, ...locationOptions.map(l => ({ value: `${LOC_PREFIX}${l.value}`, label: l.label }))]
+  const pickWhere = (v: string) => {
+    if (v.startsWith(LOC_PREFIX)) { setLocationId(v.slice(LOC_PREFIX.length)); setModality('office') }
+    else { setLocationId(''); setModality(v as Modality) }
+  }
+
+  // Book the appointment; vacancy_id optional (BE auto-creates the intake application when
+  // there is none). application_id only on create — an edit keeps its original link.
   const submit = async () => {
     if (!when) return
     setSaving(true)
     const body = {
       scheduled_at: when, type: type || 'intake', duration_min: duration, modality,
+      location_id: locationId || null,
       ...(ownerId ? { owner_id: ownerId } : {}),
       ...(vacancyId ? { vacancy_id: vacancyId } : {}),
+      ...(!editing && applicationId ? { application_id: applicationId } : {}),
     }
     try {
       if (editing) await api.patch(`/candidates/${candidateId}/appointments/${existing.id}`, body)
@@ -93,12 +131,18 @@ export default function PlanIntakeModal({ candidateId, onClose, onCreated, exist
     } finally { setSaving(false) }
   }
 
+  // Generic ("Afspraak…") vs the original intake-specific header/button copy.
+  const heading = editing
+    ? t(mode === 'appointment' ? 'work.editAppointment' : 'work.editIntake')
+    : t(mode === 'appointment' ? 'work.planAppointment' : 'work.planIntake')
+  const submitLabel = editing ? t('common:save') : t(mode === 'appointment' ? 'work.createAppointment' : 'work.createIntake')
+
   return (
     <>
       <div style={overlay} onClick={onClose} />
       <div style={panel} role="dialog" aria-modal="true">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t(editing ? 'work.editIntake' : 'work.planIntake')}</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{heading}</span>
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
         </div>
 
@@ -106,7 +150,7 @@ export default function PlanIntakeModal({ candidateId, onClose, onCreated, exist
         <div style={{ marginBottom: 14 }}>
           <div style={fieldLabel}>{t('work.appointmentType')}</div>
           <SelectMenu value={type || null} onChange={pickType} placeholder={t('work.pickType')}
-            options={intakeTypes.map(x => ({ value: x.value, label: x.label }))} />
+            options={typeOptions.map(x => ({ value: x.value, label: x.label }))} />
         </div>
 
         {/* Date/time (default = today, rounded up to the quarter) + duration override. */}
@@ -122,11 +166,11 @@ export default function PlanIntakeModal({ candidateId, onClose, onCreated, exist
           </div>
         </div>
 
-        {/* Office / remote / phone + recruiter. */}
+        {/* Office / remote / phone / a real tenant location, + recruiter. */}
         <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
           <div style={{ flex: 1 }}>
             <div style={fieldLabel}>{t('work.modality')}</div>
-            <SelectMenu value={modality} onChange={v => setModality(v as Modality)} options={modalityOptions} />
+            <SelectMenu value={whereValue} onChange={pickWhere} options={whereOptions} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={fieldLabel}>{t('work.owner')}</div>
@@ -135,10 +179,11 @@ export default function PlanIntakeModal({ candidateId, onClose, onCreated, exist
           </div>
         </div>
 
-        {/* Vacancy optional — empty = vacancy-less intake application. */}
+        {/* Vacancy optional — searchable pick-only combobox; empty = vacancy-less intake application. */}
         <div style={{ marginBottom: 20 }}>
           <div style={fieldLabel}>{t('work.vacancyOptional')}</div>
-          <SelectMenu value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.noVacancy')}
+          <CreatableSelect value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.noVacancy')}
+            allowCreate={false} menuWidth={340}
             options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{t('work.intakeVacancyHint')}</div>
         </div>
@@ -147,7 +192,7 @@ export default function PlanIntakeModal({ candidateId, onClose, onCreated, exist
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
           <button onClick={submit} disabled={saving || !when}
             style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: when ? 'pointer' : 'default', opacity: when ? 1 : 0.4 }}>
-            {saving ? t('common:saving') : t(editing ? 'common:save' : 'work.createIntake')}
+            {saving ? t('common:saving') : submitLabel}
           </button>
         </div>
       </div>

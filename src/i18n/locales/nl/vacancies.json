@@ -200,7 +200,8 @@
     "phase": "Fase",
     "source": "Bron",
     "byPhase": "Per fase",
-    "candidate": "Kandidaat"
+    "candidate": "Kandidaat",
+    "planIntake": "Intake plannen"
   },
   "statistics": {
     "title": "Conversie",

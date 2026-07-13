@@ -133,7 +133,9 @@
     "title": "Title",
     "titlePlaceholder": "Optional title…",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "durationMin": "{{count}} min",
+    "loadError": "Loading appointments failed."
   },
   "notes": {
     "title": "Notes",

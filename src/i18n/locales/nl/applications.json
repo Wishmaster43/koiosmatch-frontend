@@ -133,7 +133,9 @@
     "title": "Titel",
     "titlePlaceholder": "Optionele titel…",
     "save": "Opslaan",
-    "cancel": "Annuleren"
+    "cancel": "Annuleren",
+    "durationMin": "{{count}} min",
+    "loadError": "Afspraken laden is mislukt."
   },
   "notes": {
     "title": "Notities",

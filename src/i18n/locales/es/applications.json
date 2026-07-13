@@ -146,7 +146,9 @@
     "title": "Título",
     "titlePlaceholder": "Título opcional…",
     "save": "Guardar",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "durationMin": "{{count}} min",
+    "loadError": "Error al cargar las citas."
   },
   "notes": {
     "title": "Notas",

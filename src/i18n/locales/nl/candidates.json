@@ -246,7 +246,6 @@
     "statusSince": "{{status}} sinds {{date}}",
     "availableAgain": "weer beschikbaar {{date}}",
     "blacklistedBy": "Geblacklist door {{who}}",
-    "blacklisted": "Geblacklist",
     "placedPickPlaceholder": "Kies een match…",
     "placedOrNew": "Of maak een nieuwe",
     "placedNewPlaceholder": "Selecteer een vacature…",
@@ -260,7 +259,6 @@
     "tasksLoading": "Taken laden…",
     "tasksError": "Taken laden is mislukt.",
     "tasksEmpty": "Geen open taken voor deze kandidaat.",
-    "editStatusInfo": "Reden of datum wijzigen",
     "byWho": "door {{name}}",
     "recordGone": "Deze kandidaat bestaat niet meer — rij verwijderd uit de lijst.",
     "archivedOn": "Gearchiveerd per {{date}}",
@@ -391,7 +389,10 @@
     "matchCreated": "Match aangemaakt",
     "matchFailed": "Match aanmaken mislukt",
     "editIntake": "Intake wijzigen",
-    "intakeUpdated": "Intake bijgewerkt"
+    "intakeUpdated": "Intake bijgewerkt",
+    "planAppointment": "Afspraak plannen",
+    "editAppointment": "Afspraak wijzigen",
+    "createAppointment": "Afspraak plannen"
   },
   "communication": {
     "newNote": "Nieuwe notitie",

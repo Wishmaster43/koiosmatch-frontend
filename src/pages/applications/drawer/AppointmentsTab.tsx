@@ -1,48 +1,62 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Calendar, Plus, Save, X } from 'lucide-react'
+import { Calendar, Plus, Clock, User, MapPin, Pencil } from 'lucide-react'
 import api from '@/lib/api'
-import { notifyError } from '@/lib/notify'
 import { useDateFormat } from '@/lib/datetime'
+import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
+import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
+import type { ExistingAppointment } from '@/pages/candidates/drawer/PlanIntakeModal'
 import type { ApplicationDetail } from '@/types/application'
+import type { Id } from '@/types/common'
 
-type Appt = ApplicationDetail['appointments'][number]
+// One row from GET /candidates/{id}/appointments — the shared appointments entity,
+// filtered client-side to this application (that endpoint has no ?application_id filter).
+interface RawAppt {
+  id: Id; application_id?: Id | null; type?: string; scheduled_at?: string
+  duration_min?: number | null; modality?: string
+  owner?: { id?: Id; name?: string } | null
+  location_name?: string | null; location_id?: Id | null; status?: string
+}
 
-const inputStyle = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, borderRadius: 8,
-  border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)', outline: 'none',
-  boxSizing: 'border-box' as const, fontFamily: 'inherit' }
+const dateTimeOpts = { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' } as const
 
 /**
- * AppointmentsTab — the application's appointments (shared appointments entity,
- * B-17/C-22). Lists the planned appointments and lets the recruiter add one via
- * an inline composer → POST /candidates/{id}/appointments (optimistic + revert).
+ * AppointmentsTab — the application's appointments (shared entity, B-17/C-22).
+ * Reuses the SAME PlanIntakeModal as the candidate + vacancy drawers for both
+ * create and edit (Danny 2026-07-13: one appointment experience everywhere — this
+ * used to be a hand-rolled free-text composer showing raw ISO datetimes). Reads
+ * straight from /candidates/{id}/appointments so it always reflects the shared
+ * appointments entity, not a stale copy nested under the application.
  */
 export default function AppointmentsTab({ application: a }: { application: ApplicationDetail }) {
-  const { t } = useTranslation('applications')
+  const { t } = useTranslation(['applications', 'common'])
   const { formatDate } = useDateFormat()
-  const [appointments, setAppointments] = useState<Appt[]>(a.appointments ?? [])
-  const [adding, setAdding] = useState(false)
-  const [scheduledAt, setScheduledAt] = useState('')
-  const [type, setType] = useState('')
-  const [title, setTitle] = useState('')
+  const { metaOf } = useAppointmentTypes()
 
-  const reset = () => { setAdding(false); setScheduledAt(''); setType(''); setTitle('') }
+  const [appointments, setAppointments] = useState<RawAppt[]>([])
+  const [loading, setLoading] = useState(true)
+  const [loadFailed, setLoadFailed] = useState(false)
+  const [creating, setCreating] = useState(false)
+  // The appointment being edited (pencil on a card) → prefilled shared modal → PATCH.
+  const [editing, setEditing] = useState<ExistingAppointment | null>(null)
 
-  // Add an appointment: optimistic prepend, then persist; revert + toast on failure.
-  const save = () => {
-    if (!scheduledAt || a.candidateId == null) return
-    const when = formatDate(scheduledAt, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-    const local: Appt = { id: -Date.now(), type, title, when, with: '', status: 'planned' }
-    const snapshot = appointments
-    setAppointments(prev => [local, ...prev])
-    reset()
-    api.post(`/candidates/${a.candidateId}/appointments`, { application_id: a.id, scheduled_at: scheduledAt, type, title })
-      .catch(() => { setAppointments(snapshot); notifyError(t('common:actionFailed')) })
-  }
+  // Load this candidate's appointments and keep only the ones linked to this application.
+  const load = useCallback(() => {
+    if (a.candidateId == null) { setAppointments([]); setLoading(false); return }
+    setLoading(true); setLoadFailed(false)
+    api.get(`/candidates/${a.candidateId}/appointments`, { quiet404: true })
+      .then(r => {
+        const rows = (r.data?.data ?? r.data ?? []) as RawAppt[]
+        setAppointments(rows.filter(ap => String(ap.application_id) === String(a.id)))
+      })
+      .catch(() => setLoadFailed(true))
+      .finally(() => setLoading(false))
+  }, [a.candidateId, a.id])
+  useEffect(() => { load() }, [load])
 
   // New-appointment button; disabled when the application has no candidate link.
   const newButton = (
-    <button onClick={() => setAdding(true)} disabled={a.candidateId == null}
+    <button onClick={() => setCreating(true)} disabled={a.candidateId == null}
       style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px',
         fontSize: 12, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
         background: 'none', color: 'var(--text)', cursor: a.candidateId == null ? 'not-allowed' : 'pointer',
@@ -51,39 +65,25 @@ export default function AppointmentsTab({ application: a }: { application: Appli
     </button>
   )
 
-  // Inline composer (date + type + optional title).
-  const composer = (
-    <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 14, background: 'var(--bg)',
-      display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('appointments.datetime')}</div>
-        <input type="datetime-local" aria-label={t('appointments.datetime')} value={scheduledAt} onChange={e => setScheduledAt(e.target.value)} style={inputStyle} />
-      </div>
-      <div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('appointments.type')}</div>
-        <input value={type} onChange={e => setType(e.target.value)} placeholder={t('appointments.typePlaceholder')} style={inputStyle} />
-      </div>
-      <div>
-        <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('appointments.title')}</div>
-        <input value={title} onChange={e => setTitle(e.target.value)} placeholder={t('appointments.titlePlaceholder')} style={inputStyle} />
-      </div>
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
-        <button onClick={save} disabled={!scheduledAt} title={t('appointments.save')}
-          style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8,
-            background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: scheduledAt ? 'pointer' : 'not-allowed', opacity: scheduledAt ? 1 : 0.5 }}>
-          <Save size={15} />
-        </button>
-        <button onClick={reset} title={t('appointments.cancel')}
-          style={{ width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8,
-            background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)', cursor: 'pointer' }}>
-          <X size={15} />
-        </button>
-      </div>
-    </div>
-  )
+  // Loading state.
+  if (loading) {
+    return <div style={{ padding: '32px 0', textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
+  }
 
-  // Empty state (no appointments, not composing) — calm state with the CTA.
-  if (!appointments.length && !adding) {
+  // Error state — the shared appointments entity failed to load; offer a retry.
+  if (loadFailed) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, paddingTop: 40, fontSize: 12, color: 'var(--text-muted)' }}>
+        <span>{t('appointments.loadError')}</span>
+        <button onClick={load} style={{ padding: '5px 12px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+          {t('common:error.retry')}
+        </button>
+      </div>
+    )
+  }
+
+  // Empty state (no appointments, not creating) — calm state with the CTA.
+  if (!appointments.length && !creating) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 64, textAlign: 'center', color: 'var(--text-muted)' }}>
         <span style={{ width: 56, height: 56, borderRadius: '50%', border: '1px solid var(--border)',
@@ -93,24 +93,56 @@ export default function AppointmentsTab({ application: a }: { application: Appli
         <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{t('appointments.empty')}</div>
         <div style={{ fontSize: 12, marginTop: 4, maxWidth: 260 }}>{t('appointments.hint')}</div>
         <div style={{ marginTop: 14 }}>{newButton}</div>
+        {creating && a.candidateId != null && (
+          <PlanIntakeModal candidateId={a.candidateId} applicationId={a.id ?? null} defaultVacancyId={a.vacancyId} mode="appointment"
+            onClose={() => setCreating(false)} onCreated={load} />
+        )}
       </div>
     )
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {adding ? composer : <div style={{ display: 'flex', justifyContent: 'flex-end' }}>{newButton}</div>}
-      {appointments.map(ap => (
-        <div key={ap.id} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', background: 'var(--surface)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
-            <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{ap.title || ap.type}</span>
-            <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99,
-              background: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' }}>{t('appointments.statusPlanned')}</span>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>{newButton}</div>
+      {appointments.map(ap => {
+        const typeLabel = metaOf(ap.type)?.label ?? ap.type
+        const statusLabel = ap.status === 'planned' ? t('appointments.statusPlanned') : (ap.status || '—')
+        return (
+          <div key={ap.id} style={{ border: '1px solid var(--border)', borderRadius: 10, padding: '12px 14px', background: 'var(--surface)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{typeLabel}</span>
+              <span style={{ fontSize: 11, fontWeight: 500, padding: '2px 8px', borderRadius: 99,
+                background: 'var(--color-secondary-bg)', color: 'var(--color-secondary)' }}>{statusLabel}</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, fontSize: 12, color: 'var(--text-muted)' }}>
+              {/* Wall-time DD-MM-YYYY HH:mm — the BE stores it in UTC as-entered, so no local-tz shift. */}
+              {ap.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Calendar size={12} /> {formatDate(ap.scheduled_at, dateTimeOpts)}</span>}
+              {ap.duration_min != null && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={12} /> {t('appointments.durationMin', { count: ap.duration_min })}</span>}
+              {ap.owner?.name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={12} /> {t('appointments.with')}: {ap.owner.name}</span>}
+              {ap.location_name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MapPin size={12} /> {ap.location_name}</span>}
+              {/* Edit: opens the same shared modal, prefilled → PATCH. */}
+              {a.candidateId != null && (
+                <button onClick={() => setEditing({
+                  id: ap.id, scheduled_at: ap.scheduled_at, duration_min: ap.duration_min, modality: ap.modality,
+                  type: ap.type, owner_id: ap.owner?.id, location_id: ap.location_id ?? null,
+                })}
+                  title={t('common:edit')} aria-label={t('common:edit')}
+                  style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}>
+                  <Pencil size={12} />
+                </button>
+              )}
+            </div>
           </div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{ap.when}</div>
-          {ap.with && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('appointments.with')}: {ap.with}</div>}
-        </div>
-      ))}
+        )
+      })}
+      {creating && a.candidateId != null && (
+        <PlanIntakeModal candidateId={a.candidateId} applicationId={a.id ?? null} defaultVacancyId={a.vacancyId} mode="appointment"
+          onClose={() => setCreating(false)} onCreated={load} />
+      )}
+      {editing && a.candidateId != null && (
+        <PlanIntakeModal candidateId={a.candidateId} existing={editing} mode="appointment"
+          onClose={() => setEditing(null)} onCreated={load} />
+      )}
     </div>
   )
 }

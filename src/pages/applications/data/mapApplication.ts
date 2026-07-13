@@ -92,10 +92,14 @@ export function mapApplicationDetail(raw: ApiApplication = {}): ApplicationDetai
         author: m.author ?? '', side: m.side ?? 'in', time: m.time ?? '', text: m.text ?? '',
       })),
     })),
+    // `when` stays the RAW scheduled_at (no pre-formatting) — the card formats it with the
+    // correct UTC wall-time handling, and the shared PlanIntakeModal needs the raw ISO to edit.
     appointments: (raw.appointments ?? []).map(ap => ({
       id: ap.id, type: ap.type ?? '', title: ap.title ?? '',
       when: ap.scheduled_at ?? ap.when ?? '', with: ap.owner?.name ?? ap.with ?? '',
       status: ap.status ?? 'planned',
+      durationMin: ap.duration_min ?? null, modality: ap.modality ?? '',
+      ownerId: ap.owner?.id ?? null, locationName: ap.location_name ?? '',
     })),
     timeline: (raw.timeline ?? []).map(ev => ({
       id: ev.id, author: ev.author ?? '', initials: ev.author_initials ?? '',

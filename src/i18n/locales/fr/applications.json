@@ -146,7 +146,9 @@
     "title": "Titre",
     "titlePlaceholder": "Titre facultatif…",
     "save": "Enregistrer",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "durationMin": "{{count}} min",
+    "loadError": "Échec du chargement des rendez-vous."
   },
   "notes": {
     "title": "Notes",

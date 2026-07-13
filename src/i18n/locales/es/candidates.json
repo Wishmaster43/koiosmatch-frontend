@@ -239,7 +239,6 @@
     "statusSince": "{{status}} desde {{date}}",
     "availableAgain": "disponible de nuevo {{date}}",
     "blacklistedBy": "En lista negra por {{who}}",
-    "blacklisted": "En lista negra",
     "placedPickPlaceholder": "Elegir un match…",
     "placedOrNew": "O crear uno nuevo",
     "placedNewPlaceholder": "Seleccionar una vacante…",
@@ -253,7 +252,6 @@
     "tasksLoading": "Cargando tareas…",
     "tasksError": "No se pudieron cargar las tareas.",
     "tasksEmpty": "Sin tareas abiertas para este candidato.",
-    "editStatusInfo": "Editar motivo o fecha",
     "byWho": "por {{name}}",
     "recordGone": "Este candidato ya no existe — fila eliminada de la lista.",
     "archivedOn": "Archivado el {{date}}",
@@ -384,7 +382,10 @@
     "matchCreated": "Match creado",
     "matchFailed": "Error al crear el match",
     "editIntake": "Editar intake",
-    "intakeUpdated": "Intake actualizado"
+    "intakeUpdated": "Intake actualizado",
+    "planAppointment": "Planificar cita",
+    "editAppointment": "Editar cita",
+    "createAppointment": "Planificar cita"
   },
   "communication": {
     "newNote": "Nueva nota",

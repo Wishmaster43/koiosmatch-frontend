@@ -245,7 +245,6 @@
     "statusSince": "{{status}} since {{date}}",
     "availableAgain": "available again {{date}}",
     "blacklistedBy": "Blacklisted by {{who}}",
-    "blacklisted": "Blacklisted",
     "customFields": "Custom fields",
     "placedPickPlaceholder": "Choose a match…",
     "placedOrNew": "Or create a new one",
@@ -260,7 +259,6 @@
     "tasksLoading": "Loading tasks…",
     "tasksError": "Failed to load tasks.",
     "tasksEmpty": "No open tasks for this candidate.",
-    "editStatusInfo": "Edit reason or date",
     "byWho": "by {{name}}",
     "recordGone": "This candidate no longer exists — row removed from the list.",
     "archivedOn": "Archived on {{date}}",
@@ -391,7 +389,10 @@
     "matchCreated": "Match created",
     "matchFailed": "Creating match failed",
     "editIntake": "Edit intake",
-    "intakeUpdated": "Intake updated"
+    "intakeUpdated": "Intake updated",
+    "planAppointment": "Schedule appointment",
+    "editAppointment": "Edit appointment",
+    "createAppointment": "Schedule appointment"
   },
   "communication": {
     "newNote": "New note",

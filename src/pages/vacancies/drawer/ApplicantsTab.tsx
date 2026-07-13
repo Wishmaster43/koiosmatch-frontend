@@ -1,9 +1,13 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { CalendarPlus } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import EntityLink from '@/components/ui/EntityLink'
+import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import type { VacancyDetail } from '@/types/vacancy'
+import type { Id } from '@/types/common'
 
 // Soft phase chip in the funnel-phase colour (shared soft-chip convention).
 function PhaseChip({ label, color }: { label: ReactNode; color?: string | null }) {
@@ -15,14 +19,18 @@ function PhaseChip({ label, color }: { label: ReactNode; color?: string | null }
 }
 
 /**
- * ApplicantsTab — read-only: total leads, the per-phase breakdown and the list of
- * coupled applications (each a real candidate at a funnel phase). A match is the
- * continuation of an application; editing the phase lives on the application, not
- * here (decided model — see CLAUDE.md §3B).
+ * ApplicantsTab — mostly read-only: total leads, the per-phase breakdown and the
+ * list of coupled applications (each a real candidate at a funnel phase). A match
+ * is the continuation of an application; editing the phase lives on the
+ * application, not here (decided model — see CLAUDE.md §3B). The one action this
+ * tab does own is "Intake plannen" per row — booking an intake must match the
+ * candidate + vacancy + application the recruiter is looking at right here.
  */
 export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   const { phases, phaseMeta } = useVacancyLookups()
+  // The applicant currently being booked an intake for (opens the shared modal).
+  const [intakeFor, setIntakeFor] = useState<{ applicationId: Id | null; candidateId: Id } | null>(null)
 
   const byPhase = (v.applicationsByPhase ?? {}) as Record<string, number>
   const applications = v.applications ?? []
@@ -70,10 +78,25 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
                   {a.source && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{a.source}</div>}
                 </div>
                 {m.label && <PhaseChip label={m.label} color={m.color} />}
+                {/* Book an intake for this applicant — matches candidate + vacancy + application. */}
+                {a.candidateId != null && (
+                  <button onClick={() => setIntakeFor({ applicationId: a.id ?? null, candidateId: a.candidateId as Id })}
+                    title={t('applicants.planIntake')} aria-label={t('applicants.planIntake')}
+                    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 26, height: 26,
+                      borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)',
+                      cursor: 'pointer', flexShrink: 0 }}>
+                    <CalendarPlus size={13} />
+                  </button>
+                )}
               </div>
             )
           })}
         </div>
+      )}
+
+      {intakeFor && (
+        <PlanIntakeModal candidateId={intakeFor.candidateId} applicationId={intakeFor.applicationId} defaultVacancyId={v.id ?? null}
+          onClose={() => setIntakeFor(null)} onCreated={() => setIntakeFor(null)} />
       )}
     </div>
   )

@@ -27,7 +27,7 @@ const vacancyUrlOf = (s: AppRow) => s.vacancy?.url ?? s.url ?? null
  *  (§3B two-action model): couple to a vacancy, or plan an intake. */
 export default function WorkTab({ c }: { c: Candidate }) {
   const { t } = useTranslation(['candidates', 'common'])
-  const { formatDate } = useDateFormat()
+  const { formatDate, locale } = useDateFormat()
   // Local copy of the applications so a create shows immediately (re-fetched from
   // the candidate detail after a POST — the BE may add a vacancy-less intake row).
   const [apps, setApps] = useState<AppRow[]>((c.applications ?? []) as unknown as AppRow[])
@@ -65,11 +65,13 @@ export default function WorkTab({ c }: { c: Candidate }) {
   const ModalityIcon = ({ m }: { m?: string }) => m === 'remote' ? <Video size={11} /> : m === 'phone' ? <Phone size={11} /> : <Building2 size={11} />
   // The appointment linked to an application row (by application_id).
   const apptFor = (appId?: Id | null) => appId != null ? appts.find(a => String(a.application_id) === String(appId)) : undefined
-  // "09:00–09:30" from scheduled_at + duration_min.
+  // "09:00–09:30" from scheduled_at + duration_min. The BE stores the wall time the
+  // user entered as UTC, so this MUST read it back as UTC — Date's local getters
+  // would shift it (+2h in Europe/Amsterdam) instead of showing the entered time.
   const timeRange = (a: Appt) => {
     if (!a.scheduled_at) return ''
     const start = new Date(a.scheduled_at)
-    const hhmm = (d: Date) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+    const hhmm = (d: Date) => d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' })
     if (!a.duration_min) return hhmm(start)
     const end = new Date(start.getTime() + a.duration_min * 60000)
     return `${hhmm(start)}–${hhmm(end)}`
@@ -126,7 +128,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
                 {/* Linked appointment: date · start–end · modality · owner (CONSIST-2 / APPT). */}
                 {appt && (
                   <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 10, padding: '0 12px 10px 12px', fontSize: 11, color: 'var(--text-muted)' }}>
-                    {appt.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Calendar size={11} /> {formatDate(appt.scheduled_at)}</span>}
+                    {appt.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Calendar size={11} /> {formatDate(appt.scheduled_at, { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC' })}</span>}
                     {appt.scheduled_at && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Clock size={11} /> {timeRange(appt)}{appt.duration_min ? ` · ${appt.duration_min} min` : ''}</span>}
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ModalityIcon m={appt.modality} /> {t(`work.modality${appt.modality === 'remote' ? 'Remote' : appt.modality === 'phone' ? 'Phone' : 'Office'}`)}{appt.location_name ? ` · ${appt.location_name}` : ''}</span>
                     {appt.owner?.name && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><User size={11} /> {appt.owner.name}</span>}

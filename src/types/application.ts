@@ -62,7 +62,11 @@ export interface ApplicationDetail extends Application {
     id: Id | undefined; channel: string; status: string; date: string; time: string; summary: string
     transcript: Array<{ author: string; side: string; time: string; text: string }>
   }>
-  appointments: Array<{ id: Id | undefined; type: string; title: string; when: string; with: string; status: string }>
+  appointments: Array<{
+    id: Id | undefined; type: string; title: string; when: string; with: string; status: string
+    // Kept RAW (no pre-formatting) so the shared PlanIntakeModal can prefill an edit.
+    durationMin: number | null; modality: string; ownerId: Id | null; locationName: string
+  }>
   timeline: Array<{ id: Id | undefined; author: string; initials: string; description: string; ai: boolean; time: string }>
   notes: Array<{ id: Id | undefined; author: string; text: string; time: string }>
   matchCriteria: unknown[]
@@ -135,7 +139,11 @@ export interface ApiApplication {
     id?: Id; channel?: string; status?: string; created_at?: string; time?: string; summary?: string
     transcript?: Array<{ author?: string; side?: string; time?: string; text?: string }>
   }>
-  appointments?: Array<{ id?: Id; type?: string; title?: string; scheduled_at?: string; when?: string; owner?: { name?: string }; with?: string; status?: string }>
+  appointments?: Array<{
+    id?: Id; type?: string; title?: string; scheduled_at?: string; when?: string
+    duration_min?: number | null; modality?: string; location_name?: string
+    owner?: { id?: Id; name?: string }; with?: string; status?: string
+  }>
   timeline?: Array<{ id?: Id; author?: string; author_initials?: string; description?: string; ai?: unknown; created_at?: string; time?: string }>
   notes?: Array<{ id?: Id; author?: string; text?: string; created_at?: string }>
   match_criteria?: unknown[]
