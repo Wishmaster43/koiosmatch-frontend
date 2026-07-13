@@ -1,5 +1,6 @@
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
@@ -32,6 +33,7 @@ export default function MatchesTable({
   selectedId, selectable, selectedIds, onToggleRow, onToggleAll,
 }: MatchesTableProps) {
   const { t } = useTranslation('matches')
+  const { formatDate } = useDateFormat()
   // Match lifecycle lookup (R-1b) — resolves the status chip label/colour.
   const { metaOf: statusMeta } = useMatchStatuses()
 
@@ -58,7 +60,9 @@ export default function MatchesTable({
         ? <StatusPill label={m.label} color={m.color} />
         : (r.stage ? <StatusPill label={r.stage} color={r.stageColor} /> : <span style={{ color: 'var(--text-muted)' }}>—</span>) } },
     { key: 'owner',   header: t('cols.owner'), sortable: true, cellStyle: { color: 'var(--text-muted)' } },
-    { key: 'date',    header: t('cols.date'),  sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
+    // Raw ISO from the API → locale format (Danny 2026-07-13: "datum staat raar").
+    { key: 'date',    header: t('cols.date'),  sortable: true, sortValue: r => r.date,
+      cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.date ? formatDate(r.date) : '—' },
   ]
 
   return (

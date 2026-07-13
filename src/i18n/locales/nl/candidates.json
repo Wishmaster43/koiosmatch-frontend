@@ -823,6 +823,8 @@
       "deviationWarning": "De prijsafspraak stelt {{proposalPurchase}} inkoop / {{proposalSell}} verkoop voor — jij vult {{enteredPurchase}} / {{enteredSell}} in. Weet je het zeker?",
       "deviationConfirm": "Ja, toch plaatsen",
       "deviationCancel": "Tarieven aanpassen"
-    }
+    },
+    "candidate": "Kandidaat",
+    "pickCandidate": "Kies een kandidaat..."
   }
 }

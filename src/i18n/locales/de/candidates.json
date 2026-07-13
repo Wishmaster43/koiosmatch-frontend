@@ -823,6 +823,8 @@
       "deviationWarning": "Die Preisvereinbarung schlägt {{proposalPurchase}} Einkauf / {{proposalSell}} Verkauf vor — du hast {{enteredPurchase}} / {{enteredSell}} eingegeben. Bist du sicher?",
       "deviationConfirm": "Ja, trotzdem platzieren",
       "deviationCancel": "Tarife anpassen"
-    }
+    },
+    "candidate": "Kandidat",
+    "pickCandidate": "Kandidat wählen..."
   }
 }

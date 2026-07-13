@@ -823,6 +823,8 @@
       "deviationWarning": "L'accord tarifaire propose {{proposalPurchase}} achat / {{proposalSell}} vente — vous avez saisi {{enteredPurchase}} / {{enteredSell}}. Êtes-vous sûr(e) ?",
       "deviationConfirm": "Oui, placer quand même",
       "deviationCancel": "Ajuster les tarifs"
-    }
+    },
+    "candidate": "Candidat",
+    "pickCandidate": "Choisir un candidat..."
   }
 }

@@ -47,8 +47,10 @@ function F({ label, children }: { label: string; children: React.ReactNode }) {
   return <div><div style={lbl}>{label}</div>{children}</div>
 }
 
-export default function MatchPlacementModal({ candidateId, onClose, onCreated }: {
-  candidateId: Id
+export default function MatchPlacementModal({ candidateId: fixedCandidateId, onClose, onCreated }: {
+  // Fixed when opened from a candidate's Match tab; absent on the Matches page —
+  // then a candidate picker appears at the top of RELATIES (Danny 2026-07-13).
+  candidateId?: Id
   onClose: () => void
   onCreated: () => void
 }) {
@@ -56,6 +58,16 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   const customerOptions = useCustomerOptions(true)
   const vacancyOptions = useVacancyOptions(true)
+  // Candidate picker (only when no fixed candidate): light option list from the API.
+  const [pickedCandidateId, setPickedCandidateId] = useState('')
+  const [candidateOptions, setCandidateOptions] = useState<Array<{ id?: Id; name?: string }>>([])
+  useEffect(() => {
+    if (fixedCandidateId) return
+    api.get('/candidates', { params: { per_page: 200 } })
+      .then(r => setCandidateOptions((r.data?.data ?? []) as Array<{ id?: Id; name?: string }>))
+      .catch(() => setCandidateOptions([]))
+  }, [fixedCandidateId])
+  const candidateId = fixedCandidateId ?? (pickedCandidateId || '')
   const { functions } = useFunctions()
   const { types: contractTypes } = useContractTypes()
 
@@ -104,6 +116,7 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
 
   // Load the candidate's branch once — needed for the mismatch check.
   useEffect(() => {
+    if (!candidateId) { setCandBranch(null); return }
     let alive = true
     api.get(`/candidates/${candidateId}`)
       .then(r => {
@@ -156,7 +169,7 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
   // POST the placement. vacancy_id + department are optional; the rest form the
   // contract layer (persisted once BE adds the columns — currently tolerated).
   const submit = async () => {
-    if (!customerId || !func) return
+    if (!candidateId || !customerId || !func) return
     setSaving(true)
     const body: Record<string, unknown> = {
       candidate_id: candidateId,
@@ -232,6 +245,14 @@ export default function MatchPlacementModal({ candidateId, onClose, onCreated }:
         {/* ── Relaties ── */}
         <div style={sectionTitle}>{t('placement.relations')}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* Candidate picker — only when the modal wasn't opened from a candidate. */}
+          {!fixedCandidateId && (
+            <F label={t('placement.candidate')}>
+              <SelectMenu value={pickedCandidateId || null} onChange={setPickedCandidateId}
+                placeholder={t('placement.pickCandidate')}
+                options={candidateOptions.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
+            </F>
+          )}
           <div style={row2}>
             <F label={t('placement.customer')}>
               <SelectMenu value={customerId || null} onChange={setCustomerId} placeholder={t('placement.pickCustomer')}

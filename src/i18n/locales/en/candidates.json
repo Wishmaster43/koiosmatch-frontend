@@ -823,6 +823,8 @@
       "deviationWarning": "The rate agreement proposes {{proposalPurchase}} purchase / {{proposalSell}} sell — you entered {{enteredPurchase}} / {{enteredSell}}. Are you sure?",
       "deviationConfirm": "Yes, place anyway",
       "deviationCancel": "Adjust rates"
-    }
+    },
+    "candidate": "Candidate",
+    "pickCandidate": "Pick a candidate..."
   }
 }
