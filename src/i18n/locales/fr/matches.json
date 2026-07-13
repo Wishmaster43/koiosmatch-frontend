@@ -41,6 +41,7 @@
   },
   "drawer": {
     "label": "Match",
+    "createdAt": "Créé le {{date}}",
     "tabs": {
       "overview": "Aperçu",
       "changelog": "Historique"
@@ -55,6 +56,28 @@
       "stage": "Phase",
       "created": "Créé",
       "status": "Statut"
+    },
+    "contract": {
+      "title": "Contrat et finances",
+      "groupContract": "Contrat",
+      "groupFinancial": "Financier",
+      "contractType": "Type de contrat",
+      "cao": "CCT",
+      "startDate": "Date de début",
+      "endDate": "Date de fin",
+      "hoursPerWeek": "Heures par semaine",
+      "scale": "Échelle",
+      "step": "Échelon",
+      "purchaseRate": "Tarif d'achat",
+      "sellRate": "Tarif de vente",
+      "margin": "Marge",
+      "costCenter": "Centre de coûts",
+      "billingEmails": "E-mail(s) de facturation — un par ligne, ou séparés par une virgule",
+      "remarks": "Remarques",
+      "loading": "Chargement des détails du contrat…",
+      "error": "Impossible de charger les détails du contrat.",
+      "saveError": "Impossible d'enregistrer la modification.",
+      "saved": "Détails du contrat enregistrés."
     }
   },
   "approval": {

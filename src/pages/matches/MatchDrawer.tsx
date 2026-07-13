@@ -1,16 +1,18 @@
 /**
- * MatchDrawer — the read-only drill-down for one match, built on the shared
- * EntityDrawer + EntityHeader shell (§3A blueprint). A match is the continuation
- * of an application → placement (§3B), so this drawer only *renders*: no meta
- * pickers, no edit — except the approval workflow (MATCH-APPROVAL-1), which is a
- * calm badge + gated actions, not a picker. Thin container: header config + tab
- * list + the useMatchApproval wiring; all body markup lives in the tab/header
- * components.
+ * MatchDrawer — the drill-down for one match, built on the shared EntityDrawer +
+ * EntityHeader shell (§3A blueprint). The match facts (candidate/vacancy/client/
+ * score/stage) stay read-only — a match is the continuation of an application →
+ * placement (§3B) and those are derived — but the placement's contract/financial
+ * layer IS editable in-place (OverviewTab → MatchContractSection). The header
+ * itself stays calm: no meta pickers, only the approval workflow badge/actions
+ * (MATCH-APPROVAL-1). Thin container: header config + tab list + the
+ * useMatchApproval wiring; all body markup lives in the tab/header components.
  */
 import { useTranslation } from 'react-i18next'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import { useDateFormat } from '@/lib/datetime'
 import StatusPill from '@/components/ui/StatusPill'
 import ScorePill from './ScorePill'
 import OverviewTab from './drawer/OverviewTab'
@@ -30,12 +32,16 @@ interface MatchDrawerProps {
   // Approval workflow (§7 — UI-only gate; the backend re-checks matches.update).
   canApprove?: boolean
   onApprovalChange?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
+  // General row patch — used by the contract/financial edit (OverviewTab) to
+  // refresh the row/header when a save echoes back a recomputed approval_status.
+  onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
 }
 
 export default function MatchDrawer({
-  match, onClose, expanded = false, onToggleExpand, onSetStatus, canApprove = false, onApprovalChange,
+  match, onClose, expanded = false, onToggleExpand, onSetStatus, canApprove = false, onApprovalChange, onUpdate,
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
+  const { formatDateTime } = useDateFormat()
   // Approval data/actions live in one hook here (thin container, §3) — the header
   // pieces below stay presentational.
   const { reason, busy, rejectOpen, setRejectOpen, approve, reject } = useMatchApproval(match, onApprovalChange)
@@ -58,7 +64,7 @@ export default function MatchDrawer({
   // Tabs are config (§3A). Record history is the changelog ICON-popover in the title row
   // (never a tab) — see titleActions below. A Placement tab waits on a backend detail contract.
   const tabs: EntityTab[] = [
-    { id: 'overview',  label: t('drawer.tabs.overview'),  render: () => <OverviewTab match={match} onSetStatus={onSetStatus} /> },
+    { id: 'overview',  label: t('drawer.tabs.overview'),  render: () => <OverviewTab match={match} onSetStatus={onSetStatus} onUpdate={onUpdate} /> },
   ]
 
   return (
@@ -66,6 +72,13 @@ export default function MatchDrawer({
       entity={{ id: match.id }}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
+      // Footer — created-at only (mirrors CandidateDrawer's footer; no obvious
+      // right-side equivalent for a match, so just the left-side line).
+      footer={
+        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+          {t('drawer.createdAt', { date: formatDateTime(match.date) })}
+        </div>
+      }
       header={
         <EntityHeader
           label={t('drawer.label')}

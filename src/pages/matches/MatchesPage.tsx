@@ -199,6 +199,13 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     if (row) { setSelected(row); setPendingOpenId(null) }
   }, [pendingOpenId, rows])
   const [drawerExpanded, setDrawerExpanded] = useState(false)
+  // Shared row-patch: optimistic list update + keep the open drawer's copy in
+  // sync. Reused by the approval workflow AND the contract/financial edit (both
+  // just patch fields on the same row — no need for two persistence paths).
+  const patchRow = (id: MatchRow['id'], patch: Partial<MatchRow>) => {
+    updateMatch(id, patch)
+    setSelected(p => (p && p.id === id ? { ...p, ...patch } : p))
+  }
 
   // View toggle: table ⇄ board (planboard). Board columns = the tenant match
   // statuses (R-1b lookup + seed fallback) so there are always columns to drag.
@@ -303,9 +310,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         }}
         // Approval workflow (§7 — UI-only gate; the backend re-checks matches.update).
         canApprove={hasPermission('matches.update')}
-        onApprovalChange={(id, patch) => {
-          updateMatch(id, patch); setSelected(p => (p && p.id === id ? { ...p, ...patch } : p))
-        }} />
+        onApprovalChange={patchRow}
+        onUpdate={patchRow} />
 
       {/* Direct-match creation modal */}
       {addOpen && <AddMatchModal onClose={() => setAddOpen(false)} onCreated={addMatch} />}

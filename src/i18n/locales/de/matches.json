@@ -41,6 +41,7 @@
   },
   "drawer": {
     "label": "Match",
+    "createdAt": "Erstellt am {{date}}",
     "tabs": {
       "overview": "Übersicht",
       "changelog": "Änderungen"
@@ -55,6 +56,28 @@
       "stage": "Phase",
       "created": "Erstellt",
       "status": "Status"
+    },
+    "contract": {
+      "title": "Vertrag & Finanzen",
+      "groupContract": "Vertrag",
+      "groupFinancial": "Finanziell",
+      "contractType": "Vertragsart",
+      "cao": "Tarifvertrag",
+      "startDate": "Startdatum",
+      "endDate": "Enddatum",
+      "hoursPerWeek": "Stunden pro Woche",
+      "scale": "Skala",
+      "step": "Stufe",
+      "purchaseRate": "Einkaufstarif",
+      "sellRate": "Verkaufstarif",
+      "margin": "Marge",
+      "costCenter": "Kostenstelle",
+      "billingEmails": "Rechnungs-E-Mail(s) — eine pro Zeile oder durch Komma getrennt",
+      "remarks": "Anmerkungen",
+      "loading": "Vertragsdetails werden geladen…",
+      "error": "Vertragsdetails konnten nicht geladen werden.",
+      "saveError": "Änderung konnte nicht gespeichert werden.",
+      "saved": "Vertragsdetails gespeichert."
     }
   },
   "approval": {

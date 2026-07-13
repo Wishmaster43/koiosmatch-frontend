@@ -41,6 +41,7 @@
   },
   "drawer": {
     "label": "Match",
+    "createdAt": "Creado el {{date}}",
     "tabs": {
       "overview": "Resumen",
       "changelog": "Historial"
@@ -55,6 +56,28 @@
       "stage": "Fase",
       "created": "Creado",
       "status": "Estado"
+    },
+    "contract": {
+      "title": "Contrato y financiero",
+      "groupContract": "Contrato",
+      "groupFinancial": "Financiero",
+      "contractType": "Tipo de contrato",
+      "cao": "Convenio",
+      "startDate": "Fecha inicio",
+      "endDate": "Fecha fin",
+      "hoursPerWeek": "Horas por semana",
+      "scale": "Escala",
+      "step": "Nivel",
+      "purchaseRate": "Tarifa de compra",
+      "sellRate": "Tarifa de venta",
+      "margin": "Margen",
+      "costCenter": "Centro de costes",
+      "billingEmails": "Email(s) de facturación — uno por línea, o separados por coma",
+      "remarks": "Observaciones",
+      "loading": "Cargando detalles del contrato…",
+      "error": "No se pudieron cargar los detalles del contrato.",
+      "saveError": "No se pudo guardar el cambio.",
+      "saved": "Detalles del contrato guardados."
     }
   },
   "approval": {

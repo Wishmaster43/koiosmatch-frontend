@@ -122,7 +122,9 @@ export default function EditableFieldTable({
       return <RichTextEditor value={(v as string) ?? ''} onChange={val => setF(f.key, val)}
         expanded={!!richExpanded[f.key]} onToggleExpand={() => setRichExpanded(p => ({ ...p, [f.key]: !p[f.key] }))} />
     }
-    return <input value={(v as string) ?? ''} type={f.inputType} onChange={e => setF(f.key, e.target.value)} style={compact} />
+    // Numbers/IDs render in mono (§4) — rates, cost codes, etc.
+    return <input value={(v as string) ?? ''} type={f.inputType} onChange={e => setF(f.key, e.target.value)}
+      style={f.mono ? { ...compact, fontFamily: 'JetBrains Mono, monospace' } : compact} />
   }
 
   const renderValue = (f: FieldRow) => {
@@ -162,7 +164,7 @@ export default function EditableFieldTable({
         ? <SafeHtml html={v as string} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
         : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
     }
-    return <span style={{ fontSize: 12, color: 'var(--text)' }}>{f.prefix ? `${f.prefix} ` : ''}{(v as ReactNode) || '-'}</span>
+    return <span style={{ fontSize: 12, color: 'var(--text)', ...(f.mono ? { fontFamily: 'JetBrains Mono, monospace' } : {}) }}>{f.prefix ? `${f.prefix} ` : ''}{(v as ReactNode) || '-'}</span>
   }
 
   // One row — full-width for textarea/chips/richtext (they need the width), label-left otherwise.

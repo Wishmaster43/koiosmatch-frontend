@@ -41,6 +41,7 @@
   },
   "drawer": {
     "label": "Match",
+    "createdAt": "Aangemaakt op {{date}}",
     "tabs": {
       "overview": "Overzicht",
       "changelog": "Wijzigingen"
@@ -55,6 +56,28 @@
       "stage": "Fase",
       "created": "Aangemaakt",
       "status": "Status"
+    },
+    "contract": {
+      "title": "Contract & financieel",
+      "groupContract": "Contract",
+      "groupFinancial": "Financieel",
+      "contractType": "Contractsoort",
+      "cao": "CAO",
+      "startDate": "Begindatum",
+      "endDate": "Einddatum",
+      "hoursPerWeek": "Uren per week",
+      "scale": "Schaal",
+      "step": "Trede",
+      "purchaseRate": "Inkooptarief",
+      "sellRate": "Verkooptarief",
+      "margin": "Marge",
+      "costCenter": "Kostenplaats",
+      "billingEmails": "Facturatie-e-mail(s) — één per regel of gescheiden door een komma",
+      "remarks": "Opmerkingen",
+      "loading": "Contractgegevens laden…",
+      "error": "Contractgegevens konden niet geladen worden.",
+      "saveError": "Wijziging kon niet worden opgeslagen.",
+      "saved": "Contractgegevens opgeslagen."
     }
   },
   "approval": {

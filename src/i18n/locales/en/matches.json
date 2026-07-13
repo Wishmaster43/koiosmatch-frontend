@@ -41,6 +41,7 @@
   },
   "drawer": {
     "label": "Match",
+    "createdAt": "Created on {{date}}",
     "tabs": {
       "overview": "Overview",
       "changelog": "Changelog"
@@ -55,6 +56,28 @@
       "stage": "Stage",
       "created": "Created",
       "status": "Status"
+    },
+    "contract": {
+      "title": "Contract & financial",
+      "groupContract": "Contract",
+      "groupFinancial": "Financial",
+      "contractType": "Contract type",
+      "cao": "CBA",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "hoursPerWeek": "Hours per week",
+      "scale": "Scale",
+      "step": "Step",
+      "purchaseRate": "Purchase rate",
+      "sellRate": "Sell rate",
+      "margin": "Margin",
+      "costCenter": "Cost center",
+      "billingEmails": "Billing email(s) — one per line, or comma-separated",
+      "remarks": "Remarks",
+      "loading": "Loading contract details…",
+      "error": "Couldn't load the contract details.",
+      "saveError": "Couldn't save the change.",
+      "saved": "Contract details saved."
     }
   },
   "approval": {
