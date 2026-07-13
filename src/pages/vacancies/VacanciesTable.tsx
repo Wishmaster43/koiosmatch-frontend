@@ -51,11 +51,6 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
       render: r => <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.title}</span>,
     },
     {
-      key: 'code', header: t('columns.code'), nowrap: true, sortable: true, sortValue: r => r.code,
-      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text-muted)' },
-      render: r => r.code || '—',
-    },
-    {
       key: 'status', header: t('columns.status'), sortable: true, sortValue: r => r.statusLabel || (r.statusValue ?? ''),
       render: r => {
         // Prefer the resolved label/colour from the row; fall back to the lookup.
