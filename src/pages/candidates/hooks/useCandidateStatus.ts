@@ -78,13 +78,19 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
     const defRaw = (allSettings as Record<string, unknown> | null)?.['candidate_default_status_on_convert']
     const def = typeof defRaw === 'string' ? defRaw : 'available'
     const defStatus = statuses.find(s => s.value === def) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown; is_blacklist?: unknown }) | undefined
-    const defIsPlain = defStatus && !defStatus.requires_match && !defStatus.requires_reason && !defStatus.expects_return_date && !defStatus.is_blacklist
-    if (!(status ?? c.status) && def !== 'none' && defIsPlain) {
+    const wantsDefault = !(status ?? c.status) && def !== 'none' && defStatus && !defStatus.requires_match && !defStatus.is_blacklist
+    const needsPrompt = wantsDefault && (Boolean(defStatus.requires_reason) || Boolean(defStatus.expects_return_date))
+    if (wantsDefault && !needsPrompt) {
       setStatus(def)
       patch.status = def
     }
     setPhase(nextPhase.value)
     onUpdate?.(c.id, patch)
+    // A reason/date-flagged default can't be set silently (that's how the reason-less
+    // seed rows happened) — open the usual prompt so the reason lands properly.
+    if (needsPrompt) {
+      setStatusModal({ target: def, reason: '', date: '', needReason: Boolean(defStatus.requires_reason), needDate: Boolean(defStatus.expects_return_date), isBlacklist: false })
+    }
     setConverting(true); setTimeout(() => setConverting(false), 1000)
     const requiredComplete = makeRequiredComplete(c, allSettings)
     if (!requiredComplete(nextPhase.value)) onConvertIncomplete?.(setActiveTab)

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { SelectField } from '../components/SettingsControls'
+import { SelectField } from '../components/SettingsKit'
 import { useLookups } from '@/context/LookupsContext'
 import { useAllSettings, saveSettingsKeys, invalidateAllSettingsCache } from '@/lib/settings/useAllSettings'
 import { notifyError } from '@/lib/notify'
@@ -35,8 +35,10 @@ export function CandidateConversionSettings() {
     }
   }
 
-  const plainStatuses = (statuses ?? []).filter(s =>
-    !s.requires_match && !s.requires_reason && !s.expects_return_date && !s.is_blacklist)
+  // All statuses are selectable (Danny 2026-07-13) except the two that can't be a
+  // sane default: requires_match (Geplaatst needs a linked Match) and blacklist.
+  // Reason/date-flagged defaults simply open the usual prompt at conversion time.
+  const plainStatuses = (statuses ?? []).filter(s => !s.requires_match && !s.is_blacklist)
 
   return (
     <div style={{ maxWidth: 560 }}>
