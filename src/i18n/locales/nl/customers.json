@@ -10,7 +10,6 @@
   },
   "cols": {
     "name": "Naam",
-    "referenceNumber": "Nr.",
     "debtorNumber": "Debiteurnr.",
     "status": "Status",
     "accountManager": "Accountmanager",
@@ -104,7 +103,6 @@
     "searchPlaceholder": "Zoek locatie…",
     "col": {
       "name": "Naam",
-      "referenceNumber": "Nr.",
       "city": "Plaats",
       "departments": "Afdelingen",
       "contacts": "Contacten"
@@ -133,7 +131,6 @@
     "searchPlaceholder": "Zoek afdeling…",
     "col": {
       "name": "Naam",
-      "referenceNumber": "Nr.",
       "location": "Locatie",
       "contacts": "Contacten"
     },

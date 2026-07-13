@@ -25,8 +25,7 @@
     "lastContactType": "Kanaal",
     "phase": "Fase",
     "deployability": "Status",
-    "contractForm": "Contractvorm",
-    "referenceNumber": "Nr."
+    "contractForm": "Contractvorm"
   },
   "koios": {
     "actions": {

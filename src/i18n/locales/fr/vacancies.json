@@ -16,7 +16,6 @@
   "columns": {
     "title": "Titre",
     "code": "#",
-    "referenceNumber": "N°",
     "status": "Statut",
     "leads": "Leads",
     "applications": "Candidatures",

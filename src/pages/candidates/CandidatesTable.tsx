@@ -108,13 +108,6 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       ),
     },
     {
-      // NUMMER-1: human-readable reference number (K-00123) — narrow, mono, muted.
-      key: 'referenceNumber', header: t('columns.referenceNumber'), nowrap: true, width: 90,
-      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text-muted)' },
-      sortable: true, sortValue: c => c.referenceNumber ?? '',
-      render: c => c.referenceNumber || '—',
-    },
-    {
       key: 'title', header: t('columns.function'), nowrap: true, cellStyle: { color: 'var(--text)', fontSize: 12 },
       sortable: true, sortValue: c => c.title,
       render: c => c.title || '—',

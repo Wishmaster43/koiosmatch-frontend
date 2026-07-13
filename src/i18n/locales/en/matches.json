@@ -11,8 +11,7 @@
     "stage": "Stage",
     "owner": "Owner",
     "date": "Created",
-    "status": "Status",
-    "referenceNumber": "No."
+    "status": "Status"
   },
   "insights": {
     "stage": "Stage",

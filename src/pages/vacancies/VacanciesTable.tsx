@@ -56,13 +56,6 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
       render: r => r.code || '—',
     },
     {
-      // NUMMER-1: human-readable reference number (V-12) — distinct from the manual `code` above.
-      key: 'referenceNumber', header: t('columns.referenceNumber'), nowrap: true, width: 90,
-      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text-muted)' },
-      sortable: true, sortValue: r => r.referenceNumber ?? '',
-      render: r => r.referenceNumber || '—',
-    },
-    {
       key: 'status', header: t('columns.status'), sortable: true, sortValue: r => r.statusLabel || (r.statusValue ?? ''),
       render: r => {
         // Prefer the resolved label/colour from the row; fall back to the lookup.

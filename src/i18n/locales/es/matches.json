@@ -11,8 +11,7 @@
     "stage": "Fase",
     "owner": "Responsable",
     "date": "Creado",
-    "status": "Estado",
-    "referenceNumber": "N.º"
+    "status": "Estado"
   },
   "insights": {
     "stage": "Fase",

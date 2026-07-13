@@ -44,13 +44,6 @@ export default function LocationsTab({ customerId, locations = [], onAdd }: { cu
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
 
   const columns: Column<Location>[] = [
-    {
-      // NUMMER-1: human-readable reference number (L-001) — narrow, mono, muted.
-      key: 'referenceNumber', header: t('locations.col.referenceNumber'), nowrap: true, width: 80,
-      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text-muted)' },
-      sortable: true, sortValue: l => l.referenceNumber ?? '',
-      render: l => l.referenceNumber || '—',
-    },
     { key: 'name', header: t('locations.col.name'), sortable: true, sortValue: l => l.name,
       render: l => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

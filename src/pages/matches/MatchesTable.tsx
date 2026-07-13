@@ -50,13 +50,6 @@ export default function MatchesTable({
           <span style={{ fontWeight: 500, color: 'var(--text)' }}>{r.candidate}</span>
         </span>
       ) },
-    {
-      // NUMMER-1: human-readable reference number (M-00042) — narrow, mono, muted.
-      key: 'referenceNumber', header: t('cols.referenceNumber'), nowrap: true,
-      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text-muted)' },
-      sortable: true, sortValue: r => r.referenceNumber ?? '',
-      render: r => r.referenceNumber || '—',
-    },
     { key: 'vacancy', header: t('cols.vacancy'), sortable: true, nowrap: false },
     { key: 'client',  header: t('cols.client'),  sortable: true, cellStyle: { color: 'var(--text-muted)' } },
     { key: 'score',   header: t('cols.score'), align: 'right', sortable: true,

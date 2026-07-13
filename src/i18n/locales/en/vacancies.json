@@ -16,7 +16,6 @@
   "columns": {
     "title": "Title",
     "code": "#",
-    "referenceNumber": "No.",
     "status": "Status",
     "leads": "Leads",
     "applications": "Applications",
