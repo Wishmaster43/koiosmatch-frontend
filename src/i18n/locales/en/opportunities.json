@@ -3,6 +3,7 @@
   "loading": "Loading opportunities…",
   "empty": "No opportunities yet.",
   "error": "Opportunities could not be loaded.",
+  "pickClientFirst": "Pick a client first",
   "page": {
     "add": "Add opportunity",
     "selected": "{{count}} selected",
@@ -124,7 +125,10 @@
       "startDate": "Start date",
       "endDate": "End date",
       "expectedClose": "Expected close",
-      "owner": "Owner"
+      "owner": "Owner",
+      "location": "Location",
+      "department": "Department",
+      "contact": "Contact"
     }
   },
   "view": {

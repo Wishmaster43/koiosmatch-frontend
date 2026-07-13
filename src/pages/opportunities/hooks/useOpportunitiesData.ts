@@ -61,10 +61,12 @@ export function useOpportunitiesData() {
   const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => { const next = new Set(prev); ids.forEach(id => allSelected ? next.delete(id) : next.add(id)); return next })
   const clearSelection = () => setSelectedIds(new Set())
 
-  // Load customers once for the drawer/modal pickers.
+  // Load customers once for the drawer/modal pickers. per_page:100 so the
+  // searchable client picker (AddOpportunityModal, KlantTab) has the full set to
+  // type-filter over, not just the backend's small default page.
   useEffect(() => {
     const ctrl = new AbortController()
-    api.get('/customers', { signal: ctrl.signal })
+    api.get('/customers', { params: { per_page: 100 }, signal: ctrl.signal })
       .then(res => setCustomers(unwrapList<{ id?: Id; name?: string; company_name?: string }>(res).rows.map(c => ({ id: c.id ?? '', name: c.name ?? c.company_name ?? '—' }))))
       .catch(() => {})
     return () => ctrl.abort()
@@ -94,7 +96,10 @@ export function useOpportunitiesData() {
   }
 
   // Header/picker edits: optimistic locally, then PATCH (UI keys → API keys).
+  // On failure the local state reverts to its pre-edit snapshot AND shows the error —
+  // an optimistic edit that silently sticks around after a failed save is worse than none.
   const updateOpportunity = (id: Id | undefined, patch: Record<string, unknown>) => {
+    const previous = rows.find(x => x.id === id)
     const local: Record<string, unknown> = { ...patch }
     if ('stageValue' in patch) { const m = stageMeta(patch.stageValue as string); local.stage = m.label; local.stageColor = m.color }
     if ('ownerId'    in patch) { const u = users.find(x => x.id === patch.ownerId);     local.owner = u?.name ?? '' }
@@ -119,7 +124,25 @@ export function useOpportunitiesData() {
     if ('endDate'        in patch) body.end_date          = patch.endDate || null
     if ('serviceTypeId'   in patch) body.service_type_id   = patch.serviceTypeId ?? null
     if ('agreementTypeId' in patch) body.agreement_type_id = patch.agreementTypeId ?? null
-    if (Object.keys(body).length) api.patch(`/opportunities/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
+    // Org hierarchy (klant tab, C-42): department/contact map to real, validated
+    // columns (customer_departments/customer_contacts — api-generated.ts + the
+    // Opportunity model). The API's `location_id` is a DIFFERENT concept — the
+    // TENANT's own branch (mirrors Match.branch_id), validated against `locations`,
+    // not the customer's location — sending our pick there 422s. There is no
+    // customer_location_id column yet, so it goes out as a tolerated extra field
+    // (silently dropped by ->validated() until the backend adds it).
+    if ('locationId'   in patch) body.customer_location_id = patch.locationId || null
+    if ('departmentId' in patch) body.department_id = patch.departmentId || null
+    if ('contactId'    in patch) body.contact_id    = patch.contactId || null
+    if (Object.keys(body).length) {
+      api.patch(`/opportunities/${id}`, body).catch(() => {
+        notifyError(t('common:actionFailed'))
+        if (previous) {
+          setRows(prev => prev.map(x => x.id === id ? previous : x))
+          setSelected(prev => (prev && prev.id === id ? previous : prev))
+        }
+      })
+    }
   }
 
   return {

@@ -3,6 +3,7 @@
   "loading": "Opportunities werden geladen…",
   "empty": "Noch keine Opportunities.",
   "error": "Opportunities konnten nicht geladen werden.",
+  "pickClientFirst": "Zuerst einen Kunden wählen",
   "page": {
     "add": "Opportunity hinzufügen",
     "selected": "{{count}} ausgewählt",
@@ -102,7 +103,10 @@
       "agreementType": "Vereinbarung",
       "hours": "Stunden",
       "startDate": "Startdatum",
-      "endDate": "Enddatum"
+      "endDate": "Enddatum",
+      "location": "Standort",
+      "department": "Abteilung",
+      "contact": "Ansprechpartner"
     }
   },
   "view": {

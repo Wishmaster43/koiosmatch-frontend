@@ -133,3 +133,12 @@ body {
 .ProseMirror ul, .ProseMirror ol { padding-left: 20px; margin: 0 0 6px; }
 .ProseMirror h2 { font-size: 14px; font-weight: 700; margin: 0 0 6px; }
 .ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: #9CA3AF; pointer-events: none; float: left; height: 0; }
+
+/* DateField (react-datepicker, portalId="datepicker-portal") — the library ships
+   z-index:1 on its popper, but the portal target is a body-level sibling of
+   #root (index.html), so the calendar paints BEHIND any modal that opens its own
+   stacking context (AddOpportunityModal @ 200, AddShiftModal @ 1000, …). Force it
+   above every modal z-index in the app (highest is 1000; the toaster stays on
+   top at 9999). !important because react-datepicker's own stylesheet can load
+   after this file depending on import order. */
+.react-datepicker-popper { z-index: 2000 !important; }

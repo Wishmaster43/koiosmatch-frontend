@@ -40,7 +40,7 @@ const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)
  * not a tab. Outcome (Gewonnen/Verloren) is read from the phase, not a separate button.
  */
 export default function OpportunityDrawer({
-  opportunity: o, onClose, expanded, onToggleExpand, onUpdate, stages = [], users = [],
+  opportunity: o, onClose, expanded, onToggleExpand, onUpdate, stages = [], users = [], customers = [],
 }: OpportunityDrawerProps) {
   const { t } = useTranslation('opportunities')
   const { formatDate, formatDateTime } = useDateFormat()
@@ -64,7 +64,7 @@ export default function OpportunityDrawer({
 
   const tabs = [
     { id: 'details', label: t('drawer.tabs.details'), render: () => <DetailsTab opportunity={o} onUpdate={onUpdate} /> },
-    { id: 'klant',   label: t('drawer.tabs.klant'),   render: () => <KlantTab opportunity={o} /> },
+    { id: 'klant',   label: t('drawer.tabs.klant'),   render: () => <KlantTab opportunity={o} customers={customers} onUpdate={onUpdate} /> },
     { id: 'notes',   label: t('drawer.tabs.notes'),   render: () => <NotesTab opportunity={o} /> },
     { id: 'tasks',   label: t('drawer.tabs.tasks'),   render: () => <TasksTab opportunity={o} /> },
   ]

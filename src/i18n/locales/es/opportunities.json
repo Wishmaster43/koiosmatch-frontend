@@ -3,6 +3,7 @@
   "loading": "Cargando oportunidades…",
   "empty": "Aún no hay oportunidades.",
   "error": "No se pudieron cargar las oportunidades.",
+  "pickClientFirst": "Seleccione primero un cliente",
   "page": {
     "add": "Añadir oportunidad",
     "selected": "{{count}} seleccionado(s)",
@@ -102,7 +103,10 @@
       "agreementType": "Acuerdo",
       "hours": "Horas",
       "startDate": "Fecha de inicio",
-      "endDate": "Fecha de fin"
+      "endDate": "Fecha de fin",
+      "location": "Ubicación",
+      "department": "Departamento",
+      "contact": "Contacto"
     }
   },
   "view": {

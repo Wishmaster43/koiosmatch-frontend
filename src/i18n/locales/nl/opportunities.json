@@ -3,6 +3,7 @@
   "loading": "Kansen laden…",
   "empty": "Nog geen kansen.",
   "error": "Kansen konden niet geladen worden.",
+  "pickClientFirst": "Kies eerst een klant",
   "page": {
     "add": "Kans toevoegen",
     "selected": "{{count}} geselecteerd",
@@ -124,7 +125,10 @@
       "startDate": "Startdatum",
       "endDate": "Einddatum",
       "expectedClose": "Verwachte sluiting",
-      "owner": "Eigenaar"
+      "owner": "Eigenaar",
+      "location": "Locatie",
+      "department": "Afdeling",
+      "contact": "Contactpersoon"
     }
   },
   "view": {
