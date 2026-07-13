@@ -209,13 +209,27 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
 
   // Kanban move: set the new phase + bucket; label/colour re-resolve from the lookup.
   const handleMove = (id: Id, phaseKey: string) => {
+    const before = applications.find(a => a.id === id)
     const newBucket = bucketOfPhase(phaseKey)
     setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey, bucket: newBucket } : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, phaseKey, bucket: newBucket } as ApplicationDetail) : prev))
-    // The move can push the card out of the ACTIVE bucket tab — say so instead of
-    // letting it vanish silently (Danny: "kaarten verdwijnen" op het planboard).
-    if (newBucket !== bucket) notifySuccess(t('board.movedHidden'))
-    api.patch(`/applications/${id}`, { phase_key: phaseKey }).catch(() => notifyError(t('common:actionFailed')))
+    api.patch(`/applications/${id}`, { phase_key: phaseKey })
+      .then(() => {
+        // Only claim the move AFTER the server accepted it — the old order showed
+        // "Verplaatst" and then failed (Danny 2026-07-13).
+        if (newBucket !== bucket) notifySuccess(t('board.movedHidden'))
+      })
+      .catch(err => {
+        // Revert the optimistic move and surface the SERVER's reason (a bare
+        // "Actie mislukt" hid why the 422 happened).
+        if (before) {
+          setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey: before.phaseKey, bucket: before.bucket } : a))
+          setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, phaseKey: before.phaseKey, bucket: before.bucket } as ApplicationDetail) : prev))
+        }
+        const serverMsg = (err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } })?.response?.data
+        const detail = serverMsg?.message ?? Object.values(serverMsg?.errors ?? {})[0]?.[0]
+        notifyError(detail || t('common:actionFailed'))
+      })
   }
 
   // Reassign an application's recruiter (owner); optimistic + PATCH owner_id.

@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import type { DragEvent } from 'react'
+import { useDateFormat } from '@/lib/datetime'
 import Avatar from '@/components/ui/Avatar'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import type { Application } from '@/types/application'
@@ -15,6 +16,7 @@ const scoreColor = (v: number): string => (v >= 75 ? 'var(--color-success)' : v 
 function BoardCard({ app, onDragStart, onClick, selected }: {
   app: Application; onDragStart: (e: DragEvent<HTMLDivElement>, id: Id | undefined) => void; onClick: (app: Application) => void; selected: boolean
 }) {
+  const { formatDate } = useDateFormat()
   return (
     <div draggable onDragStart={e => onDragStart(e, app.id)} onClick={() => onClick(app)}
       style={{ background: 'var(--surface)', borderRadius: 10, padding: '12px 14px', marginBottom: 8,
@@ -52,10 +54,10 @@ function BoardCard({ app, onDragStart, onClick, selected }: {
         </div>
       )}
 
-      {/* Footer: owner + date */}
+      {/* Footer: owner + date (raw ISO from the API → locale format, Danny 2026-07-13) */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Avatar initials={app.owner?.initials} size={18} color={app.owner?.color} />
-        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{app.created}</span>
+        <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatDate(app.created)}</span>
       </div>
     </div>
   )
