@@ -4,6 +4,7 @@
  */
 import type { ComponentType, ReactNode } from 'react'
 import { TrendingUp, TrendingDown } from 'lucide-react'
+import { useNumberFormat } from '@/lib/formatters'
 
 interface KpiCardProps {
   label?: ReactNode
@@ -20,6 +21,10 @@ interface KpiCardProps {
 export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconColor, loading = false, onClick, note }: KpiCardProps) {
   const isPositive = (delta ?? 0) > 0
   const isNeutral  = delta === 0 || delta === undefined
+  // Locale-aware grouping (§ FMT-GETAL-1) — a raw number value gets thousands
+  // separators for free; callers that already pass a formatted string are untouched.
+  const { formatNumber } = useNumberFormat()
+  const displayValue = typeof value === 'number' ? formatNumber(value) : value
 
   if (loading) {
     return (
@@ -61,7 +66,7 @@ export default function KpiCard({ label, value, delta, icon: Icon, iconBg, iconC
       <div>
         <div className="mb-1 font-semibold leading-none"
           style={{ fontSize: 26, color: 'var(--text)', letterSpacing: '-0.5px' }}>
-          {value ?? '—'}
+          {displayValue ?? '—'}
         </div>
         <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</div>
         {note && (

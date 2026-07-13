@@ -21,6 +21,7 @@ import type {
   DashStats, DashOpp, DashData, TimeseriesPoint, TrendRow,
 } from '@/types/dashboard'
 import { useAllSettings, getJsonSetting, getBoolSetting } from '@/lib/settings/useAllSettings'
+import { useNumberFormat } from '@/lib/formatters'
 import { visibleBlock, kpiRow } from './templates'
 import { buildDashboardKpis } from './dashboardKpis'
 import { CheckCircle, AlertCircle } from 'lucide-react'
@@ -115,6 +116,8 @@ const PERIODES: Array<[string, string]> = [
 
 export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page: string, params?: Record<string, unknown>) => void; viewType?: string }) {
   const { t } = useTranslation('dashboard')
+  // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
+  const { formatNumber } = useNumberFormat()
   const auth = useAuth()
   const { activeTenant } = auth ?? {}
   // The active view/type is chosen in the topbar switcher (DashboardLayout); fall
@@ -136,7 +139,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
 
   // Live total — same source as the Candidates table (/candidates meta.total).
   const { data: candidateTotal, isLoading: countLoading } = useCandidateCount()
-  const candidateTotalLabel = countLoading ? '…' : (candidateTotal ?? 0).toLocaleString('nl-NL')
+  const candidateTotalLabel = countLoading ? '…' : formatNumber(candidateTotal ?? 0)
 
   // Live distributions/counts. /candidates/stats is live; /opportunities/stats
   // is best-effort (renders only if it returns). Defensive field readers mirror
@@ -261,7 +264,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     ...((dash?.attention as Record<string, number | null | undefined>) ?? {}),
     ...Object.fromEntries(Object.entries(dash ?? {}).filter(([, v]) => typeof v === 'number')) as Record<string, number>,
   }
-  const num = (v?: number | null) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
+  const num = (v?: number | null) => (v == null ? '—' : formatNumber(v))
   // Extract the filter value from a clicked chart datum (sector or legend item).
   const fv = (d?: unknown) => {
     const x = d as { filterValue?: unknown; payload?: { filterValue?: unknown } } | null | undefined

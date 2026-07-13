@@ -9,6 +9,7 @@
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { FilterX } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
+import { useNumberFormat } from '@/lib/formatters'
 import MiniDonutJs from '../charts/MiniDonut'
 
 type AnyProps = Record<string, unknown>
@@ -61,6 +62,8 @@ function DonutCard({ title, data, colors, onPick, active, onClear, picked, clear
 
 function KpiCard({ label, value, sub, color, onClick, active, channels, render }: Omit<KpiSpec, 'key'>) {
   const clickable = typeof onClick === 'function'
+  // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
+  const { formatNumber } = useNumberFormat()
   return (
     <div {...interactive(onClick)} title={typeof sub === 'string' ? sub : undefined}
       style={{ ...CARD,
@@ -74,7 +77,7 @@ function KpiCard({ label, value, sub, color, onClick, active, channels, render }
         {/* Custom card body (e.g. a mini stacked bar) overrides the value/channels. */}
         {render ?? <>
         <div style={{ fontSize: 24, fontWeight: 700, lineHeight: 1, color: color || 'var(--text)' }}>
-          {typeof value === 'number' ? value.toLocaleString('nl-NL') : value}
+          {typeof value === 'number' ? formatNumber(value) : value}
         </div>
         {channels ? (
           <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>

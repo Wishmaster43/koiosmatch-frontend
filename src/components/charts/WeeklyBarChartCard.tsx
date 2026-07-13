@@ -7,12 +7,15 @@ import type { ReactNode } from 'react'
 import { ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import type { ChartDatum, TipProps } from './chartTypes'
 import ErrorBoundary from '../ui/ErrorBoundary'
+import { useNumberFormat } from '@/lib/formatters'
 
 // A series is a grouped bar by default; `line: true` overlays it as a line (e.g. a net trend).
 export interface BarSeries { key: string; label: string; color: string; line?: boolean }
 
-// Tooltip listing every series' value for the hovered bucket.
-function MultiTooltip({ active, payload, label }: TipProps) {
+// Tooltip listing every series' value for the hovered bucket. `formatNumber` is
+// passed in (the tooltip is a plain function, not a component, so it can't call
+// the useNumberFormat hook itself).
+function MultiTooltip({ active, payload, label, formatNumber }: TipProps & { formatNumber: (v: number) => string }) {
   if (!active || !payload?.length) return null
   return (
     <div style={{ padding: '8px 11px', fontSize: 12, background: 'white', borderRadius: 10,
@@ -22,7 +25,7 @@ function MultiTooltip({ active, payload, label }: TipProps) {
         <div key={String(p.dataKey)} style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: p.color, flexShrink: 0 }} />
           <span style={{ flex: 1, color: 'var(--text-muted)' }}>{p.name}</span>
-          <strong style={{ color: 'var(--text)' }}>{p.value}</strong>
+          <strong style={{ color: 'var(--text)' }}>{formatNumber(p.value ?? 0)}</strong>
         </div>
       ))}
     </div>
@@ -32,6 +35,8 @@ function MultiTooltip({ active, payload, label }: TipProps) {
 export default function WeeklyBarChartCard({ title, data = [], series = [], height = 240, onBarClick }: {
   title?: ReactNode; data?: ChartDatum[]; series?: BarSeries[]; height?: number; onBarClick?: (row: unknown, series: BarSeries) => void
 }) {
+  // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
+  const { formatNumber } = useNumberFormat()
   if (!data.length || !series.length) {
     return (
       <div className="flex flex-col flex-1 min-w-0">
@@ -48,8 +53,9 @@ export default function WeeklyBarChartCard({ title, data = [], series = [], heig
       <ResponsiveContainer width="100%" height={height}>
         <ComposedChart data={data} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
           <XAxis dataKey="name" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false} />
-          <Tooltip content={<MultiTooltip />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
+          <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} allowDecimals={false}
+            tickFormatter={v => formatNumber(Number(v))} />
+          <Tooltip content={<MultiTooltip formatNumber={formatNumber} />} cursor={{ fill: 'rgba(0,0,0,0.03)' }} />
           <Legend wrapperStyle={{ fontSize: 11, paddingTop: 6 }} iconType="circle" iconSize={8} />
           {series.map(s => s.line ? (
             <Line key={s.key} type="monotone" dataKey={s.key} name={s.label} stroke={s.color} strokeWidth={2} dot={{ r: 2 }} isAnimationActive={false} />

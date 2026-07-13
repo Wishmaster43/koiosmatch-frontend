@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, Tooltip } from 'recharts'
 import { useTranslation } from 'react-i18next'
 import type { ChartDatum, TipProps } from './chartTypes'
 import ErrorBoundary from '../ui/ErrorBoundary'
+import { useNumberFormat } from '@/lib/formatters'
 
 const DEFAULT_COLORS = [
   'var(--color-primary)','#10B981','#3B8FD4','var(--color-warning)',
@@ -11,7 +12,9 @@ const DEFAULT_COLORS = [
 ]
 
 // `unit` is an optional label appended to the count tooltip (e.g. "12 candidates").
-function ChartTooltip({ active, payload, total, showPercent, unit }: TipProps & { total?: number; showPercent?: boolean; unit?: string }) {
+// `formatNumber` is passed in (the tooltip is a plain function, not a component,
+// so it can't call the useNumberFormat hook itself — see LineTooltip's `t` prop).
+function ChartTooltip({ active, payload, total, showPercent, unit, formatNumber }: TipProps & { total?: number; showPercent?: boolean; unit?: string; formatNumber: (v: number) => string }) {
   if (!active || !payload?.length) return null
   const item = payload[0]
   const val  = item.value ?? 0
@@ -21,7 +24,7 @@ function ChartTooltip({ active, payload, total, showPercent, unit }: TipProps & 
       style={{ border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
       <div className="mb-1 font-medium text-gray-800">{item.name}</div>
       <div style={{ color: item.payload?.fill }}>
-        {showPercent ? `${pct}%` : `${val}${unit ? ' ' + unit : ''}`}
+        {showPercent ? `${pct}%` : `${formatNumber(val)}${unit ? ' ' + unit : ''}`}
       </div>
     </div>
   )
@@ -31,6 +34,8 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
   title?: ReactNode; data?: ChartDatum[]; colors?: string[]; showPercent?: boolean; size?: number; onItemClick?: (d: unknown) => void; unit?: string
 }) {
   const { t } = useTranslation('common')
+  // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
+  const { formatNumber } = useNumberFormat()
   const total = data.reduce((s, d) => s + d.value, 0)
 
   if (!data.length) {
@@ -70,7 +75,7 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
                 <Cell key={i} fill={colors[i % colors.length]} stroke="white" strokeWidth={2} />
               ))}
             </Pie>
-            <Tooltip content={<ChartTooltip total={total} showPercent={showPercent} unit={unit} />} />
+            <Tooltip content={<ChartTooltip total={total} showPercent={showPercent} unit={unit} formatNumber={formatNumber} />} />
           </PieChart>
         </div>
         </ErrorBoundary>
@@ -94,14 +99,14 @@ export default function PieChartCard({ title, data = [], colors = DEFAULT_COLORS
                   <span className="text-xs text-gray-600 truncate">{entry.name}</span>
                 </div>
                 <span className="flex-shrink-0 text-xs font-medium text-gray-800">
-                  {showPercent ? `${pct}%` : entry.value}
+                  {showPercent ? `${pct}%` : formatNumber(entry.value)}
                 </span>
               </div>
             )
           })}
           <div className="pt-2 mt-1" style={{ borderTop: '1px solid var(--hover-bg)' }}>
             <span className="text-xs text-gray-400">
-              {t('total')}: <strong className="text-gray-700">{total}</strong>
+              {t('total')}: <strong className="text-gray-700">{formatNumber(total)}</strong>
             </span>
           </div>
         </div>

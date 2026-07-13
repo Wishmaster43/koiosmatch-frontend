@@ -1,4 +1,5 @@
 import type { ComponentType, ReactNode } from 'react'
+import { useNumberFormat } from '@/lib/formatters'
 
 // StatCard — a simple stat tile (icon + label + value + optional sub-text).
 // When onClick is provided the card becomes clickable (hover highlight + pointer cursor).
@@ -13,6 +14,10 @@ interface StatCardProps {
 }
 
 export default function StatCard({ label, value, sub, color = 'var(--color-primary)', bg = 'var(--color-primary-bg)', icon: Icon, onClick }: StatCardProps) {
+  // Locale-aware grouping (§ FMT-GETAL-1) — a raw number value gets thousands
+  // separators for free; callers that already pass a formatted string are untouched.
+  const { formatNumber } = useNumberFormat()
+  const displayValue = typeof value === 'number' ? formatNumber(value) : value
   return (
     <div
       className="flex flex-col gap-3 p-5 bg-[var(--surface)] rounded-xl"
@@ -32,7 +37,7 @@ export default function StatCard({ label, value, sub, color = 'var(--color-prima
       <div>
         <div className="mb-1 font-semibold leading-none"
           style={{ fontSize: 26, color: 'var(--text)', letterSpacing: '-0.5px' }}>
-          {value}
+          {displayValue}
         </div>
         <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</div>
         {sub && (

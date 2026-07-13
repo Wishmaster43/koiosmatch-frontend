@@ -6,6 +6,7 @@
 import type { ReactNode } from 'react'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { useNumberFormat } from '@/lib/formatters'
 
 export const PAGE_SIZE_OPTIONS = [50, 100, 200, 300, 400, 500]
 
@@ -20,6 +21,8 @@ interface PaginationBarProps {
 
 export default function PaginationBar({ page, totalPages, totalRows, pageSize, onPageChange, onPageSizeChange }: PaginationBarProps) {
   const { t } = useTranslation('common')
+  // Locale-aware grouping (§ FMT-GETAL-1) — "1.501–2.000 van 99.968", never bare digits.
+  const { formatNumber } = useNumberFormat()
   const from = totalRows === 0 ? 0 : (page - 1) * pageSize + 1
   const to   = Math.min(page * pageSize, totalRows)
 
@@ -42,7 +45,7 @@ export default function PaginationBar({ page, totalPages, totalRows, pageSize, o
     }}>
       {/* Row range info */}
       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-        {totalRows === 0 ? t('noResults') : t('rangeOf', { from, to, total: totalRows })}
+        {totalRows === 0 ? t('noResults') : t('rangeOf', { from: formatNumber(from), to: formatNumber(to), total: formatNumber(totalRows) })}
       </span>
 
       {/* Page navigation */}

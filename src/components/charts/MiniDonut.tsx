@@ -6,6 +6,8 @@
 import { PieChart, Pie, Cell, Tooltip } from 'recharts'
 import type { ChartDatum, TipProps } from './chartTypes'
 import ErrorBoundary from '../ui/ErrorBoundary'
+import { useLocale } from '@/lib/datetime'
+import { formatNumber, formatNumberCompact } from '@/lib/formatters'
 
 const DEFAULT_COLORS = [
   'var(--color-primary)', '#10B981', '#3B8FD4', 'var(--color-warning)',
@@ -34,6 +36,11 @@ export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 5
   const total = data.reduce((s, d) => s + d.value, 0)
   const innerR = Math.round(size * 0.26)
   const outerR = Math.round(size * 0.5)
+  // Compact once the grouped number would overflow the ring (5-6 digit totals on
+  // large tenants); the full grouped number always lives in the title tooltip.
+  const locale = useLocale()
+  const centerLabel = formatNumberCompact(total, locale)
+  const fullLabel = formatNumber(total, locale)
   // A segment counts as picked when the filter value matches its key OR its label.
   const isPicked = (d: ChartDatum) => {
     const k = (d as { key?: string }).key
@@ -59,7 +66,9 @@ export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 5
       </ErrorBoundary>
       <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
         justifyContent: 'center', pointerEvents: 'none' }}>
-        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>{total}</span>
+        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', pointerEvents: 'auto' }} title={fullLabel}>
+          {centerLabel}
+        </span>
       </div>
     </div>
   )

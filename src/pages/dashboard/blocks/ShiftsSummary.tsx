@@ -6,8 +6,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { interactive } from '@/lib/a11y'
-
-const n = (v?: number | null) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
+import { useNumberFormat } from '@/lib/formatters'
 
 function Tile({ label, value, color }: { label: string; value: string; color: string }) {
   return (
@@ -29,6 +28,9 @@ export default function ShiftsSummary({ open, filled, unfilled, occupancy, onOpe
   onOpen?: () => void
 }) {
   const { t } = useTranslation('dashboard')
+  // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
+  const { formatNumber } = useNumberFormat()
+  const n = (v?: number | null) => (v == null ? '—' : formatNumber(v))
   const pct = occupancy != null ? Math.max(0, Math.min(100, Math.round(occupancy))) : null
   return (
     <div {...interactive(onOpen)}

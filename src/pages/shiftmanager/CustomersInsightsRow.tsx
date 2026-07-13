@@ -9,6 +9,7 @@ import { FilterX } from 'lucide-react'
 import type { CSSProperties } from 'react'
 import MiniDonut from '@/components/charts/MiniDonut'
 import { interactive } from '@/lib/a11y'
+import { useNumberFormat } from '@/lib/formatters'
 // Same contract as the shared InsightsRow — this is a near-duplicate (DUP: fold into it later).
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import type { ChartDatum } from '@/components/charts/chartTypes'
@@ -48,6 +49,8 @@ function DonutCard({ title, data, colors, onPick, active, onClear }: Omit<DonutS
 
 function KpiCard({ label, value, sub, color, onClick, active }: Omit<KpiSpec, 'key'>) {
   const clickable = typeof onClick === 'function'
+  // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
+  const { formatNumber } = useNumberFormat()
   return (
     <div {...interactive(onClick)} title={typeof sub === 'string' ? sub : undefined}
       style={{ ...CARD,
@@ -59,7 +62,7 @@ function KpiCard({ label, value, sub, color, onClick, active }: Omit<KpiSpec, 'k
       <div style={TITLE}>{label}</div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', minWidth: 0 }}>
         <div style={{ fontSize: 24, fontWeight: 700, lineHeight: 1, color: color || 'var(--text)' }}>
-          {typeof value === 'number' ? value.toLocaleString('nl-NL') : value}
+          {typeof value === 'number' ? formatNumber(value) : value}
         </div>
         {sub && (
           <div style={{ fontSize: 10, color: 'var(--text-muted)', marginTop: 4, whiteSpace: 'nowrap',

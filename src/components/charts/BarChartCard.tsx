@@ -4,8 +4,11 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, Cell, ResponsiveContainer, Refere
 import { useTranslation } from 'react-i18next'
 import type { ChartDatum, TipProps } from './chartTypes'
 import ErrorBoundary from '../ui/ErrorBoundary'
+import { useNumberFormat } from '@/lib/formatters'
 
-function BarTooltip({ active, payload, label, total, showPercent }: TipProps & { total?: number; showPercent?: boolean }) {
+// `formatNumber` is passed in (the tooltip is a plain function, not a component,
+// so it can't call the useNumberFormat hook itself).
+function BarTooltip({ active, payload, label, total, showPercent, formatNumber }: TipProps & { total?: number; showPercent?: boolean; formatNumber: (v: number) => string }) {
   if (!active || !payload?.length) return null
   const value = payload[0].value ?? 0
   const pct   = total ? ((value / total) * 100).toFixed(1) : '0'
@@ -14,7 +17,7 @@ function BarTooltip({ active, payload, label, total, showPercent }: TipProps & {
       style={{ border: '1px solid var(--border)', boxShadow: '0 4px 16px rgba(0,0,0,0.08)' }}>
       <div className="mb-0.5 font-medium text-gray-800" style={{ fontSize: 12 }}>{label}</div>
       <div style={{ color: payload[0].fill, fontSize: 13, fontWeight: 500 }}>
-        {showPercent ? `${pct}%` : value}
+        {showPercent ? `${pct}%` : formatNumber(value)}
       </div>
     </div>
   )
@@ -24,6 +27,8 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
   title?: ReactNode; data?: ChartDatum[]; colors?: string[]; showPercent?: boolean; height?: number; onBarClick?: (d: ChartDatum) => void; showAverage?: boolean
 }) {
   const { t } = useTranslation('common')
+  // Locale-aware grouping (§ FMT-GETAL-1) — never a hardcoded 'nl-NL' toLocaleString.
+  const { formatNumber } = useNumberFormat()
   const rawTotal   = data.reduce((s, d) => s + d.value, 0)
   const rawAverage = data.length ? Math.round(rawTotal / data.length) : 0
 
@@ -52,7 +57,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
         <div className="text-sm font-medium text-gray-600">
           {title}
           {showAverage && displayAverage > 0 && (
-            <span> — {t('avg')} {displayAverage}{showPercent ? '%' : ''}</span>
+            <span> — {t('avg')} {showPercent ? displayAverage : formatNumber(displayAverage)}{showPercent ? '%' : ''}</span>
           )}
         </div>
         {onBarClick && <span className="text-xs text-gray-300">{t('clickBar')}</span>}
@@ -66,10 +71,10 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
           <YAxis
             tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
             allowDecimals={showPercent}
-            tickFormatter={v => showPercent ? `${v}%` : v}
+            tickFormatter={v => showPercent ? `${v}%` : formatNumber(Number(v))}
             domain={showPercent ? [0, 100] : undefined}
           />
-          <Tooltip content={<BarTooltip total={rawTotal} showPercent={showPercent} />} />
+          <Tooltip content={<BarTooltip total={rawTotal} showPercent={showPercent} formatNumber={formatNumber} />} />
 
           {showAverage && displayAverage > 0 && (
             <ReferenceLine
@@ -77,7 +82,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
               stroke="var(--color-primary)"
               strokeDasharray="4 4"
               strokeWidth={1.5}
-              label={{ value: `${displayAverage}${showPercent ? '%' : ''}`, position: 'right', fontSize: 10, fill: 'var(--color-primary)' }}
+              label={{ value: `${showPercent ? displayAverage : formatNumber(displayAverage)}${showPercent ? '%' : ''}`, position: 'right', fontSize: 10, fill: 'var(--color-primary)' }}
             />
           )}
 
@@ -98,7 +103,7 @@ export default function BarChartCard({ title, data = [], colors = [], showPercen
 
       <div className="flex justify-center mt-2">
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-          {t('total')}: <strong style={{ color: 'var(--text)' }}>{rawTotal}</strong>
+          {t('total')}: <strong style={{ color: 'var(--text)' }}>{formatNumber(rawTotal)}</strong>
         </span>
       </div>
     </div>
