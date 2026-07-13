@@ -142,7 +142,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     genderOptions, provinceOptions, titleOptions, locationOptions,
     statusData, funnelData, rcData,
     staleCount, neverContactedCount, noFollowupCount, intakeCount, activeConvCount, tasksCount,
-  } = useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders })
+  } = useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders, phases })
 
   // CAND-FILTERS option lists: pools (ids from the lookup), city/source (page-derived).
   const { poolItems } = usePools()

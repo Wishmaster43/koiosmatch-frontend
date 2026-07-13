@@ -17,6 +17,7 @@ interface OwnerOption { value: Id; label: string; count: number }
 interface UseCandidateOptionsParams {
   stats: CandidateStats | null
   candidates: Candidate[]
+  phases?: LookupOption[]
   locations: LocationOption[]
   statuses: LookupOption[]
   funnelTypes: LookupOption[]
@@ -24,7 +25,7 @@ interface UseCandidateOptionsParams {
   genders: LookupOption[]
 }
 
-export function useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders }: UseCandidateOptionsParams) {
+export function useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders, phases }: UseCandidateOptionsParams) {
   const { t } = useTranslation('candidates')
   // Status / funnel / owner options come from stats (whole filtered set); fall
   // back to page-based counts when stats is unavailable.
@@ -32,10 +33,13 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
     stats?.by_status
       ? stats.by_status.map(o => {
           const v = o.value ?? o.status
-          // The empty bucket = candidates without a deployability status (mostly
-          // Leads). Named + neutral grey; click-filter follows once the BE accepts
-          // the `none` sentinel (STATUS-NONE-1) — value is our sentinel already.
-          if (!v) return { value: '__none', label: t('drawer.noStatus'), color: '#8A94A6', count: o.count }
+          // The empty bucket = the Leads (no deployability status until conversion,
+          // Danny 13/7) — label + colour from the tenant's ENTRY phase lookup; the
+          // click filters to that phase once the BE phase filter lands (PHASE-FILTER-1).
+          if (!v) {
+            const entry = phases?.[0]
+            return { value: '__none', label: entry?.label ?? t('drawer.noStatus'), color: entry?.color ?? '#8A94A6', count: o.count }
+          }
           const m = metaOf(statuses, v)
           return { value: v, label: m?.label ?? v, color: m?.color, count: o.count }
         })
