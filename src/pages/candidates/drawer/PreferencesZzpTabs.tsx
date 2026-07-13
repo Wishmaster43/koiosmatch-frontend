@@ -97,9 +97,10 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
   })
 
   // Current unavailability window (status axis) — read-only next to "Inzetbaar vanaf"
-  // (Danny 2026-07-06): "niet beschikbaar sinds" + "weer beschikbaar" belong here too.
+  // (Danny 2026-07-06). Hidden for ARCHIVED candidates (Danny 2026-07-13): the
+  // archive banner tells the real story, the sick/leave window is stale noise then.
   const fmt = (d?: string | null) => (d ? formatDate(d) : '')
-  const statusWindow = (c.statusChangedAt || c.statusReturnDate) && c.status && c.status !== 'available'
+  const statusWindow = !c.archived && (c.statusChangedAt || c.statusReturnDate) && c.status && c.status !== 'available'
     ? [
         c.statusChangedAt ? t('drawer.statusSince', { status: statusMeta(c.status).label, date: fmt(c.statusChangedAt) }) : statusMeta(c.status).label,
         c.statusReturnDate ? t('drawer.availableAgain', { date: fmt(c.statusReturnDate) }) : null,

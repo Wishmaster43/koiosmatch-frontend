@@ -217,7 +217,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           }
           meta={[
             // Status only for a Kandidaat (not a Lead) — a Lead isn't deployable yet.
-            ...(status.showStatus ? [{ key: 'status', label: t('drawer.deployability'), value: status.currentStatus, options: status.statuses.map(s => ({ value: s.value, label: s.label })), onChange: status.changeStatus, menuWidth: 170, width: 160 }] : []),
+            // ARCHIVED: no status changes on an inactive dossier — restore first (2026-07-13).
+            ...(status.showStatus && !c.archived ? [{ key: 'status', label: t('drawer.deployability'), value: status.currentStatus, options: status.statuses.map(s => ({ value: s.value, label: s.label })), onChange: status.changeStatus, menuWidth: 170, width: 160 }] : []),
             { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions, onChange: onOwnerChange, menuWidth: 200, width: 190 },
           ]}
           tags={{ items: currentTags, onAdd: (tag: string) => setTags([...currentTags, tag]), onRemove: (tag: string) => setTags(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
