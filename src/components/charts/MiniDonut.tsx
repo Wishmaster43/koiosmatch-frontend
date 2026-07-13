@@ -34,7 +34,8 @@ export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 5
   pickedKey?: string | null
 }) {
   const total = data.reduce((s, d) => s + d.value, 0)
-  const innerR = Math.round(size * 0.26)
+  // 0.22 (was 0.26): a thicker colour band — the ring IS the visual (Danny 13/7).
+  const innerR = Math.round(size * 0.22)
   const outerR = Math.round(size * 0.5)
   // Compact once the grouped number would overflow the ring (5-6 digit totals on
   // large tenants); the full grouped number always lives in the title tooltip.

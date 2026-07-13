@@ -41,7 +41,7 @@ function DonutCard({ title, data, colors, onPick, active, onClear }: Omit<DonutS
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {data.length === 0
           ? <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
-          : <MiniDonut data={data as ChartDatum[]} colors={colors} size={54} onItemClick={d => onPick?.(d)} />}
+          : <MiniDonut data={data as ChartDatum[]} colors={colors} size={62} onItemClick={d => onPick?.(d)} />}
       </div>
     </div>
   )
