@@ -71,7 +71,6 @@ export default function CustomersTable({
         </div>
       ),
     },
-    { key: 'debtorNumber', header: t('cols.debtorNumber'), nowrap: true, cellStyle: { ...mutedCell, fontFamily: 'var(--font-mono, monospace)' }, sortable: true, sortValue: c => c.debtorNumber, render: c => c.debtorNumber || '—' },
     {
       key: 'status', header: t('cols.status'), sortable: true, sortValue: c => statusMeta(String(c.status)).label ?? String(c.status),
       render: c => {
