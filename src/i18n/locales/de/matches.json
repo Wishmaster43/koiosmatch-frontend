@@ -29,16 +29,6 @@
     "newThisMonth": "Neu diesen Monat",
     "unscored": "Ohne Score"
   },
-  "add": {
-    "button": "Neuer Match",
-    "title": "Neuer Match",
-    "candidate": "Kandidat",
-    "candidatePlaceholder": "Kandidat wählen…",
-    "vacancy": "Stelle",
-    "vacancyPlaceholder": "Stelle wählen…",
-    "cancel": "Abbrechen",
-    "create": "Match erstellen"
-  },
   "drawer": {
     "label": "Match",
     "createdAt": "Erstellt am {{date}}",
@@ -128,5 +118,8 @@
   },
   "page": {
     "searchPlaceholder": "Matches suchen"
+  },
+  "add": {
+    "button": "Neuer Match"
   }
 }

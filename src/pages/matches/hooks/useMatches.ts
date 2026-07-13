@@ -38,6 +38,9 @@ export function useMatches(includeArchived = false) {
   const [rows,    setRows]    = useState<MatchRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
+  // Bumping the tick re-runs the fetch — used after creating a placement (the
+  // server derives stage/status/rate fields, so a refetch beats hand-mapping).
+  const [refreshTick, setRefreshTick] = useState(0)
 
   // Archived view asks the API for soft-deleted matches too (`?include_archived=1`);
   // off by default so KPI totals drop and erased data stays hidden (§3B, AVG).
@@ -64,14 +67,13 @@ export function useMatches(includeArchived = false) {
       .catch(e => { if (alive && e?.response?.status && e.response.status !== 404) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [includeArchived])
-
-  // Prepend a newly-created match so it shows immediately (optimistic; §3).
-  const addMatch = (row: MatchRow) => setRows(prev => [row, ...prev])
+  }, [includeArchived, refreshTick])
 
   // Patch one match in place (optimistic board drag / stage change).
   const updateMatch = (id: MatchRow['id'], patch: Partial<MatchRow>) =>
     setRows(prev => prev.map(r => (r.id === id ? { ...r, ...patch } : r)))
 
-  return { rows, loading, error, addMatch, updateMatch }
+  const reload = () => setRefreshTick(t => t + 1)
+
+  return { rows, loading, error, updateMatch, reload }
 }

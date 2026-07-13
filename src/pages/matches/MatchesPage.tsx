@@ -15,7 +15,9 @@ import type { BoardColumn } from './MatchesBoard'
 import MatchDrawer from './MatchDrawer'
 import { usePageMemory } from '@/lib/usePageMemory'
 import MatchesBulkBar from './MatchesBulkBar'
-import AddMatchModal from './AddMatchModal'
+// The full placement form (§3B "direct match" path) — shared with the candidate
+// drawer; without a fixed candidateId it shows its own candidate picker.
+import MatchPlacementModal from '@/pages/candidates/drawer/MatchPlacementModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import HeaderSearch from '@/components/ui/HeaderSearch'
@@ -37,7 +39,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // stay searchable but out of the default view so KPI totals drop).
   const [showArchived, setShowArchived] = usePageMemory('matches.archived', false)
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
-  const { rows, loading, error, addMatch, updateMatch } = useMatches(showArchived)
+  const { rows, loading, error, updateMatch, reload } = useMatches(showArchived)
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Match statuses drive the board columns + donut (R-1b lookup; the funnel is
   // an APPLICATION axis — the match resource no longer carries a stage).
@@ -313,8 +315,9 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         onApprovalChange={patchRow}
         onUpdate={patchRow} />
 
-      {/* Direct-match creation modal */}
-      {addOpen && <AddMatchModal onClose={() => setAddOpen(false)} onCreated={addMatch} />}
+      {/* Direct-match creation: the full placement form (rate proposal, contract,
+          cost center) with a candidate picker; refetch so server-derived fields land. */}
+      {addOpen && <MatchPlacementModal onClose={() => setAddOpen(false)} onCreated={reload} />}
     </div>
   )
 }

@@ -29,16 +29,6 @@
     "newThisMonth": "Nieuw deze maand",
     "unscored": "Zonder score"
   },
-  "add": {
-    "button": "Nieuwe match",
-    "title": "Nieuwe match",
-    "candidate": "Kandidaat",
-    "candidatePlaceholder": "Kies een kandidaat…",
-    "vacancy": "Vacature",
-    "vacancyPlaceholder": "Kies een vacature…",
-    "cancel": "Annuleren",
-    "create": "Match aanmaken"
-  },
   "drawer": {
     "label": "Match",
     "createdAt": "Aangemaakt op {{date}}",
@@ -128,5 +118,8 @@
   },
   "page": {
     "searchPlaceholder": "Zoek naar matches"
+  },
+  "add": {
+    "button": "Nieuwe match"
   }
 }
