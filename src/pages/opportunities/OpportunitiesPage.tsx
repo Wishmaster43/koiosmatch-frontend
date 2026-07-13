@@ -15,6 +15,7 @@ import OpportunityDrawer from './OpportunityDrawer'
 import AddOpportunityModal from './AddOpportunityModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { useOpportunitiesData } from './hooks/useOpportunitiesData'
+import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 
 // Single-select donut pick: clicking the active segment clears it.
@@ -48,6 +49,11 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     selectedIds, toggleRow, toggleAll, clearSelection,
     selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity,
   } = useOpportunitiesData()
+
+  // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
+  // through it and a copied link reopens the same opportunity (NAV-BACK-1 —
+  // Danny: "back knop vanuit kans → taak en dan back kom ik niet terug waar ik was").
+  useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectOpportunity({ id } as Parameters<typeof selectOpportunity>[0]), close: closeDrawer, intent })
 
   const [view,     setView]     = usePageMemory('opps.view', 'table')  // 'table' | 'board'
   const [page,     setPage]     = usePageMemory('opps.page', 1)

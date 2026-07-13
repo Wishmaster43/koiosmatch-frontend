@@ -55,8 +55,10 @@ export default function DashboardLayout() {
   const pkg0                                = auth0?.activeTenant?.package ?? auth0?.user?.tenant?.package
   // Boot from the URL hash when it names a known page (deep-link/refresh survive);
   // Settings rewrites the hash to its own sections, so unknown hashes fall back.
+  // Split on '/' (legacy sub-path) AND '?' (NAV-BACK-1's `?open=<id>` drawer param)
+  // so a deep-linked drawer URL still resolves to its page, not the fallback.
   const [activePage,     setActivePage]     = useState(() => {
-    const fromHash = window.location.hash.replace(/^#/, '').split('/')[0]
+    const fromHash = window.location.hash.replace(/^#/, '').split(/[/?]/)[0]
     return (fromHash && PAGE_TITLES[fromHash]) ? fromHash : (PACKAGE_DEFAULT_PAGE[pkg0 ?? ''] ?? 'dashboard')
   })
   // Navigation intent: a filter the target page should apply when navigated to
@@ -73,10 +75,12 @@ export default function DashboardLayout() {
     window.history.pushState({ kmPage: page }, '', `#${page}`)
   }
   // Back/forward: restore the page from our history state (hash as reload fallback).
+  // Same '/'+'?' split as above — a NAV-BACK-1 drawer entry's `kmPage` is already
+  // the bare page (see useDrawerUrl), but the hash fallback still carries `?open=`.
   useEffect(() => {
     const onPop = (e: PopStateEvent) => {
       const page = (e.state as { kmPage?: string } | null)?.kmPage
-        ?? window.location.hash.replace(/^#/, '').split('/')[0]
+        ?? window.location.hash.replace(/^#/, '').split(/[/?]/)[0]
       if (page && PAGE_TITLES[page]) { setNavIntent(null); setActivePage(page) }
     }
     window.addEventListener('popstate', onPop)

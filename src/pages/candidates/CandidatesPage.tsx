@@ -36,6 +36,7 @@ import { useCandidateBulkActions } from './hooks/useCandidateBulkActions'
 import { useCandidateDrawerActions } from './hooks/useCandidateDrawerActions'
 import { buildCandidateInsights } from './data/candidateInsights'
 import { useOpenFromIntent } from '@/context/NavigationContext'
+import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -219,11 +220,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // Open a candidate drawer when arriving via a dashboard/cross-entity link ({ open: id }).
   useOpenFromIntent(intent, (id) => selectCandidate({ id } as Candidate))
 
-  // Remember the open drawer across page switches; coming back reopens it (Danny
-  // 2026-07-06: "opent ook niet vorige items"). Memory-only, mirrors usePageMemory.
-  const [rememberedId, setRememberedId] = usePageMemory<Id | null>('cand.openId', null)
-  useEffect(() => { setRememberedId(selected?.id ?? null) }, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (rememberedId && !selected) selectCandidate({ id: rememberedId } as Candidate) }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
+  // through it and a copied link reopens the same candidate (NAV-BACK-1 — Danny
+  // 2026-07-06: "opent ook niet vorige items"; supersedes the old memory-only remember).
+  useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectCandidate({ id } as Candidate), close: closeDrawer, intent })
 
   // A freshly created candidate: prepend to the list and open its drawer.
   const handleCreated = (c: Candidate) => {

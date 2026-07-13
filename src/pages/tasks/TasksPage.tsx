@@ -25,6 +25,7 @@ import TaskDrawer from './TaskDrawer'
 import AddTaskModal from './AddTaskModal'
 import { mapTask, mapTaskDetail } from './data/mapTask'
 import { useOpenFromIntent } from '@/context/NavigationContext'
+import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useTaskFilters } from './hooks/useTaskFilters'
 import type { Task, TaskDetail, ApiTask } from '@/types/task'
@@ -192,10 +193,10 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // Open a task drawer when arriving via a cross-entity link ({ open: id }, candidate → task).
   useOpenFromIntent(intent, (id) => selectTask({ id } as Task))
 
-  // Remember the open drawer across page switches; coming back reopens it (memory-only).
-  const [rememberedId, setRememberedId] = usePageMemory<Id | null>('tasks.openId', null)
-  useEffect(() => {{ setRememberedId(selected?.id ?? null) }}, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => {{ if (rememberedId && !selected) (id => selectTask({ id } as Task))(rememberedId) }}, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
+  // through it and a copied link reopens the same task (NAV-BACK-1; supersedes
+  // the old memory-only remember).
+  useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectTask({ id } as Task), close: closeDrawer, intent })
 
   // Edit one or more fields (drawer or kanban drag). `patch` is LOCAL-shaped.
   const handleUpdate = (id: Id | undefined, patch: Record<string, unknown>) => {

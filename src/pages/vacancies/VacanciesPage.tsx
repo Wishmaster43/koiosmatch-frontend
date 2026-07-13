@@ -27,6 +27,7 @@ import VacancyDrawer from './VacancyDrawer'
 import AddVacancyModal from './AddVacancyModal'
 import { toggleOneValue, pickKey } from './data/vacanciesShared'
 import { useNavigation } from '@/context/NavigationContext'
+import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useVacanciesData } from './hooks/useVacanciesData'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
@@ -127,10 +128,14 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // Open a vacancy drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => selectVacancy({ id } as Parameters<typeof selectVacancy>[0]))
 
-  // Remember the open drawer across page switches; coming back reopens it (memory-only).
-  const [rememberedId, setRememberedId] = usePageMemory<Id | null>('vac.openId', null)
-  useEffect(() => {{ setRememberedId(selected?.id ?? null) }}, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => {{ if (rememberedId && !selected) (id => selectVacancy({ id } as Parameters<typeof selectVacancy>[0]))(rememberedId) }}, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
+  // through it and a copied link reopens the same vacancy (NAV-BACK-1;
+  // supersedes the old memory-only remember).
+  useDrawerUrl({
+    selectedId: selected?.id,
+    openById: (id) => selectVacancy({ id } as Parameters<typeof selectVacancy>[0]),
+    close: closeDrawer, intent,
+  })
 
   // ── Donut data (status / owner / client) — stats first, page-derived fallback ──
   const statusData = useMemo<Aggregate[]>(() => {

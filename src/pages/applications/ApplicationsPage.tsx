@@ -10,6 +10,7 @@ import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
 import { useOpenFromIntent } from '@/context/NavigationContext'
+import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useApplicationFilters, OWNER_NONE } from './hooks/useApplicationFilters'
 import InsightsRow from '@/components/insights/InsightsRow'
@@ -195,10 +196,10 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Open an application drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => selectApplication({ id } as Application))
 
-  // Remember the open drawer across page switches; coming back reopens it (memory-only).
-  const [rememberedId, setRememberedId] = usePageMemory<Id | null>('apps.openId', null)
-  useEffect(() => {{ setRememberedId(selected?.id ?? null) }}, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => {{ if (rememberedId && !selected) (id => selectApplication({ id } as Application))(rememberedId) }}, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
+  // through it and a copied link reopens the same application (NAV-BACK-1;
+  // supersedes the old memory-only remember).
+  useDrawerUrl({ selectedId: selected?.id, openById: (id) => selectApplication({ id } as Application), close: closeDrawer, intent })
 
   // Shared clear-all (page memory keeps filters sticky): anything off-default resets.
   // Seed the funnel-stage filter from a dashboard chart click (funnel / funnel-conversion).

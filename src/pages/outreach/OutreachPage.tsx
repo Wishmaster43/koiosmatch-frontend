@@ -14,6 +14,7 @@ import InsightsRow from '@/components/insights/InsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
+import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useOutreachCampaigns } from './hooks/useOutreachCampaigns'
 import type { Campaign } from './hooks/useOutreachCampaigns'
 import { listCampaigns, updateCampaign, deleteCampaign } from './data/outreachApi'
@@ -60,6 +61,11 @@ export default function OutreachPage() {
   const [query, setQuery] = useState('')  // shared header search (client-side, R-5)
 
   // Archived campaigns are fetched lazily (only while the archived toggle is on).
+  // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
+  // through it and a copied link reopens the same call list (NAV-BACK-1). This
+  // page has no cross-entity intent today, so there is nothing to pass for it.
+  useDrawerUrl({ selectedId: openId, openById: (id) => setOpenId(String(id)), close: () => setOpenId(null) })
+
   const [archived, setArchived] = useState<Campaign[]>([])
   const [archLoading, setArchLoading] = useState(false)
   const [archError, setArchError] = useState(false)

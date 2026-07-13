@@ -24,6 +24,7 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import { useOpenFromIntent } from '@/context/NavigationContext'
+import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useMatches } from './hooks/useMatches'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
 import type { MatchRow } from '@/types/match'
@@ -207,6 +208,10 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     const row = rows.find(r => String(r.id) === String(pendingOpenId))
     if (row) { setSelected(row); setPendingOpenId(null) }
   }, [pendingOpenId, rows])
+  // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
+  // through it and a copied link reopens the same match (NAV-BACK-1). Reuses the
+  // existing pendingOpenId deferral above instead of a second lookup mechanism.
+  useDrawerUrl({ selectedId: selected?.id, openById: setPendingOpenId, close: () => setSelected(null), intent })
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   // Shared row-patch: optimistic list update + keep the open drawer's copy in
   // sync. Reused by the approval workflow AND the contract/financial edit (both

@@ -5,6 +5,7 @@ import { CheckCircle2, AlertTriangle, X, Archive, Map as MapIcon } from 'lucide-
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useOpenFromIntent } from '@/context/NavigationContext'
+import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { geocodeNL } from '@/lib/geocode'
 import { isReferenceQuery } from '@/lib/referenceNumber'
@@ -131,10 +132,14 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   // Open a customer drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => selectCustomer({ id } as Parameters<typeof selectCustomer>[0]))
 
-  // Remember the open drawer across page switches; coming back reopens it (memory-only).
-  const [rememberedId, setRememberedId] = usePageMemory<Id | null>('cust.openId', null)
-  useEffect(() => {{ setRememberedId(selected?.id ?? null) }}, [selected?.id]) // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => {{ if (rememberedId && !selected) (id => selectCustomer({ id } as Parameters<typeof selectCustomer>[0]))(rememberedId) }}, []) // eslint-disable-line react-hooks/exhaustive-deps
+  // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
+  // through it and a copied link reopens the same customer (NAV-BACK-1;
+  // supersedes the old memory-only remember).
+  useDrawerUrl({
+    selectedId: selected?.id,
+    openById: (id) => selectCustomer({ id } as Parameters<typeof selectCustomer>[0]),
+    close: closeDrawer, intent,
+  })
 
   // ── Option lists (stats first, page-derived as fallback) ──
   const optsFrom = (values: string[]): Opt[] => {
