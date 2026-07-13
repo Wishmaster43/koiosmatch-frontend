@@ -214,16 +214,6 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   // Kanban move = a status-only update.
   const handleMove = (id: Id, statusKey: string | number) => handleUpdate(id, { statusKey })
 
-  // Add a comment from the drawer; append optimistically (with the current user as
-  // author, like candidate notes), then POST.
-  const handleAddComment = (id: Id | undefined, body: string) => {
-    const u = auth?.user as { name?: string; firstname?: string; lastname?: string; email?: string } | null | undefined
-    const authorName = (u?.name || [u?.firstname, u?.lastname].filter(Boolean).join(' ') || u?.email || '').trim()
-    const optimistic = { id: `tmp-${Date.now()}`, author: authorName, authorInitials: initialsOf(authorName || '?'), body, time: new Date().toISOString() }
-    setSelected(prev => (prev && prev.id === id ? ({ ...prev, comments: [...(prev.comments ?? []), optimistic] } as TaskDetail) : prev))
-    api.post(`/tasks/${id}/notes`, { body }).catch(() => notifyError(t('common:actionFailed')))
-  }
-
   // Apply the authoritative task detail returned by the link endpoints.
   const applyDetail = (id: Id | undefined, res: { data?: unknown }) => {
     const r = res as { data?: { data?: unknown } }
@@ -376,7 +366,6 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
         expanded={expanded}
         onToggleExpand={() => setExpanded(v => !v)}
         onUpdate={handleUpdate}
-        onAddComment={handleAddComment}
         onAddLink={handleAddLink}
         onRemoveLink={handleRemoveLink}
       />

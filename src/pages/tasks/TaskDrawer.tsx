@@ -10,7 +10,6 @@ import { useUsers } from '@/lib/queries'
 import DetailsTab from './drawer/DetailsTab'
 import RelatedTasks from './drawer/RelatedTasks'
 import LinksTab from './drawer/LinksTab'
-import CommentsTab from './drawer/CommentsTab'
 import TaskChangelogPopover from './drawer/TaskChangelogPopover'
 import { initialsOf } from '@/lib/initials'
 import type { TaskDetail } from '@/types/task'
@@ -21,9 +20,9 @@ interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: stri
 const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
 // The tab order. The changelog is a header popover (not a tab), mirroring candidate.
-// Reacties is back as a tab (2026-07-06): the slim-down dropped it, which left the
-// comments UI — and the /tasks/{id}/notes write path — unreachable.
-const TAB_IDS = ['details', 'links', 'comments']
+// Reacties removed again (Danny 2026-07-14): the empty thread was clutter; task
+// comments live on in the record notes API but get no tab until asked for.
+const TAB_IDS = ['details', 'links']
 
 interface TaskDrawerProps {
   task: TaskDetail | null
@@ -31,7 +30,6 @@ interface TaskDrawerProps {
   expanded?: boolean
   onToggleExpand?: () => void
   onUpdate: (id: Id | undefined, patch: Record<string, unknown>) => void
-  onAddComment: (id: Id | undefined, body: string) => void
   onAddLink: (id: Id | undefined, link: NewLink) => void
   onRemoveLink: (id: Id | undefined, link: { type: string; id: Id | null }) => void
 }
@@ -42,7 +40,7 @@ interface TaskDrawerProps {
  * (status / priority / assignee) + a one-click "mark done" quick action, so the most
  * common changes need no edit-mode; the full field edit still lives in DetailsTab.
  */
-export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddComment, onAddLink, onRemoveLink }: TaskDrawerProps) {
+export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, onUpdate, onAddLink, onRemoveLink }: TaskDrawerProps) {
   const { t } = useTranslation('tasks')
   const { formatDateTime } = useDateFormat()
   const { statuses, priorities, doneStatusValues } = useTaskLookups()
@@ -54,7 +52,6 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
     switch (id) {
       case 'details':  return <><DetailsTab task={task} onUpdate={patch => onUpdate(task.id, patch)} /><RelatedTasks task={task} /></>
       case 'links':    return <LinksTab task={task} onAddLink={link => onAddLink(task.id, link)} onRemoveLink={link => onRemoveLink(task.id, link)} />
-      case 'comments': return <CommentsTab task={task} onAdd={body => onAddComment(task.id, body)} />
       default:         return null
     }
   }
