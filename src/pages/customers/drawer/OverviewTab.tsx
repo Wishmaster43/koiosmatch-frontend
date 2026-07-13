@@ -40,5 +40,5 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
     { key: 'recruitmentProblems', label: t('overview.recruitmentProblems'), type: 'textarea', group: gTexts },
   ]
 
-  return <EditableFieldTable title={t('drawer.tabs.overview')} fields={fields} value={c as unknown as Record<string, unknown>} onSave={onSave} />
+  return <EditableFieldTable fields={fields} value={c as unknown as Record<string, unknown>} onSave={onSave} />
 }

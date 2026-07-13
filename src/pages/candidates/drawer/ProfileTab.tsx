@@ -242,8 +242,8 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
 
       {/* ── Profile fields, grouped (one edit toggle for all fields) ── */}
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('drawer.tabs.profile')}</span>
+        {/* No section title: it would duplicate the tab label (Danny 2026-07-13). */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 8 }}>
           {editControls(editing, saveFields, cancelFields, () => setEditing(true))}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

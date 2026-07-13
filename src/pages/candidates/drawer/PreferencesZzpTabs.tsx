@@ -118,7 +118,7 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
         </div>
       )}
       {/* One grouped table; on Save, Contractvorm → candidateTypes, the rest → preferences. */}
-      <EditableFieldTable key={c.id} title={t('preferences.title')} fields={fields} value={value} labelWidth={160}
+      <EditableFieldTable key={c.id} fields={fields} value={value} labelWidth={160}
         onSave={(v: Record<string, unknown>) => { onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApi(v)) }} />
     </>
   )
@@ -171,5 +171,5 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     business_email:    v.email_zakelijk,
     iban:              v.iban,
   })
-  return <EditableFieldTable title={t('zzp.title')} fields={fields} value={value} labelWidth={180} onSave={(v: Record<string, unknown>) => onSave?.(toApi(v))} />
+  return <EditableFieldTable fields={fields} value={value} labelWidth={180} onSave={(v: Record<string, unknown>) => onSave?.(toApi(v))} />
 }
