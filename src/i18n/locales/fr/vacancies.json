@@ -190,7 +190,9 @@
     "noCustomFields": "Aucun champ personnalisé configuré.",
     "integrate": "Intégrer",
     "publishedOn": "Publié",
-    "notPublished": "Non publié"
+    "notPublished": "Non publié",
+    "queuedOn": "Préparé",
+    "notLiveYet": "Le site carrière public et les flux (Google Jobs, Indeed, Werkzoeken) sont en construction. Ces interrupteurs déterminent déjà ce qui sera publié dès leur activation."
   },
   "applicants": {
     "title": "Candidatures",

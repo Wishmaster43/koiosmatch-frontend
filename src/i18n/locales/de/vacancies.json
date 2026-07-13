@@ -190,7 +190,9 @@
     "noCustomFields": "Keine benutzerdefinierten Felder konfiguriert.",
     "integrate": "Integrieren",
     "publishedOn": "Veröffentlicht",
-    "notPublished": "Nicht veröffentlicht"
+    "notPublished": "Nicht veröffentlicht",
+    "queuedOn": "Vorgemerkt",
+    "notLiveYet": "Die öffentliche Karriereseite und die Kanal-Feeds (Google Jobs, Indeed, Werkzoeken) sind im Aufbau. Diese Schalter legen bereits fest, was live geht, sobald Seite und Feeds aktiv sind."
   },
   "applicants": {
     "title": "Bewerbungen",

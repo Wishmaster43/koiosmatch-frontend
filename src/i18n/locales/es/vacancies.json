@@ -190,7 +190,9 @@
     "noCustomFields": "No hay campos personalizados configurados.",
     "integrate": "Integrar",
     "publishedOn": "Publicada",
-    "notPublished": "No publicada"
+    "notPublished": "No publicada",
+    "queuedOn": "Preparado",
+    "notLiveYet": "El sitio público de empleo y los feeds (Google Jobs, Indeed, Werkzoeken) están en construcción. Estos interruptores ya determinan qué se publicará cuando estén activos."
   },
   "applicants": {
     "title": "Candidaturas",

@@ -190,7 +190,9 @@
     "noCustomFields": "Geen eigen velden geconfigureerd.",
     "integrate": "Integreer",
     "publishedOn": "Gepubliceerd",
-    "notPublished": "Niet gepubliceerd"
+    "notPublished": "Niet gepubliceerd",
+    "queuedOn": "Klaargezet",
+    "notLiveYet": "De publieke carrièresite en de kanaal-feeds (Google Jobs, Indeed, Werkzoeken) zijn in aanbouw. Deze schakelaars bepalen alvast wat er live gaat zodra de site en feeds actief zijn."
   },
   "applicants": {
     "title": "Sollicitaties",

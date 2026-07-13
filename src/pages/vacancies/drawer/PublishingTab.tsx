@@ -87,6 +87,13 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
 
       {/* Job boards */}
       <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('publishing.channels')}</div>
+      {/* Honest state (Danny 13/7): the toggles record WHAT will be published; the
+          public career site + channel feeds (CAREER-1/PUBLISH-1) are not live yet,
+          so never claim "Gepubliceerd" as if something is already out there. */}
+      <div style={{ fontSize: 11.5, color: 'var(--text-muted)', border: '1px solid var(--border)',
+        borderRadius: 8, padding: '8px 10px', marginBottom: 10, background: 'var(--bg)' }}>
+        {t('publishing.notLiveYet')}
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
         {channels.map(c => (
           <div key={c.value} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
@@ -94,7 +101,7 @@ export default function PublishingTab({ vacancy: v, onUpdate }: { vacancy: Vacan
             <span style={{ fontSize: 13, color: 'var(--text)' }}>{c.label}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <span style={{ fontSize: 11, color: c.published ? 'var(--color-success)' : 'var(--text-muted)' }}>
-                {c.published ? t('publishing.publishedOn') : t('publishing.notPublished')}
+                {c.published ? t('publishing.queuedOn') : t('publishing.notPublished')}
               </span>
               <Toggle on={c.published} onChange={next => toggleChannel(c.value, next)} label={c.label} />
             </div>

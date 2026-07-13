@@ -190,7 +190,9 @@
     "noCustomFields": "No custom fields configured.",
     "integrate": "Integrate",
     "publishedOn": "Published",
-    "notPublished": "Not published"
+    "notPublished": "Not published",
+    "queuedOn": "Queued",
+    "notLiveYet": "The public career site and the channel feeds (Google Jobs, Indeed, Werkzoeken) are under construction. These toggles already determine what goes live once the site and feeds are active."
   },
   "applicants": {
     "title": "Applications",
