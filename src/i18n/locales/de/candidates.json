@@ -271,7 +271,9 @@
     "tasksHistory": "Historie",
     "returnDateUnknownHint": "Leer lassen = noch unbekannt",
     "restoredNamed": "{{name}} wiederhergestellt",
-    "openRestored": "Öffnen"
+    "openRestored": "Öffnen",
+    "archivedNamed": "{{name}} archiviert",
+    "noStatus": "Kein Status"
   },
   "stage": {
     "lead": "Lead",
@@ -744,7 +746,8 @@
       "tasks": "Aufgaben",
       "timeline_events": "Timeline-Einträge",
       "conversations": "Gespräche"
-    }
+    },
+    "markedForDeletionNamed": "{{name}} in den Papierkorb verschoben"
   },
   "archiveGuard": {
     "title": "Offene Vorgänge gefunden",

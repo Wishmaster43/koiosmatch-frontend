@@ -35,7 +35,9 @@ export function buildCandidateInsights({
 }: Args) {
   // One strip: 3 donuts + KPI cards, all equal footprint (§3A).
   const donuts = [
-    { key: 'status', title: t('analytics.statusTitle'), data: statusData, onPick: (d: PickArg) => pickStatus(pickKey(d) as string),
+    // '__none' = the no-status bucket; filtering it needs the BE `none` sentinel
+    // (STATUS-NONE-1) — until then the segment is informational, not a filter.
+    { key: 'status', title: t('analytics.statusTitle'), data: statusData, onPick: (d: PickArg) => { const k = pickKey(d) as string; if (k !== '__none') pickStatus(k) },
       active: selectedStatus.length > 0, onClear: () => setSelectedStatus([]) },
     { key: 'funnel', title: t('analytics.funnelTitle'), data: funnelData, onPick: (d: PickArg) => pickFunnel(pickKey(d) as string),
       active: selectedFunnel.length > 0, onClear: () => setSelectedFunnel([]) },

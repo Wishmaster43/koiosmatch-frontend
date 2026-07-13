@@ -16,6 +16,13 @@ export default function ChangelogPopover({ c }: { c: Candidate }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
+  // A Tijdlijn system-row icon can request the changelog (km:open-changelog).
+  useEffect(() => {
+    const onOpen = () => setOpen(true)
+    window.addEventListener('km:open-changelog', onOpen)
+    return () => window.removeEventListener('km:open-changelog', onOpen)
+  }, [])
+
   // Close on outside click or Escape while the popover is open.
   useEffect(() => {
     if (!open) return

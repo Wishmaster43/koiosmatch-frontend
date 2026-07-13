@@ -5,6 +5,7 @@
  * page when stats is unavailable. Pure derivation from data + lookups.
  */
 import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { metaOf, optsFrom, isStale, isNeverContacted, isNoFollowup } from '../data/candidatesShared'
 import { NL_PROVINCES } from '../drawer/constants'
 import type { Candidate, CandidateStats } from '@/types/candidate'
@@ -24,11 +25,20 @@ interface UseCandidateOptionsParams {
 }
 
 export function useCandidateOptions({ stats, candidates, locations, statuses, funnelTypes, candidateTypes, genders }: UseCandidateOptionsParams) {
+  const { t } = useTranslation('candidates')
   // Status / funnel / owner options come from stats (whole filtered set); fall
   // back to page-based counts when stats is unavailable.
   const statusOptions = useMemo(() =>
     stats?.by_status
-      ? stats.by_status.map(o => { const v = o.value ?? o.status; const m = metaOf(statuses, v); return { value: v, label: m?.label ?? v, color: m?.color, count: o.count } })
+      ? stats.by_status.map(o => {
+          const v = o.value ?? o.status
+          // The empty bucket = candidates without a deployability status (mostly
+          // Leads). Named + neutral grey; click-filter follows once the BE accepts
+          // the `none` sentinel (STATUS-NONE-1) — value is our sentinel already.
+          if (!v) return { value: '__none', label: t('drawer.noStatus'), color: '#8A94A6', count: o.count }
+          const m = metaOf(statuses, v)
+          return { value: v, label: m?.label ?? v, color: m?.color, count: o.count }
+        })
       : statuses.map(s => ({ value: s.value, label: s.label, color: s.color, count: candidates.filter(c => c.status === s.value).length })).filter(o => o.count > 0)
   , [stats, candidates, statuses])
   const funnelOptions = useMemo(() =>

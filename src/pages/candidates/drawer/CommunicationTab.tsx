@@ -30,7 +30,7 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
   // Note categories from the tenant lookup (seed fallback until /note-types lands).
-  const { writableTypes } = useNoteTypes()
+  const { types: allNoteTypes, writableTypes } = useNoteTypes()
   // Contact channels (last_contact_types) — picking one on a note stamps last_contact_at/_type/_by.
   const { types: channels } = useLastContactTypes()
   // Notes persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
@@ -62,7 +62,7 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
   const notesProps = {
     notes: userNotes, onAddNote: addNote, onEditNote: editUserNote,
     timeline: c.timeline ?? [], systemNotes,
-    noteTypes: writableTypes, channels, authorInitials: c.ownerInitials, timelineName: c.name,
+    noteTypes: writableTypes, chipTypes: allNoteTypes, channels, authorInitials: c.ownerInitials, timelineName: c.name,
     timelineInitials: c.initials, editorLabels: EDITOR_LABELS,
     labels: {
       notes: t('sections.notes'),
@@ -78,6 +78,7 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
       conversations: t('sections.conversations'),
       conversationsEmpty: t('sections.conversationsEmpty'),
       notePlaceholder: (typeLabel: string) => t('communication.notePlaceholder', { type: typeLabel }),
+      openChangelog: t('drawer.changelog'),
     },
   }
 

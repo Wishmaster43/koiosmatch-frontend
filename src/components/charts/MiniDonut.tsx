@@ -28,10 +28,13 @@ function MiniTooltip({ active, payload, total }: TipProps & { total?: number }) 
   )
 }
 
-export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 56, onItemClick, pickedKey = null }: {
+export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 56, onItemClick, pickedKey = null, showCenter = true }: {
   data?: ChartDatum[]; colors?: string[]; size?: number; onItemClick?: (d: unknown) => void
   // Active-filter value (key or label) — the other segments dim so the pick is visible.
   pickedKey?: string | null
+  // false = ring only; the host shows the total elsewhere (insights cards put it
+  // in the title — a 6-digit total never fits the hole, Danny 13/7).
+  showCenter?: boolean
 }) {
   const total = data.reduce((s, d) => s + d.value, 0)
   // 0.22 (was 0.26): a thicker colour band — the ring IS the visual (Danny 13/7).
@@ -65,12 +68,14 @@ export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 5
         <Tooltip content={<MiniTooltip total={total} />} />
       </PieChart>
       </ErrorBoundary>
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
-        justifyContent: 'center', pointerEvents: 'none' }}>
-        <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', pointerEvents: 'auto' }} title={fullLabel}>
-          {centerLabel}
-        </span>
-      </div>
+      {showCenter && (
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center',
+          justifyContent: 'center', pointerEvents: 'none' }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)', pointerEvents: 'auto' }} title={fullLabel}>
+            {centerLabel}
+          </span>
+        </div>
+      )}
     </div>
   )
 }

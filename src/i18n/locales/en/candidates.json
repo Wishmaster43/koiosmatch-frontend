@@ -278,7 +278,9 @@
     "tasksHistory": "History",
     "returnDateUnknownHint": "Leave empty = not yet known",
     "restoredNamed": "{{name}} restored",
-    "openRestored": "Open"
+    "openRestored": "Open",
+    "archivedNamed": "{{name}} archived",
+    "noStatus": "No status"
   },
   "stage": {
     "lead": "Lead",
@@ -744,7 +746,8 @@
       "tasks": "Tasks",
       "timeline_events": "Timeline events",
       "conversations": "Conversations"
-    }
+    },
+    "markedForDeletionNamed": "{{name}} moved to trash"
   },
   "archiveGuard": {
     "title": "Open items found",

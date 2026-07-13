@@ -78,16 +78,22 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
   // A 409 carrying the forward-compat `{ live }` guard payload opens the guard
   // modal instead of the generic failure toast (point 4 of the ARCHIVE-GUARD spec).
   const lifecycleCall = async (call: () => Promise<unknown>, id: Id, okKey: string, failKey: string, guardMode?: 'archive' | 'trash') => {
+    const cand = candidates.find(x => x.id === id)
     try {
       await call()
       setCandidates(p => p.filter(x => x.id !== id))
       setTotal(v => Math.max(0, v - 1))
       closeDrawer()
-      notifyMsg({ type: 'success', text: t(okKey) })
+      // Named + clickable (Danny 13/7): the row leaves the current view, so the
+      // action link is how you jump straight back to the dossier.
+      notifyMsg({
+        type: 'success',
+        text: t(okKey, { name: cand?.name ?? '' }),
+        action: { label: t('drawer.openRestored'), onClick: () => selectCandidate({ id, name: cand?.name ?? '', archived: true } as Candidate) },
+      })
     } catch (e) {
       const live = guardMode ? liveFromError(e) : null
       if (live) {
-        const cand = candidates.find(x => x.id === id)
         setArchiveGuard({ candidateId: id, candidateName: cand?.name ?? '', mode: guardMode as 'archive' | 'trash', ...live })
         return
       }
@@ -97,9 +103,9 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
 
   // The actual API calls — also re-used once the guard modal resolves every blocker.
   const runArchive = (id: Id) =>
-    lifecycleCall(() => api.post('/candidates/bulk/archive', { candidate_ids: [id] }), id, 'drawer.archived', 'drawer.archiveFailed', 'archive')
+    lifecycleCall(() => api.post('/candidates/bulk/archive', { candidate_ids: [id] }), id, 'drawer.archivedNamed', 'drawer.archiveFailed', 'archive')
   const runMarkDeletion = (id: Id) =>
-    lifecycleCall(() => api.post(`/candidates/${id}/mark-deletion`, {}), id, 'erase.markedForDeletion', 'erase.markFailed', 'trash')
+    lifecycleCall(() => api.post(`/candidates/${id}/mark-deletion`, {}), id, 'erase.markedForDeletionNamed', 'erase.markFailed', 'trash')
 
   // Archive-guard modal state (§3B) — set when a pre-check or a 409 finds live blockers.
   const [archiveGuard, setArchiveGuard] = useState<ArchiveGuardTarget | null>(null)

@@ -271,7 +271,9 @@
     "tasksHistory": "Historique",
     "returnDateUnknownHint": "Laisser vide = pas encore connu",
     "restoredNamed": "{{name}} restauré(e)",
-    "openRestored": "Ouvrir"
+    "openRestored": "Ouvrir",
+    "archivedNamed": "{{name}} archivé",
+    "noStatus": "Sans statut"
   },
   "stage": {
     "lead": "Piste",
@@ -744,7 +746,8 @@
       "tasks": "Tâches",
       "timeline_events": "Événements",
       "conversations": "Conversations"
-    }
+    },
+    "markedForDeletionNamed": "{{name}} déplacé vers la corbeille"
   },
   "archiveGuard": {
     "title": "Éléments en cours détectés",

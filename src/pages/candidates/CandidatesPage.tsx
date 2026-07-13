@@ -278,7 +278,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
               color: actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
               border: `1px solid ${actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)'}` }}>
               {actionMsg.type === 'error' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
-              <span style={{ flex: 1 }}>{actionMsg.text}</span>
+              {/* Whole text is a click target when an action exists (Danny 13/7). */}
+              <span style={{ flex: 1, cursor: actionMsg.action ? 'pointer' : 'default', textDecoration: actionMsg.action ? 'underline' : 'none' }}
+                onClick={actionMsg.action ? () => { actionMsg.action!.onClick(); setActionMsg(null) } : undefined}>{actionMsg.text}</span>
               {/* Optional action (e.g. "Openen" after a restore) — underlined link-button. */}
               {actionMsg.action && (
                 <button onClick={() => { actionMsg.action!.onClick(); setActionMsg(null) }}

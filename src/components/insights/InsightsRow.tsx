@@ -34,13 +34,24 @@ const TITLE: CSSProperties = {
 }
 
 function DonutCard({ title, data, colors, onPick, active, onClear, picked, clearTitle }: Omit<DonutSpec, 'key'> & { clearTitle?: string }) {
+  // Total moves to the title line ("STATUS · 99.968") — a 6-digit total never
+  // fits the donut hole, so the ring stays clean at any tenant size (Danny 13/7).
+  const { formatNumber } = useNumberFormat()
+  const total = (data as Array<{ value?: number }>).reduce((s, d) => s + (d.value ?? 0), 0)
   return (
     <div style={{ ...CARD, position: 'relative', borderColor: active ? 'var(--color-primary)' : 'var(--border)' }}>
-      <div style={{ ...TITLE, paddingRight: active ? 64 : 0 }}>{title}</div>
+      {/* Title left, total right-aligned and ALWAYS visible (Danny 13/7); the
+          active-filter chip lives bottom-right so it never covers the total. */}
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 6 }}>
+        <div style={{ ...TITLE, minWidth: 0 }}>{title}</div>
+        {data.length > 0 && (
+          <span style={{ ...TITLE, color: 'var(--text)', flexShrink: 0 }}>{formatNumber(total)}</span>
+        )}
+      </div>
       {/* Active filter: a VISIBLE "value ✕" chip (not just a tiny icon) — clicking clears. */}
       {active && onClear && (
         <button onClick={onClear} title={clearTitle}
-          style={{ position: 'absolute', top: 5, right: 6, maxWidth: '70%', height: 20, borderRadius: 999,
+          style={{ position: 'absolute', bottom: 5, right: 6, maxWidth: '70%', height: 20, borderRadius: 999,
             display: 'flex', alignItems: 'center', gap: 4, padding: '0 7px', cursor: 'pointer',
             background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: 'none',
             fontSize: 10, fontWeight: 600 }}
@@ -53,7 +64,7 @@ function DonutCard({ title, data, colors, onPick, active, onClear, picked, clear
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {data.length === 0
           ? <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
-          : <MiniDonut data={data} colors={colors} size={62} onItemClick={(d: unknown) => onPick?.(d)} pickedKey={active ? picked : null} />}
+          : <MiniDonut data={data} colors={colors} size={62} showCenter={false} onItemClick={(d: unknown) => onPick?.(d)} pickedKey={active ? picked : null} />}
       </div>
     </div>
   )

@@ -8,7 +8,7 @@
  * 08:15). The vacancy is OPTIONAL — empty makes the backend create the Intake
  * application (CONSIST-2). On success the host reloads.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api from '@/lib/api'
@@ -61,6 +61,10 @@ export default function PlanIntakeModal({
   const { types, intakeTypes, metaOf } = useAppointmentTypes()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   const vacancyOptions = useVacancyOptions(true)
+  // A stored vacancy that is missing from the options (rejected/archived vacancy
+  // or beyond the option cap) would render as a raw id in the select (Danny 13/7)
+  // — fetch its title once and inject it as an option instead.
+  const [extraVacancy, setExtraVacancy] = useState<{ value: string; label: string } | null>(null)
   const locationOptions = useLocations()
   // The candidate-drawer intake flow only offers intake-flagged types (unchanged);
   // the generic "appointment" mode (application/vacancy drawers) offers ALL tenant
@@ -82,6 +86,14 @@ export default function PlanIntakeModal({
     if (existing?.vacancy_id) return String(existing.vacancy_id)
     return defaultVacancyId ? String(defaultVacancyId) : ''
   })
+  useEffect(() => {
+    if (!vacancyId || vacancyOptions.some(v => String(v.value) === String(vacancyId))) { setExtraVacancy(null); return }
+    let alive = true
+    api.get(`/vacancies/${vacancyId}`, { quiet404: true } as never)
+      .then(r => { const d = r.data?.data ?? r.data; if (alive && d?.title) setExtraVacancy({ value: String(vacancyId), label: String(d.title) }) })
+      .catch(() => { if (alive) setExtraVacancy(null) })
+    return () => { alive = false }
+  }, [vacancyId, vacancyOptions])
   const [saving, setSaving] = useState(false)
   const editing = !!existing
 
@@ -184,7 +196,10 @@ export default function PlanIntakeModal({
           <div style={fieldLabel}>{t('work.vacancyOptional')}</div>
           <CreatableSelect value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.noVacancy')}
             allowCreate={false} menuWidth={340}
-            options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
+            options={[
+              ...vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label })),
+              ...(extraVacancy && !vacancyOptions.some(v => String(v.value) === extraVacancy.value) ? [extraVacancy] : []),
+            ]} />
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{t('work.intakeVacancyHint')}</div>
         </div>
 

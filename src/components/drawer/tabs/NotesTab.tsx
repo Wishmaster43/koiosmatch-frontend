@@ -18,7 +18,7 @@ interface NoteType { value: string; label: string; color?: string }
 interface NoteItem { type?: string; channel?: string; title?: string; author?: string; author_name?: string; created_by?: string | { name?: string }; updated_by?: string | { name?: string }; edited_by?: string; text?: string; body?: string; ago?: string; created_at?: string; updated_at?: string; [k: string]: unknown }
 interface TimelineItem { time?: string; created_at?: string; text?: string; description?: string; [k: string]: unknown }
 interface NotesLabels {
-  notes?: ReactNode; newNote?: ReactNode; type?: ReactNode; channel?: ReactNode; channelNone?: ReactNode; save?: string; cancel?: string; edit?: string
+  notes?: ReactNode; newNote?: ReactNode; type?: ReactNode; channel?: ReactNode; channelNone?: ReactNode; save?: string; cancel?: string; edit?: string; openChangelog?: string
   notesEmpty?: ReactNode; timeline?: ReactNode; timelineEmpty?: ReactNode
   conversations?: ReactNode; conversationsEmpty?: ReactNode
   notePlaceholder?: (typeLabel: string) => string
@@ -38,6 +38,8 @@ interface NotesTabProps {
   systemNotes?: NoteItem[]
   timeline?: TimelineItem[]
   noteTypes?: NoteType[]
+  // Full type list for CHIP resolution (composer keeps the writable-only list).
+  chipTypes?: NoteType[]
   // Optional contact channels (last_contact_types). Picking one marks the note a
   // contact moment → the backend stamps last_contact_at/_type/_by. Empty = internal note.
   channels?: NoteType[]
@@ -55,7 +57,7 @@ interface NotesTabProps {
 }
 
 export default function NotesTab({
-  notes = [], systemNotes = [], timeline = [], noteTypes = [], channels = [], labels = {}, editorLabels,
+  notes = [], systemNotes = [], timeline = [], noteTypes = [], chipTypes, channels = [], labels = {}, editorLabels,
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
   showNotes = true, showTimeline = true, showConversations = true,
 }: NotesTabProps) {
@@ -98,9 +100,11 @@ export default function NotesTab({
   const typeLabel = noteTypes.find(n => n.value === type)?.label ?? ''
   const iconBtn: CSSProperties = { width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 8, cursor: 'pointer' }
 
-  // Note-type chip: resolves value→label and uses the lookup's soft colour when set.
+  // Note-type chip: resolves value→label against ALL types (chipTypes) — the
+  // composer list excludes system types, which made the chip fall back to the
+  // raw slug ("status_change" instead of "Statuswissel", Danny 13/7).
   const renderTypeChip = (value: string) => {
-    const nt = noteTypes.find(n => n.value === value || n.label === value)
+    const nt = (chipTypes ?? noteTypes).find(n => n.value === value || n.label === value)
     const col = nt?.color
     const soft: CSSProperties = col
       ? { background: col + '1A', color: col, border: `1px solid ${col}55` }
@@ -121,13 +125,17 @@ export default function NotesTab({
   }
 
   // Calm one-line system-event row (status/phase change): History icon, chip, no pencil.
+  // The icon is a BUTTON that opens the record changelog (Danny 13/7) — decoupled
+  // via a window event so this shared tab needs no drawer-specific wiring.
   const systemRow = (n: NoteItem, key: string | number) => {
     const who = noteAuthor(n)
     return (
       <div key={key} style={{ display: 'flex', gap: 8, marginBottom: 10, alignItems: 'center' }}>
-        <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', color: 'var(--text-muted)' }}>
+        <button onClick={() => window.dispatchEvent(new CustomEvent('km:open-changelog'))}
+          title={labels.openChangelog} aria-label={labels.openChangelog}
+          style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', color: 'var(--text-muted)', border: 'none', cursor: 'pointer' }}>
           <History size={13} />
-        </div>
+        </button>
         <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px' }}>
           {n.type && renderTypeChip(n.type)}
           <SafeHtml style={{ fontSize: 12, color: 'var(--text)', flex: 1, minWidth: 0 }} html={n.text ?? n.body ?? ''} />

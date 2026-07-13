@@ -25,12 +25,21 @@ const TITLE: CSSProperties = {
 }
 
 function DonutCard({ title, data, colors, onPick, active, onClear }: Omit<DonutSpec, 'key'>) {
+  // Total in the title row (ring stays clean at any size — mirrors InsightsRow).
+  const { formatNumber } = useNumberFormat()
+  const donutTotal = (data as Array<{ value?: number }>).reduce((s, d) => s + (d.value ?? 0), 0)
   return (
     <div style={{ ...CARD, position: 'relative' }}>
-      <div style={TITLE}>{title}</div>
+      {/* Title left, total right-aligned (mirrors the shared InsightsRow, §4). */}
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 6 }}>
+        <div style={{ ...TITLE, minWidth: 0 }}>{title}</div>
+        {data.length > 0 && (
+          <span style={{ ...TITLE, color: 'var(--text)', flexShrink: 0 }}>{formatNumber(donutTotal)}</span>
+        )}
+      </div>
       {active && onClear && (
         <button onClick={onClear} title="Filter wissen"
-          style={{ position: 'absolute', top: 6, right: 6, width: 20, height: 20, borderRadius: 5,
+          style={{ position: 'absolute', bottom: 6, right: 6, width: 20, height: 20, borderRadius: 5,
             display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer',
             background: 'var(--color-primary-bg)', color: 'var(--color-primary)', border: 'none', padding: 0 }}
           onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-primary)', e.currentTarget.style.color = 'var(--surface)')}
@@ -41,7 +50,7 @@ function DonutCard({ title, data, colors, onPick, active, onClear }: Omit<DonutS
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         {data.length === 0
           ? <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>—</span>
-          : <MiniDonut data={data as ChartDatum[]} colors={colors} size={62} onItemClick={d => onPick?.(d)} />}
+          : <MiniDonut data={data as ChartDatum[]} colors={colors} size={62} showCenter={false} onItemClick={d => onPick?.(d)} />}
       </div>
     </div>
   )

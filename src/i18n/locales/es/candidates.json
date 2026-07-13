@@ -271,7 +271,9 @@
     "tasksHistory": "Historial",
     "returnDateUnknownHint": "Dejar vacío = aún desconocido",
     "restoredNamed": "{{name}} restaurado/a",
-    "openRestored": "Abrir"
+    "openRestored": "Abrir",
+    "archivedNamed": "{{name}} archivado",
+    "noStatus": "Sin estado"
   },
   "stage": {
     "lead": "Lead",
@@ -744,7 +746,8 @@
       "tasks": "Tareas",
       "timeline_events": "Eventos",
       "conversations": "Conversaciones"
-    }
+    },
+    "markedForDeletionNamed": "{{name}} movido a la papelera"
   },
   "archiveGuard": {
     "title": "Asuntos pendientes encontrados",
