@@ -169,8 +169,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived, query])
 
   // The visible rows: the hook predicate (bucket/filters/attention/search) + decorate.
-  const filteredAll = useMemo(() => applications.filter(matchesFilters).map(decorate),
-    [applications, matchesFilters, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
+  // BOARD = the whole funnel: the bucket quick-view is a TABLE concept, so the board
+  // ignores it — otherwise the Afgewezen column stays empty while the KPI says 4
+  // (Danny 13/7). Other filters (search/owner/source/archived) still apply.
+  const filteredAll = useMemo(() => applications.filter(a => matchesFilters(a, { ignoreBucket: view === 'board' })).map(decorate),
+    [applications, matchesFilters, view, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Clientside pagination slice (the endpoint returns all rows at once).
   const totalRows  = filteredAll.length
@@ -335,7 +338,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     // list always matches the number on the card (Danny: "waar zijn ze allemaal?").
     { key: 'totalActive', label: t('kpi.totalActive'), value: bucketCount('active') + bucketCount('matched'),
       sub: t('kpi.totalActiveSub'), color: 'var(--color-primary)',
-      onClick: () => { setShowArchived(false); setBucket(bucket === 'allActive' ? 'active' : 'allActive'); setAttention(null) },
+      onClick: () => { clearAllFilters(); setShowArchived(false); setBucket(bucket === 'allActive' ? 'active' : 'allActive'); setAttention(null) },
       active: bucket === 'allActive' },
     { key: 'new', label: t('kpi.new'), value: applications.filter(a => a.isNew && a.bucket === 'active').length,
       sub: t('kpi.newSub'), color: 'var(--color-warning)',

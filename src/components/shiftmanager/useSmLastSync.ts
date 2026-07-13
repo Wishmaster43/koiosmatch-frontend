@@ -4,7 +4,7 @@
  * of truth on the main dashboard) and picks the ShiftManager/planning entry. Cached.
  */
 import { useQuery } from '@tanstack/react-query'
-import api from '@/lib/api'
+import { heavyGet } from '@/lib/heavyGet'
 
 interface SyncSource { system?: string; label?: string; last_synced_at?: string | null }
 
@@ -14,7 +14,7 @@ export function useSmLastSync(enabled = true): string | null {
     enabled,
     staleTime: 5 * 60_000,
     queryFn: async ({ signal }) => {
-      const sources = (await api.get('/dashboard', { signal })).data?.sync_sources ?? []
+      const sources = (await heavyGet('/dashboard', { signal })).data?.sync_sources ?? []
       return (Array.isArray(sources) ? sources : []) as SyncSource[]
     },
   })

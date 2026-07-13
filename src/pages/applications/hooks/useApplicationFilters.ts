@@ -48,12 +48,13 @@ export function useApplicationFilters() {
   }
 
   // One row predicate for table + board (the page maps decorate over the result).
-  const matchesFilters = useCallback((a: FilterableApplication): boolean => {
+  const matchesFilters = useCallback((a: FilterableApplication, opts?: { ignoreBucket?: boolean }): boolean => {
     // Detached rows only surface in the dedicated archived view (any bucket).
     if (showArchived) return Boolean(a.archived)
     if (a.archived) return false
     // 'allActive' (TOTAAL ACTIEF-kaart) spans the active + matched buckets together.
-    if (bucket === 'allActive' ? !['active', 'matched'].includes(a.bucket ?? '') : a.bucket !== bucket) return false
+    // opts.ignoreBucket: the board view shows the whole funnel (all buckets).
+    if (!opts?.ignoreBucket && (bucket === 'allActive' ? !['active', 'matched'].includes(a.bucket ?? '') : a.bucket !== bucket)) return false
     if (selectedPhase.length  && !selectedPhase.includes(a.phaseKey ?? ''))              return false
     if (selectedOwner.length  && !selectedOwner.includes(a.owner?.name || OWNER_NONE))   return false
     if (selectedSource.length && !selectedSource.includes(a.source ?? ''))               return false

@@ -10,6 +10,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
 import api, { unwrapList } from '@/lib/api'
+import { heavyGet } from '@/lib/heavyGet'
 import { mapCandidate } from '../data/mapCandidate'
 import type { ApiCandidate, Candidate, CandidateStats } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -66,7 +67,7 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
   const { data: stats = null } = useQuery({
     queryKey: ['candidates', 'stats', filterParams],
     queryFn: async ({ signal }): Promise<CandidateStats | null> => {
-      const res = await api.get('/candidates/stats', { params: filterParams, signal })
+      const res = await heavyGet('/candidates/stats', { params: filterParams, signal })
       return (res.data?.data ?? res.data ?? null) as CandidateStats | null
     },
   })

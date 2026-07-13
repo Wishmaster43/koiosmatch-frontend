@@ -111,10 +111,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * - super_admin → load ALL tenants and select the saved/first one.
    * - regular user → use only their own tenant from /auth/me (never call /tenants).
    */
-  const setupTenants = (u?: AuthUser | null) => {
+  const setupTenants = async (u?: AuthUser | null): Promise<void> => {
     const savedTenant = localStorage.getItem('active_tenant')
     if (userIsSuperAdmin(u)) {
-      api.get('/tenants')
+      // AWAITED by the restore path (TENANT-HEADER-1): rendering before the
+      // active tenant is known let early fetches go out without X-Tenant, and
+      // the backend then falls back to the FIRST tenant (demo-data-in-yesway).
+      await api.get('/tenants')
         .then(res => {
           const list = res.data?.data ?? res.data ?? []
           if (Array.isArray(list) && list.length) {
@@ -175,9 +178,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     api.get('/auth/me')
-      .then(res => {
+      .then(async res => {
         const u = applyAuthResponse(res.data)
-        setupTenants(u)
+        await setupTenants(u)
       })
       .catch(() => {
         localStorage.removeItem('auth_token')

@@ -6,6 +6,7 @@ import { useCandidateCount } from '@/lib/queries'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import api from '@/lib/api'
+import { heavyGet } from '@/lib/heavyGet'
 import { interactive } from '@/lib/a11y'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
@@ -153,9 +154,11 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   const [dashCharts, setDashCharts] = useState<{ timeseries?: Record<string, unknown>; net?: unknown } | null>(null)
   useEffect(() => {
     const ctrl = new AbortController()
-    api.get('/candidates/stats', { signal: ctrl.signal })
+    // heavyGet = dedup + failure cooldown (PERF-DASH-1 FE half) — these
+    // aggregates took the API down on demo2 when refetches piled up.
+    heavyGet('/candidates/stats', { signal: ctrl.signal })
       .then(r => setStats(r.data?.data ?? r.data ?? null)).catch(() => {})
-    api.get('/opportunities/stats', { signal: ctrl.signal })
+    heavyGet('/opportunities/stats', { signal: ctrl.signal })
       .then(r => setOpp(r.data?.data ?? r.data ?? null)).catch(() => setOpp(null))
     return () => ctrl.abort()
   }, [activeTenant?.id])
@@ -301,10 +304,10 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     if (selPeriode[0])   params.period = selPeriode[0]
     if (selStatus[0])    params.status = selStatus[0]
     if (selVestiging[0]) params.location_id = selVestiging[0]
-    api.get('/dashboard', { params, signal: ctrl.signal })
+    heavyGet('/dashboard', { params, signal: ctrl.signal })
       .then(r => setDash(r.data ?? null)).catch(() => {})
     // Dedicated charts endpoint (out-timeseries + net); fail-soft so nothing breaks if absent.
-    api.get('/dashboard/charts', { params, signal: ctrl.signal })
+    heavyGet('/dashboard/charts', { params, signal: ctrl.signal })
       .then(r => setDashCharts((r.data?.data ?? r.data) ?? null)).catch(() => setDashCharts(null))
     return () => ctrl.abort()
   }, [activeTenant?.id, selPeriode, selVestiging, selStatus])

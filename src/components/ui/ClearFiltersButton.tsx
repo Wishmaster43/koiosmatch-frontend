@@ -25,12 +25,14 @@ export default function ClearFiltersButton({ active, onClear }: { active: boolea
 
   if (!active) return null
   return (
+    // Icon-only (Danny 13/7: no text at the filters) — the label stays as
+    // tooltip + aria-label so keyboard/screen-reader users keep the meaning.
     <button onClick={onClear} title={t('clearFilters')} aria-label={t('clearFilters')}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 11px', fontSize: 11, fontWeight: 600,
-        borderRadius: 999, cursor: 'pointer', whiteSpace: 'nowrap', color: 'var(--color-warning)',
+      style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 30, height: 30,
+        borderRadius: 999, cursor: 'pointer', color: 'var(--color-warning)',
         background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
         border: '1px solid color-mix(in srgb, var(--color-warning) 35%, transparent)' }}>
-      <FilterX size={12} /> {t('clearFilters')}
+      <FilterX size={14} />
     </button>
   )
 }

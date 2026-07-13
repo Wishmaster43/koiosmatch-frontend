@@ -5,7 +5,7 @@
  *   npm run smoke boards     → only flows whose name contains "boards"
  * Requires: Vite dev server on :5173 + Herd API + seeded dev DB.
  */
-import { boot } from './lib.mjs'
+import { boot, API } from './lib.mjs'
 import { pagesRender, drillDowns } from './flows/nav.mjs'
 import { boardsDrag } from './flows/boards.mjs'
 import { statusWithReason, archiveAndFindBack, noteWithChannel, superSearch } from './flows/candidates.mjs'
@@ -23,6 +23,16 @@ const FLOWS = [
 ]
 
 const filter = process.argv[2]
+// Pre-check: is the API even up? (13-07: a wedged PHP-FPM pool made every flow
+// fail on the login timeout — this turns that into one unambiguous line.)
+try {
+  const res = await fetch(`${API.replace(/\/api$/, '')}/sanctum/csrf-cookie`, { signal: AbortSignal.timeout(8000) })
+  if (res.status >= 500) throw new Error(`status ${res.status}`)
+} catch (e) {
+  console.error(`✗ API is NIET bereikbaar (${e?.message}) — start/herstel de backend en run opnieuw.`)
+  process.exit(2)
+}
+
 const ctx = await boot()
 const results = []
 

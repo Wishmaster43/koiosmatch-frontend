@@ -58,9 +58,8 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
     setDrawerTab(tab)
     selectedIdRef.current = c.id
     setSelected(c); setDetail(null); setDrawerExpanded(false)
-    // ARCHIVED rows: the detail endpoint 404s for soft-deleted records (ARCH-3, BE) —
-    // open the drawer on the row data (banner + restore) instead of "bestaat niet meer".
-    if (c.archived) return
+    // ARCH-READ-1 (BE, 13/7): all candidate read paths are withTrashed now, so an
+    // archived dossier fetches its full detail again (notes/timeline included).
     fetchDetail(c.id).then(full => {
       if (selectedIdRef.current !== c.id) return
       if (full === 'gone') {
