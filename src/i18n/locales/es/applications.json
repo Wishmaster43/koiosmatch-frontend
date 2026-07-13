@@ -183,7 +183,8 @@
   },
   "detach": {
     "button": "Desvincular",
-    "done": "Candidatura desvinculada"
+    "done": "Candidatura desvinculada",
+    "nothingLinked": "Sin vacante vinculada"
   },
   "restore": {
     "button": "Restaurar",

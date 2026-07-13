@@ -183,7 +183,8 @@
   },
   "detach": {
     "button": "Entkoppeln",
-    "done": "Bewerbung entkoppelt"
+    "done": "Bewerbung entkoppelt",
+    "nothingLinked": "Keine Stelle verknüpft"
   },
   "restore": {
     "button": "Wiederherstellen",

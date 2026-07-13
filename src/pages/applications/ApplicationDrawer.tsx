@@ -94,10 +94,14 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
                 <ArchiveRestore size={12} /> {t('restore.button')}
               </button>
             ) : canManage ? (
-              <button onClick={() => onDetach?.(a.id)} style={{ display: 'flex', alignItems: 'center', gap: 5,
-                fontSize: 12, fontWeight: 500, padding: '5px 12px', borderRadius: 8,
-                border: '1px solid var(--color-danger)', background: 'none',
-                color: 'var(--color-danger)', cursor: 'pointer' }}>
+              // No vacancy linked = nothing to detach — grey + disabled (Danny 13/7).
+              <button onClick={() => a.vacancyId != null && onDetach?.(a.id)} disabled={a.vacancyId == null}
+                title={a.vacancyId == null ? t('detach.nothingLinked') : undefined}
+                style={{ display: 'flex', alignItems: 'center', gap: 5,
+                  fontSize: 12, fontWeight: 500, padding: '5px 12px', borderRadius: 8,
+                  border: `1px solid ${a.vacancyId == null ? 'var(--border)' : 'var(--color-danger)'}`, background: 'none',
+                  color: a.vacancyId == null ? 'var(--text-muted)' : 'var(--color-danger)',
+                  cursor: a.vacancyId == null ? 'not-allowed' : 'pointer', opacity: a.vacancyId == null ? 0.6 : 1 }}>
                 <Unlink size={12} /> {t('detach.button')}
               </button>
             ) : null}

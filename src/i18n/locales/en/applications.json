@@ -174,7 +174,8 @@
   },
   "detach": {
     "button": "Detach",
-    "done": "Application detached"
+    "done": "Application detached",
+    "nothingLinked": "No vacancy linked"
   },
   "restore": {
     "button": "Restore",

@@ -174,7 +174,8 @@
   },
   "detach": {
     "button": "Ontkoppelen",
-    "done": "Sollicitatie ontkoppeld"
+    "done": "Sollicitatie ontkoppeld",
+    "nothingLinked": "Geen vacature gekoppeld"
   },
   "restore": {
     "button": "Herstellen",

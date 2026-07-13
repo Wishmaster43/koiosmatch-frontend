@@ -183,7 +183,8 @@
   },
   "detach": {
     "button": "Dissocier",
-    "done": "Candidature dissociée"
+    "done": "Candidature dissociée",
+    "nothingLinked": "Aucune offre liée"
   },
   "restore": {
     "button": "Restaurer",

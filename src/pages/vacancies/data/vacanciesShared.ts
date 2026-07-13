@@ -45,6 +45,9 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('postalCode'      in patch) body.postcode           = patch.postalCode
   if ('city'            in patch) body.city               = patch.city
   if ('province'        in patch) body.province           = patch.province
+  // Single-line address the BE accepts TODAY; the structured address/contract_types/
+  // experience_min+max above need their validation rules BE-side first (VAC-PATCH-1).
+  if ('location'        in patch) body.location           = patch.location
   if ('experienceMin'   in patch) body.experience_min_years = patch.experienceMin
   if ('experienceMax'   in patch) body.experience_max_years = patch.experienceMax
   if ('salaryMin'       in patch) body.salary_min         = patch.salaryMin
