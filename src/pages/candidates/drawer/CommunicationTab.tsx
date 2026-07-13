@@ -6,7 +6,7 @@ import NotesTabJs from '@/components/drawer/tabs/NotesTab'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import SectionCard from '@/components/ui/SectionCard'
 import CandidateTasks from './CandidateTasks'
-import { useNoteTypes } from '@/lib/useNoteTypes'
+import { useNoteTypes, SYSTEM_NOTE_TYPES } from '@/lib/useNoteTypes'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import { useCandidateNotes } from '@/pages/candidates/hooks/useCandidateNotes'
 import type { Candidate } from '@/types/candidate'
@@ -35,6 +35,18 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
   const { types: channels } = useLastContactTypes()
   // Notes persist via the API (G-1) — add/edit/delete hit /candidates/{id}/notes.
   const { notes, addNote, editNote } = useCandidateNotes(c.id)
+
+  // SYSTEM notes (status/phase changes, BE-written) are EVENTS, not notes (Danny
+  // 2026-07-13): they render in the Tijdlijn, never in the Notities thread. Keep the
+  // original index on user notes so edits still hit the right row in the hook's list.
+  const isSystem = (n: { type?: string; is_system?: unknown }) => Boolean(n.is_system) || SYSTEM_NOTE_TYPES.has(String(n.type ?? ''))
+  const indexed = notes.map((n, i) => ({ ...n, __idx: i }))
+  const userNotes = indexed.filter(n => !isSystem(n))
+  const systemNotes = indexed.filter(isSystem)
+  const editUserNote = (fi: number, payload: { type: string; title: string; body: string; channel?: string }) =>
+    editNote(userNotes[fi].__idx, payload)
+  // The composer must never offer the system category as a writable type.
+  const writableNoteTypes = noteTypes.filter(nt => !SYSTEM_NOTE_TYPES.has(nt.value))
   // Active sub-tab — notes is the daily surface, consent/tasks/timeline one click away.
   const [subTab, setSubTab] = useState('notes')
 
@@ -50,8 +62,9 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
 
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
-    notes, onAddNote: addNote, onEditNote: editNote, timeline: c.timeline ?? [],
-    noteTypes, channels, authorInitials: c.ownerInitials, timelineName: c.name,
+    notes: userNotes, onAddNote: addNote, onEditNote: editUserNote,
+    timeline: c.timeline ?? [], systemNotes,
+    noteTypes: writableNoteTypes, channels, authorInitials: c.ownerInitials, timelineName: c.name,
     timelineInitials: c.initials, editorLabels: EDITOR_LABELS,
     labels: {
       notes: t('sections.notes'),

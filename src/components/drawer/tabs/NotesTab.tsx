@@ -33,6 +33,9 @@ const CHANNEL_ICON: Record<string, ComponentType<{ size?: number }>> = {
 
 interface NotesTabProps {
   notes?: NoteItem[]
+  // System events (status/phase changes, BE-written) — rendered in the TIMELINE
+  // section, not the notes thread (Danny 2026-07-13: events are not notes).
+  systemNotes?: NoteItem[]
   timeline?: TimelineItem[]
   noteTypes?: NoteType[]
   // Optional contact channels (last_contact_types). Picking one marks the note a
@@ -52,7 +55,7 @@ interface NotesTabProps {
 }
 
 export default function NotesTab({
-  notes = [], timeline = [], noteTypes = [], channels = [], labels = {}, editorLabels,
+  notes = [], systemNotes = [], timeline = [], noteTypes = [], channels = [], labels = {}, editorLabels,
   authorInitials, timelineName, timelineInitials, onAddNote, onEditNote,
   showNotes = true, showTimeline = true, showConversations = true,
 }: NotesTabProps) {
@@ -115,6 +118,23 @@ export default function NotesTab({
       : { background: `color-mix(in srgb, ${col} 12%, transparent)`, color: col, border: `1px solid color-mix(in srgb, ${col} 40%, transparent)` }
     const Icon = CHANNEL_ICON[value]
     return <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3, fontSize: 10, fontWeight: 600, padding: '1px 6px', borderRadius: 99, marginRight: 6, ...soft }}>{Icon && <Icon size={10} />}{ch?.label ?? value}</span>
+  }
+
+  // Calm one-line system-event row (status/phase change): History icon, chip, no pencil.
+  const systemRow = (n: NoteItem, key: string | number) => {
+    const who = noteAuthor(n)
+    return (
+      <div key={key} style={{ display: 'flex', gap: 8, marginBottom: 10, alignItems: 'center' }}>
+        <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', color: 'var(--text-muted)' }}>
+          <History size={13} />
+        </div>
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px' }}>
+          {n.type && renderTypeChip(n.type)}
+          <SafeHtml style={{ fontSize: 12, color: 'var(--text)', flex: 1, minWidth: 0 }} html={n.text ?? n.body ?? ''} />
+          <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{who ? `${who} · ` : ''}{noteWhen(n)}</span>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -186,19 +206,8 @@ export default function NotesTab({
           ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{labels.notesEmpty}</div>
           : notes.map((n, i) => {
               const who = noteAuthor(n)
-              // System event (status/phase change) — calm one-line row, no avatar/pencil.
-              if (isSystemNote(n)) return (
-                <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 10, alignItems: 'center' }}>
-                  <div style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--hover-bg)', color: 'var(--text-muted)' }}>
-                    <History size={13} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px' }}>
-                    {n.type && renderTypeChip(n.type)}
-                    <SafeHtml style={{ fontSize: 12, color: 'var(--text)', flex: 1, minWidth: 0 }} html={n.text ?? n.body ?? ''} />
-                    <span style={{ fontSize: 11, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{who ? `${who} · ` : ''}{noteWhen(n)}</span>
-                  </div>
-                </div>
-              )
+              // Safety net: a stray system note still renders as an event row here.
+              if (isSystemNote(n)) return systemRow(n, i)
               return (
               <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
                 <Avatar initials={who ? initialsOf(who) : authorInitials} size={26} />
@@ -237,7 +246,11 @@ export default function NotesTab({
       {/* Timeline */}
       {showTimeline && (
       <SectionCard title={labels.timeline}>
-        {timeline.length > 0
+        {/* Status/phase-change events belong to the timeline (Danny 2026-07-13). */}
+        {[...systemNotes]
+          .sort((a, b) => (Date.parse(b.created_at ?? '') || 0) - (Date.parse(a.created_at ?? '') || 0))
+          .map((n, i) => systemRow(n, `sys-${i}`))}
+        {(timeline.length > 0 || systemNotes.length > 0)
           ? timeline.map((ev, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 12, alignItems: 'flex-start' }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0, marginTop: 6 }} />
