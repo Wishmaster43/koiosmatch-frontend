@@ -278,7 +278,9 @@
     "taskOpen": "Taak openen",
     "tasksOpen": "Open",
     "tasksHistory": "Historie",
-    "returnDateUnknownHint": "Leeg laten = nog onbekend"
+    "returnDateUnknownHint": "Leeg laten = nog onbekend",
+    "restoredNamed": "{{name}} hersteld",
+    "openRestored": "Openen"
   },
   "stage": {
     "lead": "Lead",
@@ -742,6 +744,24 @@
       "timeline_events": "Tijdlijn-items",
       "conversations": "Gesprekken"
     }
+  },
+  "archiveGuard": {
+    "title": "Lopende zaken gevonden",
+    "body": "Let op — {{name}} heeft nog lopende zaken. Wat wil je ermee doen?",
+    "bodyAggregate": "Let op — {{blocked}} van de {{total}} geselecteerde kandidaten hebben nog lopende sollicitaties of matches. Wat wil je ermee doen?",
+    "applicationsTitle": "Lopende sollicitatie(s)",
+    "matchesTitle": "Actieve match(es)",
+    "resolutionReject": "Sollicitatie(s) afwijzen",
+    "resolutionEndMatch": "Match(es) beëindigen",
+    "matchStatus": {
+      "open": "Actief",
+      "closed": "Gesloten"
+    },
+    "matchConflict": "Kan niet beëindigd worden — er loopt nog een actief HelloFlex-contract.",
+    "stillBlocked": "Niet alles kon worden afgehandeld — geblokkeerd totdat dit is opgelost.",
+    "resolveButtonArchive": "Afhandelen en archiveren",
+    "resolveButtonTrash": "Afhandelen en naar prullenbak",
+    "resolving": "Bezig met afhandelen…"
   },
   "lifecycle": {
     "archived": "Gearchiveerd",

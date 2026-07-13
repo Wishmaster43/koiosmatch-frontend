@@ -271,7 +271,9 @@
     "taskOpen": "Abrir tarea",
     "tasksOpen": "Abiertas",
     "tasksHistory": "Historial",
-    "returnDateUnknownHint": "Dejar vacío = aún desconocido"
+    "returnDateUnknownHint": "Dejar vacío = aún desconocido",
+    "restoredNamed": "{{name}} restaurado/a",
+    "openRestored": "Abrir"
   },
   "stage": {
     "lead": "Lead",
@@ -742,6 +744,24 @@
       "timeline_events": "Eventos",
       "conversations": "Conversaciones"
     }
+  },
+  "archiveGuard": {
+    "title": "Asuntos pendientes encontrados",
+    "body": "Atención — {{name}} todavía tiene asuntos pendientes. ¿Qué quieres hacer?",
+    "bodyAggregate": "Atención — {{blocked}} de los {{total}} candidatos seleccionados todavía tienen solicitudes o matches activos. ¿Qué quieres hacer?",
+    "applicationsTitle": "Solicitud(es) pendiente(s)",
+    "matchesTitle": "Match(es) activo(s)",
+    "resolutionReject": "Rechazar solicitud(es)",
+    "resolutionEndMatch": "Finalizar match(es)",
+    "matchStatus": {
+      "open": "Activo",
+      "closed": "Cerrado"
+    },
+    "matchConflict": "No se puede finalizar — todavía hay un contrato de HelloFlex activo vinculado.",
+    "stillBlocked": "No se pudo resolver todo — sigue bloqueado hasta solucionarlo.",
+    "resolveButtonArchive": "Resolver y archivar",
+    "resolveButtonTrash": "Resolver y mover a la papelera",
+    "resolving": "Resolviendo…"
   },
   "lifecycle": {
     "archived": "Archivado",

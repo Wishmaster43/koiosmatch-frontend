@@ -271,7 +271,9 @@
     "taskOpen": "Aufgabe öffnen",
     "tasksOpen": "Offen",
     "tasksHistory": "Historie",
-    "returnDateUnknownHint": "Leer lassen = noch unbekannt"
+    "returnDateUnknownHint": "Leer lassen = noch unbekannt",
+    "restoredNamed": "{{name}} wiederhergestellt",
+    "openRestored": "Öffnen"
   },
   "stage": {
     "lead": "Lead",
@@ -742,6 +744,24 @@
       "timeline_events": "Timeline-Einträge",
       "conversations": "Gespräche"
     }
+  },
+  "archiveGuard": {
+    "title": "Offene Vorgänge gefunden",
+    "body": "Achtung — {{name}} hat noch offene Vorgänge. Was möchtest du damit tun?",
+    "bodyAggregate": "Achtung — {{blocked}} von {{total}} ausgewählten Kandidaten haben noch offene Bewerbungen oder Matches. Was möchtest du damit tun?",
+    "applicationsTitle": "Offene Bewerbung(en)",
+    "matchesTitle": "Aktive Match(es)",
+    "resolutionReject": "Bewerbung(en) ablehnen",
+    "resolutionEndMatch": "Match(es) beenden",
+    "matchStatus": {
+      "open": "Aktiv",
+      "closed": "Geschlossen"
+    },
+    "matchConflict": "Kann nicht beendet werden — es besteht noch ein aktiver HelloFlex-Vertrag.",
+    "stillBlocked": "Nicht alles konnte erledigt werden — weiterhin blockiert, bis dies behoben ist.",
+    "resolveButtonArchive": "Erledigen und archivieren",
+    "resolveButtonTrash": "Erledigen und in den Papierkorb",
+    "resolving": "Wird erledigt…"
   },
   "lifecycle": {
     "archived": "Archiviert",

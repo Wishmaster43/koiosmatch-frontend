@@ -5,13 +5,29 @@
  * against the server's `updated`/`added`/`removed` list (reverts on failure).
  * Selection state + the toast `notify` live in the container and are passed in.
  */
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import api from '@/lib/api'
 import { metaOf, initialsOf } from '../data/candidatesShared'
+import { needsLiveCheck, fetchLiveBlockers, liveFromError } from '../data/archiveGuard'
+import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 import type { Candidate, CandidatePool } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
+
+// Bulk archive-guard modal state (§3B) — aggregate mode: N of the selection
+// carry a live application/match; the same resolutions apply to all of them.
+export interface BulkArchiveGuardTarget {
+  ids: Id[]
+  blockedCount: number
+  totalCount: number
+  applications: BlockingApplication[]
+  matches: BlockingMatch[]
+}
+// Pre-check is bounded — a huge selection shouldn't fire dozens of detail
+// fetches just to open a bulk-archive confirm; beyond the cap the 409
+// forward-compat catch on the actual bulk call is the safety net.
+const BULK_GUARD_CHECK_CAP = 25
 
 interface UseCandidateBulkActionsParams {
   candidates: Candidate[]
@@ -179,12 +195,14 @@ export function useCandidateBulkActions({
     setSelectedIds(new Set())
   }
 
-  // Archive (soft-delete) the selection. Confirmation first; rows drop only once
-  // the server confirms. Authorization is UI-gated here and re-checked server-side.
-  const bulkArchive = () => {
-    const ids = [...selectedIds]
-    if (!ids.length) return
-    if (!window.confirm(t('bulk.archiveConfirm', { count: ids.length }))) return
+  // Archive-guard modal state (§3B) — set when the pre-check (or a 409 from the
+  // actual call) finds candidates with a live application/active match.
+  const [bulkArchiveGuard, setBulkArchiveGuard] = useState<BulkArchiveGuardTarget | null>(null)
+
+  // The actual bulk archive call — also re-used once the guard modal resolves
+  // every blocker. A 409 with the forward-compat `{ live }` payload re-opens the
+  // guard (whole-selection aggregate) instead of a bare error toast.
+  const runBulkArchive = (ids: Id[]) => {
     api.post('/candidates/bulk/archive', { candidate_ids: ids })
       .then((res) => {
         const archived: Id[] = Array.isArray(res.data?.archived) ? res.data.archived : ids
@@ -193,8 +211,44 @@ export function useCandidateBulkActions({
         setTotal(tt => Math.max(0, tt - archived.length))
         notify('success', t('bulk.archived', { count: archived.length }))
       })
-      .catch(() => notify('error', t('bulk.archiveError')))
+      .catch((e) => {
+        const live = liveFromError(e)
+        if (live) { setBulkArchiveGuard({ ids, blockedCount: ids.length, totalCount: ids.length, ...live }); return }
+        notify('error', t('bulk.archiveError'))
+      })
+  }
+
+  // Archive (soft-delete) the selection. Pre-checks the (row-flagged, capped)
+  // subset for live applications/matches first; any blocked candidate opens the
+  // guard modal in aggregate mode instead of the plain confirm dialog.
+  const bulkArchive = async () => {
+    const ids = [...selectedIds]
+    if (!ids.length) return
     setSelectedIds(new Set())
+    const byId = new Map(candidates.map(c => [c.id, c]))
+    const risky = ids.filter(id => needsLiveCheck(byId.get(id)))
+    const toCheck = risky.slice(0, BULK_GUARD_CHECK_CAP)
+    const checks = await Promise.all(toCheck.map(async id => ({ id, blockers: await fetchLiveBlockers(id) })))
+    const blocked = checks.filter(c => c.blockers.applications.length || c.blockers.matches.length)
+    if (blocked.length) {
+      const name = (id: Id) => byId.get(id)?.name
+      setBulkArchiveGuard({
+        ids, blockedCount: blocked.length, totalCount: ids.length,
+        applications: blocked.flatMap(b => b.blockers.applications.map(a => ({ ...a, candidateName: name(b.id) }))),
+        matches: blocked.flatMap(b => b.blockers.matches.map(m => ({ ...m, candidateName: name(b.id) }))),
+      })
+      return
+    }
+    if (!window.confirm(t('bulk.archiveConfirm', { count: ids.length }))) return
+    runBulkArchive(ids)
+  }
+
+  // The modal's primary action: every blocker resolved → run the real bulk archive.
+  const resolveBulkArchiveGuard = () => {
+    if (!bulkArchiveGuard) return
+    const { ids } = bulkArchiveGuard
+    setBulkArchiveGuard(null)
+    runBulkArchive(ids)
   }
 
   // Convert the selection to a phase (e.g. Lead→Kandidaat). The backend validates
@@ -247,5 +301,6 @@ export function useCandidateBulkActions({
     toggleRow, toggleAll, bulkAddToPool, bulkRemoveFromPool,
     bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
     selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
+    bulkArchiveGuard, setBulkArchiveGuard, resolveBulkArchiveGuard,
   }
 }

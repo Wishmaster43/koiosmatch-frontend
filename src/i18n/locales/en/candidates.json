@@ -278,7 +278,9 @@
     "taskOpen": "Open task",
     "tasksOpen": "Open",
     "tasksHistory": "History",
-    "returnDateUnknownHint": "Leave empty = not yet known"
+    "returnDateUnknownHint": "Leave empty = not yet known",
+    "restoredNamed": "{{name}} restored",
+    "openRestored": "Open"
   },
   "stage": {
     "lead": "Lead",
@@ -742,6 +744,24 @@
       "timeline_events": "Timeline events",
       "conversations": "Conversations"
     }
+  },
+  "archiveGuard": {
+    "title": "Open items found",
+    "body": "Note — {{name}} still has open items. What would you like to do?",
+    "bodyAggregate": "Note — {{blocked}} of the {{total}} selected candidates still have open applications or matches. What would you like to do?",
+    "applicationsTitle": "Open application(s)",
+    "matchesTitle": "Active match(es)",
+    "resolutionReject": "Reject application(s)",
+    "resolutionEndMatch": "End match(es)",
+    "matchStatus": {
+      "open": "Active",
+      "closed": "Closed"
+    },
+    "matchConflict": "Can't be ended — an active HelloFlex contract is still linked.",
+    "stillBlocked": "Not everything could be resolved — still blocked until this is fixed.",
+    "resolveButtonArchive": "Resolve and archive",
+    "resolveButtonTrash": "Resolve and move to trash",
+    "resolving": "Resolving…"
   },
   "lifecycle": {
     "archived": "Archived",

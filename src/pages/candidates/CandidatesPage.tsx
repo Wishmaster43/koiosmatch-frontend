@@ -15,7 +15,7 @@ import { useLookups } from '@/context/LookupsContext'
 import { useGenders } from '@/lib/useGenders'
 import { useUsers } from '@/lib/queries'
 import CandidateDrawerJs from './CandidateDrawer'
-import DeletionPreviewModal from './drawer/DeletionPreviewModal'
+import CandidateLifecycleModals from './CandidateLifecycleModals'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesTable from './CandidatesTable'
 import CandidatesBulkBar from './CandidatesBulkBar'
@@ -48,7 +48,7 @@ interface CandidateIntent {
   created_between?: [string, string]
   last_contact_between?: [string, string]
 }
-interface ActionMsg { type: string; text: string }
+interface ActionMsg { type: string; text: string; action?: { label: string; onClick: () => void } }
 interface AppUser { id: Id; name: string; [k: string]: unknown }
 
 // Still-untyped JS components — declare the props this page passes (typed boundary).
@@ -212,6 +212,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     selected, setSelected, detail, setDetail, drawerExpanded, setDrawerExpanded, drawerTab,
     selectCandidate, closeDrawer, patchCandidate,
     archiveOne, restoreOne, markDeletionOne,
+    archiveGuard, setArchiveGuard, resolveArchiveGuard,
     eraseTarget, setEraseTarget, hardDeleteOne, confirmHardDelete,
   } = useCandidateDrawerActions({ candidates, setCandidates, setTotal,
     notifyMsg: m => setActionMsg(m as ActionMsg), t })
@@ -246,6 +247,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     toggleRow, toggleAll, bulkAddToPool, bulkRemoveFromPool,
     bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
     selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
+    bulkArchiveGuard, setBulkArchiveGuard, resolveBulkArchiveGuard,
   } = useCandidateBulkActions({ candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes })
 
   // KPI strip config (3 donuts + attention cards) — pure builder (§0.3 split).
@@ -277,6 +279,13 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
               border: `1px solid ${actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)'}` }}>
               {actionMsg.type === 'error' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
               <span style={{ flex: 1 }}>{actionMsg.text}</span>
+              {/* Optional action (e.g. "Openen" after a restore) — underlined link-button. */}
+              {actionMsg.action && (
+                <button onClick={() => { actionMsg.action!.onClick(); setActionMsg(null) }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12.5, fontWeight: 600, textDecoration: 'underline', color: 'inherit' }}>
+                  {actionMsg.action.label}
+                </button>
+              )}
               <button onClick={() => setActionMsg(null)} aria-label={t('close', { ns: 'common' })}
                 style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 2 }}>
                 <X size={13} />
@@ -393,11 +402,13 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           initialTab={drawerTab}
         />
 
-        {/* Deletion-preview confirm popup (ERASE-1) — shows the blast radius before force-delete. */}
-        {eraseTarget && (
-          <DeletionPreviewModal candidateId={eraseTarget.id} candidateName={eraseTarget.name}
-            onClose={() => setEraseTarget(null)} onConfirm={confirmHardDelete} />
-        )}
+        {/* Erase/archive-guard confirm popups (ERASE-1 + §3B) — bundled in one thin
+            component purely for CandidatesPage size discipline (§0.3). */}
+        <CandidateLifecycleModals
+          eraseTarget={eraseTarget} onCloseErase={() => setEraseTarget(null)} onConfirmErase={confirmHardDelete}
+          archiveGuard={archiveGuard} onCloseArchiveGuard={() => setArchiveGuard(null)} onResolveArchiveGuard={resolveArchiveGuard}
+          bulkArchiveGuard={bulkArchiveGuard} onCloseBulkArchiveGuard={() => setBulkArchiveGuard(null)} onResolveBulkArchiveGuard={resolveBulkArchiveGuard}
+        />
       </div>
     </>
   )

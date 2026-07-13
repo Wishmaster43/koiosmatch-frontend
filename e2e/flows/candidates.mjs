@@ -60,7 +60,16 @@ export async function statusWithReason({ page, errors }) {
 // Archive from the drawer → the archived view must CONTAIN the candidate (ARCH-1 guard).
 export async function archiveAndFindBack({ page, errors }) {
   const at = errors.length
-  const name = await openFirstCandidate(page)
+  // ARCHIVE-GUARD: a row with a live funnel stage/active match now opens the guard
+  // modal instead of archiving — pick a candidate WITHOUT running business here.
+  await go(page, 'Kandidaten')
+  const row = page.locator('table tbody tr')
+    .filter({ hasNotText: /Gesolliciteerd|Uitgenodigd|Intake|Voorgesteld|Geplaatst/ }).first()
+  expect(await row.count(), 'geen archiveerbare kandidaat-rij (alles heeft lopende zaken?)')
+  const name = (await row.locator('td').nth(1).innerText()).split('\n')[0].trim()
+  await row.click()
+  await sleep(1200)
+  // The confirm now lives in the guard hook (window.confirm) — accept it when it fires.
   page.once('dialog', d => d.accept())
   const trash = page.locator('button[title*="rchiveren"], button[aria-label*="rchiveren"]').first()
   expect(await trash.count(), 'archiveer-knop niet gevonden in de drawer')

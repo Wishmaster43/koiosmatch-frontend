@@ -271,7 +271,9 @@
     "taskOpen": "Ouvrir la tâche",
     "tasksOpen": "Ouvertes",
     "tasksHistory": "Historique",
-    "returnDateUnknownHint": "Laisser vide = pas encore connu"
+    "returnDateUnknownHint": "Laisser vide = pas encore connu",
+    "restoredNamed": "{{name}} restauré(e)",
+    "openRestored": "Ouvrir"
   },
   "stage": {
     "lead": "Piste",
@@ -742,6 +744,24 @@
       "timeline_events": "Événements",
       "conversations": "Conversations"
     }
+  },
+  "archiveGuard": {
+    "title": "Éléments en cours détectés",
+    "body": "Attention — {{name}} a encore des éléments en cours. Que voulez-vous en faire ?",
+    "bodyAggregate": "Attention — {{blocked}} des {{total}} candidats sélectionnés ont encore des candidatures ou matches en cours. Que voulez-vous en faire ?",
+    "applicationsTitle": "Candidature(s) en cours",
+    "matchesTitle": "Match(es) actif(s)",
+    "resolutionReject": "Rejeter la/les candidature(s)",
+    "resolutionEndMatch": "Terminer le(s) match(es)",
+    "matchStatus": {
+      "open": "Actif",
+      "closed": "Terminé"
+    },
+    "matchConflict": "Impossible à terminer — un contrat HelloFlex actif est encore lié.",
+    "stillBlocked": "Tout n'a pas pu être résolu — toujours bloqué tant que ce n'est pas corrigé.",
+    "resolveButtonArchive": "Résoudre et archiver",
+    "resolveButtonTrash": "Résoudre et mettre à la corbeille",
+    "resolving": "Résolution en cours…"
   },
   "lifecycle": {
     "archived": "Archivé",

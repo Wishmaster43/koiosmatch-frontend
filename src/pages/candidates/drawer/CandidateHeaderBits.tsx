@@ -152,9 +152,11 @@ export function ArchivedBanner({ c, canHardDelete, onRestore, onMarkDeletion, on
           <RotateCcw size={14} />
         </button>
       )}
-      {/* Archived → move to trash (reversible); Trash → permanent delete (admin, preview popup). */}
+      {/* Archived → move to trash (reversible); Trash → permanent delete (admin, preview popup).
+          The confirm (or, when live applications/matches hang on the candidate, the
+          ArchiveGuardModal) lives in useCandidateDrawerActions.markDeletionOne. */}
       {!inTrash && onMarkDeletion && (
-        <button onClick={() => { if (confirm(t('erase.markConfirm', { name: c.name }))) onMarkDeletion(c.id) }}
+        <button onClick={() => onMarkDeletion(c.id)}
           title={t('erase.markDelete')} aria-label={t('erase.markDelete')}
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 3, display: 'flex', color: 'var(--color-danger)' }}>
           <Trash2 size={14} />
