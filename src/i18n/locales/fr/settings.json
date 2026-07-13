@@ -102,6 +102,7 @@
     "automatch": "Règles de correspondance",
     "planning_board": "Tableau de planification",
     "koios": "Koios AI",
+    "numbering": "Numérotation",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Types de contrat",
@@ -1493,5 +1494,23 @@
     "subtitle": "Le statut de disponibilité attribué au candidat juste après la conversion de Lead en Candidat. « Aucun » laisse le statut vide.",
     "none": "Aucun (définir manuellement)",
     "saveFailed": "Échec de l'enregistrement"
+  },
+  "numbering": {
+    "title": "Numérotation",
+    "subtitle": "Numéro de séquence automatique par enregistrement — préfixe, nombre de chiffres et valeur de départ par entité.",
+    "hint": "Les changements ne s'appliquent qu'aux NOUVEAUX numéros ; les numéros existants restent inchangés.",
+    "entity": "Entité",
+    "prefix": "Préfixe",
+    "pad": "Chiffres",
+    "start": "Valeur de départ",
+    "saveFailed": "Échec de l'enregistrement",
+    "entities": {
+      "candidate": "Candidat",
+      "customer": "Client",
+      "vacancy": "Poste",
+      "customer_location": "Site",
+      "customer_department": "Département",
+      "match": "Match"
+    }
   }
 }

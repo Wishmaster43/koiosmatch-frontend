@@ -16,6 +16,8 @@ const addressLine = (l: ApiLocation = {}): string => {
 export function mapDepartment(d: ApiDepartment = {}): Department {
   return {
     id: d.id,
+    // NUMMER-1: human-readable reference number (A-001).
+    referenceNumber: d.reference_number ?? '',
     name: d.name ?? '—',
     description: d.description ?? '',
     locationId: d.location_id ?? d.locationId ?? null,
@@ -46,6 +48,8 @@ export function mapLocation(l: ApiLocation = {}): Location {
   const contacts = (l.contacts ?? []).map(mapContact)
   return {
     id: l.id,
+    // NUMMER-1: human-readable reference number (L-001).
+    referenceNumber: l.reference_number ?? '',
     name: l.name ?? '—',
     street: l.street ?? '',
     houseNumber: l.house_number ?? '',
@@ -84,6 +88,8 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
 
   return {
     id: c.id,
+    // NUMMER-1: human-readable reference number (D-4).
+    referenceNumber: c.reference_number ?? '',
     name: c.name ?? '—',
     initials: initialsOf(c.name),
     debtorNumber: c.debtor_number ?? c.debtorNumber ?? '',

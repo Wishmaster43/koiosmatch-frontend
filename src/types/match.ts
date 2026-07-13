@@ -7,6 +7,8 @@
 // The raw match as it can arrive from the API (snake_case-tolerant, nested or flat).
 export interface RawMatch {
   id?: string | number
+  // NUMMER-1: server-assigned human-readable reference number (M-00042).
+  reference_number?: string
   candidate?: { first_name?: string; last_name?: string; name?: string }
   candidate_name?: string
   vacancy_title?: string
@@ -34,6 +36,8 @@ export interface RawMatch {
 // The flat row the matches table renders.
 export interface MatchRow {
   id?: string | number
+  // NUMMER-1: human-readable reference number (M-00042), shown in the drawer + table.
+  referenceNumber?: string
   candidate: string
   initials: string
   vacancy: string

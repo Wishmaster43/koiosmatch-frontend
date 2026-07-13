@@ -71,6 +71,13 @@ export default function CustomersTable({
         </div>
       ),
     },
+    {
+      // NUMMER-1: human-readable reference number (D-4) — narrow, mono, muted.
+      key: 'referenceNumber', header: t('cols.referenceNumber'), nowrap: true, width: 90,
+      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text-muted)' },
+      sortable: true, sortValue: c => c.referenceNumber ?? '',
+      render: c => c.referenceNumber || '—',
+    },
     { key: 'debtorNumber', header: t('cols.debtorNumber'), nowrap: true, cellStyle: { ...mutedCell, fontFamily: 'var(--font-mono, monospace)' }, sortable: true, sortValue: c => c.debtorNumber, render: c => c.debtorNumber || '—' },
     {
       key: 'status', header: t('cols.status'), sortable: true, sortValue: c => statusMeta(String(c.status)).label ?? String(c.status),

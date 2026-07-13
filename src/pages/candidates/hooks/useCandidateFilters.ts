@@ -8,6 +8,7 @@
 import { useState, useMemo } from 'react'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { geocodeNL } from '@/lib/geocode'
+import { isReferenceQuery } from '@/lib/referenceNumber'
 
 export interface GeoFilter { q: string; km: number; lat: number; lng: number; label: string }
 export interface DateRangeFilter { param: 'created_between' | 'last_contact_between'; from: string; to: string }
@@ -83,7 +84,13 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
     // in table view the sidebar's straal-blok drives the same params.
     if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     else if (geoFilter) { p.lat = geoFilter.lat; p.lng = geoFilter.lng; p.radius = geoFilter.km }
-    if (globalSearch.trim())     p.search         = globalSearch.trim()
+    // NUMMER-1: a typed reference number (K-00123) does an exact server-side `?ref=`
+    // lookup instead of the normal free-text search; the server ignores other filters.
+    if (globalSearch.trim()) {
+      const q = globalSearch.trim()
+      if (isReferenceQuery(q)) p.ref = q
+      else p.search = q
+    }
     if (selectedStatus.length)   p.status         = selectedStatus
     if (selectedFunnel.length)   p.funnel_type    = selectedFunnel
     if (selectedType.length)     p.candidate_type = selectedType

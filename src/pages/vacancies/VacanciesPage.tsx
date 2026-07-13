@@ -12,6 +12,7 @@ import { CheckCircle2, AlertTriangle, X, Archive, Map as MapIcon } from 'lucide-
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
+import { isReferenceQuery } from '@/lib/referenceNumber'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import InsightsRow from '@/components/insights/InsightsRow'
@@ -83,7 +84,13 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // Server-side filter params (axios serialises arrays as `key[]`).
   const filterParams = useMemo(() => {
     const p: Record<string, unknown> = {}
-    if (globalSearch.trim())    p.search      = globalSearch.trim()
+    // NUMMER-1: a typed reference number (V-12) does an exact server-side `?ref=`
+    // lookup instead of the normal free-text search; the server ignores other filters.
+    if (globalSearch.trim()) {
+      const q = globalSearch.trim()
+      if (isReferenceQuery(q)) p.ref = q
+      else p.search = q
+    }
     // '__none' = the "Geen status" donut segment → server-side no_status filter (VAC-NOSTATUS-1).
     if (statusBucket === '__none')   p.no_status = 1
     else if (statusBucket !== 'all') p.status    = [statusBucket]

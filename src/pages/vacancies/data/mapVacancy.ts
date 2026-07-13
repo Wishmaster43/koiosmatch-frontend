@@ -23,6 +23,8 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
   return {
     id: v.id,
     code: v.code ?? v.reference ?? '',
+    // NUMMER-1: human-readable reference number (V-12) — distinct from the manual code above.
+    referenceNumber: v.reference_number ?? '',
     title: v.title ?? '—',
     // Status carries its own label + colour from the tenant lookup.
     statusValue: status.value ?? v.status_value ?? (typeof v.status === 'string' ? v.status : null),

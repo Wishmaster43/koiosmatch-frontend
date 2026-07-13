@@ -190,11 +190,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           onPhotoChange={setPhotoUrl}
           photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
           renderTitle={() => (
-            // Archived: the banner tells the real story — the deployability info
-            // line ("Ziek sinds … · weer beschikbaar …") is stale noise then.
             <CandidateTitle c={c} editing={headerEdit.headerEditing} hf={headerEdit.hf} setHF={headerEdit.setHF}
-              phaseInfo={status.phaseInfo} showPhase={!!status.currentPhase}
-              statusInfoLine={c.archived ? '' : status.statusInfoLine} onEditStatusInfo={status.openStatusEdit} />
+              phaseInfo={status.phaseInfo} showPhase={!!status.currentPhase} />
           )}
           titleActions={<>
             <ChangelogPopover c={c} />

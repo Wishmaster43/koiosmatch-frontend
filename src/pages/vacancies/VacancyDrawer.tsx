@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Globe } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import DetailsTab from './drawer/DetailsTab'
@@ -88,8 +89,16 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           label={t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: (v.clientName?.[0] ?? v.title?.[0] ?? '?').toUpperCase(), soft: true }}
-          title={v.title}
-          subtitle={v.clientName || '—'}
+          renderTitle={() => (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{v.title}</span>
+                {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
+                <ReferenceNumberChip value={v.referenceNumber} />
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{v.clientName || '—'}</div>
+            </>
+          )}
           meta={[
             { key: 'status', label: t('drawer.status'), value: v.statusValue,
               options: statuses.map(s => ({ value: s.value, label: s.label })),

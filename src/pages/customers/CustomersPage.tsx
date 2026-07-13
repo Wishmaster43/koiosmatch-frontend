@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { geocodeNL } from '@/lib/geocode'
+import { isReferenceQuery } from '@/lib/referenceNumber'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useUsers } from '@/lib/queries'
@@ -89,7 +90,13 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
 
   const filterParams = useMemo(() => {
     const p: Record<string, unknown> = {}
-    if (globalSearch.trim())     p.search   = globalSearch.trim()
+    // NUMMER-1: a typed reference number (D-4) does an exact server-side `?ref=`
+    // lookup instead of the normal free-text search; the server ignores other filters.
+    if (globalSearch.trim()) {
+      const q = globalSearch.trim()
+      if (isReferenceQuery(q)) p.ref = q
+      else p.search = q
+    }
     if (selectedStatus.length)   p.status   = selectedStatus
     if (selectedOwner.length)    p.owner_id = selectedOwner
     if (selectedCity.length)     p.city     = selectedCity

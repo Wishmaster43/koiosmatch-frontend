@@ -14,6 +14,7 @@ import { useCvSettings } from '@/lib/useCvSettings'
 import { useLocale, useDateFormat } from '@/lib/datetime'
 import { useFunctions } from '@/lib/useFunctions'
 import CreatableSelect from '@/components/ui/CreatableSelect'
+import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 import type { HeaderForm } from '../hooks/useCandidateHeaderEdit'
@@ -21,12 +22,13 @@ import type { HeaderForm } from '../hooks/useCandidateHeaderEdit'
 const inputBase = { width: '100%', minWidth: 0, boxSizing: 'border-box' as const, padding: '6px 10px', borderRadius: 6, border: '1px solid var(--border)', outline: 'none' }
 const iconBtn = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 } as const
 
-// Title block: name + phase badge + status info line, or the name/function edit form.
-export function CandidateTitle({ c, editing, hf, setHF, phaseInfo, showPhase, statusInfoLine, onEditStatusInfo }: {
+// Title block: name + phase badge, or the name/function edit form. The status
+// reason/return-date line was removed from the header (Danny 13/7: calm header) —
+// that info lives in the status modal (re-pick the status), Voorkeuren and Tijdlijn.
+export function CandidateTitle({ c, editing, hf, setHF, phaseInfo, showPhase }: {
   c: Candidate; editing: boolean
   hf: (k: keyof HeaderForm) => string; setHF: (k: keyof HeaderForm, v: string) => void
   phaseInfo: { label: string; color: string }; showPhase: boolean
-  statusInfoLine: string; onEditStatusInfo: () => void
 }) {
   const { t } = useTranslation('candidates')
   const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
@@ -53,18 +55,10 @@ export function CandidateTitle({ c, editing, hf, setHF, phaseInfo, showPhase, st
           <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 999,
             background: phaseInfo.color + '1A', color: phaseInfo.color, border: `1px solid ${phaseInfo.color}55` }}>{phaseInfo.label}</span>
         )}
+        {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
+        <ReferenceNumberChip value={c.referenceNumber} />
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{c.title || '—'}</div>
-      {statusInfoLine && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 2 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{statusInfoLine}</span>
-          {/* Pencil: edit the reason / return date without changing the status. */}
-          <button onClick={onEditStatusInfo} title={t('drawer.editStatusInfo')} aria-label={t('drawer.editStatusInfo')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 1, display: 'flex', color: 'var(--text-muted)' }}>
-            <Edit2 size={10} />
-          </button>
-        </div>
-      )}
     </>
   )
 }

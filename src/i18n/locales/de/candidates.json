@@ -25,7 +25,8 @@
     "koios": "Koios",
     "phase": "Phase",
     "deployability": "Status",
-    "contractForm": "Vertragsform"
+    "contractForm": "Vertragsform",
+    "referenceNumber": "Nr."
   },
   "bulk": {
     "selected": "{{count}} ausgewählt",
@@ -97,7 +98,7 @@
   "analytics": {
     "statusTitle": "Status",
     "funnelTitle": "Funnel",
-    "rcTitle": "Pro Recruiter",
+    "rcTitle": "Recruiter",
     "stale6m": "Nicht kontaktiert > 6 Mon",
     "stale6mSub": "lange kein Kontakt",
     "noFollowup": "Keine Nachverfolgung",

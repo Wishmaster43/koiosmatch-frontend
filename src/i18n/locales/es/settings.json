@@ -102,6 +102,7 @@
     "automatch": "Reglas de coincidencia",
     "planning_board": "Tablero de planificación",
     "koios": "Koios AI",
+    "numbering": "Numeración",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Tipos de contrato",
@@ -1493,5 +1494,23 @@
     "subtitle": "El estado de disponibilidad que recibe un candidato justo después de convertir de Lead a Candidato. «Ninguno» lo deja vacío.",
     "none": "Ninguno (establecer manualmente)",
     "saveFailed": "Error al guardar"
+  },
+  "numbering": {
+    "title": "Numeración",
+    "subtitle": "Número de secuencia automático por registro — prefijo, cantidad de dígitos y valor inicial por entidad.",
+    "hint": "Los cambios solo se aplican a los números NUEVOS; los números existentes no cambian.",
+    "entity": "Entidad",
+    "prefix": "Prefijo",
+    "pad": "Dígitos",
+    "start": "Valor inicial",
+    "saveFailed": "Error al guardar",
+    "entities": {
+      "candidate": "Candidato",
+      "customer": "Cliente",
+      "vacancy": "Vacante",
+      "customer_location": "Ubicación",
+      "customer_department": "Departamento",
+      "match": "Match"
+    }
   }
 }

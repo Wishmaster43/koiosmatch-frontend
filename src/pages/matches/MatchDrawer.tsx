@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import { useDateFormat } from '@/lib/datetime'
 import StatusPill from '@/components/ui/StatusPill'
 import ScorePill from './ScorePill'
@@ -93,6 +94,8 @@ export default function MatchDrawer({
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{match.candidate}</span>
                 {/* Approval badge — colour-coded, read-only, next to the title (§3A calm header). */}
                 <MatchApprovalBadge status={match.approval_status} />
+                {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
+                <ReferenceNumberChip value={match.referenceNumber} />
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                 {[match.vacancy, match.client].filter(v => v && v !== '—').join(' · ') || '—'}

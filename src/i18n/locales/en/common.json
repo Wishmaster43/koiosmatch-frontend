@@ -13,6 +13,10 @@
   "empty": "No data yet.",
   "search": "Search…",
   "clear": "Clear",
+  "referenceNumber": {
+    "copy": "Copy number",
+    "copied": "Number copied"
+  },
   "loading": "Loading…",
   "noResults": "No results",
   "resultsCount": "{{count}} results",

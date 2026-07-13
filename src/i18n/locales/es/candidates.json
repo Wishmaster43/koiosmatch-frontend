@@ -25,7 +25,8 @@
     "koios": "Koios",
     "phase": "Fase",
     "deployability": "Estado",
-    "contractForm": "Tipo de contrato"
+    "contractForm": "Tipo de contrato",
+    "referenceNumber": "N.º"
   },
   "bulk": {
     "selected": "{{count}} seleccionado(s)",
@@ -97,7 +98,7 @@
   "analytics": {
     "statusTitle": "Estado",
     "funnelTitle": "Embudo",
-    "rcTitle": "Por reclutador",
+    "rcTitle": "Reclutador",
     "stale6m": "Sin contacto > 6 meses",
     "stale6mSub": "mucho sin contacto",
     "noFollowup": "Sin seguimiento",

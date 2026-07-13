@@ -25,6 +25,13 @@ export default function DepartmentsTab({ customerId, departments = [], onAdd }: 
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
 
   const columns: Column<Department>[] = [
+    {
+      // NUMMER-1: human-readable reference number (A-001) — narrow, mono, muted.
+      key: 'referenceNumber', header: t('departments.col.referenceNumber'), nowrap: true, width: 80,
+      cellStyle: { fontFamily: 'JetBrains Mono, monospace', fontSize: 12, color: 'var(--text-muted)' },
+      sortable: true, sortValue: d => d.referenceNumber ?? '',
+      render: d => d.referenceNumber || '—',
+    },
     { key: 'name', header: t('departments.col.name'), sortable: true, sortValue: d => d.name,
       render: d => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

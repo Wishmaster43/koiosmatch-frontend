@@ -13,6 +13,10 @@
   "empty": "Aucune donnée.",
   "search": "Rechercher…",
   "clear": "Effacer",
+  "referenceNumber": {
+    "copy": "Copier le numéro",
+    "copied": "Numéro copié"
+  },
   "loading": "Chargement…",
   "noResults": "Aucun résultat",
   "resultsCount": "{{count}} résultats",

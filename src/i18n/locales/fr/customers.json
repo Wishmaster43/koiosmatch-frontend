@@ -10,6 +10,7 @@
   },
   "cols": {
     "name": "Nom",
+    "referenceNumber": "N°",
     "debtorNumber": "N° débiteur",
     "status": "Statut",
     "accountManager": "Gestionnaire de compte",
@@ -103,6 +104,7 @@
     "searchPlaceholder": "Rechercher un site…",
     "col": {
       "name": "Nom",
+      "referenceNumber": "N°",
       "city": "Ville",
       "departments": "Services",
       "contacts": "Contacts"
@@ -131,6 +133,7 @@
     "searchPlaceholder": "Rechercher un service…",
     "col": {
       "name": "Nom",
+      "referenceNumber": "N°",
       "location": "Site",
       "contacts": "Contacts"
     },

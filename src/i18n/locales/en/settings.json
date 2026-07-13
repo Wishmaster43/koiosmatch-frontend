@@ -110,6 +110,7 @@
     "automatch": "Auto-match rules",
     "planning_board": "Planning board",
     "koios": "Koios AI",
+    "numbering": "Numbering",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Contract types",
@@ -1493,5 +1494,23 @@
     "subtitle": "The deployability status a candidate gets right after converting from Lead to Candidate. Choose \"None\" to leave it empty.",
     "none": "None (set manually)",
     "saveFailed": "Saving failed"
+  },
+  "numbering": {
+    "title": "Numbering",
+    "subtitle": "Automatic sequence number per record — prefix, digit padding and start value per entity.",
+    "hint": "Changes only apply to NEW numbers; existing numbers stay unchanged.",
+    "entity": "Entity",
+    "prefix": "Prefix",
+    "pad": "Digits",
+    "start": "Start value",
+    "saveFailed": "Saving failed",
+    "entities": {
+      "candidate": "Candidate",
+      "customer": "Customer",
+      "vacancy": "Vacancy",
+      "customer_location": "Location",
+      "customer_department": "Department",
+      "match": "Match"
+    }
   }
 }

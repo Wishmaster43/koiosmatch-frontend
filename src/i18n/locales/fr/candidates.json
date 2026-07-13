@@ -25,7 +25,8 @@
     "koios": "Koios",
     "phase": "Phase",
     "deployability": "Statut",
-    "contractForm": "Forme de contrat"
+    "contractForm": "Forme de contrat",
+    "referenceNumber": "N°"
   },
   "bulk": {
     "selected": "{{count}} sélectionné(s)",
@@ -97,7 +98,7 @@
   "analytics": {
     "statusTitle": "Statut",
     "funnelTitle": "Tunnel",
-    "rcTitle": "Par recruteur",
+    "rcTitle": "Recruteur",
     "stale6m": "Sans contact > 6 mois",
     "stale6mSub": "longtemps sans contact",
     "noFollowup": "Sans suivi",

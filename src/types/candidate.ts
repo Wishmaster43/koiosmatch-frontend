@@ -93,6 +93,9 @@ export interface CandidateMatch {
 /** The UI candidate model — every consumer relies on this shape. */
 export interface Candidate {
   id: string | number
+  // Human-readable sequence number (NUMMER-1), e.g. "K-00123". Tenant-configurable
+  // prefix/padding/start (Settings → Nummering); server-assigned, immutable.
+  referenceNumber?: string
   name: string
   firstname?: string
   lastname?: string
@@ -208,6 +211,8 @@ export interface ApiCandidateMatch {
 /** Raw API candidate record (read defensively by mapCandidate). */
 export interface ApiCandidate {
   id?: string | number
+  // NUMMER-1: server-assigned human-readable reference number (K-00123).
+  reference_number?: string
   name?: string
   full_name?: string
   firstname?: string

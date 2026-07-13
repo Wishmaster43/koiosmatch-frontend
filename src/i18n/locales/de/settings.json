@@ -102,6 +102,7 @@
     "automatch": "Auto-Match-Regeln",
     "planning_board": "Planungstafel",
     "koios": "Koios AI",
+    "numbering": "Nummerierung",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Vertragsarten",
@@ -1493,5 +1494,23 @@
     "subtitle": "Der Einsatzstatus, den ein Kandidat direkt nach der Konvertierung von Lead zu Kandidat erhält. \"Keine\" lässt den Status leer.",
     "none": "Keine (manuell setzen)",
     "saveFailed": "Speichern fehlgeschlagen"
+  },
+  "numbering": {
+    "title": "Nummerierung",
+    "subtitle": "Automatische laufende Nummer je Datensatz — Präfix, Ziffernanzahl und Startwert je Entität.",
+    "hint": "Änderungen gelten nur für NEUE Nummern; bestehende Nummern bleiben unverändert.",
+    "entity": "Entität",
+    "prefix": "Präfix",
+    "pad": "Ziffern",
+    "start": "Startwert",
+    "saveFailed": "Speichern fehlgeschlagen",
+    "entities": {
+      "candidate": "Kandidat",
+      "customer": "Kunde",
+      "vacancy": "Stelle",
+      "customer_location": "Standort",
+      "customer_department": "Abteilung",
+      "match": "Match"
+    }
   }
 }

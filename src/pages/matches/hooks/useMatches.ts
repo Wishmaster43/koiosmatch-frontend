@@ -14,6 +14,8 @@ function mapMatch(m: RawMatch): MatchRow {
   const name = m.candidate_name ?? cand.name ?? (joined || '—')
   return {
     id:         m.id,
+    // NUMMER-1: human-readable reference number (M-00042).
+    referenceNumber: m.reference_number ?? '',
     candidate:  name,
     initials:   name && name !== '—' ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '?',
     vacancy:    m.vacancy_title ?? m.vacancy?.title ?? '—',
@@ -34,7 +36,10 @@ function mapMatch(m: RawMatch): MatchRow {
 }
 
 // Match list state: rows (mapped) + loading + error. 404 = empty, not an error.
-export function useMatches(includeArchived = false) {
+// `ref` (NUMMER-1): an exact case-insensitive reference-number lookup (M-00042) —
+// when set, the super-search on the page detected a reference query, so this
+// fetches a single filtered page instead of the full paginated set.
+export function useMatches(includeArchived = false, ref: string | null = null) {
   const [rows,    setRows]    = useState<MatchRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
@@ -53,6 +58,12 @@ export function useMatches(includeArchived = false) {
     const base: Record<string, unknown> = { per_page: 100 }
     if (includeArchived) base.include_archived = 1
     const loadAll = async () => {
+      // A reference-number query (NUMMER-1) is an exact server-side lookup — one
+      // request, no pagination loop; the server ignores other filters when `ref` is set.
+      if (ref) {
+        const r = await api.get('/matches', { params: { ref } })
+        return (r.data?.data ?? []) as RawMatch[]
+      }
       const all: RawMatch[] = []
       for (let pageNo = 1; pageNo <= 10; pageNo++) {
         const r = await api.get('/matches', { params: { ...base, page: pageNo } })
@@ -67,7 +78,7 @@ export function useMatches(includeArchived = false) {
       .catch(e => { if (alive && e?.response?.status && e.response.status !== 404) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [includeArchived, refreshTick])
+  }, [includeArchived, refreshTick, ref])
 
   // Patch one match in place (optimistic board drag / stage change).
   const updateMatch = (id: MatchRow['id'], patch: Partial<MatchRow>) =>

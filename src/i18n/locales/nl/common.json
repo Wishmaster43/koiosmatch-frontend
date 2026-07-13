@@ -13,6 +13,10 @@
   "empty": "Nog geen gegevens.",
   "search": "Zoeken…",
   "clear": "Wissen",
+  "referenceNumber": {
+    "copy": "Kopieer nummer",
+    "copied": "Nummer gekopieerd"
+  },
   "loading": "Laden…",
   "noResults": "Geen resultaten",
   "resultsCount": "{{count}} resultaten",

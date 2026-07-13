@@ -110,6 +110,7 @@
     "automatch": "Automatch-regels",
     "planning_board": "Planbord-weergave",
     "koios": "Koios AI",
+    "numbering": "Nummering",
     "mod_shiftmanager": "Shiftmanager",
     "mod_helloflex": "HelloFlex",
     "contract_forms": "Contractvormen",
@@ -1493,5 +1494,23 @@
     "subtitle": "De inzetbaarheidsstatus die een kandidaat direct krijgt na conversie van Lead naar Kandidaat. Kies \"Geen\" om de status leeg te laten.",
     "none": "Geen (handmatig instellen)",
     "saveFailed": "Opslaan mislukt"
+  },
+  "numbering": {
+    "title": "Nummering",
+    "subtitle": "Automatisch reeksnummer per record — prefix, aantal cijfers en startwaarde per type.",
+    "hint": "Wijzigingen gelden alleen voor NIEUWE nummers; bestaande nummers blijven ongewijzigd.",
+    "entity": "Type",
+    "prefix": "Prefix",
+    "pad": "Cijfers",
+    "start": "Startwaarde",
+    "saveFailed": "Opslaan mislukt",
+    "entities": {
+      "candidate": "Kandidaat",
+      "customer": "Klant",
+      "vacancy": "Vacature",
+      "customer_location": "Locatie",
+      "customer_department": "Afdeling",
+      "match": "Match"
+    }
   }
 }

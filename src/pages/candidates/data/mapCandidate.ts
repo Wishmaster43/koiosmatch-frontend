@@ -60,6 +60,8 @@ export function mapCandidate(c: ApiCandidate): Candidate {
 
   return {
     id:              c.id ?? '',
+    // NUMMER-1: human-readable reference number (K-00123), shown in the drawer + table.
+    referenceNumber: c.reference_number ?? '',
     name,
     initials:        initialsOf(name),
     title:           c.function_title ?? c.title ?? '',

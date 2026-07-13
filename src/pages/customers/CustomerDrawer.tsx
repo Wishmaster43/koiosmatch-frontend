@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import NotesTab from '@/components/drawer/tabs/NotesTab'
+import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useNoteTypes } from '@/lib/useNoteTypes'
@@ -147,7 +148,11 @@ export default function CustomerDrawer({
       style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 14, fontWeight: 600, borderRadius: 6, border: '1px solid var(--border)', outline: 'none' }} />
   ) : (
     <>
-      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{c.name}</div>
+        {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
+        <ReferenceNumberChip value={c.referenceNumber} />
+      </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{[c.city, c.industry].filter(Boolean).join(' · ') || '—'}</div>
     </>
   )

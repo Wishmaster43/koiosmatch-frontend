@@ -27,6 +27,8 @@ export interface ApiChannel {
 export interface Vacancy {
   id: Id | undefined
   code: string
+  // NUMMER-1: human-readable reference number (V-12) — distinct from the manual `code`.
+  referenceNumber?: string
   title: string
   statusValue: string | number | null
   statusLabel: string
@@ -101,6 +103,8 @@ export interface ApiVacancy {
   id?: Id
   code?: string
   reference?: string
+  // NUMMER-1: server-assigned human-readable reference number (V-12).
+  reference_number?: string
   title?: string
   status?: { value?: string | number; label?: string; color?: string } | string
   // STRAAL-1: geocoded coordinates + radius distance from the server.

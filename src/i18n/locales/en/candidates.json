@@ -25,7 +25,8 @@
     "lastContactType": "Channel",
     "phase": "Phase",
     "deployability": "Status",
-    "contractForm": "Contract form"
+    "contractForm": "Contract form",
+    "referenceNumber": "No."
   },
   "koios": {
     "actions": {
@@ -104,7 +105,7 @@
   "analytics": {
     "statusTitle": "Status",
     "funnelTitle": "Funnel",
-    "rcTitle": "Per recruiter",
+    "rcTitle": "Recruiter",
     "stale6m": "Not contacted > 6 mo",
     "stale6mSub": "no contact for a while",
     "noFollowup": "No follow-up",

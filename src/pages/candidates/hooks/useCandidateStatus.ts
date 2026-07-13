@@ -2,17 +2,16 @@
  * useCandidateStatus — the phase/status axis logic of the candidate drawer
  * (§0.3 split from CandidateDrawer): phase badge + convert, deployability
  * changes driven by the status-lookup flags (requires_match → link a Match,
- * requires_reason / expects_return_date → prompt first), and the human-readable
- * status info line. Pure logic + modal state; rendering stays in the drawer.
+ * requires_reason / expects_return_date → prompt first; re-picking the current
+ * flagged status = edit its reason/date). Pure logic + modal state; rendering
+ * stays in the drawer.
  */
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { useDateFormat } from '@/lib/datetime'
 import { useLookups } from '@/context/LookupsContext'
 import { useAllSettings } from '@/lib/settings/useAllSettings'
 import { useCreateMatch } from './useCreateMatch'
 import { useVacancyOptions } from './useVacancyOptions'
-import { buildStatusInfoLine, makeRequiredComplete } from '../drawer/candidateStatusInfo'
+import { makeRequiredComplete } from '../drawer/candidateStatusInfo'
 import type { StatusFlags } from '../drawer/candidateStatusInfo'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -31,12 +30,9 @@ interface Args {
 }
 
 export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
-  const { t } = useTranslation('candidates')
-  const { formatDate } = useDateFormat() as { formatDate: (d?: string | null, opts?: Intl.DateTimeFormatOptions) => string }
-  const { phases, statuses, phaseMeta, statusMeta } = useLookups() as unknown as {
+  const { phases, statuses, phaseMeta } = useLookups() as unknown as {
     phases: LookupOption[]; statuses: LookupOption[]
     phaseMeta: (v?: string | null) => { label: string; color: string }
-    statusMeta: (v?: string | null) => { label: string; color: string }
   }
   const allSettings = useAllSettings()
   const { createMatch, creating: creatingMatch } = useCreateMatch(c?.id ?? '')
@@ -99,9 +95,8 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
   const currentStatus = status ?? c?.status
   // Deployability only applies once someone is a Kandidaat — a Lead isn't deployable yet.
   const showStatus = !!currentPhase && !isEntryPhase
-  // Flag-driven info line (§3B): blacklist reason, or reason + "available again" date.
+  // Flags of the CURRENT status (§3B) — drive the prefilled reason/date edit path.
   const statusFlags = statuses.find(s => s.value === currentStatus) as StatusFlags
-  const statusInfoLine = ((c && currentStatus) ? buildStatusInfoLine({ c, statusFlags, currentStatus, statusMeta, t, formatDate }) : '') ?? ''
 
   // Edit the reason/return date of the CURRENT status: reopen the prompt prefilled.
   const openStatusEdit = () => {
@@ -118,8 +113,11 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
 
   // Status change, driven by the lookup flags: requires_match → link a Match first;
   // requires_reason / expects_return_date → prompt; otherwise PATCH straight away.
+  // Re-picking the CURRENT flagged status opens the PREFILLED edit modal — with the
+  // header info line gone (Danny 13/7) this is the way to adjust reason/return date.
   const changeStatus = (v: string) => {
     if (!c) return
+    if (v === currentStatus && (statusFlags?.requires_reason || statusFlags?.expects_return_date || statusFlags?.is_blacklist)) { openStatusEdit(); return }
     const it = statuses.find(s => s.value === v) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown; is_blacklist?: unknown }) | undefined
     if (it?.requires_match) { setMatchChoice(null); setMatchPrompt(true); return }
     if (Boolean(it?.requires_reason) || Boolean(it?.expects_return_date)) {
@@ -163,7 +161,7 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
 
   return {
     statuses, currentPhase, phaseInfo, nextPhase, isEntryPhase, converting, doConvert,
-    currentStatus, showStatus, statusInfoLine, openStatusEdit, changeStatus,
+    currentStatus, showStatus, openStatusEdit, changeStatus,
     statusModal, setStatusModal, confirmStatus,
     matchPrompt, setMatchPrompt, matchChoice, setMatchChoice,
     newMatchVacancyId, setNewMatchVacancyId, vacancyOptions, creatingMatch, confirmPlacedMatch,

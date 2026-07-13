@@ -17,7 +17,7 @@
  */
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
-  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Key, LayoutGrid,
+  ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Hash, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Phone, Shield, Sparkles, Star,
   Store, Tags, Target, UserCheck, Users, Webhook, XCircle,
 } from 'lucide-react'
@@ -33,6 +33,7 @@ import MemorySettings from './sections/MemorySettings'
 import { ContractFormsSettings, FunnelStagesSettings, CandidateStatusesSettings, CandidatePhasesSettings } from './sections/CandidateLookupsSettings'
 import { LastContactTypesSettings, NoteTypesSettings } from './sections/CandidateCommSettings'
 import { CandidateConversionSettings } from './sections/CandidateConversionSettings'
+import NumberingSettings from './sections/NumberingSettings'
 import { CustomerStatusesSettings, LocationStatusesSettings, DepartmentStatusesSettings, ContactStatusesSettings } from './sections/CustomerSettings'
 import PoolsSettings from './sections/PoolsSettings'
 import { LanguageListSettings, LanguageLevelSettings } from './sections/LanguageSettings'
@@ -107,6 +108,8 @@ export const NAV_GROUPS = [
       { id: 'memory', icon: BookOpen, component: MemorySettings },
       { id: 'locations', icon: MapPin, component: LocationsSettings },
       { id: 'branding', icon: Palette, component: BrandSettings },
+      // NUMMER-1: prefix/padding/start per entity for the human-readable reference numbers.
+      { id: 'numbering', icon: Hash, component: NumberingSettings },
     ],
   },
   {

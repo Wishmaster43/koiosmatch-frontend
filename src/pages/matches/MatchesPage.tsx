@@ -7,6 +7,7 @@ import { useRightPanel } from '@/context/RightPanelContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import api from '@/lib/api'
 import { notify } from '@/lib/notify'
+import { isReferenceQuery } from '@/lib/referenceNumber'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import MatchesTable from './MatchesTable'
@@ -38,8 +39,13 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // Right-panel filter state: archived is off by default (§3B — archived matches
   // stay searchable but out of the default view so KPI totals drop).
   const [showArchived, setShowArchived] = usePageMemory('matches.archived', false)
+  const [query,       setQuery]       = usePageMemory('matches.search', '')
+  // NUMMER-1: a typed reference number (M-00042) narrows the fetch server-side to
+  // an exact `?ref=` lookup instead of the client-side free-text filter below.
+  const trimmedQuery = query.trim()
+  const refQuery = isReferenceQuery(trimmedQuery) ? trimmedQuery : null
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
-  const { rows, loading, error, updateMatch, reload } = useMatches(showArchived)
+  const { rows, loading, error, updateMatch, reload } = useMatches(showArchived, refQuery)
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Match statuses drive the board columns + donut (R-1b lookup; the funnel is
   // an APPLICATION axis — the match resource no longer carries a stage).
@@ -51,7 +57,6 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const [kpiScored, setKpiScored] = usePageMemory('matches.scored', false)
   const [ownerFilter, setOwnerFilter] = usePageMemory<string[]>('matches.owner', [])
   const [clientFilter, setClientFilter] = usePageMemory<string[]>('matches.client', [])
-  const [query,       setQuery]       = usePageMemory('matches.search', '')
   // Start of the current month, captured once (purity — feeds the "Nieuw" KPI).
   const [monthStart] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0); return d.getTime() })
   // Bulk selection (checkboxes); accumulates across pages, clears on filter change.
@@ -120,9 +125,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // (kept out of the memo — setting state during render can loop).
   useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter, kpiScored, showArchived, query])
 
-  // Filter the visible rows by donut selection.
+  // Filter the visible rows by donut selection. A reference-number query already
+  // narrowed `rows` server-side (exact `?ref=` lookup) — skip the free-text
+  // re-filter so the single matched row isn't accidentally filtered back out.
   const filteredAll = useMemo(() => {
-    const q = query.trim().toLowerCase()
+    const q = refQuery ? '' : query.trim().toLowerCase()
     return rows.filter(r => {
       if (stageFilter.length && !stageFilter.includes(r.status)) return false
       if (kpiScored && typeof r.score !== 'number') return false
@@ -131,7 +138,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
       if (q && ![r.candidate, r.vacancy, r.client].some(v => String(v ?? '').toLowerCase().includes(q))) return false
       return true
     })
-  }, [rows, stageFilter, ownerFilter, clientFilter, kpiScored, query])
+  }, [rows, stageFilter, ownerFilter, clientFilter, kpiScored, query, refQuery])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))

@@ -22,6 +22,8 @@ export interface Contact {
 /** A department nested under a location (flat UI shape). */
 export interface Department {
   id: Id | undefined
+  // NUMMER-1: human-readable reference number (A-001).
+  referenceNumber?: string
   name: string
   description: string
   locationId: Id | null
@@ -32,6 +34,8 @@ export interface Department {
 /** A customer location with C-6 address fields (flat UI shape). */
 export interface Location {
   id: Id | undefined
+  // NUMMER-1: human-readable reference number (L-001).
+  referenceNumber?: string
   name: string
   street: string
   houseNumber: string
@@ -63,6 +67,9 @@ export interface CustomerNote {
 /** The flat customer model rendered by the table/insights/drawer. */
 export interface Customer {
   id: Id | undefined
+  // NUMMER-1: human-readable reference number (D-4). Tenant-configurable
+  // prefix/padding/start (Settings → Nummering); server-assigned, immutable.
+  referenceNumber?: string
   name: string
   initials: string
   debtorNumber: string
@@ -116,7 +123,7 @@ export interface ApiContact {
 
 /** Raw API department (read defensively). */
 export interface ApiDepartment {
-  id?: Id; name?: string; description?: string
+  id?: Id; reference_number?: string; name?: string; description?: string
   location_id?: Id; locationId?: Id; location_name?: string; location?: { name?: string }; locationName?: string
   departments?: ApiDepartment[]; contacts?: ApiContact[]
   [k: string]: unknown
@@ -124,7 +131,7 @@ export interface ApiDepartment {
 
 /** Raw API location (read defensively). */
 export interface ApiLocation {
-  id?: Id; name?: string; street?: string; house_number?: string; house_number_suffix?: string
+  id?: Id; reference_number?: string; name?: string; street?: string; house_number?: string; house_number_suffix?: string
   postal_code?: string; city?: string; country?: string; coc_number?: string; vat_number?: string
   contact_name?: string; phone?: string; email?: string
   departments?: ApiDepartment[]; contacts?: ApiContact[]
@@ -133,7 +140,7 @@ export interface ApiLocation {
 
 /** Raw API customer (read defensively). */
 export interface ApiCustomer {
-  id?: Id; name?: string; debtor_number?: string; debtorNumber?: string
+  id?: Id; reference_number?: string; name?: string; debtor_number?: string; debtorNumber?: string
   status?: { value?: string | number; label?: string; color?: string } | string | number
   status_id?: string | number; status_label?: string; status_color?: string
   owner?: { id?: Id; name?: string; avatar_color?: string | null }
