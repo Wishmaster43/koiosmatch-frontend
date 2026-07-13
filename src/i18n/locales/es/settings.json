@@ -157,7 +157,8 @@
     "whatsapp_log": "Registro de mensajes",
     "appointment_types": "Tipos de cita",
     "candidate_skill_levels": "Niveles de habilidad",
-    "wa_message_types": "Tipos de mensajes"
+    "wa_message_types": "Tipos de mensajes",
+    "candidate_conversion": "Conversión"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1486,5 +1487,11 @@
     "title": "Tipos de mensajes",
     "subtitle": "Tu clasificación de los mensajes de WhatsApp salientes (p. ej. Solicitud, Recordatorio). El orden determina la prioridad de la cola.",
     "add": "Añadir tipo de mensaje"
+  },
+  "candidateConversion": {
+    "title": "Estado predeterminado tras la conversión",
+    "subtitle": "El estado de disponibilidad que recibe un candidato justo después de convertir de Lead a Candidato. «Ninguno» lo deja vacío.",
+    "none": "Ninguno (establecer manualmente)",
+    "saveFailed": "Error al guardar"
   }
 }

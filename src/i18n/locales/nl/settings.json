@@ -157,7 +157,8 @@
     "whatsapp_log": "Berichtenlog",
     "appointment_types": "Afspraaktypes",
     "candidate_skill_levels": "Vaardigheidsniveaus",
-    "wa_message_types": "Berichttypen"
+    "wa_message_types": "Berichttypen",
+    "candidate_conversion": "Conversie"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1486,5 +1487,11 @@
     "title": "Berichttypen",
     "subtitle": "Jouw classificatie van uitgaande WhatsApp-berichten (bv. Sollicitatie, Herinnering). De volgorde bepaalt de wachtrij-prioriteit.",
     "add": "Berichttype toevoegen"
+  },
+  "candidateConversion": {
+    "title": "Standaardstatus na conversie",
+    "subtitle": "De inzetbaarheidsstatus die een kandidaat direct krijgt na conversie van Lead naar Kandidaat. Kies \"Geen\" om de status leeg te laten.",
+    "none": "Geen (handmatig instellen)",
+    "saveFailed": "Opslaan mislukt"
   }
 }

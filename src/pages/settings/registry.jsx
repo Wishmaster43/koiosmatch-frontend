@@ -19,7 +19,7 @@ import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
   ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Key, LayoutGrid,
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Phone, Shield, Sparkles, Star,
-  Store, Tags, Target, Users, Webhook, XCircle,
+  Store, Tags, Target, UserCheck, Users, Webhook, XCircle,
 } from 'lucide-react'
 
 import UsersPage from '../users/UsersPage'
@@ -32,6 +32,7 @@ import LocationsSettings from './sections/LocationsSettings'
 import MemorySettings from './sections/MemorySettings'
 import { ContractFormsSettings, FunnelStagesSettings, CandidateStatusesSettings, CandidatePhasesSettings } from './sections/CandidateLookupsSettings'
 import { LastContactTypesSettings, NoteTypesSettings } from './sections/CandidateCommSettings'
+import { CandidateConversionSettings } from './sections/CandidateConversionSettings'
 import { CustomerStatusesSettings, LocationStatusesSettings, DepartmentStatusesSettings, ContactStatusesSettings } from './sections/CustomerSettings'
 import PoolsSettings from './sections/PoolsSettings'
 import { LanguageListSettings, LanguageLevelSettings } from './sections/LanguageSettings'
@@ -133,6 +134,8 @@ export const NAV_GROUPS = [
       { id: 'document_types', icon: FileText, component: DocumentTypesSettings },
       { id: 'driver_licenses', icon: Car, component: DriverLicenseSettings },
       { id: 'candidate_display', icon: Palette, schema: candidateDisplay },
+      // Conversion behaviour: default deployability status after Lead → Kandidaat.
+      { id: 'candidate_conversion', icon: UserCheck, component: CandidateConversionSettings },
       { id: 'candidate_skill_levels', icon: BarChart2, component: SkillLevelSettings },
       { id: 'candidate_custom_fields', icon: ListChecks, component: CandidateCustomFieldsSettings },
       { id: 'candidate_required_fields', icon: Flag, component: CandidateRequiredFieldsSettings },

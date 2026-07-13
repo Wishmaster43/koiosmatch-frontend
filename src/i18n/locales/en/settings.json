@@ -157,7 +157,8 @@
     "whatsapp_log": "Message log",
     "appointment_types": "Appointment types",
     "candidate_skill_levels": "Skill levels",
-    "wa_message_types": "Message types"
+    "wa_message_types": "Message types",
+    "candidate_conversion": "Conversion"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1486,5 +1487,11 @@
     "title": "Message types",
     "subtitle": "Your classification of outbound WhatsApp messages (e.g. Application, Reminder). The order sets the queue priority.",
     "add": "Add message type"
+  },
+  "candidateConversion": {
+    "title": "Default status after conversion",
+    "subtitle": "The deployability status a candidate gets right after converting from Lead to Candidate. Choose \"None\" to leave it empty.",
+    "none": "None (set manually)",
+    "saveFailed": "Saving failed"
   }
 }

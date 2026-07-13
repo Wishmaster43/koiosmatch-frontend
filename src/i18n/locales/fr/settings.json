@@ -157,7 +157,8 @@
     "whatsapp_log": "Journal des messages",
     "appointment_types": "Types de rendez-vous",
     "candidate_skill_levels": "Niveaux de compétence",
-    "wa_message_types": "Types de messages"
+    "wa_message_types": "Types de messages",
+    "candidate_conversion": "Conversion"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -1486,5 +1487,11 @@
     "title": "Types de messages",
     "subtitle": "Votre classification des messages WhatsApp sortants (p. ex. Candidature, Rappel). L'ordre détermine la priorité de la file.",
     "add": "Ajouter un type de message"
+  },
+  "candidateConversion": {
+    "title": "Statut par défaut après conversion",
+    "subtitle": "Le statut de disponibilité attribué au candidat juste après la conversion de Lead en Candidat. « Aucun » laisse le statut vide.",
+    "none": "Aucun (définir manuellement)",
+    "saveFailed": "Échec de l'enregistrement"
   }
 }

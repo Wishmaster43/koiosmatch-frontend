@@ -61,7 +61,6 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
   }
 
   const currentPhase = phase ?? c?.phase
-  const changePhase = (v: string) => { if (!c) return; setPhase(v); onUpdate?.(c.id, { phase: v }) }
   // Fase: colour-coded read-only badge (no picker); "convert" advances the entry (first) phase.
   const phaseInfo    = phaseMeta(currentPhase)
   const phaseIdx     = phases.findIndex(p => p.value === currentPhase)
@@ -69,9 +68,23 @@ export function useCandidateStatus({ c, onUpdate, onConvertIncomplete }: Args) {
   const isEntryPhase = phaseIdx === 0
 
   // Convert to the next phase; jump to Profile-edit unless its required fields are complete.
+  // DEFAULT-STATUS-1 (Danny 2026-07-13): a fresh Kandidaat gets the tenant's default
+  // deployability status (setting; 'none' = leave empty) in the SAME patch as the
+  // phase — only when no status is set yet, and never a flagged status (those need
+  // their own prompt). The BE first-application automation applies the same key.
   const doConvert = (setActiveTab?: (id: string) => void) => {
     if (!nextPhase || !c) return
-    changePhase(nextPhase.value)
+    const patch: Record<string, unknown> = { phase: nextPhase.value }
+    const defRaw = (allSettings as Record<string, unknown> | null)?.['candidate_default_status_on_convert']
+    const def = typeof defRaw === 'string' ? defRaw : 'available'
+    const defStatus = statuses.find(s => s.value === def) as (LookupOption & { requires_match?: unknown; requires_reason?: unknown; expects_return_date?: unknown; is_blacklist?: unknown }) | undefined
+    const defIsPlain = defStatus && !defStatus.requires_match && !defStatus.requires_reason && !defStatus.expects_return_date && !defStatus.is_blacklist
+    if (!(status ?? c.status) && def !== 'none' && defIsPlain) {
+      setStatus(def)
+      patch.status = def
+    }
+    setPhase(nextPhase.value)
+    onUpdate?.(c.id, patch)
     setConverting(true); setTimeout(() => setConverting(false), 1000)
     const requiredComplete = makeRequiredComplete(c, allSettings)
     if (!requiredComplete(nextPhase.value)) onConvertIncomplete?.(setActiveTab)

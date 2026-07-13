@@ -157,7 +157,8 @@
     "whatsapp_log": "Nachrichtenprotokoll",
     "appointment_types": "Terminarten",
     "candidate_skill_levels": "Kompetenzstufen",
-    "wa_message_types": "Nachrichtentypen"
+    "wa_message_types": "Nachrichtentypen",
+    "candidate_conversion": "Konvertierung"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1486,5 +1487,11 @@
     "title": "Nachrichtentypen",
     "subtitle": "Deine Klassifizierung ausgehender WhatsApp-Nachrichten (z. B. Bewerbung, Erinnerung). Die Reihenfolge bestimmt die Warteschlangen-Priorität.",
     "add": "Nachrichtentyp hinzufügen"
+  },
+  "candidateConversion": {
+    "title": "Standardstatus nach Konvertierung",
+    "subtitle": "Der Einsatzstatus, den ein Kandidat direkt nach der Konvertierung von Lead zu Kandidat erhält. \"Keine\" lässt den Status leer.",
+    "none": "Keine (manuell setzen)",
+    "saveFailed": "Speichern fehlgeschlagen"
   }
 }
