@@ -187,7 +187,7 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                 <label style={{ display: 'block', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
                   {fieldLabel(t, field.label as string | undefined)}
                 </label>
-                <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables}
+                <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
                   onChange={(key, val) => onUpdate(node.id, key, val)} />
                 {field.hint ? <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{field.hint as string}</div> : null}
               </div>
