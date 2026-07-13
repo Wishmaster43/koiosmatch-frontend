@@ -65,8 +65,10 @@ export function mapCandidate(c: ApiCandidate): Candidate {
     title:           c.function_title ?? c.title ?? '',
     // Contract form (multi-value slugs); label/colour via the lookups.
     candidateTypes,
-    // Funnel stage — flat fields from the API: key + NL label + colour (null = not in procedure).
-    stage:           c.funnel_type ?? c.stage ?? c.lifecycle ?? '',
+    // Funnel stage — flat fields from the API: key + NL label + colour (null = not
+    // in procedure). NEVER fall back to lifecycle: that's a different axis, and it
+    // leaked 'archived' into the funnel column as a non-existent stage (Danny 2026-07-13).
+    stage:           c.funnel_type ?? c.stage ?? '',
     stageLabel:      c.funnel_label ?? null,
     stageColor:      c.funnel_color ?? null,
     stageVacancyId:  c.funnel_vacancy_id ?? c.stage_vacancy_id ?? c.vacancy_id ?? '',

@@ -190,15 +190,19 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           onPhotoChange={setPhotoUrl}
           photoLabels={{ upload: t('drawer.photoUpload'), remove: t('drawer.photoRemove') }}
           renderTitle={() => (
+            // Archived: the banner tells the real story — the deployability info
+            // line ("Ziek sinds … · weer beschikbaar …") is stale noise then.
             <CandidateTitle c={c} editing={headerEdit.headerEditing} hf={headerEdit.hf} setHF={headerEdit.setHF}
               phaseInfo={status.phaseInfo} showPhase={!!status.currentPhase}
-              statusInfoLine={status.statusInfoLine} onEditStatusInfo={status.openStatusEdit} />
+              statusInfoLine={c.archived ? '' : status.statusInfoLine} onEditStatusInfo={status.openStatusEdit} />
           )}
           titleActions={<>
             <ChangelogPopover c={c} />
-            {/* Soft-delete → Gearchiveerd (§3B: soft-delete only; backend re-checks live links). */}
+            {/* Soft-delete → Gearchiveerd (§3B: soft-delete only). The confirm (or, when
+                live applications/matches hang on the candidate, the ArchiveGuardModal)
+                lives in useCandidateDrawerActions.archiveOne — never re-confirm here. */}
             {onArchive && !c.archived && (
-              <button onClick={() => { if (confirm(t('drawer.archiveConfirm', { name: c.name }))) onArchive(c.id) }}
+              <button onClick={() => onArchive(c.id)}
                 title={t('drawer.archive')} aria-label={t('drawer.archive')}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
                 <Trash2 size={14} />
