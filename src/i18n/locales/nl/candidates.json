@@ -394,7 +394,8 @@
     "intakeUpdated": "Intake bijgewerkt",
     "planAppointment": "Afspraak plannen",
     "editAppointment": "Afspraak wijzigen",
-    "createAppointment": "Afspraak plannen"
+    "createAppointment": "Afspraak plannen",
+    "appointmentVacancyHint": "Laat leeg voor een afspraak zonder vacature."
   },
   "communication": {
     "newNote": "Nieuwe notitie",

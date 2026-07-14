@@ -387,7 +387,8 @@
     "intakeUpdated": "Entretien mis à jour",
     "planAppointment": "Planifier un rendez-vous",
     "editAppointment": "Modifier le rendez-vous",
-    "createAppointment": "Planifier un rendez-vous"
+    "createAppointment": "Planifier un rendez-vous",
+    "appointmentVacancyHint": "Laissez vide pour un rendez-vous sans offre."
   },
   "communication": {
     "newNote": "Nouvelle note",

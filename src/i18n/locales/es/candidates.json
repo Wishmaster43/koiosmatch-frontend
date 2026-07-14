@@ -387,7 +387,8 @@
     "intakeUpdated": "Intake actualizado",
     "planAppointment": "Planificar cita",
     "editAppointment": "Editar cita",
-    "createAppointment": "Planificar cita"
+    "createAppointment": "Planificar cita",
+    "appointmentVacancyHint": "Déjalo vacío para una cita sin vacante."
   },
   "communication": {
     "newNote": "Nueva nota",

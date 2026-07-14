@@ -200,7 +200,7 @@ export default function PlanIntakeModal({
               ...vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label })),
               ...(extraVacancy && !vacancyOptions.some(v => String(v.value) === extraVacancy.value) ? [extraVacancy] : []),
             ]} />
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{t('work.intakeVacancyHint')}</div>
+          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{t(mode === 'appointment' ? 'work.appointmentVacancyHint' : 'work.intakeVacancyHint')}</div>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>

@@ -394,7 +394,8 @@
     "intakeUpdated": "Intake updated",
     "planAppointment": "Schedule appointment",
     "editAppointment": "Edit appointment",
-    "createAppointment": "Schedule appointment"
+    "createAppointment": "Schedule appointment",
+    "appointmentVacancyHint": "Leave empty for an appointment without a vacancy."
   },
   "communication": {
     "newNote": "New note",

@@ -147,8 +147,13 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   // Gender options come from the /genders tenant lookup (CFG-1), not hardcoded.
   const genderOptions = genders.map(g => ({ value: g.value, label: g.label }))
 
-  // Build owner dropdown from users list.
+  // Build owner dropdown from the users list; make sure the logged-in default is
+  // actually IN it (a super admin isn't always in the assignable list — the
+  // select rendered blank while ownerId was set; mirror of the kans-modal fix).
   const ownerOptions = users.map(u => ({ value: String(u.id), label: u.name ?? `${u.firstname} ${u.lastname}`.trim() }))
+  if (me?.id && !ownerOptions.some(o => o.value === String(me.id))) {
+    ownerOptions.unshift({ value: String(me.id), label: (me as { name?: string }).name ?? '' })
+  }
 
   return (
     <div
