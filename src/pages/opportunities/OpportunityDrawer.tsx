@@ -62,7 +62,7 @@ export default function OpportunityDrawer({
   const setTagsAndSave = (next: string[]) => { setTags(next); onUpdate?.(o.id, { tags: next }) }
 
   const ownerOptions = [
-    ...(users.some(u => u.id === o.ownerId) || !o.owner ? [] : [{ value: o.ownerId, label: o.owner }]),
+    ...(users.some(u => String(u.id) === String(o.ownerId)) || !o.owner ? [] : [{ value: o.ownerId, label: o.owner }]),
     ...users.map(u => ({ value: u.id, label: u.name })),
   ]
   const stageOptions = stages.map(s => ({ value: s.value, label: s.label }))

@@ -57,6 +57,8 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   // status_return_date key was silently dropped, so the return date never persisted.
   if ('status_return_date' in patch) body.available_again_date = patch.status_return_date
   if ('match_id'       in patch) body.match_id        = patch.match_id
+  // Owner (recruiter) change from the drawer picker — used to be local-only.
+  if ('ownerId'        in patch) body.owner_id        = patch.ownerId
   if ('availability'   in patch) body.availability    = patch.availability
   if ('stage'          in patch) body.funnel_type     = patch.stage
   if ('firstname'      in patch) body.first_name      = patch.firstname

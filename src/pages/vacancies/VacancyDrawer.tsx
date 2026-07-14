@@ -73,7 +73,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
 
   // Owner picker — include the current owner so it shows even if not in `users`.
   const ownerOptions = [
-    ...(users.some(u => u.id === v.owner?.id) || !v.owner?.name ? [] : [{ value: v.owner.id, label: v.owner.name }]),
+    ...(users.some(u => String(u.id) === String(v.owner?.id)) || !v.owner?.name ? [] : [{ value: v.owner.id, label: v.owner.name }]),
     ...users.map(u => ({ value: u.id, label: u.name })),
   ]
 

@@ -143,17 +143,21 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     }
   }
 
-  // Owner picker options — the current owner first, then every selectable user.
+  // Owner picker options — a fallback entry ONLY when the current owner is not
+  // in the selectable list (always prepending duplicated the owner — Danny 14/7),
+  // and picking one PERSISTS (owner_id patch; it used to be local-only state).
   const ownerInitialsOf = (name?: string) => name?.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() ?? '??'
+  const currentOwnerId = recruiter?.id ?? c.ownerId
+  const ownerInUsers = currentOwnerId != null && users.some(u => String(u.id) === String(currentOwnerId))
   const ownerOptions = [
-    ...(recruiter ? [] : [{ value: '__current', label: c.owner || '-', initials: c.ownerInitials }]),
-    ...users.map(u => ({ value: u.id, label: u.name, initials: ownerInitialsOf(u.name) })),
+    ...(ownerInUsers || !c.owner ? [] : [{ value: '__current', label: recruiter?.name ?? c.owner ?? '-', initials: recruiter ? ownerInitialsOf(recruiter.name) : c.ownerInitials }]),
+    ...users.map(u => ({ value: String(u.id), label: u.name, initials: ownerInitialsOf(u.name) })),
   ]
-  const ownerValue = recruiter?.id ?? '__current'
+  const ownerValue = ownerInUsers ? String(currentOwnerId) : '__current'
   const onOwnerChange = (id: string | number) => {
     if (id === '__current') return
-    const u = users.find(x => x.id === id)
-    if (u) setRecruiter({ ...u, initials: ownerInitialsOf(u.name) })
+    const u = users.find(x => String(x.id) === String(id))
+    if (u) { setRecruiter({ ...u, initials: ownerInitialsOf(u.name) }); onUpdate?.(c.id, { ownerId: u.id }) }
   }
 
   return (
