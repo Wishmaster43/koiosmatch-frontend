@@ -142,7 +142,8 @@
     "periodLastContact": "Laatste contact",
     "pool": "Talentenpool",
     "city": "Woonplaats",
-    "source": "Bron"
+    "source": "Bron",
+    "phase": "Fase"
   },
   "modal": {
     "title": "Kandidaat toevoegen",

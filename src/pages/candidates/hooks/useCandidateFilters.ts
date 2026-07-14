@@ -32,6 +32,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
   const [showTrash, setShowTrash] = usePageMemory('cand.trash', false)
   // Server-side filter dimensions (the API supports these). Owner holds owner_ids.
   const [selectedStatus,   setSelectedStatus]   = usePageMemory<string[]>('cand.status', [])
+  const [selectedPhase,    setSelectedPhase]    = usePageMemory<string[]>('cand.phase', [])
   const [selectedFunnel,   setSelectedFunnel]   = usePageMemory<string[]>('cand.funnel', [])
   const [selectedType,     setSelectedType]     = usePageMemory<string[]>('cand.type', [])
   const [selectedOwner,    setSelectedOwner]    = usePageMemory<Array<string | number>>('cand.owner', [])
@@ -63,7 +64,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
 
   // Anything narrowing the default view → the shared clear-button shows; one click resets.
   const anyFilterActive = Boolean(globalSearch.trim() || attentionFilter || dateRange || showArchived || showTrash || geoFilter
-    || selectedStatus.length || selectedFunnel.length || selectedType.length || selectedOwner.length
+    || selectedStatus.length || selectedPhase.length || selectedFunnel.length || selectedType.length || selectedOwner.length
     || selectedGeslacht.length || selectedProvince.length || selectedTitle.length || selectedLocation.length
     || selectedPool.length || selectedCity.length || selectedSource.length)
   // Remount the (self-stateful) search input on clear so the visible text resets too.
@@ -71,7 +72,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1)
     setGlobalSearch(''); setAttentionFilter(null); setDateRange(null); setShowArchived(false); setShowTrash(false)
-    setSelectedStatus([]); setSelectedFunnel([]); setSelectedType([]); setSelectedOwner([])
+    setSelectedStatus([]); setSelectedPhase([]); setSelectedFunnel([]); setSelectedType([]); setSelectedOwner([])
     setSelectedGeslacht([]); setSelectedProvince([]); setSelectedTitle([]); setSelectedLocation([])
     setSelectedPool([]); setSelectedCity([]); setSelectedSource([]); clearGeo()
   }
@@ -92,6 +93,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
       else p.search = q
     }
     if (selectedStatus.length)   p.status         = selectedStatus
+    if (selectedPhase.length)    p.phase          = selectedPhase
     if (selectedFunnel.length)   p.funnel_type    = selectedFunnel
     if (selectedType.length)     p.candidate_type = selectedType
     if (selectedOwner.length)    p.owner_id       = selectedOwner
@@ -116,12 +118,13 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
     // Period-click date range; set last so it wins over stale6m if both target last_contact.
     if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     return p
-  }, [globalSearch, selectedStatus, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, selectedPool, selectedCity, selectedSource, showArchived, showTrash, attentionFilter, dateRange, staleMonths, view, mapCenter, mapRadius, geoFilter])
+  }, [globalSearch, selectedStatus, selectedPhase, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, selectedPool, selectedCity, selectedSource, showArchived, showTrash, attentionFilter, dateRange, staleMonths, view, mapCenter, mapRadius, geoFilter])
   const filterKey = JSON.stringify(filterParams)
 
   return {
     showArchived, setShowArchived, showTrash, setShowTrash,
-    selectedStatus, setSelectedStatus, selectedFunnel, setSelectedFunnel,
+    selectedStatus, setSelectedStatus,
+    selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
     selectedType, setSelectedType, selectedOwner, setSelectedOwner,
     selectedGeslacht, setSelectedGeslacht, selectedProvince, setSelectedProvince,
     selectedTitle, setSelectedTitle, selectedLocation, setSelectedLocation,

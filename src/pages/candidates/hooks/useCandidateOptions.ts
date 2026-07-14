@@ -80,13 +80,13 @@ export function useCandidateOptions({ stats, candidates, locations, statuses, fu
   // Donut-data: reuse the count-options, enriched with the lookup colour per value.
   const colorFor = (list: LookupOption[], v: unknown) => list.find(x => x.value === v)?.color
   const statusData = useMemo(() =>
-    statusOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: colorFor(statuses, o.value) }))
+    statusOptions.map(o => ({ name: o.label, value: o.count, filterValue: o.value, color: o.color ?? colorFor(statuses, o.value) }))
   , [statusOptions, statuses])
   const funnelData = useMemo(() =>
-    funnelOptions.map(o => ({ name: o.label, value: o.count, key: o.value, color: o.color ?? colorFor(funnelTypes, o.value) }))
+    funnelOptions.map(o => ({ name: o.label, value: o.count, filterValue: o.value, color: o.color ?? colorFor(funnelTypes, o.value) }))
   , [funnelOptions, funnelTypes])
   const rcData = useMemo(() =>
-    ownerOptions.map(o => ({ name: o.label, value: o.count, key: o.value }))
+    ownerOptions.map(o => ({ name: o.label, value: o.count, filterValue: o.value }))
   , [ownerOptions])
 
   // Attention counts: prefer server-wide totals from /candidates/stats (they honour

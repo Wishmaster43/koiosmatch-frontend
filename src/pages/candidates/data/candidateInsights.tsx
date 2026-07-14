@@ -8,18 +8,21 @@ import type { TFunction } from 'i18next'
 import type { Id } from '@/types/common'
 
 // Recharts hands the clicked segment back at top level AND under `.payload`.
-type PickArg = { key?: unknown; name?: unknown; payload?: { key?: unknown } }
-const pickKey = (d: PickArg) => d?.key ?? d?.payload?.key ?? d?.name
+type PickArg = { filterValue?: unknown; name?: unknown; payload?: { filterValue?: unknown } }
+const pickKey = (d: PickArg) => d?.filterValue ?? d?.payload?.filterValue ?? d?.name
 
 // Loose datum shape — the option hooks may emit undefined name/value for empty
 // buckets, and owner keys are Ids (string | number).
-interface DonutDatum { name?: string; value?: number; key?: Id; color?: string }
+interface DonutDatum { name?: string; value?: number; filterValue?: Id; color?: string }
 
 interface Args {
   t: TFunction
   statusData: DonutDatum[]; funnelData: DonutDatum[]; rcData: DonutDatum[]
   pickStatus: (v: string) => void; pickFunnel: (v: string) => void; pickOwner: (v: string) => void
+  // Lead-segment click filters the PHASE axis (PHASE-FILTER-1).
+  pickPhase: (v: string) => void; entryPhase: string
   selectedStatus: string[]; setSelectedStatus: (v: string[]) => void
+  selectedPhase: string[]; setSelectedPhase: (v: string[]) => void
   selectedFunnel: string[]; setSelectedFunnel: (v: string[]) => void
   selectedOwner: Id[]; setSelectedOwner: (v: Id[]) => void
   attentionFilter: string | null
@@ -29,16 +32,18 @@ interface Args {
 }
 
 export function buildCandidateInsights({
-  t, statusData, funnelData, rcData, pickStatus, pickFunnel, pickOwner,
-  selectedStatus, setSelectedStatus, selectedFunnel, setSelectedFunnel,
+  t, statusData, funnelData, rcData, pickStatus, pickFunnel, pickOwner, pickPhase, entryPhase,
+  selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
   selectedOwner, setSelectedOwner, attentionFilter, toggleAttention, staleMonths, counts,
 }: Args) {
   // One strip: 3 donuts + KPI cards, all equal footprint (§3A).
   const donuts = [
-    // '__none' = the no-status bucket; filtering it needs the BE `none` sentinel
-    // (STATUS-NONE-1) — until then the segment is informational, not a filter.
-    { key: 'status', title: t('analytics.statusTitle'), data: statusData, onPick: (d: PickArg) => { const k = pickKey(d) as string; if (k !== '__none') pickStatus(k) },
-      active: selectedStatus.length > 0, onClear: () => setSelectedStatus([]) },
+    // '__none' = the Leads bucket (no deployability status): clicking it filters
+    // on the PHASE axis (phase[]=<entry>, PHASE-FILTER-1) — other segments filter
+    // on the status axis as before.
+    { key: 'status', title: t('analytics.statusTitle'), data: statusData, onPick: (d: PickArg) => { const k = pickKey(d) as string; if (k === '__none') pickPhase(entryPhase); else pickStatus(k) },
+      active: selectedStatus.length > 0 || selectedPhase.length > 0,
+      onClear: () => { setSelectedStatus([]); setSelectedPhase([]) } },
     { key: 'funnel', title: t('analytics.funnelTitle'), data: funnelData, onPick: (d: PickArg) => pickFunnel(pickKey(d) as string),
       active: selectedFunnel.length > 0, onClear: () => setSelectedFunnel([]) },
     { key: 'rc',     title: t('analytics.rcTitle'),     data: rcData,     onPick: (d: PickArg) => pickOwner(pickKey(d) as string),

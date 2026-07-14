@@ -96,7 +96,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // ALL filter state + derived filterParams live in one hook (§0.3 size split).
   const {
     showArchived, setShowArchived, showTrash, setShowTrash,
-    selectedStatus, setSelectedStatus, selectedFunnel, setSelectedFunnel,
+    selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
     selectedType, setSelectedType, selectedOwner, setSelectedOwner,
     selectedGeslacht, setSelectedGeslacht, selectedProvince, setSelectedProvince,
     selectedTitle, setSelectedTitle, selectedLocation, setSelectedLocation,
@@ -148,6 +148,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // CAND-FILTERS option lists: pools (ids from the lookup), city/source (page-derived).
   const { poolItems } = usePools()
   const poolOptions   = useMemo(() => poolItems.map(p => ({ value: p.id, label: p.name })), [poolItems])
+  // Fase-filter options (lifecycle axis) — straight from the tenant phases lookup.
+  const phaseOptions  = useMemo(() => phases.map(ph => ({ value: ph.value, label: ph.label, color: ph.color })), [phases])
   const cityOptions   = useMemo(() => optsFrom(candidates.map(c => c.city).filter(Boolean) as string[]), [candidates])
   const sourceOptions = useMemo(() => optsFrom(candidates.map(c => (c as { source?: string | null }).source ?? '').filter(Boolean)), [candidates])
 
@@ -156,6 +158,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // Klik-op-chart → zet precies één waarde, of wis bij nogmaals klikken (toggle).
   const pickOne = <T,>(set: Dispatch<SetStateAction<T[]>>) => (v: T | null | undefined) => { if (v != null) toggleOneValue(set, v) }
   const pickStatus = pickOne(setSelectedStatus)
+  const pickPhase  = pickOne(setSelectedPhase)
   const pickFunnel = pickOne(setSelectedFunnel)
   const pickOwner  = pickOne(setSelectedOwner)
   const toggleAttention = (key: string) => setAttentionFilter(prev => prev === key ? null : key)
@@ -169,7 +172,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // only re-runs when a selection or option list actually changes.
   const filterGroups = useMemo(() => buildCandidateFilterGroups({
     t, tog, filters: {
-      selectedStatus, setSelectedStatus, selectedFunnel, setSelectedFunnel,
+      selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
       selectedType, setSelectedType, selectedTitle, setSelectedTitle,
       selectedPool, setSelectedPool, selectedCity, setSelectedCity,
       selectedProvince, setSelectedProvince, selectedGeslacht, setSelectedGeslacht,
@@ -178,14 +181,14 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
       showArchived, setShowArchived, dateRange, setDateRange,
       geoFilter, geoHint, applyGeo, clearGeo,
     },
-    options: { statusOptions, funnelOptions, typeOptions, titleOptions, poolOptions, cityOptions,
+    options: { statusOptions, phaseOptions, funnelOptions, typeOptions, titleOptions, poolOptions, cityOptions,
       provinceOptions, genderOptions, ownerOptions, locationOptions, sourceOptions },
   }),
   // eslint-disable-next-line react-hooks/exhaustive-deps
   [t, showArchived, dateRange, geoFilter, geoHint,
-   selectedStatus, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner, selectedLocation,
+   selectedStatus, selectedPhase, selectedFunnel, selectedType, selectedTitle, selectedGeslacht, selectedProvince, selectedOwner, selectedLocation,
    selectedPool, selectedCity, selectedSource, poolOptions, cityOptions, sourceOptions,
-   statusOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
+   statusOptions, phaseOptions, funnelOptions, typeOptions, titleOptions, genderOptions, provinceOptions, ownerOptions, locationOptions])
 
   useEffect(() => {
     registerFilters('candidates-page', filterGroups)
@@ -253,7 +256,8 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // KPI strip config (3 donuts + attention cards) — pure builder (§0.3 split).
   const { donuts: insightDonuts, kpis: insightKpis } = buildCandidateInsights({
     t, statusData, funnelData, rcData, pickStatus, pickFunnel, pickOwner,
-    selectedStatus, setSelectedStatus, selectedFunnel, setSelectedFunnel,
+    pickPhase, entryPhase: phases[0]?.value ?? 'lead',
+    selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
     selectedOwner, setSelectedOwner, attentionFilter, toggleAttention, staleMonths,
     counts: { stale: staleCount, neverContacted: neverContactedCount, noFollowup: noFollowupCount,
       intake: intakeCount, activeConv: activeConvCount, tasks: tasksCount },

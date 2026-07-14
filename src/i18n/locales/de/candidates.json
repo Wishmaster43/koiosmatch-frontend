@@ -135,7 +135,8 @@
     "periodLastContact": "Letzter Kontakt",
     "pool": "Talentpool",
     "city": "Wohnort",
-    "source": "Quelle"
+    "source": "Quelle",
+    "phase": "Phase"
   },
   "modal": {
     "title": "Kandidat hinzufügen",

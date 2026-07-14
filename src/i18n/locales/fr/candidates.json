@@ -135,7 +135,8 @@
     "periodLastContact": "Dernier contact",
     "pool": "Vivier",
     "city": "Ville",
-    "source": "Source"
+    "source": "Source",
+    "phase": "Phase"
   },
   "modal": {
     "title": "Ajouter un candidat",

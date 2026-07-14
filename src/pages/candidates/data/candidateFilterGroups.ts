@@ -20,6 +20,7 @@ interface BuildArgs {
   tog: Tog
   filters: {
     selectedStatus: string[]; setSelectedStatus: Dispatch<SetStateAction<string[]>>
+    selectedPhase: string[]; setSelectedPhase: Dispatch<SetStateAction<string[]>>
     selectedFunnel: string[]; setSelectedFunnel: Dispatch<SetStateAction<string[]>>
     selectedType: string[]; setSelectedType: Dispatch<SetStateAction<string[]>>
     selectedTitle: string[]; setSelectedTitle: Dispatch<SetStateAction<string[]>>
@@ -48,6 +49,8 @@ export function buildCandidateFilterGroups({ t, tog, filters: f, options: o }: B
   return [
     // ── Werving: the recruiting axes (status/funnel/contract form) — open lists.
     { key: 'status', type: 'search-select', display: 'open', category: catLifecycle, label: t('filters.status'),        selected: f.selectedStatus, options: o.statusOptions, onToggle: tog(f.setSelectedStatus) },
+    // Fase (lifecycle axis) — server filter phase[] (PHASE-FILTER-1).
+    { key: 'phase',  type: 'search-select', display: 'open', category: catLifecycle, label: t('filters.phase'),         selected: f.selectedPhase,  options: o.phaseOptions,  onToggle: tog(f.setSelectedPhase) },
     { key: 'funnel', type: 'search-select', display: 'open', category: catLifecycle, label: t('filters.funnelType'),    selected: f.selectedFunnel, options: o.funnelOptions, onToggle: tog(f.setSelectedFunnel) },
     { key: 'type',   type: 'search-select', display: 'open', category: catLifecycle, label: t('filters.candidateType'), selected: f.selectedType,   options: o.typeOptions,   onToggle: tog(f.setSelectedType) },
     // ── Kwalificaties: function + pools.

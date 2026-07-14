@@ -135,7 +135,8 @@
     "periodLastContact": "Último contacto",
     "pool": "Grupo de talento",
     "city": "Ciudad",
-    "source": "Fuente"
+    "source": "Fuente",
+    "phase": "Fase"
   },
   "modal": {
     "title": "Añadir candidato",

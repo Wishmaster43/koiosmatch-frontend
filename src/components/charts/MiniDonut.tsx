@@ -47,7 +47,7 @@ export default function MiniDonut({ data = [], colors = DEFAULT_COLORS, size = 5
   const fullLabel = formatNumber(total, locale)
   // A segment counts as picked when the filter value matches its key OR its label.
   const isPicked = (d: ChartDatum) => {
-    const k = (d as { key?: string }).key
+    const k = (d as { filterValue?: string; key?: string }).filterValue ?? (d as { key?: string }).key
     return pickedKey != null && (k === pickedKey || d.name === pickedKey)
   }
 

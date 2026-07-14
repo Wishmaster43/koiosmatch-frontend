@@ -142,7 +142,8 @@
     "periodLastContact": "Last contact",
     "pool": "Talent pool",
     "city": "City",
-    "source": "Source"
+    "source": "Source",
+    "phase": "Phase"
   },
   "modal": {
     "title": "Add candidate",
