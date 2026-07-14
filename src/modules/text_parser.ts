@@ -6,8 +6,8 @@ export default {
   category: 'Tekst & Parsing',
   label:    'Tekst verwerker',
   Icon:     ScanText,
-  color:    '#7C3AED',
-  bg:       '#EDE9FE',
+  color:    'var(--color-violet)',
+  bg:       'var(--color-violet-bg)',
   schema: [
     { key: 'text', label: 'Tekst', type: 'textarea', placeholder: '{{1.inhoud}}' },
     { key: 'pattern', label: 'Patroon (regex)', type: 'text', placeholder: '(\\d+)' },

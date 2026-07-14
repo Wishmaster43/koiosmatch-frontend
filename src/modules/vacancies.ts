@@ -8,7 +8,8 @@ export default makeEntityModule({
   label:    'Vacatures',
   category: 'Vacatures',
   Icon:     Briefcase,
-  color:    '#7C3AED',
+  color:    'var(--color-violet)',
+  // eslint-disable-next-line no-restricted-syntax -- module-palette tint, kept distinct from --color-violet-bg (shared by the AI/parser modules) so the Vacatures entity stays visually distinguishable
   bg:       '#F1EBFD',
   filterFields: [
     { value: 'status',   label: 'Status' },

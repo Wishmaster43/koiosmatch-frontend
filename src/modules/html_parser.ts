@@ -6,8 +6,8 @@ export default {
   category: 'Tekst & Parsing',
   label:    'HTML Verwerker',
   Icon:     FileCode2,
-  color:    '#7C3AED',
-  bg:       '#EDE9FE',
+  color:    'var(--color-violet)',
+  bg:       'var(--color-violet-bg)',
   schema: [
     { key: 'html', label: 'HTML-inhoud', type: 'textarea', placeholder: '<html>...</html>' },
     { key: 'selector', label: 'CSS-selector', type: 'text', placeholder: '.mijn-element of #id', help: 'Selecteer een specifiek element uit de HTML.' },

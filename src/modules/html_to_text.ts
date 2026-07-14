@@ -6,8 +6,8 @@ export default {
   category: 'Tekst & Parsing',
   label:    'HTML naar tekst',
   Icon:     FileText,
-  color:    '#7C3AED',
-  bg:       '#EDE9FE',
+  color:    'var(--color-violet)',
+  bg:       'var(--color-violet-bg)',
   schema: [
     { key: 'html', label: 'HTML-inhoud', type: 'textarea', placeholder: '<p>Tekst hier</p>' },
   ],

@@ -7,7 +7,8 @@ export default {
   category: 'Communicatie',
   label: 'Berichtstatus',
   Icon:  MessageCircle,
-  color: '#16A34A',
+  color: 'var(--color-success)',
+  // eslint-disable-next-line no-restricted-syntax -- module-palette tint, no matching --color-success-bg hue close enough; tracked as a token-set follow-up
   bg:    '#EAF7EE',
   schema: [
     { key: 'message_category', label: 'Berichtcategorie', type: 'text', placeholder: 'shifts_offered' },

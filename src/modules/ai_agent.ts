@@ -7,7 +7,8 @@ export default {
   category: 'AI',
   label:    'AI Agents',
   Icon:     Bot,
-  color:    '#7C3AED',
+  color:    'var(--color-violet)',
+  // eslint-disable-next-line no-restricted-syntax -- deliberately lighter than --color-violet-bg to visually separate the AI category from the parser family
   bg:       '#F5F3FF',
 
   schema: [

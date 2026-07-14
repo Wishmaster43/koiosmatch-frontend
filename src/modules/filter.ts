@@ -6,7 +6,8 @@ export default {
   category: 'Flow beheer',
   label: 'Filter',
   Icon:  Filter,
-  color: '#7C3AED',
+  color: 'var(--color-violet)',
+  // eslint-disable-next-line no-restricted-syntax -- deliberately lighter than --color-violet-bg to visually separate "Flow beheer" nodes from the parser family
   bg:    '#F5F3FF',
   schema: [
     { key: 'field',    label: 'Veld',     type: 'text',   placeholder: 'status' },
