@@ -18,7 +18,8 @@
     "copied": "¡Copiado!",
     "back": "Atrás",
     "next": "Siguiente",
-    "edit": "Editar"
+    "edit": "Editar",
+    "close": "Cerrar"
   },
   "groups": {
     "kpis": "KPI",
@@ -91,6 +92,7 @@
     "billing_invoices": "Facturas",
     "modules": "Paquete",
     "apps": "Apps (conectores)",
+    "admin_jobs": "Gestión de tareas",
     "roles": "Roles y permisos",
     "users": "Usuarios",
     "sync": "Sincronización",
@@ -322,8 +324,9 @@
     "buttonPreview": "Vista previa del botón",
     "linkPreview": "Vista previa del enlace",
     "logo": "Logo",
-    "logoHint": "PNG o SVG, máx. 2 MB — se muestra en la barra de navegación",
-    "noLogo": "Sin logo"
+    "logoHint": "PNG, JPG, WEBP o SVG, máx. 2 MB — el SVG se escanea en el servidor. Se muestra en la barra de navegación.",
+    "noLogo": "Sin logo",
+    "logoUploadError": "No se pudo subir el logo."
   },
   "company": {
     "title": "Empresa",
@@ -1592,6 +1595,73 @@
       "waBusiness": "WhatsApp Business",
       "hours": "Horas procesadas",
       "connectors": "Conectores"
+    }
+  },
+  "jobs": {
+    "title": "Gestión de tareas",
+    "subtitle": "Estado de las colas, tareas individuales y tareas fallidas — solo para súper administradores.",
+    "tab": {
+      "overview": "Resumen",
+      "jobs": "Tareas",
+      "failed": "Fallidas"
+    },
+    "status": {
+      "active": "Activa",
+      "stalled": "Bloqueada",
+      "idle": "En reposo"
+    },
+    "state": {
+      "pending": "Pendiente",
+      "reserved": "En ejecución"
+    },
+    "byQueue": "Por cola",
+    "byTenant": "Por tenant",
+    "centralTenant": "Central (plataforma)",
+    "pending": "Pendiente",
+    "reserved": "En ejecución",
+    "oldestPending": "Más antigua pendiente",
+    "oldestReserved": "Más antigua en ejecución",
+    "failedTotal_one": "{{count}} tarea fallida",
+    "failedTotal_other": "{{count}} tareas fallidas",
+    "noQueues": "No hay colas con trabajo pendiente.",
+    "noTenants": "No hay tenants con trabajo pendiente.",
+    "loadError": "No se pudo cargar el resumen de colas.",
+    "refresh": "Actualizar",
+    "autoRefresh": "Se actualiza automáticamente cada 15s",
+    "filters": {
+      "queue": "Cola",
+      "tenant": "Tenant",
+      "all": "Todas"
+    },
+    "col": {
+      "queue": "Cola",
+      "tenant": "Tenant",
+      "job": "Tarea",
+      "attempts": "Intentos",
+      "createdAt": "Creada",
+      "runtime": "Duración",
+      "status": "Estado",
+      "exception": "Error",
+      "failedAt": "Fallida el",
+      "actions": "Acciones"
+    },
+    "empty": "No se encontraron tareas.",
+    "emptyFailed": "No hay tareas fallidas.",
+    "cancel": "Cancelar",
+    "cancelReservedError": "No se pudo cancelar — un worker ya está ejecutando esta tarea.",
+    "retry": "Reintentar",
+    "retryAll": "Reintentar todas",
+    "retryAllConfirm_one": "¿Volver a poner {{count}} tarea fallida en la cola?",
+    "retryAllConfirm_other": "¿Volver a poner las {{count}} tareas fallidas en la cola?",
+    "forget": "Eliminar",
+    "forgetConfirm": "¿Eliminar permanentemente esta tarea fallida? Esta acción no se puede deshacer.",
+    "flush": "Borrar todo",
+    "flushConfirm_one": "¿Borrar permanentemente {{count}} tarea fallida? Esta acción no se puede deshacer.",
+    "flushConfirm_other": "¿Borrar permanentemente las {{count}} tareas fallidas? Esta acción no se puede deshacer.",
+    "pagination": {
+      "prev": "Anterior",
+      "next": "Siguiente",
+      "page": "Página {{page}} de {{last}}"
     }
   }
 }

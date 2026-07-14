@@ -1,5 +1,11 @@
 {
   "title": "Kunden",
+  "status": {
+    "actief": "Aktiv",
+    "prospect": "Interessent",
+    "inactief": "Inaktiv",
+    "geblokkeerd": "Gesperrt"
+  },
   "page": {
     "add": "Kunde hinzufügen",
     "searchPlaceholder": "Kunde, Debitorennr., Account-Manager suchen…",

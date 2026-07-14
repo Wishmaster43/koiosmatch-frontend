@@ -18,7 +18,8 @@
     "copied": "Gekopieerd!",
     "back": "Terug",
     "next": "Volgende",
-    "edit": "Bewerken"
+    "edit": "Bewerken",
+    "close": "Sluiten"
   },
   "groups": {
     "kpis": "KPI's",
@@ -95,6 +96,7 @@
     "modules": "Pakket",
     "usage": "Verbruik",
     "apps": "Connectors",
+    "admin_jobs": "Taakbeheer",
     "roles": "Rollen & Rechten",
     "users": "Gebruikersbeheer",
     "sync": "Synchronisatie",
@@ -341,8 +343,9 @@
     "buttonPreview": "Knop voorbeeld",
     "linkPreview": "Link voorbeeld",
     "logo": "Logo",
-    "logoHint": "PNG of SVG, max 2 MB — wordt getoond in de navigatiebalk",
-    "noLogo": "Geen logo"
+    "logoHint": "PNG, JPG, WEBP of SVG, max 2 MB — SVG wordt serverside gescand. Getoond in de navigatiebalk.",
+    "noLogo": "Geen logo",
+    "logoUploadError": "Logo uploaden is mislukt."
   },
   "company": {
     "title": "Bedrijf",
@@ -1592,6 +1595,73 @@
       "waBusiness": "WhatsApp Business",
       "hours": "Verwerkte uren",
       "connectors": "Connectors"
+    }
+  },
+  "jobs": {
+    "title": "Taakbeheer",
+    "subtitle": "Wachtrijstatus, individuele taken en mislukte taken — alleen zichtbaar voor super admins.",
+    "tab": {
+      "overview": "Overzicht",
+      "jobs": "Taken",
+      "failed": "Mislukt"
+    },
+    "status": {
+      "active": "Actief",
+      "stalled": "Vastgelopen",
+      "idle": "Rustig"
+    },
+    "state": {
+      "pending": "Wachtend",
+      "reserved": "In behandeling"
+    },
+    "byQueue": "Per wachtrij",
+    "byTenant": "Per tenant",
+    "centralTenant": "Centraal (platform)",
+    "pending": "Wachtend",
+    "reserved": "In behandeling",
+    "oldestPending": "Oudste wachtend",
+    "oldestReserved": "Oudste in behandeling",
+    "failedTotal_one": "{{count}} mislukte taak",
+    "failedTotal_other": "{{count}} mislukte taken",
+    "noQueues": "Geen wachtrijen met openstaand werk.",
+    "noTenants": "Geen tenants met openstaand werk.",
+    "loadError": "Taakoverzicht laden is mislukt.",
+    "refresh": "Vernieuwen",
+    "autoRefresh": "Ververst automatisch elke 15s",
+    "filters": {
+      "queue": "Wachtrij",
+      "tenant": "Tenant",
+      "all": "Alle"
+    },
+    "col": {
+      "queue": "Wachtrij",
+      "tenant": "Tenant",
+      "job": "Taak",
+      "attempts": "Pogingen",
+      "createdAt": "Aangemaakt",
+      "runtime": "Looptijd",
+      "status": "Status",
+      "exception": "Foutmelding",
+      "failedAt": "Mislukt op",
+      "actions": "Acties"
+    },
+    "empty": "Geen taken gevonden.",
+    "emptyFailed": "Geen mislukte taken.",
+    "cancel": "Annuleren",
+    "cancelReservedError": "Annuleren is mislukt — de taak wordt al door een worker uitgevoerd.",
+    "retry": "Opnieuw proberen",
+    "retryAll": "Alles opnieuw proberen",
+    "retryAllConfirm_one": "{{count}} mislukte taak opnieuw in de wachtrij zetten?",
+    "retryAllConfirm_other": "Alle {{count}} mislukte taken opnieuw in de wachtrij zetten?",
+    "forget": "Verwijderen",
+    "forgetConfirm": "Deze mislukte taak permanent verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "flush": "Alles wissen",
+    "flushConfirm_one": "{{count}} mislukte taak permanent wissen? Dit kan niet ongedaan worden gemaakt.",
+    "flushConfirm_other": "ALLE {{count}} mislukte taken permanent wissen? Dit kan niet ongedaan worden gemaakt.",
+    "pagination": {
+      "prev": "Vorige",
+      "next": "Volgende",
+      "page": "Pagina {{page}} van {{last}}"
     }
   }
 }

@@ -8,8 +8,9 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Shield, BarChart2, Users, ClipboardList, Target, Clock, Eye } from 'lucide-react'
+import { Shield, BarChart2, Users, ClipboardList, Target, Clock, Eye, Check } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import {
   DASHBOARD_TYPES, KPI_ROWS, DASHBOARD_TEMPLATES, KPI_LABEL_KEY, BLOCK_LABEL_KEY, canSwitchViews,
@@ -59,27 +60,28 @@ export default function DashboardsSettings() {
     })
   }
 
-  // A toggle chip — on = tinted/bold, off = muted + strikethrough (still readable).
+  // A toggle chip = the shared QuickViewToggle (§4 soft-chip convention, one look everywhere):
+  // inactive still carries the accent (subtle tint, never grey), active = stronger tint +
+  // fontWeight 600 + a check mark, so ON/OFF reads at a glance instead of via strikethrough.
   const Chip = ({ type, kind, id, label }: { type: string; kind: 'kpis' | 'blocks'; id: string; label: string }) => {
-    const off = isHidden(type, kind, id)
-    const tone = kind === 'kpis' ? 'var(--color-primary)' : 'var(--text)'
+    const on = !isHidden(type, kind, id)
     return (
-      <button
-        type="button"
-        onClick={() => toggle(type, kind, id)}
-        aria-pressed={!off}
-        title={off ? t('dashboardsToggleOn') : t('dashboardsToggleOff')}
-        style={{
-          fontSize: 12, padding: '3px 10px', borderRadius: 999, cursor: 'pointer',
-          background: off ? 'transparent' : `color-mix(in srgb, ${tone} 12%, transparent)`,
-          border: `1px solid color-mix(in srgb, ${tone} ${off ? 20 : 34}%, transparent)`,
-          color: off ? 'var(--text-muted)' : tone,
-          fontWeight: off ? 400 : 600, textDecoration: off ? 'line-through' : 'none', opacity: off ? 0.7 : 1,
-          whiteSpace: 'nowrap',
-        }}
-      >{label}</button>
+      <QuickViewToggle
+        active={on}
+        onToggle={() => toggle(type, kind, id)}
+        label={label}
+        icon={on ? Check : undefined}
+        title={on ? t('dashboardsToggleOff') : t('dashboardsToggleOn')}
+      />
     )
   }
+
+  // Section sub-header inside a type card (KPI's / Grafieken & lijsten) — one shared
+  // style so hierarchy reads consistently with the rest of Settings (mirrors TenantUsageSettings).
+  const SectionLabel = ({ children }: { children: string }) => (
+    <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase',
+      letterSpacing: '0.05em', marginBottom: 8 }}>{children}</div>
+  )
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 860 }}>
@@ -98,8 +100,9 @@ export default function DashboardsSettings() {
         const blocks = blocksFor(type)
         return (
           <section key={type} style={{ border: '1px solid var(--border)', borderRadius: 12, background: 'var(--surface)', padding: 16 }}>
-            {/* Header: icon + type label + a "can switch" badge for the super views. */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            {/* Header: icon + type label + a "can switch" badge for the super views. A bottom
+                border separates it from the toggle sections so the card reads top-to-bottom. */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, marginBottom: 14, borderBottom: '1px solid var(--border)' }}>
               <div style={{ width: 32, height: 32, borderRadius: 8, background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Icon size={16} color="var(--color-primary)" />
               </div>
@@ -115,17 +118,17 @@ export default function DashboardsSettings() {
             </div>
 
             {/* KPI row — toggle each on/off. */}
-            <div style={{ marginBottom: 10 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>{t('dashboardsKpis')}</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            <div style={{ marginBottom: 14 }}>
+              <SectionLabel>{t('dashboardsKpis')}</SectionLabel>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {kpis.map(id => <Chip key={id} type={type} kind="kpis" id={id} label={KPI_LABEL_KEY[id] ? td(KPI_LABEL_KEY[id]) : id} />)}
               </div>
             </div>
 
             {/* Charts & lists — toggle each on/off. */}
             <div>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6 }}>{t('dashboardsBlocks')}</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              <SectionLabel>{t('dashboardsBlocks')}</SectionLabel>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {blocks.map(id => <Chip key={id} type={type} kind="blocks" id={id} label={BLOCK_LABEL_KEY[id] ? td(BLOCK_LABEL_KEY[id]) : id} />)}
               </div>
             </div>

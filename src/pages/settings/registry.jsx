@@ -60,6 +60,7 @@ import WebhooksSettings from './sections/webhooks'
 import AppsSettings from './sections/AppsSettings'
 import ModulesSettings from './sections/ModulesSettings'
 import TenantUsageSettings from './sections/TenantUsageSettings'
+import JobQueueSettings from './sections/jobs'
 import WhatsAppSettings from './sections/WhatsAppSettings'
 import ImporterenSettings from './sections/ImporterenSettings'
 import ApiKeysSettings from './sections/apikeys'
@@ -309,12 +310,14 @@ export const NAV_GROUPS = [
     ],
   },
   {
-    // Super Admin (super-admin-only): per-tenant package + add-ons, connectors, and usage.
+    // Super Admin (super-admin-only): per-tenant package + add-ons, connectors, usage + task manager.
     key: 'superadmin', icon: Shield,
     items: [
       { id: 'modules', icon: Package, component: ModulesSettings, superAdminOnly: true },
       { id: 'apps', icon: AppWindow, component: AppsSettings, superAdminOnly: true },
       { id: 'usage', icon: BarChart2, component: TenantUsageSettings, superAdminOnly: true },
+      // Taakbeheer (T4.1, extended QUEUE-VIEW-1) — queue/job health, backlog list, failure log.
+      { id: 'admin_jobs', icon: ListChecks, component: JobQueueSettings, superAdminOnly: true },
     ],
   },
   {

@@ -18,7 +18,8 @@
     "copied": "Copié !",
     "back": "Retour",
     "next": "Suivant",
-    "edit": "Modifier"
+    "edit": "Modifier",
+    "close": "Fermer"
   },
   "groups": {
     "kpis": "KPI",
@@ -91,6 +92,7 @@
     "billing_invoices": "Factures",
     "modules": "Forfait",
     "apps": "Apps (connecteurs)",
+    "admin_jobs": "Gestion des tâches",
     "roles": "Rôles et droits",
     "users": "Utilisateurs",
     "sync": "Synchronisation",
@@ -322,8 +324,9 @@
     "buttonPreview": "Aperçu du bouton",
     "linkPreview": "Aperçu du lien",
     "logo": "Logo",
-    "logoHint": "PNG ou SVG, max 2 Mo — affiché dans la barre de navigation",
-    "noLogo": "Aucun logo"
+    "logoHint": "PNG, JPG, WEBP ou SVG, max 2 Mo — le SVG est scanné côté serveur. Affiché dans la barre de navigation.",
+    "noLogo": "Aucun logo",
+    "logoUploadError": "Échec de l'envoi du logo."
   },
   "company": {
     "title": "Entreprise",
@@ -1592,6 +1595,73 @@
       "waBusiness": "WhatsApp Business",
       "hours": "Heures traitées",
       "connectors": "Connecteurs"
+    }
+  },
+  "jobs": {
+    "title": "Gestion des tâches",
+    "subtitle": "État des files d'attente, tâches individuelles et tâches échouées — réservé aux super admins.",
+    "tab": {
+      "overview": "Aperçu",
+      "jobs": "Tâches",
+      "failed": "Échecs"
+    },
+    "status": {
+      "active": "Actif",
+      "stalled": "Bloqué",
+      "idle": "Au repos"
+    },
+    "state": {
+      "pending": "En attente",
+      "reserved": "En cours"
+    },
+    "byQueue": "Par file d'attente",
+    "byTenant": "Par tenant",
+    "centralTenant": "Central (plateforme)",
+    "pending": "En attente",
+    "reserved": "En cours",
+    "oldestPending": "Plus ancienne en attente",
+    "oldestReserved": "Plus ancienne en cours",
+    "failedTotal_one": "{{count}} tâche échouée",
+    "failedTotal_other": "{{count}} tâches échouées",
+    "noQueues": "Aucune file d'attente avec du travail en attente.",
+    "noTenants": "Aucun tenant avec du travail en attente.",
+    "loadError": "Échec du chargement de l'aperçu des files d'attente.",
+    "refresh": "Actualiser",
+    "autoRefresh": "Actualisation automatique toutes les 15s",
+    "filters": {
+      "queue": "File d'attente",
+      "tenant": "Tenant",
+      "all": "Toutes"
+    },
+    "col": {
+      "queue": "File d'attente",
+      "tenant": "Tenant",
+      "job": "Tâche",
+      "attempts": "Tentatives",
+      "createdAt": "Créée",
+      "runtime": "Durée",
+      "status": "Statut",
+      "exception": "Erreur",
+      "failedAt": "Échouée le",
+      "actions": "Actions"
+    },
+    "empty": "Aucune tâche trouvée.",
+    "emptyFailed": "Aucune tâche échouée.",
+    "cancel": "Annuler",
+    "cancelReservedError": "Échec de l'annulation — un worker exécute déjà cette tâche.",
+    "retry": "Réessayer",
+    "retryAll": "Tout réessayer",
+    "retryAllConfirm_one": "Remettre {{count}} tâche échouée dans la file d'attente ?",
+    "retryAllConfirm_other": "Remettre les {{count}} tâches échouées dans la file d'attente ?",
+    "forget": "Supprimer",
+    "forgetConfirm": "Supprimer définitivement cette tâche échouée ? Cette action est irréversible.",
+    "flush": "Tout effacer",
+    "flushConfirm_one": "Effacer définitivement {{count}} tâche échouée ? Cette action est irréversible.",
+    "flushConfirm_other": "Effacer définitivement les {{count}} tâches échouées ? Cette action est irréversible.",
+    "pagination": {
+      "prev": "Précédent",
+      "next": "Suivant",
+      "page": "Page {{page}} sur {{last}}"
     }
   }
 }

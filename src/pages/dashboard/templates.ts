@@ -53,6 +53,9 @@ export const KPI_LABEL_KEY: Record<string, string> = {
   couplingErrors: 'kpi.couplingErrors', openShifts: 'kpi.openShifts', occupancy: 'kpi.occupancy',
   escalations: 'kpi.escalations', failedWf: 'kpi.failedWf', tasksOverdue: 'kpi.tasksOverdue',
   uncalledCallist: 'kpi.uncalledCallist', expiringOpps: 'kpi.expiringOpps',
+  // Was missing — Settings → Dashboards fell back to the raw id ("openVacancies")
+  // instead of the translated label used by the live dashboard (dashboardKpis.tsx).
+  openVacancies: 'kpi.openVacancies',
 }
 export const BLOCK_LABEL_KEY: Record<string, string> = {
   'chart.status': 'chart.byStatus', 'chart.funnel': 'chart.funnel', 'chart.funnelConversion': 'chart.funnelConversion',

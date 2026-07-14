@@ -1,5 +1,11 @@
 {
   "title": "Customers",
+  "status": {
+    "actief": "Active",
+    "prospect": "Prospect",
+    "inactief": "Inactive",
+    "geblokkeerd": "Blocked"
+  },
   "page": {
     "add": "Add customer",
     "searchPlaceholder": "Search customer, debtor no., account manager…",

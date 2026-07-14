@@ -18,7 +18,8 @@
     "copied": "Copied!",
     "back": "Back",
     "next": "Next",
-    "edit": "Edit"
+    "edit": "Edit",
+    "close": "Close"
   },
   "groups": {
     "kpis": "KPIs",
@@ -95,6 +96,7 @@
     "modules": "Package",
     "usage": "Usage",
     "apps": "Connectors",
+    "admin_jobs": "Task manager",
     "roles": "Roles & permissions",
     "users": "Users",
     "sync": "Synchronisation",
@@ -341,8 +343,9 @@
     "buttonPreview": "Button preview",
     "linkPreview": "Link preview",
     "logo": "Logo",
-    "logoHint": "PNG or SVG, max 2 MB — shown in the navigation bar",
-    "noLogo": "No logo"
+    "logoHint": "PNG, JPG, WEBP or SVG, max 2 MB — SVG is scanned server-side. Shown in the navigation bar.",
+    "noLogo": "No logo",
+    "logoUploadError": "Failed to upload the logo."
   },
   "company": {
     "title": "Company",
@@ -1592,6 +1595,73 @@
       "waBusiness": "WhatsApp Business",
       "hours": "Processed hours",
       "connectors": "Connectors"
+    }
+  },
+  "jobs": {
+    "title": "Task manager",
+    "subtitle": "Queue status, individual jobs and failed jobs — super admins only.",
+    "tab": {
+      "overview": "Overview",
+      "jobs": "Jobs",
+      "failed": "Failed"
+    },
+    "status": {
+      "active": "Active",
+      "stalled": "Stalled",
+      "idle": "Idle"
+    },
+    "state": {
+      "pending": "Pending",
+      "reserved": "Running"
+    },
+    "byQueue": "By queue",
+    "byTenant": "By tenant",
+    "centralTenant": "Central (platform)",
+    "pending": "Pending",
+    "reserved": "Running",
+    "oldestPending": "Oldest pending",
+    "oldestReserved": "Oldest running",
+    "failedTotal_one": "{{count}} failed job",
+    "failedTotal_other": "{{count}} failed jobs",
+    "noQueues": "No queues with pending work.",
+    "noTenants": "No tenants with pending work.",
+    "loadError": "Failed to load the queue overview.",
+    "refresh": "Refresh",
+    "autoRefresh": "Refreshes automatically every 15s",
+    "filters": {
+      "queue": "Queue",
+      "tenant": "Tenant",
+      "all": "All"
+    },
+    "col": {
+      "queue": "Queue",
+      "tenant": "Tenant",
+      "job": "Job",
+      "attempts": "Attempts",
+      "createdAt": "Created",
+      "runtime": "Runtime",
+      "status": "Status",
+      "exception": "Error",
+      "failedAt": "Failed at",
+      "actions": "Actions"
+    },
+    "empty": "No jobs found.",
+    "emptyFailed": "No failed jobs.",
+    "cancel": "Cancel",
+    "cancelReservedError": "Cancel failed — a worker is already running this job.",
+    "retry": "Retry",
+    "retryAll": "Retry all",
+    "retryAllConfirm_one": "Re-queue {{count}} failed job?",
+    "retryAllConfirm_other": "Re-queue all {{count}} failed jobs?",
+    "forget": "Delete",
+    "forgetConfirm": "Permanently delete this failed job? This cannot be undone.",
+    "flush": "Clear all",
+    "flushConfirm_one": "Permanently wipe {{count}} failed job? This cannot be undone.",
+    "flushConfirm_other": "Permanently wipe ALL {{count}} failed jobs? This cannot be undone.",
+    "pagination": {
+      "prev": "Previous",
+      "next": "Next",
+      "page": "Page {{page}} of {{last}}"
     }
   }
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Check, RefreshCw, Save, Upload } from 'lucide-react'
+import { Check, RefreshCw, Save, Upload, X } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
@@ -21,6 +21,9 @@ export default function BrandSettings() {
   const [saved,        setSaved]          = useState(false)
   const [saving,       setSaving]         = useState(false)
   const [loading,      setLoading]        = useState(true)
+  // Server-side upload error (422 — bad type/size, or the SVG-script-scan rejection) —
+  // shown inline near the logo block instead of swallowed (was a silent catch {}).
+  const [logoError,    setLogoError]      = useState(null)
   const fileRef = useRef(null)
 
   useEffect(() => {
@@ -37,6 +40,7 @@ export default function BrandSettings() {
   const handleLogoChange = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
+    setLogoError(null) // a fresh pick clears any previous upload error
     setLogoFile(file)
     const reader = new FileReader()
     reader.onload = ev => setLogoPreview(ev.target.result)
@@ -50,18 +54,25 @@ export default function BrandSettings() {
 
   const save = async () => {
     setSaving(true)
+    setLogoError(null)
     try {
       const payload = { brand_color: primaryColor, company_name: companyName }
       if (logoFile) {
         const fd = new FormData()
         fd.append('logo', logoFile)
-        // The upload endpoint persists the private path itself (logo_path) and the
-        // URL is minted fresh on every read (5 min TTL) — storing the returned
-        // signed URL in settings would re-create the legacy logo_url row the
-        // backend just cleaned up, and it expires. Response only feeds the preview.
-        const res = await api.post('/settings/logo', fd)
-        if (res.data?.logo_url) setLogoPreview(res.data.logo_url)
-        setLogoFile(null)
+        try {
+          // The upload endpoint persists the private path itself (logo_path) and the
+          // URL is minted fresh on every read (5 min TTL) — storing the returned
+          // signed URL in settings would re-create the legacy logo_url row the
+          // backend just cleaned up, and it expires. Response only feeds the preview.
+          const res = await api.post('/settings/logo', fd)
+          if (res.data?.logo_url) setLogoPreview(res.data.logo_url)
+          setLogoFile(null)
+        } catch (err) {
+          // 422 (bad type/size, or the SVG script-scan rejection) — show the
+          // backend's own message; the rest of the form still saves below.
+          setLogoError(err?.response?.data?.message ?? t('brand.logoUploadError'))
+        }
       }
       await saveSettings(payload)
       document.documentElement.style.setProperty('--color-primary', primaryColor)
@@ -168,6 +179,19 @@ export default function BrandSettings() {
             <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"
               style={{ display: 'none' }} onChange={handleLogoChange} />
           </div>
+
+          {/* Server-side upload error (422 — bad type/size, or the SVG script-scan rejection). */}
+          {logoError && (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginTop: 12, padding: '10px 12px',
+              borderRadius: 8, background: 'var(--color-danger-bg)',
+              border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+              <span style={{ fontSize: 12, color: 'var(--color-danger)', flex: 1 }}>{logoError}</span>
+              <button onClick={() => setLogoError(null)} aria-label={t('common.close')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', display: 'flex' }}>
+                <X size={13} />
+              </button>
+            </div>
+          )}
         </div>
 
       </div>

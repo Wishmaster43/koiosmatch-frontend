@@ -1,5 +1,11 @@
 {
   "title": "Clients",
+  "status": {
+    "actief": "Actif",
+    "prospect": "Prospect",
+    "inactief": "Inactif",
+    "geblokkeerd": "Bloqué"
+  },
   "page": {
     "add": "Ajouter un client",
     "searchPlaceholder": "Rechercher client, n° débiteur, gestionnaire…",

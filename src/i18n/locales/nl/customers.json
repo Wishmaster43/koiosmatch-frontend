@@ -1,5 +1,11 @@
 {
   "title": "Klanten",
+  "status": {
+    "actief": "Actief",
+    "prospect": "Prospect",
+    "inactief": "Inactief",
+    "geblokkeerd": "Geblokkeerd"
+  },
   "page": {
     "add": "Klant toevoegen",
     "searchPlaceholder": "Zoek klant, debiteurnr, accountmanager…",

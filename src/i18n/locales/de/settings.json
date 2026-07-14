@@ -18,7 +18,8 @@
     "copied": "Kopiert!",
     "back": "Zurück",
     "next": "Weiter",
-    "edit": "Bearbeiten"
+    "edit": "Bearbeiten",
+    "close": "Schließen"
   },
   "groups": {
     "kpis": "KPIs",
@@ -91,6 +92,7 @@
     "billing_invoices": "Rechnungen",
     "modules": "Paket",
     "apps": "Apps (Connectors)",
+    "admin_jobs": "Aufgabenverwaltung",
     "roles": "Rollen & Rechte",
     "users": "Benutzer",
     "sync": "Synchronisierung",
@@ -322,8 +324,9 @@
     "buttonPreview": "Schaltflächen-Vorschau",
     "linkPreview": "Link-Vorschau",
     "logo": "Logo",
-    "logoHint": "PNG oder SVG, max. 2 MB — wird in der Navigationsleiste angezeigt",
-    "noLogo": "Kein Logo"
+    "logoHint": "PNG, JPG, WEBP oder SVG, max. 2 MB — SVG wird serverseitig geprüft. Wird in der Navigationsleiste angezeigt.",
+    "noLogo": "Kein Logo",
+    "logoUploadError": "Logo-Upload fehlgeschlagen."
   },
   "company": {
     "title": "Unternehmen",
@@ -1592,6 +1595,73 @@
       "waBusiness": "WhatsApp Business",
       "hours": "Verarbeitete Stunden",
       "connectors": "Konnektoren"
+    }
+  },
+  "jobs": {
+    "title": "Aufgabenverwaltung",
+    "subtitle": "Warteschlangenstatus, einzelne Aufgaben und fehlgeschlagene Aufgaben — nur für Super-Admins.",
+    "tab": {
+      "overview": "Übersicht",
+      "jobs": "Aufgaben",
+      "failed": "Fehlgeschlagen"
+    },
+    "status": {
+      "active": "Aktiv",
+      "stalled": "Blockiert",
+      "idle": "Ruhig"
+    },
+    "state": {
+      "pending": "Wartend",
+      "reserved": "In Bearbeitung"
+    },
+    "byQueue": "Nach Warteschlange",
+    "byTenant": "Nach Mandant",
+    "centralTenant": "Zentral (Plattform)",
+    "pending": "Wartend",
+    "reserved": "In Bearbeitung",
+    "oldestPending": "Älteste wartend",
+    "oldestReserved": "Älteste in Bearbeitung",
+    "failedTotal_one": "{{count}} fehlgeschlagene Aufgabe",
+    "failedTotal_other": "{{count}} fehlgeschlagene Aufgaben",
+    "noQueues": "Keine Warteschlangen mit offener Arbeit.",
+    "noTenants": "Keine Mandanten mit offener Arbeit.",
+    "loadError": "Die Warteschlangenübersicht konnte nicht geladen werden.",
+    "refresh": "Aktualisieren",
+    "autoRefresh": "Aktualisiert automatisch alle 15s",
+    "filters": {
+      "queue": "Warteschlange",
+      "tenant": "Mandant",
+      "all": "Alle"
+    },
+    "col": {
+      "queue": "Warteschlange",
+      "tenant": "Mandant",
+      "job": "Aufgabe",
+      "attempts": "Versuche",
+      "createdAt": "Erstellt",
+      "runtime": "Laufzeit",
+      "status": "Status",
+      "exception": "Fehlermeldung",
+      "failedAt": "Fehlgeschlagen am",
+      "actions": "Aktionen"
+    },
+    "empty": "Keine Aufgaben gefunden.",
+    "emptyFailed": "Keine fehlgeschlagenen Aufgaben.",
+    "cancel": "Abbrechen",
+    "cancelReservedError": "Abbrechen fehlgeschlagen — die Aufgabe wird bereits von einem Worker ausgeführt.",
+    "retry": "Erneut versuchen",
+    "retryAll": "Alle erneut versuchen",
+    "retryAllConfirm_one": "{{count}} fehlgeschlagene Aufgabe erneut in die Warteschlange stellen?",
+    "retryAllConfirm_other": "Alle {{count}} fehlgeschlagenen Aufgaben erneut in die Warteschlange stellen?",
+    "forget": "Löschen",
+    "forgetConfirm": "Diese fehlgeschlagene Aufgabe endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
+    "flush": "Alles löschen",
+    "flushConfirm_one": "{{count}} fehlgeschlagene Aufgabe endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
+    "flushConfirm_other": "ALLE {{count}} fehlgeschlagenen Aufgaben endgültig löschen? Dies kann nicht rückgängig gemacht werden.",
+    "pagination": {
+      "prev": "Zurück",
+      "next": "Weiter",
+      "page": "Seite {{page}} von {{last}}"
     }
   }
 }
