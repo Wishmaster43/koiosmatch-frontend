@@ -124,13 +124,12 @@ export function useOpportunitiesData() {
     if ('endDate'        in patch) body.end_date          = patch.endDate || null
     if ('serviceTypeId'   in patch) body.service_type_id   = patch.serviceTypeId ?? null
     if ('agreementTypeId' in patch) body.agreement_type_id = patch.agreementTypeId ?? null
-    // Org hierarchy (klant tab, C-42): department/contact map to real, validated
-    // columns (customer_departments/customer_contacts — api-generated.ts + the
-    // Opportunity model). The API's `location_id` is a DIFFERENT concept — the
-    // TENANT's own branch (mirrors Match.branch_id), validated against `locations`,
-    // not the customer's location — sending our pick there 422s. There is no
-    // customer_location_id column yet, so it goes out as a tolerated extra field
-    // (silently dropped by ->validated() until the backend adds it).
+    // Org hierarchy (klant tab, C-42/OPP-LOC-1): department/contact/customer_location_id
+    // all map to real, validated columns (customer_departments/customer_locations/
+    // customer_contacts — see OpportunityRequest). The API's `location_id` (unrelated
+    // to `locationId` here) is a DIFFERENT concept — the TENANT's own branch (mirrors
+    // Match.branch_id), validated against `locations`, not the customer's location —
+    // sending our pick there would 422. Ours goes out under its own key.
     if ('locationId'   in patch) body.customer_location_id = patch.locationId || null
     if ('departmentId' in patch) body.department_id = patch.departmentId || null
     if ('contactId'    in patch) body.contact_id    = patch.contactId || null

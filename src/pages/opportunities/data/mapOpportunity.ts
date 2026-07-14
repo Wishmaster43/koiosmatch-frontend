@@ -13,7 +13,12 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
   const ownerObj = (o.owner && typeof o.owner === 'object') ? o.owner : null
   const svc = (o.service_type   && typeof o.service_type   === 'object') ? o.service_type   : null
   const agr = (o.agreement_type && typeof o.agreement_type === 'object') ? o.agreement_type : null
-  const loc = (o.location   && typeof o.location   === 'object') ? o.location   : null
+  // OPP-LOC-1: the customer's OWN location/site (`customer_location`) — distinct
+  // from `location`, which is the TENANT's own branch (C-41, mirrors Match.branch_id).
+  // The Klant tab's cascade (customer → location → department → contact) reads
+  // customer_location, never `location` — reading the wrong one silently prefilled
+  // an empty/mismatched pick in the drawer's edit mode (Danny, 2026-07-14).
+  const loc = (o.customer_location && typeof o.customer_location === 'object') ? o.customer_location : null
   const dep = (o.department && typeof o.department === 'object') ? o.department : null
   const con = (o.contact    && typeof o.contact    === 'object') ? o.contact    : null
   // Decimal fields (value/hours) may arrive as a string — coerce to a number or null.
@@ -52,7 +57,7 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     agreementTypeColor: agr?.color ?? '#9CA3AF',
     agreementTypeId:    agr?.id ?? o.agreement_type_id ?? null,
     location:      loc?.name ?? o.location_name ?? '',
-    locationId:    loc?.id ?? o.location_id ?? null,
+    locationId:    loc?.id ?? o.customer_location_id ?? null,
     department:    dep?.name ?? '',
     departmentId:  dep?.id ?? o.department_id ?? null,
     contact:       con?.name ?? '',

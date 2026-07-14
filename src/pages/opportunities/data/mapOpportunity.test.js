@@ -66,6 +66,25 @@ describe('mapOpportunity', () => {
     expect(row.initials).toBe('AB')
   })
 
+  it('reads the customer\'s OWN location (customer_location), not the tenant branch (location)', () => {
+    // Regression (2026-07-14): the mapper used to read `location`/`location_id`
+    // (the tenant's own branch, C-41) for the Klant tab's location field, which
+    // silently prefilled an empty/wrong pick in the drawer's edit-mode cascade —
+    // the real column is `customer_location`/`customer_location_id` (OPP-LOC-1).
+    const row = mapOpportunity({
+      id: 'o5',
+      location: { id: 'branch-1', name: 'Bureau Amsterdam' },
+      customer_location: { id: 'loc-9', name: 'Kantoor Rotterdam' },
+    })
+    expect(row.location).toBe('Kantoor Rotterdam')
+    expect(row.locationId).toBe('loc-9')
+  })
+
+  it('falls back to the flat customer_location_id when nested customer_location is absent', () => {
+    const row = mapOpportunity({ id: 'o6', customer_location_id: 'loc-42' })
+    expect(row.locationId).toBe('loc-42')
+  })
+
   it('never throws on an empty record and fills safe defaults', () => {
     const row = mapOpportunity({})
     expect(row.title).toBe('—')

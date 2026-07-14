@@ -3,19 +3,25 @@
  * feature is a read-only list (page + table), so we type the raw API shape we
  * map from and the flat row the table renders.
  */
+import type { Id } from './common'
 
 // The raw match as it can arrive from the API (snake_case-tolerant, nested or flat).
 export interface RawMatch {
   id?: string | number
   // NUMMER-1: server-assigned human-readable reference number (M-00042).
   reference_number?: string
-  candidate?: { first_name?: string; last_name?: string; name?: string }
+  candidate?: { id?: string | number; first_name?: string; last_name?: string; name?: string }
   candidate_name?: string
+  // Flat FKs for clickable linkage ("golf 2" — MatchListResource) — the nested
+  // objects above/below only add the display name/title.
+  candidate_id?: string | number
+  vacancy_id?: string | number
+  customer_id?: string | number
   vacancy_title?: string
-  vacancy?: { title?: string }
+  vacancy?: { id?: string | number; title?: string }
   client_name?: string
-  client?: { name?: string }
-  customer?: { name?: string }
+  client?: { id?: string | number; name?: string }
+  customer?: { id?: string | number; name?: string }
   score?: number | null
   match_score?: number | null
   stage_label?: string
@@ -42,6 +48,11 @@ export interface MatchRow {
   initials: string
   vacancy: string
   client: string
+  // Flat FKs (§3A cross-entity links) — power the Relations tab's hyperlinks to
+  // the candidate/vacancy/customer's own page + drawer (EntityLink).
+  candidateId: Id | null
+  vacancyId: Id | null
+  clientId: Id | null
   score: number | null
   stage: string
   // Lifecycle status slug (R-1b /match-statuses; the is_closed flag ends the match).

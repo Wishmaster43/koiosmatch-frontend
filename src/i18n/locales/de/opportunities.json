@@ -83,7 +83,8 @@
     "agreementType": "Vereinbarung",
     "location": "Standort",
     "department": "Abteilung",
-    "contact": "Ansprechpartner"
+    "contact": "Ansprechpartner",
+    "openCustomer": "Kunde öffnen"
   },
   "modal": {
     "title": "Neue Opportunity",

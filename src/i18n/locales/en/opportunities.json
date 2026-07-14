@@ -94,6 +94,7 @@
     "location": "Location",
     "department": "Department",
     "contact": "Contact",
+    "openCustomer": "Open client",
     "owner": "Owner",
     "created": "Created",
     "groups": {

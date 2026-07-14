@@ -94,6 +94,7 @@
     "location": "Locatie",
     "department": "Afdeling",
     "contact": "Contactpersoon",
+    "openCustomer": "Klant openen",
     "owner": "Eigenaar",
     "created": "Aangemaakt",
     "groups": {

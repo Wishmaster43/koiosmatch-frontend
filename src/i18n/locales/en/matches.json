@@ -34,6 +34,7 @@
     "createdAt": "Created on {{date}}",
     "tabs": {
       "overview": "Overview",
+      "relations": "Relations",
       "changelog": "Changelog"
     },
     "sectionDetails": "Match details",
@@ -47,6 +48,9 @@
       "created": "Created",
       "status": "Status"
     },
+    "openCandidate": "Open candidate",
+    "openVacancy": "Open vacancy",
+    "openClient": "Open client",
     "contract": {
       "title": "Contract & financial",
       "groupContract": "Contract",

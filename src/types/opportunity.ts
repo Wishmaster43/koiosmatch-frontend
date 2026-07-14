@@ -84,9 +84,13 @@ export interface ApiOpportunity {
   service_type_id?: Id
   agreement_type?: { id?: Id; value?: string; label?: string; color?: string } | string
   agreement_type_id?: Id
+  // The tenant's OWN branch (C-41) — NOT the customer's location; see mapOpportunity.
   location?: { id?: Id; name?: string }
   location_id?: Id
   location_name?: string
+  // OPP-LOC-1: the customer's own location/site (klantlocatie) — what the Klant tab reads.
+  customer_location?: { id?: Id; name?: string }
+  customer_location_id?: Id
   department?: { id?: Id; name?: string }
   department_id?: Id
   contact?: { id?: Id; name?: string }

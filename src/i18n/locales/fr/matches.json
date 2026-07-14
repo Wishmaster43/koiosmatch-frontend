@@ -34,6 +34,7 @@
     "createdAt": "Créé le {{date}}",
     "tabs": {
       "overview": "Aperçu",
+      "relations": "Relations",
       "changelog": "Historique"
     },
     "sectionDetails": "Détails du match",
@@ -47,6 +48,9 @@
       "created": "Créé",
       "status": "Statut"
     },
+    "openCandidate": "Ouvrir le candidat",
+    "openVacancy": "Ouvrir le poste",
+    "openClient": "Ouvrir le client",
     "contract": {
       "title": "Contrat et finances",
       "groupContract": "Contrat",

@@ -3,9 +3,16 @@
  * EntityHeader shell (§3A blueprint). The match facts (candidate/vacancy/client/
  * score/stage) stay read-only — a match is the continuation of an application →
  * placement (§3B) and those are derived — but the placement's contract/financial
- * layer IS editable in-place (OverviewTab → MatchContractSection). The header
- * itself stays calm: no meta pickers, only the approval workflow badge/actions
- * (MATCH-APPROVAL-1). Thin container: header config + tab list + the
+ * layer IS editable in-place. Three real tabs (Danny, 2026-07-14: "ook tabjes maken
+ * voor de drill down" — one tab used to wear the summary + the whole contract form
+ * at once): Overzicht (facts/score/status), Contract & financieel
+ * (MatchContractSection, moved as-is), Relaties (candidate/vacancy/klant, each a
+ * cross-entity hyperlink — RelationsTab). A Notities/Tijdlijn tab is NOT added: the
+ * backend has no /matches/{id}/notes or .../activity route yet (grepped
+ * routes/api/tenant/applications-matches.php — only CRUD + approve/reject/contract
+ * exist), so ChangelogTab stays the icon-popover it already was rather than a fake
+ * tab. The header itself stays calm: no meta pickers, only the approval workflow
+ * badge/actions (MATCH-APPROVAL-1). Thin container: header config + tab list + the
  * useMatchApproval wiring; all body markup lives in the tab/header components.
  */
 import { useTranslation } from 'react-i18next'
@@ -17,6 +24,8 @@ import { useDateFormat } from '@/lib/datetime'
 import StatusPill from '@/components/ui/StatusPill'
 import ScorePill from './ScorePill'
 import OverviewTab from './drawer/OverviewTab'
+import RelationsTab from './drawer/RelationsTab'
+import MatchContractSection from './drawer/MatchContractSection'
 import MatchChangelogPopover from './drawer/MatchChangelogPopover'
 import MatchApprovalBadge from './drawer/MatchApprovalBadge'
 import MatchApprovalActions from './drawer/MatchApprovalActions'
@@ -33,8 +42,9 @@ interface MatchDrawerProps {
   // Approval workflow (§7 — UI-only gate; the backend re-checks matches.update).
   canApprove?: boolean
   onApprovalChange?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
-  // General row patch — used by the contract/financial edit (OverviewTab) to
-  // refresh the row/header when a save echoes back a recomputed approval_status.
+  // General row patch — used by the contract/financial edit (the Contract tab,
+  // MatchContractSection) to refresh the row/header when a save echoes back a
+  // recomputed approval_status.
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
 }
 
@@ -63,9 +73,12 @@ export default function MatchDrawer({
   )
 
   // Tabs are config (§3A). Record history is the changelog ICON-popover in the title row
-  // (never a tab) — see titleActions below. A Placement tab waits on a backend detail contract.
+  // (never a tab) — see titleActions below. Contract/financial reuses drawer.contract.title
+  // as its tab label (already translated ×5) instead of a duplicate key.
   const tabs: EntityTab[] = [
-    { id: 'overview',  label: t('drawer.tabs.overview'),  render: () => <OverviewTab match={match} onSetStatus={onSetStatus} onUpdate={onUpdate} /> },
+    { id: 'overview',  label: t('drawer.tabs.overview'), render: () => <OverviewTab match={match} onSetStatus={onSetStatus} /> },
+    { id: 'contract',  label: t('drawer.contract.title'), render: () => <MatchContractSection matchId={match.id} onUpdate={onUpdate} /> },
+    { id: 'relations', label: t('drawer.tabs.relations'), render: () => <RelationsTab match={match} /> },
   ]
 
   return (

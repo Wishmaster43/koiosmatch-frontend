@@ -83,7 +83,8 @@
     "agreementType": "Accord",
     "location": "Lieu",
     "department": "Département",
-    "contact": "Contact"
+    "contact": "Contact",
+    "openCustomer": "Ouvrir le client"
   },
   "modal": {
     "title": "Nouvelle opportunité",

@@ -20,6 +20,12 @@ function mapMatch(m: RawMatch): MatchRow {
     initials:   name && name !== '—' ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '?',
     vacancy:    m.vacancy_title ?? m.vacancy?.title ?? '—',
     client:     m.client_name ?? m.client?.name ?? m.customer?.name ?? '—',
+    // Flat FKs (§3A cross-entity links) — the Relations tab hyperlinks candidate/
+    // vacancy/klant to their own page via these (EntityLink degrades to plain text
+    // when null, so an absent id never renders a dead link).
+    candidateId: m.candidate_id ?? m.candidate?.id ?? null,
+    vacancyId:   m.vacancy_id ?? m.vacancy?.id ?? null,
+    clientId:    m.customer_id ?? m.client?.id ?? m.customer?.id ?? null,
     score:      m.score ?? m.match_score ?? null,
     // Funnel stage only — the old `?? m.status` fallback painted "open" into the
     // stage axis once the R-1b resource replaced stage with status (broken board).
