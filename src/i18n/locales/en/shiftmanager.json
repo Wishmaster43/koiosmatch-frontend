@@ -172,6 +172,8 @@
     "totalRow": "Total",
     "asValues": "Values",
     "asPct": "%",
+    "asDelta": "Δ",
+    "multiYearMetric": "Series:",
     "byCustomerTitle": "No candidate by customer",
     "byFunctionTitle": "Open shifts by role",
     "inHours": "In hours",
@@ -179,6 +181,16 @@
     "colHours": "Hours",
     "colShifts": "Shifts",
     "lastSync": "Last sync: {{time}}",
+    "sync": {
+      "button": "Sync",
+      "busy": "Syncing…",
+      "choose": "Choose ShiftManager account…",
+      "noPermission": "No permission to sync",
+      "noConnection": "No active ShiftManager connection found",
+      "started": "Sync started — this can take a few minutes",
+      "failed": "Sync failed",
+      "tooManyRequests": "Too many attempts, try again in {{secs}}s"
+    },
     "empty": "—"
   },
   "customersReport": {

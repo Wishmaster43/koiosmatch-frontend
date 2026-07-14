@@ -13,7 +13,7 @@
 import { useMemo } from "react"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
 import api from "@/lib/api"
-import { SERIES, monthAbbr, YEAR_OPACITY, QUARTERS } from "./shiftsChartsConfig"
+import { SERIES, monthAbbr, YEAR_OPACITY, QUARTERS, yearTint } from "./shiftsChartsConfig"
 import type { ShiftFilterOptions, ShiftMonthRow, ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 
 // Stable empty fallback so `rows` keeps a constant reference while there is no
@@ -30,7 +30,7 @@ export function useShiftsChartData({
   selectedYears, selectedMonths, period, visible,
   selectedJobTypes, selectedCustomers, selectedLocations,
   fixedCustomers, fixedLocationIds, fixedDepartmentId, fixedCandidateId,
-  seriesLabel,
+  seriesLabel, multiYearMetric,
 }: {
   selectedYears: number[]
   selectedMonths: string[]
@@ -44,6 +44,9 @@ export function useShiftsChartData({
   fixedDepartmentId: string | null
   fixedCandidateId: string | null
   seriesLabel: (key: string) => string
+  // SM-2YR: which single metric drives the chart/table when 2+ years are selected
+  // (null/hidden falls back to the first visible series — see barSeries below).
+  multiYearMetric?: string | null
 }) {
   // Available filter options — cached ~5 min (rarely changes).
   const filterOptionsQ = useQuery({
@@ -148,32 +151,58 @@ export function useShiftsChartData({
   const activeSeries = useMemo(() => SERIES.filter((s) => visible.includes(s.key)), [visible])
   const multiYear    = selectedYears.length > 1
 
-  // Bar descriptors for the shifts chart (count) and the hours chart.
+  // SM-2YR (Danny 2026-07-06): with 2+ years selected, render exactly ONE metric —
+  // selecting years used to explode into years × series bars/columns (2 years × 5
+  // series = 10, unreadable). Single-year keeps the full multi-series view untouched.
+  // Falls back to the first visible series if the chosen metric was hidden via the
+  // "reeksen" filter.
+  const barSeries = useMemo(() => {
+    if (!multiYear) return activeSeries
+    const chosen = activeSeries.find((s) => s.key === multiYearMetric)
+    return chosen ? [chosen] : activeSeries.slice(0, 1)
+  }, [multiYear, activeSeries, multiYearMetric])
+
+  // Recency rank per selected year (0 = most recent), derived from the actual year
+  // VALUES rather than selection order — selectedYears can be a non-contiguous subset
+  // (e.g. this year + two years ago), so array position alone previously mismatched
+  // which bar looked "current" vs "muted".
+  const yearRank = useMemo(() => {
+    const desc = [...selectedYears].sort((a, b) => b - a)
+    return new Map(desc.map((y, i) => [y, i]))
+  }, [selectedYears])
+
+  // Bar descriptors for the shifts chart (count) and the hours chart. In multi-year
+  // mode the bar `name` carries the year (Totaal 2025 / Totaal 2026) so the legend and
+  // tooltip stay unambiguous with only one metric on screen.
   const shiftBars = useMemo<ShiftBar[]>(() =>
-    selectedYears.flatMap((year, yi) =>
-      activeSeries.map((s): ShiftBar => ({
+    selectedYears.flatMap((year) => {
+      const rank = yearRank.get(year) ?? 0
+      return barSeries.map((s): ShiftBar => ({
         dataKey:    `${year}_${s.key}`,
-        name:       seriesLabel(s.key),
+        name:       multiYear ? `${seriesLabel(s.key)} ${year}` : seriesLabel(s.key),
         color:      s.color,
-        opacity:    YEAR_OPACITY[yi] ?? 0.25,
-        legendType: yi === 0 ? "square" : "none",
+        fill:       yearTint(s.color, rank),
+        opacity:    YEAR_OPACITY[rank] ?? 0.3,
+        legendType: "square",
         year,
         seriesKey:  s.key,
       }))
-    ), [selectedYears, activeSeries, seriesLabel])
+    }), [selectedYears, barSeries, yearRank, multiYear, seriesLabel])
 
   const hoursBars = useMemo<ShiftBar[]>(() =>
-    selectedYears.flatMap((year, yi) =>
-      activeSeries.map((s): ShiftBar => ({
+    selectedYears.flatMap((year) => {
+      const rank = yearRank.get(year) ?? 0
+      return barSeries.map((s): ShiftBar => ({
         dataKey:    `${year}_${s.key}_uren`,
-        name:       seriesLabel(s.key),
+        name:       multiYear ? `${seriesLabel(s.key)} ${year}` : seriesLabel(s.key),
         color:      s.color,
-        opacity:    YEAR_OPACITY[yi] ?? 0.25,
-        legendType: yi === 0 ? "square" : "none",
+        fill:       yearTint(s.color, rank),
+        opacity:    YEAR_OPACITY[rank] ?? 0.3,
+        legendType: "square",
         year,
         seriesKey:  `${s.key}_uren`,
       }))
-    ), [selectedYears, activeSeries, seriesLabel])
+    }), [selectedYears, barSeries, yearRank, multiYear, seriesLabel])
 
   // Filter-driven hour KPIs for the dashboard tiles (derived from the same filtered
   // chartData): open hours = geen-kandidaat uren · this-month = prognose of the current

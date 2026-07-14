@@ -14,10 +14,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation }     from "react-i18next"
 import ShiftsDrillDownDrawer  from "./ShiftsDrillDownDrawer"
+import DrillTabs              from "@/components/ui/DrillTabs"
 import { useRightPanel }      from "@/context/RightPanelContext"
 import { SERIES, CURRENT_YEAR } from "./shiftsChartsConfig"
 import { BarChartWidget, YearIndicator, ChartCard, ShiftsDataTable, PctToggle } from "./shiftsChartsWidgets"
 import { useShiftsChartData } from "./useShiftsChartData"
+import SmSyncButton            from "./SmSyncButton"
 import { buildShiftsFilterGroups } from "./buildShiftsFilterGroups"
 import { useSavedShiftFilters } from "./useSavedShiftFilters"
 import type { ShiftFilterState } from "./useSavedShiftFilters"
@@ -69,6 +71,11 @@ export default function ShiftsChartsBlock({
   const [selectedCustomers,  setSelectedCustomers]  = useState<string[]>([])
   const [selectedLocations,  setSelectedLocations]  = useState<string[]>([])
   const [drill,              setDrill]              = useState<{ baseQuery: string; metric: string; year: number; yearSuffix: string; initialPeriod: string } | null>(null)
+  // SM-2YR: which single metric drives the chart/table once 2+ years are selected
+  // (null = "follow the first visible series"); irrelevant/untouched in single-year view.
+  const [multiYearMetric,    setMultiYearMetric]    = useState<string | null>(null)
+  const metricOptions = useMemo(() => SERIES.filter((s) => visible.includes(s.key)), [visible])
+  const effectiveMultiYearMetric = metricOptions.find((s) => s.key === multiYearMetric)?.key ?? metricOptions[0]?.key ?? null
 
   // ── Data layer ──────────────────────────────────────────────────────────────
   const { loading, error, filterOptions, chartData, shiftBars, hoursBars, multiYear, queryString, hourStats } =
@@ -76,7 +83,7 @@ export default function ShiftsChartsBlock({
       selectedYears, selectedMonths, period, visible,
       selectedJobTypes, selectedCustomers, selectedLocations,
       fixedCustomers, fixedLocationIds, fixedDepartmentId, fixedCandidateId,
-      seriesLabel,
+      seriesLabel, multiYearMetric: effectiveMultiYearMetric,
     })
 
   // Shift breakdown (klant/functie) + shift KPI cards (only when this block drives the
@@ -167,6 +174,12 @@ export default function ShiftsChartsBlock({
         : [...prev, v].sort((a, b) => Number(a) - Number(b))
     )
 
+  // SM-2YR: the metric picker's tabs + the per-year tint for the YearIndicator dots,
+  // both derived from the already-computed hoursBars (one per selected year once
+  // multiYear, sharing colour/fill with the shifts chart).
+  const metricTabs = useMemo(() => metricOptions.map((s) => ({ key: s.key, label: seriesLabel(s.key) })), [metricOptions, seriesLabel])
+  const yearColors = useMemo(() => selectedYears.map((y) => hoursBars.find((b) => b.year === y)?.fill), [selectedYears, hoursBars])
+
   const periodLabel = t('charts.periodLabel', {
     years: selectedYears.join(", "),
     unit:  period === "quarter" ? t('charts.perQuarterUnit') : t('charts.perMonthUnit'),
@@ -224,11 +237,14 @@ export default function ShiftsChartsBlock({
       {/* Combined, filter-driven KPI row (dashboard only): candidate cards + shift cards */}
       {showKpiRow && (
         <>
-          {/* Data freshness (left) + Uren/Diensten toggle (right) */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0 8px' }}>
-            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              {lastSync && t('charts.lastSync', { time: new Date(lastSync).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) })}
-            </span>
+          {/* Data freshness + SYNC-1 sync button (left) · Uren/Diensten toggle (right) */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0 0 8px', gap: 12 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                {lastSync && t('charts.lastSync', { time: new Date(lastSync).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) })}
+              </span>
+              <SmSyncButton />
+            </div>
             <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
               {(['hours', 'count'] as const).map(u => (
                 <button key={u} type="button" onClick={() => setShiftUnit(u)}
@@ -244,27 +260,40 @@ export default function ShiftsChartsBlock({
         </>
       )}
 
+      {/* SM-2YR: single-metric picker — only relevant once 2+ years are selected, since
+          the chart/table then show one metric's year-over-year bars instead of every
+          visible series (avoids the years × series explosion). */}
+      {multiYear && metricTabs.length > 1 && (
+        <div className="mb-3 flex items-center gap-2 flex-wrap">
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('charts.multiYearMetric')}</span>
+          <DrillTabs tabs={metricTabs} active={effectiveMultiYearMetric ?? ''} onChange={setMultiYearMetric} />
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartCard title={t('charts.hours')} subtitle={periodLabel} loading={loading} error={error}>
-          <YearIndicator years={selectedYears} />
+          <YearIndicator years={selectedYears} colors={yearColors} />
           <BarChartWidget data={chartData} bars={hoursBars} onBarClick={handleBarClick} />
         </ChartCard>
 
         <ChartCard title={t('charts.shifts')} subtitle={periodLabel} loading={loading} error={error}>
-          <YearIndicator years={selectedYears} />
+          <YearIndicator years={selectedYears} colors={yearColors} />
           <BarChartWidget data={chartData} bars={shiftBars} onBarClick={handleBarClick} />
         </ChartCard>
       </div>
 
-      {/* Same data as a table under each chart (hours + shifts per month, with totals). */}
+      {/* Same data as a table under each chart (hours + shifts per month, with totals).
+          SM-2YR: multiYear repurposes the pct toggle as "Δ vs previous year" (deltaMode)
+          since there is no per-year Totaal column left to divide by once only one
+          metric is on screen. */}
       <div className="grid grid-cols-1 gap-4 mt-4 lg:grid-cols-2">
         <ChartCard title={t('charts.hoursTable')} subtitle={periodLabel} loading={loading} error={error}
-          action={<PctToggle pct={hoursPct} onChange={setHoursPct} />}>
-          <ShiftsDataTable data={chartData} bars={hoursBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} onCellClick={handleBarClick} pct={hoursPct} />
+          action={<PctToggle pct={hoursPct} onChange={setHoursPct} deltaMode={multiYear} />}>
+          <ShiftsDataTable data={chartData} bars={hoursBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} onCellClick={handleBarClick} pct={hoursPct} deltaMode={multiYear} />
         </ChartCard>
         <ChartCard title={t('charts.shiftsTable')} subtitle={periodLabel} loading={loading} error={error}
-          action={<PctToggle pct={shiftsPct} onChange={setShiftsPct} />}>
-          <ShiftsDataTable data={chartData} bars={shiftBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} onCellClick={handleBarClick} pct={shiftsPct} />
+          action={<PctToggle pct={shiftsPct} onChange={setShiftsPct} deltaMode={multiYear} />}>
+          <ShiftsDataTable data={chartData} bars={shiftBars} monthLabel={t('charts.periodCol')} totalLabel={t('charts.totalRow')} multiYear={multiYear} onCellClick={handleBarClick} pct={shiftsPct} deltaMode={multiYear} />
         </ChartCard>
       </div>
 

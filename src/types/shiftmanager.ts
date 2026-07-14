@@ -88,6 +88,10 @@ export interface ShiftBar {
   dataKey: string
   name: string
   color: string
+  // Plain series colour (rank 0 = most recent selected year) or a color-mix tint of it
+  // for an older year (SM-2YR) — the actual Recharts `fill`, table swatch and legend
+  // dot all read this instead of a separate SVG opacity.
+  fill: string
   opacity: number
   legendType: 'square' | 'none'
   year: number

@@ -172,6 +172,8 @@
     "totalRow": "Totaal",
     "asValues": "Waarden",
     "asPct": "%",
+    "asDelta": "Δ",
+    "multiYearMetric": "Reeks:",
     "byCustomerTitle": "Geen kandidaat per klant",
     "byFunctionTitle": "Open diensten per functie",
     "inHours": "In uren",
@@ -179,6 +181,16 @@
     "colHours": "Uren",
     "colShifts": "Diensten",
     "lastSync": "Laatste sync: {{time}}",
+    "sync": {
+      "button": "Sync",
+      "busy": "Bezig…",
+      "choose": "Kies ShiftManager-account…",
+      "noPermission": "Geen rechten om te synchroniseren",
+      "noConnection": "Geen actieve ShiftManager-koppeling gevonden",
+      "started": "Synchronisatie gestart — kan enkele minuten duren",
+      "failed": "Synchroniseren mislukt",
+      "tooManyRequests": "Te veel pogingen, probeer over {{secs}}s opnieuw"
+    },
     "empty": "—"
   },
   "customersReport": {

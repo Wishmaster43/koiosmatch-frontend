@@ -20,7 +20,8 @@ export function BarChartWidget({ data, bars, onBarClick }: {
   onBarClick: (datum: ShiftsChartDatum, bar: ShiftBar) => void
 }) {
   // Deduplicate legend: only show the first bar per series name (avoids double
-  // legend entries when several years are plotted).
+  // legend entries when several years are plotted). The swatch reads `fill` (not the
+  // plain `color`) so a muted older-year bar (SM-2YR) shows its muted swatch too.
   const legendPayload = useMemo(() => {
     const seen = new Set<string>()
     return bars
@@ -30,7 +31,7 @@ export function BarChartWidget({ data, bars, onBarClick }: {
         seen.add(b.name)
         return true
       })
-      .map(b => ({ value: b.name, type: "square" as const, color: b.color }))
+      .map(b => ({ value: b.name, type: "square" as const, color: b.fill ?? b.color }))
   }, [bars])
 
   return (
@@ -54,8 +55,7 @@ export function BarChartWidget({ data, bars, onBarClick }: {
             key={b.dataKey}
             dataKey={b.dataKey}
             name={b.name}
-            fill={b.color}
-            fillOpacity={b.opacity}
+            fill={b.fill ?? b.color}
             legendType="none"
             radius={[4, 4, 0, 0]}
             cursor="pointer"
@@ -68,26 +68,31 @@ export function BarChartWidget({ data, bars, onBarClick }: {
   )
 }
 
-// Small year indicator, only shown when more than one year is selected.
-export function YearIndicator({ years }: { years: number[] }) {
+// Small year indicator, only shown when more than one year is selected. `colors`
+// (SM-2YR, optional) carries the single selected metric's per-year tint (newest =
+// plain colour, older = color-mix) so the dot matches the actual bars; without it,
+// falls back to the old generic slate dots.
+export function YearIndicator({ years, colors }: { years: number[]; colors?: (string | undefined)[] }) {
   if (years.length < 2) return null
   return (
     <div className="flex items-center gap-2 mb-3">
-      {years.map((y, i) => (
-        <span key={y} className="flex items-center gap-1.5 text-xs"
-          style={{ color: '#64748b', opacity: YEAR_OPACITY[i] }}>
-          <span style={{ display: 'inline-block', width: 10, height: 10,
-                         borderRadius: 2, background: '#64748b', opacity: YEAR_OPACITY[i] }} />
-          {y}
-        </span>
-      ))}
+      {years.map((y, i) => {
+        const tint = colors?.[i]
+        return (
+          <span key={y} className="flex items-center gap-1.5 text-xs" style={{ color: tint ? undefined : '#64748b', opacity: tint ? 1 : YEAR_OPACITY[i] }}>
+            <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2,
+                           background: tint ?? '#64748b', opacity: tint ? 1 : YEAR_OPACITY[i] }} />
+            {y}
+          </span>
+        )
+      })}
     </div>
   )
 }
 
 // Data table under a chart: one row per bucket (month/quarter), one column per
 // series (in SERIES order), a totals row, nl-NL thousands separators.
-export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear, onCellClick, pct = false }: {
+export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear, onCellClick, pct = false, deltaMode = false }: {
   data: ShiftsChartDatum[]
   bars: ShiftBar[]
   monthLabel: ReactNode
@@ -97,8 +102,13 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
   onCellClick?: (row: ShiftsChartDatum, bar: ShiftBar) => void
   // Waarden ↔ % (controlled — the toggle lives on the card title row for more space).
   pct?: boolean
+  // SM-2YR: when true, `bars` is one column per YEAR for a single metric, so the "%"
+  // toggle means "Δ vs the previous selected year" instead of "% of that year's Totaal"
+  // (there is no Totaal column to divide by once only one metric is on screen).
+  deltaMode?: boolean
 }) {
   const fmt = (v: unknown) => (Number(v) || 0).toLocaleString('nl-NL')
+  const fmtDelta = (d: number) => `${d > 0 ? '+' : ''}${d}%`
   const totals = bars.map(b => data.reduce((s, r) => s + (Number(r[b.dataKey]) || 0), 0))
   // Per year the "Totaal" series is the 100% baseline; every other series is a share of it
   // (Danny: "Totaal = 100%, de rest is afleiding daarvan"). Map year → its Totaal column.
@@ -110,14 +120,26 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
       totaalTotalByYear.set(b.year, totals[i])
     }
   })
-  // Cell text: absolute value, or a percentage of that row's Totaal series (same year).
-  const cell = (row: ShiftsChartDatum, b: ShiftBar) => {
+  // Cell text: absolute value, a Δ vs the previous column (deltaMode), or a percentage
+  // of that row's Totaal series (same year, the pre-SM-2YR single-year behaviour).
+  const cell = (row: ShiftsChartDatum, b: ShiftBar, idx: number) => {
     if (!pct) return fmt(row[b.dataKey])
+    if (deltaMode) {
+      if (idx === 0) return fmt(row[b.dataKey]) // oldest selected year — no earlier baseline to diff
+      const prevVal = Number(row[bars[idx - 1].dataKey]) || 0
+      const curVal  = Number(row[b.dataKey]) || 0
+      return prevVal ? fmtDelta(Math.round((curVal - prevVal) / prevVal * 100)) : '—'
+    }
     const denom = Number(row[totaalKeyByYear.get(b.year) ?? '']) || 0
     return denom ? `${Math.round((Number(row[b.dataKey]) || 0) / denom * 100)}%` : '—'
   }
-  const totalCell = (b: ShiftBar, colTotal: number) => {
+  const totalCell = (b: ShiftBar, colTotal: number, idx: number) => {
     if (!pct) return fmt(colTotal)
+    if (deltaMode) {
+      if (idx === 0) return fmt(colTotal)
+      const prevTotal = totals[idx - 1]
+      return prevTotal ? fmtDelta(Math.round((colTotal - prevTotal) / prevTotal * 100)) : '—'
+    }
     const denom = totaalTotalByYear.get(b.year) ?? 0
     return denom ? `${Math.round(colTotal / denom * 100)}%` : '—'
   }
@@ -133,8 +155,8 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
               <th style={{ ...th, textAlign: 'left' }}>{monthLabel}</th>
               {bars.map(b => (
                 <th key={b.dataKey} style={{ ...th, textAlign: 'right' }}>
-                  <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: b.color, opacity: b.opacity, marginRight: 5, verticalAlign: 'middle' }} />
-                  {b.name}{multiYear ? ` ${b.year}` : ''}
+                  <span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: 2, background: b.fill ?? b.color, marginRight: 5, verticalAlign: 'middle' }} />
+                  {b.name}{multiYear && !b.name.includes(String(b.year)) ? ` ${b.year}` : ''}
                 </th>
               ))}
             </tr>
@@ -143,7 +165,7 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
             {data.map((row, ri) => (
               <tr key={String(row.label) + ri}>
                 <td style={{ ...td, fontWeight: 500, textAlign: 'left' }}>{String(row.label)}</td>
-                {bars.map((b) => (
+                {bars.map((b, i) => (
                   <td key={b.dataKey}
                     onClick={clickable ? () => onCellClick!(row, b) : undefined}
                     onKeyDown={clickable ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCellClick!(row, b) } } : undefined}
@@ -153,14 +175,14 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
                     style={{ ...td, textAlign: 'right', cursor: clickable ? 'pointer' : undefined }}
                     onMouseEnter={clickable ? (e) => (e.currentTarget.style.background = 'var(--hover-bg)') : undefined}
                     onMouseLeave={clickable ? (e) => (e.currentTarget.style.background = 'none') : undefined}>
-                    {cell(row, b)}
+                    {cell(row, b, i)}
                   </td>
                 ))}
               </tr>
             ))}
             <tr>
               <td style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'left' }}>{totalLabel}</td>
-              {bars.map((b, i) => <td key={b.dataKey} style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'right' }}>{totalCell(b, totals[i])}</td>)}
+              {bars.map((b, i) => <td key={b.dataKey} style={{ ...td, fontWeight: 700, borderBottom: 'none', textAlign: 'right' }}>{totalCell(b, totals[i], i)}</td>)}
             </tr>
           </tbody>
         </table>
@@ -170,11 +192,12 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
 }
 
 // Small "Waarden | %" segmented toggle — rendered on a card's title row (action slot).
-export function PctToggle({ pct, onChange }: { pct: boolean; onChange: (v: boolean) => void }) {
+// `deltaMode` (SM-2YR) relabels the right pill "Δ" (year-over-year) instead of "%".
+export function PctToggle({ pct, onChange, deltaMode = false }: { pct: boolean; onChange: (v: boolean) => void; deltaMode?: boolean }) {
   const { t } = useTranslation('shiftmanager')
   return (
     <div style={{ display: 'inline-flex', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
-      {([[false, t('charts.asValues')], [true, t('charts.asPct')]] as const).map(([val, label]) => (
+      {([[false, t('charts.asValues')], [true, deltaMode ? t('charts.asDelta') : t('charts.asPct')]] as const).map(([val, label]) => (
         <button key={String(val)} type="button" onClick={() => onChange(val)}
           style={{ padding: '3px 10px', fontSize: 11, fontWeight: pct === val ? 600 : 400, border: 'none', cursor: 'pointer',
             background: pct === val ? 'var(--color-primary-bg)' : 'transparent',

@@ -172,6 +172,8 @@
     "totalRow": "Gesamt",
     "asValues": "Werte",
     "asPct": "%",
+    "asDelta": "Δ",
+    "multiYearMetric": "Reihe:",
     "byCustomerTitle": "Kein Kandidat nach Kunde",
     "byFunctionTitle": "Offene Dienste nach Funktion",
     "inHours": "In Stunden",
@@ -179,6 +181,16 @@
     "colHours": "Stunden",
     "colShifts": "Dienste",
     "lastSync": "Letzte Sync: {{time}}",
+    "sync": {
+      "button": "Sync",
+      "busy": "Läuft…",
+      "choose": "ShiftManager-Konto wählen…",
+      "noPermission": "Keine Berechtigung zum Synchronisieren",
+      "noConnection": "Keine aktive ShiftManager-Verbindung gefunden",
+      "started": "Synchronisierung gestartet — kann einige Minuten dauern",
+      "failed": "Synchronisierung fehlgeschlagen",
+      "tooManyRequests": "Zu viele Versuche, in {{secs}}s erneut versuchen"
+    },
     "empty": "—"
   },
   "customersReport": {
