@@ -12,11 +12,9 @@ import { Edit2, Save, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
-import NotesTab from '@/components/drawer/tabs/NotesTab'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
-import { useNoteTypes } from '@/lib/useNoteTypes'
 import { initialsOf } from '@/lib/initials'
 import CustomerChangelog from './drawer/CustomerChangelog'
 import OverviewTab from './drawer/OverviewTab'
@@ -29,6 +27,7 @@ import PlanningTab from './drawer/PlanningTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import DocumentsTab from './drawer/DocumentsTab'
 import PriceAgreementsTab from './drawer/PriceAgreementsTab'
+import CustomerNotesTab from './drawer/CustomerNotesTab'
 import { useCustomerLocations } from './hooks/useCustomerLocations'
 import { useCustomerDepartments } from './hooks/useCustomerDepartments'
 import { useCustomerContacts } from './hooks/useCustomerContacts'
@@ -79,8 +78,8 @@ export default function CustomerDrawer({
   const auth = useAuth()
   const hasModule = auth?.hasModule ?? (() => false)
   const { formatDateTime } = useDateFormat()
-  // Note types from the tenant lookup; author = the signed-in user (both mirror the candidate).
-  const { writableTypes: noteTypes } = useNoteTypes()
+  // Fallback note-author avatar = the signed-in user (mirrors the candidate tab);
+  // note-type lookups now live inside CustomerNotesTab itself.
   const authorInitials = initialsOf(auth?.user?.name ?? '')
 
   // Locations/departments/contacts CRUD — one source of truth shared by the
@@ -131,12 +130,17 @@ export default function CustomerDrawer({
   const currentTags   = tags ?? (c.tags as string[]) ?? []
   const changeStatus  = (v: string) => { setStatus(v); onUpdate?.(c.id, { status: v }) }
 
-  // Owner (account manager) picker — current value first, then the user list.
+  // Owner (account manager) picker — a fallback entry ONLY when the current
+  // owner is not in the selectable `users` list (always prepending it duplicated
+  // the account manager in the dropdown — Danny 2026-07-14, same bug fixed on
+  // the candidate drawer, commit 9147ea6; mirrored here).
+  const currentOwnerId = owner?.id ?? c.ownerId
+  const ownerInUsers = currentOwnerId != null && users.some(u => String(u.id) === String(currentOwnerId))
   const ownerOptions = [
-    ...(owner ? [] : [{ value: '__current', label: c.owner || '—', initials: c.ownerInitials }]),
-    ...users.map(u => ({ value: u.id, label: u.name, initials: initialsOf(u.name) })),
+    ...(ownerInUsers || !c.owner ? [] : [{ value: '__current', label: owner?.name ?? c.owner ?? '—', initials: owner ? initialsOf(owner.name) : c.ownerInitials }]),
+    ...users.map(u => ({ value: String(u.id), label: u.name, initials: initialsOf(u.name) })),
   ]
-  const ownerValue = String(owner?.id ?? '__current')
+  const ownerValue = ownerInUsers ? String(currentOwnerId) : '__current'
   const onOwnerChange = (id: string) => {
     if (id === '__current') return
     const u = users.find(x => String(x.id) === id)
@@ -180,18 +184,11 @@ export default function CustomerDrawer({
       case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} />
       case 'documents':     return <DocumentsTab customerId={c.id} />
       case 'notes':         return (
-        <NotesTab
+        <CustomerNotesTab
+          customerId={c.id} customerName={c.name} customerInitials={c.initials}
+          authorInitials={authorInitials}
           notes={c.notes ?? []}
-          noteTypes={noteTypes}
-          authorInitials={authorInitials} timelineName="" timelineInitials={authorInitials}
           onAddNote={payload => onAddNote?.(c.id, payload)}
-          labels={{
-            notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
-            save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),
-            notesEmpty: t('notes.notesEmpty'), timeline: t('notes.timeline'), timelineEmpty: t('notes.timelineEmpty'),
-            conversations: t('notes.conversations'), conversationsEmpty: t('notes.conversationsEmpty'),
-            notePlaceholder: () => t('notes.notePlaceholder'),
-          }}
         />
       )
       default: return null

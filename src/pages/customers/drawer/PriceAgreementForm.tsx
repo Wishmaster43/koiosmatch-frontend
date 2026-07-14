@@ -9,6 +9,7 @@
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import SelectMenu from '@/components/ui/SelectMenu'
+import RichTextEditor from '@/components/ui/RichTextEditor'
 import { useFunctions } from '@/lib/useFunctions'
 import { useCao } from '@/lib/useCao'
 import type { PriceAgreement, PriceAgreementPayload } from '../hooks/usePriceAgreements'
@@ -122,8 +123,11 @@ export default function PriceAgreementForm({ draft, onChange, onSave, onCancel, 
           <input type="date" value={draft.validUntil} onChange={e => onChange({ validUntil: e.target.value })} style={input} />
         </Field>
       </div>
+      {/* Rich-text prose (Danny 2026-07-14 house rule) — the editor IS the form
+          field here (form context), no separate pencil; SafeHtml renders it
+          read-only wherever the agreement is shown (PriceAgreementRow). */}
       <Field label={t('priceAgreements.remarks')}>
-        <textarea value={draft.remarks} onChange={e => onChange({ remarks: e.target.value })} rows={2} style={{ ...input, height: 'auto', padding: '8px 10px', resize: 'vertical' }} />
+        <RichTextEditor value={draft.remarks} onChange={v => onChange({ remarks: v })} />
       </Field>
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 2 }}>
         <button onClick={onCancel} style={{ height: 30, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>

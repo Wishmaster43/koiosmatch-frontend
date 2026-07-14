@@ -97,6 +97,9 @@
     "description": "Descripción",
     "recruitmentProblems": "Retos de contratación"
   },
+  "richText": {
+    "empty": "Aún no completado."
+  },
   "locations": {
     "empty": "Aún no hay ubicaciones",
     "add": "Añadir ubicación",
@@ -162,7 +165,10 @@
       "location": "Ubicación",
       "description": "Descripción",
       "contactsHere": "Contactos en este departamento",
-      "none": "Nada vinculado aún"
+      "none": "Nada vinculado aún",
+      "subtabs": {
+        "data": "Datos"
+      }
     },
     "deleteConfirm": "¿Eliminar este departamento?",
     "saveFailed": "Error al guardar.",

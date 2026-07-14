@@ -97,6 +97,9 @@
     "description": "Beschrijving",
     "recruitmentProblems": "Wervingsproblemen"
   },
+  "richText": {
+    "empty": "Nog niet ingevuld."
+  },
   "locations": {
     "empty": "Nog geen locaties",
     "add": "Locatie toevoegen",
@@ -162,7 +165,10 @@
       "location": "Locatie",
       "description": "Omschrijving",
       "contactsHere": "Contactpersonen op deze afdeling",
-      "none": "Nog niets gekoppeld"
+      "none": "Nog niets gekoppeld",
+      "subtabs": {
+        "data": "Gegevens"
+      }
     },
     "deleteConfirm": "Deze afdeling verwijderen?",
     "saveFailed": "Opslaan is mislukt.",

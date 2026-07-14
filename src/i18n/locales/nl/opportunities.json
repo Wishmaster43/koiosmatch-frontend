@@ -112,10 +112,13 @@
   },
   "modal": {
     "title": "Nieuwe kans",
+    "editTitle": "Kans bewerken",
     "titlePlaceholder": "Bijv. 5 verpleegkundigen — Zorggroep Noord",
     "required": "Titel is verplicht",
     "create": "Aanmaken",
     "creating": "Bezig…",
+    "save": "Opslaan",
+    "saving": "Bezig…",
     "cancel": "Annuleren",
     "fields": {
       "title": "Titel",

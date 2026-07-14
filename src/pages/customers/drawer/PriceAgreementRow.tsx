@@ -12,6 +12,7 @@ import { Pencil, Trash2 } from 'lucide-react'
 import { useCao } from '@/lib/useCao'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from '@/components/ui/SectionCard'
+import SafeHtml from '@/components/ui/SafeHtml'
 import PriceAgreementForm, { draftFromAgreement, draftToPayload } from './PriceAgreementForm'
 import type { PriceAgreementDraft } from './PriceAgreementForm'
 import type { PriceAgreement, PriceAgreementPayload } from '../hooks/usePriceAgreements'
@@ -95,7 +96,8 @@ export default function PriceAgreementRow({ agreement, onSave, onDelete }: {
         {agreement.validUntil ? `${t('priceAgreements.validUntil')} ${formatDate(agreement.validUntil)}` : t('priceAgreements.indefinite')}
       </div>
 
-      {agreement.remarks && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{agreement.remarks}</div>}
+      {/* Remarks is rich-text HTML (RichTextEditor in the form above) — sanitised render, never raw. */}
+      {agreement.remarks && <SafeHtml html={agreement.remarks} style={{ fontSize: 12, color: 'var(--text-muted)' }} />}
     </div>
   )
 }

@@ -34,6 +34,19 @@ export interface ContactPayload {
 
 const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('tmp-')
 
+// Defensive id-dedupe (Danny 2026-07-14): two seeded contacts (same name+email)
+// were observed rendering TWICE — GET /customers/{id}/contacts returned the same
+// row id twice for at least one customer. The backend index() query itself has no
+// join-fanout (Eloquent `with()` eager-loads via separate queries, one row per
+// contact), so a duplicate id in the response is a data/seeder issue, not a query
+// bug — reported separately. Regardless of root cause, a duplicate id must never
+// render as two rows: dedupe here once, at the single shared source (both the
+// Contactpersonen tab AND the location detail's nested list read this one list).
+const dedupeById = (rows: Contact[]): Contact[] => {
+  const seen = new Set<string>()
+  return rows.filter(c => { const k = String(c.id); return seen.has(k) ? false : (seen.add(k), true) })
+}
+
 const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.firstName !== undefined ? { first_name: p.firstName } : {}),
   ...(p.lastName !== undefined ? { last_name: p.lastName } : {}),
@@ -56,7 +69,7 @@ export function useCustomerContacts(customerId: Id | undefined) {
     if (!customerId) { setContacts([]); setLoading(false); return }
     setLoading(true); setError(false)
     api.get(`/customers/${customerId}/contacts`)
-      .then(res => setContacts(unwrapList<ApiContact>(res).rows.map(mapContact)))
+      .then(res => setContacts(dedupeById(unwrapList<ApiContact>(res).rows.map(mapContact))))
       .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [customerId])

@@ -90,10 +90,13 @@
   },
   "modal": {
     "title": "Nueva oportunidad",
+    "editTitle": "Editar oportunidad",
     "titlePlaceholder": "Ej. 5 enfermeros — Zorggroep Noord",
     "required": "El título es obligatorio",
     "create": "Crear",
     "creating": "Guardando…",
+    "save": "Guardar",
+    "saving": "Guardando…",
     "cancel": "Cancelar",
     "fields": {
       "title": "Título",

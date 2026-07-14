@@ -97,6 +97,9 @@
     "description": "Beschreibung",
     "recruitmentProblems": "Recruiting-Herausforderungen"
   },
+  "richText": {
+    "empty": "Noch nicht ausgefüllt."
+  },
   "locations": {
     "empty": "Noch keine Standorte",
     "add": "Standort hinzufügen",
@@ -162,7 +165,10 @@
       "location": "Standort",
       "description": "Beschreibung",
       "contactsHere": "Kontakte in dieser Abteilung",
-      "none": "Noch nichts verknüpft"
+      "none": "Noch nichts verknüpft",
+      "subtabs": {
+        "data": "Details"
+      }
     },
     "deleteConfirm": "Diese Abteilung löschen?",
     "saveFailed": "Speichern fehlgeschlagen.",

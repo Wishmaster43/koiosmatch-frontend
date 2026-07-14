@@ -1,7 +1,11 @@
 /**
  * OverviewTab — the customer's company fields, grouped into titled cards
- * (General / Online / Settings / Texts) with in-place edit via the shared
- * EditableFieldTable. Industry options come from the /industries lookup (never
+ * (General / Online / Settings) with in-place edit via the shared
+ * EditableFieldTable, plus a standalone Teksten section (Description +
+ * Recruitment challenges) using the candidate profile-text pattern — its own
+ * rich editor + pencil/save/cancel per field (Danny 2026-07-14), pulled OUT of
+ * the EditableFieldTable groups since a bare textarea is no longer the house
+ * pattern for prose. Industry options come from the /industries lookup (never
  * hardcoded). Saving flows back through onSave → the page's optimistic PATCH.
  */
 import { useTranslation } from 'react-i18next'
@@ -9,6 +13,7 @@ import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { useIndustries } from '@/lib/useIndustries'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import EditableRichTextField from './EditableRichTextField'
 import { buildCustomerAdviceInsights } from './customerAiInsights'
 import type { Customer } from '@/types/customer'
 
@@ -19,10 +24,10 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
   const gGeneral  = t('overview.general')
   const gOnline   = t('overview.online')
   const gSettings = t('overview.settings')
-  const gTexts    = t('overview.textsTitle')
 
   // Field schema → grouped titled cards. Keys match the flat customer shape and
-  // are translated to API keys in the page's updateCustomer.
+  // are translated to API keys in the page's updateCustomer. Description/
+  // recruitmentProblems live in their own Teksten blocks below, not here.
   const fields: FieldRow[] = [
     { key: 'debtorNumber',  label: t('overview.debtorNumber'), group: gGeneral },
     { key: 'city',          label: t('overview.city'),         group: gGeneral },
@@ -37,14 +42,23 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
     { key: 'hideCompanyName',     label: t('overview.hideCompanyName'),     type: 'checkbox', group: gSettings },
     { key: 'showInVacancies',     label: t('overview.showInVacancies'),     type: 'checkbox', group: gSettings },
     { key: 'excludeFromSourcing', label: t('overview.excludeFromSourcing'), type: 'checkbox', group: gSettings },
-
-    { key: 'description',         label: t('overview.description'),         type: 'textarea', group: gTexts },
-    { key: 'recruitmentProblems', label: t('overview.recruitmentProblems'), type: 'textarea', group: gTexts },
   ]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       <EditableFieldTable fields={fields} value={c as unknown as Record<string, unknown>} onSave={onSave} />
+
+      {/* Teksten — same rich editor + own pencil/save/cancel as the candidate profile text. */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
+          {t('overview.textsTitle')}
+        </span>
+        <EditableRichTextField label={t('overview.description')} value={c.description ?? ''}
+          onSave={html => onSave?.({ description: html })} />
+        <EditableRichTextField label={t('overview.recruitmentProblems')} value={c.recruitmentProblems ?? ''}
+          onSave={html => onSave?.({ recruitmentProblems: html })} />
+      </div>
+
       {/* Koios AI advisory — company/location completeness + relationship activity (§3A blueprint). */}
       <KoiosAdviceBlock namespace="customers" insights={buildCustomerAdviceInsights(c, t)} />
     </div>

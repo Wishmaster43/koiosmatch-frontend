@@ -42,6 +42,14 @@ export function mapDepartment(d: ApiDepartment = {}): Department {
 
 /** mapContact — raw API contact person → flat UI shape. */
 export function mapContact(p: ApiContact = {}): Contact {
+  // CONTACT-MULTI-1: the full multi-location/department set (BUG FIX Danny 2026-07-14 —
+  // the Contactpersonen table's Locatie/Afdeling columns read the OLD singular
+  // location_name/department_name, which the list endpoint never populates; only the
+  // arrays below are eager-loaded there). Filter out any row missing an id defensively.
+  const locations = (p.locations ?? []).filter((l): l is { id: Id; name?: string } => l?.id != null)
+    .map(l => ({ id: l.id, name: l.name ?? '—' }))
+  const departments = (p.departments ?? []).filter((d): d is { id: Id; name?: string } => d?.id != null)
+    .map(d => ({ id: d.id, name: d.name ?? '—' }))
   return {
     id: p.id,
     firstName: p.first_name ?? '',
@@ -52,9 +60,11 @@ export function mapContact(p: ApiContact = {}): Contact {
     phone: p.phone ?? '',
     isPrimary: Boolean(p.is_primary ?? p.isPrimary),
     locationId: p.customer_location_id ?? p.location_id ?? p.locationId ?? null,
-    locationName: p.location_name ?? p.location?.name ?? '',
+    locationName: p.location_name ?? p.location?.name ?? locations[0]?.name ?? '',
     departmentId: p.customer_department_id ?? p.department_id ?? p.departmentId ?? null,
-    departmentName: p.department_name ?? p.department?.name ?? '',
+    departmentName: p.department_name ?? p.department?.name ?? departments[0]?.name ?? '',
+    locations,
+    departments,
     statusId: p.status_id ?? null,
     ...mapStatusRef(p.status),
     customFields: p.custom_fields ?? {},

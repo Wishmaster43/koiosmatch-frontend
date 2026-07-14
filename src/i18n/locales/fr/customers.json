@@ -97,6 +97,9 @@
     "description": "Description",
     "recruitmentProblems": "Difficultés de recrutement"
   },
+  "richText": {
+    "empty": "Pas encore renseigné."
+  },
   "locations": {
     "empty": "Aucun site pour le moment",
     "add": "Ajouter un site",
@@ -162,7 +165,10 @@
       "location": "Site",
       "description": "Description",
       "contactsHere": "Contacts dans ce service",
-      "none": "Rien de lié pour le moment"
+      "none": "Rien de lié pour le moment",
+      "subtabs": {
+        "data": "Détails"
+      }
     },
     "deleteConfirm": "Supprimer ce service ?",
     "saveFailed": "L'enregistrement a échoué.",

@@ -11,7 +11,7 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, Pencil } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
@@ -67,6 +67,9 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
   const { data: users = [] } = useUsers() as { data?: { id: Id; name: string }[] }
   const { rows: raw, loading, error, reload } = useCustomerOpportunities(customerId)
   const [adding, setAdding] = useState(false)
+  // Edit pencil per row (Danny 2026-07-14): reuses AddOpportunityModal in edit
+  // mode (mirrors AddLocationModal doubling as create+edit) — no separate form.
+  const [editingOpp, setEditingOpp] = useState<Opportunity | null>(null)
   const rows = raw.map(mapOpportunity)
 
   const remove = (o: Opportunity) => {
@@ -84,10 +87,16 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
     { key: 'expectedClose', header: t('opportunities.col.expectedClose'), cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true,
       sortValue: o => o.expectedCloseAt ?? '', render: o => o.expectedCloseAt ? formatDate(o.expectedCloseAt) : '—' },
     { key: 'actions', header: '', align: 'right', render: o => (
-      <button onClick={e => { e.stopPropagation(); remove(o) }} title={t('common:delete')}
-        style={{ width: 24, height: 24, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer', border: 'none', background: 'var(--bg)', color: 'var(--color-danger)' }}>
-        <Trash2 size={12} />
-      </button>
+      <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end' }}>
+        <button onClick={e => { e.stopPropagation(); setEditingOpp(o) }} title={t('common:edit')}
+          style={{ width: 24, height: 24, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer', border: 'none', background: 'var(--bg)', color: 'var(--text-muted)' }}>
+          <Pencil size={12} />
+        </button>
+        <button onClick={e => { e.stopPropagation(); remove(o) }} title={t('common:delete')}
+          style={{ width: 24, height: 24, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer', border: 'none', background: 'var(--bg)', color: 'var(--color-danger)' }}>
+          <Trash2 size={12} />
+        </button>
+      </div>
     ) },
   ]
 
@@ -115,6 +124,15 @@ export default function OpportunitiesTab({ customerId, customerName }: { custome
         <AddOpportunityModal
           defaultCustomerId={customerId} customers={[{ id: customerId, name: customerName ?? '' }]} users={users}
           onCreated={() => reload()} onClose={() => setAdding(false)}
+        />
+      )}
+
+      {/* Edit popup — same modal, edit mode; refetch (matches how this tab loads its data). */}
+      {editingOpp && customerId != null && (
+        <AddOpportunityModal
+          existing={editingOpp}
+          defaultCustomerId={customerId} customers={[{ id: customerId, name: customerName ?? '' }]} users={users}
+          onCreated={() => reload()} onClose={() => setEditingOpp(null)}
         />
       )}
     </div>

@@ -10,7 +10,8 @@ import { useState } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X, Building } from 'lucide-react'
-import { Field, TextField, TextArea, SelectField } from '@/components/forms/fields'
+import { Field, TextField, SelectField } from '@/components/forms/fields'
+import RichTextEditor from '@/components/ui/RichTextEditor'
 import type { DepartmentPayload } from './hooks/useCustomerDepartments'
 import type { Department } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -90,8 +91,11 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
           )}
 
           <div>
+            {/* Rich-text prose (Danny 2026-07-14 house rule) — the editor replaces the
+                textarea here (form context, no separate pencil); read mode renders it
+                via SafeHtml (DepartmentDetail's Omschrijving block). */}
             <Field label={t('subModal.description')}>
-              <TextArea value={form.description} onChange={v => set('description', v)} rows={2} />
+              <RichTextEditor value={form.description} onChange={v => set('description', v)} />
             </Field>
           </div>
 

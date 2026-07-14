@@ -5,7 +5,7 @@
  */
 import type { Id } from './common'
 
-/** A contact person (flat UI shape). SUB-STATUS-1 status + CONTACT-MULTI-1 single coupling (chip UI, multi later). */
+/** A contact person (flat UI shape). SUB-STATUS-1 status + CONTACT-MULTI-1 multi coupling. */
 export interface Contact {
   id: Id | undefined
   firstName: string
@@ -15,10 +15,17 @@ export interface Contact {
   email: string
   phone: string
   isPrimary: boolean
+  // Derived PRIMARY link (first of the full set below) — kept for the single-value
+  // pickers/filters (e.g. LocationContacts' "belongs to this location" scoping).
   locationId: Id | null
   locationName: string
   departmentId: Id | null
   departmentName: string
+  // CONTACT-MULTI-1: the FULL set — a contact can serve several sites/departments
+  // of the same customer. Read by the Contactpersonen table's Locatie/Afdeling
+  // columns (multi-ready); the singular fields above stay the primary-link filter.
+  locations: { id: Id; name: string }[]
+  departments: { id: Id; name: string }[]
   statusId: Id | null
   status: string
   statusLabel: string
@@ -143,6 +150,10 @@ export interface ApiContact {
   // The BE field is `customer_location_id` / `customer_department_id`; location_id/locationId tolerated for older payloads.
   customer_location_id?: Id; location_id?: Id; locationId?: Id; location_name?: string; location?: { name?: string }
   customer_department_id?: Id; department_id?: Id; departmentId?: Id; department_name?: string; department?: { name?: string }
+  // CONTACT-MULTI-1: the full multi-location/department set, sent only when the
+  // caller eager-loaded them (whenLoaded on the resource).
+  locations?: { id?: Id; name?: string }[]
+  departments?: { id?: Id; name?: string }[]
   status?: ApiStatusRef | null; status_id?: Id | null
   custom_fields?: Record<string, unknown>
   [k: string]: unknown

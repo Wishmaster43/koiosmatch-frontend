@@ -97,6 +97,9 @@
     "description": "Description",
     "recruitmentProblems": "Recruitment challenges"
   },
+  "richText": {
+    "empty": "Not filled in yet."
+  },
   "locations": {
     "empty": "No locations yet",
     "add": "Add location",
@@ -162,7 +165,10 @@
       "location": "Location",
       "description": "Description",
       "contactsHere": "Contacts in this department",
-      "none": "Nothing linked yet"
+      "none": "Nothing linked yet",
+      "subtabs": {
+        "data": "Details"
+      }
     },
     "deleteConfirm": "Delete this department?",
     "saveFailed": "Saving failed.",

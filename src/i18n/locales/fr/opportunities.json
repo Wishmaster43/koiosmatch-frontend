@@ -90,10 +90,13 @@
   },
   "modal": {
     "title": "Nouvelle opportunité",
+    "editTitle": "Modifier l'opportunité",
     "titlePlaceholder": "Ex. 5 infirmiers — Zorggroep Noord",
     "required": "Le titre est requis",
     "create": "Créer",
     "creating": "Enregistrement…",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
     "cancel": "Annuler",
     "fields": {
       "title": "Titre",

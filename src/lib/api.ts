@@ -37,7 +37,10 @@ const api = axios.create({
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN',
   headers: {
-    'Content-Type': 'application/json',
+    // No fixed Content-Type here: axios sets application/json for plain objects
+    // AND multipart/form-data (with boundary) for FormData automatically. A
+    // hardcoded json default broke every file upload (logo 422 "field required",
+    // CMBE hotfix 14-07 — see COORDINATION-LOG).
     'Accept': 'application/json',
   },
 })

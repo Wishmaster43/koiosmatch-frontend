@@ -112,10 +112,13 @@
   },
   "modal": {
     "title": "New opportunity",
+    "editTitle": "Edit opportunity",
     "titlePlaceholder": "E.g. 5 nurses — Zorggroep Noord",
     "required": "Title is required",
     "create": "Create",
     "creating": "Saving…",
+    "save": "Save",
+    "saving": "Saving…",
     "cancel": "Cancel",
     "fields": {
       "title": "Title",

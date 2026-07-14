@@ -1,8 +1,14 @@
 /**
  * LocationDetail — the Locaties-tab drill-down (Danny 13/7: "kan niets wijzigen,
  * de naam niets???"). Fully editable via the shared EditableFieldTable house
- * pattern (pencil → save/cancel, optimistic PATCH via the parent's onSave), grouped
- * into Algemeen / Adres / Registratie / Contact ter plaatse / Facturatie cards.
+ * pattern (pencil → save/cancel, optimistic PATCH via the parent's onSave).
+ * Danny 2026-07-14: reorganised into SUB-TABS (short labels, mirrors the
+ * candidate drawer's Communicatie sub-tab bar via the shared SubTabBar) —
+ * Adres & gegevens (Algemeen/Adres/Registratie/Contact ter plaatse) · Facturatie ·
+ * Afdelingen · Contactpersonen — default Adres & gegevens. The street/no/suffix/
+ * postcode/city fields collapse into ONE composed address line in read mode
+ * (EditableFieldTable's 'address' composite, mirrors the candidate profile
+ * address row) and only expand to loose fields while editing.
  * Nested department + contact management for this location lives in
  * LocationDepartments / LocationContacts (shared hooks, one source of truth with
  * the top-level tabs). Delete asks for confirmation and returns to the list.
@@ -13,6 +19,7 @@ import { Trash2 } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SectionCard from '@/components/ui/SectionCard'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import LocationDepartments from './LocationDepartments'
 import LocationContacts from './LocationContacts'
 import PlanningSummary from './PlanningSummary'
@@ -49,20 +56,28 @@ export default function LocationDetail({
   const { t } = useTranslation('customers')
   const auth = useAuth()
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
-  const [editing, setEditing] = useState(false)
+  // Sub-tabs (short labels, Danny 2026-07-14) — default Adres & gegevens. Each
+  // EditableFieldTable below manages its own uncontrolled edit toggle (they no
+  // longer share one global pencil now that they live on separate sub-tabs).
+  const [subTab, setSubTab] = useState<'address' | 'billing' | 'departments' | 'contacts'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
-  const fields: FieldRow[] = [
+  // Algemeen/Adres/Registratie/Contact ter plaatse — the "Adres & gegevens" sub-tab.
+  // Street/no/suffix/postcode/city collapse into ONE composed line in read mode
+  // (the 'address' composite, mirrors the candidate profile address row) and only
+  // expand to loose fields while editing; state/country stay their own rows.
+  const generalFields: FieldRow[] = [
     { key: 'name', label: t('locations.detail.name'), type: 'text', group: t('subModal.groups.general') },
     { key: 'statusId', label: t('locations.detail.status'), type: 'select', options: statusOptions, group: t('subModal.groups.general') },
     { key: 'isHeadquarter', label: t('locations.detail.headquarter'), type: 'checkbox', group: t('subModal.groups.general') },
-    { key: 'street', label: t('locations.detail.street'), type: 'text', group: t('subModal.groups.address') },
-    { key: 'houseNumber', label: t('locations.detail.houseNumber'), type: 'text', group: t('subModal.groups.address') },
-    { key: 'houseNumberSuffix', label: t('locations.detail.houseNumberSuffix'), type: 'text', group: t('subModal.groups.address') },
-    // BUG FIX (Danny 13/7): postcode and city are now two separate rows/fields —
-    // the old read-only view joined postalCode + city into one "Postcode" row.
-    { key: 'postalCode', label: t('locations.detail.postalCode'), type: 'text', group: t('subModal.groups.address') },
-    { key: 'city', label: t('locations.detail.city'), type: 'text', group: t('subModal.groups.address') },
+    { key: 'address', label: t('subModal.groups.address'), type: 'address', group: t('subModal.groups.address'),
+      addressFields: [
+        { key: 'street', label: t('locations.detail.street'), type: 'text' },
+        { key: 'houseNumber', label: t('locations.detail.houseNumber'), type: 'text' },
+        { key: 'houseNumberSuffix', label: t('locations.detail.houseNumberSuffix'), type: 'text' },
+        { key: 'postalCode', label: t('locations.detail.postalCode'), type: 'text' },
+        { key: 'city', label: t('locations.detail.city'), type: 'text' },
+      ] },
     { key: 'state', label: t('locations.detail.state'), type: 'text', group: t('subModal.groups.address') },
     { key: 'country', label: t('locations.detail.country'), type: 'text', group: t('subModal.groups.address') },
     { key: 'cocNumber', label: t('locations.detail.coc'), type: 'text', group: t('locations.detail.registrationTitle') },
@@ -70,8 +85,11 @@ export default function LocationDetail({
     { key: 'contactName', label: t('locations.detail.contactName'), type: 'text', group: t('locations.detail.contactTitle') },
     { key: 'email', label: t('locations.detail.email'), type: 'text', group: t('locations.detail.contactTitle') },
     { key: 'phone', label: t('locations.detail.phone'), type: 'text', group: t('locations.detail.contactTitle') },
-    { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text', group: t('locations.detail.billingTitle') },
-    { key: 'billingEmail', label: t('locations.detail.billingEmail'), type: 'text', group: t('locations.detail.billingTitle') },
+  ]
+  // Facturatie — its own sub-tab, own EditableFieldTable instance/pencil.
+  const billingFields: FieldRow[] = [
+    { key: 'costCenter', label: t('locations.detail.costCenter'), type: 'text' },
+    { key: 'billingEmail', label: t('locations.detail.billingEmail'), type: 'text' },
   ]
 
   const values = {
@@ -92,7 +110,6 @@ export default function LocationDetail({
       contactName: v.contactName as string, email: v.email as string, phone: v.phone as string,
       costCenter: v.costCenter as string, billingEmail: v.billingEmail as string,
     })
-    setEditing(false)
   }
 
   const remove = () => { if (window.confirm(t('locations.detail.confirmDelete'))) { onDelete(l.id as Id); close() } }
@@ -107,14 +124,36 @@ export default function LocationDetail({
         </button>
       </div>
 
-      <EditableFieldTable title={t('locations.detail.addressTitle')} fields={fields} value={values} onSave={save}
-        editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={140} />
+      {/* Sub-tab strip — same shared bar as the candidate Communicatie tab; short labels. */}
+      <SubTabBar
+        tabs={[
+          { id: 'address',     label: t('locations.detail.addressTitle') },
+          { id: 'billing',     label: t('locations.detail.billingTitle') },
+          { id: 'departments', label: t('drawer.tabs.departments') },
+          { id: 'contacts',    label: t('drawer.tabs.contacts') },
+        ]}
+        active={subTab}
+        onChange={id => setSubTab(id as typeof subTab)}
+      />
 
-      <LocationDepartments locationId={l.id as Id} locationName={l.name} departments={departments} locations={locations}
-        statuses={departmentStatuses} onAdd={onAddDepartment} onUpdate={onUpdateDepartment} onRemove={onRemoveDepartment} />
+      {/* Adres & gegevens — no repeated title (it would duplicate the sub-tab label). */}
+      {subTab === 'address' && (
+        <EditableFieldTable title="" fields={generalFields} value={values} onSave={save} labelWidth={140} />
+      )}
 
-      <LocationContacts locationId={l.id as Id} locationName={l.name} contacts={contacts} locations={locations}
-        departments={departments} statuses={contactStatuses} onAdd={onAddContact} onUpdate={onUpdateContact} />
+      {subTab === 'billing' && (
+        <EditableFieldTable title="" fields={billingFields} value={values} onSave={save} labelWidth={140} />
+      )}
+
+      {subTab === 'departments' && (
+        <LocationDepartments locationId={l.id as Id} locationName={l.name} departments={departments} locations={locations}
+          statuses={departmentStatuses} onAdd={onAddDepartment} onUpdate={onUpdateDepartment} onRemove={onRemoveDepartment} />
+      )}
+
+      {subTab === 'contacts' && (
+        <LocationContacts locationId={l.id as Id} locationName={l.name} contacts={contacts} locations={locations}
+          departments={departments} statuses={contactStatuses} onAdd={onAddContact} onUpdate={onUpdateContact} />
+      )}
 
       {hasPlanning && (
         <SectionCard title={t('planning.title')}>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api from '@/lib/api'
@@ -34,18 +34,27 @@ interface ModalUser { id: Id; name: string }
 interface ModalCustomer { id: Id; name: string }
 
 /**
- * AddOpportunityModal — create a Kans. Mirrors AddVacancyModal: shared field
- * components, lookups via hooks (never hardcoded option lists), 422 mapping. The
- * stage/service/agreement selects key on the lookup id (the writes expect *_id).
+ * AddOpportunityModal — create OR edit a Kans (Danny 2026-07-14: an edit pencil
+ * per row in the customer drawer's Kansen tab reuses this same modal — mirrors
+ * AddLocationModal doubling as create+edit). Pass `existing` to prefill every
+ * field (incl. the customer cascade) and submit a PATCH instead of a POST; the
+ * `onCreated` callback fires on both a successful create AND a successful edit.
+ * Shared field components, lookups via hooks (never hardcoded option lists), 422
+ * mapping. The stage/service/agreement selects key on the lookup id (the writes
+ * expect *_id) — `stageId` is resolved from `existing.stageValue` once the tenant
+ * stage lookup loads, since Opportunity only carries the stage's stable `value`.
  */
-export default function AddOpportunityModal({ onClose, onCreated, users = [], customers = [], defaultCustomerId }: {
+export default function AddOpportunityModal({ onClose, onCreated, users = [], customers = [], defaultCustomerId, existing }: {
   onClose: () => void; onCreated?: (o: Opportunity) => void; users?: ModalUser[]; customers?: ModalCustomer[]
   // Pre-fill the client when opened from a customer's own drawer (Kansen tab) —
   // minimal addition, the picker still shows so the field never silently locks
   // out a correction; keep prop-driven (no hardcoded id) per §3A.
   defaultCustomerId?: Id
+  // Edit mode: the Kans being edited. Present ⇒ PATCH /opportunities/{id}, absent ⇒ POST /opportunities.
+  existing?: Opportunity
 }) {
   const { t } = useTranslation(['opportunities', 'common'])
+  const isEdit = Boolean(existing)
   const { stages } = useOpportunityStages()
   const { serviceTypes }   = useOpportunityServiceTypes()
   const { agreementTypes } = useOpportunityAgreementTypes()
@@ -55,16 +64,41 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<OppForm>({
-    title: '', clientId: defaultCustomerId != null ? String(defaultCustomerId) : '', stageId: '', serviceTypeId: '', agreementTypeId: '',
-    value: '', hours: '', startDate: '', endDate: '', expectedCloseAt: '',
-    ownerId: me?.id != null ? String(me.id) : '',
+    title: existing?.title ?? '',
+    clientId: existing ? String(existing.clientId ?? '') : (defaultCustomerId != null ? String(defaultCustomerId) : ''),
+    // Stage id can't be resolved yet (Opportunity only carries the stable `value`,
+    // not the lookup id) — the effect below fills it in once `stages` has loaded.
+    stageId: '',
+    serviceTypeId: existing?.serviceTypeId != null ? String(existing.serviceTypeId) : '',
+    agreementTypeId: existing?.agreementTypeId != null ? String(existing.agreementTypeId) : '',
+    value: existing?.value != null ? String(existing.value) : '',
+    hours: existing?.hours != null ? String(existing.hours) : '',
+    startDate: existing?.startDate ?? '', endDate: existing?.endDate ?? '', expectedCloseAt: existing?.expectedCloseAt ?? '',
+    ownerId: existing?.ownerId != null ? String(existing.ownerId) : (me?.id != null ? String(me.id) : ''),
   })
+
+  // Resolve the stage id from the existing deal's stable `value` once the REAL
+  // tenant stage lookup has loaded. BUG (found via probe, 2026-07-14): the seed
+  // fallback (DEFAULT_OPPORTUNITY_STAGES) carries no `id` — an earlier version of
+  // this effect matched against it first and wrote the bare slug into `stageId`
+  // ("qualified"), then a truthiness guard ("already set, skip") blocked the
+  // LATER real match (with the actual uuid) from ever overwriting it — so once
+  // the tenant lookup replaced the seed, `stageId` no longer matched any option's
+  // value and the Fase select silently reverted to unselected (Danny would have
+  // shipped a save that WIPED the existing stage). Only accept an id-bearing
+  // match, so the seed pass is a no-op and the real pass is the only one that writes.
+  useEffect(() => {
+    if (!existing?.stageValue) return
+    const match = stages.find(s => s.value === existing.stageValue)
+    if (match?.id) setForm(f => (f.stageId === String(match.id) ? f : { ...f, stageId: String(match.id) }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stages])
 
   // Klant → locatie → afdeling → contactpersoon cascade (mirrors MatchPlacementModal).
   // All three stay optional; picking a different client resets the dependent picks.
-  const [locationId,   setLocationId]   = useState('')
-  const [departmentId, setDepartmentId] = useState('')
-  const [contactId,    setContactId]    = useState('')
+  const [locationId,   setLocationId]   = useState(existing?.locationId != null ? String(existing.locationId) : '')
+  const [departmentId, setDepartmentId] = useState(existing?.departmentId != null ? String(existing.departmentId) : '')
+  const [contactId,    setContactId]    = useState(existing?.contactId != null ? String(existing.contactId) : '')
   const { locations, contacts } = useCustomerCascade(form.clientId)
   const departments = locations.find(l => String(l.id) === locationId)?.departments ?? []
 
@@ -99,7 +133,9 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         department_id: departmentId || null,
         contact_id: contactId || null,
       }
-      const r = await api.post('/opportunities', body)
+      const r = existing
+        ? await api.patch(`/opportunities/${existing.id}`, body)
+        : await api.post('/opportunities', body)
       onCreated?.(mapOpportunity(r.data?.data ?? r.data))
       onClose()
     } catch (err) {
@@ -140,7 +176,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         {/* Header */}
         <div style={{ padding: '18px 22px', borderBottom: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('modal.title')}</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{isEdit ? t('modal.editTitle') : t('modal.title')}</span>
           <button onClick={onClose} aria-label={t('common:cancel')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
             <X size={18} />
@@ -235,7 +271,9 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
               background: (canSubmit && !saving) ? 'var(--color-primary)' : '#E5E7EB',
               color: (canSubmit && !saving) ? 'white' : '#9CA3AF',
               cursor: (canSubmit && !saving) ? 'pointer' : 'not-allowed' }}>
-            {saving ? t('modal.creating') : t('modal.create')}
+            {isEdit
+              ? (saving ? t('modal.saving') : t('modal.save'))
+              : (saving ? t('modal.creating') : t('modal.create'))}
           </button>
         </div>
       </div>

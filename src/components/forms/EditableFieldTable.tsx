@@ -24,7 +24,7 @@ import SafeHtml from '@/components/ui/SafeHtml'
 export interface FieldRow {
   key: string
   label?: ReactNode
-  type?: 'text' | 'select' | 'checkbox' | 'date' | 'textarea' | 'chips' | 'richtext' | 'creatable' | 'chip-select'
+  type?: 'text' | 'select' | 'checkbox' | 'date' | 'textarea' | 'chips' | 'richtext' | 'creatable' | 'chip-select' | 'address'
   options?: Array<string | { value: string; label?: ReactNode }>
   chipOptions?: ChipOption[]
   prefix?: string
@@ -35,9 +35,24 @@ export interface FieldRow {
   mono?: boolean
   // 'chip-select' empty-state text (e.g. "no locations yet").
   emptyOptionsText?: ReactNode
+  // 'address' composite (mirrors the candidate ProfileTab pattern, Danny 2026-07-14):
+  // read mode shows ONE composed line (street+no+suffix, postcode+city); editing
+  // expands to these loose child fields instead. Child keys are read straight off
+  // the shared `values` object (street/houseNumber/houseNumberSuffix/postalCode/city).
+  addressFields?: FieldRow[]
 }
 
 type Values = Record<string, unknown>
+
+// Compose the standard NL one-line address (mirrors candidates/drawer/ProfileTab's
+// addressRow): "Straat 12a, 1234 AB Plaats". Fixed key names — every 'address' row
+// across the app (candidate profile, customer location) shares this shape.
+const composeAddressLine = (v: Values): string => {
+  const houseNo = [v.houseNumber, v.houseNumberSuffix].filter(Boolean).join('-')
+  const line1 = [v.street, houseNo].filter(Boolean).join(' ')
+  const line2 = [v.postalCode, v.city].filter(Boolean).join(' ')
+  return [line1, line2].filter(s => s && String(s).trim()).join(', ')
+}
 
 const compact: CSSProperties = {
   width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6,
@@ -193,6 +208,12 @@ export default function EditableFieldTable({
       const col = o?.color ?? 'var(--color-primary)'
       return <span style={{ padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500, background: col + '1A', color: col, border: `1px solid ${col}55` }}>{o?.label ?? cur}</span>
     }
+    // Address composite reads as ONE composed line (only reached in read mode —
+    // editing expands this row into its addressFields instead, see renderRows).
+    if (f.type === 'address') {
+      const line = composeAddressLine(saved)
+      return <span style={{ fontSize: 12, color: line ? 'var(--text)' : 'var(--text-muted)' }}>{line || '-'}</span>
+    }
     // Richtext reads as sanitised HTML (same as notes / profile text).
     if (f.type === 'richtext') {
       return (v as string)
@@ -215,6 +236,15 @@ export default function EditableFieldTable({
       {editing ? <div style={{ flex: 1, minWidth: 0 }}>{renderControl(f)}</div> : <div style={{ flex: 1, minWidth: 0, minHeight: 26, display: 'flex', alignItems: 'center' }}>{renderValue(f)}</div>}
     </div>
   )
+
+  // Render one list of fields as rows — an 'address' row expands into its loose
+  // addressFields while editing (so street/no/postcode/city become editable), and
+  // collapses back to its single composed-line row once editing stops. Border
+  // placement (`last`) follows the FLATTENED position, not the declared field list.
+  const renderFieldRows = (list: FieldRow[]) => {
+    const flat = list.flatMap(f => (f.type === 'address' && editing) ? (f.addressFields ?? []) : [f])
+    return flat.map((f, i) => renderRow(f, i === flat.length - 1))
+  }
 
   // Optional grouping — fields carrying a `group` render as separate titled cards.
   const hasGroups = fields.some(f => f.group)
@@ -243,7 +273,7 @@ export default function EditableFieldTable({
           {groups.map(g => (
             <div key={g.group}>
               {g.group && <div style={groupTitleStyle}>{g.group}</div>}
-              <div style={cardStyle}>{g.fields.map((f, i) => renderRow(f, i === g.fields.length - 1))}</div>
+              <div style={cardStyle}>{renderFieldRows(g.fields)}</div>
             </div>
           ))}
         </div>
@@ -254,7 +284,7 @@ export default function EditableFieldTable({
               {editing ? editControls() : <EditPencil onClick={startEdit} title={t('edit')} />}
             </div>
           )}
-          {fields.map((f, i) => renderRow(f, i === fields.length - 1))}
+          {renderFieldRows(fields)}
         </div>
       )}
     </div>

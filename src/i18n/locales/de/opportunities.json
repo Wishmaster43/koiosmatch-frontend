@@ -90,10 +90,13 @@
   },
   "modal": {
     "title": "Neue Opportunity",
+    "editTitle": "Opportunity bearbeiten",
     "titlePlaceholder": "Z. B. 5 Pflegekräfte — Zorggroep Noord",
     "required": "Titel ist erforderlich",
     "create": "Erstellen",
     "creating": "Wird gespeichert…",
+    "save": "Speichern",
+    "saving": "Wird gespeichert…",
     "cancel": "Abbrechen",
     "fields": {
       "title": "Titel",
