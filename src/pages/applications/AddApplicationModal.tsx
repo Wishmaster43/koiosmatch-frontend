@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
+import { useUsers } from '@/lib/queries'
+import { useAuth } from '@/context/AuthContext'
 import { mapApplication } from './data/mapApplication'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import { initialsOf } from '@/lib/initials'
@@ -15,6 +17,7 @@ type AnyProps = Record<string, unknown>
 const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 
 interface PickOption { value: Id; label: string; client?: string }
+interface AppUser { id: Id; name?: string }
 
 // Field label + shared searchable single-select (CreatableSelect) — replaces the
 // old inline SearchField dropdown (DUP-1). allowCreate off = pick-only.
@@ -31,43 +34,72 @@ function PickField({ label, ...rest }: { label: ReactNode } & AnyProps) {
  * AddApplicationModal — create a new application by linking an existing candidate
  * to a vacancy. Pickers load from /candidates and /vacancies. Persists to
  * POST /applications; on failure it still adds the row locally so the flow works
- * before the endpoint is live.
+ * before the endpoint is live. `lockedVacancy` preselects + LOCKS the vacancy
+ * field when opened from the vacancy drawer's Sollicitaties tab ("+ Sollicitatie",
+ * vacancies/drawer/ApplicantsTab) — only the candidate needs picking then
+ * (mirrors PlanIntakeModal's defaultVacancyId, but locked rather than editable
+ * since the whole point of that entry point is "for THIS vacancy").
  */
-export default function AddApplicationModal({ onClose, onCreated }: { onClose: () => void; onCreated: (app: Application) => void }) {
+export default function AddApplicationModal({ onClose, onCreated, lockedVacancy }: {
+  onClose: () => void
+  onCreated: (app: Application) => void
+  lockedVacancy?: { id: Id; title: string; client?: string }
+}) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('applications')
   const { formatDate } = useDateFormat()
+  const { data: users = [] } = useUsers() as { data?: AppUser[] }
+  const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
+  // Owner dropdown = the assignable (tenant-scoped) users list only — POST
+  // /applications 422s with "owner does not belong to this tenant" for anyone
+  // NOT in it (measured: e.g. a super-admin login isn't always a tenant user
+  // row), so — unlike the cosmetic-only AddCandidateModal merge (0115255) — an
+  // owner outside this list is never offered as a pickable/submittable option.
+  const ownerOptions = users.map(u => ({ value: String(u.id), label: u.name ?? '—' }))
+  const meIsAssignable = me?.id != null && ownerOptions.some(o => o.value === String(me.id))
   const [candidates, setCandidates] = useState<PickOption[]>([])
   const [vacancies, setVacancies]   = useState<PickOption[]>([])
   const [candidateId, setCandidateId] = useState('')
-  const [vacancyId, setVacancyId]     = useState('')
+  const [vacancyId, setVacancyId]     = useState(lockedVacancy ? String(lockedVacancy.id) : '')
+  // Default owner = the logged-in user, so a new application isn't ownerless by
+  // default (APP-OWNER-1 — Danny: applications were created with "Geen eigenaar")
+  // — but ONLY when they are actually an assignable tenant user; otherwise leave
+  // it empty and let the backend's own default apply once it lands.
+  const [ownerId, setOwnerId]         = useState('')
+  useEffect(() => { if (meIsAssignable && !ownerId) setOwnerId(String(me!.id)) }, [meIsAssignable]) // eslint-disable-line react-hooks/exhaustive-deps
   const [saving, setSaving]           = useState(false)
 
-  // Load candidate + vacancy options; an empty list on failure, never demo rows.
+  // Load candidate options always; the vacancy list only when NOT locked (data
+  // minimisation, §8/§9 — a locked value never needs the full option list).
   useEffect(() => {
     api.get('/candidates', { params: { per_page: 100 } })
       .then(r => setCandidates(unwrapList<{ id?: Id; name?: string; first_name?: string; last_name?: string }>(r).rows.map(c => ({ value: c.id ?? '', label: c.name ?? [c.first_name, c.last_name].filter(Boolean).join(' ') }))))
       .catch(() => setCandidates([]))
+    if (lockedVacancy) return
     api.get('/vacancies', { params: { per_page: 100 } })
       .then(r => setVacancies(unwrapList<{ id?: Id; title?: string; titel?: string; client_name?: string; client?: string }>(r).rows.map(v => ({ value: v.id ?? '', label: v.title ?? v.titel ?? '', client: v.client_name ?? v.client }))))
       .catch(() => setVacancies([]))
+    // Only the presence of a locked vacancy matters (checked once, on mount).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Create the application; optimistic local row if the endpoint isn't live yet.
   const create = async () => {
     if (!candidateId || !vacancyId || saving) return
     setSaving(true)
-    const cand = candidates.find(c => String(c.value) === candidateId)
-    const vac  = vacancies.find(v => String(v.value) === vacancyId)
+    const cand  = candidates.find(c => String(c.value) === candidateId)
+    const vac   = lockedVacancy ? { label: lockedVacancy.title, client: lockedVacancy.client } : vacancies.find(v => String(v.value) === vacancyId)
+    const owner = ownerOptions.find(o => o.value === ownerId)
     try {
-      const res = await api.post('/applications', { candidate_id: candidateId, vacancy_id: vacancyId })
+      const res = await api.post('/applications', { candidate_id: candidateId, vacancy_id: vacancyId, owner_id: ownerId || null })
       onCreated(mapApplication(res.data?.data ?? res.data))
     } catch {
       onCreated({
         id: -Date.now(), candidateId, candidateName: cand?.label ?? '—', candidateInitials: initialsOf(cand?.label),
         vacancyId, vacancyTitle: vac?.label ?? '—', client: vac?.client ?? '—',
         score: null, task: '', phaseKey: 'applied', bucket: 'active', source: 'Handmatig',
-        owner: { name: '', initials: '', color: null }, candidateStatusLabel: '', candidateStatusColor: '#9CA3AF',
+        owner: { id: ownerId || null, name: owner?.label ?? '', initials: initialsOf(owner?.label), color: null },
+        candidateStatusLabel: '', candidateStatusColor: '#9CA3AF',
         created: formatDate(new Date(), { day: 'numeric', month: 'short', year: 'numeric' }), isNew: true,
       } as Application)
     } finally { setSaving(false) }
@@ -87,8 +119,20 @@ export default function AddApplicationModal({ onClose, onCreated }: { onClose: (
         <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
           <PickField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')}
             options={candidates} value={candidateId} onChange={setCandidateId} />
-          <PickField label={t('add.vacancy')} placeholder={t('add.vacancyPlaceholder')}
-            options={vacancies} value={vacancyId} onChange={setVacancyId} />
+          {lockedVacancy ? (
+            <div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('add.vacancy')}</div>
+              <div style={{ padding: '8px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
+                background: 'var(--bg)', color: 'var(--text)' }}>
+                {lockedVacancy.client ? `${lockedVacancy.title} · ${lockedVacancy.client}` : lockedVacancy.title}
+              </div>
+            </div>
+          ) : (
+            <PickField label={t('add.vacancy')} placeholder={t('add.vacancyPlaceholder')}
+              options={vacancies} value={vacancyId} onChange={setVacancyId} />
+          )}
+          <PickField label={t('add.owner')} placeholder={t('add.ownerPlaceholder')}
+            options={ownerOptions} value={ownerId} onChange={setOwnerId} />
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid #F3F4F6' }}>

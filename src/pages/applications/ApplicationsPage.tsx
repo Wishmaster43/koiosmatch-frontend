@@ -247,6 +247,37 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     api.patch(`/applications/${id}`, { owner_id: ownerId }).catch(() => notifyError(t('common:actionFailed')))
   }
 
+  // Re-link (or unlink, null) an application's vacancy — shared by the Sollicitatie
+  // tab's Details block and the Vacature tab. Klant is derived from the picked
+  // option so the row/drawer update instantly; the PATCH response then reconciles
+  // both fields (the backend is the source of truth). A model guard refuses the
+  // change once a Match hangs on the is_match stage (422) — surface ITS message,
+  // never a generic one, and revert the optimistic edit.
+  const handleLinkVacancy = (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => {
+    if (id == null) return
+    const before = applications.find(a => a.id === id)
+    const patch = { vacancyId, vacancyTitle: vacancyId != null ? (meta?.title ?? '') : '', client: vacancyId != null ? (meta?.client ?? '') : '' }
+    setApplications(prev => prev.map(a => a.id === id ? { ...a, ...patch } : a))
+    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as ApplicationDetail) : prev))
+    api.patch(`/applications/${id}`, { vacancy_id: vacancyId })
+      .then(res => {
+        const updated = mapApplication(res.data?.data ?? res.data)
+        const reconciled = { vacancyId: updated.vacancyId, vacancyTitle: updated.vacancyTitle, client: updated.client }
+        setApplications(prev => prev.map(a => a.id === id ? { ...a, ...reconciled } : a))
+        setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...reconciled } as ApplicationDetail) : prev))
+      })
+      .catch(err => {
+        if (before) {
+          const revert = { vacancyId: before.vacancyId, vacancyTitle: before.vacancyTitle, client: before.client }
+          setApplications(prev => prev.map(a => a.id === id ? { ...a, ...revert } : a))
+          setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...revert } as ApplicationDetail) : prev))
+        }
+        const serverMsg = (err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } })?.response?.data
+        const detail = serverMsg?.message ?? Object.values(serverMsg?.errors ?? {})[0]?.[0]
+        notifyError(detail || t('common:actionFailed'))
+      })
+  }
+
   // Reject an application: move it to the rejected phase/bucket optimistically.
   const handleReject = (id: Id | undefined, payload: RejectPayload) => {
     const patch = { phaseKey: 'rejected', bucket: 'rejected',
@@ -444,6 +475,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         onAdjustScore={handleAdjustScore}
         onPhaseChange={(id, key) => { if (id != null) handleMove(id, key) }}
         onOwnerChange={(id, ownerId) => { if (id != null) handleOwner(id, ownerId) }}
+        onLinkVacancy={handleLinkVacancy}
         users={users}
         onDetach={handleDetach}
         onRestore={handleRestore}

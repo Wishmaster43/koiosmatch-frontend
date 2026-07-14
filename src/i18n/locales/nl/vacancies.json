@@ -204,7 +204,8 @@
     "source": "Bron",
     "byPhase": "Per fase",
     "candidate": "Kandidaat",
-    "planIntake": "Intake plannen"
+    "planIntake": "Intake plannen",
+    "addApplication": "Sollicitatie"
   },
   "statistics": {
     "title": "Conversie",

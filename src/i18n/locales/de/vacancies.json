@@ -204,7 +204,8 @@
     "source": "Quelle",
     "byPhase": "Nach Phase",
     "candidate": "Kandidat",
-    "planIntake": "Intake planen"
+    "planIntake": "Intake planen",
+    "addApplication": "Bewerbung"
   },
   "statistics": {
     "title": "Konversion",

@@ -204,7 +204,8 @@
     "source": "Source",
     "byPhase": "Par phase",
     "candidate": "Candidat",
-    "planIntake": "Planifier un entretien"
+    "planIntake": "Planifier un entretien",
+    "addApplication": "Candidature"
   },
   "statistics": {
     "title": "Conversion",

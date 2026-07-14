@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CalendarPlus } from 'lucide-react'
+import { CalendarPlus, Plus } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import EntityLink from '@/components/ui/EntityLink'
+import api from '@/lib/api'
 import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
+import AddApplicationModal from '@/pages/applications/AddApplicationModal'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
+import { mapVacancyDetail } from '../data/mapVacancy'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -22,18 +25,37 @@ function PhaseChip({ label, color }: { label: ReactNode; color?: string | null }
  * ApplicantsTab — mostly read-only: total leads, the per-phase breakdown and the
  * list of coupled applications (each a real candidate at a funnel phase). A match
  * is the continuation of an application; editing the phase lives on the
- * application, not here (decided model — see CLAUDE.md §3B). The one action this
- * tab does own is "Intake plannen" per row — booking an intake must match the
- * candidate + vacancy + application the recruiter is looking at right here.
+ * application, not here (decided model — see CLAUDE.md §3B). This tab owns two
+ * actions: "Intake plannen" per row, and "+ Sollicitatie" — create an application
+ * FOR THIS VACANCY, reusing the applications page's own create modal with the
+ * vacancy preselected + locked (Danny, vacancy drawer screenshot). This tab only
+ * receives the vacancy detail as a read prop (VacancyDrawer passes no setter down
+ * this far), so a freshly created application refetches THIS vacancy's detail
+ * locally — the list/counters update without reopening the drawer.
  */
 export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   const { phases, phaseMeta } = useVacancyLookups()
   // The applicant currently being booked an intake for (opens the shared modal).
   const [intakeFor, setIntakeFor] = useState<{ applicationId: Id | null; candidateId: Id } | null>(null)
+  const [addOpen, setAddOpen] = useState(false)
+  // Local override of the vacancy detail, refetched after "+ Sollicitatie" — reset
+  // whenever a different vacancy is shown so a stale override never leaks across.
+  const [override, setOverride] = useState<VacancyDetail | null>(null)
+  useEffect(() => { setOverride(null) }, [v.id])
+  const live = override ?? v
 
-  const byPhase = (v.applicationsByPhase ?? {}) as Record<string, number>
-  const applications = v.applications ?? []
+  // Refetch this vacancy's detail so the applications list + phase counts + total
+  // leads reflect the just-created application right away.
+  const refresh = () => {
+    if (v.id == null) return
+    api.get(`/vacancies/${v.id}`)
+      .then(r => setOverride(mapVacancyDetail(r.data?.data ?? r.data)))
+      .catch(() => {})
+  }
+
+  const byPhase = (live.applicationsByPhase ?? {}) as Record<string, number>
+  const applications = live.applications ?? []
 
   return (
     <div>
@@ -41,7 +63,7 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '10px 12px', marginBottom: 16, borderRadius: 8, background: 'var(--color-warning-bg)' }}>
         <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-warning)' }}>{t('applicants.totalLeads')}</span>
-        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-warning)' }}>{v.leadsCount ?? 0}</span>
+        <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-warning)' }}>{live.leadsCount ?? 0}</span>
       </div>
 
       {/* Per-phase breakdown — only phases with a count, in the configured order. */}
@@ -59,8 +81,19 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
         ))}
       </div>
 
-      {/* Applications list */}
-      <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', marginBottom: 8 }}>{t('applicants.title')}</div>
+      {/* Applications list — "+ Sollicitatie" sits at the section header (§3A
+          blueprint: the "+ Add" affordance in the same place/style everywhere). */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+        <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)' }}>{t('applicants.title')}</div>
+        {v.id != null && (
+          <button onClick={() => setAddOpen(true)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 500,
+              padding: '4px 10px', borderRadius: 7, border: '1px solid var(--color-primary)',
+              background: 'none', color: 'var(--color-primary)', cursor: 'pointer' }}>
+            <Plus size={12} /> {t('applicants.addApplication')}
+          </button>
+        )}
+      </div>
       {applications.length === 0 ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('applicants.empty')}</div>
       ) : (
@@ -97,6 +130,14 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
       {intakeFor && (
         <PlanIntakeModal candidateId={intakeFor.candidateId} applicationId={intakeFor.applicationId} defaultVacancyId={v.id ?? null}
           onClose={() => setIntakeFor(null)} onCreated={() => setIntakeFor(null)} />
+      )}
+
+      {addOpen && v.id != null && (
+        <AddApplicationModal
+          lockedVacancy={{ id: v.id, title: v.title, client: v.clientName }}
+          onClose={() => setAddOpen(false)}
+          onCreated={() => { setAddOpen(false); refresh() }}
+        />
       )}
     </div>
   )

@@ -19,6 +19,8 @@
     "candidatePlaceholder": "Select a candidate",
     "vacancy": "Vacancy",
     "vacancyPlaceholder": "Select a vacancy",
+    "owner": "Recruiter",
+    "ownerPlaceholder": "Select a recruiter",
     "search": "Search…",
     "create": "Create",
     "cancel": "Cancel"
@@ -86,7 +88,9 @@
     "vacancy": "Vacancy",
     "client": "Client",
     "openVacancy": "Open vacancy",
-    "openCandidate": "Open candidate"
+    "openCandidate": "Open candidate",
+    "pickVacancy": "Select a vacancy",
+    "noVacancy": "No vacancy"
   },
   "matchScore": {
     "title": "Match score",
@@ -113,7 +117,9 @@
   "vacancyDetail": {
     "loading": "Loading vacancy…",
     "error": "Failed to load the vacancy.",
-    "empty": "No vacancy linked."
+    "empty": "No vacancy linked.",
+    "linkButton": "Link vacancy",
+    "unlink": "Unlink vacancy"
   },
   "interview": {
     "title": "WhatsApp interview",

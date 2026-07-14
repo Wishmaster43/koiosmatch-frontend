@@ -19,6 +19,8 @@
     "candidatePlaceholder": "Sélectionner un candidat",
     "vacancy": "Poste",
     "vacancyPlaceholder": "Sélectionner un poste",
+    "owner": "Recruteur",
+    "ownerPlaceholder": "Sélectionner un recruteur",
     "search": "Rechercher…",
     "create": "Créer",
     "cancel": "Annuler"
@@ -86,7 +88,9 @@
     "vacancy": "Poste",
     "client": "Client",
     "openVacancy": "Ouvrir le poste",
-    "openCandidate": "Ouvrir le candidat"
+    "openCandidate": "Ouvrir le candidat",
+    "pickVacancy": "Sélectionner un poste",
+    "noVacancy": "Aucun poste"
   },
   "matchScore": {
     "title": "Score de match",
@@ -126,7 +130,9 @@
     "tags": "Tags",
     "loading": "Chargement du poste…",
     "error": "Échec du chargement du poste.",
-    "empty": "Aucun poste lié."
+    "empty": "Aucun poste lié.",
+    "linkButton": "Lier un poste",
+    "unlink": "Dissocier le poste"
   },
   "interview": {
     "title": "Entretien WhatsApp",

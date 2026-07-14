@@ -19,6 +19,8 @@
     "candidatePlaceholder": "Selecteer een kandidaat",
     "vacancy": "Vacature",
     "vacancyPlaceholder": "Selecteer een vacature",
+    "owner": "Recruiter",
+    "ownerPlaceholder": "Selecteer een recruiter",
     "search": "Zoeken…",
     "create": "Aanmaken",
     "cancel": "Annuleren"
@@ -86,7 +88,9 @@
     "vacancy": "Vacature",
     "client": "Klant",
     "openVacancy": "Open vacature",
-    "openCandidate": "Open kandidaat"
+    "openCandidate": "Open kandidaat",
+    "pickVacancy": "Selecteer een vacature",
+    "noVacancy": "Geen vacature"
   },
   "matchScore": {
     "title": "Match score",
@@ -113,7 +117,9 @@
   "vacancyDetail": {
     "loading": "Vacature laden…",
     "error": "Vacature laden is mislukt.",
-    "empty": "Geen vacature gekoppeld."
+    "empty": "Geen vacature gekoppeld.",
+    "linkButton": "Vacature koppelen",
+    "unlink": "Vacature ontkoppelen"
   },
   "interview": {
     "title": "WhatsApp-interview",

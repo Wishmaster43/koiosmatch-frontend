@@ -31,6 +31,9 @@ interface ApplicationDrawerProps {
   onAdjustScore?: (id: Id | undefined, payload: { score: number | null; criteria: Criterion[] }) => void
   onPhaseChange?: (id: Id | undefined, phaseKey: string) => void
   onOwnerChange?: (id: Id | undefined, ownerId: string) => void
+  // Re-link (or unlink, null) the vacancy this application is coupled to — shared
+  // by the Sollicitatie tab's Details block and the Vacature tab (§3A).
+  onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
   users?: Array<{ id: Id; name: string }>
   onDetach?: (id: Id | undefined) => void
   onRestore?: (id: Id | undefined) => void
@@ -41,7 +44,7 @@ interface ApplicationDrawerProps {
  * ApplicationDrawer — thin container: declares the header config + tab list and
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
  */
-export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, users, onDetach, onRestore, canManage }: ApplicationDrawerProps) {
+export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, users, onDetach, onRestore, canManage }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   const { formatDateTime } = useDateFormat()
   // Funnel phases (Settings lookup) for the header phase picker + title badge; never hardcoded.
@@ -72,9 +75,9 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
     switch (id) {
-      case 'application':  return <ApplicationTab application={a} onReject={onReject} onAdjustScore={onAdjustScore} />
+      case 'application':  return <ApplicationTab application={a} onReject={onReject} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} />
       case 'candidate':    return <CandidateTab application={a} />
-      case 'vacancy':      return <VacancyTab application={a} />
+      case 'vacancy':      return <VacancyTab application={a} onLinkVacancy={onLinkVacancy} />
       case 'interviews':   return <InterviewsTab application={a} />
       case 'appointments': return <AppointmentsTab application={a} />
       case 'timeline':     return <Timeline items={a.timeline ?? []} emptyText={t('timeline.empty')} />

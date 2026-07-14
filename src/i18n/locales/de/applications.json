@@ -19,6 +19,8 @@
     "candidatePlaceholder": "Kandidat auswählen",
     "vacancy": "Stelle",
     "vacancyPlaceholder": "Stelle auswählen",
+    "owner": "Recruiter",
+    "ownerPlaceholder": "Recruiter auswählen",
     "search": "Suchen…",
     "create": "Erstellen",
     "cancel": "Abbrechen"
@@ -86,7 +88,9 @@
     "vacancy": "Stelle",
     "client": "Kunde",
     "openVacancy": "Stelle öffnen",
-    "openCandidate": "Kandidat öffnen"
+    "openCandidate": "Kandidat öffnen",
+    "pickVacancy": "Stelle auswählen",
+    "noVacancy": "Keine Stelle"
   },
   "matchScore": {
     "title": "Match-Score",
@@ -126,7 +130,9 @@
     "tags": "Tags",
     "loading": "Stelle wird geladen…",
     "error": "Laden der Stelle fehlgeschlagen.",
-    "empty": "Keine Stelle verknüpft."
+    "empty": "Keine Stelle verknüpft.",
+    "linkButton": "Stelle verknüpfen",
+    "unlink": "Stelle trennen"
   },
   "interview": {
     "title": "WhatsApp-Interview",
