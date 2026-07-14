@@ -78,7 +78,7 @@ export default function CustomerDrawer({
   const { t } = useTranslation('customers')
   const auth = useAuth()
   const hasModule = auth?.hasModule ?? (() => false)
-  const { formatDate } = useDateFormat()
+  const { formatDateTime } = useDateFormat()
   // Note types from the tenant lookup; author = the signed-in user (both mirror the candidate).
   const { writableTypes: noteTypes } = useNoteTypes()
   const authorInitials = initialsOf(auth?.user?.name ?? '')
@@ -232,7 +232,7 @@ export default function CustomerDrawer({
       initialTab={initialTab}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: c.created ? formatDate(c.created) : '—' })}</span>}
+      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: c.created ? formatDateTime(c.created) : '—' })}</span>}
       tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: (setActiveTab?: (id: string) => void) => renderTab(tab.id, setActiveTab) }))}
       header={() => (
         <EntityHeader

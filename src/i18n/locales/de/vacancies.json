@@ -112,7 +112,8 @@
       "timeline": "Verlauf",
       "notes": "Notizen",
       "statistics": "Statistiken",
-      "extra": "Extra"
+      "extra": "Extra",
+      "changelog": "Änderungen"
     }
   },
   "matching": {
@@ -246,5 +247,11 @@
     "flowLabel": "Durchlauf",
     "flowOpen": "Seit {{days}} Tagen offen · {{count}} Bewerbung(en) erhalten.",
     "flowUnknown": "Eröffnungsdatum unbekannt · {{count}} Bewerbung(en) erhalten."
+  },
+  "changelog": {
+    "loading": "Laden…",
+    "error": "Änderungen konnten nicht geladen werden.",
+    "empty": "Noch keine Änderungen.",
+    "system": "System"
   }
 }

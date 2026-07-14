@@ -75,7 +75,8 @@
       "interviews": "Interviews",
       "appointments": "Termine",
       "timeline": "Verlauf",
-      "notes": "Notizen"
+      "notes": "Notizen",
+      "changelog": "Änderungen"
     },
     "phase": "Phase",
     "source": "Quelle",
@@ -218,5 +219,11 @@
     "progressUnknown": "Datum unbekannt · aktuelle Phase '{{phase}}'.",
     "completeness": "Vollständigkeit",
     "missingVacancy": "Keine Stelle mit dieser Bewerbung verknüpft."
+  },
+  "changelog": {
+    "loading": "Laden…",
+    "error": "Änderungen konnten nicht geladen werden.",
+    "empty": "Noch keine Änderungen.",
+    "system": "System"
   }
 }

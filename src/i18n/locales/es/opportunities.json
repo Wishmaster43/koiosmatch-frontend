@@ -57,7 +57,8 @@
     },
     "markWon": "Ganado",
     "markLost": "Perdido",
-    "expectedCloseOn": "Cierre previsto el {{date}}"
+    "expectedCloseOn": "Cierre previsto el {{date}}",
+    "tags": "Etiquetas"
   },
   "details": {
     "stage": "Fase",

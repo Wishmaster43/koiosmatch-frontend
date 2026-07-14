@@ -57,7 +57,8 @@
     },
     "markWon": "Gewonnen",
     "markLost": "Verloren",
-    "expectedCloseOn": "Voraussichtlicher Abschluss am {{date}}"
+    "expectedCloseOn": "Voraussichtlicher Abschluss am {{date}}",
+    "tags": "Tags"
   },
   "details": {
     "stage": "Phase",

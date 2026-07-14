@@ -112,7 +112,8 @@
       "documents": "Documenten",
       "timeline": "Tijdlijn",
       "notes": "Notities",
-      "statistics": "Statistieken"
+      "statistics": "Statistieken",
+      "changelog": "Wijzigingen"
     }
   },
   "matching": {
@@ -246,5 +247,11 @@
     "flowLabel": "Doorstroom",
     "flowOpen": "Open sinds {{days}} dagen · {{count}} sollicitatie(s) ontvangen.",
     "flowUnknown": "Openingsdatum onbekend · {{count}} sollicitatie(s) ontvangen."
+  },
+  "changelog": {
+    "loading": "Laden…",
+    "error": "Wijzigingen konden niet geladen worden.",
+    "empty": "Nog geen wijzigingen.",
+    "system": "Systeem"
   }
 }

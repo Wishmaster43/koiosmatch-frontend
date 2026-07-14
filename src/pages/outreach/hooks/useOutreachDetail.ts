@@ -1,10 +1,12 @@
 /**
  * useOutreachDetail — loads one campaign (GET /outreach-campaigns/{id} includes
  * targets.candidate) and checks targets off optimistically (PATCH /outreach-targets/{id};
- * the backend stamps contacted_at). Four states for the drawer; reverts on failure.
+ * the backend stamps contacted_at). Also patches the campaign's own owner (PATCH
+ * /outreach-campaigns/{id} — UpdateOutreachCampaignRequest accepts owner_id, measured
+ * in app/Http/Requests/Outreach). Four states for the drawer; reverts on failure.
  */
 import { useState, useEffect, useCallback } from 'react'
-import { getCampaign, updateTarget } from '../data/outreachApi'
+import { getCampaign, updateCampaign, updateTarget } from '../data/outreachApi'
 import type { Campaign } from './useOutreachCampaigns'
 
 export interface OutreachTarget {
@@ -63,5 +65,16 @@ export function useOutreachDetail(id: string | null) {
     catch { setDetail(d => (d && prev ? { ...d, targets: prev } : d)) }
   }, [])
 
-  return { detail, loading, error, setTargetStatus, setTargetOutcome }
+  // Change the campaign's owner — optimistic, revert on failure (mirrors setTargetStatus).
+  const setOwner = useCallback(async (campaignId: string, owner: { id: string; name: string } | null) => {
+    let prev: CampaignDetail['owner'] | undefined
+    setDetail(d => {
+      prev = d?.owner
+      return d ? { ...d, owner } : d
+    })
+    try { await updateCampaign(campaignId, { owner_id: owner?.id ?? null }) }
+    catch { setDetail(d => (d ? { ...d, owner: prev ?? null } : d)) }
+  }, [])
+
+  return { detail, loading, error, setTargetStatus, setTargetOutcome, setOwner }
 }

@@ -102,6 +102,8 @@
     "matchPick": "Kies vacature…",
     "matchConfirm": "Maak match",
     "matchCreated": "Match aangemaakt.",
-    "matchFailed": "Match maken mislukt."
+    "matchFailed": "Match maken mislukt.",
+    "owner": "Eigenaar",
+    "selectOwner": "Kies eigenaar"
   }
 }

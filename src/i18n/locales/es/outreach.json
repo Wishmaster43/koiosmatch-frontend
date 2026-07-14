@@ -102,6 +102,8 @@
     "matchPick": "Elegir vacante…",
     "matchConfirm": "Crear match",
     "matchCreated": "Match creado.",
-    "matchFailed": "Error al crear el match."
+    "matchFailed": "Error al crear el match.",
+    "owner": "Responsable",
+    "selectOwner": "Seleccionar responsable"
   }
 }

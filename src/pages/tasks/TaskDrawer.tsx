@@ -4,6 +4,7 @@ import { CheckCircle2 } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import type { MetaPicker } from '@/components/drawer/EntityHeader'
+import TitleBadge from '@/components/drawer/TitleBadge'
 import { useDateFormat } from '@/lib/datetime'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useUsers } from '@/lib/queries'
@@ -66,10 +67,12 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   }
 
   // Header meta pickers: quick status / priority / assignee change (no edit-mode).
+  // Standard picker widths (§3A blueprint: Status ~160 + Eigenaar/assignee ~190;
+  // priority stays 140 — already conforms).
   const meta: MetaPicker[] = [
-    { key: 'status',   label: t('details.status'),   value: String(task.statusKey),        options: statuses.map(s => ({ value: s.value, label: s.label })),   onChange: v => onUpdate(task.id, { statusKey: v }),   menuWidth: 170, width: 150 },
+    { key: 'status',   label: t('details.status'),   value: String(task.statusKey),        options: statuses.map(s => ({ value: s.value, label: s.label })),   onChange: v => onUpdate(task.id, { statusKey: v }),   menuWidth: 170, width: 160 },
     { key: 'priority', label: t('details.priority'), value: String(task.priorityKey),      options: priorities.map(p => ({ value: p.value, label: p.label })), onChange: v => onUpdate(task.id, { priorityKey: v }), menuWidth: 150, width: 140 },
-    { key: 'assignee', label: t('details.assignee'), value: String(task.assigneeId ?? ''), options: assigneeOpts,                                              onChange: onAssignee,                                menuWidth: 200, width: 180 },
+    { key: 'assignee', label: t('details.assignee'), value: String(task.assigneeId ?? ''), options: assigneeOpts,                                              onChange: onAssignee,                                menuWidth: 200, width: 190 },
   ]
 
   // "Mark done" quick action — only when a done status exists and the task isn't done.
@@ -88,15 +91,31 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
       entity={task}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDateTime(task.createdAt) })}</span>}
+      // Two-sided footer (§3A(8)): created-at left, empty right (consistent spacing
+      // with the candidate/other drawers even when there is no right-side content).
+      footer={
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
+          <span>{t('drawer.createdAt', { date: formatDateTime(task.createdAt) })}</span>
+          <span />
+        </div>
+      }
       tabs={TAB_IDS.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: () => renderTab(id) }))}
       header={() => (
         <EntityHeader
           label={t('drawer.label')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: initialsOf(task.title, 'T'), soft: true, color: task.statusColor }}
-          title={task.title}
-          subtitle={task.typeLabel || ''}
+          renderTitle={() => (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{task.title}</span>
+                {/* Status badge — colour-coded, read-only (mirrors the candidate phase badge,
+                    §3A(c)); the status meta picker below still handles the actual change. */}
+                <TitleBadge label={task.statusLabel} color={task.statusColor} />
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{task.typeLabel || '—'}</div>
+            </>
+          )}
           titleActions={<TaskChangelogPopover task={task} />}
           actions={markDone}
           meta={meta}

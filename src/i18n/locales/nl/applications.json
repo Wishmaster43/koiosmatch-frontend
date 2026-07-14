@@ -75,7 +75,8 @@
       "interviews": "Interviews",
       "appointments": "Afspraken",
       "timeline": "Tijdlijn",
-      "notes": "Notities"
+      "notes": "Notities",
+      "changelog": "Wijzigingen"
     },
     "phase": "Fase",
     "source": "Bron",
@@ -200,5 +201,11 @@
     "progressUnknown": "Datum onbekend · huidige fase '{{phase}}'.",
     "completeness": "Volledigheid",
     "missingVacancy": "Geen vacature gekoppeld aan deze sollicitatie."
+  },
+  "changelog": {
+    "loading": "Laden…",
+    "error": "Wijzigingen konden niet geladen worden.",
+    "empty": "Nog geen wijzigingen.",
+    "system": "Systeem"
   }
 }

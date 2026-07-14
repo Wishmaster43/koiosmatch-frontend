@@ -75,7 +75,8 @@
       "interviews": "Entrevistas",
       "appointments": "Citas",
       "timeline": "Cronología",
-      "notes": "Notas"
+      "notes": "Notas",
+      "changelog": "Cambios"
     },
     "phase": "Fase",
     "source": "Origen",
@@ -218,5 +219,11 @@
     "progressUnknown": "Fecha desconocida · fase actual «{{phase}}».",
     "completeness": "Integridad",
     "missingVacancy": "No hay vacante vinculada a esta solicitud."
+  },
+  "changelog": {
+    "loading": "Cargando…",
+    "error": "No se pudieron cargar los cambios.",
+    "empty": "Aún no hay cambios.",
+    "system": "Sistema"
   }
 }

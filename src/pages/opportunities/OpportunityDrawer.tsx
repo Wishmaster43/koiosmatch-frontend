@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import TitleBadge from '@/components/drawer/TitleBadge'
 import { useDateFormat } from '@/lib/datetime'
 import DetailsTab from './drawer/DetailsTab'
 import KlantTab from './drawer/KlantTab'
@@ -49,9 +50,16 @@ export default function OpportunityDrawer({
   const [editing,    setEditing]    = useState(false)
   const [titleDraft, setTitleDraft] = useState('')
   const [prevId,     setPrevId]     = useState<Id | undefined>(o?.id)
-  if (o?.id !== prevId) { setPrevId(o?.id); setEditing(false); setTitleDraft('') }
+  // Tags are edited inline; seed from the record and reset when a different
+  // opportunity is shown (mirrors VacancyDrawer's tag handling). UpdateOpportunityRequest
+  // accepts `tags` (grepped app/Http/Requests/Opportunity/OpportunityRequest.php).
+  const [tags, setTags] = useState<string[] | null>(null)
+  if (o?.id !== prevId) { setPrevId(o?.id); setEditing(false); setTitleDraft(''); setTags(null) }
 
   if (!o) return null
+
+  const currentTags = tags ?? o.tags ?? []
+  const setTagsAndSave = (next: string[]) => { setTags(next); onUpdate?.(o.id, { tags: next }) }
 
   const ownerOptions = [
     ...(users.some(u => u.id === o.ownerId) || !o.owner ? [] : [{ value: o.ownerId, label: o.owner }]),
@@ -78,11 +86,10 @@ export default function OpportunityDrawer({
     <>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
         <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{o.title}</div>
-        {/* Phase = colour-coded read-only badge (shows Gewonnen/Verloren at a glance). */}
-        {o.stage && (
-          <span style={{ fontSize: 11, fontWeight: 600, padding: '2px 9px', borderRadius: 999,
-            background: o.stageColor + '1A', color: o.stageColor, border: `1px solid ${o.stageColor}55` }}>{o.stage}</span>
-        )}
+        {/* Phase = colour-coded read-only badge (shows Gewonnen/Verloren at a glance).
+            NUMMER-3: opportunities carry no reference_number yet (OpportunityResource
+            omits it) — no ReferenceNumberChip until that lands. */}
+        <TitleBadge label={o.stage} color={o.stageColor} />
       </div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{o.client || '—'}</div>
       {o.expectedCloseAt && (
@@ -106,7 +113,14 @@ export default function OpportunityDrawer({
       entity={o}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDateTime(o.date) })}</span>}
+      // Two-sided footer (§3A(8)): created-at left, empty right (consistent spacing
+      // with the candidate/other drawers even when there is no right-side content).
+      footer={
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
+          <span>{t('drawer.createdAt', { date: formatDateTime(o.date) })}</span>
+          <span />
+        </div>
+      }
       tabs={tabs}
       header={() => (
         <EntityHeader
@@ -116,14 +130,19 @@ export default function OpportunityDrawer({
           renderTitle={renderTitle}
           titleActions={<OpportunityChangelogPopover opportunity={o} />}
           actions={actions}
+          // Standard picker widths (§3A blueprint: Status/Stage ~160 + Eigenaar ~190).
           meta={[
             { key: 'stage', label: t('drawer.stage'), value: o.stageValue,
               options: stageOptions, placeholder: t('drawer.selectStage'),
-              onChange: (val: string) => onUpdate?.(o.id, { stageValue: val }), menuWidth: 190, width: 190 },
+              onChange: (val: string) => onUpdate?.(o.id, { stageValue: val }), menuWidth: 170, width: 160 },
             { key: 'owner', label: t('drawer.owner'), value: o.ownerId,
               options: ownerOptions, placeholder: t('drawer.selectOwner'),
               onChange: (val: string) => onUpdate?.(o.id, { ownerId: val }), menuWidth: 200, width: 190 },
           ]}
+          // C-41: free-form tags — UpdateOpportunityRequest accepts `tags` (measured).
+          tags={{ items: currentTags, onAdd: tag => setTagsAndSave([...currentTags, tag]),
+            onRemove: tag => setTagsAndSave(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
+          tagsLabel={t('drawer.tags')}
         />
       )}
     />

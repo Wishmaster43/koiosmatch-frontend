@@ -112,7 +112,8 @@
       "timeline": "Chronologie",
       "notes": "Notes",
       "statistics": "Statistiques",
-      "extra": "Extra"
+      "extra": "Extra",
+      "changelog": "Modifications"
     }
   },
   "matching": {
@@ -246,5 +247,11 @@
     "flowLabel": "Flux",
     "flowOpen": "Ouvert depuis {{days}} jours · {{count}} candidature(s) reçue(s).",
     "flowUnknown": "Date d'ouverture inconnue · {{count}} candidature(s) reçue(s)."
+  },
+  "changelog": {
+    "loading": "Chargement…",
+    "error": "Impossible de charger les modifications.",
+    "empty": "Aucune modification pour l’instant.",
+    "system": "Système"
   }
 }

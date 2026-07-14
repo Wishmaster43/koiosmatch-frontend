@@ -102,6 +102,8 @@
     "matchPick": "Pick a vacancy…",
     "matchConfirm": "Create match",
     "matchCreated": "Match created.",
-    "matchFailed": "Creating the match failed."
+    "matchFailed": "Creating the match failed.",
+    "owner": "Owner",
+    "selectOwner": "Select owner"
   }
 }

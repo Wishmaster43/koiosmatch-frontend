@@ -62,5 +62,7 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     departmentId:  dep?.id ?? o.department_id ?? null,
     contact:       con?.name ?? '',
     contactId:     con?.id ?? o.contact_id ?? null,
+    // C-41 free-form tags (always an array for the drawer tags-editor).
+    tags: Array.isArray(o.tags) ? o.tags.map(String) : [],
   }
 }

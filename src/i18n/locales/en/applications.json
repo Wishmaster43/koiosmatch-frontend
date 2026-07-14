@@ -75,7 +75,8 @@
       "interviews": "Interviews",
       "appointments": "Appointments",
       "timeline": "Timeline",
-      "notes": "Notes"
+      "notes": "Notes",
+      "changelog": "Changelog"
     },
     "phase": "Phase",
     "source": "Source",
@@ -200,5 +201,11 @@
     "progressUnknown": "Date unknown · current phase '{{phase}}'.",
     "completeness": "Completeness",
     "missingVacancy": "No vacancy linked to this application."
+  },
+  "changelog": {
+    "loading": "Loading…",
+    "error": "Changelog could not be loaded.",
+    "empty": "No changes yet.",
+    "system": "System"
   }
 }

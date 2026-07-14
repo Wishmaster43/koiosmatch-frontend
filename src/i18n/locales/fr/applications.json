@@ -75,7 +75,8 @@
       "interviews": "Entretiens",
       "appointments": "Rendez-vous",
       "timeline": "Chronologie",
-      "notes": "Notes"
+      "notes": "Notes",
+      "changelog": "Modifications"
     },
     "phase": "Phase",
     "source": "Source",
@@ -218,5 +219,11 @@
     "progressUnknown": "Date inconnue · phase actuelle « {{phase}} ».",
     "completeness": "Exhaustivité",
     "missingVacancy": "Aucun poste associé à cette candidature."
+  },
+  "changelog": {
+    "loading": "Chargement…",
+    "error": "Impossible de charger les modifications.",
+    "empty": "Aucune modification pour l’instant.",
+    "system": "Système"
   }
 }

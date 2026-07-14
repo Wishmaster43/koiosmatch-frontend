@@ -102,6 +102,8 @@
     "matchPick": "Stelle wählen…",
     "matchConfirm": "Match erstellen",
     "matchCreated": "Match erstellt.",
-    "matchFailed": "Match erstellen fehlgeschlagen."
+    "matchFailed": "Match erstellen fehlgeschlagen.",
+    "owner": "Eigentümer",
+    "selectOwner": "Inhaber wählen"
   }
 }

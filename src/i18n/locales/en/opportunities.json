@@ -57,7 +57,8 @@
       "notes": "Notes",
       "tasks": "Tasks",
       "changelog": "Changelog"
-    }
+    },
+    "tags": "Tags"
   },
   "notes": {
     "title": "Notes",

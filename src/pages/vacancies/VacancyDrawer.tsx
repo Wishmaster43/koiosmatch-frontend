@@ -5,6 +5,7 @@ import { Globe } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import VacancyChangelogPopover from './drawer/VacancyChangelogPopover'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import DetailsTab from './drawer/DetailsTab'
@@ -81,7 +82,14 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
       entity={v}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDateTime(v.created) })}</span>}
+      // Two-sided footer (§3A(8)): created-at left, empty right (consistent spacing
+      // with the candidate/other drawers even when there is no right-side content).
+      footer={
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
+          <span>{t('drawer.createdAt', { date: formatDateTime(v.created) })}</span>
+          <span />
+        </div>
+      }
       tabs={visibleTabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: () => tab.render(v, onUpdate) }))}
       header={() => (
         <>
@@ -99,14 +107,18 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{v.clientName || '—'}</div>
             </>
           )}
+          // Changelog icon (§3A(d)) — GET /vacancies/{id}/activity exists (measured:
+          // routes/api/tenant/candidates.php), so this is the missing icon-popover, not a tab.
+          titleActions={<VacancyChangelogPopover vacancy={v} />}
+          // Standard picker widths (§3A blueprint: Status ~160 + Eigenaar ~190).
           meta={[
             { key: 'status', label: t('drawer.status'), value: v.statusValue,
               options: statuses.map(s => ({ value: s.value, label: s.label })),
-              onChange: val => onUpdate?.(v.id, { statusValue: val }), menuWidth: 160, width: 150 },
+              onChange: val => onUpdate?.(v.id, { statusValue: val }), menuWidth: 170, width: 160 },
             // Client moved to the Details tab (P3: calm header — max status + owner,
             // mirror the candidate blueprint §3A(c)); the subtitle still shows it.
             { key: 'owner', label: t('drawer.owner'), value: v.owner?.id,
-              options: ownerOptions, onChange: val => onUpdate?.(v.id, { ownerId: val }), menuWidth: 200, width: 180 },
+              options: ownerOptions, onChange: val => onUpdate?.(v.id, { ownerId: val }), menuWidth: 200, width: 190 },
           ]}
           tags={{ items: currentTags, onAdd: tag => setTagsAndSave([...currentTags, tag]),
             onRemove: tag => setTagsAndSave(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}

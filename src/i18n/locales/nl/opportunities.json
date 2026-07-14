@@ -57,7 +57,8 @@
       "notes": "Notities",
       "tasks": "Taken",
       "changelog": "Wijzigingen"
-    }
+    },
+    "tags": "Tags"
   },
   "notes": {
     "title": "Notities",

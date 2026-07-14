@@ -46,6 +46,8 @@ export interface Opportunity {
   departmentId: Id | null
   contact: string
   contactId: Id | null
+  // C-41 free-form tags — OpportunityResource always returns an array (never null).
+  tags: string[]
 }
 
 /** Raw API opportunity record (read defensively). */
@@ -95,5 +97,7 @@ export interface ApiOpportunity {
   department_id?: Id
   contact?: { id?: Id; name?: string }
   contact_id?: Id
+  // C-41 free-form tags.
+  tags?: string[]
   [k: string]: unknown
 }

@@ -7,13 +7,16 @@
  * voor de drill down" — one tab used to wear the summary + the whole contract form
  * at once): Overzicht (facts/score/status), Contract & financieel
  * (MatchContractSection, moved as-is), Relaties (candidate/vacancy/klant, each a
- * cross-entity hyperlink — RelationsTab). A Notities/Tijdlijn tab is NOT added: the
- * backend has no /matches/{id}/notes or .../activity route yet (grepped
+ * cross-entity hyperlink — RelationsTab). A Notities tab is NOT added: the
+ * backend has no /matches/{id}/notes route yet (grepped
  * routes/api/tenant/applications-matches.php — only CRUD + approve/reject/contract
  * exist), so ChangelogTab stays the icon-popover it already was rather than a fake
- * tab. The header itself stays calm: no meta pickers, only the approval workflow
- * badge/actions (MATCH-APPROVAL-1). Thin container: header config + tab list + the
- * useMatchApproval wiring; all body markup lives in the tab/header components.
+ * tab. Header meta row (DRAWER-STD-1, 2026-07-14): a standard Status picker (the
+ * same /match-statuses lookup the board/table use, ~160) + Eigenaar. UpdateMatchRequest
+ * does not accept owner_id (MATCH-OWNER-1 — grepped app/Http/Requests/JobMatch), so
+ * the owner is a read-only labelled value, not a picker, until that lands. Thin
+ * container: header config + tab list + the useMatchApproval wiring; all body markup
+ * lives in the tab/header components.
  */
 import { useTranslation } from 'react-i18next'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
@@ -21,7 +24,7 @@ import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import { useDateFormat } from '@/lib/datetime'
-import StatusPill from '@/components/ui/StatusPill'
+import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import ScorePill from './ScorePill'
 import OverviewTab from './drawer/OverviewTab'
 import RelationsTab from './drawer/RelationsTab'
@@ -56,21 +59,9 @@ export default function MatchDrawer({
   // Approval data/actions live in one hook here (thin container, §3) — the header
   // pieces below stay presentational.
   const { reason, busy, rejectOpen, setRejectOpen, approve, reject } = useMatchApproval(match, onApprovalChange)
+  // R-1b lifecycle status — the same tenant lookup the board/table use.
+  const { statuses: matchStatuses } = useMatchStatuses()
   if (!match) return null
-
-  // Read-only chip row shown under the title (score · stage · owner · approval actions).
-  const headerChips = (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
-      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <ScorePill value={match.score} />
-        {match.stage && <StatusPill label={match.stage} color={match.stageColor} />}
-        {match.owner && <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{match.owner}</span>}
-      </div>
-      <MatchApprovalActions status={match.approval_status} reason={reason} canUpdate={canApprove} busy={busy}
-        rejectOpen={rejectOpen} onOpenReject={() => setRejectOpen(true)} onCancelReject={() => setRejectOpen(false)}
-        onApprove={approve} onReject={reject} />
-    </div>
-  )
 
   // Tabs are config (§3A). Record history is the changelog ICON-popover in the title row
   // (never a tab) — see titleActions below. Contract/financial reuses drawer.contract.title
@@ -86,11 +77,13 @@ export default function MatchDrawer({
       entity={{ id: match.id }}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
-      // Footer — created-at only (mirrors CandidateDrawer's footer; no obvious
-      // right-side equivalent for a match, so just the left-side line).
+      // Two-sided footer (§3A(8)): created-at left; the right side stays empty —
+      // the rejected reason (when applicable) already shows via MatchApprovalActions
+      // in the header actions, so it is not duplicated here.
       footer={
-        <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-          {t('drawer.createdAt', { date: formatDateTime(match.date) })}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, fontSize: 11, color: 'var(--text-muted)' }}>
+          <span>{t('drawer.createdAt', { date: formatDateTime(match.date) })}</span>
+          <span />
         </div>
       }
       header={
@@ -107,6 +100,8 @@ export default function MatchDrawer({
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{match.candidate}</span>
                 {/* Approval badge — colour-coded, read-only, next to the title (§3A calm header). */}
                 <MatchApprovalBadge status={match.approval_status} />
+                {/* Score sits beside the title (moved out of the old ad-hoc headerChips row). */}
+                <ScorePill value={match.score} />
                 {/* NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
                 <ReferenceNumberChip value={match.referenceNumber} />
               </div>
@@ -115,9 +110,30 @@ export default function MatchDrawer({
               </div>
             </>
           )}
-        >
-          {headerChips}
-        </EntityHeader>
+          // MatchApprovalActions moves into the header actions slot (was the body headerChips row).
+          actions={
+            <MatchApprovalActions status={match.approval_status} reason={reason} canUpdate={canApprove} busy={busy}
+              rejectOpen={rejectOpen} onOpenReject={() => setRejectOpen(true)} onCancelReject={() => setRejectOpen(false)}
+              onApprove={approve} onReject={reject} />
+          }
+          // Standard meta-picker row (§3A(c)): Status (~160, tenant lookup) + Eigenaar.
+          // Eigenaar stays a read-only labelled value — UpdateMatchRequest has no
+          // owner_id field yet (MATCH-OWNER-1), so a picker would silently no-op.
+          meta={onSetStatus ? [
+            { key: 'status', label: t('drawer.fields.status'), value: match.status,
+              options: matchStatuses.map(s => ({ value: s.value, label: s.label })),
+              onChange: onSetStatus, menuWidth: 170, width: 160 },
+          ] : []}
+          metaExtra={
+            <div style={{ maxWidth: 190 }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{t('drawer.fields.owner')}</div>
+              <div style={{ fontSize: 12, padding: '5px 10px', border: '1px solid var(--border)', borderRadius: 7,
+                background: 'var(--bg)', color: match.owner ? 'var(--text)' : 'var(--text-muted)' }}>
+                {match.owner || '—'}
+              </div>
+            </div>
+          }
+        />
       }
       tabs={tabs}
     />

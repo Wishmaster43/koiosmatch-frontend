@@ -112,7 +112,8 @@
       "documents": "Documents",
       "timeline": "Timeline",
       "notes": "Notes",
-      "statistics": "Statistics"
+      "statistics": "Statistics",
+      "changelog": "Changelog"
     }
   },
   "matching": {
@@ -246,5 +247,11 @@
     "flowLabel": "Flow",
     "flowOpen": "Open for {{days}} days · {{count}} application(s) received.",
     "flowUnknown": "Opening date unknown · {{count}} application(s) received."
+  },
+  "changelog": {
+    "loading": "Loading…",
+    "error": "Changelog could not be loaded.",
+    "empty": "No changes yet.",
+    "system": "System"
   }
 }

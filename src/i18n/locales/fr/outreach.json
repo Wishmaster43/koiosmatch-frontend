@@ -102,6 +102,8 @@
     "matchPick": "Choisir un poste…",
     "matchConfirm": "Créer un match",
     "matchCreated": "Match créé.",
-    "matchFailed": "Échec de la création du match."
+    "matchFailed": "Échec de la création du match.",
+    "owner": "Responsable",
+    "selectOwner": "Sélectionner un responsable"
   }
 }

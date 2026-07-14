@@ -5,6 +5,8 @@ import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import TitleBadge from '@/components/drawer/TitleBadge'
+import ApplicationChangelogPopover from './drawer/ApplicationChangelogPopover'
 import ApplicationTab from './drawer/ApplicationTab'
 import CandidateTab from './drawer/CandidateTab'
 import VacancyTab from './drawer/VacancyTab'
@@ -42,8 +44,8 @@ interface ApplicationDrawerProps {
 export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, users, onDetach, onRestore, canManage }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   const { formatDateTime } = useDateFormat()
-  // Funnel phases (Settings lookup) for the header phase picker; never hardcoded.
-  const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string }> }
+  // Funnel phases (Settings lookup) for the header phase picker + title badge; never hardcoded.
+  const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string; color?: string }> }
   if (!a) return null
 
   // Header meta pickers — phase (funnel lookup) + recruiter (tenant users). The
@@ -54,13 +56,18 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
     ...(users ?? []).map(u => ({ value: String(u.id), label: u.name })),
   ]
   const ownerValue = a.owner?.id != null && ownerInUsers ? String(a.owner.id) : '__current'
+  // Standard picker widths (§3A blueprint: Status/Phase ~160 + Eigenaar ~190).
   const meta = [
     { key: 'phase', label: t('drawer.phase'), value: a.phaseKey,
       options: funnelTypes.map(f => ({ value: f.value, label: f.label })),
-      onChange: (v: string) => onPhaseChange?.(a.id, v), menuWidth: 180 },
+      onChange: (v: string) => onPhaseChange?.(a.id, v), menuWidth: 170, width: 160 },
     { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions,
-      onChange: (v: string) => { if (v !== '__current') onOwnerChange?.(a.id, String(v)) }, menuWidth: 200 },
+      onChange: (v: string) => { if (v !== '__current') onOwnerChange?.(a.id, String(v)) }, menuWidth: 200, width: 190 },
   ]
+  // Phase badge next to the title — colour-coded, read-only (mirrors the candidate
+  // phase badge, §3A(c)). NUMMER-3: applications carry no reference_number yet
+  // (ApplicationDetailResource omits it) — no ReferenceNumberChip until that lands.
+  const phaseMeta = funnelTypes.find(f => f.value === a.phaseKey)
 
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
@@ -119,8 +126,17 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
           label={t('drawer.label')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: a.candidateInitials, soft: true }}
-          title={a.candidateName}
-          subtitle={a.vacancyTitle}
+          renderTitle={() => (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{a.candidateName}</span>
+                {/* Phase badge — colour-coded, read-only (mirrors the candidate phase badge, §3A(c)). */}
+                <TitleBadge label={phaseMeta?.label} color={phaseMeta?.color} />
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.vacancyTitle || '—'}</div>
+            </>
+          )}
+          titleActions={<ApplicationChangelogPopover application={a} />}
           meta={meta}
         />
       )}
