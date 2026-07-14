@@ -1,25 +1,21 @@
 import { useState, useRef, useEffect } from 'react'
 import type { ChangeEvent, KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Plus, Bot, Sparkles, AtSign, Paperclip, ArrowUp, Maximize2, Minimize2 } from 'lucide-react'
+import { X, Bot, AtSign, Paperclip, ArrowUp } from 'lucide-react'
 import { useLocale } from '@/lib/datetime'
 import { useKoiosChat } from './koios/useKoiosChat'
 import { useKoiosSettings } from './koios/useKoiosSettings'
 import { useKoiosExpanded } from './koios/useKoiosExpanded'
+import { useKoiosMentionCounts } from './koios/useKoiosMentionCounts'
+import { matchMentionQuery } from './koios/mentionMatch'
+import { addContextRef, removeContextRef } from './koios/contextRefs'
 import KoiosSteps from './koios/KoiosSteps'
 import KoiosUsage from './koios/KoiosUsage'
 import KoiosModelPicker from './koios/KoiosModelPicker'
-import type { KoiosChatMessage, TFn } from '@/types/koios'
-
-// ── Mention picker items ──────────────────────────────────────────────────────
-// Mention items; label = t('nav.<navKey>'). desc is illustrative demo data.
-const MENTIONS = [
-  { id: 'kandidaten', navKey: 'candidates', desc: '2.845 actief' },
-  { id: 'planning',   navKey: 'planning',   desc: 'Diensten deze week' },
-  { id: 'klanten',    navKey: 'customers',  desc: '47 actief' },
-  { id: 'vacatures',  navKey: 'vacancies',  desc: '9 open' },
-  { id: 'workflows',  navKey: 'workflows',  desc: 'Automatisering' },
-]
+import KoiosMentionMenu from './koios/KoiosMentionMenu'
+import KoiosHeader from './koios/KoiosHeader'
+import type { KoiosCandidateHit } from './koios/useKoiosCandidateSearch'
+import type { KoiosChatMessage, KoiosContextRef, TFn } from '@/types/koios'
 
 // gradient used for the assistant avatar + user bubble.
 const GRADIENT = 'linear-gradient(135deg,var(--color-primary),#8B5CF6)'
@@ -121,15 +117,20 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
   const { expanded, toggle: toggleExpanded } = useKoiosExpanded()
   // Connection status (optimistic until loaded; only `false` flips to "offline").
   const connected = settings?.status?.claude_configured !== false
-  const mentions = MENTIONS.map(m => ({ ...m, label: t(`nav.${m.navKey}`) }))
   const quick    = QUICK.map(q => ({ ...q, label: t(`koios.${q.key}`) }))
   const [input,       setInput]       = useState('')
   const [focused,     setFocused]     = useState(false)
   const [showMention, setShowMention] = useState(false)
   const [mentionQ,    setMentionQ]    = useState('')
+  // @-mentioned records for the outgoing turn (KOIOS-CTX-1) — shown as removable
+  // chips above the composer; cleared on send and on "Nieuwe chat".
+  const [contextRefs, setContextRefs] = useState<KoiosContextRef[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const bottomRef   = useRef<HTMLDivElement>(null)
   const mentionRef  = useRef<HTMLDivElement>(null)
+  // Real tenant counts for the mention categories — fetched once, lazily, the
+  // first time the menu opens (never blocks the menu's first paint).
+  const mentionCounts = useKoiosMentionCounts(showMention)
 
   // Keep the latest message in view.
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages, loading])
@@ -151,24 +152,27 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
     return () => document.removeEventListener('mousedown', handler)
   }, [])
 
-  // Submit the composer: hand the text to the hook, then clear + refocus.
+  // Submit the composer: hand the text + context refs to the hook, then clear + refocus.
   const submit = (text?: string) => {
     const trimmed = (text ?? '').trim()
     if (!trimmed || loading) return
-    send(trimmed)
+    send(trimmed, contextRefs)
     setInput('')
+    setContextRefs([])
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
     setShowMention(false)
     setTimeout(() => textareaRef.current?.focus(), 50)
   }
 
+  // Track the "@" mention trigger. matchMentionQuery is unicode-safe and allows
+  // spaces (e.g. "@ahmed vos") — see mentionMatch.ts for the space-handling fix.
   const handleInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value
     setInput(val)
-    const lastAt = val.lastIndexOf('@')
-    if (lastAt !== -1 && lastAt === val.length - 1) { setShowMention(true); setMentionQ('') }
-    else if (lastAt !== -1 && val.slice(lastAt + 1).match(/^\w*$/)) { setShowMention(true); setMentionQ(val.slice(lastAt + 1).toLowerCase()) }
-    else setShowMention(false)
+    const q = matchMentionQuery(val)
+    if (q === null) { setShowMention(false); return }
+    setShowMention(true)
+    setMentionQ(q)
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -176,19 +180,29 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
     if (e.key === 'Escape') setShowMention(false)
   }
 
-  const insertMention = (item: { label: string }) => {
+  // Picking a category keeps the original behaviour: just insert "@Label ".
+  const insertCategoryMention = (label: string) => {
     const lastAt = input.lastIndexOf('@')
     const before = lastAt !== -1 ? input.slice(0, lastAt) : input
-    setInput(before + '@' + item.label + ' ')
+    setInput(before + '@' + label + ' ')
     setShowMention(false)
     textareaRef.current?.focus()
   }
 
-  const newChat = () => { reset(); setInput(''); setShowMention(false) }
+  // Picking a real candidate ALSO records a context ref (deduped by id) so the
+  // outgoing turn carries { type: 'candidate', id } alongside the mention text.
+  const insertCandidateMention = (hit: KoiosCandidateHit) => {
+    const lastAt = input.lastIndexOf('@')
+    const before = lastAt !== -1 ? input.slice(0, lastAt) : input
+    setInput(before + '@' + hit.name + ' ')
+    setContextRefs(prev => addContextRef(prev, { type: 'candidate', id: hit.id, label: hit.name }))
+    setShowMention(false)
+    textareaRef.current?.focus()
+  }
 
-  const filteredMentions = mentions.filter(m =>
-    !mentionQ || m.label.toLowerCase().includes(mentionQ) || m.id.includes(mentionQ),
-  )
+  const removeContext = (id: string) => setContextRefs(prev => removeContextRef(prev, id))
+
+  const newChat = () => { reset(); setInput(''); setShowMention(false); setContextRefs([]) }
 
   if (!open) return null
 
@@ -198,45 +212,8 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
       display: 'flex', flexDirection: 'column', transition: 'width 0.2s ease' }}>
 
       {/* ── Header ── */}
-      <div style={{ height: 56, borderBottom: '1px solid var(--sidebar-border)', flexShrink: 0,
-        display: 'flex', alignItems: 'center', padding: '0 14px', gap: 8 }}>
-        <div style={{ width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-          background: GRADIENT, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Sparkles size={13} color="white" />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--sidebar-text)', lineHeight: 1.2 }}>Koios</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', display: 'block',
-              background: connected ? 'var(--color-success)' : 'var(--color-warning)' }} />
-            <span style={{ fontSize: 10, fontWeight: 500, color: connected ? 'var(--color-success)' : 'var(--color-warning)' }}>
-              {t(connected ? 'koios.online' : 'koios.offline')}
-            </span>
-          </div>
-        </div>
-        <button onClick={newChat} title={t('koios.newChat')}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 9px', fontSize: 10,
-            fontWeight: 600, background: 'rgba(99,102,241,0.12)', color: 'var(--color-primary)',
-            border: 'none', borderRadius: 6, cursor: 'pointer', transition: 'background 0.15s' }}
-          onMouseEnter={e => e.currentTarget.style.background = 'rgba(99,102,241,0.22)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'rgba(99,102,241,0.12)'}>
-          <Plus size={10} /> {t('koios.newChatShort')}
-        </button>
-        <button onClick={toggleExpanded} aria-label={t(expanded ? 'collapse' : 'expand')} aria-expanded={expanded}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sidebar-muted)',
-            padding: 4, display: 'flex', borderRadius: 6, transition: 'background 0.1s' }}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--sidebar-hover)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-          {expanded ? <Minimize2 size={15} /> : <Maximize2 size={15} />}
-        </button>
-        <button onClick={onClose} aria-label={t('common:close', { defaultValue: 'Sluiten' })}
-          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--sidebar-muted)',
-            padding: 4, display: 'flex', borderRadius: 6, transition: 'background 0.1s' }}
-          onMouseEnter={e => e.currentTarget.style.background = 'var(--sidebar-hover)'}
-          onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-          <X size={15} />
-        </button>
-      </div>
+      <KoiosHeader connected={connected} expanded={expanded} onNewChat={newChat}
+        onToggleExpanded={toggleExpanded} onClose={onClose} t={t} />
 
       {/* ── Messages ── */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '14px 12px',
@@ -269,33 +246,36 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
       {/* ── Input area ── */}
       <div style={{ padding: '10px 12px 14px', borderTop: '1px solid var(--sidebar-border)', flexShrink: 0, position: 'relative' }}>
 
-        {/* Mention picker */}
-        {showMention && filteredMentions.length > 0 && (
-          <div ref={mentionRef}
-            style={{ position: 'absolute', bottom: '100%', left: 12, right: 12, marginBottom: 6,
-              background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12,
-              boxShadow: '0 4px 20px rgba(0,0,0,0.12)', overflow: 'hidden', zIndex: 50 }}>
-            <div style={{ padding: '8px 12px 4px', fontSize: 10, fontWeight: 700,
-              color: 'var(--text-muted)', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-              {t('koios.addContext')}
-            </div>
-            {filteredMentions.map(m => (
-              <button key={m.id} onClick={() => insertMention(m)}
-                style={{ width: '100%', textAlign: 'left', padding: '8px 12px', border: 'none',
-                  background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
-                  gap: 10, transition: 'background 0.1s' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'var(--hover-bg)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-                <div style={{ width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-                  background: 'linear-gradient(135deg,var(--color-primary-bg),#F3E8FF)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--color-primary)' }}>@</span>
-                </div>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>{m.label}</div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{m.desc}</div>
-                </div>
-              </button>
+        {/* Mention picker — live candidate search + category list (real counts) */}
+        {showMention && (
+          <KoiosMentionMenu
+            query={mentionQ}
+            counts={mentionCounts}
+            onPickCategory={insertCategoryMention}
+            onPickCandidate={insertCandidateMention}
+            t={t}
+            locale={locale}
+            menuRef={mentionRef}
+          />
+        )}
+
+        {/* Active @-mention context refs — removable chips (cleared on send/newChat) */}
+        {contextRefs.length > 0 && (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
+            {contextRefs.map(ref => (
+              <span key={ref.id} style={{
+                display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 999,
+                fontSize: 11, fontWeight: 500,
+                background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+                color: 'var(--color-primary)',
+                border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
+              }}>
+                {ref.label}
+                <button onClick={() => removeContext(ref.id)} aria-label={`${t('remove')} ${ref.label}`}
+                  style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
+                  <X size={10} />
+                </button>
+              </span>
             ))}
           </div>
         )}

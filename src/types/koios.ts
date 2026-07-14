@@ -40,5 +40,14 @@ export interface KoiosSettings {
   [k: string]: unknown
 }
 
+// One @-mention context reference attached to an outgoing chat turn (KOIOS-CTX-1,
+// additive — the backend may ignore it until it lands). `label` is UI-only (the
+// composer's removable chip); only `type`+`id` are ever sent to the API.
+export interface KoiosContextRef {
+  type: string
+  id: string
+  label: string
+}
+
 // Minimal translate signature for the Koios subcomponents.
 export type TFn = (key: string, opts?: Record<string, unknown>) => string

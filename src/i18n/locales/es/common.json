@@ -135,7 +135,14 @@
     "errorReply": "No se pudo conectar con Koios. Inténtalo de nuevo.",
     "forbidden": "No tienes acceso a Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
-    "offline": "No conectado"
+    "offline": "No conectado",
+    "mention": {
+      "leads": "Leads",
+      "locations": "Ubicaciones",
+      "departments": "Departamentos",
+      "contacts": "Contactos",
+      "total": "en total"
+    }
   },
   "clickForDetails": "Haz clic para ver detalles",
   "clickPoint": "Haz clic en un punto",

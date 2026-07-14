@@ -10,10 +10,13 @@
  *
  * stopReason ∈ end_turn | refusal | max_steps | not_configured. The panel maps
  * these to calm notices (a missing API key is `not_configured`, never an error).
+ *
+ * `send(text, context?)` — `context` is the @-mentioned records attached to this
+ * turn (KOIOS-CTX-1); optional and additive, see koiosApi for the wire contract.
  */
 import { useCallback, useState } from 'react'
 import { sendChat } from './koiosApi'
-import type { KoiosChatMessage } from '@/types/koios'
+import type { KoiosChatMessage, KoiosContextRef } from '@/types/koios'
 
 const welcomeMessage = (): KoiosChatMessage => ({ role: 'assistant', kind: 'welcome' })
 
@@ -24,13 +27,13 @@ export function useKoiosChat() {
   const [model, setModel]       = useState<string | null>(null)
 
   // Send a turn: optimistic user bubble, then map the reply into an assistant one.
-  const send = useCallback(async (text: string) => {
+  const send = useCallback(async (text: string, context?: KoiosContextRef[]) => {
     const trimmed = text.trim()
     if (!trimmed || loading) return
     setMessages((prev) => [...prev, { role: 'user', content: trimmed }])
     setLoading(true)
     try {
-      const data = await sendChat(trimmed, model)
+      const data = await sendChat(trimmed, model, context)
       setMessages((prev) => [...prev, {
         role:       'assistant',
         answer:     data?.answer ?? '',

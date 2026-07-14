@@ -135,7 +135,14 @@
     "errorReply": "Couldn't reach Koios. Please try again.",
     "forbidden": "You don't have access to Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
-    "offline": "Not connected"
+    "offline": "Not connected",
+    "mention": {
+      "leads": "Leads",
+      "locations": "Locations",
+      "departments": "Departments",
+      "contacts": "Contacts",
+      "total": "total"
+    }
   },
   "clickForDetails": "Click for details",
   "clickPoint": "Click a point",

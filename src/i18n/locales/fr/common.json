@@ -135,7 +135,14 @@
     "errorReply": "Impossible de joindre Koios. Veuillez réessayer.",
     "forbidden": "Vous n'avez pas accès à Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
-    "offline": "Non connecté"
+    "offline": "Non connecté",
+    "mention": {
+      "leads": "Prospects",
+      "locations": "Sites",
+      "departments": "Services",
+      "contacts": "Contacts",
+      "total": "au total"
+    }
   },
   "clickForDetails": "Cliquez pour les détails",
   "clickPoint": "Cliquez sur un point",

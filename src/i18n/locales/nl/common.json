@@ -135,7 +135,14 @@
     "errorReply": "Kon Koios niet bereiken. Probeer het opnieuw.",
     "forbidden": "Je hebt geen toegang tot Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
-    "offline": "Niet gekoppeld"
+    "offline": "Niet gekoppeld",
+    "mention": {
+      "leads": "Leads",
+      "locations": "Locaties",
+      "departments": "Afdelingen",
+      "contacts": "Contactpersonen",
+      "total": "totaal"
+    }
   },
   "clickForDetails": "Klik voor details",
   "clickPoint": "Klik op punt",
