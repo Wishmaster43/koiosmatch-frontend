@@ -11,6 +11,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { useLookups } from '@/context/LookupsContext'
 import { useGenders } from '@/lib/useGenders'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
+import LookupIcon from '@/components/ui/LookupIcon'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -75,7 +76,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
     typeMeta: (v: string) => { label: string; color: string }
   }
   const { colorOf: genderColor } = useGenders()
-  const { labelOf: lastContactLabel } = useLastContactTypes()
+  const { labelOf: lastContactLabel, iconOf: lastContactIcon } = useLastContactTypes()
   // Tenant display settings (Settings → Candidate → Table display). All default off.
   const settings = useAllSettings()
   // Coloured chips vs. plain text — one flag PER column. KPI row keeps colours regardless.
@@ -139,7 +140,10 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       render: c => {
         if (!c.lastContactAt) return <span style={{ color: 'var(--text-muted)' }}>—</span>
         const label = lastContactLabel(c.lastContactType)
-        const Icon = c.lastContactType ? (CONTACT_TYPE_ICON[c.lastContactType] ?? HelpCircle) : null
+        // Settings-managed icon wins (Danny 14/7: a changed icon must show up);
+        // the hardcoded map is only the fallback for legacy values.
+        const lookupIcon = c.lastContactType ? lastContactIcon(c.lastContactType) : null
+        const Icon = !lookupIcon && c.lastContactType ? (CONTACT_TYPE_ICON[c.lastContactType] ?? HelpCircle) : null
         // Tooltip + subtle "· by whom" once the backend returns last_contact_by (graceful null).
         const tip = c.lastContactBy ? `${label} · ${c.lastContactBy}` : label
         // Danny 2026-07-06: clicking the date/icon jumps STRAIGHT to Communicatie → Notities.
@@ -148,6 +152,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
             style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: 'var(--text)', fontSize: 12,
               background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>
             {formatDate(c.lastContactAt)}
+            {lookupIcon && <span style={{ display: 'inline-flex', flexShrink: 0, opacity: 0.6 }}><LookupIcon icon={lookupIcon} size={12} /></span>}
             {Icon && <Icon size={12} style={{ flexShrink: 0, opacity: 0.6 }} />}
           </button>
         )

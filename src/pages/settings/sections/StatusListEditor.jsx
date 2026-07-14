@@ -5,6 +5,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import LookupIcon from '@/components/ui/LookupIcon'
 import { Check, Save, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api from '@/lib/api'
 import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
@@ -157,7 +158,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                            borderRadius: 6, flexShrink: 0, outline: 'none' }} />
               )}
               {withColor && <ColorSwatch color={item.color ?? '#6B7280'} onChange={c => updateColor(item, c)} />}
-              {withIcon && item.icon && <span aria-hidden style={{ fontSize: 14, flexShrink: 0 }}>{item.icon}</span>}
+              {withIcon && item.icon && <span style={{ display: 'inline-flex', flexShrink: 0, color: 'var(--text-muted)' }}><LookupIcon icon={item.icon} size={14} /></span>}
               {withColor
                 ? <ColorBadge label={labelOf(item)} color={item.color ?? '#6B7280'} />
                 : <span style={{ fontSize: 13, color: 'var(--text)' }}>{labelOf(item)}</span>}

@@ -42,5 +42,13 @@ export function useLastContactTypes() {
     return hit?.label ?? value ?? ''
   }
 
-  return { types, labelOf }
+  // The Settings-managed icon slug/emoji for a value — render via <LookupIcon>.
+  const iconOf = (value?: string | null): string | undefined => {
+    const v = norm(value)
+    if (!v) return undefined
+    const hit = types.find(x => norm(x.value) === v || norm(x.label) === v) as (LookupOption & { icon?: string }) | undefined
+    return hit?.icon || undefined
+  }
+
+  return { types, labelOf, iconOf }
 }
