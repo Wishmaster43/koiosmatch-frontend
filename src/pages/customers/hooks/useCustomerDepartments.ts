@@ -21,6 +21,8 @@ export interface DepartmentPayload {
   locationId: Id | string
   description: string
   statusId: Id | null
+  // Tenant custom-field values (§3B "Eigen velden" — the Extra sub-tab).
+  customFields: Record<string, unknown>
 }
 
 const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('tmp-')
@@ -30,6 +32,7 @@ const toApi = (p: Partial<DepartmentPayload>) => ({
   ...(p.locationId !== undefined ? { location_id: p.locationId } : {}),
   ...(p.description !== undefined ? { description: p.description } : {}),
   ...(p.statusId !== undefined ? { status_id: p.statusId || null } : {}),
+  ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
 })
 
 export function useCustomerDepartments(customerId: Id | undefined) {

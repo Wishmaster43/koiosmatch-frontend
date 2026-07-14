@@ -115,5 +115,7 @@ export function mapApplicationDetail(raw: ApiApplication = {}): ApplicationDetai
     // AI vs manual override (the AI's own score is kept when overridden).
     matchSource: raw.match_score_source ?? 'ai',
     aiScore: raw.ai_match_score ?? null,
+    // Tenant custom-field values (§3B "Eigen velden").
+    customFields: raw.custom_fields ?? {},
   }
 }

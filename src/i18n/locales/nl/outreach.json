@@ -77,7 +77,8 @@
     "label": "Bellijst",
     "createdAt": "Aangemaakt op {{date}}",
     "tabs": {
-      "targets": "Bellijst"
+      "targets": "Bellijst",
+      "extra": "Extra"
     },
     "loading": "Laden…",
     "error": "Bellijst laden is mislukt.",

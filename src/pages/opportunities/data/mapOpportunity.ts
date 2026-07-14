@@ -64,5 +64,7 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     contactId:     con?.id ?? o.contact_id ?? null,
     // C-41 free-form tags (always an array for the drawer tags-editor).
     tags: Array.isArray(o.tags) ? o.tags.map(String) : [],
+    // Tenant custom-field values (§3B "Eigen velden").
+    customFieldValues: o.custom_fields ?? {},
   }
 }

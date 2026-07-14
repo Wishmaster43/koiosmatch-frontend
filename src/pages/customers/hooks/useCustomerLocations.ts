@@ -32,6 +32,8 @@ export interface LocationPayload {
   costCenter: string
   billingEmail: string
   statusId: Id | null
+  // Tenant custom-field values (§3B "Eigen velden" — the Extra sub-tab).
+  customFields: Record<string, unknown>
 }
 
 const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('tmp-')
@@ -56,6 +58,7 @@ const toApi = (p: Partial<LocationPayload>) => ({
   ...(p.costCenter !== undefined ? { cost_center: p.costCenter } : {}),
   ...(p.billingEmail !== undefined ? { billing_email: p.billingEmail } : {}),
   ...(p.statusId !== undefined ? { status_id: p.statusId || null } : {}),
+  ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
 })
 
 export function useCustomerLocations(customerId: Id | undefined) {

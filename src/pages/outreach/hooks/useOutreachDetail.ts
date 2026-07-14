@@ -76,5 +76,18 @@ export function useOutreachDetail(id: string | null) {
     catch { setDetail(d => (d ? { ...d, owner: prev ?? null } : d)) }
   }, [])
 
-  return { detail, loading, error, setTargetStatus, setTargetOutcome, setOwner }
+  // Save the Extra tab's tenant custom fields (§3B) — optimistic, merges the partial
+  // patch into the full map so the backend persists it whole; reverts on failure.
+  const setCustomFields = useCallback(async (campaignId: string, patch: Record<string, unknown>) => {
+    let prev: Record<string, unknown> | undefined
+    const merged = { ...(detail?.custom_fields ?? {}), ...patch }
+    setDetail(d => {
+      prev = d?.custom_fields
+      return d ? { ...d, custom_fields: merged } : d
+    })
+    try { await updateCampaign(campaignId, { custom_fields: merged }) }
+    catch { setDetail(d => (d ? { ...d, custom_fields: prev } : d)) }
+  }, [detail])
+
+  return { detail, loading, error, setTargetStatus, setTargetOutcome, setOwner, setCustomFields }
 }

@@ -77,7 +77,8 @@
     "label": "Anrufliste",
     "createdAt": "Erstellt am {{date}}",
     "tabs": {
-      "targets": "Anrufliste"
+      "targets": "Anrufliste",
+      "extra": "Extra"
     },
     "loading": "Laden…",
     "error": "Anrufliste konnte nicht geladen werden.",

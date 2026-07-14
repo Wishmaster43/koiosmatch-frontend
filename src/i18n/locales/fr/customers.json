@@ -72,7 +72,8 @@
       "statistics": "Statistiques",
       "priceAgreements": "Accords tarifaires",
       "documents": "Documents",
-      "notes": "Notes"
+      "notes": "Notes",
+      "extra": "Extra"
     },
     "changelog": "Historique",
     "photoUpload": "Téléverser le logo",
@@ -196,7 +197,10 @@
       "primary": "Contact principal",
       "location": "Site",
       "department": "Service",
-      "none": "Non renseigné"
+      "none": "Non renseigné",
+      "subtabs": {
+        "data": "Détails"
+      }
     },
     "deleteConfirm": "Supprimer ce contact ?",
     "saveFailed": "L'enregistrement a échoué.",

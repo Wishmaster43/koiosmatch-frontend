@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { FileText, Unlink, ArchiveRestore } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
+import { useCustomFields } from '@/lib/useCustomFields'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import TitleBadge from '@/components/drawer/TitleBadge'
+import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import ApplicationChangelogPopover from './drawer/ApplicationChangelogPopover'
 import ApplicationTab from './drawer/ApplicationTab'
 import CandidateTab from './drawer/CandidateTab'
@@ -19,7 +21,8 @@ import type { RejectPayload } from './drawer/RejectionBlock'
 import type { Criterion } from './drawer/MatchScoreBlock'
 import type { Id } from '@/types/common'
 
-// The tab order (matches the screenshots).
+// The tab order (matches the screenshots). 'extra' (§3A(f)) is appended below
+// only when the tenant has ≥1 active application custom field.
 const TAB_IDS = ['application', 'candidate', 'vacancy', 'interviews', 'appointments', 'timeline', 'notes']
 
 interface ApplicationDrawerProps {
@@ -38,17 +41,21 @@ interface ApplicationDrawerProps {
   onDetach?: (id: Id | undefined) => void
   onRestore?: (id: Id | undefined) => void
   canManage?: boolean
+  // Save the Extra tab's tenant custom fields (§3B) — a partial patch, merged by the caller.
+  onUpdateCustomFields?: (id: Id | undefined, patch: Record<string, unknown>) => void
 }
 
 /**
  * ApplicationDrawer — thin container: declares the header config + tab list and
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
  */
-export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, users, onDetach, onRestore, canManage }: ApplicationDrawerProps) {
+export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, users, onDetach, onRestore, canManage, onUpdateCustomFields }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   const { formatDateTime } = useDateFormat()
   // Funnel phases (Settings lookup) for the header phase picker + title badge; never hardcoded.
   const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string; color?: string }> }
+  // The Extra tab only shows when the tenant has defined application custom fields (§3A(f)).
+  const { fields: customFieldDefs } = useCustomFields('application')
   if (!a) return null
 
   // Header meta pickers — phase (funnel lookup) + recruiter (tenant users). The
@@ -82,9 +89,12 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       case 'appointments': return <AppointmentsTab application={a} />
       case 'timeline':     return <Timeline items={a.timeline ?? []} emptyText={t('timeline.empty')} />
       case 'notes':        return <NotesTab application={a} />
+      case 'extra':        return <CustomFieldsTab entityType="application" values={a.customFields ?? {}}
+                              onSave={patch => onUpdateCustomFields?.(a.id, patch)} />
       default:             return null
     }
   }
+  const tabIds = customFieldDefs.length > 0 ? [...TAB_IDS, 'extra'] : TAB_IDS
 
   return (
     <EntityDrawer
@@ -123,7 +133,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
           </div>
         </div>
       )}
-      tabs={TAB_IDS.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: () => renderTab(id) }))}
+      tabs={tabIds.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: () => renderTab(id) }))}
       header={() => (
         <EntityHeader
           label={t('drawer.label')}

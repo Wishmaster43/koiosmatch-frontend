@@ -72,7 +72,8 @@
       "statistics": "Statistieken",
       "priceAgreements": "Prijsafspraken",
       "documents": "Documenten",
-      "notes": "Notities"
+      "notes": "Notities",
+      "extra": "Extra"
     },
     "changelog": "Wijzigingen",
     "photoUpload": "Logo uploaden",
@@ -196,7 +197,10 @@
       "primary": "Primair contact",
       "location": "Locatie",
       "department": "Afdeling",
-      "none": "Niet opgegeven"
+      "none": "Niet opgegeven",
+      "subtabs": {
+        "data": "Gegevens"
+      }
     },
     "deleteConfirm": "Deze contactpersoon verwijderen?",
     "saveFailed": "Opslaan is mislukt.",

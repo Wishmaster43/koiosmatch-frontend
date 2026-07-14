@@ -37,6 +37,7 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
     locationId: initial?.locationId ?? lockLocationId ?? locations[0]?.id ?? '',
     description: initial?.description ?? '',
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
+    customFields: initial?.customFields ?? {},
   })
   const [error, setError] = useState(false)
   const set = <K extends keyof DepartmentPayload>(k: K, v: DepartmentPayload[K]) => { setForm(f => ({ ...f, [k]: v })); if (k === 'name' || k === 'locationId') setError(false) }

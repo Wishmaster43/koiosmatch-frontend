@@ -133,6 +133,8 @@ export function useOpportunitiesData() {
     if ('locationId'   in patch) body.customer_location_id = patch.locationId || null
     if ('departmentId' in patch) body.department_id = patch.departmentId || null
     if ('contactId'    in patch) body.contact_id    = patch.contactId || null
+    // §3B "Eigen velden" — the Extra tab patches the full merged map at once.
+    if ('customFieldValues' in patch) body.custom_fields = patch.customFieldValues
     if (Object.keys(body).length) {
       api.patch(`/opportunities/${id}`, body).catch(() => {
         notifyError(t('common:actionFailed'))

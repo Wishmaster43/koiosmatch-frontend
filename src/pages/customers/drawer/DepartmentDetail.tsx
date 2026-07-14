@@ -19,7 +19,9 @@ import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
+import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import EditableRichTextField from './EditableRichTextField'
+import { useCustomFields } from '@/lib/useCustomFields'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
@@ -36,8 +38,10 @@ export default function DepartmentDetail({ department, locations, statuses, cont
   close: () => void
 }) {
   const { t } = useTranslation('customers')
+  // The Extra sub-tab only shows when the tenant has defined customer_department custom fields (§3A(f)).
+  const { fields: customFieldDefs } = useCustomFields('customer_department')
   // Sub-tabs (short labels, Danny 2026-07-14) — default Gegevens.
-  const [subTab, setSubTab] = useState<'data' | 'contacts'>('data')
+  const [subTab, setSubTab] = useState<'data' | 'contacts' | 'extra'>('data')
 
   // Description lives in its own rich-text block below (EditableRichTextField),
   // not in this field-table anymore.
@@ -76,6 +80,7 @@ export default function DepartmentDetail({ department, locations, statuses, cont
         tabs={[
           { id: 'data',     label: t('departments.detail.subtabs.data') },
           { id: 'contacts', label: t('drawer.tabs.contacts') },
+          ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
         ]}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
@@ -87,6 +92,11 @@ export default function DepartmentDetail({ department, locations, statuses, cont
           <EditableFieldTable title="" fields={fields} value={values} onSave={save} labelWidth={130} />
           <EditableRichTextField label={t('departments.detail.description')} value={department.description ?? ''} onSave={saveDescription} />
         </div>
+      )}
+
+      {subTab === 'extra' && (
+        <CustomFieldsTab entityType="customer_department" values={department.customFields ?? {}}
+          onSave={patch => onSave(department.id as Id, { customFields: { ...department.customFields, ...patch } })} />
       )}
 
       {subTab === 'contacts' && (

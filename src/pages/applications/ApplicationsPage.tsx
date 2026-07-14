@@ -303,6 +303,15 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     api.patch(`/applications/${id}`, { match_score: score, match_criteria: criteria }).catch(() => notifyError(t('common:actionFailed')))
   }
 
+  // Save the Extra tab's tenant custom fields (§3B); the tab only mounts while the
+  // drawer is open, so `selected` is always the record being edited. Optimistic +
+  // PATCH, merging the partial patch into the full map so the backend persists it whole.
+  const handleUpdateCustomFields = (id: Id | undefined, patch: Record<string, unknown>) => {
+    const merged = { ...(selected?.customFields ?? {}), ...patch }
+    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, customFields: merged } as ApplicationDetail) : prev))
+    api.patch(`/applications/${id}`, { custom_fields: merged }).catch(() => notifyError(t('common:actionFailed')))
+  }
+
   // Detach (soft-delete) an application: kept server-side, removed from the active
   // list. Optimistic flag; revert + toast on failure. Gated by applications.update.
   const handleDetach = (id: Id | undefined) => {
@@ -473,6 +482,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         onToggleExpand={() => setExpanded(v => !v)}
         onReject={handleReject}
         onAdjustScore={handleAdjustScore}
+        onUpdateCustomFields={handleUpdateCustomFields}
         onPhaseChange={(id, key) => { if (id != null) handleMove(id, key) }}
         onOwnerChange={(id, ownerId) => { if (id != null) handleOwner(id, ownerId) }}
         onLinkVacancy={handleLinkVacancy}

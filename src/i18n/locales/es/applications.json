@@ -78,7 +78,8 @@
       "appointments": "Citas",
       "timeline": "Cronología",
       "notes": "Notas",
-      "changelog": "Cambios"
+      "changelog": "Cambios",
+      "extra": "Extra"
     },
     "phase": "Fase",
     "source": "Origen",

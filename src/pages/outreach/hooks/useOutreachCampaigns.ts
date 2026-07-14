@@ -15,6 +15,8 @@ export interface Campaign {
   targets_count?: number
   target_count?: number
   created_at?: string
+  // Tenant custom-field values (§3B "Eigen velden").
+  custom_fields?: Record<string, unknown>
   [key: string]: unknown
 }
 

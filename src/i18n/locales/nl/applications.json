@@ -78,7 +78,8 @@
       "appointments": "Afspraken",
       "timeline": "Tijdlijn",
       "notes": "Notities",
-      "changelog": "Wijzigingen"
+      "changelog": "Wijzigingen",
+      "extra": "Extra"
     },
     "phase": "Fase",
     "source": "Bron",

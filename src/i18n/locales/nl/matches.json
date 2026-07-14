@@ -35,7 +35,8 @@
     "tabs": {
       "overview": "Overzicht",
       "relations": "Relaties",
-      "changelog": "Wijzigingen"
+      "changelog": "Wijzigingen",
+      "extra": "Extra"
     },
     "sectionDetails": "Matchgegevens",
     "fields": {

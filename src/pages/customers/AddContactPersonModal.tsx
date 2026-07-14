@@ -42,6 +42,7 @@ export default function AddContactPersonModal({
     departmentId: initial?.departmentId ?? null,
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
     isPrimary: initial?.isPrimary ?? false,
+    customFields: initial?.customFields ?? {},
   })
   const [error, setError] = useState(false)
   const set = <K extends keyof ContactPayload>(k: K, v: ContactPayload[K]) => { setForm(f => ({ ...f, [k]: v })); if (k === 'firstName' || k === 'lastName') setError(false) }

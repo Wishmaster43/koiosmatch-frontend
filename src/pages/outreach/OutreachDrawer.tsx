@@ -13,10 +13,12 @@
  */
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
+import { useCustomFields } from '@/lib/useCustomFields'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import TitleBadge from '@/components/drawer/TitleBadge'
+import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { initialsOf } from '@/lib/initials'
 import { useUsers } from '@/lib/queries'
 import { useOutreachDetail } from './hooks/useOutreachDetail'
@@ -40,8 +42,10 @@ export default function OutreachDrawer({ id, createdAt, onClose, expanded = fals
 }) {
   const { t } = useTranslation('outreach')
   const { formatDateTime } = useDateFormat()
-  const { detail, loading, error, setTargetStatus, setTargetOutcome, setOwner } = useOutreachDetail(id)
+  const { detail, loading, error, setTargetStatus, setTargetOutcome, setOwner, setCustomFields } = useOutreachDetail(id)
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
+  // The Extra tab only shows when the tenant has defined outreach-campaign custom fields (§3A(f)).
+  const { fields: customFieldDefs } = useCustomFields('outreach_campaign')
   if (!id) return null
 
   const name = detail?.name ?? '…'
@@ -62,11 +66,15 @@ export default function OutreachDrawer({ id, createdAt, onClose, expanded = fals
     setOwner(id, u ? { id: String(u.id), name: userName(u) } : null)
   }
 
-  // Tabs are config (§3A) — the call list is the single tab.
+  // Tabs are config (§3A) — the call list is the main tab; Extra is appended when defined.
   const tabs: EntityTab[] = [
     { id: 'targets', label: t('drawer.tabs.targets'), render: () => (
       <TargetsTab targets={detail?.targets ?? []} loading={loading} error={error} onSetStatus={setTargetStatus} onSetOutcome={setTargetOutcome} />
     ) },
+    ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra'), render: () => (
+      <CustomFieldsTab entityType="outreach_campaign" values={detail?.custom_fields ?? {}}
+        onSave={patch => { if (id) setCustomFields(id, patch) }} />
+    ) }] : []),
   ]
 
   return (

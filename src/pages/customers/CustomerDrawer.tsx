@@ -13,8 +13,10 @@ import { useTranslation } from 'react-i18next'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useAuth } from '@/context/AuthContext'
 import { useDateFormat } from '@/lib/datetime'
+import { useCustomFields } from '@/lib/useCustomFields'
 import { initialsOf } from '@/lib/initials'
 import CustomerChangelog from './drawer/CustomerChangelog'
 import OverviewTab from './drawer/OverviewTab'
@@ -46,6 +48,7 @@ const TABS = [
   { id: 'priceAgreements', tKey: 'priceAgreements' },
   { id: 'documents',     tKey: 'documents' },
   { id: 'notes',         tKey: 'notes' },
+  { id: 'extra',         tKey: 'extra' },
 ]
 
 interface DrawerUser { id: Id; name: string; avatar_color?: string }
@@ -78,6 +81,8 @@ export default function CustomerDrawer({
   const auth = useAuth()
   const hasModule = auth?.hasModule ?? (() => false)
   const { formatDateTime } = useDateFormat()
+  // The Extra tab only shows when the tenant has defined customer custom fields (§3A(f)).
+  const { fields: customFieldDefs } = useCustomFields('customer')
   // Fallback note-author avatar = the signed-in user (mirrors the candidate tab);
   // note-type lookups now live inside CustomerNotesTab itself.
   const authorInitials = initialsOf(auth?.user?.name ?? '')
@@ -123,8 +128,9 @@ export default function CustomerDrawer({
   const startHeaderEdit = () => { setHeaderName(c.name ?? ''); setHeaderEditing(true) }
   const saveHeader = () => { if (headerName.trim()) onUpdate?.(c.id, { name: headerName.trim() }); setHeaderEditing(false) }
 
-  // Planning tab only for tenants with the Planning module (same gate as sidebar).
-  const tabs = TABS.filter(tab => tab.id !== 'planning' || hasModule('plan'))
+  // Planning tab only for tenants with the Planning module (same gate as sidebar);
+  // Extra tab only when ≥1 active custom field is defined (§3A(f)).
+  const tabs = TABS.filter(tab => (tab.id !== 'planning' || hasModule('plan')) && (tab.id !== 'extra' || customFieldDefs.length > 0))
 
   const currentStatus = status ?? c.status
   const currentTags   = tags ?? (c.tags as string[]) ?? []
@@ -190,6 +196,10 @@ export default function CustomerDrawer({
           notes={c.notes ?? []}
           onAddNote={payload => onAddNote?.(c.id, payload)}
         />
+      )
+      case 'extra':         return (
+        <CustomFieldsTab entityType="customer" values={c.customFields ?? {}}
+          onSave={patch => onUpdate?.(c.id, { customFields: { ...c.customFields, ...patch } })} />
       )
       default: return null
     }

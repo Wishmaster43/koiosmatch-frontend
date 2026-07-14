@@ -45,7 +45,8 @@
       "details": "Details",
       "links": "Links",
       "comments": "Comments",
-      "activity": "Activity"
+      "activity": "Activity",
+      "extra": "Extra"
     }
   },
   "bulk": {

@@ -35,7 +35,8 @@
     "tabs": {
       "overview": "Overview",
       "relations": "Relations",
-      "changelog": "Changelog"
+      "changelog": "Changelog",
+      "extra": "Extra"
     },
     "sectionDetails": "Match details",
     "fields": {

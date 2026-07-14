@@ -48,6 +48,7 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
     costCenter: initial?.costCenter ?? '',
     billingEmail: initial?.billingEmail ?? '',
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
+    customFields: initial?.customFields ?? {},
   })
   const [error, setError] = useState(false)
   const set = <K extends keyof LocationPayload>(k: K, v: LocationPayload[K]) => { setForm(f => ({ ...f, [k]: v })); if (k === 'name') setError(false) }

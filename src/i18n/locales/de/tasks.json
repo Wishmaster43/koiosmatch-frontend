@@ -43,7 +43,8 @@
       "details": "Details",
       "links": "Verknüpfungen",
       "comments": "Kommentare",
-      "activity": "Aktivität"
+      "activity": "Aktivität",
+      "extra": "Extra"
     },
     "markDone": "Als erledigt markieren",
     "tags": "Tags"

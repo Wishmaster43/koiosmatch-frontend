@@ -5,7 +5,9 @@ import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import type { MetaPicker } from '@/components/drawer/EntityHeader'
 import TitleBadge from '@/components/drawer/TitleBadge'
+import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useDateFormat } from '@/lib/datetime'
+import { useCustomFields } from '@/lib/useCustomFields'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useUsers } from '@/lib/queries'
 import DetailsTab from './drawer/DetailsTab'
@@ -23,6 +25,7 @@ const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].fi
 // The tab order. The changelog is a header popover (not a tab), mirroring candidate.
 // Reacties removed again (Danny 2026-07-14): the empty thread was clutter; task
 // comments live on in the record notes API but get no tab until asked for.
+// 'extra' (§3A(f)) is appended below only when the tenant has ≥1 active custom field.
 const TAB_IDS = ['details', 'links']
 
 interface TaskDrawerProps {
@@ -46,6 +49,8 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   const { formatDateTime } = useDateFormat()
   const { statuses, priorities, doneStatusValues } = useTaskLookups()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
+  // The Extra tab only shows when the tenant has defined task custom fields (§3A(f)).
+  const { fields: customFieldDefs } = useCustomFields('task')
   if (!task) return null
 
   // Map a tab id to its content component.
@@ -53,9 +58,12 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
     switch (id) {
       case 'details':  return <><DetailsTab task={task} onUpdate={patch => onUpdate(task.id, patch)} /><RelatedTasks task={task} /></>
       case 'links':    return <LinksTab task={task} onAddLink={link => onAddLink(task.id, link)} onRemoveLink={link => onRemoveLink(task.id, link)} />
+      case 'extra':    return <CustomFieldsTab entityType="task" values={task.customFields ?? {}}
+                          onSave={patch => onUpdate(task.id, { customFields: { ...task.customFields, ...patch } })} />
       default:         return null
     }
   }
+  const tabIds = customFieldDefs.length > 0 ? [...TAB_IDS, 'extra'] : TAB_IDS
 
   // Assignee options: "Bureau" (unassigned) + every user. Picking rebuilds the
   // assignee object so the optimistic UI shows the name/initials immediately.
@@ -99,7 +107,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           <span />
         </div>
       }
-      tabs={TAB_IDS.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: () => renderTab(id) }))}
+      tabs={tabIds.map(id => ({ id, label: t(`drawer.tabs.${id}`), render: () => renderTab(id) }))}
       header={() => (
         <EntityHeader
           label={t('drawer.label')}

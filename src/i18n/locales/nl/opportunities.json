@@ -56,7 +56,8 @@
       "klant": "Klant",
       "notes": "Notities",
       "tasks": "Taken",
-      "changelog": "Wijzigingen"
+      "changelog": "Wijzigingen",
+      "extra": "Extra"
     },
     "tags": "Tags"
   },

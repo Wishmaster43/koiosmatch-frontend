@@ -81,5 +81,7 @@ export function mapTaskDetail(raw: ApiTask = {}): TaskDetail {
       description: ev.description ?? '',
       time: ev.created_at ?? ev.time ?? '',
     })),
+    // Tenant custom-field values (§3B "Eigen velden").
+    customFields: raw.custom_fields ?? {},
   }
 }

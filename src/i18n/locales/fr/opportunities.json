@@ -53,7 +53,8 @@
       "changelog": "Modifications",
       "klant": "Client",
       "notes": "Notes",
-      "tasks": "Tâches"
+      "tasks": "Tâches",
+      "extra": "Extra"
     },
     "markWon": "Gagné",
     "markLost": "Perdu",

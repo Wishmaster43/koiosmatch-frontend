@@ -23,8 +23,10 @@ import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useDateFormat } from '@/lib/datetime'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
+import { useCustomFields } from '@/lib/useCustomFields'
 import ScorePill from './ScorePill'
 import OverviewTab from './drawer/OverviewTab'
 import RelationsTab from './drawer/RelationsTab'
@@ -49,10 +51,12 @@ interface MatchDrawerProps {
   // MatchContractSection) to refresh the row/header when a save echoes back a
   // recomputed approval_status.
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
+  // Save the Extra tab's tenant custom fields (§3B) — a partial patch, merged by the caller.
+  onUpdateCustomFields?: (id: MatchRow['id'], patch: Record<string, unknown>) => void
 }
 
 export default function MatchDrawer({
-  match, onClose, expanded = false, onToggleExpand, onSetStatus, canApprove = false, onApprovalChange, onUpdate,
+  match, onClose, expanded = false, onToggleExpand, onSetStatus, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
   const { formatDateTime } = useDateFormat()
@@ -61,6 +65,8 @@ export default function MatchDrawer({
   const { reason, busy, rejectOpen, setRejectOpen, approve, reject } = useMatchApproval(match, onApprovalChange)
   // R-1b lifecycle status — the same tenant lookup the board/table use.
   const { statuses: matchStatuses } = useMatchStatuses()
+  // The Extra tab only shows when the tenant has defined match custom fields (§3A(f)).
+  const { fields: customFieldDefs } = useCustomFields('match')
   if (!match) return null
 
   // Tabs are config (§3A). Record history is the changelog ICON-popover in the title row
@@ -70,6 +76,10 @@ export default function MatchDrawer({
     { id: 'overview',  label: t('drawer.tabs.overview'), render: () => <OverviewTab match={match} onSetStatus={onSetStatus} /> },
     { id: 'contract',  label: t('drawer.contract.title'), render: () => <MatchContractSection matchId={match.id} onUpdate={onUpdate} /> },
     { id: 'relations', label: t('drawer.tabs.relations'), render: () => <RelationsTab match={match} /> },
+    ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra'), render: () => (
+      <CustomFieldsTab entityType="match" values={match.customFieldValues ?? {}}
+        onSave={patch => onUpdateCustomFields?.(match.id, patch)} />
+    ) }] : []),
   ]
 
   return (

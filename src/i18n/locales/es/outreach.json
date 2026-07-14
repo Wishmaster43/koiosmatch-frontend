@@ -77,7 +77,8 @@
     "label": "Lista de llamadas",
     "createdAt": "Creado el {{date}}",
     "tabs": {
-      "targets": "Lista de llamadas"
+      "targets": "Lista de llamadas",
+      "extra": "Extra"
     },
     "loading": "Cargando…",
     "error": "No se pudo cargar la lista de llamadas.",

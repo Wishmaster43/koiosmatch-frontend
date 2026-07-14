@@ -1,16 +1,31 @@
 /**
- * CandidateCustomFieldsSettings — CRUD + reorder for tenant-defined candidate
- * fields. Definitions come from /custom-fields?entity_type=candidate. Type is immutable once
- * a field has data (has_data → type selector disabled). Key (slug) is immutable
- * after create. Delete with data → 409 (in_use).
+ * CustomFieldsSettings — the ONE settings editor for tenant custom fields, shared by
+ * every entity (§3B "Eigen velden" wave). Parameterized by `entityType` (the unified
+ * GET/POST /custom-fields?entity_type=X surface) so there is a single CRUD/reorder
+ * implementation instead of one editor per entity drifting apart — this generalises
+ * the former CandidateCustomFieldsSettings + VacancySettings' VacancyFieldsSettings
+ * (both removed; see registry.jsx and VacancySettings.jsx for the pointer comments).
+ * CRUD + reorder + in-use protection: type is immutable once a field has data
+ * (has_data → type selector disabled); key (slug) is immutable after create;
+ * delete with data → 409 (in_use).
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react'
 import api from '@/lib/api'
+import { useCustomFields } from '@/lib/useCustomFields'
 
 // Field types the backend supports.
 const FIELD_TYPES = ['text', 'textarea', 'number', 'date', 'boolean', 'select']
+
+// entity_type → the nav.<id> label already registered for its sub-tab (registry.jsx),
+// reused here as the human-readable entity name instead of a second hardcoded map.
+const ENTITY_NAV_ID = {
+  candidate: 'cf_candidate', application: 'cf_application', match: 'cf_match', vacancy: 'cf_vacancy',
+  task: 'cf_task', opportunity: 'cf_opportunity', outreach_campaign: 'cf_outreach_campaign',
+  customer: 'cf_customer', customer_location: 'cf_customer_location',
+  customer_department: 'cf_customer_department', customer_contact: 'cf_customer_contact',
+}
 
 // Generate a slug from a label (lowercase, letters/numbers/underscores only).
 const toSlug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
@@ -29,23 +44,26 @@ const inputStyle = {
 }
 const labelStyle = { fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: 4 }
 
-export default function CandidateCustomFieldsSettings() {
+export default function CustomFieldsSettings({ entityType }) {
   const { t, i18n } = useTranslation('settings')
+  const { invalidate } = useCustomFields(entityType)
+  const entityLabel = t(`nav.${ENTITY_NAV_ID[entityType] ?? entityType}`)
   const [fields,   setFields]   = useState([])
   const [loading,  setLoading]  = useState(true)
   const [expanded, setExpanded] = useState(null)
   const [adding,   setAdding]   = useState(false)
   const [saving,   setSaving]   = useState(null)
-  const [newForm,  setNewForm]  = useState({ label: '', key: '', type: 'text', options: '', required_for: '' })
+  const [newForm,  setNewForm]  = useState({ label: '', key: '', type: 'text', options: '' })
   const [editForms, setEditForms] = useState({})
 
-  // Load definitions on mount (unified /custom-fields; normalise to this editor's shape).
+  // Load definitions whenever the entity or language changes (unified /custom-fields).
   useEffect(() => {
-    api.get('/custom-fields', { params: { entity_type: 'candidate' } })
+    setLoading(true)
+    api.get('/custom-fields', { params: { entity_type: entityType } })
       .then(r => setFields((r.data?.data ?? r.data ?? []).map(d => toField(d, i18n.language))))
       .catch(() => {})
       .finally(() => setLoading(false))
-  }, [i18n.language])
+  }, [entityType, i18n.language])
 
   // Move a field one position up or down via POST /custom-fields/reorder.
   const reorder = async (id, dir) => {
@@ -55,15 +73,16 @@ export default function CandidateCustomFieldsSettings() {
     ;[next[idx], next[idx + dir]] = [next[idx + dir], next[idx]]
     setFields(next)
     await api.post('/custom-fields/reorder', { ids: next.map(f => f.id) }).catch(() => {})
+    invalidate()
   }
 
   // Toggle active without opening the full edit card.
   const toggleActive = async (field) => {
     const patched = { ...field, active: !field.active }
     setFields(p => p.map(f => f.id === field.id ? patched : f))
-    await api.patch(`/custom-fields/${field.id}`, { active: patched.active }).catch(() => {
-      setFields(p => p.map(f => f.id === field.id ? field : f))
-    })
+    await api.patch(`/custom-fields/${field.id}`, { active: patched.active })
+      .then(() => invalidate())
+      .catch(() => { setFields(p => p.map(f => f.id === field.id ? field : f)) })
   }
 
   // Create a new field.
@@ -73,7 +92,7 @@ export default function CandidateCustomFieldsSettings() {
     setSaving('new')
     try {
       const payload = {
-        entity_type: 'candidate',
+        entity_type: entityType,
         key:   newForm.key.trim() || toSlug(label),
         label_i18n: { en: label, [i18n.language]: label },
         type:  newForm.type,
@@ -82,8 +101,9 @@ export default function CandidateCustomFieldsSettings() {
       const res = await api.post('/custom-fields', payload)
       const d = res.data?.data ?? res.data
       setFields(p => [...p, toField(d, i18n.language)])
-      setNewForm({ label: '', key: '', type: 'text', options: '', required_for: '' })
+      setNewForm({ label: '', key: '', type: 'text', options: '' })
       setAdding(false)
+      invalidate()
     } catch { /* noop */ } finally { setSaving(null) }
   }
 
@@ -105,6 +125,7 @@ export default function CandidateCustomFieldsSettings() {
       const d = res.data?.data ?? res.data
       setFields(p => p.map(f => f.id === field.id ? toField(d, i18n.language) : f))
       setExpanded(null)
+      invalidate()
     } catch { /* noop */ } finally { setSaving(null) }
   }
 
@@ -116,6 +137,7 @@ export default function CandidateCustomFieldsSettings() {
       await api.delete(`/custom-fields/${field.id}`)
       setFields(p => p.filter(f => f.id !== field.id))
       if (expanded === field.id) setExpanded(null)
+      invalidate()
     } catch (e) {
       if (e?.response?.status === 409) setFields(p => p.map(f => f.id === field.id ? { ...f, has_data: true } : f))
     } finally { setSaving(null) }
@@ -127,10 +149,10 @@ export default function CandidateCustomFieldsSettings() {
 
   return (
     <div style={{ maxWidth: 640 }}>
-      {/* Header */}
+      {/* Header — entity name interpolated from the sub-tab's own nav label. */}
       <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('candidateCustomFields.title')}</h2>
-        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{t('candidateCustomFields.subtitle')}</p>
+        <h2 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('customFieldsSettings.title', { entity: entityLabel })}</h2>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{t('customFieldsSettings.subtitle')}</p>
       </div>
 
       {/* Field list */}
@@ -159,13 +181,13 @@ export default function CandidateCustomFieldsSettings() {
                 <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{field.label}</div>
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
                   <code style={{ fontFamily: 'JetBrains Mono, monospace' }}>{field.key}</code>
-                  {' · '}{t(`candidateCustomFields.types.${field.type}`)}
-                  {field.has_data && <span style={{ color: 'var(--color-warning)', marginLeft: 6 }}>· {t('candidateCustomFields.hasData')}</span>}
+                  {' · '}{t(`customFieldsSettings.types.${field.type}`)}
+                  {field.has_data && <span style={{ color: 'var(--color-warning)', marginLeft: 6 }}>· {t('customFieldsSettings.hasData')}</span>}
                 </div>
               </div>
 
               {/* Active toggle */}
-              <button onClick={() => toggleActive(field)} title={field.active ? t('candidateCustomFields.deactivate') : t('candidateCustomFields.activate')}
+              <button onClick={() => toggleActive(field)} title={field.active ? t('customFieldsSettings.deactivate') : t('customFieldsSettings.activate')}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: field.active ? 'var(--color-primary)' : 'var(--text-muted)', padding: 4 }}>
                 {field.active ? <Eye size={14} /> : <EyeOff size={14} />}
               </button>
@@ -182,43 +204,43 @@ export default function CandidateCustomFieldsSettings() {
               <div style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {/* Label */}
                 <div>
-                  <label style={labelStyle}>{t('candidateCustomFields.label')}</label>
+                  <label style={labelStyle}>{t('customFieldsSettings.label')}</label>
                   <input value={ef.label ?? field.label} onChange={e => setEF(field.id, 'label', e.target.value)} style={inputStyle} />
                 </div>
 
                 {/* Key (immutable) */}
                 <div>
-                  <label style={labelStyle}>{t('candidateCustomFields.key')} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({t('candidateCustomFields.immutable')})</span></label>
+                  <label style={labelStyle}>{t('customFieldsSettings.key')} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({t('customFieldsSettings.immutable')})</span></label>
                   <input value={field.key} disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
                 </div>
 
                 {/* Type — disabled if has_data */}
                 <div>
-                  <label style={labelStyle}>{t('candidateCustomFields.type')} {field.has_data && <span style={{ color: 'var(--color-warning)', fontWeight: 400 }}>({t('candidateCustomFields.hasData')})</span>}</label>
+                  <label style={labelStyle}>{t('customFieldsSettings.type')} {field.has_data && <span style={{ color: 'var(--color-warning)', fontWeight: 400 }}>({t('customFieldsSettings.hasData')})</span>}</label>
                   <select value={currentType} onChange={e => setEF(field.id, 'type', e.target.value)}
                     disabled={field.has_data} style={{ ...inputStyle, cursor: field.has_data ? 'not-allowed' : 'pointer', opacity: field.has_data ? 0.5 : 1 }}>
-                    {FIELD_TYPES.map(tp => <option key={tp} value={tp}>{t(`candidateCustomFields.types.${tp}`)}</option>)}
+                    {FIELD_TYPES.map(tp => <option key={tp} value={tp}>{t(`customFieldsSettings.types.${tp}`)}</option>)}
                   </select>
                 </div>
 
                 {/* Options — only for select type */}
                 {currentType === 'select' && (
                   <div>
-                    <label style={labelStyle}>{t('candidateCustomFields.options')}</label>
+                    <label style={labelStyle}>{t('customFieldsSettings.options')}</label>
                     <input value={ef.options ?? (field.options ?? []).join(', ')} onChange={e => setEF(field.id, 'options', e.target.value)}
-                      placeholder={t('candidateCustomFields.optionsPlaceholder')} style={inputStyle} />
-                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('candidateCustomFields.optionsHint')}</p>
+                      placeholder={t('customFieldsSettings.optionsPlaceholder')} style={inputStyle} />
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('customFieldsSettings.optionsHint')}</p>
                   </div>
                 )}
 
                 {/* Actions */}
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', marginTop: 4 }}>
                   <button onClick={() => handleDelete(field)} disabled={field.has_data || saving === field.id}
-                    title={field.has_data ? t('candidateCustomFields.deleteBlocked') : t('candidateCustomFields.delete')}
+                    title={field.has_data ? t('customFieldsSettings.deleteBlocked') : t('customFieldsSettings.delete')}
                     style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12,
                              borderRadius: 6, border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', background: field.has_data ? 'var(--hover-bg)' : 'var(--color-danger-bg)',
                              color: field.has_data ? 'var(--text-muted)' : 'var(--color-danger)', cursor: field.has_data ? 'not-allowed' : 'pointer' }}>
-                    <Trash2 size={12} /> {t('candidateCustomFields.delete')}
+                    <Trash2 size={12} /> {t('customFieldsSettings.delete')}
                   </button>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button onClick={() => setExpanded(null)}
@@ -243,29 +265,29 @@ export default function CandidateCustomFieldsSettings() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               <div>
-                <label style={labelStyle}>{t('candidateCustomFields.label')} *</label>
+                <label style={labelStyle}>{t('customFieldsSettings.label')} *</label>
                 <input value={newForm.label} onChange={e => setNewForm(p => ({ ...p, label: e.target.value, key: toSlug(e.target.value) }))}
-                  placeholder={t('candidateCustomFields.labelPlaceholder')} style={inputStyle} autoFocus />
+                  placeholder={t('customFieldsSettings.labelPlaceholder')} style={inputStyle} autoFocus />
               </div>
               <div>
-                <label style={labelStyle}>{t('candidateCustomFields.key')}</label>
+                <label style={labelStyle}>{t('customFieldsSettings.key')}</label>
                 <input value={newForm.key} onChange={e => setNewForm(p => ({ ...p, key: e.target.value }))}
-                  placeholder={t('candidateCustomFields.keyPlaceholder')} style={{ ...inputStyle, fontFamily: 'JetBrains Mono, monospace' }} />
+                  placeholder={t('customFieldsSettings.keyPlaceholder')} style={{ ...inputStyle, fontFamily: 'JetBrains Mono, monospace' }} />
               </div>
             </div>
             <div>
-              <label style={labelStyle}>{t('candidateCustomFields.type')}</label>
+              <label style={labelStyle}>{t('customFieldsSettings.type')}</label>
               <select value={newForm.type} onChange={e => setNewForm(p => ({ ...p, type: e.target.value }))}
                 style={{ ...inputStyle, cursor: 'pointer' }}>
-                {FIELD_TYPES.map(tp => <option key={tp} value={tp}>{t(`candidateCustomFields.types.${tp}`)}</option>)}
+                {FIELD_TYPES.map(tp => <option key={tp} value={tp}>{t(`customFieldsSettings.types.${tp}`)}</option>)}
               </select>
             </div>
             {newForm.type === 'select' && (
               <div>
-                <label style={labelStyle}>{t('candidateCustomFields.options')}</label>
+                <label style={labelStyle}>{t('customFieldsSettings.options')}</label>
                 <input value={newForm.options} onChange={e => setNewForm(p => ({ ...p, options: e.target.value }))}
-                  placeholder={t('candidateCustomFields.optionsPlaceholder')} style={inputStyle} />
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('candidateCustomFields.optionsHint')}</p>
+                  placeholder={t('customFieldsSettings.optionsPlaceholder')} style={inputStyle} />
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('customFieldsSettings.optionsHint')}</p>
               </div>
             )}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
@@ -275,7 +297,7 @@ export default function CandidateCustomFieldsSettings() {
               </button>
               <button onClick={handleCreate} disabled={!newForm.label.trim() || saving === 'new'}
                 style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
-                {saving === 'new' ? t('common.saving') : t('candidateCustomFields.add')}
+                {saving === 'new' ? t('common.saving') : t('customFieldsSettings.add')}
               </button>
             </div>
           </div>
@@ -284,7 +306,7 @@ export default function CandidateCustomFieldsSettings() {
         <button onClick={() => setAdding(true)}
           style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', fontSize: 13, borderRadius: 8,
                    border: '1px dashed var(--border)', background: 'transparent', color: 'var(--text-muted)', cursor: 'pointer', width: '100%', justifyContent: 'center' }}>
-          <Plus size={14} /> {t('candidateCustomFields.add')}
+          <Plus size={14} /> {t('customFieldsSettings.add')}
         </button>
       )}
     </div>

@@ -78,7 +78,8 @@
       "appointments": "Termine",
       "timeline": "Verlauf",
       "notes": "Notizen",
-      "changelog": "Änderungen"
+      "changelog": "Änderungen",
+      "extra": "Extra"
     },
     "phase": "Phase",
     "source": "Quelle",

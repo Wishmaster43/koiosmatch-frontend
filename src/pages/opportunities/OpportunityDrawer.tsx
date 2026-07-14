@@ -5,7 +5,9 @@ import { Edit2, Save, X } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import TitleBadge from '@/components/drawer/TitleBadge'
+import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useDateFormat } from '@/lib/datetime'
+import { useCustomFields } from '@/lib/useCustomFields'
 import DetailsTab from './drawer/DetailsTab'
 import KlantTab from './drawer/KlantTab'
 import NotesTab from './drawer/NotesTab'
@@ -45,6 +47,8 @@ export default function OpportunityDrawer({
 }: OpportunityDrawerProps) {
   const { t } = useTranslation('opportunities')
   const { formatDate, formatDateTime } = useDateFormat()
+  // The Extra tab only shows when the tenant has defined opportunity custom fields (§3A(f)).
+  const { fields: customFieldDefs } = useCustomFields('opportunity')
 
   // Inline title edit — reset when a different opportunity is shown (render-time pattern).
   const [editing,    setEditing]    = useState(false)
@@ -75,6 +79,10 @@ export default function OpportunityDrawer({
     { id: 'klant',   label: t('drawer.tabs.klant'),   render: () => <KlantTab opportunity={o} customers={customers} onUpdate={onUpdate} /> },
     { id: 'notes',   label: t('drawer.tabs.notes'),   render: () => <NotesTab opportunity={o} /> },
     { id: 'tasks',   label: t('drawer.tabs.tasks'),   render: () => <TasksTab opportunity={o} /> },
+    ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra'), render: () => (
+      <CustomFieldsTab entityType="opportunity" values={o.customFieldValues ?? {}}
+        onSave={patch => onUpdate?.(o.id, { customFieldValues: { ...o.customFieldValues, ...patch } })} />
+    ) }] : []),
   ]
 
   const renderTitle = () => editing ? (

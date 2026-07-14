@@ -72,7 +72,8 @@
       "statistics": "Statistics",
       "priceAgreements": "Price agreements",
       "documents": "Documents",
-      "notes": "Notes"
+      "notes": "Notes",
+      "extra": "Extra"
     },
     "changelog": "Changelog",
     "photoUpload": "Upload logo",
@@ -196,7 +197,10 @@
       "primary": "Primary contact",
       "location": "Location",
       "department": "Department",
-      "none": "Not provided"
+      "none": "Not provided",
+      "subtabs": {
+        "data": "Details"
+      }
     },
     "deleteConfirm": "Delete this contact?",
     "saveFailed": "Saving failed.",

@@ -138,6 +138,8 @@ export interface Customer {
   created: string
   logo: string | null
   koiosAdvice: { action?: string; label?: string; reason?: string } | null
+  // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
+  customFields: Record<string, unknown>
 }
 
 /** A tenant lookup status as embedded on a location/department/contact (SUB-STATUS-1). */
@@ -207,5 +209,7 @@ export interface ApiCustomer {
   logo?: string | null; logo_url?: string | null
   koios_advice?: { action?: string; label?: string; reason?: string } | null
   koiosAdvice?: { action?: string; label?: string; reason?: string } | null
+  // Tenant custom-field values (§3B "Eigen velden").
+  custom_fields?: Record<string, unknown>
   [k: string]: unknown
 }

@@ -36,6 +36,8 @@ export interface RawMatch {
   // reason is detail-only (fetched lazily, see useMatchApproval).
   approval_status?: string
   approval_rejected_reason?: string
+  // Tenant custom-field values (§3B "Eigen velden").
+  custom_fields?: Record<string, unknown>
   [k: string]: unknown
 }
 
@@ -68,5 +70,7 @@ export interface MatchRow {
   // (empty on the list row until useMatchApproval lazily fetches it for a rejected match).
   approval_status?: string
   approval_rejected_reason?: string
+  // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
+  customFieldValues?: Record<string, unknown>
   [k: string]: unknown
 }

@@ -44,6 +44,8 @@ export interface TaskDetail extends Task {
   description: string
   comments: Array<{ id: Id | undefined; author: string; authorInitials: string; body: string; time: string }>
   activity: Array<{ id: Id | undefined; author: string; description: string; time: string }>
+  // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
+  customFields: Record<string, unknown>
 }
 
 /** Raw API task record (read defensively). */
@@ -83,5 +85,7 @@ export interface ApiTask {
   description?: string
   activity?: Array<{ id?: Id; author?: { name?: string } | string; description?: string; created_at?: string; time?: string }>
   timeline?: Array<{ id?: Id; author?: { name?: string } | string; description?: string; created_at?: string; time?: string }>
+  // Tenant custom-field values (§3B "Eigen velden").
+  custom_fields?: Record<string, unknown>
   [k: string]: unknown
 }

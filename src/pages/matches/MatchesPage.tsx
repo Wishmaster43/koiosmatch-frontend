@@ -235,6 +235,15 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     api.patch(`/matches/${id}`, { status: statusKey }).catch(() => notify('error', t('bulk.mutateError')))
   }
 
+  // Save the Extra tab's tenant custom fields (§3B); optimistic + PATCH, merging the
+  // partial patch into the full map so the backend persists it whole (patchRow only
+  // syncs local state — the actual PATCH lives here, mirroring handleMove above).
+  const handleUpdateCustomFields = (id: MatchRow['id'], patch: Record<string, unknown>) => {
+    const merged = { ...(selected?.customFieldValues ?? {}), ...patch }
+    patchRow(id, { customFieldValues: merged })
+    api.patch(`/matches/${id}`, { custom_fields: merged }).catch(() => notify('error', t('bulk.mutateError')))
+  }
+
   return (
     <div style={{ display: 'flex', height: '100%', background: 'var(--bg)', overflow: 'hidden' }}>
 
@@ -325,7 +334,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         // Approval workflow (§7 — UI-only gate; the backend re-checks matches.update).
         canApprove={hasPermission('matches.update')}
         onApprovalChange={patchRow}
-        onUpdate={patchRow} />
+        onUpdate={patchRow}
+        onUpdateCustomFields={handleUpdateCustomFields} />
 
       {/* Direct-match creation: the full placement form (rate proposal, contract,
           cost center) with a candidate picker; refetch so server-derived fields land. */}

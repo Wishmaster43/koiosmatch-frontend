@@ -20,10 +20,12 @@ import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import SectionCard from '@/components/ui/SectionCard'
 import SubTabBar from '@/components/drawer/SubTabBar'
+import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import LocationDepartments from './LocationDepartments'
 import LocationContacts from './LocationContacts'
 import PlanningSummary from './PlanningSummary'
 import { useAuth } from '@/context/AuthContext'
+import { useCustomFields } from '@/lib/useCustomFields'
 import type { Contact, Department, Location } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { LocationPayload } from '../hooks/useCustomerLocations'
@@ -56,10 +58,12 @@ export default function LocationDetail({
   const { t } = useTranslation('customers')
   const auth = useAuth()
   const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
+  // The Extra sub-tab only shows when the tenant has defined customer_location custom fields (§3A(f)).
+  const { fields: customFieldDefs } = useCustomFields('customer_location')
   // Sub-tabs (short labels, Danny 2026-07-14) — default Adres & gegevens. Each
   // EditableFieldTable below manages its own uncontrolled edit toggle (they no
   // longer share one global pencil now that they live on separate sub-tabs).
-  const [subTab, setSubTab] = useState<'address' | 'billing' | 'departments' | 'contacts'>('address')
+  const [subTab, setSubTab] = useState<'address' | 'billing' | 'departments' | 'contacts' | 'extra'>('address')
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
   // Algemeen/Adres/Registratie/Contact ter plaatse — the "Adres & gegevens" sub-tab.
@@ -131,6 +135,7 @@ export default function LocationDetail({
           { id: 'billing',     label: t('locations.detail.billingTitle') },
           { id: 'departments', label: t('drawer.tabs.departments') },
           { id: 'contacts',    label: t('drawer.tabs.contacts') },
+          ...(customFieldDefs.length > 0 ? [{ id: 'extra', label: t('drawer.tabs.extra') }] : []),
         ]}
         active={subTab}
         onChange={id => setSubTab(id as typeof subTab)}
@@ -153,6 +158,11 @@ export default function LocationDetail({
       {subTab === 'contacts' && (
         <LocationContacts locationId={l.id as Id} locationName={l.name} contacts={contacts} locations={locations}
           departments={departments} statuses={contactStatuses} onAdd={onAddContact} onUpdate={onUpdateContact} />
+      )}
+
+      {subTab === 'extra' && (
+        <CustomFieldsTab entityType="customer_location" values={l.customFields ?? {}}
+          onSave={patch => onSave(l.id as Id, { customFields: { ...l.customFields, ...patch } })} />
       )}
 
       {hasPlanning && (

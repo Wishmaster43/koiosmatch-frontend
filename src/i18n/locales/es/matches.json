@@ -35,7 +35,8 @@
     "tabs": {
       "overview": "Resumen",
       "relations": "Relaciones",
-      "changelog": "Historial"
+      "changelog": "Historial",
+      "extra": "Extra"
     },
     "sectionDetails": "Detalles del match",
     "fields": {

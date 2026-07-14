@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, Trash2, Check, Save } from 'lucide-react'
-import api from '@/lib/api'
+import { Check, Save } from 'lucide-react'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { useAllSettings, getJsonSetting, saveSettingsKeys } from '@/lib/settings/useAllSettings'
 import StatusListEditor from './StatusListEditor'
@@ -106,76 +105,7 @@ export function VacancyChannelSettings() {
   )
 }
 
-// Slug + active-language label helpers for the unified /custom-fields payload (G-13).
-const vfSlug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '')
-const vfLabel = (l, lang, key) => l ? (l[lang] ?? l[lang.split('-')[0]] ?? l.en ?? l.nl ?? Object.values(l)[0] ?? key) : key
-
-/** Vacancy custom fields — free-form extra fields, in-use protected, own sub-tab. */
-export function VacancyFieldsSettings() {
-  const { t, i18n } = useTranslation('settings')
-  const [customFields, setCustomFields] = useState([])
-  const [newField,     setNewField]     = useState('')
-  const [addingField,  setAddingField]  = useState(false)
-
-  // Add a custom field; the backend returns the created record.
-  const addField = async () => {
-    const name = newField.trim()
-    if (!name) return
-    setAddingField(true)
-    try {
-      const res = await api.post('/custom-fields', {
-        entity_type: 'vacancy', key: vfSlug(name), label_i18n: { en: name, [i18n.language]: name }, type: 'text',
-      })
-      // Normalise back to the name-only shape this list renders (label_i18n → name).
-      const d = res.data?.data ?? res.data
-      setCustomFields(p => [...p, { ...d, name: vfLabel(d.label_i18n, i18n.language, d.key) }])
-      setNewField('')
-    } catch { /* noop */ } finally { setAddingField(false) }
-  }
-
-  // An item is protected when the backend marks it as referenced by existing data.
-  const inUse = (i) => Boolean(i.in_use ?? i.is_used ?? i.locked ?? ((i.usage_count ?? 0) > 0))
-
-  // Delete a custom field unless it is still in use; 409 = backend rejects + flags it.
-  const removeField = async (f) => {
-    if (inUse(f)) return
-    try { await api.delete(`/custom-fields/${f.id}`); setCustomFields(p => p.filter(x => x.id !== f.id)) }
-    catch (e) { if (e?.response?.status === 409) setCustomFields(p => p.map(x => x.id === f.id ? { ...x, in_use: true } : x)) }
-  }
-
-  useEffect(() => {
-    api.get('/custom-fields', { params: { entity_type: 'vacancy' } })
-      .then(r => setCustomFields((r.data?.data ?? r.data ?? []).map(d => ({ ...d, name: vfLabel(d.label_i18n, i18n.language, d.key) }))))
-      .catch(() => {})
-  }, [i18n.language])
-
-  return (
-    <div style={{ maxWidth: 640 }}>
-      <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>{t('vacancy.customFields')}</h3>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{t('vacancy.customFieldsHint')}</p>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
-        {customFields.map((f, i) => (
-          <div key={f.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8 }}>
-            <span style={{ flex: 1, fontSize: 13, color: 'var(--text)' }}>{f.name}</span>
-            <button onClick={() => removeField(f)} disabled={inUse(f)} title={inUse(f) ? t('statusList.inUse') : undefined}
-              style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', border: 'none', borderRadius: 6, color: 'var(--color-danger)',
-                       cursor: inUse(f) ? 'not-allowed' : 'pointer', opacity: inUse(f) ? 0.4 : 1 }}>
-              <Trash2 size={11} />
-            </button>
-          </div>
-        ))}
-      </div>
-
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <button onClick={addField} disabled={addingField} aria-label={t('common:add')}
-          style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px dashed var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}>
-          <Plus size={14} />
-        </button>
-        <input value={newField} onChange={e => setNewField(e.target.value)} placeholder={t('vacancy.fieldPlaceholder')}
-          onKeyDown={e => e.key === 'Enter' && addField()}
-          style={{ height: 32, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 7, outline: 'none', color: 'var(--text)' }} />
-      </div>
-    </div>
-  )
-}
+// Vacancy custom fields moved to the shared "Eigen velden" settings group
+// (§3B custom-fields wave, 2026-07-14) — one CRUD implementation for every entity
+// instead of a per-entity fork. See settings/sections/CustomFieldsSettings.jsx
+// (rendered for entityType="vacancy" via registry.jsx's custom_fields group).

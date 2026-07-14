@@ -205,7 +205,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     const body: Record<string, unknown> = {
       status: patch.statusKey, priority: patch.priorityKey, type: patch.typeKey,
       due_date: patch.due, description: patch.description, assignee_id: patch.assigneeId,
-      tags: patch.tags,
+      tags: patch.tags, custom_fields: patch.customFields,
     }
     Object.keys(body).forEach(k => { if (body[k] === undefined) delete body[k] })
     api.patch(`/tasks/${id}`, body).catch(() => notifyError(t('common:actionFailed')))

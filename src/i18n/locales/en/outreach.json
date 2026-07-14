@@ -77,7 +77,8 @@
     "label": "Call list",
     "createdAt": "Created on {{date}}",
     "tabs": {
-      "targets": "Call list"
+      "targets": "Call list",
+      "extra": "Extra"
     },
     "loading": "Loading…",
     "error": "Failed to load the call list.",

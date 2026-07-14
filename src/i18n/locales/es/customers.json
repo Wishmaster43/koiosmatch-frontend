@@ -72,7 +72,8 @@
       "statistics": "Estadísticas",
       "priceAgreements": "Acuerdos de tarifas",
       "documents": "Documentos",
-      "notes": "Notas"
+      "notes": "Notas",
+      "extra": "Extra"
     },
     "changelog": "Cambios",
     "photoUpload": "Subir logo",
@@ -196,7 +197,10 @@
       "primary": "Contacto principal",
       "location": "Ubicación",
       "department": "Departamento",
-      "none": "No indicado"
+      "none": "No indicado",
+      "subtabs": {
+        "data": "Datos"
+      }
     },
     "deleteConfirm": "¿Eliminar este contacto?",
     "saveFailed": "Error al guardar.",

@@ -56,7 +56,8 @@
       "klant": "Client",
       "notes": "Notes",
       "tasks": "Tasks",
-      "changelog": "Changelog"
+      "changelog": "Changelog",
+      "extra": "Extra"
     },
     "tags": "Tags"
   },

@@ -30,6 +30,8 @@ export interface ContactPayload {
   departmentId: Id | null
   statusId: Id | null
   isPrimary: boolean
+  // Tenant custom-field values (§3B "Eigen velden" — the Extra sub-tab).
+  customFields: Record<string, unknown>
 }
 
 const isTemp = (id: Id | undefined) => typeof id === 'string' && id.startsWith('tmp-')
@@ -57,6 +59,7 @@ const toApi = (p: Partial<ContactPayload>) => ({
   ...(p.departmentId !== undefined ? { customer_department_id: p.departmentId || null } : {}),
   ...(p.statusId !== undefined ? { status_id: p.statusId || null } : {}),
   ...(p.isPrimary !== undefined ? { is_primary: p.isPrimary } : {}),
+  ...(p.customFields !== undefined ? { custom_fields: p.customFields } : {}),
 })
 
 export function useCustomerContacts(customerId: Id | undefined) {

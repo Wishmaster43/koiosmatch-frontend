@@ -15,6 +15,9 @@ import { useTranslation } from 'react-i18next'
 import { Trash2 } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
+import SubTabBar from '@/components/drawer/SubTabBar'
+import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
+import { useCustomFields } from '@/lib/useCustomFields'
 import type { Contact, Department } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 import type { ContactPayload } from '../hooks/useCustomerContacts'
@@ -30,6 +33,9 @@ export default function ContactDetail({ contact, locations, departments, statuse
 }) {
   const { t } = useTranslation('customers')
   const [editing, setEditing] = useState(false)
+  // The Extra sub-tab only shows when the tenant has defined customer_contact custom fields (§3A(f)).
+  const { fields: customFieldDefs } = useCustomFields('customer_contact')
+  const [subTab, setSubTab] = useState<'data' | 'extra'>('data')
 
   const fields: FieldRow[] = [
     { key: 'firstName', label: t('subModal.firstName'), type: 'text' },
@@ -82,8 +88,27 @@ export default function ContactDetail({ contact, locations, departments, statuse
         </button>
       </div>
 
-      <EditableFieldTable title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
-        editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={130} />
+      {/* Sub-tab strip only appears once there is a second sub-tab to show (Extra). */}
+      {customFieldDefs.length > 0 && (
+        <SubTabBar
+          tabs={[
+            { id: 'data',  label: t('contacts.detail.subtabs.data') },
+            { id: 'extra', label: t('drawer.tabs.extra') },
+          ]}
+          active={subTab}
+          onChange={id => setSubTab(id as typeof subTab)}
+        />
+      )}
+
+      {subTab === 'data' && (
+        <EditableFieldTable title={t('contacts.detail.infoTitle')} fields={fields} value={values} onSave={save}
+          editing={editing} onStartEdit={() => setEditing(true)} onCancel={() => setEditing(false)} labelWidth={130} />
+      )}
+
+      {subTab === 'extra' && customFieldDefs.length > 0 && (
+        <CustomFieldsTab entityType="customer_contact" values={contact.customFields ?? {}}
+          onSave={patch => onSave(contact.id as Id, { customFields: { ...contact.customFields, ...patch } })} />
+      )}
     </div>
   )
 }

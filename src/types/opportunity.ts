@@ -48,6 +48,8 @@ export interface Opportunity {
   contactId: Id | null
   // C-41 free-form tags — OpportunityResource always returns an array (never null).
   tags: string[]
+  // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
+  customFieldValues: Record<string, unknown>
 }
 
 /** Raw API opportunity record (read defensively). */
@@ -99,5 +101,7 @@ export interface ApiOpportunity {
   contact_id?: Id
   // C-41 free-form tags.
   tags?: string[]
+  // Tenant custom-field values (§3B "Eigen velden").
+  custom_fields?: Record<string, unknown>
   [k: string]: unknown
 }

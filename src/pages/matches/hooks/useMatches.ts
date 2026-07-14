@@ -43,6 +43,8 @@ function mapMatch(m: RawMatch): MatchRow {
     // rejection reason is detail-only (useMatchApproval fetches it lazily).
     approval_status:          m.approval_status ?? '',
     approval_rejected_reason: m.approval_rejected_reason ?? '',
+    // Tenant custom-field values (§3B "Eigen velden").
+    customFieldValues: m.custom_fields ?? {},
   }
 }
 

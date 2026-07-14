@@ -21,6 +21,7 @@ import {
   ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Phone, Shield, Sparkles, Star,
   Store, Tags, Target, UserCheck, Users, Webhook, XCircle,
 } from 'lucide-react'
+import CustomFieldsSettings from './sections/CustomFieldsSettings'
 
 import UsersPage from '../users/UsersPage'
 import ViewConfigEditor from '@/components/settings/ViewConfigEditor'
@@ -40,7 +41,7 @@ import { LanguageListSettings, LanguageLevelSettings } from './sections/Language
 import GenderSettings from './sections/GenderSettings'
 import IndustrySettings from './sections/IndustrySettings'
 import FunctionsSettings from './sections/FunctionsSettings'
-import { VacancyStatusSettings, VacancyPhaseSettings, VacancyFieldsSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
+import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
 import { MatchStatusSettings } from './sections/MatchSettings'
@@ -48,7 +49,6 @@ import { AppointmentTypeSettings } from './sections/AppointmentTypeSettings'
 import { SkillLevelSettings } from './sections/SkillLevelSettings'
 import { OutreachStatusSettings } from './sections/OutreachSettings'
 import RejectionSettings from './sections/RejectionSettings'
-import CandidateCustomFieldsSettings from './sections/CandidateCustomFieldsSettings'
 import CandidateRequiredFieldsSettings from './sections/CandidateRequiredFieldsSettings'
 import CvTemplateSettings from './sections/CvTemplateSettings'
 import DocumentTypesSettings from './sections/DocumentTypesSettings'
@@ -143,7 +143,8 @@ export const NAV_GROUPS = [
       // Conversion behaviour: default deployability status after Lead → Kandidaat.
       { id: 'candidate_conversion', icon: UserCheck, component: CandidateConversionSettings },
       { id: 'candidate_skill_levels', icon: BarChart2, component: SkillLevelSettings },
-      { id: 'candidate_custom_fields', icon: ListChecks, component: CandidateCustomFieldsSettings },
+      // Candidate custom fields moved to the shared "Eigen velden" group below
+      // (§3B custom-fields wave) — one CRUD implementation for every entity.
       { id: 'candidate_required_fields', icon: Flag, component: CandidateRequiredFieldsSettings },
     ],
   },
@@ -184,7 +185,7 @@ export const NAV_GROUPS = [
       { id: 'vacancy_seniority', icon: BarChart2, component: VacancySenioritySettings },
       { id: 'vacancy_education', icon: BookOpen, component: VacancyEducationSettings },
       { id: 'vacancy_channels', icon: Store, component: VacancyChannelSettings },
-      { id: 'vacancy_fields', icon: FileText, component: VacancyFieldsSettings },
+      // Vacancy custom fields moved to the shared "Eigen velden" group below.
       { id: 'vacancy_app_defaults', icon: ClipboardList, component: VacancyApplicationDefaultsSettings },
       { id: 'vacancy_matching', icon: Sparkles, component: VacancyMatchingSettings },
       { id: 'vacancy_display', icon: Palette, schema: vacancyDisplay },
@@ -215,6 +216,28 @@ export const NAV_GROUPS = [
     items: [
       { id: 'outreach_statuses', icon: Tags, component: OutreachStatusSettings },
       { id: 'outreach_display', icon: Palette, schema: outreachDisplay },
+    ],
+  },
+  {
+    // Eigen velden (§3B custom-fields wave, 2026-07-14) — ONE shared CRUD editor
+    // (CustomFieldsSettings, parameterized by entityType) with a sub-tab per
+    // entity, replacing the old per-entity forks (candidate_custom_fields,
+    // vacancy_fields). Mirrors every other group here: one `render` per item so
+    // the shell's existing sub-tab strip (SettingsTabs) does the rest — no new
+    // nested tab bar needed for this to read as "one menu, one sub-tab per entity".
+    key: 'custom_fields', icon: ListChecks,
+    items: [
+      { id: 'cf_candidate', icon: Users, render: () => <CustomFieldsSettings entityType="candidate" /> },
+      { id: 'cf_application', icon: ClipboardList, render: () => <CustomFieldsSettings entityType="application" /> },
+      { id: 'cf_match', icon: Sparkles, render: () => <CustomFieldsSettings entityType="match" /> },
+      { id: 'cf_vacancy', icon: Briefcase, render: () => <CustomFieldsSettings entityType="vacancy" /> },
+      { id: 'cf_task', icon: ListChecks, render: () => <CustomFieldsSettings entityType="task" /> },
+      { id: 'cf_opportunity', icon: Target, render: () => <CustomFieldsSettings entityType="opportunity" /> },
+      { id: 'cf_outreach_campaign', icon: Phone, render: () => <CustomFieldsSettings entityType="outreach_campaign" /> },
+      { id: 'cf_customer', icon: Building2, render: () => <CustomFieldsSettings entityType="customer" /> },
+      { id: 'cf_customer_location', icon: MapPin, render: () => <CustomFieldsSettings entityType="customer_location" /> },
+      { id: 'cf_customer_department', icon: Building2, render: () => <CustomFieldsSettings entityType="customer_department" /> },
+      { id: 'cf_customer_contact', icon: Users, render: () => <CustomFieldsSettings entityType="customer_contact" /> },
     ],
   },
   // Planning lookups — each item gated on the 'plan' module (requiresPage → canAccessPage →

@@ -76,6 +76,8 @@ export interface ApplicationDetail extends Application {
   // AI reject advice + the prior rejection summary (present once rejected).
   ai?: { advice?: string; advice_reason?: string; auto_reject_eligible?: boolean }
   rejection?: { reason_label?: string; [k: string]: unknown }
+  // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
+  customFields: Record<string, unknown>
 }
 
 /** A raw candidate as the API nests it under an application. */
@@ -150,6 +152,8 @@ export interface ApiApplication {
   match_summary?: string
   match_score_source?: string
   ai_match_score?: number | null
+  // Tenant custom-field values (§3B "Eigen velden").
+  custom_fields?: Record<string, unknown>
   [k: string]: unknown
 }
 

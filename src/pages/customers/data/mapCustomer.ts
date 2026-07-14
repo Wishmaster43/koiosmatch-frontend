@@ -169,5 +169,7 @@ export function mapCustomer(c: ApiCustomer = {}): Customer {
     created: c.created_at ?? c.created ?? '',
     logo: c.logo ?? c.logo_url ?? null,
     koiosAdvice: c.koios_advice ?? c.koiosAdvice ?? null,
+    // Tenant custom-field values (§3B "Eigen velden").
+    customFields: c.custom_fields ?? {},
   }
 }
