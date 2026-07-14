@@ -1,5 +1,6 @@
 import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Building2 } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import type { ReactNode } from 'react'
@@ -14,6 +15,16 @@ import type { Id } from '@/types/common'
 const isOverdue = (r: Task): boolean => !!(r.due && !r.statusIsDone && new Date(r.due) < new Date(new Date().toDateString()))
 
 const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
+// Neutral grey fallback (§3A owner-cell convention) when the assignee has no colour.
+const NEUTRAL_AVATAR = '#9CA3AF'
+// Single-line title truncation (never wrap to 2 lines) — task titles can run long.
+const titleEllipsis = { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' as const, display: 'block' as const, maxWidth: 250 }
+// "Bureau" (no assignee) icon bubble — same 22px footprint as the person Avatar, so
+// the row never jumps between an avatar-shaped and a bare-text look (Danny 2026-07-14:
+// the tasks resource has NO location/branch on the list row yet — BE gap, see below).
+const bureauBubble = { width: 22, height: 22, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+  flexShrink: 0, background: 'color-mix(in srgb, var(--text-muted) 12%, transparent)',
+  border: '1px solid color-mix(in srgb, var(--text-muted) 40%, transparent)' }
 
 interface TasksTableProps {
   rows: Task[]
@@ -47,20 +58,25 @@ export default function TasksTable({
   const colorStatus   = getBoolSetting(settings, 'task_table_color_status', true)
   const colorPriority = getBoolSetting(settings, 'task_table_color_priority', true)
   const colorType     = getBoolSetting(settings, 'task_table_color_type', true)
-  // Coloured chip vs. plain text, driven by the per-column flag.
-  const chip = (label: string, color: string | null, on: boolean, dot = false): ReactNode =>
-    !label ? dash : on ? <SoftChip label={label} color={color} dot={dot} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{label}</span>
+  const colorAssignee = getBoolSetting(settings, 'task_table_color_assignee', true)
+  // Coloured chip vs. plain text, driven by the per-column flag. `round` — the
+  // status axis reads as a round pill; type/priority stay square (Danny 2026-07-14).
+  const chip = (label: string, color: string | null, on: boolean, dot = false, round = false): ReactNode =>
+    !label ? dash : on ? <SoftChip label={label} color={color} dot={dot} round={round} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{label}</span>
 
+  // Column order mirrors the candidates blueprint (§3A): identity → status/qualification
+  // → link → dates → assignee LAST (Danny 2026-07-14; due-asc default sort is a
+  // deliberate exception — tasks stay sorted by urgency, not recency).
   const columns: Column<Task>[] = [
     // Title — primary cell, pinned during horizontal scroll.
-    { key: 'title', header: t('cols.task'), sortable: true, sortValue: r => r.title, sticky: true, width: 220,
-      render: r => <span style={{ fontWeight: 500, color: 'var(--text)' }}>{r.title}</span> },
+    { key: 'title', header: t('cols.task'), sortable: true, sortValue: r => r.title, sticky: true, width: 300, nowrap: true,
+      render: r => <span style={{ fontWeight: 500, color: 'var(--text)', ...titleEllipsis }} title={r.title}>{r.title}</span> },
     // Activity type — soft chip (or plain text per tenant setting).
     { key: 'type', header: t('cols.type'), sortable: true, sortValue: r => r.typeLabel,
       render: r => chip(r.typeLabel, r.typeColor, colorType) },
-    // Status — soft chip (the board column).
+    // Status — round soft chip (the board column).
     { key: 'status', header: t('cols.status'), sortable: true, sortValue: r => r.statusLabel,
-      render: r => chip(r.statusLabel, r.statusColor, colorStatus) },
+      render: r => chip(r.statusLabel, r.statusColor, colorStatus, false, true) },
     // Priority — soft chip with a leading dot.
     { key: 'priority', header: t('cols.priority'), sortable: true, sortValue: r => r.priorityLabel,
       render: r => chip(r.priorityLabel, r.priorityColor, colorPriority, true) },
@@ -69,14 +85,6 @@ export default function TasksTable({
       render: r => r.linkLabel
         ? <span style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', maxWidth: 200 }}>{r.linkLabel}</span>
         : dash },
-    // Assignee — avatar + name, or "Bureau" when nobody is assigned.
-    { key: 'assignee', header: t('cols.assignee'), sortable: true, sortValue: r => r.assignee?.name ?? '',
-      render: r => r.assignee ? (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Avatar initials={r.assignee.initials} size={22} color={r.assignee.color} soft />
-          <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.assignee.name}</span>
-        </span>
-      ) : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('bureau')}</span> },
     // Due date — DD-MM-YYYY, red when overdue.
     { key: 'due', header: t('cols.due'), sortable: true, sortValue: r => r.due || '',
       render: r => r.due
@@ -84,6 +92,23 @@ export default function TasksTable({
         : dash },
     { key: 'createdAt', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.createdAt || '',
       cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => formatDate(r.createdAt) },
+    // Assignee — avatar + name (neutral grey fallback when uncoloured), or a
+    // building-icon bubble + "Bureau" when nobody is assigned (same avatar-shaped
+    // footprint either way — BE gap: the task resource carries no branch/location
+    // on the list row yet, so this can't show the vestiging until that ships).
+    // LAST column (§3A convention).
+    { key: 'assignee', header: t('cols.assignee'), sortable: true, sortValue: r => r.assignee?.name ?? '',
+      render: r => r.assignee ? (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Avatar initials={r.assignee.initials} size={22} color={colorAssignee ? (r.assignee.color || NEUTRAL_AVATAR) : NEUTRAL_AVATAR} soft />
+          <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.assignee.name}</span>
+        </span>
+      ) : (
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={bureauBubble}><Building2 size={12} style={{ color: 'var(--text-muted)' }} /></span>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('bureau')}</span>
+        </span>
+      ) },
   ]
 
   return (

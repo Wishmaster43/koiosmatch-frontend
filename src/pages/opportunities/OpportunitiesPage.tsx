@@ -198,7 +198,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
                 {/* No row virtualization: a paginated (50/page) list is small, and virtualizing
                     against a scroll container that unmounts on the board↔list toggle left the
                     table blank on return (virtualizer measured 0). Sticky header still works. */}
-                <OpportunitiesTable rows={filtered} loading={loading} error={error} valueInHours={valueInHours}
+                <OpportunitiesTable rows={filtered} loading={loading} error={error} valueInHours={valueInHours} stages={stages}
                   selectedId={selected?.id} onRowClick={selectOpportunity} stickyHeader
                   selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
               </div>

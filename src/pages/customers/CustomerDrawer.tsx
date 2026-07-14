@@ -66,11 +66,14 @@ interface CustomerDrawerProps {
   locationStatuses?: LookupOption[]
   departmentStatuses?: LookupOption[]
   contactStatuses?: LookupOption[]
+  // Deep-link: open on this tab (table count-cell → locations/departments/contacts/
+  // vacancies), mirrors the candidate drawer's initialTab.
+  initialTab?: string
 }
 
 export default function CustomerDrawer({
   customer: c, onClose, expanded, onToggleExpand, onUpdate, onAddNote,
-  users = [], statuses = [], locationStatuses = [], departmentStatuses = [], contactStatuses = [],
+  users = [], statuses = [], locationStatuses = [], departmentStatuses = [], contactStatuses = [], initialTab,
 }: CustomerDrawerProps) {
   const { t } = useTranslation('customers')
   const auth = useAuth()
@@ -226,6 +229,7 @@ export default function CustomerDrawer({
   return (
     <EntityDrawer
       entity={c}
+      initialTab={initialTab}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
       footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: c.created ? formatDate(c.created) : '—' })}</span>}

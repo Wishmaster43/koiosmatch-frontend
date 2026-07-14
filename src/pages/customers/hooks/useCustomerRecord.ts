@@ -41,12 +41,18 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   const [selected,       setSelected]       = useState<Customer | null>(null)
   const [detail,         setDetail]         = useState<Customer | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
+  // Deep-link target tab (count-cell → locations/departments/contacts/vacancies);
+  // row click = default (mirrors useCandidateDrawerActions' drawerTab).
+  const [drawerTab,      setDrawerTab]      = useState<string | undefined>(undefined)
   const selectedIdRef = useRef<Id | null>(null)
 
   // Light row first, then fetch the full detail (ref-guarded against races).
   const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
-  const selectCustomer = (c: Customer) => {
-    if (selected?.id === c.id) { closeDrawer(); return }
+  const selectCustomer = (c: Customer, tab?: string) => {
+    // Re-clicking the SAME row with no explicit tab toggles the drawer closed; a
+    // count-cell deep-link (tab given) always (re)opens on that tab instead.
+    if (selected?.id === c.id && !tab) { closeDrawer(); return }
+    setDrawerTab(tab)
     selectedIdRef.current = c.id ?? null
     setSelected(c); setDetail(null); setDrawerExpanded(false)
     api.get(`/customers/${c.id}`)
@@ -88,7 +94,7 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
   }
 
   return {
-    selected, detail, drawerExpanded, setDrawerExpanded,
+    selected, detail, drawerExpanded, setDrawerExpanded, drawerTab,
     closeDrawer, selectCustomer, updateCustomer, handleCreate, addNote,
   }
 }

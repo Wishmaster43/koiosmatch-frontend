@@ -206,5 +206,17 @@
   },
   "board": {
     "movedHidden": "Movida — la tarjeta queda fuera del filtro actual"
+  },
+  "ai": {
+    "title": "Koios AI aconseja",
+    "beta": "Beta",
+    "refresh": "Actualizar",
+    "analyzing": "Koios AI está analizando la solicitud…",
+    "progressLabel": "Progreso",
+    "progressOk": "{{days}} días en fase «{{phase}}».",
+    "progressStale": "Ya {{days}} días en fase «{{phase}}» — posiblemente estancada, revise el seguimiento.",
+    "progressUnknown": "Fecha desconocida · fase actual «{{phase}}».",
+    "completeness": "Integridad",
+    "missingVacancy": "No hay vacante vinculada a esta solicitud."
   }
 }

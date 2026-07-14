@@ -20,9 +20,12 @@ interface CandidateStatusChipProps {
    *  chip upgrades to the full lookup rules automatically once BE adds the slug. */
   fallbackLabel?: string | null
   fallbackColor?: string | null
+  /** Fully-rounded pill corners (Danny 2026-07-14: status/phase axes read as ROUND,
+   *  qualification chips stay square) — forwarded to the underlying SoftChip. */
+  round?: boolean
 }
 
-export default function CandidateStatusChip({ status, phase, plain = false, fallbackLabel, fallbackColor }: CandidateStatusChipProps) {
+export default function CandidateStatusChip({ status, phase, plain = false, fallbackLabel, fallbackColor, round = false }: CandidateStatusChipProps) {
   const { statusMeta, phases } = useLookups() as unknown as {
     statusMeta: (v: string) => { label: string; color: string }
     phases: Array<{ value: string }>
@@ -33,7 +36,7 @@ export default function CandidateStatusChip({ status, phase, plain = false, fall
     if (phase != null && phase === phases[0]?.value) return <span style={{ color: 'var(--text-muted)' }}>—</span>
     if (!fallbackLabel) return <span style={{ color: 'var(--text-muted)' }}>—</span>
     if (plain) return <span style={{ fontSize: 12.5, color: 'var(--text)' }}>{fallbackLabel}</span>
-    return <SoftChip label={fallbackLabel} color={fallbackColor || '#9CA3AF'} />
+    return <SoftChip label={fallbackLabel} color={fallbackColor || '#9CA3AF'} round={round} />
   }
   // Slug present: apply the model-v2 rule — a Lead is not deployable, so no chip.
   if (phase != null && phase === phases[0]?.value) {
@@ -41,5 +44,5 @@ export default function CandidateStatusChip({ status, phase, plain = false, fall
   }
   const m = statusMeta(status)
   if (plain) return <span style={{ fontSize: 12.5, color: 'var(--text)' }}>{m.label}</span>
-  return <SoftChip label={m.label} color={m.color} />
+  return <SoftChip label={m.label} color={m.color} round={round} />
 }

@@ -234,5 +234,17 @@
   },
   "map": {
     "pointCount": "{{count}} postes sur la carte"
+  },
+  "ai": {
+    "title": "Koios AI conseille",
+    "beta": "Bêta",
+    "refresh": "Actualiser",
+    "analyzing": "Koios AI analyse le poste…",
+    "completeness": "Exhaustivité",
+    "completeGood": "Poste bien rempli — aucun champ essentiel manquant détecté.",
+    "completePartial": "Poste complété à {{pct}}%. Ajoutez description, fourchette salariale, heures, compétences, localisation et statut pour de meilleurs résultats.",
+    "flowLabel": "Flux",
+    "flowOpen": "Ouvert depuis {{days}} jours · {{count}} candidature(s) reçue(s).",
+    "flowUnknown": "Date d'ouverture inconnue · {{count}} candidature(s) reçue(s)."
   }
 }

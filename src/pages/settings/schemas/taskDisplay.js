@@ -11,5 +11,7 @@ export default {
     { key: 'task_table_color_status',   type: 'toggle', default: true },
     { key: 'task_table_color_priority', type: 'toggle', default: true },
     { key: 'task_table_color_type',     type: 'toggle', default: true },
+    // Assignee avatar: colour (on, default) vs. neutral grey (off).
+    { key: 'task_table_color_assignee', type: 'toggle', default: true },
   ],
 }

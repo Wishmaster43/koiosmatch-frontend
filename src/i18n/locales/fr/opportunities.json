@@ -19,7 +19,8 @@
     "value": "Valeur",
     "owner": "Responsable",
     "date": "Créé",
-    "hoursValue": "{{count}} h"
+    "hoursValue": "{{count}} h",
+    "expectedClose": "Clôture prévue"
   },
   "insights": {
     "stage": "Phase",

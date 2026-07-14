@@ -403,5 +403,17 @@
   },
   "map": {
     "pointCount": "{{count}} klanten op de kaart"
+  },
+  "ai": {
+    "title": "Koios AI adviseert",
+    "beta": "Beta",
+    "refresh": "Vernieuwen",
+    "analyzing": "Koios AI analyseert het klantprofiel…",
+    "completeness": "Volledigheid",
+    "completeGood": "Klantprofiel is goed gevuld — geen ontbrekende kernvelden gedetecteerd.",
+    "completePartial": "Klantprofiel is {{pct}}% compleet. Vul KvK-nummer, btw-nummer, branche en contactgegevens aan voor een vollediger beeld.",
+    "relationshipLabel": "Relatie",
+    "relationshipActive": "{{vacancies}} open vacature(s) · {{matches}} actieve match(es).",
+    "relationshipNone": "Geen open vacatures of actieve matches geregistreerd."
   }
 }

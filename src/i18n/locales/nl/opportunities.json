@@ -19,7 +19,8 @@
     "value": "Waarde",
     "owner": "Eigenaar",
     "date": "Aangemaakt",
-    "hoursValue": "{{count}} u"
+    "hoursValue": "{{count}} u",
+    "expectedClose": "Verwachte sluiting"
   },
   "insights": {
     "stage": "Fase",

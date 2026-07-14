@@ -159,7 +159,10 @@
     "appointment_types": "Appointment types",
     "candidate_skill_levels": "Skill levels",
     "wa_message_types": "Message types",
-    "candidate_conversion": "Conversion"
+    "candidate_conversion": "Conversion",
+    "vacancy_display": "Table display",
+    "match_display": "Table display",
+    "outreach_display": "Table display"
   },
   "kpis": {
     "title": "KPI settings",
@@ -552,6 +555,10 @@
       },
       "task_table_color_type": {
         "label": "Type"
+      },
+      "task_table_color_assignee": {
+        "label": "Assignee colour",
+        "description": "On = the assignee avatar uses their colour. Off = neutral grey."
       }
     }
   },
@@ -1402,11 +1409,18 @@
   },
   "opportunityDisplay": {
     "title": "Table display",
-    "subtitle": "Show the deal magnitude in euros or in hours.",
+    "subtitle": "Per column: coloured labels or plain text. The KPI charts always keep their colours.",
     "fields": {
       "opportunity_value_in_hours": {
         "label": "Show value in hours",
         "description": "On = the Kansen table and KPIs show hours instead of euros."
+      },
+      "opportunity_table_color_stage": {
+        "label": "Stage"
+      },
+      "opportunity_table_color_owner": {
+        "label": "Owner colour",
+        "description": "On = the owner avatar uses their own colour. Off = neutral grey."
       }
     }
   },
@@ -1511,6 +1525,51 @@
       "customer_location": "Location",
       "customer_department": "Department",
       "match": "Match"
+    }
+  },
+  "vacancyDisplay": {
+    "title": "Table display",
+    "subtitle": "Per column: coloured labels or plain text. The KPI charts always keep their colours.",
+    "fields": {
+      "vacancy_table_color_status": {
+        "label": "Status"
+      },
+      "vacancy_table_color_published": {
+        "label": "Published"
+      },
+      "vacancy_table_color_owner": {
+        "label": "Owner colour",
+        "description": "On = the owner avatar uses the recruiter's colour. Off = neutral grey."
+      }
+    }
+  },
+  "matchDisplay": {
+    "title": "Table display",
+    "subtitle": "Per column: coloured labels or plain text. The match board always keeps its colours.",
+    "fields": {
+      "match_table_color_status": {
+        "label": "Status"
+      },
+      "match_table_color_owner": {
+        "label": "Owner colour",
+        "description": "On = the owner avatar uses their own colour. Off = neutral grey."
+      }
+    }
+  },
+  "outreachDisplay": {
+    "title": "Table display",
+    "subtitle": "Per column: coloured labels or plain text.",
+    "fields": {
+      "outreach_table_color_channel": {
+        "label": "Channel"
+      },
+      "outreach_table_color_status": {
+        "label": "Status"
+      },
+      "outreach_table_color_owner": {
+        "label": "Owner colour",
+        "description": "On = the owner avatar is coloured once the data carries one. Off = neutral grey."
+      }
     }
   }
 }

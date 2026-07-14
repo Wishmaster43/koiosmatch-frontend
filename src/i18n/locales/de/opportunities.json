@@ -19,7 +19,8 @@
     "value": "Wert",
     "owner": "Inhaber",
     "date": "Erstellt",
-    "hoursValue": "{{count}} Std."
+    "hoursValue": "{{count}} Std.",
+    "expectedClose": "Voraussichtlicher Abschluss"
   },
   "insights": {
     "stage": "Phase",

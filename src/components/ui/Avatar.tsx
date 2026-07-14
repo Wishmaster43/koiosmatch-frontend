@@ -5,7 +5,10 @@
  * `color` (candidate gender lookup, owner avatar_color) wins; otherwise the colour
  * is derived from the initials so the same person always gets the same colour.
  */
-const COLORS = [
+// Exported so avatarColor.ts (ShiftManager department/contact/location avatars)
+// consumes this SAME palette — one hash, one colour, app-wide (was two drifting
+// 6- vs 7-colour arrays).
+export const AVATAR_COLORS = [
   'var(--color-primary)', 'var(--color-secondary)', 'var(--color-success)',
   'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899',
 ]
@@ -19,7 +22,7 @@ interface AvatarProps {
 }
 
 export default function Avatar({ initials, size = 28, photo, color, soft = false }: AvatarProps) {
-  const bg = color || COLORS[(initials ?? '?').charCodeAt(0) % COLORS.length]
+  const bg = color || AVATAR_COLORS[(initials ?? '?').charCodeAt(0) % AVATAR_COLORS.length]
 
   if (photo) {
     return (

@@ -119,7 +119,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const { customers, setCustomers, loading, error, total, setTotal, lastPage, stats } =
     useCustomersData({ filterParams, page, pageSize, t })
   const {
-    selected, detail, drawerExpanded, setDrawerExpanded,
+    selected, detail, drawerExpanded, setDrawerExpanded, drawerTab,
     closeDrawer, selectCustomer, updateCustomer, handleCreate, addNote,
   } = useCustomerRecord({ setCustomers, setTotal, users, t })
   const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags } =
@@ -307,7 +307,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                     <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
                   )}
                   <CustomersTable rows={visibleRows} loading={loading} selectedId={selected?.id}
-                    onSelect={selectCustomer} statusMeta={statusMeta} />
+                    onSelect={selectCustomer} onOpenTab={selectCustomer} statusMeta={statusMeta} />
                 </div>
                 <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
                   onPageChange={setPage} onPageSizeChange={s => { setPageSize(s); setPage(1) }} />
@@ -320,6 +320,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                   <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>
                 )}
                 <CustomersTable rows={visibleRows} loading={loading} selectedId={selected?.id} onSelect={selectCustomer}
+                  onOpenTab={selectCustomer}
                   statusMeta={statusMeta} selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
                   stickyHeader scrollParentRef={tableScrollRef} />
               </div>
@@ -343,6 +344,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
           locationStatuses={locationStatuses}
           departmentStatuses={departmentStatuses}
           contactStatuses={contactStatuses}
+          initialTab={drawerTab}
         />
       </div>
     </>

@@ -206,5 +206,17 @@
   },
   "board": {
     "movedHidden": "Verschoben — die Karte fällt außerhalb des aktuellen Filters"
+  },
+  "ai": {
+    "title": "Koios AI empfiehlt",
+    "beta": "Beta",
+    "refresh": "Aktualisieren",
+    "analyzing": "Koios AI analysiert die Bewerbung…",
+    "progressLabel": "Fortschritt",
+    "progressOk": "{{days}} Tage in Phase '{{phase}}'.",
+    "progressStale": "Bereits {{days}} Tage in Phase '{{phase}}' — möglicherweise ins Stocken geraten, Nachfassen prüfen.",
+    "progressUnknown": "Datum unbekannt · aktuelle Phase '{{phase}}'.",
+    "completeness": "Vollständigkeit",
+    "missingVacancy": "Keine Stelle mit dieser Bewerbung verknüpft."
   }
 }

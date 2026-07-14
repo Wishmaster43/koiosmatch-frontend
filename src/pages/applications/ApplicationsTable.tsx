@@ -51,14 +51,16 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
   const colorStatus = getBoolSetting(settings, 'application_table_color_status', true)
   const colorOwner  = getBoolSetting(settings, 'application_table_color_owner', true)
 
+  // Column template mirrors the candidates blueprint (§3A): identity → phase/status →
+  // dates → qualification → Koios → owner LAST (Danny 2026-07-14 table standardization).
   const columns: Column<Application>[] = [
     // Candidate — avatar + name. Sticky first column (stays on horizontal scroll), like the candidates table.
     { key: 'candidate', header: t('cols.candidate'), sortable: true, sortValue: r => r.candidateName,
-      sticky: true, width: 200,
+      sticky: true, width: 200, nowrap: true,
       render: r => (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <Avatar initials={r.candidateInitials} size={24} soft />
-          <span style={{ fontWeight: 500, color: 'var(--text)' }}>{r.candidateName}</span>
+          <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={r.candidateName}>{r.candidateName}</span>
         </span>
       ) },
     // Vacancy — single-line clamp so long titles don't blow up the row.
@@ -68,9 +70,25 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           {r.vacancyTitle}
         </span>
       ) },
+    { key: 'client', header: t('cols.client'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
     // Match score.
     { key: 'score', header: t('cols.score'), align: 'right', sortable: true,
       sortValue: r => r.score ?? -1, render: r => <ScorePill value={r.score} plain={!colorScore} /> },
+    // Funnel phase — soft pill in the phase colour (or plain text when the toggle is off).
+    { key: 'phase', header: t('cols.phase'), sortable: true, sortValue: r => r.phaseLabel ?? '',
+      render: r => colorPhase
+        ? <StatusPill label={r.phaseLabel} color={r.phaseColor} />
+        : <span style={plainCell}>{r.phaseLabel || '—'}</span> },
+    // Candidate deployability status — the ONE shared chip (C-CHIP): slug drives the
+    // model-v2 rules (Lead→dash, blacklist), with the pre-resolved label/colour as
+    // fallback until the /applications resource exposes the slug (BE gap filed).
+    { key: 'status', header: t('cols.status'), sortable: true, sortValue: r => r.candidateStatusLabel,
+      render: r => <CandidateStatusChip status={r.candidateStatus} phase={r.candidatePhase}
+        fallbackLabel={r.candidateStatusLabel} fallbackColor={r.candidateStatusColor} plain={!colorStatus} round /> },
+    // Created date — the table defaults to newest first.
+    { key: 'created', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.created ?? '',
+      cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.created ? formatDate(r.created) : '—' },
+    { key: 'source', header: t('cols.source'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
     // AI task — Koios mark + clamped text.
     { key: 'task', header: t('cols.task'),
       render: r => r.task ? (
@@ -81,16 +99,7 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           </span>
         </span>
       ) : <span style={{ color: 'var(--text-muted)' }}>—</span> },
-    // Funnel phase — soft pill in the phase colour (or plain text when the toggle is off).
-    { key: 'phase', header: t('cols.phase'), sortable: true, sortValue: r => r.phaseLabel ?? '',
-      render: r => colorPhase
-        ? <StatusPill label={r.phaseLabel} color={r.phaseColor} />
-        : <span style={plainCell}>{r.phaseLabel || '—'}</span> },
-    { key: 'source', header: t('cols.source'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
-    // Created date — the table defaults to newest first.
-    { key: 'created', header: t('cols.created'), nowrap: true, sortable: true, sortValue: r => r.created ?? '',
-      cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, render: r => r.created ? formatDate(r.created) : '—' },
-    // Owner — avatar + name.
+    // Owner — avatar + name. LAST column (§3A convention).
     { key: 'owner', header: t('cols.owner'), sortable: true, sortValue: r => r.owner?.name,
       render: r => (
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -98,13 +107,6 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.owner?.name}</span>
         </span>
       ) },
-    { key: 'client', header: t('cols.client'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
-    // Candidate deployability status — the ONE shared chip (C-CHIP): slug drives the
-    // model-v2 rules (Lead→dash, blacklist), with the pre-resolved label/colour as
-    // fallback until the /applications resource exposes the slug (BE gap filed).
-    { key: 'status', header: t('cols.status'), sortable: true, sortValue: r => r.candidateStatusLabel,
-      render: r => <CandidateStatusChip status={r.candidateStatus} phase={r.candidatePhase}
-        fallbackLabel={r.candidateStatusLabel} fallbackColor={r.candidateStatusColor} plain={!colorStatus} /> },
   ]
 
   return (

@@ -234,5 +234,17 @@
   },
   "map": {
     "pointCount": "{{count}} vacantes en el mapa"
+  },
+  "ai": {
+    "title": "Koios AI aconseja",
+    "beta": "Beta",
+    "refresh": "Actualizar",
+    "analyzing": "Koios AI está analizando la vacante…",
+    "completeness": "Integridad",
+    "completeGood": "La vacante está bien completada: no se detectan campos clave faltantes.",
+    "completePartial": "La vacante está {{pct}}% completa. Añada descripción, rango salarial, horas, habilidades, ubicación y estado para mejores resultados.",
+    "flowLabel": "Flujo",
+    "flowOpen": "Abierta desde hace {{days}} días · {{count}} solicitud(es) recibida(s).",
+    "flowUnknown": "Fecha de apertura desconocida · {{count}} solicitud(es) recibida(s)."
   }
 }

@@ -5,6 +5,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import StatusPill from '@/components/ui/StatusPill'
+import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -44,11 +45,22 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
   const colorPublished = getBoolSetting(settings, 'vacancy_table_color_published', true)
   const colorOwner     = getBoolSetting(settings, 'vacancy_table_color_owner', true)
 
+  // Column order mirrors the candidates blueprint (§3A): identity → client → status
+  // → counts → dates → owner LAST (Danny 2026-07-14 table standardization).
   const columns: Column<Vacancy>[] = [
     {
       key: 'title', header: t('columns.title'), sortable: true, sortValue: r => r.title,
-      sticky: true, width: 260,
-      render: r => <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.title}</span>,
+      sticky: true, width: 320, nowrap: true,
+      render: r => <span style={{ color: 'var(--text)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 300 }} title={r.title}>{r.title}</span>,
+    },
+    {
+      key: 'client', header: t('columns.client'), nowrap: true, sortable: true, sortValue: r => r.clientName,
+      render: r => r.clientName ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Avatar initials={(r.clientName[0] ?? '?').toUpperCase()} size={20} soft />
+          <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.clientName}</span>
+        </div>
+      ) : <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
     {
       key: 'status', header: t('columns.status'), sortable: true, sortValue: r => r.statusLabel || (r.statusValue ?? ''),
@@ -74,17 +86,20 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
       render: r => {
         if (!r.published) return <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{t('publishedState.no')}</span>
         // Icon + text so the "published" state never relies on colour alone (a11y).
+        // Shared pill (SoftChip round + icon) — identical to the candidates/customers
+        // koios pill (Danny 2026-07-14 unification).
         return colorPublished ? (
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
-            padding: '3px 8px', borderRadius: 99, background: 'var(--color-success-bg)', color: 'var(--color-success)' }}>
-            <Globe size={12} /> {t('publishedState.yes')}
-          </span>
+          <SoftChip color="var(--color-success)" round label={<><Globe size={12} /> {t('publishedState.yes')}</>} />
         ) : (
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, ...plainCell }}>
             <Globe size={12} /> {t('publishedState.yes')}
           </span>
         )
       },
+    },
+    {
+      key: 'createdAt', header: t('columns.createdAt'), nowrap: true, cellStyle: mutedCell,
+      sortable: true, sortValue: r => r.createdSort ?? r.created, render: r => formatDate(r.created),
     },
     {
       key: 'owner', header: t('columns.owner'), sortable: true, sortValue: r => r.owner?.name ?? '',
@@ -94,19 +109,6 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
           <span style={mutedCell}>{r.owner?.name || '—'}</span>
         </div>
       ),
-    },
-    {
-      key: 'client', header: t('columns.client'), nowrap: true, sortable: true, sortValue: r => r.clientName,
-      render: r => r.clientName ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Avatar initials={(r.clientName[0] ?? '?').toUpperCase()} size={20} soft />
-          <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.clientName}</span>
-        </div>
-      ) : <span style={{ color: 'var(--text-muted)' }}>—</span>,
-    },
-    {
-      key: 'createdAt', header: t('columns.createdAt'), nowrap: true, cellStyle: mutedCell,
-      sortable: true, sortValue: r => r.createdSort ?? r.created, render: r => formatDate(r.created),
     },
   ]
 

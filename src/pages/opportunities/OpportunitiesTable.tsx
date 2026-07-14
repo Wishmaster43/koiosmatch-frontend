@@ -3,12 +3,13 @@ import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocale, useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
-import SoftChip from '@/components/ui/SoftChip'
+import StatusPill from '@/components/ui/StatusPill'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import { initialsOf } from '@/lib/initials'
+import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Opportunity } from '@/types/opportunity'
-import type { Id } from '@/types/common'
+import type { Id, LookupOption } from '@/types/common'
 
 interface OpportunitiesTableProps {
   rows: Opportunity[]
@@ -17,6 +18,9 @@ interface OpportunitiesTableProps {
   onRowClick?: (row: Opportunity) => void
   selectedId?: Id | null
   valueInHours?: boolean
+  // Stage lookup (won/lost flags) — decides whether an overdue expected-close date
+  // still counts as "late" (a closed deal is never overdue).
+  stages?: LookupOption[]
   selectable?: boolean
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
@@ -30,10 +34,15 @@ interface OpportunitiesTableProps {
 const NEUTRAL_AVATAR = '#9CA3AF'
 
 // OpportunitiesTable — declares columns only; the shared DataTable owns sorting + states.
-export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, valueInHours = false, selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
+export default function OpportunitiesTable({ rows, loading, error, onRowClick, selectedId, valueInHours = false, stages = [], selectable, selectedIds, onToggleRow, onToggleAll, stickyHeader = false, scrollParentRef }: OpportunitiesTableProps) {
   const { t } = useTranslation('opportunities')
   const locale = useLocale()
   const { formatDate } = useDateFormat()
+  // Tenant display settings (Settings → Kansen → Tabelweergave). Coloured chips ON
+  // by default, mirrors candidates/applications/customers.
+  const settings = useAllSettings()
+  const colorStage = getBoolSetting(settings, 'opportunity_table_color_stage', true)
+  const colorOwner = getBoolSetting(settings, 'opportunity_table_color_owner', true)
 
   // Locale-aware EUR formatter (no decimals) for the value column.
   const money = useMemo(
@@ -41,41 +50,60 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
     [locale],
   )
 
+  // A stage flagged isWon/isLost is terminal — a closed deal's expected-close date
+  // is never "overdue" (§4: red/bold is a live-state signal, not a permanent mark).
+  const isTerminalStage = (r: Opportunity) => stages.some(s => (s.isWon || s.isLost) && String(s.value) === String(r.stageValue))
+
   const columns: Column<Opportunity>[] = [
-    { key: 'title', header: t('cols.title'), sortable: true, sticky: true, width: 220,
+    { key: 'title', header: t('cols.title'), sortable: true, sticky: true, width: 300, nowrap: true,
       render: r => (
-        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <Avatar initials={r.initials} size={24} color={NEUTRAL_AVATAR} soft />
-          <span style={{ fontWeight: 500, color: 'var(--text)' }}>{r.title}</span>
+          <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 240 }} title={r.title}>{r.title}</span>
         </span>
       ) },
     { key: 'client', header: t('cols.client'), sortable: true, cellStyle: { color: 'var(--text-muted)' } },
     { key: 'stage',  header: t('cols.stage'), sortable: true, sortValue: r => r.stage,
-      // Shared soft-chip (C-CHIP) — identical look across every entity table.
-      render: r => r.stage
-        ? <SoftChip label={r.stage} color={r.stageColor} />
-        : <span style={{ color: 'var(--text-muted)' }}>—</span> },
-    // Value column follows the tenant setting: euro amount or hours.
+      // Phase axis — round chip (StatusPill), mirrors candidates/applications (Danny 2026-07-14).
+      render: r => {
+        if (!r.stage) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        return colorStage ? <StatusPill label={r.stage} color={r.stageColor} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.stage}</span>
+      } },
+    // Value column follows the tenant setting: euro amount or hours. Regular weight
+    // (§4: bold is emphasis/active only, never decoration on a data column).
     { key: 'value',  header: t('cols.value'), align: 'right', sortable: true,
       sortValue: r => (valueInHours ? r.hours : r.value) ?? -1,
       render: r => {
         const v = valueInHours ? r.hours : r.value
         if (v == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-        return <span style={{ fontWeight: 600, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
+        return <span style={{ fontWeight: 500, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
           {valueInHours ? t('cols.hoursValue', { count: v }) : money.format(v)}
         </span>
       } },
+    // Expected close date — red + bold when past AND the stage isn't already won/lost
+    // (mirrors the tasks due-column overdue treatment).
+    { key: 'expectedClose', header: t('cols.expectedClose'), sortable: true, sortValue: r => r.expectedCloseAt || '',
+      render: r => {
+        if (!r.expectedCloseAt) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+        const overdue = !isTerminalStage(r) && new Date(r.expectedCloseAt) < new Date(new Date().toDateString())
+        return <span style={{ fontSize: 12, color: overdue ? 'var(--color-danger)' : 'var(--text-muted)', fontWeight: overdue ? 600 : 400 }}>{formatDate(r.expectedCloseAt)}</span>
+      } },
+    { key: 'date',   header: t('cols.date'),  sortable: true, sortValue: r => r.date || '',
+      render: r => <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDate(r.date)}</span> },
+    // Owner — avatar + name. LAST column (§3A convention). The /opportunities
+    // resource's owner is `{id, name}` only, no per-user colour field yet (verified
+    // against OpportunityResource.php — BE gap, not a frontend bug), so `colorOwner`
+    // toggles between Avatar's own deterministic name-hash palette (on, distinct per
+    // owner) and a flat neutral grey (off) — swap in `r.ownerColor` once BE adds it.
     { key: 'owner',  header: t('cols.owner'), sortable: true, sortValue: r => r.owner,
       render: r => r.owner
         ? (
           <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Avatar initials={initialsOf(r.owner)} size={18} color={NEUTRAL_AVATAR} soft />
+            <Avatar initials={initialsOf(r.owner)} size={18} color={colorOwner ? undefined : NEUTRAL_AVATAR} soft />
             <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.owner}</span>
           </span>
         )
         : <span style={{ color: 'var(--text-muted)' }}>—</span> },
-    { key: 'date',   header: t('cols.date'),  sortable: true, sortValue: r => r.date || '',
-      render: r => <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{formatDate(r.date)}</span> },
   ]
 
   // No surface-card wrapper: the DataTable renders directly on the page background

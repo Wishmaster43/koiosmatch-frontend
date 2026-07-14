@@ -159,7 +159,10 @@
     "appointment_types": "Terminarten",
     "candidate_skill_levels": "Kompetenzstufen",
     "wa_message_types": "Nachrichtentypen",
-    "candidate_conversion": "Konvertierung"
+    "candidate_conversion": "Konvertierung",
+    "vacancy_display": "Tabellenansicht",
+    "match_display": "Tabellenansicht",
+    "outreach_display": "Tabellenansicht"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1268,6 +1271,10 @@
       },
       "task_table_color_type": {
         "label": "Typ"
+      },
+      "task_table_color_assignee": {
+        "label": "Farbe des Zuständigen",
+        "description": "An = der Avatar des Zuständigen verwendet dessen Farbe. Aus = neutrales Grau."
       }
     }
   },
@@ -1418,11 +1425,18 @@
   },
   "opportunityDisplay": {
     "title": "Tabellenansicht",
-    "subtitle": "Zeigen Sie die Dealgröße in Euro oder Stunden.",
+    "subtitle": "Pro Spalte: farbige Labels oder einfacher Text. Die KPI-Diagramme behalten immer ihre Farben.",
     "fields": {
       "opportunity_value_in_hours": {
         "label": "Wert in Stunden anzeigen",
         "description": "Ein = die Chancen-Tabelle und KPIs zeigen Stunden statt Euro."
+      },
+      "opportunity_table_color_stage": {
+        "label": "Phase"
+      },
+      "opportunity_table_color_owner": {
+        "label": "Eigentümerfarbe",
+        "description": "An = der Avatar des Eigentümers verwendet dessen eigene Farbe. Aus = neutrales Grau."
       }
     }
   },
@@ -1511,6 +1525,51 @@
       "customer_location": "Standort",
       "customer_department": "Abteilung",
       "match": "Match"
+    }
+  },
+  "vacancyDisplay": {
+    "title": "Tabellenansicht",
+    "subtitle": "Pro Spalte: farbige Labels oder einfacher Text. Die KPI-Diagramme behalten immer ihre Farben.",
+    "fields": {
+      "vacancy_table_color_status": {
+        "label": "Status"
+      },
+      "vacancy_table_color_published": {
+        "label": "Veröffentlicht"
+      },
+      "vacancy_table_color_owner": {
+        "label": "Eigentümerfarbe",
+        "description": "An = der Avatar des Eigentümers verwendet die Recruiter-Farbe. Aus = neutrales Grau."
+      }
+    }
+  },
+  "matchDisplay": {
+    "title": "Tabellenansicht",
+    "subtitle": "Pro Spalte: farbige Labels oder Klartext. Das Match-Board behält seine Farben immer.",
+    "fields": {
+      "match_table_color_status": {
+        "label": "Status"
+      },
+      "match_table_color_owner": {
+        "label": "Eigentümerfarbe",
+        "description": "An = der Avatar des Eigentümers verwendet dessen eigene Farbe. Aus = neutrales Grau."
+      }
+    }
+  },
+  "outreachDisplay": {
+    "title": "Tabellenansicht",
+    "subtitle": "Pro Spalte: farbige Labels oder Klartext.",
+    "fields": {
+      "outreach_table_color_channel": {
+        "label": "Kanal"
+      },
+      "outreach_table_color_status": {
+        "label": "Status"
+      },
+      "outreach_table_color_owner": {
+        "label": "Eigentümerfarbe",
+        "description": "An = der Avatar des Eigentümers wird eingefärbt, sobald die Daten das hergeben. Aus = neutrales Grau."
+      }
     }
   }
 }

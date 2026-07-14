@@ -81,6 +81,9 @@ import customerDisplay from './schemas/customerDisplay'
 import taskDisplay from './schemas/taskDisplay'
 import applicationDisplay from './schemas/applicationDisplay'
 import opportunityDisplay from './schemas/opportunityDisplay'
+import vacancyDisplay from './schemas/vacancyDisplay'
+import matchDisplay from './schemas/matchDisplay'
+import outreachDisplay from './schemas/outreachDisplay'
 import DriverLicenseSettings from './sections/DriverLicenseSettings'
 
 export const NAV_GROUPS = [
@@ -184,6 +187,7 @@ export const NAV_GROUPS = [
       { id: 'vacancy_fields', icon: FileText, component: VacancyFieldsSettings },
       { id: 'vacancy_app_defaults', icon: ClipboardList, component: VacancyApplicationDefaultsSettings },
       { id: 'vacancy_matching', icon: Sparkles, component: VacancyMatchingSettings },
+      { id: 'vacancy_display', icon: Palette, schema: vacancyDisplay },
     ],
   },
   {
@@ -202,6 +206,7 @@ export const NAV_GROUPS = [
     items: [
       { id: 'match_statuses', icon: Tags, component: MatchStatusSettings },
       { id: 'appointment_types', icon: CalendarCheck, component: AppointmentTypeSettings },
+      { id: 'match_display', icon: Palette, schema: matchDisplay },
     ],
   },
   {
@@ -209,6 +214,7 @@ export const NAV_GROUPS = [
     key: 'outreach', icon: Phone,
     items: [
       { id: 'outreach_statuses', icon: Tags, component: OutreachStatusSettings },
+      { id: 'outreach_display', icon: Palette, schema: outreachDisplay },
     ],
   },
   // Planning lookups — each item gated on the 'plan' module (requiresPage → canAccessPage →

@@ -5,6 +5,7 @@
  */
 import { useState, useEffect } from 'react'
 import api from '@/lib/api'
+import { initialsOf } from '@/lib/initials'
 import type { RawMatch, MatchRow } from '@/types/match'
 
 // Map a raw API match → the flat shape the table renders (snake_case-tolerant).
@@ -33,6 +34,10 @@ function mapMatch(m: RawMatch): MatchRow {
     status:     m.status ?? '',
     stageColor: m.stage_color ?? '#6E8FD6',
     owner:      m.owner?.name ?? m.owner_name ?? '',
+    // Owner avatar (§3A) — the resource already carries avatar_color; only the
+    // mapper was dropping it (Danny 2026-07-14 table standardization).
+    ownerInitials: initialsOf(m.owner?.name ?? m.owner_name),
+    ownerColor:    m.owner?.avatar_color ?? null,
     date:       m.created_at ?? m.matched_at ?? '',
     // Approval workflow (MATCH-APPROVAL-1) — the list carries the status; the
     // rejection reason is detail-only (useMatchApproval fetches it lazily).

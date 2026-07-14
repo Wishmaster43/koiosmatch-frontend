@@ -19,7 +19,8 @@
     "value": "Value",
     "owner": "Owner",
     "date": "Created",
-    "hoursValue": "{{count}} h"
+    "hoursValue": "{{count}} h",
+    "expectedClose": "Expected close"
   },
   "insights": {
     "stage": "Stage",

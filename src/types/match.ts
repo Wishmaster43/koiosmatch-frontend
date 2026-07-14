@@ -28,7 +28,7 @@ export interface RawMatch {
   stage?: string
   status?: string
   stage_color?: string
-  owner?: { name?: string }
+  owner?: { name?: string; avatar_color?: string | null }
   owner_name?: string
   created_at?: string
   matched_at?: string
@@ -59,6 +59,10 @@ export interface MatchRow {
   status: string
   stageColor: string
   owner: string
+  // Owner avatar (§3A owner-cell convention) — colour is null when the API/mapper
+  // has none, so the table falls back to the neutral grey (never a blank bubble).
+  ownerInitials: string
+  ownerColor: string | null
   date: string
   // Approval workflow — 'pending' | 'approved' | 'rejected'; reason is detail-only
   // (empty on the list row until useMatchApproval lazily fetches it for a rejected match).

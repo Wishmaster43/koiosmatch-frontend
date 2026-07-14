@@ -188,5 +188,17 @@
   },
   "board": {
     "movedHidden": "Moved — the card falls outside the current filter"
+  },
+  "ai": {
+    "title": "Koios AI advises",
+    "beta": "Beta",
+    "refresh": "Refresh",
+    "analyzing": "Koios AI is analysing the application…",
+    "progressLabel": "Progress",
+    "progressOk": "{{days}} days in phase '{{phase}}'.",
+    "progressStale": "Already {{days}} days in phase '{{phase}}' — possibly stalled, check the follow-up.",
+    "progressUnknown": "Date unknown · current phase '{{phase}}'.",
+    "completeness": "Completeness",
+    "missingVacancy": "No vacancy linked to this application."
   }
 }

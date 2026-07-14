@@ -188,5 +188,17 @@
   },
   "board": {
     "movedHidden": "Verplaatst — de kaart valt buiten het huidige filter"
+  },
+  "ai": {
+    "title": "Koios AI adviseert",
+    "beta": "Beta",
+    "refresh": "Vernieuwen",
+    "analyzing": "Koios AI analyseert de sollicitatie…",
+    "progressLabel": "Voortgang",
+    "progressOk": "{{days}} dagen in fase '{{phase}}'.",
+    "progressStale": "Al {{days}} dagen in fase '{{phase}}' — mogelijk vastgelopen, controleer de opvolging.",
+    "progressUnknown": "Datum onbekend · huidige fase '{{phase}}'.",
+    "completeness": "Volledigheid",
+    "missingVacancy": "Geen vacature gekoppeld aan deze sollicitatie."
   }
 }

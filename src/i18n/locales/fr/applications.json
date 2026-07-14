@@ -206,5 +206,17 @@
   },
   "board": {
     "movedHidden": "Déplacée — la carte sort du filtre actuel"
+  },
+  "ai": {
+    "title": "Koios AI conseille",
+    "beta": "Bêta",
+    "refresh": "Actualiser",
+    "analyzing": "Koios AI analyse la candidature…",
+    "progressLabel": "Progression",
+    "progressOk": "{{days}} jours en phase « {{phase}} ».",
+    "progressStale": "Déjà {{days}} jours en phase « {{phase}} » — possiblement bloquée, vérifiez le suivi.",
+    "progressUnknown": "Date inconnue · phase actuelle « {{phase}} ».",
+    "completeness": "Exhaustivité",
+    "missingVacancy": "Aucun poste associé à cette candidature."
   }
 }

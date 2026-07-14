@@ -403,5 +403,17 @@
   },
   "map": {
     "pointCount": "{{count}} customers on the map"
+  },
+  "ai": {
+    "title": "Koios AI advises",
+    "beta": "Beta",
+    "refresh": "Refresh",
+    "analyzing": "Koios AI is analysing the customer profile…",
+    "completeness": "Completeness",
+    "completeGood": "Customer profile is well filled — no missing core fields detected.",
+    "completePartial": "Customer profile is {{pct}}% complete. Add company registration number, VAT number, industry and contact details for a fuller picture.",
+    "relationshipLabel": "Relationship",
+    "relationshipActive": "{{vacancies}} open vacancy(ies) · {{matches}} active match(es).",
+    "relationshipNone": "No open vacancies or active matches recorded."
   }
 }

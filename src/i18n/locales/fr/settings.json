@@ -159,7 +159,10 @@
     "appointment_types": "Types de rendez-vous",
     "candidate_skill_levels": "Niveaux de compétence",
     "wa_message_types": "Types de messages",
-    "candidate_conversion": "Conversion"
+    "candidate_conversion": "Conversion",
+    "vacancy_display": "Affichage du tableau",
+    "match_display": "Affichage du tableau",
+    "outreach_display": "Affichage du tableau"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -1268,6 +1271,10 @@
       },
       "task_table_color_type": {
         "label": "Type"
+      },
+      "task_table_color_assignee": {
+        "label": "Couleur de l'assigné",
+        "description": "Activé = l'avatar de l'assigné utilise sa couleur. Désactivé = gris neutre."
       }
     }
   },
@@ -1418,11 +1425,18 @@
   },
   "opportunityDisplay": {
     "title": "Affichage du tableau",
-    "subtitle": "Afficher la taille de l’affaire en euros ou en heures.",
+    "subtitle": "Par colonne : libellés colorés ou texte simple. Les graphiques KPI gardent toujours leurs couleurs.",
     "fields": {
       "opportunity_value_in_hours": {
         "label": "Afficher la valeur en heures",
         "description": "Activé = le tableau Opportunités et les KPI affichent des heures au lieu d’euros."
+      },
+      "opportunity_table_color_stage": {
+        "label": "Phase"
+      },
+      "opportunity_table_color_owner": {
+        "label": "Couleur du propriétaire",
+        "description": "Activé = l'avatar du propriétaire utilise sa propre couleur. Désactivé = gris neutre."
       }
     }
   },
@@ -1511,6 +1525,51 @@
       "customer_location": "Site",
       "customer_department": "Département",
       "match": "Match"
+    }
+  },
+  "vacancyDisplay": {
+    "title": "Affichage du tableau",
+    "subtitle": "Par colonne : libellés colorés ou texte simple. Les graphiques KPI gardent toujours leurs couleurs.",
+    "fields": {
+      "vacancy_table_color_status": {
+        "label": "Statut"
+      },
+      "vacancy_table_color_published": {
+        "label": "Publié"
+      },
+      "vacancy_table_color_owner": {
+        "label": "Couleur du propriétaire",
+        "description": "Activé = l'avatar du propriétaire utilise la couleur du recruteur. Désactivé = gris neutre."
+      }
+    }
+  },
+  "matchDisplay": {
+    "title": "Affichage du tableau",
+    "subtitle": "Par colonne : étiquettes colorées ou texte brut. Le tableau des matchs garde toujours ses couleurs.",
+    "fields": {
+      "match_table_color_status": {
+        "label": "Statut"
+      },
+      "match_table_color_owner": {
+        "label": "Couleur du propriétaire",
+        "description": "Activé = l'avatar du propriétaire utilise sa propre couleur. Désactivé = gris neutre."
+      }
+    }
+  },
+  "outreachDisplay": {
+    "title": "Affichage du tableau",
+    "subtitle": "Par colonne : étiquettes colorées ou texte brut.",
+    "fields": {
+      "outreach_table_color_channel": {
+        "label": "Canal"
+      },
+      "outreach_table_color_status": {
+        "label": "Statut"
+      },
+      "outreach_table_color_owner": {
+        "label": "Couleur du propriétaire",
+        "description": "Activé = l'avatar du propriétaire est coloré dès que les données le permettent. Désactivé = gris neutre."
+      }
     }
   }
 }

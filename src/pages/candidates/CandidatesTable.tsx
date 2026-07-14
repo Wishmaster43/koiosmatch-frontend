@@ -99,11 +99,11 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
   const columns: Column<Candidate>[] = [
     {
       key: 'name', header: t('columns.name'), sortable: true, sortValue: c => c.name,
-      sticky: true, width: 200,
+      sticky: true, width: 200, nowrap: true,
       render: c => (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <Avatar initials={c.initials} size={26} color={avatarColor(c.gender)} soft />
-          <span style={{ color: 'var(--text)', fontSize: 12 }}>{c.name}</span>
+          <span style={{ color: 'var(--text)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 150 }} title={c.name}>{c.name}</span>
         </div>
       ),
     },
@@ -118,7 +118,8 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       key: 'phase', header: t('columns.phase'), sortable: true, sortValue: c => phaseMeta(c.phase).label,
       render: c => { if (!c.phase) return dash; const m = phaseMeta(c.phase)
         if (!colorPhase) return <span style={plainCell}>{m.label}</span>
-        return <SoftChip label={m.label} color={m.color} /> },
+        // Phase is a lifecycle axis — round chip, like status (Danny 2026-07-14).
+        return <SoftChip label={m.label} color={m.color} round /> },
     },
     {
       // Deployability ("status": Beschikbaar/Geplaatst/…) — model v2 axis.
@@ -126,10 +127,10 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
       // Lifecycle wins in the archived/trash views (ERASE-1): show a Gearchiveerd/
       // Verwijderd chip instead of the deployability status. Otherwise the shared chip.
       render: c => c.lifecycle === 'pending_erase'
-        ? <SoftChip label={t('lifecycle.pendingErase')} color="var(--color-danger)" />
+        ? <SoftChip label={t('lifecycle.pendingErase')} color="var(--color-danger)" round />
         : c.lifecycle === 'archived'
-          ? <SoftChip label={t('lifecycle.archived')} color="var(--text-muted)" />
-          : <CandidateStatusChip status={c.status} phase={c.phase} plain={!colorStatus} />,
+          ? <SoftChip label={t('lifecycle.archived')} color="var(--text-muted)" round />
+          : <CandidateStatusChip status={c.status} phase={c.phase} plain={!colorStatus} round />,
     },
     { key: 'created', header: t('columns.createdAt'), nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.created, render: c => formatDate(c.created) },
     {
@@ -214,14 +215,9 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
         if (!colorKoios) return <span style={plainCell} title={a.reason || undefined}>{label}</span>
         const meta = ADVICE_META[a.action] ?? ADVICE_META.default
         const Icon = meta.icon
-        return (
-          <span title={a.reason || undefined}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
-              padding: '3px 8px', borderRadius: 99, background: meta.color + '14', color: meta.color,
-              border: `1px solid ${meta.color}40`, whiteSpace: 'nowrap' }}>
-            <Icon size={12} />{label}
-          </span>
-        )
+        // Shared pill (SoftChip round + icon) — identical to the customers koios
+        // pill and the vacancies "published" pill (Danny 2026-07-14 unification).
+        return <SoftChip title={a.reason || undefined} color={meta.color} round label={<><Icon size={12} />{label}</>} />
       },
     },
     {

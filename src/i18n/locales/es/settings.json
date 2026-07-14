@@ -159,7 +159,10 @@
     "appointment_types": "Tipos de cita",
     "candidate_skill_levels": "Niveles de habilidad",
     "wa_message_types": "Tipos de mensajes",
-    "candidate_conversion": "Conversión"
+    "candidate_conversion": "Conversión",
+    "vacancy_display": "Vista de tabla",
+    "match_display": "Vista de tabla",
+    "outreach_display": "Vista de tabla"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1268,6 +1271,10 @@
       },
       "task_table_color_type": {
         "label": "Tipo"
+      },
+      "task_table_color_assignee": {
+        "label": "Color del asignado",
+        "description": "Activado = el avatar del asignado usa su color. Desactivado = gris neutro."
       }
     }
   },
@@ -1418,11 +1425,18 @@
   },
   "opportunityDisplay": {
     "title": "Vista de tabla",
-    "subtitle": "Muestra el tamaño del trato en euros o en horas.",
+    "subtitle": "Por columna: etiquetas con color o texto simple. Los gráficos KPI siempre mantienen sus colores.",
     "fields": {
       "opportunity_value_in_hours": {
         "label": "Mostrar valor en horas",
         "description": "Activado = la tabla de Oportunidades y los KPI muestran horas en lugar de euros."
+      },
+      "opportunity_table_color_stage": {
+        "label": "Fase"
+      },
+      "opportunity_table_color_owner": {
+        "label": "Color del propietario",
+        "description": "Activado = el avatar del propietario usa su propio color. Desactivado = gris neutro."
       }
     }
   },
@@ -1511,6 +1525,51 @@
       "customer_location": "Ubicación",
       "customer_department": "Departamento",
       "match": "Match"
+    }
+  },
+  "vacancyDisplay": {
+    "title": "Vista de tabla",
+    "subtitle": "Por columna: etiquetas con color o texto simple. Los gráficos KPI siempre mantienen sus colores.",
+    "fields": {
+      "vacancy_table_color_status": {
+        "label": "Estado"
+      },
+      "vacancy_table_color_published": {
+        "label": "Publicada"
+      },
+      "vacancy_table_color_owner": {
+        "label": "Color del propietario",
+        "description": "Activado = el avatar del propietario usa el color del reclutador. Desactivado = gris neutro."
+      }
+    }
+  },
+  "matchDisplay": {
+    "title": "Vista de tabla",
+    "subtitle": "Por columna: etiquetas de color o texto plano. El tablero de matches mantiene siempre sus colores.",
+    "fields": {
+      "match_table_color_status": {
+        "label": "Estado"
+      },
+      "match_table_color_owner": {
+        "label": "Color del propietario",
+        "description": "Activado = el avatar del propietario usa su propio color. Desactivado = gris neutro."
+      }
+    }
+  },
+  "outreachDisplay": {
+    "title": "Vista de tabla",
+    "subtitle": "Por columna: etiquetas de color o texto plano.",
+    "fields": {
+      "outreach_table_color_channel": {
+        "label": "Canal"
+      },
+      "outreach_table_color_status": {
+        "label": "Estado"
+      },
+      "outreach_table_color_owner": {
+        "label": "Color del propietario",
+        "description": "Activado = el avatar del propietario se colorea en cuanto los datos lo incluyan. Desactivado = gris neutro."
+      }
     }
   }
 }

@@ -234,5 +234,17 @@
   },
   "map": {
     "pointCount": "{{count}} vacatures op de kaart"
+  },
+  "ai": {
+    "title": "Koios AI adviseert",
+    "beta": "Beta",
+    "refresh": "Vernieuwen",
+    "analyzing": "Koios AI analyseert de vacature…",
+    "completeness": "Volledigheid",
+    "completeGood": "Vacature is goed gevuld — geen ontbrekende kernvelden gedetecteerd.",
+    "completePartial": "Vacature is {{pct}}% compleet. Vul omschrijving, salarisindicatie, uren, vaardigheden, locatie en status aan voor betere resultaten.",
+    "flowLabel": "Doorstroom",
+    "flowOpen": "Open sinds {{days}} dagen · {{count}} sollicitatie(s) ontvangen.",
+    "flowUnknown": "Openingsdatum onbekend · {{count}} sollicitatie(s) ontvangen."
   }
 }

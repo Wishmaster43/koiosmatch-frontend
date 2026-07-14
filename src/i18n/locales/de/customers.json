@@ -403,5 +403,17 @@
   },
   "map": {
     "pointCount": "{{count}} Kunden auf der Karte"
+  },
+  "ai": {
+    "title": "Koios AI empfiehlt",
+    "beta": "Beta",
+    "refresh": "Aktualisieren",
+    "analyzing": "Koios AI analysiert das Kundenprofil…",
+    "completeness": "Vollständigkeit",
+    "completeGood": "Kundenprofil ist gut ausgefüllt — keine fehlenden Kernfelder erkannt.",
+    "completePartial": "Kundenprofil ist zu {{pct}}% vollständig. Fügen Sie Handelsregisternummer, USt-IdNr., Branche und Kontaktdaten für ein vollständigeres Bild hinzu.",
+    "relationshipLabel": "Beziehung",
+    "relationshipActive": "{{vacancies}} offene Stelle(n) · {{matches}} aktive(s) Match(es).",
+    "relationshipNone": "Keine offenen Stellen oder aktiven Matches erfasst."
   }
 }
