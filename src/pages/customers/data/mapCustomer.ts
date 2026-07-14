@@ -6,11 +6,22 @@ import type {
 } from '@/types/customer'
 
 // Compact one-line address: "Straat 12a, 1234 AB Plaats".
+// BUG FIX (Danny 13/7): the API field is `postcode`, not `postal_code` — the old
+// fallback-only read left postalCode always empty, so the detail row silently
+// showed just the city. `postcode` now reads first; `postal_code` stays as a
+// defensive fallback for any older payload shape.
 const addressLine = (l: ApiLocation = {}): string => {
   const street = [l.street, l.house_number].filter(Boolean).join(' ') + (l.house_number_suffix ? l.house_number_suffix : '')
-  const city = [l.postal_code, l.city].filter(Boolean).join(' ')
+  const city = [l.postcode ?? l.postal_code, l.city].filter(Boolean).join(' ')
   return [street.trim(), city.trim()].filter(Boolean).join(', ')
 }
+
+// A tenant lookup status embedded on a sub-entity (SUB-STATUS-1) → the flat value/label/color triad.
+const mapStatusRef = (s?: { value?: string; label?: string; color?: string } | null) => ({
+  status: s?.value ?? '',
+  statusLabel: s?.label ?? '',
+  statusColor: s?.color ?? '',
+})
 
 /** mapDepartment — raw API department → flat UI shape (nested under a location). */
 export function mapDepartment(d: ApiDepartment = {}): Department {
@@ -23,6 +34,9 @@ export function mapDepartment(d: ApiDepartment = {}): Department {
     locationId: d.location_id ?? d.locationId ?? null,
     locationName: d.location_name ?? d.location?.name ?? d.locationName ?? '',
     contacts: (d.contacts ?? []).map(mapContact),
+    statusId: d.status_id ?? null,
+    ...mapStatusRef(d.status),
+    customFields: d.custom_fields ?? {},
   }
 }
 
@@ -30,15 +44,20 @@ export function mapDepartment(d: ApiDepartment = {}): Department {
 export function mapContact(p: ApiContact = {}): Contact {
   return {
     id: p.id,
-    name: p.name ?? '—',
+    firstName: p.first_name ?? '',
+    lastName: p.last_name ?? '',
+    name: p.name ?? [p.first_name, p.last_name].filter(Boolean).join(' ') ?? '—',
     role: p.function ?? p.role ?? '',
     email: p.email ?? '',
     phone: p.phone ?? '',
     isPrimary: Boolean(p.is_primary ?? p.isPrimary),
-    locationId: p.location_id ?? p.locationId ?? null,
+    locationId: p.customer_location_id ?? p.location_id ?? p.locationId ?? null,
     locationName: p.location_name ?? p.location?.name ?? '',
-    departmentId: p.department_id ?? p.departmentId ?? null,
+    departmentId: p.customer_department_id ?? p.department_id ?? p.departmentId ?? null,
     departmentName: p.department_name ?? p.department?.name ?? '',
+    statusId: p.status_id ?? null,
+    ...mapStatusRef(p.status),
+    customFields: p.custom_fields ?? {},
   }
 }
 
@@ -54,17 +73,25 @@ export function mapLocation(l: ApiLocation = {}): Location {
     street: l.street ?? '',
     houseNumber: l.house_number ?? '',
     houseNumberSuffix: l.house_number_suffix ?? '',
-    postalCode: l.postal_code ?? '',
+    // BUG FIX (Danny 13/7): read the real `postcode` field, not `postal_code`.
+    postalCode: l.postcode ?? l.postal_code ?? '',
     city: l.city ?? '',
+    state: l.state ?? '',
     country: l.country ?? '',
     cocNumber: l.coc_number ?? '',
     vatNumber: l.vat_number ?? '',
     contactName: l.contact_name ?? '',
     phone: l.phone ?? '',
     email: l.email ?? '',
+    isHeadquarter: Boolean(l.is_headquarter),
+    costCenter: l.cost_center ?? '',
+    billingEmail: l.billing_email ?? '',
     address: addressLine(l),
     departments,
     contacts,
+    statusId: l.status_id ?? null,
+    ...mapStatusRef(l.status),
+    customFields: l.custom_fields ?? {},
   }
 }
 

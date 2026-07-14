@@ -5,9 +5,11 @@
  */
 import type { Id } from './common'
 
-/** A contact person (flat UI shape). */
+/** A contact person (flat UI shape). SUB-STATUS-1 status + CONTACT-MULTI-1 single coupling (chip UI, multi later). */
 export interface Contact {
   id: Id | undefined
+  firstName: string
+  lastName: string
   name: string
   role: string
   email: string
@@ -17,9 +19,14 @@ export interface Contact {
   locationName: string
   departmentId: Id | null
   departmentName: string
+  statusId: Id | null
+  status: string
+  statusLabel: string
+  statusColor: string
+  customFields: Record<string, unknown>
 }
 
-/** A department nested under a location (flat UI shape). */
+/** A department nested under a location (flat UI shape). SUB-STATUS-1: lifecycle status. */
 export interface Department {
   id: Id | undefined
   // NUMMER-1: human-readable reference number (A-001).
@@ -29,9 +36,14 @@ export interface Department {
   locationId: Id | null
   locationName: string
   contacts: Contact[]
+  statusId: Id | null
+  status: string
+  statusLabel: string
+  statusColor: string
+  customFields: Record<string, unknown>
 }
 
-/** A customer location with C-6 address fields (flat UI shape). */
+/** A customer location with C-6 address fields (flat UI shape). SUB-STATUS-1: lifecycle status. */
 export interface Location {
   id: Id | undefined
   // NUMMER-1: human-readable reference number (L-001).
@@ -42,15 +54,24 @@ export interface Location {
   houseNumberSuffix: string
   postalCode: string
   city: string
+  state: string
   country: string
   cocNumber: string
   vatNumber: string
   contactName: string
   phone: string
   email: string
+  isHeadquarter: boolean
+  costCenter: string
+  billingEmail: string
   address: string
   departments: Department[]
   contacts: Contact[]
+  statusId: Id | null
+  status: string
+  statusLabel: string
+  statusColor: string
+  customFields: Record<string, unknown>
 }
 
 /** A customer note (flat UI shape). */
@@ -112,12 +133,18 @@ export interface Customer {
   koiosAdvice: { action?: string; label?: string; reason?: string } | null
 }
 
-/** Raw API contact (read defensively). */
+/** A tenant lookup status as embedded on a location/department/contact (SUB-STATUS-1). */
+export interface ApiStatusRef { value?: string; label?: string; color?: string }
+
+/** Raw API contact (read defensively). CustomerContactResource sends first_name/last_name + a composed `name`. */
 export interface ApiContact {
-  id?: Id; name?: string; function?: string; role?: string; email?: string; phone?: string
+  id?: Id; first_name?: string; last_name?: string; name?: string; function?: string; role?: string; email?: string; phone?: string
   is_primary?: unknown; isPrimary?: unknown
-  location_id?: Id; locationId?: Id; location_name?: string; location?: { name?: string }
-  department_id?: Id; departmentId?: Id; department_name?: string; department?: { name?: string }
+  // The BE field is `customer_location_id` / `customer_department_id`; location_id/locationId tolerated for older payloads.
+  customer_location_id?: Id; location_id?: Id; locationId?: Id; location_name?: string; location?: { name?: string }
+  customer_department_id?: Id; department_id?: Id; departmentId?: Id; department_name?: string; department?: { name?: string }
+  status?: ApiStatusRef | null; status_id?: Id | null
+  custom_fields?: Record<string, unknown>
   [k: string]: unknown
 }
 
@@ -126,15 +153,20 @@ export interface ApiDepartment {
   id?: Id; reference_number?: string; name?: string; description?: string
   location_id?: Id; locationId?: Id; location_name?: string; location?: { name?: string }; locationName?: string
   departments?: ApiDepartment[]; contacts?: ApiContact[]
+  status?: ApiStatusRef | null; status_id?: Id | null
+  custom_fields?: Record<string, unknown>
   [k: string]: unknown
 }
 
-/** Raw API location (read defensively). */
+/** Raw API location (read defensively). The BE field is `postcode` (not `postal_code`). */
 export interface ApiLocation {
   id?: Id; reference_number?: string; name?: string; street?: string; house_number?: string; house_number_suffix?: string
-  postal_code?: string; city?: string; country?: string; coc_number?: string; vat_number?: string
+  postcode?: string; postal_code?: string; city?: string; state?: string; country?: string; coc_number?: string; vat_number?: string
   contact_name?: string; phone?: string; email?: string
+  is_headquarter?: unknown; cost_center?: string; billing_email?: string
   departments?: ApiDepartment[]; contacts?: ApiContact[]
+  status?: ApiStatusRef | null; status_id?: Id | null
+  custom_fields?: Record<string, unknown>
   [k: string]: unknown
 }
 

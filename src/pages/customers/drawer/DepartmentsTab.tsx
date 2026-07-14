@@ -1,28 +1,39 @@
 /**
- * DepartmentsTab — the customer's departments (nested under locations) as a
- * searchable table; a row drills into detail (info + contacts in the department +
- * a planning summary scoped to that department). Adds via the parent's onAdd.
+ * DepartmentsTab — the customer's departments as a searchable table. Each row shows
+ * which LOCATION it's coupled to (Danny: "je moet kunnen zien aan welke locatie
+ * die gekoppeld is") as a soft chip, plus its status; a row drills into
+ * DepartmentDetail for full edit (incl. moving to another location) + delete.
+ * "+ Afdeling toevoegen" opens the full grouped AddDepartmentModal.
  */
-import type { ComponentType } from 'react'
+import { useState, type ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Building } from 'lucide-react'
 import SubEntityTab from './SubEntityTab'
-import PlanningSummary from './PlanningSummary'
-import { useAuth } from '@/context/AuthContext'
+import DepartmentDetail from './DepartmentDetail'
+import AddDepartmentModal from '../AddDepartmentModal'
 import type { Column } from '@/components/ui/DataTable'
-import DetailTableJs from '@/components/ui/DetailTable'
-import SectionCard from '@/components/ui/SectionCard'
-import type { Department } from '@/types/customer'
-import type { Id } from '@/types/common'
+import SoftChipJs from '@/components/ui/SoftChip'
+import type { Contact, Department } from '@/types/customer'
+import type { Id, LookupOption } from '@/types/common'
+import type { DepartmentPayload } from '../hooks/useCustomerDepartments'
 
 type AnyProps = Record<string, unknown>
-const DetailTable = DetailTableJs as unknown as ComponentType<AnyProps>
+const SoftChip = SoftChipJs as unknown as ComponentType<AnyProps>
 
-export default function DepartmentsTab({ customerId, departments = [], onAdd }: { customerId?: Id; departments?: Department[]; onAdd?: () => void }) {
+interface Props {
+  customerId?: Id
+  departments?: Department[]
+  contacts?: Contact[]
+  locations?: { id: Id; name: string }[]
+  statuses?: LookupOption[]
+  onAdd: (payload: DepartmentPayload, locationName?: string) => void
+  onUpdate: (id: Id, payload: Partial<DepartmentPayload>, locationName?: string) => void
+  onRemove: (id: Id) => void
+}
+
+export default function DepartmentsTab({ departments = [], contacts = [], locations = [], statuses = [], onAdd, onUpdate, onRemove }: Props) {
   const { t } = useTranslation('customers')
-  // Planning section only exists when the tenant has the module — no dead placeholder.
-  const auth = useAuth()
-  const hasPlanning = (auth?.hasModule ?? (() => false))('plan')
+  const [adding, setAdding] = useState(false)
 
   const columns: Column<Department>[] = [
     { key: 'name', header: t('departments.col.name'), sortable: true, sortValue: d => d.name,
@@ -32,58 +43,39 @@ export default function DepartmentsTab({ customerId, departments = [], onAdd }: 
           <span style={{ color: 'var(--text)' }}>{d.name}</span>
         </div>
       ) },
-    { key: 'location', header: t('departments.col.location'), cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true, sortValue: d => d.locationName, render: d => d.locationName || '—' },
-    { key: 'contacts', header: t('departments.col.contacts'), align: 'right', cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true, sortValue: d => (d.contacts ?? []).length, render: d => (d.contacts ?? []).length },
+    { key: 'location', header: t('departments.col.location'), sortable: true, sortValue: d => d.locationName,
+      render: d => d.locationName ? <SoftChip label={d.locationName} color="var(--color-secondary)" /> : '—' },
+    { key: 'status', header: t('departments.col.status'), sortable: true, sortValue: d => d.statusLabel,
+      render: d => d.statusLabel ? <SoftChip label={d.statusLabel} color={d.statusColor} /> : '—' },
+    { key: 'contacts', header: t('departments.col.contacts'), align: 'right', cellStyle: { color: 'var(--text-muted)', fontSize: 12 }, sortable: true,
+      sortValue: d => contacts.filter(c => String(c.departmentId) === String(d.id)).length,
+      render: d => contacts.filter(c => String(c.departmentId) === String(d.id)).length },
   ]
 
-  const renderDetail = (d: Department) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{d.name}</div>
-
-      <SectionCard title={t('departments.detail.infoTitle')}>
-        <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-          <DetailTable rows={[
-            [t('departments.detail.location'), d.locationName],
-            [t('departments.detail.description'), d.description],
-          ]} labelWidth={130} lastBorder={false} />
-        </div>
-      </SectionCard>
-
-      <SectionCard title={t('departments.detail.contactsHere')}>
-        {(d.contacts ?? []).length === 0
-          ? <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('departments.detail.none')}</div>
-          : (
-            <div style={{ border: '1px solid var(--border)', borderRadius: 10, overflow: 'hidden' }}>
-              {(d.contacts ?? []).map((p, i, arr) => (
-                <div key={p.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', fontSize: 12,
-                  borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none' }}>
-                  <span style={{ flex: 1, color: 'var(--text)' }}>{p.name}</span>
-                  <span style={{ color: 'var(--text-muted)' }}>{[p.role, p.email].filter(Boolean).join(' · ')}</span>
-                </div>
-              ))}
-            </div>
-          )}
-      </SectionCard>
-
-      {hasPlanning && (
-        <SectionCard title={t('planning.title')}>
-          <PlanningSummary customerId={customerId ?? ''} params={{ department_id: d.id }} />
-        </SectionCard>
-      )}
-    </div>
+  const renderDetail = (d: Department, close: () => void) => (
+    <DepartmentDetail department={d} locations={locations} statuses={statuses}
+      contacts={contacts.filter(c => String(c.departmentId) === String(d.id))}
+      onSave={onUpdate} onDelete={onRemove} close={close} />
   )
 
   return (
-    <SubEntityTab
-      items={departments}
-      columns={columns}
-      addLabel={t('departments.add')}
-      emptyText={t('departments.empty')}
-      searchPlaceholder={t('departments.searchPlaceholder')}
-      backLabel={t('drawer.back')}
-      searchKeys={['name', 'locationName']}
-      onAdd={onAdd}
-      renderDetail={renderDetail}
-    />
+    <>
+      <SubEntityTab
+        items={departments}
+        columns={columns}
+        addLabel={t('departments.add')}
+        emptyText={t('departments.empty')}
+        searchPlaceholder={t('departments.searchPlaceholder')}
+        backLabel={t('drawer.back')}
+        searchKeys={['name', 'locationName']}
+        onAdd={() => setAdding(true)}
+        renderDetail={renderDetail}
+      />
+      {adding && (
+        <AddDepartmentModal locations={locations} statuses={statuses}
+          onCreate={payload => onAdd(payload, locations.find(l => String(l.id) === String(payload.locationId))?.name)}
+          onClose={() => setAdding(false)} />
+      )}
+    </>
   )
 }

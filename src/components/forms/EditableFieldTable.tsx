@@ -24,7 +24,7 @@ import SafeHtml from '@/components/ui/SafeHtml'
 export interface FieldRow {
   key: string
   label?: ReactNode
-  type?: 'text' | 'select' | 'checkbox' | 'date' | 'textarea' | 'chips' | 'richtext' | 'creatable'
+  type?: 'text' | 'select' | 'checkbox' | 'date' | 'textarea' | 'chips' | 'richtext' | 'creatable' | 'chip-select'
   options?: Array<string | { value: string; label?: ReactNode }>
   chipOptions?: ChipOption[]
   prefix?: string
@@ -33,6 +33,8 @@ export interface FieldRow {
   allowCreate?: boolean
   // Numbers/IDs render in JetBrains Mono (§4) — e.g. rates, cost codes.
   mono?: boolean
+  // 'chip-select' empty-state text (e.g. "no locations yet").
+  emptyOptionsText?: ReactNode
 }
 
 type Values = Record<string, unknown>
@@ -118,6 +120,30 @@ export default function EditableFieldTable({
       return <ChipMultiSelect options={f.chipOptions ?? []} selected={arr}
         onToggle={val => setF(f.key, arr.includes(val) ? arr.filter(x => x !== val) : [...arr, val])} />
     }
+    // CONTACT-MULTI-1: a single-value coupling rendered as toggle chips (not a
+    // plain <select>) so the field is visually ready for multi-value later — the
+    // backend only supports one link today, so picking a chip REPLACES the value
+    // (clicking the active chip clears it) rather than adding to a set.
+    if (f.type === 'chip-select') {
+      const cur = v as string | undefined
+      const opts = f.chipOptions ?? []
+      if (opts.length === 0) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{f.emptyOptionsText ?? '—'}</span>
+      return (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+          {opts.map(o => {
+            const active = cur === o.value
+            const col = o.color ?? 'var(--color-primary)'
+            return (
+              <button key={o.value} type="button" onClick={() => setF(f.key, active ? '' : o.value)}
+                style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: active ? 600 : 400, transition: 'all 0.12s',
+                  ...(active ? { background: col + '1A', color: col, border: `1px solid ${col}55` } : { background: 'var(--surface)', color: 'var(--text-muted)', border: '1px solid var(--border)' }) }}>
+                {o.label}
+              </button>
+            )
+          })}
+        </div>
+      )
+    }
     if (f.type === 'richtext') {
       return <RichTextEditor value={(v as string) ?? ''} onChange={val => setF(f.key, val)}
         expanded={!!richExpanded[f.key]} onToggleExpand={() => setRichExpanded(p => ({ ...p, [f.key]: !p[f.key] }))} />
@@ -157,6 +183,15 @@ export default function EditableFieldTable({
       const o = (f.options ?? []).find(op => (typeof op === 'object' ? op.value : op) === v)
       const label = o ? (typeof o === 'object' ? o.label : o) : v
       return <span style={{ fontSize: 12, color: label ? 'var(--text)' : 'var(--text-muted)' }}>{(label as ReactNode) || '-'}</span>
+    }
+    // Single coupling reads as one soft chip (the future multi-value read view swaps
+    // this for a wrapped row of chips — CONTACT-MULTI-1 — without touching the schema).
+    if (f.type === 'chip-select') {
+      const cur = v as string | undefined
+      if (!cur) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
+      const o = (f.chipOptions ?? []).find(op => op.value === cur)
+      const col = o?.color ?? 'var(--color-primary)'
+      return <span style={{ padding: '2px 9px', borderRadius: 999, fontSize: 11, fontWeight: 500, background: col + '1A', color: col, border: `1px solid ${col}55` }}>{o?.label ?? cur}</span>
     }
     // Richtext reads as sanitised HTML (same as notes / profile text).
     if (f.type === 'richtext') {

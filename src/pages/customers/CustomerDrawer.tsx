@@ -6,7 +6,7 @@
  * The Planning tab is gated on the Planning module (same gate as the candidate
  * Planning tab); the Opportunities tab's flex-shift section is gated inside it.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { Edit2, Save, X } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -29,6 +29,9 @@ import PlanningTab from './drawer/PlanningTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import DocumentsTab from './drawer/DocumentsTab'
 import PriceAgreementsTab from './drawer/PriceAgreementsTab'
+import { useCustomerLocations } from './hooks/useCustomerLocations'
+import { useCustomerDepartments } from './hooks/useCustomerDepartments'
+import { useCustomerContacts } from './hooks/useCustomerContacts'
 import type { Customer } from '@/types/customer'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -55,15 +58,19 @@ interface CustomerDrawerProps {
   expanded?: boolean
   onToggleExpand?: () => void
   onUpdate?: (id: Id | undefined, patch: Record<string, unknown>) => void
-  onAddSub?: (kind: string, c: Customer) => void
   onAddNote?: (id: Id | undefined, payload: NotePayload) => void
   users?: DrawerUser[]
   statuses?: LookupOption[]
+  // SUB-STATUS-1: the three sub-entity status lookups (one API call, lifted from
+  // CustomersPage's useCustomerLookups so the drawer doesn't re-fetch them).
+  locationStatuses?: LookupOption[]
+  departmentStatuses?: LookupOption[]
+  contactStatuses?: LookupOption[]
 }
 
 export default function CustomerDrawer({
-  customer: c, onClose, expanded, onToggleExpand, onUpdate, onAddSub, onAddNote,
-  users = [], statuses = [],
+  customer: c, onClose, expanded, onToggleExpand, onUpdate, onAddNote,
+  users = [], statuses = [], locationStatuses = [], departmentStatuses = [], contactStatuses = [],
 }: CustomerDrawerProps) {
   const { t } = useTranslation('customers')
   const auth = useAuth()
@@ -72,6 +79,14 @@ export default function CustomerDrawer({
   // Note types from the tenant lookup; author = the signed-in user (both mirror the candidate).
   const { writableTypes: noteTypes } = useNoteTypes()
   const authorInitials = initialsOf(auth?.user?.name ?? '')
+
+  // Locations/departments/contacts CRUD — one source of truth shared by the
+  // Locaties/Afdelingen/Contactpersonen tabs AND the location detail's nested
+  // sections (§3A: reuse, never fork). Lives here (always mounted while a
+  // customer is selected) rather than per-tab, so switching tabs never refetches.
+  const locationsApi   = useCustomerLocations(c?.id)
+  const departmentsApi = useCustomerDepartments(c?.id)
+  const contactsApi    = useCustomerContacts(c?.id)
 
   // Header overrides — reset when a different customer is shown (during render).
   const [status, setStatus] = useState<string | null>(null)
@@ -83,6 +98,22 @@ export default function CustomerDrawer({
   const [logoUrl,       setLogoUrl]       = useState<string | null>(null)
   const [prevId, setPrevId] = useState<Id | undefined>(c?.id)
   if (c?.id !== prevId) { setPrevId(c?.id); setStatus(null); setOwner(null); setTags(null); setHeaderEditing(false); setLogoUrl(null) }
+
+  // Keep the list/KPI counts in sync with the live sub-entity counts (a pure local
+  // state bump — 'locationsCount' etc. aren't in useCustomerRecord's FIELD_MAP, so
+  // this never fires a stray PATCH /customers/{id}).
+  useEffect(() => {
+    if (c) onUpdate?.(c.id, { locationsCount: locationsApi.locations.length })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locationsApi.locations.length])
+  useEffect(() => {
+    if (c) onUpdate?.(c.id, { departmentsCount: departmentsApi.departments.length })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [departmentsApi.departments.length])
+  useEffect(() => {
+    if (c) onUpdate?.(c.id, { contactsCount: contactsApi.contacts.length })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contactsApi.contacts.length])
 
   if (!c) return null
 
@@ -109,16 +140,40 @@ export default function CustomerDrawer({
     if (u) { setOwner({ ...u }); onUpdate?.(c.id, { ownerId: u.id, owner: u.name, ownerInitials: initialsOf(u.name), ownerColor: u.avatar_color ?? null }) }
   }
 
-  const renderTab = (id: string): ReactNode => {
+  // Plain {id,name} location list — the shared shape the sub-entity pickers need.
+  const locationOptions = locationsApi.locations.map(l => ({ id: l.id as Id, name: l.name }))
+
+  const renderTab = (id: string, setActiveTab?: (id: string) => void): ReactNode => {
     switch (id) {
       case 'overview':      return <OverviewTab c={c} onSave={v => onUpdate?.(c.id, v)} />
-      case 'locations':     return <LocationsTab customerId={c.id} locations={c.locations} onAdd={() => onAddSub?.('locations', c)} />
-      case 'departments':   return <DepartmentsTab customerId={c.id} departments={c.departments} onAdd={() => onAddSub?.('departments', c)} />
-      case 'contacts':      return <ContactsTab contacts={c.contacts} onAdd={() => onAddSub?.('contacts', c)} />
+      case 'locations':     return (
+        <LocationsTab
+          customerId={c.id} customerName={c.name} locations={locationsApi.locations} departments={departmentsApi.departments} contacts={contactsApi.contacts}
+          statuses={locationStatuses} departmentStatuses={departmentStatuses} contactStatuses={contactStatuses}
+          onAddLocation={locationsApi.add}
+          onSaveLocation={locationsApi.update} onDeleteLocation={locationsApi.remove}
+          onAddDepartment={(payload, locName) => departmentsApi.add(payload, locName)}
+          onUpdateDepartment={(id, payload, locName) => departmentsApi.update(id, payload, locName)}
+          onRemoveDepartment={departmentsApi.remove}
+          onAddContact={contactsApi.add} onUpdateContact={contactsApi.update}
+        />
+      )
+      case 'departments':   return (
+        <DepartmentsTab
+          customerId={c.id} departments={departmentsApi.departments} contacts={contactsApi.contacts} locations={locationOptions} statuses={departmentStatuses}
+          onAdd={departmentsApi.add} onUpdate={departmentsApi.update} onRemove={departmentsApi.remove}
+        />
+      )
+      case 'contacts':      return (
+        <ContactsTab
+          contacts={contactsApi.contacts} locations={locationOptions} departments={departmentsApi.departments} statuses={contactStatuses}
+          onAdd={contactsApi.add} onUpdate={contactsApi.update} onRemove={contactsApi.remove}
+        />
+      )
       case 'vacancies':     return <VacanciesTab customerId={c.id} />
-      case 'opportunities': return <OpportunitiesTab customerId={c.id} />
+      case 'opportunities': return <OpportunitiesTab customerId={c.id} customerName={c.name} />
       case 'planning':      return <PlanningTab customerId={c.id ?? ''} />
-      case 'statistics':    return <StatisticsTab c={c} />
+      case 'statistics':    return <StatisticsTab c={c} onGoToVacancies={() => setActiveTab?.('vacancies')} />
       case 'priceAgreements': return <PriceAgreementsTab customerId={c.id} />
       case 'documents':     return <DocumentsTab customerId={c.id} />
       case 'notes':         return (
@@ -174,7 +229,7 @@ export default function CustomerDrawer({
       expanded={expanded}
       onToggleExpand={onToggleExpand}
       footer={<span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: c.created ? formatDate(c.created) : '—' })}</span>}
-      tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: () => renderTab(tab.id) }))}
+      tabs={tabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: (setActiveTab?: (id: string) => void) => renderTab(tab.id, setActiveTab) }))}
       header={() => (
         <EntityHeader
           label={t('drawer.entityLabel')}

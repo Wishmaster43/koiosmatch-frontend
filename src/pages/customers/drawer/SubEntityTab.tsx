@@ -33,22 +33,28 @@ interface SubEntityTabProps<Item> {
   backLabel?: ReactNode
   searchKeys?: string[]
   onAdd?: () => void
-  renderDetail: (item: Item) => ReactNode
+  // `close` lets the detail view return to the list itself (e.g. after a delete).
+  renderDetail: (item: Item, close: () => void) => ReactNode
+  getRowId?: (item: Item) => string | number | undefined
 }
 
 export default function SubEntityTab<Item extends object>({
   items = [], columns, addLabel, emptyText, searchPlaceholder, backLabel,
   searchKeys = ['name'], onAdd, renderDetail,
+  getRowId = (it: Item) => (it as { id?: string | number }).id,
 }: SubEntityTabProps<Item>) {
-  const [search, setSearch]     = useState('')
-  const [selected, setSelected] = useState<Item | null>(null)
+  const [search, setSearch]         = useState('')
+  const [selectedId, setSelectedId] = useState<string | number | undefined>(undefined)
+  // Track by id, not object reference, so the detail pane stays live when the
+  // parent's list updates (in-place edit) instead of freezing the clicked snapshot.
+  const selected = selectedId !== undefined ? items.find(it => getRowId(it) === selectedId) ?? null : null
 
   // Detail view — show the picked sub-entity with a back button.
   if (selected) {
     return (
       <div>
-        <button onClick={() => setSelected(null)} style={backBtn}><ArrowLeft size={13} /> {backLabel}</button>
-        {renderDetail(selected)}
+        <button onClick={() => setSelectedId(undefined)} style={backBtn}><ArrowLeft size={13} /> {backLabel}</button>
+        {renderDetail(selected, () => setSelectedId(undefined))}
       </div>
     )
   }
@@ -66,7 +72,7 @@ export default function SubEntityTab<Item extends object>({
         </div>
         {onAdd && <button onClick={onAdd} style={addBtn}><Plus size={13} /> {addLabel}</button>}
       </div>
-      <DataTable columns={columns} rows={rows} onRowClick={setSelected} emptyText={emptyText} />
+      <DataTable columns={columns} rows={rows} onRowClick={it => setSelectedId(getRowId(it))} emptyText={emptyText} />
     </div>
   )
 }

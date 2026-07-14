@@ -104,26 +104,47 @@
     "col": {
       "name": "Nombre",
       "city": "Ciudad",
+      "status": "Estado",
       "departments": "Departamentos",
       "contacts": "Contactos"
     },
     "detail": {
       "addressTitle": "Dirección y datos",
+      "name": "Nombre",
+      "status": "Estado",
+      "headquarter": "Sede principal",
       "street": "Calle",
       "houseNumber": "N.º",
       "houseNumberSuffix": "Complemento",
       "postalCode": "Código postal",
       "city": "Ciudad",
+      "state": "Provincia",
       "country": "País",
       "coc": "N.º registro",
       "vat": "N.º IVA",
+      "registrationTitle": "Registro",
+      "contactTitle": "Contacto en el lugar",
       "contactName": "Persona de contacto",
       "phone": "Teléfono",
       "email": "Correo electrónico",
+      "billingTitle": "Facturación",
+      "costCenter": "Centro de coste",
+      "billingEmail": "Correo de facturación",
       "departmentsHere": "Departamentos en esta ubicación",
       "contactsHere": "Contactos en esta ubicación",
-      "none": "Nada vinculado aún"
-    }
+      "none": "Nada vinculado aún",
+      "addDepartmentHere": "Añadir departamento",
+      "addContactHere": "Nuevo contacto",
+      "coupleAction": "Vincular",
+      "uncoupleAction": "Desvincular",
+      "pickContactTitle": "Vincular un contacto",
+      "pickContactEmpty": "No hay contactos disponibles para vincular.",
+      "deleteLocation": "Eliminar ubicación",
+      "confirmDelete": "¿Eliminar esta ubicación? Los departamentos y contactos vinculados se mantienen pero quedan desvinculados."
+    },
+    "saveFailed": "Error al guardar.",
+    "deleteFailed": "Error al eliminar.",
+    "deleteInUse": "No se puede eliminar — esta ubicación todavía está en uso."
   },
   "departments": {
     "empty": "Aún no hay departamentos",
@@ -132,6 +153,7 @@
     "col": {
       "name": "Nombre",
       "location": "Ubicación",
+      "status": "Estado",
       "contacts": "Contactos"
     },
     "detail": {
@@ -141,7 +163,11 @@
       "description": "Descripción",
       "contactsHere": "Contactos en este departamento",
       "none": "Nada vinculado aún"
-    }
+    },
+    "deleteConfirm": "¿Eliminar este departamento?",
+    "saveFailed": "Error al guardar.",
+    "deleteFailed": "Error al eliminar.",
+    "deleteInUse": "No se puede eliminar — este departamento todavía está en uso."
   },
   "contacts": {
     "empty": "Aún no hay contactos",
@@ -149,6 +175,8 @@
     "searchPlaceholder": "Buscar contacto…",
     "col": {
       "name": "Nombre",
+      "location": "Ubicación",
+      "department": "Departamento",
       "role": "Función",
       "email": "Correo electrónico",
       "phone": "Teléfono"
@@ -163,7 +191,11 @@
       "location": "Ubicación",
       "department": "Departamento",
       "none": "No indicado"
-    }
+    },
+    "deleteConfirm": "¿Eliminar este contacto?",
+    "saveFailed": "Error al guardar.",
+    "deleteFailed": "Error al eliminar.",
+    "deleteInUse": "No se puede eliminar — este contacto todavía está en uso."
   },
   "vacancies": {
     "empty": "No hay vacantes para este cliente.",
@@ -171,16 +203,26 @@
       "title": "Título",
       "status": "Estado",
       "applications": "Candidaturas"
+    },
+    "filter": {
+      "status": "Estado"
     }
   },
   "opportunities": {
-    "openVacancies": "Vacantes abiertas",
-    "openVacanciesEmpty": "No hay vacantes abiertas.",
+    "title": "Oportunidades",
+    "empty": "Aún no hay oportunidades para este cliente.",
+    "newOpportunity": "Nueva oportunidad",
+    "deleteConfirm": "¿Eliminar esta oportunidad?",
+    "deleteFailed": "Error al eliminar.",
+    "loadError": "Error al cargar las oportunidades.",
     "openShifts": "Turnos flex abiertos",
     "openShiftsEmpty": "No hay turnos abiertos.",
     "planningOff": "Los turnos abiertos aparecen cuando el módulo de Planificación esté activo.",
     "col": {
       "title": "Título",
+      "stage": "Fase",
+      "value": "Valor",
+      "expectedClose": "Cierre previsto",
       "status": "Estado",
       "applications": "Candidaturas",
       "date": "Fecha",
@@ -206,6 +248,7 @@
     "openVacanciesSub": "abiertas",
     "fillRate": "Tasa de cobertura",
     "fillRateSub": "vacantes cubiertas",
+    "fillRateFormula": "cubiertas ÷ vacantes totales",
     "loadError": "No se pudieron cargar las estadísticas.",
     "overviewTitle": "Resumen"
   },
@@ -307,29 +350,51 @@
   },
   "subModal": {
     "addLocation": "Añadir ubicación",
+    "editLocation": "Editar ubicación",
     "addDepartment": "Añadir departamento",
+    "editDepartment": "Editar departamento",
     "addContact": "Añadir contacto",
+    "editContact": "Editar contacto",
     "locationName": "Nombre de ubicación",
     "locationPlaceholder": "P. ej. Sede central",
     "departmentName": "Nombre de departamento",
     "departmentPlaceholder": "P. ej. Atención domiciliaria",
+    "description": "Descripción",
     "selectLocation": "Ubicación",
+    "selectDepartment": "Departamento",
     "noLocationsFirst": "Cree primero una ubicación",
+    "noneOption": "Ninguno",
+    "firstName": "Nombre",
+    "lastName": "Apellidos",
     "contactName": "Nombre",
     "contactPlaceholder": "P. ej. Juan Pérez",
     "role": "Función",
     "email": "Correo electrónico",
     "phone": "Teléfono",
     "isPrimary": "Contacto principal",
+    "status": "Estado",
+    "selectStatus": "Elegir estado",
+    "headquarter": "Sede principal",
     "street": "Calle",
     "houseNumber": "N.º",
     "houseNumberSuffix": "Complemento",
     "postalCode": "Código postal",
     "city": "Ciudad",
+    "state": "Provincia",
     "country": "País",
     "coc": "N.º registro",
     "vat": "N.º IVA",
+    "costCenter": "Centro de coste",
+    "billingEmail": "Correo de facturación",
+    "groups": {
+      "general": "General",
+      "address": "Dirección",
+      "registration": "Registro",
+      "contact": "Contacto en el lugar",
+      "billing": "Facturación"
+    },
     "create": "Añadir",
+    "save": "Guardar",
     "cancel": "Cancelar",
     "required": "Campo obligatorio"
   },

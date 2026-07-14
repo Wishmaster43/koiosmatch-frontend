@@ -104,26 +104,47 @@
     "col": {
       "name": "Name",
       "city": "Ort",
+      "status": "Status",
       "departments": "Abteilungen",
       "contacts": "Kontakte"
     },
     "detail": {
       "addressTitle": "Adresse & Daten",
+      "name": "Name",
+      "status": "Status",
+      "headquarter": "Hauptsitz",
       "street": "Straße",
       "houseNumber": "Nr.",
       "houseNumberSuffix": "Zusatz",
       "postalCode": "PLZ",
       "city": "Ort",
+      "state": "Bundesland",
       "country": "Land",
       "coc": "Handelsregisternr.",
       "vat": "USt-IdNr.",
+      "registrationTitle": "Registrierung",
+      "contactTitle": "Ansprechpartner vor Ort",
       "contactName": "Ansprechpartner",
       "phone": "Telefon",
       "email": "E-Mail",
+      "billingTitle": "Abrechnung",
+      "costCenter": "Kostenstelle",
+      "billingEmail": "Rechnungs-E-Mail",
       "departmentsHere": "Abteilungen an diesem Standort",
       "contactsHere": "Kontakte an diesem Standort",
-      "none": "Noch nichts verknüpft"
-    }
+      "none": "Noch nichts verknüpft",
+      "addDepartmentHere": "Abteilung hinzufügen",
+      "addContactHere": "Neuer Kontakt",
+      "coupleAction": "Verknüpfen",
+      "uncoupleAction": "Verknüpfung aufheben",
+      "pickContactTitle": "Kontakt verknüpfen",
+      "pickContactEmpty": "Keine Kontakte zum Verknüpfen verfügbar.",
+      "deleteLocation": "Standort löschen",
+      "confirmDelete": "Diesen Standort löschen? Verknüpfte Abteilungen und Kontakte bleiben bestehen, verlieren aber die Verknüpfung."
+    },
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "deleteFailed": "Löschen fehlgeschlagen.",
+    "deleteInUse": "Löschen nicht möglich — dieser Standort wird noch verwendet."
   },
   "departments": {
     "empty": "Noch keine Abteilungen",
@@ -132,6 +153,7 @@
     "col": {
       "name": "Name",
       "location": "Standort",
+      "status": "Status",
       "contacts": "Kontakte"
     },
     "detail": {
@@ -141,7 +163,11 @@
       "description": "Beschreibung",
       "contactsHere": "Kontakte in dieser Abteilung",
       "none": "Noch nichts verknüpft"
-    }
+    },
+    "deleteConfirm": "Diese Abteilung löschen?",
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "deleteFailed": "Löschen fehlgeschlagen.",
+    "deleteInUse": "Löschen nicht möglich — diese Abteilung wird noch verwendet."
   },
   "contacts": {
     "empty": "Noch keine Kontakte",
@@ -149,6 +175,8 @@
     "searchPlaceholder": "Kontakt suchen…",
     "col": {
       "name": "Name",
+      "location": "Standort",
+      "department": "Abteilung",
       "role": "Funktion",
       "email": "E-Mail",
       "phone": "Telefon"
@@ -163,7 +191,11 @@
       "location": "Standort",
       "department": "Abteilung",
       "none": "Nicht angegeben"
-    }
+    },
+    "deleteConfirm": "Diesen Kontakt löschen?",
+    "saveFailed": "Speichern fehlgeschlagen.",
+    "deleteFailed": "Löschen fehlgeschlagen.",
+    "deleteInUse": "Löschen nicht möglich — dieser Kontakt wird noch verwendet."
   },
   "vacancies": {
     "empty": "Keine Stellen für diesen Kunden.",
@@ -171,16 +203,26 @@
       "title": "Titel",
       "status": "Status",
       "applications": "Bewerbungen"
+    },
+    "filter": {
+      "status": "Status"
     }
   },
   "opportunities": {
-    "openVacancies": "Offene Stellen",
-    "openVacanciesEmpty": "Keine offenen Stellen.",
+    "title": "Chancen",
+    "empty": "Noch keine Chancen für diesen Kunden.",
+    "newOpportunity": "Neue Chance",
+    "deleteConfirm": "Diese Chance löschen?",
+    "deleteFailed": "Löschen fehlgeschlagen.",
+    "loadError": "Chancen konnten nicht geladen werden.",
     "openShifts": "Offene Flex-Dienste",
     "openShiftsEmpty": "Keine offenen Dienste.",
     "planningOff": "Offene Dienste erscheinen, sobald das Planungsmodul aktiv ist.",
     "col": {
       "title": "Titel",
+      "stage": "Phase",
+      "value": "Wert",
+      "expectedClose": "Voraussichtlicher Abschluss",
       "status": "Status",
       "applications": "Bewerbungen",
       "date": "Datum",
@@ -206,6 +248,7 @@
     "openVacanciesSub": "offen",
     "fillRate": "Besetzungsquote",
     "fillRateSub": "besetzte Stellen",
+    "fillRateFormula": "besetzte ÷ Stellen gesamt",
     "loadError": "Statistiken konnten nicht geladen werden.",
     "overviewTitle": "Übersicht"
   },
@@ -307,29 +350,51 @@
   },
   "subModal": {
     "addLocation": "Standort hinzufügen",
+    "editLocation": "Standort bearbeiten",
     "addDepartment": "Abteilung hinzufügen",
+    "editDepartment": "Abteilung bearbeiten",
     "addContact": "Kontakt hinzufügen",
+    "editContact": "Kontakt bearbeiten",
     "locationName": "Standortname",
     "locationPlaceholder": "z. B. Hauptstandort",
     "departmentName": "Abteilungsname",
     "departmentPlaceholder": "z. B. Ambulante Pflege",
+    "description": "Beschreibung",
     "selectLocation": "Standort",
+    "selectDepartment": "Abteilung",
     "noLocationsFirst": "Zuerst einen Standort anlegen",
+    "noneOption": "Keine",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
     "contactName": "Name",
     "contactPlaceholder": "z. B. Max Mustermann",
     "role": "Funktion",
     "email": "E-Mail",
     "phone": "Telefon",
     "isPrimary": "Hauptkontakt",
+    "status": "Status",
+    "selectStatus": "Status wählen",
+    "headquarter": "Hauptsitz",
     "street": "Straße",
     "houseNumber": "Nr.",
     "houseNumberSuffix": "Zusatz",
     "postalCode": "PLZ",
     "city": "Ort",
+    "state": "Bundesland",
     "country": "Land",
     "coc": "Handelsregisternr.",
     "vat": "USt-IdNr.",
+    "costCenter": "Kostenstelle",
+    "billingEmail": "Rechnungs-E-Mail",
+    "groups": {
+      "general": "Allgemein",
+      "address": "Adresse",
+      "registration": "Registrierung",
+      "contact": "Ansprechpartner vor Ort",
+      "billing": "Abrechnung"
+    },
     "create": "Hinzufügen",
+    "save": "Speichern",
     "cancel": "Abbrechen",
     "required": "Pflichtfeld"
   },

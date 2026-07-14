@@ -104,26 +104,47 @@
     "col": {
       "name": "Nom",
       "city": "Ville",
+      "status": "Statut",
       "departments": "Services",
       "contacts": "Contacts"
     },
     "detail": {
       "addressTitle": "Adresse & informations",
+      "name": "Nom",
+      "status": "Statut",
+      "headquarter": "Siège principal",
       "street": "Rue",
       "houseNumber": "N°",
       "houseNumberSuffix": "Complément",
       "postalCode": "Code postal",
       "city": "Ville",
+      "state": "Région",
       "country": "Pays",
       "coc": "N° registre",
       "vat": "N° TVA",
+      "registrationTitle": "Immatriculation",
+      "contactTitle": "Contact sur place",
       "contactName": "Personne de contact",
       "phone": "Téléphone",
       "email": "E-mail",
+      "billingTitle": "Facturation",
+      "costCenter": "Centre de coût",
+      "billingEmail": "E-mail de facturation",
       "departmentsHere": "Services sur ce site",
       "contactsHere": "Contacts sur ce site",
-      "none": "Rien de lié pour le moment"
-    }
+      "none": "Rien de lié pour le moment",
+      "addDepartmentHere": "Ajouter un service",
+      "addContactHere": "Nouveau contact",
+      "coupleAction": "Lier",
+      "uncoupleAction": "Délier",
+      "pickContactTitle": "Lier un contact",
+      "pickContactEmpty": "Aucun contact disponible à lier.",
+      "deleteLocation": "Supprimer le site",
+      "confirmDelete": "Supprimer ce site ? Les services et contacts liés restent mais sont déliés."
+    },
+    "saveFailed": "L'enregistrement a échoué.",
+    "deleteFailed": "La suppression a échoué.",
+    "deleteInUse": "Suppression impossible — ce site est encore utilisé."
   },
   "departments": {
     "empty": "Aucun service pour le moment",
@@ -132,6 +153,7 @@
     "col": {
       "name": "Nom",
       "location": "Site",
+      "status": "Statut",
       "contacts": "Contacts"
     },
     "detail": {
@@ -141,7 +163,11 @@
       "description": "Description",
       "contactsHere": "Contacts dans ce service",
       "none": "Rien de lié pour le moment"
-    }
+    },
+    "deleteConfirm": "Supprimer ce service ?",
+    "saveFailed": "L'enregistrement a échoué.",
+    "deleteFailed": "La suppression a échoué.",
+    "deleteInUse": "Suppression impossible — ce service est encore utilisé."
   },
   "contacts": {
     "empty": "Aucun contact pour le moment",
@@ -149,6 +175,8 @@
     "searchPlaceholder": "Rechercher un contact…",
     "col": {
       "name": "Nom",
+      "location": "Site",
+      "department": "Service",
       "role": "Fonction",
       "email": "E-mail",
       "phone": "Téléphone"
@@ -163,7 +191,11 @@
       "location": "Site",
       "department": "Service",
       "none": "Non renseigné"
-    }
+    },
+    "deleteConfirm": "Supprimer ce contact ?",
+    "saveFailed": "L'enregistrement a échoué.",
+    "deleteFailed": "La suppression a échoué.",
+    "deleteInUse": "Suppression impossible — ce contact est encore utilisé."
   },
   "vacancies": {
     "empty": "Aucun poste pour ce client.",
@@ -171,16 +203,26 @@
       "title": "Titre",
       "status": "Statut",
       "applications": "Candidatures"
+    },
+    "filter": {
+      "status": "Statut"
     }
   },
   "opportunities": {
-    "openVacancies": "Postes ouverts",
-    "openVacanciesEmpty": "Aucun poste ouvert.",
+    "title": "Opportunités",
+    "empty": "Aucune opportunité pour ce client pour le moment.",
+    "newOpportunity": "Nouvelle opportunité",
+    "deleteConfirm": "Supprimer cette opportunité ?",
+    "deleteFailed": "La suppression a échoué.",
+    "loadError": "Le chargement des opportunités a échoué.",
     "openShifts": "Missions flex ouvertes",
     "openShiftsEmpty": "Aucune mission ouverte.",
     "planningOff": "Les missions ouvertes apparaissent dès que le module Planning est actif.",
     "col": {
       "title": "Titre",
+      "stage": "Phase",
+      "value": "Valeur",
+      "expectedClose": "Clôture prévue",
       "status": "Statut",
       "applications": "Candidatures",
       "date": "Date",
@@ -206,6 +248,7 @@
     "openVacanciesSub": "ouverts",
     "fillRate": "Taux de pourvoi",
     "fillRateSub": "postes pourvus",
+    "fillRateFormula": "postes pourvus ÷ total des postes",
     "loadError": "Échec du chargement des statistiques.",
     "overviewTitle": "Aperçu"
   },
@@ -307,29 +350,51 @@
   },
   "subModal": {
     "addLocation": "Ajouter un site",
+    "editLocation": "Modifier le site",
     "addDepartment": "Ajouter un service",
+    "editDepartment": "Modifier le service",
     "addContact": "Ajouter un contact",
+    "editContact": "Modifier le contact",
     "locationName": "Nom du site",
     "locationPlaceholder": "P. ex. Siège",
     "departmentName": "Nom du service",
     "departmentPlaceholder": "P. ex. Soins à domicile",
+    "description": "Description",
     "selectLocation": "Site",
+    "selectDepartment": "Service",
     "noLocationsFirst": "Créez d'abord un site",
+    "noneOption": "Aucun",
+    "firstName": "Prénom",
+    "lastName": "Nom",
     "contactName": "Nom",
     "contactPlaceholder": "P. ex. Jean Dupont",
     "role": "Fonction",
     "email": "E-mail",
     "phone": "Téléphone",
     "isPrimary": "Contact principal",
+    "status": "Statut",
+    "selectStatus": "Choisir un statut",
+    "headquarter": "Siège principal",
     "street": "Rue",
     "houseNumber": "N°",
     "houseNumberSuffix": "Complément",
     "postalCode": "Code postal",
     "city": "Ville",
+    "state": "Région",
     "country": "Pays",
     "coc": "N° registre",
     "vat": "N° TVA",
+    "costCenter": "Centre de coût",
+    "billingEmail": "E-mail de facturation",
+    "groups": {
+      "general": "Général",
+      "address": "Adresse",
+      "registration": "Immatriculation",
+      "contact": "Contact sur place",
+      "billing": "Facturation"
+    },
     "create": "Ajouter",
+    "save": "Enregistrer",
     "cancel": "Annuler",
     "required": "Champ obligatoire"
   },

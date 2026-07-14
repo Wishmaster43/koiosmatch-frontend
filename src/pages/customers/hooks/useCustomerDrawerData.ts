@@ -23,17 +23,19 @@ export function useCustomerStats(id?: Id): CustomerStats | null {
   return data
 }
 
-export interface VacancyRow { id?: Id; title: string; status: { label?: string; color?: string }; applications: number }
+export interface VacancyRow { id?: Id; title: string; status: { value?: string; label?: string; color?: string }; applications: number }
 
 // Defensive vacancy row mapper (snake_case-tolerant; status as object or string).
+// Keeps the status VALUE (slug) alongside the label/color so callers can filter
+// against the tenant lookup's stable value instead of matching on display text.
 const mapVacancyRow = (v: Record<string, unknown> = {}): VacancyRow => {
-  const status = v.status
+  const status = v.status as { value?: string; label?: string; color?: string } | string | undefined
   return {
     id: v.id as Id | undefined,
     title: (v.title as string) ?? '—',
     status: (status && typeof status === 'object')
-      ? (status as { label?: string; color?: string })
-      : { label: String(v.status_label ?? v.status ?? '—'), color: v.status_color as string | undefined },
+      ? status
+      : { value: v.status_value as string | undefined ?? (typeof status === 'string' ? status : undefined), label: String(v.status_label ?? status ?? '—'), color: v.status_color as string | undefined },
     applications: (v.applications_count ?? v.applicationsCount ?? 0) as number,
   }
 }
@@ -49,6 +51,19 @@ export function useCustomerVacancies(customerId?: Id, params?: Record<string, un
       unwrapList<Record<string, unknown>>(await api.get('/vacancies', { params: { client_id: customerId, ...params }, signal })).rows.map(mapVacancyRow),
   })
   return { rows: data, loading }
+}
+
+// The customer's opportunities (Kansen), via GET /opportunities?customer_id[]={id}
+// (OpportunityQuery accepts customer_id as an array filter). Read-only list; the
+// tab's own create/delete actions call the API directly and `reload()` after.
+export function useCustomerOpportunities(customerId?: Id) {
+  const { data = [], isLoading: loading, isError: error, refetch } = useQuery({
+    queryKey: ['customers', customerId, 'opportunities'],
+    enabled: !!customerId,
+    queryFn: async ({ signal }) =>
+      unwrapList<Record<string, unknown>>(await api.get('/opportunities', { params: { customer_id: [customerId] }, signal })).rows,
+  })
+  return { rows: data, loading, error, reload: refetch }
 }
 
 export interface ShiftRow { id?: Id; date?: string; shift?: string; department?: string }

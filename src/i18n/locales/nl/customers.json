@@ -104,26 +104,47 @@
     "col": {
       "name": "Naam",
       "city": "Plaats",
+      "status": "Status",
       "departments": "Afdelingen",
       "contacts": "Contacten"
     },
     "detail": {
       "addressTitle": "Adres & gegevens",
+      "name": "Naam",
+      "status": "Status",
+      "headquarter": "Hoofdvestiging",
       "street": "Straat",
       "houseNumber": "Huisnr.",
       "houseNumberSuffix": "Toevoeging",
       "postalCode": "Postcode",
       "city": "Plaats",
+      "state": "Provincie",
       "country": "Land",
       "coc": "KvK-nummer",
       "vat": "BTW-nummer",
+      "registrationTitle": "Registratie",
+      "contactTitle": "Contact ter plaatse",
       "contactName": "Contactpersoon",
       "phone": "Telefoon",
       "email": "E-mailadres",
+      "billingTitle": "Facturatie",
+      "costCenter": "Kostenplaats",
+      "billingEmail": "Factuur e-mailadres",
       "departmentsHere": "Afdelingen op deze locatie",
       "contactsHere": "Contactpersonen op deze locatie",
-      "none": "Nog niets gekoppeld"
-    }
+      "none": "Nog niets gekoppeld",
+      "addDepartmentHere": "Afdeling toevoegen",
+      "addContactHere": "Nieuw contactpersoon",
+      "coupleAction": "Koppelen",
+      "uncoupleAction": "Ontkoppelen",
+      "pickContactTitle": "Contactpersoon koppelen",
+      "pickContactEmpty": "Geen contactpersonen om te koppelen.",
+      "deleteLocation": "Locatie verwijderen",
+      "confirmDelete": "Deze locatie verwijderen? Gekoppelde afdelingen en contactpersonen blijven bestaan maar raken ontkoppeld."
+    },
+    "saveFailed": "Opslaan is mislukt.",
+    "deleteFailed": "Verwijderen is mislukt.",
+    "deleteInUse": "Verwijderen is niet mogelijk — deze locatie wordt nog gebruikt."
   },
   "departments": {
     "empty": "Nog geen afdelingen",
@@ -132,6 +153,7 @@
     "col": {
       "name": "Naam",
       "location": "Locatie",
+      "status": "Status",
       "contacts": "Contacten"
     },
     "detail": {
@@ -141,7 +163,11 @@
       "description": "Omschrijving",
       "contactsHere": "Contactpersonen op deze afdeling",
       "none": "Nog niets gekoppeld"
-    }
+    },
+    "deleteConfirm": "Deze afdeling verwijderen?",
+    "saveFailed": "Opslaan is mislukt.",
+    "deleteFailed": "Verwijderen is mislukt.",
+    "deleteInUse": "Verwijderen is niet mogelijk — deze afdeling wordt nog gebruikt."
   },
   "contacts": {
     "empty": "Nog geen contactpersonen",
@@ -149,6 +175,8 @@
     "searchPlaceholder": "Zoek contactpersoon…",
     "col": {
       "name": "Naam",
+      "location": "Locatie",
+      "department": "Afdeling",
       "role": "Functie",
       "email": "E-mailadres",
       "phone": "Telefoon"
@@ -163,7 +191,11 @@
       "location": "Locatie",
       "department": "Afdeling",
       "none": "Niet opgegeven"
-    }
+    },
+    "deleteConfirm": "Deze contactpersoon verwijderen?",
+    "saveFailed": "Opslaan is mislukt.",
+    "deleteFailed": "Verwijderen is mislukt.",
+    "deleteInUse": "Verwijderen is niet mogelijk — deze contactpersoon wordt nog gebruikt."
   },
   "vacancies": {
     "empty": "Geen vacatures voor deze klant.",
@@ -171,16 +203,26 @@
       "title": "Titel",
       "status": "Status",
       "applications": "Sollicitaties"
+    },
+    "filter": {
+      "status": "Status"
     }
   },
   "opportunities": {
-    "openVacancies": "Open vacatures",
-    "openVacanciesEmpty": "Geen open vacatures.",
+    "title": "Kansen",
+    "empty": "Nog geen kansen voor deze klant.",
+    "newOpportunity": "Nieuwe kans",
+    "deleteConfirm": "Deze kans verwijderen?",
+    "deleteFailed": "Verwijderen is mislukt.",
+    "loadError": "Kansen laden is mislukt.",
     "openShifts": "Open flex-diensten",
     "openShiftsEmpty": "Geen open diensten.",
     "planningOff": "Open diensten worden getoond zodra de Planning-module actief is.",
     "col": {
       "title": "Titel",
+      "stage": "Fase",
+      "value": "Waarde",
+      "expectedClose": "Verwachte sluiting",
       "status": "Status",
       "applications": "Sollicitaties",
       "date": "Datum",
@@ -206,6 +248,7 @@
     "openVacanciesSub": "openstaand",
     "fillRate": "Vervulgraad",
     "fillRateSub": "vervulde vacatures",
+    "fillRateFormula": "vervulde ÷ totaal vacatures",
     "loadError": "Statistieken laden is mislukt.",
     "overviewTitle": "Overzicht"
   },
@@ -307,29 +350,51 @@
   },
   "subModal": {
     "addLocation": "Locatie toevoegen",
+    "editLocation": "Locatie bewerken",
     "addDepartment": "Afdeling toevoegen",
+    "editDepartment": "Afdeling bewerken",
     "addContact": "Contactpersoon toevoegen",
+    "editContact": "Contactpersoon bewerken",
     "locationName": "Naam locatie",
     "locationPlaceholder": "Bijv. Hoofdlocatie",
     "departmentName": "Naam afdeling",
     "departmentPlaceholder": "Bijv. Thuiszorg",
+    "description": "Omschrijving",
     "selectLocation": "Locatie",
+    "selectDepartment": "Afdeling",
     "noLocationsFirst": "Maak eerst een locatie aan",
+    "noneOption": "Geen",
+    "firstName": "Voornaam",
+    "lastName": "Achternaam",
     "contactName": "Naam",
     "contactPlaceholder": "Bijv. Jan de Vries",
     "role": "Functie",
     "email": "E-mailadres",
     "phone": "Telefoon",
     "isPrimary": "Primair contact",
+    "status": "Status",
+    "selectStatus": "Kies status",
+    "headquarter": "Hoofdvestiging",
     "street": "Straat",
     "houseNumber": "Huisnr.",
     "houseNumberSuffix": "Toevoeging",
     "postalCode": "Postcode",
     "city": "Plaats",
+    "state": "Provincie",
     "country": "Land",
     "coc": "KvK-nummer",
     "vat": "BTW-nummer",
+    "costCenter": "Kostenplaats",
+    "billingEmail": "Factuur e-mailadres",
+    "groups": {
+      "general": "Algemeen",
+      "address": "Adres",
+      "registration": "Registratie",
+      "contact": "Contact ter plaatse",
+      "billing": "Facturatie"
+    },
     "create": "Toevoegen",
+    "save": "Opslaan",
     "cancel": "Annuleren",
     "required": "Verplicht veld"
   },

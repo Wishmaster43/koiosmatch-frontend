@@ -22,9 +22,6 @@ import CustomersTable from './CustomersTable'
 import CustomersBulkBar from './CustomersBulkBar'
 import CustomerDrawer from './CustomerDrawer'
 import AddCustomerModal from './AddCustomerModal'
-import AddLocationModal from './AddLocationModal'
-import AddDepartmentModal from './AddDepartmentModal'
-import AddContactPersonModal from './AddContactPersonModal'
 import { useCustomersData } from './hooks/useCustomersData'
 import { useCustomerRecord } from './hooks/useCustomerRecord'
 import { useCustomerBulkActions } from './hooks/useCustomerBulkActions'
@@ -61,7 +58,7 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const auth = useAuth()
   const hasPermission = auth?.hasPermission ?? (() => false)
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
-  const { statuses, statusMeta } = useCustomerLookups()
+  const { statuses, statusMeta, locationStatuses, departmentStatuses, contactStatuses } = useCustomerLookups()
 
   // ── UI state ──
   const [page,      setPage]      = usePageMemory('cust.page', 1)
@@ -122,9 +119,8 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
   const { customers, setCustomers, loading, error, total, setTotal, lastPage, stats } =
     useCustomersData({ filterParams, page, pageSize, t })
   const {
-    selected, detail, drawerExpanded, setDrawerExpanded, subAdd, setSubAdd,
-    closeDrawer, selectCustomer, updateCustomer, handleCreate,
-    onCreateLocation, onCreateDepartment, onCreateContact, addNote,
+    selected, detail, drawerExpanded, setDrawerExpanded,
+    closeDrawer, selectCustomer, updateCustomer, handleCreate, addNote,
   } = useCustomerRecord({ setCustomers, setTotal, users, t })
   const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkAddTag, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags } =
     useCustomerBulkActions({ customers, setCustomers, setTotal, selectedIds, setSelectedIds, notify, statusMeta, t })
@@ -341,22 +337,14 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
           expanded={drawerExpanded}
           onToggleExpand={() => setDrawerExpanded(v => !v)}
           onUpdate={updateCustomer}
-          onAddSub={(type, customer) => setSubAdd({ type, customer })}
           onAddNote={addNote}
           users={users}
           statuses={statuses}
+          locationStatuses={locationStatuses}
+          departmentStatuses={departmentStatuses}
+          contactStatuses={contactStatuses}
         />
       </div>
-
-      {subAdd?.type === 'locations' && (
-        <AddLocationModal customerName={subAdd.customer.name} onClose={() => setSubAdd(null)} onCreate={onCreateLocation(subAdd.customer)} />
-      )}
-      {subAdd?.type === 'departments' && (
-        <AddDepartmentModal customerName={subAdd.customer.name} locations={(subAdd.customer.locations ?? []).map(l => ({ id: l.id ?? '', name: l.name }))} onClose={() => setSubAdd(null)} onCreate={onCreateDepartment(subAdd.customer)} />
-      )}
-      {subAdd?.type === 'contacts' && (
-        <AddContactPersonModal customerName={subAdd.customer.name} onClose={() => setSubAdd(null)} onCreate={onCreateContact(subAdd.customer)} />
-      )}
     </>
   )
 }

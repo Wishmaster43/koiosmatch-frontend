@@ -21,9 +21,8 @@ const API_TO_FORM: Record<string, string> = {
   expected_close_at: 'expectedCloseAt', owner_id: 'ownerId',
   // NOTE: `location_id` on the API is the TENANT's own branch (mirrors Match's
   // branch_id), not the customer's location — sending our customer-location pick
-  // under that key 422s ("exists:locations,id"). There is no customer_location_id
-  // column yet, so it goes out as a tolerated extra field (silently dropped by
-  // ->validated() until the backend adds it) — mirrors the matches pattern.
+  // under that key 422s ("exists:locations,id"). `customer_location_id` (OPP-LOC-1)
+  // is the real, validated column for the customer's own location/site.
   customer_location_id: 'locationId', department_id: 'departmentId', contact_id: 'contactId',
 }
 
@@ -39,8 +38,12 @@ interface ModalCustomer { id: Id; name: string }
  * components, lookups via hooks (never hardcoded option lists), 422 mapping. The
  * stage/service/agreement selects key on the lookup id (the writes expect *_id).
  */
-export default function AddOpportunityModal({ onClose, onCreated, users = [], customers = [] }: {
+export default function AddOpportunityModal({ onClose, onCreated, users = [], customers = [], defaultCustomerId }: {
   onClose: () => void; onCreated?: (o: Opportunity) => void; users?: ModalUser[]; customers?: ModalCustomer[]
+  // Pre-fill the client when opened from a customer's own drawer (Kansen tab) —
+  // minimal addition, the picker still shows so the field never silently locks
+  // out a correction; keep prop-driven (no hardcoded id) per §3A.
+  defaultCustomerId?: Id
 }) {
   const { t } = useTranslation(['opportunities', 'common'])
   const { stages } = useOpportunityStages()
@@ -52,7 +55,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<OppForm>({
-    title: '', clientId: '', stageId: '', serviceTypeId: '', agreementTypeId: '',
+    title: '', clientId: defaultCustomerId != null ? String(defaultCustomerId) : '', stageId: '', serviceTypeId: '', agreementTypeId: '',
     value: '', hours: '', startDate: '', endDate: '', expectedCloseAt: '',
     ownerId: me?.id != null ? String(me.id) : '',
   })
@@ -91,8 +94,7 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
         end_date: form.endDate || null,
         expected_close_at: form.expectedCloseAt || null,
         owner_id: form.ownerId || null,
-        // customer_location_id: NOT a real column yet (see API_TO_FORM note above) —
-        // sent as a tolerated extra field, forward-compatible once the backend adds it.
+        // customer_location_id (OPP-LOC-1) — the customer's own location/site.
         customer_location_id: locationId || null,
         department_id: departmentId || null,
         contact_id: contactId || null,

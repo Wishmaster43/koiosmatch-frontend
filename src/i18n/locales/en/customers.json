@@ -104,26 +104,47 @@
     "col": {
       "name": "Name",
       "city": "City",
+      "status": "Status",
       "departments": "Departments",
       "contacts": "Contacts"
     },
     "detail": {
       "addressTitle": "Address & details",
+      "name": "Name",
+      "status": "Status",
+      "headquarter": "Head office",
       "street": "Street",
       "houseNumber": "No.",
       "houseNumberSuffix": "Suffix",
       "postalCode": "Postal code",
       "city": "City",
+      "state": "State/Province",
       "country": "Country",
       "coc": "CoC number",
       "vat": "VAT number",
+      "registrationTitle": "Registration",
+      "contactTitle": "On-site contact",
       "contactName": "Contact person",
       "phone": "Phone",
       "email": "Email",
+      "billingTitle": "Billing",
+      "costCenter": "Cost center",
+      "billingEmail": "Billing email",
       "departmentsHere": "Departments at this location",
       "contactsHere": "Contacts at this location",
-      "none": "Nothing linked yet"
-    }
+      "none": "Nothing linked yet",
+      "addDepartmentHere": "Add department",
+      "addContactHere": "New contact",
+      "coupleAction": "Link",
+      "uncoupleAction": "Unlink",
+      "pickContactTitle": "Link a contact",
+      "pickContactEmpty": "No contacts available to link.",
+      "deleteLocation": "Delete location",
+      "confirmDelete": "Delete this location? Linked departments and contacts stay but become unlinked."
+    },
+    "saveFailed": "Saving failed.",
+    "deleteFailed": "Deleting failed.",
+    "deleteInUse": "Can't delete — this location is still in use."
   },
   "departments": {
     "empty": "No departments yet",
@@ -132,6 +153,7 @@
     "col": {
       "name": "Name",
       "location": "Location",
+      "status": "Status",
       "contacts": "Contacts"
     },
     "detail": {
@@ -141,7 +163,11 @@
       "description": "Description",
       "contactsHere": "Contacts in this department",
       "none": "Nothing linked yet"
-    }
+    },
+    "deleteConfirm": "Delete this department?",
+    "saveFailed": "Saving failed.",
+    "deleteFailed": "Deleting failed.",
+    "deleteInUse": "Can't delete — this department is still in use."
   },
   "contacts": {
     "empty": "No contacts yet",
@@ -149,6 +175,8 @@
     "searchPlaceholder": "Search contact…",
     "col": {
       "name": "Name",
+      "location": "Location",
+      "department": "Department",
       "role": "Role",
       "email": "Email",
       "phone": "Phone"
@@ -163,7 +191,11 @@
       "location": "Location",
       "department": "Department",
       "none": "Not provided"
-    }
+    },
+    "deleteConfirm": "Delete this contact?",
+    "saveFailed": "Saving failed.",
+    "deleteFailed": "Deleting failed.",
+    "deleteInUse": "Can't delete — this contact is still in use."
   },
   "vacancies": {
     "empty": "No vacancies for this customer.",
@@ -171,16 +203,26 @@
       "title": "Title",
       "status": "Status",
       "applications": "Applications"
+    },
+    "filter": {
+      "status": "Status"
     }
   },
   "opportunities": {
-    "openVacancies": "Open vacancies",
-    "openVacanciesEmpty": "No open vacancies.",
+    "title": "Opportunities",
+    "empty": "No opportunities for this customer yet.",
+    "newOpportunity": "New opportunity",
+    "deleteConfirm": "Delete this opportunity?",
+    "deleteFailed": "Deleting failed.",
+    "loadError": "Failed to load opportunities.",
     "openShifts": "Open flex shifts",
     "openShiftsEmpty": "No open shifts.",
     "planningOff": "Open shifts appear once the Planning module is active.",
     "col": {
       "title": "Title",
+      "stage": "Stage",
+      "value": "Value",
+      "expectedClose": "Expected close",
       "status": "Status",
       "applications": "Applications",
       "date": "Date",
@@ -206,6 +248,7 @@
     "openVacanciesSub": "open",
     "fillRate": "Fill rate",
     "fillRateSub": "filled vacancies",
+    "fillRateFormula": "filled ÷ total vacancies",
     "loadError": "Failed to load statistics.",
     "overviewTitle": "Overview"
   },
@@ -307,29 +350,51 @@
   },
   "subModal": {
     "addLocation": "Add location",
+    "editLocation": "Edit location",
     "addDepartment": "Add department",
+    "editDepartment": "Edit department",
     "addContact": "Add contact",
+    "editContact": "Edit contact",
     "locationName": "Location name",
     "locationPlaceholder": "E.g. Head office",
     "departmentName": "Department name",
     "departmentPlaceholder": "E.g. Home care",
+    "description": "Description",
     "selectLocation": "Location",
+    "selectDepartment": "Department",
     "noLocationsFirst": "Create a location first",
+    "noneOption": "None",
+    "firstName": "First name",
+    "lastName": "Last name",
     "contactName": "Name",
     "contactPlaceholder": "E.g. John Smith",
     "role": "Role",
     "email": "Email",
     "phone": "Phone",
     "isPrimary": "Primary contact",
+    "status": "Status",
+    "selectStatus": "Choose status",
+    "headquarter": "Head office",
     "street": "Street",
     "houseNumber": "No.",
     "houseNumberSuffix": "Suffix",
     "postalCode": "Postal code",
     "city": "City",
+    "state": "State/Province",
     "country": "Country",
     "coc": "CoC number",
     "vat": "VAT number",
+    "costCenter": "Cost center",
+    "billingEmail": "Billing email",
+    "groups": {
+      "general": "General",
+      "address": "Address",
+      "registration": "Registration",
+      "contact": "On-site contact",
+      "billing": "Billing"
+    },
     "create": "Add",
+    "save": "Save",
     "cancel": "Cancel",
     "required": "Required field"
   },
