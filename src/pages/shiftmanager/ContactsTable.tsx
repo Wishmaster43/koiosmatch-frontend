@@ -8,6 +8,7 @@ import type { CSSProperties } from 'react'
 import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
+import SoftChip from '@/components/ui/SoftChip'
 import { ac, ContactAvatar } from './contactParts'
 import type { SmContactRow } from '@/types/shiftmanager'
 
@@ -74,12 +75,8 @@ export default function ContactsTable({ rows, loading, selectedId, onSelect }: {
     {
       key: 'planning', header: t('contactsPage.cols.planning'), sortable: true, sortValue: c => (c.planning ? 1 : 0),
       render: c => (
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, padding: '3px 9px', borderRadius: 999,
-          background: c.planning ? 'var(--color-success-bg)' : 'var(--hover-bg)',
-          color:      c.planning ? 'var(--color-success)'  : 'var(--text-muted)',
-          border:     `1px solid ${c.planning ? '#BBF7D0' : 'var(--border)'}` }}>
-          {c.planning ? <><MessageCircle size={10} /> {t('contactsPage.yes')}</> : t('contactsPage.no')}
-        </span>
+        <SoftChip round color={c.planning ? 'var(--color-success)' : 'var(--text-muted)'}
+          label={c.planning ? <><MessageCircle size={10} /> {t('contactsPage.yes')}</> : t('contactsPage.no')} />
       ),
     },
   ]

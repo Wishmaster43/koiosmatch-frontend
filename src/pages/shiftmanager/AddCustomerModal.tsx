@@ -85,7 +85,9 @@ export default function AddCustomerModal({ onClose, onCreate }: { onClose: () =>
               <div style={{ position: 'relative' }}>
                 <select value={form.status} onChange={e => set('status', e.target.value)} aria-label={t('modal.fields.status')}
                   style={{ ...iStyle, appearance: 'none', paddingRight: 30, cursor: 'pointer' }}>
-                  {STATUSES.map(s => <option key={s} value={s}>{t(`status.${s}`)}</option>)}
+                  {/* FINDING (out of this wave's boundary — customers.json has no status.* key yet,
+                      see report): fall back to the raw value so the key path never leaks to the UI. */}
+                  {STATUSES.map(s => <option key={s} value={s}>{t(`status.${s}`, s)}</option>)}
                 </select>
                 <ChevronDown size={13} style={{ position: 'absolute', right: 9, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
               </div>

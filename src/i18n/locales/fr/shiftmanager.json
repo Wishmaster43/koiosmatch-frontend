@@ -1,4 +1,5 @@
 {
+  "comingSoon": "{{label}} — bientôt disponible",
   "shiftAnalysis": {
     "title": "Analyse des shifts candidats",
     "subtitle": "Tendance et signaux d'attention par candidat selon les heures planifiées et travaillées.",
@@ -7,14 +8,35 @@
     "unavailable": "Cette analyse attend le flux de shifts du backend. Dès qu'il sera disponible, les tendances et signaux d'attention apparaîtront ici.",
     "empty": "Aucun candidat avec un signal d'attention.",
     "hours": "{{n}} h",
-    "cols": { "name": "Nom", "position": "Poste", "avgHours": "Heures moy.", "upcoming": "Heures à venir", "alarm": "Signal" },
-    "alarm": { "wegvallend": "En chute", "daling": "Forte baisse", "opkomend": "En hausse", "nieuw_inactief": "Nouveau & inactif" },
-    "kpi": { "wegvallend": "En chute", "daling": "Forte baisse", "opkomend": "En hausse", "nieuwInactief": "Nouveau & inactif" },
+    "cols": {
+      "name": "Nom",
+      "position": "Poste",
+      "avgHours": "Heures moy.",
+      "upcoming": "Heures à venir",
+      "alarm": "Signal"
+    },
+    "alarm": {
+      "wegvallend": "En chute",
+      "daling": "Forte baisse",
+      "opkomend": "En hausse",
+      "nieuw_inactief": "Nouveau & inactif"
+    },
+    "kpi": {
+      "wegvallend": "En chute",
+      "daling": "Forte baisse",
+      "opkomend": "En hausse",
+      "nieuwInactief": "Nouveau & inactif"
+    },
     "plannedTitle": "UZK planifiés par mois",
     "matrixTitle": "Par candidat par mois",
     "candidate": "Candidat",
     "total": "Total",
-    "metric": { "prognose_hours": "Heures prévues", "prognose_shifts": "Missions prévues", "werkelijk_hours": "Heures réelles", "werkelijk_shifts": "Missions réelles" },
+    "metric": {
+      "prognose_hours": "Heures prévues",
+      "prognose_shifts": "Missions prévues",
+      "werkelijk_hours": "Heures réelles",
+      "werkelijk_shifts": "Missions réelles"
+    },
     "allForms": "Tous"
   },
   "orders": {
@@ -156,7 +178,8 @@
     "inShifts": "En services",
     "colHours": "Heures",
     "colShifts": "Services",
-    "lastSync": "Dernière synchro : {{time}}"
+    "lastSync": "Dernière synchro : {{time}}",
+    "empty": "—"
   },
   "customersReport": {
     "title": "Rapport clients",

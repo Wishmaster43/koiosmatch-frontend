@@ -29,7 +29,11 @@ interface RawCustomer {
   [k: string]: unknown
 }
 
-const STATUS_COLORS: Record<string, string> = { actief: '#16A34A', prospect: '#1B60A9', inactief: '#D97706', geblokkeerd: '#DC2626' }
+// Tokens only (§4) — never ad-hoc hex, so per-tenant theming (useTenantTheme) still applies here.
+const STATUS_COLORS: Record<string, string> = {
+  actief: 'var(--color-success)', prospect: 'var(--color-secondary)',
+  inactief: 'var(--color-warning)', geblokkeerd: 'var(--color-danger)',
+}
 const deptCount = (c: SmCustomerRow) => (c.locations ?? []).reduce((s, l) => s + (l.departments?.length ?? 0), 0)
 
 // Normalise a raw API customer into the shape the table/insights expect.
@@ -77,7 +81,7 @@ export default function CustomersPage() {
       })
       .catch(err => {
         if (isAbortError(err)) return
-        setError(t('page.loadError', { defaultValue: 'Klanten laden is mislukt.' }))
+        setError(t('page.loadError'))
         setCustomers([]); setTotal(0); setLastPage(1)
       })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
@@ -148,7 +152,7 @@ export default function CustomersPage() {
   ]
   const insightKpis: KpiSpec[] = [
     { key: 'locations',   label: t('analytics.locations'),   value: totalLocations,   sub: t('analytics.locationsSub'),   color: 'var(--color-secondary)' },
-    { key: 'departments', label: t('analytics.departments'), value: totalDepartments, sub: t('analytics.departmentsSub'), color: '#8B5CF6' },
+    { key: 'departments', label: t('analytics.departments'), value: totalDepartments, sub: t('analytics.departmentsSub'), color: 'var(--color-violet)' },
     { key: 'contacts',    label: t('analytics.contacts'),    value: totalContacts,    sub: t('analytics.contactsSub'),    color: 'var(--color-primary)' },
     { key: 'noContact',   label: t('analytics.noContact'),   value: noContactCount,   sub: t('analytics.noContactSub'),   color: 'var(--color-danger)' },
   ]
@@ -163,9 +167,12 @@ export default function CustomersPage() {
 
           <CustomersInsightsRow donuts={insightDonuts} kpis={insightKpis} />
 
-          <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
+          {/* Toolbar row — the one shared spacing spec (§4): identical KPI-row→button gap everywhere */}
+          <div style={{ padding: '0 24px 12px', minHeight: 36, display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
+            {/* On-accent button text: '#fff' (not var(--surface), which is dark in dark mode and
+                would fail contrast here) — matches the "+Add" button on every other entity page. */}
             <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
-              background: 'var(--color-primary)', color: 'var(--surface)', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
+              background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
               + {t('page.add')}
             </button>
           </div>

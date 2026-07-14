@@ -1,4 +1,5 @@
 {
+  "comingSoon": "{{label}} — komt eraan",
   "shiftAnalysis": {
     "title": "Kandidaten Shift-analyse",
     "subtitle": "Trend en aandachtssignalen per kandidaat op basis van geplande en gewerkte uren.",
@@ -7,14 +8,35 @@
     "unavailable": "Deze analyse wacht op de shift-feed vanuit de backend. Zodra die beschikbaar is, verschijnen hier de trends en aandachtssignalen.",
     "empty": "Geen kandidaten met een aandachtssignaal.",
     "hours": "{{n}} u",
-    "cols": { "name": "Naam", "position": "Functie", "avgHours": "Gem. uren", "upcoming": "Komende uren", "alarm": "Signaal" },
-    "alarm": { "wegvallend": "Wegvallend", "daling": "Sterke daling", "opkomend": "Opkomend", "nieuw_inactief": "Nieuw & inactief" },
-    "kpi": { "wegvallend": "Wegvallend", "daling": "Sterke daling", "opkomend": "Opkomend", "nieuwInactief": "Nieuw & inactief" },
+    "cols": {
+      "name": "Naam",
+      "position": "Functie",
+      "avgHours": "Gem. uren",
+      "upcoming": "Komende uren",
+      "alarm": "Signaal"
+    },
+    "alarm": {
+      "wegvallend": "Wegvallend",
+      "daling": "Sterke daling",
+      "opkomend": "Opkomend",
+      "nieuw_inactief": "Nieuw & inactief"
+    },
+    "kpi": {
+      "wegvallend": "Wegvallend",
+      "daling": "Sterke daling",
+      "opkomend": "Opkomend",
+      "nieuwInactief": "Nieuw & inactief"
+    },
     "plannedTitle": "Geplande UZK per maand",
     "matrixTitle": "Per kandidaat per maand",
     "candidate": "Kandidaat",
     "total": "Totaal",
-    "metric": { "prognose_hours": "Prognose uren", "prognose_shifts": "Prognose diensten", "werkelijk_hours": "Werkelijke uren", "werkelijk_shifts": "Werkelijke diensten" },
+    "metric": {
+      "prognose_hours": "Prognose uren",
+      "prognose_shifts": "Prognose diensten",
+      "werkelijk_hours": "Werkelijke uren",
+      "werkelijk_shifts": "Werkelijke diensten"
+    },
     "allForms": "Alle"
   },
   "orders": {
@@ -156,7 +178,8 @@
     "inShifts": "In diensten",
     "colHours": "Uren",
     "colShifts": "Diensten",
-    "lastSync": "Laatste sync: {{time}}"
+    "lastSync": "Laatste sync: {{time}}",
+    "empty": "—"
   },
   "customersReport": {
     "title": "Klanten rapport",

@@ -116,10 +116,10 @@ export default function WhatsAppPage({ intent }: { intent?: unknown } = {}) {
   return (
     <div style={{ padding: '24px 28px', overflowY: 'auto', height: '100%' }}>
 
-      {/* KPI's bovenaan (gedeelde InsightsRow, gelijk aan candidates) — klik = drill-down naar tab */}
+      {/* KPIs on top (shared InsightsRow, same as candidates) — click = drill-down into a tab */}
       <InsightsRow padding="0 0 16px" kpis={[
-        { key: 'today',     label: t('kpi.messagesToday'),       value: loading.stats ? '—' : (stats?.messages_today ?? 0),             color: '#3B8FD4',              onClick: () => setDrill('today') },
-        { key: 'contacted', label: t('kpi.candidatesContacted'), value: loading.stats ? '—' : (stats?.candidates_contacted ?? 0),       color: '#7C3AED',              onClick: () => setDrill('contacted') },
+        { key: 'today',     label: t('kpi.messagesToday'),       value: loading.stats ? '—' : (stats?.messages_today ?? 0),             color: 'var(--color-secondary)', onClick: () => setDrill('today') },
+        { key: 'contacted', label: t('kpi.candidatesContacted'), value: loading.stats ? '—' : (stats?.candidates_contacted ?? 0),       color: 'var(--color-violet)',    onClick: () => setDrill('contacted') },
         { key: 'filled',    label: t('kpi.shiftsFilled'),        value: loading.stats ? '—' : (stats?.shifts_filled_via_whatsapp ?? 0), color: 'var(--color-success)', onClick: () => setDrill('filled') },
         { key: 'escal',     label: t('kpi.openEscalations'),     value: loading.stats ? '—' : (stats?.open_escalations ?? 0),           color: 'var(--color-danger)',  onClick: () => setDrill('escal') },
       ]} />

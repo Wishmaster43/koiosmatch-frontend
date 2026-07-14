@@ -91,7 +91,7 @@ export default function LocationsTable({ rows, loading, selectedId, onSelect }: 
     {
       key: 'status', header: t('locationsPage.cols.status'), sortable: true, sortValue: l => l.status ?? '',
       render: l => l.status
-        ? <StatusPill label={l.status} color={STATUS_COLORS[l.status.toLowerCase()] ?? '#9CA3AF'} />
+        ? <StatusPill label={l.status} color={STATUS_COLORS[l.status.toLowerCase()]} />
         : <span style={{ color: 'var(--text-muted)' }}>{t('locationsPage.statusUnknown')}</span>,
     },
   ]

@@ -44,7 +44,7 @@ export default function CustomersTable({ rows, loading, selectedId, onSelect }: 
     { key: 'debtorNumber', header: t('cols.debtorNumber'), nowrap: true, cellStyle: mutedCell, sortable: true, sortValue: c => c.debtorNumber ?? '', render: c => c.debtorNumber || '—' },
     {
       key: 'status', header: t('cols.status'), sortable: true, sortValue: c => c.status ?? '',
-      render: c => <StatusPill label={t(`status.${c.status}`, c.status ?? '')} color={STATUS_COLORS[c.status ?? ''] ?? '#9CA3AF'} />,
+      render: c => <StatusPill label={t(`status.${c.status}`, c.status ?? '')} color={STATUS_COLORS[c.status ?? '']} />,
     },
     {
       key: 'accountManager', header: t('cols.accountManager'), sortable: true, sortValue: c => c.accountManager ?? '',

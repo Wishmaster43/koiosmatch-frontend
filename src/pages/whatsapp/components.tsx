@@ -2,10 +2,8 @@
  * WhatsApp dashboard presentational pieces — KPI cards, the activity chart, the
  * message feed and the escalation list (+ date helpers). Extracted from WhatsAppPage.
  */
-import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { AlertTriangle, Clock, ArrowDownLeft, ArrowUpRight } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import ErrorBoundary from '@/components/ui/ErrorBoundary'
 import type { WaCandidate, WaMessage, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
@@ -24,41 +22,16 @@ const timeAgo   = (iso?: string) => {
   if (diff < 86400) return `${Math.floor(diff / 3600)}u`
   return `${Math.floor(diff / 86400)}d`
 }
-const DIRECTION_COLOR: Record<string, string> = { inbound: 'var(--color-success)', outbound: '#3B8FD4' }
+// Tokens only (§4) — 'outbound' reuses the app's blue secondary accent, never an ad-hoc hex.
+const DIRECTION_COLOR: Record<string, string> = { inbound: 'var(--color-success)', outbound: 'var(--color-secondary)' }
 // Escalation reason → colour. Label = t('reasons.<key>').
 const REASON_COLOR: Record<string, { color: string; bg: string }> = {
-  failed_delivery:   { color: 'var(--color-danger)', bg: '#FEF2F2' },
+  failed_delivery:   { color: 'var(--color-danger)', bg: 'var(--color-danger-bg)' },
   no_reply:          { color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
-  negative_response: { color: '#7C3AED', bg: '#F5F3FF' },
+  negative_response: { color: 'var(--color-violet)', bg: 'var(--color-violet-bg)' },
 }
 
 // ─── sub-components ─────────────────────────────────────────────────────────
-
-export function KpiCard({ icon: Icon, label, value, color, loading }: {
-  icon: LucideIcon; label: ReactNode; value?: number; color: string; loading?: boolean
-}) {
-  return (
-    <div style={{
-      background: 'var(--surface)', borderRadius: 14,
-      border: '1px solid var(--border)', padding: '18px 20px',
-      display: 'flex', alignItems: 'center', gap: 16,
-    }}>
-      <div style={{
-        width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-        background: color + '18',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-      }}>
-        <Icon size={20} color={color} />
-      </div>
-      <div>
-        <div style={{ fontSize: 22, fontWeight: 700, color: 'var(--text)', lineHeight: 1.1 }}>
-          {loading ? '—' : (value ?? 0).toLocaleString('nl')}
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{label}</div>
-      </div>
-    </div>
-  )
-}
 
 function Avatar({ candidate, size = 32 }: { candidate?: WaCandidate; size?: number }) {
   return (
@@ -76,7 +49,7 @@ function Avatar({ candidate, size = 32 }: { candidate?: WaCandidate; size?: numb
 function StatusDot({ status, direction }: { status?: string; direction?: string }) {
   const color =
     status === 'read'      ? 'var(--color-success)' :
-    status === 'delivered' ? '#3B8FD4' :
+    status === 'delivered' ? 'var(--color-secondary)' :
     status === 'failed'    ? 'var(--color-danger)' :
     direction === 'inbound' ? 'var(--color-success)' : 'var(--text-muted)'
   return <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0, display: 'inline-block' }} />
@@ -155,7 +128,7 @@ export function EscalationList({ escalations, loading }: { escalations: WaEscala
         <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('escalations.title')}</span>
         {!loading && escalations.length > 0 && (
           <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 600, color: 'var(--color-danger)',
-                         background: '#FEF2F2', borderRadius: 999, padding: '1px 7px' }}>
+                         background: 'var(--color-danger-bg)', borderRadius: 999, padding: '1px 7px' }}>
             {escalations.length}
           </span>
         )}
@@ -233,8 +206,8 @@ export function ActivityChart({ data, loading }: { data: WaActivityDatum[]; load
           <AreaChart data={data} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
             <defs>
               <linearGradient id="gradOut" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor="#3B8FD4" stopOpacity={0.25} />
-                <stop offset="95%" stopColor="#3B8FD4" stopOpacity={0} />
+                <stop offset="5%"  stopColor="var(--color-secondary)" stopOpacity={0.25} />
+                <stop offset="95%" stopColor="var(--color-secondary)" stopOpacity={0} />
               </linearGradient>
               <linearGradient id="gradIn" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%"  stopColor="var(--color-success)" stopOpacity={0.25} />
@@ -242,9 +215,9 @@ export function ActivityChart({ data, loading }: { data: WaActivityDatum[]; load
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="date" tickFormatter={fmtAxisDate} tick={{ fontSize: 10, fill: '#9CA3AF' }}
+            <XAxis dataKey="date" tickFormatter={fmtAxisDate} tick={{ fontSize: 10, fill: 'var(--text-muted)' }}
                    axisLine={false} tickLine={false} interval={1} />
-            <YAxis tick={{ fontSize: 10, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 10, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
             <Tooltip
               contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border)',
                               borderRadius: 8, fontSize: 12 }}
@@ -255,7 +228,7 @@ export function ActivityChart({ data, loading }: { data: WaActivityDatum[]; load
                 {v === 'outbound' ? t('outbound') : t('inbound')}
               </span>} />
             <Area type="monotone" dataKey="outbound" name="outbound"
-              stroke="#3B8FD4" fill="url(#gradOut)" strokeWidth={2} dot={false} isAnimationActive={false} />
+              stroke="var(--color-secondary)" fill="url(#gradOut)" strokeWidth={2} dot={false} isAnimationActive={false} />
             <Area type="monotone" dataKey="inbound" name="inbound"
               stroke="var(--color-success)" fill="url(#gradIn)" strokeWidth={2} dot={false} isAnimationActive={false} />
           </AreaChart>

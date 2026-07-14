@@ -52,7 +52,7 @@ export default function CustomersReport() {
     primary:   c.name ?? '',
     secondary: t('customersReport.sub.noLocationsLinked'),
     badge:     inactive.includes(c) ? t('customersReport.inactiveWord') : t('customersReport.activeWord'),
-    badgeColor: inactive.includes(c) ? '#C2410C' : 'var(--color-success)',
+    badgeColor: inactive.includes(c) ? 'var(--color-warning)' : 'var(--color-success)',
     badgeBg:   inactive.includes(c) ? 'var(--color-warning-bg)' : 'var(--color-success-bg)',
   }))
 
@@ -121,9 +121,9 @@ export default function CustomersReport() {
               </span>
               {inactive.length > 0 && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                               background: 'var(--color-warning-bg)', color: '#C2410C', borderRadius: 999,
+                               background: 'var(--color-warning-bg)', color: 'var(--color-warning)', borderRadius: 999,
                                padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C2410C', flexShrink: 0 }} />
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)', flexShrink: 0 }} />
                   {inactive.length} {t('customersReport.inactiveWord')}
                 </span>
               )}

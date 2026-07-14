@@ -5,35 +5,25 @@
  * table of vacancies (status · applications · matched · filled · time-to-fill).
  * fill-rate/time-to-fill are server-derived; `time_to_fill_days` is null while
  * open. applications_by_phase shares the funnel key-map. Data lives in the hook.
+ * Table: shared DataTable (§4 blueprint-conformance — no bespoke table chrome).
  */
 import { useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { KpiSpec } from '@/components/insights/InsightsRow'
+import DataTable from '@/components/ui/DataTable'
+import type { Column } from '@/components/ui/DataTable'
+import SoftChip from '@/components/ui/SoftChip'
 import ReportDrillDrawer from './ReportDrillDrawer'
 import type { DrillSpec } from './ReportDrillDrawer'
 import { useVacanciesReport } from './useVacanciesReport'
-import type { ReportPeriod } from '@/types/analytics'
+import type { ReportPeriod, VacancyReportRow } from '@/types/analytics'
 
-const TH: CSSProperties = {
-  padding: '8px 12px', textAlign: 'left', fontSize: 11, fontWeight: 600,
-  color: 'var(--text-muted)', background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)',
-  whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '0.04em',
-}
-const TD: CSSProperties = { padding: '10px 12px', fontSize: 13, color: 'var(--text)',
-  borderBottom: '1px solid var(--hover-bg)', whiteSpace: 'nowrap' }
-const NUM: CSSProperties = { ...TD, textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }
-
-// Soft chip — coloured background/text, never a solid fill (soft-chip convention).
-function Chip({ label, tone }: { label: string; tone: 'success' | 'muted' }) {
-  const color = tone === 'success' ? 'var(--color-success)' : 'var(--text-muted)'
-  const bg    = tone === 'success' ? 'var(--color-success-bg)' : 'var(--hover-bg)'
-  return (
-    <span style={{ background: bg, color, fontSize: 11, fontWeight: 500,
-                   padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap' }}>{label}</span>
-  )
-}
+// Number cell: emphasised when > 0, muted when zero (mirrors the SM entity tables).
+const numCell = (n: number) => (
+  <span style={{ fontWeight: n > 0 ? 600 : 400, color: n > 0 ? 'var(--text)' : 'var(--text-muted)' }}>{n}</span>
+)
 
 export default function VacanciesReport({ period, tabsSlot }: { period: ReportPeriod; tabsSlot?: ReactNode }) {
   const { t } = useTranslation('analytics')
@@ -53,6 +43,15 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
     rowsEndpoint: '/reports/vacancies/drill', rowsParams: { status, period },
     adviceEndpoint: '/reports/vacancies/advice', adviceParams: { status, period },
   })
+  const openVacancyRow = (v: VacancyReportRow) => setDrill({
+    title: v.label, value: v.applications, subtitle: v.customer?.name ?? t(`period.${period}`),
+    breakdown: [
+      { label: t('vacancies.cols.applications'), value: v.applications },
+      { label: t('vacancies.cols.matched'),      value: v.matched },
+    ],
+    rowsEndpoint: '/reports/vacancies/drill', rowsParams: { vacancy: v.key, period },
+    adviceEndpoint: '/reports/vacancies/advice', adviceParams: { vacancy: v.key, period },
+  })
 
   const kpis: KpiSpec[] = [
     { key: 'total',  label: t('vacancies.summary.total'),  value: s?.total ?? 0,
@@ -70,6 +69,40 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
       value: s?.avg_time_to_fill_days != null ? t('vacancies.daysValue', { days: Math.round(s.avg_time_to_fill_days) }) : '—' },
   ]
 
+  // Columns — soft chips for status/filled (§4), numeric cols right-aligned + sortable.
+  const columns: Column<VacancyReportRow>[] = [
+    {
+      key: 'label', header: t('vacancies.cols.vacancy'), sortable: true, sortValue: v => v.label ?? '',
+      render: v => (
+        <>
+          {v.label}
+          {v.code && <span style={{ marginLeft: 6, fontSize: 11, fontFamily: "'JetBrains Mono', monospace", color: 'var(--text-muted)' }}>{v.code}</span>}
+        </>
+      ),
+    },
+    {
+      key: 'customer', header: t('vacancies.cols.customer'), sortable: true, sortValue: v => v.customer?.name ?? '',
+      cellStyle: { color: 'var(--text-muted)', fontSize: 12, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' },
+      render: v => v.customer?.name ?? '—',
+    },
+    {
+      key: 'status', header: t('vacancies.cols.status'), sortable: true, sortValue: v => v.status?.label ?? '',
+      render: v => v.status?.label ? <SoftChip label={v.status.label} round /> : <span style={{ color: 'var(--text-muted)' }}>—</span>,
+    },
+    { key: 'applications', header: t('vacancies.cols.applications'), align: 'right', sortable: true, sortValue: v => v.applications, render: v => numCell(v.applications) },
+    { key: 'matched',      header: t('vacancies.cols.matched'),      align: 'right', sortable: true, sortValue: v => v.matched,      render: v => numCell(v.matched) },
+    {
+      key: 'filled', header: t('vacancies.cols.filled'), sortable: true, sortValue: v => (v.filled ? 1 : 0),
+      render: v => <SoftChip label={v.filled ? t('vacancies.filledYes') : t('vacancies.filledNo')}
+        color={v.filled ? 'var(--color-success)' : 'var(--text-muted)'} round />,
+    },
+    {
+      key: 'time_to_fill_days', header: t('vacancies.cols.timeToFill'), align: 'right', sortable: true,
+      sortValue: v => v.time_to_fill_days ?? -1,
+      render: v => v.time_to_fill_days != null ? t('vacancies.daysValue', { days: v.time_to_fill_days }) : '—',
+    },
+  ]
+
   return (
     <div>
       {/* KPI strip — above the tabs (candidate-page order: KPIs first) */}
@@ -82,66 +115,20 @@ export default function VacanciesReport({ period, tabsSlot }: { period: ReportPe
       {/* Tab bar + period control (from the hub) */}
       {tabsSlot}
 
-      {/* Table — four UI states */}
+      {/* Table — shared DataTable handles loading/empty; error stays a dedicated banner */}
       <div style={{ background: 'var(--surface)', borderRadius: 12, border: '1px solid var(--border)', overflow: 'hidden' }}>
-        {loading && (
-          <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--text-muted)' }}>{t('vacancies.loading')}</div>
-        )}
-        {error && !loading && (
+        {error && !loading ? (
           <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--color-danger)' }}>{t('vacancies.error')}</div>
-        )}
-        {!loading && !error && rows.length === 0 && (
-          <div style={{ textAlign: 'center', padding: 40, fontSize: 13, color: 'var(--text-muted)' }}>{t('vacancies.empty')}</div>
-        )}
-        {!loading && !error && rows.length > 0 && (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr>
-                  <th style={TH}>{t('vacancies.cols.vacancy')}</th>
-                  <th style={TH}>{t('vacancies.cols.customer')}</th>
-                  <th style={TH}>{t('vacancies.cols.status')}</th>
-                  <th style={{ ...TH, textAlign: 'right' }}>{t('vacancies.cols.applications')}</th>
-                  <th style={{ ...TH, textAlign: 'right' }}>{t('vacancies.cols.matched')}</th>
-                  <th style={TH}>{t('vacancies.cols.filled')}</th>
-                  <th style={{ ...TH, textAlign: 'right' }}>{t('vacancies.cols.timeToFill')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((v, i) => (
-                  <tr key={v.key ?? i} style={{ cursor: 'pointer' }}
-                    onClick={() => setDrill({
-                      title: v.label, value: v.applications, subtitle: v.customer?.name ?? t(`period.${period}`),
-                      breakdown: [
-                        { label: t('vacancies.cols.applications'), value: v.applications },
-                        { label: t('vacancies.cols.matched'),      value: v.matched },
-                      ],
-                      rowsEndpoint: '/reports/vacancies/drill', rowsParams: { vacancy: v.key, period },
-                      adviceEndpoint: '/reports/vacancies/advice', adviceParams: { vacancy: v.key, period },
-                    })}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                    <td style={{ ...TD, fontWeight: 500 }}>
-                      {v.label}
-                      {v.code && <span style={{ marginLeft: 6, fontSize: 11, fontFamily: 'monospace', color: 'var(--text-muted)' }}>{v.code}</span>}
-                    </td>
-                    <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12, maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {v.customer?.name ?? '—'}
-                    </td>
-                    <td style={TD}>{v.status?.label ? <Chip label={v.status.label} tone="muted" /> : '—'}</td>
-                    <td style={NUM}>{v.applications}</td>
-                    <td style={NUM}>{v.matched}</td>
-                    <td style={TD}>
-                      <Chip label={v.filled ? t('vacancies.filledYes') : t('vacancies.filledNo')} tone={v.filled ? 'success' : 'muted'} />
-                    </td>
-                    <td style={{ ...NUM, fontWeight: 500 }}>
-                      {v.time_to_fill_days != null ? t('vacancies.daysValue', { days: v.time_to_fill_days }) : '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        ) : (
+          <DataTable
+            columns={columns}
+            rows={rows}
+            getRowId={v => v.key}
+            onRowClick={openVacancyRow}
+            loading={loading}
+            loadingText={t('vacancies.loading')}
+            emptyText={t('vacancies.empty')}
+          />
         )}
       </div>
 

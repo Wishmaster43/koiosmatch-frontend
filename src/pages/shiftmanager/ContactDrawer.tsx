@@ -5,6 +5,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import { Mail, Phone, MessageCircle, MapPin, X, ChevronRight } from 'lucide-react'
+import SoftChip from '@/components/ui/SoftChip'
 import { ac, ContactAvatar } from './contactParts'
 import type { SmContactRow } from '@/types/shiftmanager'
 
@@ -34,11 +35,10 @@ export default function ContactDrawer({ contact, onClose }: { contact: SmContact
             <div style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)', marginBottom: 2 }}>{name}</div>
             <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{contact.function_title}</div>
             {contact.planning && (
-              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, marginTop: 6,
-                padding: '2px 8px', borderRadius: 999, background: 'var(--color-success-bg)', color: 'var(--color-success)',
-                border: '1px solid #BBF7D0', fontWeight: 500 }}>
-                <MessageCircle size={10} /> {t('contactsPage.planningContact')}
-              </span>
+              <div style={{ marginTop: 6 }}>
+                <SoftChip round color="var(--color-success)"
+                  label={<><MessageCircle size={10} /> {t('contactsPage.planningContact')}</>} />
+              </div>
             )}
           </div>
         </div>

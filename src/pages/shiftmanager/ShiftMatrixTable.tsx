@@ -2,6 +2,12 @@
  * ShiftMatrixTable — candidate × month grid for the shift analysis. Rows are
  * candidates, columns are months; each cell shows the selected metric (prognose/
  * werkelijk × uren/diensten). Sticky first column + a totals row per month.
+ *
+ * Bespoke by design, not an oversight (§4 written-reason rule): this is a PIVOT
+ * grid whose column set is runtime-computed (one column per month in range) plus
+ * a totals footer row — the shared `components/ui/DataTable` models a fixed,
+ * declared column list over a flat row list and has no footer/pivot concept, so
+ * it can't express this shape. Kept as its own component; already tokens-only.
  * NOTE: renders all rows (mirrors the other SM tables); virtualize when the feed
  * scales to thousands (§9) — tracked as a perf follow-up.
  */

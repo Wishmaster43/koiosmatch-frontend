@@ -7,6 +7,10 @@
 import { avatarColor as ac } from '@/lib/avatarColor'
 export { ac }
 
+// The one soft-chip primitive (§4) — same tint formula as DepartmentsTable's StatusPill,
+// so the drawer's status badge never drifts from the table's.
+import SoftChip from '@/components/ui/SoftChip'
+
 // Square initial-avatar.
 export function Avatar({ label, size = 30, radius = 8 }: { label?: string; size?: number; radius?: number }) {
   return (
@@ -18,14 +22,11 @@ export function Avatar({ label, size = 30, radius = 8 }: { label?: string; size?
   )
 }
 
-// Active/inactive pill; the status value itself is tenant data.
+// Status → soft-chip colour (mirrors DepartmentsTable's STATUS_COLORS exactly).
+const STATUS_COLORS: Record<string, string> = { actief: 'var(--color-success)', inactief: 'var(--color-warning)' }
+
+// Active/inactive soft-chip pill; the status value itself is tenant data.
 export function StatusBadge({ status }: { status?: string }) {
-  const active = status?.toLowerCase() === 'actief'
-  return (
-    <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 9px', borderRadius: 999,
-      background: active ? 'var(--color-success-bg)' : 'var(--border)',
-      color:      active ? 'var(--color-success)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-      {status}
-    </span>
-  )
+  if (!status) return <span style={{ color: 'var(--text-muted)' }}>—</span>
+  return <SoftChip label={status} color={STATUS_COLORS[status.toLowerCase()]} round />
 }

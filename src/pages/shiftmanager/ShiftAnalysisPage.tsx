@@ -86,7 +86,7 @@ export default function ShiftAnalysisPage() {
             <KpiCard label={t('shiftAnalysis.kpi.wegvallend')} value={counts.wegvallend}
               icon={TrendingDown} iconBg="var(--color-danger-bg)" iconColor="var(--color-danger)" />
             <KpiCard label={t('shiftAnalysis.kpi.daling')} value={counts.daling}
-              icon={TrendingDown} iconBg="var(--color-warning-bg)" iconColor="#C2410C" />
+              icon={TrendingDown} iconBg="var(--color-warning-bg)" iconColor="var(--color-warning)" />
             <KpiCard label={t('shiftAnalysis.kpi.opkomend')} value={counts.opkomend}
               icon={TrendingUp} iconBg="var(--color-success-bg)" iconColor="var(--color-success)" />
             <KpiCard label={t('shiftAnalysis.kpi.nieuwInactief')} value={counts.nieuw_inactief}

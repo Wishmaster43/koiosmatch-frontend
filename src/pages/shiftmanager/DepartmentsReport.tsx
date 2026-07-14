@@ -74,10 +74,10 @@ export default function DepartmentsReport() {
 
       {/* KPI blocks */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, marginBottom: 28 }}>
-        <KpiBlock label={t('departmentsReport.kpi.totalDepartments')}  value={departments.length}        icon={Layers}    color="#7C3AED" bg="#F5F3FF" loading={loading} />
+        <KpiBlock label={t('departmentsReport.kpi.totalDepartments')}  value={departments.length}        icon={Layers}    color="var(--color-violet)" bg="var(--color-violet-bg)" loading={loading} />
         <KpiBlock label={t('departmentsReport.kpi.uniqueLocations')}   value={uniqueLocations.length}    icon={MapPin}    color="var(--color-secondary)" bg="var(--color-secondary-bg)" loading={loading}
           sub={uniqueLocations.length > 0 ? t('departmentsReport.sub.avgPerLocation', { n: (departments.length / Math.max(uniqueLocations.length, 1)).toFixed(1) }) : undefined} />
-        <KpiBlock label={t('departmentsReport.kpi.uniqueCustomers')}   value={uniqueCustomers.length}    icon={Building2} color="#059669" bg="#ECFDF5" loading={loading} />
+        <KpiBlock label={t('departmentsReport.kpi.uniqueCustomers')}   value={uniqueCustomers.length}    icon={Building2} color="var(--color-success)" bg="var(--color-success-bg)" loading={loading} />
         <KpiBlock label={t('departmentsReport.kpi.withCostCenter')}
           value={departments.filter(d => d.cost_center).length}
           icon={Hash} color="var(--color-warning)" bg="var(--color-warning-bg)" loading={loading}

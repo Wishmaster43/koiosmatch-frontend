@@ -67,10 +67,10 @@ export default function ShiftmanagerDashboard() {
   // One combined "Activiteit" donut over ACTIVE candidates (Gewerkt deze maand /
   // Ingepland / Nooit gewerkt / Geen recente activiteit) — replaces 3 separate tiles.
   const activityBuckets = useMemo(() => ([
-    { key: 'worked',  label: t('dashboard.stats.workedThisMonth'), title: t('dashboard.stats.workedThisMonthHint'), list: derived.bWorked,  color: '#16A34A' },
-    { key: 'planned', label: t('dashboard.stats.planned'),         title: t('dashboard.stats.plannedHint'),         list: derived.bPlanned, color: '#1B60A9' },
-    { key: 'never',   label: t('dashboard.stats.neverWorked'),     title: t('dashboard.stats.neverWorkedHint'),     list: derived.bNever,   color: '#DC2626' },
-    { key: 'idle',    label: t('dashboard.stats.idle'),            title: t('dashboard.stats.idleHint'),            list: derived.bIdle,    color: '#94A3B8' },
+    { key: 'worked',  label: t('dashboard.stats.workedThisMonth'), title: t('dashboard.stats.workedThisMonthHint'), list: derived.bWorked,  color: 'var(--color-success)' },
+    { key: 'planned', label: t('dashboard.stats.planned'),         title: t('dashboard.stats.plannedHint'),         list: derived.bPlanned, color: 'var(--color-secondary)' },
+    { key: 'never',   label: t('dashboard.stats.neverWorked'),     title: t('dashboard.stats.neverWorkedHint'),     list: derived.bNever,   color: 'var(--color-danger)' },
+    { key: 'idle',    label: t('dashboard.stats.idle'),            title: t('dashboard.stats.idleHint'),            list: derived.bIdle,    color: 'var(--text-muted)' },
   ]), [derived, t])
   // Drill-down: a candidate KPI opens the shared drawer — 'average' shows the per-month
   // breakdown vs KPI target, other picks list their subset.

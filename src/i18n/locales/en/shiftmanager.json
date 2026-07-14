@@ -1,4 +1,5 @@
 {
+  "comingSoon": "{{label}} — coming soon",
   "shiftAnalysis": {
     "title": "Candidate shift analysis",
     "subtitle": "Trend and attention signals per candidate based on planned and worked hours.",
@@ -7,14 +8,35 @@
     "unavailable": "This analysis is waiting on the shift feed from the backend. Once it's available, trends and attention signals appear here.",
     "empty": "No candidates with an attention signal.",
     "hours": "{{n}} h",
-    "cols": { "name": "Name", "position": "Position", "avgHours": "Avg. hours", "upcoming": "Upcoming hours", "alarm": "Signal" },
-    "alarm": { "wegvallend": "Dropping off", "daling": "Strong decline", "opkomend": "Rising", "nieuw_inactief": "New & inactive" },
-    "kpi": { "wegvallend": "Dropping off", "daling": "Strong decline", "opkomend": "Rising", "nieuwInactief": "New & inactive" },
+    "cols": {
+      "name": "Name",
+      "position": "Position",
+      "avgHours": "Avg. hours",
+      "upcoming": "Upcoming hours",
+      "alarm": "Signal"
+    },
+    "alarm": {
+      "wegvallend": "Dropping off",
+      "daling": "Strong decline",
+      "opkomend": "Rising",
+      "nieuw_inactief": "New & inactive"
+    },
+    "kpi": {
+      "wegvallend": "Dropping off",
+      "daling": "Strong decline",
+      "opkomend": "Rising",
+      "nieuwInactief": "New & inactive"
+    },
     "plannedTitle": "Planned UZK per month",
     "matrixTitle": "Per candidate per month",
     "candidate": "Candidate",
     "total": "Total",
-    "metric": { "prognose_hours": "Forecast hours", "prognose_shifts": "Forecast shifts", "werkelijk_hours": "Actual hours", "werkelijk_shifts": "Actual shifts" },
+    "metric": {
+      "prognose_hours": "Forecast hours",
+      "prognose_shifts": "Forecast shifts",
+      "werkelijk_hours": "Actual hours",
+      "werkelijk_shifts": "Actual shifts"
+    },
     "allForms": "All"
   },
   "orders": {
@@ -156,7 +178,8 @@
     "inShifts": "In shifts",
     "colHours": "Hours",
     "colShifts": "Shifts",
-    "lastSync": "Last sync: {{time}}"
+    "lastSync": "Last sync: {{time}}",
+    "empty": "—"
   },
   "customersReport": {
     "title": "Customers report",

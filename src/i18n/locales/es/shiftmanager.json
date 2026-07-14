@@ -1,4 +1,5 @@
 {
+  "comingSoon": "{{label}} — próximamente",
   "shiftAnalysis": {
     "title": "Análisis de turnos de candidatos",
     "subtitle": "Tendencia y señales de atención por candidato según horas planificadas y trabajadas.",
@@ -7,14 +8,35 @@
     "unavailable": "Este análisis está esperando el feed de turnos del backend. En cuanto esté disponible, aparecerán aquí las tendencias y señales de atención.",
     "empty": "Ningún candidato con una señal de atención.",
     "hours": "{{n}} h",
-    "cols": { "name": "Nombre", "position": "Puesto", "avgHours": "Horas prom.", "upcoming": "Horas próximas", "alarm": "Señal" },
-    "alarm": { "wegvallend": "En descenso", "daling": "Fuerte caída", "opkomend": "En aumento", "nieuw_inactief": "Nuevo e inactivo" },
-    "kpi": { "wegvallend": "En descenso", "daling": "Fuerte caída", "opkomend": "En aumento", "nieuwInactief": "Nuevo e inactivo" },
+    "cols": {
+      "name": "Nombre",
+      "position": "Puesto",
+      "avgHours": "Horas prom.",
+      "upcoming": "Horas próximas",
+      "alarm": "Señal"
+    },
+    "alarm": {
+      "wegvallend": "En descenso",
+      "daling": "Fuerte caída",
+      "opkomend": "En aumento",
+      "nieuw_inactief": "Nuevo e inactivo"
+    },
+    "kpi": {
+      "wegvallend": "En descenso",
+      "daling": "Fuerte caída",
+      "opkomend": "En aumento",
+      "nieuwInactief": "Nuevo e inactivo"
+    },
     "plannedTitle": "UZK planificados por mes",
     "matrixTitle": "Por candidato por mes",
     "candidate": "Candidato",
     "total": "Total",
-    "metric": { "prognose_hours": "Horas previstas", "prognose_shifts": "Turnos previstos", "werkelijk_hours": "Horas reales", "werkelijk_shifts": "Turnos reales" },
+    "metric": {
+      "prognose_hours": "Horas previstas",
+      "prognose_shifts": "Turnos previstos",
+      "werkelijk_hours": "Horas reales",
+      "werkelijk_shifts": "Turnos reales"
+    },
     "allForms": "Todos"
   },
   "orders": {
@@ -156,7 +178,8 @@
     "inShifts": "En turnos",
     "colHours": "Horas",
     "colShifts": "Turnos",
-    "lastSync": "Última sinc.: {{time}}"
+    "lastSync": "Última sinc.: {{time}}",
+    "empty": "—"
   },
   "customersReport": {
     "title": "Informe de clientes",

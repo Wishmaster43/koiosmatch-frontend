@@ -9,6 +9,10 @@ import { useTranslation } from 'react-i18next'
 import { avatarColor as ac } from '@/lib/avatarColor'
 export { ac }
 
+// The one soft-chip primitive (§4) — same tint formula as LocationsTable's StatusPill,
+// so the drawer's status badge never drifts from the table's.
+import SoftChip from '@/components/ui/SoftChip'
+
 // Square initial-avatar.
 export function Avatar({ label, size = 32 }: { label?: string; size?: number }) {
   return (
@@ -20,16 +24,15 @@ export function Avatar({ label, size = 32 }: { label?: string; size?: number }) 
   )
 }
 
-// Active/inactive pill; the status value itself is tenant data, only the empty
-// fallback label is translated.
+// Status → soft-chip colour (mirrors LocationsTable's STATUS_COLORS exactly).
+const STATUS_COLORS: Record<string, string> = {
+  actief: 'var(--color-success)', active: 'var(--color-success)', inactief: 'var(--color-warning)',
+}
+
+// Active/inactive soft-chip pill; the status value itself is tenant data, only the
+// empty fallback label is translated.
 export function StatusBadge({ status }: { status?: string }) {
   const { t } = useTranslation('shiftmanager')
-  const active = status?.toLowerCase() === 'actief' || status?.toLowerCase() === 'active'
-  return (
-    <span style={{ fontSize: 11, fontWeight: 500, padding: '3px 9px', borderRadius: 999,
-      background: active ? 'var(--color-success-bg)' : 'var(--border)',
-      color:      active ? 'var(--color-success)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-      {status || t('locationsPage.statusUnknown')}
-    </span>
-  )
+  if (!status) return <span style={{ color: 'var(--text-muted)' }}>{t('locationsPage.statusUnknown')}</span>
+  return <SoftChip label={status} color={STATUS_COLORS[status.toLowerCase()]} round />
 }

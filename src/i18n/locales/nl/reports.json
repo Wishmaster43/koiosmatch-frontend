@@ -365,5 +365,6 @@
       "attempts": "Poging {{count}}",
       "nextAttempt": "Volgende poging om {{time}}"
     }
-  }
+  },
+  "messageDetail": "Berichtdetail"
 }

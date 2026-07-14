@@ -95,9 +95,9 @@ export default function LocationsReport() {
               </span>
               {inactive.length > 0 && (
                 <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5,
-                               background: 'var(--color-warning-bg)', color: '#C2410C', borderRadius: 999,
+                               background: 'var(--color-warning-bg)', color: 'var(--color-warning)', borderRadius: 999,
                                padding: '3px 10px', fontSize: 12, fontWeight: 500 }}>
-                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C2410C' }} />
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-warning)' }} />
                   {inactive.length} {t('locationsReport.inactiveWord')}
                 </span>
               )}
@@ -124,7 +124,7 @@ export default function LocationsReport() {
         <KpiBlock
           label={t('locationsReport.kpi.totalDepartments')}
           value={totalDep}
-          icon={Layers} color="#7C3AED" bg="#F5F3FF"
+          icon={Layers} color="var(--color-violet)" bg="var(--color-violet-bg)"
           loading={loading}
           sub={active.length > 0 ? t('locationsReport.sub.avgPerLocation', { n: (totalDep / Math.max(active.length, 1)).toFixed(1) }) : undefined}
           onClick={!loading ? () => setDrawer({ title: t('locationsReport.drill.allDepartments'), items: drillDepartments }) : undefined}
@@ -132,7 +132,7 @@ export default function LocationsReport() {
         <KpiBlock
           label={t('locationsReport.kpi.uniqueCustomers')}
           value={uniqueCustomers.length}
-          icon={Building2} color="#059669" bg="#ECFDF5"
+          icon={Building2} color="var(--color-success)" bg="var(--color-success-bg)"
           loading={loading}
           onClick={!loading ? () => setDrawer({ title: t('locationsReport.drill.customers'), items: drillCustomers }) : undefined}
         />

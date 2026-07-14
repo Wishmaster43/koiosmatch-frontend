@@ -365,5 +365,6 @@
       "attempts": "Attempt {{count}}",
       "nextAttempt": "Next attempt at {{time}}"
     }
-  }
+  },
+  "messageDetail": "Message detail"
 }

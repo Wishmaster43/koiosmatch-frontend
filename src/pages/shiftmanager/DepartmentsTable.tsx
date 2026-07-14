@@ -67,7 +67,7 @@ export default function DepartmentsTable({ rows, loading, selectedId, onSelect }
     {
       key: 'status', header: t('departmentsPage.cols.status'), sortable: true, sortValue: d => d.status ?? '',
       render: d => d.status
-        ? <StatusPill label={d.status} color={STATUS_COLORS[d.status.toLowerCase()] ?? '#9CA3AF'} />
+        ? <StatusPill label={d.status} color={STATUS_COLORS[d.status.toLowerCase()]} />
         : <span style={{ color: 'var(--text-muted)' }}>—</span>,
     },
   ]
