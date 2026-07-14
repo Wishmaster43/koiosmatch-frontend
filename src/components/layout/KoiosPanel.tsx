@@ -8,13 +8,20 @@ import { useKoiosSettings } from './koios/useKoiosSettings'
 import { useKoiosExpanded } from './koios/useKoiosExpanded'
 import { useKoiosMentionCounts } from './koios/useKoiosMentionCounts'
 import { matchMentionQuery } from './koios/mentionMatch'
+import { resolveScopedQuery } from './koios/mentionScope'
 import { addContextRef, removeContextRef } from './koios/contextRefs'
+import { isContextResolvable } from './koios/koiosContextTypes'
+import { MENTION_CATEGORIES } from './koios/koiosMentionCategories'
+import type { MentionCategoryConfig } from './koios/koiosMentionCategories'
 import KoiosSteps from './koios/KoiosSteps'
 import KoiosUsage from './koios/KoiosUsage'
 import KoiosModelPicker from './koios/KoiosModelPicker'
 import KoiosMentionMenu from './koios/KoiosMentionMenu'
 import KoiosHeader from './koios/KoiosHeader'
-import type { KoiosCandidateHit } from './koios/useKoiosCandidateSearch'
+import KoiosPendingActionCard from './koios/KoiosPendingActionCard'
+import KoiosResultCards from './koios/KoiosResultCards'
+import type { KoiosEntityHit } from './koios/useKoiosEntitySearch'
+import type { KoiosResultRef } from './koios/koiosTypes'
 import type { KoiosChatMessage, KoiosContextRef, TFn } from '@/types/koios'
 
 // gradient used for the assistant avatar + user bubble.
@@ -43,6 +50,8 @@ function KoiosMessage({ msg, isNew, t, locale }: { msg: KoiosChatMessage; isNew?
   // Subtle tag under the bubble for a self-refusal or an unfinished (max_steps) run.
   const stopTag = isKoios && !notice && msg.stopReason === 'refusal' ? t('koios.stopRefused')
     : isKoios && !notice && msg.stopReason === 'max_steps' ? t('koios.stopMaxSteps') : null
+  // Job 3 (dormant): flatten every step's `refs[]` into one deep-link card row.
+  const resultRefs: KoiosResultRef[] = (msg.steps ?? []).flatMap((s) => s.refs ?? [])
 
   return (
     <div style={{ display: 'flex', gap: 8, flexDirection: isKoios ? 'row' : 'row-reverse',
@@ -67,6 +76,10 @@ function KoiosMessage({ msg, isNew, t, locale }: { msg: KoiosChatMessage; isNew?
           {text}
         </div>
         {stopTag && <div style={{ marginTop: 4, fontSize: 10, color: 'var(--text-muted)' }}>{stopTag}</div>}
+        {/* Job 2 (dormant): a proposed write waiting for the user's confirm/cancel. */}
+        {isKoios && !notice && msg.pendingAction && <KoiosPendingActionCard action={msg.pendingAction} />}
+        {/* Job 3 (dormant): deep-link cards for any refs a read-tool step returned. */}
+        {isKoios && !notice && resultRefs.length > 0 && <KoiosResultCards refs={resultRefs} />}
         {isKoios && !notice && <KoiosSteps steps={msg.steps} t={t} />}
         {isKoios && !notice && msg.stopReason !== 'not_configured' && (
           <KoiosUsage usage={msg.usage} model={msg.model} t={t} locale={locale} />
@@ -112,6 +125,11 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
   const [focused,     setFocused]     = useState(false)
   const [showMention, setShowMention] = useState(false)
   const [mentionQ,    setMentionQ]    = useState('')
+  // The category the user drilled into ("@Vacatures ") for a scoped search
+  // (KOIOS-SEARCH-1) — null while showing the default candidate-quick-search +
+  // category list. `label` is the exact text inserted, used to detect the
+  // scoped query's prefix (mentionScope.resolveScopedQuery).
+  const [activeCategory, setActiveCategory] = useState<{ id: string; label: string } | null>(null)
   // @-mentioned records for the outgoing turn (KOIOS-CTX-1) — shown as removable
   // chips above the composer; cleared on send and on "Nieuwe chat".
   const [contextRefs, setContextRefs] = useState<KoiosContextRef[]>([])
@@ -136,7 +154,7 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
   // Close the mention picker on an outside click.
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (mentionRef.current && !mentionRef.current.contains(e.target as Node)) setShowMention(false)
+      if (mentionRef.current && !mentionRef.current.contains(e.target as Node)) { setShowMention(false); setActiveCategory(null) }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
@@ -151,48 +169,66 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
     setContextRefs([])
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
     setShowMention(false)
+    setActiveCategory(null)
     setTimeout(() => textareaRef.current?.focus(), 50)
   }
 
   // Track the "@" mention trigger. matchMentionQuery is unicode-safe and allows
   // spaces (e.g. "@ahmed vos") — see mentionMatch.ts for the space-handling fix.
+  // A scoped category (KOIOS-SEARCH-1) is dropped the moment the typed tail no
+  // longer starts with its label — the user backspaced past it or started a
+  // fresh "@" elsewhere (mentionScope.resolveScopedQuery is the single source
+  // of truth KoiosMentionMenu itself uses for the same decision).
   const handleInput = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const val = e.target.value
     setInput(val)
     const q = matchMentionQuery(val)
-    if (q === null) { setShowMention(false); return }
+    if (q === null) { setShowMention(false); setActiveCategory(null); return }
     setShowMention(true)
     setMentionQ(q)
+    if (activeCategory && resolveScopedQuery(q, activeCategory.label) === null) setActiveCategory(null)
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submit(input) }
-    if (e.key === 'Escape') setShowMention(false)
+    if (e.key === 'Escape') { setShowMention(false); setActiveCategory(null) }
   }
 
-  // Picking a category keeps the original behaviour: just insert "@Label ".
-  const insertCategoryMention = (label: string) => {
+  // Picking a category inserts "@Label " as before. A category WITH search
+  // wiring (koiosMentionCategories) enters scoped mode — the menu stays open
+  // and switches to a live search within that category; one WITHOUT (today:
+  // `locations`, no global list endpoint) keeps the legacy text-only insert.
+  const insertCategoryMention = (category: MentionCategoryConfig, label: string) => {
     const lastAt = input.lastIndexOf('@')
     const before = lastAt !== -1 ? input.slice(0, lastAt) : input
     setInput(before + '@' + label + ' ')
-    setShowMention(false)
+    if (category.search) {
+      setActiveCategory({ id: category.id, label })
+    } else {
+      setShowMention(false)
+      setActiveCategory(null)
+    }
     textareaRef.current?.focus()
   }
 
-  // Picking a real candidate ALSO records a context ref (deduped by id) so the
-  // outgoing turn carries { type: 'candidate', id } alongside the mention text.
-  const insertCandidateMention = (hit: KoiosCandidateHit) => {
+  // Picking a real record (default candidate quick-search OR a scoped category
+  // search) ALSO records a context ref (deduped by id) so the outgoing turn
+  // carries { type, id } alongside the mention text — resolvable types only are
+  // ever sent to the backend (koiosApi.sendChat), the rest stay a UI-only pin.
+  const insertEntityMention = (hit: KoiosEntityHit, categoryId: string) => {
+    const refType = MENTION_CATEGORIES.find((c) => c.id === categoryId)?.search?.refType ?? categoryId
     const lastAt = input.lastIndexOf('@')
     const before = lastAt !== -1 ? input.slice(0, lastAt) : input
     setInput(before + '@' + hit.name + ' ')
-    setContextRefs(prev => addContextRef(prev, { type: 'candidate', id: hit.id, label: hit.name }))
+    setContextRefs(prev => addContextRef(prev, { type: refType, id: hit.id, label: hit.name }))
     setShowMention(false)
+    setActiveCategory(null)
     textareaRef.current?.focus()
   }
 
   const removeContext = (id: string) => setContextRefs(prev => removeContextRef(prev, id))
 
-  const newChat = () => { reset(); setInput(''); setShowMention(false); setContextRefs([]) }
+  const newChat = () => { reset(); setInput(''); setShowMention(false); setActiveCategory(null); setContextRefs([]) }
 
   if (!open) return null
 
@@ -219,37 +255,45 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
       {/* ── Input area ── */}
       <div style={{ padding: '10px 12px 14px', borderTop: '1px solid var(--sidebar-border)', flexShrink: 0, position: 'relative' }}>
 
-        {/* Mention picker — live candidate search + category list (real counts) */}
+        {/* Mention picker — scoped per-category search + candidate quick-search + category list */}
         {showMention && (
           <KoiosMentionMenu
             query={mentionQ}
             counts={mentionCounts}
+            activeCategoryId={activeCategory?.id ?? null}
+            activeCategoryLabel={activeCategory?.label ?? null}
             onPickCategory={insertCategoryMention}
-            onPickCandidate={insertCandidateMention}
+            onPickEntity={insertEntityMention}
             t={t}
             locale={locale}
             menuRef={mentionRef}
           />
         )}
 
-        {/* Active @-mention context refs — removable chips (cleared on send/newChat) */}
+        {/* Active @-mention context refs — removable chips (cleared on send/newChat).
+            A type the backend can't resolve yet (koiosContextTypes) still shows as a
+            chip (so the pin is visible) but is dashed + tooltipped — it is pinned
+            client-side ONLY and never sent in the outgoing context[]. */}
         {contextRefs.length > 0 && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 8 }}>
-            {contextRefs.map(ref => (
-              <span key={ref.id} style={{
-                display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 999,
-                fontSize: 11, fontWeight: 500,
-                background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
-                color: 'var(--color-primary)',
-                border: '1px solid color-mix(in srgb, var(--color-primary) 40%, transparent)',
-              }}>
-                {ref.label}
-                <button onClick={() => removeContext(ref.id)} aria-label={`${t('remove')} ${ref.label}`}
-                  style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
-                  <X size={10} />
-                </button>
-              </span>
-            ))}
+            {contextRefs.map(ref => {
+              const pending = !isContextResolvable(ref.type)
+              return (
+                <span key={ref.id} title={pending ? t('koios.contextPending') : undefined} style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 999,
+                  fontSize: 11, fontWeight: 500,
+                  background: 'color-mix(in srgb, var(--color-primary) 12%, transparent)',
+                  color: 'var(--color-primary)',
+                  border: `1px ${pending ? 'dashed' : 'solid'} color-mix(in srgb, var(--color-primary) 40%, transparent)`,
+                }}>
+                  {ref.label}
+                  <button onClick={() => removeContext(ref.id)} aria-label={`${t('remove')} ${ref.label}`}
+                    style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 0 }}>
+                    <X size={10} />
+                  </button>
+                </span>
+              )
+            })}
           </div>
         )}
 
@@ -283,7 +327,7 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
 
             {/* @ mention */}
             <button
-              onClick={() => { setInput(v => v + '@'); setShowMention(true); setMentionQ(''); textareaRef.current?.focus() }}
+              onClick={() => { setInput(v => v + '@'); setShowMention(true); setMentionQ(''); setActiveCategory(null); textareaRef.current?.focus() }}
               title={t('koios.addContext')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 5px',
                 borderRadius: 7, color: 'var(--sidebar-muted)', display: 'flex',

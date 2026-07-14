@@ -13,10 +13,15 @@
  *
  * `send(text, context?)` — `context` is the @-mentioned records attached to this
  * turn (KOIOS-CTX-1); optional and additive, see koiosApi for the wire contract.
+ *
+ * `pendingAction` (KOIOS-AGENT-PLAN §6) rides along on an assistant message when
+ * the backend proposes a guarded write instead of executing it — dormant/undefined
+ * until that half ships; KoiosPanel only renders the confirmation card when present.
  */
 import { useCallback, useState } from 'react'
 import { sendChat } from './koiosApi'
 import type { KoiosChatMessage, KoiosContextRef } from '@/types/koios'
+import './koiosTypes' // module augmentation: KoiosChatMessage.pendingAction, KoiosStep.refs
 
 const welcomeMessage = (): KoiosChatMessage => ({ role: 'assistant', kind: 'welcome' })
 
@@ -41,6 +46,7 @@ export function useKoiosChat() {
         usage:      data?.usage ?? null,
         model:      data?.model ?? null,
         stopReason: data?.stop_reason ?? 'end_turn',
+        pendingAction: data?.pending_action ?? null,
       }])
     } catch (e) {
       // 403 = no module/permission → "no access"; anything else → calm retry notice.

@@ -132,13 +132,34 @@
     "forbidden": "You don't have access to Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "Not connected",
+    "contextPending": "This record can't be linked as AI context yet — pinned for reference only.",
     "mention": {
       "leads": "Leads",
       "locations": "Locations",
       "departments": "Departments",
       "contacts": "Contacts",
-      "total": "total"
+      "total": "total",
+      "searchUnsupported": "Live search isn't available for this category yet."
+    },
+    "pendingAction": {
+      "owner": "owner: {{name}}",
+      "confirm": "Confirm",
+      "confirmFinal": "Yes, confirm",
+      "cancel": "Cancel",
+      "back": "Back",
+      "expiresIn": "Expires in {{seconds}}s",
+      "confirmed": "Done.",
+      "cancelled": "Cancelled.",
+      "expired": "This proposal has expired — ask again.",
+      "error": "Something went wrong. Please try again."
     }
+  },
+  "actionRules": {
+    "title": "Action check",
+    "ok": "Confirm",
+    "cancel": "Cancel",
+    "warnTitle": "Warning",
+    "blockTitle": "Not allowed"
   },
   "clickForDetails": "Click for details",
   "clickPoint": "Click a point",

@@ -132,13 +132,34 @@
     "forbidden": "Du hast keinen Zugriff auf Koios.",
     "usageLine": "{{model}} · {{tokens}} Tokens · {{cost}}",
     "offline": "Nicht verbunden",
+    "contextPending": "Dieser Datensatz kann noch nicht als KI-Kontext verknüpft werden — nur zur Referenz angeheftet.",
     "mention": {
       "leads": "Leads",
       "locations": "Standorte",
       "departments": "Abteilungen",
       "contacts": "Kontakte",
-      "total": "gesamt"
+      "total": "gesamt",
+      "searchUnsupported": "Livesuche ist für diese Kategorie noch nicht verfügbar."
+    },
+    "pendingAction": {
+      "owner": "Eigentümer: {{name}}",
+      "confirm": "Bestätigen",
+      "confirmFinal": "Ja, bestätigen",
+      "cancel": "Abbrechen",
+      "back": "Zurück",
+      "expiresIn": "Läuft ab in {{seconds}}s",
+      "confirmed": "Erledigt.",
+      "cancelled": "Abgebrochen.",
+      "expired": "Dieser Vorschlag ist abgelaufen — bitte erneut fragen.",
+      "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen."
     }
+  },
+  "actionRules": {
+    "title": "Aktionsprüfung",
+    "ok": "Bestätigen",
+    "cancel": "Abbrechen",
+    "warnTitle": "Achtung",
+    "blockTitle": "Nicht erlaubt"
   },
   "clickForDetails": "Für Details klicken",
   "clickPoint": "Punkt anklicken",

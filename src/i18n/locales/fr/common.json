@@ -132,13 +132,34 @@
     "forbidden": "Vous n'avez pas accès à Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "Non connecté",
+    "contextPending": "Cet enregistrement ne peut pas encore être lié comme contexte IA — épinglé à titre indicatif uniquement.",
     "mention": {
       "leads": "Prospects",
       "locations": "Sites",
       "departments": "Services",
       "contacts": "Contacts",
-      "total": "au total"
+      "total": "au total",
+      "searchUnsupported": "La recherche en direct n'est pas encore disponible pour cette catégorie."
+    },
+    "pendingAction": {
+      "owner": "propriétaire : {{name}}",
+      "confirm": "Confirmer",
+      "confirmFinal": "Oui, confirmer",
+      "cancel": "Annuler",
+      "back": "Retour",
+      "expiresIn": "Expire dans {{seconds}}s",
+      "confirmed": "Terminé.",
+      "cancelled": "Annulé.",
+      "expired": "Cette proposition a expiré — redemandez-la.",
+      "error": "Une erreur s'est produite. Veuillez réessayer."
     }
+  },
+  "actionRules": {
+    "title": "Vérification de l'action",
+    "ok": "Confirmer",
+    "cancel": "Annuler",
+    "warnTitle": "Attention",
+    "blockTitle": "Non autorisé"
   },
   "clickForDetails": "Cliquez pour les détails",
   "clickPoint": "Cliquez sur un point",

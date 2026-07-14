@@ -132,13 +132,34 @@
     "forbidden": "Je hebt geen toegang tot Koios.",
     "usageLine": "{{model}} · {{tokens}} tokens · {{cost}}",
     "offline": "Niet gekoppeld",
+    "contextPending": "Dit record kan nog niet als AI-context worden gekoppeld — alleen ter referentie vastgepind.",
     "mention": {
       "leads": "Leads",
       "locations": "Locaties",
       "departments": "Afdelingen",
       "contacts": "Contactpersonen",
-      "total": "totaal"
+      "total": "totaal",
+      "searchUnsupported": "Live zoeken is voor deze categorie nog niet beschikbaar."
+    },
+    "pendingAction": {
+      "owner": "eigenaar: {{name}}",
+      "confirm": "Bevestigen",
+      "confirmFinal": "Ja, bevestigen",
+      "cancel": "Annuleren",
+      "back": "Terug",
+      "expiresIn": "Verloopt over {{seconds}}s",
+      "confirmed": "Gelukt.",
+      "cancelled": "Geannuleerd.",
+      "expired": "Dit voorstel is verlopen — vraag het opnieuw.",
+      "error": "Er ging iets mis. Probeer het opnieuw."
     }
+  },
+  "actionRules": {
+    "title": "Actiecontrole",
+    "ok": "Bevestigen",
+    "cancel": "Annuleren",
+    "warnTitle": "Let op",
+    "blockTitle": "Niet toegestaan"
   },
   "clickForDetails": "Klik voor details",
   "clickPoint": "Klik op punt",
