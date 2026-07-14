@@ -47,7 +47,8 @@
     "tasks": "Tâches",
     "matches": "Correspondances",
     "outreach": "Listes d'appels",
-    "opportunities": "Opportunités"
+    "opportunities": "Opportunités",
+    "custom_fields": "Champs personnalisés"
   },
   "nav": {
     "candidate_display": "Affichage du tableau",
@@ -162,7 +163,18 @@
     "candidate_conversion": "Conversion",
     "vacancy_display": "Affichage du tableau",
     "match_display": "Affichage du tableau",
-    "outreach_display": "Affichage du tableau"
+    "outreach_display": "Affichage du tableau",
+    "cf_candidate": "Candidats",
+    "cf_application": "Candidatures",
+    "cf_match": "Correspondances",
+    "cf_vacancy": "Postes",
+    "cf_task": "Tâches",
+    "cf_opportunity": "Opportunités",
+    "cf_outreach_campaign": "Listes d'appels",
+    "cf_customer": "Clients",
+    "cf_customer_location": "Sites",
+    "cf_customer_department": "Services",
+    "cf_customer_contact": "Contacts"
   },
   "kpis": {
     "title": "Paramètres KPI",
@@ -233,33 +245,6 @@
         "description": "Taux de remplissage cible des services",
         "unit": "%"
       }
-    }
-  },
-  "candidateCustomFields": {
-    "title": "Champs personnalisés",
-    "subtitle": "Définissez des champs supplémentaires pour tous les candidats.",
-    "add": "Ajouter un champ",
-    "label": "Libellé",
-    "labelPlaceholder": "ex. Plaque d'immatriculation",
-    "key": "Clé (slug)",
-    "keyPlaceholder": "ex. plaque",
-    "immutable": "non modifiable après création",
-    "type": "Type",
-    "options": "Options",
-    "optionsPlaceholder": "Option 1, Option 2, Option 3",
-    "optionsHint": "Séparés par des virgules.",
-    "hasData": "a des données",
-    "delete": "Supprimer",
-    "deleteBlocked": "Impossible de supprimer",
-    "activate": "Activer",
-    "deactivate": "Désactiver",
-    "types": {
-      "text": "Texte",
-      "textarea": "Texte long",
-      "number": "Nombre",
-      "date": "Date",
-      "boolean": "Oui / Non",
-      "select": "Choix"
     }
   },
   "driverLicenseSettings": {
@@ -422,9 +407,6 @@
     "title": "Statuts",
     "subtitle": "Gérez les statuts de vos offres.",
     "add": "Ajouter un statut",
-    "customFields": "Champs personnalisés",
-    "customFieldsHint": "Définissez des noms de champs qui apparaissent sur chaque offre pour faciliter la saisie.",
-    "fieldPlaceholder": "Nom du champ…",
     "phasesTitle": "Phases",
     "phasesSubtitle": "Gérez les phases de vos offres.",
     "phasesAdd": "Ajouter une phase",
@@ -825,7 +807,8 @@
         "label": "Plannings",
         "desc": "Plannings des candidats par shift"
       }
-    }
+    },
+    "started": "Synchronisation démarrée — cela peut prendre quelques minutes. Actualisez les listes plus tard pour les données à jour."
   },
   "import": {
     "types": {
@@ -1570,6 +1553,45 @@
         "label": "Couleur du propriétaire",
         "description": "Activé = l'avatar du propriétaire est coloré dès que les données le permettent. Désactivé = gris neutre."
       }
+    }
+  },
+  "customFieldsSettings": {
+    "title": "Champs personnalisés — {{entity}}",
+    "subtitle": "Définissez des champs supplémentaires pour cette section. Les valeurs sont stockées par enregistrement.",
+    "add": "Ajouter un champ",
+    "label": "Libellé",
+    "labelPlaceholder": "ex. Plaque d'immatriculation",
+    "key": "Clé (slug)",
+    "keyPlaceholder": "ex. plaque",
+    "immutable": "non modifiable après création",
+    "type": "Type",
+    "options": "Options",
+    "optionsPlaceholder": "Option 1, Option 2, Option 3",
+    "optionsHint": "Séparés par des virgules. Les valeurs existantes sont conservées si vous modifiez les options.",
+    "hasData": "a des données",
+    "delete": "Supprimer",
+    "deleteBlocked": "Impossible de supprimer — le champ contient des données",
+    "activate": "Activer",
+    "deactivate": "Désactiver",
+    "types": {
+      "text": "Texte",
+      "textarea": "Texte long",
+      "number": "Nombre",
+      "date": "Date",
+      "boolean": "Oui / Non",
+      "select": "Choix"
+    }
+  },
+  "usage": {
+    "subtitleTenant": "Consommation de {{name}} — uniquement les quantités pour votre facturation.",
+    "month": "Mois",
+    "loadError": "Échec du chargement de la consommation.",
+    "col": {
+      "aiTokens": "Jetons IA",
+      "aiCalls": "Appels IA",
+      "waBusiness": "WhatsApp Business",
+      "hours": "Heures traitées",
+      "connectors": "Connecteurs"
     }
   }
 }

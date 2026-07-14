@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save, Upload } from 'lucide-react'
 import api from '@/lib/api'
+import { useAuth } from '@/context/AuthContext'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 
 // Preset swatches are tenant brand-colour DATA (persisted as brand_color) — literal hex by design, never tokens.
@@ -12,6 +13,7 @@ const BRAND_COLOR_PRESETS = [
 
 export default function BrandSettings() {
   const { t } = useTranslation('settings')
+  const auth = useAuth()
   const [primaryColor, setPrimaryColor]   = useState('#3B8FD4') // default brand colour (data, not styling)
   const [logoPreview,  setLogoPreview]    = useState(null)
   const [logoFile,     setLogoFile]       = useState(null)
@@ -53,11 +55,19 @@ export default function BrandSettings() {
       if (logoFile) {
         const fd = new FormData()
         fd.append('logo', logoFile)
+        // The upload endpoint persists the private path itself (logo_path) and the
+        // URL is minted fresh on every read (5 min TTL) — storing the returned
+        // signed URL in settings would re-create the legacy logo_url row the
+        // backend just cleaned up, and it expires. Response only feeds the preview.
         const res = await api.post('/settings/logo', fd)
-        if (res.data?.logo_url) payload.logo_url = res.data.logo_url
+        if (res.data?.logo_url) setLogoPreview(res.data.logo_url)
+        setLogoFile(null)
       }
       await saveSettings(payload)
       document.documentElement.style.setProperty('--color-primary', primaryColor)
+      // Refresh the auth/tenant payload so the topbar logo appears immediately —
+      // logo_url is a fresh signed URL per response (5 min TTL), never cached.
+      auth?.refreshUser?.().catch(() => {})
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch { /* noop */ }
@@ -155,7 +165,7 @@ export default function BrandSettings() {
                 </button>
               )}
             </div>
-            <input ref={fileRef} type="file" accept="image/png,image/svg+xml,image/jpeg"
+            <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml"
               style={{ display: 'none' }} onChange={handleLogoChange} />
           </div>
         </div>

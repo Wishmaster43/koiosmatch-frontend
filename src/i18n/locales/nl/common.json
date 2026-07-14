@@ -114,10 +114,6 @@
   },
   "koios": {
     "online": "Online",
-    "quickCandidates": "Kandidaten overzicht",
-    "quickOpenShifts": "Openstaande diensten",
-    "quickNewWorkflow": "Nieuwe workflow starten",
-    "quickReport": "Rapportage deze maand",
     "newChat": "Nieuwe chat",
     "newChatShort": "Nieuw",
     "addContext": "Context toevoegen",
@@ -177,5 +173,8 @@
   "noAccess": "Geen toegang",
   "noAccessDesc": "Je hebt geen rechten voor deze pagina.",
   "noAgencies": "Geen bureaus gevonden",
-  "comingSoon": "binnenkort"
+  "comingSoon": "binnenkort",
+  "justNow": "zojuist",
+  "errorGeneric": "Er is iets misgegaan",
+  "loadingShort": "…"
 }

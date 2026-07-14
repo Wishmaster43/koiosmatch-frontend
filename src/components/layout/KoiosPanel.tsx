@@ -96,15 +96,6 @@ function TypingIndicator() {
   )
 }
 
-// ── Quick suggestions ─────────────────────────────────────────────────────────
-// Quick suggestions; label = t('koios.<key>').
-const QUICK = [
-  { key: 'quickCandidates',  icon: '👥' },
-  { key: 'quickOpenShifts',  icon: '📅' },
-  { key: 'quickNewWorkflow', icon: '⚡' },
-  { key: 'quickReport',      icon: '📊' },
-]
-
 // ── Main panel ────────────────────────────────────────────────────────────────
 export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?: () => void }) {
   const { t } = useTranslation('common')
@@ -117,7 +108,6 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
   const { expanded, toggle: toggleExpanded } = useKoiosExpanded()
   // Connection status (optimistic until loaded; only `false` flips to "offline").
   const connected = settings?.status?.claude_configured !== false
-  const quick    = QUICK.map(q => ({ ...q, label: t(`koios.${q.key}`) }))
   const [input,       setInput]       = useState('')
   const [focused,     setFocused]     = useState(false)
   const [showMention, setShowMention] = useState(false)
@@ -225,23 +215,6 @@ export default function KoiosPanel({ open, onClose }: { open?: boolean; onClose?
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Quick suggestions (only on the welcome screen) ── */}
-      {messages.length === 1 && !loading && (
-        <div style={{ padding: '0 12px 10px', display: 'flex', flexDirection: 'column', gap: 5 }}>
-          {quick.map(q => (
-            <button key={q.key} onClick={() => submit(q.label)}
-              style={{ textAlign: 'left', padding: '8px 11px', fontSize: 12,
-                border: '1px solid var(--sidebar-border)', borderRadius: 10, background: 'none',
-                color: 'var(--sidebar-text)', cursor: 'pointer', transition: 'all 0.15s',
-                display: 'flex', alignItems: 'center', gap: 8 }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'var(--sidebar-hover)'; e.currentTarget.style.borderColor = 'var(--color-primary)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.borderColor = 'var(--sidebar-border)' }}>
-              <span>{q.icon}</span>
-              <span>{q.label}</span>
-            </button>
-          ))}
-        </div>
-      )}
 
       {/* ── Input area ── */}
       <div style={{ padding: '10px 12px 14px', borderTop: '1px solid var(--sidebar-border)', flexShrink: 0, position: 'relative' }}>

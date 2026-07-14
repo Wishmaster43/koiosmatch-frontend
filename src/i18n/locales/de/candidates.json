@@ -105,7 +105,9 @@
     "conversations": "Aktive Gespräche",
     "neverContacted": "Nie kontaktiert",
     "neverContactedSub": "noch kein Kontakt",
-    "staleMonths": "Nicht kontaktiert > {{months}} Mon."
+    "staleMonths": "Nicht kontaktiert > {{months}} Mon.",
+    "clearFilter": "Filter löschen",
+    "pageScopeNotice": "Serverweite Gesamtzahlen sind vorübergehend nicht verfügbar — diese Zahlen betreffen nur die geladene Seite."
   },
   "filters": {
     "search": "Suchen",
@@ -274,7 +276,8 @@
     "restoredNamed": "{{name}} wiederhergestellt",
     "openRestored": "Öffnen",
     "archivedNamed": "{{name}} archiviert",
-    "noStatus": "Kein Status"
+    "noStatus": "Kein Status",
+    "changelog": "Änderungsprotokoll"
   },
   "stage": {
     "lead": "Lead",

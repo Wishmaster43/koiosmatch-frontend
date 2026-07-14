@@ -110,13 +110,26 @@ function KpiCard({ label, value, sub, color, onClick, active, channels, render }
   )
 }
 
-export default function InsightsRow({ donuts = [], kpis = [], padding = '16px 24px 12px', clearTitle }: {
+export default function InsightsRow({ donuts = [], kpis = [], padding = '16px 24px 12px', clearTitle, notice }: {
   donuts?: DonutSpec[]; kpis?: KpiSpec[]; padding?: string; clearTitle?: string
+  // Data-honesty notice (STATS-OOM-1): shown when the server-wide stats failed and
+  // the cards silently fall back to page-scope counts — never present fallback
+  // numbers as true totals without saying so.
+  notice?: string
 }) {
   return (
+    <>
+    {notice && (
+      <div role="status" style={{ margin: '10px 24px -6px', padding: '5px 10px', fontSize: 11, borderRadius: 7,
+        color: 'var(--color-warning)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+        border: '1px solid color-mix(in srgb, var(--color-warning) 30%, transparent)', width: 'fit-content' }}>
+        {notice}
+      </div>
+    )}
     <div style={{ padding, display: 'flex', gap: 10, flexShrink: 0, flexWrap: 'nowrap', overflowX: 'auto' }}>
       {donuts.map(({ key, ...d }) => <DonutCard key={key} {...d} clearTitle={clearTitle} />)}
       {kpis.map(({ key, ...k }) => <KpiCard key={key} {...k} />)}
     </div>
+    </>
   )
 }

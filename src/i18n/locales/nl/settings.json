@@ -47,7 +47,8 @@
     "candidate": "Kandidaat",
     "applications": "Sollicitaties",
     "shared": "Gedeeld",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "custom_fields": "Eigen velden"
   },
   "nav": {
     "candidate_display": "Tabelweergave",
@@ -162,7 +163,18 @@
     "candidate_conversion": "Conversie",
     "vacancy_display": "Tabelweergave",
     "match_display": "Tabelweergave",
-    "outreach_display": "Tabelweergave"
+    "outreach_display": "Tabelweergave",
+    "cf_candidate": "Kandidaten",
+    "cf_application": "Sollicitaties",
+    "cf_match": "Matches",
+    "cf_vacancy": "Vacatures",
+    "cf_task": "Taken",
+    "cf_opportunity": "Kansen",
+    "cf_outreach_campaign": "Bellijsten",
+    "cf_customer": "Klanten",
+    "cf_customer_location": "Locaties",
+    "cf_customer_department": "Afdelingen",
+    "cf_customer_contact": "Contactpersonen"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -233,33 +245,6 @@
         "description": "Streefwaarde voor de invulgraad van diensten",
         "unit": "%"
       }
-    }
-  },
-  "candidateCustomFields": {
-    "title": "Eigen velden",
-    "subtitle": "Definieer extra velden die op alle kandidaten beschikbaar zijn. Waarden worden per kandidaat opgeslagen.",
-    "add": "Veld toevoegen",
-    "label": "Label",
-    "labelPlaceholder": "Bijv. Kenteken",
-    "key": "Sleutel (slug)",
-    "keyPlaceholder": "bijv. kenteken",
-    "immutable": "niet wijzigbaar na aanmaken",
-    "type": "Type",
-    "options": "Opties",
-    "optionsPlaceholder": "Optie 1, Optie 2, Optie 3",
-    "optionsHint": "Kommagescheiden. Bestaande waarden blijven bewaard als je opties wijzigt.",
-    "hasData": "heeft data",
-    "delete": "Verwijderen",
-    "deleteBlocked": "Kan niet verwijderd worden — veld heeft data",
-    "activate": "Activeren",
-    "deactivate": "Deactiveren",
-    "types": {
-      "text": "Tekst",
-      "textarea": "Lange tekst",
-      "number": "Getal",
-      "date": "Datum",
-      "boolean": "Ja / Nee",
-      "select": "Keuze"
     }
   },
   "driverLicenseSettings": {
@@ -497,9 +482,6 @@
     "title": "Statussen",
     "subtitle": "Beheer de statussen van je vacatures.",
     "add": "Status toevoegen",
-    "customFields": "Aangepaste velden",
-    "customFieldsHint": "Stel veldnamen in die op elke vacature verschijnen om aangepaste velden makkelijker in te vullen.",
-    "fieldPlaceholder": "Veldnaam…",
     "phasesTitle": "Fasen",
     "phasesSubtitle": "Beheer de fasen van je vacatures.",
     "phasesAdd": "Fase toevoegen",
@@ -1005,7 +987,8 @@
         "label": "Inplanningen",
         "desc": "Kandidaatinplanningen per shift"
       }
-    }
+    },
+    "started": "Synchronisatie gestart — dit kan enkele minuten duren. Ververs de lijsten later voor de bijgewerkte data."
   },
   "import": {
     "types": {
@@ -1570,6 +1553,45 @@
         "label": "Eigenaar-kleur",
         "description": "Aan = de eigenaar-avatar krijgt een kleur zodra de data die bevat. Uit = neutraal grijs."
       }
+    }
+  },
+  "customFieldsSettings": {
+    "title": "Eigen velden — {{entity}}",
+    "subtitle": "Definieer extra velden voor dit onderdeel. Waarden worden per record opgeslagen.",
+    "add": "Veld toevoegen",
+    "label": "Label",
+    "labelPlaceholder": "Bijv. Kenteken",
+    "key": "Sleutel (slug)",
+    "keyPlaceholder": "bijv. kenteken",
+    "immutable": "niet wijzigbaar na aanmaken",
+    "type": "Type",
+    "options": "Opties",
+    "optionsPlaceholder": "Optie 1, Optie 2, Optie 3",
+    "optionsHint": "Kommagescheiden. Bestaande waarden blijven bewaard als je opties wijzigt.",
+    "hasData": "heeft data",
+    "delete": "Verwijderen",
+    "deleteBlocked": "Kan niet verwijderd worden — veld heeft data",
+    "activate": "Activeren",
+    "deactivate": "Deactiveren",
+    "types": {
+      "text": "Tekst",
+      "textarea": "Lange tekst",
+      "number": "Getal",
+      "date": "Datum",
+      "boolean": "Ja / Nee",
+      "select": "Keuze"
+    }
+  },
+  "usage": {
+    "subtitleTenant": "Verbruik van {{name}} — alleen hoeveelheden voor je facturatie.",
+    "month": "Maand",
+    "loadError": "Verbruik laden is mislukt.",
+    "col": {
+      "aiTokens": "AI-tokens",
+      "aiCalls": "AI-calls",
+      "waBusiness": "WhatsApp Business",
+      "hours": "Verwerkte uren",
+      "connectors": "Connectors"
     }
   }
 }

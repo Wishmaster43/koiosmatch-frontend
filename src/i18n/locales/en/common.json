@@ -114,10 +114,6 @@
   },
   "koios": {
     "online": "Online",
-    "quickCandidates": "Candidates overview",
-    "quickOpenShifts": "Open shifts",
-    "quickNewWorkflow": "Start new workflow",
-    "quickReport": "Report this month",
     "newChat": "New chat",
     "newChatShort": "New",
     "addContext": "Add context",
@@ -177,5 +173,8 @@
   "noAccess": "No access",
   "noAccessDesc": "You don't have permission to view this page.",
   "noAgencies": "No agencies found",
-  "comingSoon": "coming soon"
+  "comingSoon": "coming soon",
+  "justNow": "just now",
+  "errorGeneric": "Something went wrong",
+  "loadingShort": "…"
 }

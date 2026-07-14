@@ -112,7 +112,9 @@
     "conversations": "Actieve gesprekken",
     "neverContacted": "Nooit benaderd",
     "neverContactedSub": "nog geen contactmoment",
-    "staleMonths": "Niet benaderd > {{months}} mnd"
+    "staleMonths": "Niet benaderd > {{months}} mnd",
+    "clearFilter": "Filter wissen",
+    "pageScopeNotice": "Serverbrede totalen zijn tijdelijk niet beschikbaar — deze cijfers gaan alleen over de geladen pagina."
   },
   "filters": {
     "search": "Zoeken",
@@ -281,7 +283,8 @@
     "restoredNamed": "{{name}} hersteld",
     "openRestored": "Openen",
     "archivedNamed": "{{name}} gearchiveerd",
-    "noStatus": "Geen status"
+    "noStatus": "Geen status",
+    "changelog": "Wijzigingslog"
   },
   "stage": {
     "lead": "Lead",

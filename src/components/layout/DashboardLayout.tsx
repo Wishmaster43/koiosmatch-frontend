@@ -148,19 +148,16 @@ export default function DashboardLayout() {
             {expanded ? <PanelLeftClose size={17} /> : <PanelLeftOpen size={17} />}
           </button>
 
-          {/* Tenant logo + naam (de bureau-switcher zelf zit in de Sidebar-kaart) */}
+          {/* Tenant naam — start van de broodkruimel ("Yesway › Dashboard"). Het logo
+              zelf staat rechts in de balk (LOGO-PLACE-1, Danny 14/7); het KM-merk
+              blijft in de zijbalk. */}
           <div className="flex items-center flex-shrink-0 gap-2">
-            {tenant?.logo_url
-              ? <img src={tenant.logo_url} alt="" style={{ height: 22, borderRadius: 4 }} />
-              : (
-                <div
-                  className="flex items-center justify-center flex-shrink-0 rounded-md"
-                  style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 11, color: 'white', fontWeight: 700 }}
-                >
-                  {(tenant?.name ?? 'K').charAt(0).toUpperCase()}
-                </div>
-              )
-            }
+            <div
+              className="flex items-center justify-center flex-shrink-0 rounded-md"
+              style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 11, color: 'white', fontWeight: 700 }}
+            >
+              {(tenant?.name ?? 'K').charAt(0).toUpperCase()}
+            </div>
             <span className="font-semibold text-[var(--text)]" style={{ fontSize: 13 }}>
               {tenant?.name ?? 'KoiosMatch'}
             </span>
@@ -184,6 +181,15 @@ export default function DashboardLayout() {
 
           {/* Right actions */}
           <div className="flex items-center flex-shrink-0 gap-2 ml-auto">
+            {/* Tenant logo — between the breadcrumb and the right-side actions
+                (LOGO-PLACE-1, Danny 14/7). logo_url is a fresh signed URL per
+                response (5 min TTL): render it straight from the tenant payload,
+                never persist or cache it. Decorative (alt="") — the tenant name
+                already reads as text in the breadcrumb. */}
+            {tenant?.logo_url && (
+              <img src={tenant.logo_url} alt="" aria-hidden
+                style={{ height: 26, maxWidth: 120, objectFit: 'contain', borderRadius: 4, marginRight: 6 }} />
+            )}
             {/* Dashboard view switcher — only on the dashboard; hidden for single-view users. */}
             {activePage === 'dashboard' && (
               <DashboardSwitcher value={dashView} options={dashAllowed} onChange={setDashView} />

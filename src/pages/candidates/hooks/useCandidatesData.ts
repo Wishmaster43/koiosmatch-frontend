@@ -64,13 +64,17 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
   const error      = listQuery.isError ? t('page.loadError', { defaultValue: 'Kandidaten laden is mislukt.' }) : null
 
   // Stats: real totals across the whole filtered set (not just the page); filter-only key.
-  const { data: stats = null } = useQuery({
+  const statsQuery = useQuery({
     queryKey: ['candidates', 'stats', filterParams],
     queryFn: async ({ signal }): Promise<CandidateStats | null> => {
       const res = await heavyGet('/candidates/stats', { params: filterParams, signal })
       return (res.data?.data ?? res.data ?? null) as CandidateStats | null
     },
   })
+  const stats = statsQuery.data ?? null
+  // Surfaced so the page can label page-scope fallback counts as such (STATS-OOM-1:
+  // demo2's stats 500'd and the donuts silently presented the loaded page as totals).
+  const statsFailed = statsQuery.isError
 
   // Vestiging (location) filter options — best-effort, cached for the session.
   const { data: locations = EMPTY_LOCATIONS } = useQuery({
@@ -96,5 +100,5 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
     })
   }, [queryClient, filterParams, page, pageSize])
 
-  return { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, locations }
+  return { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, statsFailed, locations }
 }

@@ -47,7 +47,8 @@
     "candidate": "Candidate",
     "applications": "Applications",
     "shared": "Shared",
-    "whatsapp": "WhatsApp"
+    "whatsapp": "WhatsApp",
+    "custom_fields": "Custom fields"
   },
   "nav": {
     "candidate_display": "Table display",
@@ -162,7 +163,18 @@
     "candidate_conversion": "Conversion",
     "vacancy_display": "Table display",
     "match_display": "Table display",
-    "outreach_display": "Table display"
+    "outreach_display": "Table display",
+    "cf_candidate": "Candidates",
+    "cf_application": "Applications",
+    "cf_match": "Matches",
+    "cf_vacancy": "Vacancies",
+    "cf_task": "Tasks",
+    "cf_opportunity": "Opportunities",
+    "cf_outreach_campaign": "Call lists",
+    "cf_customer": "Customers",
+    "cf_customer_location": "Locations",
+    "cf_customer_department": "Departments",
+    "cf_customer_contact": "Contacts"
   },
   "kpis": {
     "title": "KPI settings",
@@ -233,33 +245,6 @@
         "description": "Target fill rate for shifts",
         "unit": "%"
       }
-    }
-  },
-  "candidateCustomFields": {
-    "title": "Custom fields",
-    "subtitle": "Define extra fields available on all candidates. Values are stored per candidate.",
-    "add": "Add field",
-    "label": "Label",
-    "labelPlaceholder": "e.g. Licence plate",
-    "key": "Key (slug)",
-    "keyPlaceholder": "e.g. licence_plate",
-    "immutable": "cannot be changed after creation",
-    "type": "Type",
-    "options": "Options",
-    "optionsPlaceholder": "Option 1, Option 2, Option 3",
-    "optionsHint": "Comma-separated. Existing values are preserved when you change the options.",
-    "hasData": "has data",
-    "delete": "Delete",
-    "deleteBlocked": "Cannot delete — field has data",
-    "activate": "Activate",
-    "deactivate": "Deactivate",
-    "types": {
-      "text": "Text",
-      "textarea": "Long text",
-      "number": "Number",
-      "date": "Date",
-      "boolean": "Yes / No",
-      "select": "Choice"
     }
   },
   "driverLicenseSettings": {
@@ -497,9 +482,6 @@
     "title": "Statuses",
     "subtitle": "Manage the statuses of your vacancies.",
     "add": "Add status",
-    "customFields": "Custom fields",
-    "customFieldsHint": "Set field names that appear on every vacancy to make custom fields easier to fill.",
-    "fieldPlaceholder": "Field name…",
     "phasesTitle": "Phases",
     "phasesSubtitle": "Manage the phases of your vacancies.",
     "phasesAdd": "Add phase",
@@ -1005,7 +987,8 @@
         "label": "Schedulings",
         "desc": "Candidate schedulings per shift"
       }
-    }
+    },
+    "started": "Sync started — this can take a few minutes. Refresh the lists later for the updated data."
   },
   "import": {
     "types": {
@@ -1570,6 +1553,45 @@
         "label": "Owner colour",
         "description": "On = the owner avatar is coloured once the data carries one. Off = neutral grey."
       }
+    }
+  },
+  "customFieldsSettings": {
+    "title": "Custom fields — {{entity}}",
+    "subtitle": "Define extra fields for this entity. Values are stored per record.",
+    "add": "Add field",
+    "label": "Label",
+    "labelPlaceholder": "e.g. Licence plate",
+    "key": "Key (slug)",
+    "keyPlaceholder": "e.g. licence_plate",
+    "immutable": "cannot be changed after creation",
+    "type": "Type",
+    "options": "Options",
+    "optionsPlaceholder": "Option 1, Option 2, Option 3",
+    "optionsHint": "Comma-separated. Existing values are preserved when you change the options.",
+    "hasData": "has data",
+    "delete": "Delete",
+    "deleteBlocked": "Cannot delete — field has data",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "types": {
+      "text": "Text",
+      "textarea": "Long text",
+      "number": "Number",
+      "date": "Date",
+      "boolean": "Yes / No",
+      "select": "Choice"
+    }
+  },
+  "usage": {
+    "subtitleTenant": "Usage for {{name}} — quantities for your billing only.",
+    "month": "Month",
+    "loadError": "Failed to load usage.",
+    "col": {
+      "aiTokens": "AI tokens",
+      "aiCalls": "AI calls",
+      "waBusiness": "WhatsApp Business",
+      "hours": "Processed hours",
+      "connectors": "Connectors"
     }
   }
 }

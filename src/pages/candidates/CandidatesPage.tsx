@@ -59,7 +59,7 @@ const CandidateDrawer = CandidateDrawerJs as ComponentType<{
   onArchive?: (id: Id) => void; onMarkDeletion?: (id: Id) => void; onRestore?: (id: Id) => void; onHardDelete?: (id: Id) => void
   users: AppUser[]; initialTab?: string
 }>
-const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: unknown[]; clearTitle?: string }>
+const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: unknown[]; clearTitle?: string; notice?: string }>
 // STRAAL-1: the map view lazy-loads so Leaflet stays out of the main bundle (§9).
 const CandidatesMapView = lazy(() => import('./CandidatesMapView'))
 
@@ -135,7 +135,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   useEffect(() => () => { if (msgTimer.current) clearTimeout(msgTimer.current) }, [])
 
   // ── Data layer ──
-  const { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, locations } =
+  const { candidates, setCandidates, loading, error, total, setTotal, lastPage, stats, statsFailed, locations } =
     useCandidatesData({ filterParams, page, pageSize, t, setActionMsg })
 
   // ── Derived options + donut data + attention counts ──
@@ -273,7 +273,11 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           <InsightsRow donuts={insightDonuts} kpis={insightKpis}
-            clearTitle={t('analytics.clearFilter', { defaultValue: 'Filter wissen' })} />
+            clearTitle={t('analytics.clearFilter', { defaultValue: 'Filter wissen' })}
+            // Data honesty (STATS-OOM-1): when the server-wide stats call failed and
+            // there is more data than the loaded page, the cards fall back to
+            // page-scope counts — label them instead of presenting them as totals.
+            notice={statsFailed && total > candidates.length ? t('analytics.pageScopeNotice') : undefined} />
 
           {/* Transient feedback for bulk mutations (aria-live for screen readers) */}
           {actionMsg && (

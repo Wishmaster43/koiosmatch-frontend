@@ -47,7 +47,8 @@
     "tasks": "Aufgaben",
     "matches": "Matches",
     "outreach": "Anruflisten",
-    "opportunities": "Chancen"
+    "opportunities": "Chancen",
+    "custom_fields": "Eigene Felder"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",
@@ -162,7 +163,18 @@
     "candidate_conversion": "Konvertierung",
     "vacancy_display": "Tabellenansicht",
     "match_display": "Tabellenansicht",
-    "outreach_display": "Tabellenansicht"
+    "outreach_display": "Tabellenansicht",
+    "cf_candidate": "Kandidaten",
+    "cf_application": "Bewerbungen",
+    "cf_match": "Matches",
+    "cf_vacancy": "Stellen",
+    "cf_task": "Aufgaben",
+    "cf_opportunity": "Chancen",
+    "cf_outreach_campaign": "Anruflisten",
+    "cf_customer": "Kunden",
+    "cf_customer_location": "Standorte",
+    "cf_customer_department": "Abteilungen",
+    "cf_customer_contact": "Kontakte"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -233,33 +245,6 @@
         "description": "Zielwert für die Besetzungsquote",
         "unit": "%"
       }
-    }
-  },
-  "candidateCustomFields": {
-    "title": "Eigene Felder",
-    "subtitle": "Definieren Sie zusätzliche Felder für alle Kandidaten.",
-    "add": "Feld hinzufügen",
-    "label": "Bezeichnung",
-    "labelPlaceholder": "z.B. Kennzeichen",
-    "key": "Schlüssel (Slug)",
-    "keyPlaceholder": "z.B. kennzeichen",
-    "immutable": "nach Erstellung nicht änderbar",
-    "type": "Typ",
-    "options": "Optionen",
-    "optionsPlaceholder": "Option 1, Option 2, Option 3",
-    "optionsHint": "Kommagetrennt.",
-    "hasData": "hat Daten",
-    "delete": "Löschen",
-    "deleteBlocked": "Kann nicht gelöscht werden",
-    "activate": "Aktivieren",
-    "deactivate": "Deaktivieren",
-    "types": {
-      "text": "Text",
-      "textarea": "Langer Text",
-      "number": "Zahl",
-      "date": "Datum",
-      "boolean": "Ja / Nein",
-      "select": "Auswahl"
     }
   },
   "driverLicenseSettings": {
@@ -422,9 +407,6 @@
     "title": "Status",
     "subtitle": "Verwalte die Status deiner Stellen.",
     "add": "Status hinzufügen",
-    "customFields": "Benutzerdefinierte Felder",
-    "customFieldsHint": "Lege Feldnamen fest, die auf jeder Stelle erscheinen, um benutzerdefinierte Felder leichter auszufüllen.",
-    "fieldPlaceholder": "Feldname…",
     "phasesTitle": "Phasen",
     "phasesSubtitle": "Verwalte die Phasen deiner Stellen.",
     "phasesAdd": "Phase hinzufügen",
@@ -825,7 +807,8 @@
         "label": "Einplanungen",
         "desc": "Kandidaten-Einplanungen pro Schicht"
       }
-    }
+    },
+    "started": "Synchronisierung gestartet — dies kann einige Minuten dauern. Aktualisiere die Listen später für die neuen Daten."
   },
   "import": {
     "types": {
@@ -1570,6 +1553,45 @@
         "label": "Eigentümerfarbe",
         "description": "An = der Avatar des Eigentümers wird eingefärbt, sobald die Daten das hergeben. Aus = neutrales Grau."
       }
+    }
+  },
+  "customFieldsSettings": {
+    "title": "Eigene Felder — {{entity}}",
+    "subtitle": "Definieren Sie zusätzliche Felder für diesen Bereich. Werte werden pro Datensatz gespeichert.",
+    "add": "Feld hinzufügen",
+    "label": "Bezeichnung",
+    "labelPlaceholder": "z.B. Kennzeichen",
+    "key": "Schlüssel (Slug)",
+    "keyPlaceholder": "z.B. kennzeichen",
+    "immutable": "nach Erstellung nicht änderbar",
+    "type": "Typ",
+    "options": "Optionen",
+    "optionsPlaceholder": "Option 1, Option 2, Option 3",
+    "optionsHint": "Kommagetrennt. Bestehende Werte bleiben erhalten, wenn Sie die Optionen ändern.",
+    "hasData": "hat Daten",
+    "delete": "Löschen",
+    "deleteBlocked": "Kann nicht gelöscht werden — Feld hat Daten",
+    "activate": "Aktivieren",
+    "deactivate": "Deaktivieren",
+    "types": {
+      "text": "Text",
+      "textarea": "Langer Text",
+      "number": "Zahl",
+      "date": "Datum",
+      "boolean": "Ja / Nein",
+      "select": "Auswahl"
+    }
+  },
+  "usage": {
+    "subtitleTenant": "Verbrauch von {{name}} — nur Mengen für deine Abrechnung.",
+    "month": "Monat",
+    "loadError": "Verbrauch konnte nicht geladen werden.",
+    "col": {
+      "aiTokens": "KI-Tokens",
+      "aiCalls": "KI-Aufrufe",
+      "waBusiness": "WhatsApp Business",
+      "hours": "Verarbeitete Stunden",
+      "connectors": "Konnektoren"
     }
   }
 }

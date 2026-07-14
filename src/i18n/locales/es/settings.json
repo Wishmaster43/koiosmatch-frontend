@@ -47,7 +47,8 @@
     "tasks": "Tareas",
     "matches": "Coincidencias",
     "outreach": "Listas de llamadas",
-    "opportunities": "Oportunidades"
+    "opportunities": "Oportunidades",
+    "custom_fields": "Campos personalizados"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
@@ -162,7 +163,18 @@
     "candidate_conversion": "Conversión",
     "vacancy_display": "Vista de tabla",
     "match_display": "Vista de tabla",
-    "outreach_display": "Vista de tabla"
+    "outreach_display": "Vista de tabla",
+    "cf_candidate": "Candidatos",
+    "cf_application": "Candidaturas",
+    "cf_match": "Coincidencias",
+    "cf_vacancy": "Vacantes",
+    "cf_task": "Tareas",
+    "cf_opportunity": "Oportunidades",
+    "cf_outreach_campaign": "Listas de llamadas",
+    "cf_customer": "Clientes",
+    "cf_customer_location": "Ubicaciones",
+    "cf_customer_department": "Departamentos",
+    "cf_customer_contact": "Contactos"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -233,33 +245,6 @@
         "description": "Tasa de cobertura objetivo de turnos",
         "unit": "%"
       }
-    }
-  },
-  "candidateCustomFields": {
-    "title": "Campos personalizados",
-    "subtitle": "Defina campos adicionales para todos los candidatos.",
-    "add": "Añadir campo",
-    "label": "Etiqueta",
-    "labelPlaceholder": "ej. Matrícula",
-    "key": "Clave (slug)",
-    "keyPlaceholder": "ej. matricula",
-    "immutable": "no modificable tras la creación",
-    "type": "Tipo",
-    "options": "Opciones",
-    "optionsPlaceholder": "Opción 1, Opción 2, Opción 3",
-    "optionsHint": "Separadas por comas.",
-    "hasData": "tiene datos",
-    "delete": "Eliminar",
-    "deleteBlocked": "No se puede eliminar",
-    "activate": "Activar",
-    "deactivate": "Desactivar",
-    "types": {
-      "text": "Texto",
-      "textarea": "Texto largo",
-      "number": "Número",
-      "date": "Fecha",
-      "boolean": "Sí / No",
-      "select": "Opción"
     }
   },
   "driverLicenseSettings": {
@@ -422,9 +407,6 @@
     "title": "Estados",
     "subtitle": "Gestiona los estados de tus vacantes.",
     "add": "Añadir estado",
-    "customFields": "Campos personalizados",
-    "customFieldsHint": "Define nombres de campos que aparecen en cada vacante para rellenarlos más fácilmente.",
-    "fieldPlaceholder": "Nombre del campo…",
     "phasesTitle": "Fases",
     "phasesSubtitle": "Gestiona las fases de tus vacantes.",
     "phasesAdd": "Añadir fase",
@@ -825,7 +807,8 @@
         "label": "Planificaciones",
         "desc": "Planificaciones de candidatos por turno"
       }
-    }
+    },
+    "started": "Sincronización iniciada — puede tardar unos minutos. Actualiza las listas más tarde para ver los datos actualizados."
   },
   "import": {
     "types": {
@@ -1570,6 +1553,45 @@
         "label": "Color del propietario",
         "description": "Activado = el avatar del propietario se colorea en cuanto los datos lo incluyan. Desactivado = gris neutro."
       }
+    }
+  },
+  "customFieldsSettings": {
+    "title": "Campos personalizados — {{entity}}",
+    "subtitle": "Defina campos adicionales para esta sección. Los valores se guardan por registro.",
+    "add": "Añadir campo",
+    "label": "Etiqueta",
+    "labelPlaceholder": "ej. Matrícula",
+    "key": "Clave (slug)",
+    "keyPlaceholder": "ej. matricula",
+    "immutable": "no modificable tras la creación",
+    "type": "Tipo",
+    "options": "Opciones",
+    "optionsPlaceholder": "Opción 1, Opción 2, Opción 3",
+    "optionsHint": "Separadas por comas. Los valores existentes se conservan al cambiar las opciones.",
+    "hasData": "tiene datos",
+    "delete": "Eliminar",
+    "deleteBlocked": "No se puede eliminar — el campo tiene datos",
+    "activate": "Activar",
+    "deactivate": "Desactivar",
+    "types": {
+      "text": "Texto",
+      "textarea": "Texto largo",
+      "number": "Número",
+      "date": "Fecha",
+      "boolean": "Sí / No",
+      "select": "Opción"
+    }
+  },
+  "usage": {
+    "subtitleTenant": "Consumo de {{name}} — solo cantidades para tu facturación.",
+    "month": "Mes",
+    "loadError": "No se pudo cargar el consumo.",
+    "col": {
+      "aiTokens": "Tokens de IA",
+      "aiCalls": "Llamadas de IA",
+      "waBusiness": "WhatsApp Business",
+      "hours": "Horas procesadas",
+      "connectors": "Conectores"
     }
   }
 }

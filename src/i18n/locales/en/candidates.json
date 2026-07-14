@@ -112,7 +112,9 @@
     "conversations": "Active conversations",
     "neverContacted": "Never contacted",
     "neverContactedSub": "no contact moment yet",
-    "staleMonths": "Not contacted > {{months}} mo"
+    "staleMonths": "Not contacted > {{months}} mo",
+    "clearFilter": "Clear filter",
+    "pageScopeNotice": "Server-wide totals are temporarily unavailable — these figures cover the loaded page only."
   },
   "filters": {
     "search": "Search",
@@ -281,7 +283,8 @@
     "restoredNamed": "{{name}} restored",
     "openRestored": "Open",
     "archivedNamed": "{{name}} archived",
-    "noStatus": "No status"
+    "noStatus": "No status",
+    "changelog": "Changelog"
   },
   "stage": {
     "lead": "Lead",

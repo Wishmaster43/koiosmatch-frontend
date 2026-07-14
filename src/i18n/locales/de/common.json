@@ -114,10 +114,6 @@
   },
   "koios": {
     "online": "Online",
-    "quickCandidates": "Kandidatenübersicht",
-    "quickOpenShifts": "Offene Einsätze",
-    "quickNewWorkflow": "Neuen Workflow starten",
-    "quickReport": "Bericht diesen Monat",
     "newChat": "Neuer Chat",
     "newChatShort": "Neu",
     "addContext": "Kontext hinzufügen",
@@ -177,5 +173,8 @@
   "noAccess": "Kein Zugriff",
   "noAccessDesc": "Du hast keine Berechtigung für diese Seite.",
   "noAgencies": "Keine Agenturen gefunden",
-  "comingSoon": "demnächst"
+  "comingSoon": "demnächst",
+  "justNow": "gerade eben",
+  "errorGeneric": "Etwas ist schiefgelaufen",
+  "loadingShort": "…"
 }

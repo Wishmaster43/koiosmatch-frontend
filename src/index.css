@@ -142,3 +142,10 @@ body {
    top at 9999). !important because react-datepicker's own stylesheet can load
    after this file depending on import order. */
 .react-datepicker-popper { z-index: 2000 !important; }
+
+/* Hyperlinks carry the tenant primary colour (huisstijl, Danny 14/7 — "links
+   blijft blauw"). Scoped to class-less anchors so content links (rich text,
+   descriptions) pick it up while styled components (nav, buttons-as-links,
+   EntityLink) keep their own colour. */
+a:not([class]) { color: var(--color-primary); text-decoration: none; }
+a:not([class]):hover { text-decoration: underline; }
