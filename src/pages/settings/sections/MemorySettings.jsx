@@ -4,7 +4,8 @@
  */
 import { useTranslation } from 'react-i18next'
 import { useSettingsForm } from '../lib/useSettingsForm'
-import { SettingsScaffold, TextareaField } from '../components/SettingsKit'
+import { SettingsScaffold } from '../components/SettingsKit'
+import RichTextEditor from '@/components/ui/RichTextEditor'
 
 export default function MemorySettings() {
   const { t } = useTranslation('settings')
@@ -12,7 +13,8 @@ export default function MemorySettings() {
 
   return (
     <SettingsScaffold title={t('memory.title')} subtitle={t('memory.subtitle')} maxWidth={640} form={form}>
-      <TextareaField value={form.values.memory_notes}
+      {/* House rule (CLAUDE.md 14/7): free text = rich-text editor, never a bare textarea. */}
+      <RichTextEditor value={form.values.memory_notes}
         onChange={v => form.set('memory_notes', v)}
         placeholder={t('memory.placeholder')} />
     </SettingsScaffold>

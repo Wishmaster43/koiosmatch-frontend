@@ -171,7 +171,8 @@
     "kmAway": "{{km}} km",
     "clickHint": "Click the map to move the centre",
     "view": "Map",
-    "pointCount": "{{count}} points on the map"
+    "pointCount": "{{count}} points on the map",
+    "clearRadius": "Clear radius"
   },
   "noAccess": "No access",
   "noAccessDesc": "You don't have permission to view this page.",

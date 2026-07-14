@@ -9,12 +9,14 @@ import { useLookups } from '@/context/LookupsContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
-export default function CandidatesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onPick, padded }: {
+export default function CandidatesMapView({ rows, center, radiusKm, onCenterChange, onRadiusChange, onClearRadius, onPick, padded }: {
   rows: Candidate[]
   center: { lat: number; lng: number }
   radiusKm: number
   onCenterChange: (lat: number, lng: number) => void
   onRadiusChange: (km: number) => void
+  // Present while a straal is active — forwards the 'Wis straal' reset.
+  onClearRadius?: () => void
   onPick: (id: Id) => void
   padded?: boolean
 }) {
@@ -31,7 +33,7 @@ export default function CandidatesMapView({ rows, center, radiusKm, onCenterChan
     }))
 
   return (
-    <RadiusMapPanel points={points} center={center} radiusKm={radiusKm} padded={padded}
+    <RadiusMapPanel points={points} center={center} radiusKm={radiusKm} padded={padded} onClearRadius={onClearRadius}
       onCenterChange={onCenterChange} onRadiusChange={onRadiusChange} onPick={onPick}
       pointsLabel={t('candidates:map.pointCount', { count: points.length })} />
   )

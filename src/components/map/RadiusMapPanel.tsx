@@ -10,12 +10,16 @@ import type { Id } from '@/types/common'
 
 export type { MapPoint }
 
-export default function RadiusMapPanel({ points, center, radiusKm, onCenterChange, onRadiusChange, onPick, pointsLabel, padded = true }: {
+export default function RadiusMapPanel({ points, center, radiusKm, onCenterChange, onRadiusChange, onClearRadius, onPick, pointsLabel, padded = true }: {
   points: MapPoint[]
   center: { lat: number; lng: number }
+  // 0 = straal inactive: show ALL points, no circle (the silent default-radius
+  // hid everything outside 30km-Utrecht — Danny 14/7).
   radiusKm: number
   onCenterChange: (lat: number, lng: number) => void
   onRadiusChange: (km: number) => void
+  // Present while a straal is active — renders the 'Wis straal' reset button.
+  onClearRadius?: () => void
   onPick: (id: Id) => void
   // Entity-specific "{{count}} … on the map" line; falls back to the generic one.
   pointsLabel?: string
@@ -29,14 +33,22 @@ export default function RadiusMapPanel({ points, center, radiusKm, onCenterChang
       {/* Radius: slider + exact km input — both drive the server-side filter. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
         <label htmlFor="radius-slider" style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('map.radius')}</label>
-        <input id="radius-slider" type="range" min={5} max={150} step={5} value={radiusKm}
+        <input id="radius-slider" type="range" min={5} max={150} step={5} value={radiusKm > 0 ? radiusKm : 30}
           onChange={e => onRadiusChange(Number(e.target.value))} style={{ width: 180 }} />
-        <input type="number" min={1} max={300} value={radiusKm} aria-label={t('map.radius')}
+        <input type="number" min={1} max={300} value={radiusKm > 0 ? radiusKm : ''} placeholder="—" aria-label={t('map.radius')}
           onChange={e => { const v = Number(e.target.value); if (v >= 1) onRadiusChange(v) }}
           style={{ width: 62, padding: '4px 6px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)',
                    background: 'var(--hover-bg)', color: 'var(--text)', outline: 'none' }} />
         <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>km</span>
         <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('map.clickHint')}</span>
+        {onClearRadius && (
+          <button onClick={onClearRadius}
+            style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 999, cursor: 'pointer',
+              color: 'var(--color-warning)', background: 'color-mix(in srgb, var(--color-warning) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-warning) 35%, transparent)' }}>
+            {t('map.clearRadius')}
+          </button>
+        )}
         <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--text-muted)' }}>
           {pointsLabel ?? t('map.pointCount', { count: points.length })}
         </span>

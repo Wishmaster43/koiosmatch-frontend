@@ -97,6 +97,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   const {
     showArchived, setShowArchived, showTrash, setShowTrash,
     selectedStatus, setSelectedStatus, selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
+    mapStraalActive, setMapStraalActive,
     selectedType, setSelectedType, selectedOwner, setSelectedOwner,
     selectedGeslacht, setSelectedGeslacht, selectedProvince, setSelectedProvince,
     selectedTitle, setSelectedTitle, selectedLocation, setSelectedLocation,
@@ -343,9 +344,10 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
             <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
               <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
                 <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
-                  <CandidatesMapView rows={filtered} center={mapCenter} radiusKm={mapRadius} padded={false}
-                    onCenterChange={(lat, lng) => setMapCenter({ lat, lng })}
-                    onRadiusChange={setMapRadius}
+                  <CandidatesMapView rows={filtered} center={mapCenter} radiusKm={mapStraalActive ? mapRadius : 0} padded={false}
+                    onCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
+                    onRadiusChange={(km) => { setMapRadius(km); setMapStraalActive(true) }}
+                    onClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
                     onPick={(id) => selectCandidate({ id } as Candidate)} />
                 </Suspense>
               </div>

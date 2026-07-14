@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save } from 'lucide-react'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
 import { useIndustries } from '@/lib/useIndustries'
+// One language source for the whole app (Danny 14/7): the same five shipped
+// locales the profile picker offers — never a diverging local list.
+import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/profileParts'
 
 // Option lists (data — kept as-is; only labels are translated). Industries are
 // now tenant-configurable (Settings → Personalisation → Industries).
-const LANGUAGES  = ['Nederlands','Engels','Duits','Frans']
+const LANGUAGES = APP_LANGUAGES.map(l => l.label)
 const CURRENCIES = ['Euro (€)','Dollar ($)','Pond (£)']
 const TIMEZONES  = ['Europa/Amsterdam','Europa/Brussel','Europa/Londen','UTC']
 const COUNTRIES  = ['Netherlands','Belgium','Germany','United Kingdom']

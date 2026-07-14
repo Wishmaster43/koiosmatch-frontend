@@ -171,7 +171,8 @@
     "kmAway": "{{km}} km",
     "clickHint": "Cliquez sur la carte pour déplacer le centre",
     "view": "Carte",
-    "pointCount": "{{count}} points sur la carte"
+    "pointCount": "{{count}} points sur la carte",
+    "clearRadius": "Effacer le rayon"
   },
   "noAccess": "Accès refusé",
   "noAccessDesc": "Vous n'avez pas les droits pour cette page.",

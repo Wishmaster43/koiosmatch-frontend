@@ -79,6 +79,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const [view,      setView]      = usePageMemory<'table' | 'map'>('vac.viewMode', 'table')
   const [mapCenter, setMapCenter] = usePageMemory('vac.mapCenter', { lat: 52.09, lng: 5.12 })
   const [mapRadius, setMapRadius] = usePageMemory('vac.mapRadius', 30)
+  // The straal filters ONLY after the user activates it (map click / radius
+  // change) — switching to Kaart used to hide everything outside a silent
+  // 30km-Utrecht circle (Danny 14/7).
+  const [mapStraalActive, setMapStraalActive] = usePageMemory('vac.mapStraal', false)
 
   const handlePageSizeChange = (newSize: number) => { setPageSize(newSize); setPage(1) }
 
@@ -99,9 +103,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     if (selectedClient.length)  p.customer_id = selectedClient
     if (showArchived)           p.include_archived = 1
     // Map view narrows the list server-side to the chosen circle (STRAAL-1).
-    if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
+    if (view === 'map' && mapStraalActive) { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     return p
-  }, [globalSearch, statusBucket, selectedOwner, selectedClient, showArchived, view, mapCenter, mapRadius])
+  }, [globalSearch, statusBucket, selectedOwner, selectedClient, showArchived, view, mapCenter, mapRadius, mapStraalActive])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
@@ -303,8 +307,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
             <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
               <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
                 <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
-                  <VacanciesMapView rows={vacancies} padded={false} center={mapCenter} radiusKm={mapRadius}
-                    onCenterChange={(lat, lng) => setMapCenter({ lat, lng })} onRadiusChange={setMapRadius}
+                  <VacanciesMapView rows={vacancies} padded={false} center={mapCenter} radiusKm={mapStraalActive ? mapRadius : 0}
+                    onCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
+                    onRadiusChange={(km: number) => { setMapRadius(km); setMapStraalActive(true) }}
+                    onClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
                     onPick={id => selectVacancy({ id } as Parameters<typeof selectVacancy>[0])} />
                 </Suspense>
               </div>

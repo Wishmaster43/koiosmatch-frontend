@@ -171,7 +171,8 @@
     "kmAway": "{{km}} km",
     "clickHint": "Klicken Sie auf die Karte, um den Mittelpunkt zu verschieben",
     "view": "Karte",
-    "pointCount": "{{count}} Punkte auf der Karte"
+    "pointCount": "{{count}} Punkte auf der Karte",
+    "clearRadius": "Radius löschen"
   },
   "noAccess": "Kein Zugriff",
   "noAccessDesc": "Du hast keine Berechtigung für diese Seite.",

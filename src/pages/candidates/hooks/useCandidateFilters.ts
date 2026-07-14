@@ -50,6 +50,9 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
   const [dateRange, setDateRange] = useState<DateRangeFilter | null>(null)
   // Straal-filter (sidebar): place/postcode geocoded via PDOK → server-side lat/lng/radius.
   const [geoFilter, setGeoFilter] = usePageMemory<GeoFilter | null>('cand.geo', null)
+  // Kaart-straal only filters after the user activates it (map click / radius
+  // change) — the silent 30km default hid most records (Danny 14/7).
+  const [mapStraalActive, setMapStraalActive] = usePageMemory('cand.mapStraal', false)
   const [geoHint, setGeoHint] = useState<string | null>(null)
 
   // Straal-blok apply: geocode the input; not found → hint, found → filter + map sync.
@@ -83,7 +86,7 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
     const p: Record<string, unknown> = {}
     // Map view searches server-side within the chosen centre + radius (STRAAL-1);
     // in table view the sidebar's straal-blok drives the same params.
-    if (view === 'map') { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
+    if (view === 'map' && mapStraalActive) { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     else if (geoFilter) { p.lat = geoFilter.lat; p.lng = geoFilter.lng; p.radius = geoFilter.km }
     // NUMMER-1: a typed reference number (K-00123) does an exact server-side `?ref=`
     // lookup instead of the normal free-text search; the server ignores other filters.
@@ -118,13 +121,14 @@ export function useCandidateFilters({ t, staleMonths, view, mapCenter, mapRadius
     // Period-click date range; set last so it wins over stale6m if both target last_contact.
     if (dateRange) p[dateRange.param] = [dateRange.from, dateRange.to]
     return p
-  }, [globalSearch, selectedStatus, selectedPhase, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, selectedPool, selectedCity, selectedSource, showArchived, showTrash, attentionFilter, dateRange, staleMonths, view, mapCenter, mapRadius, geoFilter])
+  }, [globalSearch, selectedStatus, selectedPhase, selectedFunnel, selectedType, selectedOwner, selectedGeslacht, selectedProvince, selectedTitle, selectedLocation, selectedPool, selectedCity, selectedSource, showArchived, showTrash, attentionFilter, dateRange, staleMonths, view, mapCenter, mapRadius, mapStraalActive, geoFilter])
   const filterKey = JSON.stringify(filterParams)
 
   return {
     showArchived, setShowArchived, showTrash, setShowTrash,
     selectedStatus, setSelectedStatus,
     selectedPhase, setSelectedPhase, selectedFunnel, setSelectedFunnel,
+    mapStraalActive, setMapStraalActive,
     selectedType, setSelectedType, selectedOwner, setSelectedOwner,
     selectedGeslacht, setSelectedGeslacht, selectedProvince, setSelectedProvince,
     selectedTitle, setSelectedTitle, selectedLocation, setSelectedLocation,
