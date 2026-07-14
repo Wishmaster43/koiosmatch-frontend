@@ -50,7 +50,11 @@ export function useNoteTypes() {
     api.get('/note-types').then(r => {
       const raw = (r?.data?.data ?? r?.data ?? []) as Record<string, unknown>[]
       const d = raw.filter(Boolean).map(toOption)
-      if (d.length) setTypes(d)
+      // Dedupe by value: the per-entity note-types seeding (NOTE-TYPES-2) can
+      // repeat a value across entities — duplicate React keys crashed the thread.
+      const seen = new Set<string>()
+      const unique = d.filter(x => (seen.has(x.value) ? false : (seen.add(x.value), true)))
+      if (unique.length) setTypes(unique)
     }).catch(() => {})
   }, [])
 

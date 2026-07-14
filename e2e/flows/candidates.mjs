@@ -64,7 +64,7 @@ export async function archiveAndFindBack({ page, errors }) {
   // modal instead of archiving — pick a candidate WITHOUT running business here.
   await go(page, 'Kandidaten')
   const row = page.locator('table tbody tr')
-    .filter({ hasNotText: /Gesolliciteerd|Uitgenodigd|Intake|Voorgesteld|Geplaatst/ }).first()
+    .filter({ hasNotText: /Gesolliciteerd|Uitgenodigd|Intake|Voorgesteld|Geplaatst|Aangenomen|Matched/ }).first()
   expect(await row.count(), 'geen archiveerbare kandidaat-rij (alles heeft lopende zaken?)')
   const name = (await row.locator('td').nth(1).innerText()).split('\n')[0].trim()
   await row.click()
