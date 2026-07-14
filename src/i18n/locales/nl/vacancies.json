@@ -126,6 +126,10 @@
     "very": "Zeer belangrijk",
     "save": "Opslaan",
     "saved": "Opgeslagen",
+    "templatesError": "Matchprofielen konden niet worden geladen.",
+    "noTemplates": "Nog geen matchprofielen — maak er een aan via Instellingen.",
+    "snapshotHint": "De gewichten worden eenmalig gekopieerd van het profiel naar deze vacature; latere wijzigingen aan het profiel werken deze vacature niet automatisch bij.",
+    "basedOn": "Gebaseerd op \"{{name}}\".",
     "dim": {
       "qualifications": "Kwalificaties",
       "technical_fit": "Technische pasvorm",
@@ -215,6 +219,9 @@
     "leadsToApplications": "Leads → sollicitaties",
     "empty": "Nog onvoldoende gegevens.",
     "openApplications": "Open de sollicitaties"
+  },
+  "timeline": {
+    "empty": "Nog geen activiteit."
   },
   "modal": {
     "title": "Nieuwe vacature",

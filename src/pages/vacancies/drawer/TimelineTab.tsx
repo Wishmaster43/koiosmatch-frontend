@@ -12,7 +12,7 @@ export default function TimelineTab({ vacancy: v }: { vacancy: VacancyDetail }) 
   const items = v.timeline ?? []
 
   if (items.length === 0) {
-    return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('statistics.empty')}</div>
+    return <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('timeline.empty')}</div>
   }
 
   return (

@@ -34,6 +34,12 @@ const TABS: { id: string; tKey: string; render: (v: VacancyDetail, onUpdate?: Up
   { id: 'publishing', tKey: 'publishing', render: (v, onUpdate) => <PublishingTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'extra',      tKey: 'extra',      render: (v, onUpdate) => <ExtraTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'documents',  tKey: 'documents',  render: v => <DocumentsTab vacancy={v} /> },
+  // Tijdlijn TAB (intended: real lifecycle activity — created/status changes/
+  // applications received) is distinct BY DESIGN from the changelog ICON in the
+  // title row (raw field-change audit, VacancyChangelogPopover) — §3A(d): tab =
+  // activiteit, icon = veldwijzigingen. Currently a calm empty state: the backend
+  // hardcodes `timeline: []` (no aggregator like ApplicationTimeline exists yet for
+  // vacancies) — BE follow-up, not a reason to remove this tab.
   { id: 'timeline',   tKey: 'timeline',   render: v => <TimelineTab vacancy={v} /> },
   { id: 'notes',      tKey: 'notes',      render: v => <NotesTab vacancy={v} /> },
   { id: 'statistics', tKey: 'statistics', render: v => <StatisticsTab vacancy={v} /> },

@@ -122,6 +122,10 @@
     "linkButton": "Vacature koppelen",
     "unlink": "Vacature ontkoppelen"
   },
+  "candidateDetail": {
+    "loading": "Kandidaat wordt geladen…",
+    "error": "Kandidaat kon niet worden geladen."
+  },
   "interview": {
     "title": "WhatsApp-interview",
     "done": "Klaar",

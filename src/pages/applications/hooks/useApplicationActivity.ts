@@ -15,6 +15,9 @@ export interface ApplicationActivityEvent {
   created_at?: string
   description?: string
   log_name?: string
+  // Field-level old→new diff bag (EntityChangelogController::formatActivityEntry) —
+  // used to suppress a stage-only entry already covered by the Timeline tab (below).
+  changes?: { attributes?: Record<string, unknown>; old?: Record<string, unknown> }
   [k: string]: unknown
 }
 

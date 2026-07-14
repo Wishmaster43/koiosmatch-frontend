@@ -135,6 +135,10 @@
     "linkButton": "Lier un poste",
     "unlink": "Dissocier le poste"
   },
+  "candidateDetail": {
+    "loading": "Chargement du candidat…",
+    "error": "Impossible de charger le candidat."
+  },
   "interview": {
     "title": "Entretien WhatsApp",
     "done": "Terminé",

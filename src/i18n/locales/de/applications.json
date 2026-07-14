@@ -135,6 +135,10 @@
     "linkButton": "Stelle verknüpfen",
     "unlink": "Stelle trennen"
   },
+  "candidateDetail": {
+    "loading": "Kandidat wird geladen…",
+    "error": "Kandidat konnte nicht geladen werden."
+  },
   "interview": {
     "title": "WhatsApp-Interview",
     "done": "Erledigt",

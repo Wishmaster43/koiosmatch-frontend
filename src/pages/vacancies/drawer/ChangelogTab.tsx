@@ -1,10 +1,14 @@
 /**
- * ChangelogTab — the vacancy's audit trail. Presentational; the fetch lives in
- * useVacancyActivity (§3). Handles the four UI states explicitly and shows a calm
- * empty state until the backend read endpoint is live (404 → empty). Mirrors the
- * opportunity/match changelog so every entity reads the same (§3A). Distinct from
- * TimelineTab (the existing "created/status changed/applications received" feed
- * tab) — this is the icon-popover changelog the blueprint calls for (§3A(d)).
+ * ChangelogTab — the vacancy's FIELD-CHANGE audit trail (icon-popover, §3A(d)).
+ * Presentational; the fetch lives in useVacancyActivity (§3). Handles the four UI
+ * states explicitly and shows a calm empty state until the backend read endpoint
+ * is live (404 → empty). Mirrors the opportunity/match changelog so every entity
+ * reads the same (§3A). Distinct from the Tijdlijn TAB (TimelineTab.tsx, intended
+ * for real lifecycle activity) — tab = activiteit, icon = veldwijzigingen. No
+ * dedupe filter here (unlike the application's ChangelogTab): the vacancy Tijdlijn
+ * tab currently has no backend content to overlap with (`timeline: []`, no
+ * aggregator yet) — mirror the application's stage-only-change filter here once a
+ * vacancy activity aggregator ships (BE follow-up).
  */
 import { useTranslation } from 'react-i18next'
 import { History, AlertTriangle } from 'lucide-react'

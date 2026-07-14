@@ -126,6 +126,10 @@
     "very": "Very important",
     "save": "Save",
     "saved": "Saved",
+    "templatesError": "Couldn't load match profiles.",
+    "noTemplates": "No match profiles yet — create one in Settings.",
+    "snapshotHint": "Weights are copied from the profile onto this vacancy once; later changes to the profile do not update this vacancy automatically.",
+    "basedOn": "Based on \"{{name}}\".",
     "dim": {
       "qualifications": "Qualifications",
       "technical_fit": "Technical fit",
@@ -215,6 +219,9 @@
     "leadsToApplications": "Leads → applications",
     "empty": "Not enough data yet.",
     "openApplications": "Open the applications"
+  },
+  "timeline": {
+    "empty": "No activity yet."
   },
   "modal": {
     "title": "New vacancy",

@@ -124,6 +124,10 @@
     "very": "Muy importante",
     "save": "Guardar",
     "saved": "Guardado",
+    "templatesError": "No se pudieron cargar los perfiles de matching.",
+    "noTemplates": "Aún no hay perfiles de matching — cree uno en Configuración.",
+    "snapshotHint": "Las ponderaciones se copian una sola vez del perfil a esta vacante; los cambios posteriores en el perfil no actualizan esta vacante automáticamente.",
+    "basedOn": "Basado en «{{name}}».",
     "dim": {
       "qualifications": "Cualificaciones",
       "technical_fit": "Idoneidad técnica",
@@ -215,6 +219,9 @@
     "leadsToApplications": "Leads → candidaturas",
     "empty": "Aún no hay suficientes datos.",
     "openApplications": "Abrir las candidaturas"
+  },
+  "timeline": {
+    "empty": "Aún no hay actividad."
   },
   "modal": {
     "title": "Nueva vacante",

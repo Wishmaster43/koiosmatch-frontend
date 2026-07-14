@@ -124,6 +124,10 @@
     "very": "Très important",
     "save": "Enregistrer",
     "saved": "Enregistré",
+    "templatesError": "Impossible de charger les profils de matching.",
+    "noTemplates": "Aucun profil de matching pour le moment — créez-en un dans les paramètres.",
+    "snapshotHint": "Les pondérations sont copiées une seule fois depuis le profil vers ce poste ; les modifications ultérieures du profil ne mettent pas ce poste à jour automatiquement.",
+    "basedOn": "Basé sur « {{name}} ».",
     "dim": {
       "qualifications": "Qualifications",
       "technical_fit": "Adéquation technique",
@@ -215,6 +219,9 @@
     "leadsToApplications": "Leads → candidatures",
     "empty": "Pas encore assez de données.",
     "openApplications": "Ouvrir les candidatures"
+  },
+  "timeline": {
+    "empty": "Aucune activité pour le moment."
   },
   "modal": {
     "title": "Nouveau poste",

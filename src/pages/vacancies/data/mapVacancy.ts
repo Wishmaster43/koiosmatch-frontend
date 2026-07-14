@@ -131,6 +131,8 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     // Per-vacancy AI matching weights (6 dimensions, int 1..5) for the Matching tab.
     // (Global matcher strictness lives in /settings/matching, not on the vacancy.)
     matchWeights: raw.match_weights ?? {},
+    // MATCH-TEMPLATE-1: provenance only (snapshot semantics) — never a live link.
+    matchWeightTemplateId: raw.match_weight_template_id ?? null,
     // Job-board channels with their published state.
     channels: (raw.channels ?? raw.published_channels ?? []).map(c => ({
       value: c.value ?? c.key ?? c.id, label: c.label ?? c.name ?? '', published: Boolean(c.published),

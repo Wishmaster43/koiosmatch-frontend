@@ -54,8 +54,11 @@ export default function CandidateTab({ application: a }: { application: Applicat
     api.patch(`/candidates/${id}`, patch).catch(() => notifyError(t('common:actionFailed')))
   }
 
-  if (loading) return <div style={muted}>{t('page.loading', { defaultValue: '…' })}</div>
-  if (error || !cand) return <div style={muted}>{t('page.loadError', { defaultValue: '—' })}</div>
+  // The default namespace here is 'candidates' (every sub-tab below needs it), so
+  // these two loading/error strings — an applications-drawer concern, not a
+  // candidates one — are explicitly namespaced (mirrors VacancyTab's vacancyDetail.*).
+  if (loading) return <div style={muted}>{t('applications:candidateDetail.loading')}</div>
+  if (error || !cand) return <div style={muted}>{t('applications:candidateDetail.error')}</div>
 
   // Merge local edits over the fetched record for the tab components.
   const c = { ...cand, ...edits } as Candidate

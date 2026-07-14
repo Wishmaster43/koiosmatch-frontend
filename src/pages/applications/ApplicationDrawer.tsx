@@ -87,6 +87,10 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
       case 'vacancy':      return <VacancyTab application={a} onLinkVacancy={onLinkVacancy} />
       case 'interviews':   return <InterviewsTab application={a} />
       case 'appointments': return <AppointmentsTab application={a} />
+      // Tijdlijn TAB (real lifecycle activity: funnel transitions, appointments,
+      // notes, AI-interviews — ApplicationTimeline on the backend) is intentionally
+      // distinct from the changelog ICON in the title row (raw field-change audit,
+      // ApplicationChangelogPopover) — §3A(d): tab = activiteit, icon = veldwijzigingen.
       case 'timeline':     return <Timeline items={a.timeline ?? []} emptyText={t('timeline.empty')} />
       case 'notes':        return <NotesTab application={a} />
       case 'extra':        return <CustomFieldsTab entityType="application" values={a.customFields ?? {}}

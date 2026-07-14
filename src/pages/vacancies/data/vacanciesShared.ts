@@ -33,6 +33,9 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('channels'            in patch) body.published_channels   = patch.channels
   if ('applicationSettings' in patch) body.application_settings = patch.applicationSettings
   if ('matchWeights'        in patch) body.match_weights        = patch.matchWeights
+  // MATCH-TEMPLATE-1: assigning a template — the backend snapshots its weights onto
+  // this vacancy and returns the resolved match_weights in the same response.
+  if ('matchWeightTemplateId' in patch) body.match_weight_template_id = patch.matchWeightTemplateId
   // Details tab fields — contract forms, lookup slugs, structured address/salary/hours.
   if ('contractTypes'   in patch) body.contract_types     = patch.contractTypes
   if ('seniorityValue'  in patch) body.seniority          = patch.seniorityValue

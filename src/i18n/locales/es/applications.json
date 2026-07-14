@@ -135,6 +135,10 @@
     "linkButton": "Vincular vacante",
     "unlink": "Desvincular vacante"
   },
+  "candidateDetail": {
+    "loading": "Cargando candidato…",
+    "error": "No se pudo cargar el candidato."
+  },
   "interview": {
     "title": "Entrevista de WhatsApp",
     "done": "Hecho",

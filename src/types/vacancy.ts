@@ -85,6 +85,9 @@ export interface VacancyDetail extends Vacancy {
   description: string
   applicationSettings: Loose
   matchWeights: Loose
+  // MATCH-TEMPLATE-1: provenance only — which template these weights were last
+  // snapshotted from (null = never assigned / cleared by a manual override).
+  matchWeightTemplateId: string | null
   channels: Array<{ value: string | number | undefined; label: string; published: boolean }>
   applications: Array<{
     id: Id | undefined; candidateId: Id | null; candidateName: string; candidateInitials: string
@@ -170,6 +173,8 @@ export interface ApiVacancy {
   description?: string
   application_settings?: Loose
   match_weights?: Loose
+  // MATCH-TEMPLATE-1: which template the current match_weights snapshot came from.
+  match_weight_template_id?: string | null
   channels?: ApiChannel[]
   applications?: Array<{
     id?: Id; candidate?: { id?: Id; name?: string; initials?: string }; candidate_name?: string; candidate_id?: Id

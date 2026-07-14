@@ -122,6 +122,10 @@
     "linkButton": "Link vacancy",
     "unlink": "Unlink vacancy"
   },
+  "candidateDetail": {
+    "loading": "Loading candidate…",
+    "error": "Failed to load the candidate."
+  },
   "interview": {
     "title": "WhatsApp interview",
     "done": "Done",

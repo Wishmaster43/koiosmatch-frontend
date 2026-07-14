@@ -60,7 +60,19 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
     setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...local } as VacancyDetail) : prev))
 
     const body = buildVacancyPatch(patch)
-    if (Object.keys(body).length) api.patch(`/vacancies/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
+    if (!Object.keys(body).length) return
+    const request = api.patch(`/vacancies/${id}`, body)
+    // MATCH-TEMPLATE-1: the server computes the actual match_weights snapshot (and
+    // may clear/keep the template provenance), so re-sync those two fields from the
+    // authoritative response instead of trusting the optimistic local patch.
+    if ('matchWeights' in patch || 'matchWeightTemplateId' in patch) {
+      request.then(r => {
+        const updated = mapVacancyDetail(r.data?.data ?? r.data)
+        setDetail(prev => (prev && prev.id === id ? { ...prev, matchWeights: updated.matchWeights, matchWeightTemplateId: updated.matchWeightTemplateId } : prev))
+      }).catch(() => notifyError(t('common:actionFailed')))
+    } else {
+      request.catch(() => notifyError(t('common:actionFailed')))
+    }
   }
 
   return { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy }

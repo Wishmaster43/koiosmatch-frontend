@@ -124,6 +124,10 @@
     "very": "Sehr wichtig",
     "save": "Speichern",
     "saved": "Gespeichert",
+    "templatesError": "Matchprofile konnten nicht geladen werden.",
+    "noTemplates": "Noch keine Matchprofile — erstellen Sie eines in den Einstellungen.",
+    "snapshotHint": "Die Gewichtung wird einmalig vom Profil auf diese Stelle kopiert; spätere Änderungen am Profil aktualisieren diese Stelle nicht automatisch.",
+    "basedOn": "Basiert auf \"{{name}}\".",
     "dim": {
       "qualifications": "Qualifikationen",
       "technical_fit": "Technische Eignung",
@@ -215,6 +219,9 @@
     "leadsToApplications": "Leads → Bewerbungen",
     "empty": "Noch nicht genügend Daten.",
     "openApplications": "Bewerbungen öffnen"
+  },
+  "timeline": {
+    "empty": "Noch keine Aktivität."
   },
   "modal": {
     "title": "Neue Stelle",
