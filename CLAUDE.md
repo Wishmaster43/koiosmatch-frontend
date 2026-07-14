@@ -225,6 +225,17 @@ literal option lists inside components.
 meaning (status/stage), never as decoration; hierarchy via typography and whitespace,
 not borders. Always handle the four UI states (loading/error/empty/success).
 
+**The action/state matrix is binding (Danny 2026-07-14).**
+`koiosmatch-api/docs/AXIS-MATRIX.md` is the system-wide rulebook: allowed state
+combinations, action × state levels (allow/warn/block + which popup P1–P10),
+non-interactive rules (workflows/bulk/seeder) and the automations catalogue.
+**READ IT before building or changing any create/transition flow** (solliciteren,
+koppelen, intake, match, taak, bellijst, WhatsApp, status/fase-wissels, klant-acties)
+and verify the built behaviour against it — a UI that allows what the matrix
+blocks, skips a required popup, or misses an expected automation is a finding.
+The matrix is tenant-configurable data (seeded defaults, Settings → Actieregels);
+the FE preflight and BE guards read the same tenant rule set.
+
 ---
 
 ## 3B. Candidates — Working Spec (active focus)
