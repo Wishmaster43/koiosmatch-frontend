@@ -207,6 +207,12 @@ same validation/UX, lookups via `useX()` hooks (never hardcoded option lists).
   `color + '1A'` background, `color` text, `color + '55'` border. Never solid fills.
 - **In-place edit pattern:** a pencil toggles to diskette (save) + ✕ (cancel), shown
   above the block — never floating over the rows.
+- **Every free-text field is a rich-text block (Danny 2026-07-14).** Any multi-line
+  text field (omschrijving / opmerkingen / beschrijving / toelichting / summary /
+  wervingsproblemen …) uses the shared `components/ui/RichTextEditor` (bold, italic,
+  lists, …) with `SafeHtml` display and its OWN pencil → save/✕ — mirror the
+  candidate profile text. A bare `<textarea>` for user-facing prose is a finding.
+  (Single-line inputs and code/ID fields are exempt.)
 - **Field layout:** label-above; pair short fields into two columns; group related
   fields into titled cards (Persoonlijk / Contact / Adres …).
 
