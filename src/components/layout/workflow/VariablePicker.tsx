@@ -12,6 +12,7 @@ import { useMemo, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Braces, Search, ChevronRight } from 'lucide-react'
 import { MODULE_META } from '@/modules/index'
+import { fieldLabel, fieldPlaceholder } from './moduleI18n'
 import type { WorkflowField, WorkflowVarField, WorkflowVarGroup } from '@/types/workflow'
 
 export type InsertMode = 'token' | 'path'
@@ -202,13 +203,13 @@ export function TextFieldWithVars({ field, value, onChange, variables, multiline
   return (
     <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
       {multiline ? (
-        <textarea ref={ref} value={(value as string) || ''} placeholder={field.placeholder || ''} aria-label={field.label}
+        <textarea ref={ref} value={(value as string) || ''} placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
           onChange={e => onChange(field.key, e.target.value)} rows={4}
           style={{ ...base, fontFamily: 'monospace', resize: 'vertical', paddingRight: 9 }}
           onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}
           onBlur={e  => (e.target.style.borderColor = 'var(--border)')} />
       ) : (
-        <input ref={ref} type="text" value={(value as string) || ''} placeholder={field.placeholder || ''} aria-label={field.label}
+        <input ref={ref} type="text" value={(value as string) || ''} placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
           onChange={e => onChange(field.key, e.target.value)}
           style={base}
           onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}

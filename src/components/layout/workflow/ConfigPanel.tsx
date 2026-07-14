@@ -12,7 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { MODULE_META, MODULE_SCHEMAS } from '@/modules/index'
 import { AgentsTab, PromptsTab, FAQTab, KnowledgeTab, ToolsTab } from '@/components/ai/AIManagementTabs'
 import { FieldInput } from './fields'
-import { categorySlug, fieldLabel } from './moduleI18n'
+import { categorySlug, fieldHint, fieldLabel } from './moduleI18n'
 import AgentTestPanel from './AgentTestPanel'
 import OutputTree from './OutputTree'
 import FanoutSummary, { type WaFanout } from './FanoutSummary'
@@ -91,7 +91,8 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
           </label>
           <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
             onChange={(key, val) => onUpdate(node.id, key, val)} />
-          {field.hint ? <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{field.hint as string}</div> : null}
+          {/* Helper text under the field — registry `hint:`/`help:` through the render-layer i18n (§5). */}
+          {(field.hint ?? field.help) ? <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</div> : null}
         </div>
       ))}
       {fields.length === 0 && type !== 'router' && <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('config.noConfig')}</p>}
@@ -189,7 +190,8 @@ export default function ConfigPanel({ node, onUpdate, onDelete, onTabChange, var
                 </label>
                 <FieldInput field={field as WorkflowField} value={config?.[field.key]} variables={variables} config={config}
                   onChange={(key, val) => onUpdate(node.id, key, val)} />
-                {field.hint ? <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{field.hint as string}</div> : null}
+                {/* Registry `hint:`/`help:` helper text through the render-layer i18n (§5). */}
+                {(field.hint ?? field.help) ? <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{fieldHint(t, (field.hint ?? field.help) as string)}</div> : null}
               </div>
             ))}
           {schema.length === 0 && (

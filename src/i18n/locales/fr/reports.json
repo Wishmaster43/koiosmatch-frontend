@@ -340,7 +340,9 @@
       "success": "Réussi",
       "failed": "Échec",
       "running": "En cours",
-      "pending": "En file d'attente"
+      "pending": "En file d'attente",
+      "cancelled": "Annulée",
+      "waiting": "En attente"
     },
     "filters": {
       "status": "Statut",

@@ -340,7 +340,9 @@
       "success": "Geslaagd",
       "failed": "Mislukt",
       "running": "Bezig",
-      "pending": "In wachtrij"
+      "pending": "In wachtrij",
+      "cancelled": "Gestopt",
+      "waiting": "Wachten"
     },
     "filters": {
       "status": "Status",

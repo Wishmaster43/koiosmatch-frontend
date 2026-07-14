@@ -11,7 +11,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import type { ReactNode, DragEvent } from 'react'
 import { interactive } from '@/lib/a11y'
-import { notifyError } from '@/lib/notify'
+import { notify, notifyError } from '@/lib/notify'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { useRightPanel } from '@/context/RightPanelContext'
@@ -43,6 +43,8 @@ export default function WorkflowsPage() {
   const [loading,         setLoading]         = useState(true)
   const [selectedFolder,  setSelectedFolder]  = useState<FolderId>(null)   // null = alle, 'unassigned' = geen folder, uuid = folder
   const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null)
+  // RUN-CONTROL-1: after a 409 "already running", open the editor focused on that run.
+  const [focusRunId,      setFocusRunId]      = useState<string | number | null>(null)
   const [dragOverFolder,  setDragOverFolder]  = useState<FolderId>(null)
   // List is the Make.com-style default; the choice persists across reloads (localStorage, non-PII).
   const [viewMode,        setViewModeState]   = useState<ViewMode>(readStoredViewMode)
@@ -104,8 +106,27 @@ export default function WorkflowsPage() {
     }).finally(() => setLoading(false))
   }, [showArchived])
 
+  // Open the editor; a normal edit clears any lingering 409 run focus.
+  const openEditor = (wf: Workflow, runId: string | number | null = null) => {
+    setFocusRunId(runId)
+    setEditingWorkflow(wf)
+  }
+
   const handleRun = async (id?: string | number) => {
-    await api.post(`/workflows/${id}/run`).catch(() => api.post(`/workflows/${id}/execute`)).catch(() => notifyError(t('common:actionFailed')))
+    try {
+      await api.post(`/workflows/${id}/run`)
+    } catch (err) {
+      const e = err as { response?: { status?: number; data?: { run_id?: string | number } } }
+      // RUN-CONTROL-1 single-flight 409: this workflow already has a live run —
+      // say so (i18n) and open the builder pointed at that run (stop lives there).
+      if (e.response?.status === 409) {
+        notify('info', t('runControl.alreadyRunning'))
+        const wf = workflows.find(w => w.id === id)
+        if (wf) openEditor(wf, e.response.data?.run_id ?? null)
+        return
+      }
+      notifyError(t('common:actionFailed'))
+    }
   }
 
   // Active/draft toggle (list-row switch) — same semantics as the editor's status
@@ -247,7 +268,7 @@ export default function WorkflowsPage() {
         {/* Toolbar — add on the LEFT, count + archived + view toggle on the RIGHT (mirror Kansen). */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
           <button
-            onClick={() => setEditingWorkflow({ name: t('page.newWorkflow'), trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
+            onClick={() => openEditor({ name: t('page.newWorkflow'), trigger: 'Dagelijks 08:00', status: 'draft', last_run: null, steps: [], folder_id: selectedFolder === 'unassigned' ? null : (selectedFolder ?? null) })}
             style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: 'white', background: 'var(--color-primary)', border: 'none', borderRadius: 8, cursor: 'pointer' }}
           >
             <Plus size={14} /> {t('page.newWorkflow')}
@@ -291,7 +312,7 @@ export default function WorkflowsPage() {
                 onDragEnd={() => { dragWf.current = null }}
                 style={{ cursor: 'grab' }}
               >
-                <WorkflowCard workflow={wf} onRun={handleRun} onEdit={() => setEditingWorkflow(wf)} />
+                <WorkflowCard workflow={wf} onRun={handleRun} onEdit={() => openEditor(wf)} />
               </div>
             ))}
             {visibleWorkflows.length === 0 && (
@@ -310,7 +331,7 @@ export default function WorkflowsPage() {
                 <WorkflowListRow workflow={wf}
                   folderName={folders.find(f => f.id === wf.folder_id)?.name}
                   onRun={handleRun}
-                  onEdit={() => setEditingWorkflow(wf)}
+                  onEdit={() => openEditor(wf)}
                   onToggleStatus={() => handleToggleStatus(wf)}
                 />
               </div>
@@ -327,7 +348,8 @@ export default function WorkflowsPage() {
       {editingWorkflow && (
         <WorkflowCanvasEditor
           workflow={editingWorkflow}
-          onClose={() => setEditingWorkflow(null)}
+          initialRunId={focusRunId}
+          onClose={() => { setEditingWorkflow(null); setFocusRunId(null) }}
           onSave={handleSave}
         />
       )}

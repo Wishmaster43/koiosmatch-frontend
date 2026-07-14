@@ -13,7 +13,7 @@ import {
   FiltersField, ResponseStructureField, type OnChange,
 } from './fieldControls'
 import { TextFieldWithVars } from './VariablePicker'
-import { optionLabel } from './moduleI18n'
+import { fieldLabel, fieldPlaceholder, optionLabel } from './moduleI18n'
 import WhatsappTemplateField from './WhatsappTemplateField'
 
 export function FieldInput({ field, value, onChange, variables, config }: {
@@ -79,7 +79,7 @@ export function FieldInput({ field, value, onChange, variables, config }: {
   if (field.type === 'select') {
     return (
       <select value={(value ?? field.default ?? '') as string} onChange={e => onChange(field.key, e.target.value)}
-        aria-label={field.label}
+        aria-label={fieldLabel(t, field.label)}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', fontSize: 13, color: 'var(--text)', outline: 'none' }}>
         {field.default == null && <option value="">{t('fields.selectPlaceholder')}</option>}
         {(field.options ?? []).map(o => {
@@ -96,7 +96,7 @@ export function FieldInput({ field, value, onChange, variables, config }: {
       return <TextFieldWithVars field={field} value={value} onChange={onChange} variables={variables} multiline />
     }
     return (
-      <textarea value={(value as string) || ''} placeholder={field.placeholder || ''} aria-label={field.label}
+      <textarea value={(value as string) || ''} placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
         onChange={e => onChange(field.key, e.target.value)}
         rows={4}
         style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 12, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box', fontFamily: 'monospace', resize: 'vertical' }}
@@ -137,7 +137,7 @@ export function FieldInput({ field, value, onChange, variables, config }: {
   return (
     <input type={field.type === 'number' ? 'number' : field.type === 'date' ? 'date' : 'text'}
       value={(value ?? field.default ?? '') as string}
-      placeholder={field.placeholder || ''} aria-label={field.label}
+      placeholder={fieldPlaceholder(t, field.placeholder)} aria-label={fieldLabel(t, field.label)}
       onChange={e => onChange(field.key, field.type === 'number' ? Number(e.target.value) : e.target.value)}
       style={{ width: '100%', padding: '7px 9px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, color: 'var(--text)', background: 'var(--surface)', outline: 'none', boxSizing: 'border-box' }}
       onFocus={e => (e.target.style.borderColor = 'var(--color-primary)')}

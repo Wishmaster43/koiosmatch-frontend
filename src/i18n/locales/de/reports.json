@@ -340,7 +340,9 @@
       "success": "Erfolgreich",
       "failed": "Fehlgeschlagen",
       "running": "Läuft",
-      "pending": "In Warteschlange"
+      "pending": "In Warteschlange",
+      "cancelled": "Abgebrochen",
+      "waiting": "Wartet"
     },
     "filters": {
       "status": "Status",

@@ -17,6 +17,7 @@ import { X, Save, Play, Loader2, Plus, Zap, List, Clock, Workflow as WorkflowIco
 import { useTranslation } from 'react-i18next'
 import { MODULE_META } from '@/modules/index'
 import { ScheduleModal, scheduleLabel } from './workflow/ScheduleModal'
+import { StopRunButton } from './workflow/runControl'
 import { EdgeAddContext, EdgeDeleteContext, EdgeFilterContext, NodeRunContext, StartContext } from './workflow/contexts'
 import { OutputPanel, NODE_TYPES, EDGE_TYPES } from './workflow/canvas'
 import { EdgeFilterPanel } from './workflow/EdgeFilterPanel'
@@ -30,21 +31,22 @@ import type { Workflow } from '@/types/workflow'
 
 // ── Inner editor ──────────────────────────────────────────────────────────────
 
-function EditorInner({ workflow, onClose, onSave }: {
+function EditorInner({ workflow, onClose, onSave, initialRunId }: {
   workflow: Workflow
   onClose: () => void
   onSave: (updated: Workflow, closeAfter?: boolean) => void
+  initialRunId?: string | number | null
 }) {
   const {
     edges, onNodesChange, onEdgesChange, onConnect, nodesWithFirst, selectedNode, setSelectedNodeId,
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
-    saved, running, runError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
-    liveRun,
+    saved, running, runError, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
+    liveRun, activeRunId, liveRunActive, runConflict, handleStopped,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
     insertModule, updateNodeConfig, deleteNode, handleSave, handleRun,
-  } = useWorkflowEditor({ workflow, onSave })
+  } = useWorkflowEditor({ workflow, onSave, initialRunId })
   const { t, i18n } = useTranslation('workflows')
   // Top-level editor view: the node diagram, or this workflow's run history.
   const [view, setView] = useState<'diagram' | 'history'>('diagram')
@@ -147,12 +149,26 @@ function EditorInner({ workflow, onClose, onSave }: {
             </button>
           )}
 
-          {/* Run feedback: the backend reason (e.g. a draft can't run) or generic. */}
+          {/* Run feedback: the backend reason (e.g. a draft can't run) or generic.
+              flexShrink 0: the packed header otherwise crushes the message to "D…". */}
           {runError !== null && (
-            <span style={{ fontSize: 11, color: 'var(--color-danger, #DC2626)', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            <span style={{ fontSize: 11, color: 'var(--color-danger, #DC2626)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
               title={runError || t('common:actionFailed')}>
               {runError || t('common:actionFailed')}
             </span>
+          )}
+
+          {/* RUN-CONTROL-1 single-flight: 409 → "loopt al" + the viewer points at that run. */}
+          {runConflict && (
+            <span style={{ fontSize: 11, color: 'var(--color-warning)', maxWidth: 220, flexShrink: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+              title={t('runControl.alreadyRunning')}>
+              {t('runControl.alreadyRunning')}
+            </span>
+          )}
+
+          {/* Stop the live run (RUN-CONTROL-1) — visible while it can still be cancelled. */}
+          {liveRunActive && activeRunId != null && (
+            <StopRunButton runId={activeRunId} onStopped={handleStopped} onError={setRunError} />
           )}
 
           <button onClick={handleRun} disabled={running}
@@ -321,6 +337,8 @@ export default function WorkflowCanvasEditor(props: {
   workflow: Workflow
   onClose: () => void
   onSave: (updated: Workflow, closeAfter?: boolean) => void
+  // RUN-CONTROL-1: open focused on this (already running) run — the 409 path.
+  initialRunId?: string | number | null
 }) {
   return (
     <ReactFlowProvider>

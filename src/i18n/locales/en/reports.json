@@ -340,7 +340,9 @@
       "success": "Succeeded",
       "failed": "Failed",
       "running": "Running",
-      "pending": "Queued"
+      "pending": "Queued",
+      "cancelled": "Cancelled",
+      "waiting": "Waiting"
     },
     "filters": {
       "status": "Status",

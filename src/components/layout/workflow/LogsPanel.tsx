@@ -1,21 +1,42 @@
 /**
- * LogsPanel — the workflow's run history in the right side panel: lists the real
+ * LogsPanel — the workflow's run viewer in the right side panel: lists the real
  * executions of this workflow (status, time, candidate count, duration) with
  * expandable step results. Empty on failure, never fabricated. Extracted from
- * WorkflowCanvasEditor.
+ * WorkflowCanvasEditor. RUN-CONTROL-1: a running/waiting run gets a stop button,
+ * each step card shows its own timestamp + its OWN output slice (StepOutputSlice).
  */
 import { useState, useEffect } from 'react'
 import { X, List, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import api from '@/lib/api'
 import { StatusBadge, formatDT, formatDuration } from '@/components/reports/runFormat'
-import type { RunRow } from '@/types/reports'
+import { CANCELLABLE, StopRunButton } from './runControl'
+import { useModuleCatalog } from './useModuleCatalog'
+import StepOutputSlice from './StepOutputSlice'
+import type { RunRow, RunStep } from '@/types/reports'
+
+// Step time range, e.g. "14:03:11 → 14:03:14" (seconds matter inside one run).
+function stepTime(step: RunStep): string | null {
+  const fmt = (v?: string | null) => v
+    ? new Date(v).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+    : null
+  const from = fmt(step.started_at)
+  const to = fmt(step.finished_at)
+  if (!from) return null
+  return to && to !== from ? `${from} → ${to}` : from
+}
 
 export default function LogsPanel({ workflowId, liveRun, onClose }: { workflowId?: string | number; liveRun?: RunRow | null; onClose: () => void }) {
   const { t } = useTranslation('reports')
+  // New run-control strings live in the workflows namespace (this wave's keys).
+  const { t: tw } = useTranslation('workflows')
   const [runs,     setRuns]     = useState<RunRow[]>([])
   const [loading,  setLoading]  = useState(true)
   const [expanded, setExpanded] = useState<string | number | null>(null)
+  // Per-run stop feedback (the 422 "already finished" reason from the backend).
+  const [stopError, setStopError] = useState<{ id: string | number; message: string } | null>(null)
+  // Bundle-shape catalog (output_fields per module type) for the per-step slices.
+  const { catalog } = useModuleCatalog()
 
   // WF-R3: surface the live run (polled) at the top, with its steps auto-expanded,
   // so the panel updates in real-time while the run executes.
@@ -39,6 +60,13 @@ export default function LogsPanel({ workflowId, liveRun, onClose }: { workflowId
       .finally(() => setLoading(false))
     return () => ctrl.abort()
   }, [workflowId])
+
+  // After a successful stop: reflect it locally right away (the live poll and the
+  // next fetch confirm); cancelled steps are closed server-side.
+  const markCancelled = (id: string | number) => {
+    setStopError(null)
+    setRuns(prev => prev.map(r => r.id === id ? { ...r, status: 'cancelled' } : r))
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -67,38 +95,48 @@ export default function LogsPanel({ workflowId, liveRun, onClose }: { workflowId
           // Prefer the enriched live-state rows (duration/summary/items); the legacy
           // step_results shape (label+status only) is a fallback for old runs.
           const steps = (run.steps?.length ? run.steps : run.step_results) ?? []
+          const stoppable = run.id != null && CANCELLABLE.has(String(run.status))
           return (
             <div key={id} style={{ borderBottom: '1px solid var(--border)' }}>
               {/* Row */}
-              <button type="button"
-                onClick={() => steps.length && setExpanded(isOpen ? null : id)}
-                style={{ display: 'flex', alignItems: 'center', width: '100%', padding: '10px 16px', background: 'none', border: 'none', cursor: steps.length ? 'pointer' : 'default', gap: 8, textAlign: 'left' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
-                <StatusBadge status={run.status} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                    {formatDT(run.started_at ?? run.created_at)}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px' }}>
+                <button type="button"
+                  onClick={() => steps.length && setExpanded(isOpen ? null : id)}
+                  style={{ display: 'flex', alignItems: 'center', flex: 1, minWidth: 0, background: 'none', border: 'none', cursor: steps.length ? 'pointer' : 'default', gap: 8, textAlign: 'left', padding: 0 }}>
+                  <StatusBadge status={run.status} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    {/* The run timestamp is the card's primary line (RUN-CONTROL-1). */}
+                    <div style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--text)' }}>
+                      {formatDT(run.started_at ?? run.created_at)}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
+                      {t('runs.drawer.candidates')}: {run.candidates_count ?? run.candidates ?? '—'} · {t('runs.drawer.duration')}: {formatDuration(run.duration_ms ?? run.duration)}
+                    </div>
+                    {run.error_message && (
+                      <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 2 }}>{run.error_message}</div>
+                    )}
+                    {stopError?.id === id && (
+                      <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 2 }}>{stopError.message}</div>
+                    )}
                   </div>
-                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>
-                    {t('runs.drawer.candidates')}: {run.candidates_count ?? run.candidates ?? '—'} · {t('runs.drawer.duration')}: {formatDuration(run.duration_ms ?? run.duration)}
-                  </div>
-                  {run.error_message && (
-                    <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 2 }}>{run.error_message}</div>
+                  {steps.length > 0 && (
+                    <ChevronDown size={12} color="var(--border)"
+                      style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
                   )}
-                </div>
-                {steps.length > 0 && (
-                  <ChevronDown size={12} color="var(--border)"
-                    style={{ flexShrink: 0, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.15s' }} />
+                </button>
+                {/* Stop — only while the run can still be cancelled (running/waiting). */}
+                {stoppable && (
+                  <StopRunButton runId={run.id as string | number} compact
+                    onStopped={() => markCancelled(id)}
+                    onError={message => setStopError({ id, message: message || tw('runControl.stopFailed') })} />
                 )}
-              </button>
+              </div>
 
-              {/* Expanded step results — duration + what the step handled (capped list) */}
+              {/* Expanded step results — timestamp + duration + the step's OWN output slice */}
               {isOpen && steps.length > 0 && (
                 <div style={{ padding: '0 16px 12px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {steps.map((step, i) => {
-                    const items = Array.isArray(step.items) ? step.items as Array<{ name?: string; meta?: string | null }> : []
-                    const total = (step.items_total as number | undefined) ?? null
+                    const time = stepTime(step)
                     return (
                       <div key={i} style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
@@ -112,6 +150,10 @@ export default function LogsPanel({ workflowId, liveRun, onClose }: { workflowId
                             <StatusBadge status={step.status ?? (step.ok ? 'success' : 'failed')} />
                           </span>
                         </div>
+                        {/* WHEN this step ran — prominent on every card (RUN-CONTROL-1). */}
+                        {time && (
+                          <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text)', fontFamily: 'monospace', marginTop: 4 }}>{time}</div>
+                        )}
                         {step.error != null && (
                           <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 4 }}>{String(step.error)}</div>
                         )}
@@ -129,24 +171,8 @@ export default function LogsPanel({ workflowId, liveRun, onClose }: { workflowId
                             ))}
                           </div>
                         )}
-                        {total != null && (
-                          <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>
-                            {t('runs.drawer.output')}: {total}
-                          </div>
-                        )}
-                        {items.length > 0 && (
-                          <div style={{ maxHeight: 220, overflowY: 'auto', marginTop: 6, border: '1px solid var(--border)', borderRadius: 6 }}>
-                            {items.map((it, j) => (
-                              <div key={j} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '4px 8px', borderBottom: j < items.length - 1 ? '1px solid var(--hover-bg)' : 'none' }}>
-                                <span style={{ fontSize: 11, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.name ?? '—'}</span>
-                                {it.meta && <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{it.meta}</span>}
-                              </div>
-                            ))}
-                            {total != null && total > items.length && (
-                              <div style={{ padding: '4px 8px', fontSize: 10, color: 'var(--text-muted)' }}>+ {total - items.length}…</div>
-                            )}
-                          </div>
-                        )}
+                        {/* This step's own emitted records (collapsible; closed above 10 rows). */}
+                        <StepOutputSlice step={step} catalog={catalog} />
                       </div>
                     )
                   })}

@@ -68,9 +68,12 @@ export function buildVarFields(nodeId: string, out: unknown): WorkflowVarField[]
     : [{ token: `{{${nodeId}}}`, label: '' }]
 }
 
-export function useWorkflowEditor({ workflow, onSave }: {
+export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   workflow: Workflow
   onSave: (updated: Workflow, closeAfter?: boolean) => void
+  // RUN-CONTROL-1: open the editor already focused on an active run (the 409
+  // "already running" path from the list page) — the logs panel opens on it.
+  initialRunId?: string | number | null
 }) {
   const initFlow = stepsToFlow(
     (workflow.steps || []).map(s => ({ ...s, id: s.id || uid() }))
@@ -99,8 +102,11 @@ export function useWorkflowEditor({ workflow, onSave }: {
   const [runError,       setRunError]       = useState<string | null>(null)
   const [runningNodeId,  setRunningNodeId]  = useState<string | null>(null)
   // WF-R3: the id of the run we're polling live (set by handleRun), and its steps.
-  const [activeRunId,    setActiveRunId]    = useState<string | number | null>(null)
+  const [activeRunId,    setActiveRunId]    = useState<string | number | null>(initialRunId)
   const liveRun = useWorkflowRun(activeRunId)
+  // RUN-CONTROL-1: true after a 409 "already running" — the header shows the
+  // i18n "loopt al" feedback while the logs panel points at that run.
+  const [runConflict,    setRunConflict]    = useState(initialRunId != null)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [pickerState,    setPickerState]    = useState<{ edgeId?: string; append?: boolean } | null>(null)
   const [showSchedule,   setShowSchedule]   = useState(false)
@@ -115,7 +121,7 @@ export function useWorkflowEditor({ workflow, onSave }: {
         .catch(() => {})
     })
   }, [])
-  const [showLogs,       setShowLogs]       = useState(false)
+  const [showLogs,       setShowLogs]       = useState(initialRunId != null)
   const [filterState,    setFilterState]    = useState<{ edgeId: string } | null>(null)
   const [outputState,    setOutputState]    = useState<{ nodeId: string; output: unknown } | null>(null)
 
@@ -306,6 +312,7 @@ export function useWorkflowEditor({ workflow, onSave }: {
   const handleRun = useCallback(async () => {
     setRunning(true)
     setRunError(null)
+    setRunConflict(false)
     try {
       // Actually execute the SAVED workflow server-side (the engine runs the
       // steps on the queue). This button used to only animate — never ran.
@@ -319,15 +326,32 @@ export function useWorkflowEditor({ workflow, onSave }: {
       // Show the run history / live viewer (the polled run drives node colours).
       setShowLogs(true)
     } catch (err) {
-      // Surface the backend reason (e.g. "Workflow is niet actief" on a draft);
-      // empty string = generic message via i18n in the component.
-      const e = err as { response?: { data?: { message?: string } } }
-      setRunError(e.response?.data?.message ?? '')
+      const e = err as { response?: { status?: number; data?: { message?: string; run_id?: string | number } } }
+      // RUN-CONTROL-1 single-flight: 409 = this workflow already has a live run.
+      // Point the viewer at THAT run (poll + logs panel) and show "loopt al".
+      if (e.response?.status === 409) {
+        if (e.response.data?.run_id != null) setActiveRunId(e.response.data.run_id)
+        setRunConflict(true)
+        setShowLogs(true)
+      } else {
+        // Surface the backend reason (e.g. "Workflow is niet actief" on a draft);
+        // empty string = generic message via i18n in the component.
+        setRunError(e.response?.data?.message ?? '')
+      }
     } finally {
       setRunningNodeId(null)
       setRunning(false)
     }
   }, [workflow.id])
+
+  // RUN-CONTROL-1: the polled run can still be cancelled → show the stop button.
+  const liveRunActive = liveRun != null && ['running', 'waiting'].includes(String(liveRun.status))
+
+  // After a successful stop the conflict is over; the poll picks up `cancelled`.
+  const handleStopped = useCallback(() => {
+    setRunConflict(false)
+    setRunError(null)
+  }, [])
 
   // Variables a node may reference: the output fields of every upstream module.
   // Walks edges backward (BFS), orders ancestors left-to-right, and derives
@@ -394,8 +418,8 @@ export function useWorkflowEditor({ workflow, onSave }: {
   return {
     edges, onNodesChange, onEdgesChange, onConnect, nodesWithFirst, selectedNode, setSelectedNodeId,
     name, setName, trigger, setTrigger, scheduleConfig, setScheduleConfig, status, setStatus,
-    saved, running, runError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
-    liveRun, activeRunId,
+    saved, running, runError, setRunError, showSchedule, setShowSchedule, widePanelActive, setWidePanelActive, showLogs, setShowLogs,
+    liveRun, activeRunId, liveRunActive, runConflict, handleStopped,
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,

@@ -5,7 +5,7 @@
  */
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle, XCircle, RotateCcw, Clock } from 'lucide-react'
+import { Ban, CheckCircle, XCircle, RotateCcw, Clock } from 'lucide-react'
 
 const PAD = (n: number) => String(n).padStart(2, '0')
 
@@ -28,11 +28,15 @@ export function formatDuration(ms?: number | null) {
 interface StatusMeta { bg: string; color: string; Icon: ComponentType<{ size?: number }> }
 
 // Run status → colour + icon. Label = t('runs.status.<key>').
+// `cancelled` (RUN-CONTROL-1 stop button) is deliberately NEUTRAL grey — a
+// stopped run is not a failure; red stays reserved for `failed`.
 export const STATUS_META: Record<string, StatusMeta> = {
-  success: { bg: 'var(--color-success-bg)', color: 'var(--color-success)', Icon: CheckCircle },
-  failed:  { bg: 'var(--color-danger-bg)',  color: 'var(--color-danger)',  Icon: XCircle },
-  running: { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)', Icon: RotateCcw },
-  pending: { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Clock },
+  success:   { bg: 'var(--color-success-bg)', color: 'var(--color-success)', Icon: CheckCircle },
+  failed:    { bg: 'var(--color-danger-bg)',  color: 'var(--color-danger)',  Icon: XCircle },
+  running:   { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)', Icon: RotateCcw },
+  pending:   { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Clock },
+  waiting:   { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Clock },
+  cancelled: { bg: 'var(--hover-bg)',         color: 'var(--text-muted)',    Icon: Ban },
 }
 
 // Coloured pill with icon + translated label for a run/step status.
