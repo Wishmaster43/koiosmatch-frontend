@@ -10,6 +10,8 @@ import { useCustomerOptions } from '../hooks/useCustomerOptions'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import EntityLink from '@/components/ui/EntityLink'
+import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import { buildVacancyAdviceInsights } from './vacancyAiInsights'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -227,6 +229,9 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
               ? <div style={{ ...blockStyle, padding: '10px 12px', maxHeight: 220, overflow: 'auto' }}><SafeHtml html={v.description} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} /></div>
               : <div style={{ ...blockStyle, padding: '10px 12px', fontSize: 12, color: 'var(--text-muted)' }}>—</div>)}
       </div>
+
+      {/* Koios AI advisory — field completeness + open/applications flow (§3A blueprint). */}
+      <KoiosAdviceBlock namespace="vacancies" insights={buildVacancyAdviceInsights(v, t)} />
     </div>
   )
 }

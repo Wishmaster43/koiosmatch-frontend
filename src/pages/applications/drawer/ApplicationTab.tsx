@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import { buildApplicationAdviceInsights } from './applicationAiInsights'
 import MatchScoreBlock from './MatchScoreBlock'
 import type { Criterion } from './MatchScoreBlock'
 import RejectionBlock from './RejectionBlock'
@@ -57,6 +59,9 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
           </div>
         </div>
       </div>
+
+      {/* Koios AI advisory — phase progress + vacancy-link completeness (§3A blueprint). */}
+      <KoiosAdviceBlock namespace="applications" insights={buildApplicationAdviceInsights(a, t)} />
 
       {/* Match score — overall + configured criteria breakdown. */}
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>

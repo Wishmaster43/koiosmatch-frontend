@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { useIndustries } from '@/lib/useIndustries'
+import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
+import { buildCustomerAdviceInsights } from './customerAiInsights'
 import type { Customer } from '@/types/customer'
 
 export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (values: Record<string, unknown>) => void }) {
@@ -40,5 +42,11 @@ export default function OverviewTab({ c, onSave }: { c: Customer; onSave?: (valu
     { key: 'recruitmentProblems', label: t('overview.recruitmentProblems'), type: 'textarea', group: gTexts },
   ]
 
-  return <EditableFieldTable fields={fields} value={c as unknown as Record<string, unknown>} onSave={onSave} />
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <EditableFieldTable fields={fields} value={c as unknown as Record<string, unknown>} onSave={onSave} />
+      {/* Koios AI advisory — company/location completeness + relationship activity (§3A blueprint). */}
+      <KoiosAdviceBlock namespace="customers" insights={buildCustomerAdviceInsights(c, t)} />
+    </div>
+  )
 }
