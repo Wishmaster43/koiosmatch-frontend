@@ -114,7 +114,8 @@ export default function WorkflowsPage() {
 
   const handleRun = async (id?: string | number) => {
     try {
-      await api.post(`/workflows/${id}/run`)
+      // 409 (already running) is handled below with its own toast + builder focus.
+      await api.post(`/workflows/${id}/run`, undefined, { quietStatuses: [409] })
     } catch (err) {
       const e = err as { response?: { status?: number; data?: { run_id?: string | number } } }
       // RUN-CONTROL-1 single-flight 409: this workflow already has a live run —

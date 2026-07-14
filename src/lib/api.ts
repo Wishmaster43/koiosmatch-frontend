@@ -95,12 +95,17 @@ interface RetryableConfig extends InternalAxiosRequestConfig {
   // shipped yet; the caller has a seed fallback) is expected — keep it out of the
   // dev log so it doesn't read as (or turn the smoke suite) red.
   quiet404?: boolean
+  // Opt-in per request: these statuses are EXPECTED, caller-handled outcomes (e.g.
+  // the workflow run-start 409 "already running" gets its own inline feedback) —
+  // suppress the generic dev error-toast for them, keep everything else intact.
+  quietStatuses?: number[]
 }
 
-// Callers pass { quiet404: true } on api.get(...) — teach axios' request config the flag.
+// Callers pass { quiet404: true } / { quietStatuses: [409] } — teach axios' config the flags.
 declare module 'axios' {
   export interface AxiosRequestConfig {
     quiet404?: boolean
+    quietStatuses?: number[]
   }
 }
 
@@ -162,7 +167,8 @@ api.interceptors.response.use(
     // A-7: surface silent write-failures in dev. A failed mutation otherwise vanishes
     // into a component's `.catch` — a dev toast makes a broken/missing/500 endpoint
     // visible (this is why saves "silently" don't persist). GET stays quiet (loads degrade).
-    if (import.meta.env.DEV && method !== 'get' && status && status !== 401 && !benignTenants403 && !benignUnavailable) {
+    const callerHandled = Boolean(status && config.quietStatuses?.includes(status))
+    if (import.meta.env.DEV && method !== 'get' && status && status !== 401 && !benignTenants403 && !benignUnavailable && !callerHandled) {
       notifyError(`API ${method.toUpperCase()} ${safeUrl} → ${status}`)
     }
 

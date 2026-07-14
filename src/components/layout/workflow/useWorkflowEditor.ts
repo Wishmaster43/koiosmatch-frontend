@@ -319,7 +319,8 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
       const { default: api } = await import('@/lib/api')
       // Start the queued run and keep its id so we can poll the REAL per-step status
       // (WF-R3) — replaces the old fixed 800ms fake walk. Shape: { run: { id } }.
-      const res = await api.post(`/workflows/${workflow.id}/run`)
+      // 409 (already running) gets its own inline feedback — keep the generic dev toast out.
+      const res = await api.post(`/workflows/${workflow.id}/run`, undefined, { quietStatuses: [409] })
       const runId = (res.data?.run?.id ?? res.data?.data?.id ?? res.data?.id) as string | number | undefined
       if (runId != null) setActiveRunId(runId)
 
