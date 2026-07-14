@@ -174,6 +174,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
                 {c.lastContactDate && formatDate(c.lastContactDate)}
                 {c.lastContactDate && c.lastContactType && ' · '}
                 {c.lastContactType && lastContactLabel(c.lastContactType)}
+                {c.lastContactBy && <> · {t('drawer.byWho', { name: c.lastContactBy })}</>}
               </span>
             ) : (
               <span style={{ fontStyle: 'italic' }}>{t('drawer.notRegistered')}</span>

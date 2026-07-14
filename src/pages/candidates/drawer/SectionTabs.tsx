@@ -80,16 +80,20 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
   return (
     <AddableSection title={t('sections.education')} emptyText={t('sections.educationEmpty')}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
+      editInitial={(it: RelItem) => ({ ...it, inProgress: Boolean((it as { inProgress?: unknown; in_progress?: unknown }).inProgress ?? (it as { in_progress?: unknown }).in_progress) })}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const o = raw as { id?: Id; title?: string; education?: string; school?: string; institution?: string; start?: string; start_date?: string; end?: string; end_date?: string; inProgress?: boolean; in_progress?: boolean; issued?: string; issue_date?: string; period?: string; year?: string }
         const start = o.start ?? o.start_date, end = o.end ?? o.end_date
         const inProgress = o.inProgress ?? o.in_progress
-        // In progress: "start – Heden" with a start, else just "Nog in opleiding"
-        // (no dangling dash); otherwise the start–end range (DD-MM-YYYY).
+        // In progress: "start – heden" (issue date doubles as start on old rows;
+        // Danny 14/7), else "Nog in opleiding" — never a dangling dash. Done:
+        // the start–end range (DD-MM-YYYY).
+        const startish = fmt(start) || fmt(o.issued ?? o.issue_date)
         const range = o.period ?? (inProgress
-          ? (fmt(start) ? `${fmt(start)} – ${t('addFields.present')}` : t('addFields.inProgress'))
+          ? (startish ? `${startish} – ${t('addFields.present')}` : t('addFields.inProgress'))
           : [fmt(start), fmt(end)].filter(Boolean).join(' – '))
-        const issued = fmt(o.issued ?? o.issue_date)
+        // An in-progress opleiding has no diploma yet — suppress the issue date.
+        const issued = inProgress ? '' : fmt(o.issued ?? o.issue_date)
         // Compact secondary line: school · period · issue-date on one muted row (like Experience).
         const secondary = [o.school ?? o.institution, range, issued ? `${t('addFields.issueDate')}: ${issued}` : null].filter(Boolean).join(' · ')
         return (
@@ -122,6 +126,7 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
   return (
     <AddableSection title={t('sections.certifications')} emptyText={t('sections.certificationsEmpty')}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
+      editInitial={(it: RelItem) => ({ ...it, noExpiry: !(it as { expires?: unknown }).expires })}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const cert = raw as { id?: Id; name?: string; title?: string; org?: string; issued?: string; expires?: string }
         return (

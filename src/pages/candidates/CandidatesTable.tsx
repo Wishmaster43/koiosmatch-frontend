@@ -148,7 +148,6 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
               background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit' }}>
             {formatDate(c.lastContactAt)}
             {Icon && <Icon size={12} style={{ flexShrink: 0, opacity: 0.6 }} />}
-            {c.lastContactBy && <span style={{ color: 'var(--text-muted)', fontSize: 11, whiteSpace: 'nowrap' }}>· {c.lastContactBy}</span>}
           </button>
         )
       },

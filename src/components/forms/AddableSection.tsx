@@ -36,10 +36,13 @@ interface AddableSectionProps {
   renderItem: (item: RelItem, i: number, arr: RelItem[]) => ReactNode
   layout?: 'list' | 'tags'
   addLabel?: ReactNode
+  // Transform the stored item into edit-form initial values (derive checkbox
+  // state like noExpiry/current that isn't stored on the item itself).
+  editInitial?: (item: RelItem) => RelItem
 }
 
 export default function AddableSection({
-  title, items = [], fields, onAdd, onEdit, onRemove, emptyText, renderItem, layout = 'list', addLabel,
+  title, items = [], fields, onAdd, onEdit, onRemove, emptyText, renderItem, layout = 'list', addLabel, editInitial,
 }: AddableSectionProps) {
   const { t } = useTranslation('common')
   const [adding,     setAdding]     = useState(false)
@@ -65,7 +68,7 @@ export default function AddableSection({
 
   const renderRow = (item: RelItem, i: number, arr: RelItem[]): ReactNode =>
     editingIdx === i ? (
-      <AddForm key={`edit-${item.id ?? i}`} fields={fields} initial={item}
+      <AddForm key={`edit-${item.id ?? i}`} fields={fields} initial={editInitial ? editInitial(item) : item}
         onSave={(v: RelItem) => { onEdit?.(i, v); setEditingIdx(null) }} onCancel={() => setEditingIdx(null)} />
     ) : (onEdit || onRemove) ? (
       <div key={item.id ?? i} style={{ position: 'relative', display: isTags ? 'inline-flex' : 'block', alignItems: 'center' }}>

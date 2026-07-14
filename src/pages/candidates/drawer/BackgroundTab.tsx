@@ -55,17 +55,28 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
   const isPersisted = (id: unknown): id is string | number =>
     (typeof id === 'string' && id.length > 0) || (typeof id === 'number' && id > 0)
 
+  // Checkbox side-effects mirrored locally (the API mapper already applies them):
+  // current → no end date, in progress → no diploma date, always-valid → no expiry.
+  const NORMALIZE: Record<string, (v: RelItem) => RelItem> = {
+    experiences:    v => (v.current ? { ...v, end: null } : v),
+    educations:     v => (v.inProgress ? { ...v, issued: null } : v),
+    certifications: v => (v.noExpiry ? { ...v, expires: null } : v),
+    skills:         v => v,
+  }
+
   // add / edit-at-index / remove-at-index for a relation, with optimistic persistence.
   // Not-yet-persisted rows get a negative temp id (never collides with server ids).
   const ops = (rel: string, list: RelItem[], set: Dispatch<SetStateAction<RelItem[]>>) => ({
-    onAdd: (v: RelItem) => {
+    onAdd: (raw: RelItem) => {
+      const v = NORMALIZE[rel](raw)
       const id = -Date.now()
       set(p => [...p, { ...v, id }])
       api.post(`/candidates/${c.id}/${rel}`, TO_API[rel](v))
         .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) set(p => p.map(x => x.id === id ? { ...v, ...it } : x)) })
         .catch(() => notifyError(t('actionFailed')))
     },
-    onEdit: (i: number, v: RelItem) => {
+    onEdit: (i: number, raw: RelItem) => {
+      const v = NORMALIZE[rel](raw)
       const id = list[i]?.id
       set(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))
       if (isPersisted(id)) api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v)).catch(() => notifyError(t('actionFailed')))
