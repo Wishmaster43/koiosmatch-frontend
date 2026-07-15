@@ -1735,6 +1735,9 @@
       "prev": "Anterior",
       "next": "Siguiente",
       "page": "Página {{page}} de {{last}}"
-    }
+    },
+    "truncatedNotice": "Solo se muestran las 5.000 tareas fallidas más recientes.",
+    "driverWarning": "La cola se ejecuta en «{{driver}}» — esta pantalla inspecciona la cola de base de datos y puede no reflejar el trabajo pendiente real.",
+    "actionFailed": "Acción fallida — es posible que la tarea ya no exista. Actualiza la lista."
   }
 }

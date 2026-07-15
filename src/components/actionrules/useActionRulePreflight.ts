@@ -49,7 +49,15 @@ export function useActionRulePreflight(action: string, subject: ActionRuleSubjec
 
     promise
       .then((d) => { if (alive) setDecision(d) })
-      .catch(() => { if (alive) setError(true); cache.delete(key) })
+      .catch((e: { response?: { status?: number } }) => {
+        // 403 = the caller's role lacks the axis view-right (BE audit 15-07: the
+        // preflight routes are now permission-gated). Not an error: behave as
+        // "no decision" so no popup/banner renders — and cache the outcome, the
+        // role won't change mid-session.
+        if (e?.response?.status === 403) { if (alive) setDecision(null); return }
+        if (alive) setError(true)
+        cache.delete(key)
+      })
       .finally(() => { if (alive) setLoading(false) })
 
     return () => { alive = false; controller?.abort() }

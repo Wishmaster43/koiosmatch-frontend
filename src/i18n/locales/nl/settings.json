@@ -1735,6 +1735,9 @@
       "prev": "Vorige",
       "next": "Volgende",
       "page": "Pagina {{page}} van {{last}}"
-    }
+    },
+    "truncatedNotice": "Alleen de nieuwste 5.000 mislukte taken worden getoond.",
+    "driverWarning": "De wachtrij draait op \"{{driver}}\" — dit scherm kijkt naar de database-wachtrij en toont dan mogelijk niet de echte werkvoorraad.",
+    "actionFailed": "Actie mislukt — de taak bestaat mogelijk niet meer. Ververs de lijst."
   }
 }

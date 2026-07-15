@@ -1735,6 +1735,9 @@
       "prev": "Previous",
       "next": "Next",
       "page": "Page {{page}} of {{last}}"
-    }
+    },
+    "truncatedNotice": "Only the newest 5,000 failed jobs are shown.",
+    "driverWarning": "The queue runs on \"{{driver}}\" — this screen inspects the database queue and may not reflect the real backlog.",
+    "actionFailed": "Action failed — the job may no longer exist. Refresh the list."
   }
 }

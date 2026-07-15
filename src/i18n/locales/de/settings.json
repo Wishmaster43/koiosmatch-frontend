@@ -1735,6 +1735,9 @@
       "prev": "Zurück",
       "next": "Weiter",
       "page": "Seite {{page}} von {{last}}"
-    }
+    },
+    "truncatedNotice": "Es werden nur die neuesten 5.000 fehlgeschlagenen Jobs angezeigt.",
+    "driverWarning": "Die Warteschlange läuft auf \"{{driver}}\" — dieser Bildschirm betrachtet die Datenbank-Warteschlange und zeigt dann möglicherweise nicht den echten Rückstand.",
+    "actionFailed": "Aktion fehlgeschlagen — der Job existiert möglicherweise nicht mehr. Aktualisiere die Liste."
   }
 }

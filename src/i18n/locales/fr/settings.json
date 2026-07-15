@@ -1735,6 +1735,9 @@
       "prev": "Précédent",
       "next": "Suivant",
       "page": "Page {{page}} sur {{last}}"
-    }
+    },
+    "truncatedNotice": "Seules les 5 000 tâches échouées les plus récentes sont affichées.",
+    "driverWarning": "La file d’attente fonctionne sur « {{driver}} » — cet écran inspecte la file de base de données et peut ne pas refléter le vrai arriéré.",
+    "actionFailed": "Action échouée — la tâche n’existe peut-être plus. Actualisez la liste."
   }
 }

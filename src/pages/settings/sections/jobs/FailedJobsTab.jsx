@@ -16,6 +16,7 @@ export default function FailedJobsTab() {
   const {
     filters, setFilter, page, setPage, result, phase,
     retry, forget, retryAll, flush, busyId, bulkBusy, actionError, setActionError,
+    truncated,
   } = useFailedJobs()
 
   // Bulk actions are irreversible — confirm with the exact count before firing.
@@ -79,6 +80,13 @@ export default function FailedJobsTab() {
           <button type="button" onClick={() => setActionError(null)} aria-label={t('common.close')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={13} /></button>
         </div>
+      )}
+
+      {/* BE caps this list at the newest 5.000 (audit 15-07) — say so instead of implying completeness. */}
+      {truncated && (
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 10px', fontStyle: 'italic' }}>
+          {t('jobs.truncatedNotice')}
+        </p>
       )}
 
       {phase === 'error' && <p style={{ fontSize: 13, color: 'var(--text-muted)', padding: 8 }}>{t('jobs.loadError')}</p>}

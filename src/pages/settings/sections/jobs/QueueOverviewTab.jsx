@@ -47,6 +47,14 @@ export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFail
 
   return (
     <div>
+      {/* Non-database queue driver = this screen inspects the WRONG store (BE audit
+          15-07 sends data.driver precisely so we can warn instead of showing zeros). */}
+      {summary?.driver && summary.driver !== 'database' && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', marginBottom: 12,
+          borderRadius: 8, background: 'var(--color-warning-bg)', border: '1px solid color-mix(in srgb, var(--color-warning) 40%, transparent)' }}>
+          <span style={{ fontSize: 12, color: 'var(--text)' }}>{t('jobs.driverWarning', { driver: summary.driver })}</span>
+        </div>
+      )}
       {/* Toolbar: worst-case heartbeat + failed count + manual refresh (auto-polls every 15s). */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
         {summary?.status && (
