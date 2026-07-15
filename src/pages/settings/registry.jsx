@@ -18,7 +18,7 @@
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
   ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Hash, Key, LayoutGrid,
-  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Phone, Shield, Sparkles, Star,
+  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Phone, Shield, SlidersHorizontal, Sparkles, Star,
   Store, Tags, Target, UserCheck, Users, Webhook, XCircle,
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
@@ -43,6 +43,7 @@ import IndustrySettings from './sections/IndustrySettings'
 import FunctionsSettings from './sections/FunctionsSettings'
 import { VacancyStatusSettings, VacancyPhaseSettings, VacancySenioritySettings, VacancyEducationSettings, VacancyChannelSettings, VacancyApplicationDefaultsSettings } from './sections/VacancySettings'
 import VacancyMatchingSettings from './sections/VacancyMatchingSettings'
+import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
 import { MatchStatusSettings } from './sections/MatchSettings'
 import { AppointmentTypeSettings } from './sections/AppointmentTypeSettings'
@@ -189,6 +190,9 @@ export const NAV_GROUPS = [
       // Vacancy custom fields moved to the shared "Eigen velden" group below.
       { id: 'vacancy_app_defaults', icon: ClipboardList, component: VacancyApplicationDefaultsSettings },
       { id: 'vacancy_matching', icon: Sparkles, component: VacancyMatchingSettings },
+      // Matchprofielen (MATCH-TEMPLATE-1) — reusable named weight presets the vacancy
+      // Matching tab's picker reads (read-only there); managed here.
+      { id: 'match_templates', icon: SlidersHorizontal, component: MatchTemplatesSettings },
       { id: 'vacancy_display', icon: Palette, schema: vacancyDisplay },
     ],
   },

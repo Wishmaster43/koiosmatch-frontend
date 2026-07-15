@@ -4,8 +4,9 @@
  */
 import { Fragment } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
-import { KPI_KEYS, LogBadge } from './auditShared'
+import { X, Eye } from 'lucide-react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { KPI_KEYS, LogBadge, isAccessEvent, buildFieldDiff, entityLabel } from './auditShared'
 
 function DiffRow({ label, before, after }) {
   const { t } = useTranslation('settings')
@@ -15,11 +16,13 @@ function DiffRow({ label, before, after }) {
                   padding: '7px 0', borderBottom: '1px solid var(--hover-bg)', alignItems: 'start' }}>
       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{label}</span>
       <div style={{ fontSize: 12, background: changed ? 'var(--color-danger-bg)' : 'var(--hover-bg)',
-                    borderRadius: 6, padding: '3px 8px', color: changed ? 'var(--color-danger)' : 'var(--text-muted)' }}>
+                    borderRadius: 6, padding: '3px 8px', color: changed ? 'var(--color-danger)' : 'var(--text-muted)',
+                    wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
         {Array.isArray(before) ? (before.length ? before.join(', ') : t('audit.none')) : String(before ?? '—')}
       </div>
       <div style={{ fontSize: 12, background: changed ? 'var(--color-success-bg)' : 'var(--hover-bg)',
-                    borderRadius: 6, padding: '3px 8px', color: changed ? 'var(--color-success)' : 'var(--text-muted)' }}>
+                    borderRadius: 6, padding: '3px 8px', color: changed ? 'var(--color-success)' : 'var(--text-muted)',
+                    wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
         {Array.isArray(after)  ? (after.length  ? after.join(', ')  : t('audit.none')) : String(after  ?? '—')}
       </div>
     </div>
@@ -28,11 +31,40 @@ function DiffRow({ label, before, after }) {
 
 export function AuditDrawer({ entry, onClose }) {
   const { t } = useTranslation('settings')
+  // Focus-trapped dialog (§6, WCAG 2.2 AA): Escape closes it, Tab stays inside,
+  // focus returns to the triggering row on close — same behaviour as every other
+  // drawer/modal in the app (RightDrawer et al.), which this one had drifted from.
+  const panelRef = useFocusTrap(onClose)
   const p = entry.properties ?? {}
   const logName = entry.log_name
   const kpiLabel = (k) => KPI_KEYS.includes(k) ? t(`audit.kpi.${k}`) : k
 
   const renderContent = () => {
+    // Access (read) events — the AVG "Dossier geopend/ingezien" compliance log. These
+    // never carry an old→new diff by design, so they get their own compact panel
+    // instead of a dash-filled diff grid (Danny/CMBE 2026-07-14: visually distinct).
+    if (isAccessEvent(entry)) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', borderRadius: 8, background: 'var(--hover-bg)' }}>
+            <Eye size={14} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+            <span style={{ fontSize: 12.5, color: 'var(--text-muted)' }}>{t('audit.accessNotice')}</span>
+          </div>
+          {[
+            { label: t('audit.colEntity'), value: entry.subject_type ? [entityLabel(entry.subject_type, t), entry.subject_label].filter(Boolean).join(' · ') : '—' },
+            { label: t('audit.auth.ip'), value: p.ip ?? '—' },
+          ].map(row => (
+            <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                           background: 'var(--hover-bg)', borderRadius: 8, padding: '10px 14px' }}>
+              <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{row.label}</span>
+              <span style={{ fontSize: 13, color: 'var(--text)', maxWidth: 240,
+                              overflow: 'hidden', textOverflow: 'ellipsis', textAlign: 'right' }}>{row.value}</span>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
     if (logName === 'http') {
       const method  = p.method ?? '—'
       const status  = p.status
@@ -208,27 +240,26 @@ export function AuditDrawer({ entry, onClose }) {
       )
     }
 
-    // Field-level diff (Spatie logOnlyDirty): properties.old + properties.attributes → HelloFlex-style
-    // "field: old → new" per changed field. Renders as soon as the backend logs field diffs (C-16).
-    if (p.attributes && typeof p.attributes === 'object' && !Array.isArray(p.attributes)) {
-      const before = (p.old && typeof p.old === 'object') ? p.old : {}
-      const after = p.attributes
-      const changed = Object.keys(after).filter(k => JSON.stringify(before[k]) !== JSON.stringify(after[k]))
-      if (changed.length > 0) {
-        const fieldLabel = (k) => t(`audit.field.${k}`, { defaultValue: k.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase()) })
-        return (
-          <div>
-            <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr 1fr', gap: 8, padding: '6px 0', marginBottom: 4 }}>
-              <span />
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-danger)' }}>{t('audit.oldValue')}</span>
-              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)' }}>{t('audit.newValue')}</span>
-            </div>
-            {changed.map(k => (
-              <DiffRow key={k} label={fieldLabel(k)} before={before[k] ?? '—'} after={after[k]} />
-            ))}
+    // Generalised entity write (CHANGELOG-3 uniform shape: `entry.changes =
+    // {attributes, old}`, a top-level sibling of `properties` — NOT nested inside
+    // it). Renders exactly like the per-entity changelog popover (ChangelogTab):
+    // "field: old → new" per changed field, noise fields dropped, CREATE only lists
+    // fields that got a value. Covers every AuditsChanges model (candidate, vacancy,
+    // task, opportunity, match, customer + locations/departments/contacts, …).
+    const diffRows = buildFieldDiff(entry, t)
+    if (diffRows.length > 0) {
+      return (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: '180px 1fr 1fr', gap: 8, padding: '6px 0', marginBottom: 4 }}>
+            <span />
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-danger)' }}>{t('audit.oldValue')}</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-success)' }}>{t('audit.newValue')}</span>
           </div>
-        )
-      }
+          {diffRows.map(row => (
+            <DiffRow key={row.field} label={row.label} before={row.before} after={row.after} />
+          ))}
+        </div>
+      )
     }
 
     // Generic fallback
@@ -250,7 +281,8 @@ export function AuditDrawer({ entry, onClose }) {
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.2)' }} onClick={onClose} />
-      <div className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={entry.description} tabIndex={-1}
+        className="fixed top-0 bottom-0 right-0 z-50 flex flex-col bg-[var(--surface)]"
         style={{ width: 480, boxShadow: '-4px 0 30px rgba(0,0,0,0.1)' }}>
 
         {/* Header */}
@@ -269,7 +301,7 @@ export function AuditDrawer({ entry, onClose }) {
                 })}</span>
               </div>
             </div>
-            <button onClick={onClose}
+            <button onClick={onClose} aria-label={t('common.close')}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
                        background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 6 }}
               onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}

@@ -4,16 +4,20 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Download, ChevronUp, ChevronDown as ChevronDn } from 'lucide-react'
+import { Download, ChevronUp, ChevronDown as ChevronDn, Eye } from 'lucide-react'
 import api from '@/lib/api'
 import { useRightPanel } from '@/context/RightPanelContext'
-import { KPI_KEYS, LogBadge } from './auditShared'
+import { KPI_KEYS, LogBadge, isAccessEvent, buildFieldDiff, entityLabel } from './auditShared'
 import { AuditDrawer } from './AuditDrawer'
 import PaginationBar from '@/components/ui/PaginationBar'
 
 const PAGE_SIZE = 25
 
-// Build the compact before/after cells shown in the table row.
+// Build the compact before/after cells shown in the table row. Special-cased log
+// names (roles/settings/sync) carry their own bespoke `properties` shape; every
+// other write event (candidate/vacancy/task/opportunity/match/customer/…) uses the
+// uniform CHANGELOG-3 diff (`entry.changes`), generalised via buildFieldDiff so this
+// table renders exactly what the per-entity changelog popovers show.
 function buildDiffCells(entry, t) {
   const p = entry.properties ?? {}
   const kpiLabel = (k) => KPI_KEYS.includes(k) ? t(`audit.kpi.${k}`) : k
@@ -50,6 +54,20 @@ function buildDiffCells(entry, t) {
     }
   }
 
+  // Access (read) events never carry an old→new diff — the compliance log only
+  // records WHO opened WHICH dossier, WHEN.
+  if (isAccessEvent(entry)) return { beforeCell: '—', afterCell: '—' }
+
+  // Generalised entity write (CHANGELOG-3): one compact "field: value" per changed
+  // field, same field set/order as the per-entity changelog popover.
+  const diffRows = buildFieldDiff(entry, t)
+  if (diffRows.length) {
+    return {
+      beforeCell: diffRows.map(r => `${r.label}: ${r.before}`).join(' · '),
+      afterCell:  diffRows.map(r => `${r.label}: ${r.after}`).join(' · '),
+    }
+  }
+
   return { beforeCell: '—', afterCell: '—' }
 }
 
@@ -59,14 +77,6 @@ function SortIcon({ col, sortCol, sortDir }) {
   return sortDir === 'asc'
     ? <ChevronUp  size={10} style={{ color: 'var(--color-primary)', marginLeft: 3 }} />
     : <ChevronDn  size={10} style={{ color: 'var(--color-primary)', marginLeft: 3 }} />
-}
-
-// Humanise a Spatie subject_type ("App\\Models\\Candidate") to a readable entity label.
-function entityLabel(subjectType, t) {
-  if (!subjectType) return null
-  const base = String(subjectType).split('\\').pop()
-  const key = base.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase()
-  return t(`audit.entity.${key}`, { defaultValue: base })
 }
 
 export default function AuditLog() {
@@ -80,6 +90,10 @@ export default function AuditLog() {
   const [selectedRoles, setSelectedRoles] = useState([])
   // Actor-type filter: '' = all, 'user' = human causer, 'system' = automation/service (no email).
   const [selectedActor, setSelectedActor] = useState([])
+  // Kind filter: 'change' (created/updated/deleted) vs 'access' (the AVG read log) —
+  // the only distinguishing signal is `event`, since an access entry shares its
+  // log_name with the entity's write events (Danny/CMBE: make access separately filterable).
+  const [selectedKind,  setSelectedKind]  = useState([])
   const [dateFrom,      setDateFrom]      = useState('')
   const [dateTo,        setDateTo]        = useState('')
   const [drill,         setDrill]         = useState(null)
@@ -116,6 +130,7 @@ export default function AuditLog() {
         const actor = l.causer_email ? 'user' : 'system'
         if (!selectedActor.includes(actor)) return false
       }
+      if (selectedKind.length && !selectedKind.includes(isAccessEvent(l) ? 'access' : 'change')) return false
       if (dateFrom && new Date(l.created_at) < new Date(dateFrom))                    return false
       if (dateTo   && new Date(l.created_at) > new Date(dateTo + 'T23:59:59'))        return false
       if (q) return (
@@ -125,7 +140,7 @@ export default function AuditLog() {
       )
       return true
     })
-  }, [logs, search, selectedTypes, selectedUsers, selectedRoles, selectedActor, dateFrom, dateTo])
+  }, [logs, search, selectedTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, dateFrom, dateTo])
 
   // Sort the filtered list.
   const sorted = useMemo(() => {
@@ -140,7 +155,7 @@ export default function AuditLog() {
   }, [filteredAll, sortCol, sortDir])
 
   // Reset page when filters change.
-  useEffect(() => { setPage(1) }, [search, selectedTypes, selectedUsers, selectedRoles, selectedActor, dateFrom, dateTo])
+  useEffect(() => { setPage(1) }, [search, selectedTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, dateFrom, dateTo])
 
   const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE))
   const pageRows   = useMemo(() => sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE), [sorted, page])
@@ -182,6 +197,16 @@ export default function AuditLog() {
       onToggle: v => setSelectedActor(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     },
     {
+      // Separately filterable access-vs-change split (Danny/CMBE 2026-07-14).
+      key: 'kind', label: t('audit.filterKind'), type: 'search-select',
+      selected: selectedKind,
+      options: [
+        { value: 'change', label: t('audit.kind.change'), count: logs.filter(l => !isAccessEvent(l)).length },
+        { value: 'access', label: t('audit.kind.access'), count: logs.filter(isAccessEvent).length },
+      ],
+      onToggle: v => setSelectedKind(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
+    },
+    {
       key: 'user', label: t('audit.filterWho'),
       selected: selectedUsers,
       options: userOptions.map(u => ({
@@ -199,7 +224,7 @@ export default function AuditLog() {
       })),
       onToggle: v => setSelectedRoles(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v]),
     }] : []),
-  ], [selectedTypes, selectedUsers, selectedRoles, selectedActor, typeOptions, userOptions, roleOptions, logs, dateFrom, dateTo, t])
+  ], [selectedTypes, selectedUsers, selectedRoles, selectedActor, selectedKind, typeOptions, userOptions, roleOptions, logs, dateFrom, dateTo, t])
 
   useEffect(() => {
     registerFilters('audit-log', filterGroups)
@@ -312,8 +337,11 @@ export default function AuditLog() {
                 </tr>
               ) : pageRows.map((entry, i) => {
                 const { beforeCell, afterCell } = buildDiffCells(entry, t)
+                // Access (read) rows render muted with a leading eye icon — visually
+                // distinct from a write event at a glance, without hiding the row.
+                const access = isAccessEvent(entry)
                 return (
-                  <tr key={entry.id ?? i} style={{ cursor: 'pointer' }}
+                  <tr key={entry.id ?? i} style={{ cursor: 'pointer', opacity: access ? 0.72 : 1 }}
                     onClick={() => setDrill(entry)}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
@@ -335,7 +363,12 @@ export default function AuditLog() {
                         </>
                       ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
                     </td>
-                    <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{entry.description}</td>
+                    <td style={{ ...TD, fontWeight: 500, color: access ? 'var(--text-muted)' : 'var(--text)' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                        {access && <Eye size={12} aria-label={t('audit.kind.access')} style={{ flexShrink: 0 }} />}
+                        {entry.description}
+                      </span>
+                    </td>
                     <td style={{ ...TD, fontSize: 11, color: 'var(--color-danger)' }}>{beforeCell}</td>
                     <td style={{ ...TD, fontSize: 11, color: 'var(--color-success)' }}>{afterCell}</td>
                   </tr>
