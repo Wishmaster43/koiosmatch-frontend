@@ -21,12 +21,13 @@ const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 // Minimal application detail — only vacancyId drives this tab.
 const app = (over: Partial<ApplicationDetail> = {}) => ({ id: 1, vacancyId: 7, ...over } as unknown as ApplicationDetail)
 
-// SKIP (worklist: VACTAB-TEST-1): this file hangs deterministically inside the first
-// render even on an idle machine — reproduced 2026-07-14 with a 90s kill-timer; the
-// cause is NOT the api mock (unwrapList stubbed) and NOT machine load. Needs a real
-// bisect of VacancyTab's import graph; skipped so full-suite runs don't stall.
-describe.skip('VacancyTab', () => {
-  beforeEach(() => mockGet.mockReset())
+describe('VacancyTab', () => {
+  // VACTAB-TEST-1 root cause (bisected 2026-07-15): `beforeEach(() => mockGet.mockReset())`
+  // implicitly RETURNED the mock (mockReset() returns `this`) — vitest treats a function
+  // returned from beforeEach as a cleanup hook and CALLED api.get() with no args after
+  // every test, producing an unhandled 'boom' rejection that deadlocked the runner.
+  // Braces (statement body, no implicit return) are load-bearing here.
+  beforeEach(() => { mockGet.mockReset() })
 
   it('shows the empty state when no vacancy is linked', () => {
     render(<VacancyTab application={app({ vacancyId: null })} />)

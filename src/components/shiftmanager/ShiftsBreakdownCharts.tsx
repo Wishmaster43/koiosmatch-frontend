@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next'
 import { ChartCard } from './shiftsChartsWidgets'
 import { BREAKDOWN_PALETTE } from './useShiftsBreakdown'
 import type { BreakdownRow } from './useShiftsBreakdown'
+import { formatNumber } from '@/lib/formatters'
 
 // Both breakdown charts share one fixed height so the labels line up nicely (Danny).
 const CHART_HEIGHT = 340
@@ -24,7 +25,7 @@ function HBars({ rows, unit, offset, empty }: { rows: BreakdownRow[]; unit: 'hou
   if (data.length === 0) {
     return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: CHART_HEIGHT, fontSize: 13, color: 'var(--text-muted)' }}>{empty}</div>
   }
-  const fmt = (v: unknown) => (Number(v) || 0).toLocaleString('nl-NL')
+  const fmt = (v: unknown) => formatNumber(Number(v) || 0)
 
   return (
     <ResponsiveContainer width="100%" height={CHART_HEIGHT}>
@@ -44,7 +45,7 @@ function HBars({ rows, unit, offset, empty }: { rows: BreakdownRow[]; unit: 'hou
 // Small numbers table under a chart: name · uren · diensten (top 8 by hours).
 function MiniTable({ rows, nameCol }: { rows: BreakdownRow[]; nameCol: string }) {
   const { t } = useTranslation('shiftmanager')
-  const fmt = (v: unknown) => (Number(v) || 0).toLocaleString('nl-NL')
+  const fmt = (v: unknown) => formatNumber(Number(v) || 0)
   const top = [...rows].sort((a, b) => (Number(b.hours) || 0) - (Number(a.hours) || 0)).slice(0, 8)
   if (top.length === 0) return null
   const th: React.CSSProperties = { padding: '5px 8px', fontSize: 10, fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }

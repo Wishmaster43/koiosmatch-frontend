@@ -5,6 +5,7 @@
  * and a dropdown in the other (Danny: "PLAN EEN STANDAARD").
  */
 import type { ReactNode } from 'react'
+import { formatNumber } from '@/lib/formatters'
 
 export interface DrillTab { key: string; label: ReactNode; count?: number; title?: string }
 
@@ -24,7 +25,7 @@ export default function DrillTabs({ tabs, active, onChange }: {
               background: on ? 'var(--color-primary-bg)' : 'var(--surface)',
               color: on ? 'var(--color-primary)' : 'var(--text-muted)' }}>
             {tb.label}
-            {tb.count != null && <span style={{ opacity: 0.7, marginLeft: 4 }}>{tb.count.toLocaleString('nl-NL')}</span>}
+            {tb.count != null && <span style={{ opacity: 0.7, marginLeft: 4 }}>{formatNumber(tb.count)}</span>}
           </button>
         )
       })}

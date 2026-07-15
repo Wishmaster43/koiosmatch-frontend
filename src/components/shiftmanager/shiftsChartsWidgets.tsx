@@ -13,6 +13,7 @@ import { useTranslation } from "react-i18next"
 import ErrorBoundary from "../ui/ErrorBoundary"
 import { YEAR_OPACITY } from "./shiftsChartsConfig"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
+import { formatNumber } from '@/lib/formatters'
 
 export function BarChartWidget({ data, bars, onBarClick }: {
   data: ShiftsChartDatum[]
@@ -43,7 +44,7 @@ export function BarChartWidget({ data, bars, onBarClick }: {
         {/* nl-NL thousands separator + force the series order (Totaal · Niet ingevuld · Geen
             kandidaat · Prognose · Werkelijk) instead of recharts' default alphabetical sort. */}
         <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e2e8f0", fontSize: 13 }}
-          formatter={(value) => (Number(value) || 0).toLocaleString('nl-NL')}
+          formatter={(value) => formatNumber(Number(value) || 0)}
           itemSorter={(item) => bars.findIndex(b => b.dataKey === (item as { dataKey?: unknown }).dataKey)} />
         <Legend
           // @ts-expect-error recharts omits `payload` from its public prop types but renders it at runtime
@@ -107,7 +108,7 @@ export function ShiftsDataTable({ data, bars, monthLabel, totalLabel, multiYear,
   // (there is no Totaal column to divide by once only one metric is on screen).
   deltaMode?: boolean
 }) {
-  const fmt = (v: unknown) => (Number(v) || 0).toLocaleString('nl-NL')
+  const fmt = (v: unknown) => formatNumber(Number(v) || 0)
   const fmtDelta = (d: number) => `${d > 0 ? '+' : ''}${d}%`
   const totals = bars.map(b => data.reduce((s, r) => s + (Number(r[b.dataKey]) || 0), 0))
   // Per year the "Totaal" series is the 100% baseline; every other series is a share of it

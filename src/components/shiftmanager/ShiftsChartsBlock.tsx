@@ -29,6 +29,7 @@ import ShiftsBreakdownCharts from "./ShiftsBreakdownCharts"
 import InsightsRow from "@/components/insights/InsightsRow"
 import type { KpiSpec, DonutSpec } from "@/components/insights/InsightsRow"
 import type { ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
+import { formatNumber } from '@/lib/formatters'
 
 export default function ShiftsChartsBlock({
   filterKey         = 'shifts-charts',
@@ -96,7 +97,7 @@ export default function ShiftsChartsBlock({
   const [hoursPct,  setHoursPct]  = useState(false)
   const [shiftsPct, setShiftsPct] = useState(false)
   const { customerRows, functionRows, activeCustomers, plannedCustomers } = useShiftsBreakdown(queryString)
-  const fmtN = (n: number) => Math.round(n).toLocaleString('nl-NL')
+  const fmtN = (n: number) => formatNumber(Math.round(n))
   const isH = shiftUnit === 'hours'
   const H = hourStats.filterHours, C = hourStats.filterShifts, MH = hourStats.monthHours, MC = hourStats.monthShifts
   const val = (h: number, c: number) => fmtN(isH ? h : c)  // uren of diensten per de toggle

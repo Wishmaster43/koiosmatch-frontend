@@ -8,6 +8,7 @@ import type { CSSProperties, ReactNode, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, ChevronDown, Clock, Plus, RefreshCw, Save, Trash2 } from 'lucide-react'
 import { interactive } from '@/lib/a11y'
+import { useDateFormat } from '@/lib/datetime'
 
 // One selectable AI model.
 export interface Model { value: string; label: string; provider: string; strength: string | null }
@@ -85,6 +86,7 @@ export function SaveBar({ saving, saved, onSave }: { saving?: boolean; saved?: b
 
 export function VersionList({ versions, onRestore }: { versions?: Version[]; onRestore: (v: Version) => void }) {
   const { t } = useTranslation('workflows')
+  const { formatDateTime } = useDateFormat()
   const [open, setOpen] = useState(false)
   if (!versions?.length) return null
   return (
@@ -101,7 +103,7 @@ export function VersionList({ versions, onRestore }: { versions?: Version[]; onR
               padding: '6px 10px', borderBottom: i < versions.length - 1 ? '1px solid var(--border)' : 'none',
               background: 'var(--bg)', fontSize: 11 }}>
               <span style={{ color: 'var(--text-muted)' }}>
-                v{v.version ?? i + 1} — {v.created_at ? new Date(v.created_at).toLocaleString('nl-NL') : ''}
+                v{v.version ?? i + 1} — {v.created_at ? formatDateTime(v.created_at) : ''}
               </span>
               <button onClick={() => onRestore(v)}
                 style={{ fontSize: 11, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: '1px 5px' }}>

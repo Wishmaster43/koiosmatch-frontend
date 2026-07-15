@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { useReportDrill } from './useReportDrill'
 import RightDrawer from '@/components/ui/RightDrawer'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import { formatNumber } from '@/lib/formatters'
 
 // A drill descriptor built by each report for a clicked KPI/segment.
 export interface DrillSpec {
@@ -44,7 +45,7 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
       {/* The number being explained */}
       <div style={{ marginBottom: 18 }}>
         <div style={{ fontSize: 34, fontWeight: 700, lineHeight: 1, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
-          {typeof drill.value === 'number' ? drill.value.toLocaleString('nl-NL') : drill.value}
+          {typeof drill.value === 'number' ? formatNumber(drill.value) : drill.value}
         </div>
       </div>
 
@@ -59,7 +60,7 @@ export default function ReportDrillDrawer({ drill, onClose }: { drill: DrillSpec
                             padding: '9px 12px', borderTop: i ? '1px solid var(--border)' : 'none', fontSize: 13 }}>
                 <span style={{ color: 'var(--text)' }}>{b.label}</span>
                 <span style={{ color: 'var(--text)', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                  {typeof b.value === 'number' ? b.value.toLocaleString('nl-NL') : b.value}
+                  {typeof b.value === 'number' ? formatNumber(b.value) : b.value}
                 </span>
               </div>
             ))}

@@ -9,7 +9,9 @@ vi.mock('@/lib/api', () => ({ default: { get: vi.fn() } }))
 const run = { id: 1, status: 'success', started_at: '2026-06-23T10:00:00Z', trigger: 'manual', duration_ms: 5000 }
 
 describe('WorkflowHistoryView', () => {
-  beforeEach(() => vi.mocked(api.get).mockReset())
+  // Braces are load-bearing: mockReset() returns the mock, and a function returned
+  // from beforeEach becomes a vitest cleanup hook that CALLS it argless (VACTAB-TEST-1).
+  beforeEach(() => { vi.mocked(api.get).mockReset() })
 
   it('shows the loading state while runs are fetching', async () => {
     // Deferred promise: assert loading, then resolve so the worker settles cleanly.
