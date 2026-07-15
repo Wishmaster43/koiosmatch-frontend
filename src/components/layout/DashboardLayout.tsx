@@ -183,7 +183,7 @@ export default function DashboardLayout() {
           <div className="flex items-center flex-shrink-0 gap-2 ml-auto">
             {/* Tenant logo — between the breadcrumb and the right-side actions
                 (LOGO-PLACE-1, Danny 14/7). logo_url is a fresh signed URL per
-                response (5 min TTL): render it straight from the tenant payload,
+                response (12 h workday TTL since LOGO-TTL-1b): render it straight from the tenant payload,
                 never persist or cache it. Decorative (alt="") — the tenant name
                 already reads as text in the breadcrumb. */}
             {tenant?.logo_url && (

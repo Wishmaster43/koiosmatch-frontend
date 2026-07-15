@@ -62,7 +62,7 @@ export default function BrandSettings() {
         fd.append('logo', logoFile)
         try {
           // The upload endpoint persists the private path itself (logo_path) and the
-          // URL is minted fresh on every read (5 min TTL) — storing the returned
+          // URL is minted fresh on every read (12 h TTL, LOGO-TTL-1) — storing the returned
           // signed URL in settings would re-create the legacy logo_url row the
           // backend just cleaned up, and it expires. Response only feeds the preview.
           const res = await api.post('/settings/logo', fd)
@@ -77,7 +77,7 @@ export default function BrandSettings() {
       await saveSettings(payload)
       document.documentElement.style.setProperty('--color-primary', primaryColor)
       // Refresh the auth/tenant payload so the topbar logo appears immediately —
-      // logo_url is a fresh signed URL per response (5 min TTL), never cached.
+      // logo_url is a fresh signed URL per response (12 h TTL), never cached.
       auth?.refreshUser?.().catch(() => {})
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)

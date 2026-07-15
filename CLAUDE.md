@@ -48,48 +48,49 @@ compliant alternative.
 ## 1. Stack (authoritative)
 
 - React 18 + Vite, **Tailwind CSS** (utility-first, design tokens via CSS vars).
-- Routing: `react-router-dom`. Data: `axios` (single configured client).
+- Routing: `react-router-dom`. Data: `axios` (single configured client) +
+  **@tanstack/react-query** (K-33) — `useQuery`/`queryClient` is the standard for
+  server state (lists, stats, lookups); plain `useEffect`-fetching only where a
+  QueryClient is genuinely unavailable (some unit-tested leaf hooks).
 - Charts: `Recharts`. Icons: `lucide-react`.
 - i18n: `react-i18next` (+ `i18next`). Fonts: **Inter** (UI), **JetBrains Mono**
   (code/numbers).
 - Tests: **Vitest + React Testing Library**.
 - Lint/format: **ESLint + Prettier** (treat warnings as errors in CI).
-- Type safety: **PropTypes are the minimum** on every component. Strongly
-  prefer migrating to **TypeScript** for new features — it is the single
-  biggest scalability lever; recommend it whenever you touch shared code.
+- Type safety: **TypeScript is the norm** — the codebase is `.ts/.tsx`; new and
+  touched code is typed TS (no PropTypes). The few remaining `.jsx` files migrate
+  opportunistically when touched.
 
 ---
 
-## 2. Folder Architecture (enforce this)
+## 2. Folder Architecture (the actual layout — updated 2026-07-15)
 
 ```
 src/
-  app/          # app shell, providers, router config, error boundary
-  pages/        # route-level pages — thin; compose features, no business logic
-  features/     # domain modules, self-contained
-    candidates/
-      components/   # feature-specific UI
-      hooks/        # feature logic (data, derived state)
-      api/          # axios calls for this feature only
-      utils/        # pure helpers
-      index.js      # public surface of the feature (barrel — export only what's needed)
-    customers/  locations/  departments/  shifts/  whatsapp/  reporting/
-  components/   # SHARED, generic, dumb UI (Button, Card, Table, Modal, Drawer...)
-  hooks/        # shared cross-feature hooks
-  contexts/     # React contexts (RightPanelContext, TenantThemeContext, Auth...)
-  lib/          # axios client, formatters, i18n setup, query helpers
-  config/       # constants, route paths, design tokens, enums
-  locales/      # nl/, en/ — translation JSON
-  styles/       # tailwind base, global css, css variables
-  assets/
+  pages/        # one folder per entity/page: <Entity>Page + Table + Drawer +
+                #   drawer/ (tab components) + hooks/ + data/ (mappers) — the
+                #   candidate folder is the template (§3A)
+  components/   # SHARED UI: ui/ (DataTable, SoftChip, Slider, …), drawer/
+                #   (EntityDrawer shell), insights/, layout/ (Sidebar, topbar,
+                #   Koios panel, workflow editor), charts/, forms/, actionrules/
+  context/      # React contexts (Auth, VacancyLookups, Navigation, …) — singular
+  hooks/        # shared cross-page hooks (useDrawerUrl, …)
+  lib/          # axios client, formatters, datetime, i18n-adjacent helpers
+  modules/      # workflow-node registry (one thin config file per module)
+  i18n/locales/ # nl/ en/ de/ fr/ es/ — one JSON per namespace
+  types/        # shared TS types + api-generated.ts (openapi export)
+  pages/settings/  # settings shell + sections/ (one file per settings screen)
 ```
 
 Rules:
 
-- A feature **never** imports from another feature's internals — only via its
-  `index.js` public surface, or via `components/` / `hooks/` / `lib/`.
-- Shared UI in `components/` is **dumb**: no API calls, no business logic.
+- Everything is `.ts/.tsx`; an entity page never imports another entity page's
+  internals — shared behaviour lives in `components/` / `hooks/` / `lib/`.
+- Shared UI in `components/ui` is **dumb**: no API calls, no business logic.
 - If a file doesn't clearly belong somewhere, the design is wrong — stop and fix.
+- A `features/`-style layout (per-domain barrels) remains the long-term target if
+  the app keeps growing, but it is NOT the current truth — do not start it ad hoc;
+  moving is a deliberate, repo-wide decision.
 
 ---
 
@@ -242,7 +243,7 @@ the FE preflight and BE guards read the same tenant rule set.
 
 > The candidate domain is the **current build focus**. This is the durable spec —
 > the live task state (FE/BE split, what backend-Claude still owes) lives in
-> `docs/worklist.md` §E1. **Domain golden rule: nothing hardcoded.** Every value,
+> `koiosmatch-api/docs/WORKLIST.md` (the ONE shared FE+BE worklist, decision 2026-07-02). **Domain golden rule: nothing hardcoded.** Every value,
 > label, colour and option comes from a **tenant lookup via the API**, and every
 > user-facing string — including the labels of tenant-created lookup values — goes
 > through i18n in both locales (§5). If a screen needs an option list, there is a
@@ -297,8 +298,9 @@ Phase + Deployability**.
   without a Match) and is also set automatically by funnel Hired → Match. **Unavailable** carries an
   "available again" date + reason (re-activation workflow).
 - **Blacklist** = a **Deployability/status value** (decision 2026-06-30; not a separate button/flag).
-  It is one of the status options and is flagged **`requires_reason`** — selecting it opens the same
-  status-reason prompt. Distinct danger colour so it reads as a flag in the chip.
+  It is one of the status options, flag-driven (`is_blacklist`) — selecting it prompts for a
+  **lookup-backed `blacklist_reason`** (own vocabulary, `blacklist_reason_required` tenant
+  setting), not the generic status-reason free text. Distinct danger colour so it reads as a flag in the chip.
 - **Archived** = the soft-delete state (`deleted_at`), not a status. **Off by default in filters**
   (still searchable, so KPI totals drop).
 - **Funnel stage** = single value **per application**, seed **Applied · Invited/Intake · Proposed ·
@@ -543,11 +545,11 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
   and never let an external mirror occupy a clean name (e.g. no `/crm/…` path prefix for native).
 - **Backend/DB is out of scope here.** This is the frontend repo. Never write migrations,
   models or controllers in `koiosmatch-api` from a frontend task — diagnose and hand it to
-  backend-Claude. **DB-migratie-conventie (backend):** **NOOIT** een `add_*` / `alter_*` /
-  `change_*`-migratie maken — vouw elke schemawijziging in de bestaande `create_<table>`-migratie
-  (een nieuw migratiebestand = alleen voor een nieuwe tabel). Toepassen gebeurt via
-  `migrate:fresh` / `php artisan dev:reset` (pre-release). De volledige regel staat in de
-  backend-CLAUDE.md.
+  backend-Claude. **DB migration convention (backend):** NEVER create an `add_*` / `alter_*` /
+  `change_*` migration — fold every schema change into the existing `create_<table>`
+  migration (a new migration file = a new table only). Applying happens via
+  `migrate:fresh` / `php artisan dev:reset` (pre-release). The full rule lives in the
+  backend CLAUDE.md.
 - **Workflow modules (automation graph).** Workflow nodes live in `src/modules/` as a
   registry; per-entity modules are built from one `makeEntityModule({...})` factory (one
   **`action`** selector — Ophalen / Aanmaken / Bijwerken / … — whose `filters` / `sort` /

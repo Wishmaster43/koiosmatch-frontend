@@ -76,13 +76,17 @@ const DEFAULT_CHANNELS: VacancyLookupItem[] = [
 ]
 
 // Normalise a raw API list: keep active items, sort by order, fall back to seed.
-function normalize(raw: unknown, fallback: VacancyLookupItem[]): VacancyLookupItem[] {
+// `pinId` (channels only): the publish toggle persists channel_id (uuid) per
+// vacancy, so the value must STAY the id — CHANNEL-KEY-1 adds a `key` column
+// server-side and the generic `value ?? key ?? id` chain would silently flip
+// stored references from uuid to key the moment that merges (CMBE 15-07).
+function normalize(raw: unknown, fallback: VacancyLookupItem[], pinId = false): VacancyLookupItem[] {
   if (!Array.isArray(raw) || raw.length === 0) return fallback
   return (raw as Record<string, unknown>[])
     .filter(it => it.active !== false)
     .sort((a, b) => (Number(a.order ?? a.sort_order ?? 0)) - (Number(b.order ?? b.sort_order ?? 0)))
     .map(it => ({
-      value: String(it.value ?? it.key ?? it.id),
+      value: String((pinId ? it.id : undefined) ?? it.value ?? it.key ?? it.id),
       label: String(it.label ?? it.name ?? it.value ?? it.key),
       color: (it.color as string) ?? '#6B7280',
     }))
@@ -100,14 +104,14 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
 
   // Fetch each lookup once; a 404/empty keeps the seed fallback so the UI never breaks.
   useEffect(() => {
-    const load = (url: string, fallback: VacancyLookupItem[], set: Dispatch<SetStateAction<VacancyLookupItem[]>>) =>
-      api.get(url).then(r => set(normalize(r.data?.data ?? r.data, fallback))).catch(() => {})
+    const load = (url: string, fallback: VacancyLookupItem[], set: Dispatch<SetStateAction<VacancyLookupItem[]>>, pinId = false) =>
+      api.get(url).then(r => set(normalize(r.data?.data ?? r.data, fallback, pinId))).catch(() => {})
     Promise.allSettled([
       load('/vacancy-statuses',         DEFAULT_VACANCY_STATUSES, setStatuses),
       load('/vacancy-phases',           DEFAULT_VACANCY_PHASES,   setPhases),
       load('/vacancy-seniority-levels', DEFAULT_SENIORITY_LEVELS, setSeniorityLevels),
       load('/vacancy-education-levels', DEFAULT_EDUCATION_LEVELS, setEducationLevels),
-      load('/vacancy-channels',         DEFAULT_CHANNELS,         setChannels),
+      load('/vacancy-channels',         DEFAULT_CHANNELS,         setChannels, true),
     ]).finally(() => setLoading(false))
   }, [])
 
