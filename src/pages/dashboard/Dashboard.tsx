@@ -380,8 +380,14 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
       )}
 
       {/* Wekelijkse instroom — gegroepeerde bar: kandidaten · sollicitaties · matches (C-31). */}
-      {vis('chart.weekly') && (
-      <div style={{ marginBottom: 16 }}>
+      {/* Instroom (per week) + Funnel-conversie side by side (Danny 2026-07-15):
+          equal-width row when both are visible, full-width for whichever remains
+          when the other is switched off for this role. */}
+      {(vis('chart.weekly') || vis('chart.funnelConversion')) && (
+      <div style={{ display: 'grid',
+        gridTemplateColumns: (vis('chart.weekly') && vis('chart.funnelConversion')) ? '1fr 1fr' : '1fr',
+        gap: 16, marginBottom: 16, alignItems: 'stretch' }}>
+        {vis('chart.weekly') && (
         <Panel>
           <WeeklyBarChartCard title={t('chart.intakeWeekly')} data={trendData as unknown as ChartDatum[]} series={trendSeries}
             onBarClick={(row, s) => {
@@ -398,13 +404,11 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
               onNavigate?.(page, name ? { period: name } : undefined)
             }} />
         </Panel>
-      </div>
-      )}
-
-      {/* Funnel-conversie — % doorstroom per fase (FE-derived); klik → sollicitaties op fase. */}
-      {vis('chart.funnelConversion') && (
-      <div style={{ marginBottom: 16 }}>
-        <FunnelConversion data={funnelData} onStageClick={(fv) => onNavigate?.('applications', fv ? { stage: fv } : undefined)} />
+        )}
+        {/* Funnel-conversie — % doorstroom per fase (FE-derived); klik → sollicitaties op fase. */}
+        {vis('chart.funnelConversion') && (
+          <FunnelConversion data={funnelData} onStageClick={(fv) => onNavigate?.('applications', fv ? { stage: fv } : undefined)} />
+        )}
       </div>
       )}
 
