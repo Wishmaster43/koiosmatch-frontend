@@ -4,13 +4,14 @@
  * Shared by the global RunsTable and the workflow editor's history view so the
  * run drill-down is defined once (§3A). Focus is trapped while open.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import api from '@/lib/api'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { Zap, Clock, Users, X, AlertTriangle } from 'lucide-react'
 import { formatDT, formatDuration, StatusBadge } from './runFormat'
 import RunStepList from './RunStepList'
+import { StopRunButton, CANCELLABLE } from '@/components/layout/workflow/runControl'
 import type { RunRow } from '@/types/reports'
 
 export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
@@ -20,25 +21,47 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
 }) {
   const { t } = useTranslation('reports')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-  // Live view (WF-R3): while the run is RUNNING, poll its workflow's run list every
-  // 3s so pending/running step states and attempts update in place.
+  // Live view (WF-R3): while the run is RUNNING/WAITING, poll its workflow's run
+  // list every 3s so pending/running step states and attempts update in place.
   const [live, setLive] = useState<RunRow | null>(null)
+  // RUN-CONTROL-1: the stop button's backend reason (e.g. 422 "already finished").
+  const [stopError, setStopError] = useState<string | null>(null)
   const shown = live ?? run
+
+  // One fetch of this run's fresh row — shared by the poll interval AND the
+  // immediate refresh right after a successful stop (no waiting out the 3s tick).
+  // Resolves the fresh row (or undefined) so callers can react to its status.
+  const fetchLive = useCallback(async (): Promise<RunRow | undefined> => {
+    if (run.workflow_id == null) return undefined
+    try {
+      const res = await api.get(`/workflows/${run.workflow_id}/runs`)
+      const body = res.data as { data?: RunRow[] } | RunRow[] | undefined
+      const rows = (Array.isArray(body) ? body : body?.data ?? []) as RunRow[]
+      const fresh = rows.find(r => String(r.id) === String(run.id))
+      if (fresh) setLive(fresh)
+      return fresh
+    } catch {
+      return undefined
+    }
+  }, [run.id, run.workflow_id])
+
   useEffect(() => {
     setLive(null)
-    if (run.status !== 'running' || run.workflow_id == null) return
+    if (!CANCELLABLE.has(String(run.status))) return
     const timer = setInterval(() => {
-      api.get(`/workflows/${run.workflow_id}/runs`)
-        .then((res: { data?: unknown }) => {
-          const body = res.data as { data?: RunRow[] } | RunRow[] | undefined
-          const rows = (Array.isArray(body) ? body : body?.data ?? []) as RunRow[]
-          const fresh = rows.find(r => String(r.id) === String(run.id))
-          if (fresh) { setLive(fresh); if (fresh.status !== 'running') clearInterval(timer) }
-        })
-        .catch(() => {})
+      fetchLive().then(fresh => { if (fresh && !CANCELLABLE.has(String(fresh.status))) clearInterval(timer) })
     }, 3000)
     return () => clearInterval(timer)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [run.id, run.status, run.workflow_id])
+
+  // After a successful stop: drop any prior error and refresh immediately so the
+  // badge/step list reflect `cancelled` right away instead of on the next tick.
+  const handleStopped = useCallback(() => {
+    setStopError(null)
+    fetchLive()
+  }, [fetchLive])
+
   const steps = shown.step_results ?? shown.steps ?? []
 
   return (
@@ -58,11 +81,19 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
                 <span style={{ fontWeight: 700, fontSize: 15, color: 'var(--text)' }}>
                   {run.workflow_name ?? t('runs.drawer.workflowFallback', { id: run.workflow_id ?? run.id })}
                 </span>
-                <StatusBadge status={run.status} />
+                <StatusBadge status={shown.status} />
+                {/* RUN-CONTROL-1: this Make-style inspector stays read-only otherwise —
+                    the stop button is the one exception for a still-live run. */}
+                {CANCELLABLE.has(String(shown.status)) && shown.id != null && (
+                  <StopRunButton runId={shown.id} compact onStopped={handleStopped} onError={setStopError} />
+                )}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                {t('runs.drawer.startedColon')} {formatDT(run.started_at ?? run.created_at)}
+                {t('runs.drawer.startedColon')} {formatDT(shown.started_at ?? shown.created_at)}
               </div>
+              {stopError && (
+                <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 4 }}>{stopError}</div>
+              )}
             </div>
             <button onClick={onClose} aria-label={t('common:close')}
               style={{ width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -79,8 +110,8 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
         <div style={{ display: 'flex', gap: 1, background: 'var(--hover-bg)',
                       borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
           {[
-            { label: t('runs.drawer.candidates'), value: run.candidates_count ?? run.candidates ?? '—', Icon: Users },
-            { label: t('runs.drawer.duration'),   value: formatDuration(run.duration_ms ?? run.duration), Icon: Clock },
+            { label: t('runs.drawer.candidates'), value: shown.candidates_count ?? shown.candidates ?? '—', Icon: Users },
+            { label: t('runs.drawer.duration'),   value: formatDuration(shown.duration_ms ?? shown.duration), Icon: Clock },
           ].map(b => (
             <div key={b.label} style={{ flex: 1, padding: '10px 16px', textAlign: 'center', background: 'var(--surface)' }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
@@ -102,10 +133,10 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 20 }}>
             {[
-              { label: t('runs.drawer.started'),   value: formatDT(run.started_at  ?? run.created_at) },
-              { label: t('runs.drawer.finished'),  value: formatDT(run.finished_at ?? run.completed_at) },
-              { label: t('runs.drawer.trigger'),   value: run.trigger ?? run.trigger_type },
-              { label: t('runs.drawer.createdBy'), value: run.triggered_by ?? run.user_name },
+              { label: t('runs.drawer.started'),   value: formatDT(shown.started_at  ?? shown.created_at) },
+              { label: t('runs.drawer.finished'),  value: formatDT(shown.finished_at ?? shown.completed_at) },
+              { label: t('runs.drawer.trigger'),   value: shown.trigger ?? shown.trigger_type },
+              { label: t('runs.drawer.createdBy'), value: shown.triggered_by ?? shown.user_name },
             ].filter(r => r.value && r.value !== '—').map(r => (
               <div key={r.label} style={{ display: 'flex', gap: 8, padding: '7px 0',
                                           borderBottom: '1px solid var(--hover-bg)' }}>
@@ -129,7 +160,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
           )}
 
           {/* Error message */}
-          {run.error_message && (
+          {shown.error_message && (
             <div style={{ background: 'var(--color-danger-bg)', border: '1px solid #FCA5A5', borderRadius: 8,
                           padding: '12px 14px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
@@ -138,7 +169,7 @@ export default function RunDetailDrawer({ run, onClose, zIndex = 50 }: {
               </div>
               <pre style={{ fontSize: 11, color: 'var(--text)', whiteSpace: 'pre-wrap',
                             wordBreak: 'break-all', margin: 0, fontFamily: 'monospace' }}>
-                {run.error_message}
+                {shown.error_message}
               </pre>
             </div>
           )}

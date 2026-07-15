@@ -9,7 +9,7 @@ import { useState, useCallback, useEffect, useMemo } from 'react'
 import { addEdge, useNodesState, useEdgesState } from '@xyflow/react'
 import type { Connection } from '@xyflow/react'
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow, flowToSteps } from './serialization'
-import { useWorkflowRun } from './useWorkflowRun'
+import { useWorkflowRunControl } from './useWorkflowRunControl'
 import { useOutputSeeding } from './useOutputSeeding'
 import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, ScheduleConfig,
   WorkflowVarField, WorkflowVarGroup } from '@/types/workflow'
@@ -98,15 +98,6 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   const [, setWebhooks]                      = useState<unknown[]>([])
   const [status,         setStatus]         = useState(workflow.status || 'draft')
   const [saved,          setSaved]          = useState(false)
-  const [running,        setRunning]        = useState(false)
-  const [runError,       setRunError]       = useState<string | null>(null)
-  const [runningNodeId,  setRunningNodeId]  = useState<string | null>(null)
-  // WF-R3: the id of the run we're polling live (set by handleRun), and its steps.
-  const [activeRunId,    setActiveRunId]    = useState<string | number | null>(initialRunId)
-  const liveRun = useWorkflowRun(activeRunId)
-  // RUN-CONTROL-1: true after a 409 "already running" — the header shows the
-  // i18n "loopt al" feedback while the logs panel points at that run.
-  const [runConflict,    setRunConflict]    = useState(initialRunId != null)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [pickerState,    setPickerState]    = useState<{ edgeId?: string; append?: boolean } | null>(null)
   const [showSchedule,   setShowSchedule]   = useState(false)
@@ -124,6 +115,17 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   const [showLogs,       setShowLogs]       = useState(initialRunId != null)
   const [filterState,    setFilterState]    = useState<{ edgeId: string } | null>(null)
   const [outputState,    setOutputState]    = useState<{ nodeId: string; output: unknown } | null>(null)
+
+  // Reveal the logs/run-viewer panel whenever a run starts (or hits a 409
+  // conflict) — kept stable so the run-control hook's handleRun identity doesn't churn.
+  const openLogsOnRun = useCallback(() => setShowLogs(true), [])
+
+  // Run lifecycle (start/stop/poll/409-conflict) — extracted to its own hook
+  // (§3, split at ~400 lines) since this composer stays focused on graph state.
+  const {
+    running, runError, setRunError, runningNodeId,
+    activeRunId, liveRun, liveRunActive, runConflict, handleStopped, handleRun,
+  } = useWorkflowRunControl({ workflowId: workflow.id, initialRunId, onRunStarted: openLogsOnRun })
 
   // Run-viewer output-seeding (extracted hook): once the polled run is terminal,
   // copies each step's output onto its matching node so the VariablePicker and the
@@ -308,51 +310,6 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
       setTimeout(() => setSaved(false), 2000)
     }
   }, [nodes, edges, workflow, name, trigger, scheduleConfig, webhookId, status, onSave])
-
-  const handleRun = useCallback(async () => {
-    setRunning(true)
-    setRunError(null)
-    setRunConflict(false)
-    try {
-      // Actually execute the SAVED workflow server-side (the engine runs the
-      // steps on the queue). This button used to only animate — never ran.
-      const { default: api } = await import('@/lib/api')
-      // Start the queued run and keep its id so we can poll the REAL per-step status
-      // (WF-R3) — replaces the old fixed 800ms fake walk. Shape: { run: { id } }.
-      // 409 (already running) gets its own inline feedback — keep the generic dev toast out.
-      const res = await api.post(`/workflows/${workflow.id}/run`, undefined, { quietStatuses: [409] })
-      const runId = (res.data?.run?.id ?? res.data?.data?.id ?? res.data?.id) as string | number | undefined
-      if (runId != null) setActiveRunId(runId)
-
-      // Show the run history / live viewer (the polled run drives node colours).
-      setShowLogs(true)
-    } catch (err) {
-      const e = err as { response?: { status?: number; data?: { message?: string; run_id?: string | number } } }
-      // RUN-CONTROL-1 single-flight: 409 = this workflow already has a live run.
-      // Point the viewer at THAT run (poll + logs panel) and show "loopt al".
-      if (e.response?.status === 409) {
-        if (e.response.data?.run_id != null) setActiveRunId(e.response.data.run_id)
-        setRunConflict(true)
-        setShowLogs(true)
-      } else {
-        // Surface the backend reason (e.g. "Workflow is niet actief" on a draft);
-        // empty string = generic message via i18n in the component.
-        setRunError(e.response?.data?.message ?? '')
-      }
-    } finally {
-      setRunningNodeId(null)
-      setRunning(false)
-    }
-  }, [workflow.id])
-
-  // RUN-CONTROL-1: the polled run can still be cancelled → show the stop button.
-  const liveRunActive = liveRun != null && ['running', 'waiting'].includes(String(liveRun.status))
-
-  // After a successful stop the conflict is over; the poll picks up `cancelled`.
-  const handleStopped = useCallback(() => {
-    setRunConflict(false)
-    setRunError(null)
-  }, [])
 
   // Variables a node may reference: the output fields of every upstream module.
   // Walks edges backward (BFS), orders ancestors left-to-right, and derives

@@ -58,13 +58,29 @@ function ownSlice(step: RunStep, catalog: ModuleCatalog): { rows: Array<Record<s
 export default function StepOutputSlice({ step, catalog }: { step: RunStep; catalog: ModuleCatalog }) {
   const { t } = useTranslation('workflows')
   const slice = ownSlice(step, catalog)
-  // Legacy/passthrough fallback: the BE's generic name+meta item list.
-  const items = !slice && Array.isArray(step.items)
+  // A passthrough module (e.g. wait) never claims a slice AND never gets the
+  // generic items fallback either — that list is just the UPSTREAM step's own
+  // output riding along untouched, so showing it here only duplicates that
+  // step's card. Only gate on a KNOWN passthrough (catalog says so); while the
+  // catalog is still loading / for an uncatalogued type, keep the old fallback.
+  const emits = step.module_type ? catalog[step.module_type]?.emits : undefined
+  const isPassthrough = !slice && emits === 'passthrough'
+  // Legacy fallback for a non-passthrough module without a resolvable slice:
+  // the BE's generic name+meta item list.
+  const items = !slice && !isPassthrough && Array.isArray(step.items)
     ? (step.items as Array<{ name?: string; meta?: string | null }>) : null
   const itemsTotal = (step.items_total as number | undefined) ?? items?.length ?? 0
   const total = slice ? slice.total : itemsTotal
   // Collapsible list — default closed above 10 rows (Danny's run-viewer feedback).
   const [open, setOpen] = useState(total <= OPEN_THRESHOLD)
+
+  if (isPassthrough) {
+    return (
+      <div style={{ marginTop: 6, fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic' }}>
+        {t('runViewer.passthrough')}
+      </div>
+    )
+  }
 
   if (!slice && (!items || items.length === 0)) return null
 

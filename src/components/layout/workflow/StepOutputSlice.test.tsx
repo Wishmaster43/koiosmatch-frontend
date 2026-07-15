@@ -1,7 +1,10 @@
 /**
  * StepOutputSlice — the run viewer must show a step's OWN output slice
  * (output[module_type]) instead of the merged pipeline blob, collapse lists
- * above 10 rows by default, and fall back to the generic item list.
+ * above 10 rows by default, fall back to the generic item list for a
+ * non-passthrough module without a resolvable slice, and — RUN-CONTROL-1
+ * polish wave — show a muted note instead of that fallback for a KNOWN
+ * passthrough module (its `items` would just repeat the upstream card).
  */
 import { describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -13,6 +16,8 @@ const catalog: ModuleCatalog = {
   sm_customers: { outputFields: { id: 'Klant-ID', name: 'Klantnaam' }, emits: 'replace' },
   candidate_filter: { outputFields: { id: 'Kandidaat-ID', firstname: 'Voornaam' }, emits: 'replace' },
   whatsapp_send: { outputFields: {}, emits: 'passthrough' },
+  wait: { outputFields: {}, emits: 'passthrough' },
+  status_set: { outputFields: {}, emits: 'append' },
 }
 
 // A merged pipeline output: the step's own slice + an upstream slice + counters.
@@ -73,14 +78,25 @@ describe('StepOutputSlice', () => {
     expect(screen.getByText('runViewer.capped')).toBeInTheDocument()
   })
 
-  it('falls back to the generic item list for steps without an own slice', () => {
+  it('falls back to the generic item list for a NON-passthrough step without an own slice', () => {
     const legacy: RunStep = {
-      module_type: 'whatsapp_send',
-      output: { whatsapp_fanout: { sent: 3 } },
+      module_type: 'status_set',
+      output: { status_updated: 3 },
       items: [{ name: 'Jan Jansen', meta: 'jan@example.test' }] as unknown as RunStep['items'],
     }
     render(<StepOutputSlice step={legacy} catalog={catalog} />)
     expect(screen.getByText('Jan Jansen')).toBeInTheDocument()
+  })
+
+  it('shows a muted passthrough note instead of the generic item list for a KNOWN passthrough module', () => {
+    const waitStep: RunStep = {
+      module_type: 'wait',
+      output: {},
+      items: [{ name: 'Jan Jansen', meta: 'jan@example.test' }] as unknown as RunStep['items'],
+    }
+    render(<StepOutputSlice step={waitStep} catalog={catalog} />)
+    expect(screen.getByText('runViewer.passthrough')).toBeInTheDocument()
+    expect(screen.queryByText('Jan Jansen')).not.toBeInTheDocument()
   })
 
   it('renders nothing when the step emitted no list at all', () => {
