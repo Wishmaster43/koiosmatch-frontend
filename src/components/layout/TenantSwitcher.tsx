@@ -100,7 +100,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
     return (
       <div className="flex justify-center flex-shrink-0 mt-3">
         <div className="flex items-center justify-center rounded"
-          style={{ width: 28, height: 28, background: '#3B8FD4', fontSize: 9, color: 'white', fontWeight: 700 }}>
+          style={{ width: 28, height: 28, background: 'var(--color-primary)', fontSize: 9, color: 'white', fontWeight: 700 }}>
           {initials}
         </div>
       </div>
@@ -117,7 +117,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
         onMouseLeave={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
       >
         <div className="flex items-center justify-center flex-shrink-0 rounded"
-          style={{ width: 22, height: 22, background: '#3B8FD4', fontSize: 8, color: 'white', fontWeight: 700 }}>
+          style={{ width: 22, height: 22, background: 'var(--color-primary)', fontSize: 8, color: 'white', fontWeight: 700 }}>
           {initials}
         </div>
         <div className="flex-1 min-w-0 text-left">
@@ -162,7 +162,7 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
                   onMouseLeave={e => !isActive && (e.currentTarget.style.background = 'none')}
                 >
                   <div className="flex items-center justify-center flex-shrink-0 rounded"
-                    style={{ width: 24, height: 24, background: '#3B8FD4', fontSize: 9, color: 'white', fontWeight: 700 }}>
+                    style={{ width: 24, height: 24, background: 'var(--color-primary)', fontSize: 9, color: 'white', fontWeight: 700 }}>
                     {tenantInitials(tn.name)}
                   </div>
                   <div className="flex-1 min-w-0 text-left">

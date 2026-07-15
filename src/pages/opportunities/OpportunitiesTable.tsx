@@ -6,6 +6,7 @@ import DataTable from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
+import EntityNameCell from '@/components/ui/EntityNameCell'
 import { initialsOf } from '@/lib/initials'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Opportunity } from '@/types/opportunity'
@@ -62,21 +63,25 @@ export default function OpportunitiesTable({ rows, loading, error, onRowClick, s
           <span style={{ fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block', maxWidth: 240 }} title={r.title}>{r.title}</span>
         </span>
       ) },
-    { key: 'client', header: t('cols.client'), sortable: true, cellStyle: { color: 'var(--text-muted)' } },
+    // Klant — soft avatar + name (AVATAR-CHIP-1: same chip as the candidates identity
+    // column), muted text keeps it reading as a secondary reference, not the row's own identity.
+    { key: 'client', header: t('cols.client'), sortable: true, nowrap: true,
+      render: r => <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} /> },
     { key: 'stage',  header: t('cols.stage'), sortable: true, sortValue: r => r.stage,
       // Phase axis — round chip (StatusPill), mirrors candidates/applications (Danny 2026-07-14).
       render: r => {
         if (!r.stage) return <span style={{ color: 'var(--text-muted)' }}>—</span>
         return colorStage ? <StatusPill label={r.stage} color={r.stageColor} /> : <span style={{ color: 'var(--text)', fontSize: 12 }}>{r.stage}</span>
       } },
-    // Value column follows the tenant setting: euro amount or hours. Regular weight
-    // (§4: bold is emphasis/active only, never decoration on a data column).
+    // Value column follows the tenant setting: euro amount or hours. Regular weight,
+    // same as the other plain-text columns (§4: bold is emphasis/active only, never
+    // decoration on a data column — 500 still read as bold next to client/date/owner).
     { key: 'value',  header: t('cols.value'), align: 'right', sortable: true,
       sortValue: r => (valueInHours ? r.hours : r.value) ?? -1,
       render: r => {
         const v = valueInHours ? r.hours : r.value
         if (v == null) return <span style={{ color: 'var(--text-muted)' }}>—</span>
-        return <span style={{ fontWeight: 500, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
+        return <span style={{ fontWeight: 400, color: 'var(--text)', fontVariantNumeric: 'tabular-nums' }}>
           {valueInHours ? t('cols.hoursValue', { count: v }) : money.format(v)}
         </span>
       } },

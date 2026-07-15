@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
+import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
@@ -70,7 +71,10 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
           {r.vacancyTitle}
         </span>
       ) },
-    { key: 'client', header: t('cols.client'), sortable: true, cellStyle: { color: 'var(--text-muted)', fontSize: 12 } },
+    // Klant — soft avatar + name (AVATAR-CHIP-1: same chip as the candidate identity
+    // column), muted text keeps it reading as a secondary reference.
+    { key: 'client', header: t('cols.client'), sortable: true, nowrap: true,
+      render: r => <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} /> },
     // Match score.
     { key: 'score', header: t('cols.score'), align: 'right', sortable: true,
       sortValue: r => r.score ?? -1, render: r => <ScorePill value={r.score} plain={!colorScore} /> },

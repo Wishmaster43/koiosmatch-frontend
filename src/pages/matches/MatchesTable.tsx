@@ -4,6 +4,7 @@ import { useDateFormat } from '@/lib/datetime'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
+import EntityNameCell from '@/components/ui/EntityNameCell'
 import StatusPill from '@/components/ui/StatusPill'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -64,7 +65,10 @@ export default function MatchesTable({
         </span>
       ) },
     { key: 'vacancy', header: t('cols.vacancy'), sortable: true, nowrap: false },
-    { key: 'client',  header: t('cols.client'),  sortable: true, cellStyle: { color: 'var(--text-muted)' } },
+    // Klant — soft avatar + name (AVATAR-CHIP-1: same chip as the candidate identity
+    // column), muted text keeps it reading as a secondary reference.
+    { key: 'client',  header: t('cols.client'),  sortable: true, nowrap: true,
+      render: r => <EntityNameCell name={r.client} textStyle={{ color: 'var(--text-muted)' }} /> },
     { key: 'score',   header: t('cols.score'), align: 'right', sortable: true,
       sortValue: r => r.score ?? -1, render: r => <ScorePill value={r.score} /> },
     { key: 'stage',   header: t('cols.status'),

@@ -5,6 +5,7 @@ import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import type { ReactNode } from 'react'
 import Avatar from '@/components/ui/Avatar'
+import EntityNameCell from '@/components/ui/EntityNameCell'
 import SoftChip from '@/components/ui/SoftChip'
 import { useDateFormat } from '@/lib/datetime'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
@@ -80,11 +81,12 @@ export default function TasksTable({
     // Priority — soft chip with a leading dot.
     { key: 'priority', header: t('cols.priority'), sortable: true, sortValue: r => r.priorityLabel,
       render: r => chip(r.priorityLabel, r.priorityColor, colorPriority, true) },
-    // Linked entity — first link label, single-line clamp.
-    { key: 'links', header: t('cols.links'), cellStyle: { color: 'var(--text-muted)', fontSize: 12 },
-      render: r => r.linkLabel
-        ? <span style={{ display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden', maxWidth: 200 }}>{r.linkLabel}</span>
-        : dash },
+    // Linked entity — soft avatar + first link's label (AVATAR-CHIP-1: same chip as
+    // the candidate identity column), "+N" when a task is linked to several entities.
+    { key: 'links', header: t('cols.links'),
+      render: r => r.links.length === 0
+        ? dash
+        : <EntityNameCell name={r.links[0].label} extra={r.links.length > 1 ? r.links.length - 1 : undefined} /> },
     // Due date — DD-MM-YYYY, red when overdue.
     { key: 'due', header: t('cols.due'), sortable: true, sortValue: r => r.due || '',
       render: r => r.due
