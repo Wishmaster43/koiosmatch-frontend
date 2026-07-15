@@ -64,7 +64,8 @@
     "owner": "Recruiter",
     "source": "Bron",
     "noOwner": "Geen eigenaar",
-    "clearFilter": "Filter wissen"
+    "clearFilter": "Filter wissen",
+    "pageScopeNotice": "Recruiter/bron, gem. matchscore en AI-taken zijn gebaseerd op een steekproef van maximaal 200 sollicitaties — niet op het volledige aantal."
   },
   "drawer": {
     "label": "Sollicitatie",

@@ -2,9 +2,8 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Plus, Archive } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
+import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
-import { isAbortError } from '@/lib/mocks'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
@@ -13,6 +12,7 @@ import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useApplicationFilters, OWNER_NONE } from './hooks/useApplicationFilters'
+import { useApplicationsData, APPLICATIONS_MAX_PER_PAGE } from './hooks/useApplicationsData'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import ApplicationsTable from './ApplicationsTable'
@@ -27,12 +27,11 @@ import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { mapApplication, mapApplicationDetail } from './data/mapApplication'
 import { bucketOfPhase } from './data/applicationsShared'
-import type { Application, ApplicationDetail, ApiApplication } from '@/types/application'
+import type { Application, ApplicationDetail } from '@/types/application'
 import type { RejectPayload } from './drawer/RejectionBlock'
 import type { Criterion } from './drawer/MatchScoreBlock'
 import type { Id } from '@/types/common'
 
-interface AppStats { by_phase?: Array<{ phase_key?: string; key?: string; value?: string; count?: number }>; by_bucket?: Record<string, number> }
 interface Aggregate { name: string; key: string; color?: string; value: number }
 
 const BUCKETS = ['active', 'matched', 'rejected']
@@ -59,25 +58,36 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Tenant users — options for the editable recruiter (owner) picker in the drawer.
   const { data: users = [] } = useUsers() as { data?: Array<{ id: Id; name: string }> }
 
-  const [applications, setApplications] = useState<Application[]>([])
-  const [loading,      setLoading]      = useState(true)
-  const [error,        setError]        = useState(false)
   const [view,         setView]         = usePageMemory('apps.view', 'table')   // 'table' | 'board'
   const [page,         setPage]         = usePageMemory('apps.page', 1)
-  const [pageSize,     setPageSize]     = useState(() => user?.default_per_page ?? 50)
+  // Clamped to the backend's ApplicationQuery ceiling (`between:1,200`) — the
+  // user's `default_per_page` profile setting is shared across entities and is
+  // NOT capped for e.g. candidates, so a tenant with a higher preference would
+  // otherwise 422 here (measured: a WIP request with per_page=500 broke the
+  // pages-render/drill-downs/boards-drag smoke flows, 2026-07-15).
+  const [pageSize,     setPageSize]     = useState(() => Math.min(user?.default_per_page ?? 50, APPLICATIONS_MAX_PER_PAGE))
+  // Virtualization (F-7): the vertical scroll container the table body lives in.
+  const tableScrollRef = useRef<HTMLDivElement>(null)
   const [selected,     setSelected]     = useState<ApplicationDetail | null>(null)
   const [expanded,     setExpanded]     = useState(false)
   // KPI-card attention toggle: null | 'new' | 'scored' | 'aiTasks' (one at a time).
   const toggleAttention = (k: string) => setAttention(p => (p === k ? null : k))
   const [addOpen,        setAddOpen]        = useState(false)
-  const [stats,          setStats]          = useState<AppStats | null>(null)
-  // ALL filter state + the row predicate live in one hook (§0.3 size split).
+  // ALL filter state + the row predicate + the server filterParams live in one
+  // hook (§0.3 size split).
   const {
     bucket, setBucket, selectedPhase, setSelectedPhase, attention, setAttention,
     selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
     selectedVac, setSelectedVac, showArchived, setShowArchived, query, setQuery,
     anyFilterActive, clearAllFilters, searchEpoch, matchesFilters,
+    filterParams, bucketParam,
   } = useApplicationFilters()
+  // ── Data layer (F-6): server-paginated table page + a wide (≤200, bucket-less)
+  // sample that feeds the board and the owner/source/avgScore/aiTasks figures —
+  // see useApplicationsData's header comment for the BE-gap rationale.
+  const { applications, setApplications, loading, error, total, setTotal, lastPage,
+    wideRows, wideIsPartial, stats } =
+    useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes })
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
 
   // Clear the selection whenever the visible set changes (bucket/filters/paging).
@@ -95,62 +105,42 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Resolve an application's phase label/colour from the lookup (de-hardcoded).
   const decorate = <T extends Application>(a: T): T => { const m = funnelMeta(a.phaseKey); return { ...a, phaseLabel: m.label, phaseColor: m.color } }
 
-  // Load applications. A 404 means the endpoint isn't built yet → treat as empty.
-  // Archived view asks the API for detached rows too (`?include_archived=1`).
-  useEffect(() => {
-    const ctrl = new AbortController()
-    setLoading(true); setError(false)
-    api.get(showArchived ? '/applications?include_archived=1' : '/applications', { signal: ctrl.signal })
-      .then(res => setApplications(unwrapList<ApiApplication>(res).rows.map(mapApplication)))
-      .catch(err => {
-        if (isAbortError(err)) return
-        if (err?.response?.status && err.response.status !== 404) setError(true)
-      })
-      .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
-    return () => ctrl.abort()
-  }, [showArchived])
-
-  // KPI totals across the whole set; page-derived fallback when stats aren't live.
-  useEffect(() => {
-    const ctrl = new AbortController()
-    api.get('/applications/stats', { signal: ctrl.signal })
-      .then(res => setStats(res.data?.data ?? res.data ?? null))
-      .catch(err => { if (!isAbortError(err)) setStats(null) })
-    return () => ctrl.abort()
-  }, [])
-
-  // Counts prefer the server-wide stats; fall back to counting the loaded page.
-  const phaseCount  = (key: string) => { const s = stats?.by_phase?.find(o => (o.phase_key ?? o.key ?? o.value) === key); return s ? (s.count ?? 0) : applications.filter(a => a.phaseKey === key).length }
-  const bucketCount = (b: string)   => stats?.by_bucket?.[b] ?? applications.filter(a => a.bucket === b).length
+  // Counts prefer the server-wide stats (real totals, unaffected by any row cap);
+  // fall back to counting the wide (≤200) sample when stats hasn't loaded.
+  const phaseCount  = (key: string) => { const s = stats?.by_phase?.find(o => (o.phase_key ?? o.key ?? o.value) === key); return s ? (s.count ?? 0) : wideRows.filter(a => a.phaseKey === key).length }
+  const bucketCount = (b: string)   => stats?.by_bucket?.[b] ?? wideRows.filter(a => a.bucket === b).length
 
   // ── Donut data (phase / recruiter / source), each with counts ──
   const phaseData = useMemo<Aggregate[]>(() => phases
     .map(p => ({ name: p.label, key: p.key, color: p.color, value: phaseCount(p.key) }))
     .filter(d => d.value > 0)
-  , [phases, applications, stats]) // eslint-disable-line react-hooks/exhaustive-deps
+  , [phases, wideRows, stats]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Owner/source have NO server-wide aggregate (BE gap — see the data hook's
+  // header comment), so they derive from the wide (≤200) sample; wideIsPartial
+  // flags when that sample doesn't cover every matching application.
   const ownerData = useMemo<Aggregate[]>(() => {
     // owner_id is legitimately nullable (imports, API-created, pre-assignment):
     // unowned rows form an explicit "No owner" slice instead of being dropped.
     const m: Record<string, Aggregate> = {}
-    applications.forEach(a => {
+    wideRows.forEach(a => {
       const n = a.owner?.name
       const key = n || OWNER_NONE
       ;(m[key] ??= { name: n || t('insights.noOwner'), key, color: n ? (a.owner?.color ?? undefined) : '#9CA3AF', value: 0 }).value++
     })
     return Object.values(m)
-  }, [applications, t])
+  }, [wideRows, t])
   const sourceData = useMemo<Aggregate[]>(() => {
     const m: Record<string, Aggregate> = {}
-    applications.forEach(a => { const s = a.source; if (s) (m[s] ??= { name: s, key: s, value: 0 }).value++ })
+    wideRows.forEach(a => { const s = a.source; if (s) (m[s] ??= { name: s, key: s, value: 0 }).value++ })
     return Object.values(m)
-  }, [applications])
+  }, [wideRows])
 
   // Filter option lists (value/label/count) reuse the donut aggregates.
   const vacOptions = useMemo(() => {
     const m: Record<string, { value: string; label: string; count: number }> = {}
-    applications.forEach(a => { if (a.vacancyId) { const k = String(a.vacancyId); (m[k] ??= { value: k, label: a.vacancyTitle, count: 0 }).count++ } })
+    wideRows.forEach(a => { if (a.vacancyId) { const k = String(a.vacancyId); (m[k] ??= { value: k, label: a.vacancyTitle, count: 0 }).count++ } })
     return Object.values(m)
-  }, [applications])
+  }, [wideRows])
   const asOptions = (data: Aggregate[]) => data.map(d => ({ value: d.key, label: d.name, count: d.value }))
 
   // Register the right-panel filters (phase + recruiter + source + vacancy).
@@ -169,17 +159,18 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // Reset to the first page whenever the bucket or any filter changes.
   useEffect(() => { setPage(1) }, [bucket, attention, selectedPhase, selectedOwner, selectedSource, selectedVac, showArchived, query])
 
-  // The visible rows: the hook predicate (bucket/filters/attention/search) + decorate.
-  // BOARD = the whole funnel: the bucket quick-view is a TABLE concept, so the board
-  // ignores it — otherwise the Afgewezen column stays empty while the KPI says 4
-  // (Danny 13/7). Other filters (search/owner/source/archived) still apply.
-  const filteredAll = useMemo(() => applications.filter(a => matchesFilters(a, { ignoreBucket: view === 'board' })).map(decorate),
-    [applications, matchesFilters, view, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
+  // TABLE rows: the server's page (already narrowed by bucket/phase_key/vacancy_id/
+  // search/include_archived where unambiguous — see useApplicationFilters), refined
+  // client-side for the dimensions the backend can't filter yet (owner/source/
+  // attention/'allActive'/multi-select on phase or vacancy). Search is skipped here
+  // (ignoreQuery) — the server already ran it on a richer field set.
+  const tableRows = useMemo(() => applications.filter(a => matchesFilters(a, { ignoreQuery: true })).map(decorate),
+    [applications, matchesFilters, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Clientside pagination slice (the endpoint returns all rows at once).
-  const totalRows  = filteredAll.length
-  const lastPage   = Math.max(1, Math.ceil(totalRows / pageSize))
-  const filtered   = useMemo(() => filteredAll.slice((page - 1) * pageSize, page * pageSize), [filteredAll, page, pageSize])
+  // BOARD rows: the wide (≤200, bucket-less) sample — the board shows the WHOLE
+  // funnel regardless of the bucket tab (Danny 13/7), same client refine otherwise.
+  const boardRows = useMemo(() => wideRows.filter(a => matchesFilters(a, { ignoreBucket: true, ignoreQuery: true })).map(decorate),
+    [wideRows, matchesFilters, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Open an application: show the light row immediately, then fetch the full detail.
   const selectedIdRef = useRef<Id | null>(null)
@@ -189,7 +180,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     selectedIdRef.current = a.id ?? null
     setSelected(decorate(a) as ApplicationDetail); setExpanded(false)
     api.get(`/applications/${a.id}`)
-      .then(r => { if (selectedIdRef.current === a.id) setSelected(decorate(mapApplicationDetail(r.data?.data ?? r.data))) })
+      .then(r => { if (selectedIdRef.current === a.id) setSelected(decorate(mapApplicationDetail(r.data?.data ?? r.data, funnelTypes))) })
       .catch(() => {})
   }
 
@@ -212,9 +203,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   }, [intent])
 
   // Kanban move: set the new phase + bucket; label/colour re-resolve from the lookup.
+  // `before` checks wideRows too — the board (where a move is dragged) renders off
+  // wideRows, which the table-page `applications` array doesn't hold while in board view.
   const handleMove = (id: Id, phaseKey: string) => {
-    const before = applications.find(a => a.id === id)
-    const newBucket = bucketOfPhase(phaseKey)
+    const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
+    const newBucket = bucketOfPhase(phaseKey, funnelTypes)
     setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey, bucket: newBucket } : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, phaseKey, bucket: newBucket } as ApplicationDetail) : prev))
     api.patch(`/applications/${id}`, { phase_key: phaseKey })
@@ -255,13 +248,14 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // never a generic one, and revert the optimistic edit.
   const handleLinkVacancy = (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => {
     if (id == null) return
-    const before = applications.find(a => a.id === id)
+    // wideRows fallback: the drawer may be open while viewing the board (see handleMove).
+    const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
     const patch = { vacancyId, vacancyTitle: vacancyId != null ? (meta?.title ?? '') : '', client: vacancyId != null ? (meta?.client ?? '') : '' }
     setApplications(prev => prev.map(a => a.id === id ? { ...a, ...patch } : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as ApplicationDetail) : prev))
     api.patch(`/applications/${id}`, { vacancy_id: vacancyId })
       .then(res => {
-        const updated = mapApplication(res.data?.data ?? res.data)
+        const updated = mapApplication(res.data?.data ?? res.data, funnelTypes)
         const reconciled = { vacancyId: updated.vacancyId, vacancyTitle: updated.vacancyTitle, client: updated.client }
         setApplications(prev => prev.map(a => a.id === id ? { ...a, ...reconciled } : a))
         setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...reconciled } as ApplicationDetail) : prev))
@@ -278,9 +272,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
       })
   }
 
-  // Reject an application: move it to the rejected phase/bucket optimistically.
+  // Reject an application: move it to the FLAGGED is_rejected phase/bucket
+  // optimistically — never the literal 'rejected' key (A1: a tenant may rename it).
   const handleReject = (id: Id | undefined, payload: RejectPayload) => {
-    const patch = { phaseKey: 'rejected', bucket: 'rejected',
+    const rejectedKey = funnelTypes.find(f => f.is_rejected)?.value ?? 'rejected'
+    const patch = { phaseKey: rejectedKey, bucket: bucketOfPhase(rejectedKey, funnelTypes),
       rejection: { reason_label: payload.reason_label, note: payload.note } }
     setApplications(prev => prev.map(a => a.id === id ? ({ ...a, ...patch } as Application) : a))
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as ApplicationDetail) : prev))
@@ -288,9 +284,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     api.post(`/applications/${id}/reject`, { reason_id: payload.reason_id, note: payload.note }).catch(() => {})
   }
 
-  // A freshly created application: prepend to the list and open its drawer.
+  // A freshly created application: prepend to the list, bump the server-total
+  // (F-6: total is no longer derived from the loaded array's length) and open its drawer.
   const handleCreated = (app: Application) => {
     setApplications(prev => [app, ...prev])
+    setTotal(prev => prev + 1)
     setAddOpen(false)
     selectApplication(app)
   }
@@ -313,49 +311,69 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   }
 
   // Detach (soft-delete) an application: kept server-side, removed from the active
-  // list. Optimistic flag; revert + toast on failure. Gated by applications.update.
+  // list. Optimistic flag + total decrement (F-6: total is server-derived now,
+  // mirrors useCandidateDrawerActions); revert-by-id + toast on failure (F-6: a
+  // whole-array snapshot can't safely revert BOTH the table-page and wide caches —
+  // one of the two is empty/partial depending on view — so flip the flag back by id
+  // instead of restoring a captured array). Gated by applications.update.
   const handleDetach = (id: Id | undefined) => {
     if (id == null) return
-    const snapshot = applications
     setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: true } : a))
+    setTotal(prev => Math.max(0, prev - 1))
     closeDrawer()
     api.delete(`/applications/${id}`)
       .then(() => notifySuccess(t('detach.done')))
-      .catch(() => { setApplications(snapshot); notifyError(t('common:actionFailed')) })
+      .catch(() => {
+        setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: false } : a))
+        setTotal(prev => prev + 1)
+        notifyError(t('common:actionFailed'))
+      })
   }
 
   // Restore a detached application: back to the active list (backend re-sets the
-  // candidate to the applicant phase). Optimistic; revert + toast on failure.
+  // candidate to the applicant phase). Optimistic + total increment; revert-by-id +
+  // toast on failure (see handleDetach's note on why not a snapshot).
   const handleRestore = (id: Id | undefined) => {
     if (id == null) return
-    const snapshot = applications
     setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: false } : a))
+    setTotal(prev => prev + 1)
     closeDrawer()
     api.post(`/applications/${id}/restore`)
       .then(() => notifySuccess(t('restore.done')))
-      .catch(() => { setApplications(snapshot); notifyError(t('common:actionFailed')) })
+      .catch(() => {
+        setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: true } : a))
+        setTotal(prev => Math.max(0, prev - 1))
+        notifyError(t('common:actionFailed'))
+      })
   }
 
   // Bulk: move every selected application to one funnel phase; optimistic + PATCH each.
   const bulkSetPhase = (phaseKey: string) => {
     const ids = [...selectedIds]
     if (!ids.length) return
-    setApplications(prev => prev.map(a => a.id != null && selectedIds.has(a.id as Id) ? { ...a, phaseKey, bucket: bucketOfPhase(phaseKey) } : a))
+    setApplications(prev => prev.map(a => a.id != null && selectedIds.has(a.id as Id) ? { ...a, phaseKey, bucket: bucketOfPhase(phaseKey, funnelTypes) } : a))
     setSelectedIds(new Set())
     Promise.allSettled(ids.map(id => api.patch(`/applications/${id}`, { phase_key: phaseKey })))
       .then(() => notifySuccess(t('bulk.done', { count: ids.length })))
   }
 
-  // Bulk: detach (soft-delete) every selected application; optimistic + revert on any failure.
+  // Bulk: detach (soft-delete) every selected application; optimistic (incl. the
+  // total decrement) + revert-by-id on any failure (see handleDetach's note — a
+  // whole-array snapshot can't safely revert both the table-page and wide caches).
   const bulkDetach = () => {
     const ids = [...selectedIds]
     if (!ids.length) return
-    const snapshot = applications
     setApplications(prev => prev.map(a => a.id != null && selectedIds.has(a.id as Id) ? { ...a, archived: true } : a))
+    setTotal(prev => Math.max(0, prev - ids.length))
     setSelectedIds(new Set())
     Promise.allSettled(ids.map(id => api.delete(`/applications/${id}`))).then(rs => {
-      if (rs.some(r => r.status === 'rejected')) { setApplications(snapshot); notifyError(t('common:actionFailed')) }
-      else notifySuccess(t('bulk.done', { count: ids.length }))
+      if (rs.some(r => r.status === 'rejected')) {
+        setApplications(prev => prev.map(a => a.id != null && ids.includes(a.id as Id) ? { ...a, archived: false } : a))
+        setTotal(prev => prev + ids.length)
+        notifyError(t('common:actionFailed'))
+      } else {
+        notifySuccess(t('bulk.done', { count: ids.length }))
+      }
     })
   }
 
@@ -368,10 +386,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     { key: 'source', title: t('insights.source'), data: sourceData, onPick: pickOne(setSelectedSource), active: selectedSource.length > 0, onClear: () => setSelectedSource([]), picked: pickedLabel(sourceData, selectedSource[0]) },
   ]
   // Average match score across non-rejected applications (KPI, "—" when none scored).
-  const scored = applications.filter(a => a.bucket !== 'rejected' && typeof a.score === 'number')
+  // No server-wide aggregate (BE gap) — derived from the wide (≤200) sample.
+  const scored = wideRows.filter(a => a.bucket !== 'rejected' && typeof a.score === 'number')
   const avgScore = scored.length ? Math.round(scored.reduce((s, a) => s + (a.score as number), 0) / scored.length) + '%' : '—'
-  // Active applications that still carry an AI task (attention KPI).
-  const aiTaskCount = applications.filter(a => a.task && a.bucket === 'active').length
+  // Active applications that still carry an AI task (attention KPI); same wide sample.
+  const aiTaskCount = wideRows.filter(a => a.task && a.bucket === 'active').length
 
   // KPI cards — mirror the candidate strip: count + sub-line, click-to-filter where it maps.
   const insightKpis: KpiSpec[] = [
@@ -381,7 +400,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
       sub: t('kpi.totalActiveSub'), color: 'var(--color-primary)',
       onClick: () => { clearAllFilters(); setShowArchived(false); setBucket(bucket === 'allActive' ? 'active' : 'allActive'); setAttention(null) },
       active: bucket === 'allActive' },
-    { key: 'new', label: t('kpi.new'), value: applications.filter(a => a.isNew && a.bucket === 'active').length,
+    { key: 'new', label: t('kpi.new'), value: wideRows.filter(a => a.isNew && a.bucket === 'active').length,
       sub: t('kpi.newSub'), color: 'var(--color-warning)',
       onClick: () => { setShowArchived(false); setBucket('active'); toggleAttention('new') }, active: attention === 'new' },
     { key: 'matched', label: t('kpi.matched'), value: bucketCount('matched'), sub: t('kpi.matchedSub'),
@@ -399,7 +418,11 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, overflow: 'hidden' }}>
 
         {/* Insights strip (donuts + KPIs) */}
-        <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
+        <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')}
+          // Data honesty (BE gap): owner/source/avgScore/aiTasks have no server-wide
+          // aggregate and fall back to the ≤200-row wide sample — label it once that
+          // sample doesn't cover every matching application (mirrors CandidatesPage).
+          notice={wideIsPartial ? t('insights.pageScopeNotice') : undefined} />
 
         {/* Tab bar — add + buckets + view toggle */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between',
@@ -458,17 +481,22 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
                   onSetPhase={bulkSetPhase} onDetach={bulkDetach} canManage={canManage} phases={funnelTypes} />
               </div>
             )}
-            <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
-              <ApplicationsTable rows={filtered} loading={loading} error={error}
+            {/* Virtualized (F-7): tableScrollRef is the scroll container DataTable measures against. */}
+            <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
+              <ApplicationsTable rows={tableRows} loading={loading} error={error}
                 selectedId={selected?.id} onSelect={selectApplication} stickyHeader
-                selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
+                selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll}
+                scrollParentRef={tableScrollRef} />
             </div>
-            <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
+            <PaginationBar page={page} totalPages={lastPage} totalRows={total}
               pageSize={pageSize} onPageChange={setPage}
-              onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+              // Clamp: PaginationBar's shared PAGE_SIZE_OPTIONS offers up to 500 (other
+              // entities allow it) but ApplicationQuery caps per_page at 200 — see the
+              // pageSize state comment above.
+              onPageSizeChange={n => { setPageSize(Math.min(n, APPLICATIONS_MAX_PER_PAGE)); setPage(1) }} />
           </>
         ) : (
-          <ApplicationsBoard rows={filtered} phases={phases} onMove={handleMove}
+          <ApplicationsBoard rows={boardRows} phases={phases} onMove={handleMove}
             selectedId={selected?.id} onSelect={selectApplication} />
         )}
       </div>

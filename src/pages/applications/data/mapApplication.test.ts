@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest'
 import { mapApplication } from './mapApplication'
+import type { LookupItem } from '@/context/LookupsContext'
+
+// A tenant that renamed the funnel: 'aangenomen' carries is_match — proves the
+// mapped `bucket` is flag-driven, never the literal 'hired' slug (A1).
+const RENAMED_FUNNEL: LookupItem[] = [
+  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+  { value: 'aangenomen', label: 'Aangenomen', color: '#79B58E', is_match: true },
+]
 
 describe('mapApplication', () => {
   it('maps the owner id from a nested owner object', () => {
@@ -20,5 +28,11 @@ describe('mapApplication', () => {
 
   it('falls back to a dash when no candidate name is present', () => {
     expect(mapApplication({ id: 5 }).candidateName).toBe('—')
+  })
+
+  it('derives the bucket off the funnel lookup flags, not a hardcoded phase key', () => {
+    expect(mapApplication({ id: 6, phase_key: 'aangenomen' }, RENAMED_FUNNEL).bucket).toBe('matched')
+    // Without a matching lookup entry, an unknown key is never assumed "matched".
+    expect(mapApplication({ id: 7, phase_key: 'aangenomen' }).bucket).toBe('active')
   })
 })

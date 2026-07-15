@@ -6,6 +6,7 @@ import { X } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
+import { useLookups } from '@/context/LookupsContext'
 import { mapApplication } from './data/mapApplication'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import type { Application } from '@/types/application'
@@ -45,6 +46,8 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
 }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('applications')
+  // Funnel lookup — drives the flag-based bucket resolution in mapApplication (A1).
+  const { funnelTypes } = useLookups()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
   // Owner dropdown = the assignable (tenant-scoped) users list only — POST
@@ -91,7 +94,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     setCreateError(null)
     try {
       const res = await api.post('/applications', { candidate_id: candidateId, vacancy_id: vacancyId, owner_id: ownerId || null })
-      onCreated(mapApplication(res.data?.data ?? res.data))
+      onCreated(mapApplication(res.data?.data ?? res.data, funnelTypes))
     } catch (err) {
       const e = err as { response?: { data?: { message?: string } } }
       setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))

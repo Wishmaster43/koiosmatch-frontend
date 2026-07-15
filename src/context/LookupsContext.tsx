@@ -33,6 +33,11 @@ export interface LookupItem {
   value: string; label: string; color: string
   is_applicant?: boolean; requires_appointment?: boolean; is_default?: boolean
   requires_match?: boolean; requires_reason?: boolean; expects_return_date?: boolean; is_blacklist?: boolean
+  // Funnel-only bucket flags (LookupItemResource): is_match drives the "matched" bucket,
+  // is_rejected the "rejected" bucket — at most one stage carries each (backend singleton
+  // guard). Carried through so applications never fall back to hardcoded 'hired'/'rejected'
+  // slug checks (A1 — the funnel-flags root-cause fix, 2026-07-15).
+  is_match?: boolean; is_rejected?: boolean
   [k: string]: unknown
 }
 
@@ -71,13 +76,16 @@ export const DEFAULT_PHASES: LookupItem[] = [
 ]
 
 // Application pipeline (per application). `invited` is the intake stage that
-// carries `requires_appointment` once configured (see §3B / C-22).
+// carries `requires_appointment` once configured (see §3B / C-22). `hired` carries
+// is_match (drives the "matched" bucket + side-effects) and `rejected` carries
+// is_rejected (drives the "rejected" bucket) — never matched/detected by the literal
+// key elsewhere (A1); a tenant may rename either slug and the flag still resolves.
 export const DEFAULT_FUNNEL_TYPES: LookupItem[] = [
   { value: 'applied',  label: 'Gesolliciteerd',     color: '#94A3B8' },
   { value: 'invited',  label: 'Uitgenodigd/Intake', color: '#8C86D9', requires_appointment: true },
   { value: 'proposal', label: 'Voorgesteld',        color: '#6FA8C4' },
-  { value: 'hired',    label: 'Aangenomen',         color: '#79B58E' },
-  { value: 'rejected', label: 'Afgewezen',          color: '#D98A8A' },
+  { value: 'hired',    label: 'Aangenomen',         color: '#79B58E', is_match: true },
+  { value: 'rejected', label: 'Afgewezen',          color: '#D98A8A', is_rejected: true },
 ]
 
 // Deployability / "status" (single value), model v2 (decision 2026-06-29): "can I
@@ -130,6 +138,8 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
       is_applicant: flag(it, 'is_applicant'),
       requires_appointment: flag(it, 'requires_appointment'),
       is_blacklist: flag(it, 'is_blacklist'),
+      is_match: flag(it, 'is_match'),
+      is_rejected: flag(it, 'is_rejected'),
       is_default: flag(it, 'is_default') }))
 }
 

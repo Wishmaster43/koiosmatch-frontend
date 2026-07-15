@@ -12,6 +12,8 @@
  *     'open' | 'closed' (confirmed via /matches PATCH's documented enum).
  */
 import api from '@/lib/api'
+import { DEFAULT_FUNNEL_TYPES } from '@/context/LookupsContext'
+import type { LookupItem } from '@/context/LookupsContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -37,9 +39,18 @@ export interface LiveBlockers { applications: BlockingApplication[]; matches: Bl
 // terminal, or a "Placed" deployability (which the model requires a linked
 // Match for), flags a candidate as worth the full live-blockers check. Rows
 // with neither signal skip straight to archiving (the 409 catch is the safety
-// net if this heuristic ever misses a live link).
-export const needsLiveCheck = (c?: Candidate | null): boolean =>
-  !!c && ((!!c.stage && c.stage !== 'hired' && c.stage !== 'rejected') || c.status === 'placed')
+// net if this heuristic ever misses a live link). "Terminal" is FLAG-driven
+// (is_match/is_rejected on the tenant funnel lookup), never the literal
+// 'hired'/'rejected' key (A1) — a tenant may rename either slug. `funnelTypes`
+// defaults to the seed because the two callers of this pure helper
+// (useCandidateDrawerActions/useCandidateBulkActions) don't thread the live
+// tenant lookup through yet — follow-up, out of this change's file scope.
+export const needsLiveCheck = (c?: Candidate | null, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES): boolean => {
+  if (!c) return false
+  const meta = funnelTypes.find(f => f.value === c.stage)
+  const nonTerminalStage = !!c.stage && !(meta?.is_match || meta?.is_rejected)
+  return nonTerminalStage || c.status === 'placed'
+}
 
 // The nested application ref lacks a funnel slug — resolve the authoritative
 // phase_key per id (bounded: a candidate rarely holds more than a handful).
@@ -101,10 +112,16 @@ export function liveFromError(e: unknown): LiveBlockers | null {
   return (live.applications.length || live.matches.length) ? live : null
 }
 
-// Resolve ONE blocking application: PATCH it to the 'rejected' funnel stage —
-// mirrors ApplicationsPage.handleMove's own phase-move call (same endpoint/body).
-export async function resolveApplication(id: Id): Promise<boolean> {
-  try { await api.patch(`/applications/${id}`, { phase_key: 'rejected' }); return true }
+// Resolve ONE blocking application: PATCH it to the FLAGGED is_rejected funnel
+// stage — never the literal 'rejected' key (A1: a tenant may rename it). At most
+// one stage carries is_rejected (backend singleton guard); if a stale/multi-flagged
+// list is ever passed, take the first by sort order (the array is assumed
+// pre-sorted, mirrors LookupsContext.normalize()'s ordering). `funnelTypes`
+// defaults to the seed for the same reason as needsLiveCheck above.
+// Mirrors ApplicationsPage.handleMove's own phase-move call (same endpoint/body).
+export async function resolveApplication(id: Id, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES): Promise<boolean> {
+  const rejectedKey = funnelTypes.find(f => f.is_rejected)?.value ?? 'rejected'
+  try { await api.patch(`/applications/${id}`, { phase_key: rejectedKey }); return true }
   catch { return false }
 }
 

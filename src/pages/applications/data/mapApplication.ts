@@ -1,6 +1,7 @@
 import { bucketOfPhase } from './applicationsShared'
 import { initialsOf } from '@/lib/initials'
 import type { Id } from '@/types/common'
+import type { LookupItem } from '@/context/LookupsContext'
 import type {
   ApiApplication, Application, ApplicationDetail, ApiAppCandidate, ApiAppVacancy,
 } from '@/types/application'
@@ -9,9 +10,11 @@ import type {
  * mapApplication — raw API application → the flat shape the table/board/drawer
  * render. Snake_case-tolerant and defensive about the exact field names (the
  * /applications endpoint is not built yet — see docs/worklist.md), so it accepts
- * several spellings and never throws on a missing field.
+ * several spellings and never throws on a missing field. `funnelTypes` (the tenant
+ * funnel lookup, from useLookups()) drives the flag-based bucket fallback — only
+ * used when the API doesn't already send an explicit `bucket` (A1).
  */
-export function mapApplication(a: ApiApplication = {}): Application {
+export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[] = []): Application {
   const cand: ApiAppCandidate = a.candidate ?? {}
   const joined = [cand.first_name, cand.last_name].filter(Boolean).join(' ')
   const candidateName = a.candidate_name ?? cand.name ?? (joined || '—')
@@ -34,7 +37,7 @@ export function mapApplication(a: ApiApplication = {}): Application {
     score: a.score ?? a.match_score ?? a.match?.overall ?? null,
     task: a.task ?? a.ai_task ?? a.ai?.task ?? '',
     phaseKey,
-    bucket: a.bucket ?? bucketOfPhase(phaseKey),
+    bucket: a.bucket ?? bucketOfPhase(phaseKey, funnelTypes),
     source: a.source ?? a.source_name ?? '',
     owner: {
       id: owner.id ?? a.owner_id ?? null,
@@ -60,8 +63,8 @@ export function mapApplication(a: ApiApplication = {}): Application {
  * nested objects (candidate, vacancy, interviews, appointments, timeline, match).
  * Defensive: every nested list defaults to [] so a tab never crashes.
  */
-export function mapApplicationDetail(raw: ApiApplication = {}): ApplicationDetail {
-  const base = mapApplication(raw)
+export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: LookupItem[] = []): ApplicationDetail {
+  const base = mapApplication(raw, funnelTypes)
   const cand: ApiAppCandidate = raw.candidate ?? {}
   const vac: ApiAppVacancy = raw.vacancy ?? {}
 

@@ -64,7 +64,8 @@
     "owner": "Recruiter",
     "source": "Source",
     "noOwner": "No owner",
-    "clearFilter": "Clear filter"
+    "clearFilter": "Clear filter",
+    "pageScopeNotice": "Owner/source, avg. match score and AI tasks are based on a sample of up to 200 applications — not the full total."
   },
   "drawer": {
     "label": "Application",

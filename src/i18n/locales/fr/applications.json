@@ -64,7 +64,8 @@
     "owner": "Recruteur",
     "source": "Source",
     "clearFilter": "Effacer le filtre",
-    "noOwner": "Aucun propriétaire"
+    "noOwner": "Aucun propriétaire",
+    "pageScopeNotice": "Recruteur/source, score de correspondance moyen et tâches IA reposent sur un échantillon de 200 candidatures maximum — pas sur le total réel."
   },
   "drawer": {
     "label": "Candidature",

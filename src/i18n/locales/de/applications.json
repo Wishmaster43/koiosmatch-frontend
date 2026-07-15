@@ -64,7 +64,8 @@
     "owner": "Recruiter",
     "source": "Quelle",
     "clearFilter": "Filter zurücksetzen",
-    "noOwner": "Kein Eigentümer"
+    "noOwner": "Kein Eigentümer",
+    "pageScopeNotice": "Recruiter/Quelle, durchschn. Matchscore und KI-Aufgaben basieren auf einer Stichprobe von bis zu 200 Bewerbungen — nicht auf der Gesamtzahl."
   },
   "drawer": {
     "label": "Bewerbung",

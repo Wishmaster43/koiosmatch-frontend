@@ -1,3 +1,4 @@
+import type { RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
@@ -34,6 +35,9 @@ interface ApplicationsTableProps {
   selectedIds?: Set<Id>
   onToggleRow?: (id: Id) => void
   onToggleAll?: (ids: Id[], allSelected: boolean) => void
+  // Virtualization (F-7): the vertical scroll container this table lives in —
+  // opt-in, forwarded straight to DataTable (mirrors CustomersTable/VacanciesTable).
+  scrollParentRef?: RefObject<HTMLElement | null>
 }
 
 /**
@@ -41,7 +45,7 @@ interface ApplicationsTableProps {
  * selection, hover and the loading/empty states. Mirrors MatchesTable.
  */
 export default function ApplicationsTable({ rows, loading, error, selectedId, onSelect, stickyHeader = false,
-  selectable, selectedIds, onToggleRow, onToggleAll }: ApplicationsTableProps) {
+  selectable, selectedIds, onToggleRow, onToggleAll, scrollParentRef }: ApplicationsTableProps) {
   const { t } = useTranslation('applications')
   const { formatDate } = useDateFormat()
   // Tenant display settings (Settings → Applications → Table display). Coloured
@@ -128,6 +132,7 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
       selectedIds={selectedIds}
       onToggleRow={onToggleRow}
       onToggleAll={onToggleAll}
+      scrollParentRef={scrollParentRef}
     />
   )
 }

@@ -64,7 +64,8 @@
     "owner": "Reclutador",
     "source": "Origen",
     "clearFilter": "Borrar filtro",
-    "noOwner": "Sin propietario"
+    "noOwner": "Sin propietario",
+    "pageScopeNotice": "Reclutador/origen, puntuación media de coincidencia y tareas de IA se basan en una muestra de hasta 200 solicitudes, no en el total real."
   },
   "drawer": {
     "label": "Candidatura",

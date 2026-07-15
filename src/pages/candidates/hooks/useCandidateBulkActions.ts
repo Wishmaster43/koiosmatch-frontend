@@ -14,6 +14,7 @@ import { needsLiveCheck, fetchLiveBlockers, liveFromError } from '../data/archiv
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 import type { Candidate, CandidatePool } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
+import type { LookupItem } from '@/context/LookupsContext'
 
 // Bulk archive-guard modal state (§3B) — aggregate mode: N of the selection
 // carry a live application/match; the same resolutions apply to all of them.
@@ -37,7 +38,7 @@ interface UseCandidateBulkActionsParams {
   setSelectedIds: Dispatch<SetStateAction<Set<Id>>>
   notify: (type: string, msg: string) => void
   t: TFunction
-  funnelTypes: LookupOption[]
+  funnelTypes: LookupItem[]
   candidateTypes: LookupOption[]
 }
 
@@ -226,7 +227,7 @@ export function useCandidateBulkActions({
     if (!ids.length) return
     setSelectedIds(new Set())
     const byId = new Map(candidates.map(c => [c.id, c]))
-    const risky = ids.filter(id => needsLiveCheck(byId.get(id)))
+    const risky = ids.filter(id => needsLiveCheck(byId.get(id), funnelTypes))
     const toCheck = risky.slice(0, BULK_GUARD_CHECK_CAP)
     const checks = await Promise.all(toCheck.map(async id => ({ id, blockers: await fetchLiveBlockers(id) })))
     const blocked = checks.filter(c => c.blockers.applications.length || c.blockers.matches.length)

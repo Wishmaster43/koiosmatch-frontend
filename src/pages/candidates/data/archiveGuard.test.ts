@@ -12,6 +12,19 @@ import {
   resolveApplication, resolveMatch,
 } from './archiveGuard'
 import type { Candidate } from '@/types/candidate'
+import type { LookupItem } from '@/context/LookupsContext'
+
+// A tenant that renamed the funnel: 'hired' → 'aangenomen' (is_match) and
+// 'rejected' → 'afgewezen' (is_rejected) — proves the flag drives the check,
+// not the literal slug (A1 root-cause fix).
+const RENAMED_FUNNEL: LookupItem[] = [
+  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+  { value: 'applied', label: 'Gesolliciteerd', color: '#94A3B8' },
+  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+  { value: 'aangenomen', label: 'Aangenomen', color: '#79B58E', is_match: true },
+  // eslint-disable-next-line no-restricted-syntax -- test fixture hex, not a UI colour
+  { value: 'afgewezen', label: 'Afgewezen', color: '#D98A8A', is_rejected: true },
+]
 
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), patch: vi.fn(), delete: vi.fn() } }))
 
@@ -34,6 +47,19 @@ describe('needsLiveCheck', () => {
   it('is false for null/undefined candidates', () => {
     expect(needsLiveCheck(null)).toBe(false)
     expect(needsLiveCheck(undefined)).toBe(false)
+  })
+
+  // A1 root-cause: the literal 'hired'/'rejected' keys are ONLY a fallback seed —
+  // a tenant-renamed funnel must resolve terminal-ness off the is_match/is_rejected
+  // FLAG, never the slug.
+  it('is flag-driven: a renamed terminal stage (is_match/is_rejected) is still terminal', () => {
+    expect(needsLiveCheck({ stage: 'aangenomen', status: 'available' } as Candidate, RENAMED_FUNNEL)).toBe(false)
+    expect(needsLiveCheck({ stage: 'afgewezen', status: 'available' } as Candidate, RENAMED_FUNNEL)).toBe(false)
+  })
+  it('is flag-driven: the literal "hired"/"rejected" slug is NOT special-cased once a custom lookup is passed', () => {
+    // Under the renamed funnel, 'hired' is not a known value at all — it must be
+    // treated as a non-terminal (unknown) stage, not silently matched by the old key.
+    expect(needsLiveCheck({ stage: 'hired', status: 'available' } as Candidate, RENAMED_FUNNEL)).toBe(true)
   })
 })
 
@@ -123,6 +149,15 @@ describe('resolveApplication / resolveMatch', () => {
   it('resolveApplication reports failure without throwing', async () => {
     vi.mocked(api.patch).mockRejectedValue(new Error('500'))
     await expect(resolveApplication('a1')).resolves.toBe(false)
+  })
+
+  // A1 root-cause: with a renamed funnel, resolveApplication must PATCH the FLAGGED
+  // is_rejected stage's slug ('afgewezen'), never the hardcoded 'rejected' literal.
+  it('resolveApplication resolves the is_rejected-flagged stage from the passed lookup', async () => {
+    vi.mocked(api.patch).mockResolvedValue({ data: {} })
+    const ok = await resolveApplication('a1', RENAMED_FUNNEL)
+    expect(ok).toBe(true)
+    expect(api.patch).toHaveBeenCalledWith('/applications/a1', { phase_key: 'afgewezen' })
   })
 
   it('resolveMatch DELETEs and reports success', async () => {
