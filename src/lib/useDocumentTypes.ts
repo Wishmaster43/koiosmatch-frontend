@@ -7,9 +7,12 @@
  *
  * The colour drives the document tile + soft chip in the Documents tab, so it
  * replaces the old hardcoded DOC_TYPES / DOC_COLORS constants.
+ *
+ * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
+ * session, shared across every mounted consumer.
  */
-import { useState, useEffect } from 'react'
-import api from './api'
+import type { AxiosResponse } from 'axios'
+import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
 
 // Seed defaults (labels NL, colours = the previous DOC_COLORS map) — API overrides per tenant.
@@ -33,17 +36,15 @@ const toOption = (r: Record<string, unknown>): LookupOption => ({
   color: (r.color as string) ?? FALLBACK_COLOR,
 })
 
-export function useDocumentTypes() {
-  const [types, setTypes] = useState<LookupOption[]>(DEFAULT_DOCUMENT_TYPES)
+// null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
+const mapDocumentTypes = (res: AxiosResponse): LookupOption[] | null => {
+  const raw = (res?.data?.data ?? res?.data ?? []) as Record<string, unknown>[]
+  const d = raw.filter(Boolean).map(toOption)
+  return d.length ? d : null
+}
 
-  // Load the tenant lookup once; keep the seed if the endpoint is empty/unavailable.
-  useEffect(() => {
-    api.get('/document-types').then(r => {
-      const raw = (r?.data?.data ?? r?.data ?? []) as Record<string, unknown>[]
-      const d = raw.filter(Boolean).map(toOption)
-      if (d.length) setTypes(d)
-    }).catch(() => {})
-  }, [])
+export function useDocumentTypes() {
+  const { data: types } = useCachedLookup('/document-types', mapDocumentTypes, DEFAULT_DOCUMENT_TYPES)
 
   // Resolve a stored value/slug to its label/colour; fall back to raw value / neutral grey.
   const find = (value?: string | null) => {

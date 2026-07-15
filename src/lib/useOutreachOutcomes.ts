@@ -5,9 +5,12 @@
  * default as fallback until the endpoint lands. VALUES are the API slugs (§3B —
  * never Dutch labels as values); labels are display-only defaults. Colours are
  * semantic tokens so the soft-chips follow the tenant theme (§4).
+ *
+ * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
+ * session, shared across every mounted consumer.
  */
-import { useState, useEffect } from 'react'
-import api from './api'
+import type { AxiosResponse } from 'axios'
+import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
 
 export const DEFAULT_OUTREACH_OUTCOMES: LookupOption[] = [
@@ -24,21 +27,15 @@ const toOption = (r: Record<string, unknown>): LookupOption => ({
   color: (r.color as string) ?? undefined,
 })
 
-export function useOutreachOutcomes() {
-  const [outcomes, setOutcomes] = useState<LookupOption[]>(DEFAULT_OUTREACH_OUTCOMES)
+// null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
+const mapOutreachOutcomes = (res: AxiosResponse): LookupOption[] | null => {
+  const rows = (res.data?.data ?? res.data ?? []) as Record<string, unknown>[]
+  return Array.isArray(rows) && rows.length ? rows.map(toOption) : null
+}
 
-  // Load the tenant lookup once; keep the seed while the endpoint is missing
-  // (quiet404: the endpoint is optional until OUTREACH-2 lands backend-side).
-  useEffect(() => {
-    let alive = true
-    api.get('/outreach-outcomes', { quiet404: true })
-      .then(res => {
-        const rows = (res.data?.data ?? res.data ?? []) as Record<string, unknown>[]
-        if (alive && Array.isArray(rows) && rows.length) setOutcomes(rows.map(toOption))
-      })
-      .catch(() => {})
-    return () => { alive = false }
-  }, [])
+export function useOutreachOutcomes() {
+  // quiet404: the endpoint is optional until OUTREACH-2 lands backend-side.
+  const { data: outcomes } = useCachedLookup('/outreach-outcomes', mapOutreachOutcomes, DEFAULT_OUTREACH_OUTCOMES, { quiet404: true })
 
   // Resolve a stored slug to its meta (label + colour) — tolerant of label-stored values.
   const metaOf = (v?: string | null): LookupOption | undefined =>

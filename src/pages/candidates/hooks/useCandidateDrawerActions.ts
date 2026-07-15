@@ -12,7 +12,7 @@
  * opens instead of calling the API. The 409 catch is the safety net in case
  * that heuristic (or the backend guard, once shipped) disagrees.
  */
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import api from '@/lib/api'
 import { useCandidateRecord } from './useCandidateMutations'
 import { needsLiveCheck, fetchLiveBlockers, liveFromError } from '../data/archiveGuard'
@@ -50,11 +50,13 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
   // Full-record load + edit persistence (fetch/PATCH live in the hook, §3).
   const { fetchDetail, patchCandidate } = useCandidateRecord()
 
-  const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }
+  const closeDrawer = useCallback(() => { selectedIdRef.current = null; setSelected(null); setDetail(null); setDrawerExpanded(false) }, [])
 
   // Open a candidate: hand the light row to the drawer, then fetch the full record.
   // 404 ('gone') = a stale row (reseed / deleted elsewhere) → drop it + tell the user.
-  const selectCandidate = (c: Candidate, tab?: string) => {
+  // Stable identity (audit item 7 fast-follow): this feeds the table's memoized
+  // rows via onSelect/onOpenTab — a per-render closure defeated the row memo.
+  const selectCandidate = useCallback((c: Candidate, tab?: string) => {
     setDrawerTab(tab)
     selectedIdRef.current = c.id
     setSelected(c); setDetail(null); setDrawerExpanded(false)
@@ -71,7 +73,9 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
       }
       if (full) setDetail(full)
     })
-  }
+    // fetchDetail/setCandidates/setTotal/notifyMsg/t are stable (hook/setState/i18n).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Shared shape of every lifecycle mutation: call → drop row → close → toast.
   // A 409 carrying the forward-compat `{ live }` guard payload opens the guard

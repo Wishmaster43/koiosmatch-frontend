@@ -4,6 +4,7 @@
  * Replaces the hardcoded 'nl-NL' calls scattered through the candidate screens.
  * The locale follows ThemeContext/i18n, so a German user sees German month names.
  */
+import { useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LOCALE_BY_LANG } from '../i18n'
 
@@ -16,20 +17,22 @@ export function useLocale(): string {
 
 export function useDateFormat() {
   const locale = useLocale()
+  // Stable identities (audit item 7 fast-follow): these feed column-array memos —
+  // a fresh closure per render silently defeated the candidates row memoization.
   // Default to numeric DD-MM-YYYY (the app-wide standard, see CLAUDE.md §3B).
-  const formatDate = (value: DateInput, opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }): string => {
+  const formatDate = useCallback((value: DateInput, opts: Intl.DateTimeFormatOptions = { day: '2-digit', month: '2-digit', year: 'numeric' }): string => {
     if (!value) return '—'
     const d = new Date(value)
     return isNaN(d.getTime()) ? String(value) : d.toLocaleDateString(locale, opts)
-  }
+  }, [locale])
   // DD-MM-YYYY HH:mm — the app-wide standard for drill-downs / detail views (never raw ISO).
-  const formatDateTime = (value: DateInput): string => {
+  const formatDateTime = useCallback((value: DateInput): string => {
     if (!value) return '—'
     const d = new Date(value)
     return isNaN(d.getTime()) ? String(value)
       : d.toLocaleString(locale, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-  }
-  return { locale, formatDate, formatDateTime }
+  }, [locale])
+  return useMemo(() => ({ locale, formatDate, formatDateTime }), [locale, formatDate, formatDateTime])
 }
 
 // Age in whole years from a birthdate; accounts for whether the birthday already

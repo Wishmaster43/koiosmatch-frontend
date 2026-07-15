@@ -6,9 +6,12 @@
  * office/remote default. Fed by GET /appointment-types once the backend ships it
  * (APPT-1); until then a seed fallback drives the presets (Flex 30 / Deta 45).
  * The `is_intake` flag marks which types are intakes — never hardcoded.
+ *
+ * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
+ * session, shared across every mounted consumer.
  */
-import { useState, useEffect } from 'react'
-import api from './api'
+import type { AxiosResponse } from 'axios'
+import { useCachedLookup } from './useCachedLookup'
 
 export type Modality = 'office' | 'remote' | 'phone'
 
@@ -41,20 +44,14 @@ const toType = (r: Record<string, unknown>): AppointmentType => ({
   is_intake: Boolean(r.is_intake),
 })
 
-export function useAppointmentTypes() {
-  const [types, setTypes] = useState<AppointmentType[]>(DEFAULT_APPOINTMENT_TYPES)
+// null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
+const mapAppointmentTypes = (res: AxiosResponse): AppointmentType[] | null => {
+  const rows = (res.data?.data ?? res.data ?? []) as Record<string, unknown>[]
+  return Array.isArray(rows) && rows.length ? rows.map(toType) : null
+}
 
-  // Load the tenant lookup once; keep the seed while the endpoint is missing.
-  useEffect(() => {
-    let alive = true
-    api.get('/appointment-types', { quiet404: true })
-      .then(res => {
-        const rows = (res.data?.data ?? res.data ?? []) as Record<string, unknown>[]
-        if (alive && Array.isArray(rows) && rows.length) setTypes(rows.map(toType))
-      })
-      .catch(() => {})
-    return () => { alive = false }
-  }, [])
+export function useAppointmentTypes() {
+  const { data: types } = useCachedLookup('/appointment-types', mapAppointmentTypes, DEFAULT_APPOINTMENT_TYPES, { quiet404: true })
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
   const metaOf = (v?: string | null): AppointmentType | undefined =>

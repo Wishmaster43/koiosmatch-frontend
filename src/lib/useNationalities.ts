@@ -4,9 +4,12 @@
  * Fed by the API (GET /nationalities) with a Dutch-market default as fallback
  * while the API is empty/unavailable (CFG-1). Managed in Settings → Nationaliteiten.
  * Items are plain name strings (the candidate stores the name).
+ *
+ * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
+ * session, shared across every mounted consumer.
  */
-import { useState, useEffect } from 'react'
-import api from './api'
+import type { AxiosResponse } from 'axios'
+import { useCachedLookup } from './useCachedLookup'
 import { lookupNames } from './lookupUtils'
 
 export const DEFAULT_NATIONALITIES = [
@@ -14,15 +17,13 @@ export const DEFAULT_NATIONALITIES = [
   'Marokkaans', 'Surinaams', 'Antilliaans', 'Overig',
 ]
 
+// null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
+const mapNationalities = (res: AxiosResponse): string[] | null => {
+  const d = lookupNames(res)
+  return d.length ? d : null
+}
+
 export function useNationalities() {
-  const [nationalities, setNationalities] = useState<string[]>(DEFAULT_NATIONALITIES)
-
-  // Override the default with the configured list once the API responds.
-  useEffect(() => {
-    api.get('/nationalities').then(r => {
-      const d = lookupNames(r); if (d.length) setNationalities(d)
-    }).catch(() => {})
-  }, [])
-
+  const { data: nationalities } = useCachedLookup('/nationalities', mapNationalities, DEFAULT_NATIONALITIES)
   return { nationalities }
 }

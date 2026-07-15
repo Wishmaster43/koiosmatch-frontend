@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import type { ReactNode } from 'react'
 import api, { primeCsrf } from '../lib/api'
 import { hasModule as tenantHasModule } from '../lib/modules'
@@ -14,6 +14,17 @@ import type { Tenant, User } from '../types/api'
  *
  * NOTE: every helper here only controls the UI. Real authorization MUST be
  * enforced by the backend on each endpoint — these checks are not security.
+ *
+ * PERF (audit item 5, 2026-07-15): the context `value` is memoized and every
+ * exposed function is wrapped in useCallback (mirrors RightPanelContext) — 37
+ * consumers were re-rendering on every AuthProvider render (a route change, any
+ * unrelated state tick above it) even though most only read a stable helper
+ * like hasPermission. Helpers that never need to READ user/tenant state (login,
+ * logout, setActiveTenant, applyAuthResponse, setupTenants) use the FUNCTIONAL
+ * setState form, so they carry NO state dependency and stay referentially
+ * stable forever; the few that must read `user`/`activeTenant` (hasRole,
+ * hasModule, hasPermission, …) only change identity when that value itself
+ * changes — which is exactly when consumers SHOULD re-render anyway.
  */
 
 // The auth user, plus the flat tenant_id the backend includes on the profile.
@@ -44,6 +55,9 @@ export interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null)
 
+// Decides whether we may call the super-admin-only /tenants endpoint (pure — no closures).
+const userIsSuperAdmin = (u?: AuthUser | null) => u?.is_super_admin === true
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user,          setUser]              = useState<AuthUser | null>(null)
   const [loading,       setLoading]           = useState(true)
@@ -57,8 +71,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   /**
    * Applies an /auth/me or login response: stores user + accessible_pages.
    * Also updates activeTenant when the response includes one. Returns the user.
+   * Stable forever (useCallback, empty deps): every write below uses the
+   * functional setState form, so it never needs to close over `user`/`activeTenant`.
    */
-  const applyAuthResponse = (data: unknown): AuthUser => {
+  const applyAuthResponse = useCallback((data: unknown): AuthUser => {
     const d = data as { user?: AuthUser; data?: AuthUser; accessible_pages?: string[]; tenant?: Tenant } | null | undefined
     const u     = (d?.user ?? d?.data ?? data) as AuthUser
     const pages = d?.accessible_pages ?? u?.accessible_pages ?? []
@@ -85,14 +101,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return u
-  }
+  }, [])
 
   /**
    * Switch the active tenant (used by super admins).
    * Persists the choice, then re-fetches /auth/me so roles/permissions/context
-   * match the newly selected tenant.
+   * match the newly selected tenant. Stable forever — no state dependency.
    */
-  const setActiveTenant = async (tenant: Tenant): Promise<void> => {
+  const setActiveTenant = useCallback(async (tenant: Tenant): Promise<void> => {
     localStorage.setItem('active_tenant', tenant.id)
     setActiveTenantState(tenant)
     queryClient.clear()
@@ -101,17 +117,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // newly selected bureau. Special-category health data (AVG) — isolation must be absolute, so we
     // hard-reload to re-bootstrap the whole app for the new tenant (X-Tenant already points at it).
     window.location.reload()
-  }
-
-  // Decides whether we may call the super-admin-only /tenants endpoint.
-  const userIsSuperAdmin = (u?: AuthUser | null) => u?.is_super_admin === true
+  }, [])
 
   /**
    * Populate the tenant list + active tenant based on the user's role.
    * - super_admin → load ALL tenants and select the saved/first one.
    * - regular user → use only their own tenant from /auth/me (never call /tenants).
+   * Stable forever — every branch overwrites state outright, no read dependency.
    */
-  const setupTenants = async (u?: AuthUser | null): Promise<void> => {
+  const setupTenants = useCallback(async (u?: AuthUser | null): Promise<void> => {
     const savedTenant = localStorage.getItem('active_tenant')
     if (userIsSuperAdmin(u)) {
       // AWAITED by the restore path (TENANT-HEADER-1): rendering before the
@@ -138,7 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem('active_tenant', tenant.id)
       }
     }
-  }
+  }, [])
 
   // ── Session expiry (401) ─────────────────────────────────────────────────────
   // api.js fires 'km:auth-expired' after a 401 (and has already cleared
@@ -164,7 +178,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     window.addEventListener('km:mfa-enrollment-required', onMfaRequired)
     return () => window.removeEventListener('km:mfa-enrollment-required', onMfaRequired)
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [applyAuthResponse])
 
   // ── Startup: restore session ─────────────────────────────────────────────────
   // The httpOnly cookie is invisible to JS; the NEUTRAL km_session flag (never
@@ -191,7 +205,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null)
       })
       .finally(() => setLoading(false))
-  }, [])
+  }, [applyAuthResponse, setupTenants])
 
   // ── Login ────────────────────────────────────────────────────────────────────
   /**
@@ -201,7 +215,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * code (MFA step-up), so LoginPage can show the code input without logging in.
    * Returns the user object on normal success.
    */
-  const login = async (email: string, password: string): Promise<LoginResult> => {
+  const login = useCallback(async (email: string, password: string): Promise<LoginResult> => {
     // Cookie mode: prime the CSRF cookie before the state-changing login POST.
     await primeCsrf()
     const res = await api.post('/auth/login', { email, password })
@@ -238,7 +252,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return u
-  }
+  }, [applyAuthResponse])
 
   // ── MFA step-up verify ───────────────────────────────────────────────────────
   /**
@@ -246,7 +260,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * mfaToken comes from the login response; code is the 6-digit TOTP.
    * On success stores the session and resolves to the user object (same as login).
    */
-  const verifyMfa = async (mfaToken: string, code: string): Promise<AuthUser> => {
+  const verifyMfa = useCallback(async (mfaToken: string, code: string): Promise<AuthUser> => {
     const res = await api.post('/auth/mfa/verify', { mfa_token: mfaToken, code })
     const { tenant } = res.data
     // Same rule as login(): a body token is never stored (see above, H3).
@@ -270,28 +284,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return u
-  }
+  }, [applyAuthResponse])
 
   // ── MFA management (called from Security settings tab) ───────────────────────
   /** Start MFA setup. Returns { secret, otpauth_url } — render otpauth_url as QR. */
-  const setupMfa    = ()              => api.post('/auth/mfa/setup').then(r => r.data)
+  const setupMfa = useCallback(() => api.post('/auth/mfa/setup').then(r => r.data), [])
   /** Confirm MFA with the first TOTP code. Returns { recovery_codes: [...] }. */
-  const confirmMfa  = (code: string)  => api.post('/auth/mfa/confirm', { code }).then(r => r.data)
+  const confirmMfa = useCallback((code: string) => api.post('/auth/mfa/confirm', { code }).then(r => r.data), [])
   /** Disable MFA. Requires the current TOTP code for confirmation. */
-  const disableMfa  = (code: string)  => api.post('/auth/mfa/disable', { code }).then(r => {
+  const disableMfa = useCallback((code: string) => api.post('/auth/mfa/disable', { code }).then(r => {
     // Keep mfa_enabled in sync without a full /auth/me reload.
     setUser(prev => prev ? { ...prev, mfa_enabled: false } : prev)
     return r.data
-  })
+  }), [])
 
   // ── Refresh the profile from the server ──────────────────────────────────────
-  const refreshUser = async (): Promise<AuthUser> => {
+  const refreshUser = useCallback(async (): Promise<AuthUser> => {
     const res = await api.get('/auth/me')
     return applyAuthResponse(res.data)
-  }
+  }, [applyAuthResponse])
 
   // ── Logout ────────────────────────────────────────────────────────────────────
-  const logout = async (): Promise<void> => {
+  const logout = useCallback(async (): Promise<void> => {
     try { await api.post('/auth/logout') } catch { /* clear local state regardless */ }
     localStorage.removeItem('auth_token')
     localStorage.removeItem('auth_user')
@@ -304,34 +318,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setActiveTenantState(null)
     setTenants([])
     setAccessiblePages([])
-  }
+  }, [])
 
   // ── Role / permission helpers (UI gating only — NOT security) ────────────────
 
-  const hasRole  = (role: string) => user?.roles?.some(r => (typeof r === 'string' ? r : r.name) === role) ?? false
-  const isAdmin  = ()     => hasRole('admin') || hasRole('tenant_admin') || hasRole('super_admin')
+  const hasRole = useCallback((role: string) =>
+    user?.roles?.some(r => (typeof r === 'string' ? r : r.name) === role) ?? false, [user])
+  const isAdmin = useCallback(() =>
+    hasRole('admin') || hasRole('tenant_admin') || hasRole('super_admin'), [hasRole])
   // Super admin = explicit flag, the super_admin role, or a user without a tenant.
-  const isSuperAdmin = () => user?.is_super_admin === true || hasRole('super_admin') || (!!user && user.tenant_id == null && !user.tenant)
+  const isSuperAdmin = useCallback(() =>
+    user?.is_super_admin === true || hasRole('super_admin') || (!!user && user.tenant_id == null && !user.tenant), [user, hasRole])
 
   // Capability check for paid add-on modules ('sm', 'hf', 'ai', 'ats', 'plan').
   // Module gating is uniform: an off module is unprovisioned for the tenant, so it stays
   // hidden for EVERYONE incl. super-admins (Danny 2026-07-02) — mirrors lib/access.ts. The
   // server still 403s the endpoints. No isSuperAdmin bypass here on purpose.
-  const hasModule = (key: string) =>
-    tenantHasModule(key, activeTenant ?? user?.tenant)
+  const hasModule = useCallback((key: string) =>
+    tenantHasModule(key, activeTenant ?? user?.tenant), [activeTenant, user])
 
   // Start-dashboard type from the first role that carries one (C-35). The shape is
   // live (roles are objects), but the seeded dashboard_type values read null until a
   // dev:reset — so we default to 'readonly' (least privilege). Still tolerant of the
   // legacy string[] shape defensively (untrusted client, §7).
-  const dashboardType = (): string => {
+  const dashboardType = useCallback((): string => {
     for (const r of user?.roles ?? []) {
       if (typeof r === 'object' && r.dashboard_type) return r.dashboard_type
     }
     return 'readonly'
-  }
+  }, [user])
 
-  const hasPermission = (permName: string) => {
+  const hasPermission = useCallback((permName: string) => {
     if (!user) return false
     if (isSuperAdmin()) return true
 
@@ -350,15 +367,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return hasRole('tenant_admin') || hasRole('planner')
     }
     return false
-  }
+  }, [user, isSuperAdmin, hasRole])
 
-  const value: AuthContextValue = {
+  // Memoized so consumers that only read a stable helper (hasPermission, hasRole, …)
+  // don't re-render on every AuthProvider render — only when a field they actually
+  // use changes (audit item 5). Every value above is itself a narrow-dep useCallback,
+  // so this object's reference only changes on a genuine auth event.
+  const value = useMemo<AuthContextValue>(() => ({
     user, loading, accessiblePages,
     tenants, activeTenant, setActiveTenant,
     login, logout, refreshUser,
     verifyMfa, setupMfa, confirmMfa, disableMfa,
     hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule, dashboardType,
-  }
+  }), [
+    user, loading, accessiblePages,
+    tenants, activeTenant, setActiveTenant,
+    login, logout, refreshUser,
+    verifyMfa, setupMfa, confirmMfa, disableMfa,
+    hasRole, hasPermission, isAdmin, isSuperAdmin, hasModule, dashboardType,
+  ])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

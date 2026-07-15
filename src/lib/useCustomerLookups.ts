@@ -6,9 +6,12 @@
  * of one hook per sub-entity (mirrors useGenders/LookupsContext). Seed fallback
  * while the API is empty/unavailable. Managed in Settings → Customers → Locaties/
  * Afdelingen/Contactpersonen. NOT a hardcoded enum — tenant-configured.
+ *
+ * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
+ * session, shared across every mounted consumer.
  */
-import { useState, useEffect } from 'react'
-import api from './api'
+import type { AxiosResponse } from 'axios'
+import { useCachedLookup } from './useCachedLookup'
 import { normalizeOptions } from './lookupUtils'
 import type { LookupOption } from '@/types/common'
 
@@ -28,35 +31,43 @@ export const DEFAULT_SUB_STATUSES: LookupOption[] = [
   { value: 'inactive', label: 'Inactief', color: '#9CA3AF' },
 ]
 
-export function useCustomerLookups() {
-  const [statuses,           setStatuses]           = useState<LookupOption[]>(DEFAULT_CUSTOMER_STATUSES)
-  const [locationStatuses,   setLocationStatuses]   = useState<LookupOption[]>(DEFAULT_SUB_STATUSES)
-  const [departmentStatuses, setDepartmentStatuses] = useState<LookupOption[]>(DEFAULT_SUB_STATUSES)
-  const [contactStatuses,    setContactStatuses]    = useState<LookupOption[]>(DEFAULT_SUB_STATUSES)
-  const [loading,  setLoading]  = useState(true)
+interface CustomerLookupsData {
+  statuses: LookupOption[]
+  locationStatuses: LookupOption[]
+  departmentStatuses: LookupOption[]
+  contactStatuses: LookupOption[]
+}
 
-  // Load the tenant config once; cookie mode has no JS-visible token so just try.
-  useEffect(() => {
-    api.get('/settings/customer-lookups')
-      .then(res => {
-        const d = res.data?.data ?? res.data ?? {}
-        setStatuses(normalizeOptions(d.statuses, DEFAULT_CUSTOMER_STATUSES, '#6B7280') ?? DEFAULT_CUSTOMER_STATUSES)
-        setLocationStatuses(normalizeOptions(d.location_statuses, DEFAULT_SUB_STATUSES, '#6B7280') ?? DEFAULT_SUB_STATUSES)
-        setDepartmentStatuses(normalizeOptions(d.department_statuses, DEFAULT_SUB_STATUSES, '#6B7280') ?? DEFAULT_SUB_STATUSES)
-        setContactStatuses(normalizeOptions(d.contact_statuses, DEFAULT_SUB_STATUSES, '#6B7280') ?? DEFAULT_SUB_STATUSES)
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false))
-  }, [])
+const FALLBACK: CustomerLookupsData = {
+  statuses: DEFAULT_CUSTOMER_STATUSES,
+  locationStatuses: DEFAULT_SUB_STATUSES,
+  departmentStatuses: DEFAULT_SUB_STATUSES,
+  contactStatuses: DEFAULT_SUB_STATUSES,
+}
+
+// Each field falls back independently via normalizeOptions — always returns a
+// full, usable object (never null; a per-field default beats an all-or-nothing seed).
+const mapCustomerLookups = (res: AxiosResponse): CustomerLookupsData => {
+  const d = (res.data?.data ?? res.data ?? {}) as Record<string, unknown>
+  return {
+    statuses: normalizeOptions(d.statuses, DEFAULT_CUSTOMER_STATUSES, '#6B7280') ?? DEFAULT_CUSTOMER_STATUSES,
+    locationStatuses: normalizeOptions(d.location_statuses, DEFAULT_SUB_STATUSES, '#6B7280') ?? DEFAULT_SUB_STATUSES,
+    departmentStatuses: normalizeOptions(d.department_statuses, DEFAULT_SUB_STATUSES, '#6B7280') ?? DEFAULT_SUB_STATUSES,
+    contactStatuses: normalizeOptions(d.contact_statuses, DEFAULT_SUB_STATUSES, '#6B7280') ?? DEFAULT_SUB_STATUSES,
+  }
+}
+
+export function useCustomerLookups() {
+  const { data, loading } = useCachedLookup('/settings/customer-lookups', mapCustomerLookups, FALLBACK)
 
   // value → item helper with a neutral fallback so the UI never crashes.
   const metaIn = (list: LookupOption[]) => (v?: string | null): LookupOption => list.find(s => s.value === v) ?? { value: v ?? '', label: v || '—', color: '#9CA3AF' }
 
   return {
-    statuses, statusMeta: metaIn(statuses),
-    locationStatuses,   locationStatusMeta:   metaIn(locationStatuses),
-    departmentStatuses, departmentStatusMeta: metaIn(departmentStatuses),
-    contactStatuses,    contactStatusMeta:    metaIn(contactStatuses),
+    statuses: data.statuses, statusMeta: metaIn(data.statuses),
+    locationStatuses:   data.locationStatuses,   locationStatusMeta:   metaIn(data.locationStatuses),
+    departmentStatuses: data.departmentStatuses, departmentStatusMeta: metaIn(data.departmentStatuses),
+    contactStatuses:    data.contactStatuses,    contactStatusMeta:    metaIn(data.contactStatuses),
     loading,
   }
 }

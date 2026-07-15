@@ -7,9 +7,12 @@
  *
  * `labelOf` / `colorOf` resolve a stored value/slug to its label/colour, matching
  * on value OR label so it works whichever the note stores.
+ *
+ * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
+ * session, shared across every mounted consumer.
  */
-import { useState, useEffect } from 'react'
-import api from './api'
+import type { AxiosResponse } from 'axios'
+import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
 
 // Seed defaults. VALUES are the API slugs (mirror the backend note_types seed) — the old
@@ -42,21 +45,19 @@ const toOption = (r: Record<string, unknown>): LookupOption => ({
   color: (r.color as string) ?? undefined,
 })
 
-export function useNoteTypes() {
-  const [types, setTypes] = useState<LookupOption[]>(DEFAULT_NOTE_TYPES)
+// null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
+const mapNoteTypes = (res: AxiosResponse): LookupOption[] | null => {
+  const raw = (res?.data?.data ?? res?.data ?? []) as Record<string, unknown>[]
+  const d = raw.filter(Boolean).map(toOption)
+  // Dedupe by value: the per-entity note-types seeding (NOTE-TYPES-2) can
+  // repeat a value across entities — duplicate React keys crashed the thread.
+  const seen = new Set<string>()
+  const unique = d.filter(x => (seen.has(x.value) ? false : (seen.add(x.value), true)))
+  return unique.length ? unique : null
+}
 
-  // Load the tenant lookup once; keep the seed if the endpoint is empty/unavailable.
-  useEffect(() => {
-    api.get('/note-types').then(r => {
-      const raw = (r?.data?.data ?? r?.data ?? []) as Record<string, unknown>[]
-      const d = raw.filter(Boolean).map(toOption)
-      // Dedupe by value: the per-entity note-types seeding (NOTE-TYPES-2) can
-      // repeat a value across entities — duplicate React keys crashed the thread.
-      const seen = new Set<string>()
-      const unique = d.filter(x => (seen.has(x.value) ? false : (seen.add(x.value), true)))
-      if (unique.length) setTypes(unique)
-    }).catch(() => {})
-  }, [])
+export function useNoteTypes() {
+  const { data: types } = useCachedLookup('/note-types', mapNoteTypes, DEFAULT_NOTE_TYPES)
 
   // Resolve a stored value/slug to its label/colour; fall back to the raw value.
   const find = (value?: string | null) => {

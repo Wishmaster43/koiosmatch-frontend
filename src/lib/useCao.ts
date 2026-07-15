@@ -4,9 +4,12 @@
  * ({ value, label, color, sort_order, in_use }, delivered 2026-07-08); a seed
  * fallback drives the picker until the endpoint responds (mirrors useNoteTypes /
  * useDocumentTypes — same SlugLookup shape as /contract-types).
+ *
+ * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
+ * session, shared across every mounted consumer.
  */
-import { useState, useEffect } from 'react'
-import api from './api'
+import type { AxiosResponse } from 'axios'
+import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
 
 // Seed defaults mirror the backend seed (healthcare CAOs); labels are tenant-facing.
@@ -28,19 +31,15 @@ const toOption = (r: Record<string, unknown>): LookupOption => ({
   color: (r.color as string) ?? undefined,
 })
 
-export function useCao() {
-  const [types, setTypes] = useState<LookupOption[]>(DEFAULT_CAO)
+// null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
+const mapCao = (res: AxiosResponse): LookupOption[] | null => {
+  const raw = (res?.data?.data ?? res?.data ?? []) as Record<string, unknown>[]
+  const d = raw.filter(Boolean).map(toOption)
+  return d.length ? d : null
+}
 
-  // Load the tenant lookup once; keep the seed if the endpoint is empty/unavailable.
-  useEffect(() => {
-    let alive = true
-    api.get('/cao').then(r => {
-      const raw = (r?.data?.data ?? r?.data ?? []) as Record<string, unknown>[]
-      const d = raw.filter(Boolean).map(toOption)
-      if (alive && d.length) setTypes(d)
-    }).catch(() => {})
-    return () => { alive = false }
-  }, [])
+export function useCao() {
+  const { data: types } = useCachedLookup('/cao', mapCao, DEFAULT_CAO)
 
   // Resolve a stored value/slug to its label/colour; fall back to the raw value.
   const find = (value?: string | null) => {

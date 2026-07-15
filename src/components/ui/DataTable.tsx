@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useCallback, memo } from 'react'
 import type { CSSProperties, ReactNode, RefObject } from 'react'
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -16,6 +16,12 @@ import { useVirtualizer } from '@tanstack/react-virtual'
  * scroll container the table lives in) and only the visible rows render — the
  * body stays constant-cost at 10k+ rows. Off by default, so every existing
  * table renders exactly as before until it opts in.
+ *
+ * Row memoization (audit item 7, 2026-07-15): each row is its own memoized
+ * component (see TableRow below) so a click that only changes `selectedId`
+ * re-renders the two affected rows, not all 5000+ cells. This only pays off
+ * when the caller's `columns` array is referentially stable (useMemo) — an
+ * unstable columns array still forces every row to re-render every time.
  */
 export type RowId = string | number
 
@@ -71,6 +77,72 @@ function compare(a: unknown, b: unknown): number {
   return String(a).localeCompare(String(b), undefined, { numeric: true, sensitivity: 'base' })
 }
 
+// Shared static styles (module scope — no closures, so no reason to recreate per render).
+const checkboxCol: CSSProperties = { width: 36, padding: '8px 10px', textAlign: 'center' }
+const stopPropagation = (e: { stopPropagation: () => void }) => e.stopPropagation()
+
+interface TableRowProps<Row> {
+  row: Row
+  columns: Column<Row>[]
+  rowId: RowId
+  isSelected: boolean
+  isChecked: boolean
+  selectable: boolean
+  stickyOffsets: (number | null)[]
+  onRowClick?: (row: Row) => void
+  onToggleRow?: (id: RowId) => void
+  virtualIndex?: number
+  measureElement?: (node: Element | null) => void
+  selectRowLabel: string
+}
+
+// One table row — memoized (audit item 7): a row only re-renders when ITS OWN
+// props change (its data, or its own selected/checked flag flips), never because
+// a sibling row or unrelated table state changed. `onRowClick`/`onToggleRow` are
+// stable wrappers from the parent (see stableRowClick/stableToggleRow below), so
+// a caller that doesn't memoize its own handler still gets the full benefit —
+// only an unstable `columns` array (or a genuinely new `row` object) busts this.
+function TableRowInner<Row>({
+  row, columns, rowId, isSelected, isChecked, selectable, stickyOffsets,
+  onRowClick, onToggleRow, virtualIndex, measureElement, selectRowLabel,
+}: TableRowProps<Row>) {
+  const highlight = isSelected || isChecked
+  return (
+    <tr
+      {...(virtualIndex !== undefined ? { 'data-index': virtualIndex, ref: measureElement } : {})}
+      onClick={onRowClick ? () => onRowClick(row) : undefined}
+      style={{ borderBottom: '1px solid var(--border)', cursor: onRowClick ? 'pointer' : 'default',
+        background: highlight ? 'var(--color-primary-bg)' : 'transparent' }}
+      onMouseEnter={e => { if (!highlight) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--hover-bg)' }) } }}
+      onMouseLeave={e => { if (!highlight) { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--bg)' }) } }}>
+      {selectable && (
+        <td style={checkboxCol} onClick={stopPropagation}>
+          <input type="checkbox" checked={!!isChecked} onChange={() => onToggleRow?.(rowId)}
+            style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }} aria-label={selectRowLabel} />
+        </td>
+      )}
+      {columns.map((col, i) => {
+        // Sticky cells need the same background as the row to cover scrolled content.
+        const rowBg = highlight ? 'var(--color-primary-bg)' : 'var(--bg)'
+        const left = stickyOffsets[i]
+        const stickyStyle: CSSProperties = left == null ? {} : { position: 'sticky', left, zIndex: 1, background: rowBg }
+        return (
+          <td key={col.key}
+            {...(col.sticky ? { 'data-sticky': true } : {})}
+            style={{ padding: '10px 10px', textAlign: col.align ?? 'left',
+              whiteSpace: col.nowrap ? 'nowrap' : undefined,
+              ...(col.width ? { minWidth: col.width, width: col.width } : {}),
+              ...col.cellStyle, ...stickyStyle }}>
+            {col.render ? col.render(row) : (field(row, col.key) as ReactNode)}
+          </td>
+        )
+      })}
+    </tr>
+  )
+}
+// Generic components lose their type param through memo()'s signature — cast back.
+const TableRow = memo(TableRowInner) as typeof TableRowInner
+
 export default function DataTable<Row>({
   columns,
   rows,
@@ -123,8 +195,18 @@ export default function DataTable<Row>({
   const pageIds      = sortedRows.map(getRowId)
   const allSelected  = selectable && pageIds.length > 0 && pageIds.every(id => selectedIds?.has(id))
   const someSelected = selectable && pageIds.some(id => selectedIds?.has(id))
-  const checkboxCol: CSSProperties = { width: 36, padding: '8px 10px', textAlign: 'center' }
-  const stop = (e: { stopPropagation: () => void }) => e.stopPropagation()
+
+  // Stable wrappers around the caller's onRowClick/onToggleRow (audit item 7): most
+  // callers don't wrap these in useCallback, which would otherwise bust every row's
+  // memo on every DataTable render. Reading the latest callback via a ref keeps
+  // TableRow's props — and therefore its memo — stable regardless of the caller.
+  const onRowClickRef = useRef(onRowClick)
+  onRowClickRef.current = onRowClick
+  const stableRowClick = useCallback((row: Row) => onRowClickRef.current?.(row), [])
+  const onToggleRowRef = useRef(onToggleRow)
+  onToggleRowRef.current = onToggleRow
+  const stableToggleRow = useCallback((id: RowId) => onToggleRowRef.current?.(id), [])
+  const selectRowLabel = t('selectRow')
 
   // Pre-compute sticky left offsets: checkbox (36px if selectable) + widths of preceding sticky cols.
   const stickyOffsets = useMemo(() => {
@@ -148,8 +230,7 @@ export default function DataTable<Row>({
   // Sticky offset applied to every <th> when stickyHeader is enabled.
   const stickyTh: CSSProperties = stickyHeader ? { position: 'sticky', top: 0, zIndex: 2, background: 'var(--bg)' } : {}
 
-  // Build sticky-column style for a column at index i.
-  // Default bg is --bg (page background) because table rows are transparent and show --bg through.
+  // Build sticky-column style for a column at index i (header only — body cells use TableRow).
   const stickyColStyle = (i: number, bg = 'var(--bg)'): CSSProperties => {
     const left = stickyOffsets[i]
     if (left === null) return {}
@@ -157,45 +238,6 @@ export default function DataTable<Row>({
   }
 
   const totalCols = columns.length + (selectable ? 1 : 0)
-
-  // One row — reused by the plain and virtualized render paths. When `virtualIndex`
-  // is given, the <tr> is measured so the virtualizer tracks real heights.
-  const renderRow = (row: Row, virtualIndex?: number) => {
-    const id = getRowId(row)
-    const isSelected = selectedId != null && id === selectedId
-    const isChecked  = selectable && selectedIds?.has(id)
-    const highlight  = isSelected || isChecked
-    return (
-      <tr key={id}
-        {...(virtualIndex !== undefined ? { 'data-index': virtualIndex, ref: rowVirtualizer.measureElement } : {})}
-        onClick={onRowClick ? () => onRowClick(row) : undefined}
-        style={{ borderBottom: '1px solid var(--border)', cursor: onRowClick ? 'pointer' : 'default',
-          background: highlight ? 'var(--color-primary-bg)' : 'transparent' }}
-        onMouseEnter={e => { if (!highlight) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--hover-bg)' }) } }}
-        onMouseLeave={e => { if (!highlight) { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--bg)' }) } }}>
-        {selectable && (
-          <td style={checkboxCol} onClick={stop}>
-            <input type="checkbox" checked={!!isChecked} onChange={() => onToggleRow?.(id)}
-              style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }} aria-label={t('selectRow')} />
-          </td>
-        )}
-        {columns.map((col, i) => {
-          // Sticky cells need the same background as the row to cover scrolled content.
-          const rowBg = highlight ? 'var(--color-primary-bg)' : 'var(--bg)'
-          return (
-            <td key={col.key}
-              {...(col.sticky ? { 'data-sticky': true } : {})}
-              style={{ padding: '10px 10px', textAlign: col.align ?? 'left',
-                whiteSpace: col.nowrap ? 'nowrap' : undefined,
-                ...(col.width ? { minWidth: col.width, width: col.width } : {}),
-                ...col.cellStyle, ...stickyColStyle(i, rowBg) }}>
-              {col.render ? col.render(row) : (field(row, col.key) as ReactNode)}
-            </td>
-          )
-        })}
-      </tr>
-    )
-  }
 
   // Virtualized body: two spacer rows keep the scrollbar height correct while only
   // the visible window of real <tr>s renders (sticky header/columns keep working).
@@ -246,11 +288,33 @@ export default function DataTable<Row>({
         {virtualize ? (
           <>
             {paddingTop > 0 && <tr style={{ height: paddingTop }}><td colSpan={totalCols} style={{ padding: 0, border: 'none' }} /></tr>}
-            {virtualItems.map(vi => renderRow(sortedRows[vi.index], vi.index))}
+            {virtualItems.map(vi => {
+              const row = sortedRows[vi.index]
+              const id  = getRowId(row)
+              return (
+                <TableRow key={id} row={row} columns={columns} rowId={id}
+                  isSelected={selectedId != null && id === selectedId}
+                  isChecked={!!(selectable && selectedIds?.has(id))}
+                  selectable={selectable} stickyOffsets={stickyOffsets}
+                  onRowClick={stableRowClick} onToggleRow={stableToggleRow}
+                  virtualIndex={vi.index} measureElement={rowVirtualizer.measureElement}
+                  selectRowLabel={selectRowLabel} />
+              )
+            })}
             {paddingBottom > 0 && <tr style={{ height: paddingBottom }}><td colSpan={totalCols} style={{ padding: 0, border: 'none' }} /></tr>}
           </>
         ) : (
-          sortedRows.map(row => renderRow(row))
+          sortedRows.map(row => {
+            const id = getRowId(row)
+            return (
+              <TableRow key={id} row={row} columns={columns} rowId={id}
+                isSelected={selectedId != null && id === selectedId}
+                isChecked={!!(selectable && selectedIds?.has(id))}
+                selectable={selectable} stickyOffsets={stickyOffsets}
+                onRowClick={stableRowClick} onToggleRow={stableToggleRow}
+                selectRowLabel={selectRowLabel} />
+            )
+          })
         )}
         {sortedRows.length === 0 && (
           <tr>

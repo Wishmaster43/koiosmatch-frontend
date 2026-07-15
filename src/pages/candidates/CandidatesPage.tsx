@@ -86,6 +86,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // Transient feedback for bulk mutations (success/error), auto-dismissed.
   const [actionMsg,        setActionMsg]        = useState<ActionMsg | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Virtualization scroll parent (audit item 7): the table body only renders the
+  // visible window of rows — mirrors CustomersPage/VacanciesPage/TasksPage.
+  const tableScrollRef = useRef<HTMLDivElement>(null)
 
   // 14-day window for the "actieve gesprekken" card filter — captured once (pure render).
   const [convCutoff] = useState(() => Date.now() - 14 * 86400000)
@@ -359,14 +362,14 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
               <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                 <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
                   <CandidatesTable rows={filtered} loading={loading} selectedId={selected?.id}
-                    onSelect={selectCandidate} onOpenTab={(c, tab) => selectCandidate(c, tab)} />
+                    onSelect={selectCandidate} onOpenTab={selectCandidate} />
                 </div>
                 <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
                   onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
               </div>
             </div>
           ) : (
-          <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', padding: '0 24px 16px' }}>
+          <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', padding: '0 24px 16px' }}>
             {error && (
               <div className="mb-3 rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">
                 {error}
@@ -377,12 +380,13 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
               loading={loading}
               selectedId={selected?.id}
               onSelect={selectCandidate}
-              onOpenTab={(c, tab) => selectCandidate(c, tab)}
+              onOpenTab={selectCandidate}
               selectable
               selectedIds={selectedIds}
               onToggleRow={toggleRow}
               onToggleAll={toggleAll}
               stickyHeader
+              scrollParentRef={tableScrollRef}
             />
           </div>
           )}

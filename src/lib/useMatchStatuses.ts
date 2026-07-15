@@ -4,9 +4,13 @@
  * Fed by GET /match-statuses ({value,label,color,is_closed}); seed fallback
  * mirrors the backend seed. The is_closed FLAG (never the slug) drives the
  * behaviour: a closed status ends the match (ended_at + out of the open count).
+ *
+ * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
+ * session, shared across every mounted consumer.
  */
-import { useState, useEffect, useCallback } from 'react'
-import api from './api'
+import { useCallback } from 'react'
+import type { AxiosResponse } from 'axios'
+import { useCachedLookup } from './useCachedLookup'
 
 export interface MatchStatus { value: string; label: string; color?: string; is_closed: boolean }
 
@@ -23,20 +27,14 @@ const toStatus = (r: Record<string, unknown>): MatchStatus => ({
   is_closed: Boolean(r.is_closed),
 })
 
-export function useMatchStatuses() {
-  const [statuses, setStatuses] = useState<MatchStatus[]>(DEFAULT_MATCH_STATUSES)
+// null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
+const mapMatchStatuses = (res: AxiosResponse): MatchStatus[] | null => {
+  const rows = (res.data?.data ?? res.data ?? []) as Record<string, unknown>[]
+  return Array.isArray(rows) && rows.length ? rows.map(toStatus) : null
+}
 
-  // Load the tenant lookup once; keep the seed on failure (offline/older API).
-  useEffect(() => {
-    let alive = true
-    api.get('/match-statuses', { quiet404: true })
-      .then(res => {
-        const rows = (res.data?.data ?? res.data ?? []) as Record<string, unknown>[]
-        if (alive && Array.isArray(rows) && rows.length) setStatuses(rows.map(toStatus))
-      })
-      .catch(() => {})
-    return () => { alive = false }
-  }, [])
+export function useMatchStatuses() {
+  const { data: statuses } = useCachedLookup('/match-statuses', mapMatchStatuses, DEFAULT_MATCH_STATUSES, { quiet404: true })
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
   // useCallback: consumers hang this in memo/effect deps — it must be stable.

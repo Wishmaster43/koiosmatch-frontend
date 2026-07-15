@@ -5,9 +5,12 @@
  * list is empty/loading. Managed in Settings → Kansen. Each item carries the stable
  * `value` slug the rows key off, plus the editable label/colour and (from the API)
  * the `id` used when writing `opportunity_stage_id`. Mirrors useFunctions/useGenders.
+ *
+ * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
+ * session, shared across every mounted consumer.
  */
-import { useState, useEffect } from 'react'
-import api from './api'
+import type { AxiosResponse } from 'axios'
+import { useCachedLookup } from './useCachedLookup'
 import { normalizeOptions } from './lookupUtils'
 import type { LookupOption } from '@/types/common'
 
@@ -21,15 +24,11 @@ export const DEFAULT_OPPORTUNITY_STAGES: LookupOption[] = [
   { value: 'lost',        label: 'Verloren',       color: '#D98A8A', isLost: true },
 ]
 
-export function useOpportunityStages() {
-  const [stages, setStages] = useState<LookupOption[]>(DEFAULT_OPPORTUNITY_STAGES)
+// null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
+const mapOpportunityStages = (res: AxiosResponse): LookupOption[] | null => normalizeOptions(res.data?.data ?? res.data)
 
-  // Replace the seed with the tenant lookup once the API responds (404/empty keeps seed).
-  useEffect(() => {
-    api.get('/opportunity-stages')
-      .then(r => { const list = normalizeOptions(r.data?.data ?? r.data); if (list) setStages(list) })
-      .catch(() => {})
-  }, [])
+export function useOpportunityStages() {
+  const { data: stages } = useCachedLookup('/opportunity-stages', mapOpportunityStages, DEFAULT_OPPORTUNITY_STAGES)
 
   // value(slug) → item, with a neutral fallback so the UI never crashes.
   const stageMeta = (v?: string | null): LookupOption => stages.find(s => s.value === v) ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }

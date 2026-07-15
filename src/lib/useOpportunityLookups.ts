@@ -3,9 +3,12 @@
  * agreement type. Fed by the API with the seeds below as fallback while empty/loading
  * (worklist C-42). Mirrors useOpportunityStages. Each item carries the stable `value`
  * slug + editable label/colour and (from the API) the `id` used when writing the FK.
+ *
+ * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per URL
+ * per session, shared across every mounted consumer.
  */
-import { useState, useEffect } from 'react'
-import api from './api'
+import type { AxiosResponse } from 'axios'
+import { useCachedLookup } from './useCachedLookup'
 import { normalizeOptions } from './lookupUtils'
 import type { LookupOption } from '@/types/common'
 
@@ -24,12 +27,9 @@ export const DEFAULT_AGREEMENT_TYPES: LookupOption[] = [
 
 // Generic tenant lookup with a seed fallback; a 404/empty keeps the seed.
 function useLookup(url: string, seed: LookupOption[]) {
-  const [items, setItems] = useState<LookupOption[]>(seed)
-  useEffect(() => {
-    api.get(url)
-      .then(r => { const list = normalizeOptions(r.data?.data ?? r.data); if (list) setItems(list) })
-      .catch(() => {})
-  }, [url])
+  // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
+  const mapFn = (res: AxiosResponse): LookupOption[] | null => normalizeOptions(res.data?.data ?? res.data)
+  const { data: items } = useCachedLookup(url, mapFn, seed)
   // value(slug) → item, with a neutral fallback so the UI never crashes.
   const meta = (v?: string | null): LookupOption => items.find(i => i.value === v) ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
   return { items, meta }
