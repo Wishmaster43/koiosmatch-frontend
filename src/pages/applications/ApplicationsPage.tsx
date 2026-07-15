@@ -471,9 +471,12 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
           </div>
         </div>
 
-        {/* Content */}
-        {view === 'table' ? (
-          <>
+        {/* Content — BOTH views stay mounted, the inactive one is display:none
+            (APPS-VIRT-1): unmounting the table remounted the scroll container and
+            @tanstack/react-virtual measured 0 height → 0 rows after board→table.
+            Hiding instead keeps the virtualizer's measurements AND the board's
+            drag state alive across toggles. */}
+        <div style={{ display: view === 'table' ? 'contents' : 'none' }}>
             {/* Bulk action bar — shown above the table when ≥1 row is selected. */}
             {selectedIds.size > 0 && (
               <div style={{ padding: '8px 24px 0' }}>
@@ -494,8 +497,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
               // entities allow it) but ApplicationQuery caps per_page at 200 — see the
               // pageSize state comment above.
               onPageSizeChange={n => { setPageSize(Math.min(n, APPLICATIONS_MAX_PER_PAGE)); setPage(1) }} />
-          </>
-        ) : (
+        </div>
+        {view === 'board' && (
           <ApplicationsBoard rows={boardRows} phases={phases} onMove={handleMove}
             selectedId={selected?.id} onSelect={selectApplication} />
         )}
