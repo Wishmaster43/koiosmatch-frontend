@@ -4,12 +4,10 @@ import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
-import { useDateFormat } from '@/lib/datetime'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
 import { mapApplication } from './data/mapApplication'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
-import { initialsOf } from '@/lib/initials'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 
@@ -33,8 +31,8 @@ function PickField({ label, ...rest }: { label: ReactNode } & AnyProps) {
 /**
  * AddApplicationModal — create a new application by linking an existing candidate
  * to a vacancy. Pickers load from /candidates and /vacancies. Persists to
- * POST /applications; on failure it still adds the row locally so the flow works
- * before the endpoint is live. `lockedVacancy` preselects + LOCKS the vacancy
+ * POST /applications; a failure keeps the modal open with the server's message
+ * (never a fabricated local row). `lockedVacancy` preselects + LOCKS the vacancy
  * field when opened from the vacancy drawer's Sollicitaties tab ("+ Sollicitatie",
  * vacancies/drawer/ApplicantsTab) — only the candidate needs picking then
  * (mirrors PlanIntakeModal's defaultVacancyId, but locked rather than editable
@@ -47,7 +45,6 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
 }) {
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { t } = useTranslation('applications')
-  const { formatDate } = useDateFormat()
   const { data: users = [] } = useUsers() as { data?: AppUser[] }
   const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
   // Owner dropdown = the assignable (tenant-scoped) users list only — POST
@@ -83,25 +80,21 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Create the application; optimistic local row if the endpoint isn't live yet.
+  // Create the application. AUDIT-1 (CRITICAL, 15-07): the old catch fabricated a
+  // fake local row (id: -Date.now()) and closed the modal as if it succeeded —
+  // masking real failures INCLUDING the matrix-guard 422s. A failure now keeps the
+  // modal open and shows the server's message inline.
+  const [createError, setCreateError] = useState<string | null>(null)
   const create = async () => {
     if (!candidateId || !vacancyId || saving) return
     setSaving(true)
-    const cand  = candidates.find(c => String(c.value) === candidateId)
-    const vac   = lockedVacancy ? { label: lockedVacancy.title, client: lockedVacancy.client } : vacancies.find(v => String(v.value) === vacancyId)
-    const owner = ownerOptions.find(o => o.value === ownerId)
+    setCreateError(null)
     try {
       const res = await api.post('/applications', { candidate_id: candidateId, vacancy_id: vacancyId, owner_id: ownerId || null })
       onCreated(mapApplication(res.data?.data ?? res.data))
-    } catch {
-      onCreated({
-        id: -Date.now(), candidateId, candidateName: cand?.label ?? '—', candidateInitials: initialsOf(cand?.label),
-        vacancyId, vacancyTitle: vac?.label ?? '—', client: vac?.client ?? '—',
-        score: null, task: '', phaseKey: 'applied', bucket: 'active', source: 'Handmatig',
-        owner: { id: ownerId || null, name: owner?.label ?? '', initials: initialsOf(owner?.label), color: null },
-        candidateStatusLabel: '', candidateStatusColor: '#9CA3AF',
-        created: formatDate(new Date(), { day: 'numeric', month: 'short', year: 'numeric' }), isNew: true,
-      } as Application)
+    } catch (err) {
+      const e = err as { response?: { data?: { message?: string } } }
+      setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
     } finally { setSaving(false) }
   }
 
@@ -134,6 +127,15 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
           <PickField label={t('add.owner')} placeholder={t('add.ownerPlaceholder')}
             options={ownerOptions} value={ownerId} onChange={setOwnerId} />
         </div>
+
+        {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}
+        {createError && (
+          <div role="alert" style={{ margin: '0 22px 4px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
+            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+            {createError}
+          </div>
+        )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid #F3F4F6' }}>
           <button onClick={onClose} style={{ height: 36, padding: '0 16px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', cursor: 'pointer' }}>{t('add.cancel')}</button>

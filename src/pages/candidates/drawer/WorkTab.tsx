@@ -12,6 +12,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from './constants'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
+import { isSafeUrl } from '@/lib/safeUrl'
 
 // A linked appointment as returned by /candidates/{id}/appointments.
 interface Appt { id: Id; application_id?: Id | null; type?: string; scheduled_at?: string; duration_min?: number | null; modality?: string; owner?: { id?: Id; name?: string }; location_name?: string; status?: string }
@@ -21,7 +22,11 @@ interface Appt { id: Id; application_id?: Id | null; type?: string; scheduled_at
 interface AppRow { id?: string; logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: string }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageColor?: string }
 
 // The vacancy link, when the API exposes a URL; otherwise falls back to plain text.
-const vacancyUrlOf = (s: AppRow) => s.vacancy?.url ?? s.url ?? null
+// AUDIT-2: URLs are tenant-entered data — only http(s) may render as a link.
+const vacancyUrlOf = (s: AppRow) => {
+  const url = s.vacancy?.url ?? s.url ?? null
+  return isSafeUrl(url) ? url : null
+}
 
 /** Work tab — matches + paginated applications, with the two candidate actions
  *  (§3B two-action model): couple to a vacancy, or plan an intake. */

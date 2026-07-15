@@ -28,7 +28,16 @@ function read(key: string): SavedShiftFilter[] {
   } catch { return [] }
 }
 
-export function useSavedShiftFilters(storageKey: string) {
+// AUDIT-3 (15-07): namespace the key by the active tenant — without it a
+// super admin carried saved filter sets ACROSS tenants (cross-tenant leak of
+// customer/location selections). The tenant id is UI state, not a secret.
+function tenantScopedKey(key: string): string {
+  const tenant = localStorage.getItem('active_tenant') ?? 'default'
+  return `${key}:t=${tenant}`
+}
+
+export function useSavedShiftFilters(rawKey: string) {
+  const storageKey = tenantScopedKey(rawKey)
   const [saved, setSaved] = useState<SavedShiftFilter[]>(() => read(storageKey))
 
   // Re-read when the key changes (different dashboard context).

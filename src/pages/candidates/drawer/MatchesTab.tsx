@@ -6,6 +6,7 @@ import EntityLink from '@/components/ui/EntityLink'
 import { useNavigation } from '@/context/NavigationContext'
 import type { ReactNode } from 'react'
 import type { Candidate } from '@/types/candidate'
+import { isSafeUrl } from '@/lib/safeUrl'
 
 // Match score as a soft-coloured percentage (green ≥75, amber ≥50, red below).
 function ScorePill({ value }: { value?: number | null }) {
@@ -46,7 +47,7 @@ export default function MatchesTab({ c }: { c: Candidate }) {
               <span title={t('matchesView.backofficeLinked')} style={{ display: 'flex', color: 'var(--color-primary)' }}><Link2 size={13} /></span>
             ) : null}
             {/* Read-only link out to the vacancy when the API exposes a URL. */}
-            {m.vacancyUrl ? (
+            {isSafeUrl(m.vacancyUrl) ? (
               <a href={m.vacancyUrl} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
                 style={{ display: 'flex', color: 'var(--text-muted)' }}><ExternalLink size={12} /></a>
             ) : null}
