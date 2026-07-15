@@ -9,7 +9,7 @@
  */
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
-import api from '@/lib/api'
+import api, { isServiceUnavailable } from '@/lib/api'
 import { notify } from '@/lib/notify'
 import type { Id } from '@/types/common'
 
@@ -34,8 +34,9 @@ export function useMatchesBulkActions({ selectedIds, setSelectedIds, t }: UseMat
     return next
   })
 
-  // Queue the selection for backoffice coupling. 404 = endpoint not built yet →
-  // a calm info toast (forward-compatible), not a hard error.
+  // Queue the selection for backoffice coupling. 404 (endpoint not built yet) and
+  // 503 (integration not configured — C-15) both mean "not available right now" →
+  // the same calm info toast, never the hard-error one.
   const bulkCouple = (target: CoupleTarget) => {
     const ids = [...selectedIds]
     if (!ids.length) return
@@ -46,7 +47,7 @@ export function useMatchesBulkActions({ selectedIds, setSelectedIds, t }: UseMat
         notify('success', t('bulk.coupleQueued', { target: t(`bulk.target.${target}`), count: n }))
       })
       .catch(err => {
-        if (err?.response?.status === 404) notify('info', t('bulk.coupleUnavailable'))
+        if (err?.response?.status === 404 || isServiceUnavailable(err)) notify('info', t('bulk.coupleUnavailable'))
         else notify('error', t('bulk.mutateError'))
       })
     setSelectedIds(new Set())

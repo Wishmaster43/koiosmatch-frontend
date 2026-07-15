@@ -6,10 +6,10 @@
  * confirm/cancel footer. `block` decisions hide the confirm button — there is
  * nothing to proceed with.
  */
-import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import ActionRuleBanner from './ActionRuleBanner'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ActionRuleDecision } from './actionRuleTypes'
 
 export interface ActionRuleDialogProps {
@@ -19,21 +19,12 @@ export interface ActionRuleDialogProps {
   onCancel: () => void
 }
 
-export default function ActionRuleDialog({ open, decision, onConfirm, onCancel }: ActionRuleDialogProps) {
+// The dialog surface — its own component, mounted only while `open` (item 20):
+// useFocusTrap needs a fresh mount to attach the ref before its effect runs; a
+// single always-mounted component that just toggles visibility would not.
+function DialogPanel({ decision, onConfirm, onCancel }: Omit<ActionRuleDialogProps, 'open'>) {
   const { t } = useTranslation('common')
-  const panelRef = useRef<HTMLDivElement>(null)
-
-  // Focus the panel on open (a11y §6) and let Escape close it, mirroring the
-  // drawer/modal convention used elsewhere in the app.
-  useEffect(() => {
-    if (!open) return
-    panelRef.current?.focus()
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel() }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [open, onCancel])
-
-  if (!open) return null
+  const panelRef = useFocusTrap<HTMLDivElement>(onCancel)
   const canConfirm = decision?.effect !== 'block'
 
   return (
@@ -70,4 +61,9 @@ export default function ActionRuleDialog({ open, decision, onConfirm, onCancel }
       </div>
     </div>
   )
+}
+
+export default function ActionRuleDialog({ open, decision, onConfirm, onCancel }: ActionRuleDialogProps) {
+  if (!open) return null
+  return <DialogPanel decision={decision} onConfirm={onConfirm} onCancel={onCancel} />
 }

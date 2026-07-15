@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, AlertTriangle } from 'lucide-react'
 import api from '@/lib/api'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { Id } from '@/types/common'
 
 const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 70 }
@@ -43,11 +44,12 @@ export default function DeletionPreviewModal({ candidateId, candidateName, onClo
     .filter(r => r.n > 0)
 
   const confirm = () => { setDeleting(true); onConfirm() }
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   return (
     <>
       <div style={overlay} onClick={onClose} />
-      <div style={panel} role="dialog" aria-modal="true">
+      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={t('erase.confirmTitle')} tabIndex={-1}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><AlertTriangle size={16} /></span>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{t('erase.confirmTitle')}</span>

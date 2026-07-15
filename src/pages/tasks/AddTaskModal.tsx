@@ -21,6 +21,12 @@ interface TaskForm {
 const nameOf = (r: EntityRow): string => r.name || [r.first_name, r.last_name].filter(Boolean).join(' ') || r.title || r.email || `#${r.id}`
 const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
+// 422 field-error keys are snake_case; map them back to this form's field names.
+const API_TO_FORM: Record<string, string> = {
+  title: 'title', type: 'type', assignee_id: 'assigneeId', status: 'status',
+  due_date: 'due', priority: 'priority', description: 'description',
+}
+
 /**
  * AddTaskModal — the "Toevoegen activiteit" dialog. All option lists come from
  * tenant lookups (type/status/priority) or live endpoints (assignee=/users,
@@ -94,8 +100,17 @@ export default function AddTaskModal({ onClose, onCreated, initial, extraLinks }
       const r = await api.post('/tasks', body)
       onCreated?.(unwrap(r))
     } catch (err) {
-      const e = err as { response?: { data?: { message?: string } } }
-      setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+      // Show field-level errors from 422 validation responses; fall back to the
+      // server's message (or a generic one) so the user isn't left guessing.
+      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
+      const apiErrors = e?.response?.data?.errors
+      if (apiErrors) {
+        const e2: Record<string, boolean> = {}
+        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
+        setErrors(e2)
+      } else {
+        setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+      }
     } finally { setSaving(false) }
   }
 

@@ -71,6 +71,7 @@
       "remarks": "Remarques",
       "loading": "Chargement des détails du contrat…",
       "error": "Impossible de charger les détails du contrat.",
+      "unavailable": "Les détails du contrat ne sont pas encore disponibles (intégration non configurée).",
       "saveError": "Impossible d'enregistrer la modification.",
       "saved": "Détails du contrat enregistrés."
     }

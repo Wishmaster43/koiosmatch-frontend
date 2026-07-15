@@ -17,6 +17,13 @@ import type { Id, LookupOption } from '@/types/common'
 
 interface OptionRow { id: Id; name: string }
 
+// 422 field-error keys are snake_case; map them back to this form's field names.
+const API_TO_FORM: Record<string, string> = {
+  first_name: 'firstName', last_name: 'lastName', email: 'email', phone: 'phone',
+  function: 'role', customer_location_id: 'locationId', customer_department_id: 'departmentId',
+  status_id: 'statusId', is_primary: 'isPrimary',
+}
+
 export default function AddContactPersonModal({
   onClose, onCreate, customerName, locations = [], departments = [], statuses = [], initial, lockLocationId,
 }: {
@@ -29,7 +36,7 @@ export default function AddContactPersonModal({
   initial?: Contact | null
   lockLocationId?: Id
 }) {
-  const { t } = useTranslation('customers')
+  const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const isEdit = Boolean(initial)
   const [form, setForm] = useState<ContactPayload>({
@@ -44,13 +51,40 @@ export default function AddContactPersonModal({
     isPrimary: initial?.isPrimary ?? false,
     customFields: initial?.customFields ?? {},
   })
-  const [error, setError] = useState(false)
-  const set = <K extends keyof ContactPayload>(k: K, v: ContactPayload[K]) => { setForm(f => ({ ...f, [k]: v })); if (k === 'firstName' || k === 'lastName') setError(false) }
+  const [errors, setErrors] = useState<Record<string, boolean>>({})
+  // Non-field 422/generic failure — only reachable on the CREATE path (see submit()).
+  const [createError, setCreateError] = useState<string | null>(null)
+  const set = <K extends keyof ContactPayload>(k: K, v: ContactPayload[K]) => {
+    setForm(f => ({ ...f, [k]: v }))
+    if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
+    setCreateError(null)
+  }
 
-  const submit = () => {
-    if (!form.firstName.trim() || !form.lastName.trim()) { setError(true); return }
-    onCreate?.({ ...form, firstName: form.firstName.trim(), lastName: form.lastName.trim() })
-    onClose()
+  const submit = async () => {
+    if (!form.firstName.trim() || !form.lastName.trim()) {
+      setErrors({ firstName: !form.firstName.trim(), lastName: !form.lastName.trim() })
+      return
+    }
+    const payload = { ...form, firstName: form.firstName.trim(), lastName: form.lastName.trim() }
+    // Edit path: update() keeps its existing toast-based error handling (it also
+    // backs the couple/uncouple buttons elsewhere) — unchanged, closes immediately.
+    if (isEdit) { onCreate?.(payload); onClose(); return }
+    // Create path: add() rethrows on failure (C-18) so 422 field errors land under
+    // their fields here instead of a generic toast while the modal closed regardless.
+    try {
+      await onCreate?.(payload)
+      onClose()
+    } catch (err) {
+      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
+      const apiErrors = e?.response?.data?.errors
+      if (apiErrors) {
+        const e2: Record<string, boolean> = {}
+        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
+        setErrors(e2)
+      } else {
+        setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+      }
+    }
   }
 
   const canSubmit = !!form.firstName.trim() && !!form.lastName.trim()
@@ -81,16 +115,16 @@ export default function AddContactPersonModal({
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <div>
               <Field label={t('subModal.firstName')} required>
-                <TextField value={form.firstName} onChange={v => set('firstName', v)} error={error && !form.firstName.trim()} />
+                <TextField value={form.firstName} onChange={v => set('firstName', v)} error={errors.firstName} />
               </Field>
             </div>
             <div>
               <Field label={t('subModal.lastName')} required>
-                <TextField value={form.lastName} onChange={v => set('lastName', v)} error={error && !form.lastName.trim()} />
+                <TextField value={form.lastName} onChange={v => set('lastName', v)} error={errors.lastName} />
               </Field>
             </div>
           </div>
-          {error && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: -8 }}>{t('subModal.required')}</div>}
+          {(errors.firstName || errors.lastName) && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: -8 }}>{t('subModal.required')}</div>}
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
             <Field label={t('subModal.role')}><TextField value={form.role} onChange={v => set('role', v)} /></Field>
@@ -121,6 +155,16 @@ export default function AddContactPersonModal({
             </label>
           </div>
         </div>
+
+        {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
+        {createError && (
+          <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
+            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', flexShrink: 0 }}>
+            {createError}
+          </div>
+        )}
+
         <div style={{ padding: '12px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
           <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>{t('subModal.cancel')}</button>
           <button onClick={submit} disabled={!canSubmit} style={{ padding: '8px 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', background: canSubmit ? 'var(--color-primary)' : '#E5E7EB', color: canSubmit ? 'white' : '#9CA3AF', cursor: canSubmit ? 'pointer' : 'not-allowed' }}>

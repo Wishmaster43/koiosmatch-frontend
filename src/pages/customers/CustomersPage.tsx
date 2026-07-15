@@ -240,7 +240,9 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
 
   return (
     <>
-      {addOpen && <AddCustomerModal onClose={() => setAddOpen(false)} onCreate={form => { setAddOpen(false); handleCreate(form) }} users={users} statuses={statuses} />}
+      {/* The modal now awaits handleCreate itself and only closes on success (C-18) —
+          it used to close immediately here, hiding a failed create entirely. */}
+      {addOpen && <AddCustomerModal onClose={() => setAddOpen(false)} onCreate={handleCreate} users={users} statuses={statuses} />}
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 

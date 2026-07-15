@@ -25,27 +25,58 @@ function Label({ children, required }: { children: ReactNode; required?: boolean
 interface CustomerForm { name: string; debtorNumber: string; status: string; ownerId: string; industry: string; city: string }
 interface ModalUser { id: Id; name: string }
 
+// 422 field-error keys are snake_case; map them back to this form's field names.
+const API_TO_FORM: Record<string, string> = {
+  name: 'name', debtor_number: 'debtorNumber', status: 'status', owner_id: 'ownerId', industry: 'industry', city: 'city',
+}
+
 /**
  * AddCustomerModal — create a customer. Status comes from the tenant lookup,
  * account manager from the user list and industry from /industries — never
- * hardcoded option lists. Returns the raw form via onCreate; the page persists.
+ * hardcoded option lists. Awaits onCreate (the page's POST) and only closes on
+ * success (C-18) — it used to fire-and-forget while the page closed it regardless.
  */
 export default function AddCustomerModal({ onClose, onCreate, users = [], statuses = [] }: {
-  onClose: () => void; onCreate?: (form: CustomerForm) => void; users?: ModalUser[]; statuses?: LookupOption[]
+  onClose: () => void; onCreate?: (form: CustomerForm) => unknown; users?: ModalUser[]; statuses?: LookupOption[]
 }) {
-  const { t } = useTranslation('customers')
+  const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { industries } = useIndustries()
   const [errors, setErrors] = useState<Record<string, boolean>>({})
+  // Non-field 422/generic failure.
+  const [createError, setCreateError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
   const [form, setForm] = useState<CustomerForm>({ name: '', debtorNumber: '', status: statuses[0]?.value ?? '', ownerId: '', industry: '', city: '' })
 
-  const set = (k: keyof CustomerForm, v: string) => { setForm(f => ({ ...f, [k]: v })); if (errors[k]) setErrors(e => ({ ...e, [k]: false })) }
-
-  const handleSubmit = () => {
-    if (!form.name.trim()) { setErrors({ name: true }); return }
-    onCreate?.(form)
+  const set = (k: keyof CustomerForm, v: string) => {
+    setForm(f => ({ ...f, [k]: v }))
+    if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
+    setCreateError(null)
   }
-  const canSubmit = !!form.name.trim()
+
+  const handleSubmit = async () => {
+    if (!form.name.trim()) { setErrors({ name: true }); return }
+    setSaving(true)
+    try {
+      await onCreate?.(form)
+      onClose()
+    } catch (err) {
+      // Show field-level errors from 422 validation responses; fall back to the
+      // server's message (or a generic one) so the user isn't left guessing.
+      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
+      const apiErrors = e?.response?.data?.errors
+      if (apiErrors) {
+        const e2: Record<string, boolean> = {}
+        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
+        setErrors(e2)
+      } else {
+        setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+      }
+    } finally {
+      setSaving(false)
+    }
+  }
+  const canSubmit = !!form.name.trim() && !saving
 
   return (
     <div onClick={e => { if (e.target === e.currentTarget) onClose() }}
@@ -128,6 +159,15 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
           </div>
         </div>
 
+        {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
+        {createError && (
+          <div role="alert" style={{ margin: '0 24px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
+            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', flexShrink: 0 }}>
+            {createError}
+          </div>
+        )}
+
         {/* Footer */}
         <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', justifyContent: 'flex-end', gap: 8, background: '#FAFAFA' }}>
@@ -139,7 +179,7 @@ export default function AddCustomerModal({ onClose, onCreate, users = [], status
             style={{ padding: '8px 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
               background: canSubmit ? 'var(--color-primary)' : '#E5E7EB', color: canSubmit ? 'white' : '#9CA3AF',
               cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
-            {t('modal.create')}
+            {saving ? t('common:saving') : t('modal.create')}
           </button>
         </div>
       </div>

@@ -79,14 +79,18 @@ export function useCustomerLocations(customerId: Id | undefined) {
   useEffect(() => { load() }, [load])
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
+  // Only the Add-modal's create path calls this (inline edits go through `update`
+  // below), so it rethrows on failure instead of swallowing to null — the modal
+  // awaits it and maps 422 field errors (C-18) rather than a generic toast that
+  // fired while the modal closed regardless.
   const add = useCallback((payload: LocationPayload) => {
     if (!customerId) return
     const tmpId = `tmp-${Date.now()}`
     setLocations(ls => [mapLocation({ id: tmpId } as ApiLocation), ...ls])
     return api.post(`/customers/${customerId}/locations`, toApi(payload))
       .then(res => { const saved = mapLocation(unwrap<ApiLocation>(res)); setLocations(ls => ls.map(x => x.id === tmpId ? saved : x)); return saved })
-      .catch(() => { setLocations(ls => ls.filter(x => x.id !== tmpId)); notifyError(t('locations.saveFailed')); return null })
-  }, [customerId, t])
+      .catch(err => { setLocations(ls => ls.filter(x => x.id !== tmpId)); throw err })
+  }, [customerId])
 
   // Update — optimistic patch (partial), reverts on failure.
   const update = useCallback((id: Id, payload: Partial<LocationPayload>) => {

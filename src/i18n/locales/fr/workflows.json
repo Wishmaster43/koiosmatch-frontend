@@ -17,7 +17,8 @@
     "saved": "Enregistré !",
     "saveClose": "Enregistrer & fermer",
     "addModule": "Ajouter un module",
-    "closeTitle": "Fermer sans enregistrer"
+    "closeTitle": "Fermer sans enregistrer",
+    "unsavedConfirm": "Vous avez des modifications non enregistrées. Voulez-vous vraiment fermer ? Vos modifications seront perdues."
   },
   "fields": {
     "boolOn": "Activé",
@@ -245,6 +246,7 @@
     "viewGrid": "Cartes",
     "viewList": "Liste",
     "loading": "Chargement...",
+    "error": "Impossible de charger les workflows.",
     "empty": "Aucun workflow dans ce dossier. Glissez-en un ici ou créez-en un nouveau.",
     "addModuleAlert": "Ajoutez au moins un module au workflow avant d'enregistrer.",
     "saveFailed": "Échec de l'enregistrement : {{msg}}",

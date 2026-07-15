@@ -5,7 +5,7 @@
  * filter) + save/run. Extracted from the component so the editor stays declarative
  * (logic in a hook, §3). Returns the state + handlers the JSX consumes.
  */
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { addEdge, useNodesState, useEdgesState } from '@xyflow/react'
 import type { Connection } from '@xyflow/react'
 import { uid, mkEdge, NODE_W, NODE_H, stepsToFlow, flowToSteps } from './serialization'
@@ -69,6 +69,21 @@ export function buildVarFields(nodeId: string, out: unknown): WorkflowVarField[]
     : [{ token: `{{${nodeId}}}`, label: '' }]
 }
 
+// Build the persistable snapshot the same way handleSave does, so the dirty-check
+// (item 19) and the baseline it's compared against serialize identically — no
+// false "dirty" from a shape mismatch between the raw workflow prop and the
+// derived save payload. Exported for unit testing.
+export function computeWorkflowSnapshot(
+  nodes: FlowNode[], edges: FlowEdge[], name: string | undefined, trigger: string | undefined,
+  scheduleConfig: ScheduleConfig | null, webhookId: string | number | null, status: string,
+): string {
+  const steps = flowToSteps(nodes, edges)
+  let triggerConfig: Record<string, unknown> | undefined
+  if (trigger === 'Webhook' && webhookId) triggerConfig = { webhook_id: webhookId }
+  else if (trigger === 'Scheduled' && scheduleConfig) triggerConfig = { schedule: scheduleConfig }
+  return JSON.stringify({ name, trigger, trigger_config: triggerConfig, status, steps })
+}
+
 export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   workflow: Workflow
   onSave: (updated: Workflow, closeAfter?: boolean) => void
@@ -97,6 +112,14 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   const [scheduleConfig, setScheduleConfig] = useState<ScheduleConfig | null>(triggerConfig?.schedule ?? null)
   const [webhookId]                         = useState<string | number | null>(triggerConfig?.webhook_id ?? null)
   const [, setWebhooks]                      = useState<unknown[]>([])
+
+  // Dirty-check baseline (item 19): the snapshot right after load, computed via the
+  // SAME serializer as the live snapshot below, so a freshly-opened workflow never
+  // reads as dirty from a round-trip shape mismatch. Updated after every save.
+  const savedSnapshotRef = useRef(
+    computeWorkflowSnapshot(initFlow.nodes, initFlow.edges, workflow.name, workflow.trigger,
+      triggerConfig?.schedule ?? null, triggerConfig?.webhook_id ?? null, workflow.status || 'draft'),
+  )
   const [status,         setStatus]         = useState(workflow.status || 'draft')
   const [saved,          setSaved]          = useState(false)
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
@@ -308,11 +331,21 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     if (trigger === 'Webhook' && webhookId) nextTriggerConfig = { webhook_id: webhookId }
     else if (trigger === 'Scheduled' && scheduleConfig) nextTriggerConfig = { schedule: scheduleConfig }
     onSave({ ...workflow, name, trigger, trigger_config: nextTriggerConfig, status, steps }, closeAfter)
+    // A save just persisted the current state — it's the new dirty-check baseline.
+    savedSnapshotRef.current = computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status)
     if (!closeAfter) {
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     }
   }, [nodes, edges, workflow, name, trigger, scheduleConfig, webhookId, status, onSave])
+
+  // Dirty-check (item 19): true when the live graph/name/trigger/schedule/status
+  // differ from the last-saved baseline — serialize-compare via the shared
+  // computeWorkflowSnapshot so it stays cheap and never drifts from handleSave.
+  const isDirty = useCallback(
+    () => computeWorkflowSnapshot(nodes, edges, name, trigger, scheduleConfig, webhookId, status) !== savedSnapshotRef.current,
+    [nodes, edges, name, trigger, scheduleConfig, webhookId, status],
+  )
 
   // Variables a node may reference: the output fields of every upstream module.
   // Walks edges backward (BFS), orders ancestors left-to-right, and derives
@@ -384,6 +417,6 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
-    insertModule, updateNodeConfig, deleteNode, handleSave, handleRun,
+    insertModule, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
   }
 }

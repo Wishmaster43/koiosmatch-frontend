@@ -71,6 +71,7 @@
       "remarks": "Remarks",
       "loading": "Loading contract details…",
       "error": "Couldn't load the contract details.",
+      "unavailable": "Contract details aren't available yet (integration not configured).",
       "saveError": "Couldn't save the change.",
       "saved": "Contract details saved."
     }

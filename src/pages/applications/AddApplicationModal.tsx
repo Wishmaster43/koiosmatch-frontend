@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import type { ComponentType, ReactNode } from 'react'
+import type { ComponentType, ReactNode, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
@@ -18,13 +18,21 @@ const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 interface PickOption { value: Id; label: string; client?: string }
 interface AppUser { id: Id; name?: string }
 
+// 422 field-error keys are snake_case; map them back to this form's field names
+// (C-18 — there is no free-text field to highlight here, only pickers, so this
+// only sharpens which picker the message is about; the inline message stays).
+const API_TO_FORM: Record<string, string> = {
+  candidate_id: 'candidateId', vacancy_id: 'vacancyId', owner_id: 'ownerId',
+}
+
 // Field label + shared searchable single-select (CreatableSelect) — replaces the
-// old inline SearchField dropdown (DUP-1). allowCreate off = pick-only.
-function PickField({ label, ...rest }: { label: ReactNode } & AnyProps) {
+// old inline SearchField dropdown (DUP-1). allowCreate off = pick-only. `style`
+// (e.g. a 422 field-error border) merges with the base width, it never replaces it.
+function PickField({ label, style, ...rest }: { label: ReactNode; style?: CSSProperties } & AnyProps) {
   return (
     <div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{label}</div>
-      <CreatableSelect allowCreate={false} style={{ width: '100%' }} {...rest} />
+      <CreatableSelect allowCreate={false} style={{ width: '100%', ...style }} {...rest} />
     </div>
   )
 }
@@ -88,15 +96,25 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   // masking real failures INCLUDING the matrix-guard 422s. A failure now keeps the
   // modal open and shows the server's message inline.
   const [createError, setCreateError] = useState<string | null>(null)
+  const [errors,      setErrors]      = useState<Record<string, boolean>>({})
   const create = async () => {
     if (!candidateId || !vacancyId || saving) return
     setSaving(true)
     setCreateError(null)
+    setErrors({})
     try {
       const res = await api.post('/applications', { candidate_id: candidateId, vacancy_id: vacancyId, owner_id: ownerId || null })
       onCreated(mapApplication(unwrap(res), funnelTypes))
     } catch (err) {
-      const e = err as { response?: { data?: { message?: string } } }
+      // Show field-level errors from 422 validation responses (highlights the
+      // specific picker); fall back to the server's message otherwise.
+      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
+      const apiErrors = e?.response?.data?.errors
+      if (apiErrors) {
+        const e2: Record<string, boolean> = {}
+        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
+        setErrors(e2)
+      }
       setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
     } finally { setSaving(false) }
   }
@@ -114,7 +132,8 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
 
         <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
           <PickField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')}
-            options={candidates} value={candidateId} onChange={setCandidateId} />
+            options={candidates} value={candidateId} onChange={setCandidateId}
+            style={errors.candidateId ? { borderColor: 'var(--color-danger)' } : undefined} />
           {lockedVacancy ? (
             <div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('add.vacancy')}</div>
@@ -125,10 +144,12 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
             </div>
           ) : (
             <PickField label={t('add.vacancy')} placeholder={t('add.vacancyPlaceholder')}
-              options={vacancies} value={vacancyId} onChange={setVacancyId} />
+              options={vacancies} value={vacancyId} onChange={setVacancyId}
+              style={errors.vacancyId ? { borderColor: 'var(--color-danger)' } : undefined} />
           )}
           <PickField label={t('add.owner')} placeholder={t('add.ownerPlaceholder')}
-            options={ownerOptions} value={ownerId} onChange={setOwnerId} />
+            options={ownerOptions} value={ownerId} onChange={setOwnerId}
+            style={errors.ownerId ? { borderColor: 'var(--color-danger)' } : undefined} />
         </div>
 
         {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}

@@ -7,7 +7,7 @@
  * live in `./workflow/` (ModulePicker · ConfigPanel · LogsPanel · fields · canvas
  * · ScheduleModal). This component stays declarative: hook in, JSX out.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   ReactFlow, Background, Controls, MiniMap, ReactFlowProvider,
 } from '@xyflow/react'
@@ -45,9 +45,25 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
     pickerState, setPickerState, filterState, setFilterState, outputState, setOutputState,
     firstNodeId, setStartNodeId, getUpstreamVariables,
     handleEdgeAdd, handleEdgeDelete, handleEdgeFilter, saveEdgeFilter, handleNodeRun,
-    insertModule, updateNodeConfig, deleteNode, handleSave, handleRun,
+    insertModule, updateNodeConfig, deleteNode, handleSave, handleRun, isDirty,
   } = useWorkflowEditor({ workflow, onSave, initialRunId })
   const { t, i18n } = useTranslation('workflows')
+
+  // Dirty-check guard (item 19): closing (X) with unsaved changes used to discard
+  // them silently — confirm first. A native beforeunload guard covers the tab
+  // close/refresh/navigate-away case the in-app confirm can't catch.
+  const confirmClose = () => {
+    if (!isDirty() || window.confirm(t('editor.unsavedConfirm'))) onClose()
+  }
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!isDirty()) return
+      e.preventDefault()
+      e.returnValue = ''
+    }
+    window.addEventListener('beforeunload', handler)
+    return () => window.removeEventListener('beforeunload', handler)
+  }, [isDirty])
   // Top-level editor view: the node diagram, or this workflow's run history.
   const [view, setView] = useState<'diagram' | 'history'>('diagram')
   // Output fields of upstream modules the selected node may reference as tokens.
@@ -206,7 +222,7 @@ function EditorInner({ workflow, onClose, onSave, initialRunId }: {
             {t('editor.saveClose')}
           </button>
 
-          <button onClick={onClose} aria-label={t('common:close')}
+          <button onClick={confirmClose} aria-label={t('common:close')}
             style={{ width: 30, height: 30, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: '1px solid var(--border)', cursor: 'pointer', color: 'var(--text-muted)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'none')}

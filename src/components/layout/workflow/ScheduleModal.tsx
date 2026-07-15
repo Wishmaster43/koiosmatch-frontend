@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { X, CalendarDays, Play, Zap } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ScheduleConfig } from '@/types/workflow'
 
 // ── Schedule helpers ──────────────────────────────────────────────────────────
@@ -80,12 +81,13 @@ export function ScheduleModal({ trigger, scheduleConfig, onSave, onClose }: {
 
   const inputStyle: CSSProperties = { padding: '6px 10px', border: '1px solid var(--border)', borderRadius: 8, fontSize: 13, outline: 'none', background: 'var(--surface)', color: 'var(--text)' }
   const selectStyle: CSSProperties = { ...inputStyle, cursor: 'pointer' }
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={t('scheduleModal.title')}
-      style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}
+    <div style={{ position: 'fixed', inset: 0, zIndex: 60, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}
       onClick={onClose}>
-      <div style={{ width: 480, background: 'var(--surface)', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
+      <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('scheduleModal.title')} tabIndex={-1}
+        style={{ width: 480, background: 'var(--surface)', borderRadius: 16, boxShadow: '0 8px 40px rgba(0,0,0,0.2)', overflow: 'hidden', display: 'flex', flexDirection: 'column', maxHeight: '90vh' }}
         onClick={e => e.stopPropagation()}>
 
         {/* Header */}

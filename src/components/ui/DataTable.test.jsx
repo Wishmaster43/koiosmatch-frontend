@@ -39,4 +39,16 @@ describe('DataTable', () => {
     await user.click(screen.getByText('Bob'))
     expect(onRowClick).toHaveBeenCalledWith(rows[0])
   })
+
+  it('shows a header + skeleton-row shell while loading, not a layout-jumping spinner block', () => {
+    render(<DataTable columns={columns} rows={[]} loading loadingText="Laden…" />)
+    // The header stays put — no chrome collapse during loading.
+    expect(screen.getByText('Name')).toBeInTheDocument()
+    expect(screen.getByText('City')).toBeInTheDocument()
+    // No row data or empty-state text is rendered yet.
+    expect(screen.queryByText('Bob')).not.toBeInTheDocument()
+    expect(screen.queryByText('noResults')).not.toBeInTheDocument()
+    // The loading text is still available to assistive tech via the table caption.
+    expect(screen.getByText('Laden…')).toBeInTheDocument()
+  })
 })

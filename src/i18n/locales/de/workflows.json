@@ -17,7 +17,8 @@
     "saved": "Gespeichert!",
     "saveClose": "Speichern & schließen",
     "addModule": "Modul hinzufügen",
-    "closeTitle": "Ohne Speichern schließen"
+    "closeTitle": "Ohne Speichern schließen",
+    "unsavedConfirm": "Sie haben ungespeicherte Änderungen. Möchten Sie wirklich schließen? Ihre Änderungen gehen dann verloren."
   },
   "fields": {
     "boolOn": "An",
@@ -245,6 +246,7 @@
     "viewGrid": "Karten",
     "viewList": "Liste",
     "loading": "Wird geladen...",
+    "error": "Workflows konnten nicht geladen werden.",
     "empty": "Keine Workflows in diesem Ordner. Ziehen Sie einen hierher oder erstellen Sie einen neuen.",
     "addModuleAlert": "Fügen Sie mindestens ein Modul zum Workflow hinzu, bevor Sie speichern.",
     "saveFailed": "Speichern fehlgeschlagen: {{msg}}",

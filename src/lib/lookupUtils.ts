@@ -36,3 +36,30 @@ export function normalizeOptions(raw: unknown, fallback: LookupOption[] | null =
       ...(it.is_lost != null ? { isLost: Boolean(it.is_lost) } : {}),
     }))
 }
+
+/**
+ * sortActiveRows — the filter+sort step shared by the three multi-list lookup
+ * contexts (LookupsContext/VacancyLookupsContext/TaskLookupsContext, C-13). Each
+ * context still maps rows to its own shape (different flags per axis), but the
+ * "drop inactive, sort by order/sort_order" rule now lives in one place instead
+ * of three near-identical copies.
+ */
+export function sortActiveRows(raw: unknown): Record<string, unknown>[] {
+  if (!Array.isArray(raw)) return []
+  return (raw as Record<string, unknown>[])
+    .filter(it => it.active !== false)
+    .sort((a, b) => (Number(a.order ?? a.sort_order ?? 0)) - (Number(b.order ?? b.sort_order ?? 0)))
+}
+
+/**
+ * makeMetaResolver — the "value → item, with a neutral fallback" lookup shared by
+ * all multi-list lookup contexts, so the UI never crashes on an unknown value.
+ * `fallbackColor` and `extra` let each axis keep its exact prior fallback shape
+ * (e.g. task statuses fell back with `is_done: false`).
+ */
+export function makeMetaResolver<T extends { value: string; label: string; color?: string }>(
+  list: T[], fallbackColor = '#9CA3AF', extra: Partial<T> = {},
+) {
+  return (v?: string | null): T =>
+    list.find(i => i.value === v) ?? ({ value: v ?? '', label: v ?? '', color: fallbackColor, ...extra } as T)
+}

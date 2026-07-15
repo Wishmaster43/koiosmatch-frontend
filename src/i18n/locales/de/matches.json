@@ -71,6 +71,7 @@
       "remarks": "Anmerkungen",
       "loading": "Vertragsdetails werden geladen…",
       "error": "Vertragsdetails konnten nicht geladen werden.",
+      "unavailable": "Vertragsdetails sind noch nicht verfügbar (Integration nicht konfiguriert).",
       "saveError": "Änderung konnte nicht gespeichert werden.",
       "saved": "Vertragsdetails gespeichert."
     }

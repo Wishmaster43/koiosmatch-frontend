@@ -71,6 +71,7 @@
       "remarks": "Observaciones",
       "loading": "Cargando detalles del contrato…",
       "error": "No se pudieron cargar los detalles del contrato.",
+      "unavailable": "Los detalles del contrato aún no están disponibles (integración no configurada).",
       "saveError": "No se pudo guardar el cambio.",
       "saved": "Detalles del contrato guardados."
     }

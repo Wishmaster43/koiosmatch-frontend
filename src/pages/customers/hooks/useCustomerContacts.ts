@@ -79,14 +79,18 @@ export function useCustomerContacts(customerId: Id | undefined) {
   useEffect(() => { load() }, [load])
 
   // Create — optimistic row with a temp id, swapped for the server row on success.
+  // Only the Add-modal's create path calls this (couple/uncouple + inline edits go
+  // through `update` below), so it rethrows on failure instead of swallowing to
+  // null — the modal awaits it and maps 422 field errors (C-18), rather than the
+  // generic toast this used to fire while also closing the modal regardless.
   const add = useCallback((payload: ContactPayload) => {
     if (!customerId) return
     const tmpId = `tmp-${Date.now()}`
     setContacts(cs => [{ ...mapContact({ id: tmpId } as ApiContact), name: `${payload.firstName} ${payload.lastName}`.trim() }, ...cs])
     return api.post(`/customers/${customerId}/contacts`, toApi(payload))
       .then(res => { const saved = mapContact(unwrap<ApiContact>(res)); setContacts(cs => cs.map(x => x.id === tmpId ? saved : x)); return saved })
-      .catch(() => { setContacts(cs => cs.filter(x => x.id !== tmpId)); notifyError(t('contacts.saveFailed')); return null })
-  }, [customerId, t])
+      .catch(err => { setContacts(cs => cs.filter(x => x.id !== tmpId)); throw err })
+  }, [customerId])
 
   // Update — optimistic patch (partial; used for field edits AND couple/uncouple), reverts on failure.
   const update = useCallback((id: Id, payload: Partial<ContactPayload>) => {

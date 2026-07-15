@@ -58,7 +58,8 @@
     "saved": "Opgeslagen!",
     "saveClose": "Opslaan & sluiten",
     "addModule": "Module toevoegen",
-    "closeTitle": "Sluiten zonder opslaan"
+    "closeTitle": "Sluiten zonder opslaan",
+    "unsavedConfirm": "Je hebt niet-opgeslagen wijzigingen. Weet je zeker dat je wilt sluiten? Je wijzigingen gaan dan verloren."
   },
   "fields": {
     "boolOn": "Aan",
@@ -306,6 +307,7 @@
     "viewGrid": "Kaarten",
     "viewList": "Lijst",
     "loading": "Laden...",
+    "error": "Workflows konden niet worden geladen.",
     "empty": "Geen workflows in deze map. Sleep er een naartoe of maak een nieuwe aan.",
     "addModuleAlert": "Voeg minimaal één module toe aan de workflow voordat je opslaat.",
     "saveFailed": "Opslaan mislukt: {{msg}}",

@@ -21,7 +21,8 @@
     "saved": "Saved!",
     "saveClose": "Save & close",
     "addModule": "Add module",
-    "closeTitle": "Close without saving"
+    "closeTitle": "Close without saving",
+    "unsavedConfirm": "You have unsaved changes. Are you sure you want to close? Your changes will be lost."
   },
   "fields": {
     "boolOn": "On",
@@ -249,6 +250,7 @@
     "viewGrid": "Cards",
     "viewList": "List",
     "loading": "Loading...",
+    "error": "Couldn't load the workflows.",
     "empty": "No workflows in this folder. Drag one here or create a new one.",
     "addModuleAlert": "Add at least one module to the workflow before saving.",
     "saveFailed": "Saving failed: {{msg}}",

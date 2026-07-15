@@ -21,6 +21,8 @@ import { useFunctions } from '@/lib/useFunctions'
 import { useContractTypes } from '@/lib/useContractTypes'
 import { useRateProposal } from '../hooks/useRateProposal'
 import { RateProposalHint, RateDeviationWarning } from './RateProposalNotice'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
 import type { Id } from '@/types/common'
 
 const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 60 }
@@ -70,6 +72,13 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
   const candidateId = fixedCandidateId ?? (pickedCandidateId || '')
   const { functions } = useFunctions()
   const { types: contractTypes } = useContractTypes()
+
+  // AXIS-MATRIX-2 preflight (item 22, pattern-prover): POST /matches enforces
+  // match.create against the candidate server-side (MatchController::store) —
+  // surface the same warn/block decision here BEFORE submit, not just after a
+  // rejected POST. Minimal: an inline banner only, no button-gating yet (the full
+  // P-dialog rollout is a later wave).
+  const { decision: matchRuleDecision } = useActionRulePreflight('match.create', { candidateId: String(candidateId || '') })
 
   // ── Relaties ── customer drives the location/department/contact cascade.
   const [customerId, setCustomerId] = useState('')
@@ -233,14 +242,21 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
     }
   }
 
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+
   return (
     <>
       <div style={overlay} onClick={onClose} />
-      <div style={panel} role="dialog" aria-modal="true">
+      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={t('placement.title')} tabIndex={-1}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
           <span style={{ fontSize: 16, fontWeight: 700, color: 'var(--text)' }}>{t('placement.title')}</span>
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
         </div>
+
+        {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before the recruiter fills in the rest. */}
+        {matchRuleDecision && matchRuleDecision.effect !== 'allow' && (
+          <div style={{ marginBottom: 10 }}><ActionRuleBanner decision={matchRuleDecision} /></div>
+        )}
 
         {/* ── Relaties ── */}
         <div style={sectionTitle}>{t('placement.relations')}</div>

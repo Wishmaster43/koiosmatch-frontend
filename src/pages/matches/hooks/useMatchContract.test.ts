@@ -44,6 +44,15 @@ describe('useMatchContract', () => {
     const { result } = renderHook(() => useMatchContract('m1'))
     await waitFor(() => expect(result.current.loading).toBe(false))
     expect(result.current.error).toBe(true)
+    expect(result.current.unavailable).toBe(false)
+  })
+
+  it('treats a 503 as "unavailable" (integration not configured), not a hard error', async () => {
+    mockedGet.mockRejectedValue({ response: { status: 503 } })
+    const { result } = renderHook(() => useMatchContract('m1'))
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.unavailable).toBe(true)
+    expect(result.current.error).toBe(false)
   })
 
   it('saves optimistically and merges the recomputed margin/approval back', async () => {

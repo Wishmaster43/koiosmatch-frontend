@@ -5,6 +5,7 @@ import SectionCard from '@/components/ui/SectionCard'
 import { useDateFormat } from '@/lib/datetime'
 import { useCandidateActivity, type ActivityEvent } from '../hooks/useCandidateDrawerData'
 import { useLookups } from '@/context/LookupsContext'
+import { escapeCsvCell } from '@/lib/csv'
 import type { Candidate } from '@/types/candidate'
 
 // H2 status/phase provenance entry ({ axis, from, to, effective_from, … }) — the semantic
@@ -135,11 +136,12 @@ export default function ChangelogTab({ c, bare = false }: { c: Candidate; bare?:
   }, [items, from, until, q])
 
   // Client-side CSV export of the filtered view (user-initiated download, §8-safe).
+  // Cells go through the shared escapeCsvCell, which also guards against formula
+  // injection (a leading =+-@ opened as a live formula in Excel/Sheets — C-14).
   const exportCsv = () => {
-    const esc = (s: unknown) => `"${String(s ?? '').replace(/"/g, '""')}"`
     const rows = [
       ['datetime', 'who', 'action', 'field', 'old', 'new'].join(';'),
-      ...cards.map(cd => [cd.when ?? '', cd.who, cd.action, cd.field ?? '', cd.line ?? cd.oldVal ?? '', cd.line ? '' : cd.newVal ?? ''].map(esc).join(';')),
+      ...cards.map(cd => [cd.when ?? '', cd.who, cd.action, cd.field ?? '', cd.line ?? cd.oldVal ?? '', cd.line ? '' : cd.newVal ?? ''].map(escapeCsvCell).join(';')),
     ].join('\n')
     const url = URL.createObjectURL(new Blob([rows], { type: 'text/csv;charset=utf-8' }))
     const a = document.createElement('a')

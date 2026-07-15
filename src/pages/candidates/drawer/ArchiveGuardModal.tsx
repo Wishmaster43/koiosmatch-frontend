@@ -11,6 +11,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, AlertTriangle } from 'lucide-react'
 import SoftChip from '@/components/ui/SoftChip'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { resolveApplication, resolveMatch } from '../data/archiveGuard'
 import type { BlockingApplication, BlockingMatch } from '../data/archiveGuard'
 
@@ -53,6 +54,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
 
   const hasBlockers = applications.length > 0 || matches.length > 0
   const anyConflict = Object.values(matchErrors).some(Boolean)
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   // Resolve every listed blocker: applications → reject, matches → soft-delete.
   // Whatever fails (e.g. a HelloFlex-conflict match) stays listed + errored; the
@@ -77,7 +79,7 @@ export default function ArchiveGuardModal({ mode, candidateName, aggregate, appl
   return (
     <>
       <div style={overlay} onClick={onClose} />
-      <div style={panel} role="dialog" aria-modal="true" aria-label={t('archiveGuard.title')}>
+      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={t('archiveGuard.title')} tabIndex={-1}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <span style={{ display: 'inline-flex', width: 30, height: 30, borderRadius: 8, alignItems: 'center', justifyContent: 'center', background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}><AlertTriangle size={16} /></span>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)', flex: 1 }}>{t('archiveGuard.title')}</span>

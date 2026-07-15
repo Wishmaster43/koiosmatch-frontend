@@ -71,6 +71,7 @@
       "remarks": "Opmerkingen",
       "loading": "Contractgegevens laden…",
       "error": "Contractgegevens konden niet geladen worden.",
+      "unavailable": "Contractgegevens zijn nog niet beschikbaar (koppeling niet geconfigureerd).",
       "saveError": "Wijziging kon niet worden opgeslagen.",
       "saved": "Contractgegevens opgeslagen."
     }

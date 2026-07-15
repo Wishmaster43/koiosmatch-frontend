@@ -81,6 +81,14 @@ function compare(a: unknown, b: unknown): number {
 const checkboxCol: CSSProperties = { width: 36, padding: '8px 10px', textAlign: 'center' }
 const stopPropagation = (e: { stopPropagation: () => void }) => e.stopPropagation()
 
+// Loading skeleton (audit item 17): a fixed number of placeholder rows so the
+// table header/chrome stays put and the body doesn't "jump" from a centred
+// spinner to real rows. Bar widths vary per column so the shape reads as text,
+// not a solid block; token-based colour only (no ad-hoc grey, works in dark mode).
+const SKELETON_ROWS = 8
+const SKELETON_BAR_WIDTHS = ['85%', '60%', '75%', '50%', '90%', '65%']
+const skeletonBarWidth = (i: number) => SKELETON_BAR_WIDTHS[i % SKELETON_BAR_WIDTHS.length]
+
 interface TableRowProps<Row> {
   row: Row
   columns: Column<Row>[]
@@ -219,14 +227,6 @@ export default function DataTable<Row>({
     })
   }, [columns, selectable])
 
-  if (loading) {
-    return (
-      <div style={{ padding: '40px 0', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
-        {loadingText ?? t('loading')}
-      </div>
-    )
-  }
-
   // Sticky offset applied to every <th> when stickyHeader is enabled.
   const stickyTh: CSSProperties = stickyHeader ? { position: 'sticky', top: 0, zIndex: 2, background: 'var(--bg)' } : {}
 
@@ -246,7 +246,10 @@ export default function DataTable<Row>({
   const paddingBottom = virtualItems.length ? rowVirtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end : 0
 
   return (
-    <table style={{ width: 'max-content', minWidth: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+    <table aria-busy={loading} style={{ width: 'max-content', minWidth: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+      {/* Screen-reader-only loading announcement — the skeleton rows below carry no
+          text of their own, so this is the only accessible signal that data is loading. */}
+      {loading && <caption className="sr-only">{loadingText ?? t('loading')}</caption>}
       <thead>
         <tr style={{ borderBottom: '2px solid var(--border)' }}>
           {selectable && (
@@ -285,7 +288,18 @@ export default function DataTable<Row>({
         </tr>
       </thead>
       <tbody>
-        {virtualize ? (
+        {loading ? (
+          Array.from({ length: SKELETON_ROWS }).map((_, ri) => (
+            <tr key={`skeleton-${ri}`} style={{ borderBottom: '1px solid var(--border)' }}>
+              {selectable && <td style={checkboxCol} />}
+              {columns.map((col, ci) => (
+                <td key={col.key} style={{ padding: '10px 10px', ...(col.width ? { minWidth: col.width, width: col.width } : {}) }}>
+                  <div className="animate-pulse" style={{ height: 12, borderRadius: 4, background: 'var(--hover-bg)', width: skeletonBarWidth(ri + ci) }} />
+                </td>
+              ))}
+            </tr>
+          ))
+        ) : virtualize ? (
           <>
             {paddingTop > 0 && <tr style={{ height: paddingTop }}><td colSpan={totalCols} style={{ padding: 0, border: 'none' }} /></tr>}
             {virtualItems.map(vi => {
@@ -316,7 +330,7 @@ export default function DataTable<Row>({
             )
           })
         )}
-        {sortedRows.length === 0 && (
+        {!loading && sortedRows.length === 0 && (
           <tr>
             <td colSpan={totalCols} style={{ padding: '40px 10px', textAlign: 'center', fontSize: 13, color: 'var(--text-muted)' }}>
               {emptyText ?? t('noResults')}

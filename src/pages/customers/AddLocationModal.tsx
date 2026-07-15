@@ -19,6 +19,15 @@ const groupTitle = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase' a
 const row2 = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
 const row3 = { display: 'grid', gridTemplateColumns: '1fr 90px 90px', gap: 12 }
 
+// 422 field-error keys are snake_case; map them back to this form's field names.
+const API_TO_FORM: Record<string, string> = {
+  name: 'name', street: 'street', house_number: 'houseNumber', house_number_suffix: 'houseNumberSuffix',
+  postcode: 'postalCode', city: 'city', state: 'state', country: 'country',
+  coc_number: 'cocNumber', vat_number: 'vatNumber', contact_name: 'contactName',
+  phone: 'phone', email: 'email', is_headquarter: 'isHeadquarter',
+  cost_center: 'costCenter', billing_email: 'billingEmail', status_id: 'statusId',
+}
+
 export default function AddLocationModal({ onClose, onCreate, customerName, statuses = [], initial }: {
   onClose: () => void
   onCreate?: (v: LocationPayload) => void
@@ -27,7 +36,7 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
   // Editing an existing location pre-fills the form and flips the copy/action to "save".
   initial?: Location | null
 }) {
-  const { t } = useTranslation('customers')
+  const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const isEdit = Boolean(initial)
   const [form, setForm] = useState<LocationPayload>({
@@ -50,13 +59,37 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
     customFields: initial?.customFields ?? {},
   })
-  const [error, setError] = useState(false)
-  const set = <K extends keyof LocationPayload>(k: K, v: LocationPayload[K]) => { setForm(f => ({ ...f, [k]: v })); if (k === 'name') setError(false) }
+  const [errors, setErrors] = useState<Record<string, boolean>>({})
+  // Non-field 422/generic failure — only reachable on the CREATE path (see submit()).
+  const [createError, setCreateError] = useState<string | null>(null)
+  const set = <K extends keyof LocationPayload>(k: K, v: LocationPayload[K]) => {
+    setForm(f => ({ ...f, [k]: v }))
+    if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
+    setCreateError(null)
+  }
 
-  const submit = () => {
-    if (!form.name.trim()) { setError(true); return }
-    onCreate?.({ ...form, name: form.name.trim() })
-    onClose()
+  const submit = async () => {
+    if (!form.name.trim()) { setErrors({ name: true }); return }
+    const payload = { ...form, name: form.name.trim() }
+    // Edit path: update() keeps its existing toast-based error handling — unchanged,
+    // closes immediately.
+    if (isEdit) { onCreate?.(payload); onClose(); return }
+    // Create path: add() rethrows on failure (C-18) so 422 field errors land under
+    // their fields here instead of a generic toast while the modal closed regardless.
+    try {
+      await onCreate?.(payload)
+      onClose()
+    } catch (err) {
+      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
+      const apiErrors = e?.response?.data?.errors
+      if (apiErrors) {
+        const e2: Record<string, boolean> = {}
+        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
+        setErrors(e2)
+      } else {
+        setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+      }
+    }
   }
 
   const statusOptions = statuses.map(s => ({ value: String(s.id ?? s.value), label: s.label }))
@@ -84,9 +117,9 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
           <div style={groupTitle}>{t('subModal.groups.general')}</div>
           <div style={{ marginBottom: 12 }}>
             <Field label={t('subModal.locationName')} required>
-              <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('subModal.locationPlaceholder')} error={error} />
+              <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('subModal.locationPlaceholder')} error={errors.name} />
             </Field>
-            {error && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
+            {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
           </div>
           <div style={{ ...row2, marginBottom: 12, alignItems: 'end' }}>
             <Field label={t('subModal.status')}>
@@ -138,6 +171,15 @@ export default function AddLocationModal({ onClose, onCreate, customerName, stat
             <Field label={t('subModal.billingEmail')}><TextField type="email" value={form.billingEmail} onChange={v => set('billingEmail', v)} /></Field>
           </div>
         </div>
+
+        {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
+        {createError && (
+          <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
+            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', flexShrink: 0 }}>
+            {createError}
+          </div>
+        )}
 
         <div style={{ padding: '12px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
           <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>{t('subModal.cancel')}</button>

@@ -35,12 +35,18 @@ type FolderId = string | number | null
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function WorkflowsPage() {
-  const { t } = useTranslation('workflows')
+  const { t } = useTranslation(['workflows', 'common'])
   // Folder create/delete is settings.update-gated on the backend (R-3); mirror it in the UI.
   const canManageFolders = useAuth()?.hasPermission('settings.update') ?? false
   const [workflows,       setWorkflows]       = useState<Workflow[]>([])
   const [folders,         setFolders]         = useState<WorkflowFolder[]>([])
   const [loading,         setLoading]         = useState(true)
+  // C-16: a failed /workflows fetch used to fall back to [] silently (indistinguishable
+  // from "no workflows yet"). Track it explicitly so the page can show a real error +
+  // retry instead of a misleading empty state. The folders sidebar is secondary data —
+  // its own failure still degrades quietly to an empty sidebar.
+  const [error,           setError]           = useState(false)
+  const [fetchTick,       setFetchTick]       = useState(0)
   const [selectedFolder,  setSelectedFolder]  = useState<FolderId>(null)   // null = alle, 'unassigned' = geen folder, uuid = folder
   const [editingWorkflow, setEditingWorkflow] = useState<Workflow | null>(null)
   // RUN-CONTROL-1: after a 409 "already running", open the editor focused on that run.
@@ -83,28 +89,39 @@ export default function WorkflowsPage() {
 
   useEffect(() => {
     // Archived view asks the backend for soft-deleted rows too (C-27-workflow).
-    setLoading(true)
-    Promise.all([
-      api.get('/workflows', { params: showArchived ? { include_archived: 1 } : {} }).then(r => unwrapList<RawWorkflow>(r).rows.map(normalizeWorkflow)).catch(() => []),
-      api.get('/workflow-folders').then(r => unwrapList<WorkflowFolder>(r).rows).catch(() => []),
-    ]).then(([wfs, flds]) => {
-      // Restore graph from localStorage when the backend doesn't store connections yet (C-27).
-      // The cached steps are self-consistent (node IDs match edge source/target), so use
-      // them wholesale rather than merging with server step IDs which would cause mismatches.
-      const merged = (wfs as Workflow[]).map((wf: Workflow) => {
-        const serverHasGraph = wf.steps.some(s => Array.isArray(s.next) && s.next.length)
-        if (serverHasGraph) return wf           // backend already stores the graph → trust it
-        const raw = localStorage.getItem(`wf_graph_${wf.id}`)
-        if (!raw) return wf
-        try {
-          const cachedSteps = JSON.parse(raw)
-          return { ...wf, steps: cachedSteps }  // cached steps have consistent ids + next[]
-        } catch { return wf }
-      })
-      setWorkflows(merged)
-      setFolders(flds)
+    setLoading(true); setError(false)
+    Promise.allSettled([
+      api.get('/workflows', { params: showArchived ? { include_archived: 1 } : {} }),
+      api.get('/workflow-folders'),
+    ]).then(([wfResult, folderResult]) => {
+      if (wfResult.status === 'rejected') {
+        // The primary list failed to load — a real error, not "no workflows yet".
+        setError(true)
+        setWorkflows([])
+      } else {
+        const wfs = unwrapList<RawWorkflow>(wfResult.value).rows.map(normalizeWorkflow)
+        // Restore graph from localStorage when the backend doesn't store connections yet
+        // (C-27). The cached steps are self-consistent (node IDs match edge source/target),
+        // so use them wholesale rather than merging with server step IDs which would mismatch.
+        const merged = wfs.map((wf: Workflow) => {
+          const serverHasGraph = wf.steps.some(s => Array.isArray(s.next) && s.next.length)
+          if (serverHasGraph) return wf           // backend already stores the graph → trust it
+          const raw = localStorage.getItem(`wf_graph_${wf.id}`)
+          if (!raw) return wf
+          try {
+            const cachedSteps = JSON.parse(raw)
+            return { ...wf, steps: cachedSteps }  // cached steps have consistent ids + next[]
+          } catch { return wf }
+        })
+        setWorkflows(merged)
+      }
+      // Folders are secondary (sidebar-only) — a failure there still degrades quietly.
+      setFolders(folderResult.status === 'fulfilled' ? unwrapList<WorkflowFolder>(folderResult.value).rows : [])
     }).finally(() => setLoading(false))
-  }, [showArchived])
+  }, [showArchived, fetchTick])
+
+  // Manual retry — bumps the tick so the load effect above re-runs.
+  const retryLoad = () => setFetchTick(v => v + 1)
 
   // Open the editor; a normal edit clears any lingering 409 run focus.
   const openEditor = (wf: Workflow, runId: string | number | null = null) => {
@@ -304,6 +321,12 @@ export default function WorkflowsPage() {
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'var(--text-muted)', fontSize: 13 }}>
             <Loader2 size={14} className="animate-spin" /> {t('page.loading')}
+          </div>
+        ) : error ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--color-danger)', fontSize: 13, padding: '24px 0' }}>
+            <span>{t('page.error')}</span>
+            <button onClick={retryLoad} style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6,
+              padding: '4px 10px', cursor: 'pointer', color: 'var(--text)', fontSize: 12 }}>{t('common:error.retry')}</button>
           </div>
         ) : viewMode === 'grid' ? (
           <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))' }}>

@@ -11,7 +11,7 @@
  * so the header badge stays in sync — no other special-casing needed.
  */
 import { useState, useEffect, useCallback } from 'react'
-import api, { unwrap } from '@/lib/api'
+import api, { unwrap, isServiceUnavailable } from '@/lib/api'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
@@ -65,7 +65,9 @@ export function useMatchContract(
 ) {
   const [data,    setData]    = useState<MatchContract>(EMPTY)
   const [loading, setLoading] = useState(true)
-  const [error,   setError]   = useState(false)
+  // Raw fetch error kept (not just a boolean) so a 503 — the integration simply
+  // isn't configured yet — can be told apart from a real failure (C-15).
+  const [rawError, setRawError] = useState<unknown>(null)
   const [saving,  setSaving]  = useState(false)
   // Bumped on a failed save so the (uncontrolled) EditableFieldTable — which only
   // reads its `value` prop once, on mount — remounts from the reverted `data`.
@@ -77,15 +79,20 @@ export function useMatchContract(
   useEffect(() => {
     if (!matchId) { setData(EMPTY); setLoading(false); return }
     let alive = true
-    setLoading(true); setError(false)
+    setLoading(true); setRawError(null)
     api.get(`/matches/${matchId}`)
       .then(r => { if (alive) setData(pick((unwrap(r) ?? {}) as Record<string, unknown>)) })
-      .catch(() => { if (alive) setError(true) })
+      .catch(err => { if (alive) setRawError(err) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
   }, [matchId, fetchTick])
 
   const retry = useCallback(() => setFetchTick(v => v + 1), [])
+
+  // A 503 means the integration this detail layer depends on isn't configured
+  // yet — that's a calm "not available" state, never a hard error banner.
+  const unavailable = rawError ? isServiceUnavailable(rawError) : false
+  const error = !!rawError && !unavailable
 
   // Save: optimistic apply → PATCH → merge the server's echo (margin/approval may
   // be recomputed), or revert + rethrow on failure so the caller can toast the message.
@@ -116,5 +123,5 @@ export function useMatchContract(
     }
   }, [matchId, data, onUpdate])
 
-  return { data, loading, error, saving, revertTick, retry, save }
+  return { data, loading, error, unavailable, saving, revertTick, retry, save }
 }

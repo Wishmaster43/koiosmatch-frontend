@@ -53,14 +53,18 @@ export function useCustomerDepartments(customerId: Id | undefined) {
 
   // Create — optimistic row with a temp id + the picked location's name pre-filled
   // by the caller (via `locationName`), swapped for the server row on success.
+  // Only the Add-modal's create path calls this (inline edits go through `update`
+  // below), so it rethrows on failure instead of swallowing to null — the modal
+  // awaits it and maps 422 field errors (C-18) rather than a generic toast that
+  // fired while the modal closed regardless.
   const add = useCallback((payload: DepartmentPayload, locationName?: string) => {
     if (!customerId) return
     const tmpId = `tmp-${Date.now()}`
     setDepartments(ds => [{ ...mapDepartment({ id: tmpId } as ApiDepartment), name: payload.name, locationId: payload.locationId, locationName: locationName ?? '' }, ...ds])
     return api.post(`/customers/${customerId}/departments`, toApi(payload))
       .then(res => { const saved = mapDepartment(unwrap<ApiDepartment>(res)); const withLoc = { ...saved, locationName: saved.locationName || locationName || '' }; setDepartments(ds => ds.map(x => x.id === tmpId ? withLoc : x)); return withLoc })
-      .catch(() => { setDepartments(ds => ds.filter(x => x.id !== tmpId)); notifyError(t('departments.saveFailed')); return null })
-  }, [customerId, t])
+      .catch(err => { setDepartments(ds => ds.filter(x => x.id !== tmpId)); throw err })
+  }, [customerId])
 
   // Update — optimistic patch; reverts the whole list on failure.
   const update = useCallback((id: Id, payload: Partial<DepartmentPayload>, locationName?: string) => {

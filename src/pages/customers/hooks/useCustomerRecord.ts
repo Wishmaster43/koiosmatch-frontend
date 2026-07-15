@@ -73,19 +73,24 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
     if (Object.keys(body).length) api.patch(`/customers/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
   }
 
-  // Create a customer: optimistic prepend, then POST + reconcile (modal close is the page's).
+  // Create a customer: optimistic prepend, then POST + reconcile. Rethrows on
+  // failure (after reverting the optimistic row) instead of swallowing it — the
+  // modal awaits this and maps 422 field errors (C-18) rather than closing
+  // regardless while the row silently never gets created.
   const handleCreate = (form: CreateForm) => {
     const owner = users.find(u => String(u.id) === form.ownerId)
+    const tmpId = `new-${Date.now()}`
     const optimistic = mapCustomer({
-      id: `new-${Date.now()}`, name: form.name, debtor_number: form.debtorNumber, status: form.status,
+      id: tmpId, name: form.name, debtor_number: form.debtorNumber, status: form.status,
       city: form.city, industry: form.industry,
       owner: owner ? { id: owner.id, name: owner.name } : undefined,
     } as ApiCustomer)
     setCustomers(prev => [optimistic, ...prev]); setTotal(tt => tt + 1)
-    api.post('/customers', {
+    return api.post('/customers', {
       name: form.name, debtor_number: form.debtorNumber, status: form.status,
       city: form.city, industry: form.industry, owner_id: form.ownerId,
-    }).then(r => { const c = mapCustomer(unwrap(r)); setCustomers(prev => prev.map(x => x.id === optimistic.id ? c : x)) }).catch(() => {})
+    }).then(r => { const c = mapCustomer(unwrap(r)); setCustomers(prev => prev.map(x => x.id === optimistic.id ? c : x)); return c })
+      .catch(err => { setCustomers(prev => prev.filter(x => x.id !== tmpId)); setTotal(tt => tt - 1); throw err })
   }
 
   // Add a note to a customer (optimistic + POST).

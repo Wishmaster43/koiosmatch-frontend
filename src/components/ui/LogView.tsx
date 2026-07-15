@@ -11,6 +11,7 @@ import { Download } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import DataTable from '@/components/ui/DataTable'
 import type { Column, RowId } from '@/components/ui/DataTable'
+import { escapeCsvCell } from '@/lib/csv'
 
 export interface LogExportCol<Row> { header: string; value: (row: Row) => string }
 
@@ -44,12 +45,13 @@ export default function LogView<Row>({
     return () => unregisterFilters(filterKey)
   }, [filterKey, filterGroups, registerFilters, unregisterFilters])
 
-  // Export the shown rows to CSV (UTF-8 BOM for Excel; AVG accountability).
+  // Export the shown rows to CSV (UTF-8 BOM for Excel; AVG accountability). Cells
+  // are escaped via the shared escapeCsvCell, which also guards against formula
+  // injection (a leading =+-@ opened as a live formula in Excel/Sheets — C-14).
   const exportCsv = () => {
-    const esc = (v: string) => `"${String(v ?? '').replace(/"/g, '""')}"`
     const header = exportColumns.map(c => c.header)
     const body = rows.map(r => exportColumns.map(c => c.value(r)))
-    const csv = '﻿' + [header, ...body].map(r => r.map(esc).join(',')).join('\r\n')
+    const csv = '﻿' + [header, ...body].map(r => r.map(escapeCsvCell).join(',')).join('\r\n')
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
     const a = document.createElement('a')
     a.href = url; a.download = `${exportName}-${new Date().toISOString().slice(0, 10)}.csv`

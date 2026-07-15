@@ -66,4 +66,23 @@ describe('useActionRulePreflight', () => {
     await waitFor(() => expect(retry.current.decision).not.toBeNull())
     expect(mockGet).toHaveBeenCalledTimes(2)
   })
+
+  // A 403 means the caller's role lacks the axis view-right (BE audit 15-07) — that
+  // is NOT a preflight error: no decision (so no popup/banner renders), no error
+  // flag, and — unlike a generic failure — the outcome stays cached (the role
+  // won't change mid-session, so a second mount must not re-fetch).
+  it('treats a 403 as "no decision" — silent, not an error, and cached', async () => {
+    mockGet.mockRejectedValueOnce({ response: { status: 403 } })
+    const { result: a } = renderHook(() => useActionRulePreflight('match.create', { candidateId: 'c-403' }))
+    await waitFor(() => expect(mockGet).toHaveBeenCalledTimes(1))
+    expect(a.current.decision).toBeNull()
+    expect(a.current.error).toBe(false)
+
+    const { result: b } = renderHook(() => useActionRulePreflight('match.create', { candidateId: 'c-403' }))
+    await waitFor(() => expect(b.current.loading).toBe(false))
+    expect(b.current.decision).toBeNull()
+    expect(b.current.error).toBe(false)
+    // Cached — the second mount must not have issued a new request.
+    expect(mockGet).toHaveBeenCalledTimes(1)
+  })
 })

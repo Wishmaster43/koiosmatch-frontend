@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import api from '../lib/api'
+import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
 import { useAuth } from './AuthContext'
 
 /**
@@ -128,9 +129,7 @@ function normalize(raw: unknown, fallback: LookupItem[]): LookupItem[] {
     const seed = fallback.find(f => f.value === String(it.value))
     return seed?.[key] === true
   }
-  return (raw as Record<string, unknown>[])
-    .filter(it => it.active !== false)
-    .sort((a, b) => (Number(a.order ?? a.sort_order ?? 0)) - (Number(b.order ?? b.sort_order ?? 0)))
+  return sortActiveRows(raw)
     .map(it => ({ value: String(it.value), label: String(it.label ?? it.value), color: (it.color as string) ?? '#6B7280',
       requires_reason: flag(it, 'requires_reason'),
       requires_match: flag(it, 'requires_match'),
@@ -176,12 +175,11 @@ export function LookupsProvider({ children }: { children: ReactNode }) {
   }, [user?.id])
 
   // value → item helpers (with a neutral fallback so the UI never crashes).
-  const find = (list: LookupItem[], value?: string | null) => list.find(i => i.value === value)
-  const typeMeta   = (v?: string | null): LookupItem => find(candidateTypes, v) ?? { value: v ?? '', label: v ?? '', color: '#6B7280' }
-  const phaseMeta  = (v?: string | null): LookupItem => find(phases, v)         ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
-  const funnelMeta = (v?: string | null): LookupItem => find(funnelTypes, v)    ?? { value: v ?? '', label: v ?? '', color: '#6B7280' }
-  const statusMeta = (v?: string | null): LookupItem => find(statuses, v)       ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
-  const availabilityMeta = (v?: string | null): LookupItem => find(availability, v) ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
+  const typeMeta   = makeMetaResolver(candidateTypes, '#6B7280')
+  const phaseMeta  = makeMetaResolver(phases, '#9CA3AF')
+  const funnelMeta = makeMetaResolver(funnelTypes, '#6B7280')
+  const statusMeta = makeMetaResolver(statuses, '#9CA3AF')
+  const availabilityMeta = makeMetaResolver(availability, '#9CA3AF')
 
   const value: LookupsValue = {
     candidateTypes, phases, funnelTypes, statuses, availability, loading,

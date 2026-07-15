@@ -19,6 +19,11 @@ import type { LookupOption } from '@/types/common'
 
 interface LocationOption { id: Id; name: string }
 
+// 422 field-error keys are snake_case; map them back to this form's field names.
+const API_TO_FORM: Record<string, string> = {
+  name: 'name', location_id: 'locationId', description: 'description', status_id: 'statusId',
+}
+
 export default function AddDepartmentModal({ onClose, onCreate, locations = [], customerName, statuses = [], initial, lockLocationId }: {
   onClose: () => void
   onCreate?: (v: DepartmentPayload) => void
@@ -29,7 +34,7 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
   // Pre-select + lock the location (creating "at this location" from the location detail).
   lockLocationId?: Id
 }) {
-  const { t } = useTranslation('customers')
+  const { t } = useTranslation(['customers', 'common'])
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const isEdit = Boolean(initial)
   const [form, setForm] = useState<DepartmentPayload>({
@@ -39,13 +44,40 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
     statusId: initial?.statusId ?? (statuses[0]?.id as string | undefined) ?? null,
     customFields: initial?.customFields ?? {},
   })
-  const [error, setError] = useState(false)
-  const set = <K extends keyof DepartmentPayload>(k: K, v: DepartmentPayload[K]) => { setForm(f => ({ ...f, [k]: v })); if (k === 'name' || k === 'locationId') setError(false) }
+  const [errors, setErrors] = useState<Record<string, boolean>>({})
+  // Non-field 422/generic failure — only reachable on the CREATE path (see submit()).
+  const [createError, setCreateError] = useState<string | null>(null)
+  const set = <K extends keyof DepartmentPayload>(k: K, v: DepartmentPayload[K]) => {
+    setForm(f => ({ ...f, [k]: v }))
+    if (errors[k]) setErrors(e => ({ ...e, [k]: false }))
+    setCreateError(null)
+  }
 
-  const submit = () => {
-    if (!form.name.trim() || !form.locationId) { setError(true); return }
-    onCreate?.({ ...form, name: form.name.trim() })
-    onClose()
+  const submit = async () => {
+    if (!form.name.trim() || !form.locationId) {
+      setErrors({ name: !form.name.trim(), locationId: !form.locationId })
+      return
+    }
+    const payload = { ...form, name: form.name.trim() }
+    // Edit path: update() keeps its existing toast-based error handling — unchanged,
+    // closes immediately.
+    if (isEdit) { onCreate?.(payload); onClose(); return }
+    // Create path: add() rethrows on failure (C-18) so 422 field errors land under
+    // their fields here instead of a generic toast while the modal closed regardless.
+    try {
+      await onCreate?.(payload)
+      onClose()
+    } catch (err) {
+      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
+      const apiErrors = e?.response?.data?.errors
+      if (apiErrors) {
+        const e2: Record<string, boolean> = {}
+        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
+        setErrors(e2)
+      } else {
+        setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+      }
+    }
   }
 
   const canSubmit = !!form.name.trim() && !!form.locationId
@@ -72,8 +104,9 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
         <div style={{ padding: '18px 22px', display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div>
             <Field label={t('subModal.departmentName')} required>
-              <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('subModal.departmentPlaceholder')} error={error && !form.name.trim()} />
+              <TextField value={form.name} onChange={v => set('name', v)} placeholder={t('subModal.departmentPlaceholder')} error={errors.name} />
             </Field>
+            {errors.name && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
           </div>
 
           {showLocationPicker && (
@@ -88,6 +121,7 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
                     options={locations.map(l => ({ value: String(l.id), label: l.name }))} />
                 )}
               </Field>
+              {errors.locationId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('subModal.required')}</div>}
             </div>
           )}
 
@@ -106,6 +140,16 @@ export default function AddDepartmentModal({ onClose, onCreate, locations = [], 
             </Field>
           </div>
         </div>
+
+        {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
+        {createError && (
+          <div role="alert" style={{ margin: '0 22px 8px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
+            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+            {createError}
+          </div>
+        )}
+
         <div style={{ padding: '12px 22px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose} style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>{t('subModal.cancel')}</button>
           <button onClick={submit} disabled={!canSubmit} style={{ padding: '8px 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none', background: canSubmit ? 'var(--color-primary)' : '#E5E7EB', color: canSubmit ? 'white' : '#9CA3AF', cursor: canSubmit ? 'pointer' : 'not-allowed' }}>

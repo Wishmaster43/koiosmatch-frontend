@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { X, Save, Star, Search } from 'lucide-react'
 import { formatDate } from './helpers'
 import { interactive } from '@/lib/a11y'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { Suggestie, ShiftInput } from '@/types/planning'
 
 // ── Dummy kandidaten voor suggesties ─────────────────────────────────────────
@@ -58,6 +59,7 @@ function Avatar({ initials, size = 26 }: { initials: string; size?: number }) {
 // ── Add Shift Modal ───────────────────────────────────────────────────────────
 export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; onClose: () => void; onAdd: (shift: ShiftInput) => void }) {
   const { t } = useTranslation('planning')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const [title,      setTitle]      = useState('Dagdienst')
   const [start,      setStart]      = useState('07:00')
   const [end,        setEnd]        = useState('15:00')
@@ -90,7 +92,8 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
         onClick={e => e.target === e.currentTarget && onClose()}>
 
         {/* ── Modal wrapper gecentreerd ── */}
-        <div style={{ margin: 'auto', width: '92%', maxWidth: 1100, height: '90vh',
+        <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('addShift')} tabIndex={-1}
+          style={{ margin: 'auto', width: '92%', maxWidth: 1100, height: '90vh',
           background: 'var(--bg)', borderRadius: 14, overflow: 'hidden',
           boxShadow: '0 24px 80px rgba(0,0,0,0.2)', display: 'flex', flexDirection: 'column',
           border: '1px solid var(--border)' }}>

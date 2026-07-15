@@ -17,7 +17,8 @@
     "saved": "¡Guardado!",
     "saveClose": "Guardar y cerrar",
     "addModule": "Añadir módulo",
-    "closeTitle": "Cerrar sin guardar"
+    "closeTitle": "Cerrar sin guardar",
+    "unsavedConfirm": "Tienes cambios sin guardar. ¿Seguro que quieres cerrar? Se perderán los cambios."
   },
   "fields": {
     "boolOn": "Activado",
@@ -245,6 +246,7 @@
     "viewGrid": "Tarjetas",
     "viewList": "Lista",
     "loading": "Cargando...",
+    "error": "No se pudieron cargar los workflows.",
     "empty": "No hay workflows en esta carpeta. Arrastra uno aquí o crea uno nuevo.",
     "addModuleAlert": "Añade al menos un módulo al workflow antes de guardar.",
     "saveFailed": "Error al guardar: {{msg}}",

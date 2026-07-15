@@ -11,6 +11,7 @@
  * for the shared table component — see the Self-Audit note).
  */
 import { useTranslation } from 'react-i18next'
+import { Unplug } from 'lucide-react'
 import EditableFieldTable from '@/components/forms/EditableFieldTable'
 import type { FieldRow } from '@/components/forms/EditableFieldTable'
 import { notifySuccess, notifyError } from '@/lib/notify'
@@ -39,7 +40,7 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
   const { t } = useTranslation(['matches', 'common'])
   const { types: contractTypes } = useContractTypes()
   const { types: caoTypes } = useCao()
-  const { data, loading, error, revertTick, retry, save } = useMatchContract(matchId, onUpdate)
+  const { data, loading, error, unavailable, revertTick, retry, save } = useMatchContract(matchId, onUpdate)
 
   // Editable schema — two titled cards (Contract / Financieel) in one table.
   const fields: FieldRow[] = [
@@ -102,11 +103,21 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
     }
   }
 
-  // Four UI states (§3): loading / error (+ retry) / success. "Empty" (no contract
-  // data yet) is represented per-field as a dash, same as the sibling candidate
-  // EditableFieldTable tabs (Preferences/ZZP) — not a separate placeholder screen.
+  // Four UI states (§3): loading / unavailable / error (+ retry) / success. "Empty"
+  // (no contract data yet) is represented per-field as a dash, same as the sibling
+  // candidate EditableFieldTable tabs (Preferences/ZZP) — not a separate screen.
   if (loading) {
     return <div style={{ fontSize: 12, color: 'var(--text-muted)', padding: '10px 2px' }}>{t('drawer.contract.loading')}</div>
+  }
+  // A 503 means the backing integration isn't configured yet — a calm, neutral
+  // notice, never the danger-coloured hard-error banner (C-15).
+  if (unavailable) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 12, color: 'var(--text-muted)', padding: '10px 2px' }}>
+        <Unplug size={14} />
+        <span>{t('drawer.contract.unavailable')}</span>
+      </div>
+    )
   }
   if (error) {
     return (

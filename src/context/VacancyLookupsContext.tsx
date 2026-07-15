@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
 import api, { unwrap } from '../lib/api'
+import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
 
 /**
  * VacancyLookupsContext — the tenant-configurable vacancy lookups.
@@ -82,9 +83,7 @@ const DEFAULT_CHANNELS: VacancyLookupItem[] = [
 // stored references from uuid to key the moment that merges (CMBE 15-07).
 function normalize(raw: unknown, fallback: VacancyLookupItem[], pinId = false): VacancyLookupItem[] {
   if (!Array.isArray(raw) || raw.length === 0) return fallback
-  return (raw as Record<string, unknown>[])
-    .filter(it => it.active !== false)
-    .sort((a, b) => (Number(a.order ?? a.sort_order ?? 0)) - (Number(b.order ?? b.sort_order ?? 0)))
+  return sortActiveRows(raw)
     .map(it => ({
       value: String((pinId ? it.id : undefined) ?? it.value ?? it.key ?? it.id),
       label: String(it.label ?? it.name ?? it.value ?? it.key),
@@ -116,15 +115,12 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
   }, [])
 
   // value → item helper with a neutral fallback so the UI never crashes.
-  const metaIn = (list: VacancyLookupItem[]) => (v?: string | null): VacancyLookupItem =>
-    list.find(i => i.value === v) ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }
-
   const value: VacancyLookupsValue = {
     statuses, phases, seniorityLevels, educationLevels, channels, loading,
-    statusMeta:     metaIn(statuses),
-    phaseMeta:      metaIn(phases),
-    seniorityMeta:  metaIn(seniorityLevels),
-    educationMeta:  metaIn(educationLevels),
+    statusMeta:     makeMetaResolver(statuses),
+    phaseMeta:      makeMetaResolver(phases),
+    seniorityMeta:  makeMetaResolver(seniorityLevels),
+    educationMeta:  makeMetaResolver(educationLevels),
   }
 
   return <VacancyLookupsContext.Provider value={value}>{children}</VacancyLookupsContext.Provider>

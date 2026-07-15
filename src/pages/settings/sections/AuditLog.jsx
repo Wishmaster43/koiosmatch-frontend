@@ -6,6 +6,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, ChevronUp, ChevronDown as ChevronDn, Eye } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
+import { escapeCsvCell } from '@/lib/csv'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { KPI_KEYS, LogBadge, isAccessEvent, buildFieldDiff, entityLabel } from './auditShared'
 import { AuditDrawer } from './AuditDrawer'
@@ -232,8 +233,9 @@ export default function AuditLog() {
   }, [filterGroups, registerFilters, unregisterFilters])
 
   // Export the currently-filtered log to CSV (UTF-8 BOM for Excel; AVG accountability).
+  // Cells go through the shared escapeCsvCell, which also guards against formula
+  // injection (a leading =+-@ opened as a live formula in Excel/Sheets — C-14).
   const exportCsv = () => {
-    const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`
     const who = (e) => e.causer_email
       ? `${e.causer_name ?? t('audit.system')} (${e.causer_email})`
       : (e.causer_name ?? t('audit.system'))
@@ -249,7 +251,7 @@ export default function AuditLog() {
         entityStr,
         e.description ?? '', beforeCell, afterCell]
     })
-    const csv = '﻿' + [header, ...rows].map(r => r.map(esc).join(',')).join('\r\n')
+    const csv = '﻿' + [header, ...rows].map(r => r.map(escapeCsvCell).join(',')).join('\r\n')
     const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }))
     const a = document.createElement('a')
     a.href = url; a.download = `audit-log-${new Date().toISOString().slice(0, 10)}.csv`

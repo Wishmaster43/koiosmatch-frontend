@@ -3,7 +3,41 @@ import { useTranslation } from 'react-i18next'
 import { History, X } from 'lucide-react'
 import ChangelogTab from './ChangelogTab'
 import { sectionTitle } from '@/components/ui/SectionCard'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { Candidate } from '@/types/candidate'
+
+/**
+ * ChangelogPanel — the actual popover surface, mounted only while open. Its own
+ * component (rather than an inline conditional block) so useFocusTrap (item 20)
+ * attaches on a fresh mount — a single always-mounted parent toggling visibility
+ * would never re-run the trap effect the moment the panel first appears.
+ */
+function ChangelogPanel({ c, onClose, label }: { c: Candidate; onClose: () => void; label: string }) {
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  return (
+    <div ref={panelRef} role="dialog" aria-modal="true" aria-label={label} tabIndex={-1}
+      style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 400,
+        width: 900, maxWidth: '92vw', maxHeight: '82vh', display: 'flex', flexDirection: 'column',
+        background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
+        boxShadow: '0 8px 28px rgba(0,0,0,0.16)', overflow: 'hidden' }}>
+      {/* Popover header — title + close, supplies the chrome the bare tab drops. */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '12px 14px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+        <span style={{ ...sectionTitle, display: 'flex', alignItems: 'center', gap: 7 }}>
+          <History size={14} style={{ color: 'var(--text-muted)' }} /> {label}
+        </span>
+        <button onClick={onClose} aria-label={label}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+          <X size={15} />
+        </button>
+      </div>
+      {/* Scrollable body — the existing changelog content without its own card. */}
+      <div style={{ overflowY: 'auto', padding: '12px 14px' }}>
+        <ChangelogTab c={c} bare />
+      </div>
+    </div>
+  )
+}
 
 /**
  * ChangelogPopover — a History icon in the drawer title-row that opens the
@@ -23,14 +57,13 @@ export default function ChangelogPopover({ c }: { c: Candidate }) {
     return () => window.removeEventListener('km:open-changelog', onOpen)
   }, [])
 
-  // Close on outside click or Escape while the popover is open.
+  // Close on outside click while the popover is open (Escape is handled by the
+  // panel's own focus trap, item 20).
   useEffect(() => {
     if (!open) return
     const onClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
     document.addEventListener('mousedown', onClick)
-    document.addEventListener('keydown', onKey)
-    return () => { document.removeEventListener('mousedown', onClick); document.removeEventListener('keydown', onKey) }
+    return () => document.removeEventListener('mousedown', onClick)
   }, [open])
 
   return (
@@ -43,29 +76,7 @@ export default function ChangelogPopover({ c }: { c: Candidate }) {
         <History size={14} />
       </button>
 
-      {open && (
-        <div role="dialog" aria-label={t('drawer.tabs.changelog')}
-          style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 400,
-            width: 900, maxWidth: '92vw', maxHeight: '82vh', display: 'flex', flexDirection: 'column',
-            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
-            boxShadow: '0 8px 28px rgba(0,0,0,0.16)', overflow: 'hidden' }}>
-          {/* Popover header — title + close, supplies the chrome the bare tab drops. */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '12px 14px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-            <span style={{ ...sectionTitle, display: 'flex', alignItems: 'center', gap: 7 }}>
-              <History size={14} style={{ color: 'var(--text-muted)' }} /> {t('drawer.tabs.changelog')}
-            </span>
-            <button onClick={() => setOpen(false)} aria-label={t('common:close')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
-              <X size={15} />
-            </button>
-          </div>
-          {/* Scrollable body — the existing changelog content without its own card. */}
-          <div style={{ overflowY: 'auto', padding: '12px 14px' }}>
-            <ChangelogTab c={c} bare />
-          </div>
-        </div>
-      )}
+      {open && <ChangelogPanel c={c} onClose={() => setOpen(false)} label={t('drawer.tabs.changelog')} />}
     </div>
   )
 }

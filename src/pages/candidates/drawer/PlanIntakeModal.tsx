@@ -20,6 +20,7 @@ import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
 import type { Modality } from '@/lib/useAppointmentTypes'
 import { useLocations } from '@/lib/useLocations'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { Id } from '@/types/common'
 
 const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }
@@ -148,11 +149,12 @@ export default function PlanIntakeModal({
     ? t(mode === 'appointment' ? 'work.editAppointment' : 'work.editIntake')
     : t(mode === 'appointment' ? 'work.planAppointment' : 'work.planIntake')
   const submitLabel = editing ? t('common:save') : t(mode === 'appointment' ? 'work.createAppointment' : 'work.createIntake')
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
 
   return (
     <>
       <div style={overlay} onClick={onClose} />
-      <div style={panel} role="dialog" aria-modal="true">
+      <div ref={panelRef} style={panel} role="dialog" aria-modal="true" aria-label={heading} tabIndex={-1}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{heading}</span>
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>

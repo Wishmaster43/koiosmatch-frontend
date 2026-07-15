@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
 import api, { unwrap } from '../lib/api'
+import { sortActiveRows, makeMetaResolver } from '../lib/lookupUtils'
 
 /**
  * TaskLookupsContext — the tenant-configurable task (activity) lookups.
@@ -60,9 +61,7 @@ const truthy = (v: unknown) => v === true || v === 1 || v === '1' || v === 'true
 // Carries `is_done` (statuses) and `is_default` (priorities) so the flags survive.
 function normalize(raw: unknown, fallback: TaskLookupItem[]): TaskLookupItem[] {
   if (!Array.isArray(raw) || raw.length === 0) return fallback
-  return (raw as Record<string, unknown>[])
-    .filter(it => it.active !== false)
-    .sort((a, b) => (Number(a.order ?? a.sort_order ?? 0)) - (Number(b.order ?? b.sort_order ?? 0)))
+  return sortActiveRows(raw)
     .map(it => ({
       value: String(it.value ?? it.key ?? it.id),
       label: String(it.label ?? it.name ?? it.value ?? it.key),
@@ -91,10 +90,6 @@ export function TaskLookupsProvider({ children }: { children: ReactNode }) {
     ]).finally(() => setLoading(false))
   }, [])
 
-  // value → item helper with a neutral fallback so the UI never crashes.
-  const metaIn = (list: TaskLookupItem[]) => (v?: string | null): TaskLookupItem =>
-    list.find(i => i.value === v) ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF', is_done: false }
-
   // The set of status keys that count as "completed" (for open/overdue/done KPIs).
   const doneStatusValues = statuses.filter(s => s.is_done).map(s => s.value)
   // The default priority key (seeded `is_default`), used to preselect in the modal.
@@ -102,9 +97,9 @@ export function TaskLookupsProvider({ children }: { children: ReactNode }) {
 
   const value: TaskLookupsValue = {
     statuses, types, priorities, loading,
-    statusMeta:   metaIn(statuses),
-    typeMeta:     metaIn(types),
-    priorityMeta: metaIn(priorities),
+    statusMeta:   makeMetaResolver(statuses, '#9CA3AF', { is_done: false }),
+    typeMeta:     makeMetaResolver(types),
+    priorityMeta: makeMetaResolver(priorities),
     doneStatusValues, defaultPriority,
   }
 
