@@ -12,6 +12,7 @@ import { fieldLabel } from './moduleI18n'
 import { FilterFieldPicker } from './FilterFieldPicker'
 import { OperatorSelect } from './OperatorSelect'
 import type { WorkflowField, EdgeFilters, FilterCondition } from '@/types/workflow'
+import { unwrap, unwrapList } from '@/lib/api'
 
 // Shared change handler: writes one field's value into the node config.
 export type OnChange = (key: string, value: unknown) => void
@@ -26,7 +27,7 @@ export function FaqSelectField({ value, onChange, fieldKey }: { value?: unknown;
 
   useEffect(() => {
     import('@/lib/api').then(m => m.default.get('/ai/faqs'))
-      .then(r => setFaqs(r.data?.data ?? r.data ?? []))
+      .then(r => setFaqs(unwrapList<{ id?: string | number; name?: string; title?: string }>(r).rows))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
@@ -78,7 +79,7 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
   // Load the tenant's inbound webhooks (same resource as Settings).
   useEffect(() => {
     import('@/lib/api').then(m => m.default.get('/webhooks'))
-      .then(r => setHooks(r.data?.data ?? r.data ?? []))
+      .then(r => setHooks(unwrapList<{ id?: string | number; name?: string; token?: string }>(r).rows))
       .catch(() => setError(true))
       .finally(() => setLoading(false))
   }, [])
@@ -93,7 +94,7 @@ export function WebhookSelectField({ value, onChange, fieldKey }: { value?: unkn
     try {
       const api = (await import('@/lib/api')).default
       const r   = await api.post('/webhooks', { name })
-      const wh  = r.data?.data ?? r.data
+      const wh  = unwrap<{ id?: string | number; name?: string; token?: string }>(r)
       setHooks(prev => [...prev, wh])
       onChange(fieldKey, wh.id)
       setNewName(''); setShowNew(false)
@@ -180,7 +181,7 @@ export function LookupSelectField({ value, onChange, fieldKey, endpoint }: {
     let alive = true
     import('@/lib/api').then(m => m.default.get(endpoint))
       .then(r => {
-        const rows = (r.data?.data ?? r.data ?? []) as Array<Record<string, unknown>>
+        const rows = (unwrapList(r).rows) as Array<Record<string, unknown>>
         if (alive) setOpts(rows
           .map(o => ({ value: String(o.value ?? o.id ?? ''), label: String(o.label ?? o.name ?? o.value ?? '') }))
           .filter(o => o.value))

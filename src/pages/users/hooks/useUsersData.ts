@@ -7,7 +7,7 @@
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import type { AvailableRole } from '../usersParts'
 import type { ManagedUser } from '@/types/api'
 
@@ -22,7 +22,7 @@ export function useUsersData() {
   useEffect(() => {
     Promise.all([api.get('/users'), api.get('/roles')])
       .then(([usersRes, rolesRes]) => {
-        const list = usersRes.data?.data ?? usersRes.data ?? []
+        const list = unwrapList<ManagedUser>(usersRes).rows
         setUsers(Array.isArray(list) ? list : [])
         const roleList = rolesRes.data ?? []
         setRoles(roleList.filter((r: AvailableRole) => r.name !== 'super_admin' && r.name !== 'tenant_admin'))

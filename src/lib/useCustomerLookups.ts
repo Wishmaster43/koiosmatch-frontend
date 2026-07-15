@@ -14,6 +14,7 @@ import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { normalizeOptions } from './lookupUtils'
 import type { LookupOption } from '@/types/common'
+import { unwrap } from '@/lib/api'
 
 // Seed defaults — the values shipped for new tenants and the fallback before the
 // backend is ready. Colours match the calm light/dark scheme used across lookups.
@@ -48,7 +49,7 @@ const FALLBACK: CustomerLookupsData = {
 // Each field falls back independently via normalizeOptions — always returns a
 // full, usable object (never null; a per-field default beats an all-or-nothing seed).
 const mapCustomerLookups = (res: AxiosResponse): CustomerLookupsData => {
-  const d = (res.data?.data ?? res.data ?? {}) as Record<string, unknown>
+  const d = (unwrap(res) ?? {}) as Record<string, unknown>
   return {
     statuses: normalizeOptions(d.statuses, DEFAULT_CUSTOMER_STATUSES, '#6B7280') ?? DEFAULT_CUSTOMER_STATUSES,
     locationStatuses: normalizeOptions(d.location_statuses, DEFAULT_SUB_STATUSES, '#6B7280') ?? DEFAULT_SUB_STATUSES,

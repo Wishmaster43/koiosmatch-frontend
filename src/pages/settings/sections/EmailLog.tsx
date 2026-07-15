@@ -7,7 +7,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { X } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import LogView from '@/components/ui/LogView'
 import type { LogExportCol } from '@/components/ui/LogView'
 import { DirectionPill, StatusPill, isInbound } from '@/components/ui/logChips'
@@ -87,7 +87,7 @@ export default function EmailLog() {
   // Load the e-mail log; a missing endpoint yields an empty log (graceful).
   useEffect(() => {
     api.get('/email-log')
-      .then(r => setRows(r.data?.data ?? r.data ?? []))
+      .then(r => setRows(unwrapList<EmailLogEntry>(r).rows))
       .catch(() => setRows([]))
       .finally(() => setLoading(false))
   }, [])

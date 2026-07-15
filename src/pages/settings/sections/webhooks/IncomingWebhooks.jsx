@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, Copy, Plus, Trash2, Edit2, Save, X } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 
 // Inbound webhook URLs hang off the API root's /webhook path, not under /api.
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://koiosmatch-api.test/api'
@@ -38,7 +38,7 @@ export default function IncomingWebhooks() {
   // Load the inbound webhooks for the active tenant.
   useEffect(() => {
     api.get('/webhooks')
-      .then((res) => setWebhooks(res.data?.data ?? res.data ?? []))
+      .then((res) => setWebhooks(unwrapList(res).rows))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [])
@@ -49,7 +49,7 @@ export default function IncomingWebhooks() {
     setCreating(true)
     try {
       const res = await api.post('/webhooks', { name: name.trim(), description: desc.trim() || null })
-      setWebhooks((prev) => [...prev, res.data?.data ?? res.data])
+      setWebhooks((prev) => [...prev, unwrap(res)])
       setName('')
       setDesc('')
     } catch { /* noop */ }

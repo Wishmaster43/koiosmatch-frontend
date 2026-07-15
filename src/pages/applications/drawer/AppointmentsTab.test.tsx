@@ -8,7 +8,11 @@ import type { ApplicationDetail } from '@/types/application'
 // The tab loads /candidates/{id}/appointments and books/edits via the shared
 // PlanIntakeModal — stub both so this file only tests AppointmentsTab's own wiring
 // (loading/error/empty/filter/display), not the modal's internals.
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn() } }))
+// Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { get: vi.fn() } }
+})
 vi.mock('@/lib/datetime', () => ({ useDateFormat: () => ({ formatDate: (v: string) => v, locale: 'nl-NL' }) }))
 vi.mock('@/lib/useAppointmentTypes', () => ({
   useAppointmentTypes: () => ({ metaOf: (v?: string) => (v ? { label: `Type:${v}` } : undefined) }),

@@ -11,6 +11,7 @@ import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { normalizeOptions } from './lookupUtils'
 import type { LookupOption } from '@/types/common'
+import { unwrap } from '@/lib/api'
 
 // Service / sector — the kind of engagement (seed for healthcare staffing).
 export const DEFAULT_SERVICE_TYPES: LookupOption[] = [
@@ -28,7 +29,7 @@ export const DEFAULT_AGREEMENT_TYPES: LookupOption[] = [
 // Generic tenant lookup with a seed fallback; a 404/empty keeps the seed.
 function useLookup(url: string, seed: LookupOption[]) {
   // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
-  const mapFn = (res: AxiosResponse): LookupOption[] | null => normalizeOptions(res.data?.data ?? res.data)
+  const mapFn = (res: AxiosResponse): LookupOption[] | null => normalizeOptions(unwrap(res))
   const { data: items } = useCachedLookup(url, mapFn, seed)
   // value(slug) → item, with a neutral fallback so the UI never crashes.
   const meta = (v?: string | null): LookupOption => items.find(i => i.value === v) ?? { value: v ?? '', label: v ?? '', color: '#9CA3AF' }

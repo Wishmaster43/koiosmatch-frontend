@@ -4,7 +4,7 @@
  * mirroring the candidate/customer notes. 404 = endpoint not built yet → empty (calm).
  */
 import { useState, useEffect, useCallback } from 'react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import type { Id } from '@/types/common'
 
 export interface OpportunityNote {
@@ -24,7 +24,7 @@ export function useOpportunityNotes(id?: Id) {
     if (!id) { setItems([]); return }
     setLoading(true)
     api.get(`/opportunities/${id}/notes`, { signal })
-      .then(res => setItems(res.data?.data ?? res.data ?? []))
+      .then(res => setItems(unwrapList<OpportunityNote>(res).rows))
       .catch(() => setItems([]))
       .finally(() => { if (!signal?.aborted) setLoading(false) })
   }, [id])

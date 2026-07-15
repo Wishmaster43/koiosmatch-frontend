@@ -1,7 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, X, Map as MapIcon } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
@@ -39,7 +39,7 @@ export default function LocationsSettings() {
   const PER_PAGE = 10
 
   useEffect(() => {
-    api.get('/locations').then(r => setLocations(r.data?.data ?? r.data ?? []))
+    api.get('/locations').then(r => setLocations(unwrapList(r).rows))
       .catch(() => {}).finally(() => setLoading(false))
   }, [])
 

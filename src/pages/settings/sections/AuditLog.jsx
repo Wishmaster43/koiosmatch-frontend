@@ -5,7 +5,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Download, ChevronUp, ChevronDown as ChevronDn, Eye } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { KPI_KEYS, LogBadge, isAccessEvent, buildFieldDiff, entityLabel } from './auditShared'
 import { AuditDrawer } from './AuditDrawer'
@@ -105,7 +105,7 @@ export default function AuditLog() {
 
   useEffect(() => {
     api.get('/activity-log')
-      .then(res => setLogs(res.data?.data ?? res.data ?? []))
+      .then(res => setLogs(unwrapList(res).rows))
       .catch(() => setError(t('audit.unavailable')))
       .finally(() => setLoading(false))
   }, [t])

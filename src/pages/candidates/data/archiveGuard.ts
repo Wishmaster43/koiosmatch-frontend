@@ -11,7 +11,7 @@
  *   - GET /candidates/{id} → data.matches[] carries a real slug: status
  *     'open' | 'closed' (confirmed via /matches PATCH's documented enum).
  */
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { DEFAULT_FUNNEL_TYPES } from '@/context/LookupsContext'
 import type { LookupItem } from '@/context/LookupsContext'
 import type { Candidate } from '@/types/candidate'
@@ -57,7 +57,7 @@ export const needsLiveCheck = (c?: Candidate | null, funnelTypes: LookupItem[] =
 const isLiveApplication = async (id: Id): Promise<boolean> => {
   try {
     const r = await api.get(`/applications/${id}`)
-    const key = (r.data?.data ?? r.data)?.phase_key
+    const key = unwrap<{ phase_key?: string }>(r)?.phase_key
     return !!key && key !== 'hired' && key !== 'rejected'
   } catch {
     // Unreadable application (deleted/404 mid-flight) — don't block on it.
@@ -69,7 +69,7 @@ const isLiveApplication = async (id: Id): Promise<boolean> => {
 // applications are still live and which matches are still open.
 export async function fetchLiveBlockers(id: Id): Promise<LiveBlockers> {
   const r = await api.get(`/candidates/${id}`)
-  const data = (r.data?.data ?? r.data ?? {}) as {
+  const data = (unwrap(r) ?? {}) as {
     applications?: Array<{ id: Id; vacancyTitle?: string | null; stageLabel?: string | null; stageColor?: string | null }>
     matches?: Array<{ id: Id; vacancy?: { title?: string } | null; client?: string; customer?: { name?: string }; status?: string }>
   }

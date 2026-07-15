@@ -3,7 +3,7 @@
  * backend C-42). 404 = endpoint not built yet → empty (calm). Read-only list for the tab.
  */
 import { useState, useEffect } from 'react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import type { Id } from '@/types/common'
 
 export interface OpportunityTask {
@@ -30,7 +30,7 @@ export function useOpportunityTasks(id?: Id): { items: OpportunityTask[]; loadin
     const ctrl = new AbortController()
     setLoading(true); setError(false)
     api.get(`/opportunities/${id}/tasks`, { signal: ctrl.signal })
-      .then(res => setItems(res.data?.data ?? res.data ?? []))
+      .then(res => setItems(unwrapList<OpportunityTask>(res).rows))
       .catch(err => {
         if (err?.code === 'ERR_CANCELED') return
         if (err?.response?.status && err.response.status !== 404) setError(true)

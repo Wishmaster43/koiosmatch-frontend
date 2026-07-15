@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useDateFormat } from '@/lib/datetime'
 import type { VacancyDetail } from '@/types/vacancy'
@@ -29,7 +29,7 @@ export default function NotesTab({ vacancy: v }: { vacancy: VacancyDetail }) {
     const tmp: Note = { id: -Date.now(), author: '', text: body, time: new Date().toISOString() }
     setNotes(n => [tmp, ...n]); setText(''); setAdding(false)
     api.post(`/vacancies/${v.id}/notes`, { text: body })
-      .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) setNotes(n => n.map(x => x.id === tmp.id ? { ...tmp, ...it, time: it.created_at ?? tmp.time } : x)) })
+      .then(r => { const it = unwrap<{ id?: Id; created_at?: string }>(r); if (it?.id) setNotes(n => n.map(x => x.id === tmp.id ? { ...tmp, ...it, time: it.created_at ?? tmp.time } : x)) })
       .catch(() => notifyError(t('common:actionFailed')))
   }
 

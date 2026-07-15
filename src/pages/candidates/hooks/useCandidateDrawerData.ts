@@ -41,7 +41,7 @@ export function useCandidateActivity(id?: Id): { items: ActivityEvent[]; loading
     queryFn: async ({ signal }): Promise<ActivityEvent[]> => {
       try {
         const res = await api.get(`/candidates/${id}/activity`, { signal })
-        return (res.data?.data ?? res.data ?? []) as ActivityEvent[]
+        return (unwrapList(res).rows) as ActivityEvent[]
       } catch (err) {
         if ((err as { response?: { status?: number } })?.response?.status === 404) return []
         throw err

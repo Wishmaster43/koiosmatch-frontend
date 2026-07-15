@@ -14,6 +14,7 @@
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
+import { unwrapList } from '@/lib/api'
 
 // Seed defaults. VALUES are the API slugs (mirror the backend note_types seed) — the old
 // Dutch-label-as-value fallback made a note 422 ("type invalid") whenever the lookup hadn't
@@ -47,7 +48,7 @@ const toOption = (r: Record<string, unknown>): LookupOption => ({
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapNoteTypes = (res: AxiosResponse): LookupOption[] | null => {
-  const raw = (res?.data?.data ?? res?.data ?? []) as Record<string, unknown>[]
+  const raw = (unwrapList(res).rows) as Record<string, unknown>[]
   const d = raw.filter(Boolean).map(toOption)
   // Dedupe by value: the per-entity note-types seeding (NOTE-TYPES-2) can
   // repeat a value across entities — duplicate React keys crashed the thread.

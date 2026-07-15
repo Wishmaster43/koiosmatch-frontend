@@ -11,7 +11,7 @@
  * so the header badge stays in sync — no other special-casing needed.
  */
 import { useState, useEffect, useCallback } from 'react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
@@ -79,7 +79,7 @@ export function useMatchContract(
     let alive = true
     setLoading(true); setError(false)
     api.get(`/matches/${matchId}`)
-      .then(r => { if (alive) setData(pick((r.data?.data ?? r.data ?? {}) as Record<string, unknown>)) })
+      .then(r => { if (alive) setData(pick((unwrap(r) ?? {}) as Record<string, unknown>)) })
       .catch(() => { if (alive) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
@@ -96,7 +96,7 @@ export function useMatchContract(
     setSaving(true)
     try {
       const r = await api.patch(`/matches/${matchId}`, patch)
-      const row = (r.data?.data ?? r.data) as Record<string, unknown> | undefined
+      const row = (unwrap(r)) as Record<string, unknown> | undefined
       if (row) {
         setData(pick(row))
         // A rate/date change can re-open approval BE-side — refresh the header badge.

@@ -7,7 +7,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Loader2 } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import type { ManagedUser } from '@/types/api'
 
 export default function EditUserModal({ user, onClose, onSaved }: {
@@ -45,7 +45,7 @@ export default function EditUserModal({ user, onClose, onSaved }: {
       }
       if (changePassword && form.password) payload.password = form.password
       const res = await api.patch(`/users/${user.id}`, payload)
-      onSaved(res.data?.data ?? res.data)
+      onSaved(unwrap(res))
       onClose()
     } catch (err) {
       const e2 = err as { response?: { data?: { message?: string } } }

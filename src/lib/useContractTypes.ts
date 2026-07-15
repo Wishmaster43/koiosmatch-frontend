@@ -9,6 +9,7 @@
  */
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { unwrapList } from '@/lib/api'
 
 // Seed defaults mirror Danny's spec (ABU + ZZP + W&S); labels tenant-facing.
 export const DEFAULT_CONTRACT_TYPES = [
@@ -23,12 +24,13 @@ export const DEFAULT_CONTRACT_TYPES = [
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapContractTypes = (res: AxiosResponse): string[] | null => {
-  const rows = (res.data?.data ?? res.data ?? []) as Array<string | { name?: string; label?: string; value?: string }>
+  const rows = (unwrapList(res).rows) as Array<string | { name?: string; label?: string; value?: string }>
   const names = rows.map(x => typeof x === 'string' ? x : (x.name ?? x.label ?? x.value ?? '')).filter(Boolean) as string[]
   return names.length ? names : null
 }
 
 export function useContractTypes() {
-  const { data: types } = useCachedLookup('/contract-types', mapContractTypes, DEFAULT_CONTRACT_TYPES, { quiet404: true })
+  // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
+  const { data: types } = useCachedLookup('/contract-types', mapContractTypes, DEFAULT_CONTRACT_TYPES)
   return { types }
 }

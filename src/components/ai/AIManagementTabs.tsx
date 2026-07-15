@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { interactive } from '@/lib/a11y'
 import { notifyError } from '@/lib/notify'
 import { MODELS, inputStyle, Field, TextEditor, SideList, ListRow } from './management/shared'
@@ -31,10 +31,10 @@ export function AgentsTab() {
       api.get('/ai/prompts').catch(() => ({ data: [] })),
       api.get('/ai/faqs').catch(() => ({ data: [] })),
     ]).then(([ar, pr, fr]) => {
-      const list = ar.data?.data ?? ar.data ?? []
+      const list = unwrapList<AiAgent>(ar).rows
       setAgents(list)
-      setPrompts(pr.data?.data ?? pr.data ?? [])
-      setFaqs(fr.data?.data ?? fr.data ?? [])
+      setPrompts(unwrapList<AiItem>(pr).rows)
+      setFaqs(unwrapList<AiItem>(fr).rows)
       if (list.length) setSelected(list[0])
     }).catch(() => { /* noop */ }).finally(() => setLoading(false))
   }, [])
@@ -91,7 +91,7 @@ export function PromptsTab() {
 
   useEffect(() => {
     api.get('/ai/prompts').then(r => {
-      const list = r.data?.data ?? r.data ?? []
+      const list = unwrapList<AiItem>(r).rows
       setPrompts(list)
       if (list.length) select(list[0])
     }).catch(() => {}).finally(() => setLoading(false))
@@ -99,7 +99,7 @@ export function PromptsTab() {
 
   const select = (p: AiItem) => {
     setSelected(p); setName(p.name ?? ''); setBody(p.body ?? p.content ?? '')
-    api.get(`/ai/prompts/${p.id}/versions`).then(r => setVersions(r.data?.data ?? r.data ?? [])).catch(() => setVersions([]))
+    api.get(`/ai/prompts/${p.id}/versions`).then(r => setVersions(unwrapList<Version>(r).rows)).catch(() => setVersions([]))
   }
 
   const save = async () => {
@@ -108,10 +108,10 @@ export function PromptsTab() {
       const res = selected?.id
         ? await api.put(`/ai/prompts/${selected.id}`, { name, body })
         : await api.post('/ai/prompts', { name, body })
-      const updated = res.data?.data ?? res.data
+      const updated = unwrap<AiItem>(res)
       setPrompts(prev => selected?.id ? prev.map(p => p.id === updated.id ? updated : p) : [updated, ...prev])
       setSelected(updated); setSaved(true); setTimeout(() => setSaved(false), 2500)
-      api.get(`/ai/prompts/${updated.id}/versions`).then(r => setVersions(r.data?.data ?? r.data ?? [])).catch(() => {})
+      api.get(`/ai/prompts/${updated.id}/versions`).then(r => setVersions(unwrapList<Version>(r).rows)).catch(() => {})
     } catch {}
     setSaving(false)
   }
@@ -155,7 +155,7 @@ export function FAQTab() {
 
   useEffect(() => {
     api.get('/ai/faqs').then(r => {
-      const list = r.data?.data ?? r.data ?? []
+      const list = unwrapList<AiItem>(r).rows
       setFaqs(list)
       if (list.length) select(list[0])
     }).catch(() => {}).finally(() => setLoading(false))
@@ -163,7 +163,7 @@ export function FAQTab() {
 
   const select = (f: AiItem) => {
     setSelected(f); setName(f.name ?? ''); setBody(f.body ?? f.content ?? '')
-    api.get(`/ai/faqs/${f.id}/versions`).then(r => setVersions(r.data?.data ?? r.data ?? [])).catch(() => setVersions([]))
+    api.get(`/ai/faqs/${f.id}/versions`).then(r => setVersions(unwrapList<Version>(r).rows)).catch(() => setVersions([]))
   }
 
   const save = async () => {
@@ -172,7 +172,7 @@ export function FAQTab() {
       const res = selected?.id
         ? await api.put(`/ai/faqs/${selected.id}`, { name, body })
         : await api.post('/ai/faqs', { name, body })
-      const updated = res.data?.data ?? res.data
+      const updated = unwrap<AiItem>(res)
       setFaqs(prev => selected?.id ? prev.map(f => f.id === updated.id ? updated : f) : [updated, ...prev])
       setSelected(updated); setSaved(true); setTimeout(() => setSaved(false), 2500)
     } catch {}
@@ -217,7 +217,7 @@ export function KnowledgeTab() {
 
   useEffect(() => {
     api.get('/ai/knowledge').then(r => {
-      const list = r.data?.data ?? r.data ?? []
+      const list = unwrapList<AiItem>(r).rows
       setItems(list)
       if (list.length) { setSelected(list[0]); setName(list[0].name ?? ''); setBody(list[0].body ?? list[0].content ?? '') }
     }).catch(() => {}).finally(() => setLoading(false))
@@ -229,7 +229,7 @@ export function KnowledgeTab() {
       const res = selected?.id
         ? await api.put(`/ai/knowledge/${selected.id}`, { name, body })
         : await api.post('/ai/knowledge', { name, body })
-      const u = res.data?.data ?? res.data
+      const u = unwrap<AiItem>(res)
       setItems(prev => selected?.id ? prev.map(x => x.id === u.id ? u : x) : [u, ...prev])
       setSelected(u); setSaved(true); setTimeout(() => setSaved(false), 2500)
     } catch {}

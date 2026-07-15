@@ -7,7 +7,7 @@ import AddApplicationModal from './AddApplicationModal'
 import PlanIntakeModal from './PlanIntakeModal'
 import type { ExistingAppointment } from './PlanIntakeModal'
 import MatchPlacementModal from './MatchPlacementModal'
-import api from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionBlock } from './constants'
 import type { Candidate } from '@/types/candidate'
@@ -48,7 +48,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
   useEffect(() => {
     let alive = true
     api.get(`/candidates/${c.id}/appointments`, { quiet404: true })
-      .then(r => { if (alive) setAppts((r.data?.data ?? r.data ?? []) as Appt[]) })
+      .then(r => { if (alive) setAppts((unwrapList(r).rows) as Appt[]) })
       .catch(() => {})
     return () => { alive = false }
   }, [c.id])
@@ -60,9 +60,9 @@ export default function WorkTab({ c }: { c: Candidate }) {
         api.get(`/candidates/${c.id}`),
         api.get(`/candidates/${c.id}/appointments`, { quiet404: true }),
       ])
-      const fresh = (detail.data?.data ?? detail.data) as { applications?: AppRow[] }
+      const fresh = (unwrap(detail)) as { applications?: AppRow[] }
       setApps((fresh?.applications ?? []) as AppRow[]); setPage(1)
-      setAppts((ap.data?.data ?? ap.data ?? []) as Appt[])
+      setAppts((unwrapList(ap).rows) as Appt[])
     } catch { /* keep the current lists on a failed refresh */ }
   }
 

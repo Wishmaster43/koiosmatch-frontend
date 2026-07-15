@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import EntityLink from '@/components/ui/EntityLink'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
@@ -42,7 +42,7 @@ export default function CandidateTab({ application: a }: { application: Applicat
     let alive = true
     setLoading(true); setError(false); setEdits({})
     api.get(`/candidates/${id}`)
-      .then(r => { if (alive) setCand(mapCandidate(r.data?.data ?? r.data)) })
+      .then(r => { if (alive) setCand(mapCandidate(unwrap(r))) })
       .catch(() => { if (alive) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }

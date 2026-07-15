@@ -16,7 +16,7 @@ import type { Column } from '@/components/ui/DataTable'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import SearchSelectGroup from '@/components/reports/filter/SearchSelectGroup'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import { useCustomerVacancies } from '../hooks/useCustomerDrawerData'
 import type { VacancyRow } from '../hooks/useCustomerDrawerData'
 import type { Id } from '@/types/common'
@@ -41,7 +41,7 @@ export default function VacanciesTab({ customerId, params }: { customerId?: Id; 
   // value if present, otherwise show everything (no artificial narrowing).
   useEffect(() => {
     api.get('/vacancy-statuses').then(r => {
-      const raw = (r.data?.data ?? r.data ?? []) as Array<{ value?: string; label?: string; name?: string; active?: boolean }>
+      const raw = (unwrapList(r).rows) as Array<{ value?: string; label?: string; name?: string; active?: boolean }>
       const opts = raw.filter(o => o.active !== false).map(o => ({ value: String(o.value ?? o.name ?? ''), label: String(o.label ?? o.name ?? o.value ?? '') })).filter(o => o.value)
       if (opts.length) setStatusOptions(opts)
     }).catch(() => {})

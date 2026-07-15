@@ -17,7 +17,7 @@
  */
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
 import { notifyError } from '@/lib/notify'
 import type { Id } from '@/types/common'
@@ -100,7 +100,7 @@ export function useCandidatePlanningPreferences(candidateId?: Id) {
     setLoading(true); setError(false)
     api.get(`/candidates/${candidateId}/planning-preferences`, { signal: ctrl.signal })
       .then(res => {
-        const rows = (res.data?.data ?? res.data ?? []) as RawPreference[]
+        const rows = (unwrapList(res).rows) as RawPreference[]
         setPrefs((Array.isArray(rows) ? rows : []).map(toPreference))
       })
       .catch(err => {
@@ -123,7 +123,7 @@ export function useCandidatePlanningPreferences(candidateId?: Id) {
       const res = await api.post(`/candidates/${candidateId}/planning-preferences`, {
         kind, linkable_type: target.linkable_type, linkable_id: target.linkable_id, reason: target.reason || undefined,
       })
-      const saved = (res.data?.data ?? res.data) as RawPreference | undefined
+      const saved = (unwrap(res)) as RawPreference | undefined
       const savedPref = saved && saved.id != null ? toPreference(saved) : optimistic
       setPrefs(prev => prev.map(p => (p.id === tempId ? savedPref : p)))
     } catch (err) {
@@ -226,7 +226,7 @@ export function useCandidateAvailability(candidateId?: Id) {
     setLoading(true); setError(false)
     api.get(`/candidates/${candidateId}/availability`, { signal: ctrl.signal })
       .then(res => {
-        const rows = (res.data?.data ?? res.data ?? []) as RawAvailability[]
+        const rows = (unwrapList(res).rows) as RawAvailability[]
         setEntries((Array.isArray(rows) ? rows : []).map(toAvailability))
       })
       .catch(err => {
@@ -248,7 +248,7 @@ export function useCandidateAvailability(candidateId?: Id) {
       const res = await api.post(`/candidates/${candidateId}/availability`, {
         date: entry.date, part: entry.part, status: entry.status, reason: entry.reason || undefined,
       })
-      const saved = (res.data?.data ?? res.data) as RawAvailability | undefined
+      const saved = (unwrap(res)) as RawAvailability | undefined
       const savedEntry = saved && saved.id != null ? toAvailability(saved) : optimistic
       setEntries(prev => prev.map(e => (e.id === tempId ? savedEntry : e)))
     } catch (err) {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
 
@@ -35,7 +35,7 @@ export default function VacancyMatchingSettings() {
   useEffect(() => {
     api.get('/settings/matching')
       .then(r => {
-        const d = (r.data?.data ?? r.data) ?? {}
+        const d = (unwrap(r)) ?? {}
         const i = LEVELS.indexOf(d.strictness); if (i >= 0) setLevel(i)
         if (MODES.some(m => m.value === d.approval_mode)) setApproval(d.approval_mode)
         const cf = d.conversion_factor != null ? String(d.conversion_factor) : ''

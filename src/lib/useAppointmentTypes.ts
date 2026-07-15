@@ -12,6 +12,7 @@
  */
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { unwrapList } from '@/lib/api'
 
 export type Modality = 'office' | 'remote' | 'phone'
 
@@ -46,12 +47,13 @@ const toType = (r: Record<string, unknown>): AppointmentType => ({
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapAppointmentTypes = (res: AxiosResponse): AppointmentType[] | null => {
-  const rows = (res.data?.data ?? res.data ?? []) as Record<string, unknown>[]
+  const rows = (unwrapList(res).rows) as Record<string, unknown>[]
   return Array.isArray(rows) && rows.length ? rows.map(toType) : null
 }
 
 export function useAppointmentTypes() {
-  const { data: types } = useCachedLookup('/appointment-types', mapAppointmentTypes, DEFAULT_APPOINTMENT_TYPES, { quiet404: true })
+  // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
+  const { data: types } = useCachedLookup('/appointment-types', mapAppointmentTypes, DEFAULT_APPOINTMENT_TYPES)
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
   const metaOf = (v?: string | null): AppointmentType | undefined =>

@@ -15,6 +15,7 @@ import { useCallback } from 'react'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
+import { unwrapList } from '@/lib/api'
 
 // Soft palette — matches the calm light/dark scheme used across lookups.
 export const DEFAULT_GENDERS: LookupOption[] = [
@@ -27,7 +28,7 @@ const norm = (s?: unknown) => (s ?? '').toString().trim().toLowerCase()
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapGenders = (res: AxiosResponse): LookupOption[] | null => {
-  const d = ((res?.data?.data ?? res?.data ?? []) as LookupOption[]).filter(Boolean)
+  const d = ((unwrapList(res).rows) as LookupOption[]).filter(Boolean)
   return d.length ? d : null
 }
 

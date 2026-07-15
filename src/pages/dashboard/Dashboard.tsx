@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useCandidateCount } from '@/lib/queries'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { heavyGet } from '@/lib/heavyGet'
 import { interactive } from '@/lib/a11y'
 import PieChartCard from '@/components/charts/PieChartCard'
@@ -157,9 +157,9 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     // heavyGet = dedup + failure cooldown (PERF-DASH-1 FE half) — these
     // aggregates took the API down on demo2 when refetches piled up.
     heavyGet('/candidates/stats', { signal: ctrl.signal })
-      .then(r => setStats(r.data?.data ?? r.data ?? null)).catch(() => {})
+      .then(r => setStats(unwrap(r) ?? null)).catch(() => {})
     heavyGet('/opportunities/stats', { signal: ctrl.signal })
-      .then(r => setOpp(r.data?.data ?? r.data ?? null)).catch(() => setOpp(null))
+      .then(r => setOpp(unwrap(r) ?? null)).catch(() => setOpp(null))
     return () => ctrl.abort()
   }, [activeTenant?.id])
 
@@ -308,7 +308,7 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
       .then(r => setDash(r.data ?? null)).catch(() => {})
     // Dedicated charts endpoint (out-timeseries + net); fail-soft so nothing breaks if absent.
     heavyGet('/dashboard/charts', { params, signal: ctrl.signal })
-      .then(r => setDashCharts((r.data?.data ?? r.data) ?? null)).catch(() => setDashCharts(null))
+      .then(r => setDashCharts((unwrap(r)) ?? null)).catch(() => setDashCharts(null))
     return () => ctrl.abort()
   }, [activeTenant?.id, selPeriode, selVestiging, selStatus])
 

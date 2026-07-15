@@ -10,7 +10,7 @@
  * Danny's "weet je het zeker?"). Kept here (not in the modal) to keep that file lean.
  */
 import { useState, useEffect } from 'react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import type { Id } from '@/types/common'
 
 export type RateProposalSource = 'agreement' | 'conversion_factor' | 'purchase_only' | 'none'
@@ -60,7 +60,7 @@ export function useRateProposal({ customerId, functionTitle, cao, scale, step, p
       if (scale) params.scale = scale
       if (step)  params.step  = step
       api.get('/matches/rate-proposal', { params, signal: ctrl.signal, quiet404: true })
-        .then(r => setProposal((r.data?.data ?? r.data) as RateProposal))
+        .then(r => setProposal((unwrap(r)) as RateProposal))
         // Quiet on error — an unreachable/unshipped endpoint just means no proposal.
         .catch(err => { if (err?.code !== 'ERR_CANCELED') setProposal(null) })
     }, DEBOUNCE_MS)

@@ -11,6 +11,7 @@
 import { useCallback } from 'react'
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { unwrapList } from '@/lib/api'
 
 export interface MatchStatus { value: string; label: string; color?: string; is_closed: boolean }
 
@@ -29,12 +30,13 @@ const toStatus = (r: Record<string, unknown>): MatchStatus => ({
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapMatchStatuses = (res: AxiosResponse): MatchStatus[] | null => {
-  const rows = (res.data?.data ?? res.data ?? []) as Record<string, unknown>[]
+  const rows = (unwrapList(res).rows) as Record<string, unknown>[]
   return Array.isArray(rows) && rows.length ? rows.map(toStatus) : null
 }
 
 export function useMatchStatuses() {
-  const { data: statuses } = useCachedLookup('/match-statuses', mapMatchStatuses, DEFAULT_MATCH_STATUSES, { quiet404: true })
+  // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
+  const { data: statuses } = useCachedLookup('/match-statuses', mapMatchStatuses, DEFAULT_MATCH_STATUSES)
 
   // Resolve a stored slug to its meta; tolerant of label-stored values.
   // useCallback: consumers hang this in memo/effect deps — it must be stable.

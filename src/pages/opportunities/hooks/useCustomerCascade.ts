@@ -6,7 +6,7 @@
  * both places (mirrors MatchPlacementModal's cascade on the candidate side).
  */
 import { useState, useEffect } from 'react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import type { Id } from '@/types/common'
 
 interface CascadeOption { id?: Id; name?: string }
@@ -25,7 +25,7 @@ export function useCustomerCascade(customerId: string) {
     if (!customerId) { setDetail(null); return }
     let alive = true
     api.get(`/customers/${customerId}`)
-      .then(r => { if (alive) setDetail((r.data?.data ?? r.data) as CustomerDetail) })
+      .then(r => { if (alive) setDetail((unwrap(r)) as CustomerDetail) })
       .catch(() => { if (alive) setDetail(null) })
     return () => { alive = false }
   }, [customerId])

@@ -12,6 +12,7 @@
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
+import { unwrapList } from '@/lib/api'
 
 export const DEFAULT_OUTREACH_OUTCOMES: LookupOption[] = [
   { value: 'no_answer',      label: 'Geen gehoor',    color: 'var(--color-warning)' },
@@ -29,13 +30,13 @@ const toOption = (r: Record<string, unknown>): LookupOption => ({
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapOutreachOutcomes = (res: AxiosResponse): LookupOption[] | null => {
-  const rows = (res.data?.data ?? res.data ?? []) as Record<string, unknown>[]
+  const rows = (unwrapList(res).rows) as Record<string, unknown>[]
   return Array.isArray(rows) && rows.length ? rows.map(toOption) : null
 }
 
 export function useOutreachOutcomes() {
-  // quiet404: the endpoint is optional until OUTREACH-2 lands backend-side.
-  const { data: outcomes } = useCachedLookup('/outreach-outcomes', mapOutreachOutcomes, DEFAULT_OUTREACH_OUTCOMES, { quiet404: true })
+  // The endpoint now exists (item 11) — a real 404 should surface in the dev log again.
+  const { data: outcomes } = useCachedLookup('/outreach-outcomes', mapOutreachOutcomes, DEFAULT_OUTREACH_OUTCOMES)
 
   // Resolve a stored slug to its meta (label + colour) — tolerant of label-stored values.
   const metaOf = (v?: string | null): LookupOption | undefined =>

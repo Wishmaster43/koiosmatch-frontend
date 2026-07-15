@@ -7,7 +7,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Send, Trash2, Plus, X, Loader2, Bot, User, Zap } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -60,7 +60,10 @@ export default function AgentTestPanel({ config }: {
         conversation_history: messages,
         config,
       })
-      const data = res.data?.data ?? res.data
+      const data = unwrap<{
+        response?: string; message?: string; tokens_used?: number
+        usage?: { total_tokens?: number }; duration_ms?: number; model?: string
+      }>(res)
       const assistantMsg: Message = {
         role:        'assistant',
         content:     data.response ?? data.message ?? JSON.stringify(data),

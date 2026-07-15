@@ -8,7 +8,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { mapCandidate } from '../data/mapCandidate'
 import { buildCandidatePatch } from '../data/candidatesShared'
@@ -23,7 +23,7 @@ export function useCreateCandidate() {
     setSaving(true)
     try {
       const r = await api.post('/candidates', body)
-      return mapCandidate(r.data?.data ?? r.data)
+      return mapCandidate(unwrap(r))
     } finally {
       setSaving(false)
     }
@@ -41,7 +41,7 @@ export function useCandidateRecord() {
   const fetchDetail = async (id: Id): Promise<Candidate | 'gone' | null> => {
     try {
       const r = await api.get(`/candidates/${id}`)
-      return mapCandidate(r.data?.data ?? r.data)
+      return mapCandidate(unwrap(r))
     } catch (e) {
       return (e as { response?: { status?: number } })?.response?.status === 404 ? 'gone' : null
     }

@@ -8,7 +8,7 @@
 import { useState, useEffect } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import type { VacancyOption } from '../hooks/useVacancyOptions'
 
 interface MatchRow { id?: string | number; vacancyTitle?: string; client?: string }
@@ -46,7 +46,7 @@ export default function CandidateStatusModals({
   useEffect(() => {
     if (!statusModal?.isBlacklist || blReasons.length) return
     api.get('/blacklist-reasons')
-      .then(r => setBlReasons(((r.data?.data ?? r.data ?? []) as Array<{ name?: string }>).map(x => String(x.name ?? '')).filter(Boolean)))
+      .then(r => setBlReasons(((unwrapList(r).rows) as Array<{ name?: string }>).map(x => String(x.name ?? '')).filter(Boolean)))
       .catch(() => setBlReasons([]))
   }, [statusModal?.isBlacklist, blReasons.length])
 

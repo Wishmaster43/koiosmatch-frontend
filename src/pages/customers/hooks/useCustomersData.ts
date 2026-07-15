@@ -8,7 +8,7 @@ import { useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { mapCustomer } from '../data/mapCustomer'
 import type { Customer, ApiCustomer } from '@/types/customer'
 import type { Id } from '@/types/common'
@@ -57,7 +57,7 @@ export function useCustomersData({ filterParams, page, pageSize, t }: Args) {
     queryKey: ['customers', 'stats', filterParams],
     queryFn: async ({ signal }): Promise<PageStats | null> => {
       const res = await api.get('/customers/stats', { params: filterParams, signal })
-      return (res.data?.data ?? res.data ?? null) as PageStats | null
+      return (unwrap(res) ?? null) as PageStats | null
     },
   })
 

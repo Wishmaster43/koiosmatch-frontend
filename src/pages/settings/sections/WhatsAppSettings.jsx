@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, RefreshCw, Search } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 
 // Phone-number quality ratings → colour. Label = t('whatsapp.quality<KEY>').
 const QUALITY_META = {
@@ -46,7 +46,7 @@ export default function WhatsAppSettings() {
 
   const loadDetail = (id) =>
     api.get(`/whatsapp/${id}`).then(r => {
-      const full = r.data?.data ?? r.data
+      const full = unwrap(r)
       setPhones(Array.isArray(full?.phone_numbers) ? full.phone_numbers : [])
       setTemplates(Array.isArray(full?.templates) ? full.templates : [])
     })

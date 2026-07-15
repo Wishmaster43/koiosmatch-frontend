@@ -8,7 +8,7 @@
 import { useState, useEffect } from 'react'
 import { X, List, ChevronDown } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import { StatusBadge, formatDT, formatDuration } from '@/components/reports/runFormat'
 import { CANCELLABLE, StopRunButton } from './runControl'
 import { useModuleCatalog } from './useModuleCatalog'
@@ -51,7 +51,7 @@ export default function LogsPanel({ workflowId, liveRun, onClose }: { workflowId
     setLoading(true)
     api.get('/workflow-runs', { signal: ctrl.signal })
       .then(res => {
-        const rows = res.data?.data ?? res.data ?? []
+        const rows = unwrapList<RunRow>(res).rows
         const mine = workflowId == null ? rows : rows.filter((r: RunRow) => (r.workflow_id ?? r.workflowId) === workflowId)
         mine.sort((a: RunRow, b: RunRow) => +new Date(b.started_at ?? b.created_at ?? 0) - +new Date(a.started_at ?? a.created_at ?? 0))
         setRuns(mine)

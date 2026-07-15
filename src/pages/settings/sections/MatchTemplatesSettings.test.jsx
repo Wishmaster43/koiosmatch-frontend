@@ -11,7 +11,11 @@ import i18n from '@/i18n'
 import api from '@/lib/api'
 import MatchTemplatesSettings from './MatchTemplatesSettings'
 
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }))
+// Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
+})
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() }))
 
 // Resolve the active locale's own copy so assertions never guess/hardcode a language.

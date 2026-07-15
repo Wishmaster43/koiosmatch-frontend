@@ -536,6 +536,19 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
 - API calls live in each feature's `api/` folder — never inline in components.
 - Centralize error → user-message mapping (i18n keys), so failures are
   consistent and never leak raw server errors.
+- **Type-gen adoption (decided, audit wave C item 12).** `src/types/api-generated.ts` is an
+  openapi-typescript file generated FROM the backend's Scribe/OpenAPI spec (a pre-commit gate
+  keeps it fresh — never hand-edit it). **New API-touching code SHOULD type request/response
+  shapes from it where a matching `paths`/`operations` entry exists** — e.g.
+  `operations['getAdminJobsList']['requestBody']['content']['application/json']` for a query-param
+  shape — so a backend field rename surfaces as a compile error here, not a silent runtime 422.
+  **Hand-written interfaces are still the right call for shapes the spec doesn't carry** — in
+  practice the generated spec today only documents REQUEST shapes and the 401 error response
+  for most routes (no 2xx success schema yet), so a mapper's success-response shape is commonly
+  still hand-written; type what the spec gives you, hand-write the rest, and say which is which
+  in a comment. This is a **gradual, opportunistic** adoption — do NOT mass-migrate existing
+  files in one pass; adopt it when you touch a file for another reason, or when starting new
+  API-touching code. Reference adoption: `src/pages/settings/sections/jobs/jobsApi.ts`.
 - **Endpoint naming — source prefix for external systems.** Native Koios resources use
   **clean, unprefixed** names (`/customers`, `/candidates`, `/locations`, `/departments`,
   `/contacts`, `/kpis`, `/reports`, …). Data that mirrors an **external system** carries that

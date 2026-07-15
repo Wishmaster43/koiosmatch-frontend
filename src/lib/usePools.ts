@@ -10,6 +10,7 @@
  */
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
+import { unwrapList } from '@/lib/api'
 
 export interface PoolItem { id: string; name: string; color?: string | null }
 
@@ -18,7 +19,7 @@ const FALLBACK: PoolsLookupData = { pools: [], poolItems: [] }
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapPools = (res: AxiosResponse): PoolsLookupData | null => {
-  const raw = (res?.data?.data ?? res?.data ?? []) as Array<Record<string, unknown>>
+  const raw = (unwrapList(res).rows) as Array<Record<string, unknown>>
   const items = raw
     .map(p => ({ id: String(p.id ?? ''), name: String(p.name ?? p.label ?? p.value ?? ''), color: (p.color as string) ?? null }))
     .filter(p => p.id && p.name)

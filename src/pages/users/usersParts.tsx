@@ -9,7 +9,7 @@ import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { ShieldCheck, Shield, User, Loader2, ChevronDown } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
 import RoleChip from '@/components/ui/RoleChip'
 import type { ManagedUser } from '@/types/api'
@@ -86,7 +86,7 @@ export function RoleSelector({ user: u, availableRoles, onChanged }: {
     setOpen(false)
     try {
       const res = await api.put(`/users/${u.id}/roles`, { roles: [roleId] })
-      onChanged(res.data?.data ?? res.data)
+      onChanged(unwrap(res))
     } catch { /* noop */ }
     setSaving(false)
   }

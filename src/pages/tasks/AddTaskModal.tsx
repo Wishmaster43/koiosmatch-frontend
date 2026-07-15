@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { Field, TextField, SelectField, DateField } from '@/components/forms/fields'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
@@ -42,6 +42,10 @@ export default function AddTaskModal({ onClose, onCreated, initial, extraLinks }
   })
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
+  // AUDIT-1 pattern (mirrors AddApplicationModal): a failed create keeps the modal
+  // open and shows the server's message inline — the old empty catch silently
+  // dropped production failures (the dev-only interceptor toast never fires in prod).
+  const [createError, setCreateError] = useState<string | null>(null)
   // Linked-entity option lists (loaded once; empty/404 keeps the picker empty).
   const [candidates, setCandidates] = useState<EntityRow[]>([])
   const [customers,  setCustomers]  = useState<EntityRow[]>([])
@@ -80,6 +84,7 @@ export default function AddTaskModal({ onClose, onCreated, initial, extraLinks }
     ].filter(Boolean) as Array<{ type: string; id: string }>
 
     setSaving(true)
+    setCreateError(null)
     try {
       const body = {
         title: form.title.trim(), type: form.type, status: form.status, priority: form.priority || null,
@@ -87,8 +92,11 @@ export default function AddTaskModal({ onClose, onCreated, initial, extraLinks }
         description: form.description || null, links,
       }
       const r = await api.post('/tasks', body)
-      onCreated?.(r.data?.data ?? r.data)
-    } catch { /* surfaced via the page; keep the modal open on failure */ } finally { setSaving(false) }
+      onCreated?.(unwrap(r))
+    } catch (err) {
+      const e = err as { response?: { data?: { message?: string } } }
+      setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+    } finally { setSaving(false) }
   }
 
   const assigneeOpts = [{ value: '', label: t('modal.assigneePlaceholder') }, ...users.map(u => ({ value: String(u.id), label: userName(u) }))]
@@ -163,6 +171,15 @@ export default function AddTaskModal({ onClose, onCreated, initial, extraLinks }
             </Field>
           </div>
         </div>
+
+        {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}
+        {createError && (
+          <div role="alert" style={{ margin: '0 24px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
+            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', flexShrink: 0 }}>
+            {createError}
+          </div>
+        )}
 
         {/* Footer */}
         <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,

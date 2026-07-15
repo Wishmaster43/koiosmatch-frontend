@@ -9,7 +9,7 @@ import { useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { heavyGet } from '@/lib/heavyGet'
 import { mapCandidate } from '../data/mapCandidate'
 import type { ApiCandidate, Candidate, CandidateStats } from '@/types/candidate'
@@ -68,7 +68,7 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
     queryKey: ['candidates', 'stats', filterParams],
     queryFn: async ({ signal }): Promise<CandidateStats | null> => {
       const res = await heavyGet('/candidates/stats', { params: filterParams, signal })
-      return (res.data?.data ?? res.data ?? null) as CandidateStats | null
+      return (unwrap(res) ?? null) as CandidateStats | null
     },
   })
   const stats = statsQuery.data ?? null
@@ -81,7 +81,7 @@ export function useCandidatesData({ filterParams, page, pageSize, t, setActionMs
     queryKey: ['locations'],
     queryFn: async ({ signal }): Promise<LocationOption[]> => {
       const res = await api.get('/locations', { signal })
-      return (res.data?.data ?? res.data ?? []) as LocationOption[]
+      return (unwrapList(res).rows) as LocationOption[]
     },
   })
 

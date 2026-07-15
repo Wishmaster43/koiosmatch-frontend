@@ -7,7 +7,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Loader2 } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import type { ManagedUser } from '@/types/api'
 
 // Selectable roles in the new-user form; labels = t('users.roles.<value>').
@@ -31,7 +31,7 @@ export default function NewUserModal({ onClose, onCreated }: {
     setSaving(true); setError(null)
     try {
       const res = await api.post('/users', form)
-      onCreated(res.data?.data ?? res.data)
+      onCreated(unwrap(res))
       onClose()
     } catch (err) {
       const e2 = err as { response?: { data?: { message?: string } } }

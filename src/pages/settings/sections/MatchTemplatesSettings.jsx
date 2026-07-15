@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import Slider from '@/components/ui/Slider'
 
@@ -69,8 +69,8 @@ export default function MatchTemplatesSettings() {
       api.get('/settings/match-weight-templates'),
       api.get('/vacancy-employment-types').catch(() => ({ data: [] })),
     ]).then(([tRes, eRes]) => {
-      setTemplates(tRes.data?.data ?? tRes.data ?? [])
-      setEmploymentTypes(eRes.data?.data ?? eRes.data ?? [])
+      setTemplates(unwrapList(tRes).rows)
+      setEmploymentTypes(unwrapList(eRes).rows)
       setPhase('ready')
     }).catch(() => setPhase('error'))
   }, [])
@@ -94,7 +94,7 @@ export default function MatchTemplatesSettings() {
     try {
       const payload = { name, weights: newForm.weights, employment_type_id: newForm.employment_type_id || null, function_title: newForm.function_title.trim() || null }
       const res = await api.post('/settings/match-weight-templates', payload)
-      setTemplates(p => [...p, res.data?.data ?? res.data])
+      setTemplates(p => [...p, unwrap(res)])
       setNewForm({ name: '', weights: buildWeights(), employment_type_id: '', function_title: '' })
       setAdding(false)
     } catch {
@@ -112,7 +112,7 @@ export default function MatchTemplatesSettings() {
     try {
       const payload = { name: form.name.trim(), weights: form.weights, employment_type_id: form.employment_type_id || null, function_title: (form.function_title ?? '').trim() || null }
       const res = await api.patch(`/settings/match-weight-templates/${tpl.id}`, payload)
-      const updated = res.data?.data ?? res.data
+      const updated = unwrap(res)
       setTemplates(p => p.map(x => x.id === tpl.id ? updated : x))
       setExpanded(null)
       const linked = updated.linked_vacancies_count ?? 0

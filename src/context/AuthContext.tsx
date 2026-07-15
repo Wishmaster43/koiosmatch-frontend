@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react'
 import type { ReactNode } from 'react'
-import api, { primeCsrf } from '../lib/api'
+import api, { primeCsrf, unwrapList } from '../lib/api'
 import { hasModule as tenantHasModule } from '../lib/modules'
 import { queryClient } from '../lib/queryClient'
 import type { Tenant, User } from '../types/api'
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // the backend then falls back to the FIRST tenant (demo-data-in-yesway).
       await api.get('/tenants')
         .then(res => {
-          const list = res.data?.data ?? res.data ?? []
+          const list = unwrapList<Tenant>(res).rows
           if (Array.isArray(list) && list.length) {
             setTenants(list)
             const active = list.find((t: Tenant) => t.id === savedTenant) ?? list[0]
@@ -239,7 +239,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       try {
         const r    = await api.get('/tenants')
-        const list = r.data?.data ?? r.data ?? []
+        const list = unwrapList<Tenant>(r).rows
         if (Array.isArray(list) && list.length > 0) {
           setTenants(list)
           const first = list[0]
@@ -273,7 +273,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       try {
         const r    = await api.get('/tenants')
-        const list = r.data?.data ?? r.data ?? []
+        const list = unwrapList<Tenant>(r).rows
         if (Array.isArray(list) && list.length > 0) {
           setTenants(list)
           const first = list[0]

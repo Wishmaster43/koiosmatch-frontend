@@ -12,7 +12,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { useCustomFields } from '@/lib/useCustomFields'
 
 // Field types the backend supports.
@@ -60,7 +60,7 @@ export default function CustomFieldsSettings({ entityType }) {
   useEffect(() => {
     setLoading(true)
     api.get('/custom-fields', { params: { entity_type: entityType } })
-      .then(r => setFields((r.data?.data ?? r.data ?? []).map(d => toField(d, i18n.language))))
+      .then(r => setFields((unwrapList(r).rows).map(d => toField(d, i18n.language))))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [entityType, i18n.language])
@@ -99,7 +99,7 @@ export default function CustomFieldsSettings({ entityType }) {
         options: newForm.type === 'select' ? newForm.options.split(',').map(s => s.trim()).filter(Boolean) : [],
       }
       const res = await api.post('/custom-fields', payload)
-      const d = res.data?.data ?? res.data
+      const d = unwrap(res)
       setFields(p => [...p, toField(d, i18n.language)])
       setNewForm({ label: '', key: '', type: 'text', options: '' })
       setAdding(false)
@@ -122,7 +122,7 @@ export default function CustomFieldsSettings({ entityType }) {
       }
       if (!field.has_data) payload.type = form.type ?? field.type
       const res = await api.patch(`/custom-fields/${field.id}`, payload)
-      const d = res.data?.data ?? res.data
+      const d = unwrap(res)
       setFields(p => p.map(f => f.id === field.id ? toField(d, i18n.language) : f))
       setExpanded(null)
       invalidate()

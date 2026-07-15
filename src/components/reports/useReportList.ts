@@ -5,7 +5,7 @@
  * thrown state — the table renders its own empty state (§3). Cancels on unmount.
  */
 import { useState, useEffect } from 'react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 
 export function useReportList<T>(url: string): { rows: T[]; loading: boolean } {
   const [rows,    setRows]    = useState<T[]>([])
@@ -14,7 +14,7 @@ export function useReportList<T>(url: string): { rows: T[]; loading: boolean } {
   useEffect(() => {
     let active = true
     api.get(url)
-      .then(res => { if (active) setRows(res.data?.data ?? res.data ?? []) })
+      .then(res => { if (active) setRows(unwrapList<T>(res).rows) })
       .catch(() => { if (active) setRows([]) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }

@@ -11,6 +11,7 @@
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import type { LookupOption } from '@/types/common'
+import { unwrapList } from '@/lib/api'
 
 // Seed defaults mirror the backend seed (healthcare CAOs); labels are tenant-facing.
 export const DEFAULT_CAO: LookupOption[] = [
@@ -33,7 +34,7 @@ const toOption = (r: Record<string, unknown>): LookupOption => ({
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
 const mapCao = (res: AxiosResponse): LookupOption[] | null => {
-  const raw = (res?.data?.data ?? res?.data ?? []) as Record<string, unknown>[]
+  const raw = (unwrapList(res).rows) as Record<string, unknown>[]
   const d = raw.filter(Boolean).map(toOption)
   return d.length ? d : null
 }

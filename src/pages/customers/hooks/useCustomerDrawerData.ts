@@ -5,7 +5,7 @@
  * inputs exist, and tolerant of a missing endpoint (empty/null, never a hard error).
  */
 import { useQuery } from '@tanstack/react-query'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import type { Id } from '@/types/common'
 
 export interface CustomerStats { matches_total?: number; active_matches?: number; open_vacancies?: number; fill_rate?: number }
@@ -17,7 +17,7 @@ export function useCustomerStats(id?: Id): CustomerStats | null {
     enabled: !!id,
     queryFn: async ({ signal }): Promise<CustomerStats | null> => {
       const r = await api.get(`/customers/${id}/stats`, { signal })
-      return (r.data?.data ?? r.data ?? null) as CustomerStats | null
+      return (unwrap(r) ?? null) as CustomerStats | null
     },
   })
   return data
@@ -88,7 +88,7 @@ export function useCustomerPlanning(customerId: Id | undefined, enabled: boolean
     enabled: enabled && !!customerId,
     queryFn: async ({ signal }): Promise<PlanningData | null> => {
       const r = await api.get(`/customers/${customerId}/planning-summary`, { params, signal })
-      return (r.data?.data ?? r.data ?? null) as PlanningData | null
+      return (unwrap(r) ?? null) as PlanningData | null
     },
   })
   return { data, loading }

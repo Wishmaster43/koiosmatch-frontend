@@ -26,7 +26,11 @@ const RENAMED_FUNNEL: LookupItem[] = [
   { value: 'afgewezen', label: 'Afgewezen', color: '#D98A8A', is_rejected: true },
 ]
 
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), patch: vi.fn(), delete: vi.fn() } }))
+// Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { get: vi.fn(), patch: vi.fn(), delete: vi.fn() } }
+})
 
 afterEach(() => vi.clearAllMocks())
 

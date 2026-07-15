@@ -1,11 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 
-// Stub the tenant-aware api client + toast so no real request/toast runs.
-vi.mock('@/lib/api', () => ({
-  default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() },
-  unwrapList: (r: { data?: unknown }) => ({ rows: Array.isArray(r?.data) ? r.data : [] }),
-}))
+// Stub the tenant-aware api client + toast so no real request/toast runs. Keep the
+// real unwrap/unwrapList (importActual) — the hook now also unwraps a single
+// resource (the POST response row), which a partial mock would leave undefined.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }
+})
 vi.mock('@/lib/notify', () => ({ notifyError: vi.fn() }))
 
 import api from '@/lib/api'

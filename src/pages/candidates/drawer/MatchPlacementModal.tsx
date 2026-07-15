@@ -11,7 +11,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import SelectMenu from '@/components/ui/SelectMenu'
 import { useUsers } from '@/lib/queries'
@@ -121,7 +121,7 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
     api.get(`/candidates/${candidateId}`)
       .then(r => {
         if (!alive) return
-        const d = (r.data?.data ?? r.data) as { branch_id?: Id | null; location?: { name?: string } | null }
+        const d = (unwrap(r)) as { branch_id?: Id | null; location?: { name?: string } | null }
         setCandBranch({ id: d?.branch_id ?? null, name: d?.location?.name ?? '' })
       })
       .catch(() => { if (alive) setCandBranch(null) })
@@ -138,7 +138,7 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
     api.get(`/customers/${customerId}`)
       .then(r => {
         if (!alive) return
-        const d = (r.data?.data ?? r.data) as CustomerDetail
+        const d = (unwrap(r)) as CustomerDetail
         setDetail(d)
         if (d?.cost_center) setCostCenter(prev => prev || d.cost_center!)
         if (d?.billing_email) setBillingEmails(prev => (prev.length === 1 && !prev[0].trim()) ? [d.billing_email!] : prev)
@@ -222,9 +222,9 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
     if (!customerId || !nc.first_name.trim() || !nc.last_name.trim()) return
     try {
       const r = await api.post(`/customers/${customerId}/contacts`, { ...nc, location_id: locationId || undefined })
-      const created = (r.data?.data ?? r.data) as { id?: Id }
+      const created = (unwrap(r)) as { id?: Id }
       const fresh = await api.get(`/customers/${customerId}`)
-      setDetail((fresh.data?.data ?? fresh.data) as CustomerDetail)
+      setDetail((unwrap(fresh)) as CustomerDetail)
       if (created?.id) setContactId(String(created.id))
       setCreatingContact(false); setNc({ first_name: '', last_name: '', email: '', phone: '' })
       notifySuccess(t('placement.contactCreated'))

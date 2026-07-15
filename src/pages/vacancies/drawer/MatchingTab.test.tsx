@@ -18,7 +18,11 @@ import { useVacancyRecord } from '../hooks/useVacancyRecord'
 import api from '@/lib/api'
 import type { Vacancy } from '@/types/vacancy'
 
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), patch: vi.fn() } }))
+// Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { get: vi.fn(), patch: vi.fn() } }
+})
 
 const TEMPLATE_WEIGHTS = { qualifications: 5, technical_fit: 5, soft_skills: 2, cultural_alignment: 3, career_aspirations: 2, location: 1 }
 vi.mock('../hooks/useMatchWeightTemplates', () => ({

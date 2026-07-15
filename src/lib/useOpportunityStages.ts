@@ -13,6 +13,7 @@ import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
 import { normalizeOptions } from './lookupUtils'
 import type { LookupOption } from '@/types/common'
+import { unwrap } from '@/lib/api'
 
 // Seed shipped for new tenants + fallback before the backend responds (worklist C-28).
 export const DEFAULT_OPPORTUNITY_STAGES: LookupOption[] = [
@@ -25,7 +26,7 @@ export const DEFAULT_OPPORTUNITY_STAGES: LookupOption[] = [
 ]
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
-const mapOpportunityStages = (res: AxiosResponse): LookupOption[] | null => normalizeOptions(res.data?.data ?? res.data)
+const mapOpportunityStages = (res: AxiosResponse): LookupOption[] | null => normalizeOptions(unwrap(res))
 
 export function useOpportunityStages() {
   const { data: stages } = useCachedLookup('/opportunity-stages', mapOpportunityStages, DEFAULT_OPPORTUNITY_STAGES)

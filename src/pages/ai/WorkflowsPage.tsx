@@ -13,7 +13,7 @@ import type { ReactNode, DragEvent } from 'react'
 import { interactive } from '@/lib/a11y'
 import { notify, notifyError } from '@/lib/notify'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { Zap, Plus, Loader2, Folder, FolderPlus, Trash2, LayoutGrid, List, Archive } from 'lucide-react'
@@ -21,7 +21,7 @@ import WorkflowCanvasEditor from '@/components/layout/WorkflowCanvasEditor'
 import { normalizeWorkflow, denormalizeWorkflow } from './data/workflowMap'
 import WorkflowCard from './WorkflowCard'
 import WorkflowListRow from './WorkflowListRow'
-import type { Workflow } from '@/types/workflow'
+import type { Workflow, RawWorkflow } from '@/types/workflow'
 
 // Non-PII UI preference (which view the list opens in) — survives reloads (AW-list).
 const VIEW_MODE_KEY = 'wf.viewMode'
@@ -85,8 +85,8 @@ export default function WorkflowsPage() {
     // Archived view asks the backend for soft-deleted rows too (C-27-workflow).
     setLoading(true)
     Promise.all([
-      api.get('/workflows', { params: showArchived ? { include_archived: 1 } : {} }).then(r => (r.data?.data ?? r.data ?? []).map(normalizeWorkflow)).catch(() => []),
-      api.get('/workflow-folders').then(r => r.data?.data ?? r.data ?? []).catch(() => []),
+      api.get('/workflows', { params: showArchived ? { include_archived: 1 } : {} }).then(r => unwrapList<RawWorkflow>(r).rows.map(normalizeWorkflow)).catch(() => []),
+      api.get('/workflow-folders').then(r => unwrapList<WorkflowFolder>(r).rows).catch(() => []),
     ]).then(([wfs, flds]) => {
       // Restore graph from localStorage when the backend doesn't store connections yet (C-27).
       // The cached steps are self-consistent (node IDs match edge source/target), so use
@@ -155,7 +155,7 @@ export default function WorkflowsPage() {
         : await api.put(`/workflows/${updated.id}`, payload)
       // Keep frontend graph (steps with next/position) as source of truth — backend
       // doesn't store connections yet (C-27). Persist to localStorage so Cmd+R survives.
-      const serverData = normalizeWorkflow(res.data?.data ?? res.data)
+      const serverData = normalizeWorkflow(unwrap<RawWorkflow>(res))
       const savedWorkflow = { ...updated, id: serverData.id ?? updated.id }
       localStorage.setItem(`wf_graph_${savedWorkflow.id}`, JSON.stringify(savedWorkflow.steps))
       setWorkflows(prev => isNew ? [...prev, savedWorkflow] : prev.map(w => w.id === savedWorkflow.id ? savedWorkflow : w))
@@ -178,7 +178,7 @@ export default function WorkflowsPage() {
   const createFolder = async (name: string) => {
     try {
       const res = await api.post('/workflow-folders', { name })
-      setFolders(prev => [...prev, res.data?.data ?? res.data])
+      setFolders(prev => [...prev, unwrap<WorkflowFolder>(res)])
     } catch { /* noop */ }
   }
 

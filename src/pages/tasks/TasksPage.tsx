@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Archive, Plus } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { isAbortError } from '@/lib/mocks'
 import { initialsOf } from '@/lib/initials'
@@ -187,7 +187,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     selectedIdRef.current = task.id ?? null
     setSelected(decorate(task) as TaskDetail); setExpanded(false)
     api.get(`/tasks/${task.id}`)
-      .then(r => { if (selectedIdRef.current === task.id) setSelected(decorate(mapTaskDetail(r.data?.data ?? r.data))) })
+      .then(r => { if (selectedIdRef.current === task.id) setSelected(decorate(mapTaskDetail(unwrap(r)))) })
       .catch(() => {})
   }
   // Open a task drawer when arriving via a cross-entity link ({ open: id }, candidate → task).
@@ -215,9 +215,8 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   const handleMove = (id: Id, statusKey: string | number) => handleUpdate(id, { statusKey })
 
   // Apply the authoritative task detail returned by the link endpoints.
-  const applyDetail = (id: Id | undefined, res: { data?: unknown }) => {
-    const r = res as { data?: { data?: unknown } }
-    const detail = decorate(mapTaskDetail((r?.data?.data ?? r?.data) as ApiTask))
+  const applyDetail = (id: Id | undefined, res: { data: unknown }) => {
+    const detail = decorate(mapTaskDetail(unwrap<ApiTask>(res)))
     setSelected(prev => (prev && prev.id === id ? detail : prev))
     setTasks(prev => prev.map(x => x.id === id ? { ...x, links: detail.links, linkLabel: detail.linkLabel } : x))
   }

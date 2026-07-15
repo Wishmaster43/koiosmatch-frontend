@@ -6,7 +6,7 @@
  */
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 
 const num = (v) => (v == null ? '—' : Number(v).toLocaleString('nl-NL'))
@@ -51,7 +51,7 @@ export default function TenantUsageSettings() {
     const ctrl = new AbortController()
     setPhase('loading')
     api.get(`/admin/tenants/${activeTenant.id}/usage`, { params: { month }, signal: ctrl.signal })
-      .then(res => { setUsage(res.data?.data ?? res.data ?? {}); setPhase('ready') })
+      .then(res => { setUsage(unwrap(res) ?? {}); setPhase('ready') })
       .catch(() => setPhase('error'))
     return () => ctrl.abort()
   }, [activeTenant?.id, month])

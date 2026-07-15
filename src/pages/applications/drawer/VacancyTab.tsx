@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Link2, Unlink, Save, X } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import EntityLink from '@/components/ui/EntityLink'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DetailsTab from '@/pages/vacancies/drawer/DetailsTab'
@@ -49,7 +49,7 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
     let alive = true
     setState('loading')
     api.get(`/vacancies/${id}`)
-      .then(r => { if (!alive) return; setVac(mapVacancyDetail(r.data?.data ?? r.data)); setState('ok') })
+      .then(r => { if (!alive) return; setVac(mapVacancyDetail(unwrap(r))); setState('ok') })
       .catch(() => { if (alive) setState('error') })
     return () => { alive = false }
   }, [a.vacancyId])

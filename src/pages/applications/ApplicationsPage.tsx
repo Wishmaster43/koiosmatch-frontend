@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Plus, Archive } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -180,7 +180,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     selectedIdRef.current = a.id ?? null
     setSelected(decorate(a) as ApplicationDetail); setExpanded(false)
     api.get(`/applications/${a.id}`)
-      .then(r => { if (selectedIdRef.current === a.id) setSelected(decorate(mapApplicationDetail(r.data?.data ?? r.data, funnelTypes))) })
+      .then(r => { if (selectedIdRef.current === a.id) setSelected(decorate(mapApplicationDetail(unwrap(r), funnelTypes))) })
       .catch(() => {})
   }
 
@@ -255,7 +255,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as ApplicationDetail) : prev))
     api.patch(`/applications/${id}`, { vacancy_id: vacancyId })
       .then(res => {
-        const updated = mapApplication(res.data?.data ?? res.data, funnelTypes)
+        const updated = mapApplication(unwrap(res), funnelTypes)
         const reconciled = { vacancyId: updated.vacancyId, vacancyTitle: updated.vacancyTitle, client: updated.client }
         setApplications(prev => prev.map(a => a.id === id ? { ...a, ...reconciled } : a))
         setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...reconciled } as ApplicationDetail) : prev))

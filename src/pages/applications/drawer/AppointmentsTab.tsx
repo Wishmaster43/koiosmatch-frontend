@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Calendar, Plus, Clock, User, MapPin, Pencil } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
 import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
 import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
@@ -46,7 +46,7 @@ export default function AppointmentsTab({ application: a }: { application: Appli
     setLoading(true); setLoadFailed(false)
     api.get(`/candidates/${a.candidateId}/appointments`, { quiet404: true })
       .then(r => {
-        const rows = (r.data?.data ?? r.data ?? []) as RawAppt[]
+        const rows = (unwrapList(r).rows) as RawAppt[]
         setAppointments(rows.filter(ap => String(ap.application_id) === String(a.id)))
       })
       .catch(() => setLoadFailed(true))

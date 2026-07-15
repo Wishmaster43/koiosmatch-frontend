@@ -9,7 +9,7 @@
  * (the menu always renders immediately; counts stream in after).
  */
 import { useEffect, useState } from 'react'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { heavyGet } from '@/lib/heavyGet'
 
 export interface KoiosMentionCounts {
@@ -43,7 +43,7 @@ async function fetchTotal(url: string): Promise<number | undefined> {
 async function fetchLeadsCount(): Promise<number | undefined> {
   try {
     const res = await heavyGet('/candidates/stats')
-    const body = (res.data?.data ?? res.data ?? null) as
+    const body = (unwrap(res) ?? null) as
       { by_status?: Array<{ value?: string; status?: string; count?: number }> } | null
     const bucket = body?.by_status?.find((o) => !(o.value ?? o.status))
     return typeof bucket?.count === 'number' ? bucket.count : undefined

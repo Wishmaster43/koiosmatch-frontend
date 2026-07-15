@@ -20,7 +20,7 @@
 import { useCallback, useMemo } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { mapApplication } from '../data/mapApplication'
 import type { ApiApplication, Application } from '@/types/application'
 import type { LookupItem } from '@/context/LookupsContext'
@@ -126,7 +126,7 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
     queryFn: async ({ signal }): Promise<AppStats | null> => {
       try {
         const res = await api.get('/applications/stats', { params: statsParams, signal })
-        return (res.data?.data ?? res.data ?? null) as AppStats | null
+        return (unwrap(res) ?? null) as AppStats | null
       } catch (err) {
         if (isMissingEndpoint(err)) return null
         throw err

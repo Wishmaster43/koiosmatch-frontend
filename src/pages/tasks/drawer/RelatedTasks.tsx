@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
 import type { TaskDetail } from '@/types/task'
@@ -32,7 +32,7 @@ export default function RelatedTasks({ task }: { task: TaskDetail }) {
     if (!candidateId) { setRows([]); return }
     let alive = true
     api.get('/tasks', { params: { candidate: candidateId } })
-      .then(r => { if (alive) setRows(((r.data?.data ?? r.data ?? []) as Row[]).filter(x => String(x.id) !== String(task.id))) })
+      .then(r => { if (alive) setRows(((unwrapList(r).rows) as Row[]).filter(x => String(x.id) !== String(task.id))) })
       .catch(() => { if (alive) setRows([]) })
     return () => { alive = false }
   }, [candidateId, task.id])

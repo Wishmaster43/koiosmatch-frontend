@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { CalendarPlus, Plus } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import EntityLink from '@/components/ui/EntityLink'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import PlanIntakeModal from '@/pages/candidates/drawer/PlanIntakeModal'
 import AddApplicationModal from '@/pages/applications/AddApplicationModal'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
@@ -50,7 +50,7 @@ export default function ApplicantsTab({ vacancy: v }: { vacancy: VacancyDetail }
   const refresh = () => {
     if (v.id == null) return
     api.get(`/vacancies/${v.id}`)
-      .then(r => setOverride(mapVacancyDetail(r.data?.data ?? r.data)))
+      .then(r => setOverride(mapVacancyDetail(unwrap(r))))
       .catch(() => {})
   }
 

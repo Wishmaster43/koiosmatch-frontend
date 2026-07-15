@@ -7,7 +7,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notify } from '@/lib/notify'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
@@ -27,7 +27,7 @@ export function useMatchApproval(match: MatchRow | null, onUpdate?: (id: MatchRo
     const ctrl = new AbortController()
     api.get(`/matches/${match.id}`, { signal: ctrl.signal })
       .then(r => {
-        const d = (r.data?.data ?? r.data) as { approval_rejected_reason?: string }
+        const d = (unwrap(r)) as { approval_rejected_reason?: string }
         if (d?.approval_rejected_reason) setReason(d.approval_rejected_reason)
       })
       .catch(() => {})

@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { Field, TextField, SelectField } from '@/components/forms/fields'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useIndustries } from '@/lib/useIndustries'
 import { useFunctions } from '@/lib/useFunctions'
 import { mapVacancy } from './data/mapVacancy'
-import type { Vacancy } from '@/types/vacancy'
+import type { ApiVacancy, Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
@@ -34,6 +34,10 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
 
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [saving, setSaving] = useState(false)
+  // AUDIT-1 (item 9): a non-422 failure used to fall through the apiErrors branch
+  // silently — the button just stopped spinning with no feedback. Now every
+  // failure shows something inline; modal stays open.
+  const [createError, setCreateError] = useState<string | null>(null)
   const [form, setForm] = useState<VacancyForm>({
     title: '', clientId: '', status: statuses[0]?.value ?? '', ownerId: '',
     industry: '', category: '', location: '',
@@ -47,6 +51,7 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
   const handleSubmit = async () => {
     if (!form.title.trim()) { setErrors({ title: true }); return }
     setSaving(true)
+    setCreateError(null)
     try {
       const body = {
         title: form.title.trim(),
@@ -58,14 +63,19 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
         location: form.location || null,
       }
       const r = await api.post('/vacancies', body)
-      onCreated?.(mapVacancy(r.data?.data ?? r.data))
+      onCreated?.(mapVacancy(unwrap<ApiVacancy>(r)))
       onClose()
     } catch (err) {
-      const apiErrors = (err as { response?: { data?: { errors?: Record<string, unknown> } } })?.response?.data?.errors
+      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
+      const apiErrors = e?.response?.data?.errors
       if (apiErrors) {
         const e2: Record<string, boolean> = {}
         Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
         setErrors(e2)
+      } else {
+        // Fallback: no field-level 422 — surface the server message (or a generic
+        // one) instead of failing silently.
+        setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
       }
     } finally {
       setSaving(false)
@@ -129,6 +139,15 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
             </Field>
           </div>
         </div>
+
+        {/* Server-side rejection (validation / matrix-guard) — shown in place, modal stays open. */}
+        {createError && (
+          <div role="alert" style={{ margin: '0 22px', padding: '8px 10px', fontSize: 12, borderRadius: 8,
+            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', flexShrink: 0 }}>
+            {createError}
+          </div>
+        )}
 
         {/* Footer */}
         <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0,

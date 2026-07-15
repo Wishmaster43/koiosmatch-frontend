@@ -13,6 +13,7 @@ import { useWorkflowRunControl } from './useWorkflowRunControl'
 import { useOutputSeeding } from './useOutputSeeding'
 import type { Workflow, FlowNode, FlowEdge, FlowNodeData, EdgeFilters, ScheduleConfig,
   WorkflowVarField, WorkflowVarGroup } from '@/types/workflow'
+import { unwrapList } from '@/lib/api'
 
 // Flatten a test-run sample into dot-paths (max depth 2, capped) for the var
 // picker. An array is represented by the shape of its first element.
@@ -108,7 +109,7 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
   useEffect(() => {
     import('@/lib/api').then(m => {
       m.default.get('/webhooks')
-        .then(res => setWebhooks(res.data?.data ?? res.data ?? []))
+        .then(res => setWebhooks(unwrapList(res).rows))
         .catch(() => {})
     })
   }, [])
@@ -163,12 +164,14 @@ export function useWorkflowEditor({ workflow, onSave, initialRunId = null }: {
         const statusCond = (cfg.filters?.conditions ?? []).find(c => c.field === 'status' && c.value)
         if (statusCond) params.status = statusCond.value
         const res = await api.get('/sm_candidates', { params })
-        const rows = res.data?.data ?? res.data ?? []
+        const rows = unwrapList<Record<string, unknown>>(res).rows
         output = rows.slice(0, cfg.limit ?? 100)
 
       } else if (data.type === 'planning') {
         const res = await api.get('/planning/shifts', { params: { per_page: 100 } }).catch(() => null)
-        output = res?.data?.data ?? res?.data ?? []
+        // `res` can be null (the .catch above) — unwrapList requires a real
+        // response, so guard it explicitly (was `res?.data?.data ?? res?.data ?? []`).
+        output = res ? unwrapList(res).rows : []
 
       } else {
         // Generic module test-run — backend POST /workflows/test-module (G-9): previews the

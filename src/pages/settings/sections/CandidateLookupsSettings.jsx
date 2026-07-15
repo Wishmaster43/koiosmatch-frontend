@@ -13,11 +13,10 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
 
 const BASE = '/settings/candidate-lookups'
-const unwrap = (res) => res?.data?.data ?? res?.data
 
 // "Niet actief" → "niet_actief" — a stable English-ish slug suggestion.
 const slugify = (s) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '')

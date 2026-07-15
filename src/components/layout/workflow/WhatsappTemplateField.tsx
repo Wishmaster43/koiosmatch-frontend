@@ -17,6 +17,7 @@ import {
 } from './whatsappTemplate'
 import type { WorkflowVarGroup } from '@/types/workflow'
 import type { OnChange } from './fieldControls'
+import { unwrapList } from '@/lib/api'
 
 // ── Preview rendering ────────────────────────────────────────────────────────────
 
@@ -98,7 +99,7 @@ export default function WhatsappTemplateField({ value, onChange, config, variabl
   useEffect(() => {
     let alive = true
     import('@/lib/api').then(m => m.default.get('/whatsapp-templates'))
-      .then(r => { if (alive) setTemplates((r.data?.data ?? r.data ?? []) as WaTemplateOption[]) })
+      .then(r => { if (alive) setTemplates((unwrapList(r).rows) as WaTemplateOption[]) })
       .catch(() => {})
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }

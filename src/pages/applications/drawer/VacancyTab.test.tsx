@@ -5,13 +5,13 @@ import VacancyTab from './VacancyTab'
 import type { ApplicationDetail } from '@/types/application'
 
 // Stub the api client + the reused vacancy detail (avoids its lookups context).
-// unwrapList must be stubbed too: VacancyTab pulls in useVacancyLinkOptions, which
-// imports it from the same module — a partial mock leaves it undefined at load time.
-vi.mock('@/lib/api', () => ({
-  default: { get: vi.fn() },
-  unwrapList: (res: { data?: { data?: unknown[] } }) =>
-    ({ rows: res?.data?.data ?? [], total: 0, page: 1, lastPage: 1, perPage: 0 }),
-}))
+// Keep the real unwrap/unwrapList (importActual): VacancyTab itself now unwraps a
+// single resource, and useVacancyLinkOptions pulls in unwrapList — a partial mock
+// left either undefined at load time.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { get: vi.fn() } }
+})
 vi.mock('@/pages/vacancies/drawer/DetailsTab', () => ({ default: () => <div>details-tab</div> }))
 vi.mock('@/context/VacancyLookupsContext', () => ({ VacancyLookupsProvider: ({ children }: { children: ReactNode }) => <>{children}</> }))
 

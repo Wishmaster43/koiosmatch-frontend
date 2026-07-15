@@ -10,7 +10,11 @@ import {
   cancelJob, retryFailedJob, retryAllFailedJobs, forgetFailedJob, flushFailedJobs,
 } from './jobsApi'
 
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }))
+// Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual('@/lib/api')
+  return { ...actual, default: { get: vi.fn(), post: vi.fn(), delete: vi.fn() } }
+})
 
 afterEach(() => vi.clearAllMocks())
 

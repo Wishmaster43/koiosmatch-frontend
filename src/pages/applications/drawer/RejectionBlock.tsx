@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { XCircle } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -24,7 +24,7 @@ export default function RejectionBlock({ application: a, onReject }: { applicati
 
   // Load the rejection reasons; empty on failure, never demo data.
   useEffect(() => {
-    api.get('/candidate-rejection-reasons').then(r => setReasons(r.data?.data ?? r.data ?? [])).catch(() => setReasons([]))
+    api.get('/candidate-rejection-reasons').then(r => setReasons(unwrapList<RejectionReason>(r).rows)).catch(() => setReasons([]))
   }, [])
 
   // Already rejected → compact summary instead of the form.

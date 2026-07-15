@@ -10,6 +10,7 @@
  */
 import { useEffect, useState } from 'react'
 import type { ModuleCatalog } from './filterFieldCatalog'
+import { unwrap } from '@/lib/api'
 
 let cache: ModuleCatalog | null = null
 let inFlight: Promise<ModuleCatalog> | null = null
@@ -36,7 +37,7 @@ async function fetchCatalog(): Promise<ModuleCatalog> {
       try {
         const api = (await import('@/lib/api')).default
         const res = await api.get('/workflows/modules')
-        cache = normalize(res.data?.data ?? res.data ?? {})
+        cache = normalize(unwrap(res) ?? {})
       } catch {
         // Fail soft: an empty catalog just means the picker shows no fields yet
         // (the manual/custom CreatableSelect path still lets a user type one).

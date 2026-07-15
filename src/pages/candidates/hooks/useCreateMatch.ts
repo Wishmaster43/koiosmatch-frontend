@@ -8,7 +8,7 @@
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import type { Id } from '@/types/common'
 
@@ -22,7 +22,7 @@ export function useCreateMatch(candidateId: Id) {
     setCreating(true)
     try {
       const r = await api.post('/matches', { candidate_id: candidateId, vacancy_id: vacancyId })
-      const m = (r?.data?.data ?? r?.data) as { id?: Id } | undefined
+      const m = (unwrap(r)) as { id?: Id } | undefined
       return m?.id != null ? String(m.id) : null
     } catch {
       notifyError(t('common:actionFailed'))

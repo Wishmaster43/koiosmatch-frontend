@@ -6,7 +6,7 @@
  * drill target and cancels a superseded fetch (A-3).
  */
 import { useQuery } from '@tanstack/react-query'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import type { DrillSpec } from './ReportDrillDrawer'
 
 type DrillRow = Record<string, unknown>
@@ -19,7 +19,7 @@ export function useReportDrill(drill: DrillSpec | null) {
     queryFn: async ({ signal }) => {
       if (!drill?.rowsEndpoint) return [] as DrillRow[]
       const r = await api.get(drill.rowsEndpoint, { params: drill.rowsParams, signal })
-      return (r.data?.data ?? r.data ?? []) as DrillRow[]
+      return (unwrapList(r).rows) as DrillRow[]
     },
   })
 

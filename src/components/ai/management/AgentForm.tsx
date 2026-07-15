@@ -5,7 +5,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Brain, Check, MessageSquare, Send, Trash2 } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { interactive } from '@/lib/a11y'
 import { MODELS, STRENGTH_COLORS, inputStyle, Field, Badge, SaveBar } from './shared'
 import type { AiAgent, AiItem, ChatMessage } from '@/types/ai'
@@ -135,7 +135,7 @@ export function AgentForm({ agent, prompts, faqs, onSaved, onDelete }: {
       const res = isNew
         ? await api.post('/ai/agents', form)
         : await api.put(`/ai/agents/${agent.id}`, form)
-      onSaved(res.data?.data ?? res.data)
+      onSaved(unwrap<AiAgent>(res))
       setSaved(true); setTimeout(() => setSaved(false), 2500)
     } catch { /* noop */ }
     setSaving(false)

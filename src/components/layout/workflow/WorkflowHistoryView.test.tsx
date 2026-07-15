@@ -4,7 +4,11 @@ import api from '@/lib/api'
 import WorkflowHistoryView from './WorkflowHistoryView'
 
 // The history view fetches this workflow's runs on mount → stub the api client.
-vi.mock('@/lib/api', () => ({ default: { get: vi.fn() } }))
+// Keep the real unwrap/unwrapList (importActual) — only the default client is stubbed.
+vi.mock('@/lib/api', async () => {
+  const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
+  return { ...actual, default: { get: vi.fn() } }
+})
 
 const run = { id: 1, status: 'success', started_at: '2026-06-23T10:00:00Z', trigger: 'manual', duration_ms: 5000 }
 

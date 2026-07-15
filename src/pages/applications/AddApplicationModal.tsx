@@ -3,7 +3,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ComponentType, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -94,7 +94,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
     setCreateError(null)
     try {
       const res = await api.post('/applications', { candidate_id: candidateId, vacancy_id: vacancyId, owner_id: ownerId || null })
-      onCreated(mapApplication(res.data?.data ?? res.data, funnelTypes))
+      onCreated(mapApplication(unwrap(res), funnelTypes))
     } catch (err) {
       const e = err as { response?: { data?: { message?: string } } }
       setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))

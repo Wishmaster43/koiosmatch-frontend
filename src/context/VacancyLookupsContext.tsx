@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react'
 import type { Dispatch, ReactNode, SetStateAction } from 'react'
-import api from '../lib/api'
+import api, { unwrap } from '../lib/api'
 
 /**
  * VacancyLookupsContext — the tenant-configurable vacancy lookups.
@@ -105,7 +105,7 @@ export function VacancyLookupsProvider({ children }: { children: ReactNode }) {
   // Fetch each lookup once; a 404/empty keeps the seed fallback so the UI never breaks.
   useEffect(() => {
     const load = (url: string, fallback: VacancyLookupItem[], set: Dispatch<SetStateAction<VacancyLookupItem[]>>, pinId = false) =>
-      api.get(url).then(r => set(normalize(r.data?.data ?? r.data, fallback, pinId))).catch(() => {})
+      api.get(url).then(r => set(normalize(unwrap(r), fallback, pinId))).catch(() => {})
     Promise.allSettled([
       load('/vacancy-statuses',         DEFAULT_VACANCY_STATUSES, setStatuses),
       load('/vacancy-phases',           DEFAULT_VACANCY_PHASES,   setPhases),

@@ -7,7 +7,7 @@
  */
 import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { mapVacancyDetail } from '../data/mapVacancy'
 import { initialsOf, buildVacancyPatch } from '../data/vacanciesShared'
@@ -41,7 +41,7 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
     selectedIdRef.current = v.id ?? null
     setSelected(v); setDetail(null); setDrawerExpanded(false)
     api.get(`/vacancies/${v.id}`)
-      .then(r => { if (selectedIdRef.current === v.id) setDetail(mapVacancyDetail(r.data?.data ?? r.data)) })
+      .then(r => { if (selectedIdRef.current === v.id) setDetail(mapVacancyDetail(unwrap(r))) })
       .catch(() => {})
   }
 
@@ -67,7 +67,7 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
     // authoritative response instead of trusting the optimistic local patch.
     if ('matchWeights' in patch || 'matchWeightTemplateId' in patch) {
       request.then(r => {
-        const updated = mapVacancyDetail(r.data?.data ?? r.data)
+        const updated = mapVacancyDetail(unwrap(r))
         setDetail(prev => (prev && prev.id === id ? { ...prev, matchWeights: updated.matchWeights, matchWeightTemplateId: updated.matchWeightTemplateId } : prev))
       }).catch(() => notifyError(t('common:actionFailed')))
     } else {

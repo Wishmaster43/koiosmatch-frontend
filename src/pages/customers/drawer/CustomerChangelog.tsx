@@ -7,7 +7,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { History, X } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
 import { useDateFormat } from '@/lib/datetime'
 import { sectionTitle } from '@/components/ui/SectionCard'
@@ -29,7 +29,7 @@ export default function CustomerChangelog({ customerId }: { customerId: Id | und
     const ctrl = new AbortController()
     setLoading(true)
     api.get(`/customers/${customerId}/activity`, { signal: ctrl.signal })
-      .then(r => setItems((r.data?.data ?? r.data ?? []) as ActivityEntry[]))
+      .then(r => setItems((unwrapList(r).rows) as ActivityEntry[]))
       .catch(e => { if (!isAbortError(e)) setItems([]) })
       .finally(() => { if (!ctrl.signal.aborted) setLoading(false) })
     return () => ctrl.abort()

@@ -8,7 +8,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { useUsers } from '@/lib/queries'
 import { useOpportunityStages } from '@/lib/useOpportunityStages'
@@ -39,7 +39,7 @@ export function useOpportunitiesData() {
     queryFn: async ({ signal }) => {
       try {
         const r = await api.get('/opportunities', { params: showArchived ? { include_archived: 1 } : undefined, signal })
-        return ((r.data?.data ?? r.data ?? []) as ApiOpportunity[]).map(mapOpportunity)
+        return ((unwrapList(r).rows) as ApiOpportunity[]).map(mapOpportunity)
       } catch (e) {
         if ((e as { response?: { status?: number } })?.response?.status === 404) return [] as Opportunity[]
         throw e
@@ -80,7 +80,7 @@ export function useOpportunitiesData() {
     selectedIdRef.current = o.id ?? null
     setSelected(o); setDrawerExpanded(false)
     api.get(`/opportunities/${o.id}`)
-      .then(r => { if (selectedIdRef.current === o.id) setSelected(mapOpportunity(r.data?.data ?? r.data)) })
+      .then(r => { if (selectedIdRef.current === o.id) setSelected(mapOpportunity(unwrap(r))) })
       .catch(() => {})
   }
 

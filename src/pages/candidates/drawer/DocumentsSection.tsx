@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import type { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search, Plus, X, FileText, Pencil, Eye } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { sectionBlock } from './constants'
 import { useDocumentTypes } from '@/lib/useDocumentTypes'
@@ -56,7 +56,7 @@ export default function DocumentsSection({ c }: { c: Candidate }) {
     fd.append('file', pendingFile.file); fd.append('type', pendingType); fd.append('name', pendingFile.name)
     setPendingFile(null)
     api.post(`/candidates/${c.id}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
-      .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) setDocs(d => d.map(x => x.id === tmpId ? { ...optimistic, ...it } : x)) })
+      .then(r => { const it = unwrap<DocItem>(r); if (it?.id) setDocs(d => d.map(x => x.id === tmpId ? { ...optimistic, ...it } : x)) })
       .catch(() => notifyError(t('common:actionFailed')))
   }
 

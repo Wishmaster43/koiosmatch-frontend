@@ -11,7 +11,7 @@
 import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { mapCustomer } from '../data/mapCustomer'
 import type { Customer, ApiCustomer } from '@/types/customer'
@@ -58,7 +58,7 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
     selectedIdRef.current = c.id ?? null
     setSelected(c); setDetail(null); setDrawerExpanded(false)
     api.get(`/customers/${c.id}`)
-      .then(r => { if (selectedIdRef.current === c.id) setDetail(mapCustomer(r.data?.data ?? r.data)) })
+      .then(r => { if (selectedIdRef.current === c.id) setDetail(mapCustomer(unwrap(r))) })
       .catch(() => {})
   }
 
@@ -85,7 +85,7 @@ export function useCustomerRecord({ setCustomers, setTotal, users, t }: Args) {
     api.post('/customers', {
       name: form.name, debtor_number: form.debtorNumber, status: form.status,
       city: form.city, industry: form.industry, owner_id: form.ownerId,
-    }).then(r => { const c = mapCustomer(r.data?.data ?? r.data); setCustomers(prev => prev.map(x => x.id === optimistic.id ? c : x)) }).catch(() => {})
+    }).then(r => { const c = mapCustomer(unwrap(r)); setCustomers(prev => prev.map(x => x.id === optimistic.id ? c : x)) }).catch(() => {})
   }
 
   // Add a note to a customer (optimistic + POST).

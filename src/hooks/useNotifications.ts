@@ -7,7 +7,7 @@
  * immediately on open. Never logs PII (§8).
  */
 import { useState, useEffect, useCallback } from 'react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 
 export interface AppNotification {
   id: string | number
@@ -25,7 +25,7 @@ export function useNotifications(pollMs = 60000) {
   // Load the feed; any failure (incl. a missing endpoint) resolves to empty.
   const load = useCallback(() => {
     api.get('/notifications')
-      .then(r => setItems((r.data?.data ?? r.data ?? []) as AppNotification[]))
+      .then(r => setItems((unwrapList(r).rows) as AppNotification[]))
       .catch(() => setItems([]))
   }, [])
 

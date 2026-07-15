@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { ExperienceTab as ExperienceTabJs, EducationTab as EducationTabJs, CertificationsTab as CertificationsTabJs, SkillsTab as SkillsTabJs } from './SectionTabs'
 import LanguagesSection from './LanguagesSection'
@@ -72,7 +72,7 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
       const id = -Date.now()
       set(p => [...p, { ...v, id }])
       api.post(`/candidates/${c.id}/${rel}`, TO_API[rel](v))
-        .then(r => { const it = r?.data?.data ?? r?.data; if (it?.id) set(p => p.map(x => x.id === id ? { ...v, ...it } : x)) })
+        .then(r => { const it = unwrap<RelItem>(r); if (it?.id) set(p => p.map(x => x.id === id ? { ...v, ...it } : x)) })
         .catch(() => notifyError(t('actionFailed')))
     },
     onEdit: (i: number, raw: RelItem) => {

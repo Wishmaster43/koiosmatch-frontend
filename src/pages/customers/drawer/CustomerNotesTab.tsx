@@ -18,7 +18,7 @@
 import { useState, useEffect } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import { isAbortError } from '@/lib/mocks'
 import SubTabBar from '@/components/drawer/SubTabBar'
 import NotesTabJs from '@/components/drawer/tabs/NotesTab'
@@ -65,7 +65,7 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
     if (subTab !== 'timeline' || !customerId) return
     const ctrl = new AbortController()
     api.get(`/customers/${customerId}/activity`, { signal: ctrl.signal })
-      .then(r => setTimeline(((r.data?.data ?? r.data ?? []) as ActivityEntry[])
+      .then(r => setTimeline(((unwrapList(r).rows) as ActivityEntry[])
         .map(ev => ({ time: ev.created_at, text: ev.description ?? ev.action ?? '' }))))
       .catch(e => { if (!isAbortError(e)) setTimeline([]) })
     return () => ctrl.abort()

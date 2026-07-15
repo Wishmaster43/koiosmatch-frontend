@@ -6,7 +6,7 @@
  * error; the other sources degrade to an empty list.
  */
 import { useState, useEffect } from 'react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import type { WaStats, WaMessage, WaEscalation, WaActivityDatum } from '@/types/whatsapp'
 
 interface WaLoading { stats: boolean; messages: boolean; escalations: boolean; activity: boolean }
@@ -31,17 +31,17 @@ export function useWhatsAppData() {
       .finally(() => setLoading(p => ({ ...p, stats: false })))
 
     api.get('/whatsapp/messages', { params: { per_page: 50 } })
-      .then(r => setMessages(r.data?.data ?? r.data ?? []))
+      .then(r => setMessages(unwrapList<WaMessage>(r).rows))
       .catch(() => {})
       .finally(() => setLoading(p => ({ ...p, messages: false })))
 
     api.get('/whatsapp/escalations')
-      .then(r => setEscalations(r.data?.data ?? r.data ?? []))
+      .then(r => setEscalations(unwrapList<WaEscalation>(r).rows))
       .catch(() => {})
       .finally(() => setLoading(p => ({ ...p, escalations: false })))
 
     api.get('/whatsapp/activity')
-      .then(r => setActivity(r.data?.data ?? r.data ?? []))
+      .then(r => setActivity(unwrapList<WaActivityDatum>(r).rows))
       .catch(() => {})
       .finally(() => setLoading(p => ({ ...p, activity: false })))
 

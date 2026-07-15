@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ListChecks, Plus } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import SectionCard from '@/components/ui/SectionCard'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
 import { useNavigation } from '@/context/NavigationContext'
@@ -42,7 +42,7 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
   const load = useCallback(() => {
     setLoading(true); setError(false)
     api.get('/tasks', { params: { candidate: candidateId } })
-      .then(r => setTasks((r.data?.data ?? r.data ?? []) as TaskRow[]))
+      .then(r => setTasks((unwrapList(r).rows) as TaskRow[]))
       .catch(e => { if ([404, 422].includes(e?.response?.status)) setTasks([]); else setError(true) })
       .finally(() => setLoading(false))
   }, [candidateId])

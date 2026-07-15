@@ -7,7 +7,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ChevronDown, ChevronRight, Plus, RefreshCw, Trash2 } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { PermissionToggle, ColorSwatch } from '../components/SettingsControls'
 import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
 import RoleChip from '@/components/ui/RoleChip'
@@ -213,7 +213,7 @@ export default function RolesSettings() {
       .finally(() => setLoading(false))
     // Allowed icon set (config/roles.php); fall back to the built-in list on 404.
     api.get('/roles/icons').then(r => {
-      const list = r.data?.data ?? r.data
+      const list = unwrap(r)
       if (Array.isArray(list) && list.length) setIconOptions(list.map(x => (typeof x === 'string' ? x : x.name ?? x.value)).filter(Boolean))
     }).catch(() => {})
   }, [])

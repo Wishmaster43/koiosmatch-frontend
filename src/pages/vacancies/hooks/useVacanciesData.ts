@@ -8,7 +8,7 @@ import { useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
-import api, { unwrapList } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { mapVacancy } from '../data/mapVacancy'
 import type { Vacancy, ApiVacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -74,7 +74,7 @@ export function useVacanciesData({ filterParams, page, pageSize, t }: UseVacanci
     queryKey: ['vacancies', 'stats', filterParams],
     queryFn: async ({ signal }): Promise<VacancyStats | null> => {
       const res = await api.get('/vacancies/stats', { params: filterParams, signal })
-      return (res.data?.data ?? res.data ?? null) as VacancyStats | null
+      return (unwrap(res) ?? null) as VacancyStats | null
     },
   })
 

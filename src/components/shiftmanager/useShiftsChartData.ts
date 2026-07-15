@@ -12,7 +12,7 @@
  */
 import { useMemo } from "react"
 import { useQuery, keepPreviousData } from "@tanstack/react-query"
-import api from "@/lib/api"
+import api, { unwrapList } from "@/lib/api"
 import { SERIES, monthAbbr, YEAR_OPACITY, QUARTERS, yearTint } from "./shiftsChartsConfig"
 import type { ShiftFilterOptions, ShiftMonthRow, ShiftsChartDatum, ShiftBar } from '@/types/shiftmanager'
 
@@ -95,7 +95,7 @@ export function useShiftsChartData({
     queryKey: ['sm_reports', 'shifts-per-month', queryString],
     queryFn: async ({ signal }) => {
       const res  = await api.get(`/sm_reports/shifts-per-month?${queryString}`, { signal })
-      const data = res.data?.data ?? res.data ?? []
+      const data = unwrapList(res).rows
       return (Array.isArray(data) ? data : []) as ShiftMonthRow[]
     },
     placeholderData: keepPreviousData,

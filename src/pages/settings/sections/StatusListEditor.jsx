@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { Check, Save, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
 import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
 
 // extraField (optioneel): { key, label, options: [{value,label}], default } —
@@ -32,7 +32,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const [deleting,  setDeleting]  = useState(null)
 
   useEffect(() => {
-    api.get(endpoint).then(r => setItems(r.data?.data ?? r.data ?? [])).catch(() => {}).finally(() => setLoading(false))
+    api.get(endpoint).then(r => setItems(unwrapList(r).rows)).catch(() => {}).finally(() => setLoading(false))
   }, [endpoint])
 
   // Open the modal blank (create) or prefilled with an existing item (edit).
@@ -56,11 +56,11 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
     try {
       if (editing) {
         const res = await api.put(`${endpoint}/${editing.id}`, { ...editing, ...body })
-        const updated = res.data?.data ?? res.data ?? { ...editing, ...body }
+        const updated = unwrap(res) ?? { ...editing, ...body }
         setItems(p => p.map(x => x.id === editing.id ? { ...x, ...updated } : x))
       } else {
         const res = await api.post(endpoint, body)
-        setItems(p => [...p, res.data?.data ?? res.data])
+        setItems(p => [...p, unwrap(res)])
       }
       setShowModal(false); setDraft(emptyDraft()); setEditing(null)
     } catch { /* noop */ } finally { setSaving(false) }

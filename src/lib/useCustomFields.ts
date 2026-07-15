@@ -10,7 +10,7 @@
  */
 import { useEffect, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 
 export type CustomFieldType = 'text' | 'number' | 'date' | 'boolean' | 'select' | 'textarea'
 
@@ -64,7 +64,7 @@ export function useCustomFields(entityType: CustomFieldEntityType) {
     if (hit) { setRaw(hit); setLoading(false); return }
     setLoading(true)
     api.get('/custom-fields', { params: { entity_type: entityType } })
-      .then(r => { const list = (r.data?.data ?? r.data ?? []) as RawDef[]; cacheByEntity.set(entityType, list); setRaw(list) })
+      .then(r => { const list = (unwrapList(r).rows) as RawDef[]; cacheByEntity.set(entityType, list); setRaw(list) })
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [entityType])

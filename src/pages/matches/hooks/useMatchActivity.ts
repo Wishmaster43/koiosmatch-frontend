@@ -5,7 +5,7 @@
  * useCandidateActivity so every entity's changelog behaves identically (§3A).
  */
 import { useState, useEffect } from 'react'
-import api from '@/lib/api'
+import api, { unwrapList } from '@/lib/api'
 import type { Id } from '@/types/common'
 
 export interface MatchActivityEvent {
@@ -27,7 +27,7 @@ export function useMatchActivity(id?: Id): { items: MatchActivityEvent[]; loadin
     const ctrl = new AbortController()
     setLoading(true); setError(false)
     api.get(`/matches/${id}/activity`, { signal: ctrl.signal })
-      .then(res => setItems(res.data?.data ?? res.data ?? []))
+      .then(res => setItems(unwrapList<MatchActivityEvent>(res).rows))
       .catch(err => {
         if (err?.code === 'ERR_CANCELED') return
         // 404 = endpoint not built yet → treat as empty (calm), not a hard error.

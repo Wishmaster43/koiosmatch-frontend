@@ -11,7 +11,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
-import api from '@/lib/api'
+import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import SelectMenu from '@/components/ui/SelectMenu'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -90,7 +90,7 @@ export default function PlanIntakeModal({
     if (!vacancyId || vacancyOptions.some(v => String(v.value) === String(vacancyId))) { setExtraVacancy(null); return }
     let alive = true
     api.get(`/vacancies/${vacancyId}`, { quiet404: true } as never)
-      .then(r => { const d = r.data?.data ?? r.data; if (alive && d?.title) setExtraVacancy({ value: String(vacancyId), label: String(d.title) }) })
+      .then(r => { const d = unwrap<{ title?: string }>(r); if (alive && d?.title) setExtraVacancy({ value: String(vacancyId), label: String(d.title) }) })
       .catch(() => { if (alive) setExtraVacancy(null) })
     return () => { alive = false }
   }, [vacancyId, vacancyOptions])

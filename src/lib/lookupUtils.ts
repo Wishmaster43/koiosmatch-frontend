@@ -6,12 +6,13 @@
  */
 import type { AxiosResponse } from 'axios'
 import type { LookupOption } from '@/types/common'
+import { unwrapList } from '@/lib/api'
 
 type Named = { name?: string; label?: string; value?: string }
 
 /** Pull a flat string list from a lookup endpoint (rows are string | {name|label|value}). */
 export function lookupNames(res: AxiosResponse): string[] {
-  const raw = (res?.data?.data ?? res?.data ?? []) as unknown[]
+  const raw = (unwrapList(res).rows) as unknown[]
   return raw
     .map(x => (typeof x === 'string' ? x : ((x as Named).name ?? (x as Named).label ?? (x as Named).value)))
     .filter((v): v is string => Boolean(v))
