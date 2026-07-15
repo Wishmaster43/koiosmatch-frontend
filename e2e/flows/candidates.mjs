@@ -60,13 +60,33 @@ export async function statusWithReason({ page, errors }) {
 // Archive from the drawer → the archived view must CONTAIN the candidate (ARCH-1 guard).
 export async function archiveAndFindBack({ page, errors }) {
   const at = errors.length
-  // ARCHIVE-GUARD: a row with a live funnel stage/active match now opens the guard
-  // modal instead of archiving — pick a candidate WITHOUT running business here.
+  // ARCHIVE-GUARD: filtering rows on funnel text is NOT enough — an open MATCH is
+  // invisible in the row and 409s the archive (bit us after the 15-07 reseed). The
+  // flow provisions its own fixed probe candidate instead: create it if missing,
+  // restore it if a previous run left it archived — idempotent, zero data growth.
+  const name = 'Smoke Archiefproef'
   await go(page, 'Kandidaten')
-  const row = page.locator('table tbody tr')
-    .filter({ hasNotText: /Gesolliciteerd|Uitgenodigd|Intake|Voorgesteld|Geplaatst|Aangenomen|Matched/ }).first()
-  expect(await row.count(), 'geen archiveerbare kandidaat-rij (alles heeft lopende zaken?)')
-  const name = (await row.locator('td').nth(1).innerText()).split('\n')[0].trim()
+  await page.evaluate(async (probeName) => {
+    const xsrf = decodeURIComponent(document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '')
+    const hdrs = { Accept: 'application/json', 'Content-Type': 'application/json', 'X-XSRF-TOKEN': xsrf }
+    const found = await (await fetch(`/api/candidates?search=${encodeURIComponent(probeName)}&include_archived=1`,
+      { credentials: 'include', headers: hdrs })).json()
+    const hit = (found.data ?? [])[0]
+    if (!hit) {
+      const [first, last] = probeName.split(' ')
+      await fetch('/api/candidates', { method: 'POST', credentials: 'include', headers: hdrs,
+        body: JSON.stringify({ first_name: first, last_name: last }) })
+    } else if (hit.deleted_at || hit.archived) {
+      await fetch('/api/candidates/bulk/restore', { method: 'POST', credentials: 'include', headers: hdrs,
+        body: JSON.stringify({ candidate_ids: [hit.id] }) })
+    }
+  }, name)
+  // Fresh load so the probe row is in the table, then narrow the list to it.
+  await go(page, 'Kandidaten')
+  await page.locator('input[placeholder*="Zoek"]').first().fill('Archiefproef')
+  await sleep(1200)
+  const row = page.locator(`table tbody tr:has-text("Archiefproef")`).first()
+  expect(await row.count(), 'probe-kandidaat niet zichtbaar na aanmaken/herstellen')
   await row.click()
   await sleep(1200)
   // The confirm now lives in the guard hook (window.confirm) — accept it when it fires.
@@ -84,7 +104,12 @@ export async function archiveAndFindBack({ page, errors }) {
   // niet meer" before (Danny 2026-07-04); the restore icon proves the banner rendered.
   await page.locator(`table tbody tr:has-text("${name}")`).first().click()
   await sleep(1000)
-  expect(await page.locator('button[title="Herstellen"]').count(), 'gearchiveerde kandidaat opent NIET (drawer/banner ontbreekt)')
+  const restoreBtn = page.locator('button[title="Herstellen"]')
+  expect(await restoreBtn.count(), 'gearchiveerde kandidaat opent NIET (drawer/banner ontbreekt)')
+  // Restore right away: proves the restore seam AND resets the probe for the next
+  // run (hard delete is out until ERASE-HARD-1 lands — force-destroy 500s today).
+  await restoreBtn.first().click()
+  await sleep(1200)
   await page.keyboard.press('Escape'); await sleep(300)
   // Leave the archived view clean for the next flow.
   await page.locator('button:has-text("Gearchiveerd")').first().click()
