@@ -84,6 +84,10 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   if ('summary'           in patch) body.summary           = patch.summary
   if ('languages'         in patch) body.languages         = patch.languages
   if ('preferences'       in patch) body.preferences       = patch.preferences
+  // Tenant custom fields (Extra tab): both spellings map to the API key — this
+  // was MISSING, so every eigen-velden save silently vanished (Danny 16-07).
+  if ('customFields'      in patch) body.custom_fields     = patch.customFields
+  if ('custom_fields'     in patch) body.custom_fields     = patch.custom_fields
   if ('zzp'               in patch) body.zzp               = patch.zzp
   // Consent (C-11) → nested `consent` with ONLY the changed opt-in flags; never the
   // `_consent_at` timestamps (server-stamped). Send only the channels that are present.

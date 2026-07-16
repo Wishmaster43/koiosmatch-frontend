@@ -161,7 +161,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       // §3A(f): tenant custom fields live on their OWN gated tab (Danny 16-07,
       // punt 28 — they were buried as a section at the bottom of Profiel).
       case 'extra':          return <CustomFieldsTab entityType="candidate" values={c.customFields ?? {}}
-        onSave={patch => onUpdate?.(c.id, { custom_fields: { ...(c.customFields ?? {}), ...patch } })} />
+        // Camel key: the page's optimistic merge writes it onto the row (UI shape);
+        // buildCandidatePatch maps it to the API's custom_fields.
+        onSave={patch => onUpdate?.(c.id, { customFields: { ...(c.customFields ?? {}), ...patch } })} />
       default:               return null
     }
   }
