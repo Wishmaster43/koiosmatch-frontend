@@ -324,7 +324,9 @@
     "age": "{{count}} yrs",
     "birthdayToday": "Birthday today!",
     "birthdayTomorrow": "Birthday tomorrow!",
-    "birthdaySoon": "Birthday in {{count}} days"
+    "birthdaySoon": "Birthday in {{count}} days",
+    "sendEmail": "Send email",
+    "callPhone": "Call"
   },
   "addFields": {
     "functionTitle": "Job title",

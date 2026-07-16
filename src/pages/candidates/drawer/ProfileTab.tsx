@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X, Trash2, Cake, MessageCircle } from 'lucide-react'
+import { Edit2, Save, X, Trash2, Cake, MessageCircle, Mail, Phone } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import { NL_PROVINCES } from './constants'
 import { useDateFormat, calcAge, daysUntilBirthday } from '@/lib/datetime'
@@ -73,6 +73,10 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
   // Required fields for this candidate's phase (Settings → Verplichte velden). Only
   // the profile-owned fields are enforced here (name/function live in the header).
   const settings = useAllSettings()
+  // Punt 49: what the phone ICON does — 'tel' (OS dialer; default) or 'whatsapp'
+  // (open the WhatsApp chat, audio call is one tap there). Stored as a plain
+  // string in the settings blob; a PBX option follows the centrale decision.
+  const phoneAction = String(settings?.phone_click_action ?? 'tel')
   // Email/phone are NOT required by default (Danny 2026-07-16, job 3) — a Lead/early
   // Kandidaat may only have a name + function on file yet. Tenants can still opt them
   // back in via Settings → Verplichte velden (CandidateRequiredFieldsSettings), which
@@ -200,10 +204,33 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
     // anchors used var(--color-primary), which turns e.g. orange for a tenant with a
     // custom brand colour (useTenantTheme). --color-info is a fixed semantic token
     // (never touched by tenant theming) — the ordinary "this is a hyperlink" blue.
-    if (key === 'email' && v) return <a href={`mailto:${v}`} style={{ fontSize: 12, color: 'var(--color-info)', textDecoration: 'none' }}>{v}</a>
+    if (key === 'email' && v) return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <a href={`mailto:${v}`} style={{ fontSize: 12, color: 'var(--color-info)', textDecoration: 'none' }}>{v}</a>
+        {/* Mail shortcut icon (Danny punt 49) — same affordance as WhatsApp/phone. */}
+        <a href={`mailto:${v}`} title={t('profile.sendEmail')} aria-label={t('profile.sendEmail')}
+          style={{ display: 'inline-flex', color: 'var(--text-muted)' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-info)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
+          <Mail size={13} />
+        </a>
+      </span>
+    )
     if (key === 'phone' && v) return (
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
         <a href={`tel:${String(v).replace(/\s/g, '')}`} style={{ fontSize: 12, color: 'var(--color-info)', textDecoration: 'none' }}>{v}</a>
+        {/* Phone action icon (Danny punt 49): the CLICK ACTION is a tenant setting —
+            'tel' (default; on a phone this dials via the OS) or 'whatsapp' (opens the
+            WhatsApp conversation, where an audio call is one tap). A PBX/centrale
+            option lands once that integration is chosen (BE ticket). */}
+        <a href={phoneAction === 'whatsapp' && waDigits(v) ? `https://wa.me/${waDigits(v)}` : `tel:${String(v).replace(/\s/g, '')}`}
+          {...(phoneAction === 'whatsapp' ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+          title={t('profile.callPhone')} aria-label={t('profile.callPhone')}
+          style={{ display: 'inline-flex', color: 'var(--text-muted)' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-info)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
+          <Phone size={13} />
+        </a>
         {/* WhatsApp shortcut (Danny 2026-07-16, job 29) — muted, turns green on hover. */}
         {waDigits(v) && (
           <a href={`https://wa.me/${waDigits(v)}`} target="_blank" rel="noopener noreferrer"

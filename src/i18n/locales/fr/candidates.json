@@ -317,7 +317,9 @@
     "age": "{{count}} ans",
     "birthdayToday": "Anniversaire !",
     "birthdayTomorrow": "Anniversaire demain !",
-    "birthdaySoon": "Anniversaire dans {{count}} jours"
+    "birthdaySoon": "Anniversaire dans {{count}} jours",
+    "sendEmail": "Envoyer un e-mail",
+    "callPhone": "Appeler"
   },
   "addFields": {
     "functionTitle": "Intitulé du poste",

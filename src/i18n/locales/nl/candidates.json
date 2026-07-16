@@ -324,7 +324,9 @@
     "age": "{{count}} jr",
     "birthdayToday": "Jarig!",
     "birthdayTomorrow": "Morgen jarig!",
-    "birthdaySoon": "Bijna jarig · over {{count}} dagen"
+    "birthdaySoon": "Bijna jarig · over {{count}} dagen",
+    "sendEmail": "E-mail sturen",
+    "callPhone": "Bellen"
   },
   "addFields": {
     "functionTitle": "Functietitel",

@@ -317,7 +317,9 @@
     "age": "{{count}} J.",
     "birthdayToday": "Geburtstag!",
     "birthdayTomorrow": "Morgen Geburtstag!",
-    "birthdaySoon": "Bald Geburtstag · in {{count}} Tagen"
+    "birthdaySoon": "Bald Geburtstag · in {{count}} Tagen",
+    "sendEmail": "E-Mail senden",
+    "callPhone": "Anrufen"
   },
   "addFields": {
     "functionTitle": "Berufsbezeichnung",

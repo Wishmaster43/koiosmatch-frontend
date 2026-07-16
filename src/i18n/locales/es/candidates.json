@@ -317,7 +317,9 @@
     "age": "{{count}} años",
     "birthdayToday": "¡Cumpleaños!",
     "birthdayTomorrow": "¡Cumpleaños mañana!",
-    "birthdaySoon": "Cumpleaños en {{count}} días"
+    "birthdaySoon": "Cumpleaños en {{count}} días",
+    "sendEmail": "Enviar correo",
+    "callPhone": "Llamar"
   },
   "addFields": {
     "functionTitle": "Puesto",
