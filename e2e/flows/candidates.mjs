@@ -69,16 +69,25 @@ export async function archiveAndFindBack({ page, errors }) {
   await page.evaluate(async (probeName) => {
     const xsrf = decodeURIComponent(document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '')
     const hdrs = { Accept: 'application/json', 'Content-Type': 'application/json', 'X-XSRF-TOKEN': xsrf }
-    const found = await (await fetch(`/api/candidates?search=${encodeURIComponent(probeName)}&include_archived=1`,
+    // FIXED EMAIL = the server's own duplicate gate (409) hard-blocks accidental
+    // re-creates — 14 probe copies leaked into Danny's demo before (16-07).
+    const probeEmail = 'smoke-archiefproef@probe.local'
+    const found = await (await fetch(`/api/candidates?search=${encodeURIComponent(probeName)}&include_archived=1&per_page=50`,
       { credentials: 'include', headers: hdrs })).json()
-    const hit = (found.data ?? [])[0]
-    if (!hit) {
+    const hits = (found.data ?? []).filter(c => (c.name ?? '').includes('Archiefproef'))
+    const keeper = hits[0]
+    // Any historical extras: archive them away (hard delete blocked by ERASE-HARD-1).
+    if (hits.length > 1) {
+      await fetch('/api/candidates/bulk/archive', { method: 'POST', credentials: 'include', headers: hdrs,
+        body: JSON.stringify({ candidate_ids: hits.slice(1).map(h => h.id) }) })
+    }
+    if (!keeper) {
       const [first, last] = probeName.split(' ')
       await fetch('/api/candidates', { method: 'POST', credentials: 'include', headers: hdrs,
-        body: JSON.stringify({ first_name: first, last_name: last }) })
-    } else if (hit.deleted_at || hit.archived) {
+        body: JSON.stringify({ first_name: first, last_name: last, email: probeEmail }) })
+    } else if (keeper.deleted_at || keeper.archived) {
       await fetch('/api/candidates/bulk/restore', { method: 'POST', credentials: 'include', headers: hdrs,
-        body: JSON.stringify({ candidate_ids: [hit.id] }) })
+        body: JSON.stringify({ candidate_ids: [keeper.id] }) })
     }
   }, name)
   // Fresh load so the probe row is in the table, then narrow the list to it.
@@ -106,11 +115,21 @@ export async function archiveAndFindBack({ page, errors }) {
   await sleep(1000)
   const restoreBtn = page.locator('button[title="Herstellen"]')
   expect(await restoreBtn.count(), 'gearchiveerde kandidaat opent NIET (drawer/banner ontbreekt)')
-  // Restore right away: proves the restore seam AND resets the probe for the next
-  // run (hard delete is out until ERASE-HARD-1 lands — force-destroy 500s today).
+  // Restore proves the restore seam…
   await restoreBtn.first().click()
   await sleep(1200)
   await page.keyboard.press('Escape'); await sleep(300)
+  // …then park the probe ARCHIVED again so it never shows in Danny's default
+  // views between runs (the visible-probe leak of 16-07).
+  await page.evaluate(async () => {
+    const xsrf = decodeURIComponent(document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1] ?? '')
+    const hdrs = { Accept: 'application/json', 'Content-Type': 'application/json', 'X-XSRF-TOKEN': xsrf }
+    const found = await (await fetch('/api/candidates?search=Archiefproef', { credentials: 'include', headers: hdrs })).json()
+    const ids = (found.data ?? []).map(c => c.id)
+    if (ids.length) await fetch('/api/candidates/bulk/archive', { method: 'POST', credentials: 'include', headers: hdrs,
+      body: JSON.stringify({ candidate_ids: ids }) })
+  })
+  await sleep(400)
   // Leave the archived view clean for the next flow.
   await page.locator('button:has-text("Gearchiveerd")').first().click()
   await sleep(600)
