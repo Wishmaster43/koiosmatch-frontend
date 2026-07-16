@@ -194,6 +194,8 @@
   "noAccess": "Accès refusé",
   "noAccessDesc": "Vous n'avez pas les droits pour cette page.",
   "noAgencies": "Aucune agence trouvée",
+  "sidebarCollapse": "Réduire la barre latérale",
+  "sidebarExpand": "Développer la barre latérale",
   "comingSoon": "bientôt",
   "justNow": "à l'instant",
   "errorGeneric": "Une erreur s'est produite",

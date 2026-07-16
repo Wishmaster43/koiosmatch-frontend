@@ -136,7 +136,7 @@ export default function DashboardLayout() {
           {/* Sidebar toggle */}
           <button
             onClick={() => setExpanded(e => !e)}
-            title={expanded ? 'Sidebar inklappen' : 'Sidebar uitklappen'}
+            title={expanded ? t('sidebarCollapse') : t('sidebarExpand')}
             className="flex items-center justify-center flex-shrink-0 rounded-lg transition-colors"
             style={{
               width: 30, height: 30, border: 'none', cursor: 'pointer',
@@ -163,10 +163,13 @@ export default function DashboardLayout() {
             </span>
           </div>
 
-          {/* Breadcrumb separator + page title */}
+          {/* Breadcrumb separator + page title — PAGE_TITLES keys index the
+              'pageTitles' namespace; keySeparator is off since some keys carry a
+              literal dot ('reports.flow'). The map value is the English fallback
+              if a translation is ever missing. */}
           <span style={{ color: 'var(--border)', fontSize: 16 }}>›</span>
           <span className="font-medium truncate" style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-            {PAGE_TITLES[activePage] || activePage}
+            {t(activePage, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[activePage] || activePage })}
           </span>
           {/* Back-chip after a cross-entity jump — one click returns to where you came from. */}
           {jumpOrigin && jumpOrigin !== activePage && (
@@ -175,7 +178,7 @@ export default function DashboardLayout() {
                 borderRadius: 999, cursor: 'pointer', color: 'var(--color-primary)', flexShrink: 0,
                 background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)',
                 border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }}>
-              ← {t('back')} · {PAGE_TITLES[jumpOrigin] || jumpOrigin}
+              ← {t('back')} · {t(jumpOrigin, { ns: 'pageTitles', keySeparator: false, defaultValue: PAGE_TITLES[jumpOrigin] || jumpOrigin })}
             </button>
           )}
 

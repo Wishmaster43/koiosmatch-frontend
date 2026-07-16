@@ -14,7 +14,10 @@ export const isStale = (c: Candidate, months = 6): boolean => {
   return new Date(c.lastContactAt) < cutoff
 }
 // No follow-up (page-local count fallback only; the real filter is the server no_followup param).
-export const isNoFollowup = (c: Candidate): boolean => c.status === 'lead' && !c.lastContactAt
+// Bug fix (Wave E3): this compared `status` (the Deployability axis: available/placed/
+// unavailable/sick/leave) against 'lead', which is a Phase-axis value (§3B) — status
+// never equals 'lead', so the fallback always returned false. Compare against `phase`.
+export const isNoFollowup = (c: Candidate): boolean => c.phase === 'lead' && !c.lastContactAt
 // Never contacted: no recorded contact moment at all (page-local fallback predicate).
 export const isNeverContacted = (c: Candidate): boolean => !c.lastContactAt
 

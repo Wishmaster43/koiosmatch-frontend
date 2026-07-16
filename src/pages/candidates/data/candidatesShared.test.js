@@ -17,10 +17,20 @@ describe('attention predicates', () => {
     expect(isStale({ lastContactAt: daysAgo(200) })).toBe(true)
   })
 
-  it('isNoFollowup: only a lead without any contact', () => {
-    expect(isNoFollowup({ status: 'lead', lastContactAt: null })).toBe(true)
-    expect(isNoFollowup({ status: 'lead', lastContactAt: daysAgo(1) })).toBe(false)
-    expect(isNoFollowup({ status: 'candidate', lastContactAt: null })).toBe(false)
+  it('isNoFollowup: only a lead (Phase axis) without any contact', () => {
+    expect(isNoFollowup({ phase: 'lead', lastContactAt: null })).toBe(true)
+    expect(isNoFollowup({ phase: 'lead', lastContactAt: daysAgo(1) })).toBe(false)
+    expect(isNoFollowup({ phase: 'candidate', lastContactAt: null })).toBe(false)
+  })
+  it('isNoFollowup: bug regression — must read `phase`, never `status` (Deployability axis)', () => {
+    // Real candidates never have status === 'lead' ('lead' is a Phase value, not a
+    // Deployability one) — the old code compared status to 'lead' and so ALWAYS
+    // returned false in production, even though a naive test with status:'lead'
+    // fixtures made it look like it worked. Prove the fallback now actually fires
+    // off `phase`, and that a matching `status` alone is not enough.
+    expect(isNoFollowup({ status: 'lead', lastContactAt: null })).toBe(false)
+    expect(isNoFollowup({ status: 'lead', phase: 'candidate', lastContactAt: null })).toBe(false)
+    expect(isNoFollowup({ status: 'available', phase: 'lead', lastContactAt: null })).toBe(true)
   })
 
   it('isNeverContacted: true only when no contact moment', () => {

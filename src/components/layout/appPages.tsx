@@ -6,6 +6,7 @@
  */
 import { lazy } from 'react'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const Dashboard              = lazy(() => import('@/pages/dashboard/Dashboard'))
 const ReportsPage            = lazy(() => import('@/pages/reports/ReportsPage'))
@@ -75,18 +76,18 @@ export const PAGE_TITLES: Record<string, string> = {
   shiftmanager:                 'Shiftmanager',
   'shiftmanager.dashboard':     'Shiftmanager — Dashboard',
   'shiftmanager.candidates':    'Shiftmanager — Candidates',
-  'shiftmanager.candidate-shifts': 'Shiftmanager — Kandidaten-Shifts',
+  'shiftmanager.candidate-shifts': 'Shiftmanager — Candidate Shifts',
   'shiftmanager.customers':     'Shiftmanager — Customers',
   'shiftmanager.locations':     'Shiftmanager — Locations',
   'shiftmanager.departments':   'Shiftmanager — Departments',
-  'shiftmanager.details':       'Shiftmanager — Berichten',
-  'shiftmanager.candidates-table':  'Shiftmanager — Kandidaten',
-  'shiftmanager.customers-table':   'Shiftmanager — Klanten',
-  'shiftmanager.locations-table':   'Shiftmanager — Locaties',
-  'shiftmanager.departments-table': 'Shiftmanager — Afdelingen',
-  'shiftmanager.contacts-table':    'Shiftmanager — Contactpersonen',
-  'shiftmanager.orders-table':      'Shiftmanager — Diensten',
-  'shiftmanager.runs-table':        'Shiftmanager — Uitvoeringen',
+  'shiftmanager.details':       'Shiftmanager — Messages',
+  'shiftmanager.candidates-table':  'Shiftmanager — Candidates',
+  'shiftmanager.customers-table':   'Shiftmanager — Customers',
+  'shiftmanager.locations-table':   'Shiftmanager — Locations',
+  'shiftmanager.departments-table': 'Shiftmanager — Departments',
+  'shiftmanager.contacts-table':    'Shiftmanager — Contacts',
+  'shiftmanager.orders-table':      'Shiftmanager — Shifts',
+  'shiftmanager.runs-table':        'Shiftmanager — Runs',
 
   // Shiftmanager detail drill-downs (navigated to from SM reports)
   'details.candidates':         'SM Details — Candidates',
@@ -110,9 +111,11 @@ export const PAGE_TITLES: Record<string, string> = {
 
 // Temporary placeholder for pages that are not built yet.
 export function PlaceholderPage({ title }: { title?: ReactNode }) {
+  // "Coming soon" suffix — this route has no real feature behind it yet.
+  const { t } = useTranslation('common')
   return (
     <div className="flex items-center justify-center h-full">
-      <p className="font-mono text-sm text-[var(--text-muted)]">{title} — komt eraan</p>
+      <p className="font-mono text-sm text-[var(--text-muted)]">{title} — {t('comingSoon')}</p>
     </div>
   )
 }

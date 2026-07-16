@@ -194,6 +194,8 @@
   "noAccess": "Kein Zugriff",
   "noAccessDesc": "Du hast keine Berechtigung für diese Seite.",
   "noAgencies": "Keine Agenturen gefunden",
+  "sidebarCollapse": "Seitenleiste einklappen",
+  "sidebarExpand": "Seitenleiste ausklappen",
   "comingSoon": "demnächst",
   "justNow": "gerade eben",
   "errorGeneric": "Etwas ist schiefgelaufen",

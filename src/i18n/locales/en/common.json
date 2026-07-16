@@ -194,6 +194,8 @@
   "noAccess": "No access",
   "noAccessDesc": "You don't have permission to view this page.",
   "noAgencies": "No agencies found",
+  "sidebarCollapse": "Collapse sidebar",
+  "sidebarExpand": "Expand sidebar",
   "comingSoon": "coming soon",
   "justNow": "just now",
   "errorGeneric": "Something went wrong",

@@ -194,6 +194,8 @@
   "noAccess": "Sin acceso",
   "noAccessDesc": "No tienes permisos para esta página.",
   "noAgencies": "No se encontraron agencias",
+  "sidebarCollapse": "Contraer barra lateral",
+  "sidebarExpand": "Expandir barra lateral",
   "comingSoon": "próximamente",
   "justNow": "justo ahora",
   "errorGeneric": "Algo salió mal",

@@ -6,6 +6,7 @@
 import { lazy, Suspense } from 'react'
 import type { ReactNode } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useTranslation }                         from 'react-i18next'
 import { QueryClientProvider }                    from '@tanstack/react-query'
 import { queryClient }                            from './lib/queryClient'
 import { AuthProvider, useAuth }                  from './context/AuthContext'
@@ -24,6 +25,7 @@ const MfaEnrollmentGate = lazy(() => import('./pages/auth/MfaEnrollmentGate'))
 
 // Boot loader — shown while the auth context resolves (and as Suspense fallback).
 function BootLoader() {
+  const { t } = useTranslation('common')
   return (
     <div className="flex items-center justify-center h-screen" style={{ background: 'var(--bg)' }}>
       <div className="flex flex-col items-center gap-3">
@@ -31,7 +33,7 @@ function BootLoader() {
           style={{ width: 40, height: 40, background: 'var(--color-primary)' }}>
           <span style={{ color: 'white', fontSize: 18 }}>⚡</span>
         </div>
-        <p className="text-sm text-[var(--text-muted)]">Laden...</p>
+        <p className="text-sm text-[var(--text-muted)]">{t('loading')}</p>
       </div>
     </div>
   )

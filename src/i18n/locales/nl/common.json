@@ -194,6 +194,8 @@
   "noAccess": "Geen toegang",
   "noAccessDesc": "Je hebt geen rechten voor deze pagina.",
   "noAgencies": "Geen bureaus gevonden",
+  "sidebarCollapse": "Sidebar inklappen",
+  "sidebarExpand": "Sidebar uitklappen",
   "comingSoon": "binnenkort",
   "justNow": "zojuist",
   "errorGeneric": "Er is iets misgegaan",
