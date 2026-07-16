@@ -49,7 +49,8 @@
     "applications": "Applications",
     "shared": "Shared",
     "whatsapp": "WhatsApp",
-    "custom_fields": "Custom fields"
+    "custom_fields": "Custom fields",
+    "action_rules": "Action rules"
   },
   "nav": {
     "candidate_display": "Table display",
@@ -177,7 +178,8 @@
     "cf_customer": "Customers",
     "cf_customer_location": "Locations",
     "cf_customer_department": "Departments",
-    "cf_customer_contact": "Contacts"
+    "cf_customer_contact": "Contacts",
+    "action_rules": "Action rules"
   },
   "kpis": {
     "title": "KPI settings",
@@ -1728,5 +1730,94 @@
     "truncatedNotice": "Only the newest 5,000 failed jobs are shown.",
     "driverWarning": "The queue runs on \"{{driver}}\" — this screen inspects the database queue and may not reflect the real backlog.",
     "actionFailed": "Action failed — the job may no longer exist. Refresh the list."
+  },
+  "actionRules": {
+    "title": "Action rules",
+    "subtitle": "The tenant-configurable action×condition matrix that decides whether an action is silently allowed, shows a confirm popup, or is blocked. See AXIS-MATRIX.md for the full rules.",
+    "loadError": "Could not load the action rules.",
+    "empty": "No action rules found.",
+    "candidateAxisTitle": "Candidate actions",
+    "candidateAxisSubtitle": "Actions on or around a candidate, per deployability condition.",
+    "customerAxisTitle": "Customer actions",
+    "customerAxisSubtitle": "Actions from a customer, per customer status.",
+    "consentSectionTitle": "AVG exception — WhatsApp consent",
+    "consentSectionSubtitle": "A candidate without WhatsApp opt-in can never receive a message — this rule is locked.",
+    "actionCol": "Action",
+    "effect": {
+      "allow": "Allowed",
+      "warn": "Warning",
+      "block": "Blocked"
+    },
+    "cellAria": "{{action}} × {{condition}}: {{effect}}",
+    "cellOverrideTitle": "Differs from the default rule",
+    "lockedTitle": "System rule — not editable",
+    "legend": {
+      "title": "Legend",
+      "allow": "Allowed — applied silently",
+      "warn": "Warning — with a confirm popup",
+      "block": "Blocked — with a reason and a way out",
+      "locked": "Locked — a system rule, never editable",
+      "override": "Changed from the default rule",
+      "popupsTitle": "What does a popup code mean?"
+    },
+    "detail": {
+      "title": "Cell details",
+      "popupCode": "Popup code",
+      "noPopup": "No popup — this action is always allowed silently.",
+      "noPopupOverrideWarning": "No popup code exists for this cell — the user will only see the generic warning/block title, with no explanatory message. Consider whether this override is intended.",
+      "messageNote": "The message text is fixed per popup code and not (yet) tenant-editable.",
+      "resetCell": "Reset this cell to default",
+      "isOverride": "Changed from the default rule",
+      "isDefault": "Default rule",
+      "lockedNote": "This is a hard system rule (AXIS-MATRIX.md) and cannot be changed.",
+      "close": "Close"
+    },
+    "actions": {
+      "application_create": "Create application",
+      "application_couple_vacancy": "Couple vacancy to application",
+      "appointment_create": "Schedule appointment/intake",
+      "match_create": "Create match/placement",
+      "task_create": "Create task",
+      "calllist_add": "Add to call list",
+      "whatsapp_send": "Send WhatsApp message",
+      "candidate_propose": "Propose to customer",
+      "candidate_status_set": "Set status (workflow)",
+      "candidate_sync": "Sync to backoffice",
+      "opportunity_create": "Create opportunity",
+      "vacancy_create": "Create/open vacancy",
+      "customer_match": "Match/placement at customer",
+      "customer_propose": "Propose candidate"
+    },
+    "conditions": {
+      "lead": "Lead (no status)",
+      "available": "Available",
+      "temporarily_unavailable": "Temporarily unavailable",
+      "placed": "Placed",
+      "blacklist": "Blacklist",
+      "archived": "Archived/trash",
+      "whatsapp_no_consent": "No WhatsApp consent",
+      "active": "Active",
+      "inactive": "Inactive",
+      "blocked": "Blocked"
+    },
+    "popups": {
+      "P1": "Temporarily unavailable — confirm popup",
+      "P2": "Already placed — confirm popup",
+      "P3": "Blacklist — hard blocked",
+      "P4": "Archived/trash — hard blocked",
+      "P5": "Still Lead — confirm popup",
+      "P6": "Double placement — confirm popup",
+      "P7": "Blacklist, administrative — confirm popup",
+      "P8": "No WhatsApp consent (AVG) — hard blocked",
+      "P9": "Customer inactive/blocked — confirm popup",
+      "P10": "Customer blocked — hard blocked"
+    },
+    "saveBar": {
+      "dirtyCount_one": "{{count}} change not yet saved",
+      "dirtyCount_other": "{{count}} changes not yet saved",
+      "resetAll": "Reset everything to default",
+      "confirmResetAll": "Reset all action rules to their default values? This overwrites your changes once you save.",
+      "saveFailed": "Saving the action rules failed."
+    }
   }
 }

@@ -49,7 +49,8 @@
     "matches": "Coincidencias",
     "outreach": "Listas de llamadas",
     "opportunities": "Oportunidades",
-    "custom_fields": "Campos personalizados"
+    "custom_fields": "Campos personalizados",
+    "action_rules": "Reglas de acción"
   },
   "nav": {
     "candidate_display": "Visualización de la tabla",
@@ -177,7 +178,8 @@
     "cf_customer": "Clientes",
     "cf_customer_location": "Ubicaciones",
     "cf_customer_department": "Departamentos",
-    "cf_customer_contact": "Contactos"
+    "cf_customer_contact": "Contactos",
+    "action_rules": "Reglas de acción"
   },
   "kpis": {
     "title": "Configuración de KPI",
@@ -1728,5 +1730,94 @@
     "truncatedNotice": "Solo se muestran las 5.000 tareas fallidas más recientes.",
     "driverWarning": "La cola se ejecuta en «{{driver}}» — esta pantalla inspecciona la cola de base de datos y puede no reflejar el trabajo pendiente real.",
     "actionFailed": "Acción fallida — es posible que la tarea ya no exista. Actualiza la lista."
+  },
+  "actionRules": {
+    "title": "Reglas de acción",
+    "subtitle": "La matriz acción×condición configurable por tenant que decide si una acción se permite silenciosamente, muestra una ventana de confirmación o se bloquea. Consulta AXIS-MATRIX.md para todas las reglas.",
+    "loadError": "No se pudieron cargar las reglas de acción.",
+    "empty": "No se encontraron reglas de acción.",
+    "candidateAxisTitle": "Acciones de candidato",
+    "candidateAxisSubtitle": "Acciones sobre o alrededor de un candidato, según la condición de disponibilidad.",
+    "customerAxisTitle": "Acciones de cliente",
+    "customerAxisSubtitle": "Acciones desde un cliente, según el estado del cliente.",
+    "consentSectionTitle": "Excepción RGPD — consentimiento de WhatsApp",
+    "consentSectionSubtitle": "Un candidato sin opt-in de WhatsApp nunca puede recibir un mensaje — esta regla está bloqueada.",
+    "actionCol": "Acción",
+    "effect": {
+      "allow": "Permitido",
+      "warn": "Advertencia",
+      "block": "Bloqueado"
+    },
+    "cellAria": "{{action}} × {{condition}}: {{effect}}",
+    "cellOverrideTitle": "Difiere de la regla por defecto",
+    "lockedTitle": "Regla del sistema — no editable",
+    "legend": {
+      "title": "Leyenda",
+      "allow": "Permitido — se aplica en silencio",
+      "warn": "Advertencia — con ventana de confirmación",
+      "block": "Bloqueado — con motivo y salida",
+      "locked": "Bloqueado — regla del sistema, nunca editable",
+      "override": "Modificado respecto a la regla por defecto",
+      "popupsTitle": "¿Qué significa un código de popup?"
+    },
+    "detail": {
+      "title": "Detalles de la celda",
+      "popupCode": "Código de popup",
+      "noPopup": "Sin popup — esta acción siempre se permite en silencio.",
+      "noPopupOverrideWarning": "No existe ningún código de popup para esta celda — el usuario solo verá el título genérico de advertencia/bloqueo, sin mensaje explicativo. Comprueba si esto es lo que quieres.",
+      "messageNote": "El texto del mensaje es fijo por código de popup y (aún) no es editable por tenant.",
+      "resetCell": "Restablecer esta celda al valor por defecto",
+      "isOverride": "Modificado respecto a la regla por defecto",
+      "isDefault": "Regla por defecto",
+      "lockedNote": "Esta es una regla de sistema estricta (AXIS-MATRIX.md) y no se puede cambiar.",
+      "close": "Cerrar"
+    },
+    "actions": {
+      "application_create": "Crear solicitud",
+      "application_couple_vacancy": "Vincular vacante a la solicitud",
+      "appointment_create": "Planificar cita/intake",
+      "match_create": "Crear match/colocación",
+      "task_create": "Crear tarea",
+      "calllist_add": "Añadir a la lista de llamadas",
+      "whatsapp_send": "Enviar mensaje de WhatsApp",
+      "candidate_propose": "Proponer al cliente",
+      "candidate_status_set": "Establecer estado (workflow)",
+      "candidate_sync": "Sincronizar con el backoffice",
+      "opportunity_create": "Crear oportunidad",
+      "vacancy_create": "Crear/abrir vacante",
+      "customer_match": "Match/colocación con el cliente",
+      "customer_propose": "Proponer candidato"
+    },
+    "conditions": {
+      "lead": "Lead (sin estado)",
+      "available": "Disponible",
+      "temporarily_unavailable": "Temporalmente no disponible",
+      "placed": "Colocado",
+      "blacklist": "Lista negra",
+      "archived": "Archivado/papelera",
+      "whatsapp_no_consent": "Sin consentimiento de WhatsApp",
+      "active": "Activo",
+      "inactive": "Inactivo",
+      "blocked": "Bloqueado"
+    },
+    "popups": {
+      "P1": "Temporalmente no disponible — ventana de confirmación",
+      "P2": "Ya colocado — ventana de confirmación",
+      "P3": "Lista negra — bloqueado estrictamente",
+      "P4": "Archivado/papelera — bloqueado estrictamente",
+      "P5": "Todavía Lead — ventana de confirmación",
+      "P6": "Colocación doble — ventana de confirmación",
+      "P7": "Lista negra, administrativo — ventana de confirmación",
+      "P8": "Sin consentimiento de WhatsApp (RGPD) — bloqueado estrictamente",
+      "P9": "Cliente inactivo/bloqueado — ventana de confirmación",
+      "P10": "Cliente bloqueado — bloqueado estrictamente"
+    },
+    "saveBar": {
+      "dirtyCount_one": "{{count}} cambio sin guardar",
+      "dirtyCount_other": "{{count}} cambios sin guardar",
+      "resetAll": "Restablecer todo al valor por defecto",
+      "confirmResetAll": "¿Restablecer todas las reglas de acción a sus valores por defecto? Esto sobrescribirá tus cambios en cuanto guardes.",
+      "saveFailed": "Error al guardar las reglas de acción."
+    }
   }
 }

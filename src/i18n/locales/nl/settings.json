@@ -49,7 +49,8 @@
     "applications": "Sollicitaties",
     "shared": "Gedeeld",
     "whatsapp": "WhatsApp",
-    "custom_fields": "Eigen velden"
+    "custom_fields": "Eigen velden",
+    "action_rules": "Actieregels"
   },
   "nav": {
     "candidate_display": "Tabelweergave",
@@ -177,7 +178,8 @@
     "cf_customer": "Klanten",
     "cf_customer_location": "Locaties",
     "cf_customer_department": "Afdelingen",
-    "cf_customer_contact": "Contactpersonen"
+    "cf_customer_contact": "Contactpersonen",
+    "action_rules": "Actieregels"
   },
   "kpis": {
     "title": "KPI-instellingen",
@@ -1728,5 +1730,94 @@
     "truncatedNotice": "Alleen de nieuwste 5.000 mislukte taken worden getoond.",
     "driverWarning": "De wachtrij draait op \"{{driver}}\" — dit scherm kijkt naar de database-wachtrij en toont dan mogelijk niet de echte werkvoorraad.",
     "actionFailed": "Actie mislukt — de taak bestaat mogelijk niet meer. Ververs de lijst."
+  },
+  "actionRules": {
+    "title": "Actieregels",
+    "subtitle": "De tenant-instelbare actie×toestand-matrix die bepaalt of een actie stil wordt toegestaan, een waarschuw-popup toont, of wordt geblokkeerd. Zie AXIS-MATRIX.md voor de volledige regels.",
+    "loadError": "Kon de actieregels niet laden.",
+    "empty": "Geen actieregels gevonden.",
+    "candidateAxisTitle": "Kandidaat-acties",
+    "candidateAxisSubtitle": "Acties op of rond een kandidaat, per inzetbaarheids-toestand.",
+    "customerAxisTitle": "Klant-acties",
+    "customerAxisSubtitle": "Acties vanuit een klant, per klantstatus.",
+    "consentSectionTitle": "AVG-uitzondering — WhatsApp-toestemming",
+    "consentSectionSubtitle": "Een kandidaat zonder WhatsApp-opt-in kan nooit een bericht ontvangen — deze regel is vergrendeld.",
+    "actionCol": "Actie",
+    "effect": {
+      "allow": "Toegestaan",
+      "warn": "Waarschuwing",
+      "block": "Geblokkeerd"
+    },
+    "cellAria": "{{action}} × {{condition}}: {{effect}}",
+    "cellOverrideTitle": "Wijkt af van de standaardregel",
+    "lockedTitle": "Systeemregel — niet aanpasbaar",
+    "legend": {
+      "title": "Legenda",
+      "allow": "Toegestaan — stil doorgevoerd",
+      "warn": "Waarschuwing — met bevestig-popup",
+      "block": "Geblokkeerd — met reden en uitweg",
+      "locked": "Vergrendeld — systeemregel, nooit aanpasbaar",
+      "override": "Aangepast t.o.v. de standaardregel",
+      "popupsTitle": "Wat betekent een popup-code?"
+    },
+    "detail": {
+      "title": "Celdetails",
+      "popupCode": "Popup-code",
+      "noPopup": "Geen popup — deze actie wordt altijd stil toegestaan.",
+      "noPopupOverrideWarning": "Voor deze cel bestaat geen popup-code — de gebruiker ziet dus alleen de generieke waarschuw-/blokkadetitel, zonder toelichting. Overweeg of dit gewenst is.",
+      "messageNote": "De boodschap ligt per popup-code vast en is (nog) niet per tenant aan te passen.",
+      "resetCell": "Herstel deze cel naar standaard",
+      "isOverride": "Aangepast t.o.v. de standaardregel",
+      "isDefault": "Standaardregel",
+      "lockedNote": "Dit is een harde systeemregel (AXIS-MATRIX.md) en kan niet worden aangepast.",
+      "close": "Sluiten"
+    },
+    "actions": {
+      "application_create": "Sollicitatie aanmaken",
+      "application_couple_vacancy": "Vacature koppelen aan sollicitatie",
+      "appointment_create": "Afspraak/intake plannen",
+      "match_create": "Match/plaatsing maken",
+      "task_create": "Taak aanmaken",
+      "calllist_add": "Toevoegen aan bellijst",
+      "whatsapp_send": "WhatsApp-bericht sturen",
+      "candidate_propose": "Voorstellen aan klant",
+      "candidate_status_set": "Status wijzigen (workflow)",
+      "candidate_sync": "Koppelen aan backoffice (sync)",
+      "opportunity_create": "Kans aanmaken",
+      "vacancy_create": "Vacature aanmaken/openzetten",
+      "customer_match": "Match/plaatsing bij klant",
+      "customer_propose": "Kandidaat voorstellen"
+    },
+    "conditions": {
+      "lead": "Lead (geen status)",
+      "available": "Beschikbaar",
+      "temporarily_unavailable": "Tijdelijk niet inzetbaar",
+      "placed": "Geplaatst",
+      "blacklist": "Blacklist",
+      "archived": "Gearchiveerd/prullenbak",
+      "whatsapp_no_consent": "Geen WhatsApp-toestemming",
+      "active": "Actief",
+      "inactive": "Inactief",
+      "blocked": "Geblokkeerd"
+    },
+    "popups": {
+      "P1": "Tijdelijk niet inzetbaar — bevestig-popup",
+      "P2": "Al geplaatst — bevestig-popup",
+      "P3": "Blacklist — hard geblokkeerd",
+      "P4": "Archief/prullenbak — hard geblokkeerd",
+      "P5": "Nog Lead — bevestig-popup",
+      "P6": "Dubbele plaatsing — bevestig-popup",
+      "P7": "Blacklist, administratief — bevestig-popup",
+      "P8": "Geen WhatsApp-toestemming (AVG) — hard geblokkeerd",
+      "P9": "Klant inactief/geblokkeerd — bevestig-popup",
+      "P10": "Klant geblokkeerd — hard geblokkeerd"
+    },
+    "saveBar": {
+      "dirtyCount_one": "{{count}} wijziging nog niet opgeslagen",
+      "dirtyCount_other": "{{count}} wijzigingen nog niet opgeslagen",
+      "resetAll": "Alles herstellen naar standaard",
+      "confirmResetAll": "Alle actieregels terugzetten naar de standaardwaarden? Dit overschrijft je aanpassingen zodra je opslaat.",
+      "saveFailed": "Opslaan van de actieregels is mislukt."
+    }
   }
 }

@@ -49,7 +49,8 @@
     "matches": "Matches",
     "outreach": "Anruflisten",
     "opportunities": "Chancen",
-    "custom_fields": "Eigene Felder"
+    "custom_fields": "Eigene Felder",
+    "action_rules": "Aktionsregeln"
   },
   "nav": {
     "candidate_display": "Tabellenansicht",
@@ -177,7 +178,8 @@
     "cf_customer": "Kunden",
     "cf_customer_location": "Standorte",
     "cf_customer_department": "Abteilungen",
-    "cf_customer_contact": "Kontakte"
+    "cf_customer_contact": "Kontakte",
+    "action_rules": "Aktionsregeln"
   },
   "kpis": {
     "title": "KPI-Einstellungen",
@@ -1728,5 +1730,94 @@
     "truncatedNotice": "Es werden nur die neuesten 5.000 fehlgeschlagenen Jobs angezeigt.",
     "driverWarning": "Die Warteschlange läuft auf \"{{driver}}\" — dieser Bildschirm betrachtet die Datenbank-Warteschlange und zeigt dann möglicherweise nicht den echten Rückstand.",
     "actionFailed": "Aktion fehlgeschlagen — der Job existiert möglicherweise nicht mehr. Aktualisiere die Liste."
+  },
+  "actionRules": {
+    "title": "Aktionsregeln",
+    "subtitle": "Die pro Mandant konfigurierbare Aktion×Bedingung-Matrix, die entscheidet, ob eine Aktion stillschweigend erlaubt wird, ein Bestätigungs-Popup zeigt oder blockiert wird. Siehe AXIS-MATRIX.md für alle Regeln.",
+    "loadError": "Die Aktionsregeln konnten nicht geladen werden.",
+    "empty": "Keine Aktionsregeln gefunden.",
+    "candidateAxisTitle": "Kandidaten-Aktionen",
+    "candidateAxisSubtitle": "Aktionen an oder um einen Kandidaten, je nach Einsatzbarkeits-Status.",
+    "customerAxisTitle": "Kunden-Aktionen",
+    "customerAxisSubtitle": "Aktionen von einem Kunden aus, je nach Kundenstatus.",
+    "consentSectionTitle": "DSGVO-Ausnahme — WhatsApp-Einwilligung",
+    "consentSectionSubtitle": "Ein Kandidat ohne WhatsApp-Opt-in kann nie eine Nachricht erhalten — diese Regel ist gesperrt.",
+    "actionCol": "Aktion",
+    "effect": {
+      "allow": "Erlaubt",
+      "warn": "Warnung",
+      "block": "Blockiert"
+    },
+    "cellAria": "{{action}} × {{condition}}: {{effect}}",
+    "cellOverrideTitle": "Weicht von der Standardregel ab",
+    "lockedTitle": "Systemregel — nicht bearbeitbar",
+    "legend": {
+      "title": "Legende",
+      "allow": "Erlaubt — wird stillschweigend angewendet",
+      "warn": "Warnung — mit Bestätigungs-Popup",
+      "block": "Blockiert — mit Grund und Ausweg",
+      "locked": "Gesperrt — Systemregel, nie bearbeitbar",
+      "override": "Von der Standardregel geändert",
+      "popupsTitle": "Was bedeutet ein Popup-Code?"
+    },
+    "detail": {
+      "title": "Zelldetails",
+      "popupCode": "Popup-Code",
+      "noPopup": "Kein Popup — diese Aktion wird immer stillschweigend erlaubt.",
+      "noPopupOverrideWarning": "Für diese Zelle existiert kein Popup-Code — der Nutzer sieht nur den generischen Warnung/Blockiert-Titel, ohne erklärenden Text. Prüfe, ob das so gewollt ist.",
+      "messageNote": "Der Nachrichtentext ist pro Popup-Code fest und (noch) nicht pro Mandant anpassbar.",
+      "resetCell": "Diese Zelle auf Standard zurücksetzen",
+      "isOverride": "Von der Standardregel geändert",
+      "isDefault": "Standardregel",
+      "lockedNote": "Dies ist eine feste Systemregel (AXIS-MATRIX.md) und kann nicht geändert werden.",
+      "close": "Schließen"
+    },
+    "actions": {
+      "application_create": "Bewerbung erstellen",
+      "application_couple_vacancy": "Stelle mit Bewerbung verknüpfen",
+      "appointment_create": "Termin/Intake planen",
+      "match_create": "Match/Platzierung erstellen",
+      "task_create": "Aufgabe erstellen",
+      "calllist_add": "Zur Anrufliste hinzufügen",
+      "whatsapp_send": "WhatsApp-Nachricht senden",
+      "candidate_propose": "Dem Kunden vorschlagen",
+      "candidate_status_set": "Status setzen (Workflow)",
+      "candidate_sync": "Mit Backoffice synchronisieren",
+      "opportunity_create": "Chance erstellen",
+      "vacancy_create": "Stelle erstellen/öffnen",
+      "customer_match": "Match/Platzierung beim Kunden",
+      "customer_propose": "Kandidat vorschlagen"
+    },
+    "conditions": {
+      "lead": "Lead (kein Status)",
+      "available": "Verfügbar",
+      "temporarily_unavailable": "Vorübergehend nicht einsetzbar",
+      "placed": "Platziert",
+      "blacklist": "Schwarze Liste",
+      "archived": "Archiviert/Papierkorb",
+      "whatsapp_no_consent": "Keine WhatsApp-Einwilligung",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "blocked": "Blockiert"
+    },
+    "popups": {
+      "P1": "Vorübergehend nicht einsetzbar — Bestätigungs-Popup",
+      "P2": "Bereits platziert — Bestätigungs-Popup",
+      "P3": "Schwarze Liste — hart blockiert",
+      "P4": "Archiviert/Papierkorb — hart blockiert",
+      "P5": "Noch Lead — Bestätigungs-Popup",
+      "P6": "Doppelte Platzierung — Bestätigungs-Popup",
+      "P7": "Schwarze Liste, administrativ — Bestätigungs-Popup",
+      "P8": "Keine WhatsApp-Einwilligung (DSGVO) — hart blockiert",
+      "P9": "Kunde inaktiv/blockiert — Bestätigungs-Popup",
+      "P10": "Kunde blockiert — hart blockiert"
+    },
+    "saveBar": {
+      "dirtyCount_one": "{{count}} Änderung noch nicht gespeichert",
+      "dirtyCount_other": "{{count}} Änderungen noch nicht gespeichert",
+      "resetAll": "Alles auf Standard zurücksetzen",
+      "confirmResetAll": "Alle Aktionsregeln auf ihre Standardwerte zurücksetzen? Dies überschreibt deine Änderungen, sobald du speicherst.",
+      "saveFailed": "Speichern der Aktionsregeln ist fehlgeschlagen."
+    }
   }
 }

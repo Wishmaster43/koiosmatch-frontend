@@ -18,7 +18,7 @@
 import {
   AppWindow, BarChart2, Bell, BookOpen, Briefcase, Building2, CalendarCheck, CalendarDays, Car,
   ClipboardList, Clock, CreditCard, Download, Factory, FileText, Flag, Hash, Key, LayoutGrid,
-  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Phone, Shield, SlidersHorizontal, Sparkles, Star,
+  ListChecks, Mail, MapPin, MessageCircle, MessageSquare, Languages, Package, Palette, Phone, Scale, Shield, SlidersHorizontal, Sparkles, Star,
   Store, Tags, Target, UserCheck, Users, Webhook, XCircle,
 } from 'lucide-react'
 import CustomFieldsSettings from './sections/CustomFieldsSettings'
@@ -87,6 +87,7 @@ import vacancyDisplay from './schemas/vacancyDisplay'
 import matchDisplay from './schemas/matchDisplay'
 import outreachDisplay from './schemas/outreachDisplay'
 import DriverLicenseSettings from './sections/DriverLicenseSettings'
+import ActionRulesSettings from './sections/ActionRulesSettings'
 
 export const NAV_GROUPS = [
   {
@@ -243,6 +244,16 @@ export const NAV_GROUPS = [
       { id: 'cf_customer_location', icon: MapPin, render: () => <CustomFieldsSettings entityType="customer_location" /> },
       { id: 'cf_customer_department', icon: Building2, render: () => <CustomFieldsSettings entityType="customer_department" /> },
       { id: 'cf_customer_contact', icon: Users, render: () => <CustomFieldsSettings entityType="customer_contact" /> },
+    ],
+  },
+  {
+    // Actieregels (AXIS-MATRIX-2) — the tenant-editable action×condition matrix behind
+    // every guarded write, spanning both the candidate and customer domains (§B/§C).
+    // Its own top-level group per SETTINGS-CLEAN-1 (other rule-ish settings — conversion
+    // default status, required fields per phase, guard behaviour — consolidate here next).
+    key: 'action_rules', icon: Scale,
+    items: [
+      { id: 'action_rules', icon: Scale, component: ActionRulesSettings },
     ],
   },
   // Planning lookups — each item gated on the 'plan' module (requiresPage → canAccessPage →
