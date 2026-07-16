@@ -15,6 +15,7 @@ export default function BrandSettings() {
   const { t } = useTranslation('settings')
   const auth = useAuth()
   const [primaryColor, setPrimaryColor]   = useState('#3B8FD4') // default brand colour (data, not styling)
+  const [hexDraft,     setHexDraft]       = useState('#3B8FD4') // typeable hex mirror of primaryColor
   const [logoPreview,  setLogoPreview]    = useState(null)
   const [logoFile,     setLogoFile]       = useState(null)
   const [companyName,  setCompanyName]    = useState('')
@@ -29,7 +30,7 @@ export default function BrandSettings() {
   useEffect(() => {
     loadSettings()
       .then(stored => {
-        if (stored.brand_color)    setPrimaryColor(stored.brand_color)
+        if (stored.brand_color)    { setPrimaryColor(stored.brand_color); setHexDraft(stored.brand_color) }
         if (stored.company_name)   setCompanyName(stored.company_name)
         if (stored.logo_url)       setLogoPreview(stored.logo_url)
       })
@@ -49,6 +50,7 @@ export default function BrandSettings() {
 
   const applyColor = (color) => {
     setPrimaryColor(color)
+    setHexDraft(color)
     document.documentElement.style.setProperty('--color-primary', color)
   }
 
@@ -134,7 +136,19 @@ export default function BrandSettings() {
                 onChange={e => applyColor(e.target.value)}
                 style={{ width: 32, height: 32, borderRadius: 6, border: '1px solid var(--border)',
                          cursor: 'pointer', padding: 2 }} />
-              <span style={{ fontSize: 12, color: 'var(--text-muted)', fontFamily: 'monospace' }}>{primaryColor}</span>
+              {/* Typeable hex (Danny 16-07): the code next to the picker was read-only
+                  text — paste/type a brand hex directly; applies once it's a valid #rrggbb. */}
+              <input type="text" value={hexDraft} aria-label={t('brand.primaryColor')}
+                onChange={e => {
+                  const v = e.target.value.startsWith('#') ? e.target.value : `#${e.target.value}`
+                  setHexDraft(v)
+                  if (/^#[0-9a-fA-F]{6}$/.test(v)) applyColor(v.toLowerCase())
+                }}
+                onBlur={() => setHexDraft(primaryColor)}
+                maxLength={7} spellCheck={false}
+                style={{ width: 84, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", padding: '5px 8px',
+                         borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)',
+                         color: 'var(--text)', outline: 'none' }} />
             </div>
           </div>
           <div style={{ marginTop: 14, display: 'flex', gap: 8, alignItems: 'center' }}>
