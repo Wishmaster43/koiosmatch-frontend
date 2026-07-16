@@ -82,7 +82,12 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     vacancy: {
       id: vac.id ?? base.vacancyId, title: vac.title ?? base.vacancyTitle, client: base.client,
       vacancyId: vac.code ?? vac.reference ?? '', status: vac.status_label ?? vac.status ?? '',
-      employmentType: vac.employment_type ?? '', location: vac.location ?? '',
+      employmentType: vac.employment_type ?? '',
+      // Locatie (S6): ApplicationDetailResource sends the vacancy's work-site `city`
+      // (from location_city), not a `location` string — fall back to it so the
+      // Sollicitatie tab's Locatie field isn't always blank (measured: no
+      // customer_location_id/afdeling exists on a vacancy yet, see ApplicationTab.tsx).
+      location: vac.location ?? (vac.city as string | undefined) ?? '',
       salary: vac.salary ?? '', hours: vac.hours ?? '', experience: vac.experience ?? '',
       seniority: vac.seniority ?? '', education: vac.education ?? '',
       branch: vac.branch ?? vac.industry ?? '', category: vac.category ?? '',
@@ -120,5 +125,10 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
     aiScore: raw.ai_match_score ?? null,
     // Tenant custom-field values (§3B "Eigen velden").
     customFields: raw.custom_fields ?? {},
+    // Rejection trail (reason + toelichting/note + channel/sent_at) — S9 finding:
+    // this was NEVER mapped, so a rejected application always showed just the
+    // "Afgewezen" badge with no reason/note, even though ApplicationDetailResource
+    // sends `rejection` (reason_id/reason_label/note/channel/sent_at) once rejected.
+    rejection: (raw.rejection ?? undefined) as ApplicationDetail['rejection'],
   }
 }

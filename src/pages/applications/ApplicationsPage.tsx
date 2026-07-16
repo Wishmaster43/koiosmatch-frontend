@@ -25,6 +25,7 @@ import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import { BTN_H } from '@/config/buttonMetrics'
 import { mapApplication, mapApplicationDetail } from './data/mapApplication'
 import { bucketOfPhase } from './data/applicationsShared'
 import type { Application, ApplicationDetail } from '@/types/application'
@@ -428,8 +429,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'space-between',
           padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
             <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 5,
-              padding: '6px 14px', fontSize: 13, fontWeight: 500, background: 'var(--color-primary)', color: '#fff',
+              height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600, background: 'var(--color-primary)', color: '#fff',
               border: 'none', borderRadius: 8, cursor: 'pointer' }}>
               <Plus size={14} /> {t('add.button')}
             </button>

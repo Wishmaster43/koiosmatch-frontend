@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ApplicationTab from './ApplicationTab'
+import { peekReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
 
 // RejectionBlock fetches the reasons on mount; the vacancy-link edit mode
@@ -15,16 +16,25 @@ vi.mock('@/lib/api', () => ({
 import api from '@/lib/api'
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
 
-// Minimal application detail for the read-only "Sollicitatie" tab.
+// Minimal application detail for the read-only "Sollicitatie" tab. `vacancy` is a
+// required nested object on the real type (mapApplicationDetail always builds one) —
+// included here too so ApplicationTab's Locatie field (S6) doesn't read undefined.
+// vacancyId stays unset by default (mirrors the original fixture — several tests
+// below rely on the vacancy-link edit mode starting from "no vacancy picked").
 const app = (over: Partial<ApplicationDetail> = {}) => ({
   id: 1, source: 'Facebook', client: 'Yesway', vacancyTitle: 'Verpleegkundige',
-  bucket: 'active', score: null, matchCriteria: [], ai: {}, ...over,
+  bucket: 'active', score: null, matchCriteria: [], ai: {},
+  vacancy: { id: null, title: '', client: 'Yesway', vacancyId: '', status: '',
+    employmentType: '', location: '', salary: '', hours: '', experience: '', seniority: '',
+    education: '', branch: '', category: '', skills: [], tags: [] },
+  ...over,
 } as unknown as ApplicationDetail)
 
 describe('ApplicationTab', () => {
-  it('renders the read-only details (source/client/vacancy)', () => {
+  it('renders the read-only details (source/client/vacancy), no repeated heading', () => {
     render(<ApplicationTab application={app()} />)
-    expect(screen.getByText('drawer.details')).toBeInTheDocument()
+    // S3: the redundant "Details" heading is gone — only the pencil marks the block.
+    expect(screen.queryByText('drawer.details')).toBeNull()
     expect(screen.getByText('Facebook')).toBeInTheDocument()
     expect(screen.getByText('Yesway')).toBeInTheDocument()
     expect(screen.getByText('Verpleegkundige')).toBeInTheDocument()
@@ -81,5 +91,21 @@ describe('ApplicationTab', () => {
     await user.click(screen.getByLabelText('common:save'))
 
     expect(onLinkVacancy).toHaveBeenCalledWith(1, 'v2', { title: 'Chirurg', client: 'Acme' })
+  })
+
+  // S12/S13: the read-only vacancy value is a real EntityLink (in-app click + new-tab
+  // icon), not plain text, once a vacancy is actually linked.
+  it('renders the linked vacancy as a clickable EntityLink', () => {
+    render(<ApplicationTab application={app({ vacancyId: 'v9', vacancyTitle: 'Chirurg' })} />)
+    expect(screen.getByTitle('drawer.openVacancy')).toBeInTheDocument()
+  })
+
+  // S14/S22: clicking through to the full vacancy stashes 'application' as the
+  // return tab, so browser BACK reopens this application's drawer on Sollicitatie.
+  it('stashes the return tab before navigating to the linked vacancy', async () => {
+    const user = userEvent.setup()
+    render(<ApplicationTab application={app({ id: 77, vacancyId: 'v9', vacancyTitle: 'Chirurg' })} />)
+    await user.click(screen.getByTitle('drawer.openVacancy'))
+    expect(peekReturnTab(77)).toBe('application')
   })
 })

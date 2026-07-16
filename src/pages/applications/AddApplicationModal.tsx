@@ -8,6 +8,7 @@ import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
 import { mapApplication } from './data/mapApplication'
+import { BTN_H } from '@/config/buttonMetrics'
 import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
@@ -28,11 +29,19 @@ const API_TO_FORM: Record<string, string> = {
 // Field label + shared searchable single-select (CreatableSelect) — replaces the
 // old inline SearchField dropdown (DUP-1). allowCreate off = pick-only. `style`
 // (e.g. a 422 field-error border) merges with the base width, it never replaces it.
-function PickField({ label, style, ...rest }: { label: ReactNode; style?: CSSProperties } & AnyProps) {
+// S2 (Danny): comfortable menu width now that the panel is wide (mirrors
+// MatchPlacementModal's pickerMenuWidth) — the shared component's 220px default
+// read cramped for a full candidate/vacancy "title · client" label. `value || null`
+// (measured live, S2): this form's state starts at '' (empty string, not null/
+// undefined), and CreatableSelect's `value ?? placeholder` only falls through to
+// the placeholder on null/undefined — '' short-circuited it, so every picker
+// showed BLANK instead of "Selecteer een kandidaat/vacature/recruiter". Mirrors
+// MatchPlacementModal's own `value={x || null}` pickers (job 17/18).
+function PickField({ label, style, value, ...rest }: { label: ReactNode; style?: CSSProperties; value?: string } & AnyProps) {
   return (
     <div>
       <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{label}</div>
-      <CreatableSelect allowCreate={false} style={{ width: '100%', ...style }} {...rest} />
+      <CreatableSelect allowCreate={false} menuWidth={320} value={value || null} style={{ width: '100%', ...style }} {...rest} />
     </div>
   )
 }
@@ -122,31 +131,38 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
   return (
     <>
       <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={onClose} />
+      {/* S2 (Danny): widened to the same 720px two-column pattern as
+          MatchPlacementModal — the 440px panel read cramped for a full
+          candidate/vacancy "title · client" label + its search box. */}
       <div ref={panelRef} role="dialog" aria-modal="true" aria-label={t('add.title')} tabIndex={-1}
-        className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'white',
-        borderRadius: 12, width: 440, maxWidth: '92vw', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 22px', borderBottom: '1px solid #F3F4F6' }}>
-          <span style={{ fontSize: 15, fontWeight: 700 }}>{t('add.title')}</span>
-          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9CA3AF' }}><X size={16} /></button>
+        className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)',
+        borderRadius: 12, width: 720, maxWidth: '94vw', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 70px rgba(0,0,0,0.22)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 22px', borderBottom: '1px solid var(--border)' }}>
+          <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('add.title')}</span>
+          <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
         </div>
 
+        {/* Candidate + vacancy side by side — the two "big" relational pickers get
+            equal, comfortable room; owner stays its own row below. */}
         <div style={{ padding: 22, display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <PickField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')}
-            options={candidates} value={candidateId} onChange={setCandidateId}
-            style={errors.candidateId ? { borderColor: 'var(--color-danger)' } : undefined} />
-          {lockedVacancy ? (
-            <div>
-              <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('add.vacancy')}</div>
-              <div style={{ padding: '8px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-                background: 'var(--bg)', color: 'var(--text)' }}>
-                {lockedVacancy.client ? `${lockedVacancy.title} · ${lockedVacancy.client}` : lockedVacancy.title}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <PickField label={t('add.candidate')} placeholder={t('add.candidatePlaceholder')}
+              options={candidates} value={candidateId} onChange={setCandidateId}
+              style={errors.candidateId ? { borderColor: 'var(--color-danger)' } : undefined} />
+            {lockedVacancy ? (
+              <div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }}>{t('add.vacancy')}</div>
+                <div style={{ padding: '8px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
+                  background: 'var(--bg)', color: 'var(--text)' }}>
+                  {lockedVacancy.client ? `${lockedVacancy.title} · ${lockedVacancy.client}` : lockedVacancy.title}
+                </div>
               </div>
-            </div>
-          ) : (
-            <PickField label={t('add.vacancy')} placeholder={t('add.vacancyPlaceholder')}
-              options={vacancies} value={vacancyId} onChange={setVacancyId}
-              style={errors.vacancyId ? { borderColor: 'var(--color-danger)' } : undefined} />
-          )}
+            ) : (
+              <PickField label={t('add.vacancy')} placeholder={t('add.vacancyPlaceholder')}
+                options={vacancies} value={vacancyId} onChange={setVacancyId}
+                style={errors.vacancyId ? { borderColor: 'var(--color-danger)' } : undefined} />
+            )}
+          </div>
           <PickField label={t('add.owner')} placeholder={t('add.ownerPlaceholder')}
             options={ownerOptions} value={ownerId} onChange={setOwnerId}
             style={errors.ownerId ? { borderColor: 'var(--color-danger)' } : undefined} />
@@ -161,10 +177,11 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
           </div>
         )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid #F3F4F6' }}>
-          <button onClick={onClose} style={{ height: 36, padding: '0 16px', fontSize: 13, border: '1px solid #E5E7EB', borderRadius: 8, background: 'white', cursor: 'pointer' }}>{t('add.cancel')}</button>
+        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '14px 22px', borderTop: '1px solid var(--border)' }}>
+          <button onClick={onClose} style={{ height: BTN_H, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>{t('add.cancel')}</button>
           <button onClick={create} disabled={!candidateId || !vacancyId || saving}
-            style={{ height: 36, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
+            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8,
               background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: (candidateId && vacancyId) ? 1 : 0.4 }}>
             {t('add.create')}
           </button>

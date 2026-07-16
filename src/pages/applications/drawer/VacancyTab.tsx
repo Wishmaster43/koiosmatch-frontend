@@ -9,6 +9,7 @@ import DetailsTab from '@/pages/vacancies/drawer/DetailsTab'
 import { mapVacancyDetail } from '@/pages/vacancies/data/mapVacancy'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
+import { rememberReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -110,11 +111,15 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
             <Unlink size={12} /> {t('vacancyDetail.unlink')}
           </button>
         )}
-        <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
-            <ExternalLink size={13} /> {t('drawer.openVacancy')}
-          </span>
-        </EntityLink>
+        {/* S14/S22: stash the current subtab so browser BACK from the full vacancy
+            page reopens THIS application's drawer on the Vacature tab again. */}
+        <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'vacancy') }}>
+          <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+              <ExternalLink size={13} /> {t('drawer.openVacancy')}
+            </span>
+          </EntityLink>
+        </span>
       </div>
       <VacancyLookupsProvider>
         <DetailsTab vacancy={vac} />

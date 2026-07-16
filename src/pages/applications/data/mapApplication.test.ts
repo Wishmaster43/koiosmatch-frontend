@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { mapApplication } from './mapApplication'
+import { mapApplication, mapApplicationDetail } from './mapApplication'
 import type { LookupItem } from '@/context/LookupsContext'
 
 // A tenant that renamed the funnel: 'aangenomen' carries is_match — proves the
@@ -34,5 +34,38 @@ describe('mapApplication', () => {
     expect(mapApplication({ id: 6, phase_key: 'aangenomen' }, RENAMED_FUNNEL).bucket).toBe('matched')
     // Without a matching lookup entry, an unknown key is never assumed "matched".
     expect(mapApplication({ id: 7, phase_key: 'aangenomen' }).bucket).toBe('active')
+  })
+})
+
+describe('mapApplicationDetail', () => {
+  // S9 finding: `rejection` was NEVER read off the raw payload, so a rejected
+  // application's reason/toelichting silently vanished even though
+  // ApplicationDetailResource sends it.
+  it('maps the rejection trail (reason_label + note) from the raw payload', () => {
+    const detail = mapApplicationDetail({
+      id: 1,
+      rejection: { reason_id: 'r1', reason_label: 'Niet gekwalificeerd', note: 'Geen ervaring', channel: 'email' },
+    })
+    expect(detail.rejection?.reason_label).toBe('Niet gekwalificeerd')
+    expect(detail.rejection?.note).toBe('Geen ervaring')
+  })
+
+  it('leaves rejection undefined (never null) when the application was never rejected', () => {
+    expect(mapApplicationDetail({ id: 2, rejection: null }).rejection).toBeUndefined()
+    expect(mapApplicationDetail({ id: 3 }).rejection).toBeUndefined()
+  })
+
+  // S6 finding: the vacancy embed sends `city` (location_city), not a `location`
+  // string — Locatie on the Sollicitatie tab was always blank without this fallback.
+  it('falls back to the vacancy city when no location string is sent', () => {
+    expect(mapApplicationDetail({ id: 4, vacancy: { city: 'Rotterdam' } }).vacancy.location).toBe('Rotterdam')
+  })
+
+  it('prefers an explicit vacancy location string over the city fallback', () => {
+    expect(mapApplicationDetail({ id: 5, vacancy: { location: 'Zuid-Holland', city: 'Rotterdam' } }).vacancy.location).toBe('Zuid-Holland')
+  })
+
+  it('dashes to empty when neither location nor city is present', () => {
+    expect(mapApplicationDetail({ id: 6 }).vacancy.location).toBe('')
   })
 })

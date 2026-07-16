@@ -14,6 +14,7 @@ import { PreferencesTab, ZzpTab } from '@/pages/candidates/drawer/PreferencesZzp
 import CommunicationTab from '@/pages/candidates/drawer/CommunicationTab'
 import DocumentsSection from '@/pages/candidates/drawer/DocumentsSection'
 import StatisticsTab from '@/pages/candidates/drawer/StatisticsTab'
+import { rememberReturnTab } from './constants'
 import type { Candidate } from '@/types/candidate'
 import type { ApplicationDetail } from '@/types/application'
 
@@ -95,20 +96,29 @@ export default function CandidateTab({ application: a }: { application: Applicat
       {/* Candidate name + deployability status — the ONE shared chip (mirrors the
           applications table); available immediately from the application payload
           (candidate.status/status_label/status_color), no need to wait for the
-          full candidate fetch below. Jump-to-record link stays on the right. */}
+          full candidate fetch below. Jump-to-record link stays on the right.
+          Optional chaining: the drawer shows a LIGHT `Application` row cast as
+          `ApplicationDetail` before the full GET /applications/{id} resolves
+          (ApplicationsPage.selectApplication) — `candidate` only exists once that
+          fetch lands, so this crashed on first render without the `?.` (measured
+          live, mirrors the a.vacancy?.location fix in ApplicationTab.tsx). */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {a.candidate.name}
+            {a.candidate?.name ?? a.candidateName}
           </span>
           <CandidateStatusChip status={a.candidateStatus} phase={a.candidatePhase}
-            fallbackLabel={a.candidate.statusLabel} fallbackColor={a.candidate.statusColor} round />
+            fallbackLabel={a.candidate?.statusLabel} fallbackColor={a.candidate?.statusColor} round />
         </div>
-        <EntityLink page="candidates" id={a.candidateId} title={t('applications:drawer.openCandidate')}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0 }}>
-            <ExternalLink size={13} /> {t('applications:drawer.openCandidate')}
-          </span>
-        </EntityLink>
+        {/* S14/S22: stash the current subtab so browser BACK from the full candidate
+            page reopens THIS application's drawer on the Kandidaat tab again. */}
+        <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'candidate') }}>
+          <EntityLink page="candidates" id={a.candidateId} title={t('applications:drawer.openCandidate')}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0 }}>
+              <ExternalLink size={13} /> {t('applications:drawer.openCandidate')}
+            </span>
+          </EntityLink>
+        </span>
       </div>
       {/* The default namespace here is 'candidates' (every sub-tab below needs it), so
           these two loading/error strings — an applications-drawer concern, not a

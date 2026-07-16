@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X } from 'lucide-react'
+import EntityLink from '@/components/ui/EntityLink'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { buildApplicationAdviceInsights } from './applicationAiInsights'
@@ -11,6 +12,7 @@ import RejectionBlock from './RejectionBlock'
 import type { RejectPayload } from './RejectionBlock'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
+import { rememberReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
 
@@ -42,6 +44,12 @@ interface ApplicationTabProps {
  * vacancy link is editable in-place; Bron + Klant stay read-only — Klant is
  * derived from the vacancy) and the overall match score. Phase + recruiter are
  * edited from the drawer header (meta pickers), so they no longer live here.
+ * No repeated "Details" heading (§3A) — the pencil alone marks the editable block.
+ * Locatie shows the vacancy's own work-site city when the backend sends one;
+ * Afdeling is intentionally absent — a vacancy has no customer_location_id/
+ * customer_department_id today (measured: neither the Vacancy model nor
+ * ApplicationDetailResource carries them, unlike Opportunity/Match), so there is
+ * nothing to show or link yet (S6, reported).
  */
 export default function ApplicationTab({ application: a, onReject, onAdjustScore, onLinkVacancy }: ApplicationTabProps) {
   const { t } = useTranslation(['applications', 'common'])
@@ -75,10 +83,11 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
 
       {/* Details — Bron/Klant stay read-only (Klant derives from the vacancy);
           the vacancy link itself is editable in-place (phase/recruiter are
-          edited in the header instead). */}
+          edited in the header instead). No repeated "Details" heading (S3) —
+          the pencil (right-aligned, no heading to sit next to) is the only
+          affordance needed. */}
       <div>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('drawer.details')}</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 12, minHeight: 26 }}>
           {/* In-place edit toggle: pencil → diskette + ✕, same spot (§0.3 pattern). */}
           {onLinkVacancy && (editing ? (
             <div style={{ display: 'flex', gap: 4 }}>
@@ -95,6 +104,15 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 20px' }}>
           <Field label={t('drawer.source')}>{a.source || '—'}</Field>
           <Field label={t('drawer.client')}>{a.client || '—'}</Field>
+          {/* Locatie (S6) — the vacancy's own work-site city when the backend sends
+              one; dash otherwise. No Afdeling field: measured, nothing to show
+              (see the file docblock). */}
+          {/* Optional chaining: the drawer shows a LIGHT `Application` row cast as
+              `ApplicationDetail` before the full GET /applications/{id} resolves
+              (ApplicationsPage.selectApplication) — `vacancy` only exists once that
+              fetch lands, so this crashed on first render without the `?.` (measured
+              live). Mirrors how the rest of this file already guards a.ai/a.rejection. */}
+          <Field label={t('drawer.location')}>{a.vacancy?.location || '—'}</Field>
           <div style={{ gridColumn: '1 / -1' }}>
             {editing ? (
               <div>
@@ -102,7 +120,17 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
                 <VacancyLinkField value={vacancyId} options={vacancyOptions} onChange={setVacancyId} />
               </div>
             ) : (
-              <Field label={t('drawer.vacancy')}>{a.vacancyTitle || '—'}</Field>
+              <Field label={t('drawer.vacancy')}>
+                {/* S12/S13: the vacancy is a real linkable entity (id available) —
+                    EntityLink gives in-app click + new-tab icon; the return-tab
+                    stash (S14/S22) makes browser BACK land back on this Sollicitatie
+                    tab instead of resetting to the drawer's first tab. */}
+                <span onClickCapture={() => { if (a.id != null) rememberReturnTab(a.id, 'application') }}>
+                  <EntityLink page="vacancies" id={a.vacancyId} title={t('drawer.openVacancy')}>
+                    {a.vacancyTitle || '—'}
+                  </EntityLink>
+                </span>
+              </Field>
             )}
           </div>
         </div>

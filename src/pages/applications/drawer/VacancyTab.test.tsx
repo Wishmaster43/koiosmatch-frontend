@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import VacancyTab from './VacancyTab'
+import { peekReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
 
 // Stub the api client + the reused vacancy detail (avoids its lookups context).
@@ -50,5 +52,16 @@ describe('VacancyTab', () => {
     mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
     render(<VacancyTab application={app()} />)
     expect(await screen.findByText('details-tab')).toBeInTheDocument()
+  })
+
+  // S14/S22: clicking through to the full vacancy stashes 'vacancy' as the return
+  // tab, so browser BACK reopens this application's drawer on the Vacature tab.
+  it('stashes the return tab before navigating to the full vacancy', async () => {
+    mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
+    const user = userEvent.setup()
+    render(<VacancyTab application={app({ id: 9 })} />)
+    const openLink = await screen.findByTitle('drawer.openVacancy')
+    await user.click(openLink)
+    expect(peekReturnTab(9)).toBe('vacancy')
   })
 })

@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { XCircle } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import RichTextEditor from '@/components/ui/RichTextEditor'
+import SafeHtml from '@/components/ui/SafeHtml'
 import type { ApplicationDetail } from '@/types/application'
 import type { Id } from '@/types/common'
 
@@ -11,15 +14,17 @@ export interface RejectPayload { reason_id: string; note: string; reason_label: 
 
 /**
  * RejectionBlock — reject an application: AI advice (a hard-criterion failure is
- * the only auto-reject case), a reason + optional note, then a confirm. The
- * rejection MESSAGE (channel + template) is sent by a workflow that fires on
- * rejection — so no channel picker / preview here.
+ * the only auto-reject case), a reason (searchable, tenant-lookup CreatableSelect
+ * — S8) + an optional rich-text toelichting (S9), then a confirm. The rejection
+ * MESSAGE (channel + template) is sent by a workflow that fires on rejection —
+ * so no channel picker / preview here.
  */
 export default function RejectionBlock({ application: a, onReject }: { application: ApplicationDetail; onReject?: (id: Id | undefined, payload: RejectPayload) => void }) {
   const { t } = useTranslation('applications')
   const [reasons, setReasons]   = useState<RejectionReason[]>([])
   const [reasonId, setReasonId] = useState('')
   const [note, setNote]         = useState('')
+  const [noteExpanded, setNoteExpanded] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
   // Load the rejection reasons; empty on failure, never demo data.
@@ -27,8 +32,12 @@ export default function RejectionBlock({ application: a, onReject }: { applicati
     api.get('/candidate-rejection-reasons').then(r => setReasons(unwrapList<RejectionReason>(r).rows)).catch(() => setReasons([]))
   }, [])
 
-  // Already rejected → compact summary instead of the form.
+  // Already rejected → compact summary instead of the form. The toelichting/note
+  // (S9 finding) is read-only here — there is no safe PATCH path for an already-
+  // rejected application's note yet (re-running the reject endpoint would
+  // re-notify the candidate), so this stays a display-only rich-text block.
   if (a.bucket === 'rejected') {
+    const rejectionNote = a.rejection?.note as string | undefined
     return (
       <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -37,6 +46,12 @@ export default function RejectionBlock({ application: a, onReject }: { applicati
         </div>
         {a.rejection?.reason_label && (
           <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{a.rejection.reason_label}</div>
+        )}
+        {rejectionNote && (
+          <div style={{ marginTop: 8 }}>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 4 }}>{t('rejection.note')}</div>
+            <SafeHtml html={rejectionNote} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
+          </div>
         )}
       </div>
     )
@@ -69,23 +84,21 @@ export default function RejectionBlock({ application: a, onReject }: { applicati
         </div>
       )}
 
-      {/* Reason */}
+      {/* Reason — searchable CreatableSelect (S8), allowCreate off: a rejection
+          reason is a tenant lookup, picked never free-typed here. */}
       <div>
         <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('rejection.reason')}</div>
-        <select value={reasonId} onChange={e => setReasonId(e.target.value)}
-          style={{ width: '100%', height: 36, padding: '0 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-            background: 'var(--input-bg, var(--surface))', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' }}>
-          <option value="">{t('rejection.reasonPlaceholder')}</option>
-          {reasons.map(r => <option key={r.id} value={r.id}>{r.name ?? r.label}</option>)}
-        </select>
+        <CreatableSelect allowCreate={false} value={reasonId || null} onChange={setReasonId}
+          placeholder={t('rejection.reasonPlaceholder')}
+          options={reasons.map(r => ({ value: String(r.id ?? ''), label: r.name ?? r.label ?? '' }))} />
       </div>
 
-      {/* Note */}
+      {/* Note — the shared rich-text block (S9, house rule §3A/§4), not a bare
+          textarea; collapsed toolbar by default. */}
       <div>
         <div style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 5 }}>{t('rejection.note')}</div>
-        <textarea value={note} onChange={e => setNote(e.target.value)} rows={2} placeholder={t('rejection.notePlaceholder')}
-          style={{ width: '100%', padding: '8px 10px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
-            background: 'var(--input-bg, var(--surface))', color: 'var(--text)', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+        <RichTextEditor value={note} onChange={setNote}
+          expanded={noteExpanded} onToggleExpand={() => setNoteExpanded(v => !v)} />
       </div>
 
       {/* Confirm */}

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FileText, Unlink, ArchiveRestore } from 'lucide-react'
@@ -6,7 +7,6 @@ import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
-import TitleBadge from '@/components/drawer/TitleBadge'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import ApplicationChangelogPopover from './drawer/ApplicationChangelogPopover'
 import ApplicationTab from './drawer/ApplicationTab'
@@ -16,6 +16,8 @@ import InterviewsTab from './drawer/InterviewsTab'
 import AppointmentsTab from './drawer/AppointmentsTab'
 import NotesTab from './drawer/NotesTab'
 import Timeline from './drawer/Timeline'
+import { peekReturnTab, clearReturnTab } from './drawer/constants'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { ApplicationDetail } from '@/types/application'
 import type { RejectPayload } from './drawer/RejectionBlock'
 import type { Criterion } from './drawer/MatchScoreBlock'
@@ -43,19 +45,36 @@ interface ApplicationDrawerProps {
   canManage?: boolean
   // Save the Extra tab's tenant custom fields (§3B) — a partial patch, merged by the caller.
   onUpdateCustomFields?: (id: Id | undefined, patch: Record<string, unknown>) => void
+  // Deep-link: open on this tab (mirrors CandidateDrawer's own prop, currently unused
+  // by any caller — kept for parity/future deep-links; the return-tab memory below
+  // covers the NAV-BACK-1 case this drawer actually needs today).
+  initialTab?: string
 }
 
 /**
  * ApplicationDrawer — thin container: declares the header config + tab list and
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
  */
-export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, users, onDetach, onRestore, canManage, onUpdateCustomFields }: ApplicationDrawerProps) {
+export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, users, onDetach, onRestore, canManage, onUpdateCustomFields, initialTab }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   const { formatDateTime } = useDateFormat()
-  // Funnel phases (Settings lookup) for the header phase picker + title badge; never hardcoded.
+  // Funnel phases (Settings lookup) for the header phase picker; never hardcoded.
   const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string; color?: string }> }
   // The Extra tab only shows when the tenant has defined application custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('application')
+  // NAV-BACK-1 tab-remember: a subtab stashed by CandidateTab/VacancyTab (or the
+  // Sollicitatie tab's own vacancy link) before a cross-navigation away from this
+  // drawer, restored (once) as the initial tab when the drawer remounts after
+  // browser BACK. The parent (ApplicationsPage) remounts this component via a
+  // `key={selected?.id}` on every application change, so a lazy init is enough —
+  // no CandidateDrawer-style prevId tracking needed here.
+  const [rememberedTab] = useState<string | null>(() => (a?.id != null ? peekReturnTab(a.id) : null))
+  // Consume the remembered tab once it has been used, so a later, unrelated
+  // re-open of the same application defaults back to Sollicitatie (destructive —
+  // effect-only, see the constants.ts file comment on why).
+  useEffect(() => {
+    if (rememberedTab && a?.id != null) clearReturnTab(a.id)
+  }, [rememberedTab, a?.id])
   if (!a) return null
 
   // Header meta pickers — phase (funnel lookup) + recruiter (tenant users). The
@@ -74,10 +93,8 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
     { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions,
       onChange: (v: string) => { if (v !== '__current') onOwnerChange?.(a.id, String(v)) }, menuWidth: 200, width: 190 },
   ]
-  // Phase badge next to the title — colour-coded, read-only (mirrors the candidate
-  // phase badge, §3A(c)). NUMMER-3: applications carry no reference_number yet
-  // (ApplicationDetailResource omits it) — no ReferenceNumberChip until that lands.
-  const phaseMeta = funnelTypes.find(f => f.value === a.phaseKey)
+  // NUMMER-3: applications carry no reference_number yet (ApplicationDetailResource
+  // omits it) — no ReferenceNumberChip until that lands (measured, S5).
 
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
@@ -103,16 +120,20 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   return (
     <EntityDrawer
       entity={a}
+      // An explicit deep-link always wins; otherwise fall back to the NAV-BACK-1
+      // remembered tab (see rememberedTab above).
+      initialTab={initialTab ?? rememberedTab ?? undefined}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
       footer={(
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{t('drawer.createdAt', { date: formatDateTime(a.created) })}</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Detached → restore (primary); active → detach (danger, gated). */}
+            {/* Detached → restore (primary); active → detach (danger, gated).
+                BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
             {a.archived ? (
               <button onClick={() => onRestore?.(a.id)} style={{ display: 'flex', alignItems: 'center', gap: 5,
-                fontSize: 12, fontWeight: 500, padding: '5px 12px', borderRadius: 8,
+                fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
                 border: '1px solid var(--color-primary)', background: 'var(--color-primary-bg)',
                 color: 'var(--color-primary)', cursor: 'pointer' }}>
                 <ArchiveRestore size={12} /> {t('restore.button')}
@@ -122,7 +143,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
               <button onClick={() => a.vacancyId != null && onDetach?.(a.id)} disabled={a.vacancyId == null}
                 title={a.vacancyId == null ? t('detach.nothingLinked') : undefined}
                 style={{ display: 'flex', alignItems: 'center', gap: 5,
-                  fontSize: 12, fontWeight: 500, padding: '5px 12px', borderRadius: 8,
+                  fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
                   border: `1px solid ${a.vacancyId == null ? 'var(--border)' : 'var(--color-danger)'}`, background: 'none',
                   color: a.vacancyId == null ? 'var(--text-muted)' : 'var(--color-danger)',
                   cursor: a.vacancyId == null ? 'not-allowed' : 'pointer', opacity: a.vacancyId == null ? 0.6 : 1 }}>
@@ -130,7 +151,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
               </button>
             ) : null}
             <button style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 500,
-              padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)',
+              height: BTN_H, padding: '0 12px', borderRadius: 8, border: '1px solid var(--border)',
               background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
               <FileText size={12} /> {t('drawer.downloadCv')}
             </button>
@@ -145,11 +166,9 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
           avatar={{ initials: a.candidateInitials, soft: true }}
           renderTitle={() => (
             <>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{a.candidateName}</span>
-                {/* Phase badge — colour-coded, read-only (mirrors the candidate phase badge, §3A(c)). */}
-                <TitleBadge label={phaseMeta?.label} color={phaseMeta?.color} />
-              </div>
+              {/* S4 (Danny): no phase badge here — it duplicated the Fase meta picker
+                  below (the picker is the one source of truth for the phase). */}
+              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{a.candidateName}</span>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.vacancyTitle || '—'}</div>
             </>
           )}

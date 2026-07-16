@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import CandidateTab from './CandidateTab'
+import { peekReturnTab } from './constants'
 // CandidateTab statically imports the full candidate tab set, several of which
 // pull in @/lib/datetime — which re-exports from @/i18n, so importing it (even
 // unrendered, behind the loading state below) initialises the REAL i18n runtime
@@ -55,5 +57,14 @@ describe('CandidateTab', () => {
   it('links to the full candidate record', () => {
     render(<CandidateTab application={app()} />)
     expect(screen.getByTitle(i18n.t('applications:drawer.openCandidate'))).toBeInTheDocument()
+  })
+
+  // S14/S22: clicking through to the full candidate stashes 'candidate' as the
+  // return tab, so browser BACK reopens this application's drawer on Kandidaat.
+  it('stashes the return tab before navigating to the full candidate', async () => {
+    const user = userEvent.setup()
+    render(<CandidateTab application={app({ id: 42 })} />)
+    await user.click(screen.getByTitle(i18n.t('applications:drawer.openCandidate')))
+    expect(peekReturnTab(42)).toBe('candidate')
   })
 })
