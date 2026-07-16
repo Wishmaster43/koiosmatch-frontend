@@ -412,19 +412,7 @@
     "costCenter": "Centro de costes"
   },
   "monthlyKpi": {
-    "title": "Resumen de candidatos",
-    "pctOfKpi": "{{pct}} % del KPI",
-    "new": "Nuevos",
-    "average": "Media",
-    "kpiTarget": "Objetivo KPI",
-    "unsubscribed": "Dados de baja",
-    "newIn": "Nuevos en {{month}}",
-    "unsubscribedIn": "Dados de baja en {{month}}",
-    "averageCalc": "Cálculo de la media",
-    "kpiProgress": "Objetivo KPI y progreso",
-    "tipDetails": "Haz clic para ver detalles",
-    "tipAverage": "Haz clic para la explicación del cálculo",
-    "tipKpi": "Haz clic para el progreso del KPI"
+    "averageCalc": "Cálculo de la media"
   },
   "savedFilters": {
     "title": "Filtros guardados",

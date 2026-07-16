@@ -745,10 +745,6 @@
     "signature": "Handtekening",
     "signatureHint": "Wordt onder elke e-mail van dit type toegevoegd."
   },
-  "appStore": {
-    "title": "App store",
-    "desc": "Beheer en installeer apps en integraties."
-  },
   "notifications": {
     "email": {
       "label": "E-mail notificaties",
@@ -1090,8 +1086,6 @@
       "ats_crm_planning": "Koios Core + Planning",
       "ats_crm_ai_planning": "Koios Suite"
     },
-    "emptyTitle": "Nog geen instellingen",
-    "emptyDesc": "Instellingen voor deze module volgen.",
     "smKpiTitle": "Shiftmanager-KPI’s",
     "smKpiDesc": "Aparte KPI-doelen voor het Shiftmanager-dashboard (los van de Dashboard-KPI’s). Configuratie volgt."
   },
@@ -1343,11 +1337,6 @@
     "levelsTitle": "Niveaus",
     "levelsSubtitle": "Beheersingsniveaus (bijv. Slecht → Zeer goed, Moedertaal).",
     "addLevel": "Niveau toevoegen"
-  },
-  "availabilitySettings": {
-    "title": "Beschikbaarheid",
-    "subtitle": "Beheer de beschikbaarheidsopties — een aparte as naast de status.",
-    "add": "Optie toevoegen"
   },
   "industrySettings": {
     "title": "Industrieën",

@@ -745,10 +745,6 @@
     "signature": "Signature",
     "signatureHint": "Added to the bottom of every email of this type."
   },
-  "appStore": {
-    "title": "App store",
-    "desc": "Manage and install apps and integrations."
-  },
   "notifications": {
     "email": {
       "label": "Email notifications",
@@ -1090,8 +1086,6 @@
       "ats_crm_planning": "Koios Core + Planning",
       "ats_crm_ai_planning": "Koios Suite"
     },
-    "emptyTitle": "No settings yet",
-    "emptyDesc": "Settings for this module are coming.",
     "smKpiTitle": "Shiftmanager KPIs",
     "smKpiDesc": "Separate KPI targets for the Shiftmanager dashboard (distinct from the main Dashboard KPIs). Configuration coming."
   },
@@ -1343,11 +1337,6 @@
     "levelsTitle": "Levels",
     "levelsSubtitle": "Proficiency levels (e.g. Poor → Very good, Native).",
     "addLevel": "Add level"
-  },
-  "availabilitySettings": {
-    "title": "Availability",
-    "subtitle": "Manage the availability options — a separate axis next to status.",
-    "add": "Add option"
   },
   "industrySettings": {
     "title": "Industries",

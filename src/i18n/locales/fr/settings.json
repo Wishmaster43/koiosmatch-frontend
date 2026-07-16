@@ -543,10 +543,6 @@
     "signature": "Signature",
     "signatureHint": "Ajoutée au bas de chaque e-mail de ce type."
   },
-  "appStore": {
-    "title": "App store",
-    "desc": "Gérer et installer des apps et intégrations."
-  },
   "notifications": {
     "email": {
       "label": "Notifications e-mail",
@@ -873,8 +869,6 @@
       "ats_crm_planning": "Koios Core + Planning",
       "ats_crm_ai_planning": "Koios Suite"
     },
-    "emptyTitle": "Pas encore de réglages",
-    "emptyDesc": "Les réglages de ce module arrivent.",
     "smKpiTitle": "KPI Shiftmanager",
     "smKpiDesc": "Objectifs KPI distincts pour le tableau de bord Shiftmanager. Configuration à venir.",
     "tierHeading": "Forfait",
@@ -1405,11 +1399,6 @@
     "levelsTitle": "Niveaux",
     "levelsSubtitle": "Niveaux de maîtrise (ex. Faible → Très bien, Langue maternelle).",
     "addLevel": "Ajouter un niveau"
-  },
-  "availabilitySettings": {
-    "title": "Disponibilité",
-    "subtitle": "Gérez les options de disponibilité — un axe distinct du statut.",
-    "add": "Ajouter une option"
   },
   "industrySettings": {
     "title": "Secteurs",

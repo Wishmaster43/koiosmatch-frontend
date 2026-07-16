@@ -1,26 +1,23 @@
 /**
  * AddShiftModal — the "plan a shift" dialog: order/location/colour, shift times,
- * candidate suggestions and notes. Self-contained subtree (its Field/SectionHead/
- * Avatar/KandidaatRij helpers + style consts live here). Extracted from PlanningPage.
+ * candidate search and notes. Self-contained subtree (its Field/SectionHead/
+ * Avatar/CandidateRow helpers + style consts live here). Extracted from
+ * PlanningPage. PLAN-LOOKUP-1 (2026-07-16): the customer/department/job-title
+ * selects and the candidate list used to be hardcoded Dutch demo data — see
+ * ./hooks/useShiftLookups for the real sources and why the old fake
+ * favourite/distance suggestion ranking was dropped instead of re-faked.
  */
 import { useState, useId, cloneElement, isValidElement } from 'react'
 import type { CSSProperties, ReactNode, ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Save, Star, Search } from 'lucide-react'
+import { X, Save, Search } from 'lucide-react'
 import { formatDate } from './helpers'
 import { interactive } from '@/lib/a11y'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
-import type { Suggestie, ShiftInput } from '@/types/planning'
-
-// ── Dummy kandidaten voor suggesties ─────────────────────────────────────────
-const SUGGESTIES: Suggestie[] = [
-  { name: 'Ismail Eddahchouri',   initials: 'IE', functie: 'Verzorgende IG',   uren: 8,   km: '3.2km',  color: 'var(--color-primary)', favoriet: true  },
-  { name: 'Merel Van Muijlwijk',  initials: 'MV', functie: 'Helpende',         uren: 24,  km: '7.1km',  color: 'var(--color-success)', favoriet: true  },
-  { name: 'Elif Akagündüz',       initials: 'EA', functie: 'Gastvrouw',         uren: 16,  km: '5.4km',  color: 'var(--color-warning)', favoriet: false },
-  { name: 'Rubina Rosella Milan', initials: 'RM', functie: 'Verzorgende',       uren: 32,  km: '9.8km',  color: 'var(--color-secondary)', favoriet: false },
-  { name: 'Figen Ooijevaar',      initials: 'FO', functie: 'Zorgmedewerker',   uren: 12,  km: '11.2km', color: '#8B5CF6', favoriet: false },
-  { name: 'Petra Kuiters',        initials: 'PK', functie: 'Helpende',         uren: 40,  km: '18.5km', color: '#EC4899', favoriet: false },
-]
+import { useFunctions } from '@/lib/useFunctions'
+import { useShiftCustomers, useShiftDepartments, useShiftCandidateSearch } from './hooks/useShiftLookups'
+import type { ShiftCandidateOption } from './hooks/useShiftLookups'
+import type { ShiftInput } from '@/types/planning'
 
 // ── Field helpers ─────────────────────────────────────────────────────────────
 const INPUT: CSSProperties = { padding: '7px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7,
@@ -44,9 +41,24 @@ function SectionHead({ children, style }: { children: ReactNode; style?: CSSProp
   )
 }
 
+// One fixed palette, picked deterministically from a name's initials — no
+// per-candidate "colour" field exists (or should — see the hook file header
+// for why favourite/ranking data isn't faked), this replaces that need for
+// both the avatar and the scheduled-candidate accent border.
+const AVATAR_COLORS = ['var(--color-primary)', 'var(--color-secondary)', 'var(--color-success)', 'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899']
+function colorFor(initials: string) {
+  return AVATAR_COLORS[initials.charCodeAt(0) % AVATAR_COLORS.length]
+}
+
+// "Jan de Boer" → "JD" (max 2 letters); falls back to "?" for an empty name.
+function getInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  const chars = [parts[0]?.[0], parts[1]?.[0]].filter(Boolean).join('')
+  return (chars || '?').toUpperCase()
+}
+
 function Avatar({ initials, size = 26 }: { initials: string; size?: number }) {
-  const colors = ['var(--color-primary)','var(--color-secondary)','var(--color-success)','var(--color-warning)','var(--color-danger)','#8B5CF6','#EC4899']
-  const color  = colors[initials.charCodeAt(0) % colors.length]
+  const color = colorFor(initials)
   return (
     <div style={{ width: size, height: size, borderRadius: '50%', background: color, flexShrink: 0,
       display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
@@ -60,28 +72,33 @@ function Avatar({ initials, size = 26 }: { initials: string; size?: number }) {
 export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; onClose: () => void; onAdd: (shift: ShiftInput) => void }) {
   const { t } = useTranslation('planning')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-  const [title,      setTitle]      = useState('Dagdienst')
-  const [start,      setStart]      = useState('07:00')
-  const [end,        setEnd]        = useState('15:00')
-  const [jobtype,    setJobtype]    = useState('Verzorgende IG')
-  const [klant,      setKlant]      = useState('Stichting Rivas Zorggroep')
-  const [afdeling,   setAfdeling]   = useState('Watertorenlocatie')
-  const [locatie,    setLocatie]    = useState('Boezemlaan 4, 2771 VP Boskoop')
-  const [personen,   setPersonen]   = useState(1)
-  const [kandidaat,  setKandidaat]  = useState<Suggestie | null>(null)
-  const [zoek,       setZoek]       = useState('')
-  const [color,      setColor]      = useState('var(--color-success)')
+  const [title,       setTitle]       = useState('')
+  const [start,       setStart]       = useState('07:00')
+  const [end,         setEnd]         = useState('15:00')
+  const [jobType,     setJobType]     = useState('')
+  const [customerId,  setCustomerId]  = useState('')
+  const [departmentId,setDepartmentId]= useState('')
+  const [address,     setAddress]     = useState('')
+  const [personCount, setPersonCount] = useState(1)
+  const [candidate,   setCandidate]   = useState<ShiftCandidateOption | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [color,       setColor]       = useState('var(--color-success)')
   const COLORS = ['var(--color-success)','var(--color-primary)','var(--color-warning)','var(--color-danger)','var(--color-secondary)','#8B5CF6']
 
-  const gefilterd = SUGGESTIES.filter(s =>
-    s.name.toLowerCase().includes(zoek.toLowerCase()) ||
-    s.functie.toLowerCase().includes(zoek.toLowerCase())
-  )
-  const favorieten = gefilterd.filter(s => s.favoriet)
-  const overige    = gefilterd.filter(s => !s.favoriet)
+  // Real lookups (PLAN-LOOKUP-1) — see ./hooks/useShiftLookups for sourcing.
+  const { customers, loading: customersLoading, error: customersError } = useShiftCustomers()
+  const { departments, loading: departmentsLoading, error: departmentsError } = useShiftDepartments(customerId)
+  const { functions } = useFunctions()
+  const { candidates, loading: candidatesLoading, error: candidatesError } = useShiftCandidateSearch(searchQuery)
+
+  const customerName = customers.find(c => String(c.id) === customerId)?.name ?? ''
+
+  // A new customer invalidates the previously picked department (it belonged to
+  // the old customer) — mirrors AddOpportunityModal's cascade reset.
+  const handleCustomerChange = (id: string) => { setCustomerId(id); setDepartmentId('') }
 
   const handleSave = () => {
-    onAdd({ title, location: klant, candidate: kandidaat?.name || '', start, end, color, date })
+    onAdd({ title, location: customerName, candidate: candidate?.name || '', start, end, color, date })
     onClose()
   }
 
@@ -129,27 +146,37 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               background: 'var(--surface)', overflowY: 'auto', padding: '14px 14px' }}>
               <SectionHead>{t('sectionOrder')}</SectionHead>
               <Field label={t('fCustomer')}>
-                <select style={SELECT} value={klant} onChange={e => setKlant(e.target.value)}>
-                  <option>Stichting Rivas Zorggroep</option>
-                  <option>Yesway Zorg</option>
-                  <option>WoonzorgGroep</option>
-                  <option>Stichting Floravita</option>
+                <select style={SELECT} value={customerId} disabled={customersLoading}
+                  onChange={e => handleCustomerChange(e.target.value)}>
+                  <option value="">
+                    {customersLoading ? t('common:loading')
+                      : customersError ? t('common:errorGeneric')
+                      : customers.length === 0 ? t('common:noResults')
+                      : t('common:select')}
+                  </option>
+                  {customers.map(c => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
                 </select>
               </Field>
               <Field label={t('fDepartment')}>
-                <select style={SELECT} value={afdeling} onChange={e => setAfdeling(e.target.value)}>
-                  <option>Watertorenlocatie</option>
-                  <option>Hoofdkantoor</option>
-                  <option>Thuiszorg</option>
+                <select style={SELECT} value={departmentId} disabled={!customerId || departmentsLoading}
+                  onChange={e => setDepartmentId(e.target.value)}>
+                  <option value="">
+                    {!customerId ? t('pickCustomerFirst')
+                      : departmentsLoading ? t('common:loading')
+                      : departmentsError ? t('common:errorGeneric')
+                      : departments.length === 0 ? t('common:noResults')
+                      : t('common:select')}
+                  </option>
+                  {departments.map(d => <option key={d.id} value={String(d.id)}>{d.name}</option>)}
                 </select>
               </Field>
-              <Field label={t('fAssignment')}><input style={INPUT} defaultValue="Watertorenlocatie" /></Field>
+              <Field label={t('fAssignment')}><input style={INPUT} /></Field>
               <Field label={t('fContact')}><input style={INPUT} placeholder={t('contactPlaceholder')} /></Field>
 
               <SectionHead>{t('sectionLocation')}</SectionHead>
               <Field label={t('fAddress')}>
                 <textarea style={{ ...INPUT, resize: 'none', height: 56 }}
-                  value={locatie} onChange={e => setLocatie(e.target.value)} />
+                  value={address} onChange={e => setAddress(e.target.value)} />
               </Field>
 
               <SectionHead>{t('sectionColor')}</SectionHead>
@@ -177,19 +204,16 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                   <input type="time" style={INPUT} value={end} onChange={e => setEnd(e.target.value)} />
                 </Field>
                 <Field label={t('fPersons')}>
-                  <input type="number" style={INPUT} value={personen} min={1} max={20}
-                    onChange={e => setPersonen(Number(e.target.value))} />
+                  <input type="number" style={INPUT} value={personCount} min={1} max={20}
+                    onChange={e => setPersonCount(Number(e.target.value))} />
                 </Field>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
                 <Field label={t('fJobtype')}>
-                  <select style={SELECT} value={jobtype} onChange={e => setJobtype(e.target.value)}>
-                    <option>Verzorgende IG</option>
-                    <option>Helpende</option>
-                    <option>Verpleegkundige</option>
-                    <option>Gastvrouw</option>
-                    <option>Zorgmedewerker</option>
+                  <select style={SELECT} value={jobType} onChange={e => setJobType(e.target.value)}>
+                    <option value="">{t('common:select')}</option>
+                    {functions.map(f => <option key={f} value={f}>{f}</option>)}
                   </select>
                 </Field>
                 <Field label={t('fOpenShift')}>
@@ -203,16 +227,16 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
 
               {/* Scheduled candidate */}
               <SectionHead>{t('scheduledWorker')}</SectionHead>
-              {kandidaat ? (
+              {candidate ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-                  border: `1px solid ${kandidaat.color}40`, borderLeft: `4px solid ${kandidaat.color}`,
+                  border: `1px solid ${colorFor(getInitials(candidate.name))}40`, borderLeft: `4px solid ${colorFor(getInitials(candidate.name))}`,
                   borderRadius: 8, background: 'var(--surface)', marginBottom: 10 }}>
-                  <Avatar initials={kandidaat.initials} />
+                  <Avatar initials={getInitials(candidate.name)} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{kandidaat.name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{kandidaat.functie} · {t('hours', { n: kandidaat.uren })} · {kandidaat.km}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{candidate.name}</div>
+                    {candidate.functionTitle && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{candidate.functionTitle}</div>}
                   </div>
-                  <button onClick={() => setKandidaat(null)}
+                  <button onClick={() => setCandidate(null)}
                     style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                     <X size={14} />
                   </button>
@@ -239,11 +263,11 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
                   </tr>
                 </thead>
                 <tbody>
-                  {kandidaat ? (
+                  {candidate ? (
                     <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: '8px 10px', color: 'var(--text)' }}>{kandidaat.name}</td>
-                      <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{klant}</td>
-                      <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{kandidaat.functie}</td>
+                      <td style={{ padding: '8px 10px', color: 'var(--text)' }}>{candidate.name}</td>
+                      <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{customerName}</td>
+                      <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>{candidate.functionTitle || '-'}</td>
                       <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>-</td>
                     </tr>
                   ) : (
@@ -257,7 +281,7 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               </table>
             </div>
 
-            {/* ── Rechts: kandidaat suggesties ── */}
+            {/* ── Rechts: kandidaat zoeken (PLAN-LOOKUP-1) ── */}
             <div style={{ width: 240, flexShrink: 0, borderLeft: '1px solid var(--border)',
               background: 'var(--surface)', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
 
@@ -265,35 +289,31 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               <div style={{ padding: '12px 12px 8px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
                 <div style={{ position: 'relative' }}>
                   <Search size={13} style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                  <input value={zoek} onChange={e => setZoek(e.target.value)}
+                  <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
                     placeholder={t('searchCandidate')} aria-label={t('searchCandidate')}
                     style={{ ...INPUT, paddingLeft: 28, fontSize: 12 }} />
                 </div>
               </div>
 
               <div style={{ flex: 1, overflowY: 'auto', padding: '10px 10px' }}>
-
-                {/* Favorieten */}
-                {favorieten.length > 0 && (
-                  <>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.07em',
-                      textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 4 }}>
-                      <Star size={10} /> {t('favorites')}
-                    </div>
-                    {favorieten.map(s => (
-                      <KandidaatRij key={s.name} s={s} selected={kandidaat?.name === s.name} onClick={() => setKandidaat(s)} />
-                    ))}
-                    <div style={{ height: 1, background: 'var(--border)', margin: '8px 0' }} />
-                  </>
-                )}
-
-                {/* Suggesties */}
                 <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: '0.07em',
                   textTransform: 'uppercase', marginBottom: 6 }}>
-                  {t('suggestions')} — {jobtype}
+                  {t('common:nav.candidates')}
                 </div>
-                {overige.map(s => (
-                  <KandidaatRij key={s.name} s={s} selected={kandidaat?.name === s.name} onClick={() => setKandidaat(s)} />
+
+                {/* Four UI states — no fabricated favourite/distance ranking (see
+                    ./hooks/useShiftLookups header): just what the search returns. */}
+                {candidatesLoading && (
+                  <div style={{ padding: '12px 8px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:loading')}</div>
+                )}
+                {!candidatesLoading && candidatesError && (
+                  <div style={{ padding: '12px 8px', fontSize: 12, color: 'var(--color-danger)' }}>{t('common:errorGeneric')}</div>
+                )}
+                {!candidatesLoading && !candidatesError && candidates.length === 0 && (
+                  <div style={{ padding: '12px 8px', fontSize: 12, color: 'var(--text-muted)' }}>{t('common:noResults')}</div>
+                )}
+                {!candidatesLoading && !candidatesError && candidates.map(c => (
+                  <CandidateRow key={c.id} candidate={c} selected={candidate?.id === c.id} onClick={() => setCandidate(c)} />
                 ))}
               </div>
             </div>
@@ -304,8 +324,8 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
   )
 }
 
-function KandidaatRij({ s, selected, onClick }: { s: Suggestie; selected?: boolean; onClick?: () => void }) {
-  const { t } = useTranslation('planning')
+function CandidateRow({ candidate, selected, onClick }: { candidate: ShiftCandidateOption; selected?: boolean; onClick?: () => void }) {
+  const initials = getInitials(candidate.name)
   return (
     <div {...interactive(onClick)}
       style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 8px', borderRadius: 8,
@@ -314,12 +334,16 @@ function KandidaatRij({ s, selected, onClick }: { s: Suggestie; selected?: boole
         cursor: 'pointer', marginBottom: 4, transition: 'background 0.1s' }}
       onMouseEnter={e => { if (!selected) e.currentTarget.style.background = 'var(--hover-bg)' }}
       onMouseLeave={e => { if (!selected) e.currentTarget.style.background = 'transparent' }}>
-      <Avatar initials={s.initials} size={28} />
+      <Avatar initials={initials} size={28} />
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {s.name}
+          {candidate.name}
         </div>
-        <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>{t('hours', { n: s.uren })} · {s.km}</div>
+        {candidate.functionTitle && (
+          <div style={{ fontSize: 10, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {candidate.functionTitle}
+          </div>
+        )}
       </div>
       {selected && <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--color-primary)', flexShrink: 0 }} />}
     </div>

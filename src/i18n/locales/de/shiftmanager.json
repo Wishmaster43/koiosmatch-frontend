@@ -412,19 +412,7 @@
     "costCenter": "Kostenstelle"
   },
   "monthlyKpi": {
-    "title": "Kandidatenübersicht",
-    "pctOfKpi": "{{pct}}% des KPI",
-    "new": "Neu",
-    "average": "Durchschnitt",
-    "kpiTarget": "KPI-Ziel",
-    "unsubscribed": "Abgemeldet",
-    "newIn": "Neu in {{month}}",
-    "unsubscribedIn": "Abgemeldet in {{month}}",
-    "averageCalc": "Durchschnittsberechnung",
-    "kpiProgress": "KPI-Ziel & Fortschritt",
-    "tipDetails": "Für Details klicken",
-    "tipAverage": "Für Berechnungserklärung klicken",
-    "tipKpi": "Für KPI-Fortschritt klicken"
+    "averageCalc": "Durchschnittsberechnung"
   },
   "savedFilters": {
     "title": "Gespeicherte Filter",

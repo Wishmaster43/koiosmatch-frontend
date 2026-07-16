@@ -1,6 +1,8 @@
 /**
- * Planning (shift calendar) types. The calendar is demo-data driven for now;
- * these shapes type the shift rows and the candidate suggestions.
+ * Planning (shift calendar) types. The calendar shifts list is still demo-data
+ * driven (PlanningPage's INITIAL_SHIFTS — out of PLAN-LOOKUP-1's scope); the
+ * add-shift modal's own pickers are real (see pages/planning/hooks/useShiftLookups,
+ * which owns the ShiftCandidateOption shape for the candidate search).
  */
 
 // One planned shift on the calendar.
@@ -17,14 +19,3 @@ export interface Shift {
 
 // A new shift before it gets an id (what the add-modal emits).
 export type ShiftInput = Omit<Shift, 'id'>
-
-// A candidate suggestion shown in the add-shift modal.
-export interface Suggestie {
-  name: string
-  initials: string
-  functie: string
-  uren: number
-  km: string
-  color: string
-  favoriet: boolean
-}

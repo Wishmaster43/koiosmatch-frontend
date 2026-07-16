@@ -412,19 +412,7 @@
     "costCenter": "Kostenplaats"
   },
   "monthlyKpi": {
-    "title": "Kandidaten overzicht",
-    "pctOfKpi": "{{pct}}% van KPI",
-    "new": "Nieuw",
-    "average": "Gemiddelde",
-    "kpiTarget": "KPI doel",
-    "unsubscribed": "Uitgeschreven",
-    "newIn": "Nieuw in {{month}}",
-    "unsubscribedIn": "Uitgeschreven in {{month}}",
-    "averageCalc": "Gemiddelde berekening",
-    "kpiProgress": "KPI doel & voortgang",
-    "tipDetails": "Klik voor details",
-    "tipAverage": "Klik voor uitleg berekening",
-    "tipKpi": "Klik voor KPI voortgang"
+    "averageCalc": "Gemiddelde berekening"
   },
   "savedFilters": {
     "title": "Opgeslagen filters",

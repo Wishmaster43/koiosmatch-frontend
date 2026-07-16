@@ -543,10 +543,6 @@
     "signature": "Signatur",
     "signatureHint": "Wird an jede E-Mail dieses Typs angehängt."
   },
-  "appStore": {
-    "title": "App Store",
-    "desc": "Apps und Integrationen verwalten und installieren."
-  },
   "notifications": {
     "email": {
       "label": "E-Mail-Benachrichtigungen",
@@ -873,8 +869,6 @@
       "ats_crm_planning": "Koios Core + Planning",
       "ats_crm_ai_planning": "Koios Suite"
     },
-    "emptyTitle": "Noch keine Einstellungen",
-    "emptyDesc": "Einstellungen für dieses Modul folgen.",
     "smKpiTitle": "Shiftmanager-KPIs",
     "smKpiDesc": "Separate KPI-Ziele für das Shiftmanager-Dashboard (getrennt von den Haupt-Dashboard-KPIs). Konfiguration folgt.",
     "tierHeading": "Paket",
@@ -1405,11 +1399,6 @@
     "levelsTitle": "Niveaus",
     "levelsSubtitle": "Beherrschungsniveaus (z. B. Schlecht → Sehr gut, Muttersprache).",
     "addLevel": "Niveau hinzufügen"
-  },
-  "availabilitySettings": {
-    "title": "Verfügbarkeit",
-    "subtitle": "Verwalte die Verfügbarkeitsoptionen — eine separate Achse neben dem Status.",
-    "add": "Option hinzufügen"
   },
   "industrySettings": {
     "title": "Branchen",
