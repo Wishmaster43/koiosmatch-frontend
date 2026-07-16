@@ -85,16 +85,23 @@ export async function archiveAndFindBack({ page, errors }) {
       const [first, last] = probeName.split(' ')
       await fetch('/api/candidates', { method: 'POST', credentials: 'include', headers: hdrs,
         body: JSON.stringify({ first_name: first, last_name: last, email: probeEmail }) })
-    } else if (keeper.deleted_at || keeper.archived) {
+    } else {
+      // The list payload carries no deleted_at field — restoring unconditionally
+      // is idempotent (an active candidate restores to itself).
       await fetch('/api/candidates/bulk/restore', { method: 'POST', credentials: 'include', headers: hdrs,
         body: JSON.stringify({ candidate_ids: [keeper.id] }) })
     }
   }, name)
   // Fresh load so the probe row is in the table, then narrow the list to it.
   await go(page, 'Kandidaten')
+  // Earlier flows share this page and can leave filters/quick-views active —
+  // clear them so the probe search runs over the full set.
+  const wis = page.locator('button:has-text("Wis alle filters")').first()
+  if (await wis.count()) { await wis.click(); await sleep(600) }
   await page.locator('input[placeholder*="Zoek"]').first().fill('Archiefproef')
-  await sleep(1200)
+  // Debounce + fetch: WAIT for the row instead of counting instantly (raced at 1200ms).
   const row = page.locator(`table tbody tr:has-text("Archiefproef")`).first()
+  await row.waitFor({ timeout: 10000 }).catch(() => {})
   expect(await row.count(), 'probe-kandidaat niet zichtbaar na aanmaken/herstellen')
   await row.click()
   await sleep(1200)

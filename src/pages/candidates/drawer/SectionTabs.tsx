@@ -152,8 +152,10 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
         // Danny 14/7), else "Nog in opleiding" — never a dangling dash. Done:
         // the start–end range (DD-MM-YYYY).
         const startish = fmt(resolveEducationStartDate(o))
+        // Wording matches the checkbox ("Nog in opleiding") — it said "heden",
+        // which is the EXPERIENCE wording for a current job (Danny punt 11, 16-07).
         const range = o.period ?? (inProgress
-          ? (startish ? `${startish} – ${t('addFields.present')}` : t('addFields.inProgress'))
+          ? (startish ? `${startish} – ${t('addFields.inProgress').toLowerCase()}` : t('addFields.inProgress'))
           : [fmt(start), fmt(end)].filter(Boolean).join(' – '))
         // An in-progress opleiding has no diploma yet — suppress the issue date.
         const issued = inProgress ? '' : fmt(o.issued ?? o.issue_date)

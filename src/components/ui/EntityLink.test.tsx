@@ -16,7 +16,10 @@ describe('EntityLink', () => {
       </NavigationProvider>,
     )
     const link = screen.getByRole('button', { name: 'Verzorgende IG' })
-    expect(link.querySelector('svg')).toBeTruthy()
+    // Punt 16 restructure: the icon is its own ANCHOR (new tab) next to the name button.
+    const icon = screen.getByRole('link', { name: 'openInNewTab' })
+    expect(icon.getAttribute('href')).toContain('?open=')
+    expect(icon.getAttribute('target')).toBe('_blank')
     await userEvent.click(link)
     expect(goTo).toHaveBeenCalledWith('vacancies', { open: 'v-1' })
   })
@@ -27,7 +30,7 @@ describe('EntityLink', () => {
         <EntityLink page="vacancies" id="v-1" hideIcon>Verzorgende IG</EntityLink>
       </NavigationProvider>,
     )
-    expect(screen.getByRole('button', { name: 'Verzorgende IG' }).querySelector('svg')).toBeNull()
+    expect(screen.queryByRole('link', { name: 'openInNewTab' })).toBeNull()
   })
 
   it('degrades to plain text (no button/icon) when there is no target id', () => {

@@ -199,5 +199,6 @@
   "comingSoon": "coming soon",
   "justNow": "just now",
   "errorGeneric": "Something went wrong",
-  "loadingShort": "…"
+  "loadingShort": "…",
+  "openInNewTab": "Open in new tab"
 }

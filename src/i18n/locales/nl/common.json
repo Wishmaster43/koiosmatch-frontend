@@ -199,5 +199,6 @@
   "comingSoon": "binnenkort",
   "justNow": "zojuist",
   "errorGeneric": "Er is iets misgegaan",
-  "loadingShort": "…"
+  "loadingShort": "…",
+  "openInNewTab": "Openen in nieuw tabblad"
 }
