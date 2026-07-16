@@ -4,6 +4,7 @@ import { ExternalLink } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import EntityLink from '@/components/ui/EntityLink'
+import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import DrawerTabs from '@/components/drawer/DrawerTabs'
 import { mapCandidate } from '@/pages/candidates/data/mapCandidate'
 import ProfilePanel from '@/pages/candidates/drawer/ProfilePanel'
@@ -54,16 +55,11 @@ export default function CandidateTab({ application: a }: { application: Applicat
     api.patch(`/candidates/${id}`, patch).catch(() => notifyError(t('common:actionFailed')))
   }
 
-  // The default namespace here is 'candidates' (every sub-tab below needs it), so
-  // these two loading/error strings — an applications-drawer concern, not a
-  // candidates one — are explicitly namespaced (mirrors VacancyTab's vacancyDetail.*).
-  if (loading) return <div style={muted}>{t('applications:candidateDetail.loading')}</div>
-  if (error || !cand) return <div style={muted}>{t('applications:candidateDetail.error')}</div>
-
-  // Merge local edits over the fetched record for the tab components.
-  const c = { ...cand, ...edits } as Candidate
-  const isFreelancer = (c.candidateTypes ?? []).some(v => ZZP_TYPES.includes(v))
-  const hasWork = Boolean(c.matches?.length || c.applications?.length)
+  // Merge local edits over the fetched record for the tab components (undefined
+  // while the full candidate is still loading — the header above works without it).
+  const c = cand ? ({ ...cand, ...edits } as Candidate) : null
+  const isFreelancer = (c?.candidateTypes ?? []).some(v => ZZP_TYPES.includes(v))
+  const hasWork = Boolean(c?.matches?.length || c?.applications?.length)
 
   // Sub-tab bar — mirrors the candidate drawer (conditional Match/ZZP; planning hidden).
   const tabs = [
@@ -77,36 +73,58 @@ export default function CandidateTab({ application: a }: { application: Applicat
     { id: 'statistics',    label: t('drawer.tabs.statistics') },
   ]
 
-  const renderTab = () => {
+  // Rendered only once `c` (the fetched full candidate) is confirmed non-null below.
+  const renderTab = (cc: Candidate) => {
     switch (tab) {
-      case 'profile':        return <ProfilePanel c={c} onEditSave={(v: Record<string, unknown>) => onUpdate(c.id, v)} />
-      case 'background':     return <BackgroundTab c={c} onEditSave={(v: Record<string, unknown>) => onUpdate(c.id, v)} />
-      case 'work':           return <WorkTab c={c} />
-      case 'preferences':    return <PreferencesTab c={c}
-        onSave={(p: unknown) => onUpdate(c.id, { preferences: { ...(c.preferences ?? {}), ...(p as Record<string, unknown>) } })}
-        onTypesChange={(types: string[]) => onUpdate(c.id, { candidateTypes: types })} />
-      case 'administration': return <ZzpTab c={c} onSave={(p: unknown) => onUpdate(c.id, { zzp: p })} />
-      case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate(c.id, { consent: p })} />
-      case 'documents':      return <DocumentsSection c={c} />
-      case 'statistics':     return <StatisticsTab c={c} />
+      case 'profile':        return <ProfilePanel c={cc} onEditSave={(v: Record<string, unknown>) => onUpdate(cc.id, v)} />
+      case 'background':     return <BackgroundTab c={cc} onEditSave={(v: Record<string, unknown>) => onUpdate(cc.id, v)} />
+      case 'work':           return <WorkTab c={cc} />
+      case 'preferences':    return <PreferencesTab c={cc}
+        onSave={(p: unknown) => onUpdate(cc.id, { preferences: { ...(cc.preferences ?? {}), ...(p as Record<string, unknown>) } })}
+        onTypesChange={(types: string[]) => onUpdate(cc.id, { candidateTypes: types })} />
+      case 'administration': return <ZzpTab c={cc} onSave={(p: unknown) => onUpdate(cc.id, { zzp: p })} />
+      case 'communication':  return <CommunicationTab c={cc} onSave={(p: unknown) => onUpdate(cc.id, { consent: p })} />
+      case 'documents':      return <DocumentsSection c={cc} />
+      case 'statistics':     return <StatisticsTab c={cc} />
       default:               return null
     }
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
-      {/* Jump to the full candidate record (page + drawer). */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+      {/* Candidate name + deployability status — the ONE shared chip (mirrors the
+          applications table); available immediately from the application payload
+          (candidate.status/status_label/status_color), no need to wait for the
+          full candidate fetch below. Jump-to-record link stays on the right. */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+          <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {a.candidate.name}
+          </span>
+          <CandidateStatusChip status={a.candidateStatus} phase={a.candidatePhase}
+            fallbackLabel={a.candidate.statusLabel} fallbackColor={a.candidate.statusColor} round />
+        </div>
         <EntityLink page="candidates" id={a.candidateId} title={t('applications:drawer.openCandidate')}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, flexShrink: 0 }}>
             <ExternalLink size={13} /> {t('applications:drawer.openCandidate')}
           </span>
         </EntityLink>
       </div>
-      <div style={{ borderBottom: '1px solid var(--border)', marginBottom: 14 }}>
-        <DrawerTabs tabs={tabs} active={tab} onChange={setTab} />
-      </div>
-      {renderTab()}
+      {/* The default namespace here is 'candidates' (every sub-tab below needs it), so
+          these two loading/error strings — an applications-drawer concern, not a
+          candidates one — are explicitly namespaced (mirrors VacancyTab's vacancyDetail.*). */}
+      {loading ? (
+        <div style={muted}>{t('applications:candidateDetail.loading')}</div>
+      ) : error || !c ? (
+        <div style={muted}>{t('applications:candidateDetail.error')}</div>
+      ) : (
+        <>
+          <div style={{ borderBottom: '1px solid var(--border)', marginBottom: 14 }}>
+            <DrawerTabs tabs={tabs} active={tab} onChange={setTab} />
+          </div>
+          {renderTab(c)}
+        </>
+      )}
     </div>
   )
 }

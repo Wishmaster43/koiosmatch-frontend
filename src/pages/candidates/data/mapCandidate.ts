@@ -210,9 +210,14 @@ export function mapCandidate(c: ApiCandidate): Candidate {
       vacancyUrl:     m.vacancyUrl ?? m.vacancy?.url ?? m.vacancy_url ?? null,
       client:         m.client ?? m.customer?.name ?? m.client_name ?? '',
       score:          m.score ?? m.match_score ?? null,
+      // MATCH-EMBED-1: the lifecycle status slug — the card resolves label/colour
+      // via useMatchStatuses(); stage/stageColor (backend-resolved label) fall back.
+      status:         m.status ?? null,
       stage:          m.stageLabel ?? m.stage ?? null,
       stageColor:     m.stageColor ?? m.stage_color ?? null,
       contractStatus: m.contract_status ?? m.contractStatus ?? null,
+      // Contractvorm — a free-text tenant value, distinct from contractStatus.
+      contractType:   m.contract_type ?? m.contractType ?? null,
       createdAt:      m.created_at ?? m.createdAt ?? null,
     })),
     notes:           c.notes ?? [],

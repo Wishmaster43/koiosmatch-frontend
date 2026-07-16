@@ -83,9 +83,17 @@ export interface CandidateMatch {
   vacancyUrl?: string | null
   client: string
   score: number | null
+  // Lifecycle status slug (R-1b /match-statuses) — resolved to label/colour via
+  // useMatchStatuses() in the card (mirrors MatchesTable); `stage`/`stageColor`
+  // (backend-resolved label) stay the fallback for payloads without the slug yet.
+  status?: string | null
   stage: string | null
   stageColor: string | null
   contractStatus: string | null
+  // MATCH-EMBED-1: contract FORM (Contractvorm) — a free-text tenant value
+  // (Settings → Matches → Contract types), distinct from contractStatus (active/
+  // pending/ended, the placement's lifecycle on the candidate side).
+  contractType: string | null
   createdAt: string | null
   [k: string]: unknown
 }
@@ -193,16 +201,28 @@ export interface ApiCandidateMatch {
   vacancyUrl?: string | null
   vacancy_url?: string | null
   client?: string
-  customer?: { name?: string }
+  // MATCH-EMBED-1: the customer object now carries its own id too (unused by the
+  // card today — Klant stays plain text — but kept accurate to the real payload).
+  customer?: { id?: Id; name?: string }
   client_name?: string
   score?: number | null
   match_score?: number | null
+  // Lifecycle status slug — drives the "Fase" row via useMatchStatuses (R-1b).
+  status?: string | null
   stageLabel?: string | null
   stage?: string | null
   stageColor?: string | null
   stage_color?: string | null
   contract_status?: string | null
   contractStatus?: string | null
+  // MATCH-EMBED-1: contract form (Contractvorm), function title, and the placement
+  // period — the card renders Contractvorm; the rest is not shown here yet.
+  contract_type?: string | null
+  contractType?: string | null
+  function_title?: string | null
+  start_date?: string | null
+  end_date?: string | null
+  hours_per_week?: number | null
   created_at?: string | null
   createdAt?: string | null
   [k: string]: unknown

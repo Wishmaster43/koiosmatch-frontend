@@ -714,6 +714,7 @@
     "title": "Matches",
     "empty": "Nog geen matches.",
     "client": "Klant",
+    "contractType": "Contractvorm",
     "stage": "Fase",
     "contract": "Contract",
     "backofficeLinked": "Gekoppeld met backoffice (HelloFlex)",

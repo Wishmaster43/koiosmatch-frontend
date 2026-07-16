@@ -51,6 +51,22 @@ export default function DocPreviewModal({ doc, onClose }: { doc?: CandidateDoc |
           ) : isImage(doc.name) ? (
             <img src={url} alt={doc.name} style={{ maxWidth: '100%', display: 'block', margin: '0 auto' }} />
           ) : isPdf(doc.name) ? (
+            // AUDIT-3: `doc.url`/`objectUrl` is tenant-uploaded content, so a sandboxed
+            // preview iframe was the goal — but measured live (real Chrome, both a
+            // blob: URL and a plain http: URL) a sandboxed iframe NEVER renders
+            // Chrome's built-in PDF viewer: `sandbox=""` and `sandbox="allow-same-origin"`
+            // both show its broken-document icon (blob) or a blank frame (http) + a
+            // SecurityError touching localStorage; adding allow-scripts/allow-popups/
+            // allow-forms/allow-modals on top changes nothing. This is Chrome refusing
+            // to load its internal PDF viewer plugin inside ANY sandboxed frame,
+            // regardless of which tokens are granted — not a flag we got wrong. Shipping
+            // a sandboxed iframe here would silently break every PDF preview, so this
+            // stays unsandboxed for now (no regression vs. before); the real fix is a
+            // self-hosted, JS-rendered PDF viewer (e.g. pdf.js) that we control and CAN
+            // sandbox properly — flagged as a follow-up, not solved in this wave.
+            // Residual risk is bounded: isPdf()/isImage() gate what reaches an iframe/
+            // <img> at all (never dangerouslySetInnerHTML), and the source is either a
+            // same-origin API asset or a blob: URL we created client-side ourselves.
             <iframe src={url} title={doc.name} style={{ width: '100%', height: 600, border: 'none' }} />
           ) : (
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300, color: 'var(--text-muted)', fontSize: 13 }}>

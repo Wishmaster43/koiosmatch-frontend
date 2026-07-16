@@ -707,6 +707,7 @@
     "title": "Matches",
     "empty": "Noch keine Matches.",
     "client": "Kunde",
+    "contractType": "Vertragsart",
     "stage": "Phase",
     "contract": "Vertrag",
     "backofficeLinked": "Mit Backoffice verknüpft (HelloFlex)",

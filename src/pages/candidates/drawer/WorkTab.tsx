@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { ExternalLink, Plus, CalendarPlus, Calendar, Clock, User, Building2, Video, Phone, Pencil } from 'lucide-react'
 import MatchesTab from './MatchesTab'
 import StatusPill from '@/components/ui/StatusPill'
+import EntityLink from '@/components/ui/EntityLink'
 import AddApplicationModal from './AddApplicationModal'
 import PlanIntakeModal from './PlanIntakeModal'
 import type { ExistingAppointment } from './PlanIntakeModal'
@@ -19,7 +20,8 @@ interface Appt { id: Id; application_id?: Id | null; type?: string; scheduled_at
 
 // One application row as nested under the candidate (read defensively). The
 // funnel stage (label + colour) used to live in the header chips — shown here now.
-interface AppRow { id?: string; logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: string }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageColor?: string }
+// APP-EMBED-1: vacancy.id (internal EntityLink target) + created_at (applied-on date).
+interface AppRow { id?: string; logo_url?: string; vacancy?: { logo_url?: string; title?: string; url?: string; id?: Id }; vacature?: string; title?: string; url?: string; stageLabel?: string; stageColor?: string; created_at?: string }
 
 // The vacancy link, when the API exposes a URL; otherwise falls back to plain text.
 // AUDIT-2: URLs are tenant-entered data — only http(s) may render as a link.
@@ -113,16 +115,26 @@ export default function WorkTab({ c }: { c: Candidate }) {
               // Vacancy-less intake applications have no title → show a dash (CONSIST-2).
               const label = s.vacature ?? s.vacancy?.title ?? s.title ?? '—'
               const url = vacancyUrlOf(s)
+              const vacancyId = s.vacancy?.id ?? null
               const appt = apptFor(s.id)
               return (
               <div key={i} style={{ borderBottom: i < slice.length - 1 ? '1px solid var(--border)' : 'none' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', fontSize: 12, color: 'var(--text)' }}>
                   {(s.logo_url ?? s.vacancy?.logo_url) && <img src={s.logo_url ?? s.vacancy?.logo_url} alt="" style={{ width: 24, height: 24, borderRadius: 4, objectFit: 'contain', flexShrink: 0 }} />}
-                  {/* Vacancy name links out to the vacancy when the API gives a URL. */}
+                  {/* Vacancy name: an external URL (tenant-entered, isSafeUrl-gated above)
+                      wins when present; otherwise an internal EntityLink to the vacancy's
+                      own page + drawer when we have its id (APP-EMBED-1); a plain span
+                      only for genuinely vacancy-less (intake) rows. */}
                   {url
                     ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--color-primary)', textDecoration: 'none' }}>{label}</a>
-                    : <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>}
+                    : vacancyId != null
+                      ? <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <EntityLink page="vacancies" id={vacancyId} title={label}>{label}</EntityLink>
+                        </span>
+                      : <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>}
                   {s.stageLabel && <StatusPill label={s.stageLabel} color={s.stageColor} />}
+                  {/* Applied-on date (APP-EMBED-1: application.created_at) — dash only when genuinely missing. */}
+                  <span style={{ fontSize: 11, color: 'var(--text-muted)', flexShrink: 0 }}>{s.created_at ? formatDate(s.created_at) : '—'}</span>
                   {url && (
                     <a href={url} target="_blank" rel="noopener noreferrer" title={t('work.openVacancy')}
                       style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24, borderRadius: 5, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text-muted)', flexShrink: 0 }}>

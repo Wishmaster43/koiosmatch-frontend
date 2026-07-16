@@ -707,6 +707,7 @@
     "title": "Coincidencias",
     "empty": "Aún no hay coincidencias.",
     "client": "Cliente",
+    "contractType": "Tipo de contrato",
     "stage": "Fase",
     "contract": "Contrato",
     "backofficeLinked": "Vinculado al backoffice (HelloFlex)",

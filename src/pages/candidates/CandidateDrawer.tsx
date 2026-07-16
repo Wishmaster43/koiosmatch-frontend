@@ -4,7 +4,7 @@
  * useCandidateStatus, header edit in useCandidateHeaderEdit, and the header
  * visuals in drawer/CandidateHeaderBits; each tab is its own component.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ComponentType, ReactNode } from 'react'
 import { Trash2 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -28,6 +28,7 @@ import StatisticsTab from './drawer/StatisticsTab'
 import ChangelogPopover from './drawer/ChangelogPopover'
 import CandidateStatusModals from './drawer/CandidateStatusModals'
 import { CandidateTitle, CandidateHeaderActions, ArchivedBanner } from './drawer/CandidateHeaderBits'
+import { peekReturnTab, clearReturnTab } from './drawer/constants'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 
@@ -98,6 +99,11 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const [tags,              setTags]              = useState<string[] | null>(null)
   const [profileEdits,      setProfileEdits]      = useState<Record<string, unknown> | null>(null)
   const [photoUrl,          setPhotoUrl]          = useState<string | null>(null)
+  // NAV-BACK-1 tab-remember: a subtab stashed by MatchesTab before a candidate→Match
+  // cross-navigation, restored (once) as the initial tab when this drawer remounts
+  // after browser BACK — lazy init so it's picked up on the very first render, not
+  // only on a later id-change (see the file comment on peekReturnTab/clearReturnTab).
+  const [rememberedTab, setRememberedTab] = useState<string | null>(() => (c?.id != null ? peekReturnTab(c.id) : null))
 
   // Phase/status axis (convert, requires_match/reason prompts, info line) — §0.3 hook.
   const status = useCandidateStatus({ c, onUpdate,
@@ -110,7 +116,14 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   if (c?.id !== prevId) {
     setPrevId(c?.id)
     setRecruiter(null); setTags(null); setProfileEdits(null); setPhotoUrl(null)
+    setRememberedTab(c?.id != null ? peekReturnTab(c.id) : null)
   }
+  // Consume the remembered tab once it has been used, so a later, unrelated re-open
+  // of the same candidate defaults back to Profile (destructive — effect-only, see
+  // the constants.ts file comment on why this can't run during render).
+  useEffect(() => {
+    if (rememberedTab && c?.id != null) clearReturnTab(c.id)
+  }, [rememberedTab, c?.id])
 
   if (!c) return null
 
@@ -164,7 +177,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     <>
     <EntityDrawer
       entity={c}
-      initialTab={initialTab}
+      // An explicit deep-link (table cell / funnel-chip) always wins; otherwise
+      // fall back to the NAV-BACK-1 remembered tab (see rememberedTab above).
+      initialTab={initialTab ?? rememberedTab ?? undefined}
       expanded={expanded}
       onToggleExpand={onToggleExpand}
       footer={
