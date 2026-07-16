@@ -5,8 +5,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useCandidateCount } from '@/lib/queries'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
-import api, { unwrap } from '@/lib/api'
-import { heavyGet } from '@/lib/heavyGet'
+import { useDashboardData } from './hooks/useDashboardData'
 import { interactive } from '@/lib/a11y'
 import PieChartCard from '@/components/charts/PieChartCard'
 import BarChartCard from '@/components/charts/BarChartCard'
@@ -145,23 +144,22 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
   // Live distributions/counts. /candidates/stats is live; /opportunities/stats
   // is best-effort (renders only if it returns). Defensive field readers mirror
   // the Candidates page (by_status→status, by_funnel→funnel_type, by_owner→owner_id).
-  const [stats, setStats] = useState<DashStats | null>(null)
-  const [opp,   setOpp]   = useState<DashOpp | null>(null)
-  // One call (C-30/C-31) for the extra KPIs, recent lists, the timeseries chart and
-  // the module feeds (ai_runs / conversations). Returns the object directly (no wrapper).
-  const [dash,  setDash]  = useState<DashData | null>(null)
-  // Charts may be served on a dedicated endpoint (out-timeseries + net); merged when present.
-  const [dashCharts, setDashCharts] = useState<{ timeseries?: Record<string, unknown>; net?: unknown } | null>(null)
-  useEffect(() => {
-    const ctrl = new AbortController()
-    // heavyGet = dedup + failure cooldown (PERF-DASH-1 FE half) — these
-    // aggregates took the API down on demo2 when refetches piled up.
-    heavyGet('/candidates/stats', { signal: ctrl.signal })
-      .then(r => setStats(unwrap(r) ?? null)).catch(() => {})
-    heavyGet('/opportunities/stats', { signal: ctrl.signal })
-      .then(r => setOpp(unwrap(r) ?? null)).catch(() => setOpp(null))
-    return () => ctrl.abort()
-  }, [activeTenant?.id])
+  // Topbar filter selections (single-value per dimension server-side) — UI state
+  // stays here; ALL server state lives in useDashboardData (audit item 21).
+  const [selPeriode,   setSelPeriode]   = useState<string[]>([])
+  const [selVestiging, setSelVestiging] = useState<Array<string | number>>([])
+  const [selStatus,    setSelStatus]    = useState<string[]>([])
+  const dashFilterParams = useMemo(() => {
+    const params: Record<string, unknown> = {}
+    if (selPeriode[0])   params.period = selPeriode[0]
+    if (selStatus[0])    params.status = selStatus[0]
+    if (selVestiging[0]) params.location_id = selVestiging[0]
+    return params
+  }, [selPeriode, selStatus, selVestiging])
+  const { stats, opp, dash, dashCharts, matchesTotal, vacanciesTotal } =
+    useDashboardData<DashStats, DashOpp, DashData, { timeseries?: Record<string, unknown>; net?: unknown }>({
+      tenantId: activeTenant?.id, filterParams: dashFilterParams,
+    })
 
   // Status/funnel labels + colours come from the tenant lookups (NL, configurable)
   // — never humanised backend slugs. Mirrors how the Candidates page renders them.
@@ -274,9 +272,6 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     return (x && (x.filterValue ?? x.payload?.filterValue)) || undefined
   }
 
-  const [selPeriode,   setSelPeriode]   = useState<string[]>([])
-  const [selVestiging, setSelVestiging] = useState<Array<string | number>>([])
-  const [selStatus,    setSelStatus]    = useState<string[]>([])
   const { registerFilters, unregisterFilters } = useRightPanel()
 
   const filterGroups = useMemo(() => [
@@ -296,39 +291,8 @@ export default function Dashboard({ onNavigate, viewType }: { onNavigate?: (page
     return () => unregisterFilters('dashboard')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  // Refetch the summary whenever a filter changes. The dashboard is single-value per
-  // dimension, so the first selected entry is sent (period enum / status slug / branch id).
-  useEffect(() => {
-    const ctrl = new AbortController()
-    const params: Record<string, unknown> = {}
-    if (selPeriode[0])   params.period = selPeriode[0]
-    if (selStatus[0])    params.status = selStatus[0]
-    if (selVestiging[0]) params.location_id = selVestiging[0]
-    heavyGet('/dashboard', { params, signal: ctrl.signal })
-      .then(r => setDash(r.data ?? null)).catch(() => {})
-    // Dedicated charts endpoint (out-timeseries + net); fail-soft so nothing breaks if absent.
-    heavyGet('/dashboard/charts', { params, signal: ctrl.signal })
-      .then(r => setDashCharts((unwrap(r)) ?? null)).catch(() => setDashCharts(null))
-    return () => ctrl.abort()
-  }, [activeTenant?.id, selPeriode, selVestiging, selStatus])
-
   // WhatsApp backlog + failed (planner/recruiter KPIs); fail-soft 0 without access.
   const incompleteRuns = runs.filter(r => !r.ok).length
-
-  // Plaatsingen = matches + Vacatures-telling (Danny 2026-07-06): light meta.total
-  // fetches, refetched with the tenant; dedicated backend feeds win once delivered.
-  const [matchesTotal, setMatchesTotal] = useState<number | null>(null)
-  const [vacanciesTotal, setVacanciesTotal] = useState<number | null>(null)
-  useEffect(() => {
-    let alive = true
-    api.get('/matches', { params: { per_page: 1 }, quiet404: true })
-      .then(r => { if (alive) setMatchesTotal(r.data?.meta?.total ?? (Array.isArray(r.data?.data) ? r.data.data.length : null)) })
-      .catch(() => {})
-    api.get('/vacancies', { params: { per_page: 1 }, quiet404: true })
-      .then(r => { if (alive) setVacanciesTotal(r.data?.meta?.total ?? null) })
-      .catch(() => {})
-    return () => { alive = false }
-  }, [activeTenant?.id])
 
   // KPI blocks come from the pure builder (§0.3 size split); KPI_ROWS picks per role.
   const kpiById = buildDashboardKpis({
