@@ -90,17 +90,36 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
 function TagRow({ items = [], onAdd, onRemove, addLabel }: { items?: string[]; onAdd: (v: string) => void; onRemove: (tag: string) => void; addLabel?: string }) {
   const [adding, setAdding] = useState(false)
   const [value, setValue] = useState('')
+  // Tag-edit-in-place (Danny punt 51, 16-07): click a tag to rename it — commit
+  // as remove(old)+add(new) so every existing onAdd/onRemove wiring keeps working.
+  const [editing, setEditing] = useState<string | null>(null)
+  const [editValue, setEditValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
+  const editRef = useRef<HTMLInputElement>(null)
   useEffect(() => { if (adding) inputRef.current?.focus() }, [adding])
+  useEffect(() => { if (editing != null) editRef.current?.focus() }, [editing])
   const commit = () => { if (value.trim()) onAdd(value.trim()); setValue(''); setAdding(false) }
+  const commitEdit = () => {
+    const next = editValue.trim()
+    if (editing != null && next && next !== editing) { onRemove(editing); onAdd(next) }
+    setEditing(null); setEditValue('')
+  }
 
   return (
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
-      {items.map(tag => (
+      {items.map(tag => editing === tag ? (
+        <input key={tag} ref={editRef} value={editValue} onChange={e => setEditValue(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') commitEdit(); if (e.key === 'Escape') { setEditing(null); setEditValue('') } }}
+          onBlur={commitEdit} aria-label={tag}
+          style={{ fontSize: 11, padding: '3px 8px', borderRadius: 99, border: '1px solid var(--color-primary)', outline: 'none', color: 'var(--text)', width: Math.max(70, tag.length * 7 + 30) }} />
+      ) : (
         <span key={tag} style={{ display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, padding: '3px 8px', borderRadius: 99,
           border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
-          {tag}
-          <button onClick={() => onRemove(tag)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 13 }}>×</button>
+          <button onClick={() => { setEditing(tag); setEditValue(tag) }} title={tag}
+            style={{ background: 'none', border: 'none', cursor: 'text', color: 'inherit', font: 'inherit', padding: 0 }}>
+            {tag}
+          </button>
+          <button onClick={() => onRemove(tag)} aria-label={`× ${tag}`} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 13 }}>×</button>
         </span>
       ))}
       {adding ? (
