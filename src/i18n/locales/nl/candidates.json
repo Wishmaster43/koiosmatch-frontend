@@ -210,7 +210,8 @@
       "communication": "Communicatie",
       "documents": "Documenten",
       "statistics": "Statistieken",
-      "changelog": "Wijzigingslog"
+      "changelog": "Wijzigingslog",
+      "extra": "Extra"
     },
     "status": "Status",
     "owner": "Eigenaar",

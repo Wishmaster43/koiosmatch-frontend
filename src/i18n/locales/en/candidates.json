@@ -210,7 +210,8 @@
       "communication": "Communication",
       "documents": "Documents",
       "statistics": "Statistics",
-      "changelog": "Changelog"
+      "changelog": "Changelog",
+      "extra": "Extra"
     },
     "status": "Status",
     "owner": "Owner",

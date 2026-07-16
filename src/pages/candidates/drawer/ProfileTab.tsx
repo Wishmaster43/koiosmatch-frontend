@@ -10,7 +10,6 @@ import { useNationalities } from '@/lib/useNationalities'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
-import CustomFieldsSection from './CustomFieldsSection'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
@@ -324,7 +323,6 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
       </div>
 
       {/* Tenant custom fields — only renders when definitions exist */}
-      <CustomFieldsSection c={c} onEditSave={onEditSave} />
     </div>
   )
 }

@@ -203,7 +203,8 @@
       "communication": "Communication",
       "documents": "Documents",
       "statistics": "Statistiques",
-      "changelog": "Journal"
+      "changelog": "Journal",
+      "extra": "Extra"
     },
     "status": "Statut",
     "owner": "Responsable",

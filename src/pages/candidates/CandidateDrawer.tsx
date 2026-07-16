@@ -20,6 +20,8 @@ import { useCandidateHeaderEdit } from './hooks/useCandidateHeaderEdit'
 import ProfilePanel from './drawer/ProfilePanel'
 import BackgroundTab from './drawer/BackgroundTab'
 import WorkTab from './drawer/WorkTab'
+import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
+import { useCustomFields } from '@/lib/useCustomFields'
 import PlanningPanel from './drawer/PlanningPanel'
 import { PreferencesTab, ZzpTab } from './drawer/PreferencesZzpTabs'
 import CommunicationTab from './drawer/CommunicationTab'
@@ -125,6 +127,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     if (rememberedTab && c?.id != null) clearReturnTab(c.id)
   }, [rememberedTab, c?.id])
 
+  // Tenant custom-field definitions gate the Extra tab (hook must run before the early return).
+  const { fields: customFieldDefs } = useCustomFields('candidate')
   if (!c) return null
 
   // Freelance (ZZP) tab shows when the candidate holds the freelance/ZZP type.
@@ -136,6 +140,8 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
     if (tab.id === 'administration') return isFreelancer
     return true
   })
+  // 'Extra' appears only when the tenant has ≥1 active candidate custom field (§3A(f)).
+  if (customFieldDefs.length > 0) tabs.push({ id: 'extra', tKey: 'extra' })
   const currentTags = tags ?? c.tags ?? []
 
   const renderTabContent = (activeTab: string, setTab?: (id: string) => void) => {
@@ -152,6 +158,10 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })} />
       case 'documents':      return <DocumentsSection c={c} />
       case 'statistics':     return <StatisticsTab c={c} onJump={setTab} />
+      // §3A(f): tenant custom fields live on their OWN gated tab (Danny 16-07,
+      // punt 28 — they were buried as a section at the bottom of Profiel).
+      case 'extra':          return <CustomFieldsTab entityType="candidate" values={c.customFields ?? {}}
+        onSave={patch => onUpdate?.(c.id, { custom_fields: { ...(c.customFields ?? {}), ...patch } })} />
       default:               return null
     }
   }

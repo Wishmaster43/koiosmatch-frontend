@@ -203,7 +203,8 @@
       "communication": "Kommunikation",
       "documents": "Dokumente",
       "statistics": "Statistiken",
-      "changelog": "Änderungsprotokoll"
+      "changelog": "Änderungsprotokoll",
+      "extra": "Extra"
     },
     "status": "Status",
     "owner": "Eigentümer",

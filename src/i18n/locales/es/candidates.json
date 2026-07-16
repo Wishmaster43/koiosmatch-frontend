@@ -203,7 +203,8 @@
       "communication": "Comunicación",
       "documents": "Documentos",
       "statistics": "Estadísticas",
-      "changelog": "Registro de cambios"
+      "changelog": "Registro de cambios",
+      "extra": "Extra"
     },
     "status": "Estado",
     "owner": "Responsable",
