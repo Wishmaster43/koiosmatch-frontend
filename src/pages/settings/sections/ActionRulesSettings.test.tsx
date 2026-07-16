@@ -3,7 +3,9 @@
  * cycle-chip interaction, the locked (P4/P8) cells staying non-interactive, the
  * override badge, and the Save/Reset flows against the measured PUT contract
  * (`PUT /settings/action-rules { rules: [{action, condition, effect}] }`, only the
- * changed cells — see ActionRuleController::update()).
+ * changed cells — see ActionRuleController::update()). Also covers the Kandidaat/
+ * Klant/AVG sub-tab split (Danny 2026-07-16): default tab, switching tabs, and that
+ * a staged edit + its dirty-count survive a tab switch (the save bar spans all tabs).
  */
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
@@ -110,13 +112,59 @@ describe('ActionRulesSettings', () => {
 
   it('the AVG consent section renders whatsapp.send × no-consent as a locked hard block', async () => {
     ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: fullDefaultMatrix() } })
+    const user = userEvent.setup()
     render(<ActionRulesSettings />)
-    await waitFor(() => expect(screen.getByText(st('actionRules.consentSectionTitle'))).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
+
+    // The consent grid lives on its own AVG sub-tab — not visible until selected.
+    await user.click(screen.getByRole('tab', { name: st('actionRules.tabs.avg') }))
+    expect(screen.getByText(st('actionRules.consentSectionTitle'))).toBeInTheDocument()
 
     const actionLabel = st('actionRules.actions.whatsapp_send')
     const conditionLabel = st('actionRules.conditions.whatsapp_no_consent')
     const aria = st('actionRules.cellAria', { action: actionLabel, condition: conditionLabel, effect: st('actionRules.effect.block') })
     expect(screen.getByRole('button', { name: aria })).toBeDisabled()
+  })
+
+  it('defaults to the Kandidaat tab and hides the Klant/AVG grids until selected', async () => {
+    ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: fullDefaultMatrix() } })
+    const user = userEvent.setup()
+    render(<ActionRulesSettings />)
+    await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
+
+    // Kandidaat grid visible by default; Klant/AVG grids not yet mounted.
+    expect(screen.getByText(st('actionRules.candidateAxisTitle'))).toBeInTheDocument()
+    expect(screen.queryByText(st('actionRules.customerAxisTitle'))).not.toBeInTheDocument()
+    expect(screen.queryByText(st('actionRules.consentSectionTitle'))).not.toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: st('actionRules.tabs.candidate') })).toHaveAttribute('aria-selected', 'true')
+
+    // Switching to Klant swaps the grid and hides the Kandidaat one.
+    await user.click(screen.getByRole('tab', { name: st('actionRules.tabs.customer') }))
+    expect(screen.getByText(st('actionRules.customerAxisTitle'))).toBeInTheDocument()
+    expect(screen.queryByText(st('actionRules.candidateAxisTitle'))).not.toBeInTheDocument()
+  })
+
+  it('a staged edit on Kandidaat stays dirty (save bar spans all tabs) after switching to Klant, then back', async () => {
+    ;(api.get as ReturnType<typeof vi.fn>).mockResolvedValue({ data: { data: fullDefaultMatrix() } })
+    const user = userEvent.setup()
+    render(<ActionRulesSettings />)
+    await waitFor(() => expect(screen.getByText(st('actionRules.title'))).toBeInTheDocument())
+
+    const actionLabel = st('actionRules.actions.application_create')
+    const conditionLabel = st('actionRules.conditions.blacklist')
+    const blockAria = st('actionRules.cellAria', { action: actionLabel, condition: conditionLabel, effect: st('actionRules.effect.block') })
+    await user.click(screen.getByRole('button', { name: blockAria }))
+    expect(screen.getByText(st('actionRules.saveBar.dirtyCount', { count: 1 }))).toBeInTheDocument()
+
+    // Switch away — the dirty indicator (save bar chrome) is common to every tab.
+    await user.click(screen.getByRole('tab', { name: st('actionRules.tabs.customer') }))
+    expect(screen.getByText(st('actionRules.saveBar.dirtyCount', { count: 1 }))).toBeInTheDocument()
+
+    // Switch back — the staged (still unsaved) effect is exactly as left.
+    await user.click(screen.getByRole('tab', { name: st('actionRules.tabs.candidate') }))
+    const allowAria = st('actionRules.cellAria', { action: actionLabel, condition: conditionLabel, effect: st('actionRules.effect.allow') })
+    expect(screen.getByRole('button', { name: allowAria })).toBeInTheDocument()
+    expect(screen.getByText(st('actionRules.saveBar.dirtyCount', { count: 1 }))).toBeInTheDocument()
   })
 
   it('opening a cell detail panel shows its popup code, then reset restores the default', async () => {

@@ -1,7 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, X, Map as MapIcon } from 'lucide-react'
-import api, { unwrapList } from '@/lib/api'
+import { Plus, X, Map as MapIcon, Pencil, Trash2, AlertTriangle } from 'lucide-react'
+import api, { unwrap, unwrapList } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 
 // STRAAL-1: Leaflet only loads when the map view opens (§9 — lazy heavy deps).
@@ -15,6 +16,8 @@ const EMPTY_FORM = {
   // Business identifiers + contact details, so a location is a full entity.
   coc_number: '', vat_number: '', contact_name: '', phone: '', email: '',
 }
+// Field keys the API returns/accepts 1:1 (LocationResource ↔ Store/UpdateLocationRequest).
+const FORM_KEYS = Object.keys(EMPTY_FORM)
 
 function formatAddress(loc) {
   if (loc.address)      return loc.address
@@ -26,31 +29,60 @@ function formatAddress(loc) {
   return parts.length ? parts.join(', ') : '—'
 }
 
+// Prefill the edit form from an existing row — field names already match 1:1.
+function toFormValues(loc) {
+  const values = { ...EMPTY_FORM }
+  FORM_KEYS.forEach(k => { values[k] = loc[k] ?? '' })
+  return values
+}
+
 export default function LocationsSettings() {
   const { t } = useTranslation(['settings', 'common'])
   const [locations, setLocations] = useState([])
   const [loading,   setLoading]   = useState(true)
+  const [loadError, setLoadError] = useState(false)
   // STRAAL-1: table ↔ map quick-view (office network on the shared radius map).
   const [view,      setView]      = useState('table')
   const [showModal, setShowModal] = useState(false)
+  // null = create mode; an id = editing that row (house pencil pattern, §3A).
+  const [editingId, setEditingId] = useState(null)
   const [form,      setForm]      = useState(EMPTY_FORM)
   const [saving,    setSaving]    = useState(false)
   const [page,      setPage]      = useState(1)
   const PER_PAGE = 10
 
+  // Load once — failure is its own state (never a false "no locations yet").
   useEffect(() => {
     api.get('/locations').then(r => setLocations(unwrapList(r).rows))
-      .catch(() => {}).finally(() => setLoading(false))
+      .catch(() => setLoadError(true)).finally(() => setLoading(false))
   }, [])
 
-  const create = async () => {
+  const openCreate = () => { setEditingId(null); setForm(EMPTY_FORM); setShowModal(true) }
+  const openEdit = (loc) => { setEditingId(loc.id); setForm(toFormValues(loc)); setShowModal(true) }
+
+  // One submit for both create (POST) and edit (PATCH — measured contract:
+  // `PATCH/PUT /locations/{id}`, permission `settings.update`, see LocationController).
+  // LocationResource is a wrapped single resource (`{"data": {...}}`) — unwrap()
+  // strips that envelope instead of storing it as-is (the create path silently
+  // stored the wrapper before; fixed here so the new edit path renders correctly).
+  const submit = async () => {
     if (!form.name.trim()) return
     setSaving(true)
     try {
-      const res = await api.post('/locations', form)
-      setLocations(p => [res.data, ...p])
-      setShowModal(false); setForm(EMPTY_FORM)
-    } catch { /* noop */ } finally { setSaving(false) }
+      if (editingId) {
+        const res = await api.patch(`/locations/${editingId}`, form)
+        const updated = unwrap(res)
+        setLocations(p => p.map(l => (l.id === editingId ? updated : l)))
+      } else {
+        const res = await api.post('/locations', form)
+        setLocations(p => [unwrap(res), ...p])
+      }
+      setShowModal(false); setForm(EMPTY_FORM); setEditingId(null)
+    } catch {
+      notifyError(t('locations.saveFailed'))
+    } finally {
+      setSaving(false)
+    }
   }
 
   const paginated = locations.slice((page - 1) * PER_PAGE, page * PER_PAGE)
@@ -70,7 +102,7 @@ export default function LocationsSettings() {
           {/* Map quick-view via the ONE shared toggle (§4 — never hand-rolled). */}
           <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
             label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
-          <button onClick={() => setShowModal(true)}
+          <button onClick={openCreate}
             style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
                      background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
@@ -79,7 +111,11 @@ export default function LocationsSettings() {
         </div>
       </div>
 
-      {loading ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p> : view === 'map' ? (
+      {loading ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p> : loadError ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '24px 0', color: 'var(--color-danger)', fontSize: 13 }}>
+          <AlertTriangle size={14} /> {t('locations.loadError')}
+        </div>
+      ) : view === 'map' ? (
         // Office-network map (STRAAL-1) — lazy so Leaflet ships only when opened.
         <Suspense fallback={<p style={{ fontSize: 13, color: 'var(--text-muted)' }}>{t('common:map.loading')}</p>}>
           <LocationsMapView locations={locations} />
@@ -92,17 +128,35 @@ export default function LocationsSettings() {
                 <th style={TH}>{t('locations.colName')}</th>
                 <th style={TH}>{t('locations.colAddress')}</th>
                 <th style={TH}>{t('locations.colCreated')}</th>
+                <th style={{ ...TH, textAlign: 'right' }}>{t('locations.colActions')}</th>
               </tr>
             </thead>
             <tbody>
               {paginated.length === 0 ? (
-                <tr><td colSpan={3} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>{t('locations.empty')}</td></tr>
+                <tr><td colSpan={4} style={{ ...TD, textAlign: 'center', color: 'var(--text-muted)', padding: '32px 0' }}>{t('locations.empty')}</td></tr>
               ) : paginated.map((loc, i) => (
                 <tr key={loc.id ?? i}>
                   <td style={{ ...TD, fontWeight: 500, color: 'var(--text)' }}>{loc.name}</td>
                   <td style={TD}>{formatAddress(loc)}</td>
                   <td style={{ ...TD, color: 'var(--text-muted)', fontSize: 12 }}>
                     {loc.created_at ? new Date(loc.created_at).toLocaleString('nl-NL', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—'}
+                  </td>
+                  <td style={{ ...TD, textAlign: 'right' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
+                      <button onClick={() => openEdit(loc)} title={t('locations.edit')} aria-label={t('locations.edit')}
+                        style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                 background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'pointer', color: 'var(--text)' }}>
+                        <Pencil size={12} />
+                      </button>
+                      {/* Delete stays disabled — measured gap: the backend deletes unconditionally
+                          (no in-use guard on referencing candidates/customers/vacancies/appointments),
+                          so shipping it live could silently orphan data (§ report). */}
+                      <button disabled title={t('locations.deleteUnavailable')} aria-label={t('locations.deleteUnavailable')}
+                        style={{ width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                 background: 'var(--hover-bg)', border: 'none', borderRadius: 6, cursor: 'not-allowed', color: 'var(--text-muted)', opacity: 0.5 }}>
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -128,7 +182,7 @@ export default function LocationsSettings() {
           <div className="fixed inset-0 z-40" style={{ background: 'rgba(0,0,0,0.3)' }} onClick={() => setShowModal(false)} />
           <div className="fixed z-50" style={{ top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'var(--surface)', borderRadius: 12, padding: 24, width: 460, maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-              <span style={{ fontSize: 15, fontWeight: 700 }}>{t('locations.create')}</span>
+              <span style={{ fontSize: 15, fontWeight: 700 }}>{editingId ? t('locations.editTitle') : t('locations.create')}</span>
               <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={16} /></button>
             </div>
 
@@ -182,9 +236,9 @@ export default function LocationsSettings() {
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 20 }}>
               <button onClick={() => setShowModal(false)} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer' }}>{t('common.cancel')}</button>
-              <button onClick={create} disabled={saving || !form.name.trim()}
+              <button onClick={submit} disabled={saving || !form.name.trim()}
                 style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer', opacity: form.name.trim() ? 1 : 0.4 }}>
-                {saving ? t('common.saving') : t('locations.createBtn')}
+                {saving ? t('common.saving') : (editingId ? t('common.save') : t('locations.createBtn'))}
               </button>
             </div>
           </div>
