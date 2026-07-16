@@ -91,6 +91,7 @@ const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
 // axios doesn't know about our one-shot retry flag — extend the config type.
 interface RetryableConfig extends InternalAxiosRequestConfig {
   _retried429?: boolean
+  _retried419?: boolean
   // Opt-in per request: a 404 on an OPTIONAL endpoint (a lookup the backend hasn't
   // shipped yet; the caller has a seed fallback) is expected — keep it out of the
   // dev log so it doesn't read as (or turn the smoke suite) red.
@@ -131,6 +132,17 @@ api.interceptors.response.use(
     const config = (error.config ?? {}) as RetryableConfig
     const url    = config.url ?? ''
     const method = (config.method ?? 'get').toLowerCase()
+
+    // 419 = Sanctum rejected the CSRF token BEFORE processing (expired/rotated
+    // cookie after a long-idle tab) — the request never executed, so one retry
+    // after re-priming the cookie is safe for every method (audit LOW item).
+    if (status === 419 && !config._retried419) {
+      config._retried419 = true
+      try {
+        await primeCsrf()
+        return api(config)
+      } catch { /* cookie refresh failed — fall through to normal error handling */ }
+    }
 
     if (status === 429 && method === 'get' && !config._retried429) {
       const retryAfter = Number(
