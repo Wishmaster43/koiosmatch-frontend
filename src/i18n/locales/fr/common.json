@@ -66,6 +66,8 @@
     "cityPlaceholder": "Ville (ex. La Haye)",
     "searchAll": "Tout rechercher…",
     "clearAll": "Effacer tous les filtres",
+    "expandAll": "Tout déplier",
+    "collapseAll": "Tout replier",
     "clear": "effacer",
     "geoPlaceholder": "Code postal ou lieu",
     "apply": "Appliquer",

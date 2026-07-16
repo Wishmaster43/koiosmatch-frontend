@@ -66,6 +66,8 @@
     "cityPlaceholder": "Ciudad (p. ej. La Haya)",
     "searchAll": "Buscar todo…",
     "clearAll": "Borrar todos los filtros",
+    "expandAll": "Expandir todo",
+    "collapseAll": "Contraer todo",
     "clear": "borrar",
     "geoPlaceholder": "Código postal o lugar",
     "apply": "Aplicar",

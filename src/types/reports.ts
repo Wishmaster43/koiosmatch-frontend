@@ -49,6 +49,9 @@ export interface ReportFilterGroup {
   km?: number
   onApply?: (query: string, km: number) => void
   onClear?: () => void
+  // Optional default-collapse override for the right filter panel (punt 31) —
+  // omit it and the panel picks a sensible default (first ~4 groups open).
+  collapsed?: boolean
   [key: string]: unknown
 }
 

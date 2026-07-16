@@ -297,6 +297,7 @@ export default function DashboardLayout() {
                 title="Filters"
                 groups={filterGroups as ReportFilterGroup[]}
                 onClose={() => setRightPanelOpen(false)}
+                pageId={activePage}
               />
             </div>
           )}

@@ -66,6 +66,8 @@
     "cityPlaceholder": "Plaatsnaam (bijv. Den Haag)",
     "searchAll": "Zoek alles…",
     "clearAll": "Alle filters wissen",
+    "expandAll": "Alles uitklappen",
+    "collapseAll": "Alles inklappen",
     "clear": "wis",
     "geoPlaceholder": "Postcode of plaats",
     "apply": "Toepassen",

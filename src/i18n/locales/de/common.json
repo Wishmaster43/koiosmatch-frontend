@@ -66,6 +66,8 @@
     "cityPlaceholder": "Ort (z. B. Den Haag)",
     "searchAll": "Alles durchsuchen…",
     "clearAll": "Alle Filter löschen",
+    "expandAll": "Alle aufklappen",
+    "collapseAll": "Alle einklappen",
     "clear": "löschen",
     "geoPlaceholder": "PLZ oder Ort",
     "apply": "Anwenden",

@@ -1,31 +1,38 @@
 /**
  * ReportFilterSidebar — the right-hand filter panel shared by all reports.
- * Composes the per-group bodies (search-select / period / date-range / radio /
- * checkbox-list + the global-search and location-radius headers) registered via
- * RightPanelContext, plus a reset action. The two richest group bodies live in
- * `./filter/` (SearchSelectGroup, PeriodGroup); this file is the composer.
+ * Composes the pinned sections (global-search / location-radius / saved
+ * filters) plus one `FilterGroupBlock` per registered group, and owns the
+ * reset/expand-all actions. `RightPanelContext` feeds the `groups` prop.
+ *
+ * KANDIDAAT-100 punt 31: each group renders as its own tinted, collapsible
+ * block (no more one giant list) — frequently-used groups default open, the
+ * rest default closed, and the choice persists per page via
+ * `useFilterGroupCollapse` (./filter/useFilterGroupCollapse).
  */
-import { X, Search, RotateCcw } from 'lucide-react'
+import { X, Search, RotateCcw, ChevronsDownUp, ChevronsUpDown } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ReportFilterGroup } from '@/types/reports'
-import SearchSelectGroup from './filter/SearchSelectGroup'
-import PeriodGroup from './filter/PeriodGroup'
-import OpenCheckGroup from './filter/OpenCheckGroup'
-import GeoRadiusGroup from './filter/GeoRadiusGroup'
 import SavedFiltersGroup from './filter/SavedFiltersGroup'
+import FilterGroupBlock from './filter/FilterGroupBlock'
+import { useFilterGroupCollapse } from './filter/useFilterGroupCollapse'
 
-export default function ReportFilterSidebar({ title = 'Filters', groups = [], onClose }: { title?: ReactNode; groups?: ReportFilterGroup[]; onClose: () => void }) {
+// A group's own active-selection count (single-group version of the header sum).
+function groupActiveCount(g: ReportFilterGroup): number {
+  if (g.type === 'saved-filters')  return 0
+  if (g.type === 'period')         return g.value ? 1 : 0
+  if (g.type === 'global-search')  return g.value ? 1 : 0
+  if (g.type === 'location')       return g.city ? 1 : 0
+  if (g.type === 'date-range')     return (g.from || g.to) ? 1 : 0
+  if (g.type === 'geo-radius')     return g.applied ? 1 : 0
+  return g.selected?.length ?? 0
+}
+
+export default function ReportFilterSidebar({
+  title = 'Filters', groups = [], onClose, pageId = 'default',
+}: { title?: ReactNode; groups?: ReportFilterGroup[]; onClose: () => void; pageId?: string }) {
   const { t } = useTranslation('common')
-  const activeCount = groups.reduce((sum, g) => {
-    if (g.type === 'saved-filters') return sum
-    if (g.type === 'period') return sum + (g.value ? 1 : 0)
-    if (g.type === 'global-search') return sum + (g.value ? 1 : 0)
-    if (g.type === 'location') return sum + (g.city ? 1 : 0)
-    if (g.type === 'date-range') return sum + ((g.from || g.to) ? 1 : 0)
-    if (g.type === 'geo-radius') return sum + (g.applied ? 1 : 0)
-    return sum + (g.selected?.length ?? 0)
-  }, 0)
+  const activeCount = groups.reduce((sum, g) => sum + groupActiveCount(g), 0)
 
   const clearAll = () => {
     groups.forEach(g => {
@@ -38,6 +45,11 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
       else { g.selected?.forEach(v => g.onToggle?.(v)) }
     })
   }
+
+  // The groups rendered as collapsible blocks — everything except the pinned,
+  // always-visible sections (search bar, saved filters, location radius).
+  const collapsibleGroups = groups.filter(g => g.type !== 'global-search' && g.type !== 'location' && g.type !== 'saved-filters')
+  const collapse = useFilterGroupCollapse(pageId, collapsibleGroups)
 
   // Active-filter chips — built up front so the bar hides entirely when empty.
   // Groups can opt out with `noChip` (e.g. the SM charts, where every month/series
@@ -83,6 +95,20 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
           )}
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
+          {/* Expand all / collapse all — one click flips every group at once (punt 31c) */}
+          {collapsibleGroups.length > 0 && (
+            <button
+              onClick={() => (collapse.allExpanded ? collapse.collapseAll() : collapse.expandAll())}
+              title={collapse.allExpanded ? t('filters.collapseAll') : t('filters.expandAll')}
+              aria-label={collapse.allExpanded ? t('filters.collapseAll') : t('filters.expandAll')}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
+                       width: 22, height: 22, background: 'none', border: 'none',
+                       cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 4 }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'var(--border)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
+              {collapse.allExpanded ? <ChevronsDownUp size={12} /> : <ChevronsUpDown size={12} />}
+            </button>
+          )}
           {activeCount > 0 && (
             <button onClick={clearAll} title={t('filters.clearAll')}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -93,7 +119,7 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
               <RotateCcw size={12} />
             </button>
           )}
-          <button onClick={onClose}
+          <button onClick={onClose} aria-label={t('close')}
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center',
                      width: 22, height: 22, background: 'none', border: 'none',
                      cursor: 'pointer', color: 'var(--text-muted)', borderRadius: 4 }}
@@ -160,10 +186,10 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
         </div>
       ))}
 
-      {/* Groups */}
+      {/* Groups — each a tinted, collapsible block (punt 31a/b) */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px',
-                    display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {groups.filter(g => g.type !== 'global-search' && g.type !== 'location' && g.type !== 'saved-filters').map((group, i, arr) => (
+                    display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {collapsibleGroups.map((group, i, arr) => (
           <div key={group.key}>
             {/* Category heading — only shown when the category changes */}
             {group.category && group.category !== arr[i - 1]?.category && (
@@ -173,94 +199,12 @@ export default function ReportFilterSidebar({ title = 'Filters', groups = [], on
                 {group.category}
               </div>
             )}
-            {/* Label + clear button */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                          marginBottom: 5 }}>
-              <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--text-muted)',
-                            textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                {group.label}
-              </div>
-              {group.type !== 'period' && (group.selected?.length ?? 0) > 0 && (
-                <button
-                  onClick={() => group.selected?.forEach(v => group.onToggle?.(v))}
-                  style={{ fontSize: 9, color: 'var(--text-muted)', background: 'none', border: 'none',
-                           cursor: 'pointer', padding: 0 }}>
-                  {t('filters.clear')}
-                </button>
-              )}
-            </div>
-
-            {group.type === 'period' ? (
-              <PeriodGroup group={group} />
-            ) : group.type === 'date-range' ? (
-              // Two date inputs for a from/to range filter (e.g. audit log).
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                <input type="date" value={group.from ?? ''} onChange={e => group.onFromChange?.(e.target.value)}
-                  style={{ height: 30, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)',
-                           borderRadius: 6, color: 'var(--text)', outline: 'none', width: '100%' }} />
-                <input type="date" value={group.to ?? ''} onChange={e => group.onToChange?.(e.target.value)}
-                  style={{ height: 30, padding: '0 8px', fontSize: 12, border: '1px solid var(--border)',
-                           borderRadius: 6, color: 'var(--text)', outline: 'none', width: '100%' }} />
-              </div>
-            ) : group.type === 'geo-radius' ? (
-              <GeoRadiusGroup group={group} />
-            ) : group.type === 'search-select' && group.display === 'open' ? (
-              <OpenCheckGroup group={group} />
-            ) : group.type === 'search-select' ? (
-              <SearchSelectGroup group={group} />
-            ) : group.type === 'radio' ? (
-              <div style={{ display: 'flex', background: 'var(--border)', borderRadius: 7,
-                            padding: 2, gap: 2 }}>
-                {(group.options ?? []).map(opt => {
-                  const active = (group.selected ?? []).includes(opt.value)
-                  return (
-                    <button key={opt.value} onClick={() => group.onToggle?.(opt.value)}
-                      style={{
-                        flex: 1, padding: '4px 0', borderRadius: 5, fontSize: 11,
-                        fontWeight: active ? 600 : 400, cursor: 'pointer',
-                        border: active ? '1px solid var(--border)' : '1px solid transparent',
-                        background: active ? 'white' : 'transparent',
-                        color: active ? 'var(--text)' : 'var(--text-muted)',
-                        boxShadow: active ? '0 1px 2px rgba(0,0,0,0.06)' : 'none',
-                        transition: 'all 0.1s',
-                      }}>
-                      {opt.label}
-                    </button>
-                  )
-                })}
-              </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                {(group.options ?? []).map(opt => {
-                  const checked = (group.selected ?? []).includes(opt.value)
-                  return (
-                    <label key={opt.value}
-                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                               gap: 6, cursor: 'pointer' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
-                        <input type="checkbox" checked={checked}
-                          onChange={() => group.onToggle?.(opt.value)}
-                          style={{ accentColor: 'var(--color-primary)', width: 12, height: 12, flexShrink: 0 }} />
-                        <span style={{ fontSize: 12, color: checked ? 'var(--text)' : 'var(--text-muted)',
-                                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {opt.label}
-                        </span>
-                      </div>
-                      {opt.count !== undefined && (
-                        <span style={{
-                          flexShrink: 0, fontFamily: 'monospace', borderRadius: 999,
-                          padding: '1px 5px', fontSize: 10,
-                          background: checked ? 'var(--color-primary-bg)' : 'var(--border)',
-                          color:      checked ? 'var(--color-primary)'    : 'var(--text-muted)',
-                        }}>
-                          {opt.count}
-                        </span>
-                      )}
-                    </label>
-                  )
-                })}
-              </div>
-            )}
+            <FilterGroupBlock
+              group={group}
+              collapsed={collapse.isCollapsed(group.key)}
+              count={groupActiveCount(group)}
+              onToggle={() => collapse.toggle(group.key)}
+            />
           </div>
         ))}
       </div>

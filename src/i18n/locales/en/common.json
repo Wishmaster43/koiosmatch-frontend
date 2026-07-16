@@ -66,6 +66,8 @@
     "cityPlaceholder": "City (e.g. The Hague)",
     "searchAll": "Search everything…",
     "clearAll": "Clear all filters",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
     "clear": "clear",
     "geoPlaceholder": "Postcode or place",
     "apply": "Apply",
