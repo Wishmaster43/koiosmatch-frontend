@@ -14,7 +14,15 @@ import { useAllSettings, getBoolSetting, saveSettingsKeys } from '@/lib/settings
 export default function FunctionsSettings() {
   const { t } = useTranslation('settings')
   const settings = useAllSettings()
-  const freeEntry = getBoolSetting(settings, 'functions_allow_free_entry', true)
+  // Strict by default (Danny 2026-07-16, job 26): checked really does mean "allowed"
+  // here (Toggle checked={freeEntry}, label "Vrije invoer toestaan") — the bug was the
+  // FALLBACK shown before any tenant explicitly saves this setting. It defaulted to
+  // `true` (shows checked/allowed) while useFunctions() — and the backend's own
+  // GET /functions.allow_free_entry — both default to `false` (strict), so a
+  // never-configured tenant saw a checked toggle that lied about the actually
+  // enforced (strict) behaviour. Mirror useFunctions.ts's default here; never touches
+  // an already-persisted tenant value (getBoolSetting only falls back when unset).
+  const freeEntry = getBoolSetting(settings, 'functions_allow_free_entry', false)
   const [busy, setBusy] = useState(false)
 
   // Persist the mode; confirm before loosening to free-text (data-quality choice).

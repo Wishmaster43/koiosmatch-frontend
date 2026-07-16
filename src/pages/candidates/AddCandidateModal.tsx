@@ -90,7 +90,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
     street: 'street', postal_code: 'postalCode', city: 'city',
   }
   const requiredCfg = getJsonSetting<Record<string, string[]>>(settings, 'candidate_required_fields',
-    { lead: ['first_name', 'last_name'], candidate: ['first_name', 'last_name', 'email', 'phone', 'function_title'] })
+    // Fallback mirrors CandidateRequiredFieldsSettings' DEFAULTS (email/phone not required by default — Danny punt 3).
+    { lead: ['first_name', 'last_name'], candidate: ['first_name', 'last_name', 'function_title'] })
   const requiredForm = (requiredCfg[status] ?? requiredCfg.lead ?? []).map(k => REQ_FIELD_MAP[k]).filter(Boolean) as Array<keyof FormState>
   const isReq = (k: keyof FormState) => requiredForm.includes(k)
 

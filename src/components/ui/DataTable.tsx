@@ -81,6 +81,18 @@ function compare(a: unknown, b: unknown): number {
 const checkboxCol: CSSProperties = { width: 36, padding: '8px 10px', textAlign: 'center' }
 const stopPropagation = (e: { stopPropagation: () => void }) => e.stopPropagation()
 
+// Selected/checked row tint (audit item 1, 2026-07-16): a STICKY column (e.g. the
+// pinned Name cell) paints its OWN opaque background on top of the <tr>'s background
+// so scrolled-under content stays hidden while scrolling horizontally. Painting the
+// translucent `var(--color-primary-bg)` token on BOTH layers double-composites it —
+// the sticky cell reads as a visibly darker/different-coloured block than the rest
+// of the same row (reported as "the name turns a different colour when selected",
+// most visible whenever --color-primary-bg is translucent: any tenant with a custom
+// brand colour, and dark mode for every tenant). Pre-mixing straight into the opaque
+// --bg token keeps this single-layer and fully opaque in both states, so the sticky
+// cell and the rest of the row always render the exact same solid tint.
+const HIGHLIGHT_BG = 'color-mix(in srgb, var(--color-primary) 12%, var(--bg))'
+
 // Loading skeleton (audit item 17): a fixed number of placeholder rows so the
 // table header/chrome stays put and the body doesn't "jump" from a centred
 // spinner to real rows. Bar widths vary per column so the shape reads as text,
@@ -120,7 +132,7 @@ function TableRowInner<Row>({
       {...(virtualIndex !== undefined ? { 'data-index': virtualIndex, ref: measureElement } : {})}
       onClick={onRowClick ? () => onRowClick(row) : undefined}
       style={{ borderBottom: '1px solid var(--border)', cursor: onRowClick ? 'pointer' : 'default',
-        background: highlight ? 'var(--color-primary-bg)' : 'transparent' }}
+        background: highlight ? HIGHLIGHT_BG : 'transparent' }}
       onMouseEnter={e => { if (!highlight) { e.currentTarget.style.background = 'var(--hover-bg)'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--hover-bg)' }) } }}
       onMouseLeave={e => { if (!highlight) { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--bg)' }) } }}>
       {selectable && (
@@ -130,8 +142,10 @@ function TableRowInner<Row>({
         </td>
       )}
       {columns.map((col, i) => {
-        // Sticky cells need the same background as the row to cover scrolled content.
-        const rowBg = highlight ? 'var(--color-primary-bg)' : 'var(--bg)'
+        // Sticky cells need the same background as the row to cover scrolled content —
+        // HIGHLIGHT_BG (always opaque) so this never double-composites with the <tr>'s
+        // own background above (see the HIGHLIGHT_BG comment, job 1 2026-07-16).
+        const rowBg = highlight ? HIGHLIGHT_BG : 'var(--bg)'
         const left = stickyOffsets[i]
         const stickyStyle: CSSProperties = left == null ? {} : { position: 'sticky', left, zIndex: 1, background: rowBg }
         return (

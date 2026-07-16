@@ -39,7 +39,8 @@ const FIELDS = [
 // Sensible defaults: a Lead needs little, a Kandidaat needs the core contact set.
 const DEFAULTS = {
   lead: ['first_name', 'last_name'],
-  candidate: ['first_name', 'last_name', 'email', 'phone', 'function_title'],
+  // email/phone dropped from the default (Danny punt 3, 16-07) — a tenant can still tick them here.
+  candidate: ['first_name', 'last_name', 'function_title'],
 }
 
 export default function CandidateRequiredFieldsSettings() {

@@ -51,4 +51,23 @@ describe('DataTable', () => {
     // The loading text is still available to assistive tech via the table caption.
     expect(screen.getByText('Laden…')).toBeInTheDocument()
   })
+
+  // Job 1 (2026-07-16): a sticky column paints its OWN background on top of the
+  // <tr>'s background (to hide horizontally-scrolled content underneath), so a
+  // selected/checked row must use the exact same background value for both — a
+  // translucent token painted on both would double-composite into a visibly
+  // different colour for the sticky cell (regression guard for the "name looks a
+  // different colour when selected" bug).
+  it('gives the sticky cell the exact same background as the rest of a selected row', () => {
+    const stickyColumns = [
+      { key: 'name', header: 'Name', sticky: true, width: 120 },
+      { key: 'city', header: 'City' },
+    ]
+    render(<DataTable columns={stickyColumns} rows={rows} selectedId={1} />)
+    const bodyRows = screen.getAllByRole('row').slice(1)
+    const selectedRow = bodyRows[0]
+    const stickyCell = selectedRow.querySelector('td[data-sticky]')
+    expect(selectedRow.getAttribute('style')).toMatch(/background:\s*color-mix\(in srgb, var\(--color-primary\) 12%, var\(--bg\)\)/)
+    expect(stickyCell.getAttribute('style')).toMatch(/background:\s*color-mix\(in srgb, var\(--color-primary\) 12%, var\(--bg\)\)/)
+  })
 })

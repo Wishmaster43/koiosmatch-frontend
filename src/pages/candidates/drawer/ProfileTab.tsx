@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X, Trash2, Cake } from 'lucide-react'
+import { Edit2, Save, X, Trash2, Cake, MessageCircle } from 'lucide-react'
 import DatePicker from 'react-datepicker'
 import { NL_PROVINCES } from './constants'
 import { useDateFormat, calcAge, daysUntilBirthday } from '@/lib/datetime'
@@ -22,6 +22,18 @@ const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
 type ProfileKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth' | 'email' | 'phone'
   | 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city' | 'province' | 'linkedin'
 type ProfileForm = Record<ProfileKey, string>
+
+// wa.me needs bare E.164 digits (job 29): strip everything but digits, then turn a
+// Dutch national-format leading "0" into the "31" country code (measured: candidate
+// phones arrive either as "+31612345678" or "0612345678" — never anything stranger
+// in this dataset). Returns '' for anything too short to be a real MSISDN so a
+// corrupted/partial value never renders a dead WhatsApp link.
+// eslint-disable-next-line react-refresh/only-export-components -- pure helper exported for unit testing only (see ProfileTab.test.tsx); no runtime cost outside dev HMR.
+export function waDigits(phone: string): string {
+  const digits = phone.replace(/\D/g, '')
+  const withCountryCode = digits.startsWith('0') ? `31${digits.slice(1)}` : digits
+  return withCountryCode.length >= 8 ? withCountryCode : ''
+}
 
 function LinkedinIcon({ size = 12, color = '#0A66C2' }: { size?: number; color?: string }) {
   return (
@@ -62,8 +74,13 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
   // Required fields for this candidate's phase (Settings → Verplichte velden). Only
   // the profile-owned fields are enforced here (name/function live in the header).
   const settings = useAllSettings()
+  // Email/phone are NOT required by default (Danny 2026-07-16, job 3) — a Lead/early
+  // Kandidaat may only have a name + function on file yet. Tenants can still opt them
+  // back in via Settings → Verplichte velden (CandidateRequiredFieldsSettings), which
+  // reads/writes this same key — this is only the seed fallback shown before any
+  // tenant explicitly saves a required-fields config.
   const requiredCfg = getJsonSetting<Record<string, string[]>>(settings, 'candidate_required_fields',
-    { lead: ['first_name', 'last_name'], candidate: ['first_name', 'last_name', 'email', 'phone', 'function_title'] })
+    { lead: ['first_name', 'last_name'], candidate: ['first_name', 'last_name', 'function_title'] })
   const PROFILE_REQ_MAP: Partial<Record<ProfileKey, string>> = {
     email: 'email', phone: 'phone', gender: 'gender', dob: 'date_of_birth',
     street: 'street', postalCode: 'postal_code', city: 'city',
@@ -180,8 +197,26 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
           </a>
         : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>
     }
-    if (key === 'email' && v) return <a href={`mailto:${v}`} style={{ fontSize: 12, color: 'var(--color-primary)', textDecoration: 'none' }}>{v}</a>
-    if (key === 'phone' && v) return <a href={`tel:${String(v).replace(/\s/g, '')}`} style={{ fontSize: 12, color: 'var(--color-primary)', textDecoration: 'none' }}>{v}</a>
+    // Plain link-blue, NOT the tenant brand colour (Danny 2026-07-16, job 2): these
+    // anchors used var(--color-primary), which turns e.g. orange for a tenant with a
+    // custom brand colour (useTenantTheme). --color-info is a fixed semantic token
+    // (never touched by tenant theming) — the ordinary "this is a hyperlink" blue.
+    if (key === 'email' && v) return <a href={`mailto:${v}`} style={{ fontSize: 12, color: 'var(--color-info)', textDecoration: 'none' }}>{v}</a>
+    if (key === 'phone' && v) return (
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+        <a href={`tel:${String(v).replace(/\s/g, '')}`} style={{ fontSize: 12, color: 'var(--color-info)', textDecoration: 'none' }}>{v}</a>
+        {/* WhatsApp shortcut (Danny 2026-07-16, job 29) — muted, turns green on hover. */}
+        {waDigits(v) && (
+          <a href={`https://wa.me/${waDigits(v)}`} target="_blank" rel="noopener noreferrer"
+            title={t('profile.whatsapp')} aria-label={t('profile.whatsapp')}
+            style={{ display: 'inline-flex', color: 'var(--text-muted)' }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'var(--color-success)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)' }}>
+            <MessageCircle size={13} />
+          </a>
+        )}
+      </span>
+    )
     // Gender stores a slug/label; resolve the display label from the /genders lookup.
     if (key === 'gender') {
       const label = genders.find(g => g.value === v || g.label === v)?.label ?? v

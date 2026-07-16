@@ -302,6 +302,7 @@
     "dob": "Date of birth",
     "email": "Email address",
     "phone": "Phone",
+    "whatsapp": "Open in WhatsApp",
     "address": "Address",
     "street": "Street",
     "houseNumber": "House number",
