@@ -28,6 +28,11 @@ export function normalizeWorkflow(wf: RawWorkflow): Workflow {
     next:     (s.next ?? s.connections ?? []).map(n => ({
       target:  n.target != null ? String(n.target) : (n.target as null | undefined),
       filters: n.filters ?? null,
+      // Carry the handle ids + label — dropping them collapsed Router OR-branches
+      // to the default port on reload (test-wave find, 16-07; stepsToFlow reads all three).
+      ...(n.source_handle != null ? { source_handle: String(n.source_handle) } : {}),
+      ...(n.target_handle != null ? { target_handle: String(n.target_handle) } : {}),
+      ...(n.label != null ? { label: String(n.label) } : {}),
     })),
   }))
 
