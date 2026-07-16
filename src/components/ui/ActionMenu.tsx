@@ -48,6 +48,9 @@ export interface MenuNode {
   onPick?: (value: string | number) => void
   input?: boolean
   placeholder?: string
+  // Optional info line shown once this node is drilled into (job 35 — e.g. flagging
+  // a bulk action's real BE scope/semantics so it never reads as ambiguous).
+  note?: string
 }
 
 // Shared inline styles (CSS-var tokens only, theme-aware).
@@ -172,6 +175,15 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
               <ArrowLeft size={14} />
               <span style={{ fontWeight: 600 }}>{current.label}</span>
             </button>
+          )}
+
+          {/* Optional info line for the current level (job 35) — e.g. clarifying that a
+              bulk action applies per the backend's actual scope, not a vacancy the user picks. */}
+          {current?.note && (
+            <div style={{ padding: '8px 12px', fontSize: 11, lineHeight: 1.4, color: 'var(--text-muted)',
+              background: 'var(--hover-bg)', borderBottom: '1px solid var(--border)' }}>
+              {current.note}
+            </div>
           )}
 
           {/* Search box for an option/multi-select level (unless explicitly disabled) */}

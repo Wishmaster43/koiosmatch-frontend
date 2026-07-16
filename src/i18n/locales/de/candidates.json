@@ -78,7 +78,9 @@
     "addTag": "Tag hinzufügen",
     "addTagPlaceholder": "Tag…",
     "tagAdded": "Tag \"{{tag}}\" hinzugefügt ({{count}})",
-    "stageFailed": "{{count}} Kandidaten nicht aktualisiert."
+    "stageFailed": "{{count}} Kandidaten nicht aktualisiert.",
+    "partialResult": "{{updated}} von {{total}} aktualisiert, {{skipped}} übersprungen",
+    "stageNote": "Ändert die Phase der neuesten Bewerbung je Kandidat (keine Vakanzauswahl — Kandidaten ohne Bewerbung werden übersprungen)."
   },
   "kpi": {
     "total": "Gesamt",

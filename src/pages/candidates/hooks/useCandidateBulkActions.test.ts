@@ -66,9 +66,19 @@ describe('useCandidateBulkActions · bulkSetOwner (bulkMutate optimistic/reconci
     act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New Owner' }))
     expect(rowOf(r, 1)?.owner).toBe('New Owner') // optimistic on both
     expect(rowOf(r, 2)?.owner).toBe('New Owner')
-    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))
+    // Job 42: 1 of 2 confirmed → a partial reconcile now WARNS with the shared
+    // "N of M, Z skipped" summary — it must never read as a plain, silent success.
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.partialResult'))
     expect(rowOf(r, 1)?.owner).toBe('New Owner') // confirmed → stays
     expect(rowOf(r, 2)?.owner).toBe('Old')       // skipped by server → reverted
+  })
+
+  it('reports the full success message (not the partial one) when every row is confirmed', async () => {
+    post.mockResolvedValue({ data: { updated: [1] } })
+    const r = harness([cand({ id: 1, owner: 'Old' })])
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.bulkSetOwner({ id: 9, name: 'New Owner' }))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.ownerChanged'))
   })
 
   it('reverts everything and toasts the generic mutate error when the call fails', async () => {
@@ -89,7 +99,8 @@ describe('useCandidateBulkActions · pool add/remove', () => {
     act(() => r.result.current.actions.bulkAddToPool({ id: 'p1', name: 'Pool A' }))
     expect(rowOf(r, 1)?.pools).toHaveLength(1) // optimistic on both
     expect(rowOf(r, 2)?.pools).toHaveLength(1)
-    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))
+    // Job 42: only 1 of the 2 changed rows was confirmed → warn, don't say "success".
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.partialResult'))
     expect(rowOf(r, 1)?.pools).toHaveLength(1) // confirmed
     expect(rowOf(r, 2)?.pools).toHaveLength(0) // reverted
   })
@@ -125,7 +136,8 @@ describe('useCandidateBulkActions · tags', () => {
     act(() => r.result.current.actions.bulkAddTag('vip'))
     expect(rowOf(r, 1)?.tags).toEqual(['vip'])
     expect(rowOf(r, 2)?.tags).toEqual(['vip'])
-    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', expect.any(String)))
+    // Job 42: only 1 of the 2 candidates that needed the tag was confirmed → warn.
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.partialResult'))
     expect(rowOf(r, 1)?.tags).toEqual(['vip'])
     expect(rowOf(r, 2)?.tags).toEqual([])
   })
@@ -138,6 +150,39 @@ describe('useCandidateBulkActions · tags', () => {
     expect(rowOf(r, 1)?.tags).toEqual([])
     await waitFor(() => expect(notify).toHaveBeenCalledWith('error', 'bulk.mutateError'))
     expect(rowOf(r, 1)?.tags).toEqual(['vip'])
+  })
+})
+
+// Job 35/42: bulkSetStage drives the bulk funnel-stage action (candidates/bulk/funnel-stage),
+// which the BE resolves against each candidate's LATEST application (no vacancy scope — a
+// candidate without a live application is `skipped`, never silently dropped from the count).
+describe('useCandidateBulkActions · bulkSetStage (funnel-stage, job 35/42)', () => {
+  it('reports the specific stage-changed success when every candidate has an application to move', async () => {
+    post.mockResolvedValue({ data: { updated: [1] } })
+    const r = harness([cand({ id: 1, stage: 'applied' })])
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    act(() => r.result.current.actions.bulkSetStage('proposal'))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('success', 'bulk.stageChanged'))
+    expect(post).toHaveBeenCalledWith('/candidates/bulk/funnel-stage', { candidate_ids: [1], funnel_type: 'proposal' })
+  })
+
+  it('warns with the shared partial-result summary when a candidate without an application is skipped', async () => {
+    post.mockResolvedValue({ data: { updated: [1] } }) // candidate 2 has no application → BE skips it
+    const r = harness([cand({ id: 1, stage: 'applied' }), cand({ id: 2, stage: '' })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkSetStage('proposal'))
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.partialResult'))
+  })
+})
+
+describe('useCandidateBulkActions · runBulkArchive (job 42 — partial archive)', () => {
+  it('warns instead of a bare success when the server archives fewer than the whole selection', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true)
+    post.mockResolvedValue({ data: { archived: [1] } }) // id 2 comes back un-archived (e.g. already archived)
+    const r = harness([cand({ id: 1, stage: '', status: 'available' }), cand({ id: 2, stage: '', status: 'available' })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    await act(async () => { await r.result.current.actions.bulkArchive() })
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.partialResult'))
   })
 })
 

@@ -56,6 +56,17 @@ describe('CandidatesBulkBar', () => {
     expect(props.onSetStage).toHaveBeenCalledWith('pool')
   })
 
+  // Job 35: the bulk funnel-stage action moves each candidate's LATEST application
+  // (the BE has no vacancy scope) — the drill-in must say so instead of reading as
+  // if a vacancy could be picked.
+  it('shows the BE-scope info line when drilling into "change funnel stage"', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.changeStage'))
+    expect(screen.getByText('bulk.stageNote')).toBeInTheDocument()
+  })
+
   it('applies the exact candidate-type set via the multi-select (add/remove)', async () => {
     const user = userEvent.setup()
     const props = baseProps()

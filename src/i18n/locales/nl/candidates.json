@@ -85,7 +85,9 @@
     "addTag": "Tag toevoegen",
     "addTagPlaceholder": "Tag…",
     "tagAdded": "Tag \"{{tag}}\" toegevoegd ({{count}})",
-    "stageFailed": "{{count}} kandidaten niet bijgewerkt."
+    "stageFailed": "{{count}} kandidaten niet bijgewerkt.",
+    "partialResult": "{{updated}} van de {{total}} aangepast, {{skipped}} overgeslagen",
+    "stageNote": "Wijzigt de fase van de meest recente sollicitatie per kandidaat (geen vacature-keuze — kandidaten zonder sollicitatie worden overgeslagen)."
   },
   "kpi": {
     "total": "Totaal",

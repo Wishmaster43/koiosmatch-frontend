@@ -85,7 +85,9 @@
     "addTag": "Add tag",
     "addTagPlaceholder": "Tag…",
     "tagAdded": "Tag \"{{tag}}\" added ({{count}})",
-    "stageFailed": "{{count}} candidates not updated."
+    "stageFailed": "{{count}} candidates not updated.",
+    "partialResult": "{{updated}} of {{total}} updated, {{skipped}} skipped",
+    "stageNote": "Changes the stage of each candidate's most recent application (no vacancy choice — candidates without an application are skipped)."
   },
   "kpi": {
     "total": "Total",

@@ -47,7 +47,9 @@ interface BulkMutateArgs {
   body?: Record<string, unknown>
   patch: Partial<Candidate>
   keys: Array<keyof Candidate>
-  onSuccess: (count: number) => void
+  // Job 42: called with (updated, total) so every caller can surface an honest
+  // partial-failure summary instead of a bare "success" that hides a skip.
+  onSuccess: (updated: number, total: number) => void
 }
 
 export function useCandidateBulkActions({
@@ -79,7 +81,7 @@ export function useCandidateBulkActions({
         const added = Array.isArray(res.data?.added) ? new Set(res.data.added) : null
         if (added) setCandidates(prev => prev.map(c => (changedIds.includes(c.id) && !added.has(c.id))
           ? { ...c, pools: (c.pools ?? []).filter(p => (p.id ?? p.name) !== poolId) } : c))
-        notify('success', t('bulk.addedToPool', { pool: pool.name, count: added ? added.size : changedIds.length }))
+        notifyOutcome('bulk.addedToPool', { pool: pool.name }, added ? added.size : changedIds.length, changedIds.length)
       })
       .catch(() => {
         setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: (c.pools ?? []).filter(p => (p.id ?? p.name) !== poolId) } : c))
@@ -100,7 +102,7 @@ export function useCandidateBulkActions({
         const removed = Array.isArray(res.data?.removed) ? new Set(res.data.removed) : null
         if (removed) setCandidates(prev => prev.map(c => (changedIds.includes(c.id) && !removed.has(c.id))
           ? { ...c, pools: [...(c.pools ?? []), chip] } : c))
-        notify('success', t('bulk.removedFromPool', { pool: pool.name, count: removed ? removed.size : changedIds.length }))
+        notifyOutcome('bulk.removedFromPool', { pool: pool.name }, removed ? removed.size : changedIds.length, changedIds.length)
       })
       .catch(() => {
         setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, pools: [...(c.pools ?? []), chip] } : c))
@@ -113,6 +115,20 @@ export function useCandidateBulkActions({
   const subsetOf = <T,>(obj: T, keys: Array<keyof T>): Partial<T> =>
     keys.reduce((a, k) => { a[k] = obj[k]; return a }, {} as Partial<T>)
 
+  // Job 42 — the ONE partial-failure summary rule for every bulk action: a full
+  // success keeps the action's own descriptive toast ("Owner changed to X (3)");
+  // the moment the server's reconcile skips ≥1 row, the toast switches to a
+  // warning with an honest "N of M adjusted, Z skipped" count (bulk.partialResult)
+  // — never a bare "success" that silently swallows `skipped`. Every bulkX below
+  // routes its toast through this so the behaviour is uniform, not per-action.
+  const notifyOutcome = (successKey: string, params: Record<string, unknown>, updated: number, total: number) => {
+    if (total > 0 && updated < total) {
+      notify('warning', t('bulk.partialResult', { ...params, updated, total, skipped: total - updated }))
+    } else {
+      notify('success', t(successKey, { ...params, count: updated }))
+    }
+  }
+
   // Generic optimistic bulk field mutation: apply `patch` to the selected rows,
   // persist, reconcile against the server's `updated` list, revert on failure.
   const bulkMutate = ({ url, body, patch, keys, onSuccess }: BulkMutateArgs) => {
@@ -124,7 +140,7 @@ export function useCandidateBulkActions({
       .then((res) => {
         const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
         if (updated) setCandidates(prev => prev.map(c => (ids.includes(c.id) && !updated.has(c.id)) ? { ...c, ...snap.get(c.id) } : c))
-        onSuccess(updated ? updated.size : ids.length)
+        onSuccess(updated ? updated.size : ids.length, ids.length)
       })
       .catch(() => {
         setCandidates(prev => prev.map(c => ids.includes(c.id) ? { ...c, ...snap.get(c.id) } : c))
@@ -137,24 +153,25 @@ export function useCandidateBulkActions({
     url: '/candidates/bulk/owner', body: { owner_id: user.id },
     patch: { owner: user.name, ownerId: user.id, ownerInitials: initialsOf(user.name), ownerColor: undefined },
     keys: ['owner', 'ownerId', 'ownerInitials', 'ownerColor'],
-    onSuccess: (n) => notify('success', t('bulk.ownerChanged', { name: user.name, count: n })),
+    onSuccess: (n, total) => notifyOutcome('bulk.ownerChanged', { name: user.name }, n, total),
   })
   // Move the selection to a funnel stage — the real bulk route (BULK-2) with single-PATCH
   // semantics (Match-spawn on hired, event after commit). Replaces the per-id bridge.
+  // Job 35: the BE moves each candidate's LATEST application (no vacancy scope) — a
+  // candidate without one is `skipped`, surfaced honestly via notifyOutcome below.
   const bulkSetStage = (stage: string) => bulkMutate({
     url: '/candidates/bulk/funnel-stage', body: { funnel_type: stage },
     patch: { stage }, keys: ['stage'],
-    onSuccess: (n) => notify('success', t('bulk.stageChanged', { value: metaOf(funnelTypes, stage)?.label ?? stage, count: n })),
+    onSuccess: (n, total) => notifyOutcome('bulk.stageChanged', { value: metaOf(funnelTypes, stage)?.label ?? stage }, n, total),
   })
   // Set the EXACT candidate-type set for the selection (multi-select add/remove).
   // An empty set clears all types — so an unused type can then be deleted in Settings.
   const bulkSetTypes = (types: string[]) => bulkMutate({
     url: '/candidates/bulk/candidate-type', body: { candidate_types: types },
     patch: { candidateTypes: types }, keys: ['candidateTypes'],
-    onSuccess: (n) => notify('success', t('bulk.typeChanged', {
+    onSuccess: (n, total) => notifyOutcome('bulk.typeChanged', {
       value: types.length ? types.map(v => metaOf(candidateTypes, v)?.label ?? v).join(', ') : t('bulk.noneLabel'),
-      count: n,
-    })),
+    }, n, total),
   })
 
   // Union of tags across the selected candidates — the "remove tag" option list.
@@ -174,7 +191,7 @@ export function useCandidateBulkActions({
       .then((res) => {
         const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
         if (updated) setCandidates(prev => prev.map(c => (changedIds.includes(c.id) && !updated.has(c.id)) ? { ...c, tags: [...(c.tags ?? []), tag] } : c))
-        notify('success', t('bulk.tagRemoved', { tag, count: updated ? updated.size : changedIds.length }))
+        notifyOutcome('bulk.tagRemoved', { tag }, updated ? updated.size : changedIds.length, changedIds.length)
       })
       .catch(() => {
         setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, tags: [...(c.tags ?? []), tag] } : c))
@@ -190,7 +207,7 @@ export function useCandidateBulkActions({
     api.post('/candidates/bulk/notes', { candidate_ids: ids, text: text.trim() })
       .then((res) => {
         const n = Array.isArray(res.data?.updated) ? res.data.updated.length : ids.length
-        notify('success', t('bulk.noteAdded', { count: n }))
+        notifyOutcome('bulk.noteAdded', {}, n, ids.length)
       })
       .catch(() => notify('error', t('bulk.mutateError')))
     setSelectedIds(new Set())
@@ -210,7 +227,7 @@ export function useCandidateBulkActions({
         const set = new Set(archived)
         setCandidates(prev => prev.filter(c => !set.has(c.id)))
         setTotal(tt => Math.max(0, tt - archived.length))
-        notify('success', t('bulk.archived', { count: archived.length }))
+        notifyOutcome('bulk.archived', {}, archived.length, ids.length)
       })
       .catch((e) => {
         const live = liveFromError(e)
@@ -268,7 +285,7 @@ export function useCandidateBulkActions({
   const bulkSetStatus = (status: string, label: string) => bulkMutate({
     url: '/candidates/bulk/status', body: { status },
     patch: { status }, keys: ['status'],
-    onSuccess: (n) => notify('success', t('bulk.statusChanged', { value: label, count: n })),
+    onSuccess: (n, total) => notifyOutcome('bulk.statusChanged', { value: label }, n, total),
   })
   // Add a tag to the selection (mirror of bulkRemoveTag).
   const bulkAddTag = (tag: string) => {
@@ -281,7 +298,7 @@ export function useCandidateBulkActions({
       .then((res) => {
         const updated = Array.isArray(res.data?.updated) ? new Set(res.data.updated) : null
         if (updated) setCandidates(prev => prev.map(c => (changedIds.includes(c.id) && !updated.has(c.id)) ? { ...c, tags: (c.tags ?? []).filter(x => x !== tg) } : c))
-        notify('success', t('bulk.tagAdded', { tag: tg, count: updated ? updated.size : changedIds.length }))
+        notifyOutcome('bulk.tagAdded', { tag: tg }, updated ? updated.size : changedIds.length, changedIds.length)
       })
       .catch(() => {
         setCandidates(prev => prev.map(c => changedIds.includes(c.id) ? { ...c, tags: (c.tags ?? []).filter(x => x !== tg) } : c))
@@ -295,7 +312,7 @@ export function useCandidateBulkActions({
   const bulkSetConsent = (consent: Record<string, boolean>, label: string) => bulkMutate({
     url: '/candidates/bulk/consent', body: { consent },
     patch: {}, keys: [],
-    onSuccess: (n) => notify('success', t('bulk.consentChanged', { value: label, count: n })),
+    onSuccess: (n, total) => notifyOutcome('bulk.consentChanged', { value: label }, n, total),
   })
 
   return {

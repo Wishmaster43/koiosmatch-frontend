@@ -78,7 +78,9 @@
     "addTag": "Añadir etiqueta",
     "addTagPlaceholder": "Etiqueta…",
     "tagAdded": "Etiqueta \"{{tag}}\" añadida ({{count}})",
-    "stageFailed": "{{count}} candidatos no actualizados."
+    "stageFailed": "{{count}} candidatos no actualizados.",
+    "partialResult": "{{updated}} de {{total}} actualizados, {{skipped}} omitidos",
+    "stageNote": "Cambia la etapa de la solicitud más reciente de cada candidato (sin elegir vacante — los candidatos sin solicitud se omiten)."
   },
   "kpi": {
     "total": "Total",

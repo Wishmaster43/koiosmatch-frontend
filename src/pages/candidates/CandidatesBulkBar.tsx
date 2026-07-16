@@ -76,7 +76,14 @@ export default function CandidatesBulkBar({
       { key: 'remove-pool', label: t('bulk.removeFromPool'), icon: FolderMinus,
         searchPlaceholder: t('bulk.searchPool'), emptyText: t('bulk.noPools'), options: poolOptions, onPick: pickPool(onRemoveFromPool) },
     ] },
-    { key: 'stage', label: t('bulk.changeStage'), icon: Milestone,
+    // Job 35: the BE bulk endpoint (candidates/bulk/funnel-stage) moves each candidate's
+    // LATEST application — it has no vacancy_id/application scope to disambiguate a
+    // candidate with several live applications (confirmed: CandidateBulkController::
+    // funnelStage / CandidateBulkService::setFunnelStage in koiosmatch-api). Until the BE
+    // adds that scope, the action stays available (candidates without an application are
+    // just skipped, surfaced via the shared partial-result toast) but says so up front
+    // instead of reading as if a vacancy could be chosen.
+    { key: 'stage', label: t('bulk.changeStage'), icon: Milestone, note: t('bulk.stageNote'),
       searchPlaceholder: t('bulk.searchStage'), options: stageOptions, onPick: (v) => onSetStage(String(v)) },
     { key: 'phase', label: t('bulk.changePhase'), icon: UserCheck,
       searchPlaceholder: t('bulk.searchPhase'), options: phaseOptions, onPick: (v) => onConvertPhase(String(v)) },

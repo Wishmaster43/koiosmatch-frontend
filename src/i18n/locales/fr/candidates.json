@@ -78,7 +78,9 @@
     "addTag": "Ajouter un tag",
     "addTagPlaceholder": "Tag…",
     "tagAdded": "Tag «{{tag}}» ajouté ({{count}})",
-    "stageFailed": "{{count}} candidats non mis à jour."
+    "stageFailed": "{{count}} candidats non mis à jour.",
+    "partialResult": "{{updated}} sur {{total}} mis à jour, {{skipped}} ignoré(s)",
+    "stageNote": "Modifie l'étape de la candidature la plus récente de chaque candidat (aucun choix de vacance — les candidats sans candidature sont ignorés)."
   },
   "kpi": {
     "total": "Total",

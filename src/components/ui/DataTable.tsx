@@ -66,6 +66,21 @@ interface DataTableProps<Row> {
 // Read a column's default field off an unknown-shaped row (dynamic accessor).
 const field = (row: unknown, key: string): unknown => (row as Record<string, unknown>)[key]
 
+// Job 43 — pure range helper (unit-tested directly, no rendering needed): given the
+// row-id order on the current page, the last "anchor" id and the row just clicked,
+// return every id between them (inclusive, works whether the click landed above or
+// below the anchor). Unknown anchor/target ids (stale ref against a re-sorted page)
+// fall back to just the target row — never guess a range against a wrong index.
+// eslint-disable-next-line react-refresh/only-export-components -- pure helper exported for unit testing only (mirrors ProfileTab's waDigits); no runtime cost outside dev HMR.
+export function shiftRangeIds<T extends RowId>(pageIds: T[], anchorId: T | null, targetId: T): T[] {
+  if (anchorId == null || anchorId === targetId) return [targetId]
+  const anchorIndex = pageIds.indexOf(anchorId)
+  const targetIndex = pageIds.indexOf(targetId)
+  if (anchorIndex === -1 || targetIndex === -1) return [targetId]
+  const [start, end] = anchorIndex < targetIndex ? [anchorIndex, targetIndex] : [targetIndex, anchorIndex]
+  return pageIds.slice(start, end + 1)
+}
+
 // Comparator: empty/null sort last; numbers numerically; strings naturally.
 function compare(a: unknown, b: unknown): number {
   const na = a === '' || a == null
@@ -110,7 +125,9 @@ interface TableRowProps<Row> {
   selectable: boolean
   stickyOffsets: (number | null)[]
   onRowClick?: (row: Row) => void
-  onToggleRow?: (id: RowId) => void
+  // Job 43: the checkbox's native click event carries the shift-key flag through, so
+  // the table (not the caller) can resolve a shift-click into a range selection.
+  onToggleRow?: (id: RowId, shiftKey?: boolean) => void
   virtualIndex?: number
   measureElement?: (node: Element | null) => void
   selectRowLabel: string
@@ -137,7 +154,11 @@ function TableRowInner<Row>({
       onMouseLeave={e => { if (!highlight) { e.currentTarget.style.background = 'transparent'; e.currentTarget.querySelectorAll('td[data-sticky]').forEach(td => { (td as HTMLElement).style.background = 'var(--bg)' }) } }}>
       {selectable && (
         <td style={checkboxCol} onClick={stopPropagation}>
-          <input type="checkbox" checked={!!isChecked} onChange={() => onToggleRow?.(rowId)}
+          {/* Job 43: forward the shift-key from the native click event (onChange's
+              nativeEvent is the triggering MouseEvent for a checkbox) so a shift-click
+              can be resolved into a range selection one level up. */}
+          <input type="checkbox" checked={!!isChecked}
+            onChange={e => onToggleRow?.(rowId, (e.nativeEvent as MouseEvent).shiftKey)}
             style={{ cursor: 'pointer', accentColor: 'var(--color-primary)' }} aria-label={selectRowLabel} />
         </td>
       )}
@@ -227,7 +248,34 @@ export default function DataTable<Row>({
   const stableRowClick = useCallback((row: Row) => onRowClickRef.current?.(row), [])
   const onToggleRowRef = useRef(onToggleRow)
   onToggleRowRef.current = onToggleRow
-  const stableToggleRow = useCallback((id: RowId) => onToggleRowRef.current?.(id), [])
+  // Job 43 (shift-click range selection): refs so the stable callback below always
+  // reads the LATEST page order/selection without being recreated (which would bust
+  // every row's memo — see the docblock at the top of this file).
+  const pageIdsRef = useRef(pageIds)
+  pageIdsRef.current = pageIds
+  const selectedIdsRef = useRef(selectedIds)
+  selectedIdsRef.current = selectedIds
+  // The last row checkbox the user explicitly clicked (plain or shift) — the anchor
+  // a subsequent shift-click ranges from. A ref, not state: it never needs to render.
+  const lastClickedIdRef = useRef<RowId | null>(null)
+  // Wraps the caller's single-id onToggleRow (a per-id XOR toggle). A plain click just
+  // toggles this row and becomes the new anchor. A SHIFT click resolves the row's OWN
+  // new checked state (its current state, flipped) and applies that SAME state to
+  // every row between the anchor and here — by calling the caller's toggle only for
+  // the ids that actually need to flip, so an already-correct row in the range is left
+  // alone (onToggleRow is a pure XOR toggle, not a "set to" — this is what keeps the
+  // whole range consistent instead of re-flipping rows that already match).
+  const stableToggleRow = useCallback((id: RowId, shiftKey?: boolean) => {
+    const toggle = onToggleRowRef.current
+    if (shiftKey && lastClickedIdRef.current != null) {
+      const targetChecked = !selectedIdsRef.current?.has(id)
+      shiftRangeIds(pageIdsRef.current, lastClickedIdRef.current, id)
+        .forEach(rid => { if (!!selectedIdsRef.current?.has(rid) !== targetChecked) toggle?.(rid) })
+    } else {
+      toggle?.(id)
+    }
+    lastClickedIdRef.current = id
+  }, [])
   const selectRowLabel = t('selectRow')
 
   // Pre-compute sticky left offsets: checkbox (36px if selectable) + widths of preceding sticky cols.

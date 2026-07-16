@@ -7,6 +7,11 @@ import type { CustomFieldDef, CustomFieldEntityType } from '@/lib/useCustomField
 import { useDateFormat } from '@/lib/datetime'
 import RichTextEditor from '@/components/ui/RichTextEditor'
 import SafeHtml from '@/components/ui/SafeHtml'
+// Job 45: the SHARED titled-card frame (border/radius/padding/background) — this tab
+// is reused across all 11 entity drawers, so it must use the generic ui/SectionCard
+// styling (never a candidate-only constants file) for the frame to look identical
+// everywhere, mirroring how ProfileTab's own field groups + summary block are boxed.
+import { sectionBlock } from '@/components/ui/SectionCard'
 
 const inputStyle: CSSProperties = { width: '100%', padding: '6px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', outline: 'none', boxSizing: 'border-box' }
 const iconBtn: CSSProperties = { width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
@@ -64,10 +69,10 @@ function RichTextField({ def, value, onSave }: { def: CustomFieldDef; value: unk
       {editing
         ? <RichTextEditor value={draft} onChange={setDraft} expanded={expanded} onToggleExpand={() => setExpanded(v => !v)} />
         : (value
-            ? <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: '8px 10px', maxHeight: 180, overflow: 'auto' }}>
+            ? <div style={{ ...sectionBlock, maxHeight: 180, overflow: 'auto' }}>
                 <SafeHtml html={String(value)} style={{ fontSize: 12, color: 'var(--text)', lineHeight: 1.5 }} />
               </div>
-            : <div style={{ fontSize: 12, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('empty')}</div>)}
+            : <div style={{ ...sectionBlock, fontSize: 12, fontStyle: 'italic', color: 'var(--text-muted)' }}>{t('empty')}</div>)}
     </div>
   )
 }
@@ -126,7 +131,7 @@ export default function CustomFieldsTab({ entityType, values, onSave }: Props) {
               <button onClick={startEdit} title={t('edit')} style={{ ...iconBtn, background: 'none', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><Edit2 size={13} /></button>
             )}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px' }}>
+          <div style={{ ...sectionBlock, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px' }}>
             {simpleFields.map(def => (
               <div key={def.key}>
                 <div style={labelStyle}>{def.label}</div>
