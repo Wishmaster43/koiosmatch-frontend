@@ -19,6 +19,13 @@ export interface AppNotification {
   [k: string]: unknown
 }
 
+// Tick guard — skip a poll while the browser tab is hidden (mirrors useQueueSummary's
+// "never hammer an idle background tab"). Extracted so it is unit-testable in isolation
+// from the interval/effect wiring.
+export function shouldPollNotifications(visibilityState: DocumentVisibilityState = document.visibilityState): boolean {
+  return visibilityState === 'visible'
+}
+
 export function useNotifications(pollMs = 60000) {
   const [items, setItems] = useState<AppNotification[]>([])
 
@@ -29,10 +36,10 @@ export function useNotifications(pollMs = 60000) {
       .catch(() => setItems([]))
   }, [])
 
-  // Poll on an interval; clean up on unmount.
+  // Poll on an interval, skipping ticks while the tab is hidden; clean up on unmount.
   useEffect(() => {
     load()
-    const id = setInterval(load, pollMs)
+    const id = setInterval(() => { if (shouldPollNotifications()) load() }, pollMs)
     return () => clearInterval(id)
   }, [load, pollMs])
 

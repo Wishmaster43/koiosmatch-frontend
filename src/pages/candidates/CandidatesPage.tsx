@@ -24,6 +24,7 @@ import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
+import ErrorBanner from '@/components/ui/ErrorBanner'
 import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
 import { usePools } from '@/lib/usePools'
 import { usePageMemory } from '@/lib/usePageMemory'
@@ -370,11 +371,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
             </div>
           ) : (
           <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', padding: '0 24px 16px' }}>
-            {error && (
-              <div className="mb-3 rounded-lg px-3 py-2.5 text-sm text-red-600 bg-red-50 border border-red-200">
-                {error}
-              </div>
-            )}
+            {error && <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>}
             <CandidatesTable
               rows={filtered}
               loading={loading}

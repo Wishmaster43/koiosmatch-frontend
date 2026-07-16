@@ -24,6 +24,9 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
   const [menuOpen, setMenuOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  // Tracks the blob: URL this component created for the picked photo, so it can be
+  // revoked when replaced/removed and on unmount — otherwise every upload leaks memory.
+  const createdUrlRef = useRef<string | null>(null)
 
   useEffect(() => {
     if (!menuOpen) return
@@ -32,7 +35,24 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
     return () => document.removeEventListener('mousedown', h)
   }, [menuOpen])
 
+  // Revoke the last object URL we created on unmount (drawer closed mid-edit, etc.).
+  useEffect(() => () => { if (createdUrlRef.current) URL.revokeObjectURL(createdUrlRef.current) }, [])
+
   if (!onChange) return <Avatar initials={avatar.initials} size={44} photo={avatar.photo} color={avatar.color} soft={avatar.soft} />
+
+  // Revoke the previous blob URL (if any) before creating+tracking one for the new file.
+  const pickFile = (f: File) => {
+    if (createdUrlRef.current) URL.revokeObjectURL(createdUrlRef.current)
+    const url = URL.createObjectURL(f)
+    createdUrlRef.current = url
+    onChange(url)
+  }
+
+  // Clearing the photo also revokes any blob URL we were still holding.
+  const removePhoto = () => {
+    if (createdUrlRef.current) { URL.revokeObjectURL(createdUrlRef.current); createdUrlRef.current = null }
+    onChange('')
+  }
 
   return (
     <div ref={ref} style={{ position: 'relative', flexShrink: 0 }}>
@@ -47,7 +67,7 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
         </div>
       </button>
       <input ref={fileRef} type="file" accept="image/*" aria-label={labels?.upload ?? 'Upload'} style={{ display: 'none' }}
-        onChange={e => { const f = e.target.files?.[0]; if (f) { onChange(URL.createObjectURL(f)); setMenuOpen(false) } }} />
+        onChange={e => { const f = e.target.files?.[0]; if (f) { pickFile(f); setMenuOpen(false) } }} />
       {menuOpen && (
         <div style={{ position: 'absolute', top: '110%', left: 0, zIndex: 200, background: 'white',
           border: '1px solid var(--border)', borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,0.12)', overflow: 'hidden', minWidth: 140 }}>
@@ -56,7 +76,7 @@ function PhotoAvatar({ avatar, onChange, labels }: { avatar: AvatarConfig; onCha
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--hover-bg)')} onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             {labels?.upload ?? 'Upload'}
           </button>
-          <button onClick={() => { onChange(''); setMenuOpen(false) }}
+          <button onClick={() => { removePhoto(); setMenuOpen(false) }}
             style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'var(--color-danger-bg)')} onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
             {labels?.remove ?? 'Remove'}
