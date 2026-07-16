@@ -76,7 +76,12 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
         .catch(() => notifyError(t('actionFailed')))
     },
     onEdit: (i: number, raw: RelItem) => {
-      const v = NORMALIZE[rel](raw)
+      // Merge over the stored row FIRST: SectionTabs now has two independent editors
+      // per item (the row form for name/dates/… and the description's own rich-text
+      // pencil, ProseField) that each submit only their own subset — merging guarantees
+      // the PATCH always carries the full, current record so one editor never silently
+      // blanks the field the other one owns.
+      const v = NORMALIZE[rel]({ ...list[i], ...raw })
       const id = list[i]?.id
       set(p => p.map((x, idx) => idx === i ? { ...x, ...v } : x))
       if (isPersisted(id)) api.patch(`/candidates/${c.id}/${rel}/${id}`, TO_API[rel](v)).catch(() => notifyError(t('actionFailed')))
