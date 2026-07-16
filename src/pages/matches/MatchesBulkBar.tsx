@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { ListChecks, Link2, Building2, Layers, X } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
+import { BTN_H } from '@/config/buttonMetrics'
 
 interface MatchesBulkBarProps {
   count: number
@@ -41,8 +42,9 @@ export default function MatchesBulkBar({
         ? <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
         : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('bulk.noPermission')}</span>}
 
+      {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
       <button onClick={onClear}
-        style={{ display: 'flex', alignItems: 'center', gap: 5, marginLeft: 'auto', padding: '6px 10px', fontSize: 12,
+        style={{ display: 'flex', alignItems: 'center', gap: 5, marginLeft: 'auto', height: BTN_H, padding: '0 10px', fontSize: 12,
           border: 'none', borderRadius: 7, background: 'none', color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 500 }}>
         <X size={13} /> {t('bulk.deselect')}
       </button>

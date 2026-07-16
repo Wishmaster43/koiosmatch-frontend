@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { MessageCircle, RefreshCw, Search } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import { BTN_H } from '@/config/buttonMetrics'
 
 // Phone-number quality ratings → colour. Label = t('whatsapp.quality<KEY>').
 const QUALITY_META = {
@@ -190,8 +191,9 @@ export default function WhatsAppSettings() {
       <div>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 12 }}>
           {connId && (
+            // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
             <button onClick={syncNumbers} disabled={syncing === 'numbers'}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 12px',
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
                        fontSize: 12, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
                        border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
               <RefreshCw size={11} style={{ animation: syncing === 'numbers' ? 'spin 1s linear infinite' : 'none' }} />
@@ -253,8 +255,9 @@ export default function WhatsAppSettings() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 12 }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             {connId && (
+              // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
               <button onClick={syncTemplates} disabled={syncing === 'templates'}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 12px',
+                style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
                          fontSize: 12, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
                          border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text)' }}>
                 <RefreshCw size={11} style={{ animation: syncing === 'templates' ? 'spin 1s linear infinite' : 'none' }} />

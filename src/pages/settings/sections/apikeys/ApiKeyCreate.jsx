@@ -12,6 +12,7 @@ import { ArrowLeft, Check, Copy, Key } from 'lucide-react'
 import { createApiKey } from './apiKeysApi'
 import { KEY_TYPES } from './constants'
 import ScopeEditor from './ScopeEditor'
+import { BTN_H } from '@/config/buttonMetrics'
 
 export default function ApiKeyCreate({ onBack, onCreated }) {
   const { t } = useTranslation('settings')
@@ -57,8 +58,9 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
     <div>
       {/* Header: back + icon + title (mirrors ApiKeyDetail) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
+        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <button onClick={onBack} aria-label={t('common.back')}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)', color: 'var(--text)', cursor: 'pointer' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)', color: 'var(--text)', cursor: 'pointer' }}>
           <ArrowLeft size={13} /> {t('common.back')}
         </button>
         <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -77,13 +79,13 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid #BBF7D0', borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</code>
                 <button onClick={copySecret} aria-label={t('apiKeys.copySecret')}
-                  style={{ height: 36, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid #BBF7D0', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
+                  style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid #BBF7D0', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
                   {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('apiKeys.copySecret')}
                 </button>
               </div>
             </div>
             <button onClick={onBack}
-              style={{ height: 38, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+              style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
               {t('apiKeys.done')}
             </button>
           </div>
@@ -132,13 +134,14 @@ export default function ApiKeyCreate({ onBack, onCreated }) {
 
             {error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('apiKeys.createError')}</div>}
 
+            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={submit} disabled={saving || !form.friendly_name.trim()}
-                style={{ height: 38, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: form.friendly_name.trim() ? 'pointer' : 'not-allowed', opacity: form.friendly_name.trim() ? 1 : 0.5 }}>
+                style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: form.friendly_name.trim() ? 'pointer' : 'not-allowed', opacity: form.friendly_name.trim() ? 1 : 0.5 }}>
                 {saving ? t('apiKeys.creating') : t('apiKeys.create')}
               </button>
               <button onClick={onBack}
-                style={{ height: 38, padding: '0 16px', fontSize: 13, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+                style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
                 {t('common.cancel')}
               </button>
             </div>

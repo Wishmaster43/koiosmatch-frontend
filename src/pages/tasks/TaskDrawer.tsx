@@ -15,6 +15,7 @@ import RelatedTasks from './drawer/RelatedTasks'
 import LinksTab from './drawer/LinksTab'
 import TaskChangelogPopover from './drawer/TaskChangelogPopover'
 import { initialsOf } from '@/lib/initials'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { TaskDetail } from '@/types/task'
 import type { Id } from '@/types/common'
 
@@ -87,8 +88,9 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   const doneValue = doneStatusValues[0]
   const markDone = doneValue != null && !task.statusIsDone
     ? (
+      // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
       <button onClick={() => onUpdate(task.id, { statusKey: doneValue })}
-        style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', fontSize: 11, fontWeight: 600,
+        style={{ display: 'flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600,
           borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-success)', background: 'var(--color-success)', color: '#fff' }}>
         <CheckCircle2 size={12} /> {t('drawer.markDone')}
       </button>

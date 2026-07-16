@@ -10,6 +10,7 @@ import { RefreshCw, Trash2, X } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import { formatDT } from '@/components/reports/runFormat'
 import { useFailedJobs } from './useFailedJobs'
+import { BTN_H } from '@/config/buttonMetrics'
 
 export default function FailedJobsTab() {
   const { t } = useTranslation('settings')
@@ -56,15 +57,16 @@ export default function FailedJobsTab() {
           style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
         <input value={filters.tenant} onChange={(e) => setFilter('tenant', e.target.value)} placeholder={t('jobs.filters.tenant')}
           style={{ height: 32, padding: '0 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', width: 160 }} />
+        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
           <button type="button" disabled={bulkBusy || result.total === 0} onClick={confirmRetryAll}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', fontSize: 12, fontWeight: 500,
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 12, fontWeight: 500,
               border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)',
               cursor: bulkBusy || result.total === 0 ? 'not-allowed' : 'pointer', opacity: bulkBusy || result.total === 0 ? 0.5 : 1 }}>
             <RefreshCw size={12} /> {t('jobs.retryAll')}
           </button>
           <button type="button" disabled={bulkBusy || result.total === 0} onClick={confirmFlush}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', fontSize: 12, fontWeight: 500,
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 12, fontWeight: 500,
               border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', borderRadius: 8,
               background: 'var(--color-danger-bg)', color: 'var(--color-danger)',
               cursor: bulkBusy || result.total === 0 ? 'not-allowed' : 'pointer', opacity: bulkBusy || result.total === 0 ? 0.5 : 1 }}>

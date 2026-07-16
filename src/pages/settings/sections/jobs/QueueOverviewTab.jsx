@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { RefreshCw, Layers, Building2 } from 'lucide-react'
 import StatusPill from '@/components/ui/StatusPill'
 import { formatDuration } from '@/components/reports/runFormat'
+import { BTN_H } from '@/config/buttonMetrics'
 
 // Heartbeat status → semantic colour (never a plain grey "off" state — §4).
 const STATUS_COLOR = { active: 'var(--color-success)', stalled: 'var(--color-danger)', idle: 'var(--text-muted)' }
@@ -66,8 +67,9 @@ export default function QueueOverviewTab({ summary, phase, onRefresh, onGoToFail
             background: failedTotal ? 'color-mix(in srgb, var(--color-danger) 12%, transparent)' : 'var(--hover-bg)' }}>
           {t('jobs.failedTotal', { count: failedTotal })}
         </button>
+        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <button type="button" onClick={onRefresh}
-          style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 10px', fontSize: 12,
+          style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 10px', fontSize: 12,
             border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
           <RefreshCw size={12} className={phase === 'loading' ? 'animate-spin' : undefined} /> {t('jobs.refresh')}
         </button>

@@ -6,6 +6,7 @@ import { useIndustries } from '@/lib/useIndustries'
 // One language source for the whole app (Danny 14/7): the same five shipped
 // locales the profile picker offers — never a diverging local list.
 import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/profileParts'
+import { BTN_H } from '@/config/buttonMetrics'
 
 // Option lists (data — kept as-is; only labels are translated). Industries are
 // now tenant-configurable (Settings → Personalisation → Industries).
@@ -115,7 +116,7 @@ export default function CompanySettings() {
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('company.subtitle')}</p>
         </div>
         <button onClick={save} disabled={saving}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px',
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none', cursor: 'pointer',
                    background: saved ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
           {saved ? <><Check size={13}/> {t('common.saved')}</> : saving ? <><RefreshCw size={13} className="animate-spin"/> {t('common.saving')}</> : <><Save size={13}/> {t('common.save')}</>}
@@ -134,8 +135,9 @@ export default function CompanySettings() {
               {bannerUrl && <img src={bannerUrl} alt="" style={{ width: '100%', maxWidth: 400, height: 100, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />}
               <div style={{ display: 'flex', gap: 8 }}>
                 <input ref={bannerRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleBannerFile} />
-                <button onClick={() => bannerRef.current?.click()} style={{ height: 32, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.upload')}</button>
-                {bannerUrl && <button onClick={() => setBannerUrl(null)} style={{ height: 32, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.remove')}</button>}
+                {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
+                <button onClick={() => bannerRef.current?.click()} style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.upload')}</button>
+                {bannerUrl && <button onClick={() => setBannerUrl(null)} style={{ height: BTN_H, padding: '0 12px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common.remove')}</button>}
               </div>
             </div>
           </Row>

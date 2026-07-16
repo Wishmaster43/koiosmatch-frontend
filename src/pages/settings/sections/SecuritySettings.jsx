@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { ShieldCheck, ArrowLeft, Lock } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import MfaSetupWizard from '@/components/auth/MfaSetupWizard'
+import { BTN_H } from '@/config/buttonMetrics'
 import MfaEnforcementSetting from './MfaEnforcementSetting'
 
 export default function SecuritySettings() {
@@ -67,8 +68,9 @@ export default function SecuritySettings() {
             {error}
           </div>
         )}
+        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <button type="submit" disabled={loading || disableCode.length < 6}
-          style={{ height: 36, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
+          style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, borderRadius: 8,
                    border: 'none', cursor: (loading || disableCode.length < 6) ? 'not-allowed' : 'pointer',
                    background: (loading || disableCode.length < 6) ? 'var(--border)' : 'var(--color-danger)', color: 'white' }}>
           {loading ? t('security.working') : t('security.disableBtn')}
@@ -97,14 +99,15 @@ export default function SecuritySettings() {
         </div>
         {mfaEnabled
           ? (
+            // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
             <button onClick={() => { setStep('disabling'); setError('') }}
-              style={{ height: 32, padding: '0 14px', fontSize: 12, fontWeight: 500, borderRadius: 8,
+              style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 500, borderRadius: 8,
                        cursor: 'pointer', border: '1px solid color-mix(in srgb, var(--color-danger) 45%, transparent)', background: 'var(--color-danger-bg)', color: 'var(--color-danger)', flexShrink: 0 }}>
               {t('security.disable')}
             </button>
           ) : (
             <button onClick={() => { setStep('wizard'); setError('') }}
-              style={{ height: 32, padding: '0 14px', fontSize: 12, fontWeight: 500, borderRadius: 8,
+              style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 500, borderRadius: 8,
                        cursor: 'pointer', border: 'none',
                        background: 'var(--color-primary)', color: 'white', flexShrink: 0 }}>
               {t('security.enable')}

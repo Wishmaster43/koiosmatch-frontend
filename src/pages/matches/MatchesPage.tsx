@@ -27,6 +27,7 @@ import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useMatches } from './hooks/useMatches'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
 
@@ -269,9 +270,10 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
             />
           ) : (
             // Create a direct match (candidate + vacancy) from the Matches page.
+            // BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
             <button
               onClick={() => setAddOpen(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13,
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13,
                 fontWeight: 600, borderRadius: 8, border: 'none', cursor: 'pointer',
                 background: 'var(--color-primary)', color: '#fff' }}>
               <Plus size={15} aria-hidden="true" /> {t('add.button')}

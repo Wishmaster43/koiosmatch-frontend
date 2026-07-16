@@ -11,6 +11,7 @@ import StatusBadge from '@/components/ui/StatusBadge'
 import ActionMenu from '@/components/ui/ActionMenu'
 import { getSubscription, updateSubscription, deleteSubscription, regenerateSecret } from './webhooksApi'
 import EventCatalog from './EventCatalog'
+import { BTN_H } from '@/config/buttonMetrics'
 
 export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelete }) {
   const { t } = useTranslation('settings')
@@ -79,8 +80,9 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
       {/* Header */}
       <div className="flex items-center justify-between" style={{ marginBottom: 8, gap: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
           <button onClick={onBack} aria-label={t('common.back')}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)', color: 'var(--text)', cursor: 'pointer' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)', color: 'var(--text)', cursor: 'pointer' }}>
             <ArrowLeft size={13} /> {t('common.back')}
           </button>
           <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -104,7 +106,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
           <div style={{ fontSize: 12, fontWeight: 600, color: '#166534', marginBottom: 8 }}>{t('webhooks.outgoing.secretOnce')}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid #BBF7D0', borderRadius: 6, padding: '8px 10px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{secret}</code>
-            <button onClick={copySecret} style={{ height: 34, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid #BBF7D0', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
+            <button onClick={copySecret} style={{ height: BTN_H, padding: '0 10px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid #BBF7D0', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
               {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('webhooks.outgoing.copySecret')}
             </button>
           </div>
@@ -118,11 +120,11 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('webhooks.outgoing.detailsTitle')}</span>
           {editing ? (
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => { setForm(sub); setEditing(false) }} style={{ display: 'flex', alignItems: 'center', gap: 5, height: 30, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}><X size={13} /> {t('common.cancel')}</button>
-              <button onClick={saveDetails} style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}><Save size={13} /> {t('common.save')}</button>
+              <button onClick={() => { setForm(sub); setEditing(false) }} style={{ display: 'flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}><X size={13} /> {t('common.cancel')}</button>
+              <button onClick={saveDetails} style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}><Save size={13} /> {t('common.save')}</button>
             </div>
           ) : (
-            <button onClick={() => setEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 12px', fontSize: 13, fontWeight: 500, border: '1px solid var(--color-primary)', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', cursor: 'pointer' }}><Pencil size={13} /> {t('webhooks.outgoing.edit')}</button>
+            <button onClick={() => setEditing(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 13, fontWeight: 500, border: '1px solid var(--color-primary)', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', cursor: 'pointer' }}><Pencil size={13} /> {t('webhooks.outgoing.edit')}</button>
           )}
         </div>
         {editing ? (
@@ -148,7 +150,7 @@ export default function WebhookDetail({ subId, listRow, onBack, onPatch, onDelet
         <div className="flex items-center justify-between" style={{ marginBottom: 12 }}>
           <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('webhooks.outgoing.field.events')}</span>
           <button onClick={saveEvents} disabled={!eventsDirty || savingEv}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, cursor: eventsDirty && !savingEv ? 'pointer' : 'default', opacity: eventsDirty || savedEv ? 1 : 0.55, background: savedEv ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, cursor: eventsDirty && !savingEv ? 'pointer' : 'default', opacity: eventsDirty || savedEv ? 1 : 0.55, background: savedEv ? 'var(--color-success)' : 'var(--color-primary)', color: 'white' }}>
             {savedEv ? <><Check size={13} /> {t('common.saved')}</> : savingEv ? <><RefreshCw size={13} className="animate-spin" /> {t('common.saving')}</> : <><Save size={13} /> {t('common.save')}</>}
           </button>
         </div>

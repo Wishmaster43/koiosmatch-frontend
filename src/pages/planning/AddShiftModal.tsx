@@ -17,6 +17,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { useFunctions } from '@/lib/useFunctions'
 import { useShiftCustomers, useShiftDepartments, useShiftCandidateSearch } from './hooks/useShiftLookups'
 import type { ShiftCandidateOption } from './hooks/useShiftLookups'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { ShiftInput } from '@/types/planning'
 
 // ── Field helpers ─────────────────────────────────────────────────────────────
@@ -123,8 +124,9 @@ export default function AddShiftModal({ date, onClose, onAdd }: { date: Date; on
               <span style={{ fontSize: 12, color: 'var(--sidebar-muted)', marginLeft: 10 }}>{formatDate(date)}</span>
             </div>
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
+              {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
               <button onClick={handleSave}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 16px', fontSize: 12,
+                style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 16px', fontSize: 12,
                   fontWeight: 600, background: 'var(--color-primary)', color: '#fff',
                   border: 'none', borderRadius: 8, cursor: 'pointer' }}>
                 <Save size={13} /> {t('common:save')}

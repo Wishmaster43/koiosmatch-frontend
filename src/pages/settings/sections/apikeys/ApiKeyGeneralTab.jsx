@@ -10,6 +10,7 @@ import { Pencil, Plus, RefreshCw, Save, X } from 'lucide-react'
 import DetailTable from '@/components/ui/DetailTable'
 import { useDateFormat } from '@/lib/datetime'
 import { KEY_TYPES, isValidIpOrCidr } from './constants'
+import { BTN_H } from '@/config/buttonMetrics'
 
 export default function ApiKeyGeneralTab({ apiKey, onSave }) {
   const { t } = useTranslation('settings')
@@ -66,21 +67,21 @@ export default function ApiKeyGeneralTab({ apiKey, onSave }) {
 
   return (
     <div style={{ maxWidth: 680 }}>
-      {/* Toolbar: Edit / Save+Cancel */}
+      {/* Toolbar: Edit / Save+Cancel — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
       <div className="flex items-center justify-end" style={{ marginBottom: 14, gap: 8 }}>
         {editing ? (
           <>
-            <button onClick={cancel} style={{ display: 'flex', alignItems: 'center', gap: 5, height: 32, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+            <button onClick={cancel} style={{ display: 'flex', alignItems: 'center', gap: 5, height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
               <X size={13} /> {t('common.cancel')}
             </button>
             <button onClick={save} disabled={saving}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
               {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />} {t('common.save')}
             </button>
           </>
         ) : (
           <button onClick={() => setEditing(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 14px', fontSize: 13, fontWeight: 500, border: '1px solid var(--color-primary)', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', cursor: 'pointer' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: '1px solid var(--color-primary)', borderRadius: 8, background: 'var(--color-primary-bg)', color: 'var(--color-primary)', cursor: 'pointer' }}>
             <Pencil size={13} /> {t('apiKeys.edit')}
           </button>
         )}

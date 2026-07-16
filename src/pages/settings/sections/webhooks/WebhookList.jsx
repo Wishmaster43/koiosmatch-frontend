@@ -8,6 +8,7 @@ import { Plus, RefreshCw } from 'lucide-react'
 import DataTable from '@/components/ui/DataTable'
 import StatusBadge from '@/components/ui/StatusBadge'
 import { useDateFormat } from '@/lib/datetime'
+import { BTN_H } from '@/config/buttonMetrics'
 
 export default function WebhookList({ subs, loading, error, onReload, onOpen, onNew }) {
   const { t } = useTranslation('settings')
@@ -41,8 +42,9 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
           <h2 style={{ fontSize: 15, fontWeight: 600, color: 'var(--text)' }}>{t('webhooks.outgoing.title')}</h2>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{t('webhooks.outgoing.subtitle')}</p>
         </div>
+        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <button onClick={onNew}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
           <Plus size={14} /> {t('webhooks.outgoing.new')}
         </button>
       </div>
@@ -51,7 +53,7 @@ export default function WebhookList({ subs, loading, error, onReload, onOpen, on
         <div style={{ padding: '32px 0', textAlign: 'center' }}>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12 }}>{t('webhooks.outgoing.loadError')}</p>
           <button onClick={onReload}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: 32, padding: '0 14px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
             <RefreshCw size={13} /> {t('webhooks.outgoing.retry')}
           </button>
         </div>

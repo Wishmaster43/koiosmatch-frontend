@@ -11,6 +11,7 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import type { CSSProperties, ComponentType, KeyboardEvent as ReactKeyboardEvent, MouseEvent as ReactMouseEvent } from 'react'
 import { ChevronDown, ChevronRight, ArrowLeft, Search, Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
+import { BTN_H } from '@/config/buttonMetrics'
 
 // Icon contract shared by the trigger, nodes and options (lucide-compatible).
 type IconComponent = ComponentType<{ size?: number; style?: CSSProperties; color?: string }>
@@ -151,10 +152,11 @@ export default function ActionMenu({ label, icon: Icon, items = [], menuWidth = 
 
   return (
     <div ref={ref} style={{ position: 'relative' }} onKeyDown={onKeyDown}>
-      {/* Trigger */}
+      {/* Trigger — BTN_H (§4/§9): one explicit height for every text/action button, everywhere
+          (this single component drives every bulk bar + settings row-action menu). */}
       <button type="button" disabled={disabled} aria-haspopup="menu" aria-expanded={open}
         onClick={() => (open ? close() : setOpen(true))}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', fontSize: 12, fontWeight: 500,
+        style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 12, fontWeight: 500,
           border: `1px solid ${open ? 'var(--color-primary)' : 'var(--border)'}`, borderRadius: 7,
           background: 'var(--surface)', color: 'var(--text)', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.5 : 1 }}>
         {Icon && <Icon size={13} />}

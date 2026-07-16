@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next'
 import { Check, RefreshCw, Save } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
+import { BTN_H } from '@/config/buttonMetrics'
 
 // Base tiers (the "size bar"). `desc` lists what each tier adds over the previous one.
 const TIERS = [
@@ -178,10 +179,10 @@ export default function ModulesSettings() {
         })}
       </div>
 
-      {/* Save */}
+      {/* Save — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 40 }}>
         <button onClick={save} disabled={saving || !hasChange}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 36, padding: '0 20px',
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 20px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: 'none',
                    background: savedOk ? 'var(--color-success)' : hasChange ? 'var(--color-primary)' : 'var(--border)',
                    color: 'white', cursor: (saving || !hasChange) ? 'not-allowed' : 'pointer',

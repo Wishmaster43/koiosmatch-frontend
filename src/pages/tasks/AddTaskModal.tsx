@@ -8,6 +8,7 @@ import RichTextEditor from '@/components/ui/RichTextEditor'
 import { useTaskLookups } from '@/context/TaskLookupsContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { Id } from '@/types/common'
 
 interface EntityRow { id?: Id; name?: string; first_name?: string; last_name?: string; title?: string; email?: string }
@@ -196,16 +197,16 @@ export default function AddTaskModal({ onClose, onCreated, initial, extraLinks }
           </div>
         )}
 
-        {/* Footer */}
+        {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', justifyContent: 'flex-end', gap: 8, background: 'var(--bg)' }}>
           <button onClick={onClose}
-            style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
+            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
               background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
             {t('modal.cancel')}
           </button>
           <button onClick={handleSubmit} disabled={!canSubmit}
-            style={{ padding: '8px 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
+            style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
               background: canSubmit ? 'var(--color-primary)' : '#E5E7EB', color: canSubmit ? '#fff' : '#9CA3AF',
               cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
             {saving ? t('modal.saving') : t('modal.create')}

@@ -8,9 +8,11 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Check, X } from 'lucide-react'
+import { BTN_H } from '@/config/buttonMetrics'
 
+// BTN_H (§4/§9): one explicit height for every text/action button, everywhere.
 const actionBtn = (color: string): React.CSSProperties => ({
-  display: 'flex', alignItems: 'center', gap: 4, padding: '3px 9px', fontSize: 11, fontWeight: 600,
+  display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 9px', fontSize: 11, fontWeight: 600,
   borderRadius: 7, cursor: 'pointer', border: `1px solid ${color}`, background: 'transparent', color,
 })
 
@@ -62,13 +64,14 @@ export default function MatchApprovalActions({
             placeholder={t('approval.reasonPlaceholder')} aria-label={t('approval.reasonPlaceholder')}
             style={{ width: '100%', padding: '6px 8px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)',
               background: 'var(--surface)', color: 'var(--text)', outline: 'none', resize: 'vertical', boxSizing: 'border-box', fontFamily: 'inherit' }} />
+          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
           <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
             <button onClick={() => { onCancelReject(); setReasonText('') }}
-              style={{ height: 26, padding: '0 10px', fontSize: 11, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
+              style={{ height: BTN_H, padding: '0 10px', fontSize: 11, border: '1px solid var(--border)', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
               {t('common:cancel')}
             </button>
             <button onClick={() => onReject(reasonText)} disabled={!reasonText.trim() || busy}
-              style={{ height: 26, padding: '0 12px', fontSize: 11, fontWeight: 600, border: 'none', borderRadius: 6,
+              style={{ height: BTN_H, padding: '0 12px', fontSize: 11, fontWeight: 600, border: 'none', borderRadius: 6,
                 background: 'var(--color-danger)', color: '#fff', cursor: (reasonText.trim() && !busy) ? 'pointer' : 'default', opacity: (reasonText.trim() && !busy) ? 1 : 0.4 }}>
               {t('approval.confirmReject')}
             </button>

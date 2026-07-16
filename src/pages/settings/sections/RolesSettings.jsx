@@ -12,6 +12,7 @@ import { PermissionToggle, ColorSwatch } from '../components/SettingsControls'
 import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
 import RoleChip from '@/components/ui/RoleChip'
 import { DASHBOARD_TYPES } from '@/pages/dashboard/templates'
+import { BTN_H } from '@/config/buttonMetrics'
 
 // Small popover grid to pick a role icon from the allowed set.
 function IconPicker({ value, color, options, onPick }) {
@@ -105,8 +106,9 @@ function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }) {
     <div>
       {/* Back + role name header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
+        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <button onClick={onBack}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px',
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
                    fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)',
                    color: 'var(--text)', cursor: 'pointer' }}>
           <ArrowLeft size={13} /> {t('common.back')}
@@ -270,7 +272,7 @@ export default function RolesSettings() {
             style={{ height: 34, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)',
                      borderRadius: 8, outline: 'none', color: 'var(--text)', width: 150 }} />
           <button onClick={createRole} disabled={creating || !newRoleName.trim()}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px',
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
                      fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer', border: 'none',
                      background: 'var(--color-primary)', color: 'white', opacity: newRoleName.trim() ? 1 : 0.4 }}>
             <Plus size={13} /> {t('roles.create')}
@@ -299,8 +301,9 @@ export default function RolesSettings() {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
                 <button onClick={() => setEditRole(role)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 14px',
+                  style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
                            fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
                            border: '1px solid var(--color-primary)', background: 'var(--color-primary-bg)', color: 'var(--color-primary)' }}>
                   {t('roles.edit')}

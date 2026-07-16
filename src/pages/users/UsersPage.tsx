@@ -14,6 +14,7 @@ import NewUserModal from './NewUserModal'
 import EditUserModal from './EditUserModal'
 import { useUsersData } from './hooks/useUsersData'
 import { RoleBadge, RoleSelector, EditableAvatar, isSuperAdminUser, roleName, SUPER_ADMIN_COLOR } from './usersParts'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { ManagedUser } from '@/types/api'
 
 // Display name: "first last", falling back to the combined name field.
@@ -115,8 +116,9 @@ export default function UsersPage() {
           )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
           <button onClick={() => setShowCreate(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px',
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px',
                      fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
                      background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
             <Plus size={14} /> {t('newUser')}

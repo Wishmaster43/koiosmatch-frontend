@@ -4,6 +4,7 @@ import { Check, RefreshCw, Save, Upload, X } from 'lucide-react'
 import api from '@/lib/api'
 import { useAuth } from '@/context/AuthContext'
 import { loadSettings, saveSettings } from '../lib/settingsApi'
+import { BTN_H } from '@/config/buttonMetrics'
 
 // Preset swatches are tenant brand-colour DATA (persisted as brand_color) — literal hex by design, never tokens.
 const BRAND_COLOR_PRESETS = [
@@ -153,7 +154,8 @@ export default function BrandSettings() {
           </div>
           <div style={{ marginTop: 14, display: 'flex', gap: 8, alignItems: 'center' }}>
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('brand.preview')}</span>
-            <button style={{ height: 30, padding: '0 14px', fontSize: 12, fontWeight: 500,
+            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere (incl. this live preview). */}
+            <button style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 500,
                              background: primaryColor, color: 'white', border: 'none', borderRadius: 7, cursor: 'default' }}>
               {t('brand.buttonPreview')}
             </button>
@@ -177,14 +179,14 @@ export default function BrandSettings() {
             )}
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={() => fileRef.current?.click()}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, height: 34, padding: '0 12px',
+                style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
                          fontSize: 13, fontWeight: 500, borderRadius: 8, cursor: 'pointer',
                          border: '1px solid var(--border)', background: 'var(--hover-bg)', color: 'var(--text)' }}>
                 <Upload size={13} /> {t('common.upload')}
               </button>
               {logoPreview && (
                 <button onClick={() => { setLogoPreview(null); setLogoFile(null) }}
-                  style={{ height: 34, padding: '0 12px', fontSize: 13, borderRadius: 8, cursor: 'pointer',
+                  style={{ height: BTN_H, padding: '0 12px', fontSize: 13, borderRadius: 8, cursor: 'pointer',
                            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', background: 'var(--color-danger-bg)', color: 'var(--color-danger)' }}>
                   {t('common.remove')}
                 </button>

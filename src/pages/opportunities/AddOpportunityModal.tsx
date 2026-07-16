@@ -10,6 +10,7 @@ import { useOpportunityStages } from '@/lib/useOpportunityStages'
 import { useOpportunityServiceTypes, useOpportunityAgreementTypes } from '@/lib/useOpportunityLookups'
 import { useCustomerCascade } from './hooks/useCustomerCascade'
 import { mapOpportunity } from './data/mapOpportunity'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { ApiOpportunity, Opportunity } from '@/types/opportunity'
 import type { Id } from '@/types/common'
 
@@ -277,16 +278,16 @@ export default function AddOpportunityModal({ onClose, onCreated, users = [], cu
           </div>
         )}
 
-        {/* Footer */}
+        {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose}
-            style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8,
+            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8,
               border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
             {t('modal.cancel')}
           </button>
           <button onClick={handleSubmit} disabled={!canSubmit || saving}
-            style={{ padding: '8px 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
+            style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
               background: (canSubmit && !saving) ? 'var(--color-primary)' : '#E5E7EB',
               color: (canSubmit && !saving) ? 'white' : '#9CA3AF',
               cursor: (canSubmit && !saving) ? 'pointer' : 'not-allowed' }}>

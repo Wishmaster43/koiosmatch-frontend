@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { ListChecks, UserCog, CircleDot, Tag, Tags, StickyNote, Archive, X } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { Id, LookupOption } from '@/types/common'
 
 interface BulkUser { id: Id; name: string }
@@ -63,8 +64,9 @@ export default function CustomersBulkBar({
 
       <ActionMenu label={t('bulk.actions')} icon={ListChecks} items={items} />
 
+      {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
       <button onClick={onClear}
-        style={{ display: 'flex', alignItems: 'center', gap: 5, marginLeft: 'auto', padding: '6px 10px', fontSize: 12,
+        style={{ display: 'flex', alignItems: 'center', gap: 5, marginLeft: 'auto', height: BTN_H, padding: '0 10px', fontSize: 12,
           border: 'none', borderRadius: 7, background: 'none', color: 'var(--color-primary)', cursor: 'pointer', fontWeight: 500 }}>
         <X size={13} /> {t('bulk.deselect')}
       </button>

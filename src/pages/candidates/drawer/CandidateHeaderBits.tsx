@@ -13,6 +13,7 @@ import type { CvCandidate } from '../CandidateCvTemplate'
 import { useCvSettings } from '@/lib/useCvSettings'
 import { useLocale, useDateFormat } from '@/lib/datetime'
 import { useFunctions } from '@/lib/useFunctions'
+import { BTN_H } from '@/config/buttonMetrics'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import type { Candidate } from '@/types/candidate'
@@ -88,15 +89,17 @@ export function CandidateHeaderActions({ c, isEntryPhase, nextPhase, converting,
 
   return (
     <>
-      {/* Entry phase (Lead) → prominent convert (CV is illogical for a lead); else → download CV. */}
+      {/* Entry phase (Lead) → prominent convert (CV is illogical for a lead); else → download CV.
+          BTN_H (§4/§9, KANDIDAAT-100 #50): same explicit height as every other text/action
+          button — this was the exact "Converteer naar Kandidaat" vs "+ Kandidaat" mismatch Danny flagged. */}
       {(isEntryPhase && nextPhase) ? (
         <button onClick={onConvert}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white' }}>
           <UserCheck size={11} />{t('drawer.convertTo', { phase: nextPhase.label })}
         </button>
       ) : (
         <button disabled={cvGenerating || converting} onClick={downloadCv}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: (cvGenerating || converting) ? 'not-allowed' : 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white', opacity: (cvGenerating || converting) ? 0.7 : 1 }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 4, height: BTN_H, padding: '0 10px', fontSize: 11, fontWeight: 600, borderRadius: 7, cursor: (cvGenerating || converting) ? 'not-allowed' : 'pointer', border: '1px solid var(--color-primary)', background: 'var(--color-primary)', color: 'white', opacity: (cvGenerating || converting) ? 0.7 : 1 }}>
           <Download size={11} />{cvGenerating ? t('drawer.generating') : t('drawer.downloadCv')}
         </button>
       )}

@@ -24,6 +24,7 @@ import CustomerDrawer from './CustomerDrawer'
 import AddCustomerModal from './AddCustomerModal'
 import { useCustomersData } from './hooks/useCustomersData'
 import { useCustomerRecord } from './hooks/useCustomerRecord'
+import { BTN_H } from '@/config/buttonMetrics'
 import { useCustomerBulkActions } from './hooks/useCustomerBulkActions'
 import type { Id } from '@/types/common'
 import type { Customer } from '@/types/customer'
@@ -269,8 +270,9 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                 users={users} statuses={statuses} selectedTags={selectedTags} />
             ) : (
               <>
-                {/* Add on the left (like Applications/Candidates) */}
-                <button onClick={() => setAddOpen(true)} style={{ padding: '7px 14px', fontSize: 12, fontWeight: 500,
+                {/* Add on the left (like Applications/Candidates) — BTN_H (§4/§9): one
+                    explicit height for every text/action button, everywhere. */}
+                <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
                   background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
                   + {t('page.add')}
                 </button>

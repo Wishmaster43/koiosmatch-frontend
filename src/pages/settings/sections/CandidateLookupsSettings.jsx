@@ -15,6 +15,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
+import { BTN_H } from '@/config/buttonMetrics'
 
 const BASE = '/settings/candidate-lookups'
 
@@ -90,8 +91,9 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
           <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{title}</h3>
           <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>{subtitle}</p>
         </div>
+        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <button onClick={openAdd}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px',
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px',
                    fontSize: 13, fontWeight: 500, borderRadius: 8, border: '1px solid var(--border)',
                    background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>
           <Plus size={13} /> {t('lookups.add')}

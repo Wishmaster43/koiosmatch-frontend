@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import api, { unwrapList } from '@/lib/api'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { VacancyOption } from '../hooks/useVacancyOptions'
 
 interface MatchRow { id?: string | number; vacancyTitle?: string; client?: string }
@@ -77,10 +78,11 @@ function MatchPickModal({
           ))}
         </select>
 
+        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button onClick={onCloseMatch} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
+          <button onClick={onCloseMatch} style={{ height: BTN_H, padding: '0 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
           <button disabled={(!matchChoice && !newMatchVacancyId) || creatingMatch} onClick={onConfirmMatch}
-            style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: ((matchChoice || newMatchVacancyId) && !creatingMatch) ? 1 : 0.5 }}>{t('drawer.placedConfirm')}</button>
+            style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: ((matchChoice || newMatchVacancyId) && !creatingMatch) ? 1 : 0.5 }}>{t('drawer.placedConfirm')}</button>
         </div>
       </div>
     </div>
@@ -125,10 +127,11 @@ function StatusReasonModal({
             <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4, fontStyle: 'italic' }}>{t('drawer.returnDateUnknownHint')}</div>
           </div>
         )}
+        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <button onClick={close} style={{ padding: '7px 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
+          <button onClick={close} style={{ height: BTN_H, padding: '0 14px', fontSize: 12, borderRadius: 7, background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)', cursor: 'pointer' }}>{t('common:cancel')}</button>
           <button onClick={onConfirmStatus} disabled={statusModal.needReason && !statusModal.reason.trim()}
-            style={{ padding: '7px 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: (statusModal.needReason && !statusModal.reason.trim()) ? 0.5 : 1 }}>{t('common:save')}</button>
+            style={{ height: BTN_H, padding: '0 14px', fontSize: 12, fontWeight: 600, borderRadius: 7, background: 'var(--color-primary)', color: '#fff', border: 'none', cursor: 'pointer', opacity: (statusModal.needReason && !statusModal.reason.trim()) ? 0.5 : 1 }}>{t('common:save')}</button>
         </div>
       </div>
     </div>

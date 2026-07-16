@@ -10,6 +10,7 @@ import { useUsers } from '@/lib/queries'
 import { useGenders } from '@/lib/useGenders'
 import { useAuth } from '@/context/AuthContext'
 import { useCreateCandidate } from './hooks/useCandidateMutations'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
 
@@ -191,9 +192,10 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
           </div>
 
           <div style={{ flex: 1 }} />
+          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
           <div style={{ padding: '0 12px 16px' }}>
             <button onClick={onClose}
-              style={{ width: '100%', padding: '8px 0', fontSize: 13, borderRadius: 8,
+              style={{ width: '100%', height: BTN_H, padding: '0', fontSize: 13, borderRadius: 8,
                 border: '1px solid var(--border)', background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
               {t('common:cancel')}
             </button>
@@ -317,15 +319,16 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
             </div>
           )}
 
+          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
           <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
             display: 'flex', justifyContent: 'flex-end', gap: 8, background: 'var(--bg)' }}>
             <button onClick={onClose}
-              style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8,
+              style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8,
                 border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
               {t('common:cancel')}
             </button>
             <button onClick={handleSubmit} disabled={!canSubmit || saving}
-              style={{ padding: '8px 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
+              style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
                 background: (canSubmit && !saving) ? 'var(--color-primary)' : 'var(--border)',
                 color: (canSubmit && !saving) ? 'white' : 'var(--text-muted)',
                 cursor: (canSubmit && !saving) ? 'pointer' : 'not-allowed', transition: 'all 0.15s' }}>

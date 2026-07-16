@@ -10,6 +10,7 @@ import CustomersInsightsRow from './CustomersInsightsRow'
 import AddCustomerModal from './AddCustomerModal'
 import type { CustomerForm } from './AddCustomerModal'
 import PaginationBar from '@/components/ui/PaginationBar'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { SmCustomerRow } from '@/types/shiftmanager'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 
@@ -171,7 +172,8 @@ export default function CustomersPage() {
           <div style={{ padding: '0 24px 12px', minHeight: 36, display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }}>
             {/* On-accent button text: '#fff' (not var(--surface), which is dark in dark mode and
                 would fail contrast here) — matches the "+Add" button on every other entity page. */}
-            <button onClick={() => setAddOpen(true)} style={{ marginLeft: 'auto', padding: '7px 14px', fontSize: 12, fontWeight: 500,
+            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
+            <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', marginLeft: 'auto', height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
               background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
               + {t('page.add')}
             </button>

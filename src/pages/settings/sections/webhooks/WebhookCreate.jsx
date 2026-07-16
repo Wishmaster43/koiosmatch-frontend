@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import { ArrowLeft, Check, Copy, Webhook } from 'lucide-react'
 import { createSubscription } from './webhooksApi'
 import EventCatalog from './EventCatalog'
+import { BTN_H } from '@/config/buttonMetrics'
 
 export default function WebhookCreate({ onBack, onCreated }) {
   const { t } = useTranslation('settings')
@@ -55,8 +56,9 @@ export default function WebhookCreate({ onBack, onCreated }) {
     <div>
       {/* Header: back + icon + title (mirrors WebhookDetail) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 22 }}>
+        {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <button onClick={onBack} aria-label={t('common.back')}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, height: 32, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)', color: 'var(--text)', cursor: 'pointer' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 12px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--hover-bg)', color: 'var(--text)', cursor: 'pointer' }}>
           <ArrowLeft size={13} /> {t('common.back')}
         </button>
         <div style={{ width: 34, height: 34, borderRadius: 9, background: 'var(--color-primary-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
@@ -75,14 +77,14 @@ export default function WebhookCreate({ onBack, onCreated }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <code style={{ flex: 1, fontSize: 12, fontFamily: "'JetBrains Mono', monospace", background: 'var(--surface)', border: '1px solid #BBF7D0', borderRadius: 6, padding: '9px 11px', color: 'var(--text)', overflowX: 'auto', whiteSpace: 'nowrap' }}>{result.secret}</code>
                 <button onClick={copySecret} aria-label={t('webhooks.outgoing.copySecret')}
-                  style={{ height: 36, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid #BBF7D0', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
+                  style={{ height: BTN_H, padding: '0 12px', display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, border: '1px solid #BBF7D0', borderRadius: 6, background: 'var(--surface)', cursor: 'pointer', color: 'var(--color-success)', whiteSpace: 'nowrap' }}>
                   {copied ? <Check size={12} /> : <Copy size={12} />} {copied ? t('common.copied') : t('webhooks.outgoing.copySecret')}
                 </button>
               </div>
               <p style={{ fontSize: 11, color: '#166534', marginTop: 8 }}>{t('webhooks.outgoing.signingHint')}</p>
             </div>
             <button onClick={onBack}
-              style={{ height: 38, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+              style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
               {t('webhooks.outgoing.done')}
             </button>
           </div>
@@ -106,13 +108,14 @@ export default function WebhookCreate({ onBack, onCreated }) {
 
             {error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('webhooks.outgoing.createError')}</div>}
 
+            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={submit} disabled={saving || !canSubmit}
-                style={{ height: 38, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: canSubmit ? 'pointer' : 'not-allowed', opacity: canSubmit ? 1 : 0.5 }}>
+                style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: 'white', cursor: canSubmit ? 'pointer' : 'not-allowed', opacity: canSubmit ? 1 : 0.5 }}>
                 {saving ? t('webhooks.outgoing.creating') : t('webhooks.outgoing.create')}
               </button>
               <button onClick={onBack}
-                style={{ height: 38, padding: '0 16px', fontSize: 13, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
+                style={{ height: BTN_H, padding: '0 16px', fontSize: 13, fontWeight: 500, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', color: 'var(--text)', cursor: 'pointer' }}>
                 {t('common.cancel')}
               </button>
             </div>

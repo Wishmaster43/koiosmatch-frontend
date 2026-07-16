@@ -8,6 +8,7 @@ import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Loader2 } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { ManagedUser } from '@/types/api'
 
 export default function EditUserModal({ user, onClose, onSaved }: {
@@ -130,15 +131,15 @@ export default function EditUserModal({ user, onClose, onSaved }: {
 
           {error && <p style={{ fontSize: 12, color: 'var(--color-danger)', marginBottom: 12 }}>{error}</p>}
 
-          {/* Actions */}
+          {/* Actions — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
           <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
             <button type="button" onClick={onClose}
-              style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
+              style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)',
                        background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
               {t('common:cancel')}
             </button>
             <button type="submit" disabled={saving}
-              style={{ padding: '8px 18px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
+              style={{ height: BTN_H, padding: '0 18px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
                        background: 'var(--color-primary)', color: 'white', cursor: saving ? 'default' : 'pointer',
                        display: 'flex', alignItems: 'center', gap: 6 }}>
               {saving ? <><Loader2 size={13} style={{ animation: 'spin 1s linear infinite' }} /> {t('saving')}</> : t('common:save')}

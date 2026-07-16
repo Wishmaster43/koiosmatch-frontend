@@ -17,6 +17,7 @@ import PaginationBar from '@/components/ui/PaginationBar'
 import { useOpportunitiesData } from './hooks/useOpportunitiesData'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
+import { BTN_H } from '@/config/buttonMetrics'
 
 // Single-select donut pick: clicking the active segment clears it.
 const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
@@ -153,8 +154,9 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
           {/* Toolbar — add on the LEFT, archived + view toggle on the RIGHT (mirror candidates). */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10,
             padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
+            {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
             <button onClick={() => setAddOpen(true)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 14px', fontSize: 13, fontWeight: 600,
+              style={{ display: 'flex', alignItems: 'center', gap: 6, height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
                 borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--color-primary)', color: '#fff' }}>
               + {t('page.add')}
             </button>

@@ -3,6 +3,7 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X, Building2, ChevronDown } from 'lucide-react'
+import { BTN_H } from '@/config/buttonMetrics'
 
 // The new-customer form fields.
 export interface CustomerForm { name: string; debtorNumber: string; status: string; accountManager: string; city: string }
@@ -106,15 +107,15 @@ export default function AddCustomerModal({ onClose, onCreate }: { onClose: () =>
           </div>
         </div>
 
-        {/* Footer */}
+        {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '14px 24px', borderTop: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', justifyContent: 'flex-end', gap: 8, background: 'var(--hover-bg)' }}>
           <button onClick={onClose}
-            style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
+            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8, border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
             {t('modal.cancel')}
           </button>
           <button onClick={handleSubmit} disabled={!canSubmit}
-            style={{ padding: '8px 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
+            style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
               background: canSubmit ? 'var(--color-primary)' : 'var(--border)', color: canSubmit ? 'white' : 'var(--text-muted)',
               cursor: canSubmit ? 'pointer' : 'not-allowed' }}>
             {t('modal.create')}
