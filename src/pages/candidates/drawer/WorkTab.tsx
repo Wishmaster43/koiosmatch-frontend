@@ -10,7 +10,7 @@ import type { ExistingAppointment } from './PlanIntakeModal'
 import MatchPlacementModal from './MatchPlacementModal'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useDateFormat } from '@/lib/datetime'
-import { sectionBlock } from './constants'
+import { sectionBlock, rememberReturnTab } from './constants'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
 import { isSafeUrl } from '@/lib/safeUrl'
@@ -128,7 +128,9 @@ export default function WorkTab({ c }: { c: Candidate }) {
                   {url
                     ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--color-primary)', textDecoration: 'none' }}>{label}</a>
                     : vacancyId != null
-                      ? <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      ? <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                          // Cross-entity jump: coming BACK must land on the Werk tab (punt 15).
+                          onClickCapture={() => rememberReturnTab(c.id, 'work')}>
                           <EntityLink page="vacancies" id={vacancyId} title={label}>{label}</EntityLink>
                         </span>
                       : <span style={{ fontWeight: 500, flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>}

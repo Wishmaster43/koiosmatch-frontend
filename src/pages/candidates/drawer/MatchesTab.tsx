@@ -45,7 +45,11 @@ export default function MatchesTab({ c }: { c: Candidate }) {
           {/* Header: vacancy + score + (subtle) backoffice-link icon when coupled */}
           <div style={{ padding: '8px 12px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ flex: 1, minWidth: 0, fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>
-              <EntityLink page="vacancies" id={m.vacancyId} title={m.vacancyTitle || m.client || '—'}>{m.vacancyTitle || m.client || '—'}</EntityLink>
+              {/* Danny 16-07 (punt 15): ANY cross-entity jump from this card must return
+                  to the Werk tab — the stash was only on the match button before. */}
+              <span onClickCapture={() => rememberReturnTab(c.id, 'work')}>
+                <EntityLink page="vacancies" id={m.vacancyId} title={m.vacancyTitle || m.client || '—'}>{m.vacancyTitle || m.client || '—'}</EntityLink>
+              </span>
             </span>
             {m.id != null && (
               // NAV-BACK-1: remember this subtab (Work/Match) so BACK from the
