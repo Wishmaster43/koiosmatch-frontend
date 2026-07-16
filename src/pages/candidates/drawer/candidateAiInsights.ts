@@ -10,8 +10,12 @@ type Tx = (key: string, opts?: Record<string, unknown>) => string
  * match score lives in the application drawer, not here.
  */
 export function buildCandidateAdviceInsights(c: Candidate, t: Tx, formatDate: (v: string | null) => string): KoiosAdviceInsight[] {
+  // Dash placeholders ('-'/'—') are the mapper's EMPTY fallback (e.g. address) —
+  // truthy, so a naive Boolean() counted them as filled and the advice said
+  // "profiel compleet" while the profile visibly had gaps (Danny punt 47).
+  const filled = (v: unknown) => Boolean(v) && v !== '-' && v !== '—'
   const coreFields = [c.email, c.phone, c.dob, c.address, c.gender, c.nationality, c.summary]
-  const filledPct = Math.round((coreFields.filter(Boolean).length / coreFields.length) * 100)
+  const filledPct = Math.round((coreFields.filter(filled).length / coreFields.length) * 100)
 
   return [
     {
