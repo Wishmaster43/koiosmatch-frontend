@@ -8,7 +8,10 @@ type Tx = (key: string, opts?: Record<string, unknown>) => string
 // prefer the headquarters location, fall back to the first one (mirrors how
 // LocationsTab treats "the" address when several locations exist).
 function primaryLocation(c: Customer): Location | undefined {
-  return c.locations.find(l => l.isHeadquarter) ?? c.locations[0]
+  // The LIST payload carries only locations_count; the array arrives with the
+  // detail fetch — this builder can run in between (smoke 16-07: hard crash).
+  const locations = c.locations ?? []
+  return locations.find(l => l.isHeadquarter) ?? locations[0]
 }
 
 /**

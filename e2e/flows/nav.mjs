@@ -31,8 +31,11 @@ export async function drillDowns({ page, errors }) {
   for (const nav of DRILL_PAGES) {
     const at = errors.length
     await go(page, nav)
-    // First data row in the table body (skip the header row).
+    // First data row in the table body (skip the header row). Since the DataTable
+    // loading SKELETON (audit item 17) the tbody is briefly empty while the list
+    // fetch runs — wait for a real row instead of counting instantly (16-07 flake).
     const row = page.locator('table tbody tr').first()
+    await row.waitFor({ timeout: 10000 }).catch(() => {})
     if (!(await row.count())) { failures.push(`${nav}: geen rijen`); continue }
     await row.click()
     await sleep(1200)
