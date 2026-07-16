@@ -1,12 +1,18 @@
 /**
- * MatchPlacementModal — the full "+ Match" / placement form on the candidate Match
- * tab (MATCH-PLACEMENT-1, fase 1). A placement IS the Match (one record), so this
+ * MatchPlacementModal — the full "+ Match" form on the candidate Match tab
+ * (MATCH-PLACEMENT-1, fase 1). A placement IS the Match (one record), so this
  * POSTs to /matches with the contract/financial layer. The customer→location→
  * department→contact cascade, function + contract-type dropdowns, dates/hours and
  * the purchase/sell/margin block all work now; /matches tolerates the extra fields
  * (ignored until the backend model lands, then persisted). Rates propose from a
  * price agreement / conversion factor once customer + function are picked
- * (MATCH-PLACEMENT-2, useRateProposal) — the margin is shown live.
+ * (MATCH-PLACEMENT-2, useRateProposal) — the margin is shown live. Widened to a
+ * two-column 720px panel (Danny job 17); the long-list relational pickers (klant/
+ * locatie/afdeling/contactpersoon/functie/vacature) are typeable searchable
+ * comboboxes via the shared CreatableSelect with `allowCreate={false}` — never a
+ * hardcoded free-text create for a relational id (job 18). Cost centre + billing
+ * email propose from whichever picked level (afdeling > locatie > klant) carries a
+ * value, and freeze the moment the recruiter edits them by hand (job 21/22).
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,6 +20,8 @@ import { X } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import SelectMenu from '@/components/ui/SelectMenu'
+import CreatableSelect from '@/components/ui/CreatableSelect'
+import RichTextEditor from '@/components/ui/RichTextEditor'
 import { useUsers } from '@/lib/queries'
 import { useCustomerOptions } from '@/pages/vacancies/hooks/useCustomerOptions'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
@@ -26,22 +34,50 @@ import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrul
 import type { Id } from '@/types/common'
 
 const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.35)', zIndex: 60 }
-const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 560, maxWidth: '94vw', maxHeight: '90vh', overflowY: 'auto', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 24px 70px rgba(0,0,0,0.22)' }
+const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 720, maxWidth: '94vw', maxHeight: '90vh', overflowY: 'auto', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 24px 70px rgba(0,0,0,0.22)' }
 const lbl: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
 const input: React.CSSProperties = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
 const sectionTitle: React.CSSProperties = { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', margin: '18px 0 10px' }
-const row2: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }
+const row2: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }
+// Consistent search-box width for the relational pickers below — the widened
+// panel gives each row2 column ~330px, so a slightly wider menu than the shared
+// component's 220px default reads better without overflowing it.
+const pickerMenuWidth = 280
 
 interface UserLike { id?: Id; name?: string }
+// A department's OWN cost-centre/billing-email takeover default. NOT returned by
+// CustomerDepartmentResource today (BE gap — see Self-Audit/report); typed
+// optionally so the deepest-wins cascade below activates the moment the backend
+// ships these two columns, with zero further frontend change.
+interface CustomerDepartmentDetail { id?: Id; name?: string; cost_center?: string | null; billing_email?: string | null }
 // Fase-3 fields: branch (vestiging) + cost-centre/billing takeover defaults per
-// customer and per location — the location default wins once a location is picked.
+// customer and per location — the deepest picked level (afdeling > locatie > klant)
+// wins once it carries its own value (see cascadeValue below).
 interface CustomerDetail {
   branch_id?: Id | null
   branch?: { id?: Id; name?: string } | null
   cost_center?: string | null
   billing_email?: string | null
-  locations?: Array<{ id?: Id; name?: string; cost_center?: string | null; billing_email?: string | null; departments?: Array<{ id?: Id; name?: string }> }>
+  locations?: Array<{ id?: Id; name?: string; cost_center?: string | null; billing_email?: string | null; departments?: CustomerDepartmentDetail[] }>
   contacts?: Array<{ id?: Id; name?: string }>
+}
+
+// Deepest-first takeover-default lookup for one field (afdeling > locatie > klant):
+// returns whichever picked level carries a non-empty value, else ''. Department-
+// level values are simply undefined until the BE ships the columns, so this
+// silently falls through to location/customer — no special-casing needed here.
+function cascadeValue(detail: CustomerDetail | null, locationId: string, departmentId: string, field: 'cost_center' | 'billing_email'): string {
+  const loc = detail?.locations?.find(l => String(l.id) === locationId)
+  const dept = loc?.departments?.find(d => String(d.id) === departmentId)
+  return dept?.[field] || loc?.[field] || detail?.[field] || ''
+}
+
+// Today as an input[type=date] value (YYYY-MM-DD) — the start-date PROPOSAL
+// (job 19); the recruiter can still change it, it's just a sensible default.
+function todayISO(): string {
+  const d = new Date()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
 // A labelled field wrapper.
@@ -96,7 +132,8 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
 
   // ── Contract ──
   const [contractType, setContractType] = useState('')
-  const [startDate, setStartDate] = useState('')
+  // Proposal, not a hard default — the recruiter can freely change it (job 19).
+  const [startDate, setStartDate] = useState(todayISO)
   const [endDate, setEndDate] = useState('')
   const [hours, setHours] = useState('')
   const [cao, setCao] = useState('')
@@ -106,9 +143,16 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
   const [step, setStep] = useState('')
   const [purchase, setPurchase] = useState('')
   const [sell, setSell] = useState('')
+  // Cost centre + billing email are takeover-default PROPOSALS from the customer/
+  // location/department cascade (job 21/22) — the *Dirty flags freeze them the
+  // moment the recruiter types their own value, so a later customer/location/
+  // department pick never clobbers a manual edit.
   const [costCenter, setCostCenter] = useState('')
+  const [costCenterDirty, setCostCenterDirty] = useState(false)
   const [billingEmails, setBillingEmails] = useState<string[]>([''])
+  const [billingDirty, setBillingDirty] = useState(false)
   const [remarks, setRemarks] = useState('')
+  const [remarksExpanded, setRemarksExpanded] = useState(false)
   const [saving, setSaving] = useState(false)
 
   // Rate proposal (MATCH-PLACEMENT-2): debounced lookup keyed on customer + function
@@ -137,32 +181,32 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
     return () => { alive = false }
   }, [candidateId])
 
-  // Fetch the customer's locations/contacts when a customer is picked (cascade),
-  // and prefill the takeover defaults (cost centre + billing email) from the
-  // customer — only into still-empty fields, never over the recruiter's input.
+  // Fetch the customer's locations/contacts/departments when a customer is picked
+  // — the cascade cost-centre/billing-email PROPOSAL is owned by the two effects
+  // below (kept separate: this effect only loads data, §0.3 single purpose).
   useEffect(() => {
     if (!customerId) { setDetail(null); return }
     let alive = true
     setLocationId(''); setDepartmentId(''); setContactId('')
     api.get(`/customers/${customerId}`)
-      .then(r => {
-        if (!alive) return
-        const d = (unwrap(r)) as CustomerDetail
-        setDetail(d)
-        if (d?.cost_center) setCostCenter(prev => prev || d.cost_center!)
-        if (d?.billing_email) setBillingEmails(prev => (prev.length === 1 && !prev[0].trim()) ? [d.billing_email!] : prev)
-      })
+      .then(r => { if (alive) setDetail((unwrap(r)) as CustomerDetail) })
       .catch(() => { if (alive) setDetail(null) })
     return () => { alive = false }
   }, [customerId])
 
-  // Location default wins over the customer default once a location is picked.
+  // Cost-centre PROPOSAL — recomputed live from the deepest picked level that
+  // carries a value; frozen the instant the recruiter edits the field by hand.
   useEffect(() => {
-    if (!locationId || !detail) return
-    const loc = (detail.locations ?? []).find(l => String(l.id) === locationId)
-    if (loc?.cost_center) setCostCenter(loc.cost_center)
-    if (loc?.billing_email) setBillingEmails(prev => (prev.length === 1 && !prev[0].trim()) ? [loc.billing_email!] : prev)
-  }, [locationId]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (costCenterDirty) return
+    setCostCenter(cascadeValue(detail, locationId, departmentId, 'cost_center'))
+  }, [detail, locationId, departmentId, costCenterDirty])
+
+  // Same proposal pattern for the PRIMARY billing email (slot 0) — extra rows
+  // (1+) are the recruiter's own additions and are never touched by the cascade.
+  useEffect(() => {
+    if (billingDirty) return
+    setBillingEmails([cascadeValue(detail, locationId, departmentId, 'billing_email')])
+  }, [detail, locationId, departmentId, billingDirty])
 
   // Mismatch only counts when BOTH sides actually carry a branch (§3B: nullable).
   const branchMismatch = Boolean(candBranch?.id && detail?.branch_id && String(candBranch.id) !== String(detail.branch_id))
@@ -261,28 +305,35 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
         {/* ── Relaties ── */}
         <div style={sectionTitle}>{t('placement.relations')}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {/* Candidate picker — only when the modal wasn't opened from a candidate. */}
+          {/* Candidate picker — only when the modal wasn't opened from a candidate.
+              Searchable (job 18): the candidate list can run into the hundreds. */}
           {!fixedCandidateId && (
             <F label={t('placement.candidate')}>
-              <SelectMenu value={pickedCandidateId || null} onChange={setPickedCandidateId}
-                placeholder={t('placement.pickCandidate')}
+              <CreatableSelect value={pickedCandidateId || null} onChange={setPickedCandidateId} allowCreate={false}
+                placeholder={t('placement.pickCandidate')} menuWidth={pickerMenuWidth}
                 options={candidateOptions.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
             </F>
           )}
           <div style={row2}>
+            {/* Klant/locatie — typeable searchable pickers (job 17/18), never free-text
+                create (allowCreate={false}: a customer/location is a real relational id). */}
             <F label={t('placement.customer')}>
-              <SelectMenu value={customerId || null} onChange={setCustomerId} placeholder={t('placement.pickCustomer')}
+              <CreatableSelect value={customerId || null} onChange={setCustomerId} allowCreate={false}
+                placeholder={t('placement.pickCustomer')} menuWidth={pickerMenuWidth}
                 options={customerOptions.map(c => ({ value: String(c.value), label: c.label }))} />
             </F>
             <F label={t('placement.location')}>
-              <SelectMenu value={locationId || null} onChange={v => { setLocationId(v); setDepartmentId('') }}
+              <CreatableSelect value={locationId || null} onChange={v => { setLocationId(v); setDepartmentId('') }}
+                allowCreate={false} menuWidth={pickerMenuWidth}
                 placeholder={customerId ? t('placement.pickLocation') : t('placement.pickCustomerFirst')}
                 options={opt(locations)} />
             </F>
           </div>
           <div style={row2}>
+            {/* Afdeling/contactpersoon — same searchable pattern. */}
             <F label={t('placement.department')}>
-              <SelectMenu value={departmentId || null} onChange={setDepartmentId} placeholder={t('placement.optional')} options={opt(departments)} />
+              <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
+                placeholder={t('placement.optional')} menuWidth={pickerMenuWidth} options={opt(departments)} />
             </F>
             <div>
               <div style={{ ...lbl, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -304,13 +355,17 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
                   </div>
                 </div>
               ) : (
-                <SelectMenu value={contactId || null} onChange={setContactId} placeholder={customerId ? t('placement.pickContact') : t('placement.pickCustomerFirst')} options={opt(contacts)} />
+                <CreatableSelect value={contactId || null} onChange={setContactId} allowCreate={false} menuWidth={pickerMenuWidth}
+                  placeholder={customerId ? t('placement.pickContact') : t('placement.pickCustomerFirst')} options={opt(contacts)} />
               )}
             </div>
           </div>
           <div style={row2}>
+            {/* Functie — searchable (tenant lookup, can run to dozens of job titles);
+                Recruiter stays a plain SelectMenu (small, not in job 18's long-list scope). */}
             <F label={t('placement.function')}>
-              <SelectMenu value={func || null} onChange={setFunc} placeholder={t('placement.pickFunction')}
+              <CreatableSelect value={func || null} onChange={setFunc} allowCreate={false}
+                placeholder={t('placement.pickFunction')} menuWidth={pickerMenuWidth}
                 options={functions.map(f => ({ value: f, label: f }))} />
             </F>
             <F label={t('placement.owner')}>
@@ -318,8 +373,10 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
                 options={users.map(u => ({ value: String(u.id), label: u.name ?? '—' }))} />
             </F>
           </div>
+          {/* Vacature — searchable, mirrors PlanIntakeModal's vacancy picker. */}
           <F label={t('placement.vacancyOptional')}>
-            <SelectMenu value={vacancyId || null} onChange={setVacancyId} placeholder={t('placement.noVacancy')}
+            <CreatableSelect value={vacancyId || null} onChange={setVacancyId} allowCreate={false}
+              placeholder={t('placement.noVacancy')} menuWidth={340}
               options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
           </F>
 
@@ -381,27 +438,34 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
             <span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{hasRates ? margin.toFixed(2) : '—'}</span>
           </div>
           <div style={row2}>
-            <F label={t('placement.costCenter')}><input value={costCenter} onChange={e => setCostCenter(e.target.value)} style={input} placeholder="KP-…" /></F>
+            {/* Cost centre — proposed from the customer/location cascade above; typing
+                here freezes it (job 21/22 — never overwritten again after that). */}
+            <F label={t('placement.costCenter')}>
+              <input value={costCenter} onChange={e => { setCostCenterDirty(true); setCostCenter(e.target.value) }}
+                style={input} placeholder="KP-…" />
+            </F>
             <F label={t('placement.billingEmail')}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {billingEmails.map((em, i) => (
                   <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                     <input type="email" value={em} placeholder={i === 0 ? t('placement.billingEmailMain') : t('placement.billingEmailExtra')}
-                      onChange={e => setBillingEmails(p => p.map((x, j) => j === i ? e.target.value : x))} style={input} />
+                      onChange={e => { setBillingDirty(true); setBillingEmails(p => p.map((x, j) => j === i ? e.target.value : x)) }} style={input} />
                     {billingEmails.length > 1 && (
-                      <button onClick={() => setBillingEmails(p => p.filter((_, j) => j !== i))} aria-label={t('common:close')}
+                      <button onClick={() => { setBillingDirty(true); setBillingEmails(p => p.filter((_, j) => j !== i)) }} aria-label={t('common:close')}
                         style={{ flexShrink: 0, width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text-muted)' }}><X size={13} /></button>
                     )}
                   </div>
                 ))}
-                <button onClick={() => setBillingEmails(p => [...p, ''])}
+                <button onClick={() => { setBillingDirty(true); setBillingEmails(p => [...p, '']) }}
                   style={{ alignSelf: 'flex-start', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-primary)', fontSize: 12, fontWeight: 600, padding: 0 }}>+ {t('placement.addBillingEmail')}</button>
               </div>
             </F>
           </div>
+          {/* Opmerkingen — the shared rich-text block (house rule, CLAUDE.md §3A/§4),
+              not a bare textarea; stored/POSTed as sanitised HTML. */}
           <F label={t('placement.remarks')}>
-            <textarea value={remarks} onChange={e => setRemarks(e.target.value)} rows={2}
-              style={{ ...input, height: 'auto', padding: '8px 10px', resize: 'vertical' }} />
+            <RichTextEditor value={remarks} onChange={setRemarks}
+              expanded={remarksExpanded} onToggleExpand={() => setRemarksExpanded(v => !v)} />
           </F>
         </div>
 

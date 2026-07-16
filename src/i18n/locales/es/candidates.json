@@ -780,7 +780,7 @@
     "pendingErase": "Eliminado"
   },
   "placement": {
-    "title": "Nueva colocación",
+    "title": "Nuevo match",
     "relations": "Relaciones",
     "customer": "Cliente",
     "pickCustomer": "Elige cliente",
@@ -812,9 +812,9 @@
     "costCenter": "Centro de costes",
     "billingEmail": "Email de facturación",
     "remarks": "Observaciones",
-    "create": "Crear colocación",
-    "created": "Colocación creada",
-    "failed": "Error al crear",
+    "create": "Crear match",
+    "created": "Match creado",
+    "failed": "Error al crear el match",
     "newContact": "nuevo",
     "contactCreated": "Contacto creado",
     "contactFailed": "Error al crear",
@@ -826,7 +826,7 @@
     "addBillingEmail": "añadir email",
     "branchMismatch": "La sede difiere",
     "branchMismatchDesc": "La sede del candidato ({{candidate}}) difiere de la del cliente ({{customer}}).",
-    "branchKeep": "No — solo esta colocación en esta sede",
+    "branchKeep": "No — solo este match en esta sede",
     "branchMove": "Sí — trasladar también al candidato a esta sede",
     "rateProposal": {
       "agreement": "Propuesta (acuerdo de tarifa): {{purchase}} compra / {{sell}} venta",

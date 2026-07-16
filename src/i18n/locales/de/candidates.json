@@ -780,7 +780,7 @@
     "pendingErase": "Gelöscht"
   },
   "placement": {
-    "title": "Neue Platzierung",
+    "title": "Neuer Match",
     "relations": "Beziehungen",
     "customer": "Kunde",
     "pickCustomer": "Kunde wählen",
@@ -812,9 +812,9 @@
     "costCenter": "Kostenstelle",
     "billingEmail": "Rechnungs-E-Mail",
     "remarks": "Anmerkungen",
-    "create": "Platzierung anlegen",
-    "created": "Platzierung angelegt",
-    "failed": "Anlegen fehlgeschlagen",
+    "create": "Match erstellen",
+    "created": "Match angelegt",
+    "failed": "Match anlegen fehlgeschlagen",
     "newContact": "neu",
     "contactCreated": "Ansprechpartner angelegt",
     "contactFailed": "Anlegen fehlgeschlagen",
@@ -826,7 +826,7 @@
     "addBillingEmail": "E-Mail hinzufügen",
     "branchMismatch": "Niederlassung weicht ab",
     "branchMismatchDesc": "Die Niederlassung des Kandidaten ({{candidate}}) weicht von der des Kunden ({{customer}}) ab.",
-    "branchKeep": "Nein — nur diese Platzierung bei dieser Niederlassung",
+    "branchKeep": "Nein — nur dieser Match bei dieser Niederlassung",
     "branchMove": "Ja — Kandidat ebenfalls zu dieser Niederlassung verschieben",
     "rateProposal": {
       "agreement": "Vorschlag (Preisvereinbarung): {{purchase}} Einkauf / {{sell}} Verkauf",

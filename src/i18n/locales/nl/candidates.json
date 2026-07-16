@@ -780,7 +780,7 @@
     "pendingErase": "Verwijderd"
   },
   "placement": {
-    "title": "Nieuwe plaatsing",
+    "title": "Nieuwe match",
     "relations": "Relaties",
     "customer": "Klant",
     "pickCustomer": "Kies klant",
@@ -812,9 +812,9 @@
     "costCenter": "Kostenplaats",
     "billingEmail": "Facturatie-e-mail",
     "remarks": "Opmerkingen",
-    "create": "Plaatsing aanmaken",
-    "created": "Plaatsing aangemaakt",
-    "failed": "Plaatsing aanmaken mislukt",
+    "create": "Match aanmaken",
+    "created": "Match aangemaakt",
+    "failed": "Match aanmaken mislukt",
     "newContact": "nieuw",
     "contactCreated": "Contactpersoon aangemaakt",
     "contactFailed": "Contactpersoon aanmaken mislukt",
@@ -826,7 +826,7 @@
     "addBillingEmail": "e-mail toevoegen",
     "branchMismatch": "Vestiging wijkt af",
     "branchMismatchDesc": "Kandidaat-vestiging ({{candidate}}) wijkt af van de klant-vestiging ({{customer}}).",
-    "branchKeep": "Nee — alleen deze plaatsing bij deze vestiging",
+    "branchKeep": "Nee — alleen deze match bij deze vestiging",
     "branchMove": "Ja — zet ook de kandidaat over naar deze vestiging",
     "rateProposal": {
       "agreement": "Voorstel (prijsafspraak): {{purchase}} inkoop / {{sell}} verkoop",

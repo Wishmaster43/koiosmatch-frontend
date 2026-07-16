@@ -780,7 +780,7 @@
     "pendingErase": "Deleted"
   },
   "placement": {
-    "title": "New placement",
+    "title": "New match",
     "relations": "Relations",
     "customer": "Client",
     "pickCustomer": "Pick client",
@@ -812,9 +812,9 @@
     "costCenter": "Cost center",
     "billingEmail": "Billing email",
     "remarks": "Remarks",
-    "create": "Create placement",
-    "created": "Placement created",
-    "failed": "Creating placement failed",
+    "create": "Create match",
+    "created": "Match created",
+    "failed": "Creating match failed",
     "newContact": "new",
     "contactCreated": "Contact created",
     "contactFailed": "Creating contact failed",
@@ -826,7 +826,7 @@
     "addBillingEmail": "add email",
     "branchMismatch": "Branch differs",
     "branchMismatchDesc": "The candidate's branch ({{candidate}}) differs from the customer's branch ({{customer}}).",
-    "branchKeep": "No — only this placement at this branch",
+    "branchKeep": "No — only this match at this branch",
     "branchMove": "Yes — also move the candidate to this branch",
     "rateProposal": {
       "agreement": "Suggested (rate agreement): {{purchase}} purchase / {{sell}} sell",

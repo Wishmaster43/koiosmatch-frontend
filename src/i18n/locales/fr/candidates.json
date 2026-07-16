@@ -780,7 +780,7 @@
     "pendingErase": "Supprimé"
   },
   "placement": {
-    "title": "Nouvelle mission",
+    "title": "Nouveau match",
     "relations": "Relations",
     "customer": "Client",
     "pickCustomer": "Choisir client",
@@ -812,9 +812,9 @@
     "costCenter": "Centre de coûts",
     "billingEmail": "E-mail de facturation",
     "remarks": "Remarques",
-    "create": "Créer la mission",
-    "created": "Mission créée",
-    "failed": "Échec de la création",
+    "create": "Créer un match",
+    "created": "Match créé",
+    "failed": "Échec de la création du match",
     "newContact": "nouveau",
     "contactCreated": "Contact créé",
     "contactFailed": "Échec de la création",
@@ -826,7 +826,7 @@
     "addBillingEmail": "ajouter un e-mail",
     "branchMismatch": "Agence différente",
     "branchMismatchDesc": "L'agence du candidat ({{candidate}}) diffère de celle du client ({{customer}}).",
-    "branchKeep": "Non — uniquement ce placement dans cette agence",
+    "branchKeep": "Non — uniquement ce match dans cette agence",
     "branchMove": "Oui — transférer aussi le candidat vers cette agence",
     "rateProposal": {
       "agreement": "Suggestion (accord tarifaire) : {{purchase}} achat / {{sell}} vente",

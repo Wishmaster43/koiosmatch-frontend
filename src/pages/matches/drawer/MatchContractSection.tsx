@@ -58,7 +58,7 @@ export default function MatchContractSection({ matchId, onUpdate }: Props) {
     { key: 'sell_rate', label: t('drawer.contract.sellRate'), inputType: 'number', mono: true, group: t('drawer.contract.groupFinancial') },
     { key: 'cost_center', label: t('drawer.contract.costCenter'), group: t('drawer.contract.groupFinancial') },
     { key: 'billing_emails_text', label: t('drawer.contract.billingEmails'), type: 'textarea', group: t('drawer.contract.groupFinancial') },
-    { key: 'remarks', label: t('drawer.contract.remarks'), type: 'textarea', group: t('drawer.contract.groupFinancial') },
+    { key: 'remarks', label: t('drawer.contract.remarks'), type: 'richtext', group: t('drawer.contract.groupFinancial') },
   ]
 
   // Current values, mapped to the schema's UI keys (billing_emails → newline text).
