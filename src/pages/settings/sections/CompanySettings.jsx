@@ -7,6 +7,7 @@ import { useIndustries } from '@/lib/useIndustries'
 // locales the profile picker offers — never a diverging local list.
 import { LANGUAGES as APP_LANGUAGES } from '@/pages/auth/profileParts'
 import { BTN_H } from '@/config/buttonMetrics'
+import MfaEnforcementSetting from './MfaEnforcementSetting'
 
 // Option lists (data — kept as-is; only labels are translated). Industries are
 // now tenant-configurable (Settings → Personalisation → Industries).
@@ -159,6 +160,10 @@ export default function CompanySettings() {
           <Row label={t('company.timezone')}><Select value={form.company_timezone} onChange={v => set('company_timezone', v)} options={TIMEZONES} /></Row>
         </div>
       )}
+      {/* Organisation-wide MFA policy (admin-only, self-gated) — moved here from the
+          personal security screen: an org policy is a company setting, not a profile
+          item (Danny 16-07). */}
+      <MfaEnforcementSetting />
     </div>
   )
 }

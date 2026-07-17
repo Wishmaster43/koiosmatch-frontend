@@ -1,7 +1,9 @@
 /**
  * SecuritySettings — shows MFA status and lets the user enable (via the shared
  * MfaSetupWizard: QR → confirm → recovery codes) or disable (re-enter TOTP code)
- * two-factor authentication. Admins also see the tenant-wide enforcement toggle.
+ * two-factor authentication. PERSONAL only: the tenant-wide enforcement toggle
+ * lives in CompanySettings (org policy ≠ profile — Danny 16-07), this screen is
+ * also embedded in the profile page.
  */
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -9,7 +11,6 @@ import { ShieldCheck, ArrowLeft, Lock } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import MfaSetupWizard from '@/components/auth/MfaSetupWizard'
 import { BTN_H } from '@/config/buttonMetrics'
-import MfaEnforcementSetting from './MfaEnforcementSetting'
 
 export default function SecuritySettings() {
   const { t } = useTranslation('settings')
@@ -122,8 +123,6 @@ export default function SecuritySettings() {
           <div key={app} style={{ fontSize: 12, color: 'var(--text-muted)', padding: '3px 0' }}>· {app}</div>
         ))}
       </div>
-      {/* Organisation-wide MFA policy — renders only for admins (self-gated). */}
-      <MfaEnforcementSetting />
     </div>
   )
 }
