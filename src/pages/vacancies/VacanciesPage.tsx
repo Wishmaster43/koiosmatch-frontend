@@ -32,6 +32,7 @@ import { usePageMemory } from '@/lib/usePageMemory'
 import { useVacanciesData } from './hooks/useVacanciesData'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
 import { useOpenFromIntent } from '@/context/NavigationContext'
+import { BTN_H } from '@/config/buttonMetrics'
 import { useVacancyBulkActions } from './hooks/useVacancyBulkActions'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -254,7 +255,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
                   users={users} statuses={statuses} customers={customerList} selectedTags={selectedTags} />
               ) : (
                 <>
-                  <button onClick={() => setAddOpen(true)} style={{ padding: '7px 14px', fontSize: 12, fontWeight: 500,
+                  {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
+                  <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
                     background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
                     + {t('page.add')}
                   </button>

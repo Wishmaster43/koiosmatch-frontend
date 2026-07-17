@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Globe } from 'lucide-react'
+import { Globe, Edit2, Save, X } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
+import { channelIcon } from './data/channelIcons'
 import VacancyChangelogPopover from './drawer/VacancyChangelogPopover'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useDateFormat } from '@/lib/datetime'
@@ -54,6 +55,10 @@ interface VacancyDrawerProps {
   users?: DrawerUser[]
 }
 
+const hdrBtn: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 }
+const hdrGhost: CSSProperties = { ...hdrBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }
+const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }
+
 /**
  * VacancyDrawer — thin container: wires data (lookups + onUpdate) and declares the
  * header config + tab list. No heavy JSX, no business logic (mirror CandidateDrawer).
@@ -69,13 +74,24 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
   // Tags are edited inline; seed from the record and reset when a different
   // vacancy is shown (adjust state during render — React's recommended pattern).
   const [tags, setTags] = useState<string[] | null>(null)
+  // V7: inline title edit — mirror OpportunityDrawer's pencil → input → save/cancel.
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [titleDraft, setTitleDraft] = useState('')
   const [prevId, setPrevId] = useState<Id | undefined>(v?.id)
-  if (v?.id !== prevId) { setPrevId(v?.id); setTags(null) }
+  if (v?.id !== prevId) { setPrevId(v?.id); setTags(null); setEditingTitle(false); setTitleDraft('') }
 
   if (!v) return null
 
   const currentTags = tags ?? (v.tags as string[]) ?? []
   const setTagsAndSave = (next: string[]) => { setTags(next); onUpdate?.(v.id, { tags: next }) }
+
+  const startTitleEdit = () => { setTitleDraft(v.title); setEditingTitle(true) }
+  const saveTitleEdit  = () => { const val = titleDraft.trim(); if (val && val !== v.title) onUpdate?.(v.id, { title: val }); setEditingTitle(false) }
+
+  // V2: the channels this vacancy is actually published on (icon + label), read
+  // from the publishing data the drawer already has (v.channels, PublishingTab's
+  // own data source) — never a re-fetch.
+  const publishedChannels = (v.channels ?? []).filter(c => c.published)
 
   // Owner picker — include the current owner so it shows even if not in `users`.
   const ownerOptions = [
@@ -97,13 +113,19 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
         </div>
       }
       tabs={visibleTabs.map(tab => ({ id: tab.id, label: t(`drawer.tabs.${tab.tKey}`), render: () => tab.render(v, onUpdate) }))}
-      header={() => (
+      header={({ setActiveTab }) => (
         <>
         <EntityHeader
           label={t('drawer.entityLabel')}
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: (v.clientName?.[0] ?? v.title?.[0] ?? '?').toUpperCase(), soft: true }}
-          renderTitle={() => (
+          renderTitle={() => editingTitle ? (
+            // V7: inline title edit — mirror OpportunityDrawer's renderTitle swap.
+            <input autoFocus value={titleDraft} onChange={e => setTitleDraft(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') saveTitleEdit(); if (e.key === 'Escape') setEditingTitle(false) }}
+              style={{ width: '100%', boxSizing: 'border-box', padding: '6px 10px', fontSize: 15, fontWeight: 700,
+                borderRadius: 6, border: '1px solid var(--border)', outline: 'none', color: 'var(--text)' }} />
+          ) : (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{v.title}</span>
@@ -116,6 +138,15 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           // Changelog icon (§3A(d)) — GET /vacancies/{id}/activity exists (measured:
           // routes/api/tenant/candidates.php), so this is the missing icon-popover, not a tab.
           titleActions={<VacancyChangelogPopover vacancy={v} />}
+          // V7: title pencil → save/cancel, same spot as the changelog icon's row.
+          actions={editingTitle ? (
+            <>
+              <button onClick={saveTitleEdit} title={t('common:save')} style={hdrPrimary}><Save size={14} /></button>
+              <button onClick={() => setEditingTitle(false)} title={t('common:cancel')} style={hdrGhost}><X size={14} /></button>
+            </>
+          ) : (
+            <button onClick={startTitleEdit} title={t('common:edit')} style={hdrGhost}><Edit2 size={13} /></button>
+          )}
           // Standard picker widths (§3A blueprint: Status ~160 + Eigenaar ~190).
           meta={[
             { key: 'status', label: t('drawer.status'), value: v.statusValue,
@@ -130,12 +161,34 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
             onRemove: tag => setTagsAndSave(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
           tagsLabel={t('drawer.tags')}
         >
-          {/* Published indicator — icon + text (colour is never the only signal). */}
-          <div style={{ fontSize: 11, marginBottom: 12, display: 'inline-flex', alignItems: 'center', gap: 6,
-            color: v.published ? 'var(--color-success)' : 'var(--text-muted)' }}>
-            <Globe size={13} />
-            {v.published ? t('drawer.published') : t('drawer.notPublished')}
-          </div>
+          {/* V2: published indicator — per-channel icons for the channels this vacancy
+              is ACTUALLY published on (icon + label, colour never the only signal);
+              falls back to the generic globe + "not published" when none are. Click a
+              channel to jump straight to the Publiceren tab. */}
+          {publishedChannels.length > 0 ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
+              {publishedChannels.map(c => {
+                const Icon = channelIcon(c.label)
+                return (
+                  <button key={String(c.value)} type="button" onClick={() => setActiveTab('publishing')}
+                    title={t('drawer.publishedOnChannel', { channel: c.label })}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 500,
+                      padding: '3px 9px', borderRadius: 999, cursor: 'pointer',
+                      background: 'var(--color-success-bg, color-mix(in srgb, var(--color-success) 12%, transparent))',
+                      color: 'var(--color-success)', border: '1px solid color-mix(in srgb, var(--color-success) 40%, transparent)' }}>
+                    <Icon size={12} /> {c.label}
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            <button type="button" onClick={() => setActiveTab('publishing')}
+              style={{ fontSize: 11, marginBottom: 12, display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--text-muted)' }}>
+              <Globe size={13} />
+              {t('drawer.notPublished')}
+            </button>
+          )}
         </EntityHeader>
         </>
       )}

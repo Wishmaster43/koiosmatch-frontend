@@ -15,6 +15,14 @@ export interface VacancyActivityEvent {
   created_at?: string
   description?: string
   log_name?: string
+  // CHANGELOG-3: field-level diff (Spatie Activitylog shape) — `attributes` = the new
+  // values, `old` = the previous values; the changelog tab renders one "field: old →
+  // new" row per change. The current backend resource exposes this as `changes`
+  // (`properties` kept for the legacy key, same as the candidate/opportunity feeds).
+  properties?: { attributes?: Record<string, unknown>; old?: Record<string, unknown>; [k: string]: unknown }
+  changes?: { attributes?: Record<string, unknown>; old?: Record<string, unknown>; [k: string]: unknown }
+  // Spatie event verb (created/updated/deleted/restored) — drives the friendly action line.
+  event?: string
   [k: string]: unknown
 }
 

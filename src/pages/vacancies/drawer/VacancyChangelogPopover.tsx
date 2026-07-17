@@ -2,28 +2,59 @@ import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { History, X } from 'lucide-react'
 import ChangelogTab from './ChangelogTab'
+import { sectionTitle } from '@/components/ui/SectionCard'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { VacancyDetail } from '@/types/vacancy'
 
 /**
+ * ChangelogPanel — the actual popover surface, mounted only while open. Its own
+ * component (rather than an inline conditional block) so useFocusTrap attaches on a
+ * fresh mount — mirrors the candidate ChangelogPopover exactly (§3A(d)).
+ */
+function ChangelogPanel({ vacancy, onClose, label }: { vacancy: VacancyDetail; onClose: () => void; label: string }) {
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  return (
+    <div ref={panelRef} role="dialog" aria-modal="true" aria-label={label} tabIndex={-1}
+      style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 400,
+        width: 900, maxWidth: '92vw', maxHeight: '82vh', display: 'flex', flexDirection: 'column',
+        background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
+        boxShadow: '0 8px 28px rgba(0,0,0,0.16)', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '12px 14px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+        <span style={{ ...sectionTitle, display: 'flex', alignItems: 'center', gap: 7 }}>
+          <History size={14} style={{ color: 'var(--text-muted)' }} /> {label}
+        </span>
+        <button onClick={onClose} aria-label={label}
+          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
+          <X size={15} />
+        </button>
+      </div>
+      <div style={{ overflowY: 'auto', padding: '12px 14px' }}>
+        <ChangelogTab vacancy={vacancy} bare />
+      </div>
+    </div>
+  )
+}
+
+/**
  * VacancyChangelogPopover — a History icon in the drawer title-row that opens the
- * vacancy's audit trail in a popover. Mirrors the candidate/opportunity/match
- * ChangelogPopover: record history stays one click from every tab instead of
- * being its own tab (§3A).
+ * vacancy's audit trail in a scrollable popover. Mirrors the candidate/opportunity/
+ * match ChangelogPopover (§3A(d)): record history stays one click from every tab
+ * instead of being its own tab. V8 (VACATURES-100): widened to the same centered
+ * 900px dialog + focus trap as the candidate popover (was a cramped 360px corner
+ * dropdown) — the rewritten ChangelogTab now carries date filters/search/export
+ * that need the room.
  */
 export default function VacancyChangelogPopover({ vacancy }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  // Close on outside click or Escape while open.
   useEffect(() => {
-    if (!open) return
-    const onClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
-    document.addEventListener('mousedown', onClick)
-    document.addEventListener('keydown', onKey)
-    return () => { document.removeEventListener('mousedown', onClick); document.removeEventListener('keydown', onKey) }
-  }, [open])
+    const onOpen = () => setOpen(true)
+    window.addEventListener('km:open-changelog', onOpen)
+    return () => window.removeEventListener('km:open-changelog', onOpen)
+  }, [])
 
   return (
     <div ref={ref} style={{ position: 'relative', display: 'flex' }}>
@@ -34,28 +65,7 @@ export default function VacancyChangelogPopover({ vacancy }: { vacancy: VacancyD
         <History size={14} />
       </button>
 
-      {open && (
-        <div role="dialog" aria-label={t('drawer.tabs.changelog')}
-          style={{ position: 'absolute', top: '100%', right: 0, marginTop: 6, zIndex: 300,
-            width: 360, maxWidth: '90vw', maxHeight: 440, display: 'flex', flexDirection: 'column',
-            background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10,
-            boxShadow: '0 8px 28px rgba(0,0,0,0.16)', overflow: 'hidden' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '12px 14px', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-            <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em',
-              color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 7 }}>
-              <History size={14} style={{ color: 'var(--text-muted)' }} /> {t('drawer.tabs.changelog')}
-            </span>
-            <button onClick={() => setOpen(false)} aria-label={t('common:close')}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2, display: 'flex' }}>
-              <X size={15} />
-            </button>
-          </div>
-          <div style={{ overflowY: 'auto', padding: '12px 14px' }}>
-            <ChangelogTab vacancy={vacancy} />
-          </div>
-        </div>
-      )}
+      {open && <ChangelogPanel vacancy={vacancy} onClose={() => setOpen(false)} label={t('drawer.tabs.changelog')} />}
     </div>
   )
 }

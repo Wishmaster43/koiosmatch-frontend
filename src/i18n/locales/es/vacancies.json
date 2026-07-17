@@ -103,6 +103,7 @@
     "tags": "Etiquetas",
     "published": "Publicada",
     "notPublished": "No publicada",
+    "publishedOnChannel": "Publicada en {{channel}}",
     "tabs": {
       "details": "Detalles",
       "applicants": "Candidaturas",
@@ -174,7 +175,11 @@
     "houseNumberSuffix": "Complemento",
     "postalCode": "Código postal",
     "city": "Ciudad",
-    "province": "Provincia"
+    "province": "Provincia",
+    "customerLocation": "Sede del cliente",
+    "customerDepartment": "Departamento",
+    "contactPerson": "Persona de contacto",
+    "pickClientFirst": "Elige primero un cliente"
   },
   "publishing": {
     "channels": "Portales de empleo",
@@ -260,6 +265,45 @@
     "loading": "Cargando…",
     "error": "No se pudieron cargar los cambios.",
     "empty": "Aún no hay cambios.",
-    "system": "Sistema"
+    "system": "Sistema",
+    "emptyValue": "Vacío",
+    "updatedValue": "actualizado",
+    "dateFrom": "Fecha desde",
+    "dateUntil": "Fecha hasta",
+    "export": "Exportar",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar por campo, valor o quién…",
+    "actions": {
+      "updated": "Actualizado",
+      "created": "Creado",
+      "deleted": "Archivado",
+      "restored": "Restaurado"
+    },
+    "fields": {
+      "title": "Título",
+      "description": "Descripción",
+      "vacancy_status_id": "Estado",
+      "employment_type": "Tipo de contrato",
+      "industry": "Sector",
+      "function_title": "Función",
+      "published": "Publicada",
+      "client_id": "Cliente",
+      "owner_id": "Reclutador",
+      "location_street": "Calle",
+      "location_house_number": "Número",
+      "location_postcode": "Código postal",
+      "location_city": "Ciudad",
+      "location_province": "Provincia",
+      "salary_from": "Salario (desde)",
+      "salary_to": "Salario (hasta)",
+      "working_hours_from": "Horas (desde)",
+      "working_hours_to": "Horas (hasta)",
+      "years_of_experience": "Experiencia (años)",
+      "vacancy_seniority_level_id": "Nivel de experiencia",
+      "vacancy_education_level_id": "Formación",
+      "custom_fields": "Campos personalizados",
+      "match_weights": "Ponderación del matching IA",
+      "tags": "Tags"
+    }
   }
 }

@@ -7,6 +7,8 @@ import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useIndustries } from '@/lib/useIndustries'
 import { useFunctions } from '@/lib/useFunctions'
 import { useCustomerOptions } from '../hooks/useCustomerOptions'
+import { useCascadePickers } from '../hooks/useCascadePickers'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import EntityLink from '@/components/ui/EntityLink'
@@ -23,6 +25,11 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 type TextKey = 'category' | 'industry' | 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city'
   | 'province' | 'experienceMin' | 'experienceMax' | 'seniority' | 'education' | 'salaryMin' | 'salaryMax' | 'hoursMin' | 'hoursMax'
 type Form = Record<TextKey, string>
+
+// V4-V6 kill switch: the vacancies table has no customer_location_id/customer_department_id/
+// contact_id columns yet (VAC-CASCADE-1) — until the backend persists them, showing the
+// pickers would let an edit silently evaporate on reload. Flip to true when BE lands.
+const CASCADE_WRITE_SUPPORTED = false
 
 const inputStyle: CSSProperties = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
 const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
@@ -59,6 +66,25 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
   // Client moved here from the drawer header (P3: calm header, max status+owner pickers).
   const [clientId, setClientId] = useState<string>(String(v.clientId ?? ''))
   const [types, setTypes] = useState<string[]>(v.contractTypes ?? [])
+  // V3-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade. No
+  // `v` field to seed from yet (measured: backend has no customer_location_id/
+  // customer_department_id/contact_id columns — see useCascadePickers docblock),
+  // so this starts empty and only tracks what was picked THIS session; `savedCascade`
+  // is the cancel-revert baseline (updated on save, not on every keystroke).
+  const emptyCascade = { locationId: '', locationName: '', departmentId: '', departmentName: '', contactId: '', contactName: '' }
+  const [savedCascade, setSavedCascade] = useState(emptyCascade)
+  const [cascade, setCascade] = useState(emptyCascade)
+  // Picking a different client resets the dependent picks (cascade integrity).
+  const handleClientChange = (id: string) => { setClientId(id); setCascade(emptyCascade) }
+  const { locationPicker, departmentPicker, contactPicker } = useCascadePickers({
+    clientId,
+    customerLocationId: cascade.locationId,
+    onLocationChange: p => setCascade(c => ({ ...c, locationId: p.id, locationName: p.name })),
+    customerDepartmentId: cascade.departmentId,
+    onDepartmentChange: p => setCascade(c => ({ ...c, departmentId: p.id, departmentName: p.name })),
+    contactId: cascade.contactId,
+    onContactChange: p => setCascade(c => ({ ...c, contactId: p.id, contactName: p.name })),
+  })
   const [skills, setSkills] = useState<string[]>(() => (v.skills ?? []).map(skillStr).filter(Boolean))
   const [newSkill, setNewSkill] = useState('')
   const setF = (k: TextKey, val: string) => setForm(p => ({ ...p, [k]: val }))
@@ -87,6 +113,8 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
     onUpdate?.(v.id, {
       // Client lives in Details now (header stays calm) — send the name too for optimistic UI.
       clientId, clientName: customerOptions.find(c => String(c.value) === clientId)?.label ?? v.clientName,
+      // V3-V6: best-effort — see buildVacancyPatch / useCascadePickers docblock.
+      customerLocationId: cascade.locationId || null, customerDepartmentId: cascade.departmentId || null, contactId: cascade.contactId || null,
       contractTypes: types, category: form.category, industry: form.industry,
       street: form.street, houseNumber: form.houseNumber, houseNumberSuffix: form.houseNumberSuffix,
       postalCode: form.postalCode, city: form.city, province: form.province, location,
@@ -95,9 +123,15 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
       salaryMin: form.salaryMin, salaryMax: form.salaryMax, hoursMin: form.hoursMin, hoursMax: form.hoursMax, salary, hours,
       skills,
     })
+    setSavedCascade(cascade)
     setEditing(false)
   }
-  const cancel = () => { setForm(seedForm()); setClientId(String(v.clientId ?? '')); setTypes(v.contractTypes ?? []); setSkills((v.skills ?? []).map(skillStr).filter(Boolean)); setNewSkill(''); setEditing(false) }
+  const cancel = () => {
+    setForm(seedForm()); setClientId(String(v.clientId ?? '')); setTypes(v.contractTypes ?? [])
+    setSkills((v.skills ?? []).map(skillStr).filter(Boolean)); setNewSkill('')
+    setCascade(savedCascade)
+    setEditing(false)
+  }
   const saveDesc = () => { onUpdate?.(v.id, { description }); setDescEditing(false) }
   const cancelDesc = () => { setDescription(v.description ?? ''); setDescEditing(false) }
 
@@ -143,44 +177,67 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
         {controls(editing, save, cancel, () => setEditing(true))}
       </div>
 
-      {/* Contract type — multi-chips (same lookup as the candidate). */}
-      <div>
-        <div style={groupTitle}>{t('details.contractType')}</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-          {editing ? candidateTypes.map(ct => {
-            const on = types.includes(ct.value)
-            return (
-              <button key={ct.value} type="button" onClick={() => toggleType(ct.value)}
-                style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: on ? 600 : 400,
-                  background: on ? (ct.color ?? 'var(--color-primary)') + '1A' : 'var(--surface)',
-                  color: on ? (ct.color ?? 'var(--color-primary)') : 'var(--text-muted)',
-                  border: `1px solid ${on ? (ct.color ?? 'var(--color-primary)') + '55' : 'var(--border)'}` }}>{ct.label}</button>
-            )
-          }) : (types.length === 0 ? dash : types.map(val => { const m = typeMeta(val); return (
-            <span key={val} style={{ fontSize: 11, fontWeight: 500, padding: '2px 9px', borderRadius: 999,
-              background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span>
-          )}))}
-        </div>
-      </div>
-
+      {/* Algemeen — V1: this card's heading ("Algemeen") is now the FIRST heading in
+          the tab content (the tab itself keeps its "Details" id/label, §3A(d)-style
+          separation of tab-chrome vs content). V13: Contractvorm moved in here — it
+          used to float loose above this card. */}
       {card(t('details.groups.general'), <>
+        {row(t('details.contractType'),
+          types.length === 0 ? dash : (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+              {types.map(val => { const m = typeMeta(val); return (
+                <span key={val} style={{ fontSize: 11, fontWeight: 500, padding: '2px 9px', borderRadius: 999,
+                  background: m.color + '1A', color: m.color, border: `1px solid ${m.color}55` }}>{m.label}</span>
+              ) })}
+            </div>
+          ),
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            {candidateTypes.map(ct => {
+              const on = types.includes(ct.value)
+              return (
+                <button key={ct.value} type="button" onClick={() => toggleType(ct.value)}
+                  style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, cursor: 'pointer', fontWeight: on ? 600 : 400,
+                    background: on ? (ct.color ?? 'var(--color-primary)') + '1A' : 'var(--surface)',
+                    color: on ? (ct.color ?? 'var(--color-primary)') : 'var(--text-muted)',
+                    border: `1px solid ${on ? (ct.color ?? 'var(--color-primary)') + '55' : 'var(--border)'}` }}>{ct.label}</button>
+              )
+            })}
+          </div>)}
         {row(t('details.id'), <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>, <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>)}
+        {/* V3: client — searchable (was a plain <select>). Picking a different client
+            resets the dependent locatie/afdeling/contactpersoon picks below. */}
         {row(t('drawer.client'),
           <EntityLink page="customers" id={v.clientId}>{v.clientName || '—'}</EntityLink>,
-          <select value={clientId} onChange={e => setClientId(e.target.value)} style={inputStyle}>
-            <option value="">{t('common:select')}</option>
-            {customerOptions.map(c => <option key={String(c.value)} value={String(c.value)}>{c.label}</option>)}
-          </select>)}
+          <CreatableSelect value={clientId || null} onChange={handleClientChange} allowCreate={false}
+            placeholder={t('drawer.selectClient')} options={customerOptions.map(c => ({ value: String(c.value), label: c.label }))} />)}
+        {/* V4-V6: locatie → afdeling → contactpersoon — optional, searchable cascade.
+            HIDDEN until the backend persists these (no customer_location_id/
+            customer_department_id/contact_id on vacancies yet — VAC-CASCADE-1): an
+            edit that silently evaporates on reload is a fake affordance. Flip the
+            constant + seed from `v` when the columns land. */}
+        {CASCADE_WRITE_SUPPORTED && (<>
+          {row(t('details.customerLocation'), cascade.locationName || dash, locationPicker)}
+          {row(t('details.customerDepartment'), cascade.departmentName || dash, departmentPicker)}
+          {row(t('details.contactPerson'), cascade.contactName || dash, contactPicker)}
+        </>)}
         {row(t('details.function'), v.category || dash, select('category', fnOptions))}
         {row(t('details.preferredIndustry'), v.industry || dash, select('industry', industries.map(i => ({ value: i, label: i }))))}
       </>)}
 
       {card(t('details.groups.location'), <>
-        {row(t('details.address'), composeAddress(v.street, v.houseNumber, v.houseNumberSuffix, v.postalCode, v.city) || v.location || dash,
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-            <div style={{ display: 'flex', gap: 6 }}>{text('street', t('details.street'))}{text('houseNumber', t('details.houseNumber'))}{text('houseNumberSuffix', t('details.houseNumberSuffix'))}</div>
-            <div style={{ display: 'flex', gap: 6 }}>{text('postalCode', t('details.postalCode'))}{text('city', t('details.city'))}</div>
-          </div>)}
+        {/* V9: address — each field its own labelled row when editing (mirrors the
+            candidate ProfileTab's address convention), instead of three inputs
+            crammed onto one "Adres" row; read mode still shows one composed line. */}
+        {editing ? (
+          <>
+            {row(t('details.street'), null, text('street'))}
+            {row(`${t('details.houseNumber')} / ${t('details.houseNumberSuffix')}`, null, twoInputs('houseNumber', 'houseNumberSuffix', t('details.houseNumber'), t('details.houseNumberSuffix')))}
+            {row(t('details.postalCode'), null, text('postalCode'))}
+            {row(t('details.city'), null, text('city'))}
+          </>
+        ) : (
+          row(t('details.address'), composeAddress(v.street, v.houseNumber, v.houseNumberSuffix, v.postalCode, v.city) || v.location || dash, null)
+        )}
         {row(t('details.province'), v.province || dash, text('province'))}
       </>)}
 

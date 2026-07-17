@@ -103,6 +103,7 @@
     "tags": "Tags",
     "published": "Veröffentlicht",
     "notPublished": "Nicht veröffentlicht",
+    "publishedOnChannel": "Veröffentlicht auf {{channel}}",
     "tabs": {
       "details": "Details",
       "applicants": "Bewerbungen",
@@ -174,7 +175,11 @@
     "houseNumberSuffix": "Zusatz",
     "postalCode": "PLZ",
     "city": "Ort",
-    "province": "Provinz"
+    "province": "Provinz",
+    "customerLocation": "Kundenstandort",
+    "customerDepartment": "Abteilung",
+    "contactPerson": "Ansprechpartner",
+    "pickClientFirst": "Zuerst einen Kunden wählen"
   },
   "publishing": {
     "channels": "Jobbörsen",
@@ -260,6 +265,45 @@
     "loading": "Laden…",
     "error": "Änderungen konnten nicht geladen werden.",
     "empty": "Noch keine Änderungen.",
-    "system": "System"
+    "system": "System",
+    "emptyValue": "Leer",
+    "updatedValue": "aktualisiert",
+    "dateFrom": "Datum von",
+    "dateUntil": "Datum bis",
+    "export": "Exportieren",
+    "search": "Suchen",
+    "searchPlaceholder": "Nach Feld, Wert oder Person suchen…",
+    "actions": {
+      "updated": "Aktualisiert",
+      "created": "Erstellt",
+      "deleted": "Archiviert",
+      "restored": "Wiederhergestellt"
+    },
+    "fields": {
+      "title": "Titel",
+      "description": "Beschreibung",
+      "vacancy_status_id": "Status",
+      "employment_type": "Beschäftigungsart",
+      "industry": "Branche",
+      "function_title": "Funktion",
+      "published": "Veröffentlicht",
+      "client_id": "Kunde",
+      "owner_id": "Recruiter",
+      "location_street": "Straße",
+      "location_house_number": "Hausnummer",
+      "location_postcode": "PLZ",
+      "location_city": "Ort",
+      "location_province": "Provinz",
+      "salary_from": "Gehalt (von)",
+      "salary_to": "Gehalt (bis)",
+      "working_hours_from": "Stunden (von)",
+      "working_hours_to": "Stunden (bis)",
+      "years_of_experience": "Erfahrung (Jahre)",
+      "vacancy_seniority_level_id": "Senioritätslevel",
+      "vacancy_education_level_id": "Ausbildung",
+      "custom_fields": "Benutzerdefinierte Felder",
+      "match_weights": "KI-Matching-Gewichtung",
+      "tags": "Tags"
+    }
   }
 }

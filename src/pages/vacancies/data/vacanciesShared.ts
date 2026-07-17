@@ -26,9 +26,22 @@ export const subsetOf = (obj: Record<string, unknown>, keys: string[]): Record<s
 // (statusLabel/owner/clientName) are derived in the container; this is the persist body.
 export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string, unknown> => {
   const body: Record<string, unknown> = {}
+  // V7 (VACATURES-100): inline title edit in the drawer header (mirror OpportunityDrawer).
+  if ('title'               in patch) body.title                = patch.title
   if ('statusValue'         in patch) body.status               = patch.statusValue
   if ('ownerId'             in patch) body.owner_id             = patch.ownerId
   if ('clientId'            in patch) body.customer_id          = patch.clientId
+  // V3-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade on the
+  // Algemeen card. MEASURED: UpdateVacancyRequest/VacancyWriter accept `customer_id`
+  // only — there are no customer_location_id/customer_department_id/contact_id columns
+  // on `vacancies` (only the unrelated bureau-branch `location_id`, see Vacancy::location()).
+  // Sent best-effort anyway (same "tolerated until BE ships the columns" precedent as
+  // MatchPlacementModal's /matches payload): validated() silently drops unknown keys, so
+  // this is harmless today and starts persisting the moment BE adds the columns — report
+  // to backend-Claude rather than silently building a feature that looks half-broken.
+  if ('customerLocationId'   in patch) body.customer_location_id   = patch.customerLocationId
+  if ('customerDepartmentId' in patch) body.customer_department_id = patch.customerDepartmentId
+  if ('contactId'             in patch) body.contact_id             = patch.contactId
   if ('tags'                in patch) body.tags                 = patch.tags
   if ('channels'            in patch) body.published_channels   = patch.channels
   if ('applicationSettings' in patch) body.application_settings = patch.applicationSettings

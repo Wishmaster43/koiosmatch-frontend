@@ -7,6 +7,7 @@ import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useIndustries } from '@/lib/useIndustries'
 import { useFunctions } from '@/lib/useFunctions'
 import { mapVacancy } from './data/mapVacancy'
+import { BTN_H } from '@/config/buttonMetrics'
 import type { ApiVacancy, Vacancy } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -149,16 +150,16 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
           </div>
         )}
 
-        {/* Footer */}
+        {/* Footer — BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
         <div style={{ padding: '14px 22px', borderTop: '1px solid var(--border)', flexShrink: 0,
           display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose}
-            style={{ padding: '8px 16px', fontSize: 13, borderRadius: 8,
+            style={{ height: BTN_H, padding: '0 16px', fontSize: 13, borderRadius: 8,
               border: '1px solid var(--border)', background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
             {t('modal.cancel')}
           </button>
           <button onClick={handleSubmit} disabled={!canSubmit || saving}
-            style={{ padding: '8px 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
+            style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
               background: (canSubmit && !saving) ? 'var(--color-primary)' : '#E5E7EB',
               color: (canSubmit && !saving) ? 'white' : '#9CA3AF',
               cursor: (canSubmit && !saving) ? 'pointer' : 'not-allowed' }}>

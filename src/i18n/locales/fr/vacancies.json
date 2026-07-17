@@ -103,6 +103,7 @@
     "tags": "Tags",
     "published": "Publié",
     "notPublished": "Non publié",
+    "publishedOnChannel": "Publié sur {{channel}}",
     "tabs": {
       "details": "Détails",
       "applicants": "Candidatures",
@@ -174,7 +175,11 @@
     "houseNumberSuffix": "Complément",
     "postalCode": "Code postal",
     "city": "Ville",
-    "province": "Province"
+    "province": "Province",
+    "customerLocation": "Site du client",
+    "customerDepartment": "Service",
+    "contactPerson": "Contact",
+    "pickClientFirst": "Choisissez d'abord un client"
   },
   "publishing": {
     "channels": "Sites d'emploi",
@@ -260,6 +265,45 @@
     "loading": "Chargement…",
     "error": "Impossible de charger les modifications.",
     "empty": "Aucune modification pour l’instant.",
-    "system": "Système"
+    "system": "Système",
+    "emptyValue": "Vide",
+    "updatedValue": "mis à jour",
+    "dateFrom": "Date de début",
+    "dateUntil": "Date de fin",
+    "export": "Exporter",
+    "search": "Rechercher",
+    "searchPlaceholder": "Rechercher par champ, valeur ou personne…",
+    "actions": {
+      "updated": "Mis à jour",
+      "created": "Créé",
+      "deleted": "Archivé",
+      "restored": "Restauré"
+    },
+    "fields": {
+      "title": "Titre",
+      "description": "Description",
+      "vacancy_status_id": "Statut",
+      "employment_type": "Type de contrat",
+      "industry": "Secteur",
+      "function_title": "Fonction",
+      "published": "Publié",
+      "client_id": "Client",
+      "owner_id": "Recruteur",
+      "location_street": "Rue",
+      "location_house_number": "Numéro",
+      "location_postcode": "Code postal",
+      "location_city": "Ville",
+      "location_province": "Province",
+      "salary_from": "Salaire (de)",
+      "salary_to": "Salaire (à)",
+      "working_hours_from": "Heures (de)",
+      "working_hours_to": "Heures (à)",
+      "years_of_experience": "Expérience (années)",
+      "vacancy_seniority_level_id": "Niveau d'expérience",
+      "vacancy_education_level_id": "Formation",
+      "custom_fields": "Champs personnalisés",
+      "match_weights": "Pondération du matching IA",
+      "tags": "Tags"
+    }
   }
 }

@@ -74,11 +74,15 @@ describe('MatchingTab · template pick → weights preview + PATCH payload', () 
   it('previews the template weights immediately and PATCHes match_weight_template_id only', async () => {
     mockGet.mockResolvedValue({ data: { data: rawDetail() } })
     render(<Harness />)
-    await waitFor(() => screen.getByLabelText('matching.profile'))
+    await waitFor(() => screen.getByText('matching.profile'))
 
     mockPatch.mockResolvedValue({ data: { data: rawDetail({ match_weights: TEMPLATE_WEIGHTS, match_weight_template_id: 't1' }) } })
     const user = userEvent.setup()
-    await user.selectOptions(screen.getByLabelText('matching.profile'), 't1')
+    // V18: the template picker is a searchable CreatableSelect (was a plain
+    // <select>) — open it (its trigger button's accessible name is its current
+    // label text) then click the wanted option.
+    await user.click(screen.getByRole('button', { name: 'matching.custom' }))
+    await user.click(screen.getByRole('button', { name: 'Senior profile' }))
 
     // Optimistic preview — qualifications (template value 5 → slider index 4) updates at once.
     expect(screen.getByLabelText('matching.dim.qualifications')).toHaveValue('4')
@@ -92,14 +96,15 @@ describe('MatchingTab · template pick → weights preview + PATCH payload', () 
   it('server-resync effect: the authoritative PATCH response reconciles weights + shows the provenance hint', async () => {
     mockGet.mockResolvedValue({ data: { data: rawDetail() } })
     render(<Harness />)
-    await waitFor(() => screen.getByLabelText('matching.profile'))
+    await waitFor(() => screen.getByText('matching.profile'))
 
     // Server returns a DIFFERENT snapshot than the local template guess (e.g. rounded/adjusted server-side).
     mockPatch.mockResolvedValue({ data: { data: rawDetail({
       match_weights: { ...TEMPLATE_WEIGHTS, location: 2 }, match_weight_template_id: 't1',
     }) } })
     const user = userEvent.setup()
-    await user.selectOptions(screen.getByLabelText('matching.profile'), 't1')
+    await user.click(screen.getByRole('button', { name: 'matching.custom' }))
+    await user.click(screen.getByRole('button', { name: 'Senior profile' }))
 
     // Resync replaces the optimistic guess (location=1) with the server's resolved value (location=2).
     await waitFor(() => expect(screen.getByLabelText('matching.dim.location')).toHaveValue('1'))
@@ -111,7 +116,7 @@ describe('MatchingTab · template pick → weights preview + PATCH payload', () 
     // Start from an already-templated vacancy (provenance hint visible).
     mockGet.mockResolvedValue({ data: { data: rawDetail({ match_weights: TEMPLATE_WEIGHTS, match_weight_template_id: 't1' }) } })
     render(<Harness />)
-    await waitFor(() => screen.getByLabelText('matching.profile'))
+    await waitFor(() => screen.getByText('matching.profile'))
     expect(screen.getByText(/matching.basedOn/)).toBeInTheDocument()
 
     // Manual override — drag the location slider away from the template's preset value.

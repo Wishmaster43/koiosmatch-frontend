@@ -167,6 +167,10 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
       id: ev.id, author: ev.author ?? '', initials: ev.author_initials ?? initialsOf(ev.author ?? ''),
       description: ev.description ?? '', ai: Boolean(ev.ai), time: ev.created_at ?? ev.time ?? '',
     })),
-    notes: (raw.notes ?? []).map(n => ({ id: n.id, author: n.author ?? '', text: n.text ?? '', time: n.created_at ?? '' })),
+    // V24 fix: VacancyNoteController's shared shape returns the note body as `body`
+    // (the DB column is `text`, but the API contract mirrors the shared notes shape,
+    // { id, author, body, type, created_at }) — reading `n.text` left every note
+    // blank after a real fetch/reload (only the just-added optimistic row showed).
+    notes: (raw.notes ?? []).map(n => ({ id: n.id, author: n.author ?? '', text: String((n as Loose).body ?? n.text ?? ''), time: n.created_at ?? '' })),
   }
 }

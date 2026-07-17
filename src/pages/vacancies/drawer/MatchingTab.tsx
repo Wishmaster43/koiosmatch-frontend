@@ -3,6 +3,7 @@ import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Save, Check, Info } from 'lucide-react'
 import SliderJs from '@/components/ui/Slider'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useMatchWeightTemplates } from '../hooks/useMatchWeightTemplates'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -16,9 +17,6 @@ const DIMENSIONS = ['qualifications', 'technical_fit', 'soft_skills', 'cultural_
 // Merge a stored weight set over the neutral default (3 = balanced) for a complete set.
 const buildWeights = (w: Record<string, unknown> | undefined): Record<string, number> =>
   Object.fromEntries(DIMENSIONS.map(d => [d, Number((w ?? {})[d]) || 3]))
-
-const selectStyle = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)',
-  background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' } as const
 
 /**
  * MatchingTab — the vacancy's per-dimension importance for the AI matcher: an
@@ -77,7 +75,8 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
       </div>
 
       {/* Template picker (MATCH-TEMPLATE-1) — four explicit UI states: loading,
-          error, empty (no templates configured yet) and the ready select. */}
+          error, empty (no templates configured yet) and the ready select. V18
+          (VACATURES-100): searchable CreatableSelect (was a plain <select>). */}
       <div>
         <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }}>
           {t('matching.profile')}
@@ -87,11 +86,9 @@ export default function MatchingTab({ vacancy: v, onUpdate }: { vacancy: Vacancy
         ) : templatesError ? (
           <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('matching.templatesError')}</div>
         ) : (
-          <select value={v.matchWeightTemplateId ?? ''} onChange={e => pickTemplate(e.target.value)}
-            aria-label={t('matching.profile')} style={selectStyle}>
-            <option value="">{t('matching.custom')}</option>
-            {templates.map(tpl => <option key={String(tpl.id)} value={String(tpl.id)}>{tpl.name}</option>)}
-          </select>
+          <CreatableSelect value={v.matchWeightTemplateId ?? ''} onChange={pickTemplate} allowCreate={false}
+            placeholder={t('matching.custom')}
+            options={[{ value: '', label: t('matching.custom') }, ...templates.map(tpl => ({ value: String(tpl.id), label: tpl.name }))]} />
         )}
         {!templatesLoading && !templatesError && templates.length === 0 && (
           <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{t('matching.noTemplates')}</p>
