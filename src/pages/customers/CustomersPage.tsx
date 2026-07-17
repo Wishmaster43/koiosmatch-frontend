@@ -285,9 +285,9 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
                     to mirror the candidate blueprint's toggle order (§3A). */}
                 <div style={{ marginLeft: 'auto', display: 'flex', gap: 8 }}>
                   <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
-                    label={t('page.archivedView')} icon={Archive} />
+                    label={t('page.archivedView')} color="var(--color-archive)" icon={Archive} />
                   <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
-                    label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
+                    label={t('common:map.view')} color="var(--color-map)" icon={MapIcon} />
                 </div>
               </>
             )}

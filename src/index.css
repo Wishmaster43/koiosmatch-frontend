@@ -27,6 +27,13 @@
   /* Violet — system/AI-ish accents (super-admin, roles/modules/ai audit badges, intake). */
   --color-violet:        #7C3AED;
   --color-violet-bg:     #EDE9FE;
+  /* Fixed view-state colours (Danny punt 32, 17-07): the quick-view toggles keep ONE
+     meaning-carrying colour on every tenant — useTenantTheme never overrides these,
+     so a tenant whose brand is orange/red can't make Blacklist/Gearchiveerd/Kaart
+     look identical. Blacklist keeps --color-danger (also fixed). */
+  --color-archive:       #B45309;
+  --color-trash:         #64748B;
+  --color-map:           #2563EB;
   --sidebar-bg: #FFFFFF;
   --sidebar-text: #111827;
   --sidebar-muted: #9CA3AF;

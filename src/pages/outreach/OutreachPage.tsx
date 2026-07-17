@@ -184,7 +184,7 @@ export default function OutreachPage() {
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
             <QuickViewToggle active={showArchived} onToggle={() => setShowArchived((v) => !v)}
-              label={t('view.archived')} icon={Archive} />
+              label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
             {/* Table / board view toggle */}
             <div style={{ display: 'flex', gap: 4 }}>
               <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')} style={iconBtn(view === 'table')}><LayoutList size={16} /></button>

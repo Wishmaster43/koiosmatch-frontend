@@ -455,7 +455,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
           })}
           {/* Archived (detached) view — shared quick-view toggle (§4). */}
           <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
-            label={t('archived.toggle')} icon={Archive} />
+            label={t('archived.toggle')} color="var(--color-archive)" icon={Archive} />
           <div style={{ display: 'flex', gap: 4 }}>
             <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
               style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',

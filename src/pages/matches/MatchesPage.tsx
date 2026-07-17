@@ -291,7 +291,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
           <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
-            label={t('view.archived')} icon={Archive} />
+            label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
 
           {/* View toggle — icon-only (label as aria-label + tooltip, §6) */}
           <button onClick={() => setView('table')} title={t('view.matches')} aria-label={t('view.matches')}

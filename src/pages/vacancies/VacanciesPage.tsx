@@ -270,11 +270,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginLeft: 'auto' }}>
               {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
               <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
-                label={t('page.archivedView')} icon={Archive} />
+                label={t('page.archivedView')} color="var(--color-archive)" icon={Archive} />
               {/* STRAAL-1: table ⇄ map (radius search) — always shown, mirroring the
                   candidate blueprint (the API ships lat/lng + distance_km now). */}
               <QuickViewToggle active={view === 'map'} onToggle={() => setView(x => (x === 'map' ? 'table' : 'map'))}
-                label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
+                label={t('common:map.view')} color="var(--color-map)" icon={MapIcon} />
               {buckets.map(b => (
                 <button key={b.value} onClick={() => setStatusBucket(b.value)}
                   style={{ padding: '5px 14px', fontSize: 13, fontWeight: statusBucket === b.value ? 600 : 400, borderRadius: 7, cursor: 'pointer',

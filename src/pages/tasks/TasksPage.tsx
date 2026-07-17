@@ -314,7 +314,7 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
           <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
             <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
-              label={t('view.archived')} icon={Archive} />
+              label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
             <div style={{ display: 'flex', gap: 4 }}>
               <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
                 style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',

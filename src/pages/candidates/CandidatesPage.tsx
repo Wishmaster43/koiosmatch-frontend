@@ -338,12 +338,12 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
                   <QuickViewToggle active={blacklistActive} onToggle={toggleBlacklist}
                     label={t('page.blacklistView')} color="var(--color-danger)" icon={Ban} />
                   <QuickViewToggle active={showArchived} onToggle={() => { setShowArchived(v => !v); setShowTrash(false) }}
-                    label={t('page.archivedView')} icon={Archive} />
+                    label={t('page.archivedView')} color="var(--color-archive)" icon={Archive} />
                   <QuickViewToggle active={showTrash} onToggle={() => { setShowTrash(v => !v); setShowArchived(false) }}
-                    label={t('erase.trashView')} color="var(--color-danger)" icon={Trash2} />
+                    label={t('erase.trashView')} color="var(--color-trash)" icon={Trash2} />
                   {/* STRAAL-1: table ⇄ map (radius search) — same shared toggle look. */}
                   <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
-                    label={t('common:map.view')} color="var(--color-primary)" icon={MapIcon} />
+                    label={t('common:map.view')} color="var(--color-map)" icon={MapIcon} />
                 </div>
               </>
             )}
