@@ -4,24 +4,33 @@
  * backend (a vacancy-less application is created via the intake flow instead), so
  * the save button stays disabled until a vacancy is picked. On success the host
  * reloads the applications list.
+ *
+ * S24b (Danny 16-07): vacancy + phase are both searchable pickers (CreatableSelect,
+ * allowCreate=false — a vacancy/stage is a real relational id, never free text); the
+ * phase picker now actually WORKS server-side — POST /applications previously only
+ * accepted `phase_key`, which the backend silently ignored on create (APP-CREATE-
+ * STAGE-1 fixed this), so this now sends the real `application_stage_id` and
+ * preselects the tenant's flagged default stage (falling back to the first stage).
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
-import SelectMenu from '@/components/ui/SelectMenu'
-import { useLookups } from '@/context/LookupsContext'
+import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
+import { useApplicationStages } from '../hooks/useApplicationStages'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { Id } from '@/types/common'
 
 const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }
 const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 420, maxWidth: '92vw', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }
 const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
+// Consistent searchable-menu width (mirrors PlanIntakeModal/MatchPlacementModal's vacancy picker).
+const pickerMenuWidth = 340
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
-const API_TO_FORM: Record<string, string> = { candidate_id: 'candidateId', vacancy_id: 'vacancyId', phase_key: 'phase' }
+const API_TO_FORM: Record<string, string> = { candidate_id: 'candidateId', vacancy_id: 'vacancyId', application_stage_id: 'phase' }
 
 export default function AddApplicationModal({ candidateId, onClose, onCreated }: {
   candidateId: Id
@@ -29,13 +38,28 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
   onCreated: () => void
 }) {
   const { t } = useTranslation('candidates')
-  const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string }> }
   const vacancyOptions = useVacancyOptions(true)
+  // S24b: the real stage id (not just the slug) — needed to submit application_stage_id.
+  const { stages, defaultStage } = useApplicationStages()
   const [vacancyId, setVacancyId] = useState('')
-  // Default to the first funnel phase (Applied) — the entry point of the funnel.
-  const [phase, setPhase] = useState(() => funnelTypes[0]?.value ?? 'applied')
+  // Default to the tenant's flagged start stage (APP-CREATE-STAGE-1), falling back to the first.
+  const [phaseId, setPhaseId] = useState(() => defaultStage?.id ?? '')
   const [saving, setSaving] = useState(false)
   const [errors, setErrors] = useState<Record<string, boolean>>({})
+
+  // Measured live (PlanIntakeModal probe hit the identical bug — see its S24a(c)
+  // comment): the lazy useState initializer above only reads `stages` at MOUNT time,
+  // which is still the seed fallback (useCachedLookup's real /application-stages
+  // fetch resolves a beat later). The seed's fake id ("applied") never matches a REAL
+  // stage's UUID, so once the real data replaces the seed, `phaseId` is left holding
+  // a value that matches nothing — the picker then shows its placeholder instead of
+  // the default. Re-sync to the CURRENT default whenever it no longer matches a real
+  // option; skipped once the recruiter (or an already-valid default) picked one.
+  useEffect(() => {
+    if (phaseId && stages.some(s => s.id === phaseId)) return
+    if (!defaultStage) return
+    setPhaseId(defaultStage.id)
+  }, [defaultStage, stages, phaseId])
 
   // Couple to the vacancy via the canonical POST /applications (vacancy_id required).
   const submit = async () => {
@@ -43,7 +67,7 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
     setSaving(true)
     setErrors({})
     try {
-      await api.post('/applications', { candidate_id: candidateId, vacancy_id: vacancyId, phase_key: phase })
+      await api.post('/applications', { candidate_id: candidateId, vacancy_id: vacancyId, application_stage_id: phaseId || undefined })
       notifySuccess(t('work.applicationCreated'))
       onCreated(); onClose()
     } catch (err) {
@@ -70,16 +94,19 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('work.addApplication')}</span>
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
         </div>
+        {/* Vacancy — searchable pick-only combobox (S24b), mirrors PlanIntakeModal. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldLabel}>{t('work.vacancy')}</div>
-          <SelectMenu value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.pickVacancy')}
+          <CreatableSelect value={vacancyId || null} onChange={setVacancyId} placeholder={t('work.pickVacancy')}
+            allowCreate={false} menuWidth={pickerMenuWidth}
             options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
           {errors.vacancyId && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
+        {/* Fase — searchable pick-only combobox; now submits the real stage id (S24b). */}
         <div style={{ marginBottom: 20 }}>
           <div style={fieldLabel}>{t('work.phase')}</div>
-          <SelectMenu value={phase} onChange={setPhase}
-            options={funnelTypes.map(f => ({ value: f.value, label: f.label }))} />
+          <CreatableSelect value={phaseId || null} onChange={setPhaseId} allowCreate={false} menuWidth={pickerMenuWidth}
+            options={stages.map(s => ({ value: s.id, label: s.label }))} />
           {errors.phase && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('work.applicationFailed')}</div>}
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>

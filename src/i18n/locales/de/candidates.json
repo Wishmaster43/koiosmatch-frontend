@@ -80,7 +80,8 @@
     "tagAdded": "Tag \"{{tag}}\" hinzugefügt ({{count}})",
     "stageFailed": "{{count}} Kandidaten nicht aktualisiert.",
     "partialResult": "{{updated}} von {{total}} aktualisiert, {{skipped}} übersprungen",
-    "stageNote": "Ändert die Phase der neuesten Bewerbung je Kandidat (keine Vakanzauswahl — Kandidaten ohne Bewerbung werden übersprungen)."
+    "stageNote": "Ändert die Phase der neuesten Bewerbung je Kandidat (keine Vakanzauswahl — Kandidaten ohne Bewerbung werden übersprungen).",
+    "merge": "Zusammenführen…"
   },
   "kpi": {
     "total": "Gesamt",
@@ -398,7 +399,10 @@
     "planAppointment": "Termin planen",
     "editAppointment": "Termin bearbeiten",
     "createAppointment": "Termin planen",
-    "appointmentVacancyHint": "Leer lassen für einen Termin ohne Stelle."
+    "appointmentVacancyHint": "Leer lassen für einen Termin ohne Stelle.",
+    "endTime": "Endzeit",
+    "endTimeAt": "bis {{time}}",
+    "vacancyUnknown": "Unbekannte Stelle"
   },
   "communication": {
     "newNote": "Neue Notiz",
@@ -807,6 +811,7 @@
     "startDate": "Startdatum",
     "endDate": "Enddatum",
     "hoursPerWeek": "Stunden pro Woche",
+    "hoursShort": "Std./Wo.",
     "financial": "Finanziell",
     "scale": "Skala",
     "step": "Stufe",

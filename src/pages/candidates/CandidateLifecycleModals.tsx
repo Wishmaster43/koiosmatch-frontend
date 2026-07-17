@@ -8,8 +8,9 @@
  */
 import DeletionPreviewModal from './drawer/DeletionPreviewModal'
 import ArchiveGuardModal from './drawer/ArchiveGuardModal'
+import MergeCandidateModal from './drawer/MergeCandidateModal'
 import type { ArchiveGuardTarget } from './hooks/useCandidateDrawerActions'
-import type { BulkArchiveGuardTarget } from './hooks/useCandidateBulkActions'
+import type { BulkArchiveGuardTarget, BulkMergeTarget } from './hooks/useCandidateBulkActions'
 import type { Id } from '@/types/common'
 
 interface Props {
@@ -22,12 +23,18 @@ interface Props {
   bulkArchiveGuard: BulkArchiveGuardTarget | null
   onCloseBulkArchiveGuard: () => void
   onResolveBulkArchiveGuard: () => void
+  // Bulk-merge entry (punt 4) — opened from CandidatesBulkBar's "Samenvoegen…" when
+  // exactly 2 rows are selected; onMerged reopens the survivor's drawer fresh.
+  bulkMergeTarget: BulkMergeTarget | null
+  onCloseBulkMerge: () => void
+  onMergedBulk: (survivorId: Id) => void
 }
 
 export default function CandidateLifecycleModals({
   eraseTarget, onCloseErase, onConfirmErase,
   archiveGuard, onCloseArchiveGuard, onResolveArchiveGuard,
   bulkArchiveGuard, onCloseBulkArchiveGuard, onResolveBulkArchiveGuard,
+  bulkMergeTarget, onCloseBulkMerge, onMergedBulk,
 }: Props) {
   return (
     <>
@@ -50,6 +57,12 @@ export default function CandidateLifecycleModals({
           aggregate={{ blockedCount: bulkArchiveGuard.blockedCount, totalCount: bulkArchiveGuard.totalCount }}
           applications={bulkArchiveGuard.applications} matches={bulkArchiveGuard.matches}
           onClose={onCloseBulkArchiveGuard} onResolved={onResolveBulkArchiveGuard} />
+      )}
+      {/* Bulk-merge (punt 4) — prefilled with both selected rows, so it opens straight
+          into the survivor choice instead of the search step. */}
+      {bulkMergeTarget && (
+        <MergeCandidateModal current={bulkMergeTarget.current} initialOther={bulkMergeTarget.other}
+          onClose={onCloseBulkMerge} onMerged={onMergedBulk} />
       )}
     </>
   )

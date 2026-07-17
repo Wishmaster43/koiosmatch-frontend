@@ -30,6 +30,12 @@ export interface BulkArchiveGuardTarget {
 // forward-compat catch on the actual bulk call is the safety net.
 const BULK_GUARD_CHECK_CAP = 25
 
+// Bulk-merge entry (punt 4) — exactly 2 rows selected opens the existing
+// MergeCandidateModal with the FIRST selected as `current` and the SECOND
+// prefilled as the picked duplicate (mirrors the modal's own LiteCandidate shape).
+export interface BulkMergeLite { id: Id; name: string; code?: string; email?: string }
+export interface BulkMergeTarget { current: BulkMergeLite; other: BulkMergeLite }
+
 interface UseCandidateBulkActionsParams {
   candidates: Candidate[]
   setCandidates: Dispatch<SetStateAction<Candidate[]>>
@@ -213,6 +219,26 @@ export function useCandidateBulkActions({
     setSelectedIds(new Set())
   }
 
+  // Bulk-merge modal state (punt 4) — set once exactly 2 candidates are selected
+  // and the recruiter picks "Samenvoegen…" from the bulk-actions menu.
+  const [bulkMergeTarget, setBulkMergeTarget] = useState<BulkMergeTarget | null>(null)
+
+  // Prompt the merge modal for the two selected rows — CandidatesBulkBar only shows
+  // the menu entry when selectedIds.size === 2, this is the defensive re-check.
+  // [...selectedIds] preserves insertion (= click) order, so "first selected" is stable.
+  const bulkMergePrompt = () => {
+    const ids = [...selectedIds]
+    if (ids.length !== 2) return
+    const byId = new Map(candidates.map(c => [c.id, c]))
+    const first = byId.get(ids[0]); const second = byId.get(ids[1])
+    if (!first || !second) return
+    const toLite = (c: Candidate): BulkMergeLite => ({ id: c.id, name: c.name, code: c.referenceNumber, email: c.email })
+    setBulkMergeTarget({ current: toLite(first), other: toLite(second) })
+  }
+  // The modal's onMerged callback: close it and clear the selection (punt 4 —
+  // the survivor reopens fresh via the page's own onMerged handler).
+  const resolveBulkMerge = () => { setBulkMergeTarget(null); setSelectedIds(new Set()) }
+
   // Archive-guard modal state (§3B) — set when the pre-check (or a 409 from the
   // actual call) finds candidates with a live application/active match.
   const [bulkArchiveGuard, setBulkArchiveGuard] = useState<BulkArchiveGuardTarget | null>(null)
@@ -320,5 +346,6 @@ export function useCandidateBulkActions({
     bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
     selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
     bulkArchiveGuard, setBulkArchiveGuard, resolveBulkArchiveGuard,
+    bulkMergeTarget, bulkMergePrompt, resolveBulkMerge,
   }
 }

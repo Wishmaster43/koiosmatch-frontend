@@ -7,24 +7,39 @@
  * time is today rounded UP to the next quarter (nobody books 08:03 — it becomes
  * 08:15). The vacancy is OPTIONAL — empty makes the backend create the Intake
  * application (CONSIST-2). On success the host reloads.
+ *
+ * S24a (Danny 16-07): the panel no longer scrolls itself (see `panel` below —
+ * root-caused the clipped vacancy dropdown); the end time is shown live next to
+ * Duur; the appointment TYPE and the "where" picker both preselect their tenant
+ * `is_default` entry; the recruiter defaults to the logged-in user; and the
+ * vacancy proposal never falls back to a raw id while its title is in flight.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { notifySuccess } from '@/lib/notify'
+import { useAuth } from '@/context/AuthContext'
 import SelectMenu from '@/components/ui/SelectMenu'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useUsers } from '@/lib/queries'
 import { useAppointmentTypes } from '@/lib/useAppointmentTypes'
 import type { Modality } from '@/lib/useAppointmentTypes'
+import { useAppointmentLocations } from '@/lib/useAppointmentLocations'
 import { useLocations } from '@/lib/useLocations'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { Id } from '@/types/common'
 
 const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }
-const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 440, maxWidth: '92vw', maxHeight: '88vh', overflowY: 'auto', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }
+// S24a root-cause fix: this panel used to carry `overflowY:'auto', maxHeight:'88vh'`.
+// An ancestor with a non-visible `overflow` clips ANY absolutely-positioned descendant
+// (CreatableSelect/SelectMenu's dropdown) at the ancestor's own box — regardless of
+// z-index — the moment the dropdown's natural height pushes past it. Since this
+// modal's content is short (mirrors the unconstrained candidates/drawer/
+// AddApplicationModal panel), it never genuinely needs to scroll; dropping the
+// scroll container removes the clipping context instead of fighting it with z-index.
+const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 440, maxWidth: '92vw', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }
 const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
 const input: React.CSSProperties = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
 const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }
@@ -32,7 +47,8 @@ const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger)'
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
   scheduled_at: 'when', type: 'type', duration_min: 'duration', modality: 'modality',
-  location_id: 'locationId', owner_id: 'ownerId', vacancy_id: 'vacancyId', application_id: 'applicationId',
+  location_id: 'locationId', appointment_location: 'appointmentLocation',
+  owner_id: 'ownerId', vacancy_id: 'vacancyId', application_id: 'applicationId',
 }
 
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string }
@@ -48,7 +64,23 @@ function defaultWhen(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-export interface ExistingAppointment { id: Id; scheduled_at?: string; duration_min?: number | null; modality?: string; owner_id?: Id; type?: string; vacancy_id?: Id | null; location_id?: Id | null }
+// S24a(b): the appointment's end time, computed live from `when` + `duration` — shown
+// next to Duur so the recruiter sees "tot 22:15" without doing the maths themselves.
+// Exported (not just used internally) so the date maths gets a direct unit test
+// instead of only an indirect one through i18next's untranslated-key fallback.
+export function endTimeOf(whenLocal: string, durationMin: number): string {
+  if (!whenLocal) return ''
+  const d = new Date(whenLocal)
+  if (Number.isNaN(d.getTime())) return ''
+  d.setMinutes(d.getMinutes() + (durationMin || 0))
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+export interface ExistingAppointment {
+  id: Id; scheduled_at?: string; duration_min?: number | null; modality?: string; owner_id?: Id
+  type?: string; vacancy_id?: Id | null; location_id?: Id | null; appointment_location?: string | null
+}
 
 export default function PlanIntakeModal({
   candidateId, onClose, onCreated, existing, applicationId = null, defaultVacancyId = null, mode = 'intake',
@@ -67,11 +99,14 @@ export default function PlanIntakeModal({
 }) {
   const { t } = useTranslation(['candidates', 'common'])
   const { types, intakeTypes, metaOf } = useAppointmentTypes()
+  const { locations: appointmentLocations, defaultLocation } = useAppointmentLocations()
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
+  const { user: me } = useAuth() as unknown as { user: { id?: Id; name?: string } | null }
   const vacancyOptions = useVacancyOptions(true)
   // A stored vacancy that is missing from the options (rejected/archived vacancy
-  // or beyond the option cap) would render as a raw id in the select (Danny 13/7)
-  // — fetch its title once and inject it as an option instead.
+  // or beyond the option cap) would render as a raw id in the select (Danny 13/7,
+  // sharpened S24a-f) — fetch its title once and inject it as an option; the
+  // render-time `vacancyFallback` below covers the id while this is still null.
   const [extraVacancy, setExtraVacancy] = useState<{ value: string; label: string } | null>(null)
   const locationOptions = useLocations()
   // The candidate-drawer intake flow only offers intake-flagged types (unchanged);
@@ -79,16 +114,22 @@ export default function PlanIntakeModal({
   // types — most configured types (follow-up, phone call, …) are NOT flagged intake,
   // so restricting to intakeTypes there would make them unreachable.
   const typeOptions = mode === 'appointment' ? types : intakeTypes
+  // S24a(c): preselect the tenant's flagged default WITHIN the relevant subset
+  // (intake-only vs. all types), falling back to the first option.
+  const defaultTypeOption = typeOptions.find(x => x.is_default) ?? typeOptions[0]
 
   // datetime-local wants "YYYY-MM-DDTHH:MM" — trim an ISO string to that shape.
   const toLocalInput = (iso?: string) => iso ? iso.slice(0, 16) : ''
-  const [type, setType] = useState(() => existing?.type ?? typeOptions[0]?.value ?? '')
+  const [type, setType] = useState(() => existing?.type ?? defaultTypeOption?.value ?? '')
   const [when, setWhen] = useState(() => existing?.scheduled_at ? toLocalInput(existing.scheduled_at) : defaultWhen())
   // Duration + modality prefill from the existing appointment, else from the type.
   const [duration, setDuration] = useState<number>(() => existing?.duration_min ?? typeOptions[0]?.default_duration_min ?? 30)
   const [modality, setModality] = useState<Modality>(() => (existing?.modality as Modality) ?? typeOptions[0]?.default_modality ?? 'office')
   // A real tenant location (vs. the plain office/remote/phone presets) — empty = none picked.
   const [locationId, setLocationId] = useState(() => existing?.location_id ? String(existing.location_id) : '')
+  // S24a(d): the tenant appointment-locations lookup slug (Kantoor/Online/Telefonisch/
+  // Bij klant) — replaces the old hardcoded modality-preset labels; preselects is_default.
+  const [appointmentLocation, setAppointmentLocation] = useState(() => existing?.appointment_location ?? defaultLocation?.value ?? '')
   const [ownerId, setOwnerId] = useState(() => existing?.owner_id ? String(existing.owner_id) : '')
   const [vacancyId, setVacancyId] = useState(() => {
     if (existing?.vacancy_id) return String(existing.vacancy_id)
@@ -98,16 +139,70 @@ export default function PlanIntakeModal({
     if (!vacancyId || vacancyOptions.some(v => String(v.value) === String(vacancyId))) { setExtraVacancy(null); return }
     let alive = true
     api.get(`/vacancies/${vacancyId}`, { quiet404: true } as never)
-      .then(r => { const d = unwrap<{ title?: string }>(r); if (alive && d?.title) setExtraVacancy({ value: String(vacancyId), label: String(d.title) }) })
-      .catch(() => { if (alive) setExtraVacancy(null) })
+      .then(r => {
+        if (!alive) return
+        const d = unwrap<{ title?: string }>(r)
+        setExtraVacancy({ value: String(vacancyId), label: d?.title ? String(d.title) : t('work.vacancyUnknown') })
+      })
+      .catch(() => { if (alive) setExtraVacancy({ value: String(vacancyId), label: t('work.vacancyUnknown') }) })
     return () => { alive = false }
-  }, [vacancyId, vacancyOptions])
+  }, [vacancyId, vacancyOptions, t])
+  // The vacancy option CreatableSelect falls back to displaying its raw `value` the
+  // moment no option matches it — computed HERE (render time), not only inside the
+  // effect above, so even the very first paint (before any effect has run) never
+  // shows the raw GUID: while `extraVacancy` hasn't resolved yet for this id, fall
+  // back to a neutral "loading" label instead of leaving the slot empty.
+  const vacancyKnown = Boolean(vacancyId) && vacancyOptions.some(v => String(v.value) === String(vacancyId))
+  const vacancyFallback = (vacancyId && !vacancyKnown)
+    ? { value: String(vacancyId), label: (extraVacancy && String(extraVacancy.value) === String(vacancyId)) ? extraVacancy.label : t('common:loading') }
+    : null
   const [saving, setSaving] = useState(false)
   // 422 field errors (house pattern, mirrors AddCandidateModal/AddCustomerModal) +
   // a non-field fallback banner — replaces the old generic-toast-only handling.
   const [errors, setErrors] = useState<Record<string, boolean>>({})
   const [submitErr, setSubmitErr] = useState<string | null>(null)
   const editing = !!existing
+
+  // S24a(e): default the recruiter to the logged-in user, mirroring AddApplicationModal's
+  // meIsAssignable pattern — only on CREATE, and only while nothing is picked yet, so an
+  // edit never silently reassigns an appointment away from its stored owner.
+  const ownerOptions = users.map(u => ({ value: String(u.id), label: userName(u) }))
+  const meIsAssignable = me?.id != null && ownerOptions.some(o => o.value === String(me.id))
+  useEffect(() => {
+    if (!editing && meIsAssignable && !ownerId) setOwnerId(String(me!.id))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once meIsAssignable resolves
+  }, [meIsAssignable])
+
+  // S24a(c) — measured live (probe found "Kies een type" with no selection): a lazy
+  // useState initializer only reads `typeOptions` at MOUNT time, which is still the
+  // seed fallback (useCachedLookup resolves the real /appointment-types data a beat
+  // later). The seed's own default slug ("intake_flex") isn't a real tenant slug, so
+  // once the real data replaces the seed, `type` is left holding a value that matches
+  // NOTHING in the new `typeOptions` — SelectMenu then shows its placeholder instead
+  // of a selection. Re-sync to the CURRENT default whenever it no longer matches,
+  // carrying its duration/modality along too (mirrors pickType); skipped once editing
+  // or once the user (or a still-valid earlier default) already holds a real option.
+  useEffect(() => {
+    if (editing) return
+    if (type && typeOptions.some(x => x.value === type)) return
+    if (!defaultTypeOption) return
+    setType(defaultTypeOption.value)
+    setDuration(defaultTypeOption.default_duration_min)
+    setModality(defaultTypeOption.default_modality)
+    // Loop-safe with `type` in deps: setType makes `type` valid, so the guard no-ops next run.
+  }, [defaultTypeOption, typeOptions, editing, type])
+
+  // S24a(d) — the same re-sync for the appointment-location lookup pick. The seed's
+  // default ("kantoor") happens to match today's real seed, so this isn't observed
+  // live yet, but it must not silently break the moment a tenant's own default differs.
+  useEffect(() => {
+    if (editing) return
+    if (locationId) return // a real branch is picked instead — nothing to resync here
+    if (appointmentLocation && appointmentLocations.some(x => x.value === appointmentLocation)) return
+    if (!defaultLocation) return
+    setAppointmentLocation(defaultLocation.value)
+    // Loop-safe with `appointmentLocation` in deps: after the set the guard no-ops.
+  }, [defaultLocation, appointmentLocations, editing, locationId, appointmentLocation])
 
   // Selecting a type re-proposes its duration + modality (the user can still change them);
   // a stale location pick no longer matches a re-proposed remote/phone modality, so clear it.
@@ -117,20 +212,24 @@ export default function PlanIntakeModal({
     if (m) { setDuration(m.default_duration_min); setModality(m.default_modality); setLocationId('') }
   }
 
-  const modalityOptions: Array<{ value: Modality; label: string }> = [
-    { value: 'office', label: t('work.modalityOffice') },
-    { value: 'remote', label: t('work.modalityRemote') },
-    { value: 'phone',  label: t('work.modalityPhone') },
-  ]
+  // S24a(b): live end time, recomputed on every date/duration change.
+  const endTime = endTimeOf(when, duration)
 
-  // ONE "where" select = the 3 modality presets + the tenant's real locations. Picking a
-  // location sets modality:office + location_id; picking a preset clears the location.
+  // ONE "where" select = the tenant appointment-locations lookup (Kantoor/Online/
+  // Telefonisch/Bij klant) + the tenant's real physical branches. Picking a branch
+  // sets location_id + forces modality:office (unambiguously on-site); picking a
+  // lookup entry sets appointment_location and leaves modality as the TYPE proposed
+  // it (the lookup's slugs are tenant-configurable, not a fixed office/remote/phone
+  // enum, so there is no safe 1:1 mapping back onto the `modality` column here).
   const LOC_PREFIX = 'loc:'
-  const whereValue = locationId ? `${LOC_PREFIX}${locationId}` : modality
-  const whereOptions = [...modalityOptions, ...locationOptions.map(l => ({ value: `${LOC_PREFIX}${l.value}`, label: l.label }))]
+  const whereValue = locationId ? `${LOC_PREFIX}${locationId}` : appointmentLocation
+  const whereOptions = [
+    ...appointmentLocations.map(l => ({ value: l.value, label: l.label })),
+    ...locationOptions.map(l => ({ value: `${LOC_PREFIX}${l.value}`, label: l.label })),
+  ]
   const pickWhere = (v: string) => {
-    if (v.startsWith(LOC_PREFIX)) { setLocationId(v.slice(LOC_PREFIX.length)); setModality('office') }
-    else { setLocationId(''); setModality(v as Modality) }
+    if (v.startsWith(LOC_PREFIX)) { setLocationId(v.slice(LOC_PREFIX.length)); setAppointmentLocation(''); setModality('office') }
+    else { setLocationId(''); setAppointmentLocation(v) }
   }
 
   // Book the appointment; vacancy_id optional (BE auto-creates the intake application when
@@ -142,6 +241,7 @@ export default function PlanIntakeModal({
     const body = {
       scheduled_at: when, type: type || 'intake', duration_min: duration, modality,
       location_id: locationId || null,
+      appointment_location: appointmentLocation || null,
       ...(ownerId ? { owner_id: ownerId } : {}),
       ...(vacancyId ? { vacancy_id: vacancyId } : {}),
       ...(!editing && applicationId ? { application_id: applicationId } : {}),
@@ -190,18 +290,25 @@ export default function PlanIntakeModal({
           {errors.type && <div style={errMsg}>{t('common:required')}</div>}
         </div>
 
-        {/* Date/time (default = today, rounded up to the quarter) + duration override. */}
+        {/* Date/time (default = today, rounded up to the quarter) + duration override
+            + the live-computed end time (S24a-b) so "tot 22:15" needs no mental maths. */}
         <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
           <div style={{ flex: 1 }}>
             <label htmlFor="intake-when" style={fieldLabel as React.CSSProperties}>{t('work.intakeWhen')}</label>
             <input id="intake-when" type="datetime-local" value={when} onChange={e => setWhen(e.target.value)} style={input} />
             {errors.when && <div style={errMsg}>{t('common:required')}</div>}
           </div>
-          <div style={{ width: 110 }}>
+          <div style={{ width: 90 }}>
             <label htmlFor="intake-dur" style={fieldLabel as React.CSSProperties}>{t('work.duration')}</label>
             <input id="intake-dur" type="number" min={5} max={480} step={5} value={duration}
               onChange={e => setDuration(Number(e.target.value) || 0)} style={input} />
             {errors.duration && <div style={errMsg}>{t('common:required')}</div>}
+          </div>
+          <div style={{ width: 90 }}>
+            <div style={fieldLabel}>{t('work.endTime')}</div>
+            <div style={{ height: 36, display: 'flex', alignItems: 'center', fontSize: 13, color: endTime ? 'var(--text)' : 'var(--text-muted)', fontFamily: "'JetBrains Mono', monospace" }}>
+              {endTime ? t('work.endTimeAt', { time: endTime }) : '—'}
+            </div>
           </div>
         </div>
 
@@ -209,8 +316,8 @@ export default function PlanIntakeModal({
         <div style={{ display: 'flex', gap: 10, marginBottom: 14 }}>
           <div style={{ flex: 1 }}>
             <div style={fieldLabel}>{t('work.modality')}</div>
-            <SelectMenu value={whereValue} onChange={pickWhere} options={whereOptions} />
-            {(errors.modality || errors.locationId) && <div style={errMsg}>{t('common:required')}</div>}
+            <SelectMenu value={whereValue || null} onChange={pickWhere} options={whereOptions} />
+            {(errors.modality || errors.locationId || errors.appointmentLocation) && <div style={errMsg}>{t('common:required')}</div>}
           </div>
           <div style={{ flex: 1 }}>
             <div style={fieldLabel}>{t('work.owner')}</div>
@@ -227,7 +334,7 @@ export default function PlanIntakeModal({
             allowCreate={false} menuWidth={340}
             options={[
               ...vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label })),
-              ...(extraVacancy && !vacancyOptions.some(v => String(v.value) === extraVacancy.value) ? [extraVacancy] : []),
+              ...(vacancyFallback ? [vacancyFallback] : []),
             ]} />
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{t(mode === 'appointment' ? 'work.appointmentVacancyHint' : 'work.intakeVacancyHint')}</div>
           {(errors.vacancyId || errors.applicationId) && <div style={errMsg}>{t('common:required')}</div>}

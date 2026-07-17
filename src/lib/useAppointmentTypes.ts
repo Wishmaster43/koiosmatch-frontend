@@ -9,6 +9,9 @@
  *
  * Fetch/cache/dedupe lives in useCachedLookup (audit item 8) — one GET per
  * session, shared across every mounted consumer.
+ *
+ * `is_default` (LOOKUP-DEFAULT-1) marks the tenant's chosen plan-modal default
+ * (seed: Intake) — pre-selected by PlanIntakeModal instead of just "the first type".
  */
 import type { AxiosResponse } from 'axios'
 import { useCachedLookup } from './useCachedLookup'
@@ -24,15 +27,18 @@ export interface AppointmentType {
   default_duration_min: number
   default_modality: Modality
   is_intake: boolean
+  is_default: boolean
 }
 
 // Seed defaults — mirror the intended backend seed; slugs stable, labels tenant-facing.
+/* eslint-disable no-restricted-syntax -- seed DATA hex mirroring the backend seed, not UI styling */
 export const DEFAULT_APPOINTMENT_TYPES: AppointmentType[] = [
-  { value: 'intake_flex', label: 'Intake Flex',       color: '#6E8FD6', icon: '📋', default_duration_min: 30, default_modality: 'office', is_intake: true },
-  { value: 'intake_deta', label: 'Intake Detachering', color: '#8B5CF6', icon: '📋', default_duration_min: 45, default_modality: 'office', is_intake: true },
-  { value: 'intake_online', label: 'Intake online',    color: '#19A5CA', icon: '💻', default_duration_min: 30, default_modality: 'remote', is_intake: true },
-  { value: 'followup',    label: 'Vervolggesprek',     color: '#79B58E', icon: '🔁', default_duration_min: 30, default_modality: 'office', is_intake: false },
+  { value: 'intake_flex', label: 'Intake Flex',       color: '#6E8FD6', icon: '📋', default_duration_min: 30, default_modality: 'office', is_intake: true, is_default: true },
+  { value: 'intake_deta', label: 'Intake Detachering', color: '#8B5CF6', icon: '📋', default_duration_min: 45, default_modality: 'office', is_intake: true, is_default: false },
+  { value: 'intake_online', label: 'Intake online',    color: '#19A5CA', icon: '💻', default_duration_min: 30, default_modality: 'remote', is_intake: true, is_default: false },
+  { value: 'followup',    label: 'Vervolggesprek',     color: '#79B58E', icon: '🔁', default_duration_min: 30, default_modality: 'office', is_intake: false, is_default: false },
 ]
+/* eslint-enable no-restricted-syntax */
 
 // Normalise an API row to the UI shape (defensive about field names + defaults).
 const toType = (r: Record<string, unknown>): AppointmentType => ({
@@ -43,6 +49,7 @@ const toType = (r: Record<string, unknown>): AppointmentType => ({
   default_duration_min: Number(r.default_duration_min ?? r.duration_min ?? 30) || 30,
   default_modality: (r.default_modality as Modality) ?? 'office',
   is_intake: Boolean(r.is_intake),
+  is_default: Boolean(r.is_default),
 })
 
 // null = nothing usable in this response — useCachedLookup keeps the seed and retries next mount.
@@ -60,6 +67,8 @@ export function useAppointmentTypes() {
     types.find(x => x.value === v || x.label === v)
   // Only the intake types (for the intake picker).
   const intakeTypes = types.filter(x => x.is_intake)
+  // The tenant's flagged plan-modal default (seed: Intake), falling back to the first type.
+  const defaultType = types.find(x => x.is_default) ?? types[0]
 
-  return { types, intakeTypes, metaOf }
+  return { types, intakeTypes, metaOf, defaultType }
 }

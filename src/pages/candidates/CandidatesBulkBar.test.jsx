@@ -77,4 +77,29 @@ describe('CandidatesBulkBar', () => {
     await user.click(screen.getByText(/bulk\.typeSubmit/)) // confirm bar shows "key (1)"
     expect(props.onSetTypes).toHaveBeenCalledWith(['freelance'])
   })
+
+  // Punt 4 (bulk-merge entry): pairwise only — the menu item must never appear
+  // for a selection size other than exactly 2, regardless of permission.
+  it('hides Samenvoegen when the selection is not exactly 2, even with permission', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} count={3} canMerge onMerge={vi.fn()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('bulk.merge')).toBeNull()
+  })
+
+  it('hides Samenvoegen with exactly 2 selected but no delete permission', async () => {
+    const user = userEvent.setup()
+    render(<CandidatesBulkBar {...baseProps()} count={2} canMerge={false} onMerge={vi.fn()} />)
+    await user.click(screen.getByText('bulk.actions'))
+    expect(screen.queryByText('bulk.merge')).toBeNull()
+  })
+
+  it('shows Samenvoegen and fires onMerge with exactly 2 selected + permission', async () => {
+    const user = userEvent.setup()
+    const onMerge = vi.fn()
+    render(<CandidatesBulkBar {...baseProps()} count={2} canMerge onMerge={onMerge} />)
+    await user.click(screen.getByText('bulk.actions'))
+    await user.click(screen.getByText('bulk.merge'))
+    expect(onMerge).toHaveBeenCalledTimes(1)
+  })
 })

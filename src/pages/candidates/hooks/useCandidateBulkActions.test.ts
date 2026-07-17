@@ -283,3 +283,37 @@ describe('useCandidateBulkActions · bulkArchive (guard)', () => {
     expect(r.result.current.candidates).toHaveLength(1) // not removed — still blocked
   })
 })
+
+// Punt 4: bulk-merge entry — the FIRST selected id becomes `current`, the SECOND
+// prefills as the picked duplicate; [...selectedIds] preserves the click order
+// since Set retains insertion order.
+describe('useCandidateBulkActions · bulkMergePrompt / resolveBulkMerge (punt 4)', () => {
+  it('builds the merge target from the two selected rows, first-selected as current', () => {
+    const r = harness([
+      cand({ id: 1, name: 'Anna Huidig', referenceNumber: 'K-1', email: 'anna@x.nl' }),
+      cand({ id: 2, name: 'Anna Dubbel', referenceNumber: 'K-2', email: 'dup@x.nl' }),
+    ])
+    act(() => r.result.current.setSelectedIds(new Set([2, 1]))) // clicked id 2 first, then id 1
+    act(() => r.result.current.actions.bulkMergePrompt())
+    expect(r.result.current.actions.bulkMergeTarget).toEqual({
+      current: { id: 2, name: 'Anna Dubbel', code: 'K-2', email: 'dup@x.nl' },
+      other: { id: 1, name: 'Anna Huidig', code: 'K-1', email: 'anna@x.nl' },
+    })
+  })
+
+  it('is a no-op guard when the selection is not exactly 2 (defensive — the bulk bar already gates this)', () => {
+    const r = harness([cand({ id: 1 }), cand({ id: 2 }), cand({ id: 3 })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2, 3])))
+    act(() => r.result.current.actions.bulkMergePrompt())
+    expect(r.result.current.actions.bulkMergeTarget).toBeNull()
+  })
+
+  it('resolveBulkMerge closes the modal and clears the selection', () => {
+    const r = harness([cand({ id: 1 }), cand({ id: 2 })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    act(() => r.result.current.actions.bulkMergePrompt())
+    expect(r.result.current.actions.bulkMergeTarget).not.toBeNull()
+    act(() => r.result.current.actions.resolveBulkMerge())
+    expect(r.result.current.actions.bulkMergeTarget).toBeNull()
+  })
+})

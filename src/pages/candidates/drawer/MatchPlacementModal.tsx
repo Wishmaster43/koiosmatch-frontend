@@ -37,8 +37,11 @@ const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 
 const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 720, maxWidth: '94vw', maxHeight: '90vh', overflowY: 'auto', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 24px 70px rgba(0,0,0,0.22)' }
 const lbl: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
 const input: React.CSSProperties = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
-const sectionTitle: React.CSSProperties = { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', margin: '18px 0 10px' }
+const sectionTitle: React.CSSProperties = { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', margin: '14px 0 8px' }
 const row2: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }
+// S24c ("alle info leesbaar zonder scrollen"): a compact third column for short
+// numeric cells (uren p/w, marge) so those no longer cost a whole extra row each.
+const row3: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr 110px', gap: 14 }
 const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }
 
 // 422 field-error keys are snake_case; map them back to this form's field/state names.
@@ -439,11 +442,12 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
             </F>
             <F label={t('placement.cao')} error={errors.cao}><input value={cao} onChange={e => setCao(e.target.value)} style={input} placeholder="VVT" /></F>
           </div>
-          <div style={row2}>
+          {/* S24c: hours joins the date row (compact third column) — one row less to scroll. */}
+          <div style={row3}>
             <F label={t('placement.startDate')} error={errors.startDate}><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={input} /></F>
             <F label={t('placement.endDate')} error={errors.endDate}><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={input} /></F>
+            <F label={t('placement.hoursShort')} error={errors.hours}><input type="number" min={1} max={40} value={hours} onChange={e => setHours(e.target.value)} style={input} aria-label={t('placement.hoursPerWeek')} /></F>
           </div>
-          <F label={t('placement.hoursPerWeek')} error={errors.hours}><input type="number" min={1} max={40} value={hours} onChange={e => setHours(e.target.value)} style={{ ...input, width: 120 }} /></F>
         </div>
 
         {/* ── Financieel ── */}
@@ -453,19 +457,21 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
             <F label={t('placement.scale')} error={errors.scale}><input value={scale} onChange={e => setScale(e.target.value)} style={input} /></F>
             <F label={t('placement.step')} error={errors.step}><input value={step} onChange={e => setStep(e.target.value)} style={input} /></F>
           </div>
-          <div style={row2}>
+          {/* S24c: the live margin joins the rate row as a compact read-only cell —
+              derived, never entered; sits right next to the rates it derives from. */}
+          <div style={row3}>
             <F label={t('placement.purchaseRate')} error={errors.purchase}><input type="number" step="0.01" value={purchase} onChange={e => setPurchase(e.target.value)} style={input} placeholder="22,18" /></F>
             <F label={t('placement.sellRate')} error={errors.sell}><input type="number" step="0.01" value={sell} onChange={e => setSell(e.target.value)} style={input} placeholder="62,10" /></F>
+            <F label={t('placement.margin')}>
+              <div style={{ ...input, display: 'flex', alignItems: 'center', fontSize: 13,
+                background: 'var(--surface-2, var(--bg))',
+                color: hasRates ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
+                <span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{hasRates ? margin.toFixed(2) : '—'}</span>
+              </div>
+            </F>
           </div>
           {/* Rate proposal hint — only fills EMPTY fields above (never overwrites input). */}
           <RateProposalHint proposal={proposal} />
-          {/* Margin shown live — derived, never entered. */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, padding: '8px 12px', borderRadius: 8,
-            background: 'var(--surface-2, var(--bg))', border: '1px solid var(--border)',
-            color: hasRates ? (margin >= 0 ? 'var(--color-success)' : 'var(--color-danger)') : 'var(--text-muted)' }}>
-            <span style={{ color: 'var(--text-muted)' }}>{t('placement.margin')}</span>
-            <span style={{ fontWeight: 700, fontFamily: 'JetBrains Mono, monospace' }}>{hasRates ? margin.toFixed(2) : '—'}</span>
-          </div>
           <div style={row2}>
             {/* Cost centre — proposed from the customer/location cascade above; typing
                 here freezes it (job 21/22 — never overwritten again after that). */}

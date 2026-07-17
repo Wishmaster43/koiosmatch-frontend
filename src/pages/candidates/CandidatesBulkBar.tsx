@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, X } from 'lucide-react'
+import { ListChecks, Folder, FolderPlus, FolderMinus, UserCog, Milestone, Briefcase, Tag, Tags, StickyNote, Archive, ShieldCheck, UserCheck, Activity, GitMerge, X } from 'lucide-react'
 import ActionMenu from '@/components/ui/ActionMenu'
 import type { MenuNode } from '@/components/ui/ActionMenu'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -25,6 +25,11 @@ interface CandidatesBulkBarProps {
   onAddNote: (text: string) => void
   onArchive: () => void
   canArchive?: boolean
+  // Bulk-merge entry (punt 4) — the menu item only appears with exactly 2 rows
+  // selected (checked by the caller too — this stays a thin assembler, no rule here)
+  // and the same permission as archive (candidates.delete).
+  onMerge?: () => void
+  canMerge?: boolean
   users?: BulkUser[]
   funnelTypes?: LookupOption[]
   candidateTypes?: LookupOption[]
@@ -42,6 +47,7 @@ interface CandidatesBulkBarProps {
 export default function CandidatesBulkBar({
   count, onClear, onAddToPool, onRemoveFromPool, onSetOwner, onSetStage, onSetTypes, onSetConsent,
   onConvertPhase, onSetStatus, onAddTag, onRemoveTag, onAddNote, onArchive, canArchive = false,
+  onMerge, canMerge = false,
   users = [], funnelTypes = [], candidateTypes = [], phases = [], statuses = [], selectedTags = [],
 }: CandidatesBulkBarProps) {
   const { t } = useTranslation('candidates')
@@ -114,6 +120,9 @@ export default function CandidatesBulkBar({
         { key: 'nl-off', label: t('bulk.consentOff'), onSelect: () => onSetConsent({ newsletter_opt_in: false }, `${t('communication.consentNewsletter')} — ${t('bulk.consentOff')}`) },
       ] },
     ] },
+    // Bulk-merge (punt 4): only offered with EXACTLY 2 rows selected — merging is
+    // pairwise (one survivor absorbs one duplicate), so any other count is ambiguous.
+    ...(count === 2 && canMerge && onMerge ? [{ key: 'merge', label: t('bulk.merge'), icon: GitMerge, onSelect: onMerge }] : []),
     ...(canArchive ? [{ key: 'archive', label: t('bulk.archive'), icon: Archive, danger: true, onSelect: onArchive }] : []),
   ]
 

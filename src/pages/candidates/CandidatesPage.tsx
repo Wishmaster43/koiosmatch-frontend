@@ -259,7 +259,15 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     bulkSetOwner, bulkSetStage, bulkSetTypes, bulkSetConsent, bulkConvertPhase, bulkSetStatus, bulkAddTag,
     selectedTags, bulkRemoveTag, bulkAddNote, bulkArchive,
     bulkArchiveGuard, setBulkArchiveGuard, resolveBulkArchiveGuard,
+    bulkMergeTarget, bulkMergePrompt, resolveBulkMerge,
   } = useCandidateBulkActions({ candidates, setCandidates, setTotal, selectedIds, setSelectedIds, notify, t, funnelTypes, candidateTypes })
+
+  // Bulk-merge (punt 4): after a successful merge, close the modal, clear the
+  // selection (resolveBulkMerge) and reopen the survivor's drawer fresh.
+  const handleBulkMerged = (survivorId: Id) => {
+    resolveBulkMerge()
+    selectCandidate({ id: survivorId } as Candidate)
+  }
 
   // KPI strip config (3 donuts + attention cards) — pure builder (§0.3 split).
   const { donuts: insightDonuts, kpis: insightKpis } = buildCandidateInsights({
@@ -320,6 +328,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
                 onConvertPhase={bulkConvertPhase} onSetStatus={bulkSetStatus} onAddTag={bulkAddTag}
                 onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
                 canArchive={hasPermission('candidates.delete')}
+                onMerge={bulkMergePrompt} canMerge={hasPermission('candidates.delete')}
                 users={users} funnelTypes={funnelTypes} candidateTypes={candidateTypes} phases={phases} statuses={statuses} selectedTags={selectedTags} />
             ) : (
               <>
@@ -440,6 +449,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           eraseTarget={eraseTarget} onCloseErase={() => setEraseTarget(null)} onConfirmErase={confirmHardDelete}
           archiveGuard={archiveGuard} onCloseArchiveGuard={() => setArchiveGuard(null)} onResolveArchiveGuard={resolveArchiveGuard}
           bulkArchiveGuard={bulkArchiveGuard} onCloseBulkArchiveGuard={() => setBulkArchiveGuard(null)} onResolveBulkArchiveGuard={resolveBulkArchiveGuard}
+          bulkMergeTarget={bulkMergeTarget} onCloseBulkMerge={resolveBulkMerge} onMergedBulk={handleBulkMerged}
         />
       </div>
     </>

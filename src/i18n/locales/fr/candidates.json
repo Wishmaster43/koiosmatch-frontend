@@ -80,7 +80,8 @@
     "tagAdded": "Tag «{{tag}}» ajouté ({{count}})",
     "stageFailed": "{{count}} candidats non mis à jour.",
     "partialResult": "{{updated}} sur {{total}} mis à jour, {{skipped}} ignoré(s)",
-    "stageNote": "Modifie l'étape de la candidature la plus récente de chaque candidat (aucun choix de vacance — les candidats sans candidature sont ignorés)."
+    "stageNote": "Modifie l'étape de la candidature la plus récente de chaque candidat (aucun choix de vacance — les candidats sans candidature sont ignorés).",
+    "merge": "Fusionner…"
   },
   "kpi": {
     "total": "Total",
@@ -398,7 +399,10 @@
     "planAppointment": "Planifier un rendez-vous",
     "editAppointment": "Modifier le rendez-vous",
     "createAppointment": "Planifier un rendez-vous",
-    "appointmentVacancyHint": "Laissez vide pour un rendez-vous sans offre."
+    "appointmentVacancyHint": "Laissez vide pour un rendez-vous sans offre.",
+    "endTime": "Heure de fin",
+    "endTimeAt": "jusqu'à {{time}}",
+    "vacancyUnknown": "Offre inconnue"
   },
   "communication": {
     "newNote": "Nouvelle note",
@@ -807,6 +811,7 @@
     "startDate": "Date de début",
     "endDate": "Date de fin",
     "hoursPerWeek": "Heures par semaine",
+    "hoursShort": "H/sem.",
     "financial": "Financier",
     "scale": "Échelle",
     "step": "Échelon",

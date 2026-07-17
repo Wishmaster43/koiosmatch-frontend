@@ -87,7 +87,8 @@
     "tagAdded": "Tag \"{{tag}}\" added ({{count}})",
     "stageFailed": "{{count}} candidates not updated.",
     "partialResult": "{{updated}} of {{total}} updated, {{skipped}} skipped",
-    "stageNote": "Changes the stage of each candidate's most recent application (no vacancy choice — candidates without an application are skipped)."
+    "stageNote": "Changes the stage of each candidate's most recent application (no vacancy choice — candidates without an application are skipped).",
+    "merge": "Merge…"
   },
   "kpi": {
     "total": "Total",
@@ -405,7 +406,10 @@
     "planAppointment": "Schedule appointment",
     "editAppointment": "Edit appointment",
     "createAppointment": "Schedule appointment",
-    "appointmentVacancyHint": "Leave empty for an appointment without a vacancy."
+    "appointmentVacancyHint": "Leave empty for an appointment without a vacancy.",
+    "endTime": "End time",
+    "endTimeAt": "until {{time}}",
+    "vacancyUnknown": "Unknown vacancy"
   },
   "communication": {
     "newNote": "New note",
@@ -807,6 +811,7 @@
     "startDate": "Start date",
     "endDate": "End date",
     "hoursPerWeek": "Hours per week",
+    "hoursShort": "Hrs/wk",
     "financial": "Financial",
     "scale": "Scale",
     "step": "Step",

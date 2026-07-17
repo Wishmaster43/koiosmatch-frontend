@@ -28,10 +28,14 @@ const rowToLite = (r: ApiRow): LiteCandidate => ({
   email: r.email ?? undefined,
 })
 
-export default function MergeCandidateModal({ current, onClose, onMerged }: {
+export default function MergeCandidateModal({ current, onClose, onMerged, initialOther }: {
   current: LiteCandidate
   onClose: () => void
   onMerged: (survivorId: Id) => void
+  // Bulk-merge entry (punt 4): prefills the duplicate so the modal opens straight
+  // into step 2 (survivor choice) instead of making the recruiter re-search someone
+  // they already picked via the two-row table selection.
+  initialOther?: LiteCandidate
 }) {
   const { t } = useTranslation('candidates')
   const queryClient = useQueryClient()
@@ -41,7 +45,7 @@ export default function MergeCandidateModal({ current, onClose, onMerged }: {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<LiteCandidate[]>([])
   const [searching, setSearching] = useState(false)
-  const [other, setOther] = useState<LiteCandidate | null>(null)
+  const [other, setOther] = useState<LiteCandidate | null>(initialOther ?? null)
   // Step 2: which record remains — default: the candidate that is open now.
   const [survivorId, setSurvivorId] = useState<Id>(current.id)
   const [merging, setMerging] = useState(false)

@@ -87,7 +87,8 @@
     "tagAdded": "Tag \"{{tag}}\" toegevoegd ({{count}})",
     "stageFailed": "{{count}} kandidaten niet bijgewerkt.",
     "partialResult": "{{updated}} van de {{total}} aangepast, {{skipped}} overgeslagen",
-    "stageNote": "Wijzigt de fase van de meest recente sollicitatie per kandidaat (geen vacature-keuze — kandidaten zonder sollicitatie worden overgeslagen)."
+    "stageNote": "Wijzigt de fase van de meest recente sollicitatie per kandidaat (geen vacature-keuze — kandidaten zonder sollicitatie worden overgeslagen).",
+    "merge": "Samenvoegen…"
   },
   "kpi": {
     "total": "Totaal",
@@ -405,7 +406,10 @@
     "planAppointment": "Afspraak plannen",
     "editAppointment": "Afspraak wijzigen",
     "createAppointment": "Afspraak plannen",
-    "appointmentVacancyHint": "Laat leeg voor een afspraak zonder vacature."
+    "appointmentVacancyHint": "Laat leeg voor een afspraak zonder vacature.",
+    "endTime": "Eindtijd",
+    "endTimeAt": "tot {{time}}",
+    "vacancyUnknown": "Onbekende vacature"
   },
   "communication": {
     "newNote": "Nieuwe notitie",
@@ -807,6 +811,7 @@
     "startDate": "Begindatum",
     "endDate": "Einddatum",
     "hoursPerWeek": "Uren per week",
+    "hoursShort": "Uren p/w",
     "financial": "Financieel",
     "scale": "Schaal",
     "step": "Trede",
