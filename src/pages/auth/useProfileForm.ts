@@ -23,6 +23,13 @@ export function useProfileForm() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
   const [avatarBusy,    setAvatarBusy]    = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  // Tracks the blob: URL created for the picked file, so it can be revoked when
+  // replaced/cleared and on unmount — otherwise every avatar pick leaks memory
+  // (mirrors EntityHeader's PhotoAvatar fix).
+  const createdUrlRef = useRef<string | null>(null)
+
+  // Revoke the last object URL we created on unmount (page navigated away mid-pick).
+  useEffect(() => () => { if (createdUrlRef.current) URL.revokeObjectURL(createdUrlRef.current) }, [])
 
   // Sync as soon as the user arrives from /auth/me (may be after mount).
   useEffect(() => {
@@ -61,13 +68,21 @@ export function useProfileForm() {
   const onPickAvatar = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setAvatarPreview(URL.createObjectURL(file))   // show immediately
+    // Revoke the previous preview (if any) before creating+tracking the new one.
+    if (createdUrlRef.current) URL.revokeObjectURL(createdUrlRef.current)
+    const url = URL.createObjectURL(file)
+    createdUrlRef.current = url
+    setAvatarPreview(url)   // show immediately
     setAvatarBusy(true)
     try {
       const fd = new FormData()
       fd.append('avatar', file)
       const res = await api.post('/auth/me/avatar', fd)
-      if (res.data?.avatar_url) { setAvatarPreview(null); await refreshUser?.() }
+      if (res.data?.avatar_url) {
+        // The server copy replaces the local preview — the blob URL is no longer needed.
+        URL.revokeObjectURL(url); createdUrlRef.current = null
+        setAvatarPreview(null); await refreshUser?.()
+      }
     } catch { /* backend may not exist yet — keep the local preview */ }
     finally { setAvatarBusy(false); if (fileRef.current) fileRef.current.value = '' }
   }
@@ -76,6 +91,7 @@ export function useProfileForm() {
   const removeAvatar = async () => {
     setAvatarBusy(true)
     try { await api.delete('/auth/me/avatar'); await refreshUser?.() } catch { /* noop */ }
+    if (createdUrlRef.current) { URL.revokeObjectURL(createdUrlRef.current); createdUrlRef.current = null }
     setAvatarPreview(null); setAvatarBusy(false)
   }
 

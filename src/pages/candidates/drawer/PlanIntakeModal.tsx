@@ -12,7 +12,7 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
-import { notifyError, notifySuccess } from '@/lib/notify'
+import { notifySuccess } from '@/lib/notify'
 import SelectMenu from '@/components/ui/SelectMenu'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useUsers } from '@/lib/queries'
@@ -27,6 +27,13 @@ const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 
 const panel: React.CSSProperties = { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', zIndex: 61, width: 440, maxWidth: '92vw', maxHeight: '88vh', overflowY: 'auto', background: 'var(--surface)', borderRadius: 12, padding: 22, boxShadow: '0 20px 60px rgba(0,0,0,0.18)' }
 const fieldLabel: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', marginBottom: 5 }
 const input: React.CSSProperties = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
+const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }
+
+// 422 field-error keys are snake_case; map them back to this form's field names.
+const API_TO_FORM: Record<string, string> = {
+  scheduled_at: 'when', type: 'type', duration_min: 'duration', modality: 'modality',
+  location_id: 'locationId', owner_id: 'ownerId', vacancy_id: 'vacancyId', application_id: 'applicationId',
+}
 
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string }
 const userName = (u: UserLike) => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
@@ -96,6 +103,10 @@ export default function PlanIntakeModal({
     return () => { alive = false }
   }, [vacancyId, vacancyOptions])
   const [saving, setSaving] = useState(false)
+  // 422 field errors (house pattern, mirrors AddCandidateModal/AddCustomerModal) +
+  // a non-field fallback banner — replaces the old generic-toast-only handling.
+  const [errors, setErrors] = useState<Record<string, boolean>>({})
+  const [submitErr, setSubmitErr] = useState<string | null>(null)
   const editing = !!existing
 
   // Selecting a type re-proposes its duration + modality (the user can still change them);
@@ -127,6 +138,7 @@ export default function PlanIntakeModal({
   const submit = async () => {
     if (!when) return
     setSaving(true)
+    setErrors({}); setSubmitErr(null)
     const body = {
       scheduled_at: when, type: type || 'intake', duration_min: duration, modality,
       location_id: locationId || null,
@@ -139,8 +151,18 @@ export default function PlanIntakeModal({
       else         await api.post(`/candidates/${candidateId}/appointments`, body)
       notifySuccess(t(editing ? 'work.intakeUpdated' : 'work.intakePlanned'))
       onCreated(); onClose()
-    } catch {
-      notifyError(t('work.intakeFailed'))
+    } catch (err) {
+      // Show field-level errors from 422 validation responses; fall back to the
+      // server's message (or a generic one) so the user isn't left guessing.
+      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
+      const apiErrors = e?.response?.data?.errors
+      if (apiErrors) {
+        const e2: Record<string, boolean> = {}
+        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
+        setErrors(e2)
+      } else {
+        setSubmitErr(e?.response?.data?.message ?? t('common:errorGeneric'))
+      }
     } finally { setSaving(false) }
   }
 
@@ -165,6 +187,7 @@ export default function PlanIntakeModal({
           <div style={fieldLabel}>{t('work.appointmentType')}</div>
           <SelectMenu value={type || null} onChange={pickType} placeholder={t('work.pickType')}
             options={typeOptions.map(x => ({ value: x.value, label: x.label }))} />
+          {errors.type && <div style={errMsg}>{t('common:required')}</div>}
         </div>
 
         {/* Date/time (default = today, rounded up to the quarter) + duration override. */}
@@ -172,11 +195,13 @@ export default function PlanIntakeModal({
           <div style={{ flex: 1 }}>
             <label htmlFor="intake-when" style={fieldLabel as React.CSSProperties}>{t('work.intakeWhen')}</label>
             <input id="intake-when" type="datetime-local" value={when} onChange={e => setWhen(e.target.value)} style={input} />
+            {errors.when && <div style={errMsg}>{t('common:required')}</div>}
           </div>
           <div style={{ width: 110 }}>
             <label htmlFor="intake-dur" style={fieldLabel as React.CSSProperties}>{t('work.duration')}</label>
             <input id="intake-dur" type="number" min={5} max={480} step={5} value={duration}
               onChange={e => setDuration(Number(e.target.value) || 0)} style={input} />
+            {errors.duration && <div style={errMsg}>{t('common:required')}</div>}
           </div>
         </div>
 
@@ -185,11 +210,13 @@ export default function PlanIntakeModal({
           <div style={{ flex: 1 }}>
             <div style={fieldLabel}>{t('work.modality')}</div>
             <SelectMenu value={whereValue} onChange={pickWhere} options={whereOptions} />
+            {(errors.modality || errors.locationId) && <div style={errMsg}>{t('common:required')}</div>}
           </div>
           <div style={{ flex: 1 }}>
             <div style={fieldLabel}>{t('work.owner')}</div>
             <SelectMenu value={ownerId || null} onChange={setOwnerId} placeholder={t('work.pickOwner')}
               options={users.map(u => ({ value: String(u.id), label: userName(u) }))} />
+            {errors.ownerId && <div style={errMsg}>{t('common:required')}</div>}
           </div>
         </div>
 
@@ -203,7 +230,17 @@ export default function PlanIntakeModal({
               ...(extraVacancy && !vacancyOptions.some(v => String(v.value) === extraVacancy.value) ? [extraVacancy] : []),
             ]} />
           <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{t(mode === 'appointment' ? 'work.appointmentVacancyHint' : 'work.intakeVacancyHint')}</div>
+          {(errors.vacancyId || errors.applicationId) && <div style={errMsg}>{t('common:required')}</div>}
         </div>
+
+        {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
+        {submitErr && (
+          <div role="alert" style={{ marginBottom: 14, padding: '8px 10px', fontSize: 12, borderRadius: 8,
+            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+            {submitErr}
+          </div>
+        )}
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>

@@ -9,6 +9,7 @@ import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import ViewSwitch from '@/components/ui/ViewSwitch'
 import OpportunitiesTable from './OpportunitiesTable'
 import OpportunitiesBoard from './OpportunitiesBoard'
 import OpportunityDrawer from './OpportunityDrawer'
@@ -193,25 +194,34 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
             </div>
           </div>
 
-          {/* Content */}
-          {view === 'table' ? (
-            <>
-              <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
-                {/* No row virtualization: a paginated (50/page) list is small, and virtualizing
-                    against a scroll container that unmounts on the board↔list toggle left the
-                    table blank on return (virtualizer measured 0). Sticky header still works. */}
-                <OpportunitiesTable rows={filtered} loading={loading} error={error} valueInHours={valueInHours} stages={stages}
-                  selectedId={selected?.id} onRowClick={selectOpportunity} stickyHeader
-                  selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
-              </div>
-              <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
-                pageSize={pageSize} onPageChange={setPage}
-                onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
-            </>
-          ) : (
-            <OpportunitiesBoard rows={filteredAll} stages={stages}
-              onMove={handleMove} selectedId={selected?.id} onSelect={selectOpportunity} />
-          )}
+          {/* Table ⇄ board — ViewSwitch keeps both mounted (display toggle, not
+              unmount) so the table's virtualizer never remeasures 0 on returning
+              from the board (§ViewSwitch, mirrors candidates/customers/matches);
+              row virtualization is now safe to enable. */}
+          <ViewSwitch active={view} views={[
+            {
+              id: 'table',
+              render: () => (
+                <>
+                  <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', padding: '0 20px 20px' }}>
+                    <OpportunitiesTable rows={filtered} loading={loading} error={error} valueInHours={valueInHours} stages={stages}
+                      selectedId={selected?.id} onRowClick={selectOpportunity} stickyHeader scrollParentRef={tableScrollRef}
+                      selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
+                  </div>
+                  <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
+                    pageSize={pageSize} onPageChange={setPage}
+                    onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+                </>
+              ),
+            },
+            {
+              id: 'board',
+              render: () => (
+                <OpportunitiesBoard rows={filteredAll} stages={stages}
+                  onMove={handleMove} selectedId={selected?.id} onSelect={selectOpportunity} />
+              ),
+            },
+          ]} />
         </div>
 
         {/* Drill-down drawer — remounts (key) per opportunity so the tab re-inits */}

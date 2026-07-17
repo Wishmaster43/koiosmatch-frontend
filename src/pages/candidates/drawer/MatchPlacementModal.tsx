@@ -39,6 +39,17 @@ const lbl: React.CSSProperties = { fontSize: 12, color: 'var(--text-muted)', mar
 const input: React.CSSProperties = { width: '100%', height: 36, padding: '0 10px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, outline: 'none', boxSizing: 'border-box', background: 'var(--surface)', color: 'var(--text)' }
 const sectionTitle: React.CSSProperties = { fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', margin: '18px 0 10px' }
 const row2: React.CSSProperties = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }
+const errMsg: React.CSSProperties = { fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }
+
+// 422 field-error keys are snake_case; map them back to this form's field/state names.
+const API_TO_FORM: Record<string, string> = {
+  candidate_id: 'pickedCandidateId', customer_id: 'customerId',
+  customer_location_id: 'locationId', customer_department_id: 'departmentId', contact_id: 'contactId',
+  function_title: 'func', contract_type: 'contractType', start_date: 'startDate', end_date: 'endDate',
+  hours_per_week: 'hours', cao: 'cao', scale: 'scale', step: 'step',
+  purchase_rate: 'purchase', sell_rate: 'sell', cost_center: 'costCenter', billing_emails: 'billingEmails',
+  remarks: 'remarks', vacancy_id: 'vacancyId', owner_id: 'ownerId',
+}
 // Consistent search-box width for the relational pickers below — the widened
 // panel gives each row2 column ~330px, so a slightly wider menu than the shared
 // component's 220px default reads better without overflowing it.
@@ -80,9 +91,11 @@ function todayISO(): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-// A labelled field wrapper.
-function F({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div><div style={lbl}>{label}</div>{children}</div>
+// A labelled field wrapper — optional `error` shows the shared required-field
+// message (422 field mapping below sets these booleans).
+function F({ label, error, children }: { label: string; error?: boolean; children: React.ReactNode }) {
+  const { t } = useTranslation('common')
+  return <div><div style={lbl}>{label}</div>{children}{error && <div style={errMsg}>{t('required')}</div>}</div>
 }
 
 export default function MatchPlacementModal({ candidateId: fixedCandidateId, onClose, onCreated }: {
@@ -154,6 +167,10 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
   const [remarks, setRemarks] = useState('')
   const [remarksExpanded, setRemarksExpanded] = useState(false)
   const [saving, setSaving] = useState(false)
+  // 422 field errors (house pattern, mirrors AddCandidateModal/AddCustomerModal) +
+  // a non-field fallback banner — replaces the old generic-toast-only handling.
+  const [errors, setErrors] = useState<Record<string, boolean>>({})
+  const [submitErr, setSubmitErr] = useState<string | null>(null)
 
   // Rate proposal (MATCH-PLACEMENT-2): debounced lookup keyed on customer + function
   // (+ optional cao/scale/step). Prefills empty rate fields + drives the deviation
@@ -224,6 +241,7 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
   const submit = async () => {
     if (!candidateId || !customerId || !func) return
     setSaving(true)
+    setErrors({}); setSubmitErr(null)
     const body: Record<string, unknown> = {
       candidate_id: candidateId,
       customer_id: customerId,
@@ -255,8 +273,18 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
       }
       notifySuccess(t('placement.created'))
       onCreated(); onClose()
-    } catch {
-      notifyError(t('placement.failed'))
+    } catch (err) {
+      // Show field-level errors from 422 validation responses; fall back to the
+      // server's message (or a generic one) so the user isn't left guessing.
+      const e = err as { response?: { data?: { errors?: Record<string, unknown>; message?: string } } }
+      const apiErrors = e?.response?.data?.errors
+      if (apiErrors) {
+        const e2: Record<string, boolean> = {}
+        Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
+        setErrors(e2)
+      } else {
+        setSubmitErr(e?.response?.data?.message ?? t('common:errorGeneric'))
+      }
     } finally { setSaving(false) }
   }
 
@@ -308,7 +336,7 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
           {/* Candidate picker — only when the modal wasn't opened from a candidate.
               Searchable (job 18): the candidate list can run into the hundreds. */}
           {!fixedCandidateId && (
-            <F label={t('placement.candidate')}>
+            <F label={t('placement.candidate')} error={errors.pickedCandidateId}>
               <CreatableSelect value={pickedCandidateId || null} onChange={setPickedCandidateId} allowCreate={false}
                 placeholder={t('placement.pickCandidate')} menuWidth={pickerMenuWidth}
                 options={candidateOptions.map(c => ({ value: String(c.id), label: c.name ?? '—' }))} />
@@ -317,12 +345,12 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
           <div style={row2}>
             {/* Klant/locatie — typeable searchable pickers (job 17/18), never free-text
                 create (allowCreate={false}: a customer/location is a real relational id). */}
-            <F label={t('placement.customer')}>
+            <F label={t('placement.customer')} error={errors.customerId}>
               <CreatableSelect value={customerId || null} onChange={setCustomerId} allowCreate={false}
                 placeholder={t('placement.pickCustomer')} menuWidth={pickerMenuWidth}
                 options={customerOptions.map(c => ({ value: String(c.value), label: c.label }))} />
             </F>
-            <F label={t('placement.location')}>
+            <F label={t('placement.location')} error={errors.locationId}>
               <CreatableSelect value={locationId || null} onChange={v => { setLocationId(v); setDepartmentId('') }}
                 allowCreate={false} menuWidth={pickerMenuWidth}
                 placeholder={customerId ? t('placement.pickLocation') : t('placement.pickCustomerFirst')}
@@ -331,7 +359,7 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
           </div>
           <div style={row2}>
             {/* Afdeling/contactpersoon — same searchable pattern. */}
-            <F label={t('placement.department')}>
+            <F label={t('placement.department')} error={errors.departmentId}>
               <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
                 placeholder={t('placement.optional')} menuWidth={pickerMenuWidth} options={opt(departments)} />
             </F>
@@ -358,23 +386,24 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
                 <CreatableSelect value={contactId || null} onChange={setContactId} allowCreate={false} menuWidth={pickerMenuWidth}
                   placeholder={customerId ? t('placement.pickContact') : t('placement.pickCustomerFirst')} options={opt(contacts)} />
               )}
+              {errors.contactId && <div style={errMsg}>{t('common:required')}</div>}
             </div>
           </div>
           <div style={row2}>
             {/* Functie — searchable (tenant lookup, can run to dozens of job titles);
                 Recruiter stays a plain SelectMenu (small, not in job 18's long-list scope). */}
-            <F label={t('placement.function')}>
+            <F label={t('placement.function')} error={errors.func}>
               <CreatableSelect value={func || null} onChange={setFunc} allowCreate={false}
                 placeholder={t('placement.pickFunction')} menuWidth={pickerMenuWidth}
                 options={functions.map(f => ({ value: f, label: f }))} />
             </F>
-            <F label={t('placement.owner')}>
+            <F label={t('placement.owner')} error={errors.ownerId}>
               <SelectMenu value={ownerId || null} onChange={setOwnerId} placeholder={t('placement.optional')}
                 options={users.map(u => ({ value: String(u.id), label: u.name ?? '—' }))} />
             </F>
           </div>
           {/* Vacature — searchable, mirrors PlanIntakeModal's vacancy picker. */}
-          <F label={t('placement.vacancyOptional')}>
+          <F label={t('placement.vacancyOptional')} error={errors.vacancyId}>
             <CreatableSelect value={vacancyId || null} onChange={setVacancyId} allowCreate={false}
               placeholder={t('placement.noVacancy')} menuWidth={340}
               options={vacancyOptions.map(v => ({ value: String(v.value), label: v.client ? `${v.label} · ${v.client}` : v.label }))} />
@@ -404,29 +433,29 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
         <div style={sectionTitle}>{t('placement.contract')}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={row2}>
-            <F label={t('placement.contractType')}>
+            <F label={t('placement.contractType')} error={errors.contractType}>
               <SelectMenu value={contractType || null} onChange={setContractType} placeholder={t('placement.pickContractType')}
                 options={contractTypes.map(c => ({ value: c, label: c }))} />
             </F>
-            <F label={t('placement.cao')}><input value={cao} onChange={e => setCao(e.target.value)} style={input} placeholder="VVT" /></F>
+            <F label={t('placement.cao')} error={errors.cao}><input value={cao} onChange={e => setCao(e.target.value)} style={input} placeholder="VVT" /></F>
           </div>
           <div style={row2}>
-            <F label={t('placement.startDate')}><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={input} /></F>
-            <F label={t('placement.endDate')}><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={input} /></F>
+            <F label={t('placement.startDate')} error={errors.startDate}><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={input} /></F>
+            <F label={t('placement.endDate')} error={errors.endDate}><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={input} /></F>
           </div>
-          <F label={t('placement.hoursPerWeek')}><input type="number" min={1} max={40} value={hours} onChange={e => setHours(e.target.value)} style={{ ...input, width: 120 }} /></F>
+          <F label={t('placement.hoursPerWeek')} error={errors.hours}><input type="number" min={1} max={40} value={hours} onChange={e => setHours(e.target.value)} style={{ ...input, width: 120 }} /></F>
         </div>
 
         {/* ── Financieel ── */}
         <div style={sectionTitle}>{t('placement.financial')}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div style={row2}>
-            <F label={t('placement.scale')}><input value={scale} onChange={e => setScale(e.target.value)} style={input} /></F>
-            <F label={t('placement.step')}><input value={step} onChange={e => setStep(e.target.value)} style={input} /></F>
+            <F label={t('placement.scale')} error={errors.scale}><input value={scale} onChange={e => setScale(e.target.value)} style={input} /></F>
+            <F label={t('placement.step')} error={errors.step}><input value={step} onChange={e => setStep(e.target.value)} style={input} /></F>
           </div>
           <div style={row2}>
-            <F label={t('placement.purchaseRate')}><input type="number" step="0.01" value={purchase} onChange={e => setPurchase(e.target.value)} style={input} placeholder="22,18" /></F>
-            <F label={t('placement.sellRate')}><input type="number" step="0.01" value={sell} onChange={e => setSell(e.target.value)} style={input} placeholder="62,10" /></F>
+            <F label={t('placement.purchaseRate')} error={errors.purchase}><input type="number" step="0.01" value={purchase} onChange={e => setPurchase(e.target.value)} style={input} placeholder="22,18" /></F>
+            <F label={t('placement.sellRate')} error={errors.sell}><input type="number" step="0.01" value={sell} onChange={e => setSell(e.target.value)} style={input} placeholder="62,10" /></F>
           </div>
           {/* Rate proposal hint — only fills EMPTY fields above (never overwrites input). */}
           <RateProposalHint proposal={proposal} />
@@ -440,11 +469,11 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
           <div style={row2}>
             {/* Cost centre — proposed from the customer/location cascade above; typing
                 here freezes it (job 21/22 — never overwritten again after that). */}
-            <F label={t('placement.costCenter')}>
+            <F label={t('placement.costCenter')} error={errors.costCenter}>
               <input value={costCenter} onChange={e => { setCostCenterDirty(true); setCostCenter(e.target.value) }}
                 style={input} placeholder="KP-…" />
             </F>
-            <F label={t('placement.billingEmail')}>
+            <F label={t('placement.billingEmail')} error={errors.billingEmails}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {billingEmails.map((em, i) => (
                   <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -463,11 +492,20 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
           </div>
           {/* Opmerkingen — the shared rich-text block (house rule, CLAUDE.md §3A/§4),
               not a bare textarea; stored/POSTed as sanitised HTML. */}
-          <F label={t('placement.remarks')}>
+          <F label={t('placement.remarks')} error={errors.remarks}>
             <RichTextEditor value={remarks} onChange={setRemarks}
               expanded={remarksExpanded} onToggleExpand={() => setRemarksExpanded(v => !v)} />
           </F>
         </div>
+
+        {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
+        {submitErr && (
+          <div role="alert" style={{ marginTop: 12, padding: '8px 10px', fontSize: 12, borderRadius: 8,
+            color: 'var(--color-danger)', background: 'var(--color-danger-bg)',
+            border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)' }}>
+            {submitErr}
+          </div>
+        )}
 
         {/* Deviation guard (Danny's "weet je het zeker?"): the entered rates differ from a
             FOUND agreement proposal — calm inline confirm, one extra click, no hard block. */}

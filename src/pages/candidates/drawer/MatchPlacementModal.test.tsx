@@ -15,6 +15,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MatchPlacementModal from './MatchPlacementModal'
+import api from '@/lib/api'
 
 // A minimal customer fixture exercising all three cascade levels: the customer's
 // OWN cost centre/billing email, a location that overrides both, and a location
@@ -169,5 +170,40 @@ describe('MatchPlacementModal · opmerkingen is the shared rich-text block (job 
     render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     await screen.findByRole('dialog') // let the candidate-branch lookup settle first
     expect(screen.getByTestId('rte')).toBeInTheDocument()
+  })
+})
+
+// Regression: the catch used to only fire a generic toast — mirrors the house
+// 422 pattern (AddCandidateModal/AddCustomerModal): map errors.{field} onto the
+// matching field, fall back to a server message/generic banner otherwise.
+describe('MatchPlacementModal · 422 field mapping', () => {
+  const pickCustomerAndFunction = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
+    await user.click(screen.getByRole('button', { name: 'placement.pickFunction' }))
+    await user.click(await screen.findByRole('button', { name: 'Verzorgende IG' }))
+  }
+
+  it('maps field-level 422 errors onto the corresponding fields', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { data: { errors: { function_title: ['required'], start_date: ['invalid'] } } } })
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+    await pickCustomerAndFunction(user)
+
+    await user.click(screen.getByRole('button', { name: 'placement.create' }))
+    // Both function_title→func and start_date→startDate resolve to the shared inline message.
+    expect(await screen.findAllByText('required')).toHaveLength(2)
+  })
+
+  it('falls back to the server message as a banner when the 422 carries no field errors', async () => {
+    vi.mocked(api.post).mockRejectedValueOnce({ response: { data: { message: 'Kandidaat is al geplaatst.' } } })
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await screen.findByRole('dialog')
+    await pickCustomerAndFunction(user)
+
+    await user.click(screen.getByRole('button', { name: 'placement.create' }))
+    expect(await screen.findByText('Kandidaat is al geplaatst.')).toBeInTheDocument()
   })
 })

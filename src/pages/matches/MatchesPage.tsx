@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, LayoutList, Kanban, Archive } from 'lucide-react'
@@ -21,6 +21,7 @@ import MatchesBulkBar from './MatchesBulkBar'
 import MatchPlacementModal from '@/pages/candidates/drawer/MatchPlacementModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import ViewSwitch from '@/components/ui/ViewSwitch'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import { useOpenFromIntent } from '@/context/NavigationContext'
@@ -225,6 +226,8 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   // View toggle: table ⇄ board (planboard). Board columns = the tenant match
   // statuses (R-1b lookup + seed fallback) so there are always columns to drag.
   const [view, setView] = usePageMemory<'table' | 'board'>('matches.view', 'table')
+  // Scroll container for row virtualization — DataTable virtualizes against it.
+  const tableScrollRef = useRef<HTMLDivElement>(null)
   const stageColumns: BoardColumn[] = useMemo(
     () => matchStatuses.map(st => ({ key: st.value, label: st.label, color: st.color ?? '#6B7280' })), [matchStatuses])
 
@@ -304,25 +307,34 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         </div>
       </div>
 
-      {/* Board (planboard) or table + pagination */}
-      {view === 'board' ? (
-        <MatchesBoard rows={filteredAll} columns={stageColumns} onMove={handleMove}
-          onSelect={setSelected} selectedId={selected?.id} />
-      ) : (
-        <>
-          {/* No row virtualization here: the table unmounts in board view, and a
-              remounted virtualizer renders an empty body. Matches lists are small. */}
-          <div style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
-            <MatchesTable rows={paged} loading={loading} error={error} stickyHeader
-              onRowClick={setSelected} selectedId={selected?.id}
-              selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
-          </div>
+      {/* Table ⇄ board — ViewSwitch keeps both mounted (display toggle, not
+          unmount) so the table's virtualizer never remeasures 0 on returning from
+          the board (§ViewSwitch); row virtualization is now safe to enable. */}
+      <ViewSwitch active={view} views={[
+        {
+          id: 'table',
+          render: () => (
+            <>
+              <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
+                <MatchesTable rows={paged} loading={loading} error={error} stickyHeader scrollParentRef={tableScrollRef}
+                  onRowClick={setSelected} selectedId={selected?.id}
+                  selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
+              </div>
 
-          <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
-            pageSize={pageSize} onPageChange={setPage}
-            onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
-        </>
-      )}
+              <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
+                pageSize={pageSize} onPageChange={setPage}
+                onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+            </>
+          ),
+        },
+        {
+          id: 'board',
+          render: () => (
+            <MatchesBoard rows={filteredAll} columns={stageColumns} onMove={handleMove}
+              onSelect={setSelected} selectedId={selected?.id} />
+          ),
+        },
+      ]} />
       </div>
 
       {/* Read-only drill-down drawer */}

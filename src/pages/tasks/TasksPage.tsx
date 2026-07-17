@@ -16,6 +16,7 @@ import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
+import ViewSwitch from '@/components/ui/ViewSwitch'
 import TasksTable from './TasksTable'
 import TasksBulkBar from './TasksBulkBar'
 import PaginationBar from '@/components/ui/PaginationBar'
@@ -331,32 +332,42 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
           </div>
         </div>
 
-        {/* Bulk action bar — shown above the table when ≥1 row is selected. */}
-        {view === 'table' && selectedIds.size > 0 && (
-          <div style={{ padding: '8px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-            <TasksBulkBar count={selectedIds.size} onClear={clearSelection}
-              onSetStatus={bulkSetStatus} onSetPriority={bulkSetPriority} onSetAssignee={bulkSetAssignee}
-              onArchive={bulkArchive} canArchive={canArchive}
-              statuses={statuses} priorities={priorities} users={users} />
-          </div>
-        )}
-
-        {/* Content */}
-        {view === 'table' ? (
-          <>
-            <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
-              <TasksTable rows={filtered} loading={loading} error={error}
-                selectedId={selected?.id} onSelect={selectTask} stickyHeader scrollParentRef={tableScrollRef}
-                selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
-            </div>
-            <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
-              pageSize={pageSize} onPageChange={p => { setPage(p); setSelectedIds(new Set()) }}
-              onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
-          </>
-        ) : (
-          <TasksBoard rows={filtered} columns={columns} onMove={handleMove}
-            selectedId={selected?.id} onSelect={selectTask} />
-        )}
+        {/* Table ⇄ board — ViewSwitch keeps both mounted (display toggle, not
+            unmount) so the table's virtualizer never remeasures 0 on returning
+            from the board (§ViewSwitch, mirrors candidates/customers). */}
+        <ViewSwitch active={view} views={[
+          {
+            id: 'table',
+            render: () => (
+              <>
+                {/* Bulk action bar — shown above the table when ≥1 row is selected. */}
+                {selectedIds.size > 0 && (
+                  <div style={{ padding: '8px 24px', background: 'var(--bg)', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
+                    <TasksBulkBar count={selectedIds.size} onClear={clearSelection}
+                      onSetStatus={bulkSetStatus} onSetPriority={bulkSetPriority} onSetAssignee={bulkSetAssignee}
+                      onArchive={bulkArchive} canArchive={canArchive}
+                      statuses={statuses} priorities={priorities} users={users} />
+                  </div>
+                )}
+                <div ref={tableScrollRef} style={{ flex: 1, overflow: 'auto', padding: '0 24px 16px' }}>
+                  <TasksTable rows={filtered} loading={loading} error={error}
+                    selectedId={selected?.id} onSelect={selectTask} stickyHeader scrollParentRef={tableScrollRef}
+                    selectable selectedIds={selectedIds} onToggleRow={toggleRow} onToggleAll={toggleAll} />
+                </div>
+                <PaginationBar page={page} totalPages={lastPage} totalRows={totalRows}
+                  pageSize={pageSize} onPageChange={p => { setPage(p); setSelectedIds(new Set()) }}
+                  onPageSizeChange={n => { setPageSize(n); setPage(1) }} />
+              </>
+            ),
+          },
+          {
+            id: 'board',
+            render: () => (
+              <TasksBoard rows={filtered} columns={columns} onMove={handleMove}
+                selectedId={selected?.id} onSelect={selectTask} />
+            ),
+          },
+        ]} />
       </div>
 
       {/* Detail drawer */}

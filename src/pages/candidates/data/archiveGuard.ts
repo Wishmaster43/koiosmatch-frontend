@@ -54,11 +54,19 @@ export const needsLiveCheck = (c?: Candidate | null, funnelTypes: LookupItem[] =
 
 // The nested application ref lacks a funnel slug — resolve the authoritative
 // phase_key per id (bounded: a candidate rarely holds more than a handful).
-const isLiveApplication = async (id: Id): Promise<boolean> => {
+// "Live" is FLAG-driven (is_match/is_rejected on the tenant funnel lookup), never
+// the literal 'hired'/'rejected' key (A1, mirrors needsLiveCheck above) — the old
+// hardcoded check made a tenant-renamed terminal stage permanently unarchivable
+// (the WRITE side already resolved flags; this READ side didn't). `funnelTypes`
+// defaults to the seed for the same reason as needsLiveCheck: fetchLiveBlockers'
+// two callers don't thread the live tenant lookup through yet.
+const isLiveApplication = async (id: Id, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES): Promise<boolean> => {
   try {
     const r = await api.get(`/applications/${id}`)
     const key = unwrap<{ phase_key?: string }>(r)?.phase_key
-    return !!key && key !== 'hired' && key !== 'rejected'
+    if (!key) return false
+    const meta = funnelTypes.find(f => f.value === key)
+    return !(meta?.is_match || meta?.is_rejected)
   } catch {
     // Unreadable application (deleted/404 mid-flight) — don't block on it.
     return false
@@ -67,7 +75,7 @@ const isLiveApplication = async (id: Id): Promise<boolean> => {
 
 // The one full check: GET the candidate detail, then resolve which nested
 // applications are still live and which matches are still open.
-export async function fetchLiveBlockers(id: Id): Promise<LiveBlockers> {
+export async function fetchLiveBlockers(id: Id, funnelTypes: LookupItem[] = DEFAULT_FUNNEL_TYPES): Promise<LiveBlockers> {
   const r = await api.get(`/candidates/${id}`)
   const data = (unwrap(r) ?? {}) as {
     applications?: Array<{ id: Id; vacancyTitle?: string | null; stageLabel?: string | null; stageColor?: string | null }>
@@ -76,7 +84,7 @@ export async function fetchLiveBlockers(id: Id): Promise<LiveBlockers> {
   const rawApps = data.applications ?? []
   const rawMatches = data.matches ?? []
 
-  const liveFlags = await Promise.all(rawApps.map(a => isLiveApplication(a.id)))
+  const liveFlags = await Promise.all(rawApps.map(a => isLiveApplication(a.id, funnelTypes)))
   const applications: BlockingApplication[] = rawApps
     .filter((_, i) => liveFlags[i])
     .map(a => ({ id: a.id, vacancyTitle: a.vacancyTitle || '—', stageLabel: a.stageLabel || '—', stageColor: a.stageColor ?? null }))

@@ -112,6 +112,29 @@ describe('fetchLiveBlockers', () => {
     const result = await fetchLiveBlockers('c3')
     expect(result.applications).toEqual([])
   })
+
+  // A1 root-cause (READ side): the old check hardcoded the literal 'hired'/'rejected'
+  // phase_key, so a tenant-renamed terminal stage never resolved as terminal — a
+  // candidate stuck on such an application became permanently unarchivable. The
+  // flag-driven check (mirrors needsLiveCheck/resolveApplication) must resolve it
+  // off is_match/is_rejected via the passed funnelTypes lookup instead.
+  it('is flag-driven: a renamed terminal stage (is_match/is_rejected) is not a live blocker', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) => {
+      if (url === '/candidates/c4') return Promise.resolve({ data: { data: {
+        applications: [
+          { id: 'a1', vacancyTitle: 'X', stageLabel: 'Aangenomen', stageColor: null },
+          { id: 'a2', vacancyTitle: 'Y', stageLabel: 'Voorgesteld', stageColor: null },
+        ],
+        matches: [],
+      } } })
+      if (url === '/applications/a1') return Promise.resolve({ data: { data: { phase_key: 'aangenomen' } } })
+      if (url === '/applications/a2') return Promise.resolve({ data: { data: { phase_key: 'proposal' } } })
+      return Promise.reject(new Error('unexpected url ' + url))
+    })
+    const result = await fetchLiveBlockers('c4', RENAMED_FUNNEL)
+    // 'aangenomen' is flagged is_match (terminal) — filtered out; 'proposal' (non-terminal) stays a blocker.
+    expect(result.applications.map(a => a.id)).toEqual(['a2'])
+  })
 })
 
 describe('normalizeLivePayload / liveFromError', () => {

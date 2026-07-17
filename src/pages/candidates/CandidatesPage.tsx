@@ -25,6 +25,7 @@ import HeaderSearch from '@/components/ui/HeaderSearch'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import ViewSwitch from '@/components/ui/ViewSwitch'
 import { BTN_H } from '@/config/buttonMetrics'
 import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
 import { usePools } from '@/lib/usePools'
@@ -348,56 +349,68 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
             )}
           </div>
 
-          {/* Map view (STRAAL-1 v2, Danny 2026-07-06): map LEFT, the filtered candidate
-              table RIGHT — one radius search drives both panes. Lazy Leaflet load. */}
-          {view === 'map' ? (
-            <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
-              <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
-                <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
-                  <CandidatesMapView rows={filtered} center={mapCenter} radiusKm={mapStraalActive ? mapRadius : 0} padded={false}
-                    onCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
-                    onRadiusChange={(km) => { setMapRadius(km); setMapStraalActive(true) }}
-                    onClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
-                    onPick={(id) => selectCandidate({ id } as Candidate)} />
-                </Suspense>
-              </div>
-              {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
-              <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
-                  <CandidatesTable rows={filtered} loading={loading} selectedId={selected?.id}
-                    onSelect={selectCandidate} onOpenTab={selectCandidate} />
+          {/* Table ⇄ map — ViewSwitch keeps both mounted (display toggle, not unmount)
+              so the table's virtualizer never remeasures 0 on returning from the
+              map (§ViewSwitch). Map LEFT, filtered candidate table RIGHT when active,
+              one radius search drives both panes. Lazy Leaflet load. */}
+          <ViewSwitch active={view} views={[
+            {
+              id: 'table',
+              render: () => (
+                <>
+                  <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', padding: '0 24px 16px' }}>
+                    {error && <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>}
+                    <CandidatesTable
+                      rows={filtered}
+                      loading={loading}
+                      selectedId={selected?.id}
+                      onSelect={selectCandidate}
+                      onOpenTab={selectCandidate}
+                      selectable
+                      selectedIds={selectedIds}
+                      onToggleRow={toggleRow}
+                      onToggleAll={toggleAll}
+                      stickyHeader
+                      scrollParentRef={tableScrollRef}
+                    />
+                  </div>
+                  <PaginationBar
+                    page={page}
+                    totalPages={lastPage}
+                    totalRows={total}
+                    pageSize={pageSize}
+                    onPageChange={setPage}
+                    onPageSizeChange={handlePageSizeChange}
+                  />
+                </>
+              ),
+            },
+            {
+              id: 'map',
+              render: () => (
+                <div style={{ flex: 1, minHeight: 0, display: 'flex', gap: 14, padding: '0 24px 16px' }}>
+                  <div style={{ flex: '1.1 1 0', minWidth: 400, display: 'flex', flexDirection: 'column' }}>
+                    <Suspense fallback={<div style={{ padding: 24, fontSize: 12, color: 'var(--text-muted)' }}>{t('common:map.loading')}</div>}>
+                      <CandidatesMapView rows={filtered} center={mapCenter} radiusKm={mapStraalActive ? mapRadius : 0} padded={false}
+                        onCenterChange={(lat, lng) => { setMapCenter({ lat, lng }); setMapStraalActive(true) }}
+                        onRadiusChange={(km) => { setMapRadius(km); setMapStraalActive(true) }}
+                        onClearRadius={mapStraalActive ? () => setMapStraalActive(false) : undefined}
+                        onPick={(id) => selectCandidate({ id } as Candidate)} />
+                    </Suspense>
+                  </div>
+                  {/* Right pane: the same server-filtered rows as a table (row click = drawer). */}
+                  <div style={{ flex: '1 1 0', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ flex: 1, overflowY: 'auto', overflowX: 'auto' }}>
+                      <CandidatesTable rows={filtered} loading={loading} selectedId={selected?.id}
+                        onSelect={selectCandidate} onOpenTab={selectCandidate} />
+                    </div>
+                    <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
+                      onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
+                  </div>
                 </div>
-                <PaginationBar page={page} totalPages={lastPage} totalRows={total} pageSize={pageSize}
-                  onPageChange={setPage} onPageSizeChange={handlePageSizeChange} />
-              </div>
-            </div>
-          ) : (
-          <div ref={tableScrollRef} style={{ flex: 1, overflowY: 'auto', overflowX: 'auto', padding: '0 24px 16px' }}>
-            {error && <ErrorBanner style={{ marginBottom: 12 }}>{error}</ErrorBanner>}
-            <CandidatesTable
-              rows={filtered}
-              loading={loading}
-              selectedId={selected?.id}
-              onSelect={selectCandidate}
-              onOpenTab={selectCandidate}
-              selectable
-              selectedIds={selectedIds}
-              onToggleRow={toggleRow}
-              onToggleAll={toggleAll}
-              stickyHeader
-              scrollParentRef={tableScrollRef}
-            />
-          </div>
-          )}
-
-          {view !== 'map' && <PaginationBar
-            page={page}
-            totalPages={lastPage}
-            totalRows={total}
-            pageSize={pageSize}
-            onPageChange={setPage}
-            onPageSizeChange={handlePageSizeChange}
-          />}
+              ),
+            },
+          ]} />
         </div>
 
         {/* Drawer — remounts (key) when the full detail arrives so the tabs
