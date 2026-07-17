@@ -3,7 +3,7 @@
  * a colour picker (swatch + popup), a colour badge, and a drag-to-reorder list.
  */
 import { useState, useEffect, useRef } from 'react'
-import { GripVertical } from 'lucide-react'
+import { GripVertical, Check } from 'lucide-react'
 import { COLOR_PRESETS } from '@/lib/colorPresets'
 
 function ColorPickerPopup({ color, onChange, onClose }) {
@@ -62,6 +62,28 @@ export function ColorBadge({ label, color }) {
                    background: bg, color: color, border: `1px solid ${color}44` }}>
       {label}
     </span>
+  )
+}
+
+// Per-row "Standaard" (is_default) singleton toggle — soft-chip convention (§4):
+// tinted primary background/border, never a solid fill. Active = calm filled pill
+// (not clickable, it's already the default); inactive = a lighter, clickable pill
+// that promotes this row. The caller owns the singleton flip (only one row true).
+export function DefaultToggle({ active, onClick, busy, activeLabel, inactiveLabel }) {
+  return (
+    <button type="button" onClick={onClick} disabled={active || busy}
+      title={active ? activeLabel : inactiveLabel}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4, height: 22, padding: '0 9px',
+        fontSize: 11, fontWeight: active ? 600 : 500, borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
+        border: `1px solid color-mix(in srgb, var(--color-primary) ${active ? 45 : 28}%, transparent)`,
+        background: `color-mix(in srgb, var(--color-primary) ${active ? 16 : 8}%, transparent)`,
+        color: 'var(--color-primary)', cursor: active || busy ? 'default' : 'pointer',
+        opacity: busy ? 0.6 : 1,
+      }}>
+      {active && <Check size={10} />}
+      {active ? activeLabel : inactiveLabel}
+    </button>
   )
 }
 

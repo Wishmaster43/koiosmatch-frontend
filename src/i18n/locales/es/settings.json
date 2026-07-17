@@ -19,7 +19,9 @@
     "back": "Atrás",
     "next": "Siguiente",
     "edit": "Editar",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "default": "Predeterminado",
+    "setDefault": "Marcar como predeterminado"
   },
   "groups": {
     "kpis": "KPI",
@@ -162,6 +164,7 @@
     "email_log": "Registro de correo",
     "whatsapp_log": "Registro de mensajes",
     "appointment_types": "Tipos de cita",
+    "appointment_locations": "Ubicaciones de cita",
     "candidate_skill_levels": "Niveles de habilidad",
     "wa_message_types": "Tipos de mensajes",
     "candidate_conversion": "Conversión",
@@ -1553,6 +1556,11 @@
     "phone": "Teléfono",
     "isIntake": "Es un intake",
     "isIntakeDesc": "Los tipos con este indicador cuentan como intake."
+  },
+  "appointmentLocations": {
+    "title": "Ubicaciones de cita",
+    "subtitle": "Dónde tiene lugar la cita (p. ej. Oficina, En línea, Teléfono, En el cliente).",
+    "add": "Añadir ubicación"
   },
   "skillLevels": {
     "title": "Niveles de habilidad",

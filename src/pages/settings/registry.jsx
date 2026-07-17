@@ -47,6 +47,7 @@ import MatchTemplatesSettings from './sections/MatchTemplatesSettings'
 import { TaskStatusSettings, TaskTypeSettings, TaskPrioritySettings } from './sections/TaskSettings'
 import { MatchStatusSettings } from './sections/MatchSettings'
 import { AppointmentTypeSettings } from './sections/AppointmentTypeSettings'
+import { AppointmentLocationSettings } from './sections/AppointmentLocationSettings'
 import { SkillLevelSettings } from './sections/SkillLevelSettings'
 import { OutreachStatusSettings } from './sections/OutreachSettings'
 import RejectionSettings from './sections/RejectionSettings'
@@ -213,6 +214,7 @@ export const NAV_GROUPS = [
     items: [
       { id: 'match_statuses', icon: Tags, component: MatchStatusSettings },
       { id: 'appointment_types', icon: CalendarCheck, component: AppointmentTypeSettings },
+      { id: 'appointment_locations', icon: MapPin, component: AppointmentLocationSettings },
       { id: 'match_display', icon: Palette, schema: matchDisplay },
     ],
   },
@@ -309,7 +311,10 @@ export const NAV_GROUPS = [
   {
     key: 'integrations', icon: Store,
     items: [
-      { id: 'mod_shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresPage: 'shiftmanager' },
+      // SM-MODULE-TABS-1 (Danny 2026-07-16): visible when EITHER the 'sm' reporting
+      // module OR the ShiftManager app/koppeling is on (not requiresPage — that ANDs
+      // with just the module). See SettingsPage's requiresModuleOrApp filter.
+      { id: 'mod_shiftmanager', icon: BarChart2, component: ShiftmanagerModuleSettings, requiresModuleOrApp: { module: 'sm', app: 'shiftmanager' } },
       { id: 'apikeys', icon: Key, component: ApiKeysSettings },
       { id: 'webhooks', icon: Webhook, component: WebhooksSettings },
       { id: 'importeren', icon: Download, component: ImporterenSettings },

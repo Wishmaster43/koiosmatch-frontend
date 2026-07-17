@@ -19,7 +19,9 @@
     "back": "Retour",
     "next": "Suivant",
     "edit": "Modifier",
-    "close": "Fermer"
+    "close": "Fermer",
+    "default": "Par défaut",
+    "setDefault": "Définir par défaut"
   },
   "groups": {
     "kpis": "KPI",
@@ -162,6 +164,7 @@
     "email_log": "Journal e-mail",
     "whatsapp_log": "Journal des messages",
     "appointment_types": "Types de rendez-vous",
+    "appointment_locations": "Lieux de rendez-vous",
     "candidate_skill_levels": "Niveaux de compétence",
     "wa_message_types": "Types de messages",
     "candidate_conversion": "Conversion",
@@ -1553,6 +1556,11 @@
     "phone": "Téléphone",
     "isIntake": "Est un entretien",
     "isIntakeDesc": "Les types avec cet indicateur comptent comme un entretien."
+  },
+  "appointmentLocations": {
+    "title": "Lieux de rendez-vous",
+    "subtitle": "Où se déroule un rendez-vous (ex. Bureau, En ligne, Téléphone, Chez le client).",
+    "add": "Ajouter un lieu"
   },
   "skillLevels": {
     "title": "Niveaux de compétence",

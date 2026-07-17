@@ -19,7 +19,9 @@
     "back": "Zurück",
     "next": "Weiter",
     "edit": "Bearbeiten",
-    "close": "Schließen"
+    "close": "Schließen",
+    "default": "Standard",
+    "setDefault": "Als Standard festlegen"
   },
   "groups": {
     "kpis": "KPIs",
@@ -162,6 +164,7 @@
     "email_log": "E-Mail-Protokoll",
     "whatsapp_log": "Nachrichtenprotokoll",
     "appointment_types": "Terminarten",
+    "appointment_locations": "Terminorte",
     "candidate_skill_levels": "Kompetenzstufen",
     "wa_message_types": "Nachrichtentypen",
     "candidate_conversion": "Konvertierung",
@@ -1553,6 +1556,11 @@
     "phone": "Telefon",
     "isIntake": "Ist ein Intake",
     "isIntakeDesc": "Arten mit diesem Flag gelten als Intake."
+  },
+  "appointmentLocations": {
+    "title": "Terminorte",
+    "subtitle": "Wo ein Termin stattfindet (z. B. Büro, Online, Telefonisch, Beim Kunden).",
+    "add": "Ort hinzufügen"
   },
   "skillLevels": {
     "title": "Kompetenzstufen",

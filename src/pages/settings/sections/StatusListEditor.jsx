@@ -8,14 +8,18 @@ import { useTranslation } from 'react-i18next'
 import LookupIcon from '@/components/ui/LookupIcon'
 import { Check, Save, Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
-import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
+import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 
 // extraField (optioneel): { key, label, options: [{value,label}], default } —
 // rendert een extra keuzeveld in de aanmaak-modal + een badge in de rij.
 // flagField (optioneel): { key, label, description } — boolean gedragsvlag (R-1b:
 // is_closed/is_reached); checkbox in de modal + badge in de rij. De VLAG bepaalt
 // het gedrag, nooit het slug — zo werken tenant-eigen statussen op de schrijfpaden.
-export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, numberField = null, withIcon = false, allowAdd = true, showRank = false }) {
+// defaultField (optioneel): { key, label } — SINGLETON vlag (bv. is_default), model-
+// enforced op de backend (max één per lookup). Geen modal-veld: een losse
+// DefaultToggle per rij "promoveert" die rij en zet alle andere rijen lokaal terug
+// (optimistisch), zodat de UI de server-singleton weerspiegelt zonder een refetch.
+export default function StatusListEditor({ title, subtitle, endpoint, addLabel, withColor = true, withSave = true, compact = false, extraField = null, flagField = null, numberField = null, defaultField = null, withIcon = false, allowAdd = true, showRank = false }) {
   const { t } = useTranslation('settings')
   const emptyDraft = () => ({ name: '', color: '#3B8FD4', ...(withIcon ? { icon: '' } : {}), ...(extraField ? { [extraField.key]: extraField.default } : {}), ...(numberField ? { [numberField.key]: numberField.default } : {}), ...(flagField ? { [flagField.key]: false } : {}) })
   // Lookups differ in their display field: name (phases/status) vs label/value (genders/languages).
@@ -30,6 +34,7 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const [saving,    setSaving]    = useState(false)
   const [saved,     setSaved]     = useState(false)
   const [deleting,  setDeleting]  = useState(null)
+  const [settingDefaultId, setSettingDefaultId] = useState(null)
 
   useEffect(() => {
     api.get(endpoint).then(r => setItems(unwrapList(r).rows)).catch(() => {}).finally(() => setLoading(false))
@@ -80,6 +85,24 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
   const updateColor = async (item, color) => {
     setItems(p => p.map(x => x.id === item.id ? { ...x, color } : x))
     try { await api.put(`${endpoint}/${item.id}`, { ...item, color }) } catch { /* noop */ }
+  }
+
+  // Singleton flip (defaultField): promote one row to the tenant default and clear
+  // every other row optimistically — the backend model-enforces the same rule, so
+  // this mirrors it locally instead of waiting on a refetch. Roll back on failure.
+  const setDefault = async (item) => {
+    if (!defaultField || item[defaultField.key] || settingDefaultId) return
+    const key = defaultField.key
+    const previous = items
+    setSettingDefaultId(item.id)
+    setItems(p => p.map(x => ({ ...x, [key]: x.id === item.id })))
+    try {
+      await api.put(`${endpoint}/${item.id}`, { ...item, [key]: true })
+    } catch {
+      setItems(previous)
+    } finally {
+      setSettingDefaultId(null)
+    }
   }
 
   const saveOrder = async () => {
@@ -177,6 +200,11 @@ export default function StatusListEditor({ title, subtitle, endpoint, addLabel, 
                 <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--border)', padding: '2px 8px', borderRadius: 99, whiteSpace: 'nowrap' }}>
                   {extraField.options.find(o => o.value === item[extraField.key])?.label ?? item[extraField.key]}
                 </span>
+              )}
+              {defaultField && (
+                <DefaultToggle active={Boolean(item[defaultField.key])} busy={settingDefaultId === item.id}
+                  onClick={() => setDefault(item)}
+                  activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />
               )}
               <div style={{ flex: 1 }} />
               <button onClick={() => openEdit(item)} title={t('statusList.edit')}

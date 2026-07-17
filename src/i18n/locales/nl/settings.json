@@ -19,7 +19,9 @@
     "back": "Terug",
     "next": "Volgende",
     "edit": "Bewerken",
-    "close": "Sluiten"
+    "close": "Sluiten",
+    "default": "Standaard",
+    "setDefault": "Maak standaard"
   },
   "groups": {
     "kpis": "KPI's",
@@ -162,6 +164,7 @@
     "email_log": "E-mail-log",
     "whatsapp_log": "Berichtenlog",
     "appointment_types": "Afspraaktypes",
+    "appointment_locations": "Afspraaklocaties",
     "candidate_skill_levels": "Vaardigheidsniveaus",
     "wa_message_types": "Berichttypen",
     "candidate_conversion": "Conversie",
@@ -1553,6 +1556,11 @@
     "phone": "Telefonisch",
     "isIntake": "Is een intake",
     "isIntakeDesc": "Types met deze vlag gelden als intake (drijft \"intake gepland\")."
+  },
+  "appointmentLocations": {
+    "title": "Afspraaklocaties",
+    "subtitle": "Waar een afspraak plaatsvindt (bijv. Kantoor, Online, Telefonisch, Bij klant).",
+    "add": "Locatie toevoegen"
   },
   "skillLevels": {
     "title": "Vaardigheidsniveaus",

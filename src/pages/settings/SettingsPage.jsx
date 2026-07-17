@@ -16,12 +16,26 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Search } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useApps } from '@/context/AppsContext'
 import { canAccessPage } from '@/lib/access'
 import { NAV_GROUPS } from './registry'
 import { SettingsDirtyContext } from './lib/settingsDirty'
 import SettingItem from './components/SettingItem'
 import SettingsTabs from './components/SettingsTabs'
 import SettingsSearch from './components/SettingsSearch'
+
+// SM-MODULE-TABS-1: a nav item may declare `requiresModuleOrApp: { module, app }` to
+// stay visible when EITHER the tenant module OR the app/koppeling flag is on (a plain
+// `requiresPage` ANDs on the module only — see lib/access.ts). Exported as a pure
+// function so the module/app/both/neither matrix is unit-testable without mounting
+// the whole registry-driven shell.
+export function passesModuleOrApp(requirement, { hasModule, isAppEnabled }) {
+  if (!requirement) return true
+  const { module, app } = requirement
+  const moduleOn = module ? hasModule(module) : false
+  const appOn = app && isAppEnabled ? isAppEnabled(app) : false
+  return moduleOn || appOn
+}
 
 function parseHash() {
   const raw = window.location.hash.replace(/^#/, '')
@@ -35,8 +49,14 @@ function parseHash() {
 
 export default function SettingsPage() {
   const auth = useAuth()
-  const { isSuperAdmin } = auth
+  const { isSuperAdmin, hasModule } = auth
   const { t } = useTranslation('settings')
+  // ShiftManager settings (SM-MODULE-TABS-1) reads the app/koppeling flag from
+  // AppsContext — a nav item may declare requiresModuleOrApp to be visible on
+  // EITHER signal (a plain requiresPage ANDs on the module only). isAppEnabled is
+  // re-created by AppsProvider whenever its enabled-list changes, so it alone is
+  // enough to invalidate the memo below — no separate `enabled` dependency needed.
+  const { isAppEnabled } = useApps() ?? {}
 
   // Role/tenant gating + alphabetical sub-tabs (by translated label, language-aware).
   const visibleGroups = useMemo(() => NAV_GROUPS
@@ -46,6 +66,7 @@ export default function SettingsPage() {
         .filter(it => {
           if (it.superAdminOnly && !isSuperAdmin()) return false
           if (it.requiresPage && !canAccessPage(it.requiresPage, auth)) return false
+          if (it.requiresModuleOrApp && !passesModuleOrApp(it.requiresModuleOrApp, { hasModule, isAppEnabled })) return false
           if (it.id === 'users' && !canAccessPage('users', auth)) return false
           return true
         })
@@ -54,7 +75,7 @@ export default function SettingsPage() {
     .filter(group => group.items.length > 0)
     // Sidebar categories alphabetical too (by translated group label).
     .sort((a, b) => t(`groups.${a.key}`).localeCompare(t(`groups.${b.key}`), undefined, { sensitivity: 'base' })),
-    [auth, isSuperAdmin, t])
+    [auth, isSuperAdmin, hasModule, isAppEnabled, t])
 
   const findLocation = (groupKey, tabId) => {
     const group = visibleGroups.find(g => g.key === groupKey)

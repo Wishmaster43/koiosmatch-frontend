@@ -9,12 +9,17 @@
  *   - statuses    → `is_applicant`        (legacy funnel-reveal flag, model A)
  *   - funnel_types→ `requires_appointment` (this stage expects a planned intake
  *                    appointment; missing one is flagged — see §3B / C-22)
+ *
+ * `is_default` (LOOKUP-DEFAULT-1, api 4c25677) is a backend-enforced SINGLETON on
+ * funnel_types (application_stages) — at most one stage may carry it (seeded:
+ * Gesolliciteerd/Applied). A dedicated DefaultToggle per row promotes one stage
+ * and clears the others optimistically; no modal field (see setDefault below).
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Plus, X, Trash2, RefreshCw, Pencil } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
-import { DragList, ColorSwatch, ColorBadge } from '../components/SettingsControls'
+import { DragList, ColorSwatch, ColorBadge, DefaultToggle } from '../components/SettingsControls'
 import { BTN_H } from '@/config/buttonMetrics'
 
 const BASE = '/settings/candidate-lookups'
@@ -28,6 +33,7 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
   const [modal,    setModal]    = useState(null) // null | { mode, id?, value, label, color, is_applicant, requires_appointment }
   const [busy,     setBusy]     = useState(false)
   const [deleting, setDeleting] = useState(null)
+  const [settingDefaultId, setSettingDefaultId] = useState(null)
 
   // Per-item flag location: is_applicant on statuses, requires_appointment on the funnel.
   const isStatusBlock = slug === 'statuses'
@@ -63,6 +69,23 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
   const updateColor = async (it, color) => {
     setItems(p => p.map(x => x.id === it.id ? { ...x, color } : x))
     try { await api.put(`${BASE}/${slug}/${it.id}`, { label: it.label, color }) } catch { /* noop */ }
+  }
+
+  // Singleton flip (funnel stages only): promote one stage to is_default and clear
+  // every other row optimistically — mirrors the backend's model-enforced max-one
+  // rule so the UI doesn't need a refetch. Roll back the local state on failure.
+  const setDefault = async (it) => {
+    if (it.is_default || settingDefaultId) return
+    const previous = items
+    setSettingDefaultId(it.id)
+    setItems(p => p.map(x => ({ ...x, is_default: x.id === it.id })))
+    try {
+      await api.put(`${BASE}/${slug}/${it.id}`, { label: it.label, color: it.color, is_default: true })
+    } catch {
+      setItems(previous)
+    } finally {
+      setSettingDefaultId(null)
+    }
   }
 
   // An item is protected when the backend marks it as referenced by existing data.
@@ -121,6 +144,12 @@ export function LookupBlock({ slug, title, subtitle, items, setItems }) {
                              background: 'var(--color-primary-bg, #EEF2FF)', padding: '2px 7px', borderRadius: 999 }}>
                 {t('lookups.appointmentBadge')}
               </span>
+            )}
+            {/* Default toggle: the singleton stage new applications land on when none is chosen. */}
+            {isFunnelBlock && (
+              <DefaultToggle active={Boolean(item.is_default)} busy={settingDefaultId === item.id}
+                onClick={() => setDefault(item)}
+                activeLabel={t('common.default')} inactiveLabel={t('common.setDefault')} />
             )}
             <div style={{ flex: 1 }} />
             <button onClick={() => openEdit(item)} title={t('lookups.edit')}

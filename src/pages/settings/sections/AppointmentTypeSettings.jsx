@@ -6,6 +6,8 @@ import StatusListEditor from './StatusListEditor'
  * carries a default duration + modality + an is_intake flag, so picking a type
  * proposes the minutes and office/remote. Managed here; the recruiter overrides
  * per appointment. Reuses the shared StatusListEditor (colour + icon + reorder).
+ * `is_default` (LOOKUP-DEFAULT-1, api 4c25677) is a backend-enforced singleton —
+ * StatusListEditor's DefaultToggle promotes one row and clears the rest for us.
  */
 export function AppointmentTypeSettings() {
   const { t } = useTranslation('settings')
@@ -21,7 +23,8 @@ export function AppointmentTypeSettings() {
             { value: 'remote', label: t('appointmentTypes.remote') },
             { value: 'phone',  label: t('appointmentTypes.phone') },
           ] }}
-        flagField={{ key: 'is_intake', label: t('appointmentTypes.isIntake'), description: t('appointmentTypes.isIntakeDesc') }} />
+        flagField={{ key: 'is_intake', label: t('appointmentTypes.isIntake'), description: t('appointmentTypes.isIntakeDesc') }}
+        defaultField={{ key: 'is_default' }} />
     </div>
   )
 }

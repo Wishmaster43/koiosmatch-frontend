@@ -19,7 +19,9 @@
     "back": "Back",
     "next": "Next",
     "edit": "Edit",
-    "close": "Close"
+    "close": "Close",
+    "default": "Default",
+    "setDefault": "Make default"
   },
   "groups": {
     "kpis": "KPIs",
@@ -162,6 +164,7 @@
     "email_log": "Email log",
     "whatsapp_log": "Message log",
     "appointment_types": "Appointment types",
+    "appointment_locations": "Appointment locations",
     "candidate_skill_levels": "Skill levels",
     "wa_message_types": "Message types",
     "candidate_conversion": "Conversion",
@@ -1553,6 +1556,11 @@
     "phone": "Phone",
     "isIntake": "Is an intake",
     "isIntakeDesc": "Types with this flag count as an intake (drives \"intake planned\")."
+  },
+  "appointmentLocations": {
+    "title": "Appointment locations",
+    "subtitle": "Where an appointment takes place (e.g. Office, Online, Phone, At the client).",
+    "add": "Add location"
   },
   "skillLevels": {
     "title": "Skill levels",
