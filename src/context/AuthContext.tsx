@@ -58,6 +58,15 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 // Decides whether we may call the super-admin-only /tenants endpoint (pure — no closures).
 const userIsSuperAdmin = (u?: AuthUser | null) => u?.is_super_admin === true
 
+// AUTH-RETRY-STORM-1: one boot probe at a time, module-wide — remounts (StrictMode,
+// HMR, provider re-creation) share the in-flight /auth/me instead of stacking calls
+// that once flooded the global rate bucket and 429'd the login itself.
+let meProbe: Promise<import('axios').AxiosResponse> | null = null
+const probeMe = () => {
+  meProbe ??= api.get('/auth/me').finally(() => { meProbe = null })
+  return meProbe
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user,          setUser]              = useState<AuthUser | null>(null)
   const [loading,       setLoading]           = useState(true)
@@ -191,7 +200,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    api.get('/auth/me')
+    probeMe()
       .then(async res => {
         const u = applyAuthResponse(res.data)
         await setupTenants(u)

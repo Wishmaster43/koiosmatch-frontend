@@ -193,6 +193,19 @@ api.interceptors.response.use(
       window.dispatchEvent(new CustomEvent('km:mfa-enrollment-required'))
     }
 
+    // AUTH-RETRY-STORM-1: a 401 on /auth/me is TERMINAL — purge the session flags
+    // (km_session above all) so no later boot/refresh ever re-probes with a dead
+    // token; a /auth/me-storm once filled the global rate bucket and locked the
+    // login out. No redirect/event here: the boot path stays quiet by design and
+    // AuthContext's catch owns the UI state.
+    if (status === 401 && url.includes('/auth/me')) {
+      localStorage.removeItem('auth_token')
+      localStorage.removeItem('auth_user')
+      localStorage.removeItem('active_tenant')
+      localStorage.removeItem('accessible_pages')
+      localStorage.removeItem('km_session')
+    }
+
     const isAuthCall = url.includes('/auth/login') || url.includes('/auth/me')
     if (status === 401 && !isAuthCall) {
       localStorage.removeItem('auth_token')
