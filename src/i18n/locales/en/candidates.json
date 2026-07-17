@@ -842,5 +842,22 @@
     },
     "candidate": "Candidate",
     "pickCandidate": "Pick a candidate..."
+  },
+  "merge": {
+    "title": "Merge candidate",
+    "intro": "Find the duplicate candidate, then choose which record remains. {{name}} is the open record.",
+    "searchPlaceholder": "Search by name, number or email…",
+    "searching": "Searching…",
+    "noResults": "No candidates found.",
+    "stays": "This record remains",
+    "thisRecord": "Open record",
+    "otherRecord": "Found record",
+    "warning": "{{source}}'s data is absorbed into the remaining record; {{source}} is then archived. This cannot be undone.",
+    "back": "Back",
+    "cancel": "Cancel",
+    "confirm": "Merge",
+    "done": "Candidates merged.",
+    "errForbidden": "You are not allowed to merge candidates.",
+    "errFailed": "Merge failed. Please try again."
   }
 }

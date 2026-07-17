@@ -842,5 +842,22 @@
     },
     "candidate": "Candidat",
     "pickCandidate": "Choisir un candidat..."
+  },
+  "merge": {
+    "title": "Fusionner le candidat",
+    "intro": "Recherchez le candidat en double, puis choisissez le dossier à conserver. {{name}} est le dossier ouvert.",
+    "searchPlaceholder": "Rechercher par nom, numéro ou e-mail…",
+    "searching": "Recherche…",
+    "noResults": "Aucun candidat trouvé.",
+    "stays": "Ce dossier est conservé",
+    "thisRecord": "Dossier ouvert",
+    "otherRecord": "Dossier trouvé",
+    "warning": "Les données de {{source}} sont intégrées au dossier conservé ; {{source}} est ensuite archivé. Cette action est irréversible.",
+    "back": "Retour",
+    "cancel": "Annuler",
+    "confirm": "Fusionner",
+    "done": "Candidats fusionnés.",
+    "errForbidden": "Vous n'êtes pas autorisé à fusionner des candidats.",
+    "errFailed": "Échec de la fusion. Veuillez réessayer."
   }
 }

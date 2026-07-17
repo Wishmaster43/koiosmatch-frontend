@@ -842,5 +842,22 @@
     },
     "candidate": "Kandidaat",
     "pickCandidate": "Kies een kandidaat..."
+  },
+  "merge": {
+    "title": "Kandidaat samenvoegen",
+    "intro": "Zoek de dubbele kandidaat en kies daarna welk dossier blijft. {{name}} is het geopende dossier.",
+    "searchPlaceholder": "Zoek op naam, nummer of e-mail…",
+    "searching": "Zoeken…",
+    "noResults": "Geen kandidaten gevonden.",
+    "stays": "Dit dossier blijft",
+    "thisRecord": "Geopend dossier",
+    "otherRecord": "Gevonden dossier",
+    "warning": "De gegevens van {{source}} worden opgenomen in het blijvende dossier; {{source}} wordt daarna gearchiveerd. Dit is niet ongedaan te maken.",
+    "back": "Terug",
+    "cancel": "Annuleren",
+    "confirm": "Samenvoegen",
+    "done": "Kandidaten samengevoegd.",
+    "errForbidden": "Je hebt geen rechten om kandidaten samen te voegen.",
+    "errFailed": "Samenvoegen mislukt. Probeer het opnieuw."
   }
 }

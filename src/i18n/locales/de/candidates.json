@@ -842,5 +842,22 @@
     },
     "candidate": "Kandidat",
     "pickCandidate": "Kandidat wählen..."
+  },
+  "merge": {
+    "title": "Kandidat zusammenführen",
+    "intro": "Suche den doppelten Kandidaten und wähle dann, welcher Datensatz bestehen bleibt. {{name}} ist der geöffnete Datensatz.",
+    "searchPlaceholder": "Suche nach Name, Nummer oder E-Mail…",
+    "searching": "Suche…",
+    "noResults": "Keine Kandidaten gefunden.",
+    "stays": "Dieser Datensatz bleibt",
+    "thisRecord": "Geöffneter Datensatz",
+    "otherRecord": "Gefundener Datensatz",
+    "warning": "Die Daten von {{source}} werden in den verbleibenden Datensatz übernommen; {{source}} wird danach archiviert. Dies kann nicht rückgängig gemacht werden.",
+    "back": "Zurück",
+    "cancel": "Abbrechen",
+    "confirm": "Zusammenführen",
+    "done": "Kandidaten zusammengeführt.",
+    "errForbidden": "Du darfst keine Kandidaten zusammenführen.",
+    "errFailed": "Zusammenführen fehlgeschlagen. Bitte erneut versuchen."
   }
 }

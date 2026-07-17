@@ -6,7 +6,7 @@
  */
 import { useState, useEffect } from 'react'
 import type { ComponentType, ReactNode } from 'react'
-import { Trash2 } from 'lucide-react'
+import { Trash2, GitMerge } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
@@ -28,6 +28,7 @@ import CommunicationTab from './drawer/CommunicationTab'
 import DocumentsSection from './drawer/DocumentsSection'
 import StatisticsTab from './drawer/StatisticsTab'
 import ChangelogPopover from './drawer/ChangelogPopover'
+import MergeCandidateModal from './drawer/MergeCandidateModal'
 import CandidateStatusModals from './drawer/CandidateStatusModals'
 import { CandidateTitle, CandidateHeaderActions, ArchivedBanner } from './drawer/CandidateHeaderBits'
 import { peekReturnTab, clearReturnTab } from './drawer/constants'
@@ -76,12 +77,15 @@ interface CandidateDrawerProps {
   onMarkDeletion?: (id: Id) => void
   onRestore?: (id: Id) => void
   onHardDelete?: (id: Id) => void
+  // Merge (punt 4): page passes this only with candidates.delete; called with the
+  // survivor id after a successful merge so the page reopens it fresh.
+  onMerged?: (survivorId: Id) => void
   users?: AppUser[]
   // Deep-link: open on this tab (table contact-cell → communication, funnel-chip → work).
   initialTab?: string
 }
 
-export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onMarkDeletion, onRestore, onHardDelete, users = [], initialTab }: CandidateDrawerProps) {
+export default function CandidateDrawer({ candidate: c, onClose, expanded, onToggleExpand, onUpdate, onArchive, onMarkDeletion, onRestore, onHardDelete, onMerged, users = [], initialTab }: CandidateDrawerProps) {
   const { t } = useTranslation('candidates')
   const { formatDate, formatDateTime } = useDateFormat() as { formatDate: (d?: string | null, opts?: Intl.DateTimeFormatOptions) => string; formatDateTime: (d?: string | null) => string }
   const { labelOf: lastContactLabel } = useLastContactTypes()
@@ -94,6 +98,9 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   const { hasModule, isSuperAdmin, hasRole } = useAuth() as unknown as { hasModule: (m: string) => boolean; isSuperAdmin: () => boolean; hasRole: (r: string) => boolean }
   // Hard delete is admin-only (Danny 2026-07-03) — the backend re-checks (§7: UI gating is UX).
   const canHardDelete = isSuperAdmin() || hasRole('admin')
+
+  // Merge-duplicate overlay (punt 4) — opened from the title-row GitMerge icon.
+  const [showMerge, setShowMerge] = useState(false)
 
   // Cross-cutting drawer state; the phase/status axis + header edit live in their hooks.
   const [recruiter,         setRecruiter]         = useState<(AppUser & { initials: string }) | null>(null)
@@ -227,6 +234,15 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
           )}
           titleActions={<>
             <ChangelogPopover c={c} />
+            {/* Merge a duplicate into this record (punt 4) — same permission signal
+                as archive (candidates.delete via the page); not on archived dossiers. */}
+            {onMerged && !c.archived && (
+              <button onClick={() => setShowMerge(true)}
+                title={t('merge.title')} aria-label={t('merge.title')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--text-muted)', opacity: 0.8 }}>
+                <GitMerge size={14} />
+              </button>
+            )}
             {/* Soft-delete → Gearchiveerd (§3B: soft-delete only). The confirm (or, when
                 live applications/matches hang on the candidate, the ArchiveGuardModal)
                 lives in useCandidateDrawerActions.archiveOne — never re-confirm here. */}
@@ -261,6 +277,14 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
         </EntityHeader>
       )}
     />
+    {/* Merge-duplicate overlay — mounts fresh per open so the focus trap attaches. */}
+    {showMerge && onMerged && (
+      <MergeCandidateModal
+        current={{ id: c.id, name: c.name, code: (c as { code?: string }).code, email: (c as { email?: string }).email }}
+        onClose={() => setShowMerge(false)}
+        onMerged={id => { setShowMerge(false); onMerged(id) }}
+      />
+    )}
     <CandidateStatusModals
       matchPrompt={status.matchPrompt}
       onCloseMatch={() => status.setMatchPrompt(false)}

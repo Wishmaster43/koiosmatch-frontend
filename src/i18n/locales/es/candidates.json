@@ -842,5 +842,22 @@
     },
     "candidate": "Candidato",
     "pickCandidate": "Elige un candidato..."
+  },
+  "merge": {
+    "title": "Fusionar candidato",
+    "intro": "Busca el candidato duplicado y elige qué ficha se conserva. {{name}} es la ficha abierta.",
+    "searchPlaceholder": "Buscar por nombre, número o correo…",
+    "searching": "Buscando…",
+    "noResults": "No se encontraron candidatos.",
+    "stays": "Esta ficha se conserva",
+    "thisRecord": "Ficha abierta",
+    "otherRecord": "Ficha encontrada",
+    "warning": "Los datos de {{source}} se incorporan a la ficha conservada; {{source}} se archiva después. Esto no se puede deshacer.",
+    "back": "Atrás",
+    "cancel": "Cancelar",
+    "confirm": "Fusionar",
+    "done": "Candidatos fusionados.",
+    "errForbidden": "No tienes permiso para fusionar candidatos.",
+    "errFailed": "Error al fusionar. Inténtalo de nuevo."
   }
 }

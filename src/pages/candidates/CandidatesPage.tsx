@@ -60,6 +60,7 @@ const CandidateDrawer = CandidateDrawerJs as ComponentType<{
   candidate: Candidate | null; onClose: () => void; expanded: boolean
   onToggleExpand: () => void; onUpdate: (id: Id, patch: Record<string, unknown>) => void
   onArchive?: (id: Id) => void; onMarkDeletion?: (id: Id) => void; onRestore?: (id: Id) => void; onHardDelete?: (id: Id) => void
+  onMerged?: (survivorId: Id) => void
   users: AppUser[]; initialTab?: string
 }>
 const InsightsRow = InsightsRowJs as ComponentType<{ donuts?: unknown[]; kpis?: unknown[]; clearTitle?: string; notice?: string }>
@@ -426,6 +427,9 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
           onMarkDeletion={markDeletionOne}
           onRestore={restoreOne}
           onHardDelete={hardDeleteOne}
+          // Merge (punt 4): same permission as archive; after the merge the survivor
+          // reopens fresh (selectCandidate refetches the full detail).
+          onMerged={hasPermission('candidates.delete') ? (id) => selectCandidate({ id } as Candidate) : undefined}
           users={users}
           initialTab={drawerTab}
         />
