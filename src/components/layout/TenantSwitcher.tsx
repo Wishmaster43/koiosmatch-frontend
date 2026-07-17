@@ -10,6 +10,11 @@ import api, { unwrapList } from '@/lib/api'
 import { ChevronDown, Loader2, Search } from 'lucide-react'
 import type { Tenant } from '@/types/api'
 
+// App-default primary (mirror of :root --color-primary in index.css — keep in sync):
+// the effective brand of a tenant that never set a custom colour. We can't use the
+// CSS var here — it resolves to the ACTIVE tenant's brand, not the listed one's.
+const APP_DEFAULT_PRIMARY = '#19A5CA'
+
 const tenantInitials = (name?: string) =>
   name ? name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '??'
 
@@ -161,8 +166,12 @@ export default function TenantSwitcher({ expanded }: { expanded?: boolean }) {
                   onMouseEnter={e => !isActive && (e.currentTarget.style.background = 'var(--hover-bg)')}
                   onMouseLeave={e => !isActive && (e.currentTarget.style.background = 'none')}
                 >
+                  {/* Each tenant's OWN brand colour (list payload carries primary_color) —
+                      never the active tenant's token, so you spot a client at a glance
+                      (Danny punt 33, 17-07). No brand set → the app-default primary
+                      (that IS that tenant's effective colour), not the current var. */}
                   <div className="flex items-center justify-center flex-shrink-0 rounded"
-                    style={{ width: 24, height: 24, background: 'var(--color-primary)', fontSize: 9, color: 'white', fontWeight: 700 }}>
+                    style={{ width: 24, height: 24, background: tn.primary_color || APP_DEFAULT_PRIMARY, fontSize: 9, color: 'white', fontWeight: 700 }}>
                     {tenantInitials(tn.name)}
                   </div>
                   <div className="flex-1 min-w-0 text-left">
