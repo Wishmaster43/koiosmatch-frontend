@@ -2,8 +2,11 @@
  * useActionRulePreflight — fetches the AXIS-MATRIX-2 decision for one
  * action×subject pair and caches it for the browser session (module-scope Map,
  * mirrors useKoiosMentionCounts' session cache): the same chip/card re-rendering
- * for the same subject never re-polls the tenant. Cancels its in-flight request
- * on unmount or when action/subject changes (§9 — no stale overwrite, no leak).
+ * for the same subject never re-polls the tenant. Deliberately does NOT abort on
+ * unmount: the promise is session-shared, and aborting it poisoned the cache —
+ * StrictMode's double-mount aborted the fresh request and every later consumer
+ * (all modals, dev-wide) reused the dead promise, so no banner ever rendered
+ * (audit R1 follow-up). The `alive` guard alone prevents stale setState.
  */
 import { useEffect, useState } from 'react'
 import { fetchActionRulePreflight } from './actionRulesApi'
@@ -35,15 +38,12 @@ export function useActionRulePreflight(action: string, subject: ActionRuleSubjec
     setLoading(true)
     setError(false)
 
-    // Reuse a cached (possibly still in-flight) promise for this exact pair; only
-    // a genuine cache MISS issues a new request and owns its own abort controller
-    // — a shared/reused promise must never be aborted by a later, unrelated
-    // unmount (it may still be awaited by other mounted instances).
+    // Reuse a cached (possibly still in-flight) promise for this exact pair; a
+    // genuine cache MISS issues one request that is allowed to complete even if
+    // this instance unmounts — the RESULT is what the session cache exists for.
     let promise = cache.get(key)
-    let controller: AbortController | null = null
     if (!promise) {
-      controller = new AbortController()
-      promise = fetchActionRulePreflight(action, subject, controller.signal)
+      promise = fetchActionRulePreflight(action, subject)
       cache.set(key, promise)
     }
 
@@ -60,7 +60,7 @@ export function useActionRulePreflight(action: string, subject: ActionRuleSubjec
       })
       .finally(() => { if (alive) setLoading(false) })
 
-    return () => { alive = false; controller?.abort() }
+    return () => { alive = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [action, subject.candidateId, subject.customerId])
 
