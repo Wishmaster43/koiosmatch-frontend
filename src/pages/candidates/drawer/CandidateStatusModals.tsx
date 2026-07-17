@@ -19,6 +19,9 @@ import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { VacancyOption } from '../hooks/useVacancyOptions'
 
+// Mirrors the backend's `status_reason` column limit (CandidateProfileRequest: string|max:255).
+const STATUS_REASON_MAX = 255
+
 interface MatchRow { id?: string | number; vacancyTitle?: string; client?: string }
 // isBlacklist → the reason is the lookup-backed blacklist_reason (dropdown from
 // /blacklist-reasons; BE validates Rule::exists), never free text.
@@ -113,7 +116,14 @@ function StatusReasonModal({
                 {blReasons.map(r => <option key={r} value={r}>{r}</option>)}
               </select>
             ) : (
-              <textarea value={statusModal.reason} onChange={e => setStatusModal(m => m && ({ ...m, reason: e.target.value }))} rows={3}
+              // Plain textarea, not RichTextEditor — the backend validates status_reason
+              // as `string|max:255` and folds it into the status-change NOTE body via a
+              // ' · '-joined plain-text template (StatusChangeNoteWriter::composeStatusBody);
+              // it is never parsed/rendered as HTML, so rich markup would just be visible
+              // tags in the note. Same documented deviation as DetachReasonModal (short,
+              // structured "why" prompts stay plain). maxLength mirrors the BE limit.
+              <textarea value={statusModal.reason} maxLength={STATUS_REASON_MAX}
+                onChange={e => setStatusModal(m => m && ({ ...m, reason: e.target.value }))} rows={3}
                 style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', fontSize: 12, border: '1px solid var(--border)', borderRadius: 7, outline: 'none', resize: 'vertical' }} />
             )}
           </div>

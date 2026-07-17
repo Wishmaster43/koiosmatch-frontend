@@ -1,18 +1,19 @@
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ComponentType, CSSProperties, RefObject } from 'react'
-import { Target, Phone, CalendarPlus, Sparkles, Mail, MessageCircle, PhoneCall, Building2, Video, FileText, HelpCircle } from 'lucide-react' // HelpCircle = fallback for unknown contact channel
+import { Mail, MessageCircle, PhoneCall, Building2, Video, FileText, HelpCircle } from 'lucide-react' // HelpCircle = fallback for unknown contact channel
 import DataTable from '@/components/ui/DataTable'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import SoftChip from '@/components/ui/SoftChip'
 import type { Column } from '@/components/ui/DataTable'
-import Avatar from '@/components/ui/Avatar'
+import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import { useDateFormat } from '@/lib/datetime'
 import { useLookups } from '@/context/LookupsContext'
 import { useGenders } from '@/lib/useGenders'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import LookupIcon from '@/components/ui/LookupIcon'
+import { KoiosAdvicePill } from '@/lib/koiosAdviceMeta'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -20,7 +21,6 @@ import type { Id } from '@/types/common'
 // Plain-text cell (matches the function column) — the uniform style for all values.
 const plainCell: CSSProperties = { color: 'var(--text)', fontSize: 12 }
 const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
-const NEUTRAL_AVATAR = '#9CA3AF'
 
 type LucideIcon = ComponentType<{ size?: number; title?: string; style?: CSSProperties }>
 
@@ -35,14 +35,6 @@ const CONTACT_TYPE_ICON: Record<string, LucideIcon> = {
   appointment:      Building2,   // Afspraak (fysiek/kantoor)
   meet:             Video,       // Google Meet (online meeting)
   note:             FileText,
-}
-
-// Icon + colour per Koios advice action (hex so `+ alpha` tints work).
-const ADVICE_META: Record<string, { icon: LucideIcon; color: string }> = {
-  add_to_pool: { icon: Target,       color: '#19A5CA' },
-  contact:     { icon: Phone,        color: '#D97706' },
-  plan_intake: { icon: CalendarPlus, color: '#2563EB' },
-  default:     { icon: Sparkles,     color: '#6B7280' },
 }
 
 interface CandidatesTableProps {
@@ -228,17 +220,10 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
             <KoiosAiMark size={16} />{t('columns.koios')}
           </span>
         ),
-        render: c => {
-          const a = c.koiosAdvice
-          if (!a || !a.action || a.action === 'none') return dash
-          const label = a.label || t(`koios.actions.${a.action}`, { defaultValue: a.action })
-          if (!colorKoios) return <span style={plainCell} title={a.reason || undefined}>{label}</span>
-          const meta = ADVICE_META[a.action] ?? ADVICE_META.default
-          const Icon = meta.icon
-          // Shared pill (SoftChip round + icon) — identical to the customers koios
-          // pill and the vacancies "published" pill (Danny 2026-07-14 unification).
-          return <SoftChip title={a.reason || undefined} color={meta.color} round label={<><Icon size={12} />{label}</>} />
-        },
+        // Shared pill renderer (lib/koiosAdviceMeta) — identical to the customers koios
+        // pill and the vacancies "published" pill (Danny 2026-07-14 unification).
+        render: c => <KoiosAdvicePill advice={c.koiosAdvice} colored={colorKoios}
+          fallbackLabel={action => t(`koios.actions.${action}`, { defaultValue: action })} />,
       },
       {
         key: 'owner', header: t('columns.owner'), sortable: true, sortValue: c => c.owner,

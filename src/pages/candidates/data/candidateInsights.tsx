@@ -11,6 +11,13 @@ import type { Id } from '@/types/common'
 type PickArg = { filterValue?: unknown; name?: unknown; payload?: { filterValue?: unknown } }
 const pickKey = (d: PickArg) => d?.filterValue ?? d?.payload?.filterValue ?? d?.name
 
+// Teal accent for the "tasks" KPI card — no dedicated design token exists for this
+// hue yet (tracked as a §4 gap); kept as one documented constant instead of a raw
+// inline hex. Mirrors the identical #0D9488 ApplicationsPage's "aiTasks" KPI uses,
+// so both "tasks" cards read as the same accent across entities.
+// eslint-disable-next-line no-restricted-syntax -- no matching token hue close enough; tracked as a token-set follow-up (mirrors modules/message_lookup.ts precedent)
+const TASKS_ACCENT = '#0D9488'
+
 // Loose datum shape — the option hooks may emit undefined name/value for empty
 // buckets, and owner keys are Ids (string | number).
 interface DonutDatum { name?: string; value?: number; filterValue?: Id; color?: string }
@@ -52,19 +59,21 @@ export function buildCandidateInsights({
   const kpis = [
     { key: 'stale',      label: t('analytics.staleMonths', { months: staleMonths }), value: counts.stale, sub: t('analytics.stale6mSub'), color: 'var(--color-warning)',
       onClick: () => toggleAttention('stale6m'),    active: attentionFilter === 'stale6m' },
-    { key: 'neverContacted', label: t('analytics.neverContacted'), value: counts.neverContacted, sub: t('analytics.neverContactedSub'), color: '#0EA5E9',
+    { key: 'neverContacted', label: t('analytics.neverContacted'), value: counts.neverContacted, sub: t('analytics.neverContactedSub'), color: 'var(--color-info)',
       onClick: () => toggleAttention('neverContacted'), active: attentionFilter === 'neverContacted' },
     { key: 'noFollowup', label: t('analytics.noFollowup'), value: counts.noFollowup, sub: t('analytics.noFollowupSub'), color: 'var(--color-danger)',
       onClick: () => toggleAttention('noFollowup'), active: attentionFilter === 'noFollowup' },
     // Click filters on the SAME definition as the stat (planned intake appointments) via
     // the intake_planned param (INTAKE-1) — the old funnel-stage set never matched the count.
-    { key: 'intake',     label: t('kpi.intake'),           value: counts.intake,     sub: t('kpi.intakeSub'),           color: '#8B5CF6',
+    // Nearest semantic token for the old #8B5CF6: --color-violet is the shared
+    // "system/AI-ish accent" token whose own doc comment already names "intake" (§4).
+    { key: 'intake',     label: t('kpi.intake'),           value: counts.intake,     sub: t('kpi.intakeSub'),           color: 'var(--color-violet)',
       onClick: () => toggleAttention('intakePlanned'), active: attentionFilter === 'intakePlanned' },
     // "Actieve gesprekken" = contact in de laatste 14 dagen; the card filters the LIST
     // to exactly those candidates (Danny 2026-07-06 — no WhatsApp jump).
     { key: 'conversations', label: t('analytics.conversations'), value: counts.activeConv, color: 'var(--color-success)',
       onClick: () => toggleAttention('activeConv'), active: attentionFilter === 'activeConv' },
-    { key: 'tasks', label: t('kpi.tasks'), value: counts.tasks, sub: t('kpi.tasksSub'), color: '#0D9488',
+    { key: 'tasks', label: t('kpi.tasks'), value: counts.tasks, sub: t('kpi.tasksSub'), color: TASKS_ACCENT,
       onClick: () => toggleAttention('hasTasks'), active: attentionFilter === 'hasTasks' },
   ]
   return { donuts, kpis }

@@ -12,6 +12,7 @@ import { useDateFormat } from '@/lib/datetime'
 import { useLastContactTypes } from '@/lib/useLastContactTypes'
 import EntityDrawerJs from '@/components/drawer/EntityDrawer'
 import EntityHeaderJs from '@/components/drawer/EntityHeader'
+import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import { useGenders } from '@/lib/useGenders'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import { useAuth } from '@/context/AuthContext'
@@ -94,7 +95,7 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
   // default, per-gender only when enabled (Settings → Candidate → Table display).
   const allSettings = useAllSettings()
   const coloredByGender = getBoolSetting(allSettings, 'candidate_avatar_colored_by_gender', false)
-  const avatarColor = coloredByGender ? (genderColor(c?.gender) ?? '#9CA3AF') : '#9CA3AF'
+  const avatarColor = coloredByGender ? (genderColor(c?.gender) ?? NEUTRAL_AVATAR) : NEUTRAL_AVATAR
   const { hasModule, isSuperAdmin, hasRole } = useAuth() as unknown as { hasModule: (m: string) => boolean; isSuperAdmin: () => boolean; hasRole: (r: string) => boolean }
   // Hard delete is admin-only (Danny 2026-07-03) — the backend re-checks (§7: UI gating is UX).
   const canHardDelete = isSuperAdmin() || hasRole('admin')

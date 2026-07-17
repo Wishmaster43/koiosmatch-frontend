@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, AlertTriangle, X, Archive, Map as MapIcon } from 'lucide-react'
+import { Archive, Map as MapIcon } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useOpenFromIntent } from '@/context/NavigationContext'
@@ -19,6 +19,7 @@ import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
+import ActionMessageBanner from '@/components/ui/ActionMessageBanner'
 import CustomersTable from './CustomersTable'
 import CustomersBulkBar from './CustomersBulkBar'
 import CustomerDrawer from './CustomerDrawer'
@@ -250,17 +251,8 @@ export default function CustomersPage({ intent }: { intent?: unknown } = {}) {
 
           <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
-          {actionMsg && (
-            <div role="status" aria-live="polite" style={{ margin: '0 24px 10px', display: 'flex', alignItems: 'center', gap: 8,
-              padding: '8px 12px', borderRadius: 8, fontSize: 12.5,
-              background: actionMsg.type === 'error' ? 'var(--color-danger-bg)' : 'var(--color-success-bg)',
-              color: actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
-              border: `1px solid ${actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)'}` }}>
-              {actionMsg.type === 'error' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
-              <span style={{ flex: 1 }}>{actionMsg.text}</span>
-              <button onClick={() => setActionMsg(null)} aria-label={t('common:close')} style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 2 }}><X size={13} /></button>
-            </div>
-          )}
+          {/* Shared banner (§0.3 split, audit R1 item 1) — was copy-pasted per page. */}
+          <ActionMessageBanner msg={actionMsg} onDismiss={() => setActionMsg(null)} dismissLabel={t('common:close')} />
 
           <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
             {selectedIds.size > 0 ? (

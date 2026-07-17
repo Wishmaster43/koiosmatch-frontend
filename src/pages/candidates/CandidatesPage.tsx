@@ -8,7 +8,6 @@
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { ComponentType, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, AlertTriangle, X, Ban, Archive, Trash2, Map as MapIcon } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -18,15 +17,12 @@ import CandidateDrawerJs from './CandidateDrawer'
 import CandidateLifecycleModals from './CandidateLifecycleModals'
 import AddCandidateModal from './AddCandidateModal'
 import CandidatesTable from './CandidatesTable'
-import CandidatesBulkBar from './CandidatesBulkBar'
+import CandidatesToolbar from './CandidatesToolbar'
 import InsightsRowJs from '@/components/insights/InsightsRow'
 import PaginationBar from '@/components/ui/PaginationBar'
-import HeaderSearch from '@/components/ui/HeaderSearch'
-import QuickViewToggle from '@/components/ui/QuickViewToggle'
-import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
+import ActionMessageBanner, { type ActionMessage } from '@/components/ui/ActionMessageBanner'
 import ErrorBanner from '@/components/ui/ErrorBanner'
 import ViewSwitch from '@/components/ui/ViewSwitch'
-import { BTN_H } from '@/config/buttonMetrics'
 import { toggleOneValue, isStale, isNeverContacted, optsFrom } from './data/candidatesShared'
 import { usePools } from '@/lib/usePools'
 import { usePageMemory } from '@/lib/usePageMemory'
@@ -52,7 +48,6 @@ interface CandidateIntent {
   created_between?: [string, string]
   last_contact_between?: [string, string]
 }
-interface ActionMsg { type: string; text: string; action?: { label: string; onClick: () => void } }
 interface AppUser { id: Id; name: string; [k: string]: unknown }
 
 // Still-untyped JS components — declare the props this page passes (typed boundary).
@@ -88,7 +83,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
   // Bulk-selectie (checkboxes) — id-set; gewist bij filter/pagina-wissel.
   const [selectedIds,      setSelectedIds]      = useState<Set<Id>>(() => new Set())
   // Transient feedback for bulk mutations (success/error), auto-dismissed.
-  const [actionMsg,        setActionMsg]        = useState<ActionMsg | null>(null)
+  const [actionMsg,        setActionMsg]        = useState<ActionMessage | null>(null)
   const msgTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Virtualization scroll parent (audit item 7): the table body only renders the
   // visible window of rows — mirrors CustomersPage/VacanciesPage/TasksPage.
@@ -227,7 +222,7 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
     archiveGuard, setArchiveGuard, resolveArchiveGuard,
     eraseTarget, setEraseTarget, hardDeleteOne, confirmHardDelete,
   } = useCandidateDrawerActions({ candidates, setCandidates, setTotal,
-    notifyMsg: m => setActionMsg(m as ActionMsg), t })
+    notifyMsg: m => setActionMsg(m as ActionMessage), t })
   // Open a candidate drawer when arriving via a dashboard/cross-entity link ({ open: id }).
   useOpenFromIntent(intent, (id) => selectCandidate({ id } as Candidate))
 
@@ -294,70 +289,32 @@ export default function CandidatesPage({ intent }: { intent?: CandidateIntent } 
             // page-scope counts — label them instead of presenting them as totals.
             notice={statsFailed && total > candidates.length ? t('analytics.pageScopeNotice') : undefined} />
 
-          {/* Transient feedback for bulk mutations (aria-live for screen readers) */}
-          {actionMsg && (
-            <div role="status" aria-live="polite" style={{ margin: '0 24px 10px', display: 'flex', alignItems: 'center', gap: 8,
-              padding: '8px 12px', borderRadius: 8, fontSize: 12.5,
-              background: actionMsg.type === 'error' ? 'var(--color-danger-bg)' : 'var(--color-success-bg)',
-              color: actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
-              border: `1px solid ${actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)'}` }}>
-              {actionMsg.type === 'error' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
-              {/* Whole text is a click target when an action exists (Danny 13/7). */}
-              <span style={{ flex: 1, cursor: actionMsg.action ? 'pointer' : 'default', textDecoration: actionMsg.action ? 'underline' : 'none' }}
-                onClick={actionMsg.action ? () => { actionMsg.action!.onClick(); setActionMsg(null) } : undefined}>{actionMsg.text}</span>
-              {/* Optional action (e.g. "Openen" after a restore) — underlined link-button. */}
-              {actionMsg.action && (
-                <button onClick={() => { actionMsg.action!.onClick(); setActionMsg(null) }}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12.5, fontWeight: 600, textDecoration: 'underline', color: 'inherit' }}>
-                  {actionMsg.action.label}
-                </button>
-              )}
-              <button onClick={() => setActionMsg(null)} aria-label={t('close', { ns: 'common' })}
-                style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 2 }}>
-                <X size={13} />
-              </button>
-            </div>
-          )}
+          {/* Transient feedback for bulk mutations (aria-live for screen readers) —
+              shared banner (§0.3 split, audit R1 item 1: was copy-pasted per page). */}
+          <ActionMessageBanner msg={actionMsg} onDismiss={() => setActionMsg(null)} dismissLabel={t('close', { ns: 'common' })} />
 
-          {/* Toolbar — bulk-bar zodra er selectie is, anders de toevoeg-knop */}
-          <div style={{ padding: '0 24px 12px', display: 'flex', gap: 10, alignItems: 'center', minHeight: 36, flexShrink: 0 }}>
-            {selectedIds.size > 0 ? (
-              <CandidatesBulkBar count={selectedIds.size} onClear={() => setSelectedIds(new Set())}
-                onAddToPool={bulkAddToPool} onRemoveFromPool={bulkRemoveFromPool}
-                onSetOwner={bulkSetOwner} onSetStage={bulkSetStage} onSetTypes={bulkSetTypes} onSetConsent={bulkSetConsent}
-                onConvertPhase={bulkConvertPhase} onSetStatus={bulkSetStatus} onAddTag={bulkAddTag}
-                onRemoveTag={bulkRemoveTag} onAddNote={bulkAddNote} onArchive={bulkArchive}
-                canArchive={hasPermission('candidates.delete')}
-                onMerge={bulkMergePrompt} canMerge={hasPermission('candidates.delete')}
-                users={users} funnelTypes={funnelTypes} candidateTypes={candidateTypes} phases={phases} statuses={statuses} selectedTags={selectedTags} />
-            ) : (
-              <>
-                {/* Add on the left (like Applications) — BTN_H (§4/§9, KANDIDAAT-100 #50): one
-                    explicit height for every text/action button, everywhere. */}
-                <button onClick={() => setAddOpen(true)} style={{ display: 'flex', alignItems: 'center', height: BTN_H, padding: '0 14px', fontSize: 13, fontWeight: 600,
-                  background: 'var(--color-primary)', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer' }}>
-                  + {t('page.add')}
-                </button>
-                {/* Shared header search (T10) — debounced, drives the same server-side ?search=. */}
-                <HeaderSearch key={searchEpoch} onSearch={setGlobalSearch} defaultValue={globalSearch}
-                  placeholder={t('page.searchPlaceholder')} width={300} />
-                <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
-                {/* Quick-view toggles on the right: blacklisted-only + archived-only */}
-                <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
-                  {/* Shared quick-view toggles (§4 soft convention) — one component everywhere. */}
-                  <QuickViewToggle active={blacklistActive} onToggle={toggleBlacklist}
-                    label={t('page.blacklistView')} color="var(--color-danger)" icon={Ban} />
-                  <QuickViewToggle active={showArchived} onToggle={() => { setShowArchived(v => !v); setShowTrash(false) }}
-                    label={t('page.archivedView')} color="var(--color-archive)" icon={Archive} />
-                  <QuickViewToggle active={showTrash} onToggle={() => { setShowTrash(v => !v); setShowArchived(false) }}
-                    label={t('erase.trashView')} color="var(--color-trash)" icon={Trash2} />
-                  {/* STRAAL-1: table ⇄ map (radius search) — same shared toggle look. */}
-                  <QuickViewToggle active={view === 'map'} onToggle={() => setView(v => (v === 'map' ? 'table' : 'map'))}
-                    label={t('common:map.view')} color="var(--color-map)" icon={MapIcon} />
-                </div>
-              </>
-            )}
-          </div>
+          {/* Toolbar — bulk-bar zodra er selectie is, anders de toevoeg-knop (§0.3 split
+              into its own component, audit R1 item 1). */}
+          <CandidatesToolbar
+            selectedCount={selectedIds.size}
+            onClearSelection={() => setSelectedIds(new Set())}
+            bulkBar={{
+              onAddToPool: bulkAddToPool, onRemoveFromPool: bulkRemoveFromPool,
+              onSetOwner: bulkSetOwner, onSetStage: bulkSetStage, onSetTypes: bulkSetTypes, onSetConsent: bulkSetConsent,
+              onConvertPhase: bulkConvertPhase, onSetStatus: bulkSetStatus, onAddTag: bulkAddTag,
+              onRemoveTag: bulkRemoveTag, onAddNote: bulkAddNote, onArchive: bulkArchive,
+              canArchive: hasPermission('candidates.delete'),
+              onMerge: bulkMergePrompt, canMerge: hasPermission('candidates.delete'),
+              users, funnelTypes, candidateTypes, phases, statuses, selectedTags,
+            }}
+            onAddOpen={() => setAddOpen(true)}
+            searchEpoch={searchEpoch} globalSearch={globalSearch} onSearch={setGlobalSearch}
+            anyFilterActive={anyFilterActive} onClearFilters={clearAllFilters}
+            blacklistActive={blacklistActive} onToggleBlacklist={toggleBlacklist}
+            showArchived={showArchived} onToggleArchived={() => { setShowArchived(v => !v); setShowTrash(false) }}
+            showTrash={showTrash} onToggleTrash={() => { setShowTrash(v => !v); setShowArchived(false) }}
+            view={view} onToggleView={() => setView(v => (v === 'map' ? 'table' : 'map'))}
+          />
 
           {/* Table ⇄ map — ViewSwitch keeps both mounted (display toggle, not unmount)
               so the table's virtualizer never remeasures 0 on returning from the

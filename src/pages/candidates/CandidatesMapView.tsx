@@ -5,6 +5,7 @@
  */
 import { useTranslation } from 'react-i18next'
 import RadiusMapPanel, { type MapPoint } from '@/components/map/RadiusMapPanel'
+import { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import { useLookups } from '@/context/LookupsContext'
 import type { Candidate } from '@/types/candidate'
 import type { Id } from '@/types/common'
@@ -29,7 +30,7 @@ export default function CandidatesMapView({ rows, center, radiusKm, onCenterChan
     .map(c => ({
       id: c.id, lat: c.lat as number, lng: c.lng as number, label: c.name,
       sub: [c.city, c.distanceKm != null ? t('common:map.kmAway', { km: c.distanceKm }) : null].filter(Boolean).join(' · '),
-      color: c.status ? statusMeta(c.status).color : '#9CA3AF',
+      color: c.status ? statusMeta(c.status).color : NEUTRAL_AVATAR,
     }))
 
   return (

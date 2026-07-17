@@ -111,9 +111,9 @@ export default function PlanningOpenShifts({ openShifts, openFilters, setOpenFil
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2, flexWrap: 'wrap' }}>
                   <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text)' }}>{d.client}</span>
                   {isFavCustomer && <Heart size={11} color="var(--color-danger)" fill="var(--color-danger)" />}
-                  {isBlockedCustomer  && <Ban size={11} color="#EF4444" />}
+                  {isBlockedCustomer  && <Ban size={11} color="var(--color-danger)" />}
                   {d.openSpots === 1 && (
-                    <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: '#FEF3C7', color: '#D97706', fontWeight: 600 }}>{t('planning.lastSpot')}</span>
+                    <span style={{ fontSize: 9, padding: '1px 5px', borderRadius: 3, background: 'var(--color-warning-bg)', color: 'var(--color-warning)', fontWeight: 600 }}>{t('planning.lastSpot')}</span>
                   )}
                 </div>
                 <div style={{ fontSize: 10, color: 'var(--text-muted)', marginBottom: 3 }}>

@@ -1,30 +1,19 @@
 import { useTranslation } from 'react-i18next'
-import type { ComponentType, CSSProperties, RefObject } from 'react'
-import { Phone, CalendarPlus, Sparkles } from 'lucide-react'
+import type { CSSProperties, RefObject } from 'react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
 import Avatar from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import { useDateFormat } from '@/lib/datetime'
+import { KoiosAdvicePill } from '@/lib/koiosAdviceMeta'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import type { Customer } from '@/types/customer'
 import type { Id } from '@/types/common'
 
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
 const plainCell: CSSProperties = { color: 'var(--text)', fontSize: 12 }
-const dash = <span style={{ color: 'var(--text-muted)' }}>—</span>
 const NEUTRAL_AVATAR = '#9CA3AF'
-
-type LucideIcon = ComponentType<{ size?: number; style?: CSSProperties }>
-
-// Icon + colour per Koios advice action (hex so `+ alpha` tints work). The label
-// itself comes from the backend (already localised); the raw action is the fallback.
-const ADVICE_META: Record<string, { icon: LucideIcon; color: string }> = {
-  contact:   { icon: Phone,        color: '#D97706' },
-  follow_up: { icon: CalendarPlus, color: '#2563EB' },
-  default:   { icon: Sparkles,     color: '#6B7280' },
-}
 
 interface CustomersTableProps {
   rows: Customer[]
@@ -110,17 +99,9 @@ export default function CustomersTable({
     {
       key: 'koios', nowrap: true, sortable: true, sortValue: c => c.koiosAdvice?.action ?? '',
       header: <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><KoiosAiMark size={16} />{t('cols.koios')}</span>,
-      render: c => {
-        const a = c.koiosAdvice
-        if (!a || !a.action || a.action === 'none') return dash
-        const label = a.label || a.action
-        if (!colorKoios) return <span style={plainCell} title={a.reason || undefined}>{label}</span>
-        const meta = ADVICE_META[a.action] ?? ADVICE_META.default
-        const Icon = meta.icon
-        // Shared pill (SoftChip round + icon) — identical to the candidates koios
-        // pill and the vacancies "published" pill (Danny 2026-07-14 unification).
-        return <SoftChip title={a.reason || undefined} color={meta.color} round label={<><Icon size={12} />{label}</>} />
-      },
+      // Shared pill renderer (lib/koiosAdviceMeta) — identical to the candidates
+      // koios pill and the vacancies "published" pill (Danny 2026-07-14 unification).
+      render: c => <KoiosAdvicePill advice={c.koiosAdvice} colored={colorKoios} />,
     },
     { key: 'created',     header: t('cols.createdAt'),   nowrap: true, cellStyle: plainCell, sortable: true, sortValue: c => c.created, render: c => c.created ? formatDate(c.created) : '—' },
     {

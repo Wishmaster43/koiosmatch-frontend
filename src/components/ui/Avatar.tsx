@@ -13,6 +13,12 @@ export const AVATAR_COLORS = [
   'var(--color-warning)', 'var(--color-danger)', '#8B5CF6', '#EC4899',
 ]
 
+// Neutral grey fallback for "no colour assigned" avatars/markers — candidates
+// table/drawer/map view each redeclared this hex locally; one shared constant
+// so it can't quietly drift (audit R1 item 4).
+// eslint-disable-next-line no-restricted-syntax -- DATA fallback, not a UI colour choice (mirrors TitleBadge's identical constant)
+export const NEUTRAL_AVATAR = '#9CA3AF'
+
 interface AvatarProps {
   initials?: string
   size?: number
