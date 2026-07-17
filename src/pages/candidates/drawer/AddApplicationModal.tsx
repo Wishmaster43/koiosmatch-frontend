@@ -11,6 +11,12 @@
  * accepted `phase_key`, which the backend silently ignored on create (APP-CREATE-
  * STAGE-1 fixed this), so this now sends the real `application_stage_id` and
  * preselects the tenant's flagged default stage (falling back to the first stage).
+ *
+ * AXIS-MATRIX-2 (CMFE audit R1): wires the shared action-rule preflight for
+ * `application.create` (mirrors MatchPlacementModal's match.create) — a warn cell
+ * shows an inline banner and still lets the recruiter proceed; a block cell (e.g. an
+ * archived/blacklisted candidate) additionally disables Create, matching what the
+ * backend's own ApplicationController::store guard will refuse anyway.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -21,6 +27,7 @@ import CreatableSelect from '@/components/ui/CreatableSelect'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
 import { useApplicationStages } from '../hooks/useApplicationStages'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
 import type { Id } from '@/types/common'
 
 const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }
@@ -41,6 +48,16 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
   const vacancyOptions = useVacancyOptions(true)
   // S24b: the real stage id (not just the slug) — needed to submit application_stage_id.
   const { stages, defaultStage } = useApplicationStages()
+
+  // AXIS-MATRIX-2 preflight (mirrors MatchPlacementModal's match.create wiring, the
+  // reference implementation): POST /applications enforces application.create against
+  // the candidate server-side (ApplicationController::store) — surface the same
+  // warn/block decision here BEFORE submit. warn stays a banner only (proceed
+  // allowed); block additionally disables the submit button (§3A "calm explanation",
+  // never a silent 422 the recruiter has to decode).
+  const { decision: appRuleDecision } = useActionRulePreflight('application.create', { candidateId: String(candidateId || '') })
+  const appRuleBlocked = appRuleDecision?.effect === 'block'
+
   const [vacancyId, setVacancyId] = useState('')
   // Default to the tenant's flagged start stage (APP-CREATE-STAGE-1), falling back to the first.
   const [phaseId, setPhaseId] = useState(() => defaultStage?.id ?? '')
@@ -94,6 +111,12 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
           <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('work.addApplication')}</span>
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
         </div>
+
+        {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before the recruiter picks a vacancy. */}
+        {appRuleDecision && appRuleDecision.effect !== 'allow' && (
+          <div style={{ marginBottom: 14 }}><ActionRuleBanner decision={appRuleDecision} /></div>
+        )}
+
         {/* Vacancy — searchable pick-only combobox (S24b), mirrors PlanIntakeModal. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldLabel}>{t('work.vacancy')}</div>
@@ -111,8 +134,8 @@ export default function AddApplicationModal({ candidateId, onClose, onCreated }:
         </div>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
-          <button onClick={submit} disabled={saving || !vacancyId}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: vacancyId ? 'pointer' : 'default', opacity: vacancyId ? 1 : 0.4 }}>
+          <button onClick={submit} disabled={saving || !vacancyId || appRuleBlocked}
+            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: (vacancyId && !appRuleBlocked) ? 'pointer' : 'default', opacity: (vacancyId && !appRuleBlocked) ? 1 : 0.4 }}>
             {saving ? t('common:saving') : t('work.createApplication')}
           </button>
         </div>

@@ -81,7 +81,17 @@
     "stageFailed": "{{count}} Kandidaten nicht aktualisiert.",
     "partialResult": "{{updated}} von {{total}} aktualisiert, {{skipped}} übersprungen",
     "stageNote": "Ändert die Phase der neuesten Bewerbung je Kandidat (keine Vakanzauswahl — Kandidaten ohne Bewerbung werden übersprungen).",
-    "merge": "Zusammenführen…"
+    "merge": "Zusammenführen…",
+    "statusBlockedConfirm": "{{blocked}} von {{total}} Kandidaten können nicht aktualisiert werden ({{reasons}}). Mit {{proceed}} fortfahren?",
+    "statusAllBlocked": "Keiner der {{total}} ausgewählten Kandidaten kann aktualisiert werden ({{reasons}}).",
+    "axisConditions": {
+      "lead": "Lead",
+      "available": "Verfügbar",
+      "temporarily_unavailable": "Vorübergehend nicht einsetzbar",
+      "placed": "Platziert",
+      "blacklist": "Sperrliste",
+      "archived": "Archiviert"
+    }
   },
   "kpi": {
     "total": "Gesamt",
@@ -511,7 +521,8 @@
     "addAvailability": "Verfügbarkeit hinzufügen",
     "noAvailability": "Noch keine Ausnahmen erfasst.",
     "availabilityHint": "Standardmäßig ist der Kandidat verfügbar. Erfassen Sie hier Ausnahmen (z. B. Urlaub oder Krankheit).",
-    "availDuplicate": "Diese Tageszeit ist für dieses Datum bereits festgelegt."
+    "availDuplicate": "Diese Tageszeit ist für dieses Datum bereits festgelegt.",
+    "notPersistedYet": "Wird noch nicht gespeichert — das Planungsmodul folgt."
   },
   "statuses": {
     "actief": "Aktiv",

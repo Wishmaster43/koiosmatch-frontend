@@ -6,12 +6,18 @@
  * otherwise. The appointment-type/user/vacancy/location lookups hit the network
  * (react-query / useCachedLookup) — mocked directly so the test doesn't need a
  * QueryClientProvider.
+ *
+ * AXIS-MATRIX-2 (CMFE audit R1): the `appointment.create` preflight — create
+ * only (the PATCH edit path never re-runs the backend guard, see the component's
+ * own header comment); a warn banners but proceeds, a block additionally
+ * disables the submit button.
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import PlanIntakeModal, { endTimeOf } from './PlanIntakeModal'
 import api from '@/lib/api'
+import { useActionRulePreflight } from '@/components/actionrules'
 
 vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'Piet Recruiter' }] }) }))
 // meIsAssignable picks the same user 'u1' the users mock returns — the recruiter
@@ -43,6 +49,12 @@ vi.mock('@/lib/notify', () => ({ notifyError: vi.fn(), notifySuccess: vi.fn() })
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => Promise.reject({ response: { status: 404 } })), post: vi.fn(), patch: vi.fn() },
   unwrap: (r: { data?: { data?: unknown } }) => r?.data?.data,
+}))
+// Only the network-backed hook is stubbed (defaults to "no decision") — the real
+// ActionRuleBanner renders, so the AXIS-MATRIX-2 tests below exercise the actual component.
+vi.mock('@/components/actionrules', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/components/actionrules')>()),
+  useActionRulePreflight: vi.fn(() => ({ decision: null, loading: false, error: false })),
 }))
 
 const noop = () => {}
@@ -133,5 +145,35 @@ describe('PlanIntakeModal · S24a defaults', () => {
     render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} defaultVacancyId="vac-9" />)
     expect(screen.queryByText('vac-9')).not.toBeInTheDocument()
     expect(await screen.findByText('Verzorgende IG')).toBeInTheDocument()
+  })
+})
+
+describe('PlanIntakeModal · AXIS-MATRIX-2 preflight (CMFE audit R1)', () => {
+  it('warn: shows the banner but leaves the submit button enabled', () => {
+    vi.mocked(useActionRulePreflight).mockReturnValue({
+      decision: { effect: 'warn', popup_code: 'P1', message: 'Piet is tijdelijk niet inzetbaar (ziek).' }, loading: false, error: false,
+    })
+    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    expect(screen.getByTestId('action-rule-banner')).toHaveAttribute('data-effect', 'warn')
+    expect(screen.getByRole('button', { name: 'work.createIntake' })).toBeEnabled()
+  })
+
+  it('block: shows the banner and disables the submit button', () => {
+    vi.mocked(useActionRulePreflight).mockReturnValue({
+      decision: { effect: 'block', popup_code: 'P3', message: 'Piet staat op de blacklist.' }, loading: false, error: false,
+    })
+    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    expect(screen.getByTestId('action-rule-banner')).toHaveAttribute('data-effect', 'block')
+    expect(screen.getByRole('button', { name: 'work.createIntake' })).toBeDisabled()
+  })
+
+  it('never gates the EDIT path — the backend guard only runs on create, so a block decision is not even shown', () => {
+    vi.mocked(useActionRulePreflight).mockReturnValue({
+      decision: { effect: 'block', popup_code: 'P3', message: 'Piet staat op de blacklist.' }, loading: false, error: false,
+    })
+    render(<PlanIntakeModal candidateId="cand-1" onClose={noop} onCreated={noop}
+      existing={{ id: 'appt-1', scheduled_at: '2026-07-20T10:00:00Z', type: 'intake_flex' }} />)
+    expect(screen.queryByTestId('action-rule-banner')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'common:save' })).toBeEnabled()
   })
 })

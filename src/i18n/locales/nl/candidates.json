@@ -88,7 +88,17 @@
     "stageFailed": "{{count}} kandidaten niet bijgewerkt.",
     "partialResult": "{{updated}} van de {{total}} aangepast, {{skipped}} overgeslagen",
     "stageNote": "Wijzigt de fase van de meest recente sollicitatie per kandidaat (geen vacature-keuze — kandidaten zonder sollicitatie worden overgeslagen).",
-    "merge": "Samenvoegen…"
+    "merge": "Samenvoegen…",
+    "statusBlockedConfirm": "{{blocked}} van de {{total}} kandidaten kunnen niet worden aangepast ({{reasons}}). Doorgaan met {{proceed}}?",
+    "statusAllBlocked": "Geen van de {{total}} geselecteerde kandidaten kan worden aangepast ({{reasons}}).",
+    "axisConditions": {
+      "lead": "Lead",
+      "available": "Beschikbaar",
+      "temporarily_unavailable": "Tijdelijk niet inzetbaar",
+      "placed": "Geplaatst",
+      "blacklist": "Blacklist",
+      "archived": "Gearchiveerd"
+    }
   },
   "kpi": {
     "total": "Totaal",
@@ -518,7 +528,8 @@
     "addAvailability": "Beschikbaarheid toevoegen",
     "noAvailability": "Nog geen uitzonderingen vastgelegd.",
     "availabilityHint": "Standaard is de kandidaat beschikbaar. Leg hier uitzonderingen vast (bv. vakantie of ziekte).",
-    "availDuplicate": "Dit dagdeel is al vastgelegd voor deze datum."
+    "availDuplicate": "Dit dagdeel is al vastgelegd voor deze datum.",
+    "notPersistedYet": "Wordt nog niet opgeslagen — de planningmodule volgt."
   },
   "statuses": {
     "actief": "Actief",

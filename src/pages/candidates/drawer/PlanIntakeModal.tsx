@@ -13,6 +13,12 @@
  * Duur; the appointment TYPE and the "where" picker both preselect their tenant
  * `is_default` entry; the recruiter defaults to the logged-in user; and the
  * vacancy proposal never falls back to a raw id while its title is in flight.
+ *
+ * AXIS-MATRIX-2 (CMFE audit R1): wires the shared action-rule preflight for
+ * `appointment.create` (mirrors MatchPlacementModal's match.create) — CREATE only,
+ * since the backend's own guard (AppointmentController::store) only runs on create,
+ * never on the PATCH edit path. A warn cell shows an inline banner and still lets
+ * the recruiter proceed; a block cell additionally disables the submit button.
  */
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -29,6 +35,7 @@ import { useAppointmentLocations } from '@/lib/useAppointmentLocations'
 import { useLocations } from '@/lib/useLocations'
 import { useVacancyOptions } from '../hooks/useVacancyOptions'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
+import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
 import type { Id } from '@/types/common'
 
 const overlay: React.CSSProperties = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.3)', zIndex: 60 }
@@ -163,6 +170,16 @@ export default function PlanIntakeModal({
   const [submitErr, setSubmitErr] = useState<string | null>(null)
   const editing = !!existing
 
+  // AXIS-MATRIX-2 preflight (mirrors MatchPlacementModal's match.create wiring, the
+  // reference implementation): POST /candidates/{id}/appointments enforces
+  // appointment.create against the candidate server-side (AppointmentController::
+  // store) — surface the same warn/block decision here BEFORE submit. Only relevant
+  // on CREATE: the PATCH edit path (AppointmentController::update) never re-runs the
+  // guard, so an edit of an already-scheduled appointment is never gated by it.
+  const { decision: apptRuleDecisionRaw } = useActionRulePreflight('appointment.create', { candidateId: String(candidateId || '') })
+  const apptRuleDecision = editing ? null : apptRuleDecisionRaw
+  const apptRuleBlocked = apptRuleDecision?.effect === 'block'
+
   // S24a(e): default the recruiter to the logged-in user, mirroring AddApplicationModal's
   // meIsAssignable pattern — only on CREATE, and only while nothing is picked yet, so an
   // edit never silently reassigns an appointment away from its stored owner.
@@ -282,6 +299,11 @@ export default function PlanIntakeModal({
           <button onClick={onClose} aria-label={t('common:close')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}><X size={16} /></button>
         </div>
 
+        {/* AXIS-MATRIX-2 preflight — warn/block on this candidate before scheduling (create only). */}
+        {apptRuleDecision && apptRuleDecision.effect !== 'allow' && (
+          <div style={{ marginBottom: 14 }}><ActionRuleBanner decision={apptRuleDecision} /></div>
+        )}
+
         {/* Type → proposes duration + modality. */}
         <div style={{ marginBottom: 14 }}>
           <div style={fieldLabel}>{t('work.appointmentType')}</div>
@@ -351,8 +373,8 @@ export default function PlanIntakeModal({
 
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button onClick={onClose} style={{ height: 34, padding: '0 16px', fontSize: 13, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)', cursor: 'pointer', color: 'var(--text)' }}>{t('common:cancel')}</button>
-          <button onClick={submit} disabled={saving || !when}
-            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: when ? 'pointer' : 'default', opacity: when ? 1 : 0.4 }}>
+          <button onClick={submit} disabled={saving || !when || apptRuleBlocked}
+            style={{ height: 34, padding: '0 16px', fontSize: 13, fontWeight: 500, border: 'none', borderRadius: 8, background: 'var(--color-primary)', color: '#fff', cursor: (when && !apptRuleBlocked) ? 'pointer' : 'default', opacity: (when && !apptRuleBlocked) ? 1 : 0.4 }}>
             {saving ? t('common:saving') : submitLabel}
           </button>
         </div>

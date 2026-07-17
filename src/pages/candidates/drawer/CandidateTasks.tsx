@@ -4,6 +4,15 @@
  * status + priority chips, due date, assignee and the created-by/at line; clicking
  * a row jumps to the Taken page (open intent) and "+ Taak" creates a task that is
  * pre-linked to this candidate. Data via GET /tasks?candidate={id} (TASKS-1).
+ *
+ * AXIS-MATRIX-2 (CMFE audit R1): wires the shared action-rule preflight for
+ * `task.create` (mirrors MatchPlacementModal's match.create). The actual create
+ * form is the shared AddTaskModal (owned outside this file's scope, reused by
+ * every entity — never forked here), so this component is the only choke point
+ * available to gate it: a warn cell shows the banner but leaves "+ Taak" enabled
+ * (proceed allowed, e.g. an administrative task on a blacklisted candidate); a
+ * block cell (an archived candidate) additionally disables "+ Taak" itself —
+ * the calm explanation replaces opening a modal whose submit would just 422.
  */
 import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -13,6 +22,7 @@ import SectionCard from '@/components/ui/SectionCard'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
+import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
 import type { Id } from '@/types/common'
 
 // One task row as the API returns it — lookup fields arrive as objects or bare slugs.
@@ -37,6 +47,10 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
   const [adding, setAdding] = useState(false)
   // Open vs Historie (Danny 2026-07-04: "tabje history met alle oude taken").
   const [view, setView] = useState<'open' | 'history'>('open')
+
+  // AXIS-MATRIX-2 preflight — see file header. block disables "+ Taak" itself.
+  const { decision: taskRuleDecision } = useActionRulePreflight('task.create', { candidateId: String(candidateId || '') })
+  const taskRuleBlocked = taskRuleDecision?.effect === 'block'
 
   // Load the candidate-linked tasks; a 404/422 (param not built yet) reads as empty, not broken.
   const load = useCallback(() => {
@@ -73,8 +87,9 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
     <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
       {viewChip('open', t('drawer.tasksOpen'))}
       {viewChip('history', t('drawer.tasksHistory'))}
-      <button onClick={() => setAdding(true)}
-        style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer' }}>
+      <button onClick={() => setAdding(true)} disabled={taskRuleBlocked} title={taskRuleBlocked ? taskRuleDecision?.message ?? undefined : undefined}
+        style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, fontWeight: 500, background: 'none', border: 'none',
+          color: taskRuleBlocked ? 'var(--text-muted)' : 'var(--color-primary)', cursor: taskRuleBlocked ? 'not-allowed' : 'pointer', opacity: taskRuleBlocked ? 0.6 : 1 }}>
         <Plus size={11} /> {t('drawer.newTask')}
       </button>
     </span>
@@ -82,6 +97,10 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
 
   return (
     <SectionCard title={t('drawer.tasksTitle')} action={addAction}>
+      {/* AXIS-MATRIX-2 preflight — see file header comment. */}
+      {taskRuleDecision && taskRuleDecision.effect !== 'allow' && (
+        <div style={{ marginBottom: 10 }}><ActionRuleBanner decision={taskRuleDecision} /></div>
+      )}
       {loading && <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('drawer.tasksLoading')}</div>}
       {!loading && error && <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{t('drawer.tasksError')}</div>}
       {!loading && !error && visible.length === 0 && (

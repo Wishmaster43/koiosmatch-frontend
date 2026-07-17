@@ -81,7 +81,17 @@
     "stageFailed": "{{count}} candidats non mis à jour.",
     "partialResult": "{{updated}} sur {{total}} mis à jour, {{skipped}} ignoré(s)",
     "stageNote": "Modifie l'étape de la candidature la plus récente de chaque candidat (aucun choix de vacance — les candidats sans candidature sont ignorés).",
-    "merge": "Fusionner…"
+    "merge": "Fusionner…",
+    "statusBlockedConfirm": "{{blocked}} candidat(s) sur {{total}} ne peuvent pas être mis à jour ({{reasons}}). Continuer avec {{proceed}} ?",
+    "statusAllBlocked": "Aucun des {{total}} candidats sélectionnés ne peut être mis à jour ({{reasons}}).",
+    "axisConditions": {
+      "lead": "Lead",
+      "available": "Disponible",
+      "temporarily_unavailable": "Temporairement indisponible",
+      "placed": "Placé",
+      "blacklist": "Liste noire",
+      "archived": "Archivé"
+    }
   },
   "kpi": {
     "total": "Total",
@@ -511,7 +521,8 @@
     "addAvailability": "Ajouter une disponibilité",
     "noAvailability": "Aucune exception enregistrée pour l'instant.",
     "availabilityHint": "Par défaut, le candidat est disponible. Enregistrez ici les exceptions (p. ex. congés ou maladie).",
-    "availDuplicate": "Cette partie de journée est déjà définie pour cette date."
+    "availDuplicate": "Cette partie de journée est déjà définie pour cette date.",
+    "notPersistedYet": "Pas encore enregistré — le module de planification arrive."
   },
   "statuses": {
     "actief": "Actif",

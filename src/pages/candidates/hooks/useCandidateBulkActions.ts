@@ -4,6 +4,10 @@
  * note add and archive. Each mutation is optimistic, persists, then reconciles
  * against the server's `updated`/`added`/`removed` list (reverts on failure).
  * Selection state + the toast `notify` live in the container and are passed in.
+ *
+ * AXIS-MATRIX-2 (CMFE audit R1): `bulkSetStatus` additionally runs the shared
+ * N2 bulk preflight (`POST /action-rules/preflight-bulk`) before mutating — see
+ * its own comment below for why it is the ONE bulk action here that gets it.
  */
 import { useMemo, useState } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
@@ -35,6 +39,13 @@ const BULK_GUARD_CHECK_CAP = 25
 // prefilled as the picked duplicate (mirrors the modal's own LiteCandidate shape).
 export interface BulkMergeLite { id: Id; name: string; code?: string; email?: string }
 export interface BulkMergeTarget { current: BulkMergeLite; other: BulkMergeLite }
+
+// AXIS-MATRIX-2 N2 — POST /action-rules/preflight-bulk's response shape (mirrors
+// ActionRuleBulkPreflight::evaluate() verbatim, koiosmatch-api read-only per this
+// task's file boundary). `breakdown` only ever carries warn/block groups (an
+// allow cell never dialogs, docs/AXIS-MATRIX.md's own rule).
+interface BulkPreflightGroup { condition: string; popup_code: string | null; effect: 'warn' | 'block'; count: number; sample_names: string[] }
+interface BulkPreflightResult { total: number; allowed: number; warned: number; blocked: number; not_found: number; breakdown: BulkPreflightGroup[] }
 
 interface UseCandidateBulkActionsParams {
   candidates: Candidate[]
@@ -306,13 +317,50 @@ export function useCandidateBulkActions({
       onSuccess: (n) => notify(n < total ? 'warning' : 'success', t('bulk.convertResult', { updated: n, total })),
     })
   }
+  // AXIS-MATRIX-2 N2 (docs/AXIS-MATRIX.md "Niet-interactieve contexten"): one
+  // summary preflight BEFORE a guarded bulk mutation runs, so a recruiter sees
+  // "{n} of {m} will be skipped" up front instead of only in the after-the-fact
+  // partial-result toast. Of every candidate bulk mutation, `candidate.status_set`
+  // is the ONLY one with a real action-rules catalog entry (CandidateBulkService::
+  // status already re-checks the SAME guard server-side and skips blocked rows —
+  // this call never invents a second source of truth, it just previews it). The
+  // other bulk actions here (owner/phase/candidate-type/tags/notes/archive/consent)
+  // have no action-rules catalog token at all — their existing skip-and-reconcile
+  // reporting (notifyOutcome/bulk.partialResult) already is the honest, only signal,
+  // so they deliberately get no preflight call (no double gate).
+  const fetchStatusBulkPreflight = (ids: Id[]): Promise<BulkPreflightResult> =>
+    api.post('/action-rules/preflight-bulk', { action: 'candidate.status_set', candidate_ids: ids })
+      .then(r => r.data as BulkPreflightResult)
+
+  // Human label for one axis condition token (lead/available/temporarily_unavailable/
+  // placed/blacklist/archived) — falls back to the raw token so an unmapped future
+  // condition never renders blank.
+  const axisConditionLabel = (condition: string): string => t(`bulk.axisConditions.${condition}`, { defaultValue: condition })
+
   // Set a (simple) deployability status for the selection. Match/reason-gated statuses
   // (placed/unavailable/blacklist) are excluded from bulk in the UI.
-  const bulkSetStatus = (status: string, label: string) => bulkMutate({
+  const runBulkSetStatus = (status: string, label: string) => bulkMutate({
     url: '/candidates/bulk/status', body: { status },
     patch: { status }, keys: ['status'],
     onSuccess: (n, total) => notifyOutcome('bulk.statusChanged', { value: label }, n, total),
   })
+  const bulkSetStatus = (status: string, label: string) => {
+    const ids = [...selectedIds]
+    if (!ids.length) return
+    fetchStatusBulkPreflight(ids)
+      .then(({ total, blocked, breakdown }) => {
+        // Nothing will be skipped — proceed exactly as before, no extra confirm.
+        if (blocked <= 0) { runBulkSetStatus(status, label); return }
+        const reasons = breakdown.filter(g => g.effect === 'block')
+          .map(g => `${g.count} ${axisConditionLabel(g.condition)}`).join(', ')
+        const proceed = total - blocked
+        if (proceed <= 0) { notify('warning', t('bulk.statusAllBlocked', { total, reasons })); return }
+        if (window.confirm(t('bulk.statusBlockedConfirm', { blocked, total, reasons, proceed }))) runBulkSetStatus(status, label)
+      })
+      // The preflight is a courtesy preview, not a gate — a network hiccup or a
+      // permission read-gap must never block the actual (still server-enforced) action.
+      .catch(() => runBulkSetStatus(status, label))
+  }
   // Add a tag to the selection (mirror of bulkRemoveTag).
   const bulkAddTag = (tag: string) => {
     const ids = [...selectedIds]

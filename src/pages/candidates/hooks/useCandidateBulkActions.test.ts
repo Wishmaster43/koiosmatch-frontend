@@ -284,6 +284,89 @@ describe('useCandidateBulkActions · bulkArchive (guard)', () => {
   })
 })
 
+// AXIS-MATRIX-2 N2 (CMFE audit R1): bulkSetStatus is the ONE bulk mutation with a
+// real action-rules catalog entry (candidate.status_set) — a preflight summary runs
+// BEFORE the mutate, so a block is surfaced up front (window.confirm) instead of
+// only in the after-the-fact partial-result toast. `post` stands in for BOTH
+// endpoints here (preflight-bulk + the real status mutate), routed by URL.
+describe('useCandidateBulkActions · bulkSetStatus (AXIS-MATRIX-2 N2 bulk preflight)', () => {
+  it('proceeds straight away (no confirm) when the preflight reports nothing blocked', async () => {
+    post.mockImplementation((url: string) => {
+      if (url === '/action-rules/preflight-bulk') return Promise.resolve({ data: { total: 2, allowed: 2, warned: 0, blocked: 0, not_found: 0, breakdown: [] } })
+      if (url === '/candidates/bulk/status') return Promise.resolve({ data: { updated: [1, 2] } })
+      return Promise.reject(new Error('unexpected ' + url))
+    })
+    const confirmSpy = vi.spyOn(window, 'confirm')
+    const r = harness([cand({ id: 1, status: 'available' }), cand({ id: 2, status: 'available' })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'Geplaatst') })
+    await waitFor(() => expect(post).toHaveBeenCalledWith('/candidates/bulk/status', { candidate_ids: [1, 2], status: 'placed' }))
+    expect(post).toHaveBeenCalledWith('/action-rules/preflight-bulk', { action: 'candidate.status_set', candidate_ids: [1, 2] })
+    expect(confirmSpy).not.toHaveBeenCalled()
+  })
+
+  it('confirms with the skip summary, then proceeds with the full selection once accepted', async () => {
+    post.mockImplementation((url: string) => {
+      if (url === '/action-rules/preflight-bulk') return Promise.resolve({
+        data: { total: 3, allowed: 2, warned: 0, blocked: 1, not_found: 0,
+          breakdown: [{ condition: 'archived', popup_code: 'P4', effect: 'block', count: 1, sample_names: ['Piet'] }] },
+      })
+      if (url === '/candidates/bulk/status') return Promise.resolve({ data: { updated: [1, 2] } })
+      return Promise.reject(new Error('unexpected ' + url))
+    })
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true)
+    const r = harness([cand({ id: 1 }), cand({ id: 2 }), cand({ id: 3 })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2, 3])))
+    await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'Geplaatst') })
+    expect(confirmSpy).toHaveBeenCalledWith('bulk.statusBlockedConfirm')
+    await waitFor(() => expect(post).toHaveBeenCalledWith('/candidates/bulk/status', { candidate_ids: [1, 2, 3], status: 'placed' }))
+  })
+
+  it('never mutates when the recruiter cancels the confirm', async () => {
+    post.mockImplementation((url: string) => {
+      if (url === '/action-rules/preflight-bulk') return Promise.resolve({
+        data: { total: 2, allowed: 1, warned: 0, blocked: 1, not_found: 0,
+          breakdown: [{ condition: 'archived', popup_code: 'P4', effect: 'block', count: 1, sample_names: [] }] },
+      })
+      return Promise.reject(new Error('unexpected ' + url))
+    })
+    vi.spyOn(window, 'confirm').mockReturnValue(false)
+    const r = harness([cand({ id: 1 }), cand({ id: 2 })])
+    act(() => r.result.current.setSelectedIds(new Set([1, 2])))
+    await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'Geplaatst') })
+    expect(post).not.toHaveBeenCalledWith('/candidates/bulk/status', expect.anything())
+  })
+
+  it('warns (no confirm dialog, no mutate) when every selected candidate is blocked', async () => {
+    post.mockImplementation((url: string) => {
+      if (url === '/action-rules/preflight-bulk') return Promise.resolve({
+        data: { total: 1, allowed: 0, warned: 0, blocked: 1, not_found: 0,
+          breakdown: [{ condition: 'archived', popup_code: 'P4', effect: 'block', count: 1, sample_names: [] }] },
+      })
+      return Promise.reject(new Error('unexpected ' + url))
+    })
+    const confirmSpy = vi.spyOn(window, 'confirm')
+    const r = harness([cand({ id: 1 })])
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'Geplaatst') })
+    await waitFor(() => expect(notify).toHaveBeenCalledWith('warning', 'bulk.statusAllBlocked'))
+    expect(confirmSpy).not.toHaveBeenCalled()
+    expect(post).not.toHaveBeenCalledWith('/candidates/bulk/status', expect.anything())
+  })
+
+  it('is a courtesy preview, not a gate — a failed preflight fetch still lets the real mutate run', async () => {
+    post.mockImplementation((url: string) => {
+      if (url === '/action-rules/preflight-bulk') return Promise.reject(new Error('network hiccup'))
+      if (url === '/candidates/bulk/status') return Promise.resolve({ data: { updated: [1] } })
+      return Promise.reject(new Error('unexpected ' + url))
+    })
+    const r = harness([cand({ id: 1 })])
+    act(() => r.result.current.setSelectedIds(new Set([1])))
+    await act(async () => { r.result.current.actions.bulkSetStatus('placed', 'Geplaatst') })
+    await waitFor(() => expect(post).toHaveBeenCalledWith('/candidates/bulk/status', { candidate_ids: [1], status: 'placed' }))
+  })
+})
+
 // Punt 4: bulk-merge entry — the FIRST selected id becomes `current`, the SECOND
 // prefills as the picked duplicate; [...selectedIds] preserves the click order
 // since Set retains insertion order.

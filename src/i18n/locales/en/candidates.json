@@ -88,7 +88,17 @@
     "stageFailed": "{{count}} candidates not updated.",
     "partialResult": "{{updated}} of {{total}} updated, {{skipped}} skipped",
     "stageNote": "Changes the stage of each candidate's most recent application (no vacancy choice — candidates without an application are skipped).",
-    "merge": "Merge…"
+    "merge": "Merge…",
+    "statusBlockedConfirm": "{{blocked}} of {{total}} candidates can't be updated ({{reasons}}). Continue with {{proceed}}?",
+    "statusAllBlocked": "None of the {{total}} selected candidates can be updated ({{reasons}}).",
+    "axisConditions": {
+      "lead": "Lead",
+      "available": "Available",
+      "temporarily_unavailable": "Temporarily unavailable",
+      "placed": "Placed",
+      "blacklist": "Blacklist",
+      "archived": "Archived"
+    }
   },
   "kpi": {
     "total": "Total",
@@ -518,7 +528,8 @@
     "addAvailability": "Add availability",
     "noAvailability": "No exceptions recorded yet.",
     "availabilityHint": "By default the candidate is available. Record exceptions here (e.g. holiday or illness).",
-    "availDuplicate": "This day-part is already set for this date."
+    "availDuplicate": "This day-part is already set for this date.",
+    "notPersistedYet": "Not saved yet — the planning module is coming."
   },
   "statuses": {
     "actief": "Active",
