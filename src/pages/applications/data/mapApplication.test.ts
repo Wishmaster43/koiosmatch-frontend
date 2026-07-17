@@ -35,6 +35,38 @@ describe('mapApplication', () => {
     // Without a matching lookup entry, an unknown key is never assumed "matched".
     expect(mapApplication({ id: 7, phase_key: 'aangenomen' }).bucket).toBe('active')
   })
+
+  // S12/13: ApplicationListResource sends the vacancy's client_id as customer_id.
+  it('maps customer_id to customerId, null when absent', () => {
+    expect(mapApplication({ id: 8, customer_id: 'cust1' }).customerId).toBe('cust1')
+    expect(mapApplication({ id: 9 }).customerId).toBeNull()
+  })
+
+  // S5: the application's own display number (ApplicationListResource).
+  it('maps reference_number to referenceNumber, empty string when absent', () => {
+    expect(mapApplication({ id: 10, reference_number: 'S-00123' }).referenceNumber).toBe('S-00123')
+    expect(mapApplication({ id: 11 }).referenceNumber).toBe('')
+  })
+
+  // APP-DELETED-AT-1: both the derived `archived` boolean and the raw `deleted_at`
+  // timestamp now arrive for real — previously neither resource sent them at all.
+  describe('archived / deleted_at (APP-DELETED-AT-1)', () => {
+    it('maps archived + deletedAt from an explicit archived flag and deleted_at', () => {
+      const mapped = mapApplication({ id: 12, archived: true, deleted_at: '2026-07-10T09:00:00Z' })
+      expect(mapped.archived).toBe(true)
+      expect(mapped.deletedAt).toBe('2026-07-10T09:00:00Z')
+    })
+
+    it('derives archived from deleted_at alone when the flag is absent', () => {
+      expect(mapApplication({ id: 13, deleted_at: '2026-07-11T09:00:00Z' }).archived).toBe(true)
+    })
+
+    it('leaves archived false and deletedAt null for an active application', () => {
+      const mapped = mapApplication({ id: 14 })
+      expect(mapped.archived).toBe(false)
+      expect(mapped.deletedAt).toBeNull()
+    })
+  })
 })
 
 describe('mapApplicationDetail', () => {

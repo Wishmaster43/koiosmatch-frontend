@@ -103,6 +103,7 @@
     "location": "Locatie",
     "openVacancy": "Open vacature",
     "openCandidate": "Open kandidaat",
+    "openCustomer": "Klant openen",
     "pickVacancy": "Selecteer een vacature",
     "noVacancy": "Geen vacature"
   },
@@ -196,7 +197,9 @@
     "aiConfirm": "Beoordeel en bevestig voordat er een bericht uitgaat."
   },
   "archived": {
-    "toggle": "Gearchiveerd"
+    "toggle": "Gearchiveerd",
+    "since": "Gearchiveerd op {{date}}",
+    "flag": "Gearchiveerd"
   },
   "detach": {
     "button": "Ontkoppelen",

@@ -103,6 +103,7 @@
     "location": "Lieu",
     "openVacancy": "Ouvrir le poste",
     "openCandidate": "Ouvrir le candidat",
+    "openCustomer": "Ouvrir le client",
     "pickVacancy": "Sélectionner un poste",
     "noVacancy": "Aucun poste"
   },
@@ -205,7 +206,9 @@
     "aiConfirm": "Vérifiez et confirmez avant l'envoi d'un message."
   },
   "archived": {
-    "toggle": "Archivées"
+    "toggle": "Archivées",
+    "since": "Archivé le {{date}}",
+    "flag": "Archivé"
   },
   "detach": {
     "button": "Dissocier",

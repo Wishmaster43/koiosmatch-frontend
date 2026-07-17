@@ -185,7 +185,13 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     if (selected?.id === a.id) { closeDrawer(); return }
     selectedIdRef.current = a.id ?? null
     setSelected(decorate(a) as ApplicationDetail); setExpanded(false)
-    api.get(`/applications/${a.id}`)
+    // APP-DELETED-AT-1 (measured live, CMFE 2026-07-17): a row opened straight from
+    // the Gearchiveerd quick-view IS soft-deleted server-side — ApplicationController::
+    // show() 404s on it (`findOrFail` excludes trashed rows) unless asked to reveal
+    // them, exactly like the list. `include_archived=1` is always safe to send here:
+    // it only WIDENS the query scope (withTrashed), never narrows an active row's own
+    // lookup, so this fixes the archived case without any branching on `a.archived`.
+    api.get(`/applications/${a.id}`, { params: { include_archived: 1 } })
       .then(r => { if (selectedIdRef.current === a.id) setSelected(decorate(mapApplicationDetail(unwrap(r), funnelTypes))) })
       .catch(() => {})
   }
@@ -278,6 +284,21 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
       })
   }
 
+  // S7: PATCH the editable Bron field from the Sollicitatie tab's Details block
+  // (mirrors handleOwner's simple optimistic-patch-then-PATCH shape).
+  const handleUpdateSource = (id: Id | undefined, source: string) => {
+    const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
+    setApplications(prev => prev.map(a => a.id === id ? { ...a, source } : a))
+    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, source } as ApplicationDetail) : prev))
+    api.patch(`/applications/${id}`, { source }).catch(() => {
+      if (before) {
+        setApplications(prev => prev.map(a => a.id === id ? { ...a, source: before.source } : a))
+        setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, source: before.source } as ApplicationDetail) : prev))
+      }
+      notifyError(t('common:actionFailed'))
+    })
+  }
+
   // Reject an application: move it to the FLAGGED is_rejected phase/bucket
   // optimistically — never the literal 'rejected' key (A1: a tenant may rename it).
   const handleReject = (id: Id | undefined, payload: RejectPayload) => {
@@ -348,20 +369,15 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // of just vanishing (mirrors the candidate archived-banner UX). Gated by
   // applications.update in the drawer footer.
   //
-  // BE GAP (measured live, S15): neither ApplicationListResource nor
-  // ApplicationDetailResource ever sends `deleted_at` (or any archived/is_archived
-  // flag) — GET /applications/{id}?include_archived=1 returns 200 with the full
-  // record but NOTHING marks it as trashed, so mapApplicationDetail's own
-  // `archived` derivation is always false on a re-fetched row. Left as-is, the
-  // drawer would keep showing "Ontkoppelen" instead of "Herstellen" right after a
-  // successful detach — a resource gap identical in shape to S20's, just on
-  // reads instead of writes. Since we KNOW for a fact the DELETE just returned
-  // 204, `archived: true` is forced onto the reconciled record here rather than
-  // trusted from the (currently silent) resource field — report to backend:
-  // ApplicationListResource needs a `deleted_at` (or `archived`) field so the
-  // "Gearchiveerd" quick-view toggle (which relies on the SAME missing field,
-  // via matchesFilters' `Boolean(a.archived)`) works for every application, not
-  // only the one this session happens to hold a local flag for.
+  // APP-DELETED-AT-1 (CMFE 2026-07-17): ApplicationListResource/DetailResource now
+  // send real `archived`/`deleted_at` fields on every GET — previously NEITHER
+  // resource sent them at all, so this handler had to force `archived: true` by
+  // hand onto the refetched record (a resource gap identical in shape to S20's,
+  // just on reads instead of writes). That workaround is gone: the refetch below
+  // trusts mapApplicationDetail's own derivation. The LIST row still gets an
+  // explicit optimistic flag (a 204 DELETE has no body to reconcile from), and
+  // the refetch's own `.catch` keeps a local fallback for the rare case where
+  // the GET itself fails right after a detach that we know succeeded.
   const handleDetach = (id: Id | undefined, reason: string) => {
     if (id == null) return
     api.delete(`/applications/${id}`, { data: { reason } })
@@ -370,7 +386,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: true } : a))
         setTotal(prev => Math.max(0, prev - 1))
         api.get(`/applications/${id}`, { params: { include_archived: 1 } })
-          .then(r => { if (selectedIdRef.current === id) setSelected(decorate({ ...mapApplicationDetail(unwrap(r), funnelTypes), archived: true })) })
+          .then(r => { if (selectedIdRef.current === id) setSelected(decorate(mapApplicationDetail(unwrap(r), funnelTypes))) })
           .catch(() => { if (selectedIdRef.current === id) setSelected(prev => (prev && prev.id === id ? { ...prev, archived: true } : prev)) })
       })
       .catch(err => {
@@ -568,6 +584,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         onPhaseChange={(id, key) => { if (id != null) handleMove(id, key) }}
         onOwnerChange={(id, ownerId) => { if (id != null) handleOwner(id, ownerId) }}
         onLinkVacancy={handleLinkVacancy}
+        onUpdateSource={handleUpdateSource}
         users={users}
         onDetach={handleDetach}
         onRestore={handleRestore}

@@ -103,6 +103,7 @@
     "location": "Location",
     "openVacancy": "Open vacancy",
     "openCandidate": "Open candidate",
+    "openCustomer": "Open client",
     "pickVacancy": "Select a vacancy",
     "noVacancy": "No vacancy"
   },
@@ -196,7 +197,9 @@
     "aiConfirm": "Review and confirm before a message is sent."
   },
   "archived": {
-    "toggle": "Archived"
+    "toggle": "Archived",
+    "since": "Archived on {{date}}",
+    "flag": "Archived"
   },
   "detach": {
     "button": "Detach",

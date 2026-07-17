@@ -7,8 +7,10 @@ import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import ApplicationChangelogPopover from './drawer/ApplicationChangelogPopover'
+import ApplicationArchivedBanner from './drawer/ApplicationArchivedBanner'
 import ApplicationTab from './drawer/ApplicationTab'
 import type { CandidateNamePatch } from './drawer/CandidateNameFunctionBlock'
 import CandidateTab from './drawer/CandidateTab'
@@ -41,6 +43,8 @@ interface ApplicationDrawerProps {
   // Re-link (or unlink, null) the vacancy this application is coupled to — shared
   // by the Sollicitatie tab's Details block and the Vacature tab (§3A).
   onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
+  // S7: PATCH the editable Bron field from the Sollicitatie tab's Details block.
+  onUpdateSource?: (id: Id | undefined, source: string) => void
   users?: Array<{ id: Id; name: string }>
   // S15: detaching REQUIRES a reason (BE 422s without one) — the drawer collects
   // it via DetachReasonModal before calling this.
@@ -62,7 +66,7 @@ interface ApplicationDrawerProps {
  * ApplicationDrawer — thin container: declares the header config + tab list and
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
  */
-export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, users, onDetach, onRestore, canManage, onUpdateCustomFields, onUpdateCandidate, initialTab }: ApplicationDrawerProps) {
+export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, onUpdateSource, users, onDetach, onRestore, canManage, onUpdateCustomFields, onUpdateCandidate, initialTab }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   const { formatDateTime } = useDateFormat()
   // S15: the reason-required detach confirm modal (footer "Ontkoppelen").
@@ -102,13 +106,10 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
     { key: 'owner', label: t('drawer.owner'), value: ownerValue, options: ownerOptions,
       onChange: (v: string) => { if (v !== '__current') onOwnerChange?.(a.id, String(v)) }, menuWidth: 200, width: 190 },
   ]
-  // NUMMER-3: applications carry no reference_number yet (ApplicationDetailResource
-  // omits it) — no ReferenceNumberChip until that lands (measured, S5).
-
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
     switch (id) {
-      case 'application':  return <ApplicationTab application={a} onReject={onReject} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} onUpdateCandidate={onUpdateCandidate} />
+      case 'application':  return <ApplicationTab application={a} onReject={onReject} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} onUpdateSource={onUpdateSource} onUpdateCandidate={onUpdateCandidate} />
       case 'candidate':    return <CandidateTab application={a} />
       case 'vacancy':      return <VacancyTab application={a} onLinkVacancy={onLinkVacancy} />
       case 'interviews':   return <InterviewsTab application={a} />
@@ -175,13 +176,21 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
             <>
               {/* S4 (Danny): no phase badge here — it duplicated the Fase meta picker
                   below (the picker is the one source of truth for the phase). */}
-              <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{a.candidateName}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{a.candidateName}</span>
+                {/* S5/NUMMER-1: human-readable reference number, click-to-copy — same spot on every drawer. */}
+                <ReferenceNumberChip value={a.referenceNumber} />
+              </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{a.vacancyTitle || '—'}</div>
             </>
           )}
           titleActions={<ApplicationChangelogPopover application={a} />}
           meta={meta}
-        />
+        >
+          {/* APP-DELETED-AT-1: the in-body archived banner (mirrors candidates'
+              ArchivedBanner, minus the hard-delete/trash stage no application has). */}
+          {a.archived && <ApplicationArchivedBanner id={a.id} deletedAt={a.deletedAt} onRestore={onRestore} />}
+        </EntityHeader>
       )}
     />
     {/* S15: the reason-required detach confirm — a small modal, not a native

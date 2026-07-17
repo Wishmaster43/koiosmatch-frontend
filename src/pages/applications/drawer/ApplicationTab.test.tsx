@@ -122,6 +122,63 @@ describe('ApplicationTab', () => {
     expect(screen.getByTitle('drawer.openVacancy')).toBeInTheDocument()
   })
 
+  // S12/S13: Klant becomes a real EntityLink once the application carries a
+  // customer_id (the vacancy's client) — plain text otherwise (no id to link to).
+  it('renders Klant as a clickable EntityLink once customerId is present', () => {
+    renderTab(<ApplicationTab application={app({ customerId: 'cust1' })} />)
+    expect(screen.getByTitle('drawer.openCustomer')).toBeInTheDocument()
+    expect(screen.getByText('Yesway')).toBeInTheDocument()
+  })
+
+  it('renders Klant as plain text when no customerId is present', () => {
+    renderTab(<ApplicationTab application={app()} />)
+    expect(screen.queryByTitle('drawer.openCustomer')).toBeNull()
+    expect(screen.getByText('Yesway')).toBeInTheDocument()
+  })
+
+  // S7: Bron is editable in-place, sharing the Details block's pencil with the
+  // vacancy link — same save/cancel affordance, separate PATCH via onUpdateSource.
+  describe('Bron field (S7)', () => {
+    it('shows the Details pencil when only onUpdateSource is provided (no onLinkVacancy)', () => {
+      renderTab(<ApplicationTab application={app()} onUpdateSource={vi.fn()} />)
+      expect(screen.getByLabelText('common:edit')).toBeInTheDocument()
+    })
+
+    it('edits Bron in place and calls onUpdateSource with the new value on save', async () => {
+      const onUpdateSource = vi.fn()
+      const user = userEvent.setup()
+      renderTab(<ApplicationTab application={app({ id: 5 })} onUpdateSource={onUpdateSource} />)
+      await user.click(screen.getByLabelText('common:edit'))
+      const sourceInput = screen.getByDisplayValue('Facebook')
+      await user.clear(sourceInput)
+      await user.type(sourceInput, 'LinkedIn')
+      await user.click(screen.getByLabelText('common:save'))
+      expect(onUpdateSource).toHaveBeenCalledWith(5, 'LinkedIn')
+    })
+
+    it('does not call onUpdateSource when Bron is unchanged', async () => {
+      const onUpdateSource = vi.fn()
+      const user = userEvent.setup()
+      renderTab(<ApplicationTab application={app()} onUpdateSource={onUpdateSource} />)
+      await user.click(screen.getByLabelText('common:edit'))
+      await user.click(screen.getByLabelText('common:save'))
+      expect(onUpdateSource).not.toHaveBeenCalled()
+    })
+
+    it('cancels without calling onUpdateSource', async () => {
+      const onUpdateSource = vi.fn()
+      const user = userEvent.setup()
+      renderTab(<ApplicationTab application={app()} onUpdateSource={onUpdateSource} />)
+      await user.click(screen.getByLabelText('common:edit'))
+      const sourceInput = screen.getByDisplayValue('Facebook')
+      await user.clear(sourceInput)
+      await user.type(sourceInput, 'LinkedIn')
+      await user.click(screen.getByLabelText('common:cancel'))
+      expect(onUpdateSource).not.toHaveBeenCalled()
+      expect(screen.getByText('Facebook')).toBeInTheDocument()
+    })
+  })
+
   // S14/S22: clicking through to the full vacancy stashes 'application' as the
   // return tab, so browser BACK reopens this application's drawer on Sollicitatie.
   it('stashes the return tab before navigating to the linked vacancy', async () => {

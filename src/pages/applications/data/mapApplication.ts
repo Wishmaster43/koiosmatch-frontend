@@ -34,6 +34,10 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     vacancyId: a.vacancy_id ?? vacancy.id ?? null,
     vacancyTitle: a.vacancy_title ?? vacancy.title ?? '—',
     client: a.client_name ?? a.client?.name ?? a.customer?.name ?? vacancy.client_name ?? '—',
+    // S12/13: the customer id (ApplicationListResource sends the vacancy's client_id).
+    customerId: a.customer_id ?? null,
+    // S5: the application's own display number (e.g. "S-00123").
+    referenceNumber: a.reference_number ?? '',
     score: a.score ?? a.match_score ?? a.match?.overall ?? null,
     task: a.task ?? a.ai_task ?? a.ai?.task ?? '',
     phaseKey,
@@ -52,8 +56,12 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
     candidatePhase: (a.candidate_phase ?? cand.phase ?? '') as string,
     created: a.created_at ?? a.applied_at ?? '',
     isNew: Boolean(a.is_new ?? false),
-    // Detached rows arrive only with `?include_archived=1`; flag via deleted_at.
-    archived: Boolean(a.deleted_at ?? a.archived ?? false),
+    // APP-DELETED-AT-1: the backend now sends BOTH fields for real (previously
+    // neither ApplicationListResource nor ApplicationDetailResource sent them at
+    // all, so `archived` had to be inferred/forced by the caller — no longer
+    // needed). Detached rows arrive only with `?include_archived=1`.
+    archived: Boolean(a.archived ?? Boolean(a.deleted_at)),
+    deletedAt: a.deleted_at ?? null,
   }
 }
 

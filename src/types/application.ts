@@ -22,6 +22,10 @@ export interface Application {
   vacancyId: Id | null
   vacancyTitle: string
   client: string
+  // S12/13: the customer id (the vacancy's client) — drives the Klant EntityLink.
+  customerId: Id | null
+  // S5: the application's own human-readable display number (e.g. "S-00123").
+  referenceNumber: string
   score: number | null
   task: string
   phaseKey: string
@@ -39,6 +43,9 @@ export interface Application {
   // Detached (soft-deleted) — the row is kept server-side but hidden from the
   // active list; true only when the API is asked for `?include_archived=1`.
   archived: boolean
+  // APP-DELETED-AT-1: the raw timestamp behind `archived` — feeds the drawer's
+  // archived banner ("Archived on <date>"); null while active.
+  deletedAt: string | null
   // Phase label/colour the drawer may carry alongside the stable phaseKey.
   phaseLabel?: string
   phaseColor?: string
@@ -113,6 +120,10 @@ export interface ApiApplication {
   client_name?: string
   client?: { name?: string }
   customer?: { name?: string }
+  // S12/13: the customer id (ApplicationListResource: the vacancy's client_id).
+  customer_id?: Id | null
+  // S5: the application's own reference number (ApplicationListResource).
+  reference_number?: string | null
   score?: number | null
   match_score?: number | null
   match?: { overall?: number | null; criteria?: unknown[]; summary?: string }
