@@ -24,7 +24,11 @@ function ScoreRing({ value, size = 26 }: { value: number; size?: number }) {
   const circ = 2 * Math.PI * r
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={c + '33'} strokeWidth="3" />
+      {/* F7 follow-up (audit R1): `c` is always one of the three --color-* tokens
+          from scoreColor(), never data-hex, so `c + '33'` was the same broken
+          hex-concat-on-token defect the board's count badge had (`var(--…)33` is
+          not a valid CSS colour) — color-mix works for both hex and tokens. */}
+      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`color-mix(in srgb, ${c} 20%, transparent)`} strokeWidth="3" />
       <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={c} strokeWidth="3" strokeLinecap="round"
         strokeDasharray={`${circ * value / 100} ${circ}`} transform={`rotate(-90 ${size / 2} ${size / 2})`} />
     </svg>

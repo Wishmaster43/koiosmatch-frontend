@@ -2,8 +2,6 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LayoutList, Kanban, Plus, Archive } from 'lucide-react'
-import api, { unwrap } from '@/lib/api'
-import { notifyError, notifySuccess } from '@/lib/notify'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useLookups } from '@/context/LookupsContext'
 import { useAuth } from '@/context/AuthContext'
@@ -13,8 +11,9 @@ import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useApplicationFilters, OWNER_NONE } from './hooks/useApplicationFilters'
 import { useApplicationsData, APPLICATIONS_MAX_PER_PAGE } from './hooks/useApplicationsData'
+import { useApplicationDrawerActions } from './hooks/useApplicationDrawerActions'
+import { useApplicationBulkActions } from './hooks/useApplicationBulkActions'
 import InsightsRow from '@/components/insights/InsightsRow'
-import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
 import ApplicationsTable from './ApplicationsTable'
 import ApplicationsBoard from './ApplicationsBoard'
 import type { BoardPhase } from './ApplicationsBoard'
@@ -26,29 +25,25 @@ import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
 import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { BTN_H } from '@/config/buttonMetrics'
-import { mapApplication, mapApplicationDetail } from './data/mapApplication'
-import { bucketOfPhase } from './data/applicationsShared'
-import { buildCandidatePatch } from '@/pages/candidates/data/candidatesShared'
-import type { CandidateNamePatch } from './drawer/CandidateNameFunctionBlock'
-import type { Application, ApplicationDetail } from '@/types/application'
-import type { RejectPayload } from './drawer/RejectionBlock'
-import type { Criterion } from './drawer/MatchScoreBlock'
+import {
+  buildPhaseData, buildOwnerData, buildSourceData, buildVacOptions, asOptions,
+  bucketCount, computeAvgScore, computeAiTaskCount, buildApplicationInsights,
+} from './data/applicationInsights'
+import type { Application } from '@/types/application'
 import type { Id } from '@/types/common'
 
-interface Aggregate { name: string; key: string; color?: string; value: number }
-
 const BUCKETS = ['active', 'matched', 'rejected']
-// Sentinel filter key for rows without an owner (owner_id is nullable).
 
-// Donut click → set exactly one filter value (or clear when clicking it again).
-const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (d: unknown) => {
-  const o = d as { key?: string; name?: string; payload?: { key?: string } } | null | undefined
-  const v = o?.key ?? o?.payload?.key ?? o?.name
-  if (v != null) set(p => (p.length === 1 && p[0] === v) ? [] : [v])
-}
 // Right-panel multi-toggle for a filter dimension.
 const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
 
+/**
+ * ApplicationsPage — thin container (§0.3 split, mirrors CandidatesPage): owns
+ * the UI/view state (page, view mode, selection) and composes the filters hook,
+ * the data hook, the drawer-actions hook, the bulk-actions hook and the pure
+ * insights builder, then renders the insights row + table/board + drawer. Heavy
+ * logic lives in ./hooks and ./data.
+ */
 export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) {
   const { t } = useTranslation('applications')
   const auth = useAuth()
@@ -74,8 +69,6 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const [pageSize,     setPageSize]     = useState(() => Math.min(user?.default_per_page ?? 50, APPLICATIONS_MAX_PER_PAGE))
   // Virtualization (F-7): the vertical scroll container the table body lives in.
   const tableScrollRef = useRef<HTMLDivElement>(null)
-  const [selected,     setSelected]     = useState<ApplicationDetail | null>(null)
-  const [expanded,     setExpanded]     = useState(false)
   // KPI-card attention toggle: null | 'new' | 'scored' | 'aiTasks' (one at a time).
   const toggleAttention = (k: string) => setAttention(p => (p === k ? null : k))
   const [addOpen,        setAddOpen]        = useState(false)
@@ -92,7 +85,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   // sample that feeds the board and the owner/source/avgScore/aiTasks figures —
   // see useApplicationsData's header comment for the BE-gap rationale.
   const { applications, setApplications, loading, error, total, setTotal, lastPage,
-    wideRows, wideIsPartial, stats } =
+    wideRows, wideLoading, wideError, wideIsPartial, stats } =
     useApplicationsData({ view, filterParams, bucketParam, page, pageSize, funnelTypes })
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
 
@@ -100,54 +93,30 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   useEffect(() => { setSelectedIds(new Set()) },
     [bucket, showArchived, page, pageSize, selectedPhase, selectedOwner, selectedSource, selectedVac, query])
 
-  // Row-selection handlers for the table checkboxes + bulk bar.
-  const toggleRow = (id: Id) => setSelectedIds(prev => { const n = new Set(prev); if (n.has(id)) n.delete(id); else n.add(id); return n })
-  const toggleAll = (ids: Id[], allSelected: boolean) => setSelectedIds(prev => {
-    const n = new Set(prev); ids.forEach(i => allSelected ? n.delete(i) : n.add(i)); return n })
-
   // Board columns = the funnel lookup, normalised to { key, label, color }.
   const phases = useMemo<BoardPhase[]>(() => funnelTypes.map(f => ({ key: f.value, label: f.label, color: f.color })), [funnelTypes])
 
   // Resolve an application's phase label/colour from the lookup (de-hardcoded).
   const decorate = <T extends Application>(a: T): T => { const m = funnelMeta(a.phaseKey); return { ...a, phaseLabel: m.label, phaseColor: m.color } }
 
-  // Counts prefer the server-wide stats (real totals, unaffected by any row cap);
-  // fall back to counting the wide (≤200) sample when stats hasn't loaded.
-  const phaseCount  = (key: string) => { const s = stats?.by_phase?.find(o => (o.phase_key ?? o.key ?? o.value) === key); return s ? (s.count ?? 0) : wideRows.filter(a => a.phaseKey === key).length }
-  const bucketCount = (b: string)   => stats?.by_bucket?.[b] ?? wideRows.filter(a => a.bucket === b).length
+  // ── Single-record drawer actions (select/move/owner/link/reject/score/detach/…)
+  // — §0.3 split (F1, audit R1): mirrors useCandidateDrawerActions.
+  const {
+    selected, expanded, setExpanded, closeDrawer, selectApplication,
+    handleMove, handleOwner, handleLinkVacancy, handleUpdateSource, handleReject,
+    handleAdjustScore, handleUpdateCustomFields, handleUpdateCandidate, handleDetach, handleRestore,
+  } = useApplicationDrawerActions({ applications, wideRows, setApplications, setTotal, funnelTypes, users, bucket, decorate, t })
 
-  // ── Donut data (phase / recruiter / source), each with counts ──
-  const phaseData = useMemo<Aggregate[]>(() => phases
-    .map(p => ({ name: p.label, key: p.key, color: p.color, value: phaseCount(p.key) }))
-    .filter(d => d.value > 0)
-  , [phases, wideRows, stats]) // eslint-disable-line react-hooks/exhaustive-deps
-  // Owner/source have NO server-wide aggregate (BE gap — see the data hook's
-  // header comment), so they derive from the wide (≤200) sample; wideIsPartial
-  // flags when that sample doesn't cover every matching application.
-  const ownerData = useMemo<Aggregate[]>(() => {
-    // owner_id is legitimately nullable (imports, API-created, pre-assignment):
-    // unowned rows form an explicit "No owner" slice instead of being dropped.
-    const m: Record<string, Aggregate> = {}
-    wideRows.forEach(a => {
-      const n = a.owner?.name
-      const key = n || OWNER_NONE
-      ;(m[key] ??= { name: n || t('insights.noOwner'), key, color: n ? (a.owner?.color ?? undefined) : '#9CA3AF', value: 0 }).value++
-    })
-    return Object.values(m)
-  }, [wideRows, t])
-  const sourceData = useMemo<Aggregate[]>(() => {
-    const m: Record<string, Aggregate> = {}
-    wideRows.forEach(a => { const s = a.source; if (s) (m[s] ??= { name: s, key: s, value: 0 }).value++ })
-    return Object.values(m)
-  }, [wideRows])
+  // ── Bulk selection + mutations — §0.3 split (F1, audit R1): mirrors useCandidateBulkActions.
+  const { toggleRow, toggleAll, bulkSetPhase, bulkDetach } =
+    useApplicationBulkActions({ setApplications, setTotal, selectedIds, setSelectedIds, funnelTypes, t })
 
-  // Filter option lists (value/label/count) reuse the donut aggregates.
-  const vacOptions = useMemo(() => {
-    const m: Record<string, { value: string; label: string; count: number }> = {}
-    wideRows.forEach(a => { if (a.vacancyId) { const k = String(a.vacancyId); (m[k] ??= { value: k, label: a.vacancyTitle, count: 0 }).count++ } })
-    return Object.values(m)
-  }, [wideRows])
-  const asOptions = (data: Aggregate[]) => data.map(d => ({ value: d.key, label: d.name, count: d.value }))
+  // ── Donut data (phase / recruiter / source) + filter option lists — pure
+  // aggregate builders (F1, audit R1: data/applicationInsights.ts).
+  const phaseData  = useMemo(() => buildPhaseData(phases, stats, wideRows), [phases, stats, wideRows])
+  const ownerData  = useMemo(() => buildOwnerData(wideRows, t('insights.noOwner'), OWNER_NONE), [wideRows, t])
+  const sourceData = useMemo(() => buildSourceData(wideRows), [wideRows])
+  const vacOptions = useMemo(() => buildVacOptions(wideRows), [wideRows])
 
   // Register the right-panel filters (phase + recruiter + source + vacancy).
   const filterGroups = useMemo(() => [
@@ -178,24 +147,6 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const boardRows = useMemo(() => wideRows.filter(a => matchesFilters(a, { ignoreBucket: true, ignoreQuery: true })).map(decorate),
     [wideRows, matchesFilters, funnelTypes]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Open an application: show the light row immediately, then fetch the full detail.
-  const selectedIdRef = useRef<Id | null>(null)
-  const closeDrawer = () => { selectedIdRef.current = null; setSelected(null); setExpanded(false) }
-  const selectApplication = (a: Application) => {
-    if (selected?.id === a.id) { closeDrawer(); return }
-    selectedIdRef.current = a.id ?? null
-    setSelected(decorate(a) as ApplicationDetail); setExpanded(false)
-    // APP-DELETED-AT-1 (measured live, CMFE 2026-07-17): a row opened straight from
-    // the Gearchiveerd quick-view IS soft-deleted server-side — ApplicationController::
-    // show() 404s on it (`findOrFail` excludes trashed rows) unless asked to reveal
-    // them, exactly like the list. `include_archived=1` is always safe to send here:
-    // it only WIDENS the query scope (withTrashed), never narrows an active row's own
-    // lookup, so this fixes the archived case without any branching on `a.archived`.
-    api.get(`/applications/${a.id}`, { params: { include_archived: 1 } })
-      .then(r => { if (selectedIdRef.current === a.id) setSelected(decorate(mapApplicationDetail(unwrap(r), funnelTypes))) })
-      .catch(() => {})
-  }
-
   // Open an application drawer when arriving via a cross-entity link (intent).
   useOpenFromIntent(intent, (id) => selectApplication({ id } as Application))
 
@@ -214,103 +165,6 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     if (i?.vacancy) setSelectedVac([String(i.vacancy)])
   }, [intent])
 
-  // Kanban move: set the new phase + bucket; label/colour re-resolve from the lookup.
-  // `before` checks wideRows too — the board (where a move is dragged) renders off
-  // wideRows, which the table-page `applications` array doesn't hold while in board view.
-  const handleMove = (id: Id, phaseKey: string) => {
-    const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
-    const newBucket = bucketOfPhase(phaseKey, funnelTypes)
-    setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey, bucket: newBucket } : a))
-    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, phaseKey, bucket: newBucket } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { phase_key: phaseKey })
-      .then(() => {
-        // Only claim the move AFTER the server accepted it — the old order showed
-        // "Verplaatst" and then failed (Danny 2026-07-13).
-        if (newBucket !== bucket) notifySuccess(t('board.movedHidden'))
-      })
-      .catch(err => {
-        // Revert the optimistic move and surface the SERVER's reason (a bare
-        // "Actie mislukt" hid why the 422 happened).
-        if (before) {
-          setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey: before.phaseKey, bucket: before.bucket } : a))
-          setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, phaseKey: before.phaseKey, bucket: before.bucket } as ApplicationDetail) : prev))
-        }
-        const serverMsg = (err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } })?.response?.data
-        const detail = serverMsg?.message ?? Object.values(serverMsg?.errors ?? {})[0]?.[0]
-        notifyError(detail || t('common:actionFailed'))
-      })
-  }
-
-  // Reassign an application's recruiter (owner); optimistic + PATCH owner_id.
-  const handleOwner = (id: Id, ownerId: string) => {
-    const u = users.find(x => String(x.id) === String(ownerId))
-    if (!u) return
-    const initials = u.name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
-    const owner = { id: ownerId, name: u.name, initials, color: null }
-    setApplications(prev => prev.map(a => a.id === id ? { ...a, owner } : a))
-    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, owner } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { owner_id: ownerId }).catch(() => notifyError(t('common:actionFailed')))
-  }
-
-  // Re-link (or unlink, null) an application's vacancy — shared by the Sollicitatie
-  // tab's Details block and the Vacature tab. Klant is derived from the picked
-  // option so the row/drawer update instantly; the PATCH response then reconciles
-  // both fields (the backend is the source of truth). A model guard refuses the
-  // change once a Match hangs on the is_match stage (422) — surface ITS message,
-  // never a generic one, and revert the optimistic edit.
-  const handleLinkVacancy = (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => {
-    if (id == null) return
-    // wideRows fallback: the drawer may be open while viewing the board (see handleMove).
-    const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
-    const patch = { vacancyId, vacancyTitle: vacancyId != null ? (meta?.title ?? '') : '', client: vacancyId != null ? (meta?.client ?? '') : '' }
-    setApplications(prev => prev.map(a => a.id === id ? { ...a, ...patch } : a))
-    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { vacancy_id: vacancyId })
-      .then(res => {
-        const updated = mapApplication(unwrap(res), funnelTypes)
-        const reconciled = { vacancyId: updated.vacancyId, vacancyTitle: updated.vacancyTitle, client: updated.client }
-        setApplications(prev => prev.map(a => a.id === id ? { ...a, ...reconciled } : a))
-        setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...reconciled } as ApplicationDetail) : prev))
-      })
-      .catch(err => {
-        if (before) {
-          const revert = { vacancyId: before.vacancyId, vacancyTitle: before.vacancyTitle, client: before.client }
-          setApplications(prev => prev.map(a => a.id === id ? { ...a, ...revert } : a))
-          setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...revert } as ApplicationDetail) : prev))
-        }
-        const serverMsg = (err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } })?.response?.data
-        const detail = serverMsg?.message ?? Object.values(serverMsg?.errors ?? {})[0]?.[0]
-        notifyError(detail || t('common:actionFailed'))
-      })
-  }
-
-  // S7: PATCH the editable Bron field from the Sollicitatie tab's Details block
-  // (mirrors handleOwner's simple optimistic-patch-then-PATCH shape).
-  const handleUpdateSource = (id: Id | undefined, source: string) => {
-    const before = applications.find(a => a.id === id) ?? wideRows.find(a => a.id === id)
-    setApplications(prev => prev.map(a => a.id === id ? { ...a, source } : a))
-    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, source } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { source }).catch(() => {
-      if (before) {
-        setApplications(prev => prev.map(a => a.id === id ? { ...a, source: before.source } : a))
-        setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, source: before.source } as ApplicationDetail) : prev))
-      }
-      notifyError(t('common:actionFailed'))
-    })
-  }
-
-  // Reject an application: move it to the FLAGGED is_rejected phase/bucket
-  // optimistically — never the literal 'rejected' key (A1: a tenant may rename it).
-  const handleReject = (id: Id | undefined, payload: RejectPayload) => {
-    const rejectedKey = funnelTypes.find(f => f.is_rejected)?.value ?? 'rejected'
-    const patch = { phaseKey: rejectedKey, bucket: bucketOfPhase(rejectedKey, funnelTypes),
-      rejection: { reason_label: payload.reason_label, note: payload.note } }
-    setApplications(prev => prev.map(a => a.id === id ? ({ ...a, ...patch } as Application) : a))
-    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as ApplicationDetail) : prev))
-    // The message (channel + template) is sent by the rejection workflow.
-    api.post(`/applications/${id}/reject`, { reason_id: payload.reason_id, note: payload.note }).catch(() => {})
-  }
-
   // A freshly created application: prepend to the list, bump the server-total
   // (F-6: total is no longer derived from the loaded array's length) and open its drawer.
   const handleCreated = (app: Application) => {
@@ -320,164 +174,22 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     selectApplication(app)
   }
 
-  // Manual match-score override on an application (per applicant); optimistic + PATCH.
-  const handleAdjustScore = (id: Id | undefined, { score, criteria }: { score: number | null; criteria: Criterion[] }) => {
-    const patch = { score, matchCriteria: criteria, matchSource: 'manual' }
-    setApplications(prev => prev.map(a => a.id === id ? ({ ...a, ...patch } as Application) : a))
-    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...patch } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { match_score: score, match_criteria: criteria }).catch(() => notifyError(t('common:actionFailed')))
-  }
-
-  // Save the Extra tab's tenant custom fields (§3B); the tab only mounts while the
-  // drawer is open, so `selected` is always the record being edited. Optimistic +
-  // PATCH, merging the partial patch into the full map so the backend persists it whole.
-  const handleUpdateCustomFields = (id: Id | undefined, patch: Record<string, unknown>) => {
-    const merged = { ...(selected?.customFields ?? {}), ...patch }
-    setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, customFields: merged } as ApplicationDetail) : prev))
-    api.patch(`/applications/${id}`, { custom_fields: merged }).catch(() => notifyError(t('common:actionFailed')))
-  }
-
-  // S32: edit the linked candidate's name/function from the Sollicitatie tab.
-  // PATCH /candidates/{id} (buildCandidatePatch: firstname/lastname/title →
-  // first_name/last_name/function_title) — the response is CandidateDetailResource,
-  // which already recomputes `name`/`function_title`, so reconciling from it IS
-  // "refresh drawer data after save" without a second round-trip GET.
-  const handleUpdateCandidate = (candidateId: Id | null | undefined, patch: CandidateNamePatch) => {
-    if (candidateId == null) return
-    const body = buildCandidatePatch(patch as unknown as Record<string, unknown>)
-    api.patch(`/candidates/${candidateId}`, body)
-      .then(r => {
-        const updated = unwrap<{ name?: string; function_title?: string }>(r)
-        setApplications(prev => prev.map(a => a.candidateId === candidateId
-          ? { ...a, candidateName: updated.name ?? a.candidateName } : a))
-        setSelected(prev => (prev && prev.candidateId === candidateId)
-          ? decorate({ ...prev, candidateName: updated.name ?? prev.candidateName,
-              candidate: { ...prev.candidate, function: updated.function_title ?? prev.candidate.function } } as ApplicationDetail)
-          : prev)
-      })
-      .catch(() => notifyError(t('common:actionFailed')))
-  }
-
-  // Detach (soft-delete) an application: kept server-side, removed from the active
-  // list. S15 (BE cb1e684): DELETE now REQUIRES a `reason` (422 without one) —
-  // the drawer's DetachReasonModal collects it — and the backend writes it as a
-  // note the Notities tab shows. Non-optimistic (unlike the old version): a 422
-  // must never look like it succeeded. On success the row leaves the active list,
-  // but the drawer STAYS OPEN and refetches the SAME record with
-  // ?include_archived=1 (required for a soft-deleted row, see ApplicationController::
-  // show) so it shows the archived state honestly with its restore path, instead
-  // of just vanishing (mirrors the candidate archived-banner UX). Gated by
-  // applications.update in the drawer footer.
-  //
-  // APP-DELETED-AT-1 (CMFE 2026-07-17): ApplicationListResource/DetailResource now
-  // send real `archived`/`deleted_at` fields on every GET — previously NEITHER
-  // resource sent them at all, so this handler had to force `archived: true` by
-  // hand onto the refetched record (a resource gap identical in shape to S20's,
-  // just on reads instead of writes). That workaround is gone: the refetch below
-  // trusts mapApplicationDetail's own derivation. The LIST row still gets an
-  // explicit optimistic flag (a 204 DELETE has no body to reconcile from), and
-  // the refetch's own `.catch` keeps a local fallback for the rare case where
-  // the GET itself fails right after a detach that we know succeeded.
-  const handleDetach = (id: Id | undefined, reason: string) => {
-    if (id == null) return
-    api.delete(`/applications/${id}`, { data: { reason } })
-      .then(() => {
-        notifySuccess(t('detach.done'))
-        setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: true } : a))
-        setTotal(prev => Math.max(0, prev - 1))
-        api.get(`/applications/${id}`, { params: { include_archived: 1 } })
-          .then(r => { if (selectedIdRef.current === id) setSelected(decorate(mapApplicationDetail(unwrap(r), funnelTypes))) })
-          .catch(() => { if (selectedIdRef.current === id) setSelected(prev => (prev && prev.id === id ? { ...prev, archived: true } : prev)) })
-      })
-      .catch(err => {
-        const serverMsg = (err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } })?.response?.data
-        const detail = serverMsg?.message ?? Object.values(serverMsg?.errors ?? {})[0]?.[0]
-        notifyError(detail || t('common:actionFailed'))
-      })
-  }
-
-  // Restore a detached application: back to the active list (backend re-sets the
-  // candidate to the applicant phase). Optimistic + total increment; revert-by-id +
-  // toast on failure (see handleDetach's note on why not a snapshot).
-  const handleRestore = (id: Id | undefined) => {
-    if (id == null) return
-    setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: false } : a))
-    setTotal(prev => prev + 1)
-    closeDrawer()
-    api.post(`/applications/${id}/restore`)
-      .then(() => notifySuccess(t('restore.done')))
-      .catch(() => {
-        setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: true } : a))
-        setTotal(prev => Math.max(0, prev - 1))
-        notifyError(t('common:actionFailed'))
-      })
-  }
-
-  // Bulk: move every selected application to one funnel phase; optimistic + PATCH each.
-  const bulkSetPhase = (phaseKey: string) => {
-    const ids = [...selectedIds]
-    if (!ids.length) return
-    setApplications(prev => prev.map(a => a.id != null && selectedIds.has(a.id as Id) ? { ...a, phaseKey, bucket: bucketOfPhase(phaseKey, funnelTypes) } : a))
-    setSelectedIds(new Set())
-    Promise.allSettled(ids.map(id => api.patch(`/applications/${id}`, { phase_key: phaseKey })))
-      .then(() => notifySuccess(t('bulk.done', { count: ids.length })))
-  }
-
-  // Bulk: detach (soft-delete) every selected application; optimistic (incl. the
-  // total decrement) + revert-by-id on any failure (see handleDetach's note — a
-  // whole-array snapshot can't safely revert both the table-page and wide caches).
-  const bulkDetach = () => {
-    const ids = [...selectedIds]
-    if (!ids.length) return
-    setApplications(prev => prev.map(a => a.id != null && selectedIds.has(a.id as Id) ? { ...a, archived: true } : a))
-    setTotal(prev => Math.max(0, prev - ids.length))
-    setSelectedIds(new Set())
-    Promise.allSettled(ids.map(id => api.delete(`/applications/${id}`))).then(rs => {
-      if (rs.some(r => r.status === 'rejected')) {
-        setApplications(prev => prev.map(a => a.id != null && ids.includes(a.id as Id) ? { ...a, archived: false } : a))
-        setTotal(prev => prev + ids.length)
-        notifyError(t('common:actionFailed'))
-      } else {
-        notifySuccess(t('bulk.done', { count: ids.length }))
-      }
-    })
-  }
-
-  // ── Insights strip: 3 donuts (filterable) + 4 KPI cards, equal footprint ──
-  // `picked` = the chip label; phase filters store the SLUG, so resolve it to its label.
-  const pickedLabel = (data: Aggregate[], v?: string) => (v ? (data.find(d => d.key === v)?.name ?? v) : null)
-  const insightDonuts: DonutSpec[] = [
-    { key: 'phase',  title: t('insights.phase'),  data: phaseData,  onPick: pickOne(setSelectedPhase),  active: selectedPhase.length > 0,  onClear: () => setSelectedPhase([]),  picked: pickedLabel(phaseData, selectedPhase[0]) },
-    { key: 'owner',  title: t('insights.owner'),  data: ownerData,  onPick: pickOne(setSelectedOwner),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]),  picked: pickedLabel(ownerData, selectedOwner[0]) },
-    { key: 'source', title: t('insights.source'), data: sourceData, onPick: pickOne(setSelectedSource), active: selectedSource.length > 0, onClear: () => setSelectedSource([]), picked: pickedLabel(sourceData, selectedSource[0]) },
-  ]
-  // Average match score across non-rejected applications (KPI, "—" when none scored).
-  // No server-wide aggregate (BE gap) — derived from the wide (≤200) sample.
-  const scored = wideRows.filter(a => a.bucket !== 'rejected' && typeof a.score === 'number')
-  const avgScore = scored.length ? Math.round(scored.reduce((s, a) => s + (a.score as number), 0) / scored.length) + '%' : '—'
-  // Active applications that still carry an AI task (attention KPI); same wide sample.
-  const aiTaskCount = wideRows.filter(a => a.task && a.bucket === 'active').length
-
-  // KPI cards — mirror the candidate strip: count + sub-line, click-to-filter where it maps.
-  const insightKpis: KpiSpec[] = [
-    // TOTAAL ACTIEF spans two buckets — clicking shows BOTH (active + matched), so the
-    // list always matches the number on the card (Danny: "waar zijn ze allemaal?").
-    { key: 'totalActive', label: t('kpi.totalActive'), value: bucketCount('active') + bucketCount('matched'),
-      sub: t('kpi.totalActiveSub'), color: 'var(--color-primary)',
-      onClick: () => { clearAllFilters(); setShowArchived(false); setBucket(bucket === 'allActive' ? 'active' : 'allActive'); setAttention(null) },
-      active: bucket === 'allActive' },
-    { key: 'new', label: t('kpi.new'), value: wideRows.filter(a => a.isNew && a.bucket === 'active').length,
-      sub: t('kpi.newSub'), color: 'var(--color-warning)',
-      onClick: () => { setShowArchived(false); setBucket('active'); toggleAttention('new') }, active: attention === 'new' },
-    { key: 'matched', label: t('kpi.matched'), value: bucketCount('matched'), sub: t('kpi.matchedSub'),
-      color: 'var(--color-success)', onClick: () => { setShowArchived(false); setBucket('matched') }, active: !showArchived && bucket === 'matched' },
-    { key: 'rejected', label: t('kpi.rejected'), value: bucketCount('rejected'), sub: t('kpi.rejectedSub'),
-      color: 'var(--color-danger)', onClick: () => { setShowArchived(false); setBucket('rejected') }, active: !showArchived && bucket === 'rejected' },
-    { key: 'avgScore', label: t('kpi.avgScore'), value: avgScore, sub: t('kpi.avgScoreSub'), color: 'var(--color-secondary)',
-      onClick: () => { setShowArchived(false); toggleAttention('scored') }, active: attention === 'scored' },
-    { key: 'aiTasks', label: t('kpi.aiTasks'), value: aiTaskCount, sub: t('kpi.aiTasksSub'), color: '#0D9488',
-      onClick: () => { setShowArchived(false); setBucket('active'); toggleAttention('aiTasks') }, active: attention === 'aiTasks' },
-  ]
+  // ── Insights strip: 3 donuts (filterable) + 6 KPI cards, equal footprint —
+  // figures computed here, assembled by the pure builder (F1, audit R1).
+  const avgScore = useMemo(() => computeAvgScore(wideRows), [wideRows])
+  const aiTaskCount = useMemo(() => computeAiTaskCount(wideRows), [wideRows])
+  const counts = useMemo(() => ({
+    active: bucketCount(stats, wideRows, 'active'),
+    matched: bucketCount(stats, wideRows, 'matched'),
+    rejected: bucketCount(stats, wideRows, 'rejected'),
+    new: wideRows.filter(a => a.isNew && a.bucket === 'active').length,
+  }), [stats, wideRows])
+  const { donuts: insightDonuts, kpis: insightKpis } = buildApplicationInsights({
+    t, phaseData, ownerData, sourceData,
+    selectedPhase, setSelectedPhase, selectedOwner, setSelectedOwner, selectedSource, setSelectedSource,
+    bucket, setBucket, attention, setAttention, toggleAttention, showArchived, setShowArchived, clearAllFilters,
+    counts, avgScore, aiTaskCount,
+  })
 
   return (
     <div style={{ display: 'flex', height: '100%', background: 'var(--bg)', overflow: 'hidden' }}>
@@ -567,7 +279,8 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         </div>
         {view === 'board' && (
           <ApplicationsBoard rows={boardRows} phases={phases} onMove={handleMove}
-            selectedId={selected?.id} onSelect={selectApplication} />
+            selectedId={selected?.id} onSelect={selectApplication}
+            loading={wideLoading} error={wideError} />
         )}
       </div>
 

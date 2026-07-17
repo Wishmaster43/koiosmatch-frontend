@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import type { DragEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
 import Avatar from '@/components/ui/Avatar'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
@@ -77,8 +78,11 @@ function BoardColumn({ phase, items, onDragStart, onDrop, onDragOver, onSelect, 
       onDrop={e => onDrop(e, phase.key)} onDragOver={onDragOver}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
         <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--text)' }}>{phase.label}</span>
+        {/* F7 (audit R1): color-mix instead of a hex-concat tint (`color + '20'`
+            silently breaks once `phase.color` is a `var(--…)` token, not a hex —
+            color-mix works for both). */}
         <span style={{ fontSize: 11, fontWeight: 600, padding: '1px 7px', borderRadius: 99,
-          background: phase.color + '20', color: phase.color }}>{items.length}</span>
+          background: `color-mix(in srgb, ${phase.color} 12%, transparent)`, color: phase.color }}>{items.length}</span>
       </div>
       <div style={{ flex: 1, minHeight: 60 }}>
         {items.map(app => (
@@ -94,9 +98,14 @@ function BoardColumn({ phase, items, onDragStart, onDrop, onDragOver, onSelect, 
  * ApplicationsBoard — kanban view, one column per funnel phase. Presentational:
  * the page owns the data and the phase mutation (onMove).
  */
-export default function ApplicationsBoard({ rows, phases, onMove, onSelect, selectedId }: {
+export default function ApplicationsBoard({ rows, phases, onMove, onSelect, selectedId, loading, error }: {
   rows: Application[]; phases: BoardPhase[]; onMove: (id: Id, phaseKey: string) => void; onSelect: (app: Application) => void; selectedId?: Id | null
+  // F3 (audit R1): the board renders off the wide (bucket-less) sample — surface
+  // its own loading/error state instead of silently showing zero-count columns
+  // on first paint or after a failed fetch (mirrors ApplicationsTable's states).
+  loading?: boolean; error?: unknown
 }) {
+  const { t } = useTranslation('applications')
   // Edge-scroll the board while dragging (HTML5 DnD never scrolls itself).
   const { ref: boardScrollRef, onDragOver: boardAutoScroll } = useDragAutoScroll<HTMLDivElement>()
   const dragId = useRef<Id | null>(null)
@@ -106,6 +115,20 @@ export default function ApplicationsBoard({ rows, phases, onMove, onSelect, sele
   const handleDrop = (e: DragEvent<HTMLDivElement>, phaseKey: string) => {
     e.preventDefault()
     if (dragId.current != null) { onMove(dragId.current, phaseKey); dragId.current = null }
+  }
+
+  // Honest four-state board (F3): a wide-sample fetch failure or the first-paint
+  // load must never look like "zero applications everywhere" — show the same
+  // calm, centred message the table shows in its own loading/error/empty slot,
+  // instead of silently rendering every phase column at count 0.
+  if (loading || error || rows.length === 0) {
+    const message = loading ? t('loading') : error ? t('error') : t('empty')
+    return (
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        padding: 40, fontSize: 13, color: 'var(--text-muted)' }}>
+        {message}
+      </div>
+    )
   }
 
   return (

@@ -114,6 +114,10 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
   const wideRows    = wideQuery.data?.applications ?? EMPTY_APPLICATIONS
   const wideTotal   = wideQuery.data?.total ?? 0
   const wideLoading = wideQuery.isLoading
+  // F3 (audit R1): the board renders off wideRows — expose its own error flag so
+  // a wide-sample fetch failure shows an honest message instead of silently
+  // looking like zero applications in every funnel column.
+  const wideError   = wideQuery.isError
   // Honest page-scope flag (STATS-OOM-1 pattern): the owner/source donuts and the
   // avgScore/aiTasks KPIs derive from wideRows — flag when that sample is partial.
   const wideIsPartial = wideTotal > wideRows.length
@@ -160,6 +164,6 @@ export function useApplicationsData({ view, filterParams, bucketParam, page, pag
 
   return {
     applications, setApplications, loading, error, total, setTotal, lastPage,
-    wideRows, wideLoading, wideIsPartial, stats,
+    wideRows, wideLoading, wideError, wideIsPartial, stats,
   }
 }
