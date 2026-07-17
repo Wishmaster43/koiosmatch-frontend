@@ -5,6 +5,14 @@
  * useVacancyRecord already extracted the data/record layers from this same page).
  * Pure derivation only: stats first (server-wide, filter-honouring), page-loaded
  * rows as the fallback — no fetching, no side effects.
+ *
+ * Donut-footprint deviation (§4/§3A equal-footprint note, audit R1 item 7): this
+ * hook feeds FIVE donuts (status/owner/client/category/published), not the
+ * candidate blueprint's three. This is a deliberate, Danny-requested product
+ * choice, not drift: Danny explicitly asked for the Gepubliceerd donut (V27) and
+ * the Functie donut (V28) on 17-07, on top of the pre-existing status/owner/client
+ * set — see VacanciesPage's `insightDonuts` array for where the two extra entries
+ * are wired in.
  */
 import { useMemo } from 'react'
 import type { TFunction } from 'i18next'

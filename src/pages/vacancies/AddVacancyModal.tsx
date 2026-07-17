@@ -160,8 +160,10 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
           </button>
           <button onClick={handleSubmit} disabled={!canSubmit || saving}
             style={{ height: BTN_H, padding: '0 20px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
-              background: (canSubmit && !saving) ? 'var(--color-primary)' : '#E5E7EB',
-              color: (canSubmit && !saving) ? 'white' : '#9CA3AF',
+              // Audit R1 item 3: hardcoded hex → design tokens (blueprint parity
+              // with AddCandidateModal's disabled-state colours, §4).
+              background: (canSubmit && !saving) ? 'var(--color-primary)' : 'var(--border)',
+              color: (canSubmit && !saving) ? 'white' : 'var(--text-muted)',
               cursor: (canSubmit && !saving) ? 'pointer' : 'not-allowed' }}>
             {saving ? t('modal.creating') : t('modal.create')}
           </button>

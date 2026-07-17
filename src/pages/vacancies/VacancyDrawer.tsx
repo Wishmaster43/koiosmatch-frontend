@@ -7,6 +7,7 @@ import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import { channelIcon } from './data/channelIcons'
 import VacancyChangelogPopover from './drawer/VacancyChangelogPopover'
+import VacancyArchivedBanner from './drawer/VacancyArchivedBanner'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import DetailsTab from './drawer/DetailsTab'
@@ -17,7 +18,7 @@ import TimelineTab from './drawer/TimelineTab'
 import NotesTab from './drawer/NotesTab'
 import StatisticsTab from './drawer/StatisticsTab'
 import MatchingTab from './drawer/MatchingTab'
-import ExtraTab from './drawer/ExtraTab'
+import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useVacancyCustomFields } from '@/lib/useVacancyCustomFields'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
@@ -33,7 +34,13 @@ const TABS: { id: string; tKey: string; render: (v: VacancyDetail, onUpdate?: Up
   { id: 'applicants', tKey: 'applicants', render: v => <ApplicantsTab vacancy={v} /> },
   { id: 'matching',   tKey: 'matching',   render: (v, onUpdate) => <MatchingTab vacancy={v} onUpdate={onUpdate} /> },
   { id: 'publishing', tKey: 'publishing', render: (v, onUpdate) => <PublishingTab vacancy={v} onUpdate={onUpdate} /> },
-  { id: 'extra',      tKey: 'extra',      render: (v, onUpdate) => <ExtraTab vacancy={v} onUpdate={onUpdate} /> },
+  // Audit R1 item 1: the tenant custom-fields tab now goes through the ONE shared
+  // CustomFieldsTab (§3A(f)) — the old bespoke ExtraTab (own fetch + a bare
+  // <textarea> for textarea-type fields) is deleted; this hands entityType +
+  // the vacancy's own customFieldValues map + a save callback that merges into
+  // the existing customFieldValues patch path (buildVacancyPatch → custom_fields).
+  { id: 'extra',      tKey: 'extra',      render: (v, onUpdate) => <CustomFieldsTab entityType="vacancy" values={v.customFieldValues ?? {}}
+      onSave={patch => onUpdate?.(v.id, { customFieldValues: { ...(v.customFieldValues ?? {}), ...patch } })} /> },
   { id: 'documents',  tKey: 'documents',  render: v => <DocumentsTab vacancy={v} /> },
   // Tijdlijn TAB (intended: real lifecycle activity — created/status changes/
   // applications received) is distinct BY DESIGN from the changelog ICON in the
@@ -161,6 +168,10 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
             onRemove: tag => setTagsAndSave(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
           tagsLabel={t('drawer.tags')}
         >
+          {/* Archived banner (audit R1 item 8) — mirrors the application/candidate
+              drawer's in-body archived state; the table already shows the soft chip,
+              the drawer previously had no equivalent. */}
+          {v.archived && <VacancyArchivedBanner archivedAt={v.archivedAt} />}
           {/* V2: published indicator — per-channel icons for the channels this vacancy
               is ACTUALLY published on (icon + label, colour never the only signal);
               falls back to the generic globe + "not published" when none are. Click a

@@ -118,6 +118,10 @@
       "statistics": "Statistiques",
       "extra": "Extra",
       "changelog": "Modifications"
+    },
+    "archivedBanner": {
+      "since": "Archivé le {{date}}",
+      "flag": "Archivé"
     }
   },
   "matching": {

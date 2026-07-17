@@ -1,20 +1,14 @@
-import { useState } from 'react'
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2, Plus } from 'lucide-react'
-import { useLookups } from '@/context/LookupsContext'
-import { useVacancyLookups } from '@/context/VacancyLookupsContext'
-import { useIndustries } from '@/lib/useIndustries'
-import { useFunctions } from '@/lib/useFunctions'
-import { useDateFormat } from '@/lib/datetime'
-import { useCustomerOptions } from '../hooks/useCustomerOptions'
-import { useCascadePickers } from '../hooks/useCascadePickers'
 import CreatableSelect from '@/components/ui/CreatableSelect'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
 import EntityLink from '@/components/ui/EntityLink'
 import KoiosAdviceBlock from '@/components/ai/KoiosAdviceBlock'
 import { buildVacancyAdviceInsights } from './vacancyAiInsights'
+import { useVacancyDetailsForm, composeAddress } from '../hooks/useVacancyDetailsForm'
+import type { TextKey } from '../hooks/useVacancyDetailsForm'
 import type { VacancyDetail } from '@/types/vacancy'
 import type { Id } from '@/types/common'
 
@@ -23,14 +17,6 @@ const RichTextEditor = RichTextEditorJs as unknown as ComponentType<AnyProps>
 const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
 
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
-type TextKey = 'category' | 'industry' | 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city'
-  | 'province' | 'experienceMin' | 'experienceMax' | 'seniority' | 'education' | 'salaryMin' | 'salaryMax' | 'hoursMin' | 'hoursMax'
-  // VAC-DATES-1: the vacancy's own runtime window (native <input type="date">, YYYY-MM-DD).
-  | 'startDate' | 'endDate'
-type Form = Record<TextKey, string>
-// V4-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade — one
-// picked {id,name} per step (VAC-CASCADE-1: seeded from the detail, persisted for real).
-type CascadeState = { locationId: string; locationName: string; departmentId: string; departmentName: string; contactId: string; contactName: string }
 
 const inputStyle: CSSProperties = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
 const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
@@ -38,117 +24,28 @@ const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border
 const groupTitle: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
 
 /**
- * DetailsTab — vacancy field grid, editable in place (one pencil toggles all
- * fields), mirroring the candidate ProfileTab. Contract type reuses the candidate
+ * DetailsTab — vacancy field grid, card layout only (audit R1 item 6: the form/
+ * cascade/types/skills/save/cancel logic now lives in useVacancyDetailsForm —
+ * this mirrors how VacanciesPage got useVacancyInsights; behaviour identical).
+ * Mirrors the candidate ProfileTab. Contract type reuses the candidate
  * contract-forms lookup (multi-chips); function/industry come from the tenant
- * lookups; the address is structured (composed read, separate edit); experience is
- * a from–to range; the description uses the same rich editor as the profile text.
- * Skills stay read-only (their own list UX is a follow-up).
+ * lookups; the address is structured (composed read, separate edit); experience
+ * is a from–to range; the description uses the same rich editor as the profile
+ * text. Skills stay a vertical list (edit/remove per row).
  */
 export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyDetail; onUpdate?: UpdateFn }) {
   const { t } = useTranslation('vacancies')
-  const { candidateTypes, typeMeta } = useLookups() as unknown as {
-    candidateTypes: Array<{ value: string; label: string; color?: string }>
-    typeMeta: (v: string) => { label: string; color: string }
-  }
-  const { seniorityLevels, educationLevels } = useVacancyLookups()
-  const { industries } = useIndustries()
-  const { functions } = useFunctions() as { functions: Array<string | { value: string; label?: string }> }
-  const { formatDate } = useDateFormat()
+  const {
+    candidateTypes, typeMeta, seniorityLevels, educationLevels, industries, formatDate, fnOptions,
+    editing, setEditing, form, setF, save, cancel,
+    clientId, handleClientChange, customerOptions, cascade, locationPicker, departmentPicker, contactPicker,
+    types, toggleType,
+    skills, newSkill, setNewSkill, addSkill, removeSkill,
+    descEditing, setDescEditing, descExpanded, setDescExpanded, description, setDescription, saveDesc, cancelDesc,
+  } = useVacancyDetailsForm(v, onUpdate)
 
-  const seedForm = (): Form => ({
-    category: v.category, industry: v.industry,
-    street: v.street, houseNumber: v.houseNumber, houseNumberSuffix: v.houseNumberSuffix, postalCode: v.postalCode, city: v.city, province: v.province,
-    experienceMin: v.experienceMin, experienceMax: v.experienceMax, seniority: v.seniorityValue, education: v.educationValue,
-    salaryMin: v.salaryMin, salaryMax: v.salaryMax, hoursMin: v.hoursMin, hoursMax: v.hoursMax,
-    // VAC-DATES-1: seed from the raw YYYY-MM-DD strings the detail already carries.
-    startDate: v.startDate, endDate: v.endDate,
-  })
-  const skillStr = (s: unknown): string => (typeof s === 'string' ? s : ((s as { name?: string; label?: string })?.name ?? (s as { label?: string })?.label ?? ''))
-  const [editing, setEditing] = useState(false)
-  const [form, setForm] = useState<Form>(seedForm)
-  // Client moved here from the drawer header (P3: calm header, max status+owner pickers).
-  const [clientId, setClientId] = useState<string>(String(v.clientId ?? ''))
-  const [types, setTypes] = useState<string[]>(v.contractTypes ?? [])
-  // V3-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade.
-  // VAC-CASCADE-1 (backend wave 6): the detail now carries the persisted ids +
-  // resolved names, so this seeds from `v` — read-mode shows the saved values on
-  // load/reload instead of always-empty; `savedCascade` is the cancel-revert
-  // baseline (updated on save, not on every keystroke).
-  const emptyCascade: CascadeState = { locationId: '', locationName: '', departmentId: '', departmentName: '', contactId: '', contactName: '' }
-  const seedCascade = (): CascadeState => ({
-    locationId: v.customerLocationId || '', locationName: v.customerLocationName || '',
-    departmentId: v.customerDepartmentId || '', departmentName: v.customerDepartmentName || '',
-    contactId: v.contactId || '', contactName: v.contactName || '',
-  })
-  const [savedCascade, setSavedCascade] = useState<CascadeState>(seedCascade)
-  const [cascade, setCascade] = useState<CascadeState>(seedCascade)
-  // Picking a different client resets the dependent picks (cascade integrity).
-  const handleClientChange = (id: string) => { setClientId(id); setCascade(emptyCascade) }
-  const { locationPicker, departmentPicker, contactPicker } = useCascadePickers({
-    clientId,
-    customerLocationId: cascade.locationId,
-    onLocationChange: p => setCascade(c => ({ ...c, locationId: p.id, locationName: p.name })),
-    customerDepartmentId: cascade.departmentId,
-    onDepartmentChange: p => setCascade(c => ({ ...c, departmentId: p.id, departmentName: p.name })),
-    contactId: cascade.contactId,
-    onContactChange: p => setCascade(c => ({ ...c, contactId: p.id, contactName: p.name })),
-  })
-  const [skills, setSkills] = useState<string[]>(() => (v.skills ?? []).map(skillStr).filter(Boolean))
-  const [newSkill, setNewSkill] = useState('')
-  const setF = (k: TextKey, val: string) => setForm(p => ({ ...p, [k]: val }))
-  const toggleType = (val: string) => setTypes(p => p.includes(val) ? p.filter(x => x !== val) : [...p, val])
-  // Skills are quick-editable OUTSIDE the pencil (Danny 2026-07-06: "kan ik niet
-  // invullen"): adding/removing persists immediately; inside edit-mode the change
-  // rides along with the big Save instead.
-  const persistSkills = (next: string[]) => { setSkills(next); if (!editing) onUpdate?.(v.id, { skills: next }) }
-  const addSkill = () => { const sk = newSkill.trim(); if (sk && !skills.includes(sk)) persistSkills([...skills, sk]); setNewSkill('') }
-  const removeSkill = (s: string) => persistSkills(skills.filter(x => x !== s))
-
-  // Description edits in its own block (rich text), like the candidate profile text.
-  const [descEditing, setDescEditing] = useState(false)
-  const [descExpanded, setDescExpanded] = useState(false)
-  const [description, setDescription] = useState(v.description ?? '')
-
-  // Customer options load only while editing (capped page, React Query).
-  const customerOptions = useCustomerOptions(editing)
-
-  const save = () => {
-    const sen = seniorityLevels.find(s => s.value === form.seniority)
-    const edu = educationLevels.find(e => e.value === form.education)
-    const salary = [form.salaryMin, form.salaryMax].filter(Boolean).join(' – ')
-    const hours  = [form.hoursMin, form.hoursMax].filter(Boolean).join(' – ')
-    const location = composeAddress(form.street, form.houseNumber, form.houseNumberSuffix, form.postalCode, form.city)
-    onUpdate?.(v.id, {
-      // Client lives in Details now (header stays calm) — send the name too for optimistic UI.
-      clientId, clientName: customerOptions.find(c => String(c.value) === clientId)?.label ?? v.clientName,
-      // V3-V6 / VAC-CASCADE-1: persisted for real (buildVacancyPatch → customer_location_id/
-      // customer_department_id/contact_id, whitelisted in VacancyWriter's scalar passthrough).
-      customerLocationId: cascade.locationId || null, customerDepartmentId: cascade.departmentId || null, contactId: cascade.contactId || null,
-      contractTypes: types, category: form.category, industry: form.industry,
-      street: form.street, houseNumber: form.houseNumber, houseNumberSuffix: form.houseNumberSuffix,
-      postalCode: form.postalCode, city: form.city, province: form.province, location,
-      experienceMin: form.experienceMin, experienceMax: form.experienceMax,
-      seniorityValue: form.seniority, seniority: sen?.label ?? '', educationValue: form.education, education: edu?.label ?? '',
-      salaryMin: form.salaryMin, salaryMax: form.salaryMax, hoursMin: form.hoursMin, hoursMax: form.hoursMax, salary, hours,
-      skills,
-      // VAC-DATES-1: runtime window (BE validates end_date after_or_equal:start_date).
-      startDate: form.startDate, endDate: form.endDate,
-    })
-    setSavedCascade(cascade)
-    setEditing(false)
-  }
-  const cancel = () => {
-    setForm(seedForm()); setClientId(String(v.clientId ?? '')); setTypes(v.contractTypes ?? [])
-    setSkills((v.skills ?? []).map(skillStr).filter(Boolean)); setNewSkill('')
-    setCascade(savedCascade)
-    setEditing(false)
-  }
-  const saveDesc = () => { onUpdate?.(v.id, { description }); setDescEditing(false) }
-  const cancelDesc = () => { setDescription(v.description ?? ''); setDescEditing(false) }
-
-  const fnOptions = functions.map(f => (typeof f === 'string' ? { value: f, label: f } : { value: f.value, label: f.label ?? f.value }))
-
+  // Edit-toggle control block (pencil ↔ save/cancel), reused for the field grid
+  // and the description block (each with its own independent editing state).
   const controls = (isEditing: boolean, onSave: () => void, onCancel: () => void, onStart: () => void, extra?: ReactNode) => isEditing ? (
     <div style={{ display: 'flex', gap: 4 }}>
       {extra}
@@ -309,12 +206,4 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
       <KoiosAdviceBlock namespace="vacancies" insights={buildVacancyAdviceInsights(v, t)} />
     </div>
   )
-}
-
-// Compose a one-line address from the structured fields (street nr-suffix, postcode city).
-function composeAddress(street: string, houseNumber: string, suffix: string, postalCode: string, city: string): string {
-  return [
-    [street, [houseNumber, suffix].filter(Boolean).join('-')].filter(Boolean).join(' '),
-    [postalCode, city].filter(Boolean).join(' '),
-  ].filter(s => s && s.trim()).join(', ')
 }

@@ -8,12 +8,13 @@
 import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CheckCircle2, AlertTriangle, X, Archive, Map as MapIcon } from 'lucide-react'
+import { Archive, Map as MapIcon } from 'lucide-react'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAuth } from '@/context/AuthContext'
 import { useUsers } from '@/lib/queries'
 import { isReferenceQuery } from '@/lib/referenceNumber'
 import ErrorBanner from '@/components/ui/ErrorBanner'
+import ActionMessageBanner from '@/components/ui/ActionMessageBanner'
 import { VacancyLookupsProvider, useVacancyLookups } from '@/context/VacancyLookupsContext'
 import InsightsRow from '@/components/insights/InsightsRow'
 import type { DonutSpec, KpiSpec } from '@/components/insights/InsightsRow'
@@ -187,8 +188,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     { key: 'owner',  title: t('insights.ownerTitle'),  data: ownerData,  onPick: d => pickOne(setSelectedOwner)(pickKey(d)),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
     { key: 'client', title: t('insights.clientTitle'), data: clientData, onPick: d => pickOne(setSelectedClient)(pickKey(d)), active: selectedClient.length > 0, onClear: () => setSelectedClient([]) },
     // V28: functie donut — server-wide by_category aggregate, click-to-filter onto
-    // the existing category[] param (§3A equal-footprint note: this is the row's
-    // 5th donut — see the report for the footprint deviation vs. candidates' 3).
+    // the existing category[] param. §4/§3A equal-footprint note (audit R1 item 7):
+    // this is the row's 5th donut, not the candidate blueprint's 3 — a deliberate
+    // product choice (Danny asked for this + the V27 published donut on 17-07), not
+    // drift; see useVacancyInsights.ts's docblock for the full written reason.
     { key: 'category', title: t('insights.categoryTitle'), data: categoryData,
       onPick: d => pickOne(setSelectedCategory)(pickKey(d)), active: selectedCategory.length > 0, onClear: () => setSelectedCategory([]) },
     // V27: click a segment → publishedBucket ('published'/'unpublished'); click again clears.
@@ -270,21 +273,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
             </div>
           </div>
 
-          {/* Transient feedback for bulk mutations (aria-live for screen readers) */}
-          {actionMsg && (
-            <div role="status" aria-live="polite" style={{ margin: '0 24px 10px', display: 'flex', alignItems: 'center', gap: 8,
-              padding: '8px 12px', borderRadius: 8, fontSize: 12.5,
-              background: actionMsg.type === 'error' ? 'var(--color-danger-bg)' : 'var(--color-success-bg)',
-              color: actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)',
-              border: `1px solid ${actionMsg.type === 'error' ? 'var(--color-danger)' : 'var(--color-success)'}` }}>
-              {actionMsg.type === 'error' ? <AlertTriangle size={14} /> : <CheckCircle2 size={14} />}
-              <span style={{ flex: 1 }}>{actionMsg.text}</span>
-              <button onClick={() => setActionMsg(null)} aria-label={t('common:close', 'Sluiten')}
-                style={{ display: 'flex', border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', padding: 2 }}>
-                <X size={13} />
-              </button>
-            </div>
-          )}
+          {/* Transient feedback for bulk mutations — audit R1 item 5: this was a
+              copy-pasted role=status banner (mirrored in Candidates/Customers); now
+              the ONE shared component (§3A). */}
+          <ActionMessageBanner msg={actionMsg} onDismiss={() => setActionMsg(null)} dismissLabel={t('common:close', 'Sluiten')} />
 
           {/* Map view (STRAAL-1 v2, mirrors candidates): map LEFT, the filtered vacancy
               table RIGHT — one radius search drives both panes. Lazy Leaflet load. */}

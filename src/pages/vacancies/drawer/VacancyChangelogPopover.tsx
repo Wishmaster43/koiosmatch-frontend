@@ -43,18 +43,30 @@ function ChangelogPanel({ vacancy, onClose, label }: { vacancy: VacancyDetail; o
  * instead of being its own tab. V8 (VACATURES-100): widened to the same centered
  * 900px dialog + focus trap as the candidate popover (was a cramped 360px corner
  * dropdown) — the rewritten ChangelogTab now carries date filters/search/export
- * that need the room.
+ * that need the room. Closes on outside click while open (Escape is handled by
+ * the panel's own focus trap) — audit R1 item 2: this effect was missing here,
+ * copied verbatim from the candidate ChangelogPopover.
  */
 export default function VacancyChangelogPopover({ vacancy }: { vacancy: VacancyDetail }) {
   const { t } = useTranslation('vacancies')
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
+  // A Tijdlijn system-row icon can request the changelog (km:open-changelog).
   useEffect(() => {
     const onOpen = () => setOpen(true)
     window.addEventListener('km:open-changelog', onOpen)
     return () => window.removeEventListener('km:open-changelog', onOpen)
   }, [])
+
+  // Close on outside click while the popover is open (Escape is handled by the
+  // panel's own focus trap, item 20).
+  useEffect(() => {
+    if (!open) return
+    const onClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('mousedown', onClick)
+    return () => document.removeEventListener('mousedown', onClick)
+  }, [open])
 
   return (
     <div ref={ref} style={{ position: 'relative', display: 'flex' }}>

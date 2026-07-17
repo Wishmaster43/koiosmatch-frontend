@@ -118,6 +118,10 @@
       "notes": "Notes",
       "statistics": "Statistics",
       "changelog": "Changelog"
+    },
+    "archivedBanner": {
+      "since": "Archived on {{date}}",
+      "flag": "Archived"
     }
   },
   "matching": {

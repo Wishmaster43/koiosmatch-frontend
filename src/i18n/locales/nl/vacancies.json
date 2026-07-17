@@ -118,6 +118,10 @@
       "notes": "Notities",
       "statistics": "Statistieken",
       "changelog": "Wijzigingen"
+    },
+    "archivedBanner": {
+      "since": "Gearchiveerd op {{date}}",
+      "flag": "Gearchiveerd"
     }
   },
   "matching": {
