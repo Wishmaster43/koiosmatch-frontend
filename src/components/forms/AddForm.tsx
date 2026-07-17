@@ -77,10 +77,18 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
   // Fields whose hideWhen condition is active drop out entirely (pairing runs on what's left).
   const dis = (f: FieldDef) => !!(f.disabledWhen && values[f.disabledWhen])
   const visibleFields = fields.filter(f => !(f.hideWhen && values[f.hideWhen]))
+  // The checkbox field ("Huidige functie" / "Nog in opleiding" / "Altijd geldig")
+  // shares one line with the save/cancel buttons instead of its own row — wherever
+  // it sits in the field list, so every section puts it in the same compact spot
+  // (Danny 17-07, punten 1+2). Conditional fields around it (hideWhen/altLabel)
+  // keep working: they reference the field by key, not by position.
+  const cbIndex = visibleFields.findLastIndex(f => f.checkbox)
+  const footerCheckbox = cbIndex >= 0 ? visibleFields[cbIndex] : null
+  const rowFields = footerCheckbox ? visibleFields.filter((_, i) => i !== cbIndex) : visibleFields
   const rows: ReactNode[] = []
-  for (let i = 0; i < visibleFields.length; i++) {
-    const f = visibleFields[i]
-    const next = visibleFields[i + 1]
+  for (let i = 0; i < rowFields.length; i++) {
+    const f = rowFields[i]
+    const next = rowFields[i + 1]
     if ((f.half && next?.half) || f.separator) {
       rows.push(
         <div key={f.key} style={f.separator
@@ -101,15 +109,21 @@ export default function AddForm({ fields, onSave, onCancel, initial }: {
     <div style={{ border: '1px solid var(--border)', borderRadius: 10, padding: 12, marginBottom: 10,
       background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: 8 }}>
       {rows}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 6 }}>
-        <button onClick={() => onSave(values)} title={t('save')}
-          style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
-          <Save size={14} />
-        </button>
-        <button onClick={onCancel} title={t('cancel')}
-          style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
-          <X size={14} />
-        </button>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: footerCheckbox ? 'space-between' : 'flex-end', gap: 6 }}>
+        {footerCheckbox && (
+          <FieldInput f={footerCheckbox} value={values[footerCheckbox.key]}
+            onChange={v => set(footerCheckbox.key, v)} values={values} disabled={dis(footerCheckbox)} />
+        )}
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button onClick={() => onSave(values)} title={t('save')}
+            style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}>
+            <Save size={14} />
+          </button>
+          <button onClick={onCancel} title={t('cancel')}
+            style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}>
+            <X size={14} />
+          </button>
+        </div>
       </div>
     </div>
   )
