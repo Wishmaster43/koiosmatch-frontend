@@ -57,7 +57,9 @@ function ProseField({ value, onSave }: { value?: string; onSave: (html: string) 
     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, marginTop: 6 }}>
       <div style={{ flex: 1, minWidth: 0 }}>
         {editing
-          ? <RichTextEditor value={draft} onChange={setDraft} />
+          // Compact editor: a row description is one or two lines — the default 120px
+          // block dwarfed the row it belongs to (Danny punt 48, "rode blok te groot").
+          ? <RichTextEditor value={draft} onChange={setDraft} minHeight={48} />
           : (value
               ? <SafeHtml html={value} style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5 }} />
               : <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>-</span>)}

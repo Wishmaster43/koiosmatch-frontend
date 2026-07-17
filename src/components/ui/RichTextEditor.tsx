@@ -26,9 +26,12 @@ interface RichTextEditorProps {
   onToggleExpand?: () => void
   labels?: Partial<typeof DEFAULT_LABELS>
   fill?: boolean
+  // Collapsed content height; inline row editors (experience/education desc) pass a
+  // compact value so a one-line note doesn't open a huge block (Danny punt 48).
+  minHeight?: number
 }
 
-export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false }: RichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120 }: RichTextEditorProps) {
   // Merge caller overrides over the built-in English defaults.
   const lab = { ...DEFAULT_LABELS, ...labels }
   // Raw-HTML source mode — edit the markup directly to spot/fix errors.
@@ -92,12 +95,12 @@ export default function RichTextEditor({ value, onChange, expanded, onToggleExpa
       </div>
       {htmlMode ? (
         <textarea value={value || ''} onChange={e => onChange(e.target.value)} spellCheck={false}
-          style={{ width: '100%', boxSizing: 'border-box', minHeight: expanded ? 320 : 120, padding: '10px 12px',
+          style={{ width: '100%', boxSizing: 'border-box', minHeight: expanded ? 320 : minHeight, padding: '10px 12px',
             fontSize: 12, fontFamily: 'JetBrains Mono, monospace', color: 'var(--text)', background: 'var(--surface)',
             border: 'none', outline: 'none', resize: 'vertical', ...(fill ? { flex: 1 } : null) }} />
       ) : (
         <EditorContent editor={editor} className={fill ? 'km-editor-fill' : undefined}
-          style={{ minHeight: expanded ? 320 : 120, padding: '10px 12px', fontSize: 13, color: 'var(--text)', cursor: 'text',
+          style={{ minHeight: expanded ? 320 : minHeight, padding: '10px 12px', fontSize: 13, color: 'var(--text)', cursor: 'text',
             ...(fill ? { flex: 1 } : null) }} />
       )}
     </div>
