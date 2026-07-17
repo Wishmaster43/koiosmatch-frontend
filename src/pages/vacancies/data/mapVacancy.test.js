@@ -95,4 +95,42 @@ describe('mapVacancyDetail', () => {
       contactId: '', contactName: '',
     })
   })
+
+  // V25 (VACATURES-100): GET /vacancies/{id} never attaches applications_by_phase/
+  // applications_count (VacancyController::show() has no attachApplicationCounts()
+  // call — only index() does), so the Statistics tab + the Sollicitaties tab's
+  // per-phase chips came back empty for every real vacancy. The full coupled-
+  // applications list IS loaded on the detail endpoint, so mapVacancyDetail derives
+  // the same counts from it when the attached fields are missing.
+  it('derives applicationsByPhase/applicationsCount from raw.applications when the detail response never attached them', () => {
+    const detail = mapVacancyDetail({
+      id: 'v1', title: 'Test',
+      // No applications_by_phase/applications_count on this raw payload — mirrors
+      // the real GET /vacancies/{id} response.
+      applications: [
+        { id: 'a1', phase: { value: 'applied' } },
+        { id: 'a2', phase: { value: 'applied' } },
+        { id: 'a3', phase: { value: 'hired' } },
+      ],
+    })
+    expect(detail.applicationsByPhase).toEqual({ applied: 2, hired: 1 })
+    expect(detail.applicationsCount).toBe(3)
+  })
+
+  it('prefers the attached applications_by_phase/applications_count when the backend DID send them (e.g. a future show() fix)', () => {
+    const detail = mapVacancyDetail({
+      id: 'v1', title: 'Test',
+      applications_by_phase: { applied: 10 }, applications_count: 10,
+      applications: [{ id: 'a1', phase: { value: 'hired' } }],
+    })
+    // The attached (real, server-computed) counts win over the applications-array derivation.
+    expect(detail.applicationsByPhase).toEqual({ applied: 10 })
+    expect(detail.applicationsCount).toBe(10)
+  })
+
+  it('never crashes when there are no applications and no attached counts', () => {
+    const detail = mapVacancyDetail({ id: 'v1' })
+    expect(detail.applicationsByPhase).toEqual({})
+    expect(detail.applicationsCount).toBe(0)
+  })
 })

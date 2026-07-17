@@ -5,8 +5,9 @@ import type { KoiosAdviceInsight } from '@/components/ai/KoiosAdviceBlock'
 type Tx = (key: string, opts?: Record<string, unknown>) => string
 
 // Whole days between an ISO date and now; null when the date is missing/unparseable
-// so a bad or absent `created` never leaks into the copy as NaN.
-function daysSince(iso: string | undefined, now: Date = new Date()): number | null {
+// so a bad or absent `created` never leaks into the copy as NaN. Exported (V25):
+// StatisticsTab's "days open" tile reuses this exact calculation — single source.
+export function daysSince(iso: string | undefined, now: Date = new Date()): number | null {
   if (!iso) return null
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return null

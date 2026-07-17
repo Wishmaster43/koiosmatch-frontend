@@ -31,6 +31,7 @@ import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { useVacanciesData } from './hooks/useVacanciesData'
 import { useVacancyRecord } from './hooks/useVacancyRecord'
+import { useVacancyInsights } from './hooks/useVacancyInsights'
 import { useOpenFromIntent } from '@/context/NavigationContext'
 import { BTN_H } from '@/config/buttonMetrics'
 import { useVacancyBulkActions } from './hooks/useVacancyBulkActions'
@@ -41,13 +42,6 @@ import type { Id } from '@/types/common'
 const VacanciesMapView = lazy(() => import('./VacanciesMapView'))
 
 interface AppUser { id: Id; name: string }
-interface Aggregate { name: string; key: string; color?: string; value: number }
-interface VacancyStatsShape {
-  by_status?: Array<{ value?: string; status?: string; count?: number }>
-  by_owner?: Array<{ id?: Id; owner_id?: Id; name?: string; count?: number }>
-  by_client?: Array<{ id?: Id; customer_id?: Id; name?: string; count?: number }>
-  by_phase?: Array<{ value?: string; phase?: string; count?: number }> | Record<string, number>
-}
 
 function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { t } = useTranslation(['vacancies', 'common'])
@@ -76,6 +70,10 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const [selectedClient, setSelectedClient] = usePageMemory<string[]>('vac.client', [])
   const [globalSearch,   setGlobalSearch]   = usePageMemory('vac.search', '')
   const [showArchived,   setShowArchived]   = usePageMemory('vac.archived', false)
+  // V27: Gepubliceerd/Niet-gepubliceerd — a real server-side filter (VacancyQuery::
+  // rules()/filtered() already accept a `published` boolean on both /vacancies and
+  // /vacancies/stats), just never wired into the UI before.
+  const [publishedBucket, setPublishedBucket] = usePageMemory<'all' | 'published' | 'unpublished'>('vac.published', 'all')
   // STRAAL-1: map view + radius-search state (server-side ?lat=&lng=&radius=).
   const [view,      setView]      = usePageMemory<'table' | 'map'>('vac.viewMode', 'table')
   const [mapCenter, setMapCenter] = usePageMemory('vac.mapCenter', { lat: 52.09, lng: 5.12 })
@@ -103,10 +101,16 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     if (selectedOwner.length)   p.owner_id    = selectedOwner
     if (selectedClient.length)  p.customer_id = selectedClient
     if (showArchived)           p.include_archived = 1
+    // V27: server-side published/unpublished filter (honoured by both the list and
+    // stats). Laravel's `boolean` rule only accepts true/false/0/1/'0'/'1' — NOT the
+    // strings "true"/"false" a JS boolean serialises to in a query string — so this
+    // sends 1/0 (numeric), mirroring `include_archived`/`no_status` above (a real
+    // 422 caught by the live read-only probe before this fix).
+    if (publishedBucket !== 'all') p.published = publishedBucket === 'published' ? 1 : 0
     // Map view narrows the list server-side to the chosen circle (STRAAL-1).
     if (view === 'map' && mapStraalActive) { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     return p
-  }, [globalSearch, statusBucket, selectedOwner, selectedClient, showArchived, view, mapCenter, mapRadius, mapStraalActive])
+  }, [globalSearch, statusBucket, selectedOwner, selectedClient, showArchived, publishedBucket, view, mapCenter, mapRadius, mapStraalActive])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
@@ -123,7 +127,6 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   // ── Data layer ──
   const { vacancies, setVacancies, loading, error, total, setTotal, lastPage, stats, customers } =
     useVacanciesData({ filterParams, page, pageSize, t })
-  const s = stats as VacancyStatsShape | null
   const customerList = customers as { id: Id; name: string }[]
 
   // ── Drawer/record data layer (§3): selection + detail fetch + optimistic edits ──
@@ -142,46 +145,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     close: closeDrawer, intent,
   })
 
-  // ── Donut data (status / owner / client) — stats first, page-derived fallback ──
-  const statusData = useMemo<Aggregate[]>(() => {
-    if (s?.by_status) {
-      // Stats carry bare uuid's; resolve label/colour via the lookup OR the loaded rows
-      // (the seed created two status sets — VAC-SEED-1 — so the lookup alone can miss).
-      const rowMeta = new Map(vacancies.filter(v => v.statusValue).map(v => [String(v.statusValue), { label: v.statusLabel, color: v.statusColor }]))
-      return s.by_status.map(o => {
-        const v = o.value ?? o.status
-        // 41/71 seeded vacancies have NO status — a real, named segment (not clickable-to-nothing).
-        if (v == null) return { name: t('insights.noStatus'), value: o.count ?? 0, key: '__none', color: '#9CA3AF' }
-        const m = statusMeta(v)
-        const rm = rowMeta.get(String(v))
-        return { name: m.label || rm?.label || t('insights.noStatus'), value: o.count ?? 0, key: String(v), color: (m.label ? m.color : rm?.color) ?? '#9CA3AF' }
-      })
-    }
-    return statuses.map(st => ({ name: st.label, key: st.value, color: st.color, value: vacancies.filter(v => v.statusValue === st.value).length })).filter(d => d.value > 0)
-  }, [s, statuses, vacancies, statusMeta])
-  const ownerData = useMemo<Aggregate[]>(() => {
-    if (s?.by_owner) return s.by_owner.map(o => ({ name: o.name || '—', key: String(o.id ?? o.owner_id ?? ''), value: o.count ?? 0 })).filter(o => o.key !== '')
-    const m: Record<string, Aggregate> = {}
-    vacancies.forEach(v => { if (v.owner?.id != null) { const k = String(v.owner.id); (m[k] ??= { name: v.owner.name || '—', key: k, color: v.owner.color ?? undefined, value: 0 }).value++ } })
-    return Object.values(m)
-  }, [s, vacancies])
-  const clientData = useMemo<Aggregate[]>(() => {
-    if (s?.by_client) return s.by_client.map(o => ({ name: o.name || '—', key: String(o.id ?? o.customer_id ?? ''), value: o.count ?? 0 })).filter(o => o.key !== '')
-    const m: Record<string, Aggregate> = {}
-    vacancies.forEach(v => { if (v.clientId != null) { const k = String(v.clientId); (m[k] ??= { name: v.clientName || '—', key: k, value: 0 }).value++ } })
-    return Object.values(m)
-  }, [s, vacancies])
-
-  // KPI cards = funnel-phase counts across applications.
-  const phaseCounts = useMemo<Record<string, number>>(() => {
-    if (s?.by_phase) {
-      if (Array.isArray(s.by_phase)) return Object.fromEntries(s.by_phase.map(o => [o.value ?? o.phase, o.count ?? 0]))
-      return s.by_phase
-    }
-    const acc: Record<string, number> = {}
-    vacancies.forEach(v => Object.entries(v.applicationsByPhase ?? {}).forEach(([k, n]) => { acc[k] = (acc[k] ?? 0) + (Number(n) || 0) }))
-    return acc
-  }, [s, vacancies])
+  // ── Insights derivation (status/owner/client/published donuts + phase KPI counts) ──
+  const { statusData, ownerData, clientData, publishedData, phaseCounts, publishedNotice } =
+    useVacancyInsights({ stats, vacancies, total, statuses, statusMeta, t })
 
   // Option lists for the right-panel filters.
   const ownerOptions  = useMemo(() => ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })), [ownerData])
@@ -206,21 +172,25 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const { toggleRow, toggleAll, bulkSetOwner, bulkSetStatus, bulkSetClient, bulkPublish, bulkRemoveTag, bulkAddNote, bulkArchive, selectedTags } =
     useVacancyBulkActions({ vacancies, setVacancies, setTotal, selectedIds, setSelectedIds, notify, t, statusMeta: statusMetaSafe })
 
-  // ── Insights strip: 3 donuts + funnel-phase KPI cards ──
+  // ── Insights strip: 4 donuts + funnel-phase KPI cards ──
   const insightDonuts: DonutSpec[] = [
     { key: 'status', title: t('insights.statusTitle'), data: statusData,
       onPick: d => { const k = pickKey(d); setStatusBucket(prev => (prev === k ? 'all' : (k ?? 'all'))) },
       active: statusBucket !== 'all', onClear: () => setStatusBucket('all') },
     { key: 'owner',  title: t('insights.ownerTitle'),  data: ownerData,  onPick: d => pickOne(setSelectedOwner)(pickKey(d)),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
     { key: 'client', title: t('insights.clientTitle'), data: clientData, onPick: d => pickOne(setSelectedClient)(pickKey(d)), active: selectedClient.length > 0, onClear: () => setSelectedClient([]) },
+    // V27: click a segment → publishedBucket ('published'/'unpublished'); click again clears.
+    { key: 'published', title: t('insights.publishedTitle'), data: publishedData,
+      onPick: d => { const k = pickKey(d); setPublishedBucket(prev => (prev === k ? 'all' : (k === 'published' || k === 'unpublished' ? k : 'all'))) },
+      active: publishedBucket !== 'all', onClear: () => setPublishedBucket('all') },
   ]
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(globalSearch.trim() || showArchived || statusBucket !== 'all'
-    || selectedOwner.length || selectedClient.length)
+    || selectedOwner.length || selectedClient.length || publishedBucket !== 'all')
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setStatusBucket('all')
-    setSelectedOwner([]); setSelectedClient([]); setPage(1)
+    setSelectedOwner([]); setSelectedClient([]); setPublishedBucket('all'); setPage(1)
   }
 
   // Funnel counts are APPLICATION numbers — clicking jumps to Sollicitaties with that
@@ -240,7 +210,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
           {/* KPI block: donuts + funnel-phase KPI cards */}
-          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
+          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} notice={publishedNotice} />
 
           {/* Add/bulk on the left (like Candidates/Applications); status tabs pushed right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',

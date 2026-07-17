@@ -32,8 +32,11 @@
     "statusTitle": "Status",
     "ownerTitle": "Recruiter",
     "clientTitle": "Kunde",
+    "publishedTitle": "Veröffentlicht",
     "clearFilter": "Filter zurücksetzen",
-    "noStatus": "Kein Status"
+    "noStatus": "Kein Status",
+    "unknownStatus": "Unbekannt",
+    "publishedPageScopeNotice": "Die Anzahl (nicht) veröffentlicht basiert auf der geladenen Seite — eine serverweite Aufschlüsselung ist noch nicht verfügbar."
   },
   "kpi": {
     "applied": "Beworben",
@@ -222,6 +225,14 @@
     "appliedToHired": "Beworben → eingestellt",
     "bySource": "Nach Quelle",
     "leadsToApplications": "Leads → Bewerbungen",
+    "ofLeads": "{{count}} Leads",
+    "daysOpen": "Tage offen",
+    "daysOpenSub": "seit {{date}}",
+    "channelsPublished": "Veröffentlichungskanäle",
+    "channelsPublishedSub": "von {{total}} konfiguriert",
+    "overviewTitle": "Übersicht",
+    "createdOn": "Erstellt",
+    "lastActivity": "Letzte Aktivität",
     "empty": "Noch nicht genügend Daten.",
     "openApplications": "Bewerbungen öffnen"
   },

@@ -18,6 +18,41 @@ export const pickKey = (d: unknown): string | undefined => {
   return o?.key ?? o?.payload?.key ?? o?.name
 }
 
+// One raw `/vacancies/stats` by_status row — the backend already resolves a label/
+// colour itself (real name, or its own 'Onbekend'/'Geen status' copy), which the FE
+// can use as a last-resort source before ever assuming "no status" (see below).
+export interface RawStatusStat { value?: string | number | null; status?: string | number | null; label?: string; color?: string; count?: number }
+export interface StatusMetaLike { label?: string; color?: string }
+export interface StatusDonutSegment { name: string; value: number; key: string; color: string }
+
+/**
+ * resolveStatusSegment — one status-donut segment's display name/colour (V27 fix).
+ *
+ * Preference order: the live tenant lookup → any loaded row carrying that same
+ * status id → the backend's own resolved label → a distinct "unknown" copy.
+ * A real (non-null) status id that resolves nowhere is UNKNOWN, never "Geen
+ * status" — the previous fallback here silently folded any unresolved-but-real
+ * status into the no-status bucket, inflating it and never showing the segment's
+ * own colour/count under its real (if unnamed) identity. Only a literal null
+ * value (VAC-NOSTATUS-1's `?no_status=1` bucket) is genuinely "no status".
+ */
+export function resolveStatusSegment(
+  raw: RawStatusStat,
+  statusMeta: (v: string) => StatusMetaLike,
+  rowMeta: Map<string, StatusMetaLike>,
+  noStatusLabel: string,
+  unknownLabel: string,
+): StatusDonutSegment {
+  const v = raw.value ?? raw.status
+  if (v == null) return { name: noStatusLabel, value: raw.count ?? 0, key: '__none', color: '#9CA3AF' }
+  const key = String(v)
+  const m = statusMeta(key)
+  const rm = rowMeta.get(key)
+  const name = m.label || rm?.label || raw.label || unknownLabel
+  const color = (m.label ? m.color : rm?.color) ?? raw.color ?? '#9CA3AF'
+  return { name, value: raw.count ?? 0, key, color: color as string }
+}
+
 // Snapshot a subset of fields, for optimistic revert/reconcile.
 export const subsetOf = (obj: Record<string, unknown>, keys: string[]): Record<string, unknown> =>
   keys.reduce<Record<string, unknown>>((a, k) => { a[k] = obj[k]; return a }, {})

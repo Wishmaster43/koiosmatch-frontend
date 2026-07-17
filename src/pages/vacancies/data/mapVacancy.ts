@@ -92,8 +92,26 @@ const numStr = (x: unknown): string => (x == null ? '' : String(x))
 export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
   const base = mapVacancy(raw)
 
+  // V25 fix: GET /vacancies/{id} never attaches applications_by_phase/applications_count
+  // (VacancyController::show() has no attachApplicationCounts() call — only index() does),
+  // so a fresh detail fetch always came back with an empty breakdown ("Statistieken leeg" /
+  // ApplicantsTab's per-phase chips empty too). The full coupled-applications list IS loaded
+  // on the detail endpoint (raw.applications), so derive the same counts from it here — the
+  // exact same real records, just aggregated for this one record (not a page-scope guess).
+  const rawApplications = Array.isArray(raw.applications) ? raw.applications : []
+  const phaseFromApplications: Loose = {}
+  rawApplications.forEach(a => {
+    const key = a.phase?.value ?? a.phase_key ?? a.stage
+    if (key != null) phaseFromApplications[String(key)] = (Number(phaseFromApplications[String(key)]) || 0) + 1
+  })
+  const hasAttachedPhaseCounts = Object.keys(base.applicationsByPhase as Loose).length > 0
+  const applicationsByPhase = hasAttachedPhaseCounts ? base.applicationsByPhase : phaseFromApplications
+  const applicationsCount = base.applicationsCount || rawApplications.length
+
   return {
     ...base,
+    applicationsByPhase,
+    applicationsCount,
     // Raw values for the in-place editor (bind selects to these, show the labels above).
     seniorityValue: valueOf(raw.seniority),
     educationValue: valueOf(raw.education),

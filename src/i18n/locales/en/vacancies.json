@@ -32,8 +32,11 @@
     "statusTitle": "Status",
     "ownerTitle": "Recruiter",
     "clientTitle": "Client",
+    "publishedTitle": "Published",
     "clearFilter": "Clear filter",
-    "noStatus": "No status"
+    "noStatus": "No status",
+    "unknownStatus": "Unknown",
+    "publishedPageScopeNotice": "The published/unpublished count is based on the loaded page — a server-wide breakdown isn't available yet."
   },
   "kpi": {
     "applied": "Applied",
@@ -222,6 +225,14 @@
     "appliedToHired": "Applied → hired",
     "bySource": "By source",
     "leadsToApplications": "Leads → applications",
+    "ofLeads": "{{count}} leads",
+    "daysOpen": "Days open",
+    "daysOpenSub": "since {{date}}",
+    "channelsPublished": "Publication channels",
+    "channelsPublishedSub": "of {{total}} configured",
+    "overviewTitle": "Overview",
+    "createdOn": "Created",
+    "lastActivity": "Last activity",
     "empty": "Not enough data yet.",
     "openApplications": "Open the applications"
   },

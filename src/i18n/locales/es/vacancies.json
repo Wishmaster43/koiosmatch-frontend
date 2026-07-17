@@ -32,8 +32,11 @@
     "statusTitle": "Estado",
     "ownerTitle": "Reclutador",
     "clientTitle": "Cliente",
+    "publishedTitle": "Publicada",
     "clearFilter": "Borrar filtro",
-    "noStatus": "Sin estado"
+    "noStatus": "Sin estado",
+    "unknownStatus": "Desconocido",
+    "publishedPageScopeNotice": "El recuento de publicada/no publicada se basa en la página cargada — todavía no hay un desglose a nivel de servidor disponible."
   },
   "kpi": {
     "applied": "Postulado",
@@ -222,6 +225,14 @@
     "appliedToHired": "Postulado → contratado",
     "bySource": "Por origen",
     "leadsToApplications": "Leads → candidaturas",
+    "ofLeads": "{{count}} leads",
+    "daysOpen": "Días abierta",
+    "daysOpenSub": "desde {{date}}",
+    "channelsPublished": "Canales de publicación",
+    "channelsPublishedSub": "de {{total}} configurados",
+    "overviewTitle": "Resumen",
+    "createdOn": "Creada",
+    "lastActivity": "Última actividad",
     "empty": "Aún no hay suficientes datos.",
     "openApplications": "Abrir las candidaturas"
   },

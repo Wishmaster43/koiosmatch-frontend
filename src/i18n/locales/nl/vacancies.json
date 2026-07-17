@@ -32,8 +32,11 @@
     "statusTitle": "Status",
     "ownerTitle": "Recruiter",
     "clientTitle": "Klant",
+    "publishedTitle": "Gepubliceerd",
     "clearFilter": "Filter wissen",
-    "noStatus": "Geen status"
+    "noStatus": "Geen status",
+    "unknownStatus": "Onbekend",
+    "publishedPageScopeNotice": "Het aantal (niet) gepubliceerd is gebaseerd op de geladen pagina — er is nog geen serverbrede uitsplitsing beschikbaar."
   },
   "kpi": {
     "applied": "Gesolliciteerd",
@@ -222,6 +225,14 @@
     "appliedToHired": "Gesolliciteerd → aangenomen",
     "bySource": "Per bron",
     "leadsToApplications": "Leads → sollicitaties",
+    "ofLeads": "{{count}} leads",
+    "daysOpen": "Dagen open",
+    "daysOpenSub": "sinds {{date}}",
+    "channelsPublished": "Publicatiekanalen",
+    "channelsPublishedSub": "van de {{total}} geconfigureerd",
+    "overviewTitle": "Overzicht",
+    "createdOn": "Aangemaakt",
+    "lastActivity": "Laatste activiteit",
     "empty": "Nog onvoldoende gegevens.",
     "openApplications": "Open de sollicitaties"
   },
