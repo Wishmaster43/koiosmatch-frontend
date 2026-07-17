@@ -1,14 +1,21 @@
 /**
- * EditUserModal — edit an existing user's profile fields (PATCH /users/{id}).
- * Name, e-mail, phone, and optional password reset. Role is changed inline in the table.
+ * EditUserModal — edit an existing user's profile fields (PATCH /users/{id}),
+ * plus the user's branch coupling (USERS-ROLES-LOC-1, GET/PUT /users/{id}/branches).
+ * Branches live only here (not the table) — GET /users doesn't carry them, so a
+ * table column would mean an N+1 fetch per row; mirrors RolesSettings, which
+ * shows its branch template only in the per-role detail, never the roles list.
+ * Role is changed inline in the table.
  */
 import { useState } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, RefreshCw } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { BTN_H } from '@/config/buttonMetrics'
+import { useLocations } from '@/lib/useLocations'
+import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import { useUserBranches } from './hooks/useUserBranches'
 import type { ManagedUser } from '@/types/api'
 
 export default function EditUserModal({ user, onClose, onSaved }: {
@@ -18,6 +25,8 @@ export default function EditUserModal({ user, onClose, onSaved }: {
 }) {
   const { t } = useTranslation('users')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
+  const locationOptions = useLocations()
+  const { branches, loading: branchesLoading, saving: branchesSaving, toggle: toggleBranch } = useUserBranches(user.id)
   // Fallback: split `name` when firstname/lastname arrive as a single string.
   const nameParts = (user.name ?? '').split(' ')
   const [form, setForm] = useState({
@@ -112,6 +121,33 @@ export default function EditUserModal({ user, onClose, onSaved }: {
           <div style={{ marginBottom: 12 }}>
             <label style={labelStyle}>{t('phone')}</label>
             <input type="tel" value={form.phone} onChange={set('phone')} style={inputStyle} placeholder="+31 6 …" aria-label={t('phone')} />
+          </div>
+
+          {/* Branches (USERS-ROLES-LOC-1) — current coupling, editable via the shared
+              chip multi-select; a non-empty set already hard-scopes this user's
+              candidate visibility (VESTIGING-1 fase 2), so the hint below says so. */}
+          <div style={{ marginBottom: 20, padding: '12px 14px', background: 'var(--hover-bg)', borderRadius: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text)' }}>{t('branches.title')}</span>
+              {branchesSaving && <RefreshCw size={12} className="animate-spin" style={{ color: 'var(--text-muted)' }} />}
+            </div>
+            <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('branches.hint')}</p>
+            {branchesLoading ? (
+              <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('branches.loading')}</p>
+            ) : (
+              // Locations are always UUID strings server-side; ChipMultiSelect's
+              // ChipOption.value is typed as plain `string` (narrower than the
+              // shared `Id` union `useLocations` returns) — normalise here.
+              <ChipMultiSelect
+                options={locationOptions.map(o => ({ value: String(o.value), label: o.label }))}
+                selected={branches.map(b => String(b.location_id))}
+                onToggle={toggleBranch}
+                emptyText={t('branches.noLocations')}
+              />
+            )}
+            {!branchesLoading && branches.length === 0 && locationOptions.length > 0 && (
+              <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>{t('branches.emptyHint')}</p>
+            )}
           </div>
 
           {/* Optional password reset */}

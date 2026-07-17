@@ -34,10 +34,21 @@
     "user": "User"
   },
   "noRoles": "No roles available",
+  "rolesLoading": "Loading roles…",
   "editUser": "Edit user",
   "saveFailed": "Could not save.",
   "saving": "Saving…",
   "phone": "Phone number",
   "changePassword": "Change password",
-  "newPassword": "New password"
+  "newPassword": "New password",
+  "branches": {
+    "title": "Branches",
+    "hint": "Determines which branches this user is coupled to. This already limits which candidates are visible and editable (candidates outside these branches are hidden); other areas (vacancies, customers, …) aren't branch-scoped yet.",
+    "emptyHint": "No branches selected — this user still sees every candidate, unrestricted.",
+    "noLocations": "No branches configured yet.",
+    "saveFailed": "Couldn't save branches. Please try again.",
+    "loading": "Loading…",
+    "previewTitle": "Branches for this role",
+    "previewEmpty": "No starting set — this role has no branches, so the new user starts unrestricted."
+  }
 }

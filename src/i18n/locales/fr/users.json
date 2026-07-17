@@ -34,10 +34,21 @@
     "user": "Utilisateur"
   },
   "noRoles": "Aucun rôle disponible",
+  "rolesLoading": "Chargement des rôles…",
   "editUser": "Modifier l'utilisateur",
   "saveFailed": "Échec de l'enregistrement.",
   "saving": "Enregistrement…",
   "phone": "Numéro de téléphone",
   "changePassword": "Changer le mot de passe",
-  "newPassword": "Nouveau mot de passe"
+  "newPassword": "Nouveau mot de passe",
+  "branches": {
+    "title": "Sites",
+    "hint": "Détermine à quels sites cet utilisateur est rattaché. Cela limite déjà les candidats visibles et modifiables (les candidats en dehors de ces sites sont masqués) ; les autres domaines (offres, clients, …) ne sont pas encore limités par site.",
+    "emptyHint": "Aucun site sélectionné — cet utilisateur voit encore tous les candidats, sans restriction.",
+    "noLocations": "Aucun site configuré pour le moment.",
+    "saveFailed": "Impossible d'enregistrer les sites. Veuillez réessayer.",
+    "loading": "Chargement…",
+    "previewTitle": "Sites de ce rôle",
+    "previewEmpty": "Aucun ensemble de départ — ce rôle n'a aucun site ; le nouvel utilisateur démarre sans restriction."
+  }
 }

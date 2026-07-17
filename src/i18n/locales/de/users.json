@@ -34,10 +34,21 @@
     "user": "Benutzer"
   },
   "noRoles": "Keine Rollen verfügbar",
+  "rolesLoading": "Rollen werden geladen…",
   "editUser": "Benutzer bearbeiten",
   "saveFailed": "Speichern fehlgeschlagen.",
   "saving": "Speichern…",
   "phone": "Telefonnummer",
   "changePassword": "Passwort ändern",
-  "newPassword": "Neues Passwort"
+  "newPassword": "Neues Passwort",
+  "branches": {
+    "title": "Standorte",
+    "hint": "Legt fest, welchen Standorten dieser Benutzer zugeordnet ist. Dies schränkt bereits ein, welche Kandidaten sichtbar und bearbeitbar sind (Kandidaten außerhalb dieser Standorte sind ausgeblendet); andere Bereiche (Stellen, Kunden, …) sind noch nicht standortgebunden.",
+    "emptyHint": "Keine Standorte ausgewählt — dieser Benutzer sieht weiterhin alle Kandidaten, ohne Einschränkung.",
+    "noLocations": "Noch keine Standorte angelegt.",
+    "saveFailed": "Die Standorte konnten nicht gespeichert werden. Bitte erneut versuchen.",
+    "loading": "Wird geladen…",
+    "previewTitle": "Standorte dieser Rolle",
+    "previewEmpty": "Keine Startauswahl — diese Rolle hat keine Standorte; der neue Benutzer startet ohne Einschränkung."
+  }
 }

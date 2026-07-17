@@ -29,14 +29,19 @@ export const roleName = (r: RoleRef): string | undefined => typeof r === 'string
 export const SUPER_ADMIN_COLOR = 'var(--color-violet)'
 
 // Role → fallback colour + icon (data palette; a backend-supplied role colour wins).
-// Label = t('users.roles.<name>') (default → user).
+// Label = t('roles.<name>') (default → user).
 const ROLE_META: Record<string, { color: string; icon: LucideIcon }> = {
   super_admin:   { color: SUPER_ADMIN_COLOR, icon: ShieldCheck },
   tenant_admin:  { color: '#1D4ED8', icon: Shield },
   planner:       { color: '#065F46', icon: User },
   default:       { color: '#6B7280', icon: User },
 }
-const roleLabel = (t: TFunc, name: string) => t(`users.roles.${name === 'default' ? 'user' : name}`, { defaultValue: name })
+// Exported so NewUserModal can label roles the same way (seeded roles get the
+// translated name; custom tenant roles fall back to their own raw name).
+// FIX (was `users.roles.<name>`, a dead key — users.json has no top-level "users"
+// object, so this always silently fell through to the raw role name): the seed
+// labels live at `roles.<name>` directly in the `users` namespace.
+export const roleLabel = (t: TFunc, name: string) => t(`roles.${name === 'default' ? 'user' : name}`, { defaultValue: name })
 
 // Icon-name fallback for the seeded/system roles (before a tenant sets an icon).
 const LEGACY_ICON: Record<string, string> = {
@@ -218,6 +223,30 @@ export function EditableAvatar({ user: u, onPick }: { user: ManagedUser; onPick?
           </div>
         </>
       )}
+    </div>
+  )
+}
+
+// A branch row as returned by GET /users/{id}/branches and /roles/{id}/branches
+// (USERS-ROLES-LOC-1) — name is the location's display name, resolved server-side.
+export interface BranchRow { location_id: string | number; name?: string | null }
+
+// BranchChips — read-only soft-tinted chips for a fixed branch set (no toggle):
+// the role-template preview in NewUserModal and, at a glance, "what this user is
+// currently coupled to". Editing itself happens via the shared ChipMultiSelect
+// (components/ui) against the full location list — this is display-only.
+export function BranchChips({ branches, emptyText }: { branches: BranchRow[]; emptyText?: string }) {
+  if (branches.length === 0) return <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{emptyText ?? '—'}</span>
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+      {branches.map(b => (
+        <span key={b.location_id}
+          style={{ padding: '3px 10px', borderRadius: 999, fontSize: 12, fontWeight: 600,
+                   background: 'var(--color-primary-bg)', color: 'var(--color-primary)',
+                   border: '1px solid var(--color-primary)' }}>
+          {b.name ?? '—'}
+        </span>
+      ))}
     </div>
   )
 }

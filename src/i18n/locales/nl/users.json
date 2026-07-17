@@ -34,10 +34,21 @@
     "user": "Gebruiker"
   },
   "noRoles": "Geen rollen beschikbaar",
+  "rolesLoading": "Rollen laden…",
   "editUser": "Gebruiker bewerken",
   "saveFailed": "Opslaan mislukt.",
   "saving": "Opslaan…",
   "phone": "Telefoonnummer",
   "changePassword": "Wachtwoord wijzigen",
-  "newPassword": "Nieuw wachtwoord"
+  "newPassword": "Nieuw wachtwoord",
+  "branches": {
+    "title": "Vestigingen",
+    "hint": "Bepaalt aan welke vestigingen deze gebruiker gekoppeld is. Dit beperkt al welke kandidaten zichtbaar en bewerkbaar zijn (kandidaten buiten deze vestigingen zijn verborgen); andere onderdelen (vacatures, klanten, …) zijn nog niet vestiging-gebonden.",
+    "emptyHint": "Geen vestigingen geselecteerd — deze gebruiker ziet nog alle kandidaten, zonder beperking.",
+    "noLocations": "Nog geen vestigingen ingericht.",
+    "saveFailed": "Opslaan van vestigingen is mislukt. Probeer het opnieuw.",
+    "loading": "Laden…",
+    "previewTitle": "Vestigingen bij deze rol",
+    "previewEmpty": "Geen startset — deze rol heeft geen vestigingen; de nieuwe gebruiker start zonder beperking."
+  }
 }

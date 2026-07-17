@@ -975,7 +975,7 @@
     "startDashboardNone": "Standard",
     "branchesTemplate": "Standorte (Vorlage)",
     "branchesTemplateHint": "Die Standortmenge, die neue Benutzer mit dieser Rolle als Ausgangspunkt erhalten. Bestehende Benutzer behalten ihre eigene Auswahl — dies bearbeitet nur die Vorlage.",
-    "branchesEmptyHint": "Keine Standorte ausgewählt — neue Benutzer mit dieser Rolle werden auf keinen Standort beschränkt (standortbasierte Zugriffsbeschränkung ist noch nicht aktiv).",
+    "branchesEmptyHint": "Keine Niederlassungen ausgewählt — neue Benutzer mit dieser Rolle starten ohne Niederlassungs-Zuordnung und sehen ALLE Kandidaten. Mit zugeordneten Niederlassungen sieht ein Benutzer nur Kandidaten dieser Niederlassungen.",
     "branchesNoLocations": "Noch keine Standorte angelegt.",
     "branchesSaveFailed": "Die Standortvorlage konnte nicht gespeichert werden. Bitte erneut versuchen."
   },

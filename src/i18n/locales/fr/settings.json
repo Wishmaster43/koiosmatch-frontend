@@ -975,7 +975,7 @@
     "startDashboardNone": "Par défaut",
     "branchesTemplate": "Sites (modèle)",
     "branchesTemplateHint": "L'ensemble de sites de départ attribué aux nouveaux utilisateurs ayant ce rôle. Les utilisateurs existants gardent leur propre ensemble — ceci ne modifie que le modèle.",
-    "branchesEmptyHint": "Aucun site sélectionné — les nouveaux utilisateurs ayant ce rôle ne seront limités à aucun site (la restriction d'accès par site n'est pas encore active).",
+    "branchesEmptyHint": "Aucune agence sélectionnée — les nouveaux utilisateurs avec ce rôle démarrent sans rattachement et voient TOUS les candidats. Avec des agences rattachées, un utilisateur ne voit que les candidats de ces agences.",
     "branchesNoLocations": "Aucun site configuré pour le moment.",
     "branchesSaveFailed": "Impossible d'enregistrer le modèle de sites. Veuillez réessayer."
   },

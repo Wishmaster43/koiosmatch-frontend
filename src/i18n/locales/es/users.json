@@ -34,10 +34,21 @@
     "user": "Usuario"
   },
   "noRoles": "No hay roles disponibles",
+  "rolesLoading": "Cargando roles…",
   "editUser": "Editar usuario",
   "saveFailed": "No se pudo guardar.",
   "saving": "Guardando…",
   "phone": "Número de teléfono",
   "changePassword": "Cambiar contraseña",
-  "newPassword": "Nueva contraseña"
+  "newPassword": "Nueva contraseña",
+  "branches": {
+    "title": "Sedes",
+    "hint": "Determina a qué sedes está vinculado este usuario. Esto ya limita qué candidatos son visibles y editables (los candidatos fuera de estas sedes quedan ocultos); otras áreas (vacantes, clientes, …) todavía no están limitadas por sede.",
+    "emptyHint": "Ninguna sede seleccionada — este usuario sigue viendo todos los candidatos, sin restricción.",
+    "noLocations": "Todavía no hay sedes configuradas.",
+    "saveFailed": "No se pudieron guardar las sedes. Inténtalo de nuevo.",
+    "loading": "Cargando…",
+    "previewTitle": "Sedes de este rol",
+    "previewEmpty": "Sin conjunto inicial — este rol no tiene sedes; el nuevo usuario empieza sin restricción."
+  }
 }

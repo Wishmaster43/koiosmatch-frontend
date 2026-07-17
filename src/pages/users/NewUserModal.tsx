@@ -1,8 +1,11 @@
 /**
- * NewUserModal — create-user dialog (POST /users). Self-contained; ROLES lives here.
- * Extracted from UsersPage.
+ * NewUserModal — create-user dialog (POST /users). Roles come from the live
+ * central roles table (LOOKUP-GAP-1a — the old hardcoded ROLES literal rejected
+ * custom tenant roles); picking one previews the branches the new user will
+ * inherit (USERS-ROLES-LOC-1 role-template copy on create). Extracted from
+ * UsersPage.
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useFocusTrap } from '@/hooks/useFocusTrap'
 import type { ChangeEvent, CSSProperties, FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,9 +13,9 @@ import { X, Loader2 } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { ManagedUser } from '@/types/api'
-
-// Selectable roles in the new-user form; labels = t('users.roles.<value>').
-const ROLES = ['tenant_admin', 'planner', 'user']
+import { useAssignableRoles } from './hooks/useAssignableRoles'
+import { useRoleBranchTemplate } from './hooks/useRoleBranchTemplate'
+import { roleLabel, BranchChips } from './usersParts'
 
 export default function NewUserModal({ onClose, onCreated }: {
   onClose: () => void
@@ -20,9 +23,22 @@ export default function NewUserModal({ onClose, onCreated }: {
 }) {
   const { t } = useTranslation('users')
   const panelRef = useFocusTrap<HTMLDivElement>(onClose)
-  const [form, setForm]     = useState({ firstname: '', lastname: '', email: '', password: '', role: 'planner' })
+  const { roles, loading: rolesLoading } = useAssignableRoles()
+  const [form, setForm]     = useState({ firstname: '', lastname: '', email: '', password: '', role: '' })
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState<string | null>(null)
+
+  // Seed the role select once the live list arrives — prefer "planner" (the old
+  // default) if present, otherwise whatever the tenant's first assignable role is.
+  useEffect(() => {
+    if (form.role || roles.length === 0) return
+    const preferred = roles.find(r => r.name === 'planner') ?? roles[0]
+    setForm(f => (f.role ? f : { ...f, role: preferred.name }))
+  }, [roles, form.role])
+
+  // The picked role's id drives the branch-template preview below the select.
+  const selectedRoleId = roles.find(r => r.name === form.role)?.id ?? null
+  const { branches: templateBranches, loading: templateLoading } = useRoleBranchTemplate(selectedRoleId)
 
   const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }))
@@ -82,12 +98,32 @@ export default function NewUserModal({ onClose, onCreated }: {
             <label style={label}>{t('password')}</label>
             <input required type="password" value={form.password} onChange={set('password')} style={input} placeholder={t('pwPlaceholder')} aria-label={t('password')} />
           </div>
-          <div style={{ marginBottom: 20 }}>
+          <div style={{ marginBottom: 12 }}>
             <label style={label}>{t('role')}</label>
-            <select value={form.role} onChange={set('role')} aria-label={t('role')} style={{ ...input, cursor: 'pointer' }}>
-              {ROLES.map(r => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
+            <select required value={form.role} onChange={set('role')} aria-label={t('role')}
+              disabled={rolesLoading || roles.length === 0}
+              style={{ ...input, cursor: rolesLoading || roles.length === 0 ? 'default' : 'pointer' }}>
+              {rolesLoading && <option value="">{t('rolesLoading')}</option>}
+              {!rolesLoading && roles.length === 0 && <option value="">{t('noRoles')}</option>}
+              {roles.map(r => <option key={r.id} value={r.name}>{roleLabel(t, r.name)}</option>)}
             </select>
           </div>
+
+          {/* Role-template preview — which branches this role starts new users with
+              (read-only; copied server-side on create, editable per-user afterwards). */}
+          {form.role && (
+            <div style={{ marginBottom: 20, padding: '10px 12px', borderRadius: 8, background: 'var(--hover-bg)' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', marginBottom: 6,
+                            textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                {t('branches.previewTitle')}
+              </div>
+              {templateLoading ? (
+                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('branches.loading')}</p>
+              ) : (
+                <BranchChips branches={templateBranches} emptyText={t('branches.previewEmpty')} />
+              )}
+            </div>
+          )}
 
           {error && <p style={{ fontSize: 12, color: 'var(--color-danger)', marginBottom: 12 }}>{error}</p>}
 
@@ -98,7 +134,7 @@ export default function NewUserModal({ onClose, onCreated }: {
                        background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
               {t('common:cancel')}
             </button>
-            <button type="submit" disabled={saving}
+            <button type="submit" disabled={saving || !form.role}
               style={{ height: BTN_H, padding: '0 18px', fontSize: 13, fontWeight: 600, borderRadius: 8, border: 'none',
                        background: 'var(--color-primary)', color: 'white', cursor: saving ? 'default' : 'pointer',
                        display: 'flex', alignItems: 'center', gap: 6 }}>
