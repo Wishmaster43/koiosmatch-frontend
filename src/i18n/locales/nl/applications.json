@@ -70,7 +70,19 @@
   "drawer": {
     "label": "Sollicitatie",
     "createdAt": "Aangemaakt op {{date}}",
-    "downloadCv": "CV",
+    "cv": {
+      "title": "CV",
+      "loading": "CV laden…",
+      "error": "CV laden is mislukt.",
+      "empty": "Nog geen CV geüpload.",
+      "view": "Bekijken"
+    },
+    "candidateFields": {
+      "name": "Naam",
+      "firstName": "Voornaam",
+      "lastName": "Achternaam",
+      "function": "Functie"
+    },
     "tabs": {
       "application": "Sollicitatie",
       "candidate": "Kandidaat",
@@ -189,7 +201,11 @@
   "detach": {
     "button": "Ontkoppelen",
     "done": "Sollicitatie ontkoppeld",
-    "nothingLinked": "Geen vacature gekoppeld"
+    "nothingLinked": "Geen vacature gekoppeld",
+    "reasonTitle": "Reden voor ontkoppelen",
+    "reasonLabel": "Reden",
+    "reasonPlaceholder": "Waarom wordt deze sollicitatie ontkoppeld?",
+    "confirm": "Ontkoppelen"
   },
   "restore": {
     "button": "Herstellen",

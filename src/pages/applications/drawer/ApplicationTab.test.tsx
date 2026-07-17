@@ -1,13 +1,29 @@
+import type { ReactElement } from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ApplicationTab from './ApplicationTab'
 import { peekReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
 
+// Deterministic key-echo (repo-wide precedent, e.g. AddShiftModal.test.tsx) —
+// without it, i18n's real (async-initialising) instance can finish loading
+// mid-file once anything here awaits a promise (S31's real QueryClient does),
+// flipping later assertions from raw keys to actual NL copy.
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (k: string) => k }) }))
+// S31: CvBlock's useDateFormat (@/lib/datetime) imports `@/i18n`, which needs a
+// REAL react-i18next (initReactI18next) to initialise — stub the whole module
+// instead so nothing in this file ever imports the real i18n singleton.
+vi.mock('@/lib/datetime', () => ({
+  useDateFormat: () => ({ formatDate: (d: unknown) => (d ? String(d) : '—'), formatDateTime: (d: unknown) => (d ? String(d) : '—') }),
+  useLocale: () => 'nl-NL',
+}))
+
 // RejectionBlock fetches the reasons on mount; the vacancy-link edit mode
-// (useVacancyLinkOptions) fetches /vacancies — stub both so this file only
-// tests ApplicationTab's own wiring, not either dependency's internals.
+// (useVacancyLinkOptions) fetches /vacancies; S31's CvBlock fetches the linked
+// candidate's documents via React Query — stub the client so this file only
+// tests ApplicationTab's own wiring, not any dependency's internals.
 vi.mock('@/lib/api', () => ({
   default: { get: vi.fn(() => Promise.resolve({ data: [] })) },
   unwrapList: (res: { data?: { data?: unknown[] } }) =>
@@ -15,6 +31,12 @@ vi.mock('@/lib/api', () => ({
 }))
 import api from '@/lib/api'
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
+
+// S31: CvBlock's useCandidateCvDocument needs a QueryClientProvider in the tree.
+const renderTab = (ui: ReactElement) => {
+  const qc = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>)
+}
 
 // Minimal application detail for the read-only "Sollicitatie" tab. `vacancy` is a
 // required nested object on the real type (mapApplicationDetail always builds one) —
@@ -32,7 +54,7 @@ const app = (over: Partial<ApplicationDetail> = {}) => ({
 
 describe('ApplicationTab', () => {
   it('renders the read-only details (source/client/vacancy), no repeated heading', () => {
-    render(<ApplicationTab application={app()} />)
+    renderTab(<ApplicationTab application={app()} />)
     // S3: the redundant "Details" heading is gone — only the pencil marks the block.
     expect(screen.queryByText('drawer.details')).toBeNull()
     expect(screen.getByText('Facebook')).toBeInTheDocument()
@@ -41,23 +63,23 @@ describe('ApplicationTab', () => {
   })
 
   it('shows the rejection block for an active application', () => {
-    render(<ApplicationTab application={app()} />)
+    renderTab(<ApplicationTab application={app()} />)
     expect(screen.getByText('rejection.title')).toBeInTheDocument()
   })
 
   it('hides the rejection block once the application is a match', () => {
-    render(<ApplicationTab application={app({ bucket: 'matched' })} />)
+    renderTab(<ApplicationTab application={app({ bucket: 'matched' })} />)
     expect(screen.queryByText('rejection.title')).toBeNull()
   })
 
   it('hides the Details edit pencil when onLinkVacancy is not provided', () => {
-    render(<ApplicationTab application={app()} />)
+    renderTab(<ApplicationTab application={app()} />)
     expect(screen.queryByLabelText('common:edit')).toBeNull()
   })
 
   it('opens the vacancy picker in edit mode, showing a diskette + cancel', async () => {
     const user = userEvent.setup()
-    render(<ApplicationTab application={app()} onLinkVacancy={vi.fn()} />)
+    renderTab(<ApplicationTab application={app()} onLinkVacancy={vi.fn()} />)
     await user.click(screen.getByLabelText('common:edit'))
     expect(screen.getByLabelText('common:save')).toBeInTheDocument()
     expect(screen.getByLabelText('common:cancel')).toBeInTheDocument()
@@ -68,7 +90,7 @@ describe('ApplicationTab', () => {
   it('cancels the edit without calling onLinkVacancy', async () => {
     const onLinkVacancy = vi.fn()
     const user = userEvent.setup()
-    render(<ApplicationTab application={app()} onLinkVacancy={onLinkVacancy} />)
+    renderTab(<ApplicationTab application={app()} onLinkVacancy={onLinkVacancy} />)
     await user.click(screen.getByLabelText('common:edit'))
     await user.click(screen.getByLabelText('common:cancel'))
     expect(screen.queryByLabelText('common:save')).toBeNull()
@@ -80,7 +102,7 @@ describe('ApplicationTab', () => {
     mockGet.mockResolvedValue({ data: { data: [{ id: 'v2', title: 'Chirurg', client_name: 'Acme' }] } })
     const onLinkVacancy = vi.fn()
     const user = userEvent.setup()
-    render(<ApplicationTab application={app()} onLinkVacancy={onLinkVacancy} />)
+    renderTab(<ApplicationTab application={app()} onLinkVacancy={onLinkVacancy} />)
 
     await user.click(screen.getByLabelText('common:edit'))
     await waitFor(() => expect(mockGet).toHaveBeenCalledWith('/vacancies', { params: { per_page: 100 } }))
@@ -96,7 +118,7 @@ describe('ApplicationTab', () => {
   // S12/S13: the read-only vacancy value is a real EntityLink (in-app click + new-tab
   // icon), not plain text, once a vacancy is actually linked.
   it('renders the linked vacancy as a clickable EntityLink', () => {
-    render(<ApplicationTab application={app({ vacancyId: 'v9', vacancyTitle: 'Chirurg' })} />)
+    renderTab(<ApplicationTab application={app({ vacancyId: 'v9', vacancyTitle: 'Chirurg' })} />)
     expect(screen.getByTitle('drawer.openVacancy')).toBeInTheDocument()
   })
 
@@ -104,8 +126,49 @@ describe('ApplicationTab', () => {
   // return tab, so browser BACK reopens this application's drawer on Sollicitatie.
   it('stashes the return tab before navigating to the linked vacancy', async () => {
     const user = userEvent.setup()
-    render(<ApplicationTab application={app({ id: 77, vacancyId: 'v9', vacancyTitle: 'Chirurg' })} />)
+    renderTab(<ApplicationTab application={app({ id: 77, vacancyId: 'v9', vacancyTitle: 'Chirurg' })} />)
     await user.click(screen.getByTitle('drawer.openVacancy'))
     expect(peekReturnTab(77)).toBe('application')
+  })
+
+  // S32: candidate name + function, editable in place (house pencil), PATCHing
+  // the CANDIDATE endpoint via onUpdateCandidate.
+  describe('candidate name/function block (S32)', () => {
+    it('shows the read-only name/function and hides its pencil without onUpdateCandidate', () => {
+      renderTab(<ApplicationTab application={app({ candidateName: 'Anna de Vries', candidate: { function: 'Verzorgende IG' } as ApplicationDetail['candidate'] })} />)
+      expect(screen.getByText('Anna de Vries')).toBeInTheDocument()
+      expect(screen.getByText('Verzorgende IG')).toBeInTheDocument()
+      expect(screen.queryByLabelText('common:edit')).toBeNull()
+    })
+
+    it('edits the name/function in place and calls onUpdateCandidate with the split name', async () => {
+      const onUpdateCandidate = vi.fn()
+      const user = userEvent.setup()
+      renderTab(<ApplicationTab
+        application={app({ candidateId: 'c1', candidateName: 'Anna de Vries', candidate: { function: 'Verzorgende IG' } as ApplicationDetail['candidate'] })}
+        onUpdateCandidate={onUpdateCandidate} />)
+      await user.click(screen.getByLabelText('common:edit'))
+      const lastNameInput = screen.getByDisplayValue('Vries')
+      await user.clear(lastNameInput)
+      await user.type(lastNameInput, 'Jansen')
+      await user.click(screen.getByLabelText('common:save'))
+      expect(onUpdateCandidate).toHaveBeenCalledWith('c1', { firstname: 'Anna', lastname: 'Jansen', title: 'Verzorgende IG' })
+    })
+  })
+
+  // S31: the linked candidate's CV(s), reusing the candidate Documents preview affordance.
+  describe('CV block (S31)', () => {
+    it('shows a subtle empty line when the candidate has no CV', async () => {
+      renderTab(<ApplicationTab application={app({ candidateId: 'c1' })} />)
+      expect(await screen.findByText('drawer.cv.empty')).toBeInTheDocument()
+    })
+
+    it('renders a CV row with its filename', async () => {
+      mockGet.mockImplementation((url: string) => String(url).includes('/documents')
+        ? Promise.resolve({ data: { data: [{ id: 'd1', name: 'cv-anna.pdf', type: 'CV', created_at: '2026-07-01T10:00:00Z' }] } })
+        : Promise.resolve({ data: [] }))
+      renderTab(<ApplicationTab application={app({ candidateId: 'c1' })} />)
+      expect(await screen.findByText('cv-anna.pdf')).toBeInTheDocument()
+    })
   })
 })

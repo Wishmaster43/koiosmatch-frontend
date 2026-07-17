@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FileText, Unlink, ArchiveRestore } from 'lucide-react'
+import { Unlink, ArchiveRestore } from 'lucide-react'
 import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useCustomFields } from '@/lib/useCustomFields'
@@ -10,12 +10,14 @@ import EntityHeader from '@/components/drawer/EntityHeader'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import ApplicationChangelogPopover from './drawer/ApplicationChangelogPopover'
 import ApplicationTab from './drawer/ApplicationTab'
+import type { CandidateNamePatch } from './drawer/CandidateNameFunctionBlock'
 import CandidateTab from './drawer/CandidateTab'
 import VacancyTab from './drawer/VacancyTab'
 import InterviewsTab from './drawer/InterviewsTab'
 import AppointmentsTab from './drawer/AppointmentsTab'
 import NotesTab from './drawer/NotesTab'
 import Timeline from './drawer/Timeline'
+import DetachReasonModal from './drawer/DetachReasonModal'
 import { peekReturnTab, clearReturnTab } from './drawer/constants'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { ApplicationDetail } from '@/types/application'
@@ -40,11 +42,16 @@ interface ApplicationDrawerProps {
   // by the Sollicitatie tab's Details block and the Vacature tab (§3A).
   onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
   users?: Array<{ id: Id; name: string }>
-  onDetach?: (id: Id | undefined) => void
+  // S15: detaching REQUIRES a reason (BE 422s without one) — the drawer collects
+  // it via DetachReasonModal before calling this.
+  onDetach?: (id: Id | undefined, reason: string) => void
   onRestore?: (id: Id | undefined) => void
   canManage?: boolean
   // Save the Extra tab's tenant custom fields (§3B) — a partial patch, merged by the caller.
   onUpdateCustomFields?: (id: Id | undefined, patch: Record<string, unknown>) => void
+  // S32: edit the linked candidate's name + function in place (PATCH /candidates/
+  // {id}). Undefined hides the pencil (permission-gated by the caller).
+  onUpdateCandidate?: (candidateId: Id | null, patch: CandidateNamePatch) => void
   // Deep-link: open on this tab (mirrors CandidateDrawer's own prop, currently unused
   // by any caller — kept for parity/future deep-links; the return-tab memory below
   // covers the NAV-BACK-1 case this drawer actually needs today).
@@ -55,9 +62,11 @@ interface ApplicationDrawerProps {
  * ApplicationDrawer — thin container: declares the header config + tab list and
  * wires them to the shared EntityDrawer shell. No heavy JSX, no business logic.
  */
-export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, users, onDetach, onRestore, canManage, onUpdateCustomFields, initialTab }: ApplicationDrawerProps) {
+export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, users, onDetach, onRestore, canManage, onUpdateCustomFields, onUpdateCandidate, initialTab }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
   const { formatDateTime } = useDateFormat()
+  // S15: the reason-required detach confirm modal (footer "Ontkoppelen").
+  const [detachModalOpen, setDetachModalOpen] = useState(false)
   // Funnel phases (Settings lookup) for the header phase picker; never hardcoded.
   const { funnelTypes } = useLookups() as unknown as { funnelTypes: Array<{ value: string; label: string; color?: string }> }
   // The Extra tab only shows when the tenant has defined application custom fields (§3A(f)).
@@ -99,7 +108,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   // Map a tab id to its content component.
   const renderTab = (id: string): ReactNode => {
     switch (id) {
-      case 'application':  return <ApplicationTab application={a} onReject={onReject} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} />
+      case 'application':  return <ApplicationTab application={a} onReject={onReject} onAdjustScore={onAdjustScore} onLinkVacancy={onLinkVacancy} onUpdateCandidate={onUpdateCandidate} />
       case 'candidate':    return <CandidateTab application={a} />
       case 'vacancy':      return <VacancyTab application={a} onLinkVacancy={onLinkVacancy} />
       case 'interviews':   return <InterviewsTab application={a} />
@@ -118,6 +127,7 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
   const tabIds = customFieldDefs.length > 0 ? [...TAB_IDS, 'extra'] : TAB_IDS
 
   return (
+    <>
     <EntityDrawer
       entity={a}
       // An explicit deep-link always wins; otherwise fall back to the NAV-BACK-1
@@ -140,7 +150,9 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
               </button>
             ) : canManage ? (
               // No vacancy linked = nothing to detach — grey + disabled (Danny 13/7).
-              <button onClick={() => a.vacancyId != null && onDetach?.(a.id)} disabled={a.vacancyId == null}
+              // S15: opens the reason-required confirm modal instead of detaching
+              // straight away (the BE 422s a bare DELETE now).
+              <button onClick={() => a.vacancyId != null && setDetachModalOpen(true)} disabled={a.vacancyId == null}
                 title={a.vacancyId == null ? t('detach.nothingLinked') : undefined}
                 style={{ display: 'flex', alignItems: 'center', gap: 5,
                   fontSize: 12, fontWeight: 500, height: BTN_H, padding: '0 12px', borderRadius: 8,
@@ -150,11 +162,6 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
                 <Unlink size={12} /> {t('detach.button')}
               </button>
             ) : null}
-            <button style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 500,
-              height: BTN_H, padding: '0 12px', borderRadius: 8, border: '1px solid var(--border)',
-              background: 'none', color: 'var(--text)', cursor: 'pointer' }}>
-              <FileText size={12} /> {t('drawer.downloadCv')}
-            </button>
           </div>
         </div>
       )}
@@ -177,5 +184,14 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
         />
       )}
     />
+    {/* S15: the reason-required detach confirm — a small modal, not a native
+        confirm(), since it collects the free-text reason the BE now requires. */}
+    {detachModalOpen && (
+      <DetachReasonModal
+        onCancel={() => setDetachModalOpen(false)}
+        onConfirm={reason => { setDetachModalOpen(false); onDetach?.(a.id, reason) }}
+      />
+    )}
+    </>
   )
 }

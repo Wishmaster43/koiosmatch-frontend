@@ -3,10 +3,12 @@ import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Link2, Unlink, Save, X } from 'lucide-react'
 import api, { unwrap } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import EntityLink from '@/components/ui/EntityLink'
 import { VacancyLookupsProvider } from '@/context/VacancyLookupsContext'
 import DetailsTab from '@/pages/vacancies/drawer/DetailsTab'
 import { mapVacancyDetail } from '@/pages/vacancies/data/mapVacancy'
+import { buildVacancyPatch } from '@/pages/vacancies/data/vacanciesShared'
 import VacancyLinkField from './VacancyLinkField'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
 import { rememberReturnTab } from './constants'
@@ -27,11 +29,20 @@ interface VacancyTabProps {
 
 /**
  * VacancyTab — reuses the real vacancy detail inside the application drawer:
- * fetches the linked vacancy and renders the shared vacancy DetailsTab (read-only),
- * so it looks identical to the vacancy drawer instead of a bespoke banner. The
- * empty state gets a "Vacature koppelen" CTA and the linked state a subtle
- * "Ontkoppelen" affordance — both drive the same onLinkVacancy handler as the
- * Sollicitatie tab's Details block (VacancyLinkField, useVacancyLinkOptions).
+ * fetches the linked vacancy and renders the shared vacancy DetailsTab, so it
+ * looks and BEHAVES identical to the real vacancy drawer instead of a bespoke
+ * banner. The empty state gets a "Vacature koppelen" CTA and the linked state a
+ * subtle "Ontkoppelen" affordance — both drive the same onLinkVacancy handler as
+ * the Sollicitatie tab's Details block (VacancyLinkField, useVacancyLinkOptions).
+ *
+ * S20 fix (2026-07-17): this used to render <DetailsTab> WITHOUT an `onUpdate`,
+ * intending it as "read-only" — but DetailsTab always shows its edit pencils
+ * regardless (it has no read-only mode), so every field (incl. "Vereiste
+ * vaardigheden") looked editable and silently did nothing on save (`onUpdate?.`
+ * no-op'd). The BE write path already exists (VacancyWriter handles skills/etc.
+ * for the real vacancy drawer), so the FE fix is to wire a real `onUpdate` here
+ * too — reusing the exact PATCH shape (`buildVacancyPatch`) the vacancy page
+ * uses — rather than fake a read-only mode DetailsTab doesn't support.
  */
 export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTabProps) {
   const { t } = useTranslation(['applications', 'common'])
@@ -67,6 +78,18 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
   }
   const unlink = () => onLinkVacancy?.(a.id, null)
 
+  // S20: make the reused DetailsTab actually persist — optimistic local merge,
+  // then PATCH /vacancies/{id} with the same UI-patch → API-body mapping the
+  // real vacancy drawer uses (buildVacancyPatch), so "Vereiste vaardigheden"
+  // (and every other DetailsTab field) saves for real instead of no-op'ing.
+  const updateVacancy = (id: Id | undefined, patch: Record<string, unknown>) => {
+    if (id == null) return
+    setVac(prev => (prev ? ({ ...prev, ...patch } as VacancyDetail) : prev))
+    const body = buildVacancyPatch(patch)
+    if (!Object.keys(body).length) return
+    api.patch(`/vacancies/${id}`, body).catch(() => notifyError(t('common:actionFailed')))
+  }
+
   const muted: CSSProperties = { fontSize: 13, color: 'var(--text-muted)', padding: '24px 0', textAlign: 'center' }
   if (state === 'loading') return <div style={muted}>{t('vacancyDetail.loading')}</div>
   if (state === 'error') return <div style={muted}>{t('vacancyDetail.error')}</div>
@@ -98,9 +121,11 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
     )
   }
 
-  // Read-only reuse: DetailsTab needs the vacancy lookups it renders labels from.
-  // A link jumps to the full vacancy record (page + drawer) for edits; Ontkoppelen
-  // sits next to it as a subtle affordance (guard-422 toast handled by the parent).
+  // Full reuse: DetailsTab needs the vacancy lookups it renders labels from, and
+  // (S20) now gets a real onUpdate so its edit pencils actually persist. A link
+  // still jumps to the full vacancy record (page + drawer) for anything outside
+  // DetailsTab; Ontkoppelen sits next to it as a subtle affordance (guard-422
+  // toast handled by the parent).
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 14 }}>
@@ -122,7 +147,7 @@ export default function VacancyTab({ application: a, onLinkVacancy }: VacancyTab
         </span>
       </div>
       <VacancyLookupsProvider>
-        <DetailsTab vacancy={vac} />
+        <DetailsTab vacancy={vac} onUpdate={updateVacancy} />
       </VacancyLookupsProvider>
     </div>
   )

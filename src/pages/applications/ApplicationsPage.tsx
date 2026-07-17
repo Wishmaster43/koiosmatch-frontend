@@ -28,6 +28,8 @@ import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import { BTN_H } from '@/config/buttonMetrics'
 import { mapApplication, mapApplicationDetail } from './data/mapApplication'
 import { bucketOfPhase } from './data/applicationsShared'
+import { buildCandidatePatch } from '@/pages/candidates/data/candidatesShared'
+import type { CandidateNamePatch } from './drawer/CandidateNameFunctionBlock'
 import type { Application, ApplicationDetail } from '@/types/application'
 import type { RejectPayload } from './drawer/RejectionBlock'
 import type { Criterion } from './drawer/MatchScoreBlock'
@@ -53,6 +55,9 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
   const user = auth?.user as { default_per_page?: number } | null | undefined
   // Detach/restore are destructive → gate in the UI (backend re-checks the perm).
   const canManage = auth?.hasPermission?.('applications.update') ?? false
+  // S32: the candidate name/function pencil PATCHes /candidates/{id} — gate on the
+  // actual target permission, not applications.update (backend re-checks either way).
+  const canEditCandidate = auth?.hasPermission?.('candidates.update') ?? false
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Funnel phases come from the tenant lookup (Settings → Funnel stages), never hardcoded.
   const { funnelTypes, funnelMeta } = useLookups()
@@ -311,23 +316,67 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
     api.patch(`/applications/${id}`, { custom_fields: merged }).catch(() => notifyError(t('common:actionFailed')))
   }
 
+  // S32: edit the linked candidate's name/function from the Sollicitatie tab.
+  // PATCH /candidates/{id} (buildCandidatePatch: firstname/lastname/title →
+  // first_name/last_name/function_title) — the response is CandidateDetailResource,
+  // which already recomputes `name`/`function_title`, so reconciling from it IS
+  // "refresh drawer data after save" without a second round-trip GET.
+  const handleUpdateCandidate = (candidateId: Id | null | undefined, patch: CandidateNamePatch) => {
+    if (candidateId == null) return
+    const body = buildCandidatePatch(patch as unknown as Record<string, unknown>)
+    api.patch(`/candidates/${candidateId}`, body)
+      .then(r => {
+        const updated = unwrap<{ name?: string; function_title?: string }>(r)
+        setApplications(prev => prev.map(a => a.candidateId === candidateId
+          ? { ...a, candidateName: updated.name ?? a.candidateName } : a))
+        setSelected(prev => (prev && prev.candidateId === candidateId)
+          ? decorate({ ...prev, candidateName: updated.name ?? prev.candidateName,
+              candidate: { ...prev.candidate, function: updated.function_title ?? prev.candidate.function } } as ApplicationDetail)
+          : prev)
+      })
+      .catch(() => notifyError(t('common:actionFailed')))
+  }
+
   // Detach (soft-delete) an application: kept server-side, removed from the active
-  // list. Optimistic flag + total decrement (F-6: total is server-derived now,
-  // mirrors useCandidateDrawerActions); revert-by-id + toast on failure (F-6: a
-  // whole-array snapshot can't safely revert BOTH the table-page and wide caches —
-  // one of the two is empty/partial depending on view — so flip the flag back by id
-  // instead of restoring a captured array). Gated by applications.update.
-  const handleDetach = (id: Id | undefined) => {
+  // list. S15 (BE cb1e684): DELETE now REQUIRES a `reason` (422 without one) —
+  // the drawer's DetachReasonModal collects it — and the backend writes it as a
+  // note the Notities tab shows. Non-optimistic (unlike the old version): a 422
+  // must never look like it succeeded. On success the row leaves the active list,
+  // but the drawer STAYS OPEN and refetches the SAME record with
+  // ?include_archived=1 (required for a soft-deleted row, see ApplicationController::
+  // show) so it shows the archived state honestly with its restore path, instead
+  // of just vanishing (mirrors the candidate archived-banner UX). Gated by
+  // applications.update in the drawer footer.
+  //
+  // BE GAP (measured live, S15): neither ApplicationListResource nor
+  // ApplicationDetailResource ever sends `deleted_at` (or any archived/is_archived
+  // flag) — GET /applications/{id}?include_archived=1 returns 200 with the full
+  // record but NOTHING marks it as trashed, so mapApplicationDetail's own
+  // `archived` derivation is always false on a re-fetched row. Left as-is, the
+  // drawer would keep showing "Ontkoppelen" instead of "Herstellen" right after a
+  // successful detach — a resource gap identical in shape to S20's, just on
+  // reads instead of writes. Since we KNOW for a fact the DELETE just returned
+  // 204, `archived: true` is forced onto the reconciled record here rather than
+  // trusted from the (currently silent) resource field — report to backend:
+  // ApplicationListResource needs a `deleted_at` (or `archived`) field so the
+  // "Gearchiveerd" quick-view toggle (which relies on the SAME missing field,
+  // via matchesFilters' `Boolean(a.archived)`) works for every application, not
+  // only the one this session happens to hold a local flag for.
+  const handleDetach = (id: Id | undefined, reason: string) => {
     if (id == null) return
-    setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: true } : a))
-    setTotal(prev => Math.max(0, prev - 1))
-    closeDrawer()
-    api.delete(`/applications/${id}`)
-      .then(() => notifySuccess(t('detach.done')))
-      .catch(() => {
-        setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: false } : a))
-        setTotal(prev => prev + 1)
-        notifyError(t('common:actionFailed'))
+    api.delete(`/applications/${id}`, { data: { reason } })
+      .then(() => {
+        notifySuccess(t('detach.done'))
+        setApplications(prev => prev.map(a => a.id === id ? { ...a, archived: true } : a))
+        setTotal(prev => Math.max(0, prev - 1))
+        api.get(`/applications/${id}`, { params: { include_archived: 1 } })
+          .then(r => { if (selectedIdRef.current === id) setSelected(decorate({ ...mapApplicationDetail(unwrap(r), funnelTypes), archived: true })) })
+          .catch(() => { if (selectedIdRef.current === id) setSelected(prev => (prev && prev.id === id ? { ...prev, archived: true } : prev)) })
+      })
+      .catch(err => {
+        const serverMsg = (err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } })?.response?.data
+        const detail = serverMsg?.message ?? Object.values(serverMsg?.errors ?? {})[0]?.[0]
+        notifyError(detail || t('common:actionFailed'))
       })
   }
 
@@ -523,6 +572,7 @@ export default function ApplicationsPage({ intent }: { intent?: unknown } = {}) 
         onDetach={handleDetach}
         onRestore={handleRestore}
         canManage={canManage}
+        onUpdateCandidate={canEditCandidate ? handleUpdateCandidate : undefined}
       />
 
       {addOpen && <AddApplicationModal onClose={() => setAddOpen(false)} onCreated={handleCreated} />}

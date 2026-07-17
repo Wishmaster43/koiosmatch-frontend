@@ -70,7 +70,19 @@
   "drawer": {
     "label": "Bewerbung",
     "createdAt": "Erstellt am {{date}}",
-    "downloadCv": "Lebenslauf",
+    "cv": {
+      "title": "Lebenslauf",
+      "loading": "Lebenslauf wird geladen…",
+      "error": "Lebenslauf konnte nicht geladen werden.",
+      "empty": "Noch kein Lebenslauf hochgeladen.",
+      "view": "Ansehen"
+    },
+    "candidateFields": {
+      "name": "Name",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "function": "Funktion"
+    },
     "tabs": {
       "application": "Bewerbung",
       "candidate": "Kandidat",
@@ -198,7 +210,11 @@
   "detach": {
     "button": "Entkoppeln",
     "done": "Bewerbung entkoppelt",
-    "nothingLinked": "Keine Stelle verknüpft"
+    "nothingLinked": "Keine Stelle verknüpft",
+    "reasonTitle": "Grund für die Entkopplung",
+    "reasonLabel": "Grund",
+    "reasonPlaceholder": "Warum wird diese Bewerbung entkoppelt?",
+    "confirm": "Entkoppeln"
   },
   "restore": {
     "button": "Wiederherstellen",

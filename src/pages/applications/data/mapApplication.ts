@@ -1,6 +1,6 @@
 import { bucketOfPhase } from './applicationsShared'
 import { initialsOf } from '@/lib/initials'
-import type { Id } from '@/types/common'
+import type { Id, Loose } from '@/types/common'
 import type { LookupItem } from '@/context/LookupsContext'
 import type {
   ApiApplication, Application, ApplicationDetail, ApiAppCandidate, ApiAppVacancy,
@@ -113,8 +113,13 @@ export function mapApplicationDetail(raw: ApiApplication = {}, funnelTypes: Look
       id: ev.id, author: ev.author ?? '', initials: ev.author_initials ?? '',
       description: ev.description ?? '', ai: Boolean(ev.ai), time: ev.created_at ?? ev.time ?? '',
     })),
+    // S15: `title` carries e.g. the detach reason's "Sollicitatie ontkoppeld"
+    // heading (ApplicationDetailResource always sends it, but the ApiApplication
+    // type's notes shape doesn't declare it yet — read it defensively, mirrors
+    // mapVacancy's `(n as Loose).body` for the same "field exists, type is behind"
+    // situation). The shared NotesTab renders it above the body when present.
     notes: (raw.notes ?? []).map(n => ({
-      id: n.id, author: n.author ?? '', text: n.text ?? '', time: n.created_at ?? '',
+      id: n.id, author: n.author ?? '', title: (n as Loose).title ?? '', text: n.text ?? '', time: n.created_at ?? '',
     })),
     // Match SCORE = the fit on the application (flat fields; "match" the noun is a
     // separate entity). `score` (overall) comes from mapApplication (match_score).

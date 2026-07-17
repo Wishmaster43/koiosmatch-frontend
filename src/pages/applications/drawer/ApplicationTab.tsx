@@ -11,6 +11,9 @@ import type { Criterion } from './MatchScoreBlock'
 import RejectionBlock from './RejectionBlock'
 import type { RejectPayload } from './RejectionBlock'
 import VacancyLinkField from './VacancyLinkField'
+import CandidateNameFunctionBlock from './CandidateNameFunctionBlock'
+import type { CandidateNamePatch } from './CandidateNameFunctionBlock'
+import CvBlock from './CvBlock'
 import { useVacancyLinkOptions } from '../hooks/useVacancyLinkOptions'
 import { rememberReturnTab } from './constants'
 import type { ApplicationDetail } from '@/types/application'
@@ -37,21 +40,29 @@ interface ApplicationTabProps {
   // picked option so the caller can update it optimistically before the PATCH
   // response reconciles it. Undefined hides the pencil (read-only caller).
   onLinkVacancy?: (id: Id | undefined, vacancyId: Id | null, meta?: { title?: string; client?: string }) => void
+  // S32: edit the linked candidate's name + function in place (PATCH /candidates/
+  // {id}). Undefined hides the pencil — the caller only passes this when the
+  // user has candidates.update (permission-gated, mirrors onLinkVacancy above).
+  onUpdateCandidate?: (candidateId: Id | null, patch: CandidateNamePatch) => void
 }
 
 /**
- * ApplicationTab — the "Sollicitatie" tab: the AI task, the Details block (the
+ * ApplicationTab — the "Sollicitatie" tab: candidate name/function (S32, editable
+ * in place), the linked candidate's CV (S31), the AI task, the Details block (the
  * vacancy link is editable in-place; Bron + Klant stay read-only — Klant is
  * derived from the vacancy) and the overall match score. Phase + recruiter are
  * edited from the drawer header (meta pickers), so they no longer live here.
  * No repeated "Details" heading (§3A) — the pencil alone marks the editable block.
- * Locatie shows the vacancy's own work-site city when the backend sends one;
- * Afdeling is intentionally absent — a vacancy has no customer_location_id/
- * customer_department_id today (measured: neither the Vacancy model nor
- * ApplicationDetailResource carries them, unlike Opportunity/Match), so there is
- * nothing to show or link yet (S6, reported).
+ * Locatie shows the vacancy's own work-site city when the backend sends one.
+ * S19 (re-measured 2026-07-17): the vacancy NOW carries customer_location_id/
+ * customer_department_id/contact_id (VAC-CASCADE-1, wave 6) — the older "no
+ * afdeling exists yet" note above was stale. That fuller klant/locatie/afdeling/
+ * contactpersoon picture already renders in the Vacature TAB (VacancyTab reuses
+ * the real vacancy DetailsTab, which has those rows) — this Sollicitatie-tab
+ * summary intentionally stays light (§3A: one shared surface, never fork the
+ * same fields into two editors) and only adds the vacancy LINK here.
  */
-export default function ApplicationTab({ application: a, onReject, onAdjustScore, onLinkVacancy }: ApplicationTabProps) {
+export default function ApplicationTab({ application: a, onReject, onAdjustScore, onLinkVacancy, onUpdateCandidate }: ApplicationTabProps) {
   const { t } = useTranslation(['applications', 'common'])
   // In-place edit of the vacancy link — pencil → searchable picker → diskette/✕
   // (§3A house pattern, mirrors KlantTab). Options only load while editing.
@@ -69,6 +80,15 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+      {/* S32: candidate name + function, editable in place (house pencil) — PATCHes
+          the candidate record without leaving this tab. */}
+      <CandidateNameFunctionBlock name={a.candidateName} func={a.candidate?.function ?? ''}
+        onSave={onUpdateCandidate ? patch => onUpdateCandidate(a.candidateId, patch) : undefined} />
+
+      {/* S31: the linked candidate's CV(s) at a glance — reuses the candidate
+          Documents tab's own preview affordance. */}
+      <CvBlock candidateId={a.candidateId} />
+
       {/* AI task */}
       {a.task && (
         <div>
@@ -105,8 +125,9 @@ export default function ApplicationTab({ application: a, onReject, onAdjustScore
           <Field label={t('drawer.source')}>{a.source || '—'}</Field>
           <Field label={t('drawer.client')}>{a.client || '—'}</Field>
           {/* Locatie (S6) — the vacancy's own work-site city when the backend sends
-              one; dash otherwise. No Afdeling field: measured, nothing to show
-              (see the file docblock). */}
+              one; dash otherwise. Klant/locatie/afdeling/contactpersoon in full
+              live on the Vacature tab (see the file docblock, S19) — this summary
+              deliberately stays light. */}
           {/* Optional chaining: the drawer shows a LIGHT `Application` row cast as
               `ApplicationDetail` before the full GET /applications/{id} resolves
               (ApplicationsPage.selectApplication) — `vacancy` only exists once that

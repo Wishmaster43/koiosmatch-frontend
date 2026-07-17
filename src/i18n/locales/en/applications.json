@@ -70,7 +70,19 @@
   "drawer": {
     "label": "Application",
     "createdAt": "Created on {{date}}",
-    "downloadCv": "CV",
+    "cv": {
+      "title": "CV",
+      "loading": "Loading CV…",
+      "error": "Failed to load the CV.",
+      "empty": "No CV uploaded yet.",
+      "view": "View"
+    },
+    "candidateFields": {
+      "name": "Name",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "function": "Function"
+    },
     "tabs": {
       "application": "Application",
       "candidate": "Candidate",
@@ -189,7 +201,11 @@
   "detach": {
     "button": "Detach",
     "done": "Application detached",
-    "nothingLinked": "No vacancy linked"
+    "nothingLinked": "No vacancy linked",
+    "reasonTitle": "Reason for detaching",
+    "reasonLabel": "Reason",
+    "reasonPlaceholder": "Why is this application being detached?",
+    "confirm": "Detach"
   },
   "restore": {
     "button": "Restore",

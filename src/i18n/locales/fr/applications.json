@@ -70,7 +70,19 @@
   "drawer": {
     "label": "Candidature",
     "createdAt": "Créé le {{date}}",
-    "downloadCv": "CV",
+    "cv": {
+      "title": "CV",
+      "loading": "Chargement du CV…",
+      "error": "Échec du chargement du CV.",
+      "empty": "Aucun CV téléversé pour le moment.",
+      "view": "Voir"
+    },
+    "candidateFields": {
+      "name": "Nom",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "function": "Fonction"
+    },
     "tabs": {
       "application": "Candidature",
       "candidate": "Candidat",
@@ -198,7 +210,11 @@
   "detach": {
     "button": "Dissocier",
     "done": "Candidature dissociée",
-    "nothingLinked": "Aucune offre liée"
+    "nothingLinked": "Aucune offre liée",
+    "reasonTitle": "Motif de la dissociation",
+    "reasonLabel": "Motif",
+    "reasonPlaceholder": "Pourquoi cette candidature est-elle dissociée ?",
+    "confirm": "Dissocier"
   },
   "restore": {
     "button": "Restaurer",

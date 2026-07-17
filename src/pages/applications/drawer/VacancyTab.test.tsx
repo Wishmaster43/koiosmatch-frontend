@@ -12,13 +12,23 @@ import type { ApplicationDetail } from '@/types/application'
 // left either undefined at load time.
 vi.mock('@/lib/api', async () => {
   const actual = await vi.importActual<typeof import('@/lib/api')>('@/lib/api')
-  return { ...actual, default: { get: vi.fn() } }
+  return { ...actual, default: { get: vi.fn(), patch: vi.fn() } }
 })
-vi.mock('@/pages/vacancies/drawer/DetailsTab', () => ({ default: () => <div>details-tab</div> }))
+// S20: the mock exposes onUpdate so a test can prove it actually fires a PATCH
+// (the whole point of the fix — DetailsTab's pencils used to no-op here).
+vi.mock('@/pages/vacancies/drawer/DetailsTab', () => ({
+  default: ({ onUpdate }: { onUpdate?: (id: number, patch: Record<string, unknown>) => void }) => (
+    <div>
+      details-tab
+      <button onClick={() => onUpdate?.(7, { skills: ['Triage'] })}>save-skill</button>
+    </div>
+  ),
+}))
 vi.mock('@/context/VacancyLookupsContext', () => ({ VacancyLookupsProvider: ({ children }: { children: ReactNode }) => <>{children}</> }))
 
 import api from '@/lib/api'
 const mockGet = api.get as unknown as ReturnType<typeof vi.fn>
+const mockPatch = api.patch as unknown as ReturnType<typeof vi.fn>
 
 // Minimal application detail — only vacancyId drives this tab.
 const app = (over: Partial<ApplicationDetail> = {}) => ({ id: 1, vacancyId: 7, ...over } as unknown as ApplicationDetail)
@@ -29,7 +39,7 @@ describe('VacancyTab', () => {
   // returned from beforeEach as a cleanup hook and CALLED api.get() with no args after
   // every test, producing an unhandled 'boom' rejection that deadlocked the runner.
   // Braces (statement body, no implicit return) are load-bearing here.
-  beforeEach(() => { mockGet.mockReset() })
+  beforeEach(() => { mockGet.mockReset(); mockPatch.mockReset(); mockPatch.mockResolvedValue({ data: { data: {} } }) })
 
   it('shows the empty state when no vacancy is linked', () => {
     render(<VacancyTab application={app({ vacancyId: null })} />)
@@ -52,6 +62,17 @@ describe('VacancyTab', () => {
     mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
     render(<VacancyTab application={app()} />)
     expect(await screen.findByText('details-tab')).toBeInTheDocument()
+  })
+
+  // S20: the reused DetailsTab's onUpdate must actually PATCH /vacancies/{id} —
+  // it used to be omitted entirely, so every edit (incl. "Vereiste vaardigheden")
+  // silently did nothing.
+  it('persists a DetailsTab edit via PATCH /vacancies/{id}', async () => {
+    mockGet.mockResolvedValue({ data: { data: { id: 7, title: 'Verpleegkundige' } } })
+    const user = userEvent.setup()
+    render(<VacancyTab application={app()} />)
+    await user.click(await screen.findByText('save-skill'))
+    expect(mockPatch).toHaveBeenCalledWith('/vacancies/7', { skills: ['Triage'] })
   })
 
   // S14/S22: clicking through to the full vacancy stashes 'vacancy' as the return
