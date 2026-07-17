@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next'
 import { Plus, Trash2, ChevronDown, ChevronUp, Eye, EyeOff } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
 import { useCustomFields } from '@/lib/useCustomFields'
+import { DragList } from '../components/SettingsControls'
 
 // Field types the backend supports.
 const FIELD_TYPES = ['text', 'textarea', 'number', 'date', 'boolean', 'select']
@@ -65,12 +66,10 @@ export default function CustomFieldsSettings({ entityType }) {
       .finally(() => setLoading(false))
   }, [entityType, i18n.language])
 
-  // Move a field one position up or down via POST /custom-fields/reorder.
-  const reorder = async (id, dir) => {
-    const idx = fields.findIndex(f => f.id === id)
-    if ((dir === -1 && idx === 0) || (dir === 1 && idx === fields.length - 1)) return
-    const next = [...fields]
-    ;[next[idx], next[idx + dir]] = [next[idx + dir], next[idx]]
+  // Persist a drag-reordered list (same mechanism as the contract-forms lookup
+  // editor's DragList — one shared drag implementation, not a per-screen redo).
+  // Optimistic: apply locally first, POST the full id order, reconcile invalidate.
+  const reorder = async (next) => {
     setFields(next)
     await api.post('/custom-fields/reorder', { ids: next.map(f => f.id) }).catch(() => {})
     invalidate()
@@ -155,109 +154,104 @@ export default function CustomFieldsSettings({ entityType }) {
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 4 }}>{t('customFieldsSettings.subtitle')}</p>
       </div>
 
-      {/* Field list */}
-      {fields.map((field, idx) => {
-        const isOpen = expanded === field.id
-        const ef = editForms[field.id] ?? {}
-        const currentType = ef.type ?? field.type
-        return (
-          <div key={field.id} style={{ ...cardStyle, opacity: field.active ? 1 : 0.6 }}>
-            {/* Row summary */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              {/* Reorder arrows */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                <button onClick={() => reorder(field.id, -1)} disabled={idx === 0}
-                  style={{ background: 'none', border: 'none', cursor: idx === 0 ? 'default' : 'pointer', color: 'color-mix(in srgb, var(--text-muted) 55%, transparent)', padding: 0, lineHeight: 1 }}>
-                  <ChevronUp size={13} />
+      {/* Field list — drag-to-reorder via the shared DragList (same mechanism as the
+          contract-forms lookup editor, CandidateLookupsSettings' LookupBlock). The grip
+          drags the whole card; renderItem returns one flex:1 column so the header row +
+          the optional expanded edit form both sit to the right of the handle. */}
+      <DragList
+        items={fields}
+        onReorder={reorder}
+        renderItem={(field) => {
+          const isOpen = expanded === field.id
+          const ef = editForms[field.id] ?? {}
+          const currentType = ef.type ?? field.type
+          return (
+            <div style={{ ...cardStyle, flex: 1, minWidth: 0, marginBottom: 0, opacity: field.active ? 1 : 0.6 }}>
+              {/* Row summary */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {/* Label + meta */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{field.label}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                    <code style={{ fontFamily: 'JetBrains Mono, monospace' }}>{field.key}</code>
+                    {' · '}{t(`customFieldsSettings.types.${field.type}`)}
+                    {field.has_data && <span style={{ color: 'var(--color-warning)', marginLeft: 6 }}>· {t('customFieldsSettings.hasData')}</span>}
+                  </div>
+                </div>
+
+                {/* Active toggle */}
+                <button onClick={() => toggleActive(field)} title={field.active ? t('customFieldsSettings.deactivate') : t('customFieldsSettings.activate')}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: field.active ? 'var(--color-primary)' : 'var(--text-muted)', padding: 4 }}>
+                  {field.active ? <Eye size={14} /> : <EyeOff size={14} />}
                 </button>
-                <button onClick={() => reorder(field.id, 1)} disabled={idx === fields.length - 1}
-                  style={{ background: 'none', border: 'none', cursor: idx === fields.length - 1 ? 'default' : 'pointer', color: 'color-mix(in srgb, var(--text-muted) 55%, transparent)', padding: 0, lineHeight: 1 }}>
-                  <ChevronDown size={13} />
+
+                {/* Expand / collapse */}
+                <button onClick={() => setExpanded(isOpen ? null : field.id)}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
+                  {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </button>
               </div>
 
-              {/* Label + meta */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 500, fontSize: 13, color: 'var(--text)' }}>{field.label}</div>
-                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-                  <code style={{ fontFamily: 'JetBrains Mono, monospace' }}>{field.key}</code>
-                  {' · '}{t(`customFieldsSettings.types.${field.type}`)}
-                  {field.has_data && <span style={{ color: 'var(--color-warning)', marginLeft: 6 }}>· {t('customFieldsSettings.hasData')}</span>}
-                </div>
-              </div>
-
-              {/* Active toggle */}
-              <button onClick={() => toggleActive(field)} title={field.active ? t('customFieldsSettings.deactivate') : t('customFieldsSettings.activate')}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: field.active ? 'var(--color-primary)' : 'var(--text-muted)', padding: 4 }}>
-                {field.active ? <Eye size={14} /> : <EyeOff size={14} />}
-              </button>
-
-              {/* Expand / collapse */}
-              <button onClick={() => setExpanded(isOpen ? null : field.id)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
-                {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </button>
-            </div>
-
-            {/* Expanded edit form */}
-            {isOpen && (
-              <div style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {/* Label */}
-                <div>
-                  <label style={labelStyle}>{t('customFieldsSettings.label')}</label>
-                  <input value={ef.label ?? field.label} onChange={e => setEF(field.id, 'label', e.target.value)} style={inputStyle} />
-                </div>
-
-                {/* Key (immutable) */}
-                <div>
-                  <label style={labelStyle}>{t('customFieldsSettings.key')} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({t('customFieldsSettings.immutable')})</span></label>
-                  <input value={field.key} disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
-                </div>
-
-                {/* Type — disabled if has_data */}
-                <div>
-                  <label style={labelStyle}>{t('customFieldsSettings.type')} {field.has_data && <span style={{ color: 'var(--color-warning)', fontWeight: 400 }}>({t('customFieldsSettings.hasData')})</span>}</label>
-                  <select value={currentType} onChange={e => setEF(field.id, 'type', e.target.value)}
-                    disabled={field.has_data} style={{ ...inputStyle, cursor: field.has_data ? 'not-allowed' : 'pointer', opacity: field.has_data ? 0.5 : 1 }}>
-                    {FIELD_TYPES.map(tp => <option key={tp} value={tp}>{t(`customFieldsSettings.types.${tp}`)}</option>)}
-                  </select>
-                </div>
-
-                {/* Options — only for select type */}
-                {currentType === 'select' && (
+              {/* Expanded edit form */}
+              {isOpen && (
+                <div style={{ marginTop: 14, borderTop: '1px solid var(--border)', paddingTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {/* Label */}
                   <div>
-                    <label style={labelStyle}>{t('customFieldsSettings.options')}</label>
-                    <input value={ef.options ?? (field.options ?? []).join(', ')} onChange={e => setEF(field.id, 'options', e.target.value)}
-                      placeholder={t('customFieldsSettings.optionsPlaceholder')} style={inputStyle} />
-                    <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('customFieldsSettings.optionsHint')}</p>
+                    <label style={labelStyle}>{t('customFieldsSettings.label')}</label>
+                    <input value={ef.label ?? field.label} onChange={e => setEF(field.id, 'label', e.target.value)} style={inputStyle} />
                   </div>
-                )}
 
-                {/* Actions */}
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', marginTop: 4 }}>
-                  <button onClick={() => handleDelete(field)} disabled={field.has_data || saving === field.id}
-                    title={field.has_data ? t('customFieldsSettings.deleteBlocked') : t('customFieldsSettings.delete')}
-                    style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12,
-                             borderRadius: 6, border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', background: field.has_data ? 'var(--hover-bg)' : 'var(--color-danger-bg)',
-                             color: field.has_data ? 'var(--text-muted)' : 'var(--color-danger)', cursor: field.has_data ? 'not-allowed' : 'pointer' }}>
-                    <Trash2 size={12} /> {t('customFieldsSettings.delete')}
-                  </button>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => setExpanded(null)}
-                      style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                      {t('common.cancel')}
+                  {/* Key (immutable) */}
+                  <div>
+                    <label style={labelStyle}>{t('customFieldsSettings.key')} <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}>({t('customFieldsSettings.immutable')})</span></label>
+                    <input value={field.key} disabled style={{ ...inputStyle, opacity: 0.5, cursor: 'not-allowed' }} />
+                  </div>
+
+                  {/* Type — disabled if has_data */}
+                  <div>
+                    <label style={labelStyle}>{t('customFieldsSettings.type')} {field.has_data && <span style={{ color: 'var(--color-warning)', fontWeight: 400 }}>({t('customFieldsSettings.hasData')})</span>}</label>
+                    <select value={currentType} onChange={e => setEF(field.id, 'type', e.target.value)}
+                      disabled={field.has_data} style={{ ...inputStyle, cursor: field.has_data ? 'not-allowed' : 'pointer', opacity: field.has_data ? 0.5 : 1 }}>
+                      {FIELD_TYPES.map(tp => <option key={tp} value={tp}>{t(`customFieldsSettings.types.${tp}`)}</option>)}
+                    </select>
+                  </div>
+
+                  {/* Options — only for select type */}
+                  {currentType === 'select' && (
+                    <div>
+                      <label style={labelStyle}>{t('customFieldsSettings.options')}</label>
+                      <input value={ef.options ?? (field.options ?? []).join(', ')} onChange={e => setEF(field.id, 'options', e.target.value)}
+                        placeholder={t('customFieldsSettings.optionsPlaceholder')} style={inputStyle} />
+                      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 3 }}>{t('customFieldsSettings.optionsHint')}</p>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'space-between', marginTop: 4 }}>
+                    <button onClick={() => handleDelete(field)} disabled={field.has_data || saving === field.id}
+                      title={field.has_data ? t('customFieldsSettings.deleteBlocked') : t('customFieldsSettings.delete')}
+                      style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', fontSize: 12,
+                               borderRadius: 6, border: '1px solid color-mix(in srgb, var(--color-danger) 40%, transparent)', background: field.has_data ? 'var(--hover-bg)' : 'var(--color-danger-bg)',
+                               color: field.has_data ? 'var(--text-muted)' : 'var(--color-danger)', cursor: field.has_data ? 'not-allowed' : 'pointer' }}>
+                      <Trash2 size={12} /> {t('customFieldsSettings.delete')}
                     </button>
-                    <button onClick={() => handleSave(field)} disabled={saving === field.id}
-                      style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
-                      {saving === field.id ? t('common.saving') : t('common.save')}
-                    </button>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button onClick={() => setExpanded(null)}
+                        style={{ padding: '6px 14px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                        {t('common.cancel')}
+                      </button>
+                      <button onClick={() => handleSave(field)} disabled={saving === field.id}
+                        style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, borderRadius: 6, border: 'none', background: 'var(--color-primary)', color: 'white', cursor: 'pointer' }}>
+                        {saving === field.id ? t('common.saving') : t('common.save')}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
-        )
-      })}
+              )}
+            </div>
+          )
+        }}
+      />
 
       {/* Add new field */}
       {adding ? (

@@ -1174,7 +1174,12 @@
     "color": "Colour",
     "icon": "Icon",
     "startDashboard": "Start dashboard",
-    "startDashboardNone": "Default"
+    "startDashboardNone": "Default",
+    "branchesTemplate": "Branches (template)",
+    "branchesTemplateHint": "The starting set of branches new users with this role receive. Existing users keep their own set — this only edits the template.",
+    "branchesEmptyHint": "No branches selected — new users with this role won't be limited to any branch (branch-based access restriction is not enforced yet).",
+    "branchesNoLocations": "No branches configured yet.",
+    "branchesSaveFailed": "Couldn't save the branch template. Please try again."
   },
   "audit": {
     "title": "Audit log",

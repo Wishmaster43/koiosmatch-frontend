@@ -972,7 +972,12 @@
     "color": "Color",
     "icon": "Icono",
     "startDashboard": "Panel inicial",
-    "startDashboardNone": "Predeterminado"
+    "startDashboardNone": "Predeterminado",
+    "branchesTemplate": "Sedes (plantilla)",
+    "branchesTemplateHint": "El conjunto de sedes inicial que reciben los nuevos usuarios con este rol. Los usuarios existentes conservan su propio conjunto — esto solo edita la plantilla.",
+    "branchesEmptyHint": "Ninguna sede seleccionada — los nuevos usuarios con este rol no estarán limitados a ninguna sede (la restricción de acceso por sede aún no está activa).",
+    "branchesNoLocations": "Todavía no hay sedes configuradas.",
+    "branchesSaveFailed": "No se pudo guardar la plantilla de sedes. Inténtalo de nuevo."
   },
   "audit": {
     "title": "Registro de auditoría",

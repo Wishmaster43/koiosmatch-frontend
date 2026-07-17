@@ -972,7 +972,12 @@
     "color": "Couleur",
     "icon": "Icône",
     "startDashboard": "Tableau de bord initial",
-    "startDashboardNone": "Par défaut"
+    "startDashboardNone": "Par défaut",
+    "branchesTemplate": "Sites (modèle)",
+    "branchesTemplateHint": "L'ensemble de sites de départ attribué aux nouveaux utilisateurs ayant ce rôle. Les utilisateurs existants gardent leur propre ensemble — ceci ne modifie que le modèle.",
+    "branchesEmptyHint": "Aucun site sélectionné — les nouveaux utilisateurs ayant ce rôle ne seront limités à aucun site (la restriction d'accès par site n'est pas encore active).",
+    "branchesNoLocations": "Aucun site configuré pour le moment.",
+    "branchesSaveFailed": "Impossible d'enregistrer le modèle de sites. Veuillez réessayer."
   },
   "audit": {
     "title": "Journal d'audit",

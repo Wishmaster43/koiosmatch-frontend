@@ -7,12 +7,74 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ArrowLeft, ChevronDown, ChevronRight, Plus, RefreshCw, Trash2 } from 'lucide-react'
-import api, { unwrap } from '@/lib/api'
+import api, { unwrap, unwrapList } from '@/lib/api'
+import { notifyError } from '@/lib/notify'
 import { PermissionToggle, ColorSwatch } from '../components/SettingsControls'
 import { roleIconEl, ROLE_ICON_NAMES } from '@/lib/roleIcons'
 import RoleChip from '@/components/ui/RoleChip'
+import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import { useLocations } from '@/lib/useLocations'
 import { DASHBOARD_TYPES } from '@/pages/dashboard/templates'
 import { BTN_H } from '@/config/buttonMetrics'
+
+// One role's branch TEMPLATE — the starting set new users with this role inherit
+// (USERS-ROLES-LOC-1 / BranchAssignmentController::roleBranches). Existing users
+// keep their own set once created; this only edits the template row.
+function RoleBranchTemplate({ roleId }) {
+  const { t } = useTranslation('settings')
+  const locationOptions = useLocations()
+  const [branchIds, setBranchIds] = useState([])
+  const [loading,   setLoading]   = useState(true)
+  const [saving,    setSaving]    = useState(false)
+
+  // Load the role's current template whenever the open role changes.
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    api.get(`/roles/${roleId}/branches`)
+      .then(r => { if (!cancelled) setBranchIds(unwrapList(r).rows.map(b => b.location_id)) })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [roleId])
+
+  // Toggle one branch — optimistic PUT (replace-set), revert + notify on failure.
+  const toggle = async (locationId) => {
+    const prev = branchIds
+    const next = prev.includes(locationId) ? prev.filter(id => id !== locationId) : [...prev, locationId]
+    setBranchIds(next)
+    setSaving(true)
+    try {
+      await api.put(`/roles/${roleId}/branches`, { location_ids: next })
+    } catch {
+      setBranchIds(prev)
+      notifyError(t('roles.branchesSaveFailed'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div style={{ marginBottom: 22, padding: '12px 16px', background: 'var(--surface)',
+                  border: '1px solid var(--border)', borderRadius: 10 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted)' }}>{t('roles.branchesTemplate')}</span>
+        {saving && <RefreshCw size={12} className="animate-spin" style={{ color: 'var(--text-muted)' }} />}
+      </div>
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', marginBottom: 10 }}>{t('roles.branchesTemplateHint')}</p>
+      {loading ? (
+        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('common.loadingShort')}</p>
+      ) : (
+        <ChipMultiSelect options={locationOptions} selected={branchIds} onToggle={toggle} emptyText={t('roles.branchesNoLocations')} />
+      )}
+      {/* Honest empty-state note — an empty template does not restrict data today (branch-level
+          authorization ships behind a tenant toggle, VESTIGING-1 fase 3, not yet enabled). */}
+      {!loading && branchIds.length === 0 && locationOptions.length > 0 && (
+        <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>{t('roles.branchesEmptyHint')}</p>
+      )}
+    </div>
+  )
+}
 
 // Small popover grid to pick a role icon from the allowed set.
 function IconPicker({ value, color, options, onPick }) {
@@ -155,6 +217,9 @@ function RoleDetail({ role, permissions, iconOptions, onBack, onUpdate }) {
           <RoleChip name={localRole.name} color={color} icon={iconName} />
         </div>
       </div>
+
+      {/* Branch template — the starting set new users with this role inherit (§ USERS-ROLES-LOC-1) */}
+      <RoleBranchTemplate roleId={localRole.id} />
 
       {/* Permission groups */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

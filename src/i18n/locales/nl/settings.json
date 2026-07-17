@@ -1174,7 +1174,12 @@
     "color": "Kleur",
     "icon": "Icoon",
     "startDashboard": "Startdashboard",
-    "startDashboardNone": "Standaard"
+    "startDashboardNone": "Standaard",
+    "branchesTemplate": "Vestigingen (template)",
+    "branchesTemplateHint": "De startset vestigingen die nieuwe gebruikers met deze rol krijgen. Bestaande gebruikers behouden hun eigen set — dit past alleen de template aan.",
+    "branchesEmptyHint": "Geen vestigingen geselecteerd — nieuwe gebruikers met deze rol worden niet beperkt tot een vestiging (vestiging-gebonden toegangsbeperking is nog niet actief).",
+    "branchesNoLocations": "Nog geen vestigingen ingericht.",
+    "branchesSaveFailed": "Opslaan van de vestiging-template is mislukt. Probeer het opnieuw."
   },
   "audit": {
     "title": "Audit log",
