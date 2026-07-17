@@ -52,8 +52,10 @@ export function useEntityDocuments(prefix: string, parentId: Id | undefined) {
     const fd = new FormData()
     fd.append('file', file); fd.append('type', type); fd.append('name', name)
     api.post(`/${prefix}/${parentId}/documents`, fd, { headers: { 'Content-Type': 'multipart/form-data' } })
-      .then(res => { const saved = unwrap<EntityDoc>(res); setDocs(d => d.map(x => x.id === tmpId ? { ...saved, size: fmtSize(saved.size) } : x)) })
-      .catch(() => { setDocs(d => d.filter(x => x.id !== tmpId)); notifyError(t('common:actionFailed')) })
+      // Audit R1 🔴: the optimistic row's object URL leaked on every upload — revoke it
+      // the moment the server doc replaces (or the failure drops) the temp row.
+      .then(res => { const saved = unwrap<EntityDoc>(res); if (objectUrl) URL.revokeObjectURL(objectUrl); setDocs(d => d.map(x => x.id === tmpId ? { ...saved, size: fmtSize(saved.size) } : x)) })
+      .catch(() => { if (objectUrl) URL.revokeObjectURL(objectUrl); setDocs(d => d.filter(x => x.id !== tmpId)); notifyError(t('common:actionFailed')) })
   }, [prefix, parentId, t])
 
   // Rename — optimistic, reverts on failure. A temp (not-yet-persisted) row skips the PATCH.
