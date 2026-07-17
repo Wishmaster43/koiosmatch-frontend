@@ -33,10 +33,10 @@
     "ownerTitle": "Recruiter",
     "clientTitle": "Klant",
     "publishedTitle": "Gepubliceerd",
+    "categoryTitle": "Functie",
     "clearFilter": "Filter wissen",
     "noStatus": "Geen status",
-    "unknownStatus": "Onbekend",
-    "publishedPageScopeNotice": "Het aantal (niet) gepubliceerd is gebaseerd op de geladen pagina — er is nog geen serverbrede uitsplitsing beschikbaar."
+    "unknownStatus": "Onbekend"
   },
   "kpi": {
     "applied": "Gesolliciteerd",
@@ -151,6 +151,8 @@
       "conditions": "Voorwaarden"
     },
     "id": "Vacature-ID",
+    "startDate": "Startdatum",
+    "endDate": "Einddatum",
     "status": "Status",
     "contractType": "Contractvorm",
     "employmentType": "Soort dienstverband",
@@ -294,6 +296,8 @@
       "title": "Titel",
       "description": "Beschrijving",
       "vacancy_status_id": "Status",
+      "start_date": "Startdatum",
+      "end_date": "Einddatum",
       "employment_type": "Soort dienstverband",
       "industry": "Branche",
       "function_title": "Functie",

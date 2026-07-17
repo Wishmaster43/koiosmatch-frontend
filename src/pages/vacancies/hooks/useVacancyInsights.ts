@@ -22,6 +22,12 @@ interface VacancyStatsShape {
   by_owner?: Array<{ id?: Id; owner_id?: Id; name?: string; count?: number }>
   by_client?: Array<{ id?: Id; customer_id?: Id; name?: string; count?: number }>
   by_phase?: Array<{ value?: string; phase?: string; count?: number }> | Record<string, number>
+  // V27: server-wide published/concept split (was FE page-scope only).
+  by_published?: Array<{ value?: boolean; count?: number }>
+  // V28: counts per shared /functions name (function_title); null (no function set)
+  // arrives as its own resolved bucket (label 'Geen functie') — see categoryData below
+  // for why the FE never makes that particular bucket clickable.
+  by_category?: Array<{ value?: string | null; label?: string; count?: number }>
 }
 
 interface Args {
@@ -30,13 +36,12 @@ interface Args {
   // of the vacancy data layer (the /vacancies/stats endpoint is still settling).
   stats: Record<string, unknown> | null
   vacancies: Vacancy[]
-  total: number
   statuses: VacancyLookupItem[]
   statusMeta: (v?: string | null) => VacancyLookupItem
   t: TFunction
 }
 
-export function useVacancyInsights({ stats, vacancies, total, statuses, statusMeta, t }: Args) {
+export function useVacancyInsights({ stats, vacancies, statuses, statusMeta, t }: Args) {
   const s = stats as VacancyStatsShape | null
   // ── Donut data (status / owner / client / published) — stats first, page-derived fallback ──
   const statusData = useMemo<Aggregate[]>(() => {
@@ -52,18 +57,43 @@ export function useVacancyInsights({ stats, vacancies, total, statuses, statusMe
     return statuses.map(st => ({ name: st.label, key: st.value, color: st.color, value: vacancies.filter(v => v.statusValue === st.value).length })).filter(d => d.value > 0)
   }, [s, statuses, vacancies, statusMeta, t])
 
-  // V27: Gepubliceerd/Niet-gepubliceerd donut. /vacancies/stats has no by_published
-  // aggregate yet (mirrors by_status would need the same treatment — ticket filed),
-  // so — same fallback owner/client already use when their stats slice is missing —
-  // this counts the loaded page; `publishedNotice` below says so when that's partial.
+  // V27 fix: /vacancies/stats now returns a server-wide by_published aggregate
+  // (VacancyQuery::stats), so this is a real count honouring every active filter —
+  // the STATS-OOM-1 page-scope honesty notice is gone (no longer needed/lying).
+  // Page-scope fallback stays only for a stats fetch that hasn't resolved yet /
+  // an old-shape response (never crash, never lie).
   const publishedData = useMemo<Aggregate[]>(() => {
+    if (s?.by_published) {
+      return s.by_published
+        .map(o => ({
+          name: o.value ? t('publishedState.yes') : t('publishedState.no'),
+          key: o.value ? 'published' : 'unpublished',
+          color: o.value ? 'var(--color-success)' : '#9CA3AF',
+          value: o.count ?? 0,
+        }))
+        .filter(d => d.value > 0)
+    }
     const publishedCount = vacancies.filter(v => v.published).length
     const unpublishedCount = vacancies.length - publishedCount
     const out: Aggregate[] = []
     if (publishedCount > 0)   out.push({ name: t('publishedState.yes'), key: 'published',   color: 'var(--color-success)', value: publishedCount })
     if (unpublishedCount > 0) out.push({ name: t('publishedState.no'),  key: 'unpublished', color: '#9CA3AF',              value: unpublishedCount })
     return out
-  }, [vacancies, t])
+  }, [s, vacancies, t])
+
+  // V28: functie donut — counts per shared /functions name (function_title), server-
+  // wide and filter-honouring. The null/"Geen functie" bucket has no dedicated
+  // `no_category` query param (unlike status' `no_status`), so — mirroring how
+  // owner/client already drop a null-id bucket from THEIR clickable donuts — it is
+  // left out here rather than wiring a click that would silently return zero rows.
+  // No page-scope fallback: function_title isn't on the list row (VacancyListResource),
+  // only the stats aggregate carries it, so an empty stats response means an empty donut.
+  const categoryData = useMemo<Aggregate[]>(() => {
+    if (!s?.by_category) return []
+    return s.by_category
+      .filter(o => o.value != null && o.value !== '')
+      .map(o => ({ name: o.label || String(o.value), key: String(o.value), value: o.count ?? 0 }))
+  }, [s])
 
   const ownerData = useMemo<Aggregate[]>(() => {
     if (s?.by_owner) return s.by_owner.map(o => ({ name: o.name || '—', key: String(o.id ?? o.owner_id ?? ''), value: o.count ?? 0 })).filter(o => o.key !== '')
@@ -90,9 +120,5 @@ export function useVacancyInsights({ stats, vacancies, total, statuses, statusMe
     return acc
   }, [s, vacancies])
 
-  // Data-honesty (STATS-OOM-1): the published donut has no server-wide aggregate yet,
-  // so it only ever reflects the loaded page — say so when there's more data than that.
-  const publishedNotice = total > vacancies.length ? t('insights.publishedPageScopeNotice') : undefined
-
-  return { statusData, ownerData, clientData, publishedData, phaseCounts, publishedNotice }
+  return { statusData, ownerData, clientData, publishedData, categoryData, phaseCounts }
 }

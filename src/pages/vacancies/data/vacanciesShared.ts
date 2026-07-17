@@ -104,6 +104,9 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('hoursMax'        in patch) body.hours_max          = patch.hoursMax
   if ('description'     in patch) body.description        = patch.description
   if ('skills'          in patch) body.skills             = patch.skills
+  // VAC-DATES-1: the vacancy's own runtime window (validated after_or_equal:start_date BE-side).
+  if ('startDate'       in patch) body.start_date         = patch.startDate
+  if ('endDate'         in patch) body.end_date           = patch.endDate
   // Extra tab — per-vacancy custom-field values map.
   if ('customFieldValues' in patch) body.custom_fields    = patch.customFieldValues
   return body

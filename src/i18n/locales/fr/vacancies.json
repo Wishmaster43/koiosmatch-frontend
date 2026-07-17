@@ -33,10 +33,10 @@
     "ownerTitle": "Recruteur",
     "clientTitle": "Client",
     "publishedTitle": "Publié",
+    "categoryTitle": "Fonction",
     "clearFilter": "Effacer le filtre",
     "noStatus": "Sans statut",
-    "unknownStatus": "Inconnu",
-    "publishedPageScopeNotice": "Le nombre publié/non publié est basé sur la page chargée — une ventilation à l'échelle du serveur n'est pas encore disponible."
+    "unknownStatus": "Inconnu"
   },
   "kpi": {
     "applied": "Postulé",
@@ -151,6 +151,8 @@
       "location": "Lieu"
     },
     "id": "ID du poste",
+    "startDate": "Date de début",
+    "endDate": "Date de fin",
     "status": "Statut",
     "employmentType": "Type de contrat",
     "location": "Site",
@@ -294,6 +296,8 @@
       "title": "Titre",
       "description": "Description",
       "vacancy_status_id": "Statut",
+      "start_date": "Date de début",
+      "end_date": "Date de fin",
       "employment_type": "Type de contrat",
       "industry": "Secteur",
       "function_title": "Fonction",

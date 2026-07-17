@@ -52,6 +52,14 @@ export interface Vacancy {
   lat: number | null
   lng: number | null
   distanceKm: number | null
+  // VAC-DATES-1: the vacancy's own runtime window (YYYY-MM-DD, native <input type="date">
+  // shape) — present on both the list AND detail resource, so it lives on the base row.
+  startDate: string
+  endDate: string
+  // Archive state (soft-delete) — mirrors the candidate's archived/archivedAt pair so
+  // the table can render the same soft "Gearchiveerd" chip when include_archived=1.
+  archived: boolean
+  archivedAt: string | null
 }
 
 /** The enriched vacancy model rendered by the drawer tabs. */
@@ -148,6 +156,12 @@ export interface ApiVacancy {
   tags?: unknown[]
   created_at?: string
   createdAt?: string
+  // VAC-DATES-1: the vacancy's own runtime window (both list + detail resources).
+  start_date?: string | null
+  end_date?: string | null
+  // Archive state (soft-delete) — VacancyListResource always sends both.
+  archived?: boolean
+  deleted_at?: string | null
   // detail
   employment_type?: unknown
   employment_type_label?: string

@@ -6,6 +6,7 @@ import { useLookups } from '@/context/LookupsContext'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useIndustries } from '@/lib/useIndustries'
 import { useFunctions } from '@/lib/useFunctions'
+import { useDateFormat } from '@/lib/datetime'
 import { useCustomerOptions } from '../hooks/useCustomerOptions'
 import { useCascadePickers } from '../hooks/useCascadePickers'
 import CreatableSelect from '@/components/ui/CreatableSelect'
@@ -24,6 +25,8 @@ const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
 type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 type TextKey = 'category' | 'industry' | 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city'
   | 'province' | 'experienceMin' | 'experienceMax' | 'seniority' | 'education' | 'salaryMin' | 'salaryMax' | 'hoursMin' | 'hoursMax'
+  // VAC-DATES-1: the vacancy's own runtime window (native <input type="date">, YYYY-MM-DD).
+  | 'startDate' | 'endDate'
 type Form = Record<TextKey, string>
 // V4-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade — one
 // picked {id,name} per step (VAC-CASCADE-1: seeded from the detail, persisted for real).
@@ -51,12 +54,15 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
   const { seniorityLevels, educationLevels } = useVacancyLookups()
   const { industries } = useIndustries()
   const { functions } = useFunctions() as { functions: Array<string | { value: string; label?: string }> }
+  const { formatDate } = useDateFormat()
 
   const seedForm = (): Form => ({
     category: v.category, industry: v.industry,
     street: v.street, houseNumber: v.houseNumber, houseNumberSuffix: v.houseNumberSuffix, postalCode: v.postalCode, city: v.city, province: v.province,
     experienceMin: v.experienceMin, experienceMax: v.experienceMax, seniority: v.seniorityValue, education: v.educationValue,
     salaryMin: v.salaryMin, salaryMax: v.salaryMax, hoursMin: v.hoursMin, hoursMax: v.hoursMax,
+    // VAC-DATES-1: seed from the raw YYYY-MM-DD strings the detail already carries.
+    startDate: v.startDate, endDate: v.endDate,
   })
   const skillStr = (s: unknown): string => (typeof s === 'string' ? s : ((s as { name?: string; label?: string })?.name ?? (s as { label?: string })?.label ?? ''))
   const [editing, setEditing] = useState(false)
@@ -126,6 +132,8 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
       seniorityValue: form.seniority, seniority: sen?.label ?? '', educationValue: form.education, education: edu?.label ?? '',
       salaryMin: form.salaryMin, salaryMax: form.salaryMax, hoursMin: form.hoursMin, hoursMax: form.hoursMax, salary, hours,
       skills,
+      // VAC-DATES-1: runtime window (BE validates end_date after_or_equal:start_date).
+      startDate: form.startDate, endDate: form.endDate,
     })
     setSavedCascade(cascade)
     setEditing(false)
@@ -172,6 +180,11 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
   )
   const pair = (min: string, max: string, suffix?: string) => { const s = [min, max].filter(Boolean).join(' – '); return s ? `${s}${suffix ? ` ${suffix}` : ''}` : '' }
   const twoInputs = (a: TextKey, b: TextKey, pa: string, pb: string) => <div style={{ display: 'flex', gap: 6 }}>{text(a, pa)}{text(b, pb)}</div>
+  // VAC-DATES-1: native date inputs (form values are already YYYY-MM-DD) paired
+  // half-row, mirroring the houseNumber/houseNumberSuffix convention above.
+  const dateInput = (k: TextKey) => <input type="date" value={form[k]} onChange={e => setF(k, e.target.value)} style={inputStyle} />
+  const twoDates = (a: TextKey, b: TextKey) => <div style={{ display: 'flex', gap: 6 }}>{dateInput(a)}{dateInput(b)}</div>
+  const dateRange = (a: string, b: string) => { const s = [a, b].filter(Boolean).map(d => formatDate(d)); return s.join(' – ') }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -208,6 +221,10 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
             })}
           </div>)}
         {row(t('details.id'), <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>, <span style={{ color: 'var(--text-muted)' }}>{v.code || '—'}</span>)}
+        {/* VAC-DATES-1: the vacancy's own runtime window — start_date AND end_date
+            (validated after_or_equal:start_date server-side), paired half-row like
+            houseNumber/houseNumberSuffix below. */}
+        {row(`${t('details.startDate')} / ${t('details.endDate')}`, dateRange(v.startDate, v.endDate) || dash, twoDates('startDate', 'endDate'))}
         {/* V3: client — searchable (was a plain <select>). Picking a different client
             resets the dependent locatie/afdeling/contactpersoon picks below. */}
         {row(t('drawer.client'),

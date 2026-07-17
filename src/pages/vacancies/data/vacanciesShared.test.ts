@@ -8,7 +8,7 @@
  * copy — "Geen status" is reserved for a literal null value.
  */
 import { describe, it, expect } from 'vitest'
-import { resolveStatusSegment } from './vacanciesShared'
+import { resolveStatusSegment, buildVacancyPatch } from './vacanciesShared'
 
 const statusMeta = (v: string) => (v === 's1' ? { label: 'Open', color: '#79B58E' } : {})
 const NO_STATUS = 'Geen status'
@@ -47,5 +47,22 @@ describe('resolveStatusSegment', () => {
   it('never leaks the raw uuid as the display name', () => {
     const seg = resolveStatusSegment({ value: '3f2b1c4d-0000-0000-0000-000000000000', count: 1 }, statusMeta, new Map(), NO_STATUS, UNKNOWN)
     expect(seg.name).toBe(UNKNOWN)
+  })
+})
+
+// VAC-DATES-1: the runtime-window rows persist through the same generic UI-patch →
+// API-body mapping the rest of DetailsTab uses (buildVacancyPatch), reused verbatim
+// by the application drawer's VacancyTab (S20) — so this one mapping backs both.
+describe('buildVacancyPatch · runtime window (VAC-DATES-1)', () => {
+  it('maps startDate/endDate to the API snake_case fields', () => {
+    const body = buildVacancyPatch({ startDate: '2026-01-01', endDate: '2026-06-30' })
+    expect(body).toEqual({ start_date: '2026-01-01', end_date: '2026-06-30' })
+  })
+
+  it('omits start_date/end_date entirely when absent from the patch (partial saves)', () => {
+    const body = buildVacancyPatch({ title: 'New title' })
+    expect(body).toEqual({ title: 'New title' })
+    expect(body).not.toHaveProperty('start_date')
+    expect(body).not.toHaveProperty('end_date')
   })
 })

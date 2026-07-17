@@ -33,10 +33,10 @@
     "ownerTitle": "Reclutador",
     "clientTitle": "Cliente",
     "publishedTitle": "Publicada",
+    "categoryTitle": "Función",
     "clearFilter": "Borrar filtro",
     "noStatus": "Sin estado",
-    "unknownStatus": "Desconocido",
-    "publishedPageScopeNotice": "El recuento de publicada/no publicada se basa en la página cargada — todavía no hay un desglose a nivel de servidor disponible."
+    "unknownStatus": "Desconocido"
   },
   "kpi": {
     "applied": "Postulado",
@@ -151,6 +151,8 @@
       "location": "Ubicación"
     },
     "id": "ID de vacante",
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de fin",
     "status": "Estado",
     "employmentType": "Tipo de contrato",
     "location": "Ubicación",
@@ -294,6 +296,8 @@
       "title": "Título",
       "description": "Descripción",
       "vacancy_status_id": "Estado",
+      "start_date": "Fecha de inicio",
+      "end_date": "Fecha de fin",
       "employment_type": "Tipo de contrato",
       "industry": "Sector",
       "function_title": "Función",

@@ -65,6 +65,9 @@ export default function VacanciesTable({ rows, loading, selectedId, onSelect, se
     {
       key: 'status', header: t('columns.status'), sortable: true, sortValue: r => r.statusLabel || (r.statusValue ?? ''),
       render: r => {
+        // Archive state wins over the status pill (mirrors CandidatesTable): a soft-
+        // deleted row shown via include_archived=1 reads as "Archived", not its stale status.
+        if (r.archived) return <SoftChip label={t('page.archivedView')} color="var(--text-muted)" round />
         // Prefer the resolved label/colour from the row; fall back to the lookup.
         const m = r.statusLabel ? { label: r.statusLabel, color: r.statusColor } : statusMeta(r.statusValue != null ? String(r.statusValue) : null)
         if (!m.label) return <span style={{ color: 'var(--text-muted)' }}>—</span>

@@ -68,6 +68,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const [statusBucket,   setStatusBucket]   = usePageMemory('vac.status', 'all')
   const [selectedOwner,  setSelectedOwner]  = usePageMemory<string[]>('vac.owner', [])
   const [selectedClient, setSelectedClient] = usePageMemory<string[]>('vac.client', [])
+  // V28: functie filter — the by_category donut's click-to-filter target (existing
+  // BE `category[]` param, VacancyQuery::filtered()).
+  const [selectedCategory, setSelectedCategory] = usePageMemory<string[]>('vac.category', [])
   const [globalSearch,   setGlobalSearch]   = usePageMemory('vac.search', '')
   const [showArchived,   setShowArchived]   = usePageMemory('vac.archived', false)
   // V27: Gepubliceerd/Niet-gepubliceerd — a real server-side filter (VacancyQuery::
@@ -100,6 +103,8 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     else if (statusBucket !== 'all') p.status    = [statusBucket]
     if (selectedOwner.length)   p.owner_id    = selectedOwner
     if (selectedClient.length)  p.customer_id = selectedClient
+    // V28: functie donut filter — VacancyQuery::filtered() already whereIn's on function_title.
+    if (selectedCategory.length) p.category  = selectedCategory
     if (showArchived)           p.include_archived = 1
     // V27: server-side published/unpublished filter (honoured by both the list and
     // stats). Laravel's `boolean` rule only accepts true/false/0/1/'0'/'1' — NOT the
@@ -110,7 +115,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     // Map view narrows the list server-side to the chosen circle (STRAAL-1).
     if (view === 'map' && mapStraalActive) { p.lat = mapCenter.lat; p.lng = mapCenter.lng; p.radius = mapRadius }
     return p
-  }, [globalSearch, statusBucket, selectedOwner, selectedClient, showArchived, publishedBucket, view, mapCenter, mapRadius, mapStraalActive])
+  }, [globalSearch, statusBucket, selectedOwner, selectedClient, selectedCategory, showArchived, publishedBucket, view, mapCenter, mapRadius, mapStraalActive])
   const filterKey = JSON.stringify(filterParams)
 
   // Filters changed → back to page 1; the visible rows change → drop the selection.
@@ -145,23 +150,25 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
     close: closeDrawer, intent,
   })
 
-  // ── Insights derivation (status/owner/client/published donuts + phase KPI counts) ──
-  const { statusData, ownerData, clientData, publishedData, phaseCounts, publishedNotice } =
-    useVacancyInsights({ stats, vacancies, total, statuses, statusMeta, t })
+  // ── Insights derivation (status/owner/client/category/published donuts + phase KPI counts) ──
+  const { statusData, ownerData, clientData, publishedData, categoryData, phaseCounts } =
+    useVacancyInsights({ stats, vacancies, statuses, statusMeta, t })
 
   // Option lists for the right-panel filters.
-  const ownerOptions  = useMemo(() => ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })), [ownerData])
-  const clientOptions = useMemo(() => clientData.map(d => ({ value: d.key, label: d.name, count: d.value })), [clientData])
+  const ownerOptions    = useMemo(() => ownerData.map(d => ({ value: d.key, label: d.name, count: d.value })), [ownerData])
+  const clientOptions   = useMemo(() => clientData.map(d => ({ value: d.key, label: d.name, count: d.value })), [clientData])
+  const categoryOptions = useMemo(() => categoryData.map(d => ({ value: d.key, label: d.name, count: d.value })), [categoryData])
 
   const tog = (set: Dispatch<SetStateAction<string[]>>) => (v: string) => set(p => p.includes(v) ? p.filter(x => x !== v) : [...p, v])
   const pickOne = (set: Dispatch<SetStateAction<string[]>>) => (v: string | undefined) => { if (v != null) toggleOneValue(set, v) }
 
-  // Register the right-panel filters (owner + client; status is the tab bar).
+  // Register the right-panel filters (owner + client + functie; status is the tab bar).
   const catOrg = t('filters.categories.organisation')
   const filterGroups = useMemo(() => [
-    { key: 'owner',  type: 'search-select', category: catOrg, label: t('filters.owner'),  selected: selectedOwner,  options: ownerOptions,  onToggle: tog(setSelectedOwner) },
-    { key: 'client', type: 'search-select', category: catOrg, label: t('filters.client'), selected: selectedClient, options: clientOptions, onToggle: tog(setSelectedClient) },
-  ], [t, catOrg, selectedOwner, selectedClient, ownerOptions, clientOptions])
+    { key: 'owner',    type: 'search-select', category: catOrg, label: t('filters.owner'),    selected: selectedOwner,    options: ownerOptions,    onToggle: tog(setSelectedOwner) },
+    { key: 'client',   type: 'search-select', category: catOrg, label: t('filters.client'),   selected: selectedClient,   options: clientOptions,   onToggle: tog(setSelectedClient) },
+    { key: 'category', type: 'search-select', category: catOrg, label: t('filters.category'), selected: selectedCategory, options: categoryOptions, onToggle: tog(setSelectedCategory) },
+  ], [t, catOrg, selectedOwner, selectedClient, selectedCategory, ownerOptions, clientOptions, categoryOptions])
 
   useEffect(() => {
     registerFilters('vacancies-page', filterGroups)
@@ -179,6 +186,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
       active: statusBucket !== 'all', onClear: () => setStatusBucket('all') },
     { key: 'owner',  title: t('insights.ownerTitle'),  data: ownerData,  onPick: d => pickOne(setSelectedOwner)(pickKey(d)),  active: selectedOwner.length > 0,  onClear: () => setSelectedOwner([]) },
     { key: 'client', title: t('insights.clientTitle'), data: clientData, onPick: d => pickOne(setSelectedClient)(pickKey(d)), active: selectedClient.length > 0, onClear: () => setSelectedClient([]) },
+    // V28: functie donut — server-wide by_category aggregate, click-to-filter onto
+    // the existing category[] param (§3A equal-footprint note: this is the row's
+    // 5th donut — see the report for the footprint deviation vs. candidates' 3).
+    { key: 'category', title: t('insights.categoryTitle'), data: categoryData,
+      onPick: d => pickOne(setSelectedCategory)(pickKey(d)), active: selectedCategory.length > 0, onClear: () => setSelectedCategory([]) },
     // V27: click a segment → publishedBucket ('published'/'unpublished'); click again clears.
     { key: 'published', title: t('insights.publishedTitle'), data: publishedData,
       onPick: d => { const k = pickKey(d); setPublishedBucket(prev => (prev === k ? 'all' : (k === 'published' || k === 'unpublished' ? k : 'all'))) },
@@ -186,11 +198,11 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   ]
   // Shared clear-all (page memory keeps filters sticky).
   const anyFilterActive = Boolean(globalSearch.trim() || showArchived || statusBucket !== 'all'
-    || selectedOwner.length || selectedClient.length || publishedBucket !== 'all')
+    || selectedOwner.length || selectedClient.length || selectedCategory.length || publishedBucket !== 'all')
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
     setSearchEpoch(e => e + 1); setGlobalSearch(''); setShowArchived(false); setStatusBucket('all')
-    setSelectedOwner([]); setSelectedClient([]); setPublishedBucket('all'); setPage(1)
+    setSelectedOwner([]); setSelectedClient([]); setSelectedCategory([]); setPublishedBucket('all'); setPage(1)
   }
 
   // Funnel counts are APPLICATION numbers — clicking jumps to Sollicitaties with that
@@ -209,8 +221,9 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
       <div style={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          {/* KPI block: donuts + funnel-phase KPI cards */}
-          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} notice={publishedNotice} />
+          {/* KPI block: donuts + funnel-phase KPI cards. V27: the published donut is now
+              a real server-wide aggregate, so no more STATS-OOM-1 honesty notice here. */}
+          <InsightsRow donuts={insightDonuts} kpis={insightKpis} clearTitle={t('insights.clearFilter')} />
 
           {/* Add/bulk on the left (like Candidates/Applications); status tabs pushed right */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',

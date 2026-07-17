@@ -33,10 +33,10 @@
     "ownerTitle": "Recruiter",
     "clientTitle": "Client",
     "publishedTitle": "Published",
+    "categoryTitle": "Function",
     "clearFilter": "Clear filter",
     "noStatus": "No status",
-    "unknownStatus": "Unknown",
-    "publishedPageScopeNotice": "The published/unpublished count is based on the loaded page — a server-wide breakdown isn't available yet."
+    "unknownStatus": "Unknown"
   },
   "kpi": {
     "applied": "Applied",
@@ -151,6 +151,8 @@
       "conditions": "Conditions"
     },
     "id": "Vacancy ID",
+    "startDate": "Start date",
+    "endDate": "End date",
     "status": "Status",
     "contractType": "Contract type",
     "employmentType": "Employment type",
@@ -294,6 +296,8 @@
       "title": "Title",
       "description": "Description",
       "vacancy_status_id": "Status",
+      "start_date": "Start date",
+      "end_date": "End date",
       "employment_type": "Employment type",
       "industry": "Industry",
       "function_title": "Function",

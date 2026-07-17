@@ -33,6 +33,40 @@ describe('mapVacancy', () => {
     expect(row.applicationsCount).toBe(0)
     expect(row.owner.initials).toBe('?')
   })
+
+  // VAC-DATES-1: start_date/end_date now ship on the list resource too (both
+  // already YYYY-MM-DD via Carbon::toDateString(), the exact <input type="date"> shape).
+  it('maps the runtime window (start_date/end_date)', () => {
+    const row = mapVacancy({ id: 'v3', start_date: '2026-01-01', end_date: '2026-06-30' })
+    expect(row.startDate).toBe('2026-01-01')
+    expect(row.endDate).toBe('2026-06-30')
+  })
+
+  it('defaults startDate/endDate to empty strings when never set', () => {
+    const row = mapVacancy({ id: 'v4' })
+    expect(row.startDate).toBe('')
+    expect(row.endDate).toBe('')
+  })
+
+  // Archive state: VacancyListResource always sends both `archived` (bool) and
+  // `deleted_at` (iso) — mirror candidates so the include_archived=1 view can
+  // render the soft "Gearchiveerd" chip.
+  it('maps the archive state from the resource\'s own `archived` flag', () => {
+    const row = mapVacancy({ id: 'v5', archived: true, deleted_at: '2026-07-01T10:00:00Z' })
+    expect(row.archived).toBe(true)
+    expect(row.archivedAt).toBe('2026-07-01T10:00:00Z')
+  })
+
+  it('derives archived from deleted_at when the archived flag is absent (defensive)', () => {
+    const row = mapVacancy({ id: 'v6', deleted_at: '2026-07-01T10:00:00Z' })
+    expect(row.archived).toBe(true)
+  })
+
+  it('defaults to not-archived / null archivedAt on a live vacancy', () => {
+    const row = mapVacancy({ id: 'v7' })
+    expect(row.archived).toBe(false)
+    expect(row.archivedAt).toBeNull()
+  })
 })
 
 describe('mapVacancyDetail', () => {

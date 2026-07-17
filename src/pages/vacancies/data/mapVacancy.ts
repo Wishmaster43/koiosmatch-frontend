@@ -51,6 +51,14 @@ export function mapVacancy(v: ApiVacancy = {}): Vacancy {
     lat: typeof v.lat === 'number' ? v.lat : null,
     lng: typeof v.lng === 'number' ? v.lng : null,
     distanceKm: typeof v.distance_km === 'number' ? v.distance_km : null,
+    // VAC-DATES-1: runtime window, already YYYY-MM-DD (Carbon::toDateString()) —
+    // the exact shape a native <input type="date"> reads/writes.
+    startDate: v.start_date ?? '',
+    endDate: v.end_date ?? '',
+    // Archive state (soft-delete) — the FE archived-toggle (include_archived=1)
+    // surfaces these rows; mirror candidates so the row renders the soft chip.
+    archived: Boolean(v.archived ?? (v.deleted_at != null)),
+    archivedAt: v.deleted_at ?? null,
   }
 }
 

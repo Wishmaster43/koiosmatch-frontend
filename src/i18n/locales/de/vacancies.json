@@ -33,10 +33,10 @@
     "ownerTitle": "Recruiter",
     "clientTitle": "Kunde",
     "publishedTitle": "Veröffentlicht",
+    "categoryTitle": "Funktion",
     "clearFilter": "Filter zurücksetzen",
     "noStatus": "Kein Status",
-    "unknownStatus": "Unbekannt",
-    "publishedPageScopeNotice": "Die Anzahl (nicht) veröffentlicht basiert auf der geladenen Seite — eine serverweite Aufschlüsselung ist noch nicht verfügbar."
+    "unknownStatus": "Unbekannt"
   },
   "kpi": {
     "applied": "Beworben",
@@ -151,6 +151,8 @@
       "location": "Standort"
     },
     "id": "Stellen-ID",
+    "startDate": "Startdatum",
+    "endDate": "Enddatum",
     "status": "Status",
     "employmentType": "Beschäftigungsart",
     "location": "Standort",
@@ -294,6 +296,8 @@
       "title": "Titel",
       "description": "Beschreibung",
       "vacancy_status_id": "Status",
+      "start_date": "Startdatum",
+      "end_date": "Enddatum",
       "employment_type": "Beschäftigungsart",
       "industry": "Branche",
       "function_title": "Funktion",
