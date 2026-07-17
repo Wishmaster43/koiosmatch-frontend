@@ -54,4 +54,45 @@ describe('mapVacancyDetail', () => {
     expect(detail.channels[0]).toMatchObject({ value: 'career', published: true })
     expect(detail.applications[0]).toMatchObject({ candidateName: 'Rosa Tijssen', candidateInitials: 'RT', phaseValue: 'hired' })
   })
+
+  // CHANNEL-ICON-1: the merged channel's stable key + icon ride along so
+  // channelIcons.ts can map exactly instead of heuristically matching the label.
+  it('carries the channel key + icon through', () => {
+    const detail = mapVacancyDetail({
+      id: 'v1', title: 'Test',
+      channels: [{ value: 'ch1', key: 'indeed', icon: 'briefcase', label: 'Indeed', published: true }],
+    })
+    expect(detail.channels[0]).toMatchObject({ key: 'indeed', icon: 'briefcase', published: true })
+  })
+
+  it('never crashes when a channel has no key/icon yet (pre-CHANNEL-ICON-1 row)', () => {
+    const detail = mapVacancyDetail({ id: 'v1', channels: [{ value: 'ch1', label: 'Indeed', published: false }] })
+    expect(detail.channels[0].key).toBeUndefined()
+    expect(detail.channels[0].icon).toBeUndefined()
+  })
+
+  // VAC-CASCADE-1 (backend wave 6): the persisted klant → locatie → afdeling →
+  // contactpersoon cascade — ids + resolved {id,name} seed the in-place editor.
+  it('seeds the customer cascade ids + resolved names from the detail', () => {
+    const detail = mapVacancyDetail({
+      id: 'v1', title: 'Test',
+      customer_location_id: 'loc1', customer_location: { id: 'loc1', name: 'Locatie Assen' },
+      customer_department_id: 'dep1', customer_department: { id: 'dep1', name: 'Afdeling A' },
+      contact_id: 'con1', contact: { id: 'con1', name: 'Petra de Boer' },
+    })
+    expect(detail).toMatchObject({
+      customerLocationId: 'loc1', customerLocationName: 'Locatie Assen',
+      customerDepartmentId: 'dep1', customerDepartmentName: 'Afdeling A',
+      contactId: 'con1', contactName: 'Petra de Boer',
+    })
+  })
+
+  it('the customer cascade defaults to empty strings when never picked', () => {
+    const detail = mapVacancyDetail({ id: 'v1' })
+    expect(detail).toMatchObject({
+      customerLocationId: '', customerLocationName: '',
+      customerDepartmentId: '', customerDepartmentName: '',
+      contactId: '', contactName: '',
+    })
+  })
 })

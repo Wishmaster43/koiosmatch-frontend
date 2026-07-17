@@ -16,7 +16,10 @@ export interface VacancyOwner {
 /** A raw job-board channel item (used by base + detail). */
 export interface ApiChannel {
   value?: string | number
+  // CHANNEL-ICON-1: the stable machine key + icon name so the FE maps publish
+  // icons exactly (channelIcons.ts), never a heuristic on the editable label.
   key?: string | number
+  icon?: string
   id?: Id
   label?: string
   name?: string
@@ -88,7 +91,16 @@ export interface VacancyDetail extends Vacancy {
   // MATCH-TEMPLATE-1: provenance only — which template these weights were last
   // snapshotted from (null = never assigned / cleared by a manual override).
   matchWeightTemplateId: string | null
-  channels: Array<{ value: string | number | undefined; label: string; published: boolean }>
+  // VAC-CASCADE-1: klant → locatie → afdeling → contactpersoon — ids for the in-place
+  // editor's pickers, resolved display names for read-mode (seeded from the detail so
+  // a saved pick still shows after a reload, and cancel reverts to these).
+  customerLocationId: string
+  customerLocationName: string
+  customerDepartmentId: string
+  customerDepartmentName: string
+  contactId: string
+  contactName: string
+  channels: Array<{ value: string | number | undefined; label: string; published: boolean; key?: string; icon?: string }>
   applications: Array<{
     id: Id | undefined; candidateId: Id | null; candidateName: string; candidateInitials: string
     phaseValue: string | number | null; phaseLabel: string; phaseColor: string; source: string; created: string
@@ -185,5 +197,12 @@ export interface ApiVacancy {
   documents?: Array<{ id?: Id; name?: string; size?: unknown }>
   timeline?: Array<{ id?: Id; author?: string; author_initials?: string; description?: string; ai?: unknown; created_at?: string; time?: string }>
   notes?: Array<{ id?: Id; author?: string; text?: string; created_at?: string }>
+  // VAC-CASCADE-1: klant → locatie → afdeling → contactpersoon — ids + resolved {id,name}.
+  customer_location_id?: Id
+  customer_location?: { id?: Id; name?: string } | null
+  customer_department_id?: Id
+  customer_department?: { id?: Id; name?: string } | null
+  contact_id?: Id
+  contact?: { id?: Id; name?: string } | null
   [k: string]: unknown
 }

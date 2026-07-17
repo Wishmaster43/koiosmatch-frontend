@@ -126,6 +126,15 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     category: labelOf(raw.function) || raw.category || raw.function_title || '',
     skills: raw.skills ?? [],
     description: raw.description ?? '',
+    // VAC-CASCADE-1 (backend wave 6): the persisted klant → locatie → afdeling →
+    // contactpersoon cascade — ids seed the in-place editor's pickers, names seed
+    // the read-mode rows (both empty when never picked).
+    customerLocationId: raw.customer_location_id != null ? String(raw.customer_location_id) : '',
+    customerLocationName: raw.customer_location?.name ?? '',
+    customerDepartmentId: raw.customer_department_id != null ? String(raw.customer_department_id) : '',
+    customerDepartmentName: raw.customer_department?.name ?? '',
+    contactId: raw.contact_id != null ? String(raw.contact_id) : '',
+    contactName: raw.contact?.name ?? '',
     // Per-vacancy application settings (cv/cover_letter/photo/remarks/interview_consent → required|optional|hidden).
     applicationSettings: raw.application_settings ?? {},
     // Per-vacancy AI matching weights (6 dimensions, int 1..5) for the Matching tab.
@@ -133,9 +142,11 @@ export function mapVacancyDetail(raw: ApiVacancy = {}): VacancyDetail {
     matchWeights: raw.match_weights ?? {},
     // MATCH-TEMPLATE-1: provenance only (snapshot semantics) — never a live link.
     matchWeightTemplateId: raw.match_weight_template_id ?? null,
-    // Job-board channels with their published state.
+    // Job-board channels with their published state. CHANNEL-ICON-1: key/icon ride
+    // along (undefined on a pre-migration row) so channelIcons.ts maps exactly.
     channels: (raw.channels ?? raw.published_channels ?? []).map(c => ({
       value: c.value ?? c.key ?? c.id, label: c.label ?? c.name ?? '', published: Boolean(c.published),
+      key: c.key != null ? String(c.key) : undefined, icon: c.icon ?? undefined,
     })),
     // Coupled applications (each links a real candidate at a funnel phase).
     applications: (raw.applications ?? []).map(a => {

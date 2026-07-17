@@ -25,11 +25,9 @@ type UpdateFn = (id: Id | undefined, patch: Record<string, unknown>) => void
 type TextKey = 'category' | 'industry' | 'street' | 'houseNumber' | 'houseNumberSuffix' | 'postalCode' | 'city'
   | 'province' | 'experienceMin' | 'experienceMax' | 'seniority' | 'education' | 'salaryMin' | 'salaryMax' | 'hoursMin' | 'hoursMax'
 type Form = Record<TextKey, string>
-
-// V4-V6 kill switch: the vacancies table has no customer_location_id/customer_department_id/
-// contact_id columns yet (VAC-CASCADE-1) — until the backend persists them, showing the
-// pickers would let an edit silently evaporate on reload. Flip to true when BE lands.
-const CASCADE_WRITE_SUPPORTED = false
+// V4-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade — one
+// picked {id,name} per step (VAC-CASCADE-1: seeded from the detail, persisted for real).
+type CascadeState = { locationId: string; locationName: string; departmentId: string; departmentName: string; contactId: string; contactName: string }
 
 const inputStyle: CSSProperties = { width: '100%', padding: '7px 10px', fontSize: 12, borderRadius: 6, border: '1px solid var(--border)', background: 'var(--input-bg)', color: 'var(--text)', boxSizing: 'border-box', outline: 'none' }
 const iconBtn: CSSProperties = { width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, cursor: 'pointer' }
@@ -66,14 +64,19 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
   // Client moved here from the drawer header (P3: calm header, max status+owner pickers).
   const [clientId, setClientId] = useState<string>(String(v.clientId ?? ''))
   const [types, setTypes] = useState<string[]>(v.contractTypes ?? [])
-  // V3-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade. No
-  // `v` field to seed from yet (measured: backend has no customer_location_id/
-  // customer_department_id/contact_id columns — see useCascadePickers docblock),
-  // so this starts empty and only tracks what was picked THIS session; `savedCascade`
-  // is the cancel-revert baseline (updated on save, not on every keystroke).
-  const emptyCascade = { locationId: '', locationName: '', departmentId: '', departmentName: '', contactId: '', contactName: '' }
-  const [savedCascade, setSavedCascade] = useState(emptyCascade)
-  const [cascade, setCascade] = useState(emptyCascade)
+  // V3-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade.
+  // VAC-CASCADE-1 (backend wave 6): the detail now carries the persisted ids +
+  // resolved names, so this seeds from `v` — read-mode shows the saved values on
+  // load/reload instead of always-empty; `savedCascade` is the cancel-revert
+  // baseline (updated on save, not on every keystroke).
+  const emptyCascade: CascadeState = { locationId: '', locationName: '', departmentId: '', departmentName: '', contactId: '', contactName: '' }
+  const seedCascade = (): CascadeState => ({
+    locationId: v.customerLocationId || '', locationName: v.customerLocationName || '',
+    departmentId: v.customerDepartmentId || '', departmentName: v.customerDepartmentName || '',
+    contactId: v.contactId || '', contactName: v.contactName || '',
+  })
+  const [savedCascade, setSavedCascade] = useState<CascadeState>(seedCascade)
+  const [cascade, setCascade] = useState<CascadeState>(seedCascade)
   // Picking a different client resets the dependent picks (cascade integrity).
   const handleClientChange = (id: string) => { setClientId(id); setCascade(emptyCascade) }
   const { locationPicker, departmentPicker, contactPicker } = useCascadePickers({
@@ -113,7 +116,8 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
     onUpdate?.(v.id, {
       // Client lives in Details now (header stays calm) — send the name too for optimistic UI.
       clientId, clientName: customerOptions.find(c => String(c.value) === clientId)?.label ?? v.clientName,
-      // V3-V6: best-effort — see buildVacancyPatch / useCascadePickers docblock.
+      // V3-V6 / VAC-CASCADE-1: persisted for real (buildVacancyPatch → customer_location_id/
+      // customer_department_id/contact_id, whitelisted in VacancyWriter's scalar passthrough).
       customerLocationId: cascade.locationId || null, customerDepartmentId: cascade.departmentId || null, contactId: cascade.contactId || null,
       contractTypes: types, category: form.category, industry: form.industry,
       street: form.street, houseNumber: form.houseNumber, houseNumberSuffix: form.houseNumberSuffix,
@@ -211,15 +215,12 @@ export default function DetailsTab({ vacancy: v, onUpdate }: { vacancy: VacancyD
           <CreatableSelect value={clientId || null} onChange={handleClientChange} allowCreate={false}
             placeholder={t('drawer.selectClient')} options={customerOptions.map(c => ({ value: String(c.value), label: c.label }))} />)}
         {/* V4-V6: locatie → afdeling → contactpersoon — optional, searchable cascade.
-            HIDDEN until the backend persists these (no customer_location_id/
-            customer_department_id/contact_id on vacancies yet — VAC-CASCADE-1): an
-            edit that silently evaporates on reload is a fake affordance. Flip the
-            constant + seed from `v` when the columns land. */}
-        {CASCADE_WRITE_SUPPORTED && (<>
-          {row(t('details.customerLocation'), cascade.locationName || dash, locationPicker)}
-          {row(t('details.customerDepartment'), cascade.departmentName || dash, departmentPicker)}
-          {row(t('details.contactPerson'), cascade.contactName || dash, contactPicker)}
-        </>)}
+            VAC-CASCADE-1: the backend persists customer_location_id/customer_department_id/
+            contact_id, so read-mode shows the saved name (or a dash) and the edit
+            survives a reload instead of silently evaporating. */}
+        {row(t('details.customerLocation'), cascade.locationName || dash, locationPicker)}
+        {row(t('details.customerDepartment'), cascade.departmentName || dash, departmentPicker)}
+        {row(t('details.contactPerson'), cascade.contactName || dash, contactPicker)}
         {row(t('details.function'), v.category || dash, select('category', fnOptions))}
         {row(t('details.preferredIndustry'), v.industry || dash, select('industry', industries.map(i => ({ value: i, label: i }))))}
       </>)}

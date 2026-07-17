@@ -32,13 +32,10 @@ export const buildVacancyPatch = (patch: Record<string, unknown>): Record<string
   if ('ownerId'             in patch) body.owner_id             = patch.ownerId
   if ('clientId'            in patch) body.customer_id          = patch.clientId
   // V3-V6 (VACATURES-100): klant → locatie → afdeling → contactpersoon cascade on the
-  // Algemeen card. MEASURED: UpdateVacancyRequest/VacancyWriter accept `customer_id`
-  // only — there are no customer_location_id/customer_department_id/contact_id columns
-  // on `vacancies` (only the unrelated bureau-branch `location_id`, see Vacancy::location()).
-  // Sent best-effort anyway (same "tolerated until BE ships the columns" precedent as
-  // MatchPlacementModal's /matches payload): validated() silently drops unknown keys, so
-  // this is harmless today and starts persisting the moment BE adds the columns — report
-  // to backend-Claude rather than silently building a feature that looks half-broken.
+  // Algemeen card. VAC-CASCADE-1 (backend wave 6): customer_location_id/
+  // customer_department_id/contact_id are real columns on `vacancies`, whitelisted
+  // in VacancyWriter's scalar passthrough — this persists for real (proven by
+  // VacancyCascadeTest's round-trip).
   if ('customerLocationId'   in patch) body.customer_location_id   = patch.customerLocationId
   if ('customerDepartmentId' in patch) body.customer_department_id = patch.customerDepartmentId
   if ('contactId'             in patch) body.contact_id             = patch.contactId

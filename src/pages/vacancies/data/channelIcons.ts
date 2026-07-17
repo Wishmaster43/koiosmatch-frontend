@@ -1,23 +1,42 @@
 import { Building2, Search, Briefcase, Users, Globe } from 'lucide-react'
 import type { ComponentType, CSSProperties } from 'react'
 
+type IconComponent = ComponentType<{ size?: number; style?: CSSProperties }>
+
 /**
- * channelIcon — a per-channel icon for the drawer header's published indicator (V2,
- * VACATURES-100), matched heuristically by the channel's (tenant-editable) label.
+ * channelIcon — the exact icon for a merged job-board channel (drawer header's
+ * published indicator), resolved from the backend's stable `icon`/`key` fields
+ * (CHANNEL-ICON-1: VacancyQuery::attachMergedChannels now sends both), never a
+ * heuristic on the tenant-editable display label.
  *
- * MEASURED: `vacancy_channels` HAS `icon`/`key` columns (create_vacancy_table.php),
- * but neither VacancyQuery::attachMergedChannels (channels_merged: value/label/
- * published only) nor VacancyLookupsContext.normalize() (value/label/color only)
- * expose them to the frontend today — so there is no tenant-driven icon/stable-key
- * to read here. This label-matching heuristic is a bounded, presentation-only
- * stand-in until backend-Claude wires `icon`/`key` through both; report as a
- * follow-up rather than hardcoding a slug→icon map keyed on an unstable uuid.
+ * Primary lookup is `icon` — a free-text lucide icon name (VacancyChannelController
+ * accepts any string up to 64 chars; VacancyLookupSeeder ships globe/search/
+ * briefcase). Falls back to the stable `key` (career_site/google_jobs/indeed/
+ * werkzoeken) for a row with no/unrecognised icon, e.g. a pre-CHANNEL-ICON-1 row
+ * seeded before the column existed (see VacancyChannelKeyTest's null-key case).
+ * A totally unknown channel gets a generic globe — never a blank/broken icon.
  */
-export function channelIcon(label: string): ComponentType<{ size?: number; style?: CSSProperties }> {
-  const l = label.toLowerCase()
-  if (l.includes('indeed')) return Briefcase
-  if (l.includes('google')) return Search
-  if (l.includes('werkzoeken') || l.includes('werk.nl')) return Users
-  if (l.includes('carri') || l.includes('career')) return Building2
+const ICONS_BY_NAME: Record<string, IconComponent> = {
+  globe: Globe,
+  search: Search,
+  briefcase: Briefcase,
+  building: Building2,
+  building2: Building2,
+  users: Users,
+}
+
+// Fallback keyed on the seed's stable machine key (VacancyLookupSeeder).
+const ICONS_BY_KEY: Record<string, IconComponent> = {
+  career_site: Globe,
+  google_jobs: Search,
+  indeed: Briefcase,
+  werkzoeken: Briefcase,
+}
+
+export function channelIcon(icon?: string | null, key?: string | number | null): IconComponent {
+  const byIcon = icon ? ICONS_BY_NAME[String(icon).toLowerCase().trim()] : undefined
+  if (byIcon) return byIcon
+  const byKey = key != null ? ICONS_BY_KEY[String(key).toLowerCase().trim()] : undefined
+  if (byKey) return byKey
   return Globe
 }

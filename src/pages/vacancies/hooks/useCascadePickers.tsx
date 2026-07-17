@@ -22,11 +22,10 @@ interface Args {
  * department directly auto-fills its parent location; narrowing to one location's
  * departments once one is picked.
  *
- * MEASURED (VACATURES-100 V4-V6): UpdateVacancyRequest has no customer_location_id/
- * customer_department_id/contact_id columns on `vacancies` (only the unrelated
- * bureau-branch `location_id`) — see buildVacancyPatch's comment. The picks still
- * flow through onUpdate best-effort (harmlessly dropped server-side today, same
- * "tolerated until BE ships the columns" precedent as MatchPlacementModal).
+ * VAC-CASCADE-1 (backend wave 6): `vacancies` now persists customer_location_id/
+ * customer_department_id/contact_id (VacancyWriter's scalar passthrough whitelist),
+ * so the picks made here are a real save, not a best-effort no-op — see
+ * buildVacancyPatch and DetailsTab's seedCascade.
  */
 export function useCascadePickers({
   clientId, customerLocationId, onLocationChange, customerDepartmentId, onDepartmentChange, contactId, onContactChange,

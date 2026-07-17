@@ -168,7 +168,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           {publishedChannels.length > 0 ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
               {publishedChannels.map(c => {
-                const Icon = channelIcon(c.label)
+                const Icon = channelIcon(c.icon, c.key)
                 return (
                   <button key={String(c.value)} type="button" onClick={() => setActiveTab('publishing')}
                     title={t('drawer.publishedOnChannel', { channel: c.label })}
