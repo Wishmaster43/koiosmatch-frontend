@@ -193,7 +193,8 @@
       "summary": "Resumen",
       "branches": "Sedes",
       "branchesNone": "Aún no hay sedes configuradas.",
-      "branchesAutoHint": "Vacío = automáticamente las sedes a las que estás vinculado."
+      "branchesAutoHint": "Vacío = automáticamente las sedes a las que estás vinculado.",
+      "branchesAdd": "Añadir sede"
     },
     "gender": {
       "male": "Hombre",

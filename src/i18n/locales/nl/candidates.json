@@ -200,7 +200,8 @@
       "summary": "Profieltekst",
       "branches": "Vestigingen",
       "branchesNone": "Nog geen vestigingen ingericht.",
-      "branchesAutoHint": "Leeg = automatisch de vestigingen waar jij aan gekoppeld bent."
+      "branchesAutoHint": "Leeg = automatisch de vestigingen waar jij aan gekoppeld bent.",
+      "branchesAdd": "Vestiging toevoegen"
     },
     "gender": {
       "male": "Man",

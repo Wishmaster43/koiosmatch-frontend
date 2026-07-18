@@ -193,7 +193,8 @@
       "summary": "Résumé",
       "branches": "Agences",
       "branchesNone": "Aucune agence configurée.",
-      "branchesAutoHint": "Vide = automatiquement les agences auxquelles vous êtes rattaché."
+      "branchesAutoHint": "Vide = automatiquement les agences auxquelles vous êtes rattaché.",
+      "branchesAdd": "Ajouter une agence"
     },
     "gender": {
       "male": "Homme",

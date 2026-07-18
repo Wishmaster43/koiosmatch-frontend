@@ -200,7 +200,8 @@
       "summary": "Summary",
       "branches": "Branches",
       "branchesNone": "No branches configured yet.",
-      "branchesAutoHint": "Empty = automatically the branches you are linked to."
+      "branchesAutoHint": "Empty = automatically the branches you are linked to.",
+      "branchesAdd": "Add branch"
     },
     "gender": {
       "male": "Male",

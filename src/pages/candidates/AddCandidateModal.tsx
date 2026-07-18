@@ -11,7 +11,7 @@ import { useGenders } from '@/lib/useGenders'
 import { useAuth } from '@/context/AuthContext'
 import { useCreateCandidate } from './hooks/useCandidateMutations'
 import { useLocations } from '@/lib/useLocations'
-import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import SearchSelect from '@/components/ui/SearchSelect'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -275,17 +275,26 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                   </Field>
                 </div>
 
-                {/* Vestigingen (punt 10): chips uit settings/company/locations. Leeg =
-                    de backend koppelt automatisch de vestigingen van de maker
-                    (BranchAccess::autoAssign); gekozen chips worden na aanmaken
-                    per stuk aan het dossier gekoppeld. */}
+                {/* Vestigingen (punt 10, r2-vervolg): zelfde patroon als de drill-down's
+                    BranchSection — gekozen vestigingen als chips met ×, toevoegen via de
+                    zoekbare SearchSelect (niet alle opties als toggle-chips: te druk). */}
                 <Field label={t('modal.fields.branches')}>
-                  <ChipMultiSelect
+                  {branchIds.length > 0 && (
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                      {branchIds.map(id => (
+                        <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
+                          borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
+                          {locations.find(o => String(o.value) === id)?.label ?? id}
+                          <button type="button" onClick={() => setBranchIds(p => p.filter(x => x !== id))} aria-label={t('common:remove')}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                  <SearchSelect triggerLabel={t('modal.fields.branchesAdd')}
                     options={locations.map(o => ({ value: String(o.value), label: o.label }))}
                     selected={branchIds}
-                    onToggle={id => setBranchIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])}
-                    emptyText={t('modal.fields.branchesNone')}
-                  />
+                    onToggle={(id: string) => setBranchIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])} />
                   {branchIds.length === 0 && locations.length > 0 && (
                     <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: '6px 0 0' }}>{t('modal.fields.branchesAutoHint')}</p>
                   )}
