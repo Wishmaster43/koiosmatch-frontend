@@ -593,7 +593,10 @@
     "groupFinancial": "Finanzen",
     "groupWork": "Arbeitspräferenzen",
     "groupOther": "Sonstiges",
-    "moreTitle": "Weitere Präferenzen"
+    "moreTitle": "Weitere Präferenzen",
+    "groupDesiredRate": "Gewünschter Stundenlohn",
+    "desiredRateMin": "Von (€ pro Stunde)",
+    "desiredRateMax": "Bis (€ pro Stunde)"
   },
   "zzp": {
     "title": "Freiberufler",

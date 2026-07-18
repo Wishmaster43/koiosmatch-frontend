@@ -593,7 +593,10 @@
     "groupFinancial": "Financiero",
     "groupWork": "Preferencias de trabajo",
     "groupOther": "Otros",
-    "moreTitle": "Otras preferencias"
+    "moreTitle": "Otras preferencias",
+    "groupDesiredRate": "Tarifa por hora deseada",
+    "desiredRateMin": "Desde (€ por hora)",
+    "desiredRateMax": "Hasta (€ por hora)"
   },
   "zzp": {
     "title": "Autónomo",

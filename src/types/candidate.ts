@@ -100,6 +100,9 @@ export interface CandidateMatch {
 
 /** The UI candidate model — every consumer relies on this shape. */
 export interface Candidate {
+  // RATE-WISH-1: gewenst uurloon van-tot (strings for the edit fields; '' = leeg).
+  desiredRateMin?: string
+  desiredRateMax?: string
   id: string | number
   // Human-readable sequence number (NUMMER-1), e.g. "K-00123". Tenant-configurable
   // prefix/padding/start (Settings → Nummering); server-assigned, immutable.
@@ -230,6 +233,8 @@ export interface ApiCandidateMatch {
 
 /** Raw API candidate record (read defensively by mapCandidate). */
 export interface ApiCandidate {
+  desired_rate_min?: number | string | null
+  desired_rate_max?: number | string | null
   id?: string | number
   // NUMMER-1: server-assigned human-readable reference number (K-00123).
   reference_number?: string

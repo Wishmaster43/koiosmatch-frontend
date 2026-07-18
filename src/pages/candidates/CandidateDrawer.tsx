@@ -160,7 +160,14 @@ export default function CandidateDrawer({ candidate: c, onClose, expanded, onTog
       case 'work':           return <WorkTab c={c} />
       case 'planning':       return <PlanningPanel c={c} />
       case 'preferences':    return <PreferencesTab c={c}
-        onSave={(p: unknown) => onUpdate?.(c.id, { preferences: { ...(c.preferences ?? {}), ...(p as Record<string, unknown>) } })}
+        onSave={(p: unknown) => {
+          // RATE-WISH-1: desired_rate_* are ROOT candidate fields — split them out of
+          // the preferences blob so everything lands in ONE PATCH.
+          const { desired_rate_min, desired_rate_max, ...prefs } = p as Record<string, unknown>
+          onUpdate?.(c.id, { preferences: { ...(c.preferences ?? {}), ...prefs },
+            ...(desired_rate_min !== undefined ? { desiredRateMin: desired_rate_min } : {}),
+            ...(desired_rate_max !== undefined ? { desiredRateMax: desired_rate_max } : {}) })
+        }}
         onTypesChange={(types: string[]) => onUpdate?.(c.id, { candidateTypes: types })} />
       case 'administration': return <ZzpTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { zzp: p })} />
       case 'communication':  return <CommunicationTab c={c} onSave={(p: unknown) => onUpdate?.(c.id, { consent: p })} />

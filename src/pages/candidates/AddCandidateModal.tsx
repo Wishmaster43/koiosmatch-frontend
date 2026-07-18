@@ -212,55 +212,35 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 940,
         boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', maxHeight: '90vh' }}>
 
-        {/* ── Left panel: status (lifecycle) selection ── */}
-        <div style={{ width: 260, flexShrink: 0, borderRight: '1px solid var(--border)',
-          background: 'var(--bg)', display: 'flex', flexDirection: 'column' }}>
-
-          <div style={{ padding: '20px 20px 14px' }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: 'var(--text)' }}>{t('modal.statusPanelTitle')}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{t('modal.statusPanelHint')}</div>
-          </div>
-
-          <div style={{ padding: '4px 12px 20px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {pickStatuses.map(s => {
-              const active = status === s.value
-              return (
-                <button key={s.value} onClick={() => { setStatus(s.value); setErrors({}) }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px',
-                    borderRadius: 10, cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s',
-                    border: `1.5px solid ${active ? s.color : 'var(--border)'}`,
-                    background: active ? s.color + '14' : 'var(--surface)',
-                    boxShadow: active ? `0 0 0 2px ${s.color}22` : 'none' }}>
-                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
-                  <div style={{ fontSize: 13, fontWeight: 600, color: active ? s.color : 'var(--text)' }}>{s.label}</div>
-                </button>
-              )
-            })}
-          </div>
-
-          <div style={{ flex: 1 }} />
-          {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
-          <div style={{ padding: '0 12px 16px' }}>
-            <button onClick={onClose}
-              style={{ width: '100%', height: BTN_H, padding: '0', fontSize: 13, borderRadius: 8,
-                border: '1px solid var(--border)', background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-              {t('common:cancel')}
-            </button>
-          </div>
-        </div>
-
-        {/* ── Right panel: candidate form ── */}
+        {/* ── Form panel — full width; the phase choice is a compact segmented row in
+            the header (Danny r2: de linkerkolom verspilde ~260px aan twee knoppen) ── */}
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
 
-          <div style={{ padding: '20px 24px 14px', borderBottom: '1px solid var(--border)',
-            display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-            <div>
+          <div style={{ padding: '18px 24px 14px', borderBottom: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--text)' }}>
                 {selectedStatus ? `${t('modal.newPrefix')} — ${statusLabel}` : t('modal.candidateData')}
               </div>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
-                {status ? t('modal.fillRequired') : t('modal.selectTypeLeft')}
+                {status ? t('modal.fillRequired') : t('modal.statusPanelHint')}
               </div>
+            </div>
+            {/* Phase choice — two compact pills, same colour semantics as the old cards. */}
+            <div style={{ display: 'flex', gap: 8, marginLeft: 'auto', flexShrink: 0 }}>
+              {pickStatuses.map(s => {
+                const active = status === s.value
+                return (
+                  <button key={s.value} onClick={() => { setStatus(s.value); setErrors({}) }} aria-pressed={active}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, height: BTN_H, padding: '0 14px',
+                      borderRadius: 999, cursor: 'pointer', transition: 'all 0.15s',
+                      border: `1.5px solid ${active ? s.color : 'var(--border)'}`,
+                      background: active ? s.color + '14' : 'var(--surface)' }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: s.color, flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? s.color : 'var(--text)' }}>{s.label}</span>
+                  </button>
+                )
+              })}
             </div>
             <button onClick={onClose} aria-label={t('common:close')}
               style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', padding: 4 }}>
@@ -328,7 +308,7 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                   </div>
                 </div>
 
-                {/* ── Werk — function + owner + branch chips ── */}
+                {/* ── Werk — function + owner ── */}
                 <div>
                   <div style={cardHead}>{t('modal.fields.cardWork')}</div>
                   <div style={cardBox}>
@@ -339,30 +319,6 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                     <Field label={t('modal.fields.owner')}>
                       <SelectField value={String(form.ownerId)} onChange={v => set('ownerId', v)}
                         placeholder={t('common:select')} options={ownerOptions} />
-                    </Field>
-                    {/* Vestigingen (punt 10, r2-vervolg): zelfde patroon als de drill-down's
-                        BranchSection — gekozen vestigingen als chips met ×, toevoegen via de
-                        zoekbare SearchSelect (niet alle opties als toggle-chips: te druk). */}
-                    <Field label={t('modal.fields.branches')}>
-                      {branchIds.length > 0 && (
-                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-                          {branchIds.map(id => (
-                            <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
-                              borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
-                              {locations.find(o => String(o.value) === id)?.label ?? id}
-                              <button type="button" onClick={() => setBranchIds(p => p.filter(x => x !== id))} aria-label={t('common:remove')}
-                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      <SearchSelect triggerLabel={t('modal.fields.branchesAdd')}
-                        options={locations.map(o => ({ value: String(o.value), label: o.label }))}
-                        selected={branchIds}
-                        onToggle={(id: string) => setBranchIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])} />
-                      {branchIds.length === 0 && locations.length > 0 && (
-                        <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: '6px 0 0' }}>{t('modal.fields.branchesAutoHint')}</p>
-                      )}
                     </Field>
                   </div>
                 </div>
@@ -396,6 +352,35 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                           placeholder={t('common:select')} options={provinces} menuWidth={260} />
                       </Field>
                       <div />
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Vestigingen — eigen kader onder Adres (Danny r2): chips met ×,
+                    toevoegen via de zoekbare SearchSelect (drill-down-patroon). ── */}
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <div style={cardHead}>{t('modal.fields.branches')}</div>
+                  <div style={cardBox}>
+                    {branchIds.length > 0 && (
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {branchIds.map(id => (
+                          <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
+                            borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
+                            {locations.find(o => String(o.value) === id)?.label ?? id}
+                            <button type="button" onClick={() => setBranchIds(p => p.filter(x => x !== id))} aria-label={t('common:remove')}
+                              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    <div>
+                      <SearchSelect triggerLabel={t('modal.fields.branchesAdd')}
+                        options={locations.map(o => ({ value: String(o.value), label: o.label }))}
+                        selected={branchIds}
+                        onToggle={(id: string) => setBranchIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])} />
+                      {branchIds.length === 0 && locations.length > 0 && (
+                        <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: '6px 0 0' }}>{t('modal.fields.branchesAutoHint')}</p>
+                      )}
                     </div>
                   </div>
                 </div>

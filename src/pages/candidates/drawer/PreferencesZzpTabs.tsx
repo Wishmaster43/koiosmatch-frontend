@@ -71,6 +71,9 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
     loonheffing:       pref.wage_tax       ?? false,
     loonheffing_vanaf: pref.wage_tax_from  ?? '',
     remarks:     pref.remarks        ?? '',
+    // RATE-WISH-1: root fields on the candidate, not the preferences blob.
+    desiredRateMin: (c as { desiredRateMin?: string }).desiredRateMin ?? '',
+    desiredRateMax: (c as { desiredRateMax?: string }).desiredRateMax ?? '',
   }
   const fields = [
     { key: 'contractvorm',    label: t('drawer.candidateType'),      group: t('preferences.groupAvailability'), type: 'chips', chipOptions: candidateTypeOptions },
@@ -85,6 +88,8 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
     { key: 'rijbewijs',       label: t('preferences.license'),       group: t('preferences.groupTravel'), type: 'chips', chipOptions: licenseOptions },
     { key: 'loonheffing',      label: t('preferences.wageTax'),       group: t('preferences.groupPayroll'), type: 'checkbox' },
     { key: 'loonheffing_vanaf', label: t('preferences.wageTaxFrom'),  group: t('preferences.groupPayroll'), type: 'date' },
+    { key: 'desiredRateMin', label: t('preferences.desiredRateMin'), group: t('preferences.groupDesiredRate') },
+    { key: 'desiredRateMax', label: t('preferences.desiredRateMax'), group: t('preferences.groupDesiredRate') },
     { key: 'remarks',     label: t('preferences.remarks'),       group: t('preferences.groupOther'), type: 'richtext' },
   ]
   // Preferences blob — Contractvorm is routed separately (to candidateTypes, not preferences).
@@ -101,6 +106,10 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
     wage_tax:        v.loonheffing,
     wage_tax_from:   v.loonheffing_vanaf,
     remarks:         v.remarks,
+    // RATE-WISH-1: ride along in the SAME save; the drawer splits these out of the
+    // preferences blob into root-level patch keys (one PATCH, one request).
+    desired_rate_min: v.desiredRateMin,
+    desired_rate_max: v.desiredRateMax,
   })
   const handleSave = (v: Record<string, unknown>) => { onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApi(v)) }
 
@@ -128,7 +137,7 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
   const [subTab, setSubTab] = useState('availability')
   const availabilityFields = fields.filter(f => f.group === t('preferences.groupAvailability')).map(f => ({ ...f, group: undefined }))
   const travelFields       = fields.filter(f => f.group === t('preferences.groupTravel')).map(f => ({ ...f, group: undefined }))
-  const financialFields    = fields.filter(f => f.group === t('preferences.groupPayroll'))
+  const financialFields    = fields.filter(f => f.group === t('preferences.groupPayroll') || f.group === t('preferences.groupDesiredRate'))
   const otherFields        = fields.filter(f => f.group === t('preferences.groupOther')).map(f => ({ ...f, group: undefined }))
 
   // Current unavailability window (status axis) — read-only next to "Inzetbaar vanaf"
@@ -160,19 +169,6 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
       {subTab === 'financial' && (
         <>
           <EditableFieldTable key={c.id} fields={financialFields} value={value} labelWidth={160} onSave={handleSave} />
-          {/* SEAM (Danny kandidaten-ronde-2, punt D update — RATE-WISH-1): a second
-              group card for "gewenst uurloon" (desired_rate_min/desired_rate_max,
-              a paired VAN–TOT EUR range) belongs here once the backend ships it.
-              As of 2026-07-18 the fields are only an open CMFE→CMBE ask
-              (COORDINATION-LOG.md, not yet in openapi.yaml or the candidate
-              model/resource — measured against the api repo) — no input renders
-              for them yet (CLAUDE.md: never a fake affordance that doesn't
-              persist). When the fields land: add
-              `desiredRateMin`/`desiredRateMax` to `value` (from
-              `pref.desired_rate_min`/`desired_rate_max`), two `type: 'text'`
-              (or numeric) rows with `half: true` under a NEW
-              `t('preferences.groupDesiredRate')` group in `fields`, map them in
-              `toApi`, and add that group's key to `financialFields` above. */}
         </>
       )}
       {subTab === 'other'        && <EditableFieldTable key={c.id} fields={otherFields}        value={value} labelWidth={160} onSave={handleSave} />}

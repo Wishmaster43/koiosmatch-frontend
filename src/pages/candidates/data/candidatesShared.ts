@@ -84,6 +84,9 @@ export const buildCandidatePatch = (patch: Record<string, unknown>): Record<stri
   if ('summary'           in patch) body.summary           = patch.summary
   if ('languages'         in patch) body.languages         = patch.languages
   if ('preferences'       in patch) body.preferences       = patch.preferences
+  // RATE-WISH-1: gewenst uurloon van-tot ('' -> null so clearing persists).
+  if ('desiredRateMin' in patch) body.desired_rate_min = patch.desiredRateMin === '' ? null : patch.desiredRateMin
+  if ('desiredRateMax' in patch) body.desired_rate_max = patch.desiredRateMax === '' ? null : patch.desiredRateMax
   // Tenant custom fields (Extra tab): both spellings map to the API key — this
   // was MISSING, so every eigen-velden save silently vanished (Danny 16-07).
   if ('customFields'      in patch) body.custom_fields     = patch.customFields

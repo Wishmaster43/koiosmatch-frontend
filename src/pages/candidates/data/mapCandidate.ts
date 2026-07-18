@@ -58,7 +58,10 @@ export function mapCandidate(c: ApiCandidate): Candidate {
   // status slug, or the availability axis — else empty. Lead/Candidate get NO guess.
   const deployability = String(c.deployability ?? LEGACY_DEPLOY[rawStatus] ?? (isLegacy ? (c.availability ?? '') : (rawStatus || c.availability || '')))
 
+  // RATE-WISH-1: gewenst uurloon (van-tot) — root fields on the candidate.
   return {
+    desiredRateMin: c.desired_rate_min != null ? String(c.desired_rate_min) : '',
+    desiredRateMax: c.desired_rate_max != null ? String(c.desired_rate_max) : '',
     id:              c.id ?? '',
     // NUMMER-1: human-readable reference number (K-00123), shown in the drawer + table.
     referenceNumber: c.reference_number ?? '',

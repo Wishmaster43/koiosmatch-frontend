@@ -600,7 +600,10 @@
     "groupFinancial": "Financial",
     "groupWork": "Work preferences",
     "groupOther": "Other",
-    "moreTitle": "Other preferences"
+    "moreTitle": "Other preferences",
+    "groupDesiredRate": "Desired hourly rate",
+    "desiredRateMin": "From (€ per hour)",
+    "desiredRateMax": "To (€ per hour)"
   },
   "zzp": {
     "title": "Freelancer",

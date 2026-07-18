@@ -600,7 +600,10 @@
     "groupFinancial": "Financieel",
     "groupWork": "Werkvoorkeuren",
     "groupOther": "Overig",
-    "moreTitle": "Overige voorkeuren"
+    "moreTitle": "Overige voorkeuren",
+    "groupDesiredRate": "Gewenst uurloon",
+    "desiredRateMin": "Van (€ per uur)",
+    "desiredRateMax": "Tot (€ per uur)"
   },
   "zzp": {
     "title": "ZZP'er",
