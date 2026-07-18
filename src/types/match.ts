@@ -72,5 +72,10 @@ export interface MatchRow {
   approval_rejected_reason?: string
   // Tenant custom-field values (§3B "Eigen velden" — the drawer's gated Extra tab).
   customFieldValues?: Record<string, unknown>
+  // ARCHIVE-1 (sweep 9170e40): purely CLIENT-side — MatchListResource/MatchDetailResource
+  // never send archived/deleted_at (BE gap, see useMatchArchive), so this only reflects a
+  // delete/restore this session just performed, not a page-load/list-level archived state.
+  archived?: boolean
+  archivedAt?: string | null
   [k: string]: unknown
 }

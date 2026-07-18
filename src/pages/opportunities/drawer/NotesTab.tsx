@@ -5,12 +5,6 @@ import { useOpportunityNotes } from '../hooks/useOpportunityNotes'
 import type { Opportunity } from '@/types/opportunity'
 
 // Rich-text editor tooltips (mirror the candidate/application drawer).
-const EDITOR_LABELS = {
-  bold: 'Bold', italic: 'Italic', bulletList: 'Bullet list', orderedList: 'Numbered list',
-  heading: 'Heading', alignLeft: 'Align left', alignCenter: 'Align center', alignRight: 'Align right',
-  undo: 'Undo', redo: 'Redo', expand: 'Expand', collapse: 'Collapse',
-}
-
 /**
  * NotesTab — internal notes for an opportunity. Reuses the shared NotesTab so it
  * looks exactly like the candidate drawer; data via /opportunities/{id}/notes (C-41).
@@ -25,7 +19,7 @@ export default function NotesTab({ opportunity: o }: { opportunity: Opportunity 
       notes={notes}
       onAddNote={(p: { type: string; body: string }) => addNote({ type: p.type, body: p.body })}
       noteTypes={noteTypes}
-      editorLabels={EDITOR_LABELS}
+     
       showTimeline={false}
       showConversations={false}
       labels={{

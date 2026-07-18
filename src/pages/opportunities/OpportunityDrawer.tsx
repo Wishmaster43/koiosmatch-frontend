@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Edit2, Save, X } from 'lucide-react'
+import { Edit2, Save, X, Trash2 } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import TitleBadge from '@/components/drawer/TitleBadge'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useDateFormat } from '@/lib/datetime'
@@ -29,6 +30,11 @@ interface OpportunityDrawerProps {
   stages?: LookupOption[]
   users?: DrawerUser[]
   customers?: DrawerCustomer[]
+  // ARCHIVE-1: per-id soft-delete/restore (§7 — UI-only gate; the backend
+  // re-checks opportunities.delete / opportunities.update). Absent = no
+  // permission, so the trash icon/restore button simply don't render.
+  onArchive?: (id: Id | undefined) => void
+  onRestore?: (id: Id | undefined) => void
 }
 
 const hdrBtn: CSSProperties = { display: 'flex', alignItems: 'center', justifyContent: 'center', width: 28, height: 28, borderRadius: 7, cursor: 'pointer', flexShrink: 0 }
@@ -44,6 +50,7 @@ const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)
  */
 export default function OpportunityDrawer({
   opportunity: o, onClose, expanded, onToggleExpand, onUpdate, stages = [], users = [], customers = [],
+  onArchive, onRestore,
 }: OpportunityDrawerProps) {
   const { t } = useTranslation('opportunities')
   const { formatDate, formatDateTime } = useDateFormat()
@@ -106,8 +113,9 @@ export default function OpportunityDrawer({
     </>
   )
 
-  // Header actions = just inline title edit (no Won/Lost buttons — outcome is the phase).
-  const actions = editing ? (
+  // Header actions = just inline title edit (no Won/Lost buttons — outcome is the
+  // phase). ARCHIVED: no title edit on a soft-deleted deal — restore first.
+  const actions = o.archived ? null : editing ? (
     <>
       <button onClick={saveEdit} title={t('common:save')} style={hdrPrimary}><Save size={14} /></button>
       <button onClick={() => setEditing(false)} title={t('common:cancel')} style={hdrGhost}><X size={14} /></button>
@@ -136,10 +144,22 @@ export default function OpportunityDrawer({
           expanded={expanded} onToggleExpand={onToggleExpand} onClose={onClose}
           avatar={{ initials: o.initials, soft: true, color: '#9CA3AF' }}
           renderTitle={renderTitle}
-          titleActions={<OpportunityChangelogPopover opportunity={o} />}
+          titleActions={<>
+            <OpportunityChangelogPopover opportunity={o} />
+            {/* ARCHIVE-1: per-id soft-delete (mirrors candidates' trash icon in the
+                title row) — hidden once already archived; the banner below takes over. */}
+            {onArchive && !o.archived && (
+              <button onClick={() => onArchive(o.id)}
+                title={t('drawer.archive')} aria-label={t('drawer.archive')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
+                <Trash2 size={14} />
+              </button>
+            )}
+          </>}
           actions={actions}
           // Standard picker widths (§3A blueprint: Status/Stage ~160 + Eigenaar ~190).
-          meta={[
+          // ARCHIVED: no stage/owner changes on a soft-deleted deal — restore first.
+          meta={o.archived ? [] : [
             { key: 'stage', label: t('drawer.stage'), value: o.stageValue,
               options: stageOptions, placeholder: t('drawer.selectStage'),
               onChange: (val: string) => onUpdate?.(o.id, { stageValue: val }), menuWidth: 170, width: 160 },
@@ -151,7 +171,16 @@ export default function OpportunityDrawer({
           tags={{ items: currentTags, onAdd: tag => setTagsAndSave([...currentTags, tag]),
             onRemove: tag => setTagsAndSave(currentTags.filter(x => x !== tag)), addLabel: t('drawer.tags') }}
           tagsLabel={t('drawer.tags')}
-        />
+        >
+          {/* Archived banner (ARCHIVE-1): since-when + restore, right under the header —
+              purely local state (see the type comment on Opportunity.archived), set the
+              moment this session's own archive/restore call completes. */}
+          {o.archived && (
+            <ArchivedBanner id={o.id}
+              message={o.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(o.archivedAt) }) : t('drawer.archivedBanner.flag')}
+              onRestore={onRestore} restoreLabel={t('drawer.archivedBanner.restore')} />
+          )}
+        </EntityHeader>
       )}
     />
   )

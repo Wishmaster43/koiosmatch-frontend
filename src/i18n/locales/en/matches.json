@@ -32,6 +32,18 @@
   "drawer": {
     "label": "Match",
     "createdAt": "Created on {{date}}",
+    "archive": "Archive",
+    "archiveConfirm": "Archive this match? You can restore it afterwards.",
+    "archived": "Match archived.",
+    "archiveFailed": "Couldn't archive the match.",
+    "archiveBlockedActiveContract": "This placement has an active contract — end it first.",
+    "archivedBanner": {
+      "since": "Archived since {{date}}",
+      "flag": "Archived",
+      "restore": "Restore",
+      "restored": "Match restored.",
+      "restoreFailed": "Couldn't restore the match."
+    },
     "tabs": {
       "overview": "Overview",
       "relations": "Relations",
@@ -116,8 +128,7 @@
   },
   "view": {
     "matches": "Matches",
-    "board": "Board",
-    "archived": "Archived"
+    "board": "Board"
   },
   "board": {
     "empty": "No matches"

@@ -23,7 +23,11 @@ export interface Opportunity {
   expectedCloseAt: string | null
   // Deal-type unit (R-4): 'euro' | 'hours' | null — null counts in both pipelines.
   dealTypeUnit: string | null
+  // ARCHIVE-1: OpportunityResource never serializes `archived`/`deleted_at` (BE gap —
+  // see useOpportunityArchive), so `archived` only reflects a delete/restore THIS
+  // session performed, not the true server-side state of every row in the list.
   archived: boolean
+  archivedAt: string | null
   // Deal magnitude in hours (staffing) alongside the € value.
   hours: number | null
   hoursPeriod: string

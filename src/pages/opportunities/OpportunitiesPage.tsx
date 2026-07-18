@@ -1,14 +1,13 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LayoutList, Kanban, Archive } from 'lucide-react'
+import { LayoutList, Kanban } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useAllSettings, getBoolSetting } from '@/lib/settings/useAllSettings'
 import OpportunitiesInsightsRow from './OpportunitiesInsightsRow'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
-import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import OpportunitiesTable from './OpportunitiesTable'
 import OpportunitiesBoard from './OpportunitiesBoard'
@@ -16,6 +15,7 @@ import OpportunityDrawer from './OpportunityDrawer'
 import AddOpportunityModal from './AddOpportunityModal'
 import PaginationBar from '@/components/ui/PaginationBar'
 import { useOpportunitiesData } from './hooks/useOpportunitiesData'
+import { useOpportunityArchive } from './hooks/useOpportunityArchive'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { usePageMemory } from '@/lib/usePageMemory'
 import { BTN_H } from '@/config/buttonMetrics'
@@ -39,6 +39,8 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   const tableScrollRef = useRef<HTMLDivElement>(null)
   const auth = useAuth()
   const user = auth?.user as { default_per_page?: number } | null | undefined
+  // Archive/restore is authorization-gated in the UI; the backend re-checks (§7).
+  const hasPermission = auth?.hasPermission ?? (() => false)
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Tenant setting: show the deal magnitude in hours instead of euro (Settings → Kansen).
   const valueInHours = getBoolSetting(useAllSettings(), 'opportunity_value_in_hours', false)
@@ -46,11 +48,15 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
   // Data layer (§3): list + customers + selection + optimistic mutations.
   const {
     rows, loading, error, customers, users, stages,
-    showArchived, setShowArchived,
     selected, drawerExpanded, setDrawerExpanded,
     selectedIds, toggleRow, toggleAll, clearSelection,
-    selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity,
+    selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity, reload,
   } = useOpportunitiesData()
+
+  // ARCHIVE-1: per-id archive/restore (routes pre-date this sweep; see the hook's
+  // own comment). Gated on the SAME permission each route requires server-side —
+  // opportunities.delete for the trash icon, opportunities.update for restore.
+  const { archiveOpportunity, restoreOpportunity } = useOpportunityArchive({ onPatch: updateOpportunity, onReload: reload })
 
   // Mirror the open drawer in the URL (?open=<id>): browser back/forward walks
   // through it and a copied link reopens the same opportunity (NAV-BACK-1 —
@@ -114,11 +120,14 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
     return () => unregisterFilters('opportunities-page')
   }, [filterGroups, registerFilters, unregisterFilters])
 
-  // Visible rows = the stage/owner/client selection applied client-side.
+  // Visible rows = the stage/owner/client selection applied client-side. No
+  // archived-only VIEW here (ARCHIVE-1 — see useOpportunitiesData's file comment):
+  // an archived row still drops out of the default view the instant this session
+  // archives it (optimistic `r.archived` patch), it just can't be browsed as a
+  // dedicated list because the backend never tells us which OTHER rows are archived.
   const filteredAll = useMemo(() => {
     return rows.filter(r => {
-      // Archived view shows only archived rows; otherwise archived (soft-deleted) are hidden.
-      if (showArchived ? !r.archived : r.archived) return false
+      if (r.archived) return false
       if (stage.length  && !stage.includes(r.stage))   return false
       if (owner.length  && !owner.includes(r.owner))   return false
       if (client.length && !client.includes(r.client)) return false
@@ -130,7 +139,7 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
       }
       return true
     })
-  }, [rows, stage, owner, client, showArchived, query, expiringOnly, dayStart])
+  }, [rows, stage, owner, client, query, expiringOnly, dayStart])
 
   const totalRows = filteredAll.length
   const lastPage  = Math.max(1, Math.ceil(totalRows / pageSize))
@@ -152,7 +161,10 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
             onSetStageFilter={setStage}
           />
 
-          {/* Toolbar — add on the LEFT, archived + view toggle on the RIGHT (mirror candidates). */}
+          {/* Toolbar — add on the LEFT, view toggle on the RIGHT. No archived
+              QuickViewToggle here (ARCHIVE-1): see useOpportunitiesData's file
+              comment — the backend never tells the FE which rows are archived,
+              so a list-level toggle would be a fake affordance. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 10,
             padding: '0 24px 12px', minHeight: 36, flexShrink: 0 }}>
             {/* BTN_H (§4/§9): one explicit height for every text/action button, everywhere. */}
@@ -174,9 +186,6 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
               </div>
             )}
             <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 8 }}>
-              {/* Archived (soft-deleted) view — shared quick-view toggle (§4). */}
-              <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
-                label={t('page.archived')} color="var(--color-archive)" icon={Archive} />
               <div style={{ display: 'flex', gap: 4 }}>
                 <button onClick={() => setView('table')} title={t('view.table')} aria-label={t('view.table')}
                   style={{ padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
@@ -233,6 +242,11 @@ export default function OpportunitiesPage({ intent }: { intent?: unknown } = {})
           onToggleExpand={() => setDrawerExpanded(v => !v)}
           onUpdate={updateOpportunity}
           stages={stages} users={users} customers={customers}
+          // ARCHIVE-1: per-id delete/restore (§7 — UI-only gate; the backend
+          // re-checks opportunities.delete / opportunities.update respectively —
+          // the two routes require DIFFERENT permissions, so gate them separately).
+          onArchive={hasPermission('opportunities.delete') ? archiveOpportunity : undefined}
+          onRestore={hasPermission('opportunities.update') ? restoreOpportunity : undefined}
         />
       </div>
     </>

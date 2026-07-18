@@ -19,9 +19,11 @@
  * lives in the tab/header components.
  */
 import { useTranslation } from 'react-i18next'
+import { Trash2 } from 'lucide-react'
 import EntityDrawer from '@/components/drawer/EntityDrawer'
 import type { EntityTab } from '@/components/drawer/EntityDrawer'
 import EntityHeader from '@/components/drawer/EntityHeader'
+import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import { useDateFormat } from '@/lib/datetime'
@@ -53,13 +55,18 @@ interface MatchDrawerProps {
   onUpdate?: (id: MatchRow['id'], patch: Partial<MatchRow>) => void
   // Save the Extra tab's tenant custom fields (§3B) — a partial patch, merged by the caller.
   onUpdateCustomFields?: (id: MatchRow['id'], patch: Record<string, unknown>) => void
+  // ARCHIVE-1: per-id soft-delete/restore (§7 — UI-only gate; the backend re-checks
+  // matches.update). Absent = no permission, so the trash icon/restore button don't render.
+  onArchive?: (id: MatchRow['id']) => void
+  onRestore?: (id: MatchRow['id']) => void
 }
 
 export default function MatchDrawer({
   match, onClose, expanded = false, onToggleExpand, onSetStatus, canApprove = false, onApprovalChange, onUpdate, onUpdateCustomFields,
+  onArchive, onRestore,
 }: MatchDrawerProps) {
   const { t } = useTranslation('matches')
-  const { formatDateTime } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   // Approval data/actions live in one hook here (thin container, §3) — the header
   // pieces below stay presentational.
   const { reason, busy, rejectOpen, setRejectOpen, approve, reject } = useMatchApproval(match, onApprovalChange)
@@ -103,7 +110,18 @@ export default function MatchDrawer({
           expanded={expanded}
           onToggleExpand={onToggleExpand}
           onClose={onClose}
-          titleActions={<MatchChangelogPopover match={match} />}
+          titleActions={<>
+            <MatchChangelogPopover match={match} />
+            {/* ARCHIVE-1: per-id soft-delete (mirrors candidates' trash icon in the
+                title row) — hidden once already archived; the banner below takes over. */}
+            {onArchive && !match.archived && (
+              <button onClick={() => onArchive(match.id)}
+                title={t('drawer.archive')} aria-label={t('drawer.archive')}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', color: 'var(--color-danger)', opacity: 0.7 }}>
+                <Trash2 size={14} />
+              </button>
+            )}
+          </>}
           renderTitle={() => (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -121,15 +139,17 @@ export default function MatchDrawer({
             </>
           )}
           // MatchApprovalActions moves into the header actions slot (was the body headerChips row).
+          // ARCHIVED: no review action on a soft-deleted placement — restore first.
           actions={
-            <MatchApprovalActions status={match.approval_status} reason={reason} canUpdate={canApprove} busy={busy}
+            <MatchApprovalActions status={match.approval_status} reason={reason} canUpdate={canApprove && !match.archived} busy={busy}
               rejectOpen={rejectOpen} onOpenReject={() => setRejectOpen(true)} onCancelReject={() => setRejectOpen(false)}
               onApprove={approve} onReject={reject} />
           }
           // Standard meta-picker row (§3A(c)): Status (~160, tenant lookup) + Eigenaar.
           // Eigenaar stays a read-only labelled value — UpdateMatchRequest has no
           // owner_id field yet (MATCH-OWNER-1), so a picker would silently no-op.
-          meta={onSetStatus ? [
+          // ARCHIVED: no status changes on a soft-deleted placement — restore first (mirrors candidates).
+          meta={onSetStatus && !match.archived ? [
             { key: 'status', label: t('drawer.fields.status'), value: match.status,
               options: matchStatuses.map(s => ({ value: s.value, label: s.label })),
               onChange: onSetStatus, menuWidth: 170, width: 160 },
@@ -143,7 +163,16 @@ export default function MatchDrawer({
               </div>
             </div>
           }
-        />
+        >
+          {/* Archived banner (ARCHIVE-1): since-when + restore, right under the header —
+              purely local state (see the type comment on MatchRow.archived), set the moment
+              this session's own archive/restore call completes. */}
+          {match.archived && (
+            <ArchivedBanner id={match.id}
+              message={match.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(match.archivedAt) }) : t('drawer.archivedBanner.flag')}
+              onRestore={onRestore} restoreLabel={t('drawer.archivedBanner.restore')} />
+          )}
+        </EntityHeader>
       }
       tabs={tabs}
     />

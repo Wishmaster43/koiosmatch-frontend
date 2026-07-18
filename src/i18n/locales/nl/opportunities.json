@@ -8,8 +8,6 @@
     "add": "Kans toevoegen",
     "selected": "{{count}} geselecteerd",
     "clearSelection": "Selectie wissen",
-    "archived": "Gearchiveerd",
-    "archivedView": "Gearchiveerde kansen tonen",
     "searchPlaceholder": "Zoek naar kansen"
   },
   "cols": {
@@ -48,6 +46,17 @@
     "selectOwner": "Kies eigenaar",
     "selectClient": "Kies klant",
     "createdAt": "Aangemaakt op {{date}}",
+    "archive": "Archiveren",
+    "archiveConfirm": "Deze kans archiveren? Je kunt hem daarna herstellen.",
+    "archived": "Kans gearchiveerd.",
+    "archiveFailed": "Kans kon niet gearchiveerd worden.",
+    "archivedBanner": {
+      "since": "Gearchiveerd sinds {{date}}",
+      "flag": "Gearchiveerd",
+      "restore": "Herstellen",
+      "restored": "Kans hersteld.",
+      "restoreFailed": "Kans kon niet hersteld worden."
+    },
     "markWon": "Gewonnen",
     "markLost": "Verloren",
     "expectedCloseOn": "Verwacht te sluiten op {{date}}",

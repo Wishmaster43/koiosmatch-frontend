@@ -4,6 +4,20 @@
  * and holds the optimistic mutations (create, board move, header/picker edits).
  * Lookups (users, stages) are pulled in here too so the page stays presentational.
  * A missing endpoint (404) is an empty list, not an error.
+ *
+ * ARCHIVE-1 (2026-07-18): this used to also fetch `?include_archived=1` and expose
+ * a `showArchived` toggle. Measured: OpportunityController::index DOES honour that
+ * param (`$request->boolean('include_archived')` → `withTrashed()`, grepped
+ * app/Http/Controllers/OpportunityController.php) — but OpportunityResource never
+ * serializes `archived`/`deleted_at` on either the list or the detail row (same
+ * resource class serves both). So a fetch with the flag on silently returns active
+ * + archived rows MIXED, indistinguishable — the former client-side filter
+ * (`r.archived`) was always false, meaning the "Archived" view always rendered
+ * ZERO rows. Dropped rather than shipped as a fake toggle (§0/§4); the single-
+ * record archive/restore (useOpportunityArchive) is unaffected — see its own
+ * comment for the exact BE routes. Recommend backend add the two fields
+ * (mirror VacancyListResource/ApplicationListResource/CandidateListResource)
+ * to re-enable list-level archived visibility.
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -30,15 +44,18 @@ export function useOpportunitiesData() {
 
   const queryClient = useQueryClient()
   const [customers, setCustomers] = useState<PageCustomer[]>([])
-  const [showArchived, setShowArchived] = useState(false)
 
-  // Opportunities list via React Query (A-3); the archived view opts into ?include_archived=1.
-  // A missing endpoint (404) is an empty list, not an error.
-  const { data, isLoading: loading, isError: error } = useQuery({
-    queryKey: ['opportunities', showArchived],
+  // Opportunities list via React Query (A-3). A missing endpoint (404) is an
+  // empty list, not an error. `refetch` doubles as the post-archive/restore
+  // reload (useOpportunityArchive) so a just-archived row drops out of view and
+  // a just-restored one comes back — the default query already excludes
+  // soft-deleted rows, so no `include_archived` fetch is needed here (see the
+  // file comment on why the archived-only view was removed).
+  const { data, isLoading: loading, isError: error, refetch } = useQuery({
+    queryKey: ['opportunities'],
     queryFn: async ({ signal }) => {
       try {
-        const r = await api.get('/opportunities', { params: showArchived ? { include_archived: 1 } : undefined, signal })
+        const r = await api.get('/opportunities', { signal })
         return ((unwrapList(r).rows) as ApiOpportunity[]).map(mapOpportunity)
       } catch (e) {
         if ((e as { response?: { status?: number } })?.response?.status === 404) return [] as Opportunity[]
@@ -49,9 +66,9 @@ export function useOpportunitiesData() {
   const rows = data ?? EMPTY_OPPORTUNITIES
   // Keep the setRows(prev => …) API the optimistic mutations use, backed by the query cache.
   const setRows = useCallback((updater: Opportunity[] | ((prev: Opportunity[]) => Opportunity[])) => {
-    queryClient.setQueryData<Opportunity[]>(['opportunities', showArchived], prev =>
+    queryClient.setQueryData<Opportunity[]>(['opportunities'], prev =>
       typeof updater === 'function' ? (updater as (p: Opportunity[]) => Opportunity[])(prev ?? []) : updater)
-  }, [queryClient, showArchived])
+  }, [queryClient])
   const [selected,       setSelected]       = useState<Opportunity | null>(null)
   const [drawerExpanded, setDrawerExpanded] = useState(false)
   const [selectedIds,    setSelectedIds]    = useState<Set<Id>>(() => new Set())
@@ -146,11 +163,14 @@ export function useOpportunitiesData() {
     }
   }
 
+  // Post-mutation reload (archive/restore) — a plain wrapper so callers don't
+  // need to know this is React Query's refetch under the hood.
+  const reload = () => { void refetch() }
+
   return {
     rows, loading, error, customers, users, stages, stageMeta,
-    showArchived, setShowArchived,
     selected, drawerExpanded, setDrawerExpanded,
     selectedIds, toggleRow, toggleAll, clearSelection,
-    selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity,
+    selectOpportunity, closeDrawer, handleCreated, handleMove, updateOpportunity, reload,
   }
 }

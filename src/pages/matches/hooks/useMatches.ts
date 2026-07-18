@@ -2,6 +2,16 @@
  * useMatches — loads the tenant's matches (GET /matches) and maps them to the flat
  * MatchRow shape the table renders. A missing endpoint (404) is an empty list, not
  * an error. Data logic lives here so MatchesPage stays presentational (§3).
+ *
+ * ARCHIVE-1 (2026-07-18): this used to accept an `includeArchived` flag and send
+ * `?include_archived=1`, mirroring vacancies/applications/opportunities — but
+ * MatchController::index never reads that param (no `withTrashed()` on the query,
+ * grepped app/Http/Controllers/MatchController.php) and neither MatchListResource
+ * nor MatchDetailResource ever serialize `archived`/`deleted_at`. The flag was a
+ * no-op: toggling it re-fetched the identical rows every time. Dropped rather than
+ * shipped as a fake control (§0/§4) — re-add once the backend adds `include_archived`
+ * handling + the archived/deleted_at fields (mirror OpportunityController@index +
+ * VacancyListResource/ApplicationListResource).
  */
 import { useState, useEffect } from 'react'
 import api from '@/lib/api'
@@ -52,16 +62,16 @@ function mapMatch(m: RawMatch): MatchRow {
 // `ref` (NUMMER-1): an exact case-insensitive reference-number lookup (M-00042) —
 // when set, the super-search on the page detected a reference query, so this
 // fetches a single filtered page instead of the full paginated set.
-export function useMatches(includeArchived = false, ref: string | null = null) {
+export function useMatches(ref: string | null = null) {
   const [rows,    setRows]    = useState<MatchRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState(false)
   // Bumping the tick re-runs the fetch — used after creating a placement (the
-  // server derives stage/status/rate fields, so a refetch beats hand-mapping).
+  // server derives stage/status/rate fields, so a refetch beats hand-mapping) and
+  // after an archive/restore (useMatchArchive) so a just-archived row drops out of
+  // the list and a just-restored one comes back.
   const [refreshTick, setRefreshTick] = useState(0)
 
-  // Archived view asks the API for soft-deleted matches too (`?include_archived=1`);
-  // off by default so KPI totals drop and erased data stays hidden (§3B, AVG).
   useEffect(() => {
     let alive = true
     setLoading(true)
@@ -69,7 +79,6 @@ export function useMatches(includeArchived = false, ref: string | null = null) {
     // (Danny: "84 vs 25" — 25 wás de bug). per_page is server-capped at 100 (422
     // above it), so follow last_page and accumulate; safety cap at 10 pages.
     const base: Record<string, unknown> = { per_page: 100 }
-    if (includeArchived) base.include_archived = 1
     const loadAll = async () => {
       // A reference-number query (NUMMER-1) is an exact server-side lookup — one
       // request, no pagination loop; the server ignores other filters when `ref` is set.
@@ -91,9 +100,9 @@ export function useMatches(includeArchived = false, ref: string | null = null) {
       .catch(e => { if (alive && e?.response?.status && e.response.status !== 404) setError(true) })
       .finally(() => { if (alive) setLoading(false) })
     return () => { alive = false }
-  }, [includeArchived, refreshTick, ref])
+  }, [refreshTick, ref])
 
-  // Patch one match in place (optimistic board drag / stage change).
+  // Patch one match in place (optimistic board drag / stage change / archive flag).
   const updateMatch = (id: MatchRow['id'], patch: Partial<MatchRow>) =>
     setRows(prev => prev.map(r => (r.id === id ? { ...r, ...patch } : r)))
 

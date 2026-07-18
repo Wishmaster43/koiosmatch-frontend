@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Plus, LayoutList, Kanban, Archive } from 'lucide-react'
+import { Plus, LayoutList, Kanban } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRightPanel } from '@/context/RightPanelContext'
 import { useMatchStatuses } from '@/lib/useMatchStatuses'
@@ -20,7 +20,6 @@ import MatchesBulkBar from './MatchesBulkBar'
 // drawer; without a fixed candidateId it shows its own candidate picker.
 import MatchPlacementModal from '@/pages/candidates/drawer/MatchPlacementModal'
 import PaginationBar from '@/components/ui/PaginationBar'
-import QuickViewToggle from '@/components/ui/QuickViewToggle'
 import ViewSwitch from '@/components/ui/ViewSwitch'
 import HeaderSearch from '@/components/ui/HeaderSearch'
 import ClearFiltersButton from '@/components/ui/ClearFiltersButton'
@@ -28,6 +27,7 @@ import { useOpenFromIntent } from '@/context/NavigationContext'
 import { useDrawerUrl } from '@/hooks/useDrawerUrl'
 import { useMatches } from './hooks/useMatches'
 import { useMatchesBulkActions } from './hooks/useMatchesBulkActions'
+import { useMatchArchive } from './hooks/useMatchArchive'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { MatchRow } from '@/types/match'
 import type { Id } from '@/types/common'
@@ -39,16 +39,13 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   const user = auth?.user
   // Coupling is authorization-gated in the UI; the backend re-checks (§7).
   const hasPermission = auth?.hasPermission ?? (() => false)
-  // Right-panel filter state: archived is off by default (§3B — archived matches
-  // stay searchable but out of the default view so KPI totals drop).
-  const [showArchived, setShowArchived] = usePageMemory('matches.archived', false)
   const [query,       setQuery]       = usePageMemory('matches.search', '')
   // NUMMER-1: a typed reference number (M-00042) narrows the fetch server-side to
   // an exact `?ref=` lookup instead of the client-side free-text filter below.
   const trimmedQuery = query.trim()
   const refQuery = isReferenceQuery(trimmedQuery) ? trimmedQuery : null
   // Data (fetch + mapping) lives in the hook (§3); the page only derives + renders.
-  const { rows, loading, error, updateMatch, reload } = useMatches(showArchived, refQuery)
+  const { rows, loading, error, updateMatch, reload } = useMatches(refQuery)
   const { registerFilters, unregisterFilters } = useRightPanel()
   // Match statuses drive the board columns + donut (R-1b lookup; the funnel is
   // an APPLICATION axis — the match resource no longer carries a stage).
@@ -126,7 +123,7 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
 
   // Reset to the first page and clear the selection whenever a filter changes
   // (kept out of the memo — setting state during render can loop).
-  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter, kpiScored, showArchived, query])
+  useEffect(() => { setPage(1); setSelectedIds(new Set()) }, [stageFilter, ownerFilter, kpiScored, query])
 
   // Filter the visible rows by donut selection. A reference-number query already
   // narrowed `rows` server-side (exact `?ref=` lookup) — skip the free-text
@@ -167,10 +164,10 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
   ]
 
   // Shared clear-all (page memory keeps filters sticky).
-  const anyFilterActive = Boolean(query.trim() || showArchived || kpiScored || stageFilter.length || ownerFilter.length || clientFilter.length)
+  const anyFilterActive = Boolean(query.trim() || kpiScored || stageFilter.length || ownerFilter.length || clientFilter.length)
   const [searchEpoch, setSearchEpoch] = useState(0)
   const clearAllFilters = () => {
-    setSearchEpoch(e => e + 1); setQuery(''); setShowArchived(false); setKpiScored(false)
+    setSearchEpoch(e => e + 1); setQuery(''); setKpiScored(false)
     setStageFilter([]); setOwnerFilter([]); setClientFilter([])
   }
 
@@ -222,6 +219,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
     updateMatch(id, patch)
     setSelected(p => (p && p.id === id ? { ...p, ...patch } : p))
   }
+
+  // ARCHIVE-1: per-id archive/restore (enkelstuks-sweep, BE 9170e40) — gated on
+  // matches.update, the same permission the DELETE/restore routes themselves require.
+  const { archiveMatch, restoreMatch } = useMatchArchive({ onPatch: patchRow, onReload: reload })
+  const canArchive = hasPermission('matches.update')
 
   // View toggle: table ⇄ board (planboard). Board columns = the tenant match
   // statuses (R-1b lookup + seed fallback) so there are always columns to drag.
@@ -287,12 +289,14 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
             <ClearFiltersButton active={anyFilterActive} onClear={clearAllFilters} />
         </div>
 
-        {/* Right — archived (separate, with label) + icon-only view toggle (mirror opportunities) */}
+        {/* Right — icon-only view toggle (mirror opportunities). No archived
+            QuickViewToggle here (ARCHIVE-1): MatchController::index never honours
+            include_archived and neither match resource ever serializes archived/
+            deleted_at (grepped app/Http/Controllers/MatchController.php +
+            app/Http/Resources/JobMatch/*.php) — a toggle would always show the
+            identical list, a fake affordance. See useMatches.ts for the full note
+            and the recommended backend fix. */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          {/* Archived (soft-deleted) — shared quick-view toggle (§4). */}
-          <QuickViewToggle active={showArchived} onToggle={() => setShowArchived(v => !v)}
-            label={t('view.archived')} color="var(--color-archive)" icon={Archive} />
-
           {/* View toggle — icon-only (label as aria-label + tooltip, §6) */}
           <button onClick={() => setView('table')} title={t('view.matches')} aria-label={t('view.matches')}
             style={{ display: 'flex', padding: 6, borderRadius: 6, border: '1px solid var(--border)', cursor: 'pointer',
@@ -349,7 +353,11 @@ export default function MatchesPage({ intent }: { intent?: unknown } = {}) {
         canApprove={hasPermission('matches.update')}
         onApprovalChange={patchRow}
         onUpdate={patchRow}
-        onUpdateCustomFields={handleUpdateCustomFields} />
+        onUpdateCustomFields={handleUpdateCustomFields}
+        // ARCHIVE-1: per-id delete/restore (§7 — UI-only gate; the backend re-checks
+        // matches.update on both routes).
+        onArchive={canArchive ? archiveMatch : undefined}
+        onRestore={canArchive ? restoreMatch : undefined} />
 
       {/* Direct-match creation: the full placement form (rate proposal, contract,
           cost center) with a candidate picker; refetch so server-derived fields land. */}

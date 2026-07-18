@@ -8,8 +8,6 @@
     "add": "Add opportunity",
     "selected": "{{count}} selected",
     "clearSelection": "Clear selection",
-    "archived": "Archived",
-    "archivedView": "Show archived opportunities",
     "searchPlaceholder": "Search opportunities"
   },
   "cols": {
@@ -48,6 +46,17 @@
     "selectOwner": "Select owner",
     "selectClient": "Select client",
     "createdAt": "Created on {{date}}",
+    "archive": "Archive",
+    "archiveConfirm": "Archive this opportunity? You can restore it afterwards.",
+    "archived": "Opportunity archived.",
+    "archiveFailed": "Couldn't archive the opportunity.",
+    "archivedBanner": {
+      "since": "Archived since {{date}}",
+      "flag": "Archived",
+      "restore": "Restore",
+      "restored": "Opportunity restored.",
+      "restoreFailed": "Couldn't restore the opportunity."
+    },
     "markWon": "Won",
     "markLost": "Lost",
     "expectedCloseOn": "Expected to close on {{date}}",

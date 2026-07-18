@@ -8,8 +8,6 @@
     "add": "Opportunity hinzufügen",
     "selected": "{{count}} ausgewählt",
     "clearSelection": "Auswahl aufheben",
-    "archived": "Archiviert",
-    "archivedView": "Archivierte Chancen anzeigen",
     "searchPlaceholder": "Chancen suchen"
   },
   "cols": {
@@ -48,6 +46,17 @@
     "selectOwner": "Inhaber wählen",
     "selectClient": "Kunde wählen",
     "createdAt": "Erstellt am {{date}}",
+    "archive": "Archivieren",
+    "archiveConfirm": "Diese Opportunity archivieren? Du kannst sie danach wiederherstellen.",
+    "archived": "Opportunity archiviert.",
+    "archiveFailed": "Opportunity konnte nicht archiviert werden.",
+    "archivedBanner": {
+      "since": "Archiviert seit {{date}}",
+      "flag": "Archiviert",
+      "restore": "Wiederherstellen",
+      "restored": "Opportunity wiederhergestellt.",
+      "restoreFailed": "Opportunity konnte nicht wiederhergestellt werden."
+    },
     "tabs": {
       "details": "Details",
       "changelog": "Änderungen",

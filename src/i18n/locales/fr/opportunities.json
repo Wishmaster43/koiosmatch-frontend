@@ -8,8 +8,6 @@
     "add": "Ajouter une opportunité",
     "selected": "{{count}} sélectionné(e)s",
     "clearSelection": "Effacer la sélection",
-    "archived": "Archivées",
-    "archivedView": "Afficher les opportunités archivées",
     "searchPlaceholder": "Rechercher des opportunités"
   },
   "cols": {
@@ -48,6 +46,17 @@
     "selectOwner": "Sélectionner un responsable",
     "selectClient": "Sélectionner un client",
     "createdAt": "Créé le {{date}}",
+    "archive": "Archiver",
+    "archiveConfirm": "Archiver cette opportunité ? Vous pourrez la restaurer ensuite.",
+    "archived": "Opportunité archivée.",
+    "archiveFailed": "Impossible d'archiver l'opportunité.",
+    "archivedBanner": {
+      "since": "Archivée depuis le {{date}}",
+      "flag": "Archivée",
+      "restore": "Restaurer",
+      "restored": "Opportunité restaurée.",
+      "restoreFailed": "Impossible de restaurer l'opportunité."
+    },
     "tabs": {
       "details": "Détails",
       "changelog": "Modifications",

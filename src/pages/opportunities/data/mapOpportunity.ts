@@ -41,6 +41,7 @@ export function mapOpportunity(o: ApiOpportunity): Opportunity {
     date:       o.created_at ?? o.expected_close_at ?? o.close_date ?? '',
     expectedCloseAt: o.expected_close_at ?? null,
     archived:   Boolean(o.archived ?? o.deleted_at),
+    archivedAt: o.deleted_at ?? null,
     // Zorg-detachering fields (C-42) — tolerated absent until the backend lands.
     hours:            num(o.hours),
     hoursPeriod:      o.hours_period ?? 'week',

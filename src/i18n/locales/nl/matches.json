@@ -32,6 +32,18 @@
   "drawer": {
     "label": "Match",
     "createdAt": "Aangemaakt op {{date}}",
+    "archive": "Archiveren",
+    "archiveConfirm": "Deze match archiveren? Je kunt hem daarna herstellen.",
+    "archived": "Match gearchiveerd.",
+    "archiveFailed": "Match kon niet gearchiveerd worden.",
+    "archiveBlockedActiveContract": "Deze plaatsing heeft een actief contract — beëindig dat eerst.",
+    "archivedBanner": {
+      "since": "Gearchiveerd sinds {{date}}",
+      "flag": "Gearchiveerd",
+      "restore": "Herstellen",
+      "restored": "Match hersteld.",
+      "restoreFailed": "Match kon niet hersteld worden."
+    },
     "tabs": {
       "overview": "Overzicht",
       "relations": "Relaties",
@@ -116,8 +128,7 @@
   },
   "view": {
     "matches": "Matches",
-    "board": "Board",
-    "archived": "Gearchiveerd"
+    "board": "Board"
   },
   "board": {
     "empty": "Geen matches"
