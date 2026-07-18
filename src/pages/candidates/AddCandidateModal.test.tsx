@@ -1,9 +1,8 @@
 /**
  * AddCandidateModal — covers Danny's Optie A layout rework (2026-07-18): the right
  * panel renders as titled cards (Persoonlijk / Contact / Werk) in the drill-down
- * style, the address card is collapsed by default behind a calm disclosure,
- * force-opens when the picked phase's required-fields config includes an address
- * field, and the submit body is UNCHANGED by the layout work — including the
+ * style, the address card is always open (Danny r2), functietitel/geslacht/
+ * provincie render as searchable comboboxen, Esc closes via the focus trap, and the submit body is UNCHANGED by the layout work — including the
  * explicit location_ids chips and the omit-when-empty rule (punt 10). Network-
  * backed hooks are mocked directly (no QueryClientProvider needed); the shared
  * form fields render for real. i18next is uninitialised in tests, so t() returns
@@ -42,6 +41,8 @@ vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [{ id: 'u1', name: 'P
 vi.mock('@/lib/useGenders', () => ({ useGenders: () => ({ genders: [{ value: 'male', label: 'Man' }, { value: 'female', label: 'Vrouw' }] }) }))
 vi.mock('@/context/AuthContext', () => ({ useAuth: () => ({ user: { id: 'u1', name: 'Piet Recruiter', branch_ids: ['b1'] } }) }))
 vi.mock('./hooks/useCandidateMutations', () => ({ useCreateCandidate: () => ({ createCandidate, saving: false }) }))
+vi.mock('@/lib/useFunctions', () => ({ useFunctions: () => ({ functions: [{ value: 'Verzorgende IG', label: 'Verzorgende IG' }], allowFreeEntry: true }) }))
+vi.mock('./hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: [{ value: 'Utrecht', label: 'Utrecht' }] }) }))
 vi.mock('@/lib/useLocations', () => ({ useLocations: () => [{ value: 'b1', label: 'Vestiging Noord' }, { value: 'b2', label: 'Vestiging Zuid' }] }))
 
 const noop = () => {}
@@ -60,55 +61,35 @@ describe('AddCandidateModal · Optie A card layout', () => {
     // A representative field per card still renders (names / email / function).
     expect(screen.getByPlaceholderText('modal.fields.firstName')).toBeInTheDocument()
     expect(screen.getByPlaceholderText('modal.fields.emailPlaceholder')).toBeInTheDocument()
-    expect(screen.getByPlaceholderText('modal.fields.functionPlaceholder')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'modal.fields.functionPlaceholder' })).toBeInTheDocument()
     // Branch chips seed from /auth/me (punt 10) — the b1 chip is visible.
     expect(screen.getByText('Vestiging Noord')).toBeInTheDocument()
   })
 
-  it('keeps the address card collapsed by default behind the disclosure', () => {
+  it('renders the address card open by default (Danny r2: geen inklap)', () => {
     render(<AddCandidateModal onClose={noop} />)
-    expect(screen.queryByPlaceholderText('modal.fields.streetPlaceholder')).toBeNull()
-    const toggle = screen.getByRole('button', { name: /modal\.fields\.addressExpand/ })
-    expect(toggle).toHaveAttribute('aria-expanded', 'false')
-  })
-
-  it('opens the address card on click and can collapse it again while empty', async () => {
-    const user = userEvent.setup()
-    render(<AddCandidateModal onClose={noop} />)
-    await user.click(screen.getByRole('button', { name: /modal\.fields\.addressExpand/ }))
-    expect(screen.getByPlaceholderText('modal.fields.streetPlaceholder')).toBeInTheDocument()
-    // While no address field is required/filled, the title row collapses it again.
-    const collapse = screen.getByRole('button', { name: /modal\.fields\.cardAddress/ })
-    expect(collapse).toHaveAttribute('aria-expanded', 'true')
-    await user.click(collapse)
-    expect(screen.queryByPlaceholderText('modal.fields.streetPlaceholder')).toBeNull()
-  })
-
-  it('auto-opens (and locks open) when the picked phase requires an address field', async () => {
-    // Lead requires city → the card must be open on mount, with no disclosure.
-    state.settings = { candidate_required_fields: JSON.stringify({
-      lead: ['first_name', 'last_name', 'city'], candidate: ['first_name', 'last_name'],
-    }) }
-    const user = userEvent.setup()
-    render(<AddCandidateModal onClose={noop} />)
-    expect(screen.getByPlaceholderText('modal.fields.cityPlaceholder')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /modal\.fields\.addressExpand/ })).toBeNull()
-    // Forced open = no collapse control either (it would hide a required field).
-    expect(screen.queryByRole('button', { name: /modal\.fields\.cardAddress/ })).toBeNull()
-    // Switching to a phase WITHOUT address requirements collapses it back.
-    await user.click(screen.getByRole('button', { name: 'Kandidaat' }))
-    expect(screen.queryByPlaceholderText('modal.fields.cityPlaceholder')).toBeNull()
-    expect(screen.getByRole('button', { name: /modal\.fields\.addressExpand/ })).toBeInTheDocument()
-  })
-
-  it('stays open once an address field holds a value', async () => {
-    const user = userEvent.setup()
-    render(<AddCandidateModal onClose={noop} />)
-    await user.click(screen.getByRole('button', { name: /modal\.fields\.addressExpand/ }))
-    await user.type(screen.getByPlaceholderText('modal.fields.streetPlaceholder'), 'Dorpsstraat')
-    // A filled field forces the card open — the collapse control disappears.
-    expect(screen.queryByRole('button', { name: /modal\.fields\.cardAddress/ })).toBeNull()
     expect(screen.getByText('modal.fields.cardAddress')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('modal.fields.streetPlaceholder')).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('modal.fields.cityPlaceholder')).toBeInTheDocument()
+  })
+
+  it('geslacht/provincie/functietitel are searchable comboboxen (drill-down pattern)', async () => {
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={noop} />)
+    // Opening the function combobox reveals its type-to-filter input + lookup option.
+    await user.click(screen.getByRole('button', { name: 'modal.fields.functionPlaceholder' }))
+    expect(await screen.findByRole('button', { name: /Verzorgende IG/ })).toBeInTheDocument()
+    // Province combobox lists the lookup value.
+    await user.click(screen.getAllByRole('button', { name: 'common:select' })[1])
+    expect(await screen.findByRole('button', { name: /Utrecht/ })).toBeInTheDocument()
+  })
+
+  it('Esc closes the modal via the focus trap', async () => {
+    const onClose = vi.fn()
+    const user = userEvent.setup()
+    render(<AddCandidateModal onClose={onClose} />)
+    await user.keyboard('{Escape}')
+    expect(onClose).toHaveBeenCalled()
   })
 })
 

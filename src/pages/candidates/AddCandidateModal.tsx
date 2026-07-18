@@ -3,17 +3,16 @@
  * Left: the phase column (Lead/Kandidaat), untouched. Right: a two-column grid of
  * titled cards (Persoonlijk / Contact / Werk / Adres) in the drill-down ProfileTab
  * card style, replacing the old single stacked column. The address card is
- * collapsed by default behind a calm disclosure and forces open when the picked
- * phase requires an address field or one already carries a value/error.
- * Layout-only rework: state keys, validation, submit body and 422 handling are
- * unchanged.
+ * always open (Danny r2: popup groter, geen inklap); functietitel/geslacht/
+ * provincie are searchable comboboxen mirroring the drill-down, and Esc closes
+ * via the house focus trap. State keys, validation, submit body and 422
+ * handling are unchanged.
  */
 import { useState, useEffect } from 'react'
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, UserPlus, ChevronRight, ChevronDown } from 'lucide-react'
+import { X, UserPlus } from 'lucide-react'
 import { Field as FieldJs, TextField as TextFieldJs, SelectField as SelectFieldJs } from '@/components/forms/fields'
-import { NL_PROVINCES } from './drawer/constants'
 import { useLookups } from '@/context/LookupsContext'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import { useUsers } from '@/lib/queries'
@@ -22,6 +21,10 @@ import { useAuth } from '@/context/AuthContext'
 import { useCreateCandidate } from './hooks/useCandidateMutations'
 import { useLocations } from '@/lib/useLocations'
 import SearchSelect from '@/components/ui/SearchSelect'
+import CreatableSelectJs from '@/components/ui/CreatableSelect'
+import { useFunctions } from '@/lib/useFunctions'
+import { useProvinces } from './hooks/useProvinces'
+import { useFocusTrap } from '@/hooks/useFocusTrap'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -30,6 +33,8 @@ import type { Id, LookupOption } from '@/types/common'
 const Field = FieldJs as ComponentType<{ label?: ReactNode; required?: boolean; children?: ReactNode }>
 const TextField = TextFieldJs as ComponentType<{ value?: string; onChange?: (v: string) => void; placeholder?: string; type?: string; error?: boolean; style?: CSSProperties }>
 const SelectField = SelectFieldJs as ComponentType<{ value?: string; onChange?: (v: string) => void; placeholder?: string; options?: Array<{ value: string; label: string } | string> }>
+// Searchable combobox (drill-down pattern) — still untyped JS, same cast as ProfileTab.
+const CreatableSelect = CreatableSelectJs as unknown as ComponentType<Record<string, unknown>>
 
 // 422 field-error keys are snake_case; map them back to this form's field names.
 const API_TO_FORM: Record<string, string> = {
@@ -53,8 +58,6 @@ interface FormState {
   ownerId: string | number
 }
 
-// The address-card fields — drive the collapsed-by-default disclosure below.
-const ADDRESS_KEYS: Array<keyof FormState> = ['street', 'houseNumber', 'houseNumberSuffix', 'postalCode', 'city', 'province']
 
 // Card chrome — mirrors the drill-down ProfileTab exactly (11px uppercase muted
 // heading above a bordered surface card) so the modal reads as the same system (§3A).
@@ -75,6 +78,12 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const { user: me } = useAuth() as unknown as { user: { id?: Id; branch_ids?: Array<string | number> } | null }
   const settings = useAllSettings()
   const { genders } = useGenders()
+  // Zoekbare comboboxen (Danny r2): functietitel uit de functies-lookup (free-entry-
+  // toggle bepaalt of typen een nieuwe waarde mag opleveren), provincies uit de lookup.
+  const { functions, allowFreeEntry } = useFunctions() as { functions: Array<string | { value: string; label: string }>; allowFreeEntry: boolean }
+  const { provinces } = useProvinces()
+  // Esc sluit + tab-trap + focus-restore (huispatroon).
+  const panelRef = useFocusTrap<HTMLDivElement>(onClose)
   const { createCandidate, saving } = useCreateCandidate()
 
   // On create you pick the PHASE (Lead/Kandidaat); deployability defaults to available.
@@ -86,8 +95,6 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const [status,    setStatus]    = useState(defaultStatus)
   const [errors,    setErrors]    = useState<Record<string, boolean>>({})
   const [submitErr, setSubmitErr] = useState<string | null>(null)
-  // Optie A: the address card starts collapsed; this flag is the user's explicit open.
-  const [addressOpen, setAddressOpen] = useState(false)
   // Punt 10: vestiging-chips — voorgevuld met de eigen koppelingen uit /auth/me
   // (ME-BRANCHES-1). Leeg = veld weglaten → de backend koppelt automatisch de
   // maker-vestigingen (punt 9); een afwijkende keuze gaat expliciet mee in de
@@ -127,10 +134,6 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const requiredForm = (requiredCfg[status] ?? requiredCfg.lead ?? []).map(k => REQ_FIELD_MAP[k]).filter(Boolean) as Array<keyof FormState>
   const isReq = (k: keyof FormState) => requiredForm.includes(k)
 
-  // The address card force-opens when the picked phase requires an address field, or
-  // one already holds a value / validation error — never hide a required/filled field.
-  const addressForced = ADDRESS_KEYS.some(k => isReq(k) || !!String(form[k] ?? '').trim() || !!errors[k])
-  const showAddress = addressOpen || addressForced
 
   const handleSubmit = async () => {
     const e: Record<string, boolean> = {}
@@ -205,7 +208,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
       onClick={e => e.target === e.currentTarget && onClose()}
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 200,
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-      <div style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 900,
+      <div ref={panelRef} role="dialog" aria-modal="true" tabIndex={-1}
+        style={{ background: 'var(--surface)', borderRadius: 16, width: '100%', maxWidth: 940,
         boxShadow: '0 20px 60px rgba(0,0,0,0.22)', overflow: 'hidden', display: 'flex', maxHeight: '90vh' }}>
 
         {/* ── Left panel: status (lifecycle) selection ── */}
@@ -304,7 +308,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                         <TextField type="date" value={form.dateOfBirth} onChange={v => set('dateOfBirth', v)} error={errors.dateOfBirth} />
                       </Field>
                       <Field label={t('modal.fields.gender')} required={isReq('gender')}>
-                        <SelectField value={form.gender} onChange={v => set('gender', v)} placeholder={t('common:select')} options={genderOptions} />
+                        <CreatableSelect value={form.gender || null} onChange={(v: string) => set('gender', v)} allowCreate={false}
+                          placeholder={t('common:select')} options={genderOptions} menuWidth={220} />
                       </Field>
                     </div>
                   </div>
@@ -328,7 +333,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                   <div style={cardHead}>{t('modal.fields.cardWork')}</div>
                   <div style={cardBox}>
                     <Field label={t('modal.fields.functionTitle')} required={isReq('functionTitle')}>
-                      <TextField value={form.functionTitle} onChange={v => set('functionTitle', v)} placeholder={t('modal.fields.functionPlaceholder')} error={errors.functionTitle} />
+                      <CreatableSelect value={form.functionTitle || null} onChange={(v: string) => set('functionTitle', v)} allowCreate={allowFreeEntry}
+                      placeholder={t('modal.fields.functionPlaceholder')} options={functions} menuWidth={280} />
                     </Field>
                     <Field label={t('modal.fields.owner')}>
                       <SelectField value={String(form.ownerId)} onChange={v => set('ownerId', v)}
@@ -361,57 +367,37 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                   </div>
                 </div>
 
-                {/* ── Adres — collapsed disclosure by default; forced open when required/
-                    filled/errored (the collapse control then disappears: collapsing
-                    would hide a required or filled field) ── */}
+                {/* ── Adres — altijd open (Danny r2: popup groter, geen inklap) ── */}
                 <div style={{ gridColumn: '1 / -1' }}>
-                  {!showAddress ? (
-                    <button type="button" onClick={() => setAddressOpen(true)} aria-expanded={false}
-                      style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: '9px 12px',
-                        fontSize: 12, fontWeight: 500, borderRadius: 10, border: '1px dashed var(--border)',
-                        background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
-                      <ChevronRight size={13} /> {t('modal.fields.addressExpand')}
-                    </button>
-                  ) : (
-                    <>
-                      {addressForced ? (
-                        <div style={cardHead}>{t('modal.fields.cardAddress')}</div>
-                      ) : (
-                        <button type="button" onClick={() => setAddressOpen(false)} aria-expanded={true}
-                          style={{ ...cardHead, display: 'flex', alignItems: 'center', gap: 4, width: '100%',
-                            background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
-                          <ChevronDown size={12} /> {t('modal.fields.cardAddress')}
-                        </button>
-                      )}
-                      <div style={cardBox}>
-                        <div style={row('2fr 1fr 1fr')}>
-                          <Field label={t('modal.fields.street')} required={isReq('street')}>
-                            <TextField value={form.street} onChange={v => set('street', v)} placeholder={t('modal.fields.streetPlaceholder')} error={errors.street} />
-                          </Field>
-                          <Field label={t('modal.fields.houseNumber')}>
-                            <TextField value={form.houseNumber} onChange={v => set('houseNumber', v)} />
-                          </Field>
-                          <Field label={t('modal.fields.houseNumberSuffix')}>
-                            <TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} />
-                          </Field>
-                        </div>
-                        <div style={row('1fr 2fr')}>
-                          <Field label={t('modal.fields.postalCode')} required={isReq('postalCode')}>
-                            <TextField value={form.postalCode} onChange={v => set('postalCode', v)} error={errors.postalCode} />
-                          </Field>
-                          <Field label={t('modal.fields.city')} required={isReq('city')}>
-                            <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} error={errors.city} />
-                          </Field>
-                        </div>
-                        <div style={row('1fr 1fr')}>
-                          <Field label={t('modal.fields.province')}>
-                            <SelectField value={form.province} onChange={v => set('province', v)} placeholder={t('common:select')} options={NL_PROVINCES} />
-                          </Field>
-                          <div />
-                        </div>
-                      </div>
-                    </>
-                  )}
+                  <div style={cardHead}>{t('modal.fields.cardAddress')}</div>
+                  <div style={cardBox}>
+                    <div style={row('2fr 1fr 1fr')}>
+                      <Field label={t('modal.fields.street')} required={isReq('street')}>
+                        <TextField value={form.street} onChange={v => set('street', v)} placeholder={t('modal.fields.streetPlaceholder')} error={errors.street} />
+                      </Field>
+                      <Field label={t('modal.fields.houseNumber')}>
+                        <TextField value={form.houseNumber} onChange={v => set('houseNumber', v)} />
+                      </Field>
+                      <Field label={t('modal.fields.houseNumberSuffix')}>
+                        <TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} />
+                      </Field>
+                    </div>
+                    <div style={row('1fr 2fr')}>
+                      <Field label={t('modal.fields.postalCode')} required={isReq('postalCode')}>
+                        <TextField value={form.postalCode} onChange={v => set('postalCode', v)} error={errors.postalCode} />
+                      </Field>
+                      <Field label={t('modal.fields.city')} required={isReq('city')}>
+                        <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} error={errors.city} />
+                      </Field>
+                    </div>
+                    <div style={row('1fr 1fr')}>
+                      <Field label={t('modal.fields.province')}>
+                        <CreatableSelect value={form.province || null} onChange={(v: string) => set('province', v)} allowCreate={false}
+                          placeholder={t('common:select')} options={provinces} menuWidth={260} />
+                      </Field>
+                      <div />
+                    </div>
+                  </div>
                 </div>
 
               </div>
