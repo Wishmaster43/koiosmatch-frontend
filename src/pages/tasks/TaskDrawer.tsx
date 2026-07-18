@@ -79,9 +79,11 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   }
 
   // Header meta pickers: quick status / priority / assignee change (no edit-mode).
-  // ARCHIVED: no pickers on an inactive record — every task PATCH 404s while soft-
-  // deleted (measured: TaskController::update findOrFail) — restore first (mirrors
-  // the candidate drawer's archived gating).
+  // ARCHIVED: no pickers on an inactive record. W2 delivered (measured):
+  // TaskController::update is now Task::withTrashed()->findOrFail, so the PATCH no
+  // longer 404s on a soft-deleted task — but the gating stays: editing an archived
+  // record is a deliberate product choice (restore first), not a technical necessity
+  // anymore. Keep it hidden.
   // Standard picker widths (§3A blueprint: Status ~160 + Eigenaar/assignee ~190;
   // priority stays 140 — already conforms).
   const meta: MetaPicker[] = task.archived ? [] : [
@@ -91,7 +93,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
   ]
 
   // "Mark done" quick action — only when a done status exists and the task isn't
-  // done; never on an archived task (same 404 gating as the pickers above).
+  // done; never on an archived task (same product-choice gating as the pickers above).
   const doneValue = doneStatusValues[0]
   const markDone = doneValue != null && !task.statusIsDone && !task.archived
     ? (
@@ -136,7 +138,7 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           titleActions={<TaskChangelogPopover task={task} />}
           actions={markDone}
           meta={meta}
-          // Tag editing is a PATCH too — hidden while archived (404s, see meta above).
+          // Tag editing is a PATCH too — hidden while archived (same gating, see meta above).
           tags={task.archived ? undefined : {
             items: task.tags ?? [],
             onAdd: (tag: string) => onUpdate(task.id, { tags: [...(task.tags ?? []), tag] }),
@@ -146,8 +148,9 @@ export default function TaskDrawer({ task, onClose, expanded, onToggleExpand, on
           tagsLabel={t('drawer.tags')}
         >
           {/* Enkelstuks-sweep: archived state + per-id restore via the ONE shared
-              ArchivedBanner (§3A — extend, never duplicate). archivedAt is null today
-              (measured: TaskListResource has no deleted_at) → flag-only line. */}
+              ArchivedBanner (§3A — extend, never duplicate). W2 delivered (measured:
+              TaskListResource now carries deleted_at) → shows "Archived on {date}";
+              falls back to the flag-only line only if a row somehow has none. */}
           {task.archived && (
             <ArchivedBanner id={task.id} onRestore={onRestore}
               message={task.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(task.archivedAt) }) : t('drawer.archivedBanner.flag')}

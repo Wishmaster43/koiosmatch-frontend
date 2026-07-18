@@ -57,8 +57,9 @@ export function mapTask(t: ApiTask = {}): Task {
     linkLabel: firstLinkLabel(links),
     commentCount: t.comment_count ?? (t.comments?.length ?? 0),
     createdAt: t.created_at ?? '',
-    // Not returned by the API today (measured); the page sets this from which
-    // fetch (active vs ?archived=1) produced the row — kept here for a stable default.
+    // W2 delivered (measured: TaskListResource carries `archived` + `deleted_at`
+    // on both the list row and the detail) — read straight through; the page's
+    // ?archived=1 fetch still stamps `archived: true` defensively (belt-and-braces).
     archived: Boolean(t.archived),
     archivedAt: t.deleted_at ?? null,
   }

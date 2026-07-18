@@ -10,6 +10,13 @@
  * owner_id (measured in app/Http/Requests/Outreach) — via useOutreachDetail.setOwner.
  * No changelog icon: there is no /outreach-campaigns/{id}/activity route yet
  * (grepped routes/api/tenant/tasks-outreach.php) — OUTREACH-ACTIVITY-1.
+ *
+ * W2 delivered (measured): OutreachCampaignController::show is now withTrashed and
+ * OutreachCampaignResource carries `archived`/`deleted_at`, so an archived campaign
+ * fetches its real detail (targets included) instead of the row's bare fallbacks.
+ * The owner picker/PATCH stays gated on archived regardless — update() is still a
+ * plain findOrFail (would 404) AND it is a deliberate product choice either way
+ * (restore first).
  */
 import { useTranslation } from 'react-i18next'
 import { useDateFormat } from '@/lib/datetime'
@@ -34,13 +41,16 @@ const STATUS_COLOR: Record<string, string> = {
 interface UserLike { id?: Id; name?: string; firstname?: string; lastname?: string; email?: string }
 const userName = (u: UserLike): string => u.name || [u.firstname, u.lastname].filter(Boolean).join(' ') || u.email || '—'
 
-export default function OutreachDrawer({ id, createdAt, archived = false, fallbackName, fallbackStatus, onRestore, onClose, expanded = false, onToggleExpand }: {
+export default function OutreachDrawer({ id, createdAt, archived = false, archivedAt = null, fallbackName, fallbackStatus, onRestore, onClose, expanded = false, onToggleExpand }: {
   id: string | null
   createdAt?: string
-  // Enkelstuks-sweep: soft-deleted row (client-side flag from the page). The detail
-  // GET 404s while archived (measured: show() has no withTrashed), so the fetch is
-  // skipped and the row's name/status stand in.
+  // Enkelstuks-sweep: soft-deleted row (flag from the page). W2 delivered (measured:
+  // show() is now withTrashed), so the drawer fetches the real detail even when
+  // archived — the fallbacks below only cover the brief loading gap.
   archived?: boolean
+  // W2 delivered (measured: OutreachCampaignResource carries deleted_at) — the
+  // banner reads "Archived on {date}"; null falls back to the flag-only line.
+  archivedAt?: string | null
   fallbackName?: string
   fallbackStatus?: string
   // Per-id restore — the page passes this only with outreach.update.
@@ -50,9 +60,9 @@ export default function OutreachDrawer({ id, createdAt, archived = false, fallba
   onToggleExpand?: () => void
 }) {
   const { t } = useTranslation('outreach')
-  const { formatDateTime } = useDateFormat()
-  // Skip the guaranteed-404 fetch on an archived campaign (hooks before any return).
-  const { detail, loading, error, setTargetStatus, setTargetOutcome, setOwner, setCustomFields } = useOutreachDetail(archived ? null : id)
+  const { formatDate, formatDateTime } = useDateFormat()
+  // Always fetch: an archived campaign's detail now loads too (withTrashed show()).
+  const { detail, loading, error, setTargetStatus, setTargetOutcome, setOwner, setCustomFields } = useOutreachDetail(id)
   const { data: users = [] } = useUsers() as { data?: UserLike[] }
   // The Extra tab only shows when the tenant has defined outreach-campaign custom fields (§3A(f)).
   const { fields: customFieldDefs } = useCustomFields('outreach_campaign')
@@ -111,9 +121,11 @@ export default function OutreachDrawer({ id, createdAt, archived = false, fallba
                 {/* Status badge — colour-coded, read-only (was the body StatusPill, §3A(c)). */}
                 <TitleBadge label={t(`status.${st}`, { defaultValue: st })} color={STATUS_COLOR[st] ?? '#94A3B8'} />
               </div>
-              {/* Archived: the targets are not loadable (404), so no fake 0-of-0 progress. */}
+              {/* W2 delivered: the detail (incl. targets) now loads for an archived
+                  campaign too, so the real progress shows regardless of archive state
+                  — the ArchivedBanner below already carries the archived signal. */}
               <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                {archived ? t('drawer.archivedBanner.flag') : t('drawer.progress', { done, total })}
+                {t('drawer.progress', { done, total })}
               </div>
             </>
           )}
@@ -121,7 +133,9 @@ export default function OutreachDrawer({ id, createdAt, archived = false, fallba
           onToggleExpand={onToggleExpand}
           onClose={onClose}
           // Standard picker widths (§3A blueprint: Eigenaar ~190). ARCHIVED: no owner
-          // picker on an inactive record — the PATCH 404s while soft-deleted; restore first.
+          // picker on an inactive record — update() is still a plain findOrFail (404s
+          // on a soft-deleted campaign) AND the gating is a deliberate product choice
+          // either way; restore first.
           meta={archived ? [] : [
             { key: 'owner', label: t('drawer.owner'), value: String(detail?.owner?.id ?? ''),
               options: ownerOptions, placeholder: t('drawer.selectOwner'),
@@ -129,11 +143,12 @@ export default function OutreachDrawer({ id, createdAt, archived = false, fallba
           ]}
         >
           {/* Enkelstuks-sweep: archived state + per-id restore via the ONE shared
-              ArchivedBanner (§3A — extend, never duplicate). Flag-only line: the
-              resource carries no deleted_at (measured, OutreachCampaignResource). */}
+              ArchivedBanner (§3A — extend, never duplicate). W2 delivered (measured:
+              OutreachCampaignResource now carries deleted_at) → dated banner; falls
+              back to the flag-only line when archivedAt is absent. */}
           {archived && (
             <ArchivedBanner id={id} onRestore={onRestore ? () => onRestore(id) : undefined}
-              message={t('drawer.archivedBanner.flag')}
+              message={archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(archivedAt) }) : t('drawer.archivedBanner.flag')}
               restoreLabel={t('drawer.archivedBanner.restore')} />
           )}
         </EntityHeader>

@@ -130,10 +130,11 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
   }, [])
 
   // All tasks decorated with their lookup labels/colours — the basis for KPIs/donuts/view.
-  // Archived (soft-deleted) tasks, fetched lazily while the archived toggle is on.
-  // The list resource carries no archived flag (measured: TaskListResource has no
-  // deleted_at), so rows from this onlyTrashed fetch are flagged client-side — the
-  // drawer's archived banner + restore affordance key off it.
+  // Archived (soft-deleted) tasks, fetched lazily while the archived toggle is on
+  // (server-side onlyTrashed via ?archived=1). TaskListResource now delivers
+  // `archived`/`deleted_at` itself (W2 delivered, measured), so mapTask already sets
+  // them correctly; the `archived: true` stamp below stays as a defensive no-op in
+  // case a future BE regression drops the field on this specific fetch.
   useEffect(() => {
     if (!showArchived) return
     const ctrl = new AbortController()
@@ -191,9 +192,10 @@ function TasksPageInner({ intent }: { intent?: unknown }) {
     if (selected?.id === task.id) { closeDrawer(); return }
     selectedIdRef.current = task.id ?? null
     setSelected(decorate(task) as TaskDetail); setExpanded(false)
-    // NOTE: for an ARCHIVED task this fetch 404s (BE show() has no withTrashed —
-    // measured, TaskController) so the drawer keeps rendering the light row; the
-    // archived flag from that row must survive the (future) detail replace.
+    // W2 delivered (measured: TaskController::show is now Task::withTrashed()->
+    // findOrFail) — this fetch succeeds for an archived task too and replaces the
+    // light row with the full detail; `archived` still pins to the row's own value
+    // (same value either way) so a stale response can never flip it.
     api.get(`/tasks/${task.id}`)
       .then(r => { if (selectedIdRef.current === task.id) setSelected(decorate({ ...mapTaskDetail(unwrap(r)), archived: task.archived })) })
       .catch(() => {})

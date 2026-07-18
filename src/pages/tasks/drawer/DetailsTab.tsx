@@ -83,8 +83,9 @@ export default function DetailsTab({ task, onUpdate }: { task: TaskDetail; onUpd
               style={{ ...iconBtn, background: 'var(--bg)', color: 'var(--text-muted)', border: '1px solid var(--border)' }}><X size={13} /></button>
           </div>
         ) : !task.archived && (
-          // No edit on an ARCHIVED task — the PATCH 404s while soft-deleted (measured:
-          // TaskController::update findOrFail); restore first (mirrors the header gating).
+          // No edit on an ARCHIVED task. W2 delivered (measured: TaskController::update
+          // is now withTrashed, so the PATCH no longer 404s) — the gating stays anyway:
+          // restore first is a deliberate product choice (mirrors the header gating).
           <button onClick={startEdit} title={t('details.title')} aria-label={t('details.title')}
             style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, display: 'flex' }}>
             <Edit2 size={13} />

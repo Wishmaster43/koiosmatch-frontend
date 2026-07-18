@@ -1,9 +1,11 @@
 /**
  * OutreachDrawer — the enkelstuks-sweep archived state: an archived bellijst shows
- * the shared ArchivedBanner with a working per-id restore, skips the guaranteed-404
- * detail fetch, renders the row's fallback name and hides the owner picker (its
- * PATCH 404s on a soft-deleted record). (The live seed has no archived campaigns,
- * so this wiring is verified here.)
+ * the shared ArchivedBanner (flag-only, or "Archived on {date}" once archivedAt is
+ * set — W2 delivered, measured: OutreachCampaignResource carries deleted_at) with a
+ * working per-id restore. W2 also delivered show() as withTrashed, so the drawer now
+ * FETCHES the real detail even while archived (only the owner picker stays hidden —
+ * update() is still a plain findOrFail and it's a deliberate product choice either
+ * way). (The live seed has no archived campaigns, so this wiring is verified here.)
  */
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -25,18 +27,28 @@ vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 
 describe('OutreachDrawer — archived state', () => {
-  it('skips the 404 fetch, shows fallback name + banner, and fires the per-id restore', () => {
+  it('still fetches the real detail (W2: show() is withTrashed), shows the flag-only banner, and fires the per-id restore', () => {
     const onRestore = vi.fn()
     render(<OutreachDrawer id="c1" archived fallbackName="Bellijst Zorg" fallbackStatus="active"
       onRestore={onRestore} onClose={() => {}} />)
-    // Archived → the hook receives null (no fetch), the row's name stands in.
-    expect(detailMock).toHaveBeenLastCalledWith(null)
+    // Archived no longer skips the fetch — the hook still gets the real id.
+    expect(detailMock).toHaveBeenLastCalledWith('c1')
+    // The stubbed hook returns detail: null, so the fallback name still stands in
+    // while loading.
     expect(screen.getByText('Bellijst Zorg')).toBeInTheDocument()
-    // Banner line + subtitle both say archived; the owner picker is hidden.
-    expect(screen.getAllByText('Gearchiveerd').length).toBeGreaterThan(0)
+    // No archivedAt passed → flag-only banner; the owner picker stays hidden.
+    expect(screen.getByText('Gearchiveerd')).toBeInTheDocument()
     expect(screen.queryByText('Eigenaar')).toBeNull()
     fireEvent.click(screen.getByRole('button', { name: 'Herstellen' }))
     expect(onRestore).toHaveBeenCalledWith('c1')
+  })
+
+  // W2 delivered (measured): OutreachCampaignResource now carries deleted_at — the
+  // banner upgrades from the flag-only line to the dated one once it's on the record.
+  it('shows the dated banner once archivedAt is set', () => {
+    render(<OutreachDrawer id="c1" archived archivedAt="2026-07-10T10:00:00" fallbackName="Bellijst Zorg"
+      onClose={() => {}} />)
+    expect(screen.getByText('Gearchiveerd op 10-07-2026')).toBeInTheDocument()
   })
 
   it('fetches + shows the owner picker and no banner for an active campaign', () => {

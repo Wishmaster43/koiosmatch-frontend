@@ -69,30 +69,25 @@ export default function OutreachPage() {
   // page has no cross-entity intent today, so there is nothing to pass for it.
   useDrawerUrl({ selectedId: openId, openById: (id) => setOpenId(String(id)), close: () => setOpenId(null) })
 
-  // MEASURED seam fix: the BE list param is `include_archived=1` (withTrashed —
-  // active + archived MIXED; the old `archived: 1` was silently ignored, so the
-  // archived view showed the ACTIVE list). The resource carries no deleted_at/
-  // archived field either, so archived-only is derived below by subtracting the
-  // active ids. BE gap (report): an onlyTrashed param + a deleted_at field would
-  // make this exact — and paginated sets larger than one page can miss rows.
+  // OUTREACH-TRASHED-1 fixed (W2 delivered, measured): the BE now takes
+  // `?archived=1` as a true onlyTrashed filter (mirrors tasks), so the archived
+  // list comes straight from the server — no more client-side subtraction against
+  // the active ids, which used to break past the first page.
   const [archivedRaw, setArchivedRaw] = useState<Campaign[]>([])
   const [archLoading, setArchLoading] = useState(false)
   const [archError, setArchError] = useState(false)
   useEffect(() => {
     if (!showArchived) return
     setArchLoading(true); setArchError(false)
-    listCampaigns({ include_archived: 1 })
+    listCampaigns({ archived: 1 })
       .then((res) => setArchivedRaw((res.rows as Campaign[]) ?? []))
       .catch(() => setArchError(true))
       .finally(() => setArchLoading(false))
   }, [showArchived])
 
-  // Archived-only rows = the mixed withTrashed list minus the active ids, flagged
-  // for the drawer's archived banner (client-side — see the measured gap above).
-  const archived = useMemo(() => {
-    const activeIds = new Set(campaigns.map((c) => c.id))
-    return archivedRaw.filter((c) => !activeIds.has(c.id)).map((c) => ({ ...c, archived: true }))
-  }, [archivedRaw, campaigns])
+  // Archived-only rows, exactly as the server returned them (each already carries
+  // `archived: true` / `deleted_at` from OutreachCampaignResource).
+  const archived = archivedRaw
 
   // Clear the selection whenever the filter/view/archived toggle changes.
   useEffect(() => { setSelectedIds(new Set()) }, [selectedStatus, selectedChannel, kpiTargets, view, showArchived])
@@ -256,11 +251,12 @@ export default function OutreachPage() {
         )}
       </div>
       {/* Per-bellijst drill-down (the call list itself) — row click opens it. An
-          archived row feeds the drawer its banner + name/status fallbacks (the
-          detail GET 404s while soft-deleted — measured, OutreachCampaignController::
-          show has no withTrashed). */}
+          archived row feeds the drawer its banner + name/status fallbacks; W2
+          delivered (measured: OutreachCampaignController::show is now withTrashed)
+          so the drawer fetches the real detail instead of skipping the call. */}
       <OutreachDrawer id={openId} createdAt={openRow?.created_at} onClose={() => setOpenId(null)}
-        archived={Boolean(openRow?.archived)} fallbackName={openRow?.name} fallbackStatus={openRow?.status}
+        archived={Boolean(openRow?.archived)} archivedAt={openRow?.deleted_at ?? null}
+        fallbackName={openRow?.name} fallbackStatus={openRow?.status}
         onRestore={canRestore ? restoreOne : undefined}
         expanded={drawerExpanded} onToggleExpand={() => setDrawerExpanded(e => !e)} />
     </div>

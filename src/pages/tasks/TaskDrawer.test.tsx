@@ -1,8 +1,10 @@
 /**
  * TaskDrawer — the enkelstuks-sweep archived state: an archived task shows the
- * shared ArchivedBanner with a working per-id restore, and every mutating
- * affordance (mark done, meta pickers, tag editor) is hidden while archived —
- * the task PATCH 404s on a soft-deleted record, so offering it would be fake.
+ * shared ArchivedBanner (flag-only, or "Archived on {date}" once deleted_at is
+ * present — W2 delivered, measured: TaskListResource carries it) with a working
+ * per-id restore. Every mutating affordance (mark done, meta pickers, tag editor)
+ * stays hidden while archived — a deliberate product choice (restore first), not
+ * a technical 404 anymore (TaskController::update is now withTrashed).
  * (The live seed has no archived tasks, so this wiring is verified here.)
  */
 import { describe, it, expect, vi } from 'vitest'
@@ -27,8 +29,8 @@ vi.mock('@/lib/queries', () => ({ useUsers: () => ({ data: [] }) }))
 vi.mock('@/lib/useCustomFields', () => ({ useCustomFields: () => ({ fields: [] }) }))
 vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => new Promise(() => {})) }, unwrap: (r: unknown) => r, unwrapList: () => ({ rows: [] }) }))
 
-// A minimal drawer-ready task; `archived` flips per test.
-const task = (archived: boolean): TaskDetail => ({
+// A minimal drawer-ready task; `archived` (+ optional `archivedAt`) flips per test.
+const task = (archived: boolean, archivedAt: string | null = null): TaskDetail => ({
   id: 't1', title: 'Bel kandidaat', typeKey: 'call', typeLabel: 'Belafspraak', typeColor: null,
   // eslint-disable-next-line no-restricted-syntax -- test fixture lookup colour (DATA, not UI styling)
   statusKey: 'todo', statusLabel: 'Te doen', statusColor: '#888888', statusIsDone: false,
@@ -36,7 +38,7 @@ const task = (archived: boolean): TaskDetail => ({
   assigneeId: null, assignee: null, owner: { name: 'Danny' },
   due: '', dueTime: '', completedAt: '', tags: [], links: [], linkLabel: '', commentCount: 0,
   createdAt: '2026-07-01T10:00:00', description: '', comments: [], activity: [], customFields: {},
-  archived, archivedAt: null,
+  archived, archivedAt,
 })
 
 const noop = () => {}
@@ -44,13 +46,19 @@ const mount = (t: TaskDetail, onRestore?: (id: unknown) => void) =>
   render(<TaskDrawer task={t} onClose={noop} onUpdate={noop} onAddLink={noop} onRemoveLink={noop} onRestore={onRestore} />)
 
 describe('TaskDrawer — archived state', () => {
-  it('shows the archived banner and fires the per-id restore', () => {
+  it('shows the flag-only banner when archivedAt is absent and fires the per-id restore', () => {
     const onRestore = vi.fn()
     mount(task(true), onRestore)
-    // Flag-only banner line (no deleted_at on the task resource yet).
     expect(screen.getByText('Gearchiveerd')).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Herstellen' }))
     expect(onRestore).toHaveBeenCalledWith('t1')
+  })
+
+  // W2 delivered (measured): TaskListResource now carries deleted_at — the banner
+  // upgrades from the flag-only line to the dated one once it's on the record.
+  it('shows the dated banner once archivedAt is set', () => {
+    mount(task(true, '2026-07-10T10:00:00'))
+    expect(screen.getByText('Gearchiveerd op 10-07-2026')).toBeInTheDocument()
   })
 
   it('hides mark-done + restore affordances appropriately per state', () => {

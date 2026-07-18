@@ -12,6 +12,7 @@ import { Phone, X, RotateCcw, ListChecks, Handshake } from 'lucide-react'
 import Avatar from '@/components/ui/Avatar'
 import CandidateStatusChip from '@/components/ui/CandidateStatusChip'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
+import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
 import api from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
 import { initialsOf } from '@/lib/initials'
@@ -169,13 +170,17 @@ export default function TargetsTab({ targets, loading, error, onSetStatus, onSet
         )
       })}
 
-      {/* New task pre-linked to the row's candidate (shared modal). */}
+      {/* New task pre-linked to the row's candidate (shared modal). AddTaskModal reads
+          useTaskLookups — outside TasksPage that provider is absent (live crash, Danny
+          18-07, same fix as CandidateTasks), so it wraps its own here. */}
       {taskFor?.candidate?.id && (
-        <AddTaskModal
-          initial={{ candidateId: String(taskFor.candidate.id) }}
-          onClose={() => setTaskFor(null)}
-          onCreated={() => setTaskFor(null)}
-        />
+        <TaskLookupsProvider>
+          <AddTaskModal
+            initial={{ candidateId: String(taskFor.candidate.id) }}
+            onClose={() => setTaskFor(null)}
+            onCreated={() => setTaskFor(null)}
+          />
+        </TaskLookupsProvider>
       )}
     </div>
   )

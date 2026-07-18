@@ -17,10 +17,12 @@ vi.mock('@/lib/api', async () => {
 afterEach(() => vi.clearAllMocks())
 
 describe('outreachApi', () => {
-  it('listCampaigns passes params through to GET /outreach-campaigns (include_archived wiring)', async () => {
+  // OUTREACH-TRASHED-1 fixed (W2 delivered, measured): `archived=1` is now a true
+  // onlyTrashed filter server-side (mirrors tasks) — the page uses it directly.
+  it('listCampaigns passes params through to GET /outreach-campaigns (archived=1 onlyTrashed wiring)', async () => {
     vi.mocked(api.get).mockResolvedValue({ data: { data: [] } })
-    await listCampaigns({ include_archived: 1 })
-    expect(api.get).toHaveBeenCalledWith('/outreach-campaigns', { params: { include_archived: 1 } })
+    await listCampaigns({ archived: 1 })
+    expect(api.get).toHaveBeenCalledWith('/outreach-campaigns', { params: { archived: 1 } })
   })
 
   it('deleteCampaign sends the per-id DELETE /outreach-campaigns/{id}', async () => {
