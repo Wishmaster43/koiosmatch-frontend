@@ -7,7 +7,7 @@ import EntityHeader from '@/components/drawer/EntityHeader'
 import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import { channelIcon } from './data/channelIcons'
 import VacancyChangelogPopover from './drawer/VacancyChangelogPopover'
-import VacancyArchivedBanner from './drawer/VacancyArchivedBanner'
+import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import DetailsTab from './drawer/DetailsTab'
@@ -75,7 +75,7 @@ const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)
 export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, onRestore, users = [] }: VacancyDrawerProps) {
   const { t } = useTranslation('vacancies')
   const { statuses } = useVacancyLookups()
-  const { formatDateTime } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   // The Extra tab only shows when the tenant has defined vacancy custom fields.
   const { fields: customFieldDefs } = useVacancyCustomFields()
   const visibleTabs = TABS.filter(tab => tab.id !== 'extra' || customFieldDefs.length > 0)
@@ -172,8 +172,14 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
         >
           {/* Archived banner (audit R1 item 8) — mirrors the application/candidate
               drawer's in-body archived state; the table already shows the soft chip,
-              the drawer previously had no equivalent. */}
-          {v.archived && <VacancyArchivedBanner id={v.id} archivedAt={v.archivedAt} onRestore={onRestore} />}
+              the drawer previously had no equivalent. Now the ONE shared
+              components/drawer/ArchivedBanner (§3A — extend, never duplicate); the
+              since-when/flag i18n keys are unchanged (drawer.archivedBanner.*, vacancies ns). */}
+          {v.archived && (
+            <ArchivedBanner id={v.id} onRestore={onRestore}
+              message={v.archivedAt ? t('drawer.archivedBanner.since', { date: formatDate(v.archivedAt) }) : t('drawer.archivedBanner.flag')}
+              restoreLabel={t('drawer.archivedBanner.restore')} />
+          )}
           {/* V2: published indicator — per-channel icons for the channels this vacancy
               is ACTUALLY published on (icon + label, colour never the only signal);
               falls back to the generic globe + "not published" when none are. Click a

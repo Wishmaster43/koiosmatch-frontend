@@ -18,12 +18,12 @@ interface ArchivedBannerProps {
  * ArchivedBanner — the ONE shared in-body archived state for every entity drawer
  * (extracted from the near-identical VacancyArchivedBanner/ApplicationArchivedBanner,
  * ~40 lines each, that would otherwise have gained a 3rd/4th copy for matches/
- * opportunities). Shows the since-when line + a restore action right under the
+ * opportunities, and later adopted by vacancies/applications too, retiring those
+ * two local copies). Shows the since-when line + a restore action right under the
  * header, using the shared `--color-archive` token (§4 — the same one the list's
  * QuickViewToggle uses for this exact state). Dumb: strings arrive as props, so it
- * never needs its own i18n namespace. Vacancies/applications/candidates keep their
- * existing local banners for now — adopting this shared one there is a follow-up,
- * not done here (out of this task's file boundary).
+ * never needs its own i18n namespace — each entity keeps its own translation keys
+ * and passes the already-translated message/restoreLabel in.
  */
 export default function ArchivedBanner({ id, message, onRestore, restoreLabel }: ArchivedBannerProps) {
   return (

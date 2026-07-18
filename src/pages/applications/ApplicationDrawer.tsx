@@ -11,7 +11,7 @@ import ReferenceNumberChip from '@/components/ui/ReferenceNumberChip'
 import CustomFieldsTab from '@/components/drawer/CustomFieldsTab'
 import ApplicationChangelogPopover from './drawer/ApplicationChangelogPopover'
 import ApplicationBucketBadge from './drawer/ApplicationBucketBadge'
-import ApplicationArchivedBanner from './drawer/ApplicationArchivedBanner'
+import ArchivedBanner from '@/components/drawer/ArchivedBanner'
 import ApplicationTab from './drawer/ApplicationTab'
 import type { CandidateNamePatch } from './drawer/CandidateNameFunctionBlock'
 import CandidateTab from './drawer/CandidateTab'
@@ -69,7 +69,7 @@ interface ApplicationDrawerProps {
  */
 export default function ApplicationDrawer({ application: a, onClose, expanded, onToggleExpand, onReject, onAdjustScore, onPhaseChange, onOwnerChange, onLinkVacancy, onUpdateSource, users, onDetach, onRestore, canManage, onUpdateCustomFields, onUpdateCandidate, initialTab }: ApplicationDrawerProps) {
   const { t } = useTranslation('applications')
-  const { formatDateTime } = useDateFormat()
+  const { formatDate, formatDateTime } = useDateFormat()
   // S15: the reason-required detach confirm modal (footer "Ontkoppelen").
   const [detachModalOpen, setDetachModalOpen] = useState(false)
   // Funnel phases (Settings lookup) for the header phase picker; never hardcoded.
@@ -192,9 +192,14 @@ export default function ApplicationDrawer({ application: a, onClose, expanded, o
           titleActions={<ApplicationChangelogPopover application={a} />}
           meta={meta}
         >
-          {/* APP-DELETED-AT-1: the in-body archived banner (mirrors candidates'
-              ArchivedBanner, minus the hard-delete/trash stage no application has). */}
-          {a.archived && <ApplicationArchivedBanner id={a.id} deletedAt={a.deletedAt} onRestore={onRestore} />}
+          {/* APP-DELETED-AT-1: the in-body archived banner, now the ONE shared
+              components/drawer/ArchivedBanner (§3A — extend, never duplicate); the
+              existing archived.since/flag + restore.button i18n keys are unchanged. */}
+          {a.archived && (
+            <ArchivedBanner id={a.id} onRestore={onRestore}
+              message={a.deletedAt ? t('archived.since', { date: formatDate(a.deletedAt) }) : t('archived.flag')}
+              restoreLabel={t('restore.button')} />
+          )}
         </EntityHeader>
       )}
     />
