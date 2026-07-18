@@ -190,7 +190,10 @@
       "nationality": "Nationalität",
       "placeOfBirth": "Geburtsort",
       "linkedin": "LinkedIn",
-      "summary": "Profiltext"
+      "summary": "Profiltext",
+      "branches": "Niederlassungen",
+      "branchesNone": "Noch keine Niederlassungen eingerichtet.",
+      "branchesAutoHint": "Leer = automatisch die Niederlassungen, denen du zugeordnet bist."
     },
     "gender": {
       "male": "Männlich",

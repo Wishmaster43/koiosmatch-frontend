@@ -197,7 +197,10 @@
       "nationality": "Nationaliteit",
       "placeOfBirth": "Geboorteplaats",
       "linkedin": "LinkedIn",
-      "summary": "Profieltekst"
+      "summary": "Profieltekst",
+      "branches": "Vestigingen",
+      "branchesNone": "Nog geen vestigingen ingericht.",
+      "branchesAutoHint": "Leeg = automatisch de vestigingen waar jij aan gekoppeld bent."
     },
     "gender": {
       "male": "Man",

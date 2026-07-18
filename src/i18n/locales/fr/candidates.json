@@ -190,7 +190,10 @@
       "nationality": "Nationalité",
       "placeOfBirth": "Lieu de naissance",
       "linkedin": "LinkedIn",
-      "summary": "Résumé"
+      "summary": "Résumé",
+      "branches": "Agences",
+      "branchesNone": "Aucune agence configurée.",
+      "branchesAutoHint": "Vide = automatiquement les agences auxquelles vous êtes rattaché."
     },
     "gender": {
       "male": "Homme",

@@ -197,7 +197,10 @@
       "nationality": "Nationality",
       "placeOfBirth": "Place of birth",
       "linkedin": "LinkedIn",
-      "summary": "Summary"
+      "summary": "Summary",
+      "branches": "Branches",
+      "branchesNone": "No branches configured yet.",
+      "branchesAutoHint": "Empty = automatically the branches you are linked to."
     },
     "gender": {
       "male": "Male",

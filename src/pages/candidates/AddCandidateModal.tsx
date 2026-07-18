@@ -10,6 +10,9 @@ import { useUsers } from '@/lib/queries'
 import { useGenders } from '@/lib/useGenders'
 import { useAuth } from '@/context/AuthContext'
 import { useCreateCandidate } from './hooks/useCandidateMutations'
+import { useLocations } from '@/lib/useLocations'
+import ChipMultiSelect from '@/components/ui/ChipMultiSelect'
+import api from '@/lib/api'
 import { BTN_H } from '@/config/buttonMetrics'
 import type { Candidate } from '@/types/candidate'
 import type { Id, LookupOption } from '@/types/common'
@@ -64,6 +67,9 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const [status,    setStatus]    = useState(defaultStatus)
   const [errors,    setErrors]    = useState<Record<string, boolean>>({})
   const [submitErr, setSubmitErr] = useState<string | null>(null)
+  // Punt 10: vestiging-chips — leeg laat de backend de maker-vestigingen auto-koppelen.
+  const locations = useLocations()
+  const [branchIds, setBranchIds] = useState<string[]>([])
   const [form, setForm] = useState<FormState>({
     firstName: '', middleName: '', lastName: '',
     functionTitle: '',
@@ -124,7 +130,13 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         candidate_types:     [],
       }
       // Create via the hook; it rethrows so the 422 handling below still runs.
-      onCreated?.(await createCandidate(body))
+      const created = await createCandidate(body)
+      // Punt 10: explicitly picked branches attach per id on top of the server's
+      // auto-assign (best effort — the dossier itself is already created).
+      if (branchIds.length && created?.id != null) {
+        await Promise.allSettled(branchIds.map(id => api.post(`/candidates/${created.id}/branches`, { location_id: id })))
+      }
+      onCreated?.(created)
       onClose()
     } catch (err) {
       // Show field-level errors from 422 validation responses.
@@ -262,6 +274,22 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                       placeholder={t('common:select')} options={ownerOptions} />
                   </Field>
                 </div>
+
+                {/* Vestigingen (punt 10): chips uit settings/company/locations. Leeg =
+                    de backend koppelt automatisch de vestigingen van de maker
+                    (BranchAccess::autoAssign); gekozen chips worden na aanmaken
+                    per stuk aan het dossier gekoppeld. */}
+                <Field label={t('modal.fields.branches')}>
+                  <ChipMultiSelect
+                    options={locations.map(o => ({ value: String(o.value), label: o.label }))}
+                    selected={branchIds}
+                    onToggle={id => setBranchIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])}
+                    emptyText={t('modal.fields.branchesNone')}
+                  />
+                  {branchIds.length === 0 && locations.length > 0 && (
+                    <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: '6px 0 0' }}>{t('modal.fields.branchesAutoHint')}</p>
+                  )}
+                </Field>
 
                 {/* Contact */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

@@ -190,7 +190,10 @@
       "nationality": "Nacionalidad",
       "placeOfBirth": "Lugar de nacimiento",
       "linkedin": "LinkedIn",
-      "summary": "Resumen"
+      "summary": "Resumen",
+      "branches": "Sedes",
+      "branchesNone": "Aún no hay sedes configuradas.",
+      "branchesAutoHint": "Vacío = automáticamente las sedes a las que estás vinculado."
     },
     "gender": {
       "male": "Hombre",
