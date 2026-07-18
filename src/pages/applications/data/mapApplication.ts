@@ -50,7 +50,7 @@ export function mapApplication(a: ApiApplication = {}, funnelTypes: LookupItem[]
       color: owner.avatar_color ?? null,
     },
     candidateStatusLabel: a.candidate_status_label ?? cand.status_label ?? '',
-    candidateStatusColor: a.candidate_status_color ?? cand.status_color ?? '#9CA3AF',
+    candidateStatusColor: a.candidate_status_color ?? cand.status_color ?? 'var(--text-muted)',
     // Slugs when present (drives the shared chip's model-v2 rules); empty otherwise.
     candidateStatus: (a.candidate_status ?? cand.status ?? '') as string,
     candidatePhase: (a.candidate_phase ?? cand.phase ?? '') as string,

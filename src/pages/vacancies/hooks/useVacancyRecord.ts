@@ -8,7 +8,7 @@
 import { useState, useRef } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import api, { unwrap } from '@/lib/api'
-import { notifyError } from '@/lib/notify'
+import { notifyError, notifySuccess } from '@/lib/notify'
 import { mapVacancyDetail } from '../data/mapVacancy'
 import { initialsOf, buildVacancyPatch } from '../data/vacanciesShared'
 import type { TFunction } from 'i18next'
@@ -75,5 +75,20 @@ export function useVacancyRecord({ setVacancies, setTotal, statusMeta, users, cu
     }
   }
 
-  return { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy }
+  // VAC-RESTORE-1 (BE 1ac4e14): bring an archived vacancy back; reconcile all three
+  // local copies so the chip/banner clear without a refetch.
+  const restoreVacancy = (id: Id | undefined) => {
+    if (id == null) return
+    api.post(`/vacancies/${id}/restore`)
+      .then(() => {
+        notifySuccess(t('drawer.archivedBanner.restored'))
+        const clear = { archived: false, archivedAt: null }
+        setVacancies(prev => prev.map(x => x.id === id ? ({ ...x, ...clear } as Vacancy) : x))
+        setSelected(prev => (prev && prev.id === id ? ({ ...prev, ...clear } as Vacancy) : prev))
+        setDetail(prev   => (prev && prev.id === id ? ({ ...prev, ...clear } as VacancyDetail) : prev))
+      })
+      .catch(() => notifyError(t('drawer.archivedBanner.restoreFailed')))
+  }
+
+  return { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy, restoreVacancy }
 }

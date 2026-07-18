@@ -121,7 +121,10 @@
     },
     "archivedBanner": {
       "since": "Archived on {{date}}",
-      "flag": "Archived"
+      "flag": "Archived",
+      "restore": "Restore",
+      "restored": "Vacancy restored.",
+      "restoreFailed": "Restore failed. Please try again."
     }
   },
   "matching": {

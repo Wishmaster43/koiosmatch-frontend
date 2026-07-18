@@ -207,7 +207,7 @@ export default function CandidatesTable({ rows, loading, selectedId, onSelect, o
           const shown = pools.slice(0, 2)
           return (
             <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-              {shown.map((p, i) => <SoftChip key={p.id ?? p.name ?? i} label={p.name} color={p.color || '#6B7280'} title={p.name} />)}
+              {shown.map((p, i) => <SoftChip key={p.id ?? p.name ?? i} label={p.name} color={p.color || 'var(--text-muted)'} title={p.name} />)}
               {pools.length > shown.length && <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>+{pools.length - shown.length}</span>}
             </div>
           )

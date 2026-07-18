@@ -121,7 +121,10 @@
     },
     "archivedBanner": {
       "since": "Archivé le {{date}}",
-      "flag": "Archivé"
+      "flag": "Archivé",
+      "restore": "Restaurer",
+      "restored": "Offre restaurée.",
+      "restoreFailed": "Échec de la restauration. Veuillez réessayer."
     }
   },
   "matching": {

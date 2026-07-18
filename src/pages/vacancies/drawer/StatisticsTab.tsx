@@ -72,7 +72,7 @@ export default function StatisticsTab({ vacancy: v }: { vacancy: VacancyDetail }
           { label: t('statistics.daysOpen'), value: daysOpen ?? '—',
             sub: v.created ? t('statistics.daysOpenSub', { date: formatDate(v.created) }) : undefined, color: 'var(--color-secondary)' },
           { label: t('statistics.channelsPublished'), value: publishedChannels.length,
-            sub: t('statistics.channelsPublishedSub', { total: (v.channels ?? []).length }), color: '#8B5CF6' },
+            sub: t('statistics.channelsPublishedSub', { total: (v.channels ?? []).length }), color: 'var(--color-violet)' },
         ]}
         overview={{
           title: t('statistics.overviewTitle'),

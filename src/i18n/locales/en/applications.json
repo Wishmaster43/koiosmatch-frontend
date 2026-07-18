@@ -183,6 +183,8 @@
     "changePhase": "Change phase",
     "searchPhase": "Search phase…",
     "detach": "Detach",
+    "detachReasonPlaceholder": "Why are these applications being detached?",
+    "detachConfirm": "Detach",
     "done": "{{count}} updated"
   },
   "rejection": {

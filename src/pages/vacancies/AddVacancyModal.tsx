@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
+import { extractApiError } from '@/lib/extractApiError'
 import api, { unwrap } from '@/lib/api'
 import { Field, TextField, SelectField } from '@/components/forms/fields'
 import { useVacancyLookups } from '@/context/VacancyLookupsContext'
@@ -76,7 +77,7 @@ export default function AddVacancyModal({ onClose, onCreated, users = [], custom
       } else {
         // Fallback: no field-level 422 — surface the server message (or a generic
         // one) instead of failing silently.
-        setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+        setCreateError(extractApiError(e, t('common:errorGeneric')))
       }
     } finally {
       setSaving(false)

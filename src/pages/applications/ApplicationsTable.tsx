@@ -111,7 +111,7 @@ export default function ApplicationsTable({ rows, loading, error, selectedId, on
     { key: 'owner', header: t('cols.owner'), sortable: true, sortValue: r => r.owner?.name,
       render: r => (
         <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Avatar initials={r.owner?.initials} size={22} color={colorOwner ? r.owner?.color : '#9CA3AF'} soft />
+          <Avatar initials={r.owner?.initials} size={22} color={colorOwner ? r.owner?.color : 'var(--text-muted)'} soft />
           <span style={{ fontSize: 12, color: 'var(--text)' }}>{r.owner?.name}</span>
         </span>
       ) },

@@ -15,6 +15,9 @@ interface RawAgenda { id?: Id; status?: string; start_time?: string; end_time?: 
 interface RawOpen { id?: Id; status?: string; shift_type?: string; start_time?: string; end_time?: string; number_persons?: number; function?: string; customer?: string; location?: string }
 
 // Stable colour from a string so the same client keeps the same bar colour.
+// Categorical DATA palette (distinct hues for arbitrary client identity, not semantic
+// meaning) — deliberately raw hex, same exemption class as AVATAR_COLORS (§4).
+// eslint-disable-next-line no-restricted-syntax
 const PALETTE = ['#1B60A9', '#8B5CF6', '#16A34A', '#F59E0B', '#0EA5E9', '#DB2777']
 const colorFor = (s: string) => PALETTE[[...s].reduce((a, c) => a + c.charCodeAt(0), 0) % PALETTE.length]
 

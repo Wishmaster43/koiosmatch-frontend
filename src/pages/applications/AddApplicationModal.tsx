@@ -4,6 +4,7 @@ import type { ComponentType, ReactNode, CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
 import { X } from 'lucide-react'
 import api, { unwrap, unwrapList } from '@/lib/api'
+import { extractApiError } from '@/lib/extractApiError'
 import { useUsers } from '@/lib/queries'
 import { useAuth } from '@/context/AuthContext'
 import { useLookups } from '@/context/LookupsContext'
@@ -124,7 +125,7 @@ export default function AddApplicationModal({ onClose, onCreated, lockedVacancy 
         Object.keys(apiErrors).forEach(k => { e2[API_TO_FORM[k] ?? k] = true })
         setErrors(e2)
       }
-      setCreateError(e?.response?.data?.message ?? t('common:errorGeneric'))
+      setCreateError(extractApiError(err, t('common:errorGeneric')))
     } finally { setSaving(false) }
   }
 

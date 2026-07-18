@@ -136,7 +136,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
   const customerList = customers as { id: Id; name: string }[]
 
   // ── Drawer/record data layer (§3): selection + detail fetch + optimistic edits ──
-  const { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy } =
+  const { selected, detail, drawerExpanded, setDrawerExpanded, closeDrawer, selectVacancy, handleCreated, updateVacancy, restoreVacancy } =
     useVacancyRecord({ setVacancies, setTotal, statusMeta, users, customers: customerList, t })
 
   // Open a vacancy drawer when arriving via a cross-entity link (intent).
@@ -276,7 +276,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
           {/* Transient feedback for bulk mutations — audit R1 item 5: this was a
               copy-pasted role=status banner (mirrored in Candidates/Customers); now
               the ONE shared component (§3A). */}
-          <ActionMessageBanner msg={actionMsg} onDismiss={() => setActionMsg(null)} dismissLabel={t('common:close', 'Sluiten')} />
+          <ActionMessageBanner msg={actionMsg} onDismiss={() => setActionMsg(null)} dismissLabel={t('common:close')} />
 
           {/* Map view (STRAAL-1 v2, mirrors candidates): map LEFT, the filtered vacancy
               table RIGHT — one radius search drives both panes. Lazy Leaflet load. */}
@@ -338,6 +338,7 @@ function VacanciesPageInner({ intent }: { intent?: unknown }) {
           expanded={drawerExpanded}
           onToggleExpand={() => setDrawerExpanded(v => !v)}
           onUpdate={updateVacancy}
+          onRestore={hasPermission('vacancies.update') ? restoreVacancy : undefined}
           users={users}
         />
       </div>

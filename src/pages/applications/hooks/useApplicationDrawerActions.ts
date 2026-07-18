@@ -11,6 +11,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import type { TFunction } from 'i18next'
 import api, { unwrap } from '@/lib/api'
 import { notifyError, notifySuccess } from '@/lib/notify'
+import { extractApiError } from '@/lib/extractApiError'
 import { mapApplication, mapApplicationDetail } from '../data/mapApplication'
 import { bucketOfPhase } from '../data/applicationsShared'
 import { buildCandidatePatch } from '@/pages/candidates/data/candidatesShared'
@@ -80,9 +81,7 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
           setApplications(prev => prev.map(a => a.id === id ? { ...a, phaseKey: before.phaseKey, bucket: before.bucket } : a))
           setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, phaseKey: before.phaseKey, bucket: before.bucket } as ApplicationDetail) : prev))
         }
-        const serverMsg = (err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } })?.response?.data
-        const detail = serverMsg?.message ?? Object.values(serverMsg?.errors ?? {})[0]?.[0]
-        notifyError(detail || t('common:actionFailed'))
+        notifyError(extractApiError(err, t('common:actionFailed')))
       })
   }
 
@@ -123,9 +122,7 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
           setApplications(prev => prev.map(a => a.id === id ? { ...a, ...revert } : a))
           setSelected(prev => (prev && prev.id === id ? decorate({ ...prev, ...revert } as ApplicationDetail) : prev))
         }
-        const serverMsg = (err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } })?.response?.data
-        const detail = serverMsg?.message ?? Object.values(serverMsg?.errors ?? {})[0]?.[0]
-        notifyError(detail || t('common:actionFailed'))
+        notifyError(extractApiError(err, t('common:actionFailed')))
       })
   }
 
@@ -226,9 +223,7 @@ export function useApplicationDrawerActions({ applications, wideRows, setApplica
           .catch(() => { if (selectedIdRef.current === id) setSelected(prev => (prev && prev.id === id ? { ...prev, archived: true } : prev)) })
       })
       .catch(err => {
-        const serverMsg = (err as { response?: { data?: { message?: string; errors?: Record<string, string[]> } } })?.response?.data
-        const detail = serverMsg?.message ?? Object.values(serverMsg?.errors ?? {})[0]?.[0]
-        notifyError(detail || t('common:actionFailed'))
+        notifyError(extractApiError(err, t('common:actionFailed')))
       })
   }
 

@@ -42,14 +42,16 @@ export function useApplicationBulkActions({ setApplications, setTotal, selectedI
   // Bulk: detach (soft-delete) every selected application; optimistic (incl. the
   // total decrement) + revert-by-id on any failure (see useApplicationDrawerActions'
   // handleDetach note — a whole-array snapshot can't safely revert both the
-  // table-page and wide caches).
-  const bulkDetach = () => {
+  // table-page and wide caches). Heraudit-R2 finding 1: the backend REQUIRES a
+  // `reason` on DELETE /applications/{id} (S15, same guard as the single-record
+  // detach) — sending none 422s every call, so the bar must collect one too.
+  const bulkDetach = (reason: string) => {
     const ids = [...selectedIds]
     if (!ids.length) return
     setApplications(prev => prev.map(a => a.id != null && selectedIds.has(a.id as Id) ? { ...a, archived: true } : a))
     setTotal(prev => Math.max(0, prev - ids.length))
     setSelectedIds(new Set())
-    Promise.allSettled(ids.map(id => api.delete(`/applications/${id}`))).then(rs => {
+    Promise.allSettled(ids.map(id => api.delete(`/applications/${id}`, { data: { reason } }))).then(rs => {
       if (rs.some(r => r.status === 'rejected')) {
         setApplications(prev => prev.map(a => a.id != null && ids.includes(a.id as Id) ? { ...a, archived: false } : a))
         setTotal(prev => prev + ids.length)

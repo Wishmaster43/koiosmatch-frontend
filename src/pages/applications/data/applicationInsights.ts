@@ -55,7 +55,7 @@ export const buildOwnerData = (wideRows: Application[], noOwnerLabel: string, ow
   wideRows.forEach(a => {
     const n = a.owner?.name
     const key = n || ownerNoneKey
-    ;(m[key] ??= { name: n || noOwnerLabel, key, color: n ? (a.owner?.color ?? undefined) : '#9CA3AF', value: 0 }).value++
+    ;(m[key] ??= { name: n || noOwnerLabel, key, color: n ? (a.owner?.color ?? undefined) : 'var(--text-muted)', value: 0 }).value++
   })
   return Object.values(m)
 }

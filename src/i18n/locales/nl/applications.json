@@ -183,6 +183,8 @@
     "changePhase": "Fase wijzigen",
     "searchPhase": "Fase zoeken…",
     "detach": "Ontkoppelen",
+    "detachReasonPlaceholder": "Waarom worden deze sollicitaties ontkoppeld?",
+    "detachConfirm": "Ontkoppelen",
     "done": "{{count}} bijgewerkt"
   },
   "rejection": {

@@ -45,9 +45,10 @@ export default function InterviewsTab({ application: a }: { application: Applica
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {interviews.map(iv => (
         <div key={iv.id} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {/* Header */}
+          {/* Header — WhatsApp affordance in the success token (F6: mirrors ProfileTab's
+              waDigits() hover colour) rather than the brand's literal hex green. */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ width: 40, height: 40, borderRadius: '50%', background: '#25D366', flexShrink: 0,
+            <span style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--color-success)', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
               <MessageCircle size={20} />
             </span>

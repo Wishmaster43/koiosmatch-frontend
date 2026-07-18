@@ -25,5 +25,5 @@ const BUCKET_COLOR: Record<string, string> = {
 export default function ApplicationBucketBadge({ bucket }: { bucket?: string }) {
   const { t } = useTranslation('applications')
   if (!bucket) return null
-  return <SoftChip label={t(`buckets.${bucket}`)} color={BUCKET_COLOR[bucket] ?? '#9CA3AF'} round />
+  return <SoftChip label={t(`buckets.${bucket}`)} color={BUCKET_COLOR[bucket] ?? 'var(--text-muted)'} round />
 }

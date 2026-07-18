@@ -59,6 +59,8 @@ interface VacancyDrawerProps {
   expanded?: boolean
   onToggleExpand?: () => void
   onUpdate?: UpdateFn
+  // VAC-RESTORE-1: page passes this only with vacancies.update permission.
+  onRestore?: (id: Id | undefined) => void
   users?: DrawerUser[]
 }
 
@@ -70,7 +72,7 @@ const hdrPrimary: CSSProperties = { ...hdrBtn, background: 'var(--color-primary)
  * VacancyDrawer — thin container: wires data (lookups + onUpdate) and declares the
  * header config + tab list. No heavy JSX, no business logic (mirror CandidateDrawer).
  */
-export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, users = [] }: VacancyDrawerProps) {
+export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleExpand, onUpdate, onRestore, users = [] }: VacancyDrawerProps) {
   const { t } = useTranslation('vacancies')
   const { statuses } = useVacancyLookups()
   const { formatDateTime } = useDateFormat()
@@ -171,7 +173,7 @@ export default function VacancyDrawer({ vacancy: v, onClose, expanded, onToggleE
           {/* Archived banner (audit R1 item 8) — mirrors the application/candidate
               drawer's in-body archived state; the table already shows the soft chip,
               the drawer previously had no equivalent. */}
-          {v.archived && <VacancyArchivedBanner archivedAt={v.archivedAt} />}
+          {v.archived && <VacancyArchivedBanner id={v.id} archivedAt={v.archivedAt} onRestore={onRestore} />}
           {/* V2: published indicator — per-channel icons for the channels this vacancy
               is ACTUALLY published on (icon + label, colour never the only signal);
               falls back to the generic globe + "not published" when none are. Click a

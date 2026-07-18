@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import type { CSSProperties, RefObject } from 'react'
 import DataTable from '@/components/ui/DataTable'
 import type { Column } from '@/components/ui/DataTable'
-import Avatar from '@/components/ui/Avatar'
+import Avatar, { NEUTRAL_AVATAR } from '@/components/ui/Avatar'
 import SoftChip from '@/components/ui/SoftChip'
 import KoiosAiMark from '@/components/ui/KoiosAiMark'
 import { useDateFormat } from '@/lib/datetime'
@@ -13,7 +13,6 @@ import type { Id } from '@/types/common'
 
 const mutedCell: CSSProperties = { color: 'var(--text-muted)', fontSize: 12 }
 const plainCell: CSSProperties = { color: 'var(--text)', fontSize: 12 }
-const NEUTRAL_AVATAR = '#9CA3AF'
 
 interface CustomersTableProps {
   rows: Customer[]

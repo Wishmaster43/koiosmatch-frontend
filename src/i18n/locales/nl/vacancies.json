@@ -121,7 +121,10 @@
     },
     "archivedBanner": {
       "since": "Gearchiveerd op {{date}}",
-      "flag": "Gearchiveerd"
+      "flag": "Gearchiveerd",
+      "restore": "Herstellen",
+      "restored": "Vacature hersteld.",
+      "restoreFailed": "Herstellen mislukt. Probeer het opnieuw."
     }
   },
   "matching": {

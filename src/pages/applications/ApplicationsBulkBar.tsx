@@ -9,7 +9,7 @@ interface ApplicationsBulkBarProps {
   count: number
   onClear: () => void
   onSetPhase: (phaseKey: string) => void
-  onDetach: () => void
+  onDetach: (reason: string) => void
   canManage?: boolean
   phases?: LookupOption[]
 }
@@ -26,10 +26,16 @@ export default function ApplicationsBulkBar({ count, onClear, onSetPhase, onDeta
   const phaseOptions = phases.map(p => ({ value: p.value, label: p.label, color: p.color }))
 
   // Declarative action tree; detach only when the user may manage (server re-checks).
+  // Heraudit-R2 finding 1: detach is an `input` node (mirrors CandidatesBulkBar's
+  // note action) — the backend REQUIRES a `reason` on DELETE /applications/{id}
+  // (S15), so a plain onSelect can never reach it; the drill-in collects the
+  // reason and threads it through onSubmit → onDetach(reason).
   const items: MenuNode[] = [
     { key: 'phase', label: t('bulk.changePhase'), icon: Milestone,
       searchPlaceholder: t('bulk.searchPhase'), options: phaseOptions, onPick: v => onSetPhase(String(v)) },
-    ...(canManage ? [{ key: 'detach', label: t('bulk.detach'), icon: Unlink, danger: true, onSelect: onDetach }] : []),
+    ...(canManage ? [{ key: 'detach', label: t('bulk.detach'), icon: Unlink, danger: true, input: true,
+      placeholder: t('bulk.detachReasonPlaceholder'), submitLabel: t('bulk.detachConfirm'),
+      onSubmit: (v: string | Array<string | number>) => onDetach(String(v)) }] : []),
   ]
 
   return (
