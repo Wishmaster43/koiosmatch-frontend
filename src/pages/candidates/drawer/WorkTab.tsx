@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ExternalLink, Plus, CalendarPlus, Calendar, Clock, User, Building2, Video, Phone, Pencil } from 'lucide-react'
 import MatchesTab from './MatchesTab'
+import PoolsSection from './PoolsSection'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import StatusPill from '@/components/ui/StatusPill'
 import EntityLink from '@/components/ui/EntityLink'
 import AddApplicationModal from './AddApplicationModal'
@@ -33,7 +35,7 @@ const vacancyUrlOf = (s: AppRow) => {
 /** Work tab — matches + paginated applications, with the two candidate actions
  *  (§3B two-action model): couple to a vacancy, or plan an intake. */
 export default function WorkTab({ c }: { c: Candidate }) {
-  const { t } = useTranslation(['candidates', 'common'])
+  const { t, i18n } = useTranslation(['candidates', 'common'])
   const { formatDate, locale } = useDateFormat()
   // Local copy of the applications so a create shows immediately (re-fetched from
   // the candidate detail after a POST — the BE may add a vacancy-less intake row).
@@ -88,20 +90,45 @@ export default function WorkTab({ c }: { c: Candidate }) {
   const pages = Math.max(1, Math.ceil(apps.length / PER))
   const slice = apps.slice((page - 1) * PER, page * PER)
 
-  // Shared soft-button style for the two header actions.
+  // Shared soft-button style for the header actions (now split across sub-tabs).
   const actionBtn: React.CSSProperties = { display: 'inline-flex', alignItems: 'center', gap: 5, height: 26, padding: '0 10px', fontSize: 11.5, fontWeight: 500, borderRadius: 6, cursor: 'pointer', color: 'var(--color-primary)', background: 'color-mix(in srgb, var(--color-primary) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--color-primary) 30%, transparent)' }
+
+  // House sub-tab bar (Danny kandidaten-ronde-2, punt C): Sollicitaties · Matches ·
+  // Talentenpools, sorted ALPHABETICALLY BY TRANSLATED LABEL (computed at render
+  // time so the order still reads correctly once another locale reorders them) —
+  // the DEFAULT open tab is always Sollicitaties/Applications regardless of where
+  // the sort lands it. Each action button moves INTO the sub-tab it belongs to.
+  const SUB_TABS = [
+    { id: 'applications', label: t('sections.applications') },
+    { id: 'matches',       label: t('sections.placements') },
+    { id: 'pools',         label: t('sections.pools') },
+  ].sort((a, b) => a.label.localeCompare(b.label, i18n.language))
+  const [subTab, setSubTab] = useState('applications')
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <MatchesTab c={c} />
-      <div>
-        {/* Applications header: count on the left, the two actions on the right. */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-          <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>
-            {t('sections.applications')} <span style={{ fontWeight: 400 }}>{apps.length}</span>
-          </div>
-          <div style={{ display: 'flex', gap: 6 }}>
+      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
+
+      {/* Matches — read-only list; "+ Match" moved here from the Sollicitaties header. */}
+      {subTab === 'matches' && (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
             <button onClick={() => setModal('match')} style={actionBtn}><Plus size={12} /> {t('work.addMatch')}</button>
+          </div>
+          <MatchesTab c={c} />
+        </div>
+      )}
+
+      {/* Talentenpools — moved here from the Profiel tab (kept as the exact same component). */}
+      {subTab === 'pools' && <PoolsSection c={c} />}
+
+      {subTab === 'applications' && (
+      <div>
+        {/* No "Sollicitaties" label here (Danny addendum 4) — the sub-tab bar
+            above already says it; just the count + the two actions remain. */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{apps.length}</span>
+          <div style={{ display: 'flex', gap: 6 }}>
             <button onClick={() => setModal('apply')} style={actionBtn}><Plus size={12} /> {t('work.addApplication')}</button>
             <button onClick={() => setModal('intake')} style={actionBtn}><CalendarPlus size={12} /> {t('work.planIntake')}</button>
           </div>
@@ -172,6 +199,7 @@ export default function WorkTab({ c }: { c: Candidate }) {
         )}
       </div>
       </div>
+      )}
 
       {modal === 'apply'  && <AddApplicationModal candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}
       {modal === 'intake' && <PlanIntakeModal     candidateId={c.id} onClose={() => setModal(null)} onCreated={reload} />}

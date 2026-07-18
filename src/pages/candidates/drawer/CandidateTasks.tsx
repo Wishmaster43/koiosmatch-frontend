@@ -20,6 +20,7 @@ import { ListChecks, Plus } from 'lucide-react'
 import api, { unwrapList } from '@/lib/api'
 import SectionCard from '@/components/ui/SectionCard'
 import AddTaskModal from '@/pages/tasks/AddTaskModal'
+import { TaskLookupsProvider } from '@/context/TaskLookupsContext'
 import { useNavigation } from '@/context/NavigationContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useActionRulePreflight, ActionRuleBanner } from '@/components/actionrules'
@@ -96,7 +97,10 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
   )
 
   return (
-    <SectionCard title={t('drawer.tasksTitle')} action={addAction}>
+    // No title (Danny addendum 4): this only renders inside the Communicatie →
+    // Taken sub-tab, whose bar already says "Taken" — the Open/Historie toggle +
+    // "+ Taak" action stays on this row, just without the repeated label.
+    <SectionCard action={addAction}>
       {/* AXIS-MATRIX-2 preflight — see file header comment. */}
       {taskRuleDecision && taskRuleDecision.effect !== 'allow' && (
         <div style={{ marginBottom: 10 }}><ActionRuleBanner decision={taskRuleDecision} /></div>
@@ -140,13 +144,17 @@ export default function CandidateTasks({ candidateId }: { candidateId: Id }) {
           </button>
         )
       })}
-      {/* New task, pre-linked to this candidate; reload so the fresh row shows at once. */}
+      {/* New task, pre-linked to this candidate; reload so the fresh row shows at once.
+          AddTaskModal reads useTaskLookups — outside TasksPage that provider is absent
+          (live crash, Danny 18-07), so it wraps its own here. */}
       {adding && (
-        <AddTaskModal
-          initial={{ candidateId: String(candidateId) }}
-          onClose={() => setAdding(false)}
-          onCreated={() => { setAdding(false); load() }}
-        />
+        <TaskLookupsProvider>
+          <AddTaskModal
+            initial={{ candidateId: String(candidateId) }}
+            onClose={() => setAdding(false)}
+            onCreated={() => { setAdding(false); load() }}
+          />
+        </TaskLookupsProvider>
       )}
     </SectionCard>
   )

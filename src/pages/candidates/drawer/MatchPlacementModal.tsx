@@ -6,13 +6,18 @@
  * the purchase/sell/margin block all work now; /matches tolerates the extra fields
  * (ignored until the backend model lands, then persisted). Rates propose from a
  * price agreement / conversion factor once customer + function are picked
- * (MATCH-PLACEMENT-2, useRateProposal) — the margin is shown live. Widened to a
- * two-column 720px panel (Danny job 17); the long-list relational pickers (klant/
- * locatie/afdeling/contactpersoon/functie/vacature) are typeable searchable
- * comboboxes via the shared CreatableSelect with `allowCreate={false}` — never a
- * hardcoded free-text create for a relational id (job 18). Cost centre + billing
- * email propose from whichever picked level (afdeling > locatie > klant) carries a
- * value, and freeze the moment the recruiter edits them by hand (job 21/22).
+ * (MATCH-PLACEMENT-2, useRateProposal) — the margin is shown live. The
+ * long-list relational pickers (klant/locatie/afdeling/contactpersoon/functie/
+ * vacature) are typeable searchable comboboxes via the shared CreatableSelect
+ * with `allowCreate={false}` — never a hardcoded free-text create for a
+ * relational id (job 18). Cost centre + billing email propose from whichever
+ * picked level (afdeling > locatie > klant) carries a value, and freeze the
+ * moment the recruiter edits them by hand (job 21/22).
+ *
+ * Widened again to a 900px panel (Danny kandidaten-ronde-2, punt C.2.1 — "lang en
+ * smal, kan dit niet breder?"): Relaties stays full-width (its pickers are the
+ * ones that needed to breathe), Contract + Financieel now sit side by side below
+ * it so the form reads less like a tall scrolling strip.
  *
  * This is a thin container (audit R1 item 1, MUST-SPLIT — used to be 532 lines
  * with 4 inline api-calls): all state/effects/submit/422-mapping now live in
@@ -29,7 +34,7 @@ import { useMatchPlacementForm } from './matchPlacement/useMatchPlacementForm'
 import RelationsSection from './matchPlacement/RelationsSection'
 import ContractSection from './matchPlacement/ContractSection'
 import FinancialSection from './matchPlacement/FinancialSection'
-import { overlay, panel, sectionTitle } from './matchPlacement/styles'
+import { overlay, panel, sectionTitle, twoColSections } from './matchPlacement/styles'
 import type { Id } from '@/types/common'
 
 export default function MatchPlacementModal({ candidateId: fixedCandidateId, onClose, onCreated }: {
@@ -77,28 +82,34 @@ export default function MatchPlacementModal({ candidateId: fixedCandidateId, onC
           mismatchChoice={form.mismatchChoice} setMismatchChoice={form.setMismatchChoice}
         />
 
-        {/* ── Contract ── */}
-        <div style={sectionTitle}>{t('placement.contract')}</div>
-        <ContractSection
-          t={t} errors={form.errors}
-          contractType={form.contractType} setContractType={form.setContractType} contractTypes={form.contractTypes}
-          cao={form.cao} setCao={form.setCao}
-          startDate={form.startDate} setStartDate={form.setStartDate}
-          endDate={form.endDate} setEndDate={form.setEndDate}
-          hours={form.hours} setHours={form.setHours}
-        />
-
-        {/* ── Financieel ── */}
-        <div style={sectionTitle}>{t('placement.financial')}</div>
-        <FinancialSection
-          t={t} errors={form.errors}
-          scale={form.scale} setScale={form.setScale} step={form.step} setStep={form.setStep}
-          purchase={form.purchase} setPurchase={form.setPurchase} sell={form.sell} setSell={form.setSell}
-          margin={form.margin} hasRates={form.hasRates} proposal={form.proposal}
-          costCenter={form.costCenter} setCostCenter={form.setCostCenter} setCostCenterDirty={form.setCostCenterDirty}
-          billingEmails={form.billingEmails} setBillingEmails={form.setBillingEmails} setBillingDirty={form.setBillingDirty}
-          remarks={form.remarks} setRemarks={form.setRemarks} remarksExpanded={form.remarksExpanded} setRemarksExpanded={form.setRemarksExpanded}
-        />
+        {/* ── Contract + Financieel side by side (punt C.2.1) — Relaties above keeps
+            the full panel width for its searchable pickers; these two shorter,
+            plain-input-heavy sections pair up fine in half the width each. ── */}
+        <div style={twoColSections}>
+          <div>
+            <div style={sectionTitle}>{t('placement.contract')}</div>
+            <ContractSection
+              t={t} errors={form.errors}
+              contractType={form.contractType} setContractType={form.setContractType} contractTypes={form.contractTypes}
+              cao={form.cao} setCao={form.setCao}
+              startDate={form.startDate} setStartDate={form.setStartDate}
+              endDate={form.endDate} setEndDate={form.setEndDate}
+              hours={form.hours} setHours={form.setHours}
+            />
+          </div>
+          <div>
+            <div style={sectionTitle}>{t('placement.financial')}</div>
+            <FinancialSection
+              t={t} errors={form.errors}
+              scale={form.scale} setScale={form.setScale} step={form.step} setStep={form.setStep}
+              purchase={form.purchase} setPurchase={form.setPurchase} sell={form.sell} setSell={form.setSell}
+              margin={form.margin} hasRates={form.hasRates} proposal={form.proposal}
+              costCenter={form.costCenter} setCostCenter={form.setCostCenter} setCostCenterDirty={form.setCostCenterDirty}
+              billingEmails={form.billingEmails} setBillingEmails={form.setBillingEmails} setBillingDirty={form.setBillingDirty}
+              remarks={form.remarks} setRemarks={form.setRemarks} remarksExpanded={form.remarksExpanded} setRemarksExpanded={form.setRemarksExpanded}
+            />
+          </div>
+        </div>
 
         {/* Server-side rejection (non-field 422 / other failure) — shown in place, modal stays open. */}
         {form.submitErr && (

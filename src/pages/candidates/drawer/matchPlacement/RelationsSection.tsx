@@ -79,9 +79,12 @@ export default function RelationsSection({
         </F>
       </div>
       <div style={row2}>
-        {/* Afdeling/contactpersoon — same searchable pattern. */}
+        {/* Afdeling/contactpersoon — same searchable pattern. allowCreate={false}
+            was missing here (live-check finding, kandidaten-ronde-2 punt C.2.1):
+            a department is a real relational id like customer/location/contact,
+            never a free-text create — the file header already claimed this. */}
         <F label={t('placement.department')} error={errors.departmentId}>
-          <CreatableSelect value={departmentId || null} onChange={setDepartmentId}
+          <CreatableSelect value={departmentId || null} onChange={setDepartmentId} allowCreate={false}
             placeholder={t('placement.optional')} menuWidth={pickerMenuWidth} options={opt(departments)} />
         </F>
         <div>

@@ -3,19 +3,21 @@ import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Edit2, Save, X, Trash2, Cake, MessageCircle, Mail, Phone } from 'lucide-react'
 import DatePicker from 'react-datepicker'
-import { NL_PROVINCES } from './constants'
 import { useDateFormat, calcAge, daysUntilBirthday } from '@/lib/datetime'
 import { useGenders } from '@/lib/useGenders'
 import { useNationalities } from '@/lib/useNationalities'
+import { useProvinces } from '../hooks/useProvinces'
 import { useAllSettings, getJsonSetting } from '@/lib/settings/useAllSettings'
 import RichTextEditorJs from '@/components/ui/RichTextEditor'
 import SafeHtmlJs from '@/components/ui/SafeHtml'
+import CreatableSelectJs from '@/components/ui/CreatableSelect'
 import type { Candidate } from '@/types/candidate'
 
 type AnyProps = Record<string, unknown>
 // Still-untyped JS UI helpers — accept any props at the boundary.
 const RichTextEditor = RichTextEditorJs as unknown as ComponentType<AnyProps>
 const SafeHtml = SafeHtmlJs as unknown as ComponentType<AnyProps>
+const CreatableSelect = CreatableSelectJs as unknown as ComponentType<AnyProps>
 
 // The editable profile fields — all string-valued and present on Candidate.
 type ProfileKey = 'gender' | 'nationality' | 'dob' | 'placeOfBirth' | 'email' | 'phone'
@@ -49,9 +51,11 @@ function LinkedinIcon({ size = 12, color = '#0A66C2' }: { size?: number; color?:
 export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candidate; onEditSave?: (v: Record<string, unknown>) => void; autoEditSignal?: number }) {
   const { t } = useTranslation('candidates')
   const { formatDate } = useDateFormat()
-  // Gender + nationality come from tenant lookups (CFG-1), not hardcoded lists.
+  // Gender + nationality + province come from tenant lookups (CFG-1 / PROVINCES-1),
+  // never hardcoded lists — each hook keeps a seed fallback for an empty/offline API.
   const { genders } = useGenders()
   const { nationalities } = useNationalities()
+  const { provinces } = useProvinces()
   const emptyForm = (): ProfileForm => ({
     gender: c.gender ?? '', nationality: c.nationality ?? '', dob: c.dob ?? '', placeOfBirth: c.placeOfBirth ?? '',
     email: c.email ?? '', phone: c.phone ?? '',
@@ -123,25 +127,26 @@ export default function ProfileTab({ c, onEditSave, autoEditSignal }: { c: Candi
 
   const blockStyle: CSSProperties = { borderRadius: 10, overflow: 'hidden', border: '1px solid var(--border)', background: 'var(--surface)' }
 
-  // The edit input for one field — selects / date picker / plain text.
+  // The edit input for one field — searchable comboboxes / date picker / plain text.
+  // Gender/nationality/province are pick-only (allowCreate=false) type-to-filter
+  // dropdowns over their tenant lookups — never a plain <select> (Danny
+  // kandidaten-ronde-2, punt A): a long lookup list (e.g. 12+ provinces, dozens of
+  // nationalities) is easier to find by typing than by scrolling a native select.
   const renderInput = (key: ProfileKey) => {
     if (key === 'gender') return (
-      <select value={form.gender} onChange={e => setF('gender', e.target.value)} style={inputStyle}>
-        <option value="">{t('common:select')}</option>
-        {genders.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
-      </select>
+      <CreatableSelect value={form.gender || null} onChange={(v: string) => setF('gender', v)} allowCreate={false}
+        placeholder={t('common:select')} style={inputStyle}
+        options={genders.map(g => ({ value: g.value, label: g.label }))} />
     )
     if (key === 'nationality') return (
-      <select value={form.nationality} onChange={e => setF('nationality', e.target.value)} style={inputStyle}>
-        <option value="">{t('common:select')}</option>
-        {nationalities.map(n => <option key={n} value={n}>{n}</option>)}
-      </select>
+      <CreatableSelect value={form.nationality || null} onChange={(v: string) => setF('nationality', v)} allowCreate={false}
+        placeholder={t('common:select')} style={inputStyle}
+        options={nationalities.map(n => ({ value: n, label: n }))} />
     )
     if (key === 'province') return (
-      <select value={form.province} onChange={e => setF('province', e.target.value)} style={inputStyle}>
-        <option value="">{t('common:select')}</option>
-        {NL_PROVINCES.map((p: string) => <option key={p} value={p}>{p}</option>)}
-      </select>
+      <CreatableSelect value={form.province || null} onChange={(v: string) => setF('province', v)} allowCreate={false}
+        placeholder={t('common:select')} style={inputStyle}
+        options={provinces.map((p: string) => ({ value: p, label: p }))} />
     )
     if (key === 'dob') return (
       <DatePicker

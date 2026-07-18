@@ -26,8 +26,9 @@ export default function PoolsSection({ c }: { c: Candidate }) {
   }, [open])
 
   return (
+    // No section title (Danny addendum 4): this only renders inside the Match
+    // tab's own "Talentenpools" sub-tab, whose bar already carries that label.
     <div>
-      <div style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 6 }}>{t('sections.pools')}</div>
       <div style={sectionBlock}>
 
       {pools.length > 0 && (

@@ -5,6 +5,7 @@ import api, { unwrap } from '@/lib/api'
 import { notifyError } from '@/lib/notify'
 import { ExperienceTab as ExperienceTabJs, EducationTab as EducationTabJs, CertificationsTab as CertificationsTabJs, SkillsTab as SkillsTabJs } from './SectionTabs'
 import LanguagesSection from './LanguagesSection'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import type { Candidate } from '@/types/candidate'
 
 type RelItem = Record<string, unknown>
@@ -48,7 +49,9 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
   // Candidate.skills is string[] from the mapper, but the SkillsTab edits them as
   // { name, level } objects (it renders both) — widen to the relation-item shape.
   const [skills,      setSkills]       = useState<RelItem[]>((c.skills ?? []) as unknown as RelItem[])
-  const { t } = useTranslation('common')
+  // 'common' stays the default ns (bare t('actionFailed') below); candidates:
+  // strings (the sub-tab labels) use the explicit prefix.
+  const { t, i18n } = useTranslation(['common', 'candidates'])
 
   // A row is persisted (has a server id) once it isn't the negative temp placeholder:
   // a non-empty UUID string (backend uses UUIDs) or a positive legacy numeric id.
@@ -93,14 +96,32 @@ export default function BackgroundTab({ c, onEditSave }: { c: Candidate; onEditS
     },
   })
 
+  // House sub-tab bar (Danny kandidaten-ronde-2, punt B): one sub-tab per section
+  // instead of five stacked blocks. Order is ALPHABETICAL BY TRANSLATED LABEL —
+  // computed at render time, not hardcoded, so the tab order still reads correctly
+  // once another locale reorders Education/Experience relative to each other
+  // (e.g. NL: Certificeringen·Ervaring·Opleiding·Talen·Vaardigheden vs EN:
+  // Certifications·Education·Experience·Languages·Skills). The DEFAULT open tab
+  // is always Ervaring/Experience regardless of where the sort lands it.
+  const SUB_TABS = [
+    { id: 'certifications', label: t('candidates:sections.certifications') },
+    { id: 'experience',     label: t('candidates:sections.experience') },
+    { id: 'education',      label: t('candidates:sections.education') },
+    { id: 'languages',      label: t('candidates:sections.languages') },
+    { id: 'skills',         label: t('candidates:sections.skills') },
+  ].sort((a, b) => a.label.localeCompare(b.label, i18n.language))
+  const [subTab, setSubTab] = useState('experience')
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <ExperienceTab     items={experiences} {...ops('experiences', experiences, setExperiences)} />
-      <EducationTab      items={educations}  {...ops('educations', educations, setEducations)} />
-      <CertificationsTab items={certs}       {...ops('certifications', certs, setCerts)} />
-      <SkillsTab         items={skills}      {...ops('skills', skills, setSkills)} />
-      {/* Languages moved here from the Profile tab — persists via the drawer's onUpdate. */}
-      <LanguagesSection c={c} onEditSave={onEditSave} />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
+      {subTab === 'experience'     && <ExperienceTab     items={experiences} {...ops('experiences', experiences, setExperiences)} />}
+      {subTab === 'education'      && <EducationTab      items={educations}  {...ops('educations', educations, setEducations)} />}
+      {subTab === 'certifications' && <CertificationsTab items={certs}       {...ops('certifications', certs, setCerts)} />}
+      {subTab === 'skills'         && <SkillsTab         items={skills}      {...ops('skills', skills, setSkills)} />}
+      {/* Talen already lived on this tab (moved here from Profiel earlier) — now its
+          own sub-tab instead of a stacked block; persists via the drawer's onUpdate. */}
+      {subTab === 'languages'      && <LanguagesSection c={c} onEditSave={onEditSave} />}
     </div>
   )
 }

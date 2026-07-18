@@ -38,8 +38,10 @@ export default function LanguagesSection({ c, onEditSave }: { c: Candidate; onEd
 
   return (
     <div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <span style={{ fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{t('sections.languages')}</span>
+      {/* No section title (Danny addendum 4): this only renders inside the
+          Achtergrond → Talen sub-tab, whose bar already says "Talen" — mirrors
+          ProfileTab's own "no section title, it would duplicate the tab label". */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginBottom: 6 }}>
         {editing ? (
           <div style={{ display: 'flex', gap: 4 }}>
             <button onClick={save} title={t('common:save')} style={{ ...iconBtn, background: 'var(--color-primary)', color: '#fff', border: 'none' }}><Save size={13} /></button>

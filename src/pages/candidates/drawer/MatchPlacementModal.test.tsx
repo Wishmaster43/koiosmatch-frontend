@@ -12,7 +12,7 @@
  * test doesn't need a QueryClientProvider.
  */
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import MatchPlacementModal from './MatchPlacementModal'
 import api from '@/lib/api'
@@ -26,10 +26,13 @@ const { mockCustomer } = vi.hoisted(() => ({
     id: 'cust-1', name: 'Zorggroep A',
     cost_center: 'KP-KLANT', billing_email: 'klant@factuur.nl', branch_id: null,
     locations: [
-      { id: 'loc-1', name: 'Locatie Noord', cost_center: 'KP-LOC1', billing_email: 'loc1@factuur.nl', departments: [{ id: 'dep-1', name: 'Afdeling A' }] },
+      // Two departments here (job C.2.1 regression: the department picker must be
+      // searchable too, not just customer/location) — Afdeling A/B.
+      { id: 'loc-1', name: 'Locatie Noord', cost_center: 'KP-LOC1', billing_email: 'loc1@factuur.nl', departments: [{ id: 'dep-1', name: 'Afdeling A' }, { id: 'dep-2', name: 'Afdeling B' }] },
       { id: 'loc-2', name: 'Locatie Zuid', departments: [] },
     ],
-    contacts: [{ id: 'con-1', name: 'Jan Jansen' }],
+    // Two contacts (same C.2.1 regression, for the contact picker) — Jan/Marie.
+    contacts: [{ id: 'con-1', name: 'Jan Jansen' }, { id: 'con-2', name: 'Marie Bakker' }],
   },
 }))
 
@@ -72,12 +75,12 @@ vi.mock('@/lib/api', () => {
 
 const noop = () => {}
 
-describe('MatchPlacementModal · layout (job 17)', () => {
-  it('renders as a wide two-column panel, not the old narrow 560px form', async () => {
+describe('MatchPlacementModal · layout (job 17, widened further at kandidaten-ronde-2 punt C.2.1)', () => {
+  it('renders as a wide panel, not the old narrow 560px form', async () => {
     render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
     // Let the candidate-branch lookup effect settle before asserting (avoids an
     // act() warning from its microtask resolving after the test body returns).
-    expect(await screen.findByRole('dialog')).toHaveStyle({ width: '720px' })
+    expect(await screen.findByRole('dialog')).toHaveStyle({ width: '900px' })
   })
 })
 
@@ -109,6 +112,53 @@ describe('MatchPlacementModal · searchable pickers (job 18)', () => {
     await user.type(screen.getByPlaceholderText('placement.pickLocation'), 'Noord')
     expect(screen.getByRole('button', { name: 'Locatie Noord' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Locatie Zuid' })).toBeNull()
+  })
+
+  // C.2.1 regression: department + contact are the other two of Danny's "all four
+  // cascade fields" — both must filter by typing too, not just customer/location.
+  // The department picker's empty-state text ("placement.optional") is shared with
+  // the (non-searchable) owner SelectMenu, so its toggle is found via the field's
+  // own label instead of by button name.
+  it('the department picker becomes searchable once a location is picked', async () => {
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
+    await user.click(screen.getByRole('button', { name: 'placement.pickLocation' }))
+    await user.click(await screen.findByRole('button', { name: 'Locatie Noord' }))
+    const deptField = screen.getByText('placement.department').parentElement as HTMLElement
+    await user.click(within(deptField).getByRole('button'))
+    await user.type(screen.getByPlaceholderText('placement.optional'), 'Afdeling A')
+    expect(screen.getByRole('button', { name: 'Afdeling A' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Afdeling B' })).toBeNull()
+  })
+
+  // Live-check finding (kandidaten-ronde-2 punt C.2.1): the department picker was
+  // missing `allowCreate={false}` — every sibling relational picker (customer,
+  // location, contact, function, vacancy) already had it, so a department (a real
+  // backend id) could be "created" as a free-text value by mistake. Regression guard.
+  it('the department picker is pick-only (allowCreate=false) — typing an unknown value never offers to create it', async () => {
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
+    await user.click(screen.getByRole('button', { name: 'placement.pickLocation' }))
+    await user.click(await screen.findByRole('button', { name: 'Locatie Noord' }))
+    const deptField = screen.getByText('placement.department').parentElement as HTMLElement
+    await user.click(within(deptField).getByRole('button'))
+    await user.type(screen.getByPlaceholderText('placement.optional'), 'NoSuchDepartmentXYZ')
+    expect(screen.queryByText(/NoSuchDepartmentXYZ/)).toBeNull()
+  })
+
+  it('the contact picker is a typeable searchable combobox once a customer is picked', async () => {
+    const user = userEvent.setup()
+    render(<MatchPlacementModal candidateId="cand-1" onClose={noop} onCreated={noop} />)
+    await user.click(screen.getByRole('button', { name: 'placement.pickCustomer' }))
+    await user.click(await screen.findByRole('button', { name: 'Zorggroep A' }))
+    await user.click(screen.getByRole('button', { name: 'placement.pickContact' }))
+    await user.type(screen.getByPlaceholderText('placement.pickContact'), 'Jan')
+    expect(screen.getByRole('button', { name: 'Jan Jansen' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Marie Bakker' })).toBeNull()
   })
 })
 

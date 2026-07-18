@@ -33,7 +33,10 @@ export default function MatchesTab({ c }: { c: Candidate }) {
   const matches = c.matches ?? []
 
   return (
-    <SectionCard title={t('matchesView.title')}>
+    // No title here (Danny addendum 4): this only ever renders inside the Match
+    // tab's own "Matches" sub-tab — a second "Matches" heading would just repeat
+    // the sub-tab bar right above it.
+    <SectionCard>
       {matches.length === 0 ? (
         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{t('matchesView.empty')}</div>
       ) : matches.map((m, i) => {

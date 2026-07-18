@@ -1,5 +1,15 @@
-import { describe, it, expect } from 'vitest'
-import { waDigits } from './ProfileTab'
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import ProfileTab, { waDigits } from './ProfileTab'
+import type { Candidate } from '@/types/candidate'
+
+vi.mock('@/lib/api', () => ({ default: { get: vi.fn(() => Promise.reject({ response: { status: 404 } })) } }))
+vi.mock('@/lib/useGenders', () => ({ useGenders: () => ({ genders: [{ value: 'male', label: 'Man' }, { value: 'female', label: 'Vrouw' }] }) }))
+vi.mock('@/lib/useNationalities', () => ({ useNationalities: () => ({ nationalities: ['Nederlands', 'Belgisch'] }) }))
+vi.mock('../hooks/useProvinces', () => ({ useProvinces: () => ({ provinces: ['Utrecht', 'Zuid-Holland'] }) }))
+vi.mock('@/components/ui/RichTextEditor', () => ({ default: () => null }))
+vi.mock('@/components/ui/SafeHtml', () => ({ default: () => null }))
 
 // Job 29 (2026-07-16): the wa.me link needs bare E.164 digits — covers the two
 // phone shapes seen in the candidate dataset (with/without the +31 country code)
@@ -17,5 +27,50 @@ describe('waDigits', () => {
   it('returns empty for a value too short to be a real MSISDN', () => {
     expect(waDigits('0612')).toBe('')
     expect(waDigits('-')).toBe('')
+  })
+})
+
+// Kandidaten-ronde-2, punt A: Geslacht/Nationaliteit/Provincie become searchable
+// (type-to-filter) dropdowns instead of a plain native <select>.
+describe('ProfileTab · searchable dropdowns (kandidaten-ronde-2, punt A)', () => {
+  const candidate = { id: 1, gender: '', nationality: '', province: '' } as unknown as Candidate
+
+  it('renders no plain <select> for gender/nationality/province once editing starts', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<ProfileTab c={candidate} />)
+    await user.click(screen.getAllByTitle('Bewerken')[0])
+    expect(container.querySelectorAll('select')).toHaveLength(0)
+  })
+
+  it('typing in the nationality picker filters down to the matching option only', async () => {
+    const user = userEvent.setup()
+    render(<ProfileTab c={candidate} />)
+    await user.click(screen.getAllByTitle('Bewerken')[0])
+    const natField = screen.getByText('Nationaliteit').parentElement as HTMLElement
+    await user.click(within(natField).getByRole('button'))
+    await user.type(screen.getByPlaceholderText('Selecteer'), 'Belg')
+    expect(screen.getByRole('button', { name: 'Belgisch' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Nederlands' })).toBeNull()
+  })
+
+  it('typing in the province picker filters down to the matching option only', async () => {
+    const user = userEvent.setup()
+    render(<ProfileTab c={candidate} />)
+    await user.click(screen.getAllByTitle('Bewerken')[0])
+    const provField = screen.getByText('Provincie').parentElement as HTMLElement
+    await user.click(within(provField).getByRole('button'))
+    await user.type(screen.getByPlaceholderText('Selecteer'), 'Utr')
+    expect(screen.getByRole('button', { name: 'Utrecht' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Zuid-Holland' })).toBeNull()
+  })
+
+  it('is pick-only (allowCreate=false) — typing an unknown value never offers to create it', async () => {
+    const user = userEvent.setup()
+    render(<ProfileTab c={candidate} />)
+    await user.click(screen.getAllByTitle('Bewerken')[0])
+    const genderField = screen.getByText('Geslacht').parentElement as HTMLElement
+    await user.click(within(genderField).getByRole('button'))
+    await user.type(screen.getByPlaceholderText('Selecteer'), 'NoSuchGenderXYZ')
+    expect(screen.queryByText(/NoSuchGenderXYZ/)).toBeNull()
   })
 })

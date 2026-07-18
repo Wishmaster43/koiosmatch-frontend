@@ -1,6 +1,15 @@
 /**
  * SectionTabs — the candidate's list sections (experience, education,
  * certifications, skills). Each is a thin config on the shared AddableSection.
+ *
+ * `title={null}` on every AddableSection below (Danny addendum 4, kandidaten-
+ * ronde-2): each of these now renders ONLY inside its own Achtergrond sub-tab
+ * (Ervaring/Opleiding/Certificeringen/Vaardigheden — BackgroundTab.tsx), whose
+ * sub-tab bar already carries that exact label — an in-content "CERTIFICERINGEN"
+ * card title right under the "Certificeringen" sub-tab button was a double
+ * heading. SectionCard (under AddableSection) skips the title row entirely when
+ * `title` is falsy but still renders its `action` ("+ Toevoegen"), so the calm
+ * content starts directly with the add-button row.
  */
 import { useState } from 'react'
 import type { ComponentType, CSSProperties } from 'react'
@@ -96,7 +105,7 @@ export function ExperienceTab({ items = [], onAdd, onEdit, onRemove }: RelTabPro
     { key: 'current',  label: t('addFields.currentJob'), checkbox: true },
   ]
   return (
-    <AddableSection title={t('sections.experience')} emptyText={t('sections.experienceEmpty')}
+    <AddableSection title={null} emptyText={t('sections.experienceEmpty')}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const e = raw as { id?: Id; title?: string; function_title?: string; company?: string; employer?: string; location?: string; start?: string; start_date?: string; end?: string; end_date?: string; current?: boolean; period?: string; desc?: string }
@@ -139,7 +148,7 @@ export function EducationTab({ items = [], onAdd, onEdit, onRemove }: RelTabProp
     // below (ProseField), mirroring Experience/Certifications (house rule).
   ]
   return (
-    <AddableSection title={t('sections.education')} emptyText={t('sections.educationEmpty')}
+    <AddableSection title={null} emptyText={t('sections.educationEmpty')}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       // Mirror the read line's own fallback (resolveEducationStartDate) into the edit
       // form's initial values — otherwise a legacy in-progress row that shows e.g.
@@ -192,7 +201,7 @@ export function CertificationsTab({ items = [], onAdd, onEdit, onRemove }: RelTa
     { key: 'license', label: t('addFields.licenseNumber') },
   ]
   return (
-    <AddableSection title={t('sections.certifications')} emptyText={t('sections.certificationsEmpty')}
+    <AddableSection title={null} emptyText={t('sections.certificationsEmpty')}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       editInitial={(it: RelItem) => ({ ...it, noExpiry: !(it as { expires?: unknown }).expires })}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
@@ -227,7 +236,7 @@ export function SkillsTab({ items = [], onAdd, onEdit, onRemove }: RelTabProps) 
   ]
   // Skills render as a vertical list (one per row) so edit/remove read clearly.
   return (
-    <AddableSection title={t('sections.skills')} emptyText={t('sections.skillsEmpty')}
+    <AddableSection title={null} emptyText={t('sections.skillsEmpty')}
       items={items} fields={fields} onAdd={onAdd} onEdit={onEdit} onRemove={onRemove}
       renderItem={(raw: RelItem, i: number, arr: RelItem[]) => {
         const v = raw as { id?: Id; name?: string; skill?: string; level?: string }

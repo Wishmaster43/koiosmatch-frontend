@@ -1,13 +1,20 @@
 /**
  * Preferences + Freelance (ZZP) tabs — both schema-driven EditableFieldTables.
  *
- * Preferences keeps every field (incl. days/function/industries/licences as chips
- * & a dropdown) inside ONE table, grouped (Availability / Travel / …), so there are
- * no stray section headers and a single save persists the whole `preferences` set.
+ * Each field is still declared once with its `group`, and each sub-tab below
+ * simply FILTERS that one field list by group — one source of truth, no
+ * duplicated field definitions. Every EditableFieldTable instance is handed the
+ * SAME full `value`/`onSave` (never a group-scoped slice): its internal draft is
+ * seeded from the complete value object, so saving from any one sub-tab still
+ * round-trips the whole preferences/zzp set, exactly like the single-table
+ * layout before it (Danny kandidaten-ronde-2, punten D/E — layout-only, no field/
+ * behaviour change).
  */
+import { useState } from 'react'
 import type { ComponentType } from 'react'
 import { useTranslation } from 'react-i18next'
 import EditableFieldTableJs from '@/components/forms/EditableFieldTable'
+import SubTabBar from '@/components/drawer/SubTabBar'
 import { useLookups } from '@/context/LookupsContext'
 import { useDateFormat } from '@/lib/datetime'
 import { useFunctions } from '@/lib/useFunctions'
@@ -95,6 +102,34 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
     wage_tax_from:   v.loonheffing_vanaf,
     remarks:         v.remarks,
   })
+  const handleSave = (v: Record<string, unknown>) => { onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApi(v)) }
+
+  // Sub-tabs (Danny kandidaten-ronde-2, punt D, updated): Beschikbaarheid · Reizen ·
+  // Financieel · Overig — Danny named this exact order, NOT alphabetical (unlike
+  // punten B/C). Each sub-tab filters the ONE `fields` list above by its existing
+  // `group`. Financieel took over Loonheffing (was under Overig) — Overig is now
+  // just Opmerkingen.
+  //
+  // Redundant group-card titles are stripped (Danny addendum 4 — a sub-tab whose
+  // OWN bar already says e.g. "Beschikbaarheid" doesn't need a second
+  // "BESCHIKBAARHEID" card title inside it): Beschikbaarheid/Reizen/Overig each
+  // hold exactly one group that equals their own sub-tab label, so `group` is
+  // cleared for their filtered rows (EditableFieldTable then renders one calm,
+  // un-headed card — same branch as ZzpTab's Facturatie below). Financieel keeps
+  // "Loonheffing" as a real, DISTINCT sub-section heading (it isn't the same text
+  // as "Financieel"), which will read clearly once RATE-WISH-1 adds the second
+  // (desired-rate) group next to it — see the seam comment in the render below.
+  const SUB_TABS = [
+    { id: 'availability', label: t('preferences.groupAvailability') },
+    { id: 'travel',       label: t('preferences.groupTravel') },
+    { id: 'financial',    label: t('preferences.groupFinancial') },
+    { id: 'other',        label: t('preferences.groupOther') },
+  ]
+  const [subTab, setSubTab] = useState('availability')
+  const availabilityFields = fields.filter(f => f.group === t('preferences.groupAvailability')).map(f => ({ ...f, group: undefined }))
+  const travelFields       = fields.filter(f => f.group === t('preferences.groupTravel')).map(f => ({ ...f, group: undefined }))
+  const financialFields    = fields.filter(f => f.group === t('preferences.groupPayroll'))
+  const otherFields        = fields.filter(f => f.group === t('preferences.groupOther')).map(f => ({ ...f, group: undefined }))
 
   // Current unavailability window (status axis) — read-only next to "Inzetbaar vanaf"
   // (Danny 2026-07-06). Hidden for ARCHIVED candidates (Danny 2026-07-13): the
@@ -117,9 +152,30 @@ export function PreferencesTab({ c, onSave, onTypesChange }: { c: Candidate; onS
           {statusWindow}
         </div>
       )}
-      {/* One grouped table; on Save, Contractvorm → candidateTypes, the rest → preferences. */}
-      <EditableFieldTable key={c.id} fields={fields} value={value} labelWidth={160}
-        onSave={(v: Record<string, unknown>) => { onTypesChange?.((v.contractvorm as string[]) ?? []); onSave?.(toApi(v)) }} />
+      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
+      {/* One EditableFieldTable per sub-tab, all fed the SAME full value/onSave (see
+          file comment) — on Save, Contractvorm → candidateTypes, the rest → preferences. */}
+      {subTab === 'availability' && <EditableFieldTable key={c.id} fields={availabilityFields} value={value} labelWidth={160} onSave={handleSave} />}
+      {subTab === 'travel'       && <EditableFieldTable key={c.id} fields={travelFields}       value={value} labelWidth={160} onSave={handleSave} />}
+      {subTab === 'financial' && (
+        <>
+          <EditableFieldTable key={c.id} fields={financialFields} value={value} labelWidth={160} onSave={handleSave} />
+          {/* SEAM (Danny kandidaten-ronde-2, punt D update — RATE-WISH-1): a second
+              group card for "gewenst uurloon" (desired_rate_min/desired_rate_max,
+              a paired VAN–TOT EUR range) belongs here once the backend ships it.
+              As of 2026-07-18 the fields are only an open CMFE→CMBE ask
+              (COORDINATION-LOG.md, not yet in openapi.yaml or the candidate
+              model/resource — measured against the api repo) — no input renders
+              for them yet (CLAUDE.md: never a fake affordance that doesn't
+              persist). When the fields land: add
+              `desiredRateMin`/`desiredRateMax` to `value` (from
+              `pref.desired_rate_min`/`desired_rate_max`), two `type: 'text'`
+              (or numeric) rows with `half: true` under a NEW
+              `t('preferences.groupDesiredRate')` group in `fields`, map them in
+              `toApi`, and add that group's key to `financialFields` above. */}
+        </>
+      )}
+      {subTab === 'other'        && <EditableFieldTable key={c.id} fields={otherFields}        value={value} labelWidth={160} onSave={handleSave} />}
     </>
   )
 }
@@ -171,5 +227,33 @@ export function ZzpTab({ c, onSave }: { c: Candidate; onSave?: (v: Record<string
     business_email:    v.email_zakelijk,
     iban:              v.iban,
   })
-  return <EditableFieldTable fields={fields} value={value} labelWidth={180} onSave={(v: Record<string, unknown>) => onSave?.(toApi(v))} />
+  const handleSave = (v: Record<string, unknown>) => onSave?.(toApi(v))
+
+  // Sub-tabs (Danny kandidaten-ronde-2, punt E): Bedrijf · Facturatie — order as
+  // named, not alphabetical. Bedrijf absorbs the company address cluster too
+  // ("Adres hoort bij bedrijf", Danny's clarification) — Facturatie is Crediteur/
+  // e-mail/IBAN, the only group left.
+  //
+  // Redundant group-card titles stripped (addendum 4): Bedrijf's OWN "Bedrijf"
+  // group-card would repeat the sub-tab bar right above it, so only ITS rows lose
+  // their `group` — Adres stays a genuine, distinct sub-section within Bedrijf.
+  // Facturatie has just the one group (same text as its own sub-tab label), so it
+  // loses its heading entirely — one calm, un-headed card, like Beschikbaarheid/Reizen.
+  const SUB_TABS = [
+    { id: 'company',   label: t('zzp.groupCompany') },
+    { id: 'invoicing', label: t('zzp.groupInvoicing') },
+  ]
+  const [subTab, setSubTab] = useState('company')
+  const companyFields   = fields
+    .filter(f => f.group === t('zzp.groupCompany') || f.group === t('zzp.groupAddress'))
+    .map(f => f.group === t('zzp.groupCompany') ? { ...f, group: undefined } : f)
+  const invoicingFields = fields.filter(f => f.group === t('zzp.groupInvoicing')).map(f => ({ ...f, group: undefined }))
+
+  return (
+    <>
+      <SubTabBar tabs={SUB_TABS} active={subTab} onChange={setSubTab} />
+      {subTab === 'company'   && <EditableFieldTable fields={companyFields}   value={value} labelWidth={180} onSave={handleSave} />}
+      {subTab === 'invoicing' && <EditableFieldTable fields={invoicingFields} value={value} labelWidth={180} onSave={handleSave} />}
+    </>
+  )
 }

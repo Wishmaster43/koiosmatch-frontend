@@ -50,7 +50,16 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
     { key: 'email_opt_in',      at: 'email_consent_at',      label: t('communication.consentEmail'),      dflt: true },
     { key: 'newsletter_opt_in', at: 'newsletter_consent_at', label: t('communication.consentNewsletter'), dflt: false },
   ]
-  const setConsent = (key: string, val: boolean) => onSave?.({ ...consent, [key]: val })
+  // Optimistic "given at" (Danny punt F, live finding): the server DOES stamp
+  // {channel}_consent_at on a flip, but buildCandidatePatch only ever forwards the
+  // *_opt_in flags to the API (candidatesShared.ts) — the `_at` keys we set here
+  // never reach the request body, they only make the date show up immediately
+  // instead of waiting for the drawer to reopen. Toggling OFF nulls the local
+  // date too, so an unchecked box never shows a stale "gegeven op".
+  const setConsent = (key: string, val: boolean) => {
+    const atKey = CONSENT_CH.find(ch => ch.key === key)?.at
+    onSave?.({ ...consent, [key]: val, ...(atKey ? { [atKey]: val ? new Date().toISOString() : null } : {}) })
+  }
 
   // Shared NotesTab props — each sub-tab renders exactly one of its sections.
   const notesProps = {
@@ -59,7 +68,12 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
     noteTypes: writableTypes, chipTypes: allNoteTypes, channels, authorInitials: c.ownerInitials, timelineName: c.name,
     timelineInitials: c.initials,
     labels: {
-      notes: t('sections.notes'),
+      // No section titles (Danny addendum 4): notes/timeline/conversations each
+      // render as the SOLE visible NotesTab section for their own sub-tab, whose
+      // bar already carries that exact label ("Notities"/"Tijdlijn"/"Conversaties") —
+      // an in-content heading would just repeat it. The *Empty strings still
+      // show (they're the empty-state copy, not a title).
+      notes: '',
       newNote: t('communication.newNote'),
       type: t('communication.type'),
       channel: t('communication.channel'),
@@ -67,9 +81,9 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
       save: t('common:save'),
       cancel: t('common:cancel'),
       notesEmpty: t('sections.notesEmpty'),
-      timeline: t('sections.timeline'),
+      timeline: '',
       timelineEmpty: t('sections.timelineEmpty'),
-      conversations: t('sections.conversations'),
+      conversations: '',
       conversationsEmpty: t('sections.conversationsEmpty'),
       notePlaceholder: (typeLabel: string) => t('communication.notePlaceholder', { type: typeLabel }),
       openChangelog: t('drawer.changelog'),
@@ -91,9 +105,10 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
         onChange={setSubTab}
       />
 
-      {/* Consent toggles (AVG) — each channel shows its "given at" date+time inline. */}
+      {/* Consent toggles (AVG) — each channel shows its "given at" date+time inline.
+          No title (Danny addendum 4): the sub-tab bar already says "Toestemmingen". */}
       {subTab === 'consent' && (
-        <SectionCard title={t('communication.consentTitle')}>
+        <SectionCard>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {CONSENT_CH.map(ch => {
               const on = (consent[ch.key] as boolean | undefined) ?? ch.dflt
