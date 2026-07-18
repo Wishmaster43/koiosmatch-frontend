@@ -1,7 +1,17 @@
+/**
+ * AddCandidateModal — the "+ Kandidaat" create form (Danny's Optie A, 2026-07-18).
+ * Left: the phase column (Lead/Kandidaat), untouched. Right: a two-column grid of
+ * titled cards (Persoonlijk / Contact / Werk / Adres) in the drill-down ProfileTab
+ * card style, replacing the old single stacked column. The address card is
+ * collapsed by default behind a calm disclosure and forces open when the picked
+ * phase requires an address field or one already carries a value/error.
+ * Layout-only rework: state keys, validation, submit body and 422 handling are
+ * unchanged.
+ */
 import { useState, useEffect } from 'react'
 import type { ComponentType, CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X, UserPlus } from 'lucide-react'
+import { X, UserPlus, ChevronRight, ChevronDown } from 'lucide-react'
 import { Field as FieldJs, TextField as TextFieldJs, SelectField as SelectFieldJs } from '@/components/forms/fields'
 import { NL_PROVINCES } from './drawer/constants'
 import { useLookups } from '@/context/LookupsContext'
@@ -43,6 +53,16 @@ interface FormState {
   ownerId: string | number
 }
 
+// The address-card fields — drive the collapsed-by-default disclosure below.
+const ADDRESS_KEYS: Array<keyof FormState> = ['street', 'houseNumber', 'houseNumberSuffix', 'postalCode', 'city', 'province']
+
+// Card chrome — mirrors the drill-down ProfileTab exactly (11px uppercase muted
+// heading above a bordered surface card) so the modal reads as the same system (§3A).
+const cardHead: CSSProperties = { fontSize: 11, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)', marginBottom: 3 }
+const cardBox: CSSProperties = { borderRadius: 10, border: '1px solid var(--border)', background: 'var(--surface)', padding: 12, display: 'flex', flexDirection: 'column', gap: 12 }
+// One-line field pairing (§3A: short fields two-up) — a grid row with the given column spec.
+const row = (cols: string): CSSProperties => ({ display: 'grid', gridTemplateColumns: cols, gap: 12 })
+
 interface AddCandidateModalProps {
   onClose: () => void
   onCreated?: (candidate: Candidate) => void
@@ -66,6 +86,8 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const [status,    setStatus]    = useState(defaultStatus)
   const [errors,    setErrors]    = useState<Record<string, boolean>>({})
   const [submitErr, setSubmitErr] = useState<string | null>(null)
+  // Optie A: the address card starts collapsed; this flag is the user's explicit open.
+  const [addressOpen, setAddressOpen] = useState(false)
   // Punt 10: vestiging-chips — voorgevuld met de eigen koppelingen uit /auth/me
   // (ME-BRANCHES-1). Leeg = veld weglaten → de backend koppelt automatisch de
   // maker-vestigingen (punt 9); een afwijkende keuze gaat expliciet mee in de
@@ -105,6 +127,11 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
   const requiredForm = (requiredCfg[status] ?? requiredCfg.lead ?? []).map(k => REQ_FIELD_MAP[k]).filter(Boolean) as Array<keyof FormState>
   const isReq = (k: keyof FormState) => requiredForm.includes(k)
 
+  // The address card force-opens when the picked phase requires an address field, or
+  // one already holds a value / validation error — never hide a required/filled field.
+  const addressForced = ADDRESS_KEYS.some(k => isReq(k) || !!String(form[k] ?? '').trim() || !!errors[k])
+  const showAddress = addressOpen || addressForced
+
   const handleSubmit = async () => {
     const e: Record<string, boolean> = {}
     requiredForm.forEach(k => { if (!String(form[k] ?? '').trim()) e[k] = true })
@@ -136,7 +163,11 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
         ...(branchIds.length ? { location_ids: branchIds } : {}),
       }
       // Create via the hook; it rethrows so the 422 handling below still runs.
-      onCreated?.(await createCandidate(body))
+      // Create FIRST, then notify: `onCreated?.(await …)` short-circuits the whole
+      // call — argument included — when the optional prop is absent, silently
+      // skipping the create itself (audit R2-M finding).
+      const created = await createCandidate(body)
+      onCreated?.(created)
       onClose()
     } catch (err) {
       // Show field-level errors from 422 validation responses.
@@ -247,102 +278,141 @@ export default function AddCandidateModal({ onClose, onCreated }: AddCandidateMo
                 </div>
               </div>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              // Two-column grid of titled cards (Optie A) — Persoonlijk/Adres span both
+              // columns (their paired rows need the width); Contact/Werk sit side by side.
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, alignItems: 'start' }}>
 
-                {/* Name row — first / middle / last */}
-                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 2fr', gap: 12 }}>
-                  <Field label={t('modal.fields.firstName')} required={isReq('firstName')}>
-                    <TextField value={form.firstName} onChange={v => set('firstName', v)} placeholder={t('modal.fields.firstName')} error={errors.firstName} />
-                    {errors.firstName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
-                  </Field>
-                  <Field label={t('modal.fields.middleName')}>
-                    <TextField value={form.middleName} onChange={v => set('middleName', v)} placeholder="van" />
-                  </Field>
-                  <Field label={t('modal.fields.lastName')} required={isReq('lastName')}>
-                    <TextField value={form.lastName} onChange={v => set('lastName', v)} placeholder={t('modal.fields.lastName')} error={errors.lastName} />
-                    {errors.lastName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
-                  </Field>
-                </div>
-
-                {/* Function + owner */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Field label={t('modal.fields.functionTitle')} required={isReq('functionTitle')}>
-                    <TextField value={form.functionTitle} onChange={v => set('functionTitle', v)} placeholder={t('modal.fields.functionPlaceholder')} error={errors.functionTitle} />
-                  </Field>
-                  <Field label={t('modal.fields.owner')}>
-                    <SelectField value={String(form.ownerId)} onChange={v => set('ownerId', v)}
-                      placeholder={t('common:select')} options={ownerOptions} />
-                  </Field>
-                </div>
-
-                {/* Vestigingen (punt 10, r2-vervolg): zelfde patroon als de drill-down's
-                    BranchSection — gekozen vestigingen als chips met ×, toevoegen via de
-                    zoekbare SearchSelect (niet alle opties als toggle-chips: te druk). */}
-                <Field label={t('modal.fields.branches')}>
-                  {branchIds.length > 0 && (
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-                      {branchIds.map(id => (
-                        <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
-                          borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
-                          {locations.find(o => String(o.value) === id)?.label ?? id}
-                          <button type="button" onClick={() => setBranchIds(p => p.filter(x => x !== id))} aria-label={t('common:remove')}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
-                        </span>
-                      ))}
+                {/* ── Persoonlijk — name row + birthdate/gender pair ── */}
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <div style={cardHead}>{t('modal.fields.cardPersonal')}</div>
+                  <div style={cardBox}>
+                    <div style={row('2fr 1fr 2fr')}>
+                      <Field label={t('modal.fields.firstName')} required={isReq('firstName')}>
+                        <TextField value={form.firstName} onChange={v => set('firstName', v)} placeholder={t('modal.fields.firstName')} error={errors.firstName} />
+                        {errors.firstName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
+                      </Field>
+                      <Field label={t('modal.fields.middleName')}>
+                        <TextField value={form.middleName} onChange={v => set('middleName', v)} placeholder="van" />
+                      </Field>
+                      <Field label={t('modal.fields.lastName')} required={isReq('lastName')}>
+                        <TextField value={form.lastName} onChange={v => set('lastName', v)} placeholder={t('modal.fields.lastName')} error={errors.lastName} />
+                        {errors.lastName && <div style={{ fontSize: 11, color: 'var(--color-danger)', marginTop: 3 }}>{t('common:required')}</div>}
+                      </Field>
                     </div>
+                    <div style={row('1fr 1fr')}>
+                      <Field label={t('modal.fields.dob')} required={isReq('dateOfBirth')}>
+                        <TextField type="date" value={form.dateOfBirth} onChange={v => set('dateOfBirth', v)} error={errors.dateOfBirth} />
+                      </Field>
+                      <Field label={t('modal.fields.gender')} required={isReq('gender')}>
+                        <SelectField value={form.gender} onChange={v => set('gender', v)} placeholder={t('common:select')} options={genderOptions} />
+                      </Field>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── Contact — email + phone (half-width card, so stacked) ── */}
+                <div>
+                  <div style={cardHead}>{t('modal.fields.cardContact')}</div>
+                  <div style={cardBox}>
+                    <Field label={t('modal.fields.email')} required={isReq('email')}>
+                      <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('modal.fields.emailPlaceholder')} error={errors.email} />
+                    </Field>
+                    <Field label={t('modal.fields.phone')} required={isReq('phone')}>
+                      <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} error={errors.phone} />
+                    </Field>
+                  </div>
+                </div>
+
+                {/* ── Werk — function + owner + branch chips ── */}
+                <div>
+                  <div style={cardHead}>{t('modal.fields.cardWork')}</div>
+                  <div style={cardBox}>
+                    <Field label={t('modal.fields.functionTitle')} required={isReq('functionTitle')}>
+                      <TextField value={form.functionTitle} onChange={v => set('functionTitle', v)} placeholder={t('modal.fields.functionPlaceholder')} error={errors.functionTitle} />
+                    </Field>
+                    <Field label={t('modal.fields.owner')}>
+                      <SelectField value={String(form.ownerId)} onChange={v => set('ownerId', v)}
+                        placeholder={t('common:select')} options={ownerOptions} />
+                    </Field>
+                    {/* Vestigingen (punt 10, r2-vervolg): zelfde patroon als de drill-down's
+                        BranchSection — gekozen vestigingen als chips met ×, toevoegen via de
+                        zoekbare SearchSelect (niet alle opties als toggle-chips: te druk). */}
+                    <Field label={t('modal.fields.branches')}>
+                      {branchIds.length > 0 && (
+                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
+                          {branchIds.map(id => (
+                            <span key={id} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, padding: '3px 8px',
+                              borderRadius: 6, border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}>
+                              {locations.find(o => String(o.value) === id)?.label ?? id}
+                              <button type="button" onClick={() => setBranchIds(p => p.filter(x => x !== id))} aria-label={t('common:remove')}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 0, lineHeight: 1, fontSize: 14 }}>×</button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <SearchSelect triggerLabel={t('modal.fields.branchesAdd')}
+                        options={locations.map(o => ({ value: String(o.value), label: o.label }))}
+                        selected={branchIds}
+                        onToggle={(id: string) => setBranchIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])} />
+                      {branchIds.length === 0 && locations.length > 0 && (
+                        <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: '6px 0 0' }}>{t('modal.fields.branchesAutoHint')}</p>
+                      )}
+                    </Field>
+                  </div>
+                </div>
+
+                {/* ── Adres — collapsed disclosure by default; forced open when required/
+                    filled/errored (the collapse control then disappears: collapsing
+                    would hide a required or filled field) ── */}
+                <div style={{ gridColumn: '1 / -1' }}>
+                  {!showAddress ? (
+                    <button type="button" onClick={() => setAddressOpen(true)} aria-expanded={false}
+                      style={{ display: 'flex', alignItems: 'center', gap: 6, width: '100%', padding: '9px 12px',
+                        fontSize: 12, fontWeight: 500, borderRadius: 10, border: '1px dashed var(--border)',
+                        background: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}>
+                      <ChevronRight size={13} /> {t('modal.fields.addressExpand')}
+                    </button>
+                  ) : (
+                    <>
+                      {addressForced ? (
+                        <div style={cardHead}>{t('modal.fields.cardAddress')}</div>
+                      ) : (
+                        <button type="button" onClick={() => setAddressOpen(false)} aria-expanded={true}
+                          style={{ ...cardHead, display: 'flex', alignItems: 'center', gap: 4, width: '100%',
+                            background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left' }}>
+                          <ChevronDown size={12} /> {t('modal.fields.cardAddress')}
+                        </button>
+                      )}
+                      <div style={cardBox}>
+                        <div style={row('2fr 1fr 1fr')}>
+                          <Field label={t('modal.fields.street')} required={isReq('street')}>
+                            <TextField value={form.street} onChange={v => set('street', v)} placeholder={t('modal.fields.streetPlaceholder')} error={errors.street} />
+                          </Field>
+                          <Field label={t('modal.fields.houseNumber')}>
+                            <TextField value={form.houseNumber} onChange={v => set('houseNumber', v)} />
+                          </Field>
+                          <Field label={t('modal.fields.houseNumberSuffix')}>
+                            <TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} />
+                          </Field>
+                        </div>
+                        <div style={row('1fr 2fr')}>
+                          <Field label={t('modal.fields.postalCode')} required={isReq('postalCode')}>
+                            <TextField value={form.postalCode} onChange={v => set('postalCode', v)} error={errors.postalCode} />
+                          </Field>
+                          <Field label={t('modal.fields.city')} required={isReq('city')}>
+                            <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} error={errors.city} />
+                          </Field>
+                        </div>
+                        <div style={row('1fr 1fr')}>
+                          <Field label={t('modal.fields.province')}>
+                            <SelectField value={form.province} onChange={v => set('province', v)} placeholder={t('common:select')} options={NL_PROVINCES} />
+                          </Field>
+                          <div />
+                        </div>
+                      </div>
+                    </>
                   )}
-                  <SearchSelect triggerLabel={t('modal.fields.branchesAdd')}
-                    options={locations.map(o => ({ value: String(o.value), label: o.label }))}
-                    selected={branchIds}
-                    onToggle={(id: string) => setBranchIds(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id])} />
-                  {branchIds.length === 0 && locations.length > 0 && (
-                    <p style={{ fontSize: 11, color: 'var(--text-muted)', fontStyle: 'italic', margin: '6px 0 0' }}>{t('modal.fields.branchesAutoHint')}</p>
-                  )}
-                </Field>
-
-                {/* Contact */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Field label={t('modal.fields.email')} required={isReq('email')}>
-                    <TextField type="email" value={form.email} onChange={v => set('email', v)} placeholder={t('modal.fields.emailPlaceholder')} error={errors.email} />
-                  </Field>
-                  <Field label={t('modal.fields.phone')} required={isReq('phone')}>
-                    <TextField type="tel" value={form.phone} onChange={v => set('phone', v)} placeholder={t('modal.fields.phonePlaceholder')} error={errors.phone} />
-                  </Field>
                 </div>
-
-                {/* Personal */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Field label={t('modal.fields.dob')} required={isReq('dateOfBirth')}>
-                    <TextField type="date" value={form.dateOfBirth} onChange={v => set('dateOfBirth', v)} error={errors.dateOfBirth} />
-                  </Field>
-                  <Field label={t('modal.fields.gender')} required={isReq('gender')}>
-                    <SelectField value={form.gender} onChange={v => set('gender', v)} placeholder={t('common:select')} options={genderOptions} />
-                  </Field>
-                </div>
-
-                {/* Address */}
-                <Field label={t('modal.fields.street')} required={isReq('street')}>
-                  <TextField value={form.street} onChange={v => set('street', v)} placeholder={t('modal.fields.streetPlaceholder')} error={errors.street} />
-                </Field>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Field label={t('modal.fields.houseNumber')}>
-                    <TextField value={form.houseNumber} onChange={v => set('houseNumber', v)} />
-                  </Field>
-                  <Field label={t('modal.fields.houseNumberSuffix')}>
-                    <TextField value={form.houseNumberSuffix} onChange={v => set('houseNumberSuffix', v)} />
-                  </Field>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <Field label={t('modal.fields.postalCode')} required={isReq('postalCode')}>
-                    <TextField value={form.postalCode} onChange={v => set('postalCode', v)} error={errors.postalCode} />
-                  </Field>
-                  <Field label={t('modal.fields.city')} required={isReq('city')}>
-                    <TextField value={form.city} onChange={v => set('city', v)} placeholder={t('modal.fields.cityPlaceholder')} error={errors.city} />
-                  </Field>
-                </div>
-                <Field label={t('modal.fields.province')}>
-                  <SelectField value={form.province} onChange={v => set('province', v)} placeholder={t('common:select')} options={NL_PROVINCES} />
-                </Field>
 
               </div>
             )}

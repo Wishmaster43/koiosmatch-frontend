@@ -201,7 +201,12 @@
       "branches": "Branches",
       "branchesNone": "No branches configured yet.",
       "branchesAutoHint": "Empty = automatically the branches you are linked to.",
-      "branchesAdd": "Add branch"
+      "branchesAdd": "Add branch",
+      "cardPersonal": "Personal",
+      "cardContact": "Contact",
+      "cardWork": "Work",
+      "cardAddress": "Address",
+      "addressExpand": "Add address"
     },
     "gender": {
       "male": "Male",
@@ -592,6 +597,7 @@
     "wageTaxFrom": "Effective from",
     "groupAvailability": "Availability",
     "groupTravel": "Travel",
+    "groupFinancial": "Financial",
     "groupWork": "Work preferences",
     "groupOther": "Other",
     "moreTitle": "Other preferences"

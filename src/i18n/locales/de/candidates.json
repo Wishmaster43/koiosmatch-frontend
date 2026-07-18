@@ -194,7 +194,12 @@
       "branches": "Niederlassungen",
       "branchesNone": "Noch keine Niederlassungen eingerichtet.",
       "branchesAutoHint": "Leer = automatisch die Niederlassungen, denen du zugeordnet bist.",
-      "branchesAdd": "Niederlassung hinzufügen"
+      "branchesAdd": "Niederlassung hinzufügen",
+      "cardPersonal": "Persönlich",
+      "cardContact": "Kontakt",
+      "cardWork": "Arbeit",
+      "cardAddress": "Adresse",
+      "addressExpand": "Adresse hinzufügen"
     },
     "gender": {
       "male": "Männlich",
@@ -585,6 +590,7 @@
     "wageTaxFrom": "Gültig ab",
     "groupAvailability": "Verfügbarkeit",
     "groupTravel": "Reisen",
+    "groupFinancial": "Finanzen",
     "groupWork": "Arbeitspräferenzen",
     "groupOther": "Sonstiges",
     "moreTitle": "Weitere Präferenzen"

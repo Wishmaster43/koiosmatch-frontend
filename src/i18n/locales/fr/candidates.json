@@ -194,7 +194,12 @@
       "branches": "Agences",
       "branchesNone": "Aucune agence configurée.",
       "branchesAutoHint": "Vide = automatiquement les agences auxquelles vous êtes rattaché.",
-      "branchesAdd": "Ajouter une agence"
+      "branchesAdd": "Ajouter une agence",
+      "cardPersonal": "Personnel",
+      "cardContact": "Contact",
+      "cardWork": "Travail",
+      "cardAddress": "Adresse",
+      "addressExpand": "Ajouter une adresse"
     },
     "gender": {
       "male": "Homme",
@@ -585,6 +590,7 @@
     "wageTaxFrom": "À partir du",
     "groupAvailability": "Disponibilité",
     "groupTravel": "Déplacements",
+    "groupFinancial": "Financier",
     "groupWork": "Préférences de travail",
     "groupOther": "Autre",
     "moreTitle": "Autres préférences"

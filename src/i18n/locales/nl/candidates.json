@@ -201,7 +201,12 @@
       "branches": "Vestigingen",
       "branchesNone": "Nog geen vestigingen ingericht.",
       "branchesAutoHint": "Leeg = automatisch de vestigingen waar jij aan gekoppeld bent.",
-      "branchesAdd": "Vestiging toevoegen"
+      "branchesAdd": "Vestiging toevoegen",
+      "cardPersonal": "Persoonlijk",
+      "cardContact": "Contact",
+      "cardWork": "Werk",
+      "cardAddress": "Adres",
+      "addressExpand": "Adres toevoegen"
     },
     "gender": {
       "male": "Man",
@@ -592,6 +597,7 @@
     "wageTaxFrom": "Per wanneer",
     "groupAvailability": "Beschikbaarheid",
     "groupTravel": "Reizen",
+    "groupFinancial": "Financieel",
     "groupWork": "Werkvoorkeuren",
     "groupOther": "Overig",
     "moreTitle": "Overige voorkeuren"

@@ -194,7 +194,12 @@
       "branches": "Sedes",
       "branchesNone": "Aún no hay sedes configuradas.",
       "branchesAutoHint": "Vacío = automáticamente las sedes a las que estás vinculado.",
-      "branchesAdd": "Añadir sede"
+      "branchesAdd": "Añadir sede",
+      "cardPersonal": "Personal",
+      "cardContact": "Contacto",
+      "cardWork": "Trabajo",
+      "cardAddress": "Dirección",
+      "addressExpand": "Añadir dirección"
     },
     "gender": {
       "male": "Hombre",
@@ -585,6 +590,7 @@
     "wageTaxFrom": "Vigente desde",
     "groupAvailability": "Disponibilidad",
     "groupTravel": "Desplazamientos",
+    "groupFinancial": "Financiero",
     "groupWork": "Preferencias de trabajo",
     "groupOther": "Otros",
     "moreTitle": "Otras preferencias"
