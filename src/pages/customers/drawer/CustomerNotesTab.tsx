@@ -33,12 +33,6 @@ const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
 interface TimelineEntry { time?: string; text?: string }
 interface ActivityEntry { description?: string; action?: string; created_at?: string }
 
-const EDITOR_LABELS = {
-  bold: 'Bold', italic: 'Italic', bulletList: 'Bullet list', orderedList: 'Numbered list',
-  heading: 'Heading', alignLeft: 'Align left', alignCenter: 'Align center', alignRight: 'Align right',
-  undo: 'Undo', redo: 'Redo', expand: 'Expand', collapse: 'Collapse',
-}
-
 interface Props {
   customerId: Id | undefined
   // Timeline identity — the customer itself (mirrors the candidate tab's own
@@ -75,7 +69,7 @@ export default function CustomerNotesTab({ customerId, customerName, customerIni
   const notesProps = {
     notes, onAddNote, timeline, noteTypes, chipTypes,
     authorInitials, timelineName: customerName, timelineInitials: customerInitials,
-    editorLabels: EDITOR_LABELS,
+   
     labels: {
       notes: t('notes.notes'), newNote: t('notes.newNote'), type: t('notes.type'),
       save: t('notes.save'), cancel: t('notes.cancel'), edit: t('notes.edit'),

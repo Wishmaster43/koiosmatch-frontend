@@ -102,6 +102,10 @@ Rules:
   doing fetch + transform + error handling is too fat — extract a hook.
 - **Always handle four UI states explicitly:** `loading`, `error`, `empty`,
   `success`. Never render a blank screen on failure.
+- **No fake affordances.** Every interactive control has a REAL persistence path,
+  or renders disabled with an honest notice. A form that edits local state without
+  a save route (PlanningTab, 2026-07-17) or a picker whose PATCH the server drops
+  (vacancy-cascade) is a finding — gate it until the backend path exists.
 - **Wrap risky subtrees in an Error Boundary.** One global boundary in `app/`,
   plus local boundaries around heavy widgets (charts, drawers).
 - **Props are typed** (PropTypes/TS) and documented with one comment line.
@@ -523,7 +527,10 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
 - Memoize deliberately (`useMemo`/`useCallback`/`React.memo`) where it prevents
   expensive re-renders — not blindly.
 - Debounce expensive inputs (search/filter). Cancel in-flight axios requests on
-  unmount.
+  unmount — **maar aborteer nooit een module-scope/sessie-gedeelde promise-cache**:
+  StrictMode's dubbele mount vergiftigde zo de preflight-cache app-breed
+  (2026-07-17); een gedeelde cache wil het RESULTAAT, de alive-guard beschermt de
+  state al.
 - Keep an eye on bundle size; lazy-load heavy deps (charts) per route.
 
 ---
@@ -549,6 +556,9 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
   in a comment. This is a **gradual, opportunistic** adoption — do NOT mass-migrate existing
   files in one pass; adopt it when you touch a file for another reason, or when starting new
   API-touching code. Reference adoption: `src/pages/settings/sections/jobs/jobsApi.ts`.
+- **Een record = de per-id-route** (`DELETE /{entity}/{id}`, `POST /{entity}/{id}/restore`);
+  bulk-routes zijn uitsluitend voor echte massa-mutaties — nooit een bulk-call met een id
+  (enkelstuks-sweep 2026-07-18; elke soft-delete-entiteit heeft beide routes).
 - **Endpoint naming — source prefix for external systems.** Native Koios resources use
   **clean, unprefixed** names (`/customers`, `/candidates`, `/locations`, `/departments`,
   `/contacts`, `/kpis`, `/reports`, …). Data that mirrors an **external system** carries that
@@ -584,6 +594,9 @@ never label it "Matched"; "matched" is the *application* bucket, a different axi
 - Naming: `PascalCase` components, `camelCase` functions/vars, `useX` hooks,
   `UPPER_SNAKE` constants. Names describe intent, not implementation.
 - No dead code, no commented-out blocks, no `console.log` in committed code.
+- **Een nieuwe gedeelde helper landt met adoptie op de bestaande kopieerplekken** —
+  een helper naast drie verse kopieen van het patroon dat hij vervangt
+  (extractApiError, 2026-07-17) is een finding, geen vooruitgang.
 - Pure functions for transforms; side effects isolated in hooks/effects.
 - Consistent imports (absolute via alias, e.g. `@/features/...`). No deep
   relative `../../../` chains.
@@ -622,6 +635,10 @@ Be honest. If something is not done, say so — do not pretend.
   backend delivery and before declaring any feature done. A red flow is a real finding,
   never "flaky". "Done" = clicked, not just compiled.**
 - Cover critical paths: forms, auth-gated UI, data tables, the four UI states.
+- **Mutation tests assert the REQUEST (method/route/body), never only that a callback
+  fired.** Audit-les 2026-07-17: bulk-ontkoppelen was volledig dood (verplichte
+  `reason`-body ontbrak) terwijl de unit-test groen was — hij bewees alleen dat de
+  callback vuurde. Een test die de naad niet raakt, bewijst niets over de naad.
 - Every bug fix ships with a regression test.
 
 ---

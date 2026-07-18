@@ -202,5 +202,20 @@
   "justNow": "gerade eben",
   "errorGeneric": "Etwas ist schiefgelaufen",
   "loadingShort": "…",
-  "openInNewTab": "In neuem Tab öffnen"
+  "openInNewTab": "In neuem Tab öffnen",
+  "editor": {
+    "bold": "Fett",
+    "italic": "Kursiv",
+    "bulletList": "Aufzählung",
+    "orderedList": "Nummerierte Liste",
+    "heading": "Überschrift",
+    "alignLeft": "Linksbündig",
+    "alignCenter": "Zentrieren",
+    "alignRight": "Rechtsbündig",
+    "undo": "Rückgängig",
+    "redo": "Wiederholen",
+    "expand": "Vergrößern",
+    "collapse": "Verkleinern",
+    "html": "HTML-Quelle"
+  }
 }

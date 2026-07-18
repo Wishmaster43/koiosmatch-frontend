@@ -202,5 +202,20 @@
   "justNow": "zojuist",
   "errorGeneric": "Er is iets misgegaan",
   "loadingShort": "…",
-  "openInNewTab": "Openen in nieuw tabblad"
+  "openInNewTab": "Openen in nieuw tabblad",
+  "editor": {
+    "bold": "Vet",
+    "italic": "Cursief",
+    "bulletList": "Opsomming",
+    "orderedList": "Genummerde lijst",
+    "heading": "Kop",
+    "alignLeft": "Links uitlijnen",
+    "alignCenter": "Centreren",
+    "alignRight": "Rechts uitlijnen",
+    "undo": "Ongedaan maken",
+    "redo": "Opnieuw",
+    "expand": "Vergroten",
+    "collapse": "Verkleinen",
+    "html": "HTML-bron"
+  }
 }

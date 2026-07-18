@@ -202,5 +202,20 @@
   "justNow": "à l'instant",
   "errorGeneric": "Une erreur s'est produite",
   "loadingShort": "…",
-  "openInNewTab": "Ouvrir dans un nouvel onglet"
+  "openInNewTab": "Ouvrir dans un nouvel onglet",
+  "editor": {
+    "bold": "Gras",
+    "italic": "Italique",
+    "bulletList": "Liste à puces",
+    "orderedList": "Liste numérotée",
+    "heading": "Titre",
+    "alignLeft": "Aligner à gauche",
+    "alignCenter": "Centrer",
+    "alignRight": "Aligner à droite",
+    "undo": "Annuler",
+    "redo": "Rétablir",
+    "expand": "Agrandir",
+    "collapse": "Réduire",
+    "html": "Source HTML"
+  }
 }

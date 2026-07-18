@@ -202,5 +202,20 @@
   "justNow": "just now",
   "errorGeneric": "Something went wrong",
   "loadingShort": "…",
-  "openInNewTab": "Open in new tab"
+  "openInNewTab": "Open in new tab",
+  "editor": {
+    "bold": "Bold",
+    "italic": "Italic",
+    "bulletList": "Bullet list",
+    "orderedList": "Numbered list",
+    "heading": "Heading",
+    "alignLeft": "Align left",
+    "alignCenter": "Align center",
+    "alignRight": "Align right",
+    "undo": "Undo",
+    "redo": "Redo",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "html": "HTML source"
+  }
 }

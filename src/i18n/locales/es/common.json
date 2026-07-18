@@ -202,5 +202,20 @@
   "justNow": "justo ahora",
   "errorGeneric": "Algo salió mal",
   "loadingShort": "…",
-  "openInNewTab": "Abrir en una pestaña nueva"
+  "openInNewTab": "Abrir en una pestaña nueva",
+  "editor": {
+    "bold": "Negrita",
+    "italic": "Cursiva",
+    "bulletList": "Lista con viñetas",
+    "orderedList": "Lista numerada",
+    "heading": "Encabezado",
+    "alignLeft": "Alinear a la izquierda",
+    "alignCenter": "Centrar",
+    "alignRight": "Alinear a la derecha",
+    "undo": "Deshacer",
+    "redo": "Rehacer",
+    "expand": "Ampliar",
+    "collapse": "Reducir",
+    "html": "Código HTML"
+  }
 }

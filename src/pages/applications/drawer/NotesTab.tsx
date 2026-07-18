@@ -6,12 +6,6 @@ import { useNoteTypes } from '@/lib/useNoteTypes'
 import type { ApplicationDetail } from '@/types/application'
 
 // Rich-text editor tooltips (mirror the candidate drawer for a consistent look).
-const EDITOR_LABELS = {
-  bold: 'Bold', italic: 'Italic', bulletList: 'Bullet list', orderedList: 'Numbered list',
-  heading: 'Heading', alignLeft: 'Align left', alignCenter: 'Align center', alignRight: 'Align right',
-  undo: 'Undo', redo: 'Redo', expand: 'Expand', collapse: 'Collapse',
-}
-
 // Structural match for the shared NotesTab's NoteItem (typed fields + open index).
 interface Note { type?: string; title?: string; author?: string; text?: string; body?: string; ago?: string; created_at?: string; [k: string]: unknown }
 
@@ -43,7 +37,7 @@ export default function NotesTab({ application: a }: { application: ApplicationD
       onAddNote={addNote}
       noteTypes={noteTypes}
       authorInitials={initials}
-      editorLabels={EDITOR_LABELS}
+     
       showTimeline={false}
       showConversations={false}
       labels={{

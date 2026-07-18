@@ -106,7 +106,8 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
 
   // The actual API calls — also re-used once the guard modal resolves every blocker.
   const runArchive = (id: Id) =>
-    lifecycleCall(() => api.post('/candidates/bulk/archive', { candidate_ids: [id] }), id, 'drawer.archivedNamed', 'drawer.archiveFailed', 'archive')
+    // Enkelstuks-sweep (BE 5970c03): one record = the per-id route, never bulk-with-one-id.
+    lifecycleCall(() => api.delete(`/candidates/${id}`), id, 'drawer.archivedNamed', 'drawer.archiveFailed', 'archive')
   const runMarkDeletion = (id: Id) =>
     lifecycleCall(() => api.post(`/candidates/${id}/mark-deletion`, {}), id, 'erase.markedForDeletionNamed', 'erase.markFailed', 'trash')
 
@@ -140,7 +141,8 @@ export function useCandidateDrawerActions({ candidates, setCandidates, setTotal,
   const restoreOne = async (id: Id) => {
     const cand = candidates.find(x => x.id === id)
     try {
-      await api.post('/candidates/bulk/restore', { candidate_ids: [id] })
+      // Enkelstuks-sweep (BE 5970c03): per-id restore for a single record.
+      await api.post(`/candidates/${id}/restore`)
       setCandidates(p => p.filter(x => x.id !== id))
       setTotal(v => Math.max(0, v - 1))
       closeDrawer()

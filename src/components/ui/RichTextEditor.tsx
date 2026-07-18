@@ -5,26 +5,27 @@
  * through SafeHtml). The `<>` toggle swaps the WYSIWYG view for a raw-HTML textarea
  * so you can inspect/fix the markup.
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import TextAlign from '@tiptap/extension-text-align'
 import { Bold, Italic, List, ListOrdered, Heading2, AlignLeft, AlignCenter, AlignRight, Undo2, Redo2, Maximize2, Minimize2, Code } from 'lucide-react'
 
-// Built-in toolbar tooltips so callers don't have to pass labels; override per screen.
-const DEFAULT_LABELS = {
-  bold: 'Bold', italic: 'Italic', bulletList: 'Bullet list', orderedList: 'Numbered list',
-  heading: 'Heading', alignLeft: 'Align left', alignCenter: 'Align center', alignRight: 'Align right',
-  undo: 'Undo', redo: 'Redo', expand: 'Expand', collapse: 'Collapse', html: 'HTML source',
-}
+// Toolbar-tooltip keys (common:editor.*) — the component translates its own
+// defaults (audit R2: four features each shipped a hardcoded-English copy of
+// these labels; one i18n'd source here fixes every consumer). Callers may
+// still override per screen via the `labels` prop.
+const LABEL_KEYS = ['bold', 'italic', 'bulletList', 'orderedList', 'heading', 'alignLeft', 'alignCenter', 'alignRight', 'undo', 'redo', 'expand', 'collapse', 'html'] as const
+type EditorLabels = Record<(typeof LABEL_KEYS)[number], string>
 
 interface RichTextEditorProps {
   value?: string
   onChange: (html: string) => void
   expanded?: boolean
   onToggleExpand?: () => void
-  labels?: Partial<typeof DEFAULT_LABELS>
+  labels?: Partial<EditorLabels>
   fill?: boolean
   // Collapsed content height; inline row editors (experience/education desc) pass a
   // compact value so a one-line note doesn't open a huge block (Danny punt 48).
@@ -32,8 +33,12 @@ interface RichTextEditorProps {
 }
 
 export default function RichTextEditor({ value, onChange, expanded, onToggleExpand, labels = {}, fill = false, minHeight = 120 }: RichTextEditorProps) {
-  // Merge caller overrides over the built-in English defaults.
-  const lab = { ...DEFAULT_LABELS, ...labels }
+  // Merge caller overrides over the i18n'd defaults (common:editor.*).
+  const { t } = useTranslation('common')
+  const lab = useMemo(() => ({
+    ...Object.fromEntries(LABEL_KEYS.map(k => [k, t(`editor.${k}`)])) as EditorLabels,
+    ...labels,
+  }), [t, labels])
   // Raw-HTML source mode — edit the markup directly to spot/fix errors.
   const [htmlMode, setHtmlMode] = useState(false)
 

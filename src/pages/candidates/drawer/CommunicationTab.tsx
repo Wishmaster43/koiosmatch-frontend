@@ -15,12 +15,6 @@ type AnyProps = Record<string, unknown>
 // Still-untyped JS components — accept any props at the boundary.
 const NotesTab = NotesTabJs as unknown as ComponentType<AnyProps>
 
-const EDITOR_LABELS = {
-  bold: 'Bold', italic: 'Italic', bulletList: 'Bullet list', orderedList: 'Numbered list',
-  heading: 'Heading', alignLeft: 'Align left', alignCenter: 'Align center', alignRight: 'Align right',
-  undo: 'Undo', redo: 'Redo', expand: 'Expand', collapse: 'Collapse',
-}
-
 /**
  * Communication tab — sub-tabs (Danny 2026-07-03, mirrors the Planning panel):
  * Toestemmingen · Taken · Notities · Tijdlijn · Conversaties. Each section renders
@@ -63,7 +57,7 @@ export default function CommunicationTab({ c, onSave }: { c: Candidate; onSave?:
     notes: userNotes, onAddNote: addNote, onEditNote: editUserNote,
     timeline: c.timeline ?? [], systemNotes,
     noteTypes: writableTypes, chipTypes: allNoteTypes, channels, authorInitials: c.ownerInitials, timelineName: c.name,
-    timelineInitials: c.initials, editorLabels: EDITOR_LABELS,
+    timelineInitials: c.initials,
     labels: {
       notes: t('sections.notes'),
       newNote: t('communication.newNote'),
